@@ -1,0 +1,22 @@
+﻿using Common.Authorization.Security;
+
+namespace Application.Interfaces.Services.LL;
+public interface IUserService
+{
+    /// <summary>
+    /// Login with the given Email and Password
+    /// </summary>
+    /// <param name="email"></param>
+    /// <param name="password"></param>
+    /// <returns></returns>
+    public Task<AuthInfo> Login(string email, string password);
+
+    /// <summary>
+    /// Register with the given Username, Email, and Password
+    /// </summary>
+    /// <param name="username"></param>
+    /// <param name="email"></param>
+    /// <param name="password"></param>
+    /// <returns></returns>
+    public Task<AuthInfo> Register(string username, string email, string password);
+}
