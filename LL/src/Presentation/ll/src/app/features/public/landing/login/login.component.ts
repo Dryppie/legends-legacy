@@ -1,0 +1,85 @@
+import { Component } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
+import { NgClass, NgIf } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { AuthService } from '../../../../core/services/auth/auth.service';
+import { emailValidator } from '../../../../shared/validators/email-validator';
+import { passwordValidator } from '../../../../shared/validators/password-validator';
+import { ButtonComponent } from '../../../../shared/components/button/button.component';
+
+@Component({
+  selector: 'app-login',
+  standalone: true,
+  imports: [
+    RouterLink,
+    ReactiveFormsModule,
+    NgIf,
+    ButtonComponent,
+    MatIconModule,
+    MatFormFieldModule,
+    MatInputModule,
+    NgClass,
+  ],
+  templateUrl: './login.component.html',
+  styleUrl: './login.component.css',
+})
+export class LoginComponent {
+  loginForm = new FormGroup({
+    email: new FormControl('admin@hotmail.com', [
+      Validators.required,
+      emailValidator(),
+    ]),
+    password: new FormControl('Password123!', [
+      Validators.required,
+      passwordValidator(),
+      Validators.minLength(8),
+    ]),
+  });
+  document: any;
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+  ) {}
+  loginError: boolean = false;
+  validatorError: boolean | undefined = false;
+
+  login() {
+    const email = this.loginForm.value.email;
+    const password = this.loginForm.value.password;
+    if (typeof email === 'string' && typeof password === 'string') {
+      this.authService.login(email, password).subscribe({
+        next: () => {
+          this.router.navigateByUrl('/game');
+        },
+        error: () => {
+          this.loginError = true;
+        },
+      });
+    }
+  }
+
+  resetLoginError() {
+    this.loginError = false;
+  }
+  validateEmail() {
+    return this.validateField('email');
+  }
+
+  validatePassword() {
+    return this.validateField('password');
+  }
+
+  private validateField(field: string) {
+    const control = this.loginForm.get(field);
+    return control?.invalid && (control.dirty || control.touched);
+  }
+}

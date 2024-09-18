@@ -1,0 +1,24 @@
+<div class="group relative">
+  <!-- Target element to hover over -->
+  <ng-content></ng-content>
+
+  <!-- Info box that shows on hover -->
+  <div
+    class="absolute left-0 top-0 z-50 mt-2 hidden w-64 rounded-lg border border-gray-300 bg-white p-4 shadow-lg group-hover:block"
+  >
+    <!-- Optional image -->
+    <div *ngIf="imageUrl" class="mb-3">
+      <img
+        [src]="imageUrl"
+        alt="Info Image"
+        class="h-32 w-full rounded object-cover"
+      />
+    </div>
+
+    <!-- Title -->
+    <div class="mb-1 text-lg font-bold text-gray-800">{{ title }}</div>
+
+    <!-- Description -->
+    <div class="text-sm text-gray-600">{{ description }}</div>
+  </div>
+</div>

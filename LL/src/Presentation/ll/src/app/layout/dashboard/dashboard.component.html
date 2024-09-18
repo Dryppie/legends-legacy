@@ -1,0 +1,38 @@
+<div
+  class="flex h-full flex-auto flex-col bg-cover bg-center"
+  style="background-image: url(&quot;backgrounds/background.png&quot;)"
+>
+  <app-navbar class="p-4"></app-navbar>
+
+  <div class="flex h-full gap-4 overflow-hidden">
+    <nav>
+      <app-sidebar class="flex h-full"></app-sidebar>
+    </nav>
+    <div class="flex h-full w-full flex-col space-y-4">
+      <div class="relative h-full w-full overflow-hidden pr-4">
+        <div
+          class="border-gradient absolute inset-0 flex w-full items-center rounded-md py-[1px] pr-4 sm:opacity-90"
+        >
+          <div class="h-full w-full rounded-md bg-texture"></div>
+        </div>
+        <main class="relative h-full w-full rounded-md p-6">
+          <router-outlet></router-outlet>
+        </main>
+      </div>
+      <footer
+        class="flex h-12 flex-none justify-end rounded-md rounded-b-none text-white"
+      >
+        <div
+          class="border-gradient relative flex h-full items-center rounded-md pt-[1px]"
+        >
+          <div
+            class="flex h-full w-80 items-center justify-between rounded-tl-md bg-texture px-3"
+          >
+            <div class="text-primary">CHAT</div>
+            <img src="icons/ActivePlus.svg" />
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+</div>

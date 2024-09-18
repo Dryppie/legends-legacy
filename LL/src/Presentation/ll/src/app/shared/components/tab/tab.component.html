@@ -1,0 +1,10 @@
+<div *ngIf="tabs.length > 1" class="flex justify-around">
+  <span
+    *ngFor="let tab of tabs"
+    class="flex-1 border-b border-light_gray py-2 text-center font-semibold text-light_gray hover:border-primary focus:outline-none"
+    [ngClass]="{ 'border-primary text-primary': activeTab === tab }"
+    (click)="setActiveTab(tab)"
+  >
+    {{ tab }}
+  </span>
+</div>

@@ -1,0 +1,24 @@
+<div
+  class="flex items-center border-b border-gray bg-cover bg-center p-3 shadow-md"
+  [ngClass]="{
+    'border-b-0': isActive,
+  }"
+  [style.background-image]="
+    isActive
+      ? 'linear-gradient(to bottom, #00000095 50%, #1f150c95), url(core/Light.svg)'
+      : 'none'
+  "
+>
+  <div class="flex h-12 w-12 items-center justify-center rounded-full">
+    <app-profession-icon
+      class="scale-75"
+      [image]="item.route"
+    ></app-profession-icon>
+  </div>
+  <div class="ml-4 flex flex-col gap-1">
+    <h3 class="text-primary">{{ item.title }}</h3>
+    <small class="text-white">{{ item.description }}</small>
+    <!-- Placeholder for additional content injected by child components -->
+    <ng-content></ng-content>
+  </div>
+</div>

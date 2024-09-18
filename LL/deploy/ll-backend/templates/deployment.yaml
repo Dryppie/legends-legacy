@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ll-backend.fullname" . }}
+  labels:
+    {{- include "ll-backend.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "ll-backend.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "ll-backend.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "ll-backend.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            {{- range $name, $item := .Values.env }}
+            - name: {{ $name }}
+              {{- $item | toYaml | nindent 14 }}
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz/live
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /healthz/ready
+              port: http
+
+          volumeMounts:
+            - mountPath: /app/publish/versions/ll
+              name: config-ll-versions
+              readOnly: true
+            - mountPath: /app/publish/versions/cew
+              name: config-cew-versions
+              readOnly: true
+
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - configMap:
+            defaultMode: 420
+            items:
+              - key: ll-app-version
+                path: llapp.version
+            name: ll-app-version
+          name: config-ll-versions
+        - configMap:
+            defaultMode: 420
+            items:
+              - key: cew-platform-version
+                path: cewplatform.version
+              - key: cew-platform-name
+                path: cewplatform.name
+            name: cew-platform-version
+          name: config-cew-versions
+
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

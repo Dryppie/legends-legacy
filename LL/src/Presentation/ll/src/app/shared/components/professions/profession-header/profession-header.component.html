@@ -1,0 +1,15 @@
+<div
+  class="flex h-16 w-full flex-col items-center justify-between gap-4 sm:flex-row"
+>
+  <div class="flex w-full items-center gap-6 text-white">
+    <app-profession-icon [image]="title"></app-profession-icon>
+    <div class="flex flex-col gap-1">
+      <span>Lv. 11</span>
+      <h2 class="text-primary">{{ title }}</h2>
+      <small>16/100xp</small>
+    </div>
+  </div>
+  <div class="w-full sm:flex sm:justify-end">
+    <app-profession-action></app-profession-action>
+  </div>
+</div>

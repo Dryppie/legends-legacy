@@ -1,0 +1,45 @@
+<div
+  *ngFor="let toast of toasts"
+  [ngClass]="getPositionClass(toast.position)"
+  class="z-50 mb-4 flex h-20 w-96 items-start space-x-4 rounded-lg bg-[#0E0C15] p-4 text-white shadow-lg transition-all"
+>
+  <!-- Icon -->
+  <div class="flex-shrink-0">
+    <img
+      *ngIf="toast.type === 'error'"
+      src="core/toast/error.svg"
+      alt="Error Icon"
+      class="h-8 w-8"
+    />
+    <img
+      *ngIf="toast.type === 'warning'"
+      src="core/toast/warning.svg"
+      alt="Info Icon"
+      class="h-8 w-8"
+    />
+    <img
+      *ngIf="toast.type === 'success'"
+      src="core/toast/success.svg"
+      alt="Success Icon"
+      class="h-8 w-8"
+    />
+  </div>
+
+  <!-- Content -->
+  <div class="flex-1">
+    <h4 class="font-bold">{{ toast.title }}</h4>
+    <p class="text-sm text-gray-300">{{ toast.message }}</p>
+
+    <!-- Progress Bar -->
+    <div class="relative mt-2 h-1 rounded bg-gray-700">
+      <div
+        #progressBar
+        class="absolute left-0 top-0 h-full rounded bg-[#D72E34]"
+        [ngStyle]="{
+          width: toast.progress + '%',
+          backgroundColor: getProgressBarColor(toast.type),
+        }"
+      ></div>
+    </div>
+  </div>
+</div>

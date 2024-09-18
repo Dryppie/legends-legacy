@@ -1,0 +1,92 @@
+<div class="flex items-center justify-center h-full">
+  <div class="max-w-md w-full">
+    <div>
+      <h2 class="text-center text-4xl font-extrabold text-blood-primary">
+        Join the Adventure and<br />create your Legend!
+      </h2>
+    </div>
+    <form [formGroup]="registerForm" (ngSubmit)="register()" class="mt-8">
+      <mat-form-field class="w-full" subscriptSizing="dynamic">
+        <mat-label>Username</mat-label>
+        <input
+          matInput
+          (input)="resetLoginError()"
+          aria-label="Username"
+          type="username"
+          required
+          class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:shadow-outline-blue focus:border-ancient-secondary focus:z-10 sm:text-sm sm:leading-5"
+          placeholder="Username"
+          formControlName="username"
+        />
+        <mat-icon matSuffix>person</mat-icon>
+      </mat-form-field>
+      <mat-form-field class="w-full" subscriptSizing="dynamic">
+        <mat-label>Email</mat-label>
+        <input
+          matInput
+          (input)="resetLoginError()"
+          aria-label="Email address"
+          type="email"
+          required
+          class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:shadow-outline-blue focus:border-ancient-secondary focus:z-10 sm:text-sm sm:leading-5"
+          placeholder="Email"
+          formControlName="email"
+        />
+        <mat-icon matSuffix>email</mat-icon>
+      </mat-form-field>
+      <mat-form-field class="w-full" subscriptSizing="dynamic">
+        <mat-label>Password</mat-label>
+        <input
+          matInput
+          (input)="resetLoginError()"
+          aria-label="Password"
+          type="password"
+          required
+          class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:shadow-outline-blue focus:border-ancient-secondary focus:z-10 sm:text-sm sm:leading-5"
+          placeholder="Password"
+          formControlName="password"
+        />
+        <mat-icon matSuffix>lock</mat-icon>
+      </mat-form-field>
+      <mat-form-field class="w-full" subscriptSizing="dynamic">
+        <mat-label>Confirm Password</mat-label>
+        <input
+          matInput
+          (input)="resetLoginError()"
+          aria-label="Confirm Password"
+          type="password"
+          required
+          class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:shadow-outline-blue focus:border-ancient-secondary focus:z-10 sm:text-sm sm:leading-5"
+          placeholder="Confirm Password"
+          formControlName="confirmPassword"
+        />
+        <mat-icon matSuffix>lock</mat-icon>
+      </mat-form-field>
+      <div *ngIf="loginError" class="mt-4">
+        <span class="text-blood-primary"
+          >Registration failed. Please try again.</span
+        >
+      </div>
+      <!-- Signup Button -->
+      <div class="mt-6">
+        <button
+          [disabled]="!registerForm.valid"
+          type="submit"
+          class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm leading-5 font-medium rounded-md focus:outline-none focus:shadow-outline-blue active:bg-yellow-600 text-blood-primary bg-ancient-secondary hover:bg-ancient-primary disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed"
+        >
+          Sign Up
+        </button>
+      </div>
+
+      <div class="mt-6 text-center">
+        <button
+          routerLink="/login"
+          class="font-medium text-ancient-primary focus:outline-none focus:underline"
+        >
+          Already have an account?
+          <span class="text-blood-primary">Log In!</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

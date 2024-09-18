@@ -1,0 +1,31 @@
+<div class="flex h-full flex-col gap-4 rounded-md">
+  <!--inventory header-->
+  <app-default-header
+    title="Inventory"
+    text="Slots 3/120"
+    image="character/inventory"
+  ></app-default-header>
+  <!--inventory-->
+  <div class="flex h-full flex-col overflow-hidden rounded-md bg-black/40 pt-2">
+    <app-tab [tabs]="tabLabels" class="flex-none"></app-tab>
+
+    <div
+      class="mb-2 grid h-full grid-cols-3 gap-2 overflow-y-auto pt-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-9 2xl:grid-cols-12"
+    >
+      <app-inventory-slot
+        *ngFor="let item of items"
+        [item]="item"
+      ></app-inventory-slot>
+      <app-inventory-slot
+        *ngFor="let emptySlot of emptySlots"
+        [item]="emptySlot"
+      >
+      </app-inventory-slot>
+    </div>
+  </div>
+  <div class="flex-none justify-end space-x-4 text-sm">
+    <div>💎 5356</div>
+    <div>📜 55</div>
+    <div>🔮 15</div>
+  </div>
+</div>

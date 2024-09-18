@@ -1,0 +1,27 @@
+<aside class="border-gradient flex rounded-tr-md">
+  <div
+    class="mt-[1px] flex h-full w-80 flex-auto flex-col rounded-tr-md bg-texture bg-auto text-primary"
+  >
+    <div class="h-16 p-2 text-white">Character</div>
+    <app-tab
+      [tabs]="tabLabels"
+      [activeTab]="activeTab"
+      (tabSelected)="setActiveTab($event)"
+    >
+    </app-tab>
+    <!-- Tab Content -->
+    <div *ngFor="let tab of tabs" class="overflow-auto">
+      <div *ngIf="activeTab === tab.label" class="tab-content">
+        <div *ngFor="let item of tab.items" class="flex flex-col">
+          <app-sidebar-item
+            [item]="item"
+            routerLink="/game/{{ item.route }}"
+            (click)="navigateTo(item.id)"
+            class="text-light_gray"
+            [isActive]="activeItem === item.id"
+          ></app-sidebar-item>
+        </div>
+      </div>
+    </div>
+  </div>
+</aside>

@@ -1,0 +1,100 @@
+name: Build and Deploy LL
+
+on:
+  push:
+    branches:
+      - main
+      - "releases/*"
+    paths:
+      - "LL/**"
+    paths-ignore:
+      - "LL/src/Presentation/ll/**"
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      BUILD_CONFIGURATION: Release
+      CONTAINER_REGISTRY: critplatformudv001
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Checkout infrastructure repository
+        uses: actions/checkout@v3
+        with:
+          repository: your-org/infrastructure
+          path: infrastructure
+
+      - name: Build LL using PowerShell script
+        shell: pwsh
+        run: ./build/build-ll.ps1
+
+      - name: Log in to container registry
+        run: |
+          echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ env.CONTAINER_REGISTRY }} -u ${{ secrets.REGISTRY_USERNAME }} --password-stdin
+
+      - name: Build and push Docker image
+        run: |
+          docker build -t ${{ env.CONTAINER_REGISTRY }}:${{ env.TAG }} .
+          docker push ${{ env.CONTAINER_REGISTRY }}:${{ env.TAG }}
+
+      - name: Package and push Helm chart
+        if: ${{ success() && github.event_name != 'pull_request' }}
+        run: |
+          ACR_NAME=${{ env.CONTAINER_REGISTRY }}
+          HELM_VERSION=${{ env.VERSION }}
+          APP_VERSION=${{ env.TAG }}
+          cd it-platform/ADS/deploy
+          helm package ./ads-backend/ --version $HELM_VERSION --app-version $APP_VERSION
+          for FILE in *.tgz; do
+            helm push "$FILE" oci://$ACR_NAME.azurecr.io/helm
+          done
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: ${{ github.workspace }}/build
+
+      - name: Bump version
+        run: |
+          echo "${{ env.VERSION }}" > deploy/versions/ads-backend.version
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add deploy/versions/ads-backend.version
+          git commit -m "Bump version to ${{ env.VERSION }}"
+          git push origin HEAD:${{ github.ref }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get current version
+        id: version
+        run: |
+          VERSION_FILE=deploy/versions/ll-backend.version
+          if [ -f "$VERSION_FILE" ]; then
+            VERSION=$(cat $VERSION_FILE)
+          else
+            VERSION="0.0.0"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Increment version
+        id: increment_version
+        run: |
+          IFS='.' read -r major minor patch <<< "${{ steps.version.outputs.version }}"
+          patch=$((patch + 1))
+          NEW_VERSION="$major.$minor.$patch"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Set version and tag
+        run: |
+          echo "VERSION=${{ steps.increment_version.outputs.new_version }}" >> $GITHUB_ENV
+          if [[ '${{ github.ref }}' == 'refs/heads/release/'* ]]; then
+            echo "TAG=release-${{ steps.increment_version.outputs.new_version }}" >> $GITHUB_ENV
+          elif [[ '${{ github.ref }}' == 'refs/heads/main' ]]; then
+            echo "TAG=main-${{ steps.increment_version.outputs.new_version }}" >> $GITHUB_ENV
+          else
+            echo "TAG=${{ steps.increment_version.outputs.new_version }}" >> $GITHUB_ENV
+          fi
