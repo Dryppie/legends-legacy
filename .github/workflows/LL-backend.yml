@@ -1,7 +1,6 @@
 name: Build and Deploy LL
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - main
@@ -9,6 +8,7 @@ on:
     paths:
       - "LL/**"
       - "!LL/src/Presentation/ll/**"
+  workflow_dispatch:
 
 env:
   MAJOR: 0
