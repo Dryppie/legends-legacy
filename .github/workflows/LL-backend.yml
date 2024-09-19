@@ -12,7 +12,6 @@ on:
 env:
   MAJOR: 0
   MINOR: 0
-  CONTAINER_REGISTRY: critplatformudv001
 
 jobs:
   build_and_test:
@@ -24,7 +23,7 @@ jobs:
       TAGCOMMIT: ${{ steps.set_version.outputs.TAGCOMMIT }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set Version and Tag
         id: set_version
@@ -63,7 +62,7 @@ jobs:
           echo "TAGCOMMIT=${TAGCOMMIT}" >> $GITHUB_ENV
 
       - name: Build and Test
-        uses: ./.github/workflows/build.yml
+        uses: ./.github/workflows/LL-backend-build.yml
         with:
           projects_filter: "legends-legacy/LL/LL.sln"
           test_projects_filter: "legends-legacy/LL/LL.sln"
@@ -80,9 +79,6 @@ jobs:
         with:
           tag: ${{ env.TAG }}
           version: ${{ env.VERSION }}
-          containerRegistry: ${{ env.CONTAINER_REGISTRY }}
-          registryUsername: ${{ secrets.REGISTRY_USERNAME }}
-          registryPassword: ${{ secrets.REGISTRY_PASSWORD }}
           workingDirectory: "legends-legacy"
           buildScript: "./build/build-ll.ps1"
 

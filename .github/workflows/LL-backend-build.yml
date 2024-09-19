@@ -4,30 +4,30 @@ on:
   workflow_call:
     inputs:
       build_configuration:
-        description: 'Build configuration (e.g., Debug or Release).'
+        description: "Build configuration (e.g., Debug or Release)."
         required: false
-        default: 'Release'
+        default: "Release"
         type: string
       projects_filter:
-        description: 'Path or pattern to the projects to restore and build.'
+        description: "Path or pattern to the projects to restore and build."
         required: true
         type: string
       test_projects_filter:
-        description: 'Path or pattern to the test projects.'
+        description: "Path or pattern to the test projects."
         required: true
         type: string
       test_run_settings_file:
-        description: 'Path to the test run settings file.'
+        description: "Path to the test run settings file."
         required: false
         type: string
       project_name:
-        description: 'Project name.'
+        description: "Project name."
         required: true
         type: string
       version:
-        description: 'Version number.'
+        description: "Version number."
         required: false
-        default: ''
+        default: ""
         type: string
 
 jobs:
@@ -35,12 +35,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.x'
+          dotnet-version: "8.x"
 
       - name: Restore ${{ inputs.project_name }}
         run: |
@@ -67,7 +67,7 @@ jobs:
 
       # - name: Publish Test Results
       #   if: always()
-      #   uses: actions/upload-artifact@v3
+      #   uses: actions/upload-artifact@v4
       #   with:
       #     name: TestResults
       #     path: '**/TestResults/*.trx'

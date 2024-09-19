@@ -12,14 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Build steps
       - name: Build solution
         run: dotnet build your-solution.sln --configuration ${{ inputs.build_configuration }}
 
       - name: Checkout infrastructure repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: your-org/infrastructure
           path: infrastructure
@@ -50,7 +50,7 @@ jobs:
           done
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
           path: ${{ github.workspace }}/build
