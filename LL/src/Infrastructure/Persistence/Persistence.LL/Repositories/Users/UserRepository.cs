@@ -11,7 +11,7 @@ public class UserRepository : IUserRepository
         _context = context;
     }
 
-    // inheritdocs />
+    // inheritdoc />
     public bool DoesUserExist(string email)
     {
         return _context.Users.Any(x => x.Email == email);
