@@ -1,6 +1,7 @@
 name: Build and Deploy LL
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -65,7 +66,7 @@ jobs:
       #     echo "TAGCOMMIT=${TAGCOMMIT}" >> $GITHUB_ENV
 
       - name: Build and Test
-        uses: ./.github/workflows/LL-backend-build.yml
+        uses: .github/workflows/LL-backend-build.yml
         with:
           projects_filter: "legends-legacy/LL/LL.sln"
           test_projects_filter: "legends-legacy/LL/LL.sln"
@@ -78,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Docker Publish and Push
-        uses: ./.github/actions/docker.yml
+        uses: .github/actions/docker.yml
         with:
           tag: ${{ env.TAG }}
           version: ${{ env.VERSION }}
@@ -90,7 +91,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Helm Package and Push
-        uses: ./.github/actions/helm.yaml
+        uses: .github/actions/helm.yaml
         with:
           containerRegistry: ${{ env.CONTAINER_REGISTRY }}
           registryUsername: ${{ secrets.REGISTRY_USERNAME }}
