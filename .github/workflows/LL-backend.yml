@@ -100,13 +100,13 @@ jobs:
           tag: ${{ env.TAG }}
           workingDirectory: "legends-legacy/LL/deploy"
 
-  version_bump:
-    needs: helm
-    uses: ./.github/workflows/version-bump.yml
-    with:
-      tag: ${{ needs.build_and_test.outputs.TAG }}
-      version: ${{ needs.build_and_test.outputs.VERSION }}
-      versionfile: "deploy/versions/ll-backend.version"
-    secrets:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      INFRASTRUCTURE_REPO: "your-org/infrastructure"
+  # version_bump:
+  #   needs: helm
+  #   uses: ./.github/workflows/version-bump.yml
+  #   with:
+  #     tag: ${{ needs.build_and_test.outputs.TAG }}
+  #     version: ${{ needs.build_and_test.outputs.VERSION }}
+  #     versionfile: "deploy/versions/ll-backend.version"
+  #   secrets:
+  #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     INFRASTRUCTURE_REPO: "your-org/infrastructure"
