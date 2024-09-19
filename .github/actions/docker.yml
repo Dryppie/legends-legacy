@@ -1,0 +1,61 @@
+name: "Docker Publish and Push Action"
+description: "Builds Docker images and pushes them to a container registry."
+
+inputs:
+  tag:
+    description: "Image tag."
+    required: true
+  version:
+    description: "Version."
+    required: true
+  containerRegistry:
+    description: "Container registry name."
+    required: true
+  registryUsername:
+    description: "Container registry username."
+    required: true
+  registryPassword:
+    description: "Container registry password."
+    required: true
+  workingDirectory:
+    description: "Working directory."
+    required: false
+    default: "legends-legacy"
+  buildScript:
+    description: "Path to the build script."
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Print Docker images
+      shell: pwsh
+      run: |
+        Write-Host "--images--"
+        docker images
+
+    - name: Docker Login
+      if: ${{ success() && github.event_name != 'pull_request' }}
+      shell: bash
+      run: |
+        echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+    - name: Docker Build by PowerShell
+      if: ${{ success() && github.event_name != 'pull_request' }}
+      shell: pwsh
+      working-directory: ${{ inputs.workingDirectory }}
+      env:
+        DOCKER_REGISTRY: "ghcr.io/${{ github.repository_owner }}/"
+        IMAGE_TAG: "${{ inputs.tag }}"
+        VERSION: "${{ inputs.version }}"
+        BUILD_VERSION: "${{ inputs.version }}"
+      run: |
+        $DebugPreference = 'Continue'
+        pwd
+        . "${{ inputs.buildScript }}"
+
+    - name: Docker Push
+      if: ${{ success() && github.event_name != 'pull_request' }}
+      shell: bash
+      run: |
+        docker push ghcr.io/${{ github.repository_owner }}/${{ inputs.imageName }}:${{ inputs.tag }}
