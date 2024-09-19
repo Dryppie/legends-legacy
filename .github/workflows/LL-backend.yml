@@ -12,54 +12,57 @@ on:
 env:
   MAJOR: 0
   MINOR: 0
+  PATCH: 0
+  TAG: 1
+  VERSION: 1
 
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
-    outputs:
-      VERSION: ${{ steps.set_version.outputs.VERSION }}
-      TAG: ${{ steps.set_version.outputs.TAG }}
-      TAGID: ${{ steps.set_version.outputs.TAGID }}
-      TAGCOMMIT: ${{ steps.set_version.outputs.TAGCOMMIT }}
+    # outputs:
+    #   VERSION: ${{ steps.set_version.outputs.VERSION }}
+    #   TAG: ${{ steps.set_version.outputs.TAG }}
+    #   TAGID: ${{ steps.set_version.outputs.TAGID }}
+    #   TAGCOMMIT: ${{ steps.set_version.outputs.TAGCOMMIT }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set Version and Tag
-        id: set_version
-        shell: bash
-        run: |
-          # Set PATCH using GITHUB_RUN_NUMBER
-          echo "PATCH=${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
+      # - name: Set Version and Tag
+      #   id: set_version
+      #   shell: bash
+      #   run: |
+      #     # Set PATCH using GITHUB_RUN_NUMBER
+      #     echo "PATCH=${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
 
-          # Construct VERSION
-          VERSION="${MAJOR}.${MINOR}.${PATCH}"
+      #     # Construct VERSION
+      #     VERSION="${MAJOR}.${MINOR}.${PATCH}"
 
-          # Determine TAG based on branch
-          BRANCH_NAME="${GITHUB_REF#refs/he/}"
-          if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
-            TAG="main-${VERSION}"
-          elif [[ "${GITHUB_REF}" == refs/heads/release/* ]]; then
-            TAG="release-${VERSION}"
-          else
-            TAG="${VERSION}"
-          fi
+      #     # Determine TAG based on branch
+      #     BRANCH_NAME="${GITHUB_REF#refs/he/}"
+      #     if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
+      #       TAG="main-${VERSION}"
+      #     elif [[ "${GITHUB_REF}" == refs/heads/release/* ]]; then
+      #       TAG="release-${VERSION}"
+      #     else
+      #       TAG="${VERSION}"
+      #     fi
 
-          # Set TAGID and TAGCOMMIT
-          TAGID="build-${GITHUB_RUN_ID}"
-          TAGCOMMIT="commit-${GITHUB_SHA}"
+      #     # Set TAGID and TAGCOMMIT
+      #     TAGID="build-${GITHUB_RUN_ID}"
+      #     TAGCOMMIT="commit-${GITHUB_SHA}"
 
-          # Set outputs
-          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
-          echo "TAG=${TAG}" >> $GITHUB_OUTPUT
-          echo "TAGID=${TAGID}" >> $GITHUB_OUTPUT
-          echo "TAGCOMMIT=${TAGCOMMIT}" >> $GITHUB_OUTPUT
+      #     # Set outputs
+      #     echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+      #     echo "TAG=${TAG}" >> $GITHUB_OUTPUT
+      #     echo "TAGID=${TAGID}" >> $GITHUB_OUTPUT
+      #     echo "TAGCOMMIT=${TAGCOMMIT}" >> $GITHUB_OUTPUT
 
-          # Export variables for this job
-          echo "VERSION=${VERSION}" >> $GITHUB_ENV
-          echo "TAG=${TAG}" >> $GITHUB_ENV
-          echo "TAGID=${TAGID}" >> $GITHUB_ENV
-          echo "TAGCOMMIT=${TAGCOMMIT}" >> $GITHUB_ENV
+      #     # Export variables for this job
+      #     echo "VERSION=${VERSION}" >> $GITHUB_ENV
+      #     echo "TAG=${TAG}" >> $GITHUB_ENV
+      #     echo "TAGID=${TAGID}" >> $GITHUB_ENV
+      #     echo "TAGCOMMIT=${TAGCOMMIT}" >> $GITHUB_ENV
 
       - name: Build and Test
         uses: ./.github/workflows/LL-backend-build.yml
