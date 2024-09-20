@@ -7,8 +7,8 @@ on:
       - main
       - "releases/**"
     paths:
-      - "ADS/**"
-      - "!ADS/src/Presentation/ads/**"
+      - "LL/**"
+      - "!LL/src/Presentation/ll/**"
 
 env:
   buildConfiguration: Release
@@ -59,6 +59,8 @@ jobs:
     needs: setup
     runs-on: ubuntu-latest
     steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
       - name: Build backend
         uses: ./.github/workflows/LL-backend-build.yml
         with:
