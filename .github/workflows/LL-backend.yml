@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Create version variable
         run: |
@@ -59,10 +59,8 @@ jobs:
     needs: setup
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
       - name: Build backend
-        uses: ./.github/workflows/LL-backend-build.yml
+        uses: ./.github/actions/backend-build
         with:
           projects_filter: "legends-legacy/LL/LL.sln"
           test_projects_filter: "legends-legacy/LL/LL.sln"
