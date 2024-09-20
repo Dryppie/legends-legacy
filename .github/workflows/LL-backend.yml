@@ -10,23 +10,27 @@ on:
       - "ADS/**"
       - "!ADS/src/Presentation/ads/**"
 
+env:
+  buildConfiguration: Release
+
+  major: 0
+  minor: 0
+  patch: ${{ github.run_number }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    env:
-      buildConfiguration: Release
-
-      major: 0
-      minor: 0
-      patch: ${{ github.run_number }}
-      version: ${{ env.major }}.${{ env.minor }}.${{ env.patch }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Create version variable
+        run: |
+          echo "version=${{env.major}}.${{env.minor}}.${{env.patch}}" >> $GITHUB_ENV
+
       - name: Set tag variable
+
         shell: bash
         run: |
           echo "GITHUB_REF is $GITHUB_REF"
