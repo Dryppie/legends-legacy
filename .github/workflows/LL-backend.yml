@@ -54,3 +54,50 @@ jobs:
           echo "Version Tag: ${{ env.tag }}"
           echo "Build ID Tag: ${{ env.tagid }}"
           echo "Commit Tag: ${{ env.tagcommit }}"
+
+      - name: Build
+        uses: ./.github/workflows/LL-backend-build.yml
+        with:
+          projects_filter: "legends-legacy/LL/LL.sln"
+          test_projects_filter: "legends-legacy/LL/LL.sln"
+          test_run_settings_file: "legends-legacy/LL/CodeCoverage.runsettings"
+          project_name: "LL"
+          version: ${{ env.VERSION }}
+
+  docker:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Docker Publish and Push
+        uses: ./.github/actions/docker.yml
+        with:
+          tag: ${{ env.TAG }}
+          version: ${{ env.VERSION }}
+          workingDirectory: "legends-legacy"
+          buildScript: "./build/build-ll.ps1"
+
+  helm:
+    needs: docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Helm Package and Push
+        uses: ./.github/actions/helm.yaml
+        with:
+          containerRegistry: ${{ env.CONTAINER_REGISTRY }}
+          registryUsername: ${{ secrets.REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.REGISTRY_PASSWORD }}
+          version: ${{ env.VERSION }}
+          tag: ${{ env.TAG }}
+          workingDirectory: "legends-legacy/LL/deploy"
+
+  # version_bump:
+  #   needs: helm
+  #   uses: ./.github/workflows/version-bump.yml
+  #   with:
+  #     tag: ${{ needs.build_and_test.outputs.TAG }}
+  #     version: ${{ needs.build_and_test.outputs.VERSION }}
+  #     versionfile: "deploy/versions/ll-backend.version"
+  #     build_configuration:
+  #   secrets:
+  #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     INFRASTRUCTURE_REPO: "your-org/infrastructure"
