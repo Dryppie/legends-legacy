@@ -59,13 +59,10 @@ jobs:
     needs: setup
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - name: Build backend
         uses: ./.github/actions/build-backend
         with:
           projects_filter: "legends-legacy/LL/LL.sln"
-          test_projects_filter: "legends-legacy/LL/LL.sln"
-          test_run_settings_file: "legends-legacy/LL/CodeCoverage.runsettings"
           project_name: "LL"
           version: ${{ env.VERSION }}
 

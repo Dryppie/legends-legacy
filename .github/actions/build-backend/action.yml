@@ -12,14 +12,6 @@ on:
         description: "Path or pattern to the projects to restore and build."
         required: true
         type: string
-      test_projects_filter:
-        description: "Path or pattern to the test projects."
-        required: true
-        type: string
-      test_run_settings_file:
-        description: "Path to the test run settings file."
-        required: false
-        type: string
       project_name:
         description: "Project name."
         required: true
