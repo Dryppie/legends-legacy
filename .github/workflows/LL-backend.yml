@@ -1,112 +1,52 @@
-name: Build and Deploy LL
+name: Build
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-      - "releases/*"
+      - "releases/**"
     paths:
-      - "LL/**"
-      - "!LL/src/Presentation/ll/**"
-  workflow_dispatch:
-
-env:
-  MAJOR: 0
-  MINOR: 0
-  PATCH: 0
-  TAG: 1
-  VERSION: 1
+      - "ADS/**"
+      - "!ADS/src/Presentation/ads/**"
 
 jobs:
-  build_and_test:
+  build:
     runs-on: ubuntu-latest
-    # outputs:
-    #   VERSION: ${{ steps.set_version.outputs.VERSION }}
-    #   TAG: ${{ steps.set_version.outputs.TAG }}
-    #   TAGID: ${{ steps.set_version.outputs.TAGID }}
-    #   TAGCOMMIT: ${{ steps.set_version.outputs.TAGCOMMIT }}
+
+    env:
+      buildConfiguration: Release
+
+      major: 0
+      minor: 0
+      patch: ${{ github.run_number }}
+      version: ${{ env.major }}.${{ env.minor }}.${{ env.patch }}
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      # - name: Set Version and Tag
-      #   id: set_version
-      #   shell: bash
-      #   run: |
-      #     # Set PATCH using GITHUB_RUN_NUMBER
-      #     echo "PATCH=${GITHUB_RUN_NUMBER}" >> $GITHUB_ENV
+      - name: Set tag variable
+        shell: bash
+        run: |
+          echo "GITHUB_REF is $GITHUB_REF"
+          if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
+            tag="main-${{ env.version }}"
+          elif [[ "$GITHUB_REF" == refs/heads/releases/* ]]; then
+            tag="release-${{ env.version }}"
+          else
+            tag="${{ env.version }}"
+          fi
+          echo "tag=$tag" >> $GITHUB_ENV
 
-      #     # Construct VERSION
-      #     VERSION="${MAJOR}.${MINOR}.${PATCH}"
+      - name: Set tagid and tagcommit
+        run: |
+          echo "tagid=build-${{ github.run_id }}" >> $GITHUB_ENV
+          echo "tagcommit=commit-${{ github.sha }}" >> $GITHUB_ENV
 
-      #     # Determine TAG based on branch
-      #     BRANCH_NAME="${GITHUB_REF#refs/he/}"
-      #     if [[ "${GITHUB_REF}" == "refs/heads/main" ]]; then
-      #       TAG="main-${VERSION}"
-      #     elif [[ "${GITHUB_REF}" == refs/heads/release/* ]]; then
-      #       TAG="release-${VERSION}"
-      #     else
-      #       TAG="${VERSION}"
-      #     fi
-
-      #     # Set TAGID and TAGCOMMIT
-      #     TAGID="build-${GITHUB_RUN_ID}"
-      #     TAGCOMMIT="commit-${GITHUB_SHA}"
-
-      #     # Set outputs
-      #     echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
-      #     echo "TAG=${TAG}" >> $GITHUB_OUTPUT
-      #     echo "TAGID=${TAGID}" >> $GITHUB_OUTPUT
-      #     echo "TAGCOMMIT=${TAGCOMMIT}" >> $GITHUB_OUTPUT
-
-      #     # Export variables for this job
-      #     echo "VERSION=${VERSION}" >> $GITHUB_ENV
-      #     echo "TAG=${TAG}" >> $GITHUB_ENV
-      #     echo "TAGID=${TAGID}" >> $GITHUB_ENV
-      #     echo "TAGCOMMIT=${TAGCOMMIT}" >> $GITHUB_ENV
-
-      - name: Build and Test
-        uses: .github/workflows/LL-backend-build.yml
-        with:
-          projects_filter: "legends-legacy/LL/LL.sln"
-          test_projects_filter: "legends-legacy/LL/LL.sln"
-          test_run_settings_file: "legends-legacy/LL/CodeCoverage.runsettings"
-          project_name: "LL"
-          version: ${{ env.VERSION }}
-
-  docker:
-    needs: build_and_test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Docker Publish and Push
-        uses: .github/actions/docker.yml
-        with:
-          tag: ${{ env.TAG }}
-          version: ${{ env.VERSION }}
-          workingDirectory: "legends-legacy"
-          buildScript: "./build/build-ll.ps1"
-
-  helm:
-    needs: docker
-    runs-on: ubuntu-latest
-    steps:
-      - name: Helm Package and Push
-        uses: .github/actions/helm.yaml
-        with:
-          containerRegistry: ${{ env.CONTAINER_REGISTRY }}
-          registryUsername: ${{ secrets.REGISTRY_USERNAME }}
-          registryPassword: ${{ secrets.REGISTRY_PASSWORD }}
-          version: ${{ env.VERSION }}
-          tag: ${{ env.TAG }}
-          workingDirectory: "legends-legacy/LL/deploy"
-
-  # version_bump:
-  #   needs: helm
-  #   uses: ./.github/workflows/version-bump.yml
-  #   with:
-  #     tag: ${{ needs.build_and_test.outputs.TAG }}
-  #     version: ${{ needs.build_and_test.outputs.VERSION }}
-  #     versionfile: "deploy/versions/ll-backend.version"
-  #   secrets:
-  #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     INFRASTRUCTURE_REPO: "your-org/infrastructure"
+      # Optionally, use the computed tags
+      - name: Output Tags
+        run: |
+          echo "Version Tag: ${{ env.tag }}"
+          echo "Build ID Tag: ${{ env.tagid }}"
+          echo "Commit Tag: ${{ env.tagcommit }}"
