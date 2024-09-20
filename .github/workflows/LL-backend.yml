@@ -59,10 +59,9 @@ jobs:
     needs: setup
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       - name: Build backend
-        uses: ./.github/actions/backend-build
+        uses: ./.github/actions/build-backend
         with:
           projects_filter: "legends-legacy/LL/LL.sln"
           test_projects_filter: "legends-legacy/LL/LL.sln"
