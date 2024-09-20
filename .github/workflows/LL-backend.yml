@@ -18,7 +18,7 @@ env:
   patch: ${{ github.run_number }}
 
 jobs:
-  build:
+  setup:
     runs-on: ubuntu-latest
 
     steps:
@@ -55,7 +55,11 @@ jobs:
           echo "Build ID Tag: ${{ env.tagid }}"
           echo "Commit Tag: ${{ env.tagcommit }}"
 
-      - name: Build
+  build:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build backend
         uses: ./.github/workflows/LL-backend-build.yml
         with:
           projects_filter: "legends-legacy/LL/LL.sln"
