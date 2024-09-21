@@ -84,7 +84,7 @@ jobs:
           tag: ${{ env.TAG }}
           version: ${{ needs.setup.outputs.version }}
           workingDirectory: "LL"
-          buildScript: "LL/build/build-ll.ps1"
+          buildScript: "build/build-ll.ps1"
           token: ${{ secrets.GITHUB_TOKEN }}
 
   helm:
