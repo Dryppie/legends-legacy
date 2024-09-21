@@ -34,7 +34,7 @@ jobs:
         id: set_version
         run: |
           echo "version=${{env.major}}.${{env.minor}}.${{env.patch}}" >> $GITHUB_ENV
-          echo "::set-output name=version::${{env.major}}.${{env.minor}}.${{env.patch}}"
+          echo "version=${{env.major}}.${{env.minor}}.${{env.patch}}" >> $GITHUB_OUTPUT
 
       - name: Set tag variable
         id: set_tag
@@ -48,22 +48,13 @@ jobs:
           else
             tag="${{ env.version }}"
           fi
-          echo "::set-output name=tag::$tag"
-          echo "tag=$tag" >> $GITHUB_ENV
+          echo "tag=$tag" >> $GITHUB_OUTPUT
 
       - name: Set tagid and tagcommit
         id: set_tagid
         run: |
-          echo "tagid=build-${{ github.run_id }}" >> $GITHUB_ENV
-          echo "tagcommit=commit-${{ github.sha }}" >> $GITHUB_ENV
-          echo "::set-output name=tagid::build-${{ github.run_id }}"
-          echo "::set-output name=tagcommit::commit-${{ github.sha }}"
-
-      - name: Output Tags
-        run: |
-          echo "Version Tag: ${{ env.tag }}"
-          echo "Build ID Tag: ${{ env.tagid }}"
-          echo "Commit Tag: ${{ env.tagcommit }}"
+          echo "tagid=build-${{ github.run_id }}" >> $GITHUB_OUTPUT
+          echo "tagcommit=commit-${{ github.sha }}" >> $GITHUB_OUTPUT
 
   build:
     needs: setup
@@ -78,6 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Docker Publish and Push
         uses: ./.github/actions/build-and-push-docker
         with:
