@@ -79,6 +79,7 @@ jobs:
           version: ${{ needs.setup.outputs.version }}
           buildScript: "build/build-ll.ps1"
           token: ${{ secrets.GITHUB_TOKEN }}
+          imageName: "ll-backend"
 
   helm:
     needs:

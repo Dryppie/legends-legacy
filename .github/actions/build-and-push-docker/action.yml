@@ -46,7 +46,7 @@ runs:
       env:
         OWNER: "${{ github.repository_owner }}"
 
-    - name: Docker Build by PowerShell
+    - name: Docker Build and Push by PowerShell
       if: ${{ success() && github.event_name != 'pull_request' }}
       shell: pwsh
       working-directory: ${{ github.workspace }}
@@ -59,9 +59,3 @@ runs:
         $DebugPreference = 'Continue'
         pwd
         . "${{ inputs.buildScript }}"
-
-    - name: Docker Push
-      if: ${{ success() && github.event_name != 'pull_request' }}
-      shell: bash
-      run: |
-        docker push ghcr.io/${{ env.OWNER_LC }}/${{ inputs.imageName }}:${{ inputs.tag }}
