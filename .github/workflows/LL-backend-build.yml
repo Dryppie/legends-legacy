@@ -34,7 +34,9 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.x"
-
+      - name: List files in the repository
+        run: |
+          ls ${{ github.workspace }}
       - name: Restore ${{ inputs.project_name }}
         run: |
           dotnet restore "${{ inputs.projects_filter }}"
