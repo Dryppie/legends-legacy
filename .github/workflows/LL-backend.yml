@@ -79,7 +79,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   helm:
-    needs: docker
+    needs:
+      - setup
+      - docker
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
