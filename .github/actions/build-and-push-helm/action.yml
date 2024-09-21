@@ -20,7 +20,10 @@ inputs:
   workingDirectory:
     description: "Working directory."
     required: false
-    default: "legends-legacy/ADS/deploy"
+    default: "LL/deploy"
+  token:
+    description: "GitHub token for authentication"
+    required: true
 
 runs:
   using: "composite"

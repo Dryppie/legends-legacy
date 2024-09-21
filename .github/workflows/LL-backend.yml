@@ -85,6 +85,7 @@ jobs:
           version: ${{ needs.setup.outputs.version }}
           workingDirectory: "legends-legacy"
           buildScript: "./build/build-ll.ps1"
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   helm:
     needs: docker
@@ -99,7 +100,8 @@ jobs:
           registryPassword: ${{ secrets.REGISTRY_PASSWORD }}
           version: ${{ needs.setup.outputs.version }}
           tag: ${{ env.TAG }}
-          workingDirectory: "legends-legacy/LL/deploy"
+          workingDirectory: "LL/deploy"
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   # version_bump:
   #   needs: helm
