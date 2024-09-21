@@ -81,7 +81,7 @@ jobs:
       - name: Docker Publish and Push
         uses: ./.github/actions/build-and-push-docker
         with:
-          tag: ${{ env.TAG }}
+          tag: ${{ needs.setup.outputs.tag }}
           version: ${{ needs.setup.outputs.version }}
           buildScript: "build/build-ll.ps1"
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -98,7 +98,7 @@ jobs:
           registryUsername: ${{ secrets.REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.REGISTRY_PASSWORD }}
           version: ${{ needs.setup.outputs.version }}
-          tag: ${{ env.TAG }}
+          tag: ${{ needs.setup.outputs.tag }}
           workingDirectory: "LL/deploy"
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -106,7 +106,7 @@ jobs:
   #   needs: helm
   #   uses: ./.github/workflows/version-bump.yml
   #   with:
-  #     tag: ${{ needs.build_and_test.outputs.TAG }}
+  #     tag: ${{ needs.setup.outputs.TAG }}
   #     version: ${{ needs.setup.outputs.VERSION }}
   #     versionfile: "deploy/versions/ll-backend.version"
   #     build_configuration:
