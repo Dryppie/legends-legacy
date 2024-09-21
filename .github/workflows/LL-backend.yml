@@ -20,17 +20,24 @@ env:
 jobs:
   setup:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.set_version.outputs.version }}
+      tag: ${{ steps.set_tag.outputs.tag }}
+      tagid: ${{ steps.set_tagid.outputs.tagid }}
+      tagcommit: ${{ steps.set_tagid.outputs.tagcommit }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Create version variable
+        id: set_version
         run: |
           echo "version=${{env.major}}.${{env.minor}}.${{env.patch}}" >> $GITHUB_ENV
+          echo "::set-output name=version::${{env.major}}.${{env.minor}}.${{env.patch}}"
 
       - name: Set tag variable
-
+        id: set_tag
         shell: bash
         run: |
           echo "GITHUB_REF is $GITHUB_REF"
@@ -41,14 +48,17 @@ jobs:
           else
             tag="${{ env.version }}"
           fi
+          echo "::set-output name=tag::$tag"
           echo "tag=$tag" >> $GITHUB_ENV
 
       - name: Set tagid and tagcommit
+        id: set_tagid
         run: |
           echo "tagid=build-${{ github.run_id }}" >> $GITHUB_ENV
           echo "tagcommit=commit-${{ github.sha }}" >> $GITHUB_ENV
+          echo "::set-output name=tagid::build-${{ github.run_id }}"
+          echo "::set-output name=tagcommit::commit-${{ github.sha }}"
 
-      # Optionally, use the computed tags
       - name: Output Tags
         run: |
           echo "Version Tag: ${{ env.tag }}"
@@ -57,15 +67,11 @@ jobs:
 
   build:
     needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build backend
-        uses: ./.github/actions/build-backend
-        with:
-          projects_filter: "legends-legacy/LL/LL.sln"
-          project_name: "LL"
-          version: ${{ env.VERSION }}
+    uses: ./.github/workflows/LL-backend-build.yml
+    with:
+      projects_filter: "legends-legacy/LL/LL.sln"
+      project_name: "LL"
+      version: ${{ needs.setup.outputs.version }}
 
   docker:
     needs: build
@@ -75,7 +81,7 @@ jobs:
         uses: ./.github/actions/docker.yml
         with:
           tag: ${{ env.TAG }}
-          version: ${{ env.VERSION }}
+          version: ${{ needs.setup.outputs.version }}
           workingDirectory: "legends-legacy"
           buildScript: "./build/build-ll.ps1"
 
@@ -89,7 +95,7 @@ jobs:
           containerRegistry: ${{ env.CONTAINER_REGISTRY }}
           registryUsername: ${{ secrets.REGISTRY_USERNAME }}
           registryPassword: ${{ secrets.REGISTRY_PASSWORD }}
-          version: ${{ env.VERSION }}
+          version: ${{ needs.setup.outputs.version }}
           tag: ${{ env.TAG }}
           workingDirectory: "legends-legacy/LL/deploy"
 
@@ -98,7 +104,7 @@ jobs:
   #   uses: ./.github/workflows/version-bump.yml
   #   with:
   #     tag: ${{ needs.build_and_test.outputs.TAG }}
-  #     version: ${{ needs.build_and_test.outputs.VERSION }}
+  #     version: ${{ needs.setup.outputs.VERSION }}
   #     versionfile: "deploy/versions/ll-backend.version"
   #     build_configuration:
   #   secrets:
