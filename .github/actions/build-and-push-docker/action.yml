@@ -39,12 +39,16 @@ runs:
       run: |
         echo "${{ inputs.token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
+    - name: set lower case owner name
+      shell: bash
+      run: echo ::set-env name=IMAGE_REPOSITORY::$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
+
     - name: Docker Build by PowerShell
       if: ${{ success() && github.event_name != 'pull_request' }}
       shell: pwsh
       working-directory: ${{ github.workspace }}
       env:
-        DOCKER_REGISTRY: "ghcr.io/${{ github.repository_owner }}/"
+        DOCKER_REGISTRY: "ghcr.io/${{ env.IMAGE_REPOSITORY }}/"
         IMAGE_TAG: "${{ inputs.tag }}"
         VERSION: "${{ inputs.version }}"
         BUILD_VERSION: "${{ inputs.version }}"
@@ -57,4 +61,4 @@ runs:
       if: ${{ success() && github.event_name != 'pull_request' }}
       shell: bash
       run: |
-        docker push ghcr.io/dryppie/${{ inputs.imageName }}:${{ inputs.tag }}
+        docker push ghcr.io/${{ env.IMAGE_REPOSITORY }}/${{ inputs.imageName }}:${{ inputs.tag }}
