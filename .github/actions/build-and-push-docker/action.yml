@@ -54,6 +54,7 @@ runs:
         . "${{ inputs.buildScript }}"
 
     - name: set lower case owner name
+      shell: bash
       run: |
         echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
       env:
