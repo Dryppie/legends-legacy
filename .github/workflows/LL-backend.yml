@@ -91,9 +91,6 @@ jobs:
       - name: Helm Package and Push
         uses: ./.github/actions/build-and-push-helm
         with:
-          containerRegistry: ${{ env.CONTAINER_REGISTRY }}
-          registryUsername: ${{ secrets.REGISTRY_USERNAME }}
-          registryPassword: ${{ secrets.REGISTRY_PASSWORD }}
           version: ${{ needs.setup.outputs.version }}
           tag: ${{ needs.setup.outputs.tag }}
           workingDirectory: "LL/deploy"

@@ -2,15 +2,6 @@ name: "Helm Package and Push Action"
 description: "Packages Helm charts and pushes them to a container registry."
 
 inputs:
-  containerRegistry:
-    description: "Container registry name."
-    required: true
-  registryUsername:
-    description: "Container registry username."
-    required: true
-  registryPassword:
-    description: "Container registry password."
-    required: true
   version:
     description: "Helm chart version."
     required: true
@@ -42,7 +33,7 @@ runs:
       if: ${{ success() && github.event_name != 'pull_request' }}
       shell: bash
       run: |
-        echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ghcr.io --username "${{ github.actor }}" --password-stdin
+        echo "${{ inputs.token }}" | helm registry login ghcr.io --username "${{ github.actor }}" --password-stdin
 
     - name: Package Helm Chart
       shell: bash
@@ -54,4 +45,4 @@ runs:
     - name: Push Helm Chart
       shell: bash
       run: |
-        helm push ./ll-backend-${{ inputs.version }}.tgz oci://ghcr.io/{{ github.repository }}/helm-charts
+        helm push ./ll-backend-${{ inputs.version }}.tgz oci://ghcr.io/${{ github.repository }}/helm-charts
