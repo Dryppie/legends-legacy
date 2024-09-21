@@ -59,6 +59,7 @@ jobs:
     needs: setup
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Build backend
         uses: ./.github/actions/build-backend
         with:

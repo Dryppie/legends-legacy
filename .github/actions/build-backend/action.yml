@@ -1,4 +1,4 @@
-name: Build Workflow
+name: Build Action
 
 inputs:
   build_configuration:
