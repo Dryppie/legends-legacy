@@ -51,7 +51,7 @@ runs:
       shell: pwsh
       working-directory: ${{ github.workspace }}
       env:
-        DOCKER_REGISTRY: "ghcr.io/${{ github.OWNER_LC }}/"
+        DOCKER_REGISTRY: "ghcr.io/${{ env.OWNER_LC }}/"
         IMAGE_TAG: "${{ inputs.tag }}"
         VERSION: "${{ inputs.version }}"
         BUILD_VERSION: "${{ inputs.version }}"
