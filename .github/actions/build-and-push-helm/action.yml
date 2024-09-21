@@ -41,4 +41,4 @@ runs:
     - name: Push Helm Chart
       shell: bash
       run: |
-        helm push ll-backend-${{ inputs.version }}.tgz oci://ghcr.io/${{ env.OWNER_LC }}/helm-charts
+        helm push ll-backend-${{ inputs.version }}.tgz oci://ghcr.io/${{ env.OWNER_LC }}/helm
