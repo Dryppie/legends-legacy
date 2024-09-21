@@ -69,7 +69,7 @@ jobs:
     needs: setup
     uses: ./.github/workflows/LL-backend-build.yml
     with:
-      projects_filter: "legends-legacy/LL/LL.sln"
+      projects_filter: "legends-legacy/LL/LegendsLegacy.sln"
       project_name: "LL"
       version: ${{ needs.setup.outputs.version }}
 
