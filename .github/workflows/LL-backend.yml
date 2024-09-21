@@ -83,7 +83,7 @@ jobs:
         with:
           tag: ${{ env.TAG }}
           version: ${{ needs.setup.outputs.version }}
-          workingDirectory: "legends-legacy"
+          workingDirectory: "LL"
           buildScript: "./build/build-ll.ps1"
           token: ${{ secrets.GITHUB_TOKEN }}
 
