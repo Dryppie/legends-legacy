@@ -31,7 +31,14 @@ runs:
           --version ${{ inputs.version }} \
           --app-version ${{ inputs.tag }}
 
+    - name: set lower case owner name
+      shell: bash
+      run: |
+        echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
+      env:
+        OWNER: "${{ github.repository_owner }}"
+
     - name: Push Helm Chart
       shell: bash
       run: |
-        helm push ll-backend-${{ inputs.version }}.tgz oci://ghcr.io/${{ github.repository }}/helm-charts
+        helm push ll-backend-${{ inputs.version }}.tgz oci://ghcr.io/${{ env.OWNER_LC }}/helm-charts
