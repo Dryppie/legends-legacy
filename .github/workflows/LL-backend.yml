@@ -78,7 +78,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Docker Publish and Push
-        uses: ./.github/actions/docker.yml
+        uses: ./.github/actions/build-and-push-docker
         with:
           tag: ${{ env.TAG }}
           version: ${{ needs.setup.outputs.version }}
@@ -90,7 +90,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Helm Package and Push
-        uses: ./.github/actions/helm.yaml
+        uses: ./.github/actions/build-and-push-helm
         with:
           containerRegistry: ${{ env.CONTAINER_REGISTRY }}
           registryUsername: ${{ secrets.REGISTRY_USERNAME }}
