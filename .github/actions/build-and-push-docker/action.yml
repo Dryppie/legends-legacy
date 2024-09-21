@@ -53,12 +53,8 @@ runs:
         pwd
         . "${{ inputs.buildScript }}"
 
-    - name: set lower case owner name
-      shell: bash
-      run: echo ::set-env name=IMAGE_REPOSITORY::$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
-
     - name: Docker Push
       if: ${{ success() && github.event_name != 'pull_request' }}
       shell: bash
       run: |
-        docker push ghcr.io/${{ env.IMAGE_REPOSITORY }}/${{ inputs.imageName }}:${{ inputs.tag }}
+        docker push ghcr.io/dryppie/${{ inputs.imageName }}:${{ inputs.tag }}
