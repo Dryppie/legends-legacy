@@ -10,8 +10,7 @@ inputs:
     required: true
   workingDirectory:
     description: "Working directory."
-    required: false
-    default: "LL/deploy"
+    required: true
   token:
     description: "GitHub token for authentication"
     required: true

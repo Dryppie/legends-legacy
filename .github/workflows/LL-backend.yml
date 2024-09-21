@@ -93,7 +93,7 @@ jobs:
         with:
           version: ${{ needs.setup.outputs.version }}
           tag: ${{ needs.setup.outputs.tag }}
-          workingDirectory: "LL/deploy"
+          workingDirectory: "LL/deploy/ll-backend"
           token: ${{ secrets.GITHUB_TOKEN }}
 
   # version_bump:
