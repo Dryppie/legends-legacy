@@ -65,7 +65,9 @@ jobs:
       version: ${{ needs.setup.outputs.version }}
 
   docker:
-    needs: build
+    needs:
+      - setup
+      - build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
