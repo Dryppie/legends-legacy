@@ -1,6 +1,5 @@
 name: "Docker Publish and Push Action"
 description: "Builds Docker images and pushes them to a container registry."
-permissions: write-all
 
 inputs:
   tag:

@@ -1,6 +1,5 @@
 name: "Helm Package and Push Action"
 description: "Packages Helm charts and pushes them to a container registry."
-permissions: write-all
 
 inputs:
   containerRegistry:
