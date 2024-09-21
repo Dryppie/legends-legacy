@@ -77,6 +77,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Docker Publish and Push
         uses: ./.github/actions/build-and-push-docker
         with:
@@ -89,6 +90,7 @@ jobs:
     needs: docker
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: Helm Package and Push
         uses: ./.github/actions/build-and-push-helm
         with:
