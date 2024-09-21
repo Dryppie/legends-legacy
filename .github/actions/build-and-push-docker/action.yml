@@ -53,12 +53,11 @@ runs:
         VERSION: "${{ inputs.version }}"
         BUILD_VERSION: "${{ inputs.version }}"
       run: |
-        $DebugPreference = 'Continue'
-        pwd
-        . "${{ inputs.buildScript }}"
+        run: |
+          ls
 
-    - name: Docker Push
-      if: ${{ success() && github.event_name != 'pull_request' }}
-      shell: bash
-      run: |
-        docker push ghcr.io/${{ github.repository_owner }}/${{ inputs.imageName }}:${{ inputs.tag }}
+    # - name: Docker Push
+    #   if: ${{ success() && github.event_name != 'pull_request' }}
+    #   shell: bash
+    #   run: |
+    #     docker push ghcr.io/${{ github.repository_owner }}/${{ inputs.imageName }}:${{ inputs.tag }}
