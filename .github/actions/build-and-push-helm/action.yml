@@ -47,7 +47,7 @@ runs:
     - name: Package Helm Chart
       shell: bash
       run: |
-        helm package ./path/to/chart \
+        helm package ${{ inputs.workingDirectory }} \
           --version ${{ inputs.version }} \
           --app-version ${{ inputs.tag }}
 

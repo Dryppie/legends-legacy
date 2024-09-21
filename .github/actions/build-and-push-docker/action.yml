@@ -16,11 +16,7 @@ inputs:
     required: true
   registryPassword:
     description: "Container registry password."
-    required: true
-  workingDirectory:
-    description: "Working directory."
-    required: false
-    default: "legends-legacy"
+    required: true"
   buildScript:
     description: "Path to the build script."
     required: true
@@ -46,17 +42,19 @@ runs:
     - name: Docker Build by PowerShell
       if: ${{ success() && github.event_name != 'pull_request' }}
       shell: pwsh
-      working-directory: ${{ inputs.workingDirectory }}
+      working-directory: ${{ github.workspace }}
       env:
         DOCKER_REGISTRY: "ghcr.io/${{ github.repository_owner }}/"
         IMAGE_TAG: "${{ inputs.tag }}"
         VERSION: "${{ inputs.version }}"
         BUILD_VERSION: "${{ inputs.version }}"
       run: |
-        ls
+        $DebugPreference = 'Continue'
+        pwd
+        . "${{ inputs.buildScript }}"
 
-    # - name: Docker Push
-    #   if: ${{ success() && github.event_name != 'pull_request' }}
-    #   shell: bash
-    #   run: |
-    #     docker push ghcr.io/${{ github.repository_owner }}/${{ inputs.imageName }}:${{ inputs.tag }}
+    - name: Docker Push
+      if: ${{ success() && github.event_name != 'pull_request' }}
+      shell: bash
+      run: |
+        docker push ghcr.io/${{ github.repository_owner }}/${{ inputs.imageName }}:${{ inputs.tag }}
