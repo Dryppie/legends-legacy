@@ -7,7 +7,7 @@ on:
       - main
       - "releases/**"
     paths:
-      - "LL/src/Presentation/ll"
+      - "LL/src/Presentation/ll/**"
 
 env:
   buildConfiguration: Release
@@ -29,24 +29,49 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Checkout ll-infrastructure repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/ll-infrastructure
+          path: ll-infrastructure
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create version variable
         id: set_version
+        shell: bash
         run: |
-          echo "version=${{env.major}}.${{env.minor}}.${{env.patch}}" >> $GITHUB_ENV
-          echo "version=${{env.major}}.${{env.minor}}.${{env.patch}}" >> $GITHUB_OUTPUT
+          # Read the version from the file
+          version=$(cat ll-infrastructure/deploy/versions/ll-frontend.version)
+          echo "Current version is $version"
+
+          # Split the version into major, minor, and patch
+          IFS='.' read -r major minor patch <<< "$version"
+
+          # Increment the patch number
+          patch=$((patch + 1))
+
+          # Construct the new version
+          new_version="${major}.${minor}.${patch}"
+          echo "New version is $new_version"
+
+          # Set the version as an output and environment variable
+          echo "version=$new_version" >> $GITHUB_OUTPUT
+          echo "version=$new_version" >> $GITHUB_ENV
 
       - name: Set tag variable
         id: set_tag
         shell: bash
         run: |
           echo "GITHUB_REF is $GITHUB_REF"
+          version="${{ steps.set_version.outputs.version }}"
           if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
-            tag="main-${{ env.version }}"
+            tag="main-${version}"
           elif [[ "$GITHUB_REF" == refs/heads/releases/* ]]; then
-            tag="release-${{ env.version }}"
+            tag="release-${version}"
           else
-            tag="${{ env.version }}"
+            tag="${version}"
           fi
+          echo "Tag is $tag"
           echo "tag=$tag" >> $GITHUB_OUTPUT
 
       - name: Set tagid and tagcommit
@@ -105,14 +130,25 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           imageName: "ll-frontend"
 
-  # version_bump:
-  #   needs: helm
-  #   uses: ./.github/workflows/version-bump.yml
-  #   with:
-  #     tag: ${{ needs.setup.outputs.TAG }}
-  #     version: ${{ needs.setup.outputs.VERSION }}
-  #     versionfile: "deploy/versions/ll-backend.version"
-  #     build_configuration:
-  #   secrets:
-  #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     INFRASTRUCTURE_REPO: "your-org/infrastructure"
+  bump_version:
+    runs-on: ubuntu-latest
+    needs: [setup] # Ensure this job runs after the setup job
+    steps:
+      - name: Checkout ll-infrastructure repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/ll-infrastructure
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update version file
+        shell: bash
+        run: |
+          cd ll-infrastructure
+          # Update the version in the file
+          echo "${{ needs.setup.outputs.version }}" > deploy/versions/ll-frontend.version
+          # Commit and push changes
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git add deploy/versions/ll-backend.version
+          git commit -m "Bump ll-backend version to ${{ needs.setup.outputs.version }}"
+          git push
