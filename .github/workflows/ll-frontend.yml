@@ -65,12 +65,13 @@ jobs:
       - name: Build Docker image using pwsh
         shell: pwsh
         run: |
-          docker --debug build `
-            --file "LL/src/Presentation/ll/dockerfile" `
-            --build-arg name=ll `
-            --build-arg BUILD_VERSION=${{ needs.setup.outputs.version }} `
-            --progress=plain `
-            --tag ll-frontend:${{ needs.setup.outputs.TAG }} .
+          docker build \
+            --file "LL/src/Presentation/ll/dockerfile" \
+            --build-arg name=ll \
+            --build-arg BUILD_VERSION=${{ needs.setup.outputs.version }} \
+            --progress=plain \
+            --tag ll-frontend:${{ needs.setup.outputs.TAG }} \
+            LL/src/Presentation/ll
 
       - name: Docker Login
         if: ${{ success() && github.event_name != 'pull_request' }}
