@@ -8,15 +8,6 @@ inputs:
   version:
     description: "Version."
     required: true
-  containerRegistry:
-    description: "Container registry name."
-    required: true
-  registryUsername:
-    description: "Container registry username."
-    required: true
-  registryPassword:
-    description: "Container registry password."
-    required: true"
   buildScript:
     description: "Path to the build script."
     required: true
