@@ -73,7 +73,7 @@ jobs:
             --file "LL/src/Presentation/ll/Dockerfile" `
             --build-arg name=ll `
             --build-arg BUILD_VERSION=$version `
-            --tag your-image-name:$version .
+            --tag ll-frontend:${{ needs.setup.outputs.TAG }} .
 
       - name: Docker Login
         if: ${{ success() && github.event_name != 'pull_request' }}
