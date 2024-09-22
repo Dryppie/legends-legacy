@@ -64,21 +64,16 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: test
-        shell: bash
+
+      - name: Build Docker image using pwsh
+        shell: pwsh
         run: |
-          ls LL/src/Presentation/ll/
-      - name: Build Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: "LL/src/Presentation/ll/"
-          build-args: |
-            name=ll
-            BUILD_VERSION=${{ needs.setup.outputs.version }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          load: true
+          $version = '${{ needs.setup.outputs.version }}'
+          docker build `
+            --file "LL/src/Presentation/ll/Dockerfile" `
+            --build-arg name=ll `
+            --build-arg BUILD_VERSION=$version `
+            --tag your-image-name:$version .
 
       - name: Docker Login
         if: ${{ success() && github.event_name != 'pull_request' }}
