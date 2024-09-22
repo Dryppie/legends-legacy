@@ -62,14 +62,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build Docker image using pwsh
         shell: pwsh
         run: |
-          docker build \
-            --file "LL/src/Presentation/ll/dockerfile" \
-            --build-arg name=ll \
-            --build-arg BUILD_VERSION=${{ needs.setup.outputs.version }} \
-            --tag ll-frontend:${{ needs.setup.outputs.TAG }} \
+          docker build `
+            --file "LL/src/Presentation/ll/Dockerfile" `
+            --build-arg name=ll `
+            --build-arg BUILD_VERSION=${{ needs.setup.outputs.version }} `
+            --tag ll-frontend:${{ needs.setup.outputs.TAG }} `
             LL/src/Presentation/ll
 
       - name: Docker Login
