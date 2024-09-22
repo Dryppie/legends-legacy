@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 ### STAGE 1: Build ###
-FROM node:20-alpine as angular
+FROM node:20-alpine AS angular
 WORKDIR /ng-app
 # List files before copying
 RUN ls -al /ng-app
