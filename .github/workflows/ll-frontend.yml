@@ -62,6 +62,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: set lower case owner name
+        shell: bash
+        run: |
+          echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
+        env:
+          OWNER: "${{ github.repository_owner }}"
+
       - name: Build Docker image using pwsh
         shell: pwsh
         run: |
@@ -69,7 +76,7 @@ jobs:
             --file "LL/src/Presentation/ll/Dockerfile" `
             --build-arg name=ll `
             --build-arg BUILD_VERSION=${{ needs.setup.outputs.version }} `
-            --tag ll-frontend:${{ needs.setup.outputs.TAG }} `
+            --tag ghcr.io/${{ env.OWNER_LC }}/ll-frontend:${{ needs.setup.outputs.TAG }} `
             LL/src/Presentation/ll
 
       - name: Docker Login
@@ -77,13 +84,6 @@ jobs:
         shell: bash
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-
-      - name: set lower case owner name
-        shell: bash
-        run: |
-          echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
-        env:
-          OWNER: "${{ github.repository_owner }}"
 
       - name: Print Docker images
         shell: pwsh
