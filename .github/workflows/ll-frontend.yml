@@ -11,7 +11,7 @@ on:
 
 env:
   buildConfiguration: Release
-  dockerfilePath: LL/src/Presentation/ll/
+  dockerfilePath: "LL/src/Presentation/ll/"
   major: 0
   minor: 0
   patch: ${{ github.run_number }}
