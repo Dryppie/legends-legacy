@@ -1,4 +1,4 @@
-name: Build Workflow
+name: LL backend - build workflow
 
 on:
   workflow_call:
