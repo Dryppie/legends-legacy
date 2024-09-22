@@ -67,12 +67,12 @@ jobs:
       - name: test
         shell: bash
         run: |
-          ls
+          ls LL/src/Presentation/ll/
       - name: Build Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: "LL/src/Presentation/ll"
+          file: "LL/src/Presentation/ll/"
           build-args: |
             name=ll
             BUILD_VERSION=${{ needs.setup.outputs.version }}
