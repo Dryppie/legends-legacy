@@ -68,11 +68,10 @@ jobs:
       - name: Build Docker image using pwsh
         shell: pwsh
         run: |
-          $version = '${{ needs.setup.outputs.version }}'
           docker build `
             --file "LL/src/Presentation/ll/Dockerfile" `
             --build-arg name=ll `
-            --build-arg BUILD_VERSION=$version `
+            --build-arg BUILD_VERSION=${{ needs.setup.outputs.version }} `
             --tag ll-frontend:${{ needs.setup.outputs.TAG }} .
 
       - name: Docker Login
