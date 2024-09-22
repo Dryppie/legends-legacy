@@ -2,9 +2,6 @@
 ### STAGE 1: Build ###
 FROM node:20-alpine AS angular
 WORKDIR /ng-app
-# List files before copying
-RUN ls -al /ng-app
-
 COPY package*.json .
 COPY src/environments/environment.ts ./
 
@@ -14,8 +11,7 @@ RUN sed -i "s/buildversion/${BUILD_VERSION}/g" environment.ts
 RUN npm ci
 COPY . .
 RUN cp environment.ts src/environments/environment.ts && npm run build
-# List files after copy to see what was copied
-RUN ls -al /ng-app
+
 ### STAGE 2: Run ###
 FROM nginx:alpine
 EXPOSE 80

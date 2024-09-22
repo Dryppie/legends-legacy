@@ -62,12 +62,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      - name: Check Build Context
-        run: |
-          ls -al .
-          ls -al ./LL/src/Presentation/ll/
       - name: Build Docker image using pwsh
         shell: pwsh
         run: |
