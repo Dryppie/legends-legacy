@@ -41,7 +41,7 @@ jobs:
         shell: bash
         run: |
           # Read the version from the file
-          version=$(cat ll-infrastructure/deploy/versions/ll-backend.version)
+          version=$(cat deploy/versions/ll-backend.version)
           echo "Current version is $version"
 
           # Split the version into major, minor, and patch

@@ -33,7 +33,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ github.repository_owner }}/ll-infrastructure
-          path: ll-infrastructure
           token: ${{ secrets.PAT_TOKEN }}
 
       - name: Create version variable
@@ -41,7 +40,7 @@ jobs:
         shell: bash
         run: |
           # Read the version from the file
-          version=$(cat ll-infrastructure/deploy/versions/ll-frontend.version)
+          version=$(cat deploy/versions/ll-frontend.version)
           echo "Current version is $version"
 
           # Split the version into major, minor, and patch
