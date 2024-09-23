@@ -35,7 +35,7 @@ jobs:
         with:
           repository: ${{ github.repository_owner }}/ll-infrastructure
           path: ll-infrastructure
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Create version variable
         id: set_version
@@ -103,7 +103,7 @@ jobs:
           tag: ${{ needs.setup.outputs.tag }}
           version: ${{ needs.setup.outputs.version }}
           buildScript: "build/build-ll.ps1"
-          token: ${{ secrets.PAT_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   helm:
     needs:
