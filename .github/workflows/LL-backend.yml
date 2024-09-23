@@ -103,7 +103,7 @@ jobs:
           tag: ${{ needs.setup.outputs.tag }}
           version: ${{ needs.setup.outputs.version }}
           buildScript: "build/build-ll.ps1"
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
 
   helm:
     needs:

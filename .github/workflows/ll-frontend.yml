@@ -34,7 +34,7 @@ jobs:
         with:
           repository: ${{ github.repository_owner }}/ll-infrastructure
           path: ll-infrastructure
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PAT_TOKEN }}
 
       - name: Create version variable
         id: set_version
