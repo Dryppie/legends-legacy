@@ -135,7 +135,6 @@ jobs:
       - name: Update version file
         shell: bash
         run: |
-          cd ll-infrastructure
           # Update the version in the file
           echo "${{ needs.setup.outputs.version }}" > deploy/versions/ll-backend.version
           # Commit and push changes
