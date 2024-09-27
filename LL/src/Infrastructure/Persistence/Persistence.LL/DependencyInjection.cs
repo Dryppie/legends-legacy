@@ -7,6 +7,7 @@ using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Persistence.LL.Interfaces;
 using Persistence.LL.Repositories.CharacterActions;
 using Persistence.LL.Repositories.Characters;
 using Persistence.LL.Repositories.Inventories;
@@ -19,17 +20,19 @@ public static class DependencyInjection
     public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
     {
         var timeout = configuration.GetSection("Database").GetValue<int>("TimeoutInSeconds");
-        services.AddDbContext<LLDbContext>(options =>
+        services.AddDbContextFactory<LLDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("LegendsLegacyDB"), sqlServerOptions => sqlServerOptions.CommandTimeout(timeout))
         );
 
-        services.AddScoped<IDbContext>(provider => provider.GetService<LLDbContext>() ?? throw new SystemException("LLDbContext could not be resolved"));
+        services.AddScoped<IDbContext>(provider => provider.GetRequiredService<LLDbContext>() ?? throw new SystemException("LLDbContext could not be resolved"));
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }
 
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
+
         //services.AddScoped<IAttributesRepository, AttributesRepository>();
         services.AddScoped<ICharacterRepository, CharacterRepository>();
         services.AddScoped<ICharacterActionRepository, CharacterActionRepository>();

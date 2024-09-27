@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20240827192959_BaseMigration")]
+    [Migration("20240925144323_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -127,17 +127,17 @@ namespace Persistence.LL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("aa9df1de-ca94-4dc5-a8d0-b75d2410c631"),
+                            Id = new Guid("a7e24e82-23ec-45f9-88a2-e15334aa251a"),
                             Name = "Sword"
                         },
                         new
                         {
-                            Id = new Guid("82b4b352-43ce-4ce1-9f54-ea67308c849b"),
+                            Id = new Guid("2c7c55f4-6784-444e-8497-dc53ab7d206b"),
                             Name = "Shield"
                         },
                         new
                         {
-                            Id = new Guid("b9068f1e-cd9a-4941-b2c2-3e88f7473326"),
+                            Id = new Guid("7e5d0d95-af8a-4552-adb3-29efb609fcd3"),
                             Name = "Potion"
                         });
                 });
@@ -155,7 +155,7 @@ namespace Persistence.LL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("6b5a2d58-6695-4690-84c4-dc0c6559702a")
+                            Id = new Guid("6f5e25ba-4e58-455b-ad58-fed5c356662d")
                         });
                 });
 
@@ -306,18 +306,18 @@ namespace Persistence.LL.Migrations
                     b.HasData(
                         new
                         {
-                            ItemsId = new Guid("aa9df1de-ca94-4dc5-a8d0-b75d2410c631"),
-                            LootTablesId = new Guid("6b5a2d58-6695-4690-84c4-dc0c6559702a")
+                            ItemsId = new Guid("a7e24e82-23ec-45f9-88a2-e15334aa251a"),
+                            LootTablesId = new Guid("6f5e25ba-4e58-455b-ad58-fed5c356662d")
                         },
                         new
                         {
-                            ItemsId = new Guid("82b4b352-43ce-4ce1-9f54-ea67308c849b"),
-                            LootTablesId = new Guid("6b5a2d58-6695-4690-84c4-dc0c6559702a")
+                            ItemsId = new Guid("2c7c55f4-6784-444e-8497-dc53ab7d206b"),
+                            LootTablesId = new Guid("6f5e25ba-4e58-455b-ad58-fed5c356662d")
                         },
                         new
                         {
-                            ItemsId = new Guid("b9068f1e-cd9a-4941-b2c2-3e88f7473326"),
-                            LootTablesId = new Guid("6b5a2d58-6695-4690-84c4-dc0c6559702a")
+                            ItemsId = new Guid("7e5d0d95-af8a-4552-adb3-29efb609fcd3"),
+                            LootTablesId = new Guid("6f5e25ba-4e58-455b-ad58-fed5c356662d")
                         });
                 });
 

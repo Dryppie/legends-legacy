@@ -32,9 +32,11 @@ public class AuthController : BaseController
 
     [AllowAnonymous]
     [HttpPost("register")]
-    public async Task<ActionResult<bool>> Register([FromBody] UserRegisterDto input)
+    public async Task<ActionResult> Register([FromBody] UserRegisterDto input)
     {
-        return await Mediator.Send(new RegisterCommand(input.Username, input.Email, input.Password));
+        await Mediator.Send(new RegisterCommand(input.Username, input.Email, input.Password));
+
+        return Ok();
     }
 
     /// <summary>

@@ -134,7 +134,18 @@ export class AuthService {
       return this.purgeAuth().pipe(map(() => null));
     }
 
-    const tokens = JSON.parse(jsonString);
+    let tokens;
+    try {
+      tokens = JSON.parse(jsonString);
+    } catch (error) {
+      console.error('Error parsing JSON:', error);
+      return this.purgeAuth().pipe(map(() => null));
+    }
+
+    if (!Array.isArray(tokens)) {
+      return this.purgeAuth().pipe(map(() => null));
+    }
+
     const accessToken = tokens.find(
       (token: { key: string; value: string }) => token.key === 'AccessToken',
     )?.value;

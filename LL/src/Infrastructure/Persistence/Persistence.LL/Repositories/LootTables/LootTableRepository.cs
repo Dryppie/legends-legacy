@@ -2,20 +2,21 @@
 using Common.Exceptions;
 using Domain.Models.LootTables;
 using Microsoft.EntityFrameworkCore;
+using Persistence.LL.Interfaces;
 
 namespace Persistence.LL.Repositories.LootTables;
 public class LootTableRepository : ILootTableRepository
 {
-    private readonly IDbContext _dbContext;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public LootTableRepository(IDbContext dbContext)
+    public LootTableRepository(IUnitOfWork unitOfWork)
     {
-        _dbContext = dbContext;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<LootTable> GetLootTableByIdAsync(Guid lootTableId, CancellationToken cancellationToken)
     {
-        var lootTable = await _dbContext.LootTables.Include(lt => lt.Items)
+        var lootTable = await _unitOfWork.Context.LootTables.Include(lt => lt.Items)
             .FirstOrDefaultAsync(lt => lt.Id.Equals(lootTableId), cancellationToken);
         NotFoundException.ThrowIfNull(lootTable, nameof(lootTable), lootTableId);
 
@@ -24,7 +25,7 @@ public class LootTableRepository : ILootTableRepository
 
     public async Task<LootTable> GetGatheringNodeLootTableAsync(Guid gatheringNodeId, CancellationToken cancellationToken)
     {
-        var gatheringLootTable = await _dbContext.GatheringNodes
+        var gatheringLootTable = await _unitOfWork.Context.GatheringNodes
             .Where(gn => gn.Id == gatheringNodeId)
             .Select(gn => gn.LootTable)
             .FirstOrDefaultAsync(cancellationToken);

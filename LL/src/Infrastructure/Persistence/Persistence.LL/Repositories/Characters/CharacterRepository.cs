@@ -2,15 +2,16 @@
 using Common.Exceptions;
 using Domain.Models.Entities.Actors.Characters;
 using Microsoft.EntityFrameworkCore;
+using Persistence.LL.Interfaces;
 
 namespace Persistence.LL.Repositories.Characters;
 public class CharacterRepository : ICharacterRepository
 {
-    private readonly IDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public CharacterRepository(IDbContext context)
+    public CharacterRepository(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     /// <inheritdoc/>
@@ -21,9 +22,9 @@ public class CharacterRepository : ICharacterRepository
             UserId = userId,
             Name = username
         };
-        _context.Characters.Add(character);
+        _unitOfWork.Context.Characters.Add(character);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _unitOfWork.Context.SaveChangesAsync(cancellationToken);
 
         return character;
     }
@@ -31,7 +32,7 @@ public class CharacterRepository : ICharacterRepository
     /// <inheritdoc/>
     public async Task<Character> GetCharacterByUserIdAsync(Guid userId)
     {
-        var character = await _context.Characters
+        var character = await _unitOfWork.Context.Characters
             //.Include(c => c.Modifiers)
             //.Include(c => c.RawAttributes)
             //.ThenInclude(a => a.AttributeBase)
@@ -44,7 +45,7 @@ public class CharacterRepository : ICharacterRepository
     /// <inheritdoc/>
     public async Task<Character> GetCharacterByCharacterIdAsync(Guid characterId)
     {
-        var character = await _context.Characters
+        var character = await _unitOfWork.Context.Characters
             //.Include(c => c.Modifiers)
             //.Include(c => c.RawAttributes)
             //.ThenInclude(a => a.AttributeBase)

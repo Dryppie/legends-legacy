@@ -59,7 +59,7 @@ export class CharacterActionsService {
 
   startCharacterAction(): void {
     const characterAction = {
-      characterActionType: 0,
+      characterActionType: 1,
       lootTableId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
     };
     this.apiService
@@ -115,7 +115,7 @@ export class CharacterActionsService {
           const updatedAt = new Date(action.updatedAt).getTime();
           const now = Date.now();
           const timeSinceUpdate = now - updatedAt;
-          let nextInterval = environment.baseDuration - timeSinceUpdate;
+          let nextInterval = environment.baseDuration * 1000 - timeSinceUpdate;
 
           if (nextInterval <= 0) {
             nextInterval = 0; // Call immediately if the time has already passed

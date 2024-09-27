@@ -5,22 +5,22 @@ using Common.Authorization.Security;
 using MediatR;
 
 namespace Application.UseCases.Users.Commands.Register;
-public record RegisterCommand(string Username, string Email, string Password) : IRequest<bool>;
+public record RegisterCommand(string Username, string Email, string Password) : IRequest;
 
-internal class RegisterCommandHandler : IRequestHandler<RegisterCommand, bool>
+internal class RegisterCommandHandler : IRequestHandler<RegisterCommand>
 {
     private readonly IUserService _userService;
     private readonly IJwtGenerator _jwtGenerator;
-    private readonly IMediator _mediator;
+    private readonly IMediator _publisher;
 
-    public RegisterCommandHandler(IUserService userService, IJwtGenerator jwtGenerator, IMediator mediator)
+    public RegisterCommandHandler(IUserService userService, IJwtGenerator jwtGenerator, IMediator publisher)
     {
         _userService = userService;
         _jwtGenerator = jwtGenerator;
-        _mediator = mediator;
+        _publisher = publisher;
     }
 
-    public async Task<bool> Handle(RegisterCommand request, CancellationToken cancellationToken)
+    public async Task Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         try
         {
@@ -28,16 +28,13 @@ internal class RegisterCommandHandler : IRequestHandler<RegisterCommand, bool>
             var user = await _userService.Register(request.Username, request.Email, request.Password);
 
             // Create a character for the registered user
-            var test = _mediator.Publish(new UserCreatedEvent(user.Id, user.Name), cancellationToken);
+            await _publisher.Publish(new UserCreatedEvent(user.Id, user.Name), cancellationToken);
 
-            return test.IsCompleted;
+            
         }
         catch
         {
-#if !DEBUG
             throw new Exception($"Problem creating user {request.Username}");
-#endif
-            return false;
         }
     }
 }

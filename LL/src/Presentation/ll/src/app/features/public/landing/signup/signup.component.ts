@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { NgIf } from '@angular/common';
+import { NgClass, NgIf } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -15,6 +15,7 @@ import { AuthService } from '../../../../core/services/auth/auth.service';
 import { emailValidator } from '../../../../shared/validators/email-validator';
 import { passwordValidator } from '../../../../shared/validators/password-validator';
 import { passwordMatchValidator } from '../../../../shared/validators/password-match-validator';
+import { ButtonComponent } from '../../../../shared/components/button/button.component';
 
 @Component({
   selector: 'app-signup',
@@ -26,6 +27,8 @@ import { passwordMatchValidator } from '../../../../shared/validators/password-m
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
+    NgClass,
+    ButtonComponent,
   ],
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.css',
@@ -38,12 +41,12 @@ export class SignupComponent {
         Validators.required,
         emailValidator(),
       ]),
-      password: new FormControl('drypping', [
+      password: new FormControl('Drypping', [
         Validators.required,
         passwordValidator(),
         Validators.minLength(8),
       ]),
-      confirmPassword: new FormControl('drypping'),
+      confirmPassword: new FormControl('Drypping'),
     },
     { validators: passwordMatchValidator() },
   );
@@ -54,6 +57,7 @@ export class SignupComponent {
   loginError: boolean = false;
 
   register() {
+    console.log('testing register');
     const username = this.registerForm.value.username;
     const email = this.registerForm.value.email;
     const password = this.registerForm.value.password;
@@ -65,7 +69,7 @@ export class SignupComponent {
     ) {
       this.authService.register(username, email, password).subscribe({
         next: () => {
-          this.router.navigateByUrl('/game');
+          this.router.navigateByUrl('/login');
         },
         error: () => {
           this.loginError = true;
@@ -76,5 +80,18 @@ export class SignupComponent {
 
   resetLoginError() {
     this.loginError = false;
+  }
+
+  validateEmail() {
+    return this.validateField('email');
+  }
+
+  validatePassword() {
+    return this.validateField('password');
+  }
+
+  private validateField(field: string) {
+    const control = this.registerForm.get(field);
+    return control?.invalid && (control.dirty || control.touched);
   }
 }

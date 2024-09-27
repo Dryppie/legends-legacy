@@ -1,92 +1,152 @@
-<div class="flex items-center justify-center h-full">
-  <div class="max-w-md w-full">
-    <div>
-      <h2 class="text-center text-4xl font-extrabold text-blood-primary">
-        Join the Adventure and<br />create your Legend!
-      </h2>
+<div
+  class="flex h-full items-center justify-center bg-cover bg-center"
+  style="background-image: url(&quot;landing/loginbackground.png&quot;)"
+>
+  <div
+    class="flex h-full max-h-[50rem] w-full max-w-xl flex-col items-center rounded-lg backdrop-blur-sm"
+    style="background-image: url(&quot;landing/blur.svg&quot;)"
+  >
+    <div class="my-8 flex justify-center pt-8">
+      <img src="core/Logo.svg" alt="Logo" class="h-28 w-28 object-contain" />
     </div>
-    <form [formGroup]="registerForm" (ngSubmit)="register()" class="mt-8">
-      <mat-form-field class="w-full" subscriptSizing="dynamic">
-        <mat-label>Username</mat-label>
+    <div class="flex flex-col items-center justify-center space-y-3 pb-12">
+      <h2 class="primary-gradient">Join the adventure and</h2>
+      <h2 class="primary-gradient">create your legend!</h2>
+      <img
+        src="core/Divider.svg"
+        alt="Logo"
+        class="center w-60 object-contain"
+      />
+    </div>
+    <form [formGroup]="registerForm" (ngSubmit)="register()" class="mt-2">
+      <label
+        class="group relative flex h-12 w-full items-center border border-[#494949] bg-gray focus-within:border-[#B57D0B]"
+        [ngClass]="{
+          'border-[#D72E34]': loginError || validateEmail(),
+          'border-[#494949]': !loginError,
+        }"
+      >
+        <p class="cursor-text pl-3 text-[#D1D1D1]">Username</p>
         <input
           matInput
+          data-1p-ignore
           (input)="resetLoginError()"
           aria-label="Username"
           type="username"
           required
-          class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:shadow-outline-blue focus:border-ancient-secondary focus:z-10 sm:text-sm sm:leading-5"
-          placeholder="Username"
+          class="relative ml-auto h-full w-full appearance-none bg-gray pr-3 text-right text-white focus:z-10 focus:outline-none sm:text-sm sm:leading-5"
           formControlName="username"
         />
-        <mat-icon matSuffix>person</mat-icon>
-      </mat-form-field>
-      <mat-form-field class="w-full" subscriptSizing="dynamic">
-        <mat-label>Email</mat-label>
+      </label>
+      <label
+        class="group relative mt-4 flex h-12 w-full items-center border border-[#494949] bg-gray focus-within:border-[#B57D0B]"
+        [ngClass]="{
+          'border-[#D72E34]': loginError || validateEmail(),
+          'border-[#494949]': !loginError,
+        }"
+      >
+        <p class="cursor-text pl-3 text-[#D1D1D1]">Email</p>
         <input
           matInput
+          data-1p-ignore
           (input)="resetLoginError()"
           aria-label="Email address"
           type="email"
           required
-          class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:shadow-outline-blue focus:border-ancient-secondary focus:z-10 sm:text-sm sm:leading-5"
-          placeholder="Email"
+          class="relative ml-auto h-full w-full appearance-none bg-gray pr-3 text-right text-white focus:z-10 focus:outline-none sm:text-sm sm:leading-5"
           formControlName="email"
         />
-        <mat-icon matSuffix>email</mat-icon>
-      </mat-form-field>
-      <mat-form-field class="w-full" subscriptSizing="dynamic">
-        <mat-label>Password</mat-label>
+      </label>
+      <div *ngIf="validateEmail()" class="mt-1 text-sm text-[#D72E34]">
+        Incorrect Email format
+      </div>
+      <label
+        class="group relative mt-4 flex h-12 w-full items-center border bg-gray focus-within:border-[#B57D0B]"
+        [ngClass]="{
+          'border-[#D72E34]': loginError || validatePassword(),
+          'border-[#494949]': !loginError,
+        }"
+      >
+        <p class="cursor-text pl-3 text-[#D1D1D1]">Password</p>
         <input
+          data-1p-ignore
           matInput
           (input)="resetLoginError()"
           aria-label="Password"
           type="password"
           required
-          class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:shadow-outline-blue focus:border-ancient-secondary focus:z-10 sm:text-sm sm:leading-5"
-          placeholder="Password"
+          class="relative ml-auto h-full w-full appearance-none bg-gray pr-3 text-right text-white focus:z-10 focus:outline-none sm:text-sm sm:leading-5"
           formControlName="password"
         />
-        <mat-icon matSuffix>lock</mat-icon>
-      </mat-form-field>
-      <mat-form-field class="w-full" subscriptSizing="dynamic">
-        <mat-label>Confirm Password</mat-label>
+      </label>
+      <div *ngIf="validatePassword()" class="mt-1 text-sm text-[#D72E34]">
+        Incorrect Password format
+      </div>
+      <label
+        class="group relative mt-4 flex h-12 w-full items-center border bg-gray focus-within:border-[#B57D0B]"
+        [ngClass]="{
+          'border-[#D72E34]': loginError || validatePassword(),
+          'border-[#494949]': !loginError,
+        }"
+      >
+        <p class="cursor-text pl-3 text-[#D1D1D1]">Confirm Password</p>
         <input
+          data-1p-ignore
           matInput
           (input)="resetLoginError()"
-          aria-label="Confirm Password"
+          aria-label="Password"
           type="password"
           required
-          class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:shadow-outline-blue focus:border-ancient-secondary focus:z-10 sm:text-sm sm:leading-5"
-          placeholder="Confirm Password"
-          formControlName="confirmPassword"
+          class="relative ml-auto h-full w-full appearance-none bg-gray pr-3 text-right text-white focus:z-10 focus:outline-none sm:text-sm sm:leading-5"
+          formControlName="password"
         />
-        <mat-icon matSuffix>lock</mat-icon>
-      </mat-form-field>
+      </label>
+      <div *ngIf="validatePassword()" class="mt-1 text-sm text-[#D72E34]">
+        Incorrect Password format
+      </div>
+
+      <div class="mt-2 flex items-center justify-between">
+        <div class="flex items-center">
+          <input
+            id="remember_me"
+            type="checkbox"
+            class="form-checkbox h-4 w-4 accent-blood-primary transition duration-150 ease-in-out"
+          />
+          <label
+            for="remember_me"
+            class="ml-2 block text-sm leading-5 text-ancient-secondary"
+          >
+            Remember me
+          </label>
+        </div>
+
+        <div class="text-sm leading-5">
+          <button
+            href="#"
+            class="font-medium text-ancient-secondary hover:text-ancient-primary focus:underline focus:outline-none"
+          >
+            Forgot password?
+          </button>
+        </div>
+      </div>
       <div *ngIf="loginError" class="mt-4">
         <span class="text-blood-primary"
           >Registration failed. Please try again.</span
         >
       </div>
-      <!-- Signup Button -->
-      <div class="mt-6">
-        <button
-          [disabled]="!registerForm.valid"
+      <div class="mt-12">
+        <app-button
           type="submit"
-          class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm leading-5 font-medium rounded-md focus:outline-none focus:shadow-outline-blue active:bg-yellow-600 text-blood-primary bg-ancient-secondary hover:bg-ancient-primary disabled:opacity-50 disabled:bg-gray-400 disabled:cursor-not-allowed"
-        >
-          Sign Up
-        </button>
+          [disabled]="!registerForm.valid"
+          text="SIGN UP"
+        ></app-button>
       </div>
-
-      <div class="mt-6 text-center">
-        <button
-          routerLink="/login"
-          class="font-medium text-ancient-primary focus:outline-none focus:underline"
-        >
-          Already have an account?
-          <span class="text-blood-primary">Log In!</span>
-        </button>
-      </div>
+      <button
+        routerLink="/login"
+        class="my-8 w-full text-center text-primary underline focus:outline-none"
+      >
+        Already have an account? Log In!
+      </button>
     </form>
   </div>
 </div>

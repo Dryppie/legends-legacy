@@ -20,7 +20,7 @@
 
     <form [formGroup]="loginForm" (ngSubmit)="login()" class="mt-2">
       <label
-        class="bg-gray group relative flex h-12 w-full items-center border border-[#494949] focus-within:border-[#B57D0B]"
+        class="group relative flex h-12 w-full items-center border border-[#494949] bg-gray focus-within:border-[#B57D0B]"
         [ngClass]="{
           'border-[#D72E34]': loginError || validateEmail(),
           'border-[#494949]': !loginError,
@@ -28,12 +28,13 @@
       >
         <p class="cursor-text pl-3 text-[#D1D1D1]">Email</p>
         <input
+          data-1p-ignore
           matInput
           (input)="resetLoginError()"
           aria-label="Email address"
           type="email"
           required
-          class="bg-gray relative ml-auto h-full w-full appearance-none pr-3 text-right text-white focus:z-10 focus:outline-none sm:text-sm sm:leading-5"
+          class="relative ml-auto h-full w-full appearance-none bg-gray pr-3 text-right text-white focus:z-10 focus:outline-none sm:text-sm sm:leading-5"
           formControlName="email"
         />
       </label>
@@ -41,7 +42,7 @@
         Incorrect Email format
       </div>
       <label
-        class="bg-gray group relative mt-4 flex h-12 w-full items-center border focus-within:border-[#B57D0B]"
+        class="group relative mt-4 flex h-12 w-full items-center border bg-gray focus-within:border-[#B57D0B]"
         [ngClass]="{
           'border-[#D72E34]': loginError || validatePassword(),
           'border-[#494949]': !loginError,
@@ -49,12 +50,13 @@
       >
         <p class="cursor-text pl-3 text-[#D1D1D1]">Password</p>
         <input
+          data-1p-ignore
           matInput
           (input)="resetLoginError()"
           aria-label="Password"
           type="password"
           required
-          class="bg-gray relative ml-auto h-full w-full appearance-none pr-3 text-right text-white focus:z-10 focus:outline-none sm:text-sm sm:leading-5"
+          class="relative ml-auto h-full w-full appearance-none bg-gray pr-3 text-right text-white focus:z-10 focus:outline-none sm:text-sm sm:leading-5"
           formControlName="password"
         />
       </label>
@@ -97,7 +99,7 @@
 
       <button
         routerLink="/signup"
-        class="w-full py-8 text-center text-primary underline focus:outline-none"
+        class="my-8 w-full text-center text-primary underline focus:outline-none"
       >
         New to Legend's Legacy? Sign up!
       </button>
@@ -106,7 +108,7 @@
     <div class="mt-4 flex justify-center">
       <button
         type="button"
-        class="flex items-center rounded-lg bg-white px-4 py-2 text-black shadow-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-75"
+        class="hover:bg-gray-200 focus:ring-gray-500 flex items-center rounded-lg bg-white px-4 py-2 text-black shadow-md focus:outline-none focus:ring-2 focus:ring-opacity-75"
       >
         <img src="/assets/google-logo.png" alt="Google Logo" class="mr-2 h-5" />
         Continue with Google

@@ -8,16 +8,16 @@ namespace Application.UseCases.Characters.EventHandlers;
 public class UserCreatedEventHandler : INotificationHandler<UserCreatedEvent>
 {
     private readonly ICharacterService _characterService;
-    private readonly IMediator _mediator;
-    public UserCreatedEventHandler(ICharacterService characterService, IMediator mediator)
+    private readonly IPublisher _publisher;
+    public UserCreatedEventHandler(ICharacterService characterService, IMediator publisher)
     {
         _characterService = characterService;
-        _mediator = mediator;
+        _publisher = publisher;
     }
 
     public async Task Handle(UserCreatedEvent userCreatedEvent, CancellationToken cancellationToken)
     {
         var character = await _characterService.CreateCharacterAsync(userCreatedEvent.UserId, userCreatedEvent.Username, cancellationToken);
-        await _mediator.Publish(new CharacterCreatedEvent(character.Id), cancellationToken);
+        await _publisher.Publish(new CharacterCreatedEvent(character.Id), cancellationToken);
     }
 }
