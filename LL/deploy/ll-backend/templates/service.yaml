@@ -2,7 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "ll-backend.fullname" . }}
-  labels: {{- include "ll-backend.labels" . | nindent 4 }}
+  labels:
+    {{- include "ll-backend.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -10,4 +11,5 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
-  selector: {{- include "ll-backend.selectorLabels" . | nindent 4 }}
+  selector:
+    {{- include "ll-backend.selectorLabels" . | nindent 4 }}
