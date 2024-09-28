@@ -193,7 +193,7 @@ else
     app.MapControllers();
 }
 
-app.MapHealthChecks("/healthz/ready");
+app.MapHealthChecks("/healthz/ready").AllowAnonymous();
 app.MapHealthChecks("/healthz/live", new HealthCheckOptions
 {
     Predicate = _ => false
