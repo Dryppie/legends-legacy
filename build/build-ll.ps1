@@ -24,7 +24,7 @@ Write-Debug "--- dotnet publish ---"
 dotnet publish "$root/LL/src/API/API.LL/API.LL.csproj" -c Release -o $artifactPath/api.ll /p:UseAppHost=false --runtime=linux-x64 --no-self-contained
 
 Write-Debug "--- docker build ---"
-docker build -f --platform linux/amd64,linux/arm64 "$buildpath/ll-backend.dockerfile" $artifactPath/api.ll/. --tag "$($DOCKER_REGISTRY)ll-backend:$IMAGE_TAG"
+docker buildx build -f --platform linux/amd64,linux/arm64 "$buildpath/ll-backend.dockerfile" $artifactPath/api.ll/. --tag "$($DOCKER_REGISTRY)ll-backend:$IMAGE_TAG"
 
 #docker build $root/src/Presentation/web-app/. --build-arg BUILD_VERSION="$BUILD_VERSION" --tag "$($DOCKER_REGISTRY)webweb:$IMAGE_TAG"
 
