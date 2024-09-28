@@ -197,6 +197,6 @@ app.MapHealthChecks("/healthz/ready");
 app.MapHealthChecks("/healthz/live", new HealthCheckOptions
 {
     Predicate = _ => false
-});
+}).AllowAnonymous();
 
 app.Run();
