@@ -1,5 +1,5 @@
 name: "Docker Publish and Push Action"
-description: "Builds Docker images for multiple platforms and pushes them to a container registry."
+description: "Builds Docker images and pushes them to a container registry."
 
 inputs:
   tag:
@@ -18,15 +18,11 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Set up QEMU for multi-platform builds
-      shell: bash
+    - name: Print Docker images
+      shell: pwsh
       run: |
-        docker run --rm --privileged tonistiigi/binfmt --install all
-    
-    - name: Set up Docker Buildx
-      shell: bash
-      run: |
-        docker buildx create --use
+        Write-Host "--images--"
+        docker images
 
     - name: Docker Login
       if: ${{ success() && github.event_name != 'pull_request' }}
