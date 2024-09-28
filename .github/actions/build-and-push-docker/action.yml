@@ -19,10 +19,12 @@ runs:
   using: "composite"
   steps:
     - name: Set up QEMU for multi-platform builds
+      shell: bash
       run: |
         docker run --rm --privileged tonistiigi/binfmt --install all
     
     - name: Set up Docker Buildx
+      shell: bash
       run: |
         docker buildx create --use
 
