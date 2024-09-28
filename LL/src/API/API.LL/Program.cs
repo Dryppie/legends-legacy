@@ -19,8 +19,9 @@ var config = builder.Configuration;
 
 config.AddEnvironmentVariables();
 
-// Add services to the container.
+builder.Services.AddHttpContextAccessor();
 
+// Add services to the container.
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -179,8 +180,6 @@ if (app.Environment.IsDevelopment())
     }
 
 app.UseCors("AllowSpecificOrigin");
-
-app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
