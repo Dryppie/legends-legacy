@@ -25,6 +25,7 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks();
 
 builder.Services.AddApiVersioning(options =>
 {
@@ -182,7 +183,14 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+if (config.GetValue("FeatureManagement:AllowAnonymous", false))
+{
+    app.MapControllers().AllowAnonymous();
+}
+else
+{
+    app.MapControllers();
+}
 
 app.MapHealthChecks("/healthz/ready");
 app.MapHealthChecks("/healthz/live", new HealthCheckOptions

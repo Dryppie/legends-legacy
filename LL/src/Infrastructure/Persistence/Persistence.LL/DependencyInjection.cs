@@ -19,12 +19,39 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
     {
-        var timeout = configuration.GetSection("Database").GetValue<int>("TimeoutInSeconds");
-        services.AddDbContextFactory<LLDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("LegendsLegacyDB"), sqlServerOptions => sqlServerOptions.CommandTimeout(timeout))
-        );
+        var databaseSection = configuration.GetSection("Database");
+        var timeout = databaseSection.GetValue<int>("TimeoutInSeconds");
+        var databaseType = databaseSection.GetValue<string>("Type");
+        var connectionStrings = databaseSection.GetSection("ConnectionStrings");
+        var connectionString = connectionStrings.GetValue<string>("LegendsLegacyDB");
 
-        services.AddScoped<IDbContext>(provider => provider.GetRequiredService<LLDbContext>() ?? throw new SystemException("LLDbContext could not be resolved"));
+        services.AddDbContextFactory<LLDbContext>(options =>
+        {
+            if (string.Equals(databaseType, "SqlServer", StringComparison.OrdinalIgnoreCase))
+            {
+                options.UseSqlServer(
+                    connectionString,
+                    sqlServerOptions => sqlServerOptions.CommandTimeout(timeout)
+                );
+            }
+            else if (string.Equals(databaseType, "MariaDb", StringComparison.OrdinalIgnoreCase))
+            {
+                options.UseMySql(
+                    connectionString,
+                    ServerVersion.AutoDetect(connectionString),
+                    mySqlOptions => mySqlOptions.CommandTimeout(timeout)
+                );
+            }
+            else
+            {
+                throw new InvalidOperationException("Unsupported database type specified in configuration.");
+            }
+        });
+
+        services.AddScoped<IDbContext>(provider =>
+            provider.GetRequiredService<LLDbContext>()
+            ?? throw new SystemException("LLDbContext could not be resolved")
+        );
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;

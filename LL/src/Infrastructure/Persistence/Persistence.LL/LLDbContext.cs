@@ -33,35 +33,36 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(LLDbContext).Assembly);
-        if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
+
+        // Apply provider-specific configurations
+        if (Database.IsSqlServer() || Database.IsMySql())
         {
-            SetupSqlite(modelBuilder);
+            SetupProviderSpecificConversions(modelBuilder);
         }
 
-        // If a class is derived from Entity, add it here
+        // Configure inheritance using a discriminator
         modelBuilder.Entity<Entity>()
             .HasDiscriminator<int>("EntityType")
             .HasValue<Actor>(1)
-        //    .HasValue<Item>(2)
+            //.HasValue<Item>(2)
             .HasValue<Character>(3);
-        //    .HasValue<NPC>(4)
-        //    .HasValue<Creature>(5);
+        //.HasValue<NPC>(4)
+        //.HasValue<Creature>(5);
 
-        
+        // Seed data
         SeedData.Seed(modelBuilder);
     }
 
-    private static void SetupSqlite(ModelBuilder builder)
+    private static void SetupProviderSpecificConversions(ModelBuilder builder)
     {
         foreach (var entityType in builder.Model.GetEntityTypes())
         {
-            var properties = entityType.ClrType.GetProperties().Where(p => p.PropertyType == typeof(DateTimeOffset)
-                                                                           || p.PropertyType ==
-                                                                           typeof(DateTimeOffset?));
+            var properties = entityType.ClrType.GetProperties()
+                .Where(p => p.PropertyType == typeof(DateTimeOffset) || p.PropertyType == typeof(DateTimeOffset?));
+
             foreach (var property in properties)
             {
-                builder
-                    .Entity(entityType.Name)
+                builder.Entity(entityType.Name)
                     .Property(property.Name)
                     .HasConversion(new DateTimeOffsetToBinaryConverter());
             }
