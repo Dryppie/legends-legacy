@@ -56,7 +56,7 @@ spec:
               name: config-ll-versions
               readOnly: true
             - mountPath: /app/publish/versions/ll
-              name: config-ll-versions
+              name: config-ll-platform-versions
               readOnly: true
 
           resources:
@@ -77,7 +77,7 @@ spec:
               - key: ll-platform-name
                 path: ll-platform.name
             name: ll-platform-version
-          name: config-ll-versions
+          name: config-ll-platform-versions
 
       {{- with .Values.nodeSelector }}
       nodeSelector:
