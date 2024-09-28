@@ -5,6 +5,7 @@ using Common;
 using Domain.Models.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -182,5 +183,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHealthChecks("/healthz/ready");
+app.MapHealthChecks("/healthz/live", new HealthCheckOptions
+{
+    Predicate = _ => false
+});
 
 app.Run();

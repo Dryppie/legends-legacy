@@ -1,5 +1,5 @@
 name: "Docker Publish and Push Action"
-description: "Builds Docker images and pushes them to a container registry."
+description: "Builds Docker images for multiple platforms and pushes them to a container registry."
 
 inputs:
   tag:
@@ -18,11 +18,13 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Print Docker images
-      shell: pwsh
+    - name: Set up QEMU for multi-platform builds
       run: |
-        Write-Host "--images--"
-        docker images
+        docker run --rm --privileged tonistiigi/binfmt --install all
+    
+    - name: Set up Docker Buildx
+      run: |
+        docker buildx create --use
 
     - name: Docker Login
       if: ${{ success() && github.event_name != 'pull_request' }}
@@ -37,9 +39,9 @@ runs:
       env:
         OWNER: "${{ github.repository_owner }}"
 
-    - name: Docker Build and Push by PowerShell
+    - name: Docker Build and Push for Multi-platform
       if: ${{ success() && github.event_name != 'pull_request' }}
-      shell: pwsh
+      shell: bash
       working-directory: ${{ github.workspace }}
       env:
         DOCKER_REGISTRY: "ghcr.io/${{ env.OWNER_LC }}/"
@@ -47,6 +49,7 @@ runs:
         VERSION: "${{ inputs.version }}"
         BUILD_VERSION: "${{ inputs.version }}"
       run: |
-        $DebugPreference = 'Continue'
-        pwd
-        . "${{ inputs.buildScript }}"
+        docker buildx build --platform linux/amd64,linux/arm64 \
+          -t $DOCKER_REGISTRY${{ inputs.tag }}:${{ inputs.version }} \
+          -f ${{ inputs.buildScript }} \
+          --push .
