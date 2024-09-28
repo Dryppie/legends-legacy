@@ -41,9 +41,9 @@ runs:
       env:
         OWNER: "${{ github.repository_owner }}"
 
-    - name: Docker Build and Push for Multi-platform
+    - name: Docker Build and Push by PowerShell
       if: ${{ success() && github.event_name != 'pull_request' }}
-      shell: bash
+      shell: pwsh
       working-directory: ${{ github.workspace }}
       env:
         DOCKER_REGISTRY: "ghcr.io/${{ env.OWNER_LC }}/"
@@ -51,7 +51,6 @@ runs:
         VERSION: "${{ inputs.version }}"
         BUILD_VERSION: "${{ inputs.version }}"
       run: |
-        docker buildx build --platform linux/amd64,linux/arm64 \
-          -t $DOCKER_REGISTRY${{ inputs.tag }}:${{ inputs.version }} \
-          -f ${{ inputs.buildScript }} \
-          --push .
+        $DebugPreference = 'Continue'
+        pwd
+        . "${{ inputs.buildScript }}"
