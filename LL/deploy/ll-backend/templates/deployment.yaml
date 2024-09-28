@@ -55,7 +55,7 @@ spec:
             - mountPath: /app/publish/versions/ll
               name: config-ll-versions
               readOnly: true
-            - mountPath: /app/publish/versions/ll
+            - mountPath: /app/publish/versions/platform
               name: config-ll-platform-versions
               readOnly: true
 
