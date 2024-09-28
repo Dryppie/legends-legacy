@@ -92,6 +92,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Docker Login
+        if: ${{ success() && github.event_name != 'pull_request' }}
+        shell: bash
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
       - name: set lower case owner name
         shell: bash
         run: |
@@ -103,29 +109,13 @@ jobs:
         shell: pwsh
         run: |
           docker buildx build `
+            --push `
             --file "LL/src/Presentation/ll/Dockerfile" `
             --build-arg name=ll `
             --build-arg BUILD_VERSION=${{ needs.setup.outputs.version }} `
             --tag ghcr.io/${{ env.OWNER_LC }}/ll-frontend:${{ needs.setup.outputs.TAG }} `
             --platform linux/amd64,linux/arm64 `
             LL/src/Presentation/ll
-
-      - name: Docker Login
-        if: ${{ success() && github.event_name != 'pull_request' }}
-        shell: bash
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-
-      - name: Print Docker images
-        shell: pwsh
-        run: |
-          Write-Host "--images--"
-          docker images
-
-      - name: Push Docker images
-        if: github.event_name != 'pull_request'
-        run: |
-          docker push ghcr.io/${{ env.OWNER_LC }}/ll-frontend:${{ needs.setup.outputs.TAG }}
 
       - name: Helm Package and Push
         uses: ./.github/actions/build-and-push-helm
