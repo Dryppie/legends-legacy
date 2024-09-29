@@ -57,7 +57,6 @@ export class SignupComponent {
   loginError: boolean = false;
 
   register() {
-    console.log('testing register');
     const username = this.registerForm.value.username;
     const email = this.registerForm.value.email;
     const password = this.registerForm.value.password;

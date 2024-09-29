@@ -52,9 +52,6 @@ export class InventoryComponent implements OnInit {
   getInventory(): void {
     this.inventoryService.getInventory().subscribe({
       next: (inventory: InventoryDto) => {
-        // Log the inventory items for debugging
-        console.log(inventory.inventoryItems);
-
         // Update the component's items
         this.items = inventory.inventoryItems.map((item) => ({
           id: item.itemId, // Assign itemId as the id
@@ -63,7 +60,6 @@ export class InventoryComponent implements OnInit {
           description: '', // Add descriptions if needed
           quantity: item.quantity,
         }));
-        this.items.map((item) => console.log(item));
         // Adjust the number of empty slots based on the items
         this.emptySlots = Array(120 - this.items.length).fill(null);
       },
