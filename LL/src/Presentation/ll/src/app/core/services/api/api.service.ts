@@ -11,7 +11,7 @@ import { environment } from '../../../../environments/environment';
 export class ApiService {
   constructor(private http: HttpClient) {}
 
-  public apiUrl = `${environment.apiBaseUrl}/api/v1`;
+  public apiUrl = `api/v1/`;
 
   deafultHeaders = new HttpHeaders({
     'Content-Type': 'application/json',
