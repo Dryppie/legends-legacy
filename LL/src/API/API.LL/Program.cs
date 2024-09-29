@@ -51,7 +51,7 @@ builder.Services.AddIdentityApiEndpoints<AppUser>()
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
-        builder => builder.WithOrigins("http://localhost:4200") // Angular's default port
+        builder => builder.WithOrigins("http://localhost:4200", "https://dev.legends-legacy.com")
                           .AllowCredentials()
                           .AllowAnyMethod()
                           .AllowAnyHeader());
