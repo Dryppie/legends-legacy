@@ -4,5 +4,5 @@
   window.env = window.env || {};
   // Environment variables
   window.env.environment = "${environment}";
-  window.env.apiUrl = "${apiUrl}";
+  window.env.apiBaseUrl = "${apiBaseUrl}";
 })(this);

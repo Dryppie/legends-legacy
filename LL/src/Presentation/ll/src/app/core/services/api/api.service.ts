@@ -11,6 +11,8 @@ import { environment } from '../../../../environments/environment';
 export class ApiService {
   constructor(private http: HttpClient) {}
 
+  public apiUrl = `${environment.apiBaseUrl}/api/v1`;
+
   deafultHeaders = new HttpHeaders({
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -22,7 +24,7 @@ export class ApiService {
 
   get(path: string, params: HttpParams = new HttpParams()): Observable<any> {
     return this.http
-      .get(`${environment.apiUrl}${path}`, {
+      .get(`${this.apiUrl}${path}`, {
         params,
         withCredentials: true,
         headers: this.deafultHeaders,
@@ -32,7 +34,7 @@ export class ApiService {
 
   put(path: string, body: Object = {}): Observable<any> {
     return this.http
-      .put(`${environment.apiUrl}${path}`, JSON.stringify(body), {
+      .put(`${this.apiUrl}${path}`, JSON.stringify(body), {
         withCredentials: true,
         headers: this.deafultHeaders,
       })
@@ -41,7 +43,7 @@ export class ApiService {
 
   patch(path: string, body: Object = {}): Observable<any> {
     return this.http
-      .patch(`${environment.apiUrl}${path}`, JSON.stringify(body), {
+      .patch(`${this.apiUrl}${path}`, JSON.stringify(body), {
         withCredentials: true,
         headers: this.deafultHeaders,
       })
@@ -50,7 +52,7 @@ export class ApiService {
 
   post(path: string, body: Object = {}): Observable<any> {
     return this.http
-      .post(`${environment.apiUrl}${path}`, JSON.stringify(body), {
+      .post(`${this.apiUrl}${path}`, JSON.stringify(body), {
         withCredentials: true,
         headers: this.deafultHeaders,
       })
@@ -59,7 +61,7 @@ export class ApiService {
 
   delete(path: string, body: Object = {}): Observable<any> {
     return this.http
-      .delete(`${environment.apiUrl}${path}`, {
+      .delete(`${this.apiUrl}${path}`, {
         withCredentials: true,
         headers: this.deafultHeaders,
         body: JSON.stringify(body),
