@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20241001185814_BaseMigration")]
+    [Migration("20241001194016_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace Persistence.LL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.7")
+                .HasAnnotation("ProductVersion", "8.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -127,17 +127,17 @@ namespace Persistence.LL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("eb52fe0d-a236-4d20-94b3-4b3c1d9b9b11"),
+                            Id = new Guid("61734796-237a-4957-89e9-54d05ee2aef5"),
                             Name = "Sword"
                         },
                         new
                         {
-                            Id = new Guid("11146874-69e6-44be-ac6a-162ac74752f3"),
+                            Id = new Guid("aa150081-5a6b-462c-aca2-08137a355328"),
                             Name = "Shield"
                         },
                         new
                         {
-                            Id = new Guid("8e0b802a-9885-4664-a507-488ed5b39502"),
+                            Id = new Guid("09390cd3-7090-40ef-b3ac-168f1e334866"),
                             Name = "Potion"
                         });
                 });
@@ -155,7 +155,7 @@ namespace Persistence.LL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("39ff2cda-c622-4121-a3ec-2f4431b1a478")
+                            Id = new Guid("3feaeda7-4175-4710-84cb-668047b56906")
                         });
                 });
 
@@ -306,18 +306,18 @@ namespace Persistence.LL.Migrations
                     b.HasData(
                         new
                         {
-                            ItemsId = new Guid("eb52fe0d-a236-4d20-94b3-4b3c1d9b9b11"),
-                            LootTablesId = new Guid("39ff2cda-c622-4121-a3ec-2f4431b1a478")
+                            ItemsId = new Guid("61734796-237a-4957-89e9-54d05ee2aef5"),
+                            LootTablesId = new Guid("3feaeda7-4175-4710-84cb-668047b56906")
                         },
                         new
                         {
-                            ItemsId = new Guid("11146874-69e6-44be-ac6a-162ac74752f3"),
-                            LootTablesId = new Guid("39ff2cda-c622-4121-a3ec-2f4431b1a478")
+                            ItemsId = new Guid("aa150081-5a6b-462c-aca2-08137a355328"),
+                            LootTablesId = new Guid("3feaeda7-4175-4710-84cb-668047b56906")
                         },
                         new
                         {
-                            ItemsId = new Guid("8e0b802a-9885-4664-a507-488ed5b39502"),
-                            LootTablesId = new Guid("39ff2cda-c622-4121-a3ec-2f4431b1a478")
+                            ItemsId = new Guid("09390cd3-7090-40ef-b3ac-168f1e334866"),
+                            LootTablesId = new Guid("3feaeda7-4175-4710-84cb-668047b56906")
                         });
                 });
 

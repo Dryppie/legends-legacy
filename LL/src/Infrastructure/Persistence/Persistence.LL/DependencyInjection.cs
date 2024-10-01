@@ -34,12 +34,11 @@ public static class DependencyInjection
                     sqlServerOptions => sqlServerOptions.CommandTimeout(timeout)
                 );
             }
-            else if (string.Equals(databaseType, "MariaDb", StringComparison.OrdinalIgnoreCase))
+            else if (string.Equals(databaseType, "PostgreSql", StringComparison.OrdinalIgnoreCase))
             {
-                options.UseMySql(
+                options.UseNpgsql(
                     connectionString,
-                    ServerVersion.AutoDetect(connectionString),
-                    mySqlOptions => mySqlOptions.CommandTimeout(timeout)
+                    npgsqlOptions => npgsqlOptions.CommandTimeout(timeout)
                 );
             }
             else

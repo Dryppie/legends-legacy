@@ -24,7 +24,7 @@ public class CharacterActionsController : BaseController
     [HttpPost]
     public async Task<ActionResult<bool>> Start([FromBody] StartCharacterActionRequest request)
     {
-        request.LootTableId = Guid.Parse("39ff2cda-c622-4121-a3ec-2f4431b1a478");
+        request.LootTableId = Guid.Parse("3feaeda7-4175-4710-84cb-668047b56906");
         return await Mediator.Send(new StartCharacterActionCommand(CharacterGuid, request.CharacterActionType, request.LootTableId));
     }
 

@@ -36,24 +36,8 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(LLDbContext).Assembly);
 
-        // CREATE TABLE `AspNetRoles` (
-        //    `Id` nvarchar(450) NOT NULL,
-        //    `Name` nvarchar(256) NULL,
-        //    `NormalizedName` nvarchar(256) NULL,
-        //    `ConcurrencyStamp` nvarchar(max) NULL,
-        //    CONSTRAINT `PK_AspNetRoles` PRIMARY KEY(`Id`)
-        //);
-        //  Unhandled exception. MySqlConnector.MySqlException(0x80004005): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near 'max) NULL,
-        
-        //      CONSTRAINT `PK_AspNetRoles` PRIMARY KEY(`Id`)
-        //  ) ' vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-        modelBuilder.Entity<IdentityRole>(entity =>
-        {
-            entity.Property(e => e.ConcurrencyStamp).HasColumnType("text");
-        });
-
         // Apply provider-specific configurations
-        if (Database.IsSqlServer() || Database.IsMySql())
+        if (Database.IsSqlServer() || Database.IsNpgsql())
         {
             SetupProviderSpecificConversions(modelBuilder);
         }

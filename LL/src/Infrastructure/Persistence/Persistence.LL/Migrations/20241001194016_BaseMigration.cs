@@ -356,24 +356,24 @@ namespace Persistence.LL.Migrations
                 columns: new[] { "Id", "Name" },
                 values: new object[,]
                 {
-                    { new Guid("11146874-69e6-44be-ac6a-162ac74752f3"), "Shield" },
-                    { new Guid("8e0b802a-9885-4664-a507-488ed5b39502"), "Potion" },
-                    { new Guid("eb52fe0d-a236-4d20-94b3-4b3c1d9b9b11"), "Sword" }
+                    { new Guid("09390cd3-7090-40ef-b3ac-168f1e334866"), "Potion" },
+                    { new Guid("61734796-237a-4957-89e9-54d05ee2aef5"), "Sword" },
+                    { new Guid("aa150081-5a6b-462c-aca2-08137a355328"), "Shield" }
                 });
 
             migrationBuilder.InsertData(
                 table: "LootTables",
                 column: "Id",
-                value: new Guid("39ff2cda-c622-4121-a3ec-2f4431b1a478"));
+                value: new Guid("3feaeda7-4175-4710-84cb-668047b56906"));
 
             migrationBuilder.InsertData(
                 table: "ItemLootTable",
                 columns: new[] { "ItemsId", "LootTablesId" },
                 values: new object[,]
                 {
-                    { new Guid("11146874-69e6-44be-ac6a-162ac74752f3"), new Guid("39ff2cda-c622-4121-a3ec-2f4431b1a478") },
-                    { new Guid("8e0b802a-9885-4664-a507-488ed5b39502"), new Guid("39ff2cda-c622-4121-a3ec-2f4431b1a478") },
-                    { new Guid("eb52fe0d-a236-4d20-94b3-4b3c1d9b9b11"), new Guid("39ff2cda-c622-4121-a3ec-2f4431b1a478") }
+                    { new Guid("09390cd3-7090-40ef-b3ac-168f1e334866"), new Guid("3feaeda7-4175-4710-84cb-668047b56906") },
+                    { new Guid("61734796-237a-4957-89e9-54d05ee2aef5"), new Guid("3feaeda7-4175-4710-84cb-668047b56906") },
+                    { new Guid("aa150081-5a6b-462c-aca2-08137a355328"), new Guid("3feaeda7-4175-4710-84cb-668047b56906") }
                 });
 
             migrationBuilder.CreateIndex(
