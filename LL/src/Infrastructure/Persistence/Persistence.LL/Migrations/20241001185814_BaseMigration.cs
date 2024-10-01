@@ -20,7 +20,7 @@ namespace Persistence.LL.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    ConcurrencyStamp = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -32,7 +32,7 @@ namespace Persistence.LL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    BannedUntil = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    BannedUntil = table.Column<long>(type: "bigint", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -44,7 +44,7 @@ namespace Persistence.LL.Migrations
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
                     TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    LockoutEnd = table.Column<long>(type: "bigint", nullable: true),
                     LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
                     AccessFailedCount = table.Column<int>(type: "int", nullable: false)
                 },
@@ -211,7 +211,7 @@ namespace Persistence.LL.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TimeOfAccess = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    TimeOfAccess = table.Column<long>(type: "bigint", nullable: false),
                     AppUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
@@ -232,7 +232,7 @@ namespace Persistence.LL.Migrations
                     ItemPurchased = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Cost = table.Column<float>(type: "real", nullable: false),
                     Currency = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TimeOfPurchase = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    TimeOfPurchase = table.Column<long>(type: "bigint", nullable: false),
                     PaymentMethod = table.Column<int>(type: "int", nullable: false),
                     TransactionStatus = table.Column<int>(type: "int", nullable: false),
                     AppUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
@@ -296,7 +296,7 @@ namespace Persistence.LL.Migrations
                     CharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CharacterActionType = table.Column<int>(type: "int", nullable: false),
                     LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    UpdatedAt = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -356,24 +356,24 @@ namespace Persistence.LL.Migrations
                 columns: new[] { "Id", "Name" },
                 values: new object[,]
                 {
-                    { new Guid("2c7c55f4-6784-444e-8497-dc53ab7d206b"), "Shield" },
-                    { new Guid("7e5d0d95-af8a-4552-adb3-29efb609fcd3"), "Potion" },
-                    { new Guid("a7e24e82-23ec-45f9-88a2-e15334aa251a"), "Sword" }
+                    { new Guid("11146874-69e6-44be-ac6a-162ac74752f3"), "Shield" },
+                    { new Guid("8e0b802a-9885-4664-a507-488ed5b39502"), "Potion" },
+                    { new Guid("eb52fe0d-a236-4d20-94b3-4b3c1d9b9b11"), "Sword" }
                 });
 
             migrationBuilder.InsertData(
                 table: "LootTables",
                 column: "Id",
-                value: new Guid("6f5e25ba-4e58-455b-ad58-fed5c356662d"));
+                value: new Guid("39ff2cda-c622-4121-a3ec-2f4431b1a478"));
 
             migrationBuilder.InsertData(
                 table: "ItemLootTable",
                 columns: new[] { "ItemsId", "LootTablesId" },
                 values: new object[,]
                 {
-                    { new Guid("2c7c55f4-6784-444e-8497-dc53ab7d206b"), new Guid("6f5e25ba-4e58-455b-ad58-fed5c356662d") },
-                    { new Guid("7e5d0d95-af8a-4552-adb3-29efb609fcd3"), new Guid("6f5e25ba-4e58-455b-ad58-fed5c356662d") },
-                    { new Guid("a7e24e82-23ec-45f9-88a2-e15334aa251a"), new Guid("6f5e25ba-4e58-455b-ad58-fed5c356662d") }
+                    { new Guid("11146874-69e6-44be-ac6a-162ac74752f3"), new Guid("39ff2cda-c622-4121-a3ec-2f4431b1a478") },
+                    { new Guid("8e0b802a-9885-4664-a507-488ed5b39502"), new Guid("39ff2cda-c622-4121-a3ec-2f4431b1a478") },
+                    { new Guid("eb52fe0d-a236-4d20-94b3-4b3c1d9b9b11"), new Guid("39ff2cda-c622-4121-a3ec-2f4431b1a478") }
                 });
 
             migrationBuilder.CreateIndex(
