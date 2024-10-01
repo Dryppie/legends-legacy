@@ -8,12 +8,14 @@ using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.LootTables;
 using Domain.Models.Users;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
 using Persistence.LL.Seeds;
+using System.Reflection.Emit;
 
 namespace Persistence.LL;
 public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbContext<AppUser>(options), IDbContext
@@ -55,6 +57,11 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
 
     private static void SetupProviderSpecificConversions(ModelBuilder builder)
     {
+        builder.Entity<IdentityRole>(entity =>
+        {
+            entity.Property(e => e.ConcurrencyStamp).HasColumnType("longtext");
+        });
+
         foreach (var entityType in builder.Model.GetEntityTypes())
         {
             var properties = entityType.ClrType.GetProperties()
