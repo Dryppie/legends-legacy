@@ -142,11 +142,13 @@ public class LLDbContextFactory : IDesignTimeDbContextFactory<LLDbContext>
             .AddEnvironmentVariables()
             .Build();
 
-        var connectionString = configuration.GetConnectionString("LegendsLegacyDB");
+        var databaseSection = configuration.GetSection("Database");
+        var timeout = databaseSection.GetValue<int>("TimeoutInSeconds");
+        var connectionStrings = databaseSection.GetSection("ConnectionStrings");
+        var connectionString = connectionStrings.GetValue<string>("LegendsLegacyDB");
 
         DbContextOptionsBuilder<LLDbContext> optionsBuilder = new();
 
-        var timeout = configuration.GetSection("Database").GetValue<int>("TimeoutInSeconds");
         optionsBuilder.UseSqlServer(connectionString, sqlServerOptions => sqlServerOptions.CommandTimeout(timeout));
 
         return new(optionsBuilder.Options);
