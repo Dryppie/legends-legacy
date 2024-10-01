@@ -154,7 +154,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
-#if DEBUG
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<LLDbContext>();
@@ -164,7 +163,6 @@ using (var scope = app.Services.CreateScope())
     await context.Database.MigrateAsync();
     await context.SeedUsersAsync(userManager);
 }
-#endif
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
