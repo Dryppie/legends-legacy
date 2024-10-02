@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20241001194016_BaseMigration")]
+    [Migration("20241002161919_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace Persistence.LL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "8.0.7")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -36,8 +36,8 @@ namespace Persistence.LL.Migrations
                     b.Property<Guid>("LootTableId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<long>("UpdatedAt")
-                        .HasColumnType("bigint");
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.HasKey("CharacterId");
 
@@ -127,17 +127,17 @@ namespace Persistence.LL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("61734796-237a-4957-89e9-54d05ee2aef5"),
+                            Id = new Guid("963771fe-5572-4668-9ef7-b39018157b63"),
                             Name = "Sword"
                         },
                         new
                         {
-                            Id = new Guid("aa150081-5a6b-462c-aca2-08137a355328"),
+                            Id = new Guid("c91cbd98-34b8-4723-b3fb-a5c38681ca2a"),
                             Name = "Shield"
                         },
                         new
                         {
-                            Id = new Guid("09390cd3-7090-40ef-b3ac-168f1e334866"),
+                            Id = new Guid("1621b5ef-ab71-4cef-aed2-5b369f9678aa"),
                             Name = "Potion"
                         });
                 });
@@ -155,7 +155,7 @@ namespace Persistence.LL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("3feaeda7-4175-4710-84cb-668047b56906")
+                            Id = new Guid("551c9f1c-f7fd-4edb-8a59-753dfcbc8d5b")
                         });
                 });
 
@@ -167,8 +167,8 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<long?>("BannedUntil")
-                        .HasColumnType("bigint");
+                    b.Property<DateTimeOffset?>("BannedUntil")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -184,8 +184,8 @@ namespace Persistence.LL.Migrations
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
-                    b.Property<long?>("LockoutEnd")
-                        .HasColumnType("bigint");
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -240,8 +240,8 @@ namespace Persistence.LL.Migrations
                     b.Property<string>("AppUserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<long>("TimeOfAccess")
-                        .HasColumnType("bigint");
+                    b.Property<DateTimeOffset>("TimeOfAccess")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -276,8 +276,8 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("PaymentMethod")
                         .HasColumnType("int");
 
-                    b.Property<long>("TimeOfPurchase")
-                        .HasColumnType("bigint");
+                    b.Property<DateTimeOffset>("TimeOfPurchase")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int>("TransactionStatus")
                         .HasColumnType("int");
@@ -306,18 +306,18 @@ namespace Persistence.LL.Migrations
                     b.HasData(
                         new
                         {
-                            ItemsId = new Guid("61734796-237a-4957-89e9-54d05ee2aef5"),
-                            LootTablesId = new Guid("3feaeda7-4175-4710-84cb-668047b56906")
+                            ItemsId = new Guid("963771fe-5572-4668-9ef7-b39018157b63"),
+                            LootTablesId = new Guid("551c9f1c-f7fd-4edb-8a59-753dfcbc8d5b")
                         },
                         new
                         {
-                            ItemsId = new Guid("aa150081-5a6b-462c-aca2-08137a355328"),
-                            LootTablesId = new Guid("3feaeda7-4175-4710-84cb-668047b56906")
+                            ItemsId = new Guid("c91cbd98-34b8-4723-b3fb-a5c38681ca2a"),
+                            LootTablesId = new Guid("551c9f1c-f7fd-4edb-8a59-753dfcbc8d5b")
                         },
                         new
                         {
-                            ItemsId = new Guid("09390cd3-7090-40ef-b3ac-168f1e334866"),
-                            LootTablesId = new Guid("3feaeda7-4175-4710-84cb-668047b56906")
+                            ItemsId = new Guid("1621b5ef-ab71-4cef-aed2-5b369f9678aa"),
+                            LootTablesId = new Guid("551c9f1c-f7fd-4edb-8a59-753dfcbc8d5b")
                         });
                 });
 
@@ -328,7 +328,7 @@ namespace Persistence.LL.Migrations
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
-                        .HasColumnType("text");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)

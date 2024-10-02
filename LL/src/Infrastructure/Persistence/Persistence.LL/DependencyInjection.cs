@@ -19,38 +19,12 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
     {
-        var databaseSection = configuration.GetSection("Database");
-        var timeout = databaseSection.GetValue<int>("TimeoutInSeconds");
-        var databaseType = databaseSection.GetValue<string>("Type");
-        var connectionStrings = databaseSection.GetSection("ConnectionStrings");
-        var connectionString = connectionStrings.GetValue<string>("LegendsLegacyDB");
-
+        var timeout = configuration.GetSection("Database").GetValue<int>("TimeoutInSeconds");
         services.AddDbContextFactory<LLDbContext>(options =>
-        {
-            if (string.Equals(databaseType, "SqlServer", StringComparison.OrdinalIgnoreCase))
-            {
-                options.UseSqlServer(
-                    connectionString,
-                    sqlServerOptions => sqlServerOptions.CommandTimeout(timeout)
-                );
-            }
-            else if (string.Equals(databaseType, "PostgreSql", StringComparison.OrdinalIgnoreCase))
-            {
-                options.UseNpgsql(
-                    connectionString,
-                    npgsqlOptions => npgsqlOptions.CommandTimeout(timeout)
-                );
-            }
-            else
-            {
-                throw new InvalidOperationException("Unsupported database type specified in configuration.");
-            }
-        });
-
-        services.AddScoped<IDbContext>(provider =>
-            provider.GetRequiredService<LLDbContext>()
-            ?? throw new SystemException("LLDbContext could not be resolved")
+            options.UseSqlServer(configuration.GetConnectionString("LegendsLegacyDB"), sqlServerOptions => sqlServerOptions.CommandTimeout(timeout))
         );
+
+        services.AddScoped<IDbContext>(provider => provider.GetRequiredService<LLDbContext>() ?? throw new SystemException("LLDbContext could not be resolved"));
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;

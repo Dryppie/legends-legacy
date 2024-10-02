@@ -8,14 +8,12 @@ using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.LootTables;
 using Domain.Models.Users;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
 using Persistence.LL.Seeds;
-using System.Data;
 
 namespace Persistence.LL;
 public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbContext<AppUser>(options), IDbContext
@@ -35,37 +33,35 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(LLDbContext).Assembly);
-
-        // Apply provider-specific configurations
-        if (Database.IsSqlServer() || Database.IsNpgsql())
+        if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
         {
-            SetupProviderSpecificConversions(modelBuilder);
+            SetupSqlite(modelBuilder);
         }
 
-        // Configure inheritance using a discriminator
+        // If a class is derived from Entity, add it here
         modelBuilder.Entity<Entity>()
             .HasDiscriminator<int>("EntityType")
             .HasValue<Actor>(1)
-            //.HasValue<Item>(2)
+        //    .HasValue<Item>(2)
             .HasValue<Character>(3);
-        //.HasValue<NPC>(4)
-        //.HasValue<Creature>(5);
+        //    .HasValue<NPC>(4)
+        //    .HasValue<Creature>(5);
 
-        // Seed data
+
         SeedData.Seed(modelBuilder);
     }
 
-    private static void SetupProviderSpecificConversions(ModelBuilder builder)
+    private static void SetupSqlite(ModelBuilder builder)
     {
-
         foreach (var entityType in builder.Model.GetEntityTypes())
         {
-            var properties = entityType.ClrType.GetProperties()
-                .Where(p => p.PropertyType == typeof(DateTimeOffset) || p.PropertyType == typeof(DateTimeOffset?));
-
+            var properties = entityType.ClrType.GetProperties().Where(p => p.PropertyType == typeof(DateTimeOffset)
+                                                                           || p.PropertyType ==
+                                                                           typeof(DateTimeOffset?));
             foreach (var property in properties)
             {
-                builder.Entity(entityType.Name)
+                builder
+                    .Entity(entityType.Name)
                     .Property(property.Name)
                     .HasConversion(new DateTimeOffsetToBinaryConverter());
             }
@@ -145,13 +141,11 @@ public class LLDbContextFactory : IDesignTimeDbContextFactory<LLDbContext>
             .AddEnvironmentVariables()
             .Build();
 
-        var databaseSection = configuration.GetSection("Database");
-        var timeout = databaseSection.GetValue<int>("TimeoutInSeconds");
-        var connectionStrings = databaseSection.GetSection("ConnectionStrings");
-        var connectionString = connectionStrings.GetValue<string>("LegendsLegacyDB");
+        var connectionString = configuration.GetConnectionString("LegendsLegacyDB");
 
         DbContextOptionsBuilder<LLDbContext> optionsBuilder = new();
 
+        var timeout = configuration.GetSection("Database").GetValue<int>("TimeoutInSeconds");
         optionsBuilder.UseSqlServer(connectionString, sqlServerOptions => sqlServerOptions.CommandTimeout(timeout));
 
         return new(optionsBuilder.Options);
