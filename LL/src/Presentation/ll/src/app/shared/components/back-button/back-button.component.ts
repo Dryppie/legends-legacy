@@ -5,8 +5,6 @@ import { Component } from '@angular/core';
   standalone: true,
   imports: [],
   templateUrl: './back-button.component.html',
-  styleUrl: './back-button.component.css'
+  styleUrl: './back-button.component.css',
 })
-export class BackButtonComponent {
-
-}
+export class BackButtonComponent {}

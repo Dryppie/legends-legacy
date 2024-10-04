@@ -1,5 +1,11 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { Component, OnInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  OnInit,
+  Output,
+  ViewChild,
+} from '@angular/core';
 import { SidebarItemComponent } from './sidebar-item/sidebar-item.component';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { SidebarItem, Tab } from '../../../shared/models/sidebar-item';
@@ -29,6 +35,8 @@ import { TabComponent } from '../../../shared/components/tab/tab.component';
   styleUrl: './sidebar.component.css',
 })
 export class SidebarComponent implements OnInit {
+  @Output() itemTapped = new EventEmitter<void>();
+
   @ViewChild('tabComponent') tabComponent!: TabComponent;
   tabs: Tab[] = [{ label: '', items: [] as SidebarItem[] }];
   activeTab: string = '';
@@ -145,6 +153,10 @@ export class SidebarComponent implements OnInit {
   }
   navigateTo(tabLabel: string) {
     this.activeItem = tabLabel;
+  }
+
+  toggleSidebar() {
+    this.itemTapped.emit();
   }
 
   get tabLabels(): string[] {

@@ -1,6 +1,6 @@
-<aside class="border-gradient flex rounded-tr-md">
+<aside class="border-gradient flex w-full rounded-tr-md sm:w-80">
   <div
-    class="mt-[1px] flex h-full w-80 flex-auto flex-col rounded-tr-md bg-texture bg-auto text-primary"
+    class="mt-[1px] flex h-full w-full flex-auto flex-col rounded-tr-md bg-texture bg-auto text-primary"
   >
     <div class="h-16 p-2 text-white">Character</div>
     <app-tab
@@ -14,6 +14,7 @@
       <div *ngIf="activeTab === tab.label" class="tab-content">
         <div *ngFor="let item of tab.items" class="flex flex-col">
           <app-sidebar-item
+            (click)="toggleSidebar()"
             [item]="item"
             routerLink="/game/{{ item.route }}"
             (click)="navigateTo(item.id)"

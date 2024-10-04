@@ -51,6 +51,15 @@ builder.Services.AddAuthorizationBuilder().SetFallbackPolicy(new AuthorizationPo
 builder.Services.AddIdentityApiEndpoints<AppUser>()
     .AddEntityFrameworkStores<LLDbContext>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder => builder.WithOrigins("http://localhost:4200", "https://dev.legends-legacy.com")
+                          .AllowCredentials()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader());
+});
+
 // TODO: Create an extension method for this
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -168,9 +177,8 @@ if (app.Environment.IsDevelopment())
         app.UseSwaggerUI();
     }
 
-app.UseCors(builder => builder.AllowAnyOrigin()
-                                  .AllowAnyHeader()
-                                  .AllowAnyMethod());
+app.UseCors("AllowSpecificOrigin");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
