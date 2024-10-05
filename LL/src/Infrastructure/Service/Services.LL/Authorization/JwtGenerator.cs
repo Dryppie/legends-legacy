@@ -136,6 +136,7 @@ public class JwtGenerator : IJwtGenerator
         {
             Id = id,
             Name = user!.UserName!,
+            CharacterId = user.Id
         };
 
         return GenerateTokens(authInfo);
