@@ -3,6 +3,7 @@ using Application.Common.Interfaces;
 using Common.Authorization.Security;
 using Common.DateTimeProvider;
 using Common.Exceptions;
+using Domain.Models.Entities.Actors.Characters;
 using Domain.Models.Users;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -116,6 +117,9 @@ public class JwtGenerator : IJwtGenerator
         var user = _context.Users
             .FirstOrDefault(x => x.Id == id && !x.BannedUntil.HasValue);
         NotFoundException.ThrowIfNull(user, nameof(AppUser), id);
+        var character = _context.Characters
+            .FirstOrDefault(x => x.UserId == user.Id);
+        NotFoundException.ThrowIfNull(character, nameof(Character), user.Id);
 
 
 
@@ -136,7 +140,7 @@ public class JwtGenerator : IJwtGenerator
         {
             Id = id,
             Name = user!.UserName!,
-            CharacterId = user.Id
+            CharacterId = character.Id.ToString(),
         };
 
         return GenerateTokens(authInfo);
