@@ -151,9 +151,18 @@ public class JwtGenerator : IJwtGenerator
     internal static bool ValidateToken(string key, string issuer, string audience, string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
+        var jwtSecurityToken = tokenHandler.ReadJwtToken(token);
 
+        var claims = jwtSecurityToken.Claims.ToList();
         try
         {
+            var idClaim = claims.SingleOrDefault(x => x.Type.Equals("CharacterId"))!;
+
+            if (idClaim == null || !Guid.TryParse(idClaim.Value, out var characterId))
+            {
+                return false;
+            }
+
             tokenHandler.ValidateToken(token,
                 new()
                 {
