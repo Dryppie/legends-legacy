@@ -4,7 +4,7 @@ import { TabComponent } from '../../../../shared/components/tab/tab.component';
 import { InventoryItem, Tab } from '../../../../shared/models/sidebar-item';
 import { InventorySlotComponent } from '../../../../shared/components/inventory-slot/inventory-slot.component';
 import { InventoryService } from '../../../../core/services/inventory/inventory.service';
-import { InventoryDto } from '../../../../shared/models/inventoryDto';
+import { InventoryDto } from '../../../../shared/models/Dtos/inventoryDto';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 
 @Component({

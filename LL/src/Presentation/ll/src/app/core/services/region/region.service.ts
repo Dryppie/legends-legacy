@@ -5,17 +5,17 @@ import { catchError, map, Observable, throwError } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
-export class InventoryService {
+export class RegionService {
   constructor(private apiService: ApiService) {}
 
-  public getInventory(): Observable<any> {
-    return this.apiService.get('inventory').pipe(
-      map((inventory) => {
+  public getRegionById(id: string): Observable<any> {
+    return this.apiService.get(`region/${id}`).pipe(
+      map((region) => {
         // this.toastService.showToast(
         //   'Action completed successfully!',
         //   'success',
         // );
-        return inventory;
+        return region;
       }),
 
       catchError(() => {
@@ -25,7 +25,7 @@ export class InventoryService {
         //   'error',
         //   't',
         // );
-        return throwError(() => new Error('Failed to get inventory'));
+        return throwError(() => new Error(`Failed to get region: ${id}`));
       }),
     );
   }

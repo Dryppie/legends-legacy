@@ -25,6 +25,13 @@ export const MAINVIEW_ROUTES: Routes = [
             './../../../features/game/professions/professions.routes'
           ).then((m) => m.PROFESSIONS_ROUTES),
       },
+      {
+        path: 'world',
+        loadChildren: () =>
+          import('./../../../features/game/world/world.routes').then(
+            (m) => m.WORLD_ROUTES,
+          ),
+      },
     ],
   },
 ];

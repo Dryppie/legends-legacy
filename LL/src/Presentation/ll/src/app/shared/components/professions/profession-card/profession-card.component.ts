@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { MiniButtonComponent } from '../../mini-button/mini-button.component';
 import { CharacterActionsService } from '../../../../core/services/character-actions/character-actions.service';
-import { CharacterActionDto } from '../../../models/characterActionDto';
+import { CharacterActionDto } from '../../../models/Dtos/characterActionDto';
 import { Subscription } from 'rxjs';
 import { NgIf } from '@angular/common';
 

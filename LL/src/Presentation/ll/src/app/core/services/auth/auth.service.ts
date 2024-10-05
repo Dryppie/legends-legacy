@@ -16,7 +16,7 @@ import {
 
 import { ApiService } from '../api/api.service';
 
-import { CharacterDto } from '../../../shared/models/characterDto';
+import { CharacterDto } from '../../../shared/models/Dtos/characterDto';
 import { NamedStorageKeys } from '../../common/enums/named-storage-keys';
 import { ToastService } from '../toast/toast.service';
 

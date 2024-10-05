@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ProgressBarComponent } from '../../progress-bar/progress-bar.component';
-import { CharacterActionDto } from '../../../models/characterActionDto';
+import { CharacterActionDto } from '../../../models/Dtos/characterActionDto';
 import { Subscription } from 'rxjs';
 import { CharacterActionsService } from '../../../../core/services/character-actions/character-actions.service';
 import { NgIf } from '@angular/common';

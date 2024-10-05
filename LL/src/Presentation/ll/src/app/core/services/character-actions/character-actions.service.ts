@@ -15,7 +15,7 @@ import {
   timer,
 } from 'rxjs';
 import { ApiService } from '../api/api.service'; // Import the shared API service
-import { CharacterActionDto } from '../../../shared/models/characterActionDto'; // Import CharacterActionDto model
+import { CharacterActionDto } from '../../../shared/models/Dtos/characterActionDto'; // Import CharacterActionDto model
 import { environment } from '../../../../environments/environment';
 
 @Injectable({
