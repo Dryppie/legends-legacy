@@ -26,7 +26,7 @@ import { NgClass, NgIf } from '@angular/common';
   styleUrl: './dashboard.component.css',
 })
 export class DashboardComponent implements OnInit {
-  isNavOpen = false;
+  isSidebarOpen = true;
   isScreenSmall = false;
 
   ngOnInit() {
@@ -43,6 +43,6 @@ export class DashboardComponent implements OnInit {
   }
 
   toggleNav() {
-    this.isNavOpen = !this.isNavOpen;
+    this.isSidebarOpen = !this.isSidebarOpen;
   }
 }

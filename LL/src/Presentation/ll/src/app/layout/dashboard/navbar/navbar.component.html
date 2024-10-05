@@ -9,71 +9,45 @@
     class="border-gradient relative flex h-24 w-full items-center rounded-r-md"
   >
     <div
-      class="flex h-[calc(6rem-2px)] w-full items-center justify-between rounded-r-md bg-texture bg-auto pl-12"
+      class="flex h-[calc(6rem-2px)] w-full justify-between rounded-r-md bg-texture bg-auto pl-12"
     >
-      <div #menuButton class="flex md:hidden">
-        <button class="text-white focus:outline-none">
-          <!-- Hamburger icon -->
-          <svg
-            class="h-6 w-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16"
-            ></path>
-          </svg>
-        </button>
-      </div>
-      <div class="flex flex-col space-y-2 pl-4">
-        <h2 class="text-sm text-white md:text-lg">Dryp</h2>
-        <div class="flex">
+      <div class="flex flex-col justify-center space-y-2 pl-4">
+        <h2 class="text-white">Dryp</h2>
+        <div class="hidden sm:flex">
           <div
             class="flex h-8 min-w-20 items-center justify-between space-x-2 rounded-full bg-[#121216CC]"
           >
-            <img
-              src="core/currencies/Diamonds.svg"
-              class="h-6 w-6 md:h-10 md:w-10"
-            />
-            <h2 class="pl-1 pr-3 pt-[1px] text-sm text-primary md:text-base">
-              9
-            </h2>
+            <img src="core/currencies/Diamonds.svg" class="h-10 min-w-10" />
+            <label class="pl-1 pr-3 pt-[1px] text-primary">9</label>
           </div>
           <div
             class="flex h-8 min-w-20 items-center justify-between space-x-2 rounded-full bg-[#121216CC]"
           >
-            <img
-              src="core/currencies/Coins.svg"
-              class="h-6 w-6 md:h-10 md:w-10"
-            />
-            <h2 class="pl-1 pr-3 pt-[1px] text-sm text-primary md:text-base">
-              5147
-            </h2>
+            <img src="core/currencies/Coins.svg" class="h-10 min-w-10" />
+            <label class="pl-1 pr-3 pt-[1px] text-primary">5147</label>
           </div>
         </div>
       </div>
-
-      <!-- <div
-      class="progress-container relative mx-auto h-3 min-w-[10rem] overflow-hidden rounded-full bg-gray-200 md:w-[20rem] lg:w-[35rem] xl:w-[50rem]"
-    >
-      <div #progressBar class="h-full bg-primary"></div>
-    </div> -->
-      <div class="profile ml-4 flex items-center">
+      <div class="ml-4 flex items-start pt-6 sm:items-center sm:pt-0">
         <div
-          class="hidden items-center justify-start space-x-6 text-nowrap bg-transparent p-6 text-[#6D6D6D] md:flex"
+          class="flex items-center justify-between bg-transparent p-4 text-[#6D6D6D] sm:hidden"
+          (click)="toggleList()"
+          *ngIf="!showList"
         >
-          <app-navbutton link="character" label="Character"></app-navbutton>
-          <app-navbutton link="professions" label="Professions"></app-navbutton>
-          <app-navbutton link="#" label="Team"></app-navbutton>
-          <app-navbutton link="#" label="Town"></app-navbutton>
-          <app-navbutton link="#" label="Dungeons"></app-navbutton>
-          <app-navbutton link="#" label="Quests"></app-navbutton>
-          <app-navbutton link="#" label="Guild"></app-navbutton>
+          <img src="core/button/Hamburger.png" class="cursor-pointer" />
+          <h3 class="cursor-pointer pl-2 text-primary">{{ activeLabel }}</h3>
+        </div>
+        <div
+          class="flex flex-col items-center text-nowrap bg-transparent p-2 text-[#6D6D6D] sm:flex-row sm:space-x-6 sm:p-6"
+          *ngIf="(showList && isScreenSmall) || !isScreenSmall"
+        >
+          <app-navbutton
+            *ngFor="let button of navButtons"
+            [link]="button.link"
+            [label]="button.label"
+            (click)="toggleList()"
+            (itemTapped)="activeNavbar(button.label)"
+          ></app-navbutton>
         </div>
       </div>
     </div>

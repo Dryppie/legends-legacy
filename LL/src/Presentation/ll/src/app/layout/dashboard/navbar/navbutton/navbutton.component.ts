@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { SidebarService } from '../../../../core/services/sidebar/sidebar.service';
 
@@ -13,6 +13,7 @@ import { SidebarService } from '../../../../core/services/sidebar/sidebar.servic
 export class NavbuttonComponent {
   @Input() link: string = '';
   @Input() label: string = '';
+  @Output() itemTapped = new EventEmitter<void>();
 
   inactiveIcon = 'icons/InactivePlus.svg';
   activeIcon = 'icons/ActivePlus.svg';
@@ -21,5 +22,6 @@ export class NavbuttonComponent {
 
   updateSidebar() {
     this.sidebarService.updateContent(this.link.toLowerCase()); // update based on the label or link
+    this.itemTapped.emit();
   }
 }
