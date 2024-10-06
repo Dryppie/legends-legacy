@@ -61,7 +61,7 @@ export class InventoryComponent implements OnInit {
           quantity: item.quantity,
         }));
         // Adjust the number of empty slots based on the items
-        this.emptySlots = Array(120 - this.items.length).fill(null);
+        this.emptySlots = Array(90 - this.items.length).fill(null);
       },
       error: (error) => {
         console.error('Error fetching inventory:', error);

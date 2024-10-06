@@ -15,18 +15,22 @@
       [ngClass]="{ hidden: isSidebarOpen }"
       class="h-full w-full flex-col space-y-4 sm:flex"
     >
-      <div class="relative h-full w-full overflow-hidden pr-4">
+      <div class="relative h-full w-full flex-auto overflow-hidden sm:pr-4">
         <div
-          class="border-gradient absolute inset-0 flex w-full items-center rounded-md py-[1px] sm:pr-4 sm:opacity-90"
+          class="border-gradient absolute inset-0 flex w-full items-center py-[1px] sm:rounded-md sm:pr-4 sm:opacity-90"
         >
-          <div class="h-full w-full rounded-md bg-texture"></div>
+          <div class="h-full w-full bg-texture sm:rounded-md"></div>
         </div>
-        <main class="relative flex h-full w-full flex-col gap-2 rounded-md p-6">
+        <main
+          class="relative flex h-full w-full flex-auto flex-col gap-2 overflow-hidden pt-4 sm:rounded-md sm:pt-6"
+        >
           <app-back-button
             (click)="toggleNav()"
-            class="w-12 sm:hidden"
+            class="ml-6 w-12 sm:hidden"
           ></app-back-button>
-          <router-outlet></router-outlet>
+          <div class="w-full overflow-hidden pl-4 sm:pb-6 sm:pl-6">
+            <router-outlet></router-outlet>
+          </div>
         </main>
       </div>
       <footer

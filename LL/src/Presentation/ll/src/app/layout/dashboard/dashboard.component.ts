@@ -3,8 +3,6 @@ import { SidebarComponent } from './sidebar/sidebar.component';
 import { RouterOutlet } from '@angular/router';
 import { InventoryComponent } from '../../features/game/character/inventory/inventory.component';
 import { NavbarComponent } from './navbar/navbar.component';
-import { MainViewComponent } from './main/main-view.component';
-import { CharacterActionsService } from '../../core/services/character-actions/character-actions.service';
 import { BackButtonComponent } from '../../shared/components/back-button/back-button.component';
 import { NgClass, NgIf } from '@angular/common';
 
@@ -17,7 +15,6 @@ import { NgClass, NgIf } from '@angular/common';
     InventoryComponent,
     InventoryComponent,
     NavbarComponent,
-    MainViewComponent,
     BackButtonComponent,
     NgIf,
     NgClass,

@@ -8,8 +8,29 @@ export const DASHBOARD_ROUTES: Routes = [
     children: [
       {
         path: '',
+        redirectTo: 'character',
+        pathMatch: 'full',
+      },
+      {
+        path: 'character',
         loadChildren: () =>
-          import('./main/main-view.routes').then((m) => m.MAINVIEW_ROUTES),
+          import('./../../features/game/character/character.routes').then(
+            (m) => m.CHARACTER_ROUTES,
+          ),
+      },
+      {
+        path: 'professions',
+        loadChildren: () =>
+          import('./../../features/game/professions/professions.routes').then(
+            (m) => m.PROFESSIONS_ROUTES,
+          ),
+      },
+      {
+        path: 'world',
+        loadChildren: () =>
+          import('./../../features/game/world/world.routes').then(
+            (m) => m.WORLD_ROUTES,
+          ),
       },
     ],
   },
