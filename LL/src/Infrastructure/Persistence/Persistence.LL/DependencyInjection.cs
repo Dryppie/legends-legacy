@@ -1,6 +1,8 @@
 ﻿using Application.Common.Interfaces;
+using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
-using Domain.Models.Entities.Actors.Characters;
+using Domain.Models.Entities;
+using Domain.Models.Entities.Characters;
 using Domain.Models.Inventories;
 using Domain.Models.LootTables;
 using Domain.Models.Users;
@@ -8,8 +10,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Persistence.LL.Interfaces;
+using Persistence.LL.Repositories.Attributes;
 using Persistence.LL.Repositories.CharacterActions;
-using Persistence.LL.Repositories.Characters;
+using Persistence.LL.Repositories.Entities;
+using Persistence.LL.Repositories.Entities.Characters;
 using Persistence.LL.Repositories.Inventories;
 using Persistence.LL.Repositories.LootTables;
 using Persistence.LL.Repositories.Users;
@@ -33,9 +37,11 @@ public static class DependencyInjection
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
 
-        //services.AddScoped<IAttributesRepository, AttributesRepository>();
+        services.AddScoped<IAttributeRepository, AttributeRepository>();
         services.AddScoped<ICharacterRepository, CharacterRepository>();
         services.AddScoped<ICharacterActionRepository, CharacterActionRepository>();
+
+        services.AddScoped<IEntityRepository, EntityRepository>();
 
         services.AddScoped<ILootTableRepository, LootTableRepository>();
         services.AddScoped<IInventoryRepository, InventoryRepository>();

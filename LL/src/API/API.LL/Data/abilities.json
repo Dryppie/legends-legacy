@@ -1,0 +1,168 @@
+[
+  {
+    "Id": "fireball_01",
+    "Name": "Fireball",
+    "Description": "Hurls a fireball that deals damage over time.",
+    "Type": "Active",
+    "Cooldown": 150,
+    "Cost": 10,
+    "Effects": [
+      {
+        "Action": {
+          "Type": "Damage",
+          "Amount": 20
+        },
+        "Duration": {
+          "Type": "TimedDuration",
+          "Duration": 0
+        },
+        "Targeting": "SingleEnemy",
+        "Trigger": "None",
+        "Log": "{Target} received {Amount} damage."
+      },
+      {
+        "Action": {
+          "Type": "Damage",
+          "Amount": 8
+        },
+        "Duration": {
+          "Type": "TimedDuration",
+          "Duration": 30
+        },
+        "Interval": {
+          "Type": "Interval",
+          "Interval": 10
+        },
+        "Targeting": "SingleEnemy",
+        "Trigger": "OnTickInterval",
+        "IsFlatAmount": true,
+        "Log": "{Target} is burning, and took {Amount} fire damage."
+      }
+    ]
+  },
+  {
+    "Id": "heal_01",
+    "Name": "Heal",
+    "Description": "Restores health to the target every 4 second for 20 seconds.",
+    "Type": "Active",
+    "Cooldown": 120,
+    "Cost": 10,
+    "Effects": [
+      {
+        "Action": {
+          "Type": "Healing",
+          "Amount": 15
+        },
+        "Duration": {
+          "Type": "TimedDuration",
+          "Duration": 200
+        },
+        "Interval": {
+          "Type": "Interval",
+          "Interval": 40
+        },
+        "Targeting": "Self",
+        "Trigger": "OnTickInterval",
+        "Log": "{Target} was healed for {Amount}."
+      }
+    ]
+  },
+  {
+    "Id": "s_retaliate_01",
+    "Name": "Retaliate",
+    "Description": "Deals damage back to the attacker when hit.",
+    "Type": "Passive",
+    "Cooldown": 0,
+    "Cost": 0,
+    "Effects": [
+      {
+        "Action": {
+          "Type": "Damage",
+          "Amount": 2
+        },
+        "Duration": {
+          "Type": "IndefiniteDuration",
+          "Duration": 0
+        },
+        "Targeting": "Self",
+        "Trigger": "OnAttacked",
+        "ApplyOnSelf": false,
+        "IsFlatAmount": true,
+        "Log": "{Actor} retaliated against {Target} and dealt {Amount} damage."
+      }
+    ]
+  },
+  {
+    "Id": "retaliate_01",
+    "Name": "Forbidden Ritual",
+    "Description": "Summon a low level demon.",
+    "Type": "Active",
+    "Cooldown": 20,
+    "Cost": 50,
+    "ActivationLog": "{Actor} used {Ability}.",
+    "Effects": [
+      {
+        "Action": {
+          "Type": "Summon",
+          "SummonId": "monster",
+          "SummonDuration": 300
+        },
+        "Duration": {
+          "Type": "IndefiniteDuration",
+          "Duration": 0
+        },
+        "Targeting": "Self",
+        "Trigger": "None",
+        "Log": "{Target} has been summoned by {Actor}."
+      }
+    ]
+  },
+  {
+    "Id": "empower_01",
+    "Name": "Empower",
+    "Description": "Strengthen your attack power.",
+    "Type": "Active",
+    "Cooldown": 190,
+    "Cost": 10,
+    "Effects": [
+      {
+        "Action": {
+          "Type": "ModifyAttribute",
+          "Attribute": "Strength",
+          "Amount": 10,
+          "ModifierType": "Flat"
+        },
+        "Duration": {
+          "Type": "TimedDuration",
+          "Duration": 600
+        },
+        "Targeting": "Self",
+        "Trigger": "None",
+        "Log": "{Actor}'s strength increased by 10'."
+      }
+    ]
+  },
+  {
+    "Id": "stun_01",
+    "Name": "Stun",
+    "Description": "Stun the enemy.",
+    "Type": "Active",
+    "Cooldown": 300,
+    "Cost": 10,
+    "Effects": [
+      {
+        "Action": {
+          "Type": "ApplyStatusEffect",
+          "Status": "Stun"
+        },
+        "Duration": {
+          "Type": "TimedDuration",
+          "Duration": 200
+        },
+        "Targeting": "SingleEnemy",
+        "Trigger": "None",
+        "Log": "{Actor} stunned {Target}."
+      }
+    ]
+  }
+]

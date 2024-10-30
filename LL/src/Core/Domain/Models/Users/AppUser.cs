@@ -1,5 +1,4 @@
-﻿using Domain.Models.Entities.Actors.Characters;
-using Domain.Models.Users.IPAddresses;
+﻿using Domain.Models.Users.IPAddresses;
 using Domain.Models.Users.Transactions;
 using Microsoft.AspNetCore.Identity;
 

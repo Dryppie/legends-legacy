@@ -1,8 +1,11 @@
 ﻿using Application.Common.Interfaces;
+using Domain.Models.Abilities;
+using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.Entities;
-using Domain.Models.Entities.Actors;
-using Domain.Models.Entities.Actors.Characters;
+using Domain.Models.Entities.Characters;
+using Domain.Models.Entities.Creatures;
+using Domain.Models.Entities.NPCs;
 using Domain.Models.GatheringNodes;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
@@ -38,15 +41,16 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
             SetupSqlite(modelBuilder);
         }
 
+        modelBuilder.Entity<Character>().HasBaseType<Entity>();
+        modelBuilder.Entity<NPC>().HasBaseType<Entity>();
+        modelBuilder.Entity<Creature>().HasBaseType<Entity>();
+
         // If a class is derived from Entity, add it here
         modelBuilder.Entity<Entity>()
             .HasDiscriminator<int>("EntityType")
-            .HasValue<Actor>(1)
-        //    .HasValue<Item>(2)
-            .HasValue<Character>(3);
-        //    .HasValue<NPC>(4)
-        //    .HasValue<Creature>(5);
-
+            .HasValue<Character>(1)
+            .HasValue<NPC>(2)
+            .HasValue<Creature>(3);
 
         SeedData.Seed(modelBuilder);
     }
@@ -68,20 +72,19 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
         }
     }
 
-    //public DbSet<Ability> Abilities => Set<Ability>();
+    public DbSet<AbilityId> AbilityIds => Set<AbilityId>();
 
     //public DbSet<Achievement> Achievements => Set<Achievement>();
-
-    //public DbSet<AttributeBase> Attributes => Set<AttributeBase>();
-    //public DbSet<EntityAttribute> EntityAttributes => Set<EntityAttribute>();
+    public DbSet<EntityAttribute> EntityAttributes => Set<EntityAttribute>();
 
     //public DbSet<Building> Buildings => Set<Building>();
 
     public DbSet<Character> Characters => Set<Character>();
+    public DbSet<Creature> Creatures => Set<Creature>();
 
     //public DbSet<Echo> Echoes => Set<Echo>();
 
-    //public DbSet<Entity> Entities => Set<Entity>();
+    public DbSet<Entity> Entities => Set<Entity>();
 
     // Effects
 

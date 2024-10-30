@@ -11,6 +11,6 @@ public interface ILootService
     /// <param name="lootTable"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public List<InventoryItem> GenerateGatheringLoot(LootTable lootTable, CancellationToken cancellationToken);
+    public List<InventoryItem> GenerateGatheringLootAsync(LootTable lootTable, CancellationToken cancellationToken);
 
 }

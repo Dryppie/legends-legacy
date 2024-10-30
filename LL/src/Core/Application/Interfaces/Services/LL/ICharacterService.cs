@@ -1,4 +1,4 @@
-﻿using Domain.Models.Entities.Actors.Characters;
+﻿using Domain.Models.Entities.Characters;
 
 namespace Application.Interfaces.Services.LL;
 public interface ICharacterService

@@ -167,7 +167,7 @@ using (var scope = app.Services.CreateScope())
 
     // Migrate and Seed
     await context.Database.MigrateAsync();
-    await context.SeedUsersAsync(userManager);
+    await context.SeedData(userManager);
 }
 
 // Configure the HTTP request pipeline.

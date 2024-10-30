@@ -4,11 +4,12 @@ import { ActivatedRoute } from '@angular/router';
 import { RegionDto } from '../../../../shared/models/Dtos/regionDto';
 import { RegionService } from '../../../../core/services/region/region.service';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { CombatComponent } from '../../../../shared/components/combat/combat.component';
 
 @Component({
   selector: 'app-region',
   standalone: true,
-  imports: [NgIf, ButtonComponent],
+  imports: [NgIf, ButtonComponent, CombatComponent],
   templateUrl: './region.component.html',
   styleUrl: './region.component.css',
 })

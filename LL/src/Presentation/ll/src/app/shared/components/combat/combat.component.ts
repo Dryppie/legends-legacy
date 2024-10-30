@@ -1,0 +1,237 @@
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { DefaultHeaderComponent } from '../default-header/default-header.component';
+import { CombatAvatarComponent } from './combat-avatar/combat-avatar.component';
+import { CombatOverviewComponent } from './combat-overview/combat-overview.component';
+import { CombatService } from '../../../core/services/combat/combat.service';
+import { CharacterActionsService } from '../../../core/services/character-actions/character-actions.service';
+import { CombatEvent, EventType } from '../../models/Dtos/combatEventDto';
+import { NgFor, NgIf, NgStyle } from '@angular/common';
+import {
+  CombatEntityDto,
+  CombatResultDto,
+} from '../../models/Dtos/combatResultDto';
+import { Subscription } from 'rxjs';
+
+@Component({
+  selector: 'app-combat',
+  standalone: true,
+  imports: [
+    DefaultHeaderComponent,
+    CombatAvatarComponent,
+    CombatOverviewComponent,
+    NgFor,
+    NgIf,
+    NgStyle,
+  ],
+  templateUrl: './combat.component.html',
+  styleUrl: './combat.component.css',
+})
+export class CombatComponent implements OnInit, OnDestroy {
+  @Input() combatEvents: CombatEvent[] = [];
+  playerCharacters: CombatEntityDto[] = [];
+  enemyCharacters: CombatEntityDto[] = [];
+  private subscriptions: Subscription = new Subscription();
+
+  constructor(
+    private combatService: CombatService,
+    private characterAction: CharacterActionsService,
+  ) {}
+
+  ngOnInit(): void {
+    this.characterAction.getCharacterAction();
+
+    const combatResultSub = this.combatService
+      .getCombatResult()
+      .subscribe((combatResult) => {
+        this.handleCombatSetup(combatResult);
+      });
+    this.subscriptions.add(combatResultSub);
+
+    const combatEventsSub = this.combatService
+      .getCombatEvents()
+      .subscribe((event) => {
+        this.handleCombatEvent(event);
+      });
+    this.subscriptions.add(combatEventsSub);
+
+    const combatOutcomeSub = this.combatService
+      .getCombatOutcome()
+      .subscribe((outcome) => {
+        setTimeout(() => {
+          this.combatEvents = [];
+          this.resetTeams();
+        }, 1000);
+      });
+    this.subscriptions.add(combatOutcomeSub);
+  }
+
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
+  }
+
+  handleCombatSetup(combatResult: CombatResultDto) {
+    this.playerCharacters = combatResult.playerTeam;
+    this.enemyCharacters = combatResult.enemyTeam;
+  }
+
+  private handleCombatEvent(event: CombatEvent): void {
+    switch (event.eventType) {
+      case EventType.AbilityUse:
+        this.handleAbilityUseEvent(event);
+        break;
+      case EventType.Damage:
+        this.handleDamageEvent(event);
+        break;
+      case EventType.DamageOverTime:
+        this.handleDamageEvent(event);
+        break;
+      case EventType.DamageCrit:
+        this.handleDamageEvent(event);
+        break;
+      // case EventType.Miss:
+      //   this.handleBlockEvent(event);
+      //   break;
+      // case EventType.Parry:
+      //   this.handleBlockEvent(event);
+      //   break;
+      case EventType.Block:
+        this.handleBlockEvent(event);
+        break;
+      case EventType.Heal:
+        this.handleHealEvent(event);
+        break;
+      case EventType.HealOverTime:
+        this.handleHealEvent(event);
+        break;
+      case EventType.HealCrit:
+        this.handleHealEvent(event);
+        break;
+      case EventType.Summon:
+        this.handleSummonEvent(event);
+        break;
+      case EventType.SummonExpired:
+        this.handleSummonExpiredEvent(event);
+        break;
+      case EventType.Buff:
+        this.handleBuffEvent(event);
+        break;
+      case EventType.BuffExpired:
+        const buffExpired = true;
+        this.handleBuffEvent(event, buffExpired);
+        break;
+      // Add other event types as needed
+      default:
+        console.warn(`Unhandled event type: ${event.eventType}`);
+    }
+
+    // Always push to the events list so the UI can display it
+    this.combatEvents.push(event);
+  }
+
+  private handleAbilityUseEvent(event: CombatEvent) {
+    const character = this.findCharacterById(event.actorId);
+    if (character) {
+      character.mana = Math.max(character.mana - event.magnitude, 0);
+    }
+    // console.log(`Ability Use: ${event.details}`);
+  }
+
+  private handleDamageEvent(event: CombatEvent): void {
+    const character = this.findCharacterById(event.targetId);
+    if (character) {
+      character.health = Math.max(character.health - event.magnitude, 0);
+    }
+    // console.log(`Damage: ${event.details}`);
+  }
+
+  private handleHealEvent(event: CombatEvent): void {
+    const character = this.findCharacterById(event.targetId);
+    if (character) {
+      character.health = Math.min(
+        character.health + event.magnitude,
+        character.maxHealth,
+      );
+    }
+    // console.log(`Healed: ${event.details}`);
+  }
+
+  private handleBlockEvent(event: CombatEvent): void {
+    // Implement specific logic for handling block events
+    // console.log(`Blocked: ${event.details}`);
+  }
+
+  private handleSummonEvent(event: CombatEvent): void {
+    const summonedCharacter: CombatEntityDto = {
+      name: 'Blood Imp',
+      id: event.targetId,
+      health: 100,
+      maxHealth: 100,
+      mana: 0,
+      maxMana: 0,
+    };
+
+    if (this.isEntityInPlayerTeam(event.actorId)) {
+      this.playerCharacters.push(summonedCharacter);
+    } else {
+      this.enemyCharacters.push(summonedCharacter);
+    }
+    // console.log(`Summon: ${event.details}`);
+  }
+
+  private handleSummonExpiredEvent(event: CombatEvent): void {
+    if (this.isEntityInPlayerTeam(event.actorId)) {
+      this.playerCharacters = this.playerCharacters.filter(
+        (c) => c.id !== event.targetId,
+      );
+      this.focusCharacter('player', 0);
+    } else {
+      this.enemyCharacters = this.enemyCharacters.filter(
+        (c) => c.id !== event.targetId,
+      );
+      this.focusCharacter('enemy', 0);
+    }
+    // console.log(`Summon Expired: ${event.details}`);
+  }
+
+  private handleBuffEvent(event: CombatEvent, buffExpired: boolean = false) {
+    // if (buffExpired) console.log(`Buff Expired: ${event.details}`);
+    // else console.log(`Buff: ${event.details}`);
+  }
+
+  private findCharacterById(id: string): CombatEntityDto | undefined {
+    return (
+      this.playerCharacters.find((c) => c.id === id) ||
+      this.enemyCharacters.find((c) => c.id === id)
+    );
+  }
+
+  private isEntityInPlayerTeam(actorId: string): boolean {
+    return this.playerCharacters.some((c) => c.id === actorId);
+  }
+
+  private resetTeams(): void {
+    this.selectedPlayerCharacterIndex = 0;
+    this.selectedEnemyCharacterIndex = 0;
+  }
+
+  /// Selectable characters
+
+  selectedPlayerCharacterIndex: number = 0;
+  selectedEnemyCharacterIndex: number = 0;
+
+  get selectedPlayerCharacter() {
+    return this.playerCharacters[this.selectedPlayerCharacterIndex];
+  }
+
+  get selectedEnemyCharacter() {
+    return this.enemyCharacters[this.selectedEnemyCharacterIndex];
+  }
+
+  focusCharacter(team: 'player' | 'enemy', index: number) {
+    if (team === 'player') {
+      this.selectedPlayerCharacterIndex = index;
+    } else {
+      this.selectedEnemyCharacterIndex = index;
+    }
+  }
+}

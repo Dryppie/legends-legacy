@@ -1,9 +1,11 @@
 ﻿using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL;
 using Microsoft.Extensions.DependencyInjection;
+using Services.LL.Attributes;
 using Services.LL.Authorization;
 using Services.LL.CharacterActions;
-using Services.LL.Characters;
+using Services.LL.Entities;
+using Services.LL.Entities.Characters;
 using Services.LL.Interfaces;
 using Services.LL.Inventories;
 using Services.LL.Loots;
@@ -15,10 +17,14 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
-        //services.AddScoped<IAttributesService, AttributesService>();
+        services.AddScoped<IAttributeService, AttributeService>();
         services.AddScoped<ICharacterService, CharacterService>();
         services.AddScoped<ICharacterActionService, CharacterActionService>();
         
+        services.AddScoped<ICombatService, CombatService>();
+
+        services.AddScoped<IEntityService, EntityService>();
+
         services.AddScoped<IGatheringService, GatheringService>();
         
         services.AddScoped<ILootService, LootServices>();

@@ -1,5 +1,9 @@
-﻿using Domain.Models.CharacterActions;
-using Domain.Models.Entities.Actors.Characters;
+﻿using Domain.Models.Abilities;
+using Domain.Models.Attributes;
+using Domain.Models.CharacterActions;
+using Domain.Models.Entities;
+using Domain.Models.Entities.Characters;
+using Domain.Models.Entities.Creatures;
 using Domain.Models.GatheringNodes;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
@@ -10,14 +14,14 @@ using Microsoft.EntityFrameworkCore;
 namespace Application.Common.Interfaces;
 public interface IDbContext
 {
-    //DbSet<Ability> Abilities { get; }
+    DbSet<AbilityId> AbilityIds { get; }
     //DbSet<Achievement> Achievements { get; }
-    //DbSet<AttributeBase> Attributes { get; }
-    //DbSet<EntityAttribute> EntityAttributes { get; }
+    DbSet<EntityAttribute> EntityAttributes { get; }
     //DbSet<Building> Buildings { get; }
     DbSet<Character> Characters { get; }
+    DbSet<Creature> Creatures { get; }
     //DbSet<Echo> Echoes { get; }
-    //DbSet<Entity> Entities { get; }
+    DbSet<Entity> Entities { get; }
 
     // Effects
     //DbSet<Modifier> Modifiers { get; }

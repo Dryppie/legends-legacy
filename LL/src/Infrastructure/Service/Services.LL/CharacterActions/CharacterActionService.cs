@@ -2,6 +2,8 @@
 using Application.UseCases.Inventories.Events;
 using Common.Extensions;
 using Domain.Models.CharacterActions;
+using Domain.Models.Combat;
+using Domain.Models.Entities;
 using Domain.Models.Inventories;
 using MediatR;
 using Services.LL.Interfaces;
@@ -11,12 +13,14 @@ public class CharacterActionService : ICharacterActionService
 {
     private readonly ICharacterActionRepository _characterActionRepository;
     private readonly IGatheringService _gatheringService;
+    private readonly ICombatService _combatService;
     private readonly ILootService _lootService;
     private readonly IMediator _mediator;
-    public CharacterActionService(ICharacterActionRepository characterActionRepository, IGatheringService gatheringService, ILootService lootService, IMediator mediator)
+    public CharacterActionService(ICharacterActionRepository characterActionRepository, IGatheringService gatheringService, ICombatService combatService, ILootService lootService, IMediator mediator)
     {
         _characterActionRepository = characterActionRepository;
         _gatheringService = gatheringService;
+        _combatService = combatService;
         _lootService = lootService;
         _mediator = mediator;
     }
@@ -34,22 +38,90 @@ public class CharacterActionService : ICharacterActionService
     public async Task<CharacterAction?> GetCharacterActionAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var now = DateTimeOffset.UtcNow;
+        var originalNow = now;
+
         var characterAction = await _characterActionRepository.GetCharacterActionAsync(characterId, cancellationToken);
 
         if (characterAction == null) return null;
 
-        // How many actions can be performed since the last time it was checked
-        int actionsToPerform = characterAction.UpdatedAt.NumberOfXSecondsIntervals(now, 6);
-        // Return if no actions could be performed (This usually happens in case of a refresh)
-        if (actionsToPerform == 0) return characterAction;
+        // If it's been longer than 12 hours since the player checked in, their action is capped
+        // Actions are only calculated from UpdatedAt, to the capped time (12 hours ahead)
+        var isCapped = characterAction.UpdatedAt.AddHours(12) < now;
+        if (isCapped) now = characterAction.UpdatedAt.AddHours(12);
 
-        await UpdateCharacterActionAsync(characterAction, actionsToPerform, cancellationToken);
+        switch (characterAction.CharacterActionType)
+        {
+            case CharacterActionType.Gathering:
+                await HandleGatheringActionAsync(characterAction, now, cancellationToken);
+                break;
 
-        var loot = await ExecuteAction(characterAction, actionsToPerform, cancellationToken);
+            case CharacterActionType.Combat:
+                characterAction.CombatResult = await HandleCombatActionAsync(characterAction, now, cancellationToken);
+                break;
 
-        await ProcessLootAsync(characterId, loot, cancellationToken);
+            //case CharacterActionType.Profession:
+            //    await HandleProfessionActionAsync(characterAction, now, cancellationToken);
+            //    break;
+
+            // Add other action types as needed
+            default:
+                throw new InvalidOperationException("Unknown action type.");
+        }
+
+        // If the action is capped, simply set the updatedAt to the original time, as their actiontime is reset to now
+        if (isCapped)
+        {
+            characterAction.UpdatedAt = originalNow;
+            characterAction.CombatResult = null;
+        }
+
+        await _characterActionRepository.UpdateCharacterActionAsync(characterAction, cancellationToken);
 
         return characterAction;
+    }
+
+    private async Task HandleGatheringActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        int actionsToPerform = characterAction.UpdatedAt.NumberOfXSecondsIntervals(now, 6);
+
+        if (actionsToPerform == 0) return;
+
+        // Update the UpdatedAt timestamp
+        characterAction.UpdatedAt += TimeSpan.FromSeconds(6 * actionsToPerform);
+
+        // Perform the gathering actions
+        var loot = await _gatheringService.PerformGatheringAsync(characterAction.LootTableId, actionsToPerform, cancellationToken);
+
+        // Process the loot
+        if (loot.Count > 0)
+        {
+            await ProcessLootAsync(characterAction.CharacterId, loot, cancellationToken);
+        }
+    }
+
+    private async Task<CombatResult> HandleCombatActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        var totalLoot = new List<InventoryItem>();
+        var characterTeam = new List<Guid>() { Guid.Parse("37d062c9-6a73-4139-b9b7-3d5de80fbe29") };
+        var enemyTeam = new List<Guid>() { Guid.Parse("00000000-0000-0000-0000-000000000002") };
+
+        int combatsPerformed = 0;
+        var combatAction = new CombatAction(characterTeam, enemyTeam);
+
+        var lastCombatResult = await _combatService.PerformCombatAsync(combatAction, characterAction, now, cancellationToken);
+
+        // Process the accumulated loot
+        if (totalLoot.Count > 0)
+        {
+            //await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
+        }
+
+        return lastCombatResult;
+    }
+
+    private async Task HandleProfessionActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
     }
 
     /// <summary>
@@ -65,32 +137,6 @@ public class CharacterActionService : ICharacterActionService
     {
         characterAction.UpdatedAt += TimeSpan.FromSeconds(6 * characterActionsToPerform);
         await _characterActionRepository.UpdateCharacterActionAsync(characterAction, cancellationToken);
-    }
-
-    private async Task<List<InventoryItem>> ExecuteAction(CharacterAction characterAction, int actionsToPerform, CancellationToken cancellationToken)
-    {
-        var totalLoot = new List<InventoryItem>();
-
-        switch (characterAction.CharacterActionType)
-        {
-            case CharacterActionType.Combat:
-                //totalLoot = await _combatService.PerformAction(request);
-                break;
-            case CharacterActionType.Gathering:
-                var loot = await _gatheringService.PerformGathering(characterAction.LootTableId, actionsToPerform, cancellationToken);
-                if (loot.Count > 0)
-                {
-                    totalLoot.AddRange(loot);
-                }
-                break;
-            case CharacterActionType.Profession:
-                //totalLoot = await _professionService.PerformAction(request);
-                break;
-            default:
-                throw new InvalidOperationException("Unknown action type.");
-        }
-
-        return totalLoot;
     }
 
     // TODO: After adding the loot to the character's inventory in the database,

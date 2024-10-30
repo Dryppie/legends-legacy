@@ -1,4 +1,5 @@
-﻿using Domain.Models.Entities.Actors.Characters;
+﻿using Domain.Models.Combat;
+using Domain.Models.Entities.Characters;
 using Domain.Models.LootTables;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -12,14 +13,16 @@ public class CharacterAction
     public Guid LootTableId { get; set; }
     public LootTable LootTable { get; set; } = null!;
     public DateTimeOffset UpdatedAt { get; set; }
-    public bool IsFinished => DateTime.UtcNow >= UpdatedAt.AddHours(OFFLINE_DURATION);
+    //public bool IsCapped => DateTimeOffset.UtcNow >= UpdatedAt.AddHours(OFFLINE_DURATION);
+    [NotMapped]
+    public CombatResult? CombatResult { get; set; }
 
     public CharacterAction(Guid characterId, CharacterActionType characterActionType, Guid lootTableId)
     {
         CharacterId = characterId;
         CharacterActionType = characterActionType;
         LootTableId = lootTableId;
-        UpdatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTimeOffset.UtcNow;
     }
 
     public CharacterAction()

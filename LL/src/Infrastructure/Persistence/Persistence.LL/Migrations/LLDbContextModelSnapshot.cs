@@ -22,6 +22,37 @@ namespace Persistence.LL.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Domain.Models.Abilities.AbilityId", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("EntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id", "EntityId");
+
+                    b.HasIndex("EntityId");
+
+                    b.ToTable("AbilityIds");
+                });
+
+            modelBuilder.Entity("Domain.Models.Attributes.EntityAttribute", b =>
+                {
+                    b.Property<Guid>("EntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AttributeType")
+                        .HasColumnType("int");
+
+                    b.Property<float>("Value")
+                        .HasColumnType("real");
+
+                    b.HasKey("EntityId", "AttributeType");
+
+                    b.ToTable("EntityAttributes");
+                });
+
             modelBuilder.Entity("Domain.Models.CharacterActions.CharacterAction", b =>
                 {
                     b.Property<Guid>("CharacterId")
@@ -58,7 +89,7 @@ namespace Persistence.LL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Entity");
+                    b.ToTable("Entities");
 
                     b.HasDiscriminator<int>("EntityType");
 
@@ -113,9 +144,15 @@ namespace Persistence.LL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("ItemType")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Rarity")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -124,18 +161,24 @@ namespace Persistence.LL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("963771fe-5572-4668-9ef7-b39018157b63"),
-                            Name = "Sword"
+                            Id = new Guid("c3fa0c6d-6829-4043-a0f9-1a7bed0888ce"),
+                            ItemType = 0,
+                            Name = "Sword",
+                            Rarity = 0
                         },
                         new
                         {
-                            Id = new Guid("c91cbd98-34b8-4723-b3fb-a5c38681ca2a"),
-                            Name = "Shield"
+                            Id = new Guid("1d5e380a-32f2-418c-a2cd-ce9b5cd5b562"),
+                            ItemType = 0,
+                            Name = "Shield",
+                            Rarity = 0
                         },
                         new
                         {
-                            Id = new Guid("1621b5ef-ab71-4cef-aed2-5b369f9678aa"),
-                            Name = "Potion"
+                            Id = new Guid("b19a8cd8-c8dd-4eb2-abb4-1bb16124e506"),
+                            ItemType = 0,
+                            Name = "Potion",
+                            Rarity = 0
                         });
                 });
 
@@ -152,7 +195,7 @@ namespace Persistence.LL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("551c9f1c-f7fd-4edb-8a59-753dfcbc8d5b")
+                            Id = new Guid("18735aef-f6a0-4953-9e50-7a4c2e8f9043")
                         });
                 });
 
@@ -303,18 +346,18 @@ namespace Persistence.LL.Migrations
                     b.HasData(
                         new
                         {
-                            ItemsId = new Guid("963771fe-5572-4668-9ef7-b39018157b63"),
-                            LootTablesId = new Guid("551c9f1c-f7fd-4edb-8a59-753dfcbc8d5b")
+                            ItemsId = new Guid("c3fa0c6d-6829-4043-a0f9-1a7bed0888ce"),
+                            LootTablesId = new Guid("18735aef-f6a0-4953-9e50-7a4c2e8f9043")
                         },
                         new
                         {
-                            ItemsId = new Guid("c91cbd98-34b8-4723-b3fb-a5c38681ca2a"),
-                            LootTablesId = new Guid("551c9f1c-f7fd-4edb-8a59-753dfcbc8d5b")
+                            ItemsId = new Guid("1d5e380a-32f2-418c-a2cd-ce9b5cd5b562"),
+                            LootTablesId = new Guid("18735aef-f6a0-4953-9e50-7a4c2e8f9043")
                         },
                         new
                         {
-                            ItemsId = new Guid("1621b5ef-ab71-4cef-aed2-5b369f9678aa"),
-                            LootTablesId = new Guid("551c9f1c-f7fd-4edb-8a59-753dfcbc8d5b")
+                            ItemsId = new Guid("b19a8cd8-c8dd-4eb2-abb4-1bb16124e506"),
+                            LootTablesId = new Guid("18735aef-f6a0-4953-9e50-7a4c2e8f9043")
                         });
                 });
 
@@ -451,16 +494,9 @@ namespace Persistence.LL.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Domain.Models.Entities.Actors.Actor", b =>
+            modelBuilder.Entity("Domain.Models.Entities.Characters.Character", b =>
                 {
                     b.HasBaseType("Domain.Models.Entities.Entity");
-
-                    b.HasDiscriminator().HasValue(1);
-                });
-
-            modelBuilder.Entity("Domain.Models.Entities.Actors.Characters.Character", b =>
-                {
-                    b.HasBaseType("Domain.Models.Entities.Actors.Actor");
 
                     b.Property<int>("Experience")
                         .HasColumnType("int");
@@ -474,12 +510,44 @@ namespace Persistence.LL.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasDiscriminator().HasValue(1);
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.Creatures.Creature", b =>
+                {
+                    b.HasBaseType("Domain.Models.Entities.Entity");
+
                     b.HasDiscriminator().HasValue(3);
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.NPCs.NPC", b =>
+                {
+                    b.HasBaseType("Domain.Models.Entities.Entity");
+
+                    b.HasDiscriminator().HasValue(2);
+                });
+
+            modelBuilder.Entity("Domain.Models.Abilities.AbilityId", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Entity", null)
+                        .WithMany("AbilityIds")
+                        .HasForeignKey("EntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Attributes.EntityAttribute", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Entity", null)
+                        .WithMany("BaseAttributes")
+                        .HasForeignKey("EntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.Models.CharacterActions.CharacterAction", b =>
                 {
-                    b.HasOne("Domain.Models.Entities.Actors.Characters.Character", "Character")
+                    b.HasOne("Domain.Models.Entities.Characters.Character", "Character")
                         .WithOne("CharacterAction")
                         .HasForeignKey("Domain.Models.CharacterActions.CharacterAction", "CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -509,7 +577,7 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.Inventories.Inventory", b =>
                 {
-                    b.HasOne("Domain.Models.Entities.Actors.Characters.Character", "Character")
+                    b.HasOne("Domain.Models.Entities.Characters.Character", "Character")
                         .WithOne("Inventory")
                         .HasForeignKey("Domain.Models.Inventories.Inventory", "CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -607,7 +675,7 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Domain.Models.Entities.Actors.Characters.Character", b =>
+            modelBuilder.Entity("Domain.Models.Entities.Characters.Character", b =>
                 {
                     b.HasOne("Domain.Models.Users.AppUser", "User")
                         .WithMany()
@@ -616,6 +684,13 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.Entity", b =>
+                {
+                    b.Navigation("AbilityIds");
+
+                    b.Navigation("BaseAttributes");
                 });
 
             modelBuilder.Entity("Domain.Models.Inventories.Inventory", b =>
@@ -630,7 +705,7 @@ namespace Persistence.LL.Migrations
                     b.Navigation("Transactions");
                 });
 
-            modelBuilder.Entity("Domain.Models.Entities.Actors.Characters.Character", b =>
+            modelBuilder.Entity("Domain.Models.Entities.Characters.Character", b =>
                 {
                     b.Navigation("CharacterAction");
 

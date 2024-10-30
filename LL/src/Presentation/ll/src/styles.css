@@ -57,6 +57,15 @@
     );
   }
 
+  .chat-gradient {
+    background: linear-gradient(
+      to right,
+      #8392ba00 0%,
+      #3b4254 50%,
+      #3b425490 100%
+    );
+  }
+
   .card-gradient {
     background: linear-gradient(
       to right,

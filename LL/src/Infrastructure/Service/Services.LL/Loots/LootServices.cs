@@ -6,7 +6,7 @@ using Domain.Models.LootTables;
 namespace Services.LL.Loots;
 public class LootServices : ILootService
 {
-    public List<InventoryItem> GenerateGatheringLoot(LootTable lootTable, CancellationToken cancellationToken)
+    public List<InventoryItem> GenerateGatheringLootAsync(LootTable lootTable, CancellationToken cancellationToken)
     {
         return GetRandomLoot(lootTable);
     }

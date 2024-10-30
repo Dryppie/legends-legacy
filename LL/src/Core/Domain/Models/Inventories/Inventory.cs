@@ -1,4 +1,4 @@
-﻿using Domain.Models.Entities.Actors.Characters;
+﻿using Domain.Models.Entities.Characters;
 
 namespace Domain.Models.Inventories;
 public class Inventory

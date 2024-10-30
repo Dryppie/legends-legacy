@@ -1,0 +1,11 @@
+<div class="flex h-full flex-col overflow-hidden rounded-md bg-black/40">
+  <h3 class="h-16 min-h-16 content-center p-4 text-primary">Battle overview</h3>
+  <div class="chat-gradient mb-4 h-[1px]"></div>
+  <div class="overflow-y-scroll" appStickyScroll>
+    <app-combat-overview-item
+      *ngFor="let combatEvent of combatEvents"
+      [combatEvent]="combatEvent"
+    ></app-combat-overview-item>
+    <div #sentinel></div>
+  </div>
+</div>

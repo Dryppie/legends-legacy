@@ -121,7 +121,7 @@ public class AuthController : BaseController
         //Domain = "hi", //_configuration["HostedDomain"], // the top level domain such as bupl.dk or webtestbupl.dk
         SameSite = IsLocal() ? SameSiteMode.None : SameSiteMode.Strict,
         IsEssential = true,
-        Expires = DateTime.Now.AddYears(1),
+        Expires = DateTimeOffset.UtcNow.AddYears(1),
         MaxAge = TimeSpan.FromDays(365),
     };
 }

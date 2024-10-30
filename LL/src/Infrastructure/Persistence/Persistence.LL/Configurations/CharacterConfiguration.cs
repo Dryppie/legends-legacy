@@ -1,5 +1,5 @@
 ﻿using Domain.Models.CharacterActions;
-using Domain.Models.Entities.Actors.Characters;
+using Domain.Models.Entities.Characters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

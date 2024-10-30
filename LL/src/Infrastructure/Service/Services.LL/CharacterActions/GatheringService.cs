@@ -15,7 +15,7 @@ public class GatheringService : IGatheringService
         _lootTableService = lootTableService;
     }
 
-    public async Task<List<InventoryItem>> PerformGathering(Guid lootTableId, int actionsToPerform, CancellationToken cancellationToken)
+    public async Task<List<InventoryItem>> PerformGatheringAsync(Guid lootTableId, int actionsToPerform, CancellationToken cancellationToken)
     {
         // Find the kind of gathering the player does, check their levels, proceed to generate loot
         var totalLoot = new List<InventoryItem>();
@@ -27,7 +27,7 @@ public class GatheringService : IGatheringService
         for (var i = actionsToPerform; i > 0; i--)
         {
             // Generate loot for every action, and add it to the total loot
-            var loot = _lootService.GenerateGatheringLoot(lootTable, cancellationToken);
+            var loot = _lootService.GenerateGatheringLootAsync(lootTable, cancellationToken);
             if (loot.Count > 0)
             {
                 totalLoot.AddRange(loot);

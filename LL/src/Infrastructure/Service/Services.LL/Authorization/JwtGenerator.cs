@@ -3,7 +3,7 @@ using Application.Common.Interfaces;
 using Common.Authorization.Security;
 using Common.DateTimeProvider;
 using Common.Exceptions;
-using Domain.Models.Entities.Actors.Characters;
+using Domain.Models.Entities.Characters;
 using Domain.Models.Users;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -40,7 +40,7 @@ public class JwtGenerator : IJwtGenerator
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.Now.AddDays(7),
+            Expires = DateTimeOffset.UtcNow.AddDays(7).Date,
             SigningCredentials = creds
         };
 

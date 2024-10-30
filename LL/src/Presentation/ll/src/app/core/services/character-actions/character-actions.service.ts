@@ -17,6 +17,8 @@ import {
 import { ApiService } from '../api/api.service'; // Import the shared API service
 import { CharacterActionDto } from '../../../shared/models/Dtos/characterActionDto'; // Import CharacterActionDto model
 import { environment } from '../../../../environments/environment';
+import { CombatService } from '../combat/combat.service';
+import { CombatResultDto } from '../../../shared/models/Dtos/combatResultDto';
 
 @Injectable({
   providedIn: 'root',
@@ -29,7 +31,10 @@ export class CharacterActionsService {
 
   private pollingSubscription: Subscription | null = null;
 
-  constructor(private apiService: ApiService) {
+  constructor(
+    private apiService: ApiService,
+    private combatService: CombatService,
+  ) {
     this.init();
   }
 
@@ -49,10 +54,14 @@ export class CharacterActionsService {
       )
       .subscribe((action: CharacterActionDto | null) => {
         this.setCurrentAction(action);
-        if (action) {
-          this.startPolling();
-        } else {
-          this.stopPolling();
+        if (!action) this.stopPolling();
+
+        this.startPolling();
+
+        if (action?.characterActionType === 0) {
+          this.combatService.startCombatSimulation(
+            action.combatResult as CombatResultDto,
+          );
         }
       });
   }
@@ -110,6 +119,26 @@ export class CharacterActionsService {
           }
 
           this.setCurrentAction(action);
+          // if CombatAction
+          if (action.characterActionType === 0) {
+            // Calculate the next interval based on updatedAt - now
+            const updatedAt = new Date(action.updatedAt).getTime();
+            const now = Date.now();
+            let nextInterval = updatedAt - now;
+
+            if (nextInterval <= 0) {
+              nextInterval = 0; // Call immediately if the time has already passed
+            }
+
+            return timer(nextInterval).pipe(
+              mergeMap(() => this.apiService.get('CharacterActions')),
+              catchError((error) => {
+                console.error('Polling error:', error);
+                this.stopPolling();
+                return EMPTY;
+              }),
+            );
+          }
 
           // Compute the next interval based on updatedAt
           const updatedAt = new Date(action.updatedAt).getTime();
@@ -137,10 +166,12 @@ export class CharacterActionsService {
         }),
       )
       .subscribe((action: CharacterActionDto | null) => {
-        if (action) {
-          this.setCurrentAction(action);
-        } else {
-          this.stopPolling();
+        if (!action) this.stopPolling();
+
+        this.setCurrentAction(action);
+
+        if (action?.combatResult) {
+          this.combatService.startCombatSimulation(action.combatResult);
         }
       });
   }

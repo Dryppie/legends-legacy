@@ -13,7 +13,6 @@ public class CharacterCreatedEventHandler : INotificationHandler<CharacterCreate
 
     public async Task Handle(CharacterCreatedEvent notification, CancellationToken cancellationToken)
     {
-        Console.WriteLine("INVENTORY");
         await _inventoryService.CreateInventoryAsync(notification.CharacterId, cancellationToken);
     }
 }
