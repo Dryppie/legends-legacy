@@ -1,0 +1,12 @@
+﻿using Domain.Models.Regions;
+
+namespace Application.Interfaces.Services.LL;
+public interface IRegionService
+{
+    /// <summary>
+    /// Get the Region by Id
+    /// </summary>
+    /// <param name="regionId"></param>
+    /// <returns></returns>
+    Task<Region> GetRegionByIdAsync(int regionId, CancellationToken cancellationToken);
+}

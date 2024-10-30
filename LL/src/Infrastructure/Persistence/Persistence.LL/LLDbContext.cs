@@ -10,6 +10,8 @@ using Domain.Models.GatheringNodes;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.LootTables;
+using Domain.Models.Regions;
+using Domain.Models.Regions.Areas;
 using Domain.Models.Users;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -75,6 +77,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
     public DbSet<AbilityId> AbilityIds => Set<AbilityId>();
 
     //public DbSet<Achievement> Achievements => Set<Achievement>();
+    public DbSet<Area> Areas => Set<Area>();
     public DbSet<EntityAttribute> EntityAttributes => Set<EntityAttribute>();
 
     //public DbSet<Building> Buildings => Set<Building>();
@@ -127,6 +130,8 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
     //public DbSet<Town> Towns => Set<Town>();
 
     //public DbSet<TownBuilding> TownBuildings => Set<TownBuilding>();
+
+    public DbSet<Region> Regions => Set<Region>();
 
     public new DbSet<AppUser> Users => Set<AppUser>();
 }

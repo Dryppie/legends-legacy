@@ -171,7 +171,7 @@ public abstract class Entity
         }
     }
 
-    internal int CalculateReceiveHealing(int healing)
+    public int CalculateReceiveHealing(int healing)
     {
         // Add logic to calculate healing
         return healing;

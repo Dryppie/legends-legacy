@@ -152,7 +152,7 @@ public class JwtGenerator : IJwtGenerator
         return ValidateToken(_topSecretAccessKey, "", "", token);
     }
 
-    internal static bool ValidateToken(string key, string issuer, string audience, string token)
+    private static bool ValidateToken(string key, string issuer, string audience, string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var jwtSecurityToken = tokenHandler.ReadJwtToken(token);

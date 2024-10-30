@@ -23,6 +23,8 @@
     <Folder Include="UseCases\Characters\Dtos\" />
     <Folder Include="UseCases\Characters\Queries\" />
     <Folder Include="UseCases\Inventories\Commands\" />
+    <Folder Include="UseCases\Regions\Dtos\" />
+    <Folder Include="UseCases\Regions\Commands\" />
     <Folder Include="UseCases\Users\Commands\Delete\" />
   </ItemGroup>
 

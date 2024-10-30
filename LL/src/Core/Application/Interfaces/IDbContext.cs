@@ -8,6 +8,8 @@ using Domain.Models.GatheringNodes;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.LootTables;
+using Domain.Models.Regions;
+using Domain.Models.Regions.Areas;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +18,7 @@ public interface IDbContext
 {
     DbSet<AbilityId> AbilityIds { get; }
     //DbSet<Achievement> Achievements { get; }
+    DbSet<Area> Areas { get; }
     DbSet<EntityAttribute> EntityAttributes { get; }
     //DbSet<Building> Buildings { get; }
     DbSet<Character> Characters { get; }
@@ -48,6 +51,7 @@ public interface IDbContext
     //DbSet<Title> Titles { get; }
     //DbSet<Town> Towns { get; }
     //DbSet<TownBuilding> TownBuildings { get; }
+    DbSet<Region> Regions { get; }
     DbSet<AppUser> Users { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);

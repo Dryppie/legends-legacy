@@ -1,5 +1,4 @@
-﻿using AutoMapper.Features;
-using Domain.Helpers;
+﻿using Domain.Helpers;
 using Domain.Models.Abilities;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Characters;
@@ -7,9 +6,10 @@ using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.LootTables;
+using Domain.Models.Regions;
+using Domain.Models.Regions.Areas;
 using Domain.Models.Users;
 using Microsoft.AspNetCore.Identity;
-using System.Collections.Generic;
 
 namespace Persistence.LL.Seeds;
 public static class LLDbContextExtensions
@@ -67,30 +67,34 @@ public static class LLDbContextExtensions
         SeedCreatures(context);
     }
 
+
     private static void SeedCreatures(LLDbContext context)
     {
         if (!context.Creatures.Any())
         {
             // Define creature IDs
             var goblinId = Guid.Parse("00000000-0000-0000-0000-000000000001");
-            var orcShamanId = Guid.Parse("00000000-0000-0000-0000-000000000002");
-            var trollId = Guid.Parse("00000000-0000-0000-0000-000000000003");
+            var goblinWarriorId = Guid.Parse("00000000-0000-0000-0000-000000000002");
+            var goblinArcherId = Guid.Parse("00000000-0000-0000-0000-000000000003");
+            var largeRatId = Guid.Parse("00000000-0000-0000-0000-000000000004");
 
             // Create creatures
             var creatures = new List<Creature>
-        {
-            new Creature { Id = goblinId, Name = "Goblin" },
-            new Creature { Id = orcShamanId, Name = "Orc Shaman" },
-            new Creature { Id = trollId, Name = "Troll" }
-        };
+            {
+                new Creature { Id = goblinId, Name = "Goblin" },
+                new Creature { Id = goblinWarriorId, Name = "Goblin Warrior" },
+                new Creature { Id = goblinArcherId, Name = "Goblin Archer" },
+                new Creature { Id = largeRatId, Name = "Large Rat" }
+            };
 
             context.Creatures.AddRange(creatures);
 
             // Create attributes
             var attributes = new List<EntityAttribute>();
             attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(goblinId));
-            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(orcShamanId));
-            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(trollId));
+            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(goblinWarriorId));
+            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(goblinArcherId));
+            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(largeRatId));
 
             context.EntityAttributes.AddRange(attributes);
             var abilityIds = new List<AbilityId>()
@@ -102,16 +106,50 @@ public static class LLDbContextExtensions
                 },
                 new AbilityId()
                 {
-                    EntityId = orcShamanId,
+                    EntityId = goblinWarriorId,
                     Id = "summon_01"
                 },
                 new AbilityId()
                 {
-                    EntityId = trollId,
+                    EntityId = goblinArcherId,
+                    Id = "heal_01"
+                },
+                new AbilityId()
+                {
+                    EntityId = largeRatId,
                     Id = "heal_01"
                 }
             };
             context.AbilityIds.AddRange(abilityIds);
+
+
+            if (!context.Regions.Any())
+            {
+                var areas = new List<Area>()
+                {
+                    new Area
+                    {
+                        Id = 1,
+                        Name = "Grasslands",
+                        Creatures = creatures
+                    }
+                };
+
+                context.Areas.AddRange(areas);
+
+                var shenicRegionId = 1;
+
+                var regions = new List<Region>
+                {
+                    new Region()
+                    {
+                        Id = shenicRegionId,
+                        Areas = areas
+                    }
+                };
+                context.Regions.AddRange(regions);
+            }
+
             context.SaveChanges();
         }
     }

@@ -1,13 +1,12 @@
 ﻿using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL;
 using Application.UseCases.Users.Events;
-using Common.Authorization.Security;
 using MediatR;
 
 namespace Application.UseCases.Users.Commands.Register;
 public record RegisterCommand(string Username, string Email, string Password) : IRequest;
 
-internal class RegisterCommandHandler : IRequestHandler<RegisterCommand>
+public class RegisterCommandHandler : IRequestHandler<RegisterCommand>
 {
     private readonly IUserService _userService;
     private readonly IJwtGenerator _jwtGenerator;
