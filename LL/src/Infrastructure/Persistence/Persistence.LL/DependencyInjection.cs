@@ -5,6 +5,7 @@ using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Inventories;
 using Domain.Models.LootTables;
+using Domain.Models.Regions;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -16,6 +17,7 @@ using Persistence.LL.Repositories.Entities;
 using Persistence.LL.Repositories.Entities.Characters;
 using Persistence.LL.Repositories.Inventories;
 using Persistence.LL.Repositories.LootTables;
+using Persistence.LL.Repositories.Regions;
 using Persistence.LL.Repositories.Users;
 
 namespace Persistence.LL;
@@ -45,6 +47,7 @@ public static class DependencyInjection
 
         services.AddScoped<ILootTableRepository, LootTableRepository>();
         services.AddScoped<IInventoryRepository, InventoryRepository>();
+        services.AddScoped<IRegionRepository, RegionRepository>();
 
         services.AddScoped<IUserRepository, UserRepository>();
 

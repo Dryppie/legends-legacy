@@ -2,6 +2,7 @@
 using Domain.Models.Abilities;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
+using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
@@ -53,6 +54,11 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
             .HasValue<Character>(1)
             .HasValue<NPC>(2)
             .HasValue<Creature>(3);
+
+        modelBuilder.Entity<ActionDetails>()
+        .HasDiscriminator<CharacterActionType>("ActionType")
+        .HasValue<CombatActionDetails>(CharacterActionType.Combat)
+        .HasValue<GatheringActionDetails>(CharacterActionType.Gathering);
 
         SeedData.Seed(modelBuilder);
     }

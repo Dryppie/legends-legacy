@@ -19,6 +19,7 @@ public class RegionRepository : IRegionRepository
     {
         var region = await _unitOfWork.Context.Regions
             .Include(r => r.Areas)
+            .ThenInclude(a => a.Creatures)
             .FirstOrDefaultAsync(r => r.Id.Equals(regionId), cancellationToken);
 
         NotFoundException.ThrowIfNull(region, nameof(region), regionId);

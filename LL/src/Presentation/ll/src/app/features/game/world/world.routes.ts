@@ -9,7 +9,7 @@ export const WORLD_ROUTES: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'shenic',
+        redirectTo: '1',
         pathMatch: 'full',
       },
       {

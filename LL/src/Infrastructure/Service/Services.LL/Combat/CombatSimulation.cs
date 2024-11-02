@@ -254,6 +254,19 @@ public class CombatSimulation : ICombatContext
             case Targeting.AllEnemies:
                 targets = enemyTeam.Where(e => e.IsAlive).ToList();
                 break;
+            case Targeting.TwoEnemies:
+                if(enemyTeam.Where(e => e.IsAlive).Count() >= 2) {
+                    targets = enemyTeam.Where(e => e.IsAlive).Take(2).ToList();
+                }
+                else
+                {
+                    var enemyTargets = SelectTarget(enemyTeam);
+                    if (enemyTargets != null) targets.Add(enemyTargets);
+                }
+                break;
+            case Targeting.TwoAllies:
+                targets = enemyTeam.Where(e => e.IsAlive).ToList();
+                break;
 
             case Targeting.Self:
                 targets.Add(caster);

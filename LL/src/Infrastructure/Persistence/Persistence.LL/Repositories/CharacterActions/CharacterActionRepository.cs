@@ -21,7 +21,9 @@ public class CharacterActionRepository : ICharacterActionRepository
 
     public async Task<CharacterAction?> GetCharacterActionAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        var characterAction = await _context.CharacterActions.FindAsync([characterId], cancellationToken);
+        var characterAction = await _context.CharacterActions
+            .Include(ca => ca.ActionDetails)
+            .FirstOrDefaultAsync(ca => ca.CharacterId.Equals(characterId), cancellationToken);
         return characterAction;
     }
 

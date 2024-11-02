@@ -102,22 +102,42 @@ public static class LLDbContextExtensions
                 new AbilityId()
                 {
                     EntityId = goblinId,
-                    Id = "fireball_01"
+                    Id = "sneakAttack"
+                },
+                new AbilityId()
+                {
+                    EntityId = goblinId,
+                    Id = "pocketDirt"
                 },
                 new AbilityId()
                 {
                     EntityId = goblinWarriorId,
-                    Id = "summon_01"
+                    Id = "recklessAssault"
+                },
+                new AbilityId()
+                {
+                    EntityId = goblinWarriorId,
+                    Id = "ragingCleave"
                 },
                 new AbilityId()
                 {
                     EntityId = goblinArcherId,
-                    Id = "heal_01"
+                    Id = "poisonedArrows"
+                },
+                new AbilityId()
+                {
+                    EntityId = goblinArcherId,
+                    Id = "snipersStrike"
                 },
                 new AbilityId()
                 {
                     EntityId = largeRatId,
-                    Id = "heal_01"
+                    Id = "bigAndTough"
+                },
+                new AbilityId()
+                {
+                    EntityId = largeRatId,
+                    Id = "tailWrap"
                 }
             };
             context.AbilityIds.AddRange(abilityIds);
@@ -129,21 +149,18 @@ public static class LLDbContextExtensions
                 {
                     new Area
                     {
-                        Id = 1,
-                        Name = "Grasslands",
+                        Name = "Luno Ruins",
                         Creatures = creatures
                     }
                 };
 
                 context.Areas.AddRange(areas);
 
-                var shenicRegionId = 1;
-
                 var regions = new List<Region>
                 {
                     new Region()
                     {
-                        Id = shenicRegionId,
+                        Name = "Shenic",
                         Areas = areas
                     }
                 };

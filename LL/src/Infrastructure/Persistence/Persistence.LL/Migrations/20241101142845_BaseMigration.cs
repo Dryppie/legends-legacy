@@ -79,6 +79,19 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Regions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Regions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -185,28 +198,6 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Entities",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    EntityType = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    Experience = table.Column<int>(type: "int", nullable: true),
-                    Gold = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Entities", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Entities_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "IPAddress",
                 columns: table => new
                 {
@@ -247,6 +238,27 @@ namespace Persistence.LL.Migrations
                         column: x => x.AppUserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ActionDetails",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ActionType = table.Column<int>(type: "int", nullable: false),
+                    CharacterTeam = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EnemyTeam = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ActionDetails", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ActionDetails_LootTables_LootTableId",
+                        column: x => x.LootTableId,
+                        principalTable: "LootTables",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -292,6 +304,53 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Areas",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RegionId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Areas", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Areas_Regions_RegionId",
+                        column: x => x.RegionId,
+                        principalTable: "Regions",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Entities",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EntityType = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Experience = table.Column<int>(type: "int", nullable: true),
+                    Gold = table.Column<int>(type: "int", nullable: true),
+                    AreaId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Entities", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Entities_Areas_AreaId",
+                        column: x => x.AreaId,
+                        principalTable: "Areas",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Entities_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AbilityIds",
                 columns: table => new
                 {
@@ -315,22 +374,22 @@ namespace Persistence.LL.Migrations
                 {
                     CharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CharacterActionType = table.Column<int>(type: "int", nullable: false),
-                    LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ActionDetailsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CharacterActions", x => x.CharacterId);
                     table.ForeignKey(
-                        name: "FK_CharacterActions_Entities_CharacterId",
-                        column: x => x.CharacterId,
-                        principalTable: "Entities",
+                        name: "FK_CharacterActions_ActionDetails_ActionDetailsId",
+                        column: x => x.ActionDetailsId,
+                        principalTable: "ActionDetails",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CharacterActions_LootTables_LootTableId",
-                        column: x => x.LootTableId,
-                        principalTable: "LootTables",
+                        name: "FK_CharacterActions_Entities_CharacterId",
+                        column: x => x.CharacterId,
+                        principalTable: "Entities",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -395,30 +454,40 @@ namespace Persistence.LL.Migrations
                 columns: new[] { "Id", "ItemType", "Name", "Rarity" },
                 values: new object[,]
                 {
-                    { new Guid("1d5e380a-32f2-418c-a2cd-ce9b5cd5b562"), 0, "Shield", 0 },
-                    { new Guid("b19a8cd8-c8dd-4eb2-abb4-1bb16124e506"), 0, "Potion", 0 },
-                    { new Guid("c3fa0c6d-6829-4043-a0f9-1a7bed0888ce"), 0, "Sword", 0 }
+                    { new Guid("616b0cf8-ebb1-4150-bc1a-a9513faa919b"), 0, "Sword", 0 },
+                    { new Guid("6cc47865-6e7e-4e7c-a1f5-95f3bcda3de6"), 0, "Shield", 0 },
+                    { new Guid("994e8381-bf0b-4a3a-b8ed-1fea6ddeb0cb"), 0, "Potion", 0 }
                 });
 
             migrationBuilder.InsertData(
                 table: "LootTables",
                 column: "Id",
-                value: new Guid("18735aef-f6a0-4953-9e50-7a4c2e8f9043"));
+                value: new Guid("43e6b3db-4477-42ff-a24c-8b492a393968"));
 
             migrationBuilder.InsertData(
                 table: "ItemLootTable",
                 columns: new[] { "ItemsId", "LootTablesId" },
                 values: new object[,]
                 {
-                    { new Guid("1d5e380a-32f2-418c-a2cd-ce9b5cd5b562"), new Guid("18735aef-f6a0-4953-9e50-7a4c2e8f9043") },
-                    { new Guid("b19a8cd8-c8dd-4eb2-abb4-1bb16124e506"), new Guid("18735aef-f6a0-4953-9e50-7a4c2e8f9043") },
-                    { new Guid("c3fa0c6d-6829-4043-a0f9-1a7bed0888ce"), new Guid("18735aef-f6a0-4953-9e50-7a4c2e8f9043") }
+                    { new Guid("616b0cf8-ebb1-4150-bc1a-a9513faa919b"), new Guid("43e6b3db-4477-42ff-a24c-8b492a393968") },
+                    { new Guid("6cc47865-6e7e-4e7c-a1f5-95f3bcda3de6"), new Guid("43e6b3db-4477-42ff-a24c-8b492a393968") },
+                    { new Guid("994e8381-bf0b-4a3a-b8ed-1fea6ddeb0cb"), new Guid("43e6b3db-4477-42ff-a24c-8b492a393968") }
                 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AbilityIds_EntityId",
                 table: "AbilityIds",
                 column: "EntityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ActionDetails_LootTableId",
+                table: "ActionDetails",
+                column: "LootTableId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Areas_RegionId",
+                table: "Areas",
+                column: "RegionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -460,9 +529,15 @@ namespace Persistence.LL.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CharacterActions_LootTableId",
+                name: "IX_CharacterActions_ActionDetailsId",
                 table: "CharacterActions",
-                column: "LootTableId");
+                column: "ActionDetailsId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Entities_AreaId",
+                table: "Entities",
+                column: "AreaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Entities_UserId",
@@ -536,6 +611,9 @@ namespace Persistence.LL.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "ActionDetails");
+
+            migrationBuilder.DropTable(
                 name: "Inventories");
 
             migrationBuilder.DropTable(
@@ -548,7 +626,13 @@ namespace Persistence.LL.Migrations
                 name: "Entities");
 
             migrationBuilder.DropTable(
+                name: "Areas");
+
+            migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Regions");
         }
     }
 }

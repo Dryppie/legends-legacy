@@ -4,6 +4,7 @@ namespace Domain.Models.Regions;
 public class Region
 {
     public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
     //public ICollection<Rift> Rifts { get; set; }
     //public ICollection<Raid> Raids { get; set; }
     //public ICollection<Dungeon> Dungeons { get; set; }

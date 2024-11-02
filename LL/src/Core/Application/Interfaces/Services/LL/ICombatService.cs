@@ -1,4 +1,6 @@
 ﻿using Domain.Models.CharacterActions;
+using Domain.Models.CharacterActions.CharacterActionDetails;
+using Domain.Models.CharacterActions.CombatActions;
 using Domain.Models.Combat;
 
 namespace Application.Interfaces.Services.LL;
@@ -11,5 +13,5 @@ public interface ICombatService
     /// <param name="duration"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Task<CombatResult> PerformCombatAsync(CombatAction combatAction, CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken);
+    public Task<CombatResult> PerformCombatAsync(CombatActionDetails combatAction, CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken);
 }

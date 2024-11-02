@@ -14,6 +14,8 @@ public class TargetingConverter : JsonConverter<Targeting>
             "Self" => Targeting.Self,
             "SingleEnemy" => Targeting.SingleEnemy,
             "SingleAlly" => Targeting.SingleAlly,
+            "TwoEnemies" => Targeting.TwoEnemies,
+            "TwoAllies" => Targeting.TwoAllies,
             "SingleDeadEnemy" => Targeting.SingleDeadEnemy,
             "SingleDeadAlly" => Targeting.SingleDeadAlly,
             "SingleRandomEnemy" => Targeting.SingleRandomEnemy,

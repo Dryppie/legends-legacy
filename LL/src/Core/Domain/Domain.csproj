@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Models\CharacterActions\GatheringActions\" />
     <Folder Include="Models\Regions\Dungeons\" />
     <Folder Include="Models\Regions\Raids\" />
     <Folder Include="Models\Regions\Rifts\" />

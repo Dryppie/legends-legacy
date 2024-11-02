@@ -177,7 +177,7 @@ function getWorldSidebar(): Tab[] {
       label: 'World',
       items: [
         {
-          id: 'shenic',
+          id: '1',
           route: 'world',
           icon: 'path/to/quest-icon.png',
           title: 'Shenic',
@@ -188,7 +188,7 @@ function getWorldSidebar(): Tab[] {
           ],
         },
         {
-          id: 'regnia',
+          id: '2',
           route: 'world',
           icon: 'path/to/quest-icon.png',
           title: 'Regnia',

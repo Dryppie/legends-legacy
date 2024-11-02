@@ -3,6 +3,8 @@ using Domain.Components.Attributes;
 using Domain.Helpers;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
+using Domain.Models.CharacterActions.CharacterActionDetails;
+using Domain.Models.CharacterActions.CombatActions;
 using Domain.Models.Combat;
 using Domain.Models.Entities;
 using Force.DeepCloner;
@@ -19,11 +21,11 @@ public class CombatService : ICombatService
         _entityService = entityService;
     }
 
-    public async Task<CombatResult> PerformCombatAsync(CombatAction combatAction, CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
+    public async Task<CombatResult> PerformCombatAsync(CombatActionDetails combatAction, CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
         // Initialize combatants
-        var playerCharacters = await GetPlayerCharactersAsync(combatAction.CharacterTeam, cancellationToken);
-        var enemyCharacters = await GetEnemyCharactersAsync(combatAction.EnemyTeam);
+        var playerCharacters = await GetPlayerCharactersAsync(combatAction.CharacterTeam.ToList(), cancellationToken);
+        var enemyCharacters = await GetEnemyCharactersAsync(combatAction.EnemyTeam.ToList());
 
         // Prepare entities for combat
         await PrepareEntitiesForCombat(playerCharacters.Concat(enemyCharacters));

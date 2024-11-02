@@ -9,6 +9,10 @@ public class CharacterActionConfiguration : IEntityTypeConfiguration<CharacterAc
     public void Configure(EntityTypeBuilder<CharacterAction> builder)
     {
         builder.HasKey(e => e.CharacterId);
+        builder.HasOne(ca => ca.ActionDetails)
+               .WithOne();
+
         builder.Property(e => e.CharacterId).IsRequired();
+
     }
 }

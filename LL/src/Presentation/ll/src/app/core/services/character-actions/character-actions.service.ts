@@ -2,20 +2,15 @@ import { Injectable } from '@angular/core';
 import {
   BehaviorSubject,
   EMPTY,
-  Observable,
-  ReplaySubject,
   Subscription,
   catchError,
   expand,
-  interval,
   mergeMap,
   of,
-  tap,
-  throwError,
   timer,
 } from 'rxjs';
 import { ApiService } from '../api/api.service'; // Import the shared API service
-import { CharacterActionDto } from '../../../shared/models/Dtos/characterActionDto'; // Import CharacterActionDto model
+import { CharacterActionDto, StartCombatActionRequest, StartGatheringActionRequest } from '../../../shared/models/Dtos/characterActionDto'; // Import CharacterActionDto model
 import { environment } from '../../../../environments/environment';
 import { CombatService } from '../combat/combat.service';
 import { CombatResultDto } from '../../../shared/models/Dtos/combatResultDto';
@@ -66,13 +61,23 @@ export class CharacterActionsService {
       });
   }
 
-  startCharacterAction(): void {
-    const characterAction = {
-      characterActionType: 1,
-      lootTableId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-    };
+  startCombatAction(startCombatActionRequest: StartCombatActionRequest): void {
     this.apiService
-      .post('CharacterActions', characterAction)
+      .post('CharacterActions/StartCombat', startCombatActionRequest)
+      .pipe(
+        catchError((error) => {
+          console.error('Failed to start character action:', error);
+          return of(null);
+        }),
+      )
+      .subscribe(() => {
+        this.getCharacterAction();
+      });
+  }
+
+  startGatheringAction(gatheringAction: StartGatheringActionRequest): void {
+    this.apiService
+      .post('CharacterActions/StartGathering', gatheringAction)
       .pipe(
         catchError((error) => {
           console.error('Failed to start character action:', error);

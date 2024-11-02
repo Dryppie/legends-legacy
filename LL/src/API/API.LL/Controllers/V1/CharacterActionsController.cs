@@ -3,6 +3,7 @@ using Application.UseCases.CharacterActions.Commands.StartCharacterAction;
 using Application.UseCases.CharacterActions.Dtos;
 using Application.UseCases.CharacterActions.Queries.GetCharacterAction;
 using Domain.Models.CharacterActions;
+using Domain.Models.CharacterActions.CharacterActionDetails;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,22 +11,26 @@ namespace API.LL.Controllers.V1;
 [Authorize]
 public class CharacterActionsController : BaseController
 {
+    public record StartCombatActionRequest(CombatActionDetails CombatActionDetails);
+    public record StartGatheringActionRequest(GatheringActionDetails GatheringActionDetails);
     [HttpGet]
     public async Task<ActionResult<CharacterActionDto?>> Get()
     {
         return await Mediator.Send(new GetCharacterActionQuery(CharacterGuid));
     }
-    public class StartCharacterActionRequest
+    // POST api/<CharacterActionsController>
+    [HttpPost("StartCombat")]
+    public async Task<ActionResult<bool>> StartCombat([FromBody] StartCombatActionRequest request)
     {
-        public CharacterActionType CharacterActionType { get; set; }
-        public Guid LootTableId { get; set; }
+
+        return await Mediator.Send(new StartCharacterActionCommand(CharacterGuid, CharacterActionType.Combat, request.CombatActionDetails));
     }
     // POST api/<CharacterActionsController>
-    [HttpPost]
-    public async Task<ActionResult<bool>> Start([FromBody] StartCharacterActionRequest request)
+    [HttpPost("StartGathering")]
+    public async Task<ActionResult<bool>> StartGathering([FromBody] StartGatheringActionRequest request)
     {
-        request.LootTableId = Guid.Parse("18735aef-f6a0-4953-9e50-7a4c2e8f9043");
-        return await Mediator.Send(new StartCharacterActionCommand(CharacterGuid, request.CharacterActionType, request.LootTableId));
+
+        return await Mediator.Send(new StartCharacterActionCommand(CharacterGuid, CharacterActionType.Gathering, request.GatheringActionDetails));
     }
 
     [HttpDelete]

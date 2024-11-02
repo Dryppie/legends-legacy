@@ -2,6 +2,8 @@
 using Application.UseCases.Inventories.Events;
 using Common.Extensions;
 using Domain.Models.CharacterActions;
+using Domain.Models.CharacterActions.CharacterActionDetails;
+using Domain.Models.CharacterActions.CombatActions;
 using Domain.Models.Combat;
 using Domain.Models.Entities;
 using Domain.Models.Inventories;
@@ -88,9 +90,10 @@ public class CharacterActionService : ICharacterActionService
 
         // Update the UpdatedAt timestamp
         characterAction.UpdatedAt += TimeSpan.FromSeconds(6 * actionsToPerform);
+        var actionDetails = characterAction.ActionDetails as GatheringActionDetails;
 
         // Perform the gathering actions
-        var loot = await _gatheringService.PerformGatheringAsync(characterAction.LootTableId, actionsToPerform, cancellationToken);
+        var loot = await _gatheringService.PerformGatheringAsync(actionDetails!.LootTable.Id, actionsToPerform, cancellationToken);
 
         // Process the loot
         if (loot.Count > 0)
@@ -102,13 +105,10 @@ public class CharacterActionService : ICharacterActionService
     private async Task<CombatResult> HandleCombatActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
         var totalLoot = new List<InventoryItem>();
-        var characterTeam = new List<Guid>() { Guid.Parse("37d062c9-6a73-4139-b9b7-3d5de80fbe29") };
-        var enemyTeam = new List<Guid>() { Guid.Parse("00000000-0000-0000-0000-000000000002") };
-
+        
         int combatsPerformed = 0;
-        var combatAction = new CombatAction(characterTeam, enemyTeam);
-
-        var lastCombatResult = await _combatService.PerformCombatAsync(combatAction, characterAction, now, cancellationToken);
+        var actionDetails = characterAction.ActionDetails as CombatActionDetails; 
+        var lastCombatResult = await _combatService.PerformCombatAsync(actionDetails, characterAction, now, cancellationToken);
 
         // Process the accumulated loot
         if (totalLoot.Count > 0)

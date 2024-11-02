@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { MiniButtonComponent } from '../../mini-button/mini-button.component';
 import { CharacterActionsService } from '../../../../core/services/character-actions/character-actions.service';
-import { CharacterActionDto } from '../../../models/Dtos/characterActionDto';
+import { CharacterActionDto, GatheringActionDetails, StartGatheringActionRequest } from '../../../models/Dtos/characterActionDto';
 import { Subscription } from 'rxjs';
 import { NgIf } from '@angular/common';
 
@@ -35,8 +35,14 @@ export class ProfessionCardComponent {
     return this.currentAction?.lootTableId == this.professionNodeLootTable;
   }
 
-  startCharacterAction() {
-    this.characterActionsService.startCharacterAction();
+  startGatheringAction() {
+    const gatheringActionDetails: GatheringActionDetails = {
+      lootTableId: this.professionNodeLootTable
+    }
+    const startGatheringActionRequest: StartGatheringActionRequest = {
+      gatheringActionDetails: gatheringActionDetails
+    }
+    this.characterActionsService.startGatheringAction(startGatheringActionRequest);
   }
 
   cancelCharacterAction() {

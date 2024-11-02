@@ -21,7 +21,7 @@ public abstract class Entity
     public List<Ability> Abilities { get; set; } = [];
     [NotMapped]
     public int NextBasicAttackIn = 30; // Set this to be equal to BasicAttackSpeed at combat start
-    public bool IsAlive => CombatAttributes.First(cm => cm.Key.Equals(AttributeType.Health)).Value > 0;
+    public bool IsAlive => CombatAttributes.FirstOrDefault(cm => cm.Key.Equals(AttributeType.Health)).Value > 0;
     [NotMapped]
     public List<Equipment> Equipment { get; set; } = [];
     [NotMapped]

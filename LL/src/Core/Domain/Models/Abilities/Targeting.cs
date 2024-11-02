@@ -5,6 +5,8 @@ public enum Targeting
     Self,
     SingleEnemy,
     SingleAlly,
+    TwoEnemies,
+    TwoAllies,
     SingleDeadEnemy,
     SingleDeadAlly,
     SingleRandomEnemy,

@@ -15,10 +15,19 @@ public class EntityRepository : IEntityRepository
 
     public async Task<List<Entity>> GetEntitiesByIdsAsync(List<Guid> entityIds)
     {
-        var entityTasks = entityIds.Select(id => GetEntityByIdAsync(id, CancellationToken.None)).ToList();
-        var entities = await Task.WhenAll(entityTasks);
+        var entities = await _unitOfWork.Context.Entities
+            .Include(e => e.BaseAttributes)
+            .Include(e => e.AbilityIds)
+            .Where(e => entityIds.Contains(e.Id))
+            .ToListAsync();
 
-        return entities.ToList();
+        var missingIds = entityIds.Except(entities.Select(e => e.Id)).ToList();
+        if (missingIds.Count > 0)
+        {
+            NotFoundException.ThrowIfNull(missingIds, nameof(entities), entityIds);
+        }
+
+        return entities;
     }
 
     public async Task<Entity> GetEntityByIdAsync(Guid entityId, CancellationToken cancellationToken)

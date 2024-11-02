@@ -10,6 +10,7 @@ using Services.LL.Interfaces;
 using Services.LL.Inventories;
 using Services.LL.Loots;
 using Services.LL.LootTables;
+using Services.LL.Regions;
 using Services.LL.Users;
 
 namespace Services.LL;
@@ -30,6 +31,7 @@ public static class DependencyInjection
         services.AddScoped<ILootService, LootServices>();
         services.AddScoped<ILootTableService, LootTableService>();
         services.AddScoped<IInventoryService, InventoryService>();
+        services.AddScoped<IRegionService, RegionService>();
 
         //services.AddScoped<ICombatManager, CombatManager>();
         //services.AddScoped<ICombatService, CombatService>();
