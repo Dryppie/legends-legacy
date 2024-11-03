@@ -187,17 +187,17 @@ function getWorldSidebar(): Tab[] {
             { icon: 'path/to/coin-icon.png', amount: 1 },
           ],
         },
-        {
-          id: '2',
-          route: 'world',
-          icon: 'path/to/quest-icon.png',
-          title: 'Regnia',
-          description: 'The Regnia Region',
-          rewards: [
-            { icon: 'path/to/fire-icon.png', amount: 2 },
-            { icon: 'path/to/coin-icon.png', amount: 1 },
-          ],
-        },
+        // {
+        //   id: '2',
+        //   route: 'world',
+        //   icon: 'path/to/quest-icon.png',
+        //   title: 'Regnia',
+        //   description: 'The Regnia Region',
+        //   rewards: [
+        //     { icon: 'path/to/fire-icon.png', amount: 2 },
+        //     { icon: 'path/to/coin-icon.png', amount: 1 },
+        //   ],
+        // },
       ],
     },
   ];
