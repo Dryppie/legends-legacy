@@ -104,31 +104,6 @@
       <div *ngIf="validatePassword()" class="mt-1 text-sm text-[#D72E34]">
         Incorrect Password format
       </div>
-
-      <div class="mt-2 flex items-center justify-between">
-        <div class="flex items-center">
-          <input
-            id="remember_me"
-            type="checkbox"
-            class="form-checkbox h-4 w-4 accent-blood-primary transition duration-150 ease-in-out"
-          />
-          <label
-            for="remember_me"
-            class="ml-2 block text-sm leading-5 text-ancient-secondary"
-          >
-            Remember me
-          </label>
-        </div>
-
-        <div class="text-sm leading-5">
-          <button
-            href="#"
-            class="font-medium text-ancient-secondary hover:text-ancient-primary focus:underline focus:outline-none"
-          >
-            Forgot password?
-          </button>
-        </div>
-      </div>
       <div *ngIf="loginError" class="mt-4">
         <span class="text-blood-primary"
           >Registration failed. Please try again.</span

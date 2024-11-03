@@ -16,6 +16,7 @@ import { emailValidator } from '../../../../shared/validators/email-validator';
 import { passwordValidator } from '../../../../shared/validators/password-validator';
 import { passwordMatchValidator } from '../../../../shared/validators/password-match-validator';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-signup',
@@ -36,17 +37,17 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
 export class SignupComponent {
   registerForm = new FormGroup(
     {
-      username: new FormControl('Dryp'),
-      email: new FormControl('Dryp@hotmail.com', [
+      username: new FormControl(environment.isLocal ? 'Dryp' : ''),
+      email: new FormControl(environment.isLocal ? 'Dryp@hotmail.com' : '', [
         Validators.required,
         emailValidator(),
       ]),
-      password: new FormControl('Drypping', [
+      password: new FormControl(environment.isLocal ? 'Drypping' : '', [
         Validators.required,
         passwordValidator(),
         Validators.minLength(8),
       ]),
-      confirmPassword: new FormControl('Drypping'),
+      confirmPassword: new FormControl(environment.isLocal ? 'Drypping' : ''),
     },
     { validators: passwordMatchValidator() },
   );

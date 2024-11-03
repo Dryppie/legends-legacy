@@ -3,6 +3,7 @@ import { CharacterBadgeComponent } from '../../../shared/components/character-ba
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { NavbuttonComponent } from './navbutton/navbutton.component';
 import { NgFor, NgIf } from '@angular/common';
+import { AuthService } from '../../../core/services/auth/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -19,6 +20,10 @@ import { NgFor, NgIf } from '@angular/common';
   styleUrls: ['./navbar.component.css'], // Corrected to `styleUrls`
 })
 export class NavbarComponent {
+  logout() {
+    this.authService.logout();
+  }
+  constructor(private authService: AuthService) {}
   @Input() isScreenSmall!: boolean;
   showList = false;
   activeLabel = 'Character'; // Default active label

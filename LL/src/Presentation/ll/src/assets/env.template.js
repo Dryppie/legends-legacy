@@ -5,4 +5,5 @@
   // Environment variables
   window.env.environment = "${environment}";
   window.env.apiBaseUrl = "${apiBaseUrl}";
+  window.env.isLocal = "${isLocal}";
 })(this);

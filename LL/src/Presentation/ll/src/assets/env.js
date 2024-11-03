@@ -5,4 +5,5 @@
   // Environment variables
   window.env.environment = "dev";
   window.env.apiBaseUrl = "https://localhost:7060";
+  window.env.isLocal = true;
 })(this);

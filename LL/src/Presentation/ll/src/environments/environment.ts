@@ -3,7 +3,7 @@ export const environment = {
   environment: env.environment as 'dev' | 'test' | 'prod',
   apiBaseUrl: env.apiBaseUrl,
   production: false,
-  isLocal: true,
+  isLocal: env.isLocal,
   // apiUrl: 'https://localhost:7060/api/v1/',
   login: {
     uri: '',

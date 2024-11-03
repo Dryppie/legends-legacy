@@ -15,6 +15,7 @@ import { AuthService } from '../../../../core/services/auth/auth.service';
 import { emailValidator } from '../../../../shared/validators/email-validator';
 import { passwordValidator } from '../../../../shared/validators/password-validator';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -34,11 +35,11 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
 })
 export class LoginComponent {
   loginForm = new FormGroup({
-    email: new FormControl('admin@hotmail.com', [
+    email: new FormControl(environment.isLocal ? 'admin@hotmail.com' : '', [
       Validators.required,
       emailValidator(),
     ]),
-    password: new FormControl('Password123!', [
+    password: new FormControl(environment.isLocal ? 'Password123!' : '', [
       Validators.required,
       passwordValidator(),
       Validators.minLength(8),
