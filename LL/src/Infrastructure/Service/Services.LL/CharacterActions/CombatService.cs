@@ -25,7 +25,7 @@ public class CombatService : ICombatService
     {
         // Initialize combatants
         var playerCharacters = await GetPlayerCharactersAsync(combatAction.CharacterTeam.ToList(), cancellationToken);
-        var enemyCharacters = await GetEnemyCharactersAsync(combatAction.EnemyTeam.ToList());
+        var enemyCharacters = await GetEnemyCharactersAsync(SelectRandom(combatAction.EnemyTeam.ToList()));
 
         // Prepare entities for combat
         await PrepareEntitiesForCombat(playerCharacters.Concat(enemyCharacters));
@@ -63,6 +63,26 @@ public class CombatService : ICombatService
 
 
         return lastCombatResult;
+    }
+    private List<Guid> SelectRandom(List<Guid> enemyTeam)
+    {
+        int randomCount = GetWeightedRandom();
+        return enemyTeam.OrderBy(x => Guid.NewGuid()).Take(randomCount).ToList();
+    }
+
+    private int GetWeightedRandom()
+    {
+        Random rand = new Random();
+        int randomValue = rand.Next(0, 100);
+
+        if (randomValue < 25) // 25% chance
+            return 1;
+        else if (randomValue < 80) // 55% chance
+            return 2;
+        else if (randomValue < 95) // 15% chance
+            return 3;
+        else // 5% chance
+            return 4;
     }
 
     private List<CombatEntity> CreateCombatEntities(List<Entity> playerCharacters)

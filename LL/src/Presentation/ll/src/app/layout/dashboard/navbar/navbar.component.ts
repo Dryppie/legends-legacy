@@ -1,5 +1,4 @@
-import { Component, ElementRef, ViewChild, OnInit, Input } from '@angular/core';
-import { CharacterActionsService } from '../../../core/services/character-actions/character-actions.service';
+import { Component, Input } from '@angular/core';
 import { CharacterBadgeComponent } from '../../../shared/components/character-badge/character-badge.component';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { NavbuttonComponent } from './navbutton/navbutton.component';

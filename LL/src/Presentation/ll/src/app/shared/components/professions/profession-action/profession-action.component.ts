@@ -4,6 +4,7 @@ import { CharacterActionDto } from '../../../models/Dtos/characterActionDto';
 import { Subscription } from 'rxjs';
 import { CharacterActionsService } from '../../../../core/services/character-actions/character-actions.service';
 import { NgIf } from '@angular/common';
+import { CharacterActionType } from '../../../models/enums/CharacterActionType';
 
 @Component({
   selector: 'app-profession-action',
@@ -16,6 +17,7 @@ export class ProfessionActionComponent implements OnInit, OnDestroy {
   currentAction: CharacterActionDto | null = null;
   private subscription: Subscription = new Subscription();
   remainingTime: string = '00:00'; // Add a property to track the remaining time
+  isGatheringAction = false;
 
   constructor(private characterActionsService: CharacterActionsService) {}
 
@@ -23,6 +25,14 @@ export class ProfessionActionComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.characterActionsService.currentAction$.subscribe((action) => {
         this.currentAction = action;
+        if (
+          this.currentAction?.characterActionType ===
+          CharacterActionType.Gathering
+        ) {
+          this.isGatheringAction = true;
+        } else {
+          this.isGatheringAction = false;
+        }
       }),
     );
   }

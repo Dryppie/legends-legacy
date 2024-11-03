@@ -1,7 +1,8 @@
+import { CharacterActionType } from '../enums/CharacterActionType';
 import { CombatResultDto } from './combatResultDto';
 
 export interface CharacterActionDto {
-  characterActionType: number;
+  characterActionType: CharacterActionType;
   lootTableId: string;
   updatedAt: Date;
   combatResult?: CombatResultDto;
@@ -12,7 +13,7 @@ export interface StartCombatActionRequest {
 }
 
 export interface StartGatheringActionRequest {
-  gatheringActionDetails: GatheringActionDetails
+  gatheringActionDetails: GatheringActionDetails;
 }
 
 interface ActionDetails {

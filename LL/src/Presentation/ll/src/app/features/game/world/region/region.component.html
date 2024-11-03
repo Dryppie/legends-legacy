@@ -1,9 +1,11 @@
-<div *ngIf="!combatStarted">
+<div *ngIf="!currentAction || currentAction.characterActionType !== 0">
   <h1 class="text-primary">{{ region.name }}</h1>
   <div *ngFor="let area of region.areas">
-    <div class="text-primary">{{area.name}}</div>
+    <div class="text-primary">{{ area.name }}</div>
   </div>
   <app-button (click)="Battle()" text="BATTLE"></app-button>
 </div>
 
-<app-combat *ngIf="combatStarted"></app-combat>
+<app-combat
+  *ngIf="currentAction != null && currentAction.characterActionType === 0"
+></app-combat>

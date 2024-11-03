@@ -10,15 +10,20 @@ import {
   timer,
 } from 'rxjs';
 import { ApiService } from '../api/api.service'; // Import the shared API service
-import { CharacterActionDto, StartCombatActionRequest, StartGatheringActionRequest } from '../../../shared/models/Dtos/characterActionDto'; // Import CharacterActionDto model
+import {
+  CharacterActionDto,
+  StartCombatActionRequest,
+  StartGatheringActionRequest,
+} from '../../../shared/models/Dtos/characterActionDto'; // Import CharacterActionDto model
 import { environment } from '../../../../environments/environment';
 import { CombatService } from '../combat/combat.service';
-import { CombatResultDto } from '../../../shared/models/Dtos/combatResultDto';
+import { CharacterActionType } from '../../../shared/models/enums/CharacterActionType';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CharacterActionsService {
+  private isInitialized = false;
   private currentActionSubject = new BehaviorSubject<CharacterActionDto | null>(
     null,
   );
@@ -34,31 +39,17 @@ export class CharacterActionsService {
   }
 
   private init(): void {
-    // Initial fetch on service initialization
+    if (this.isInitialized) {
+      return; // Initialization already done
+    }
+    this.isInitialized = true;
+    // Initial fetch on app initialization
     this.getCharacterAction();
   }
 
   getCharacterAction(): void {
-    this.apiService
-      .get('CharacterActions')
-      .pipe(
-        catchError((error) => {
-          console.error('Failed to fetch character action:', error);
-          return of(null); // Continue with null to avoid breaking the stream
-        }),
-      )
-      .subscribe((action: CharacterActionDto | null) => {
-        this.setCurrentAction(action);
-        if (!action) this.stopPolling();
-
-        this.startPolling();
-
-        if (action?.characterActionType === 0) {
-          this.combatService.startCombatSimulation(
-            action.combatResult as CombatResultDto,
-          );
-        }
-      });
+    this.stopPolling();
+    this.startPolling();
   }
 
   startCombatAction(startCombatActionRequest: StartCombatActionRequest): void {
@@ -100,7 +91,7 @@ export class CharacterActionsService {
       )
       .subscribe(() => {
         this.clearCurrentAction();
-        this.stopPolling();
+        this.combatService.clearCurrentCombat();
       });
   }
 
@@ -125,7 +116,7 @@ export class CharacterActionsService {
 
           this.setCurrentAction(action);
           // if CombatAction
-          if (action.characterActionType === 0) {
+          if (action.characterActionType === CharacterActionType.Combat) {
             // Calculate the next interval based on updatedAt - now
             const updatedAt = new Date(action.updatedAt).getTime();
             const now = Date.now();
@@ -175,8 +166,8 @@ export class CharacterActionsService {
 
         this.setCurrentAction(action);
 
-        if (action?.combatResult) {
-          this.combatService.startCombatSimulation(action.combatResult);
+        if (action?.characterActionType === CharacterActionType.Combat) {
+          this.combatService.startCombatSimulation(action);
         }
       });
   }

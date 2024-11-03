@@ -4,13 +4,13 @@
     "Name": "Sneak Attack",
     "Description": "Stab the target in the back, dealing basic attack damage, and apply 30 bleed damage over 10 seconds.",
     "Type": "Active",
-    "Cooldown": 10,
-    "Cost": 10,
+    "Cooldown": 90,
+    "Cost": 12,
     "Effects": [
       {
         "Action": {
           "Type": "Damage",
-          "Amount": 2
+          "Amount": 5
         },
         "Duration": {
           "Type": "TimedDuration",
@@ -23,7 +23,7 @@
       {
         "Action": {
           "Type": "Damage",
-          "Amount": 3
+          "Amount": 1
         },
         "Duration": {
           "Type": "TimedDuration",
@@ -56,8 +56,8 @@
           "ModifierType": "Additive"
         },
         "Duration": {
-          "Type": "TimedDuration",
-          "Duration": 60
+          "Type": "IndefiniteDuraiton",
+          "Duration": 0
         },
         "Targeting": "SingleEnemy",
         "Trigger": "OnDodge",
@@ -71,13 +71,13 @@
     "Name": "Raging Cleave",
     "Description": "Swing your weapon in a wide arc, dealing damage to two enemies.",
     "Type": "Active",
-    "Cooldown": 15,
-    "Cost": 20,
+    "Cooldown": 120,
+    "Cost": 9,
     "Effects": [
       {
         "Action": {
           "Type": "Damage",
-          "Amount": 3
+          "Amount": 8
         },
         "Duration": {
           "Type": "TimedDuration",
@@ -138,7 +138,7 @@
       {
         "Action": {
           "Type": "Damage",
-          "Amount": 5
+          "Amount": 2
         },
         "Duration": {
           "Type": "TimedDuration",
@@ -161,13 +161,13 @@
     "Name": "Sniper's Strike",
     "Description": "Unleash a powerful shot with increased critical chance.",
     "Type": "Active",
-    "Cooldown": 30,
-    "Cost": 15,
+    "Cooldown": 150,
+    "Cost": 12,
     "Effects": [
       {
         "Action": {
           "Type": "Damage",
-          "Amount": 5
+          "Amount": 15
         },
         "Duration": {
           "Type": "TimedDuration",
@@ -195,7 +195,7 @@
       {
         "Action": {
           "Type": "Damage",
-          "Amount": 3
+          "Amount": 12
         },
         "Duration": {
           "Type": "TimedDuration",
@@ -230,19 +230,19 @@
         "Log": "{Actor}'s health is increased by 10% due to being Big and Tough."
       }
     ]
-  },  
+  },
   {
     "Id": "fireball_01",
     "Name": "Fireball",
     "Description": "Hurls a fireball that deals damage over time.",
     "Type": "Active",
-    "Cooldown": 10,
-    "Cost": 5,
+    "Cooldown": 120,
+    "Cost": 7,
     "Effects": [
       {
         "Action": {
           "Type": "Damage",
-          "Amount": 50
+          "Amount": 22
         },
         "Duration": {
           "Type": "TimedDuration",
@@ -255,11 +255,11 @@
       {
         "Action": {
           "Type": "Damage",
-          "Amount": 20
+          "Amount": 8
         },
         "Duration": {
           "Type": "TimedDuration",
-          "Duration": 30
+          "Duration": 40
         },
         "Interval": {
           "Type": "Interval",
@@ -277,21 +277,21 @@
     "Name": "Heal",
     "Description": "Restores health to the target every 4 second for 20 seconds.",
     "Type": "Active",
-    "Cooldown": 20,
-    "Cost": 5,
+    "Cooldown": 120,
+    "Cost": 6,
     "Effects": [
       {
         "Action": {
           "Type": "Healing",
-          "Amount": 20
+          "Amount": 19
         },
         "Duration": {
           "Type": "TimedDuration",
-          "Duration": 200
+          "Duration": 120
         },
         "Interval": {
           "Type": "Interval",
-          "Interval": 20
+          "Interval": 30
         },
         "Targeting": "Self",
         "Trigger": "OnTickInterval",

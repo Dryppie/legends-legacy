@@ -3,7 +3,6 @@ import { DefaultHeaderComponent } from '../default-header/default-header.compone
 import { CombatAvatarComponent } from './combat-avatar/combat-avatar.component';
 import { CombatOverviewComponent } from './combat-overview/combat-overview.component';
 import { CombatService } from '../../../core/services/combat/combat.service';
-import { CharacterActionsService } from '../../../core/services/character-actions/character-actions.service';
 import { CombatEvent, EventType } from '../../models/Dtos/combatEventDto';
 import { NgFor, NgIf, NgStyle } from '@angular/common';
 import {
@@ -11,6 +10,8 @@ import {
   CombatResultDto,
 } from '../../models/Dtos/combatResultDto';
 import { Subscription } from 'rxjs';
+import { CountdownComponent } from '../countdown/countdown.component';
+import { CharacterActionsService } from '../../../core/services/character-actions/character-actions.service';
 
 @Component({
   selector: 'app-combat',
@@ -22,59 +23,83 @@ import { Subscription } from 'rxjs';
     NgFor,
     NgIf,
     NgStyle,
+    CountdownComponent,
   ],
   templateUrl: './combat.component.html',
   styleUrl: './combat.component.css',
 })
 export class CombatComponent implements OnInit, OnDestroy {
+  StopCombatButtonText: string = 'Stop Combat';
+  stopCombat() {
+    this.characterActionService.stopCharacterAction();
+    this.combatEnded();
+    this.subscriptions.unsubscribe();
+  }
+  combatEnded() {
+    this.combatEvents = [];
+    this.resetTeams();
+  }
+
   @Input() combatEvents: CombatEvent[] = [];
   playerCharacters: CombatEntityDto[] = [];
   enemyCharacters: CombatEntityDto[] = [];
-  private subscriptions: Subscription = new Subscription();
+  subscriptions: Subscription = new Subscription();
+  nextCombatIn: Date | null = null;
+  displayCombat = false;
 
   constructor(
     private combatService: CombatService,
-    private characterAction: CharacterActionsService,
+    private characterActionService: CharacterActionsService,
   ) {}
 
   ngOnInit(): void {
-    this.characterAction.getCharacterAction();
-
-    const combatResultSub = this.combatService
-      .getCombatResult()
-      .subscribe((combatResult) => {
+    const combatResultSub = this.combatService.combatResult$.subscribe(
+      (combatResult) => {
+        this.displayCombat = true;
         this.handleCombatSetup(combatResult);
-      });
+      },
+    );
     this.subscriptions.add(combatResultSub);
 
-    const combatEventsSub = this.combatService
-      .getCombatEvents()
-      .subscribe((event) => {
+    const combatEventsSub = this.combatService.combatEvents$.subscribe(
+      (event) => {
         this.handleCombatEvent(event);
-      });
+      },
+    );
     this.subscriptions.add(combatEventsSub);
 
-    const combatOutcomeSub = this.combatService
-      .getCombatOutcome()
-      .subscribe((outcome) => {
+    const combatOutcomeSub = this.combatService.combatOutcome$.subscribe(
+      (outcome) => {
+        // Add some kind of animation during this this. Then after one second, reset the teams and empty combat events
         setTimeout(() => {
-          this.combatEvents = [];
-          this.resetTeams();
+          this.combatEnded();
         }, 1000);
-      });
+      },
+    );
     this.subscriptions.add(combatOutcomeSub);
+
+    const nextCombatSub = this.combatService.nextCombat$.subscribe((time) => {
+      this.nextCombatIn = time;
+      if (this.combatEvents.length === 0) {
+        this.displayCombat = false;
+      }
+    });
+    this.subscriptions.add(nextCombatSub);
   }
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
   }
 
-  handleCombatSetup(combatResult: CombatResultDto) {
+  handleCombatSetup(combatResult: CombatResultDto | null) {
+    if (!combatResult) return;
     this.playerCharacters = combatResult.playerTeam;
     this.enemyCharacters = combatResult.enemyTeam;
   }
 
-  private handleCombatEvent(event: CombatEvent): void {
+  private handleCombatEvent(event: CombatEvent | null): void {
+    if (!event) return;
+
     switch (event.eventType) {
       case EventType.AbilityUse:
         this.handleAbilityUseEvent(event);
