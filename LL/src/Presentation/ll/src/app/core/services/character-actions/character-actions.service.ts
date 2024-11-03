@@ -81,6 +81,8 @@ export class CharacterActionsService {
   }
 
   stopCharacterAction(): void {
+    this.clearCurrentAction();
+    this.combatService.clearCurrentCombat();
     this.apiService
       .delete('CharacterActions')
       .pipe(
@@ -89,10 +91,7 @@ export class CharacterActionsService {
           return of(null);
         }),
       )
-      .subscribe(() => {
-        this.clearCurrentAction();
-        this.combatService.clearCurrentCombat();
-      });
+      .subscribe(() => {});
   }
 
   private setCurrentAction(action: CharacterActionDto | null): void {

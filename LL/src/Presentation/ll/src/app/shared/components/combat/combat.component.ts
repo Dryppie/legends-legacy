@@ -32,6 +32,7 @@ export class CombatComponent implements OnInit, OnDestroy {
   StopCombatButtonText: string = 'Stop Combat';
   stopCombat() {
     this.characterActionService.stopCharacterAction();
+    this.nextCombatIn = null;
     this.combatEnded();
     this.subscriptions.unsubscribe();
   }
