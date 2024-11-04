@@ -10,7 +10,7 @@ export const CHARACTER_ROUTES: Routes = [
     children: [
       {
         path: '',
-        redirectTo: '',
+        redirectTo: 'inventory',
         pathMatch: 'full',
       },
       {

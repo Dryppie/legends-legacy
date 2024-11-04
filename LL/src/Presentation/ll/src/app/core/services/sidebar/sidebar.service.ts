@@ -52,17 +52,17 @@ function getCharacterSidebar(): Tab[] {
     {
       label: 'Daily',
       items: [
-        {
-          id: 'inventory',
-          route: 'character',
-          icon: 'path/to/quest-icon.png',
-          title: 'Character Overview',
-          description: 'Statistics and Equipment',
-          rewards: [
-            { icon: 'path/to/fire-icon.png', amount: 2 },
-            { icon: 'path/to/coin-icon.png', amount: 1 },
-          ],
-        },
+        // {
+        //   id: 'inventory',
+        //   route: 'character',
+        //   icon: 'path/to/quest-icon.png',
+        //   title: 'Character Overview',
+        //   description: 'Statistics and Equipment',
+        //   rewards: [
+        //     { icon: 'path/to/fire-icon.png', amount: 2 },
+        //     { icon: 'path/to/coin-icon.png', amount: 1 },
+        //   ],
+        // },
         {
           id: 'inventory',
           route: 'character',
@@ -74,46 +74,46 @@ function getCharacterSidebar(): Tab[] {
             { icon: 'path/to/coin-icon.png', amount: 1 },
           ],
         },
-        {
-          id: '3',
-          route: 'character/essences',
-          icon: 'path/to/quest-icon.png',
-          title: 'Essences',
-          description: 'More details about the quests',
-          rewards: [
-            { icon: 'path/to/fire-icon.png', amount: 2 },
-            { icon: 'path/to/coin-icon.png', amount: 1 },
-          ],
-        },
-        {
-          id: '4',
-          route: 'character/achievements',
-          icon: 'path/to/quest-icon.png',
-          title: 'Achievements & Titles',
-          description: 'More details about the quests',
-          rewards: [
-            { icon: 'path/to/fire-icon.png', amount: 2 },
-            { icon: 'path/to/coin-icon.png', amount: 1 },
-          ],
-        },
+        // {
+        //   id: '3',
+        //   route: 'character/essences',
+        //   icon: 'path/to/quest-icon.png',
+        //   title: 'Essences',
+        //   description: 'More details about the quests',
+        //   rewards: [
+        //     { icon: 'path/to/fire-icon.png', amount: 2 },
+        //     { icon: 'path/to/coin-icon.png', amount: 1 },
+        //   ],
+        // },
+        // {
+        //   id: '4',
+        //   route: 'character/achievements',
+        //   icon: 'path/to/quest-icon.png',
+        //   title: 'Achievements & Titles',
+        //   description: 'More details about the quests',
+        //   rewards: [
+        //     { icon: 'path/to/fire-icon.png', amount: 2 },
+        //     { icon: 'path/to/coin-icon.png', amount: 1 },
+        //   ],
+        // },
       ],
     },
-    {
-      label: 'Weekly',
-      items: [
-        {
-          id: '1',
-          route: 'quest/1',
-          icon: 'path/to/quest-icon.png',
-          title: 'Wolf Hunting',
-          description: 'More details about the quests',
-          rewards: [
-            { icon: 'path/to/fire-icon.png', amount: 3 },
-            { icon: 'path/to/coin-icon.png', amount: 2 },
-          ],
-        },
-      ],
-    },
+    // {
+    //   label: 'Weekly',
+    //   items: [
+    //     {
+    //       id: '1',
+    //       route: 'quest/1',
+    //       icon: 'path/to/quest-icon.png',
+    //       title: 'Wolf Hunting',
+    //       description: 'More details about the quests',
+    //       rewards: [
+    //         { icon: 'path/to/fire-icon.png', amount: 3 },
+    //         { icon: 'path/to/coin-icon.png', amount: 2 },
+    //       ],
+    //     },
+    //   ],
+    // },
   ];
 }
 
@@ -122,39 +122,39 @@ function getProfessionSidebar(): Tab[] {
     {
       label: 'Daily',
       items: [
-        {
-          id: 'fishing',
-          route: 'professions',
-          icon: 'path/to/dynamic-quest-icon.png',
-          title: 'Fishing',
-          description: 'LV 0/100',
-          rewards: [
-            { icon: 'path/to/fire-icon.png', amount: 5 },
-            { icon: 'path/to/coin-icon.png', amount: 3 },
-          ],
-        },
-        {
-          id: '2',
-          route: 'professions/foraging',
-          icon: 'path/to/dynamic-quest-icon.png',
-          title: 'Foraging',
-          description: '1',
-          rewards: [
-            { icon: 'path/to/fire-icon.png', amount: 4 },
-            { icon: 'path/to/coin-icon.png', amount: 2 },
-          ],
-        },
-        {
-          id: '3',
-          route: 'professions/mining',
-          icon: 'path/to/dynamic-quest-icon.png',
-          title: 'Mining',
-          description: 'LV 0/100',
-          rewards: [
-            { icon: 'path/to/fire-icon.png', amount: 5 },
-            { icon: 'path/to/coin-icon.png', amount: 3 },
-          ],
-        },
+        // {
+        //   id: 'fishing',
+        //   route: 'professions',
+        //   icon: 'path/to/dynamic-quest-icon.png',
+        //   title: 'Fishing',
+        //   description: 'LV 0/100',
+        //   rewards: [
+        //     { icon: 'path/to/fire-icon.png', amount: 5 },
+        //     { icon: 'path/to/coin-icon.png', amount: 3 },
+        //   ],
+        // },
+        // {
+        //   id: '2',
+        //   route: 'professions/foraging',
+        //   icon: 'path/to/dynamic-quest-icon.png',
+        //   title: 'Foraging',
+        //   description: '1',
+        //   rewards: [
+        //     { icon: 'path/to/fire-icon.png', amount: 4 },
+        //     { icon: 'path/to/coin-icon.png', amount: 2 },
+        //   ],
+        // },
+        // {
+        //   id: '3',
+        //   route: 'professions/mining',
+        //   icon: 'path/to/dynamic-quest-icon.png',
+        //   title: 'Mining',
+        //   description: 'LV 0/100',
+        //   rewards: [
+        //     { icon: 'path/to/fire-icon.png', amount: 5 },
+        //     { icon: 'path/to/coin-icon.png', amount: 3 },
+        //   ],
+        // },
         {
           id: 'woodcutting',
           route: 'professions',

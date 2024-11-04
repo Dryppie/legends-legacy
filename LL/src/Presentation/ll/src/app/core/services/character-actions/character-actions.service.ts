@@ -18,6 +18,7 @@ import {
 import { environment } from '../../../../environments/environment';
 import { CombatService } from '../combat/combat.service';
 import { CharacterActionType } from '../../../shared/models/enums/CharacterActionType';
+import { NamedStorageKeys } from '../../common/enums/named-storage-keys';
 
 @Injectable({
   providedIn: 'root',
@@ -53,6 +54,7 @@ export class CharacterActionsService {
   }
 
   startCombatAction(startCombatActionRequest: StartCombatActionRequest): void {
+    this.setCAT(CharacterActionType.Gathering);
     this.apiService
       .post('CharacterActions/StartCombat', startCombatActionRequest)
       .pipe(
@@ -67,10 +69,12 @@ export class CharacterActionsService {
   }
 
   startGatheringAction(gatheringAction: StartGatheringActionRequest): void {
+    this.setCAT(CharacterActionType.Combat);
     this.apiService
       .post('CharacterActions/StartGathering', gatheringAction)
       .pipe(
         catchError((error) => {
+          this.clearCAT();
           console.error('Failed to start character action:', error);
           return of(null);
         }),
@@ -179,7 +183,23 @@ export class CharacterActionsService {
   }
 
   clearCurrentAction(): void {
+    this.clearCAT();
     this.setCurrentAction(null);
     this.stopPolling();
+  }
+
+  setCAT(characterActionType: CharacterActionType): void {
+    localStorage.setItem(
+      NamedStorageKeys.CharacterActionType,
+      JSON.stringify(characterActionType),
+    );
+  }
+
+  getCAT(): string | null {
+    return localStorage.getItem(NamedStorageKeys.CharacterActionType);
+  }
+
+  clearCAT(): void {
+    localStorage.removeItem(NamedStorageKeys.CharacterActionType);
   }
 }

@@ -31,8 +31,8 @@ export class NavbarComponent {
     { link: '/game/character', label: 'Character' },
     { link: '/game/professions', label: 'Professions' },
     { link: '/game/world', label: 'World' },
-    { link: '#', label: 'Team' },
-    { link: '#', label: 'Town' },
+    // { link: '#', label: 'Team' },
+    // { link: '#', label: 'Town' },
   ];
 
   toggleList() {
