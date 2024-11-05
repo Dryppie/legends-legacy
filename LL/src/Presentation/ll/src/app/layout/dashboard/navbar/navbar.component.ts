@@ -41,7 +41,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.subscription.add(
       this.authService.currentCharacter$.subscribe((character) => {
-        console.log(character);
         this.currentCharacter = character;
       }),
     );
