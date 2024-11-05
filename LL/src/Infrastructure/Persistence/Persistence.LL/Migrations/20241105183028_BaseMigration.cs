@@ -33,6 +33,7 @@ namespace Persistence.LL.Migrations
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     BannedUntil = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    IsGuest = table.Column<bool>(type: "bit", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -454,24 +455,24 @@ namespace Persistence.LL.Migrations
                 columns: new[] { "Id", "ItemType", "Name", "Rarity" },
                 values: new object[,]
                 {
-                    { new Guid("4669c3fb-fcf7-42f8-a193-16e9c2bc9687"), 0, "Sword", 0 },
-                    { new Guid("6b0a13ae-1c72-47eb-9ff9-0a50fa03d46d"), 0, "Shield", 0 },
-                    { new Guid("d90d8dea-d432-4112-a07e-c360fb295581"), 0, "Potion", 0 }
+                    { new Guid("39103c23-4197-4780-9c35-79ecaf3b3040"), 0, "Sword", 0 },
+                    { new Guid("593153f4-6fd8-4498-ab1f-cbf6a876d342"), 0, "Potion", 0 },
+                    { new Guid("93ac0a96-e6fe-43c0-8e0e-060f4fde8dac"), 0, "Shield", 0 }
                 });
 
             migrationBuilder.InsertData(
                 table: "LootTables",
                 column: "Id",
-                value: new Guid("62e05f14-71c5-4769-bff6-bccd1a52fe1e"));
+                value: new Guid("cc46a63c-c64b-4ed4-bd73-bbb8bb659456"));
 
             migrationBuilder.InsertData(
                 table: "ItemLootTable",
                 columns: new[] { "ItemsId", "LootTablesId" },
                 values: new object[,]
                 {
-                    { new Guid("4669c3fb-fcf7-42f8-a193-16e9c2bc9687"), new Guid("62e05f14-71c5-4769-bff6-bccd1a52fe1e") },
-                    { new Guid("6b0a13ae-1c72-47eb-9ff9-0a50fa03d46d"), new Guid("62e05f14-71c5-4769-bff6-bccd1a52fe1e") },
-                    { new Guid("d90d8dea-d432-4112-a07e-c360fb295581"), new Guid("62e05f14-71c5-4769-bff6-bccd1a52fe1e") }
+                    { new Guid("39103c23-4197-4780-9c35-79ecaf3b3040"), new Guid("cc46a63c-c64b-4ed4-bd73-bbb8bb659456") },
+                    { new Guid("593153f4-6fd8-4498-ab1f-cbf6a876d342"), new Guid("cc46a63c-c64b-4ed4-bd73-bbb8bb659456") },
+                    { new Guid("93ac0a96-e6fe-43c0-8e0e-060f4fde8dac"), new Guid("cc46a63c-c64b-4ed4-bd73-bbb8bb659456") }
                 });
 
             migrationBuilder.CreateIndex(

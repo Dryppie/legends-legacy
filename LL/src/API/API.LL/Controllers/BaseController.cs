@@ -24,7 +24,7 @@ public abstract class BaseController : ControllerBase
     /// </summary>
     protected ISender Mediator => _mediator ??= HttpContext.RequestServices.GetService<ISender>() ?? throw new SystemException(nameof(_mediator));
 
-    protected Guid CurrentUserCrmId => Guid.Parse(User.FindFirstValue(ClaimTypes.UserData)!);
+    protected Guid CurrentUserId => Guid.Parse(User.FindFirstValue(ClaimTypes.UserData)!);
     protected Guid CharacterGuid => Guid.Parse(User.FindFirstValue("CharacterId")!);
     protected string CurrentUserName => User.FindFirstValue(ClaimTypes.Name)!;
 

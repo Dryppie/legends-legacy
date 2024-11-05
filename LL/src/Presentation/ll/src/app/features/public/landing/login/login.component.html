@@ -105,13 +105,22 @@
       </button>
     </form>
 
-    <div class="mt-4 flex justify-center">
+    <!-- <div class="mt-4 flex justify-center">
       <button
         type="button"
         class="hover:bg-gray-200 focus:ring-gray-500 flex items-center rounded-lg bg-white px-4 py-2 text-black shadow-md focus:outline-none focus:ring-2 focus:ring-opacity-75"
       >
         <img src="/assets/google-logo.png" alt="Google Logo" class="mr-2 h-5" />
         Continue with Google
+      </button>
+    </div> -->
+    <div class="mt-4 flex justify-center">
+      <button
+        (click)="loginAsGuest()"
+        type="button"
+        class="hover:bg-gray-200 focus:ring-gray-500 flex items-center rounded-lg bg-white px-4 py-2 text-black shadow-md focus:outline-none focus:ring-2 focus:ring-opacity-75"
+      >
+        Login as Guest
       </button>
     </div>
   </div>

@@ -1,12 +1,15 @@
 ﻿using API.LL.Controllers;
 using Application.UseCases.Authorization.Commands.CreateNewTokens;
 using Application.UseCases.Authorization.Queries.ValidateToken;
+using Application.UseCases.Users.Commands.ConvertGuestToUser;
+using Application.UseCases.Users.Commands.GuestLogin;
 using Application.UseCases.Users.Commands.Register;
 using Application.UseCases.Users.Queries.Login;
 using Common.Authorization.Security;
 using Common.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 [Authorize]
 public class AuthController : BaseController
@@ -28,6 +31,39 @@ public class AuthController : BaseController
         Response.Cookies.Append(cookies.ToArray(), GetCookieOptions());
 
         return Ok(cookies);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("loginAsGuest")]
+    public async Task<ActionResult<Tokens>> LoginAsGuest()
+    {
+        var tokens = await Mediator.Send(new GuestLoginCommand());
+        var cookies = new List<KeyValuePair<string, string>>
+        {
+            new KeyValuePair<string, string>("AccessToken", tokens.AccessToken),
+            new KeyValuePair<string, string>("RefreshToken", tokens.RefreshToken)
+        };
+
+        Response.Cookies.Append(cookies.ToArray(), GetCookieOptions());
+
+        return Ok(cookies);
+    }
+
+    [Authorize] // User must be authenticated
+    [HttpPost("convertGuestToUser")]
+    public async Task<ActionResult> ConvertGuestToUser([FromBody] UserRegisterDto input)
+    {
+        var userId = User.FindFirst(ClaimTypes.UserData)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+
+        var result = await Mediator.Send(new ConvertGuestToUserCommand(userId, input.Username, input.Email, input.Password));
+
+        if (result)
+            return Ok();
+        else
+            return BadRequest();
     }
 
     [AllowAnonymous]

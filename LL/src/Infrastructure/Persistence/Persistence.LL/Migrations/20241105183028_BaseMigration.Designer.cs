@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20241102155851_BaseMigration")]
+    [Migration("20241105183028_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -183,21 +183,21 @@ namespace Persistence.LL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("4669c3fb-fcf7-42f8-a193-16e9c2bc9687"),
+                            Id = new Guid("39103c23-4197-4780-9c35-79ecaf3b3040"),
                             ItemType = 0,
                             Name = "Sword",
                             Rarity = 0
                         },
                         new
                         {
-                            Id = new Guid("6b0a13ae-1c72-47eb-9ff9-0a50fa03d46d"),
+                            Id = new Guid("93ac0a96-e6fe-43c0-8e0e-060f4fde8dac"),
                             ItemType = 0,
                             Name = "Shield",
                             Rarity = 0
                         },
                         new
                         {
-                            Id = new Guid("d90d8dea-d432-4112-a07e-c360fb295581"),
+                            Id = new Guid("593153f4-6fd8-4498-ab1f-cbf6a876d342"),
                             ItemType = 0,
                             Name = "Potion",
                             Rarity = 0
@@ -217,7 +217,7 @@ namespace Persistence.LL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("62e05f14-71c5-4769-bff6-bccd1a52fe1e")
+                            Id = new Guid("cc46a63c-c64b-4ed4-bd73-bbb8bb659456")
                         });
                 });
 
@@ -280,6 +280,9 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsGuest")
                         .HasColumnType("bit");
 
                     b.Property<bool>("LockoutEnabled")
@@ -407,18 +410,18 @@ namespace Persistence.LL.Migrations
                     b.HasData(
                         new
                         {
-                            ItemsId = new Guid("4669c3fb-fcf7-42f8-a193-16e9c2bc9687"),
-                            LootTablesId = new Guid("62e05f14-71c5-4769-bff6-bccd1a52fe1e")
+                            ItemsId = new Guid("39103c23-4197-4780-9c35-79ecaf3b3040"),
+                            LootTablesId = new Guid("cc46a63c-c64b-4ed4-bd73-bbb8bb659456")
                         },
                         new
                         {
-                            ItemsId = new Guid("6b0a13ae-1c72-47eb-9ff9-0a50fa03d46d"),
-                            LootTablesId = new Guid("62e05f14-71c5-4769-bff6-bccd1a52fe1e")
+                            ItemsId = new Guid("93ac0a96-e6fe-43c0-8e0e-060f4fde8dac"),
+                            LootTablesId = new Guid("cc46a63c-c64b-4ed4-bd73-bbb8bb659456")
                         },
                         new
                         {
-                            ItemsId = new Guid("d90d8dea-d432-4112-a07e-c360fb295581"),
-                            LootTablesId = new Guid("62e05f14-71c5-4769-bff6-bccd1a52fe1e")
+                            ItemsId = new Guid("593153f4-6fd8-4498-ab1f-cbf6a876d342"),
+                            LootTablesId = new Guid("cc46a63c-c64b-4ed4-bd73-bbb8bb659456")
                         });
                 });
 

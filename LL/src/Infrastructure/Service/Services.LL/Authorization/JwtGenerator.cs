@@ -84,7 +84,8 @@ public class JwtGenerator : IJwtGenerator
         {
             new(ClaimTypes.UserData, info.Id),
             new(ClaimTypes.Name, info.Name),
-            new("CharacterId", info.CharacterId)
+            new("CharacterId", info.CharacterId),
+            new("IsPlayer", info.IsPlayer.ToString(), ClaimValueTypes.Boolean)
         };
     }
 

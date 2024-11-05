@@ -17,4 +17,10 @@ public class UserRepository : IUserRepository
     {
         return _unitOfWork.Context.Users.Any(x => x.Email == email);
     }
+
+    // inheritdocs />
+    public bool DoesGuestExist(string userId)
+    {
+        return _unitOfWork.Context.Users.Any(x => x.Id == userId);
+    }
 }

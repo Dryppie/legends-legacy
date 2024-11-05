@@ -83,4 +83,8 @@ export class LoginComponent {
     const control = this.loginForm.get(field);
     return control?.invalid && (control.dirty || control.touched);
   }
+
+  loginAsGuest() {
+    this.authService.loginAsGuest();
+  }
 }

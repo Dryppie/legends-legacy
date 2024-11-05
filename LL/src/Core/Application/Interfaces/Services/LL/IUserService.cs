@@ -3,6 +3,14 @@
 namespace Application.Interfaces.Services.LL;
 public interface IUserService
 {
+
+    /// <summary>
+    /// Convert a guest into a user account
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    Task<AuthInfo> ConvertGuestToUser(string userId, string username, string email, string password);
+
     /// <summary>
     /// Login with the given Email and Password
     /// </summary>
@@ -19,4 +27,10 @@ public interface IUserService
     /// <param name="password"></param>
     /// <returns></returns>
     public Task<AuthInfo> Register(string username, string email, string password);
+
+    /// <summary>
+    /// Register as a guest user
+    /// </summary>
+    /// <returns></returns>
+    public Task<AuthInfo> RegisterGuest();
 }

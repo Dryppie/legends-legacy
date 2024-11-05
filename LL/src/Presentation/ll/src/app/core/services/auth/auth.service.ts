@@ -43,9 +43,16 @@ export class AuthService {
     private toastService: ToastService,
   ) {}
 
-  setAuth(currentCharacter: CharacterDto): void {
-    this.currentCharacterSubject.next(currentCharacter);
-    this.isAuthenticatedSubject.next(true);
+  setAuth(): void {
+    this.getLoggedInCharacter().subscribe({
+      next: (character) => {
+        this.currentCharacterSubject.next(character);
+        this.isAuthenticatedSubject.next(true);
+      },
+      error: () => {
+        this.isAuthenticatedSubject.next(false); // Set as not authenticated in case of an error
+      },
+    });
   }
 
   purgeAuth(): Observable<void> {
@@ -72,7 +79,7 @@ export class AuthService {
     };
     return this.apiService.post('auth/login', userCredentials).pipe(
       tap((user) => {
-        this.setAuth(user);
+        this.setAuth();
         this.setToken(user);
         this.toastService.showToast(
           'Action completed successfully!',
@@ -115,14 +122,27 @@ export class AuthService {
     this.apiService
       .post('auth/logout')
       .pipe(take(1))
-      .subscribe(() => {
-        this.purgeAuth();
-        this.router.navigateByUrl(`/`);
+      .subscribe({
+        next: () => {
+          this.purgeAuth();
+          this.router.navigateByUrl('/');
+        },
+        error: (error) => {
+          console.log('logout failed', error);
+        },
       });
   }
 
-  getCurrentCharacter(): CharacterDto | null {
-    return this.currentCharacterSubject.value;
+  getLoggedInCharacter(): Observable<CharacterDto> {
+    return this.apiService.get('character').pipe(
+      tap((character) => {
+        return character;
+      }),
+
+      catchError(() => {
+        return throwError(() => new Error('Failed to register'));
+      }),
+    );
   }
 
   // Verify the user has a valid token pair, by requesting details about the user
@@ -181,8 +201,48 @@ export class AuthService {
     );
   }
 
+  loginAsGuest() {
+    this.apiService.post('auth/loginAsGuest').subscribe({
+      next: (user) => {
+        this.setToken(user);
+        this.setAuth();
+        this.router.navigateByUrl('/game');
+      },
+      error: (error) => {
+        throw new Error('Failed to login as guest');
+      },
+    });
+  }
+
+  convertGuestToUser(
+    username: string,
+    email: string,
+    password: string,
+  ): Observable<any> {
+    const userCredentials = {
+      Username: username,
+      Email: email,
+      Password: password,
+    };
+    return this.apiService
+      .post('auth/convertGuestToUser', userCredentials)
+      .pipe(
+        tap((user) => {
+          this.setToken(user);
+          // Update local state if necessary
+          this.toastService.showToast(
+            'Account created successfully!',
+            'success',
+          );
+        }),
+        catchError(() => {
+          return throwError(() => new Error('Failed to convert guest to user'));
+        }),
+      );
+  }
+
   private handleAuthSuccess(res: any): Observable<CharacterDto> {
-    this.setAuth(res as CharacterDto);
+    this.setAuth();
     return of(res as CharacterDto); // Ensure the return type is Observable<CharacterDto>
   }
 
