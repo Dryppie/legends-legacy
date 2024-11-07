@@ -17,7 +17,6 @@ import { CharacterActionsService } from '../../../core/services/character-action
   selector: 'app-combat',
   standalone: true,
   imports: [
-    DefaultHeaderComponent,
     CombatAvatarComponent,
     CombatOverviewComponent,
     NgFor,
@@ -29,23 +28,13 @@ import { CharacterActionsService } from '../../../core/services/character-action
   styleUrl: './combat.component.css',
 })
 export class CombatComponent implements OnInit, OnDestroy {
-  StopCombatButtonText: string = 'Stop Combat';
-  stopCombat() {
-    this.characterActionService.stopCharacterAction();
-    this.nextCombatIn = null;
-    this.combatEnded();
-    this.subscriptions.unsubscribe();
-  }
-  combatEnded() {
-    this.combatEvents = [];
-    this.resetTeams();
-  }
-
   @Input() combatEvents: CombatEvent[] = [];
+  StopCombatButtonText: string = 'Stop Combat';
   playerCharacters: CombatEntityDto[] = [];
   enemyCharacters: CombatEntityDto[] = [];
   subscriptions: Subscription = new Subscription();
   nextCombatIn: Date | null = null;
+  isCombatActive = false;
   displayCombat = false;
 
   constructor(
@@ -54,10 +43,20 @@ export class CombatComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    const nextCombatSub = this.combatService.nextCombat$.subscribe((time) => {
+      if (time) {
+        this.nextCombatIn = time;
+        this.displayCombat = false;
+      }
+    });
+    this.subscriptions.add(nextCombatSub);
+
     const combatResultSub = this.combatService.combatResult$.subscribe(
       (combatResult) => {
-        this.displayCombat = true;
-        this.handleCombatSetup(combatResult);
+        if (combatResult) {
+          this.handleCombatSetup(combatResult);
+          this.displayCombat = true;
+        }
       },
     );
     this.subscriptions.add(combatResultSub);
@@ -71,25 +70,29 @@ export class CombatComponent implements OnInit, OnDestroy {
 
     const combatOutcomeSub = this.combatService.combatOutcome$.subscribe(
       (outcome) => {
-        // Add some kind of animation during this this. Then after one second, reset the teams and empty combat events
-        setTimeout(() => {
-          this.combatEnded();
-        }, 1000);
+        if (outcome !== null) {
+          // Add some kind of animation during this this. Then after one second, reset the teams and empty combat events
+          setTimeout(() => {
+            this.combatEnded();
+          }, 1000);
+        }
       },
     );
     this.subscriptions.add(combatOutcomeSub);
-
-    const nextCombatSub = this.combatService.nextCombat$.subscribe((time) => {
-      this.nextCombatIn = time;
-      if (this.combatEvents.length === 0) {
-        this.displayCombat = false;
-      }
-    });
-    this.subscriptions.add(nextCombatSub);
   }
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
+  }
+
+  stopCombat() {
+    this.characterActionService.stopCharacterAction();
+    this.combatEnded();
+    this.subscriptions.unsubscribe();
+  }
+  combatEnded() {
+    this.combatEvents = [];
+    this.resetTeams();
   }
 
   handleCombatSetup(combatResult: CombatResultDto | null) {

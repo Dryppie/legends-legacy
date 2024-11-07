@@ -4,7 +4,7 @@ import { Component, Input } from '@angular/core';
 @Component({
   selector: 'app-character-badge',
   standalone: true,
-  imports: [NgStyle],
+  imports: [],
   templateUrl: './character-badge.component.html',
   styleUrl: './character-badge.component.css',
 })
