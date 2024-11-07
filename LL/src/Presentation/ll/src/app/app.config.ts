@@ -13,10 +13,11 @@ import {
 } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { AuthService } from './core/services/auth/auth.service';
-import { firstValueFrom } from 'rxjs';
+import { catchError, firstValueFrom, of } from 'rxjs';
 
 export function initializeApp(authService: AuthService) {
-  return () => firstValueFrom(authService.checkAuth()); // Convert to Promise if needed
+  return () =>
+    firstValueFrom(authService.checkAuth()).catch(() => Promise.resolve());
 }
 
 export const appConfig: ApplicationConfig = {
@@ -24,7 +25,6 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideAnimations(),
     provideHttpClient(withInterceptorsFromDi()),
-    provideRouter(routes),
     provideAnimationsAsync(),
     AuthService,
     {
@@ -33,5 +33,6 @@ export const appConfig: ApplicationConfig = {
       deps: [AuthService],
       multi: true,
     },
+    provideRouter(routes),
   ],
 };

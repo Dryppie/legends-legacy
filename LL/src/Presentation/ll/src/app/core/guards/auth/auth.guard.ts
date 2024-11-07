@@ -5,7 +5,7 @@ import {
   Router,
   RouterStateSnapshot,
 } from '@angular/router';
-import { firstValueFrom, Observable, take } from 'rxjs';
+import { filter, firstValueFrom, Observable, take } from 'rxjs';
 import { AuthService } from '../../services/auth/auth.service';
 
 export const authGuard: CanActivateFn = async (
@@ -18,7 +18,10 @@ export const authGuard: CanActivateFn = async (
   authService.returnUrl = state.url;
 
   const isAuthed = await firstValueFrom(
-    authService.isAuthenticated$.pipe(take(1)),
+    authService.isAuthenticated$.pipe(
+      filter((value) => value !== null), // Wait for non-null authentication status
+      take(1),
+    ),
   );
 
   if (isAuthed) {
