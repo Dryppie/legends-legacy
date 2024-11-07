@@ -2,20 +2,19 @@
 using Common.Exceptions;
 using Domain.Models.Inventories;
 using Microsoft.EntityFrameworkCore;
-using Persistence.LL.Interfaces;
 
 namespace Persistence.LL.Repositories.Inventories;
 public class InventoryRepository : IInventoryRepository
 {
-    private readonly IUnitOfWork _unitOfWork;
-    public InventoryRepository(IUnitOfWork unitOfWork)
+    private readonly IDbContext _context;
+    public InventoryRepository(IDbContext unitOfWork)
     {
-        _unitOfWork = unitOfWork;
+        _context = unitOfWork;
     }
 
     public async Task<Inventory> GetInventoryByIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        var inventory = await _unitOfWork.Context.Inventories
+        var inventory = await _context.Inventories
             .Include(i => i.InventoryItems) // Include the related items
             .FirstOrDefaultAsync(i => i.CharacterId == characterId, cancellationToken); // Assuming CharacterId is the foreign key
 
@@ -38,7 +37,7 @@ public class InventoryRepository : IInventoryRepository
 
         // Get all relevant InventoryItems in one database call
         var itemIds = aggregatedLoot.Select(i => i.ItemId);
-        var existingItems = _unitOfWork.Context.InventoryItems
+        var existingItems = _context.InventoryItems
             .Where(i => i.InventoryId == characterId && itemIds.Contains(i.ItemId));
 
         foreach (var item in aggregatedLoot)
@@ -55,12 +54,12 @@ public class InventoryRepository : IInventoryRepository
             else
             {
                 // If item doesn't exist, add it to the database
-                await _unitOfWork.Context.InventoryItems.AddAsync(item, cancellationToken);
+                await _context.InventoryItems.AddAsync(item, cancellationToken);
             }
         }
 
         // Save the changes to the database
-        await _unitOfWork.Context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task CreateInventoryAsync(Guid characterId, CancellationToken cancellationToken)
@@ -70,9 +69,9 @@ public class InventoryRepository : IInventoryRepository
             CharacterId = characterId,
         };
 
-        await _unitOfWork.Context.Inventories.AddAsync(inventory, cancellationToken);
+        await _context.Inventories.AddAsync(inventory, cancellationToken);
 
-        await _unitOfWork.Context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
 }

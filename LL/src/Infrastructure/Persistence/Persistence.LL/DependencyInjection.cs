@@ -10,7 +10,6 @@ using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Persistence.LL.Interfaces;
 using Persistence.LL.Repositories.Attributes;
 using Persistence.LL.Repositories.CharacterActions;
 using Persistence.LL.Repositories.Entities;
@@ -31,7 +30,6 @@ public static class DependencyInjection
         );
 
         services.AddScoped<IDbContext>(provider => provider.GetRequiredService<LLDbContext>() ?? throw new SystemException("LLDbContext could not be resolved"));
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }

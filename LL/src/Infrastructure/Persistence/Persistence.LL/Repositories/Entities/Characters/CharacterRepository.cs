@@ -1,17 +1,17 @@
 ﻿using Application.Common.Interfaces;
 using Common.Exceptions;
+using Domain.Models.Abilities;
 using Domain.Models.Entities.Characters;
 using Microsoft.EntityFrameworkCore;
-using Persistence.LL.Interfaces;
 
 namespace Persistence.LL.Repositories.Entities.Characters;
 public class CharacterRepository : ICharacterRepository
 {
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IDbContext _context;
 
-    public CharacterRepository(IUnitOfWork unitOfWork)
+    public CharacterRepository(IDbContext context)
     {
-        _unitOfWork = unitOfWork;
+        _context = context;
     }
 
     /// <inheritdoc/>
@@ -22,9 +22,26 @@ public class CharacterRepository : ICharacterRepository
             UserId = userId,
             Name = username
         };
-        _unitOfWork.Context.Characters.Add(character);
+        _context.Characters.Add(character);
 
-        await _unitOfWork.Context.SaveChangesAsync(cancellationToken);
+        // TODO: This is only temporary, so guests have abilities
+
+        var abilities = new List<AbilityId>()
+            {
+                new AbilityId()
+                {
+                    EntityId = character.Id,
+                    Id = "fireball_01"
+                },
+                new AbilityId()
+                {
+                    EntityId = character.Id,
+                    Id = "heal_01"
+                }
+            };
+        _context.AbilityIds.AddRange(abilities);
+
+        await _context.SaveChangesAsync(cancellationToken);
 
         return character;
     }
@@ -32,7 +49,7 @@ public class CharacterRepository : ICharacterRepository
     /// <inheritdoc/>
     public async Task<Character> GetCharacterByUserIdAsync(Guid userId)
     {
-        var character = await _unitOfWork.Context.Characters
+        var character = await _context.Characters
             //.Include(c => c.Modifiers)
             //.Include(c => c.RawAttributes)
             //.ThenInclude(a => a.AttributeBase)
@@ -45,7 +62,7 @@ public class CharacterRepository : ICharacterRepository
     /// <inheritdoc/>
     public async Task<Character> GetCharacterByCharacterIdAsync(Guid characterId)
     {
-        var character = await _unitOfWork.Context.Characters
+        var character = await _context.Characters
             //.Include(c => c.Modifiers)
             //.Include(c => c.RawAttributes)
             //.ThenInclude(a => a.AttributeBase)

@@ -1,26 +1,25 @@
 ﻿using Application.Common.Interfaces;
 using Domain.Models.Users;
-using Persistence.LL.Interfaces;
 
 namespace Persistence.LL.Repositories.Users;
 public class UserRepository : IUserRepository
 {
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IDbContext _context;
 
-    public UserRepository(IUnitOfWork unitOfWork)
+    public UserRepository(IDbContext unitOfWork)
     {
-        _unitOfWork = unitOfWork;
+        _context = unitOfWork;
     }
 
     // inheritdocs />
     public bool DoesUserExist(string email)
     {
-        return _unitOfWork.Context.Users.Any(x => x.Email == email);
+        return _context.Users.Any(x => x.Email == email);
     }
 
     // inheritdocs />
     public bool DoesGuestExist(string userId)
     {
-        return _unitOfWork.Context.Users.Any(x => x.Id == userId);
+        return _context.Users.Any(x => x.Id == userId);
     }
 }
