@@ -32,7 +32,7 @@ export class AuthService {
     .asObservable()
     .pipe(distinctUntilChanged());
 
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(false); // Start with false
+  private isAuthenticatedSubject = new BehaviorSubject<boolean | null>(false); // Start with false
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
   public returnUrl = '/';
@@ -44,10 +44,11 @@ export class AuthService {
   ) {}
 
   setAuth(): void {
+    this.isAuthenticatedSubject.next(true);
+
     this.getLoggedInCharacter().subscribe({
       next: (character) => {
         this.currentCharacterSubject.next(character);
-        this.isAuthenticatedSubject.next(true);
       },
       error: () => {
         this.isAuthenticatedSubject.next(false); // Set as not authenticated in case of an error
@@ -78,9 +79,9 @@ export class AuthService {
       Password: password,
     };
     return this.apiService.post('auth/login', userCredentials).pipe(
-      tap((user) => {
+      tap((newTokens) => {
         this.setAuth();
-        this.setToken(user);
+        this.setToken(newTokens);
         this.toastService.showToast(
           'Action completed successfully!',
           'success',
@@ -108,8 +109,8 @@ export class AuthService {
       Password: password,
     };
     return this.apiService.post('auth/register', userCredentials).pipe(
-      tap((user) => {
-        this.setToken(user);
+      tap((newTokens) => {
+        this.setToken(newTokens);
       }),
 
       catchError(() => {
@@ -128,7 +129,8 @@ export class AuthService {
           this.router.navigateByUrl('/');
         },
         error: (error) => {
-          console.log('logout failed', error);
+          this.purgeAuth();
+          console.error('logout failed', error);
         },
       });
   }
@@ -162,10 +164,6 @@ export class AuthService {
       return this.purgeAuth().pipe(map(() => null));
     }
 
-    if (!Array.isArray(tokens)) {
-      return this.purgeAuth().pipe(map(() => null));
-    }
-
     const accessToken = tokens.find(
       (token: { key: string; value: string }) => token.key === 'AccessToken',
     )?.value;
@@ -180,14 +178,17 @@ export class AuthService {
     return this.apiService.post('auth/validateToken', accessToken).pipe(
       tap({
         next: (res) => this.handleAuthSuccess(res),
-        error: (err) => console.error('Error validating token', err),
+        error: () => {
+          // In case of error, attempt to refresh tokens
+          this.refreshTokens(refreshToken).subscribe();
+        },
       }),
       map((res) => res as CharacterDto),
-      catchError(() =>
-        this.refreshTokens(refreshToken).pipe(
-          map((res) => res || null), // Ensure null is returned if refreshTokens fails
-        ),
-      ),
+      catchError(() => {
+        // On failure to validate or refresh tokens, update authentication status
+        this.isAuthenticatedSubject.next(false);
+        return of(null);
+      }),
     );
   }
 
@@ -203,8 +204,8 @@ export class AuthService {
 
   loginAsGuest() {
     this.apiService.post('auth/loginAsGuest').subscribe({
-      next: (user) => {
-        this.setToken(user);
+      next: (newTokens) => {
+        this.setToken(newTokens);
         this.setAuth();
         this.router.navigateByUrl('/game');
       },
@@ -227,8 +228,8 @@ export class AuthService {
     return this.apiService
       .post('auth/convertGuestToUser', userCredentials)
       .pipe(
-        tap((user) => {
-          this.setToken(user);
+        tap((newTokens) => {
+          this.setToken(newTokens);
           // Update local state if necessary
           this.toastService.showToast(
             'Account created successfully!',
@@ -257,8 +258,8 @@ export class AuthService {
     );
   }
 
-  setToken(user: any): void {
-    localStorage.setItem(NamedStorageKeys.Session, JSON.stringify(user));
+  setToken(newTokens: any): void {
+    localStorage.setItem(NamedStorageKeys.Session, JSON.stringify(newTokens));
   }
 
   getToken(): string | null {

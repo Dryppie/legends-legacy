@@ -10,14 +10,7 @@ import { CharacterDto } from '../../../shared/models/Dtos/characterDto';
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [
-    CharacterBadgeComponent,
-    RouterLink,
-    RouterLinkActive,
-    NavbuttonComponent,
-    NgIf,
-    NgFor,
-  ],
+  imports: [CharacterBadgeComponent, NavbuttonComponent, NgIf, NgFor],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css'], // Corrected to `styleUrls`
 })

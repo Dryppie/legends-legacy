@@ -40,15 +40,14 @@ export class CombatService {
 
   startCombatSimulation(characterAction: CharacterActionDto): void {
     this.clearCurrentCombat();
-    this.nextCombatSubject.next(characterAction.updatedAt);
     if (!characterAction.combatResult) return;
+    this.nextCombatSubject.next(characterAction.updatedAt);
 
     const combatAction = characterAction.combatResult;
-    if (combatAction.eventLog.length === 0) {
+    if (combatAction.eventLog.length < 1) {
       return;
     }
     // Emit the entire combat result
-    this.combatResultSubject.next(combatAction);
 
     // Convert StartedAt to milliseconds
     const combatStartTime = new Date(combatAction.startedAt).getTime();
@@ -67,6 +66,8 @@ export class CombatService {
       this.allSubscriptions.push(eventSubscription);
     });
 
+    this.combatResultSubject.next(combatAction);
+
     // Calculate remaining combat duration
     const combatDurationMs = combatAction.duration * 100; // Corrected to 100ms per unit
     const remainingDuration = combatStartTime + combatDurationMs - now;
@@ -75,24 +76,10 @@ export class CombatService {
       remainingDuration <= 0
         ? of(combatAction.outcome)
         : of(combatAction.outcome).pipe(delay(remainingDuration))
-    ).subscribe((outcome) => this.combatOutcomeSubject.next(outcome));
+    ).subscribe((outcome) => {
+      this.combatOutcomeSubject.next(outcome);
+    });
 
     this.allSubscriptions.push(outcomeSubscription); // Track outcome subscription
   }
-
-  // getCombatEvents(): ObservableOb<CombatEvent> {
-  //   return this.combatEventSubject.asObservable();
-  // }
-
-  // getCombatResult(): Observable<CombatResultDto> {
-  //   return this.combatResult$.asObservable();
-  // }
-
-  // getCombatOutcome(): Observable<BattleOutcome> {
-  //   return this.combatOutcome$.asObservable();
-  // }
-
-  // getNextCombat(): Observable<Date> {
-  //   return this.nextCombat$.asObservable();
-  // }
 }

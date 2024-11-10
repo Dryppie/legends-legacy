@@ -1,21 +1,21 @@
-﻿using Common.Exceptions;
+﻿using Application.Common.Interfaces;
+using Common.Exceptions;
 using Domain.Models.Entities;
 using Microsoft.EntityFrameworkCore;
-using Persistence.LL.Interfaces;
 
 namespace Persistence.LL.Repositories.Entities;
 public class EntityRepository : IEntityRepository
 {
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IDbContext _context;
 
-    public EntityRepository(IUnitOfWork unitOfWork)
+    public EntityRepository(IDbContext unitOfWork)
     {
-        _unitOfWork = unitOfWork;
+        _context = unitOfWork;
     }
 
     public async Task<List<Entity>> GetEntitiesByIdsAsync(List<Guid> entityIds)
     {
-        var entities = await _unitOfWork.Context.Entities
+        var entities = await _context.Entities
             .Include(e => e.BaseAttributes)
             .Include(e => e.AbilityIds)
             .Where(e => entityIds.Contains(e.Id))
@@ -32,7 +32,7 @@ public class EntityRepository : IEntityRepository
 
     public async Task<Entity> GetEntityByIdAsync(Guid entityId, CancellationToken cancellationToken)
     {
-        var entity = await _unitOfWork.Context.Entities
+        var entity = await _context.Entities
             .Include(e => e.BaseAttributes)
             .Include(e => e.AbilityIds)
             .FirstOrDefaultAsync(e => e.Id.Equals(entityId), cancellationToken);
