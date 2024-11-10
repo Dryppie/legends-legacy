@@ -19,7 +19,7 @@ public class HealingAction : IEffectAction
         var healingReceived = context.Target.CalculateReceiveHealing(context.IsFlatAmount ? Magnitude : context.Magnitude);
 
         context.Magnitude = healingReceived;
-        context.EffectType = EventType.Heal;
+        context.EventType = EventType.Heal;
         context.Details = context.Details
             .Replace("{Actor}", context.Owner.Name)
             .Replace("{Target}", context.Target.Name)

@@ -204,7 +204,8 @@ public class CombatSimulation : ICombatContext
                 interval: effectTemplate.Interval.Clone(),
                 caster: actor,
                 applyOnSelf: effectTemplate.ApplyOnSelf,
-                isFlatAmount: effectTemplate.IsFlatAmount
+                isFlatAmount: effectTemplate.IsFlatAmount,
+                chance: effectTemplate.Chance
                 );
 
                 if (effectTemplate.Action is SummonAction summonEffect)
@@ -348,7 +349,7 @@ public class CombatSimulation : ICombatContext
             Timestamp = CurrentTime,
             ActorId = context.Owner.Id,
             TargetId = context.Target.Id,
-            EventType = context.EffectType,
+            EventType = context.EventType,
             Details = context.Details,
             Magnitude = context.Magnitude,
         };

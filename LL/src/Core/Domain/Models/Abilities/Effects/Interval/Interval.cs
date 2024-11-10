@@ -1,6 +1,6 @@
 ﻿using Domain.Interfaces;
 
-namespace Domain.Models.Abilities.Effects.Timed;
+namespace Domain.Models.Abilities.Effects.Interval;
 public class Interval : IEffectInterval
 {
     private int interval;
@@ -9,7 +9,7 @@ public class Interval : IEffectInterval
     public Interval(int interval)
     {
         this.interval = interval;
-        this.ticksUntilNextTrigger = interval;
+        ticksUntilNextTrigger = interval;
     }
 
     public bool ShouldTrigger()

@@ -21,7 +21,7 @@ public class SelfDestructAction : IEffectAction
     {
         _combatContext.RemoveEntityFromTeam(context.Target);
 
-        context.EffectType = EventType.SummonExpired;
+        context.EventType = EventType.SummonExpired;
         context.Details = $"{context.Target.Name} vanished. Summon effect expired.";
 
         action.Invoke(context);

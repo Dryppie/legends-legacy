@@ -15,7 +15,7 @@ public class ModifyAttributeAction : IEffectAction
 
     public void Execute(EffectContext context, Action<EffectContext> action)
     {
-        context.EffectType = AttributeModifier.Amount > 0 ? EventType.Buff : EventType.Debuff;
+        context.EventType = AttributeModifier.Amount > 0 ? EventType.Buff : EventType.Debuff;
         context.Details = context.Details
             .Replace("{Actor}", context.Owner.Name)
             .Replace("{Target}", context.Target.Name)
@@ -28,7 +28,7 @@ public class ModifyAttributeAction : IEffectAction
 
     public void OnExpireExecute(EffectContext context, Action<EffectContext> action)
     {
-        context.EffectType = AttributeModifier.Amount > 0 ? EventType.BuffExpired : EventType.DebuffExpired;
+        context.EventType = AttributeModifier.Amount > 0 ? EventType.BuffExpired : EventType.DebuffExpired;
         context.Details = context.Details
             .Replace("{Actor}", context.Owner.Name)
             .Replace("{Target}", context.Target.Name)

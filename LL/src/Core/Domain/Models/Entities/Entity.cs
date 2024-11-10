@@ -51,7 +51,8 @@ public abstract class Entity
                 TriggerEvent = TriggerEvent.None,
                 Magnitude = effect.Action.Magnitude,
                 Details = effect.Log,
-                IsFlatAmount = effect.IsFlatAmount
+                IsFlatAmount = effect.IsFlatAmount,
+                EffectModifications = effect.EffectModifications,
             };
 
             effect.ExecuteAction(context);
@@ -79,30 +80,14 @@ public abstract class Entity
         {
             if (effect.Interval.ShouldTrigger())
             {
-                var intervalContext = new EffectContext
-                {
-                    Owner = effect.Caster ?? this,
-                    Target = this,
-                    TriggerEvent = TriggerEvent.OnTickInterval,
-                    Details = effect.Log,
-                    Magnitude = effect.Action.Magnitude,
-                    IsFlatAmount = effect.IsFlatAmount
-                };
+                var intervalContext = CreateEffectContextFromEffect(effect);
 
                 effect.ExecuteAction(intervalContext);
             }
 
             if (!effect.Duration.IsActive())
             {
-                var expireContext = new EffectContext
-                {
-                    Owner = effect.Caster ?? this,
-                    Target = this,
-                    TriggerEvent = TriggerEvent.None,
-                    Details = effect.Log,
-                    Magnitude = effect.Action.Magnitude,
-                    IsFlatAmount = effect.IsFlatAmount
-                };
+                var expireContext = CreateEffectContextFromEffect(effect);
 
                 effect.ExecuteOnExpireAction(expireContext);
 
@@ -119,15 +104,7 @@ public abstract class Entity
         {
             if (!effect.IsTrigger(triggerEvent)) continue;
 
-            var context = new EffectContext
-            {
-                Owner = this,
-                Target = effect.ApplyOnSelf ? this : opponent ?? effect.Caster ?? this,
-                TriggerEvent = triggerEvent,
-                Details = effect.Log,
-                Magnitude = magnitude,
-                IsFlatAmount = effect.IsFlatAmount
-            };
+            var context = CreateEffectContextFromEffect(effect);
 
             effect.ExecuteAction(context);
         }
@@ -236,6 +213,11 @@ public abstract class Entity
         TemporaryModifiers = [];
         ActiveEffects.Clear();
         Statuses.Clear();
+    }
+
+    public EffectContext CreateEffectContextFromEffect(Effect effect)
+    {
+        return new EffectContext(effect.Caster ?? this, this, effect.Trigger, effect.Action.Magnitude, effect.IsFlatAmount, effect.Log, effect.EffectModifications);
     }
 
     //public Actor DeepClone()

@@ -28,7 +28,7 @@ public class DamageAction : IEffectAction
         }
 
         context.Magnitude = calculatedResult.CalculatedDamageReceived;
-        context.EffectType = EventType.Damage;
+        context.EventType = EventType.Damage;
         context.AttackOutcome = calculatedResult.AttackOutcome;
         context.Details = context.Details
             .Replace("{Actor}", context.Owner.Name)

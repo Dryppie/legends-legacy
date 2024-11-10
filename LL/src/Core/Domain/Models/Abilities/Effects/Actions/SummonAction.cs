@@ -49,7 +49,7 @@ public class SummonAction : IEffectAction
         _combatContext.AddEntityToTeam(_caster, summonedCreature);
 
         context.Target = summonedCreature;
-        context.EffectType = EventType.Summon;
+        context.EventType = EventType.Summon;
         context.Details = context.Details
             .Replace("{Actor}", context.Owner.Name)
             .Replace("{Target}", summonedCreature.Name);
