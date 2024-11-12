@@ -43,7 +43,7 @@ public static class LLDbContextExtensions
             context.Inventories.Add(inventory);
 
             var attributes = EntityBaseAttributeHelper.CreateEntityAttributes(character.Id);
-            context.EntityAttributes.AddRange(attributes);
+            await context.EntityAttributes.AddRangeAsync(attributes);
 
             var abilities = new List<AbilityId>()
             {
@@ -59,16 +59,18 @@ public static class LLDbContextExtensions
                 }
             };
 
-            context.AbilityIds.AddRange(abilities);
-
-            await context.SaveChangesAsync();
+            await context.AbilityIds.AddRangeAsync(abilities);
         }
 
-        SeedCreatures(context);
+        await SeedCreatures(context);
+
+        await SeedItemsAndLootTables(context);
+        
+        await context.SaveChangesAsync();
     }
 
 
-    private static void SeedCreatures(LLDbContext context)
+    private static async Task SeedCreatures(LLDbContext context)
     {
         if (!context.Creatures.Any())
         {
@@ -76,87 +78,27 @@ public static class LLDbContextExtensions
             var goblinId = Guid.Parse("00000000-0000-0000-0000-000000000001");
             var goblinWarriorId = Guid.Parse("00000000-0000-0000-0000-000000000002");
             var goblinArcherId = Guid.Parse("00000000-0000-0000-0000-000000000003");
-            var goblinShamanId = Guid.Parse("00000000-0000-0000-0000-000000000004");
-            var largeRatId = Guid.Parse("00000000-0000-0000-0000-000000000005");
-            var flameImpId = Guid.Parse("00000000-0000-0000-0000-000000000006");
-            var frostImpId = Guid.Parse("00000000-0000-0000-0000-000000000007");
-            var shadowImpId = Guid.Parse("00000000-0000-0000-0000-000000000008");
-            var greenSlimeId = Guid.Parse("00000000-0000-0000-0000-000000000009");
-            var redSlimeId = Guid.Parse("00000000-0000-0000-0000-00000000000A");
-            var blueSlimeId = Guid.Parse("00000000-0000-0000-0000-00000000000B");
-            var brownSlimeId = Guid.Parse("00000000-0000-0000-0000-00000000000C");
-            var transparentSlimeId = Guid.Parse("00000000-0000-0000-0000-00000000000D");
-            var rainbowSlimeId = Guid.Parse("00000000-0000-0000-0000-00000000000E");
-            var caveBatId = Guid.Parse("00000000-0000-0000-0000-00000000000F");
-            var giantBatId = Guid.Parse("00000000-0000-0000-0000-000000000010");
-            var vampireBatId = Guid.Parse("00000000-0000-0000-0000-000000000011");
-            var viperId = Guid.Parse("00000000-0000-0000-0000-000000000012");
-            var constrictorSnakeId = Guid.Parse("00000000-0000-0000-0000-000000000013");
-            var venomousSnakeId = Guid.Parse("00000000-0000-0000-0000-000000000014");
-            var skeletonId = Guid.Parse("00000000-0000-0000-0000-000000000015");
-            var spiderId = Guid.Parse("00000000-0000-0000-0000-000000000016");
-            var venomousSpiderlingId = Guid.Parse("00000000-0000-0000-0000-000000000017");
-            var giantSpiderId = Guid.Parse("00000000-0000-0000-0000-000000000018");
-            var antSoldierId = Guid.Parse("00000000-0000-0000-0000-000000000019");
-            var fireAntId = Guid.Parse("00000000-0000-0000-0000-00000000001A");
-            var woodNymphId = Guid.Parse("00000000-0000-0000-0000-00000000001B");
-            var forestSpiritId = Guid.Parse("00000000-0000-0000-0000-00000000001C");
-            var pixieId = Guid.Parse("00000000-0000-0000-0000-00000000001D");
-            var illusionFoxId = Guid.Parse("00000000-0000-0000-0000-00000000001E");
-            var enchantedFairyId = Guid.Parse("00000000-0000-0000-0000-00000000001F");
-            var nightshadeBlossomId = Guid.Parse("00000000-0000-0000-0000-000000000020");
-            var gladePantherId = Guid.Parse("00000000-0000-0000-0000-000000000021");
-            var treantSaplingId = Guid.Parse("00000000-0000-0000-0000-000000000022");
+            var largeRatId = Guid.Parse("00000000-0000-0000-0000-000000000004");
+
             // Create creatures
             var creatures = new List<Creature>
             {
                 new Creature { Id = goblinId, Name = "Goblin" },
                 new Creature { Id = goblinWarriorId, Name = "Goblin Warrior" },
                 new Creature { Id = goblinArcherId, Name = "Goblin Archer" },
-                new Creature { Id = goblinShamanId, Name = "Goblin Shaman" },
-                new Creature { Id = largeRatId, Name = "Large Rat" },
-                new Creature { Id = flameImpId, Name = "Flame Imp" },
-                new Creature { Id = frostImpId, Name = "Frost Imp" },
-                new Creature { Id = shadowImpId, Name = "Shadow Imp" },
-                new Creature { Id = greenSlimeId, Name = "Green Slime" },
-                new Creature { Id = redSlimeId, Name = "Red Slime" },
-                new Creature { Id = blueSlimeId, Name = "Blue Slime" },
-                new Creature { Id = brownSlimeId, Name = "Brown Slime" },
-                new Creature { Id = transparentSlimeId, Name = "Transparent Slime" },
-                new Creature { Id = rainbowSlimeId, Name = "Rainbow Slime" },
-                new Creature { Id = caveBatId, Name = "Cave Bat" },
-                new Creature { Id = giantBatId, Name = "Giant Bat" },
-                new Creature { Id = vampireBatId, Name = "Vampire Bat" },
-                new Creature { Id = viperId, Name = "Viper" },
-                new Creature { Id = constrictorSnakeId, Name = "Constrictor Snake" },
-                new Creature { Id = venomousSnakeId, Name = "Venomous Snake" },
-                new Creature { Id = skeletonId, Name = "Skeleton" },
-                new Creature { Id = spiderId, Name = "Spider" },
-                new Creature { Id = venomousSpiderlingId, Name = "Venomous Spiderling" },
-                new Creature { Id = giantSpiderId, Name = "Giant Spider" },
-                new Creature { Id = antSoldierId, Name = "Ant Soldier" },
-                new Creature { Id = fireAntId, Name = "Fire Ant" },
-                new Creature { Id = woodNymphId, Name = "Wood Nymph" },
-                new Creature { Id = forestSpiritId, Name = "Forest Spirit" },
-                new Creature { Id = pixieId, Name = "Pixie" },
-                new Creature { Id = illusionFoxId, Name = "Illusion Fox" },
-                new Creature { Id = enchantedFairyId, Name = "Enchanted Fairy" },
-                new Creature { Id = nightshadeBlossomId, Name = "Nightshade Blossom" },
-                new Creature { Id = gladePantherId, Name = "Glade Panther" },
-                new Creature { Id = treantSaplingId, Name = "Treant Sapling" }
+                new Creature { Id = largeRatId, Name = "Large Rat" }
             };
 
-            context.Creatures.AddRange(creatures);
+            await context.Creatures.AddRangeAsync(creatures);
 
             // Create attributes
             var attributes = new List<EntityAttribute>();
+            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(goblinId));
+            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(goblinWarriorId));
+            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(goblinArcherId));
+            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(largeRatId));
 
-            foreach (var creature in creatures)
-            {
-                attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(creature.Id));
-            }
-
-            context.EntityAttributes.AddRange(attributes);
+            await context.EntityAttributes.AddRangeAsync(attributes);
             var abilityIds = new List<AbilityId>()
             {
                 new AbilityId()
@@ -200,7 +142,7 @@ public static class LLDbContextExtensions
                     Id = "tailWrap"
                 }
             };
-            context.AbilityIds.AddRange(abilityIds);
+            await context.AbilityIds.AddRangeAsync(abilityIds);
 
 
             if (!context.Regions.Any())
@@ -214,7 +156,7 @@ public static class LLDbContextExtensions
                     }
                 };
 
-                context.Areas.AddRange(areas);
+                await context.Areas.AddRangeAsync(areas);
 
                 var regions = new List<Region>
                 {
@@ -224,61 +166,160 @@ public static class LLDbContextExtensions
                         Areas = areas
                     }
                 };
-                context.Regions.AddRange(regions);
+                await context.Regions.AddRangeAsync(regions);
             }
-
-            context.SaveChanges();
         }
     }
 
-    public static async Task SeedItemsAndLootTables(this LLDbContext context)
+    public static async Task SeedItemsAndLootTables(LLDbContext context)
     {
-        // Seed LootTable and Items
         if (!context.LootTables.Any() && !context.Items.Any())
         {
-            // Create Items
-            var sword = new Item
-            {
-                Id = Guid.NewGuid(),
-                Name = "Sword"
-            };
+            await SeedOddGear(context);
 
-            var shield = new Item
-            {
-                Id = Guid.NewGuid(),
-                Name = "Shield"
-            };
-
-            var potion = new Item
-            {
-                Id = Guid.NewGuid(),
-                Name = "Potion"
-            };
-
-            var treeLog = new Item
-            {
-                Id = Guid.NewGuid(),
-                Name = "Tree Log"
-            };
-
-            var oakLog = new Item
-            {
-                Id = Guid.NewGuid(),
-                Name = "Oak Log"
-            };
-
-            context.Items.AddRange(sword, shield, potion);
-            await context.SaveChangesAsync();
-
-            // Create LootTable and associate items with it
-            var lootTable = new LootTable
-            {
-                Id = Guid.NewGuid(),
-                Items = new List<Item> { sword, shield, potion }
-            };
-
-            context.LootTables.Add(lootTable);
-            await context.SaveChangesAsync();
+            await SeedWoodcuttingLootTables(context);
         }
+    }
+
+    public static async Task SeedOddGear(LLDbContext context)
+    {
+        // Create Items
+        var sword = new Item
+        {
+            Id = Guid.NewGuid(),
+            Name = "Sword"
+        };
+
+        var shield = new Item
+        {
+            Id = Guid.NewGuid(),
+            Name = "Shield"
+        };
+
+        var potion = new Item
+        {
+            Id = Guid.NewGuid(),
+            Name = "Potion"
+        };
+
+        var swordLTI = new LootTableItem
+        {
+            ItemId = sword.Id,
+        };
+
+        var shieldLTI = new LootTableItem
+        {
+            ItemId = shield.Id,
+        };
+
+        var potionLTI = new LootTableItem
+        {
+            ItemId = potion.Id,
+        };
+
+
+        await context.Items.AddRangeAsync(sword, shield, potion);
+
+        await context.LootTableItems.AddRangeAsync(swordLTI, shieldLTI, potionLTI);
+
+        // Create LootTable and associate items with it
+        var lootTable = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = new List<LootTableEntry> { swordLTI, shieldLTI, potionLTI }
+        };
+
+        context.LootTables.Add(lootTable);
+    }
+
+    public static async Task SeedWoodcuttingLootTables(LLDbContext context)
+    {
+        var treeLog = new Item { Id = Guid.NewGuid(), Name = "Tree Log" };
+        var nest = new Item { Id = Guid.NewGuid(), Name = "Nest" };
+
+        // Create Items for Tree Drops
+        var oakLog = new Item { Id = Guid.NewGuid(), Name = "Oak Log" };
+        var smallGem = new Item { Id = Guid.NewGuid(), Name = "Small Gemstone" };
+
+        var birchLog = new Item { Id = Guid.NewGuid(), Name = "Birch Log" };
+        var rareHerb = new Item { Id = Guid.NewGuid(), Name = "Rare Herb" };
+
+        // Additional items for higher-level trees
+        var mapleLog = new Item { Id = Guid.NewGuid(), Name = "Maple Log" };
+        var mapleSyrup = new Item { Id = Guid.NewGuid(), Name = "Maple Syrup" };
+
+        var redwoodLog = new Item { Id = Guid.NewGuid(), Name = "Redwood Log" };
+        var redwoodBark = new Item { Id = Guid.NewGuid(), Name = "Redwood Bark" };
+
+        // Add items to context
+        await context.Items.AddRangeAsync(oakLog, smallGem, birchLog, rareHerb, mapleLog, mapleSyrup, redwoodLog, redwoodBark);
+
+        var nestLootTableItem = new LootTableItem { ItemId = nest.Id, Weight = 1 };
+
+        // Create LootTableRarities for Tree
+        var treeLootTableLegendary = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [nestLootTableItem],
+            Weight = 1 // 0.01% chance to drop nest. 144%~ chance in 24 hours.
+        };
+        var treeLootTableCommon = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [new LootTableItem { ItemId = treeLog.Id, Weight = 20 }],
+            Weight = 80 // 16%
+        };
+        var treeLootTable = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [treeLootTableCommon, treeLootTableLegendary]
+        };
+
+        // Create LootTableItems for Oak Tree
+        var oakLootTableLegendary = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [nestLootTableItem],
+            Weight = 2 // 0.02% chance to drop nest. 144%~ chance in 12 hours.
+        };
+        var oakLootTableCommon = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [new LootTableItem { ItemId = oakLog.Id, Weight = 20 }],
+            Weight = 80 // 16%
+        };
+        var oakLootTable = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [oakLootTableCommon, oakLootTableLegendary]
+        };
+
+        // Create LootTableItems for Birch Tree
+        var birchLootTableLegendary = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [nestLootTableItem],
+            Weight = 3 // 0.04% chance to drop nest. 144%~ chance in 9 hours.
+        };
+        var birchLootTableRare = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [new LootTableItem { ItemId = rareHerb.Id, Weight = 30 }],
+            Weight = 15 // 4.5%
+        };
+        var birchLootTableCommon = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [new LootTableItem { ItemId = birchLog.Id, Weight = 20 }],
+            Weight = 80 // 16%
+        };
+        var birchLootTable = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [birchLootTableCommon, birchLootTableRare, birchLootTableLegendary]
+        };
+
+        // Add LootTables to context
+        await context.LootTables.AddRangeAsync(treeLootTable, oakLootTable, birchLootTable);
     }
 }

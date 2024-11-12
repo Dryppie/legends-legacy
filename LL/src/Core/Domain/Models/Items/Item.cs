@@ -1,5 +1,4 @@
-﻿using Domain.Models.Attributes;
-using Domain.Models.LootTables;
+﻿using Domain.Models.LootTables;
 
 namespace Domain.Models.Items;
 public class Item
@@ -8,5 +7,5 @@ public class Item
     public string Name { get; set; } = string.Empty;
     public ItemType ItemType { get; set; }
     public Rarity Rarity { get; set; }
-    public ICollection<LootTable> LootTables { get; set; } = [];
+    public ICollection<LootTableItem> LootTablesItems { get; set; } = [];
 }

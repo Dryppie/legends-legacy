@@ -24,7 +24,7 @@ public class LootServices : ILootService
 
         // TODO: Make a CONST / Appsettings for drop %
         var totalWeight = 10000;
-        var itemsCopy = new List<Item>(lootTable.Items);
+        var itemsCopy = new List<Item>(lootTable.Entries);
 
         for (int i = 0; i < numberOfItems; i++)
         {
@@ -33,7 +33,7 @@ public class LootServices : ILootService
 
             foreach (var item in itemsCopy)
             {
-                cumulativeWeight += totalWeight / lootTable.Items.Count;
+                cumulativeWeight += totalWeight / lootTable.Entries.Count;
                 if (roll < cumulativeWeight)
                 {
                     var inventoryItem = ConvertItemIntoInventoryItem(item);

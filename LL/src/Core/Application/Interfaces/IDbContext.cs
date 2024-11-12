@@ -42,6 +42,7 @@ public interface IDbContext
     DbSet<InventoryItem> InventoryItems { get; }
     DbSet<Item> Items { get; }
     DbSet<LootTable> LootTables { get; }
+    DbSet<LootTableItem> LootTablesItems { get; }
     //DbSet<Party> Parties { get; }
     //DbSet<PartyMember> PartyMembers { get; }
     //DbSet<Profession> Professions { get; }

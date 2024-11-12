@@ -26,7 +26,7 @@ public static class SeedData
 
         // Seed relationships between LootTable and Items
         modelBuilder.Entity<LootTable>()
-            .HasMany(lt => lt.Items)
+            .HasMany(lt => lt.Entries)
             .WithMany(i => i.LootTables)
             .UsingEntity(j => j.HasData(
                 new { LootTablesId = lootTableId, ItemsId = swordId },

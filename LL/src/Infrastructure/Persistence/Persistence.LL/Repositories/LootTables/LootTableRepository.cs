@@ -15,7 +15,7 @@ public class LootTableRepository : ILootTableRepository
 
     public async Task<LootTable> GetLootTableByIdAsync(Guid lootTableId, CancellationToken cancellationToken)
     {
-        var lootTable = await _context.LootTables.Include(lt => lt.Items)
+        var lootTable = await _context.LootTables.Include(lt => lt.Entries)
             .FirstOrDefaultAsync(lt => lt.Id.Equals(lootTableId), cancellationToken);
         NotFoundException.ThrowIfNull(lootTable, nameof(lootTable), lootTableId);
 

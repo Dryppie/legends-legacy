@@ -145,7 +145,5 @@ public class CombatService : ICombatService
         //    // Save changes
         //    await _characterRepository.UpdateCharacterAsync(character, cancellationToken);
         //}
-
-
     }
 }

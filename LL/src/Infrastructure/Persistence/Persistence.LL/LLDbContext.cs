@@ -118,6 +118,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
 
     public DbSet<Item> Items => Set<Item>();
     public DbSet<LootTable> LootTables => Set<LootTable>();
+    public DbSet<LootTableItem> LootTableItems => Set<LootTableItem>();
 
     //public DbSet<Party> Parties => Set<Party>();
 
