@@ -6,6 +6,8 @@ public class ScalingDamageAction : IEffectAction
 {
     private readonly int _damageAmount;
     public int Magnitude => _damageAmount;
+    public AttributeType? DamageScalingAttribute {  get; set; }
+    public float DamageScalingMultiplier { get; set; }
     public float ScalingFactor {  get; set; }
     public float Interval {  get; set; }
     public AttributeType ScalingAttribute { get; set; }

@@ -68,5 +68,10 @@ public enum TriggerEvent
     /// <summary>
     /// Triggered when an entity is revived
     /// </summary>
-    OnRevived
+    OnRevived,
+    /// <summary>
+    /// Triggered when an entity's health is changed
+    /// Used for HealthCondition effects
+    /// </summary>
+    OnHealthChanged
 }

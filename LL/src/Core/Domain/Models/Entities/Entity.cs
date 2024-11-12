@@ -44,16 +44,7 @@ public abstract class Entity
         if (effect.Trigger == TriggerEvent.None)
         {
             // Create an EffectContext for immediate execution
-            var context = new EffectContext
-            {
-                Owner = effect.Caster ?? this,
-                Target = this,
-                TriggerEvent = TriggerEvent.None,
-                Magnitude = effect.Action.Magnitude,
-                Details = effect.Log,
-                IsFlatAmount = effect.IsFlatAmount,
-                EffectModifications = effect.EffectModifications,
-            };
+            var context = CreateEffectContextFromEffect(effect);
 
             effect.ExecuteAction(context);
         }
@@ -141,6 +132,7 @@ public abstract class Entity
         CombatAttributes[AttributeType.Health] -= damage;
 
         TriggerEffects(TriggerEvent.OnAttacked, attacker, damage);
+        TriggerEffects(TriggerEvent.OnHealthChanged, attacker, damage);
 
         if (!IsAlive)
         {

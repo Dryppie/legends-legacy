@@ -10,7 +10,9 @@
       {
         "Action": {
           "Type": "Damage",
-          "Amount": 5
+          "Amount": 5,
+          "ScalingAttribute": "Agility",
+          "ScalingMultiplier": 0.1
         },
         "Duration": {
           "Type": "TimedDuration",
@@ -208,9 +210,9 @@
     ]
   },
   {
-    "Id": "bigAndTough",
-    "Name": "Big and Tough",
-    "Description": "Health is increased by 10%.",
+    "Id": "big",
+    "Name": "Big",
+    "Description": "Health is increased by 50.",
     "Type": "Passive",
     "Cooldown": 0,
     "Cost": 0,
@@ -219,15 +221,44 @@
         "Action": {
           "Type": "ModifyAttribute",
           "Attribute": "Health",
-          "Amount": 10,
-          "ModifierType": "Multiplicative"
+          "Amount": 50,
+          "ModifierType": "Flat"
         },
         "Duration": {
           "Type": "IndefiniteDuration"
         },
         "Targeting": "Self",
         "Trigger": "None",
-        "Log": "{Actor}'s health is increased by 10% due to being Big and Tough."
+        "Log": "{Actor}'s health is increased by 50 due to being big."
+      }
+    ]
+  },
+  {
+    "Id": "heal_01",
+    "Name": "Last Stance",
+    "Description": "Defense is increased by 30% when your health is below 20%.",
+    "Type": "Passive",
+    "Cooldown": 0,
+    "Cost": 0,
+    "Effects": [
+      {
+        "Action": {
+          "Type": "ModifyAttribute",
+          "Attribute": "Health",
+          "Amount": 30,
+          "ModifierType": "Multiplicative"
+        },
+        "Duration": {
+          "Type": "IndefiniteDuration"
+        },
+        "Condition": {
+          "Type": "HealthCondition",
+          "HealthPercentage": 80,
+          "ComparisonType": "LessThan"
+        },
+        "Targeting": "Self",
+        "Trigger": "OnHealthChanged",
+        "Log": "{Actor}'s defense is increased by 30% due to falling below 20% health."
       }
     ]
   },
@@ -273,7 +304,7 @@
     ]
   },
   {
-    "Id": "heal_01",
+    "Id": "s_heal_01",
     "Name": "Heal",
     "Description": "Restores health to the target every 4 second for 20 seconds.",
     "Type": "Active",

@@ -13,6 +13,7 @@ public class InterfaceConverterFactory : JsonConverterFactory
         _converters[typeof(IEffectAction)] = new EffectActionConverter();
         _converters[typeof(IEffectDuration)] = new EffectDurationConverter();
         _converters[typeof(IEffectInterval)] = new EffectIntervalConverter();
+        _converters[typeof(IEffectCondition)] = new EffectConditionConverter();
         // Add other interface converters as needed
     }
 

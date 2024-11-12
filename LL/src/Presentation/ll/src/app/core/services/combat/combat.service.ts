@@ -39,7 +39,6 @@ export class CombatService {
   constructor() {}
 
   startCombatSimulation(characterAction: CharacterActionDto): void {
-    this.clearCurrentCombat();
     if (!characterAction.combatResult) return;
     this.nextCombatSubject.next(characterAction.updatedAt);
 

@@ -1,4 +1,5 @@
 ﻿using Domain.Interfaces;
+using Domain.Models.Abilities.Effects.Conditions;
 using Domain.Models.Abilities.Effects.EffectModifications;
 using Domain.Models.Abilities.Effects.Interval;
 using Domain.Models.Abilities.Effects.Trigger;
@@ -27,7 +28,7 @@ public class Effect
 
     public Effect(IEffectAction action,
                   IEffectDuration duration,
-                  IEffectCondition condition,
+                  IEffectCondition? condition = null,
                   Entity? caster = null,
                   Targeting targeting = Targeting.None,
                   TriggerEvent trigger = TriggerEvent.None,
@@ -38,7 +39,7 @@ public class Effect
     {
         Action = action;
         Duration = duration;
-        Condition = condition;
+        Condition = condition ?? new NoCondition();
         Caster = caster;
         Targeting = targeting;
         Trigger = trigger;

@@ -5,4 +5,5 @@ namespace Domain.Models.Abilities.Effects.Conditions;
 public class NoCondition : IEffectCondition
 {
     public bool IsSatisfied(EffectContext context) => true;
+    public IEffectCondition Clone() => new NoCondition();
 }

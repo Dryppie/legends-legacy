@@ -199,6 +199,7 @@ public class CombatSimulation : ICombatContext
                 var effectInstance = new Effect(
                 action: effectTemplate.Action,
                 duration: effectTemplate.Duration.Clone(),
+                condition: effectTemplate.Condition.Clone(),
                 targeting: effectTemplate.Targeting,
                 trigger: effectTemplate.Trigger,
                 interval: effectTemplate.Interval.Clone(),

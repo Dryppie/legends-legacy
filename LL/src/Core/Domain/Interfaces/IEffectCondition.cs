@@ -4,4 +4,5 @@ namespace Domain.Interfaces;
 public interface IEffectCondition
 {
     bool IsSatisfied(EffectContext context);
+    IEffectCondition Clone();
 }

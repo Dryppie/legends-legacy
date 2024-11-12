@@ -2,12 +2,12 @@
 using Domain.Models.Attributes;
 
 namespace Domain.Models.Abilities.Effects.Conditions;
-public class HealthThresholdCondition : IEffectCondition
+public class HealthCondition : IEffectCondition
 {
     public int HealthPercentage { get; }
     public ComparisonType Comparison { get; }
 
-    public HealthThresholdCondition(int healthPercentage, ComparisonType comparison)
+    public HealthCondition(int healthPercentage, ComparisonType comparison)
     {
         HealthPercentage = healthPercentage;
         Comparison = comparison;
@@ -24,5 +24,10 @@ public class HealthThresholdCondition : IEffectCondition
             ComparisonType.EqualTo => targetHealthPercent == HealthPercentage,
             _ => false,
         };
+    }
+
+    public IEffectCondition Clone()
+    {
+        return new HealthCondition(HealthPercentage, Comparison);
     }
 }

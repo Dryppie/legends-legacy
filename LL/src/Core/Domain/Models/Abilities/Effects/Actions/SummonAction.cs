@@ -1,4 +1,5 @@
 ﻿using Domain.Interfaces;
+using Domain.Models.Abilities.Effects.Conditions;
 using Domain.Models.Abilities.Effects.Timed;
 using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Combat;
@@ -34,11 +35,13 @@ public class SummonAction : IEffectAction
         // If the summoned entity has a limited duration, add a self-destruct effect
         if (Magnitude > 0)
         {
-            var selfDestructAction = new SelfDestructAction(_combatContext);
+            var selfDestructAction = new SelfDestructAction(_combatContext!);
             var duration = new TimedDuration(Magnitude);
+            var condition = new NoCondition();
             var selfDestructEffect = new Effect(
                 action: selfDestructAction,
                 duration: duration,
+                condition: condition,
                 caster: context.Owner,
                 trigger: TriggerEvent.OnTickInterval
             );
@@ -46,7 +49,7 @@ public class SummonAction : IEffectAction
         }
 
         // Add the summoned entity to the caster's team
-        _combatContext.AddEntityToTeam(_caster, summonedCreature);
+        _combatContext!.AddEntityToTeam(_caster!, summonedCreature);
 
         context.Target = summonedCreature;
         context.EventType = EventType.Summon;

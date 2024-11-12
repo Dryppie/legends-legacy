@@ -5,7 +5,6 @@ public class EffectModification
 {
     // DamageMultiplierModifier: Increases or decreases damage dealt.
     // UnblockableModifier: Makes an attack unblockable.
-    // StatusEffectApplier: Adds a status effect to the target upon execution.
     // CooldownReducerModifier: Reduces the cooldown of the ability.
     // ResourceCostModifier: Adjusts the resource cost of the ability.
     // AccuracyModifier: Alters the chance to hit the target.

@@ -58,6 +58,7 @@ public class CombatService : ICombatService
             // https://chatgpt.com/c/671943b1-0958-800d-9234-32c45632490e
         }
 
+        // Create CombatEntities to keep track of simple data over each entity, such as id, health, mana
         lastCombatResult.PlayerTeam = CreateCombatEntities(playerCharacters);
         lastCombatResult.EnemyTeam = CreateCombatEntities(enemyCharacters);
 
@@ -144,5 +145,7 @@ public class CombatService : ICombatService
         //    // Save changes
         //    await _characterRepository.UpdateCharacterAsync(character, cancellationToken);
         //}
+
+
     }
 }

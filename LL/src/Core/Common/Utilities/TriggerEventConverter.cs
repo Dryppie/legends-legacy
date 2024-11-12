@@ -1,11 +1,6 @@
 ﻿using Domain.Models.Abilities.Effects.Trigger;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
 using System.Text.Json;
-using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace Common.Utilities;
 public class TriggerEventConverter : JsonConverter<TriggerEvent>
@@ -31,6 +26,7 @@ public class TriggerEventConverter : JsonConverter<TriggerEvent>
             "OnBuffApplied" => TriggerEvent.OnBuffApplied,
             "OnDebuffApplied" => TriggerEvent.OnBuffApplied,
             "OnRevived" => TriggerEvent.OnRevived,
+            "OnHealthChanged" => TriggerEvent.OnHealthChanged,
             _ => throw new JsonException($"Unknown trigger event: {stringValue}")
         };
     }

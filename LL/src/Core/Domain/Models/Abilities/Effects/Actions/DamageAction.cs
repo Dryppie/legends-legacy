@@ -1,5 +1,6 @@
 ﻿using Domain.Helpers;
 using Domain.Interfaces;
+using Domain.Models.Attributes;
 using Domain.Models.Combat;
 
 namespace Domain.Models.Abilities.Effects.Actions;
@@ -7,10 +8,14 @@ public class DamageAction : IEffectAction
 {
     private readonly int _damageAmount;
     public int Magnitude => _damageAmount;
+    public AttributeType? DamageScalingAttribute { get; set; }
+    public float DamageScalingMultiplier { get; set; }
 
-    public DamageAction(int damageAmount)
+    public DamageAction(int damageAmount, AttributeType? damageScalingAttribute, float damageScalingMultiplier)
     {
         _damageAmount = damageAmount;
+        DamageScalingAttribute = damageScalingAttribute;
+        DamageScalingMultiplier = damageScalingMultiplier;
     }
 
     public void Execute(EffectContext context, Action<EffectContext> action)

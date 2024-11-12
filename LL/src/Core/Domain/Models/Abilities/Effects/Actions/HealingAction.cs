@@ -1,4 +1,5 @@
 ﻿using Domain.Interfaces;
+using Domain.Models.Attributes;
 using Domain.Models.Combat;
 
 namespace Domain.Models.Abilities.Effects.Actions;
@@ -6,10 +7,14 @@ public class HealingAction : IEffectAction
 {
     private readonly int _healAmount;
     public int Magnitude => _healAmount;
+    public AttributeType? HealScalingAttribute { get; set; }
+    public float HealScalingMultiplier { get; set; }
 
-    public HealingAction(int healAmount)
+    public HealingAction(int healAmount, AttributeType? healScalingAttribute, float healScalingMultiplier)
     {
         _healAmount = healAmount;
+        HealScalingAttribute = healScalingAttribute;
+        HealScalingMultiplier = healScalingMultiplier;
     }
 
     public void Execute(EffectContext context, Action<EffectContext> action)

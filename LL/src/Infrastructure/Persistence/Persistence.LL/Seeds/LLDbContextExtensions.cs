@@ -192,7 +192,7 @@ public static class LLDbContextExtensions
                 new AbilityId()
                 {
                     EntityId = largeRatId,
-                    Id = "bigAndTough"
+                    Id = "big"
                 },
                 new AbilityId()
                 {
