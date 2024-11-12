@@ -62,7 +62,7 @@ public static class LLDbContextExtensions
             await context.AbilityIds.AddRangeAsync(abilities);
         }
 
-        await SeedCreatures(context);
+        await SeedCreaturesAndLootTables(context);
 
         await SeedItemsAndLootTables(context);
         
@@ -70,7 +70,7 @@ public static class LLDbContextExtensions
     }
 
 
-    private static async Task SeedCreatures(LLDbContext context)
+    private static async Task SeedCreaturesAndLootTables(LLDbContext context)
     {
         if (!context.Creatures.Any())
         {
@@ -144,6 +144,94 @@ public static class LLDbContextExtensions
             };
             await context.AbilityIds.AddRangeAsync(abilityIds);
 
+            var goblinEssence = new Essence
+            {
+                Id = Guid.NewGuid(),
+                Name = "Goblin's Essence",
+                PassiveAbilityId = "pocketDirt",
+                ActiveAbilityId = "sneakAttack"
+            };
+
+            var goblinWarriorEssence = new Essence
+            {
+                Id = Guid.NewGuid(),
+                Name = "Goblin Warrior's Essence",
+                PassiveAbilityId = "recklessAssault",
+                ActiveAbilityId = "ragingCleave"
+            };
+
+            var goblinArcherEssence = new Essence
+            {
+                Id = Guid.NewGuid(),
+                Name = "Goblin Archer's Essence",
+                PassiveAbilityId = "poisonedArrows",
+                ActiveAbilityId = "snipersStrike"
+            };
+
+            var largeRatEssence = new Essence
+            {
+                Id = Guid.NewGuid(),
+                Name = "Large Rat's Essence",
+                PassiveAbilityId = "big",
+                ActiveAbilityId = "tailWrap"
+            };
+            // Add items to context
+            await context.Items.AddRangeAsync(goblinEssence, goblinWarriorEssence, goblinArcherEssence, largeRatEssence);
+
+            var goblinEssenceLootTableItem = new LootTableItem { ItemId = goblinEssence.Id, Weight = 2 };
+            var goblinWarriorEssenceLootTableItem = new LootTableItem { ItemId = goblinWarriorEssence.Id, Weight = 1 };
+            var goblinArcherEssenceLootTableItem = new LootTableItem { ItemId = goblinArcherEssence.Id, Weight = 1 };
+            var largeRatEssenceLootTableItem = new LootTableItem { ItemId = largeRatEssence.Id, Weight = 2 };
+
+            // Create LootTableRarities for Goblin
+            var goblinLootTableLegendary = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [goblinEssenceLootTableItem],
+                Weight = 1 // 0.02%
+            };
+            var goblinLootTable = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [goblinLootTableLegendary]
+            };
+            // Create LootTableRarities for Goblin Warrior
+            var goblinWarriorLootTableLegendary = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [goblinWarriorEssenceLootTableItem],
+                Weight = 1 // 0.01%
+            };
+            var goblinWarriorLootTable = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [goblinWarriorLootTableLegendary]
+            };
+            // Create LootTableRarities for Goblin Archer
+            var goblinArcherLootTableLegendary = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [goblinArcherEssenceLootTableItem],
+                Weight = 1 // 0.01%
+            };
+            var goblinArcherLootTable = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [goblinArcherLootTableLegendary]
+            };
+            // Create LootTableRarities for Large Rat
+            var largeRatLootTableLegendary = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [largeRatEssenceLootTableItem],
+                Weight = 1 // 0.02%
+            };
+            var largeRatLootTable = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [largeRatLootTableLegendary]
+            };
+            await context.LootTables.AddRangeAsync(goblinLootTable, goblinWarriorLootTable, goblinArcherLootTable, largeRatLootTable);
 
             if (!context.Regions.Any())
             {
@@ -234,25 +322,17 @@ public static class LLDbContextExtensions
 
     public static async Task SeedWoodcuttingLootTables(LLDbContext context)
     {
+        // Create Items for Tree Drops
         var treeLog = new Item { Id = Guid.NewGuid(), Name = "Tree Log" };
         var nest = new Item { Id = Guid.NewGuid(), Name = "Nest" };
-
-        // Create Items for Tree Drops
+        
         var oakLog = new Item { Id = Guid.NewGuid(), Name = "Oak Log" };
-        var smallGem = new Item { Id = Guid.NewGuid(), Name = "Small Gemstone" };
-
+        
         var birchLog = new Item { Id = Guid.NewGuid(), Name = "Birch Log" };
         var rareHerb = new Item { Id = Guid.NewGuid(), Name = "Rare Herb" };
 
-        // Additional items for higher-level trees
-        var mapleLog = new Item { Id = Guid.NewGuid(), Name = "Maple Log" };
-        var mapleSyrup = new Item { Id = Guid.NewGuid(), Name = "Maple Syrup" };
-
-        var redwoodLog = new Item { Id = Guid.NewGuid(), Name = "Redwood Log" };
-        var redwoodBark = new Item { Id = Guid.NewGuid(), Name = "Redwood Bark" };
-
         // Add items to context
-        await context.Items.AddRangeAsync(oakLog, smallGem, birchLog, rareHerb, mapleLog, mapleSyrup, redwoodLog, redwoodBark);
+        await context.Items.AddRangeAsync(treeLog, nest, oakLog, birchLog, rareHerb);
 
         var nestLootTableItem = new LootTableItem { ItemId = nest.Id, Weight = 1 };
 

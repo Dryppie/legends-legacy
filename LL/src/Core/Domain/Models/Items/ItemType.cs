@@ -4,4 +4,5 @@ public enum ItemType
     Weapon,
     Armor,
     Consumable,
+    Essence
 }
