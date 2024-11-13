@@ -62,7 +62,7 @@ public static class LLDbContextExtensions
             await context.AbilityIds.AddRangeAsync(abilities);
         }
 
-        await SeedCreaturesAndLootTables(context);
+        await SeedCreaturesAndLootTablesForShenicRegionLumoRuins(context);
 
         await SeedItemsAndLootTables(context);
         
@@ -70,7 +70,7 @@ public static class LLDbContextExtensions
     }
 
 
-    private static async Task SeedCreaturesAndLootTables(LLDbContext context)
+    private static async Task SeedCreaturesAndLootTablesForShenicRegionLumoRuins(LLDbContext context)
     {
         if (!context.Creatures.Any())
         {
@@ -81,7 +81,7 @@ public static class LLDbContextExtensions
             var largeRatId = Guid.Parse("00000000-0000-0000-0000-000000000004");
 
             // Create creatures
-            var creatures = new List<Creature>
+            var lumoRuinsCreatures = new List<Creature>
             {
                 new Creature { Id = goblinId, Name = "Goblin" },
                 new Creature { Id = goblinWarriorId, Name = "Goblin Warrior" },
@@ -89,7 +89,7 @@ public static class LLDbContextExtensions
                 new Creature { Id = largeRatId, Name = "Large Rat" }
             };
 
-            await context.Creatures.AddRangeAsync(creatures);
+            await context.Creatures.AddRangeAsync(lumoRuinsCreatures);
 
             // Create attributes
             var attributes = new List<EntityAttribute>();
@@ -239,8 +239,8 @@ public static class LLDbContextExtensions
                 {
                     new Area
                     {
-                        Name = "Luno Ruins",
-                        Creatures = creatures
+                        Name = "Lumo Ruins",
+                        Creatures = lumoRuinsCreatures
                     }
                 };
 

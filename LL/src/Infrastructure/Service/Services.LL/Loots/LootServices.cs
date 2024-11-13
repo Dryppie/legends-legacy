@@ -15,35 +15,35 @@ public class LootServices : ILootService
     public List<InventoryItem> GetRandomLoot(LootTable lootTable, bool allowZeroDrops = false)
     {
         var selectedLoot = new List<InventoryItem>();
-        var random = new Random();
+        //var random = new Random();
 
-        int numberOfItems = GetNumberOfItemsToDrop(allowZeroDrops);
+        //int numberOfItems = GetNumberOfItemsToDrop(allowZeroDrops);
 
-        if (numberOfItems == 0)
-            return selectedLoot;
+        //if (numberOfItems == 0)
+        //    return selectedLoot;
 
-        // TODO: Make a CONST / Appsettings for drop %
-        var totalWeight = 10000;
-        var itemsCopy = new List<Item>(lootTable.Entries);
+        //// TODO: Make a CONST / Appsettings for drop %
+        //var totalWeight = 10000;
+        //var itemsCopy = new List<Item>(lootTable.Entries);
 
-        for (int i = 0; i < numberOfItems; i++)
-        {
-            int roll = random.Next(0, totalWeight);
-            float cumulativeWeight = 0;
+        //for (int i = 0; i < numberOfItems; i++)
+        //{
+        //    int roll = random.Next(0, totalWeight);
+        //    float cumulativeWeight = 0;
 
-            foreach (var item in itemsCopy)
-            {
-                cumulativeWeight += totalWeight / lootTable.Entries.Count;
-                if (roll < cumulativeWeight)
-                {
-                    var inventoryItem = ConvertItemIntoInventoryItem(item);
-                    selectedLoot.Add(inventoryItem);
-                    //totalWeight /= i; // Reduce total weight
-                    itemsCopy.Remove(item); // Ensure item is not selected again
-                    break;
-                }
-            }
-        }
+        //    foreach (var item in itemsCopy)
+        //    {
+        //        cumulativeWeight += totalWeight / lootTable.Entries.Count;
+        //        if (roll < cumulativeWeight)
+        //        {
+        //            var inventoryItem = ConvertItemIntoInventoryItem(item);
+        //            selectedLoot.Add(inventoryItem);
+        //            //totalWeight /= i; // Reduce total weight
+        //            itemsCopy.Remove(item); // Ensure item is not selected again
+        //            break;
+        //        }
+        //    }
+        //}
 
         return selectedLoot;
     }

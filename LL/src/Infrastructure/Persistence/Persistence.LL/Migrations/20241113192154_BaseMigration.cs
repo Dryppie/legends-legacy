@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace Persistence.LL.Migrations
 {
     /// <inheritdoc />
@@ -66,17 +64,6 @@ namespace Persistence.LL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Items", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "LootTables",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_LootTables", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -242,66 +229,29 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ActionDetails",
+                name: "LootTableEntry",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ActionType = table.Column<int>(type: "int", nullable: false),
-                    CharacterTeam = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EnemyTeam = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    Weight = table.Column<float>(type: "real", nullable: false),
+                    LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    LootTableType = table.Column<int>(type: "int", nullable: false),
+                    ItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ActionDetails", x => x.Id);
+                    table.PrimaryKey("PK_LootTableEntry", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ActionDetails_LootTables_LootTableId",
-                        column: x => x.LootTableId,
-                        principalTable: "LootTables",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "GatheringNodes",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GatheringNodes", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_GatheringNodes_LootTables_LootTableId",
-                        column: x => x.LootTableId,
-                        principalTable: "LootTables",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ItemLootTable",
-                columns: table => new
-                {
-                    ItemsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    LootTablesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ItemLootTable", x => new { x.ItemsId, x.LootTablesId });
-                    table.ForeignKey(
-                        name: "FK_ItemLootTable_Items_ItemsId",
-                        column: x => x.ItemsId,
+                        name: "FK_LootTableEntry_Items_ItemId",
+                        column: x => x.ItemId,
                         principalTable: "Items",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ItemLootTable_LootTables_LootTablesId",
-                        column: x => x.LootTablesId,
-                        principalTable: "LootTables",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_LootTableEntry_LootTableEntry_LootTableId",
+                        column: x => x.LootTableId,
+                        principalTable: "LootTableEntry",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -321,6 +271,45 @@ namespace Persistence.LL.Migrations
                         column: x => x.RegionId,
                         principalTable: "Regions",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ActionDetails",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ActionType = table.Column<int>(type: "int", nullable: false),
+                    CharacterTeam = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EnemyTeam = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ActionDetails", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ActionDetails_LootTableEntry_LootTableId",
+                        column: x => x.LootTableId,
+                        principalTable: "LootTableEntry",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GatheringNodes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GatheringNodes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_GatheringNodes_LootTableEntry_LootTableId",
+                        column: x => x.LootTableId,
+                        principalTable: "LootTableEntry",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -450,31 +439,6 @@ namespace Persistence.LL.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.InsertData(
-                table: "Items",
-                columns: new[] { "Id", "ItemType", "Name", "Rarity" },
-                values: new object[,]
-                {
-                    { new Guid("39103c23-4197-4780-9c35-79ecaf3b3040"), 0, "Sword", 0 },
-                    { new Guid("593153f4-6fd8-4498-ab1f-cbf6a876d342"), 0, "Potion", 0 },
-                    { new Guid("93ac0a96-e6fe-43c0-8e0e-060f4fde8dac"), 0, "Shield", 0 }
-                });
-
-            migrationBuilder.InsertData(
-                table: "LootTables",
-                column: "Id",
-                value: new Guid("cc46a63c-c64b-4ed4-bd73-bbb8bb659456"));
-
-            migrationBuilder.InsertData(
-                table: "ItemLootTable",
-                columns: new[] { "ItemsId", "LootTablesId" },
-                values: new object[,]
-                {
-                    { new Guid("39103c23-4197-4780-9c35-79ecaf3b3040"), new Guid("cc46a63c-c64b-4ed4-bd73-bbb8bb659456") },
-                    { new Guid("593153f4-6fd8-4498-ab1f-cbf6a876d342"), new Guid("cc46a63c-c64b-4ed4-bd73-bbb8bb659456") },
-                    { new Guid("93ac0a96-e6fe-43c0-8e0e-060f4fde8dac"), new Guid("cc46a63c-c64b-4ed4-bd73-bbb8bb659456") }
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_AbilityIds_EntityId",
                 table: "AbilityIds",
@@ -556,9 +520,14 @@ namespace Persistence.LL.Migrations
                 column: "AppUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ItemLootTable_LootTablesId",
-                table: "ItemLootTable",
-                column: "LootTablesId");
+                name: "IX_LootTableEntry_ItemId",
+                table: "LootTableEntry",
+                column: "ItemId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LootTableEntry_LootTableId",
+                table: "LootTableEntry",
+                column: "LootTableId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Transaction_AppUserId",
@@ -603,9 +572,6 @@ namespace Persistence.LL.Migrations
                 name: "IPAddress");
 
             migrationBuilder.DropTable(
-                name: "ItemLootTable");
-
-            migrationBuilder.DropTable(
                 name: "Transaction");
 
             migrationBuilder.DropTable(
@@ -618,13 +584,13 @@ namespace Persistence.LL.Migrations
                 name: "Inventories");
 
             migrationBuilder.DropTable(
-                name: "Items");
-
-            migrationBuilder.DropTable(
-                name: "LootTables");
+                name: "LootTableEntry");
 
             migrationBuilder.DropTable(
                 name: "Entities");
+
+            migrationBuilder.DropTable(
+                name: "Items");
 
             migrationBuilder.DropTable(
                 name: "Areas");

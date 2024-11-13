@@ -17,7 +17,7 @@ namespace Persistence.LL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.7")
+                .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -176,46 +176,32 @@ namespace Persistence.LL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Items");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("39103c23-4197-4780-9c35-79ecaf3b3040"),
-                            ItemType = 0,
-                            Name = "Sword",
-                            Rarity = 0
-                        },
-                        new
-                        {
-                            Id = new Guid("93ac0a96-e6fe-43c0-8e0e-060f4fde8dac"),
-                            ItemType = 0,
-                            Name = "Shield",
-                            Rarity = 0
-                        },
-                        new
-                        {
-                            Id = new Guid("593153f4-6fd8-4498-ab1f-cbf6a876d342"),
-                            ItemType = 0,
-                            Name = "Potion",
-                            Rarity = 0
-                        });
                 });
 
-            modelBuilder.Entity("Domain.Models.LootTables.LootTable", b =>
+            modelBuilder.Entity("Domain.Models.LootTables.LootTableEntry", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("LootTableId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("LootTableType")
+                        .HasColumnType("int");
+
+                    b.Property<float>("Weight")
+                        .HasColumnType("real");
+
                     b.HasKey("Id");
 
-                    b.ToTable("LootTables");
+                    b.HasIndex("LootTableId");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("cc46a63c-c64b-4ed4-bd73-bbb8bb659456")
-                        });
+                    b.ToTable("LootTableEntry");
+
+                    b.HasDiscriminator<int>("LootTableType");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
@@ -388,38 +374,6 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("AppUserId");
 
                     b.ToTable("Transaction");
-                });
-
-            modelBuilder.Entity("ItemLootTable", b =>
-                {
-                    b.Property<Guid>("ItemsId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("LootTablesId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("ItemsId", "LootTablesId");
-
-                    b.HasIndex("LootTablesId");
-
-                    b.ToTable("ItemLootTable");
-
-                    b.HasData(
-                        new
-                        {
-                            ItemsId = new Guid("39103c23-4197-4780-9c35-79ecaf3b3040"),
-                            LootTablesId = new Guid("cc46a63c-c64b-4ed4-bd73-bbb8bb659456")
-                        },
-                        new
-                        {
-                            ItemsId = new Guid("93ac0a96-e6fe-43c0-8e0e-060f4fde8dac"),
-                            LootTablesId = new Guid("cc46a63c-c64b-4ed4-bd73-bbb8bb659456")
-                        },
-                        new
-                        {
-                            ItemsId = new Guid("593153f4-6fd8-4498-ab1f-cbf6a876d342"),
-                            LootTablesId = new Guid("cc46a63c-c64b-4ed4-bd73-bbb8bb659456")
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -620,6 +574,25 @@ namespace Persistence.LL.Migrations
                     b.HasDiscriminator().HasValue(2);
                 });
 
+            modelBuilder.Entity("Domain.Models.LootTables.LootTable", b =>
+                {
+                    b.HasBaseType("Domain.Models.LootTables.LootTableEntry");
+
+                    b.HasDiscriminator().HasValue(1);
+                });
+
+            modelBuilder.Entity("Domain.Models.LootTables.LootTableItem", b =>
+                {
+                    b.HasBaseType("Domain.Models.LootTables.LootTableEntry");
+
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasDiscriminator().HasValue(2);
+                });
+
             modelBuilder.Entity("Domain.Models.Abilities.AbilityId", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Entity", null)
@@ -688,6 +661,13 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Domain.Models.LootTables.LootTableEntry", b =>
+                {
+                    b.HasOne("Domain.Models.LootTables.LootTable", null)
+                        .WithMany("Entries")
+                        .HasForeignKey("LootTableId");
+                });
+
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
                 {
                     b.HasOne("Domain.Models.Regions.Region", null)
@@ -707,21 +687,6 @@ namespace Persistence.LL.Migrations
                     b.HasOne("Domain.Models.Users.AppUser", null)
                         .WithMany("Transactions")
                         .HasForeignKey("AppUserId");
-                });
-
-            modelBuilder.Entity("ItemLootTable", b =>
-                {
-                    b.HasOne("Domain.Models.Items.Item", null)
-                        .WithMany()
-                        .HasForeignKey("ItemsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Models.LootTables.LootTable", null)
-                        .WithMany()
-                        .HasForeignKey("LootTablesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -804,6 +769,17 @@ namespace Persistence.LL.Migrations
                         .HasForeignKey("AreaId");
                 });
 
+            modelBuilder.Entity("Domain.Models.LootTables.LootTableItem", b =>
+                {
+                    b.HasOne("Domain.Models.Items.Item", "Item")
+                        .WithMany("LootTablesItems")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+                });
+
             modelBuilder.Entity("Domain.Models.Entities.Entity", b =>
                 {
                     b.Navigation("AbilityIds");
@@ -814,6 +790,11 @@ namespace Persistence.LL.Migrations
             modelBuilder.Entity("Domain.Models.Inventories.Inventory", b =>
                 {
                     b.Navigation("InventoryItems");
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Item", b =>
+                {
+                    b.Navigation("LootTablesItems");
                 });
 
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
@@ -839,6 +820,11 @@ namespace Persistence.LL.Migrations
 
                     b.Navigation("Inventory")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.LootTables.LootTable", b =>
+                {
+                    b.Navigation("Entries");
                 });
 #pragma warning restore 612, 618
         }

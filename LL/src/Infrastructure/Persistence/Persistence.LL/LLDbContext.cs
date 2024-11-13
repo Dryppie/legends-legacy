@@ -56,11 +56,14 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
             .HasValue<Creature>(3);
 
         modelBuilder.Entity<ActionDetails>()
-        .HasDiscriminator<CharacterActionType>("ActionType")
-        .HasValue<CombatActionDetails>(CharacterActionType.Combat)
-        .HasValue<GatheringActionDetails>(CharacterActionType.Gathering);
+            .HasDiscriminator<CharacterActionType>("ActionType")
+            .HasValue<CombatActionDetails>(CharacterActionType.Combat)
+            .HasValue<GatheringActionDetails>(CharacterActionType.Gathering);
 
-        SeedData.Seed(modelBuilder);
+        modelBuilder.Entity<LootTableEntry>()
+            .HasDiscriminator<int>("LootTableType")
+            .HasValue<LootTable>(1)
+            .HasValue<LootTableItem>(2);
     }
 
     private static void SetupSqlite(ModelBuilder builder)
