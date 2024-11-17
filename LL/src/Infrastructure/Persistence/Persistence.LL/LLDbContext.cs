@@ -1,4 +1,5 @@
 ﻿using Application.Common.Interfaces;
+using Domain.Models;
 using Domain.Models.Abilities;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
@@ -10,6 +11,7 @@ using Domain.Models.Entities.NPCs;
 using Domain.Models.GatheringNodes;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
+using Domain.Models.Items.Equipments;
 using Domain.Models.LootTables;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
@@ -55,6 +57,12 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
             .HasValue<NPC>(2)
             .HasValue<Creature>(3);
 
+        modelBuilder.Entity<Item>()
+            .HasDiscriminator<int>("ItemTypes")
+            .HasValue<Item>(1)
+            .HasValue<Equipment>(2)
+            .HasValue<EssenceItem>(3);
+
         modelBuilder.Entity<ActionDetails>()
             .HasDiscriminator<CharacterActionType>("ActionType")
             .HasValue<CombatActionDetails>(CharacterActionType.Combat)
@@ -64,6 +72,11 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
             .HasDiscriminator<int>("LootTableType")
             .HasValue<LootTable>(1)
             .HasValue<LootTableItem>(2);
+        //modelBuilder.Entity<LootTableEntry>()
+        //    .HasDiscriminator<string>("LootTableType")
+        //    .HasValue<LootTableEntry>("LootTableEntry")
+        //    .HasValue<LootTable>("LootTable")
+        //    .HasValue<LootTableItem>("LootTableItem");
     }
 
     private static void SetupSqlite(ModelBuilder builder)
@@ -97,6 +110,9 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
     //public DbSet<Echo> Echoes => Set<Echo>();
 
     public DbSet<Entity> Entities => Set<Entity>();
+
+    public DbSet<Essence> Essences => Set<Essence>();
+    public DbSet<EssenceItem> EssenceItems => Set<EssenceItem>();
 
     // Effects
 

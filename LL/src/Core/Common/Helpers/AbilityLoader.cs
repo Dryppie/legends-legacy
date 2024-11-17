@@ -14,7 +14,7 @@ public static class AbilityLoader
 
         // Deserialize JSON into a list of abilities
         List<Ability> abilities = JsonSerializer.Deserialize<List<Ability>>(json, AbilityJsonReader.Options)!;
-        var ids = entity.AbilityIds.Select(x => x.Id).ToList();
+        var ids = entity.AbilityIds;
 
         var entityAbilities = abilities.Where(a => ids.Contains(a.Id)).ToList();
         entity.Abilities = entityAbilities;

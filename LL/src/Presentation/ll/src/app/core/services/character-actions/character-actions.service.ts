@@ -17,7 +17,7 @@ import {
 } from '../../../shared/models/Dtos/characterActionDto'; // Import CharacterActionDto model
 import { environment } from '../../../../environments/environment';
 import { CombatService } from '../combat/combat.service';
-import { CharacterActionType } from '../../../shared/models/enums/CharacterActionType';
+import { CharacterActionType } from '../../../shared/models/enums/characterActionType';
 import { NamedStorageKeys } from '../../common/enums/named-storage-keys';
 
 @Injectable({

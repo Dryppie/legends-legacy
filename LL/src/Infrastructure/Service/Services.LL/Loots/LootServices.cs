@@ -1,77 +1,71 @@
 ﻿using Application.Interfaces.Services.LL;
+using Domain.Models.Entities;
+using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.LootTables;
+using System;
 
 namespace Services.LL.Loots;
 public class LootServices : ILootService
 {
+    private static readonly Random RandomGenerator = new();
+
     public List<InventoryItem> GenerateGatheringLootAsync(LootTable lootTable, CancellationToken cancellationToken)
     {
         return GetRandomLoot(lootTable);
     }
 
-    // TODO: Redo Loot Generation
-    public List<InventoryItem> GetRandomLoot(LootTable lootTable, bool allowZeroDrops = false)
+    public List<InventoryItem> GenerateIdleCombatLootAsync(List<Entity> entities)
     {
-        var selectedLoot = new List<InventoryItem>();
-        //var random = new Random();
-
-        //int numberOfItems = GetNumberOfItemsToDrop(allowZeroDrops);
-
-        //if (numberOfItems == 0)
-        //    return selectedLoot;
-
-        //// TODO: Make a CONST / Appsettings for drop %
-        //var totalWeight = 10000;
-        //var itemsCopy = new List<Item>(lootTable.Entries);
-
-        //for (int i = 0; i < numberOfItems; i++)
-        //{
-        //    int roll = random.Next(0, totalWeight);
-        //    float cumulativeWeight = 0;
-
-        //    foreach (var item in itemsCopy)
-        //    {
-        //        cumulativeWeight += totalWeight / lootTable.Entries.Count;
-        //        if (roll < cumulativeWeight)
-        //        {
-        //            var inventoryItem = ConvertItemIntoInventoryItem(item);
-        //            selectedLoot.Add(inventoryItem);
-        //            //totalWeight /= i; // Reduce total weight
-        //            itemsCopy.Remove(item); // Ensure item is not selected again
-        //            break;
-        //        }
-        //    }
-        //}
-
-        return selectedLoot;
+        var totalLoot = new List<InventoryItem>();
+        foreach (var entity in entities.OfType<Creature>())
+        {
+            totalLoot.AddRange(GetRandomLoot(entity.LootTable));
+        }
+        return totalLoot;
     }
 
-    private int GetNumberOfItemsToDrop(bool allowZeroDrops)
+    // TODO: Redo Loot Generation
+    public List<InventoryItem> GetRandomLoot(LootTable lootTable, int numberOfRolls = 1)
     {
+        var generatedLoot = new List<InventoryItem>();
         var random = new Random();
 
-        // Define weights: 0 drops -> 1
-        //                 1 drop  -> 6
-        //                 2 drops -> 1
-        //                 3 drops -> 2
-        var weights = allowZeroDrops ? new int[] { 5, 85, 9, 1 } : new int[] { 0, 90, 9, 1 };
-
-        var totalWeight = weights.Sum();
-        var roll = random.Next(0, totalWeight);
-        var cumulativeWeight = 0;
-
-        for (int i = 0; i < weights.Length; i++)
+        for (int i = 0; i < numberOfRolls; i++)
         {
-            cumulativeWeight += weights[i];
-            if (roll < cumulativeWeight)
+
+            var selectedEntry = GetRandomEntryBasedOnWeight([.. lootTable.Entries]);
+
+            if (selectedEntry is LootTableItem lootTableItem)
             {
-                return i;
+                generatedLoot.Add(ConvertItemIntoInventoryItem(lootTableItem.Item));
+            }
+            else if (selectedEntry is LootTable table)
+            {
+                generatedLoot.AddRange(GetRandomLoot(table, 1));
             }
         }
 
-        return 1; // Default to 1 item if something goes wrong
+        return generatedLoot;
+    }
+
+    private LootTableEntry? GetRandomEntryBasedOnWeight(List<LootTableEntry> entries)
+    {
+        double totalWeight = entries.Sum(e => e.Weight);
+        double randomValue = RandomGenerator.NextSingle() * 100;
+        double cumulativeWeight = 0.0;
+
+        foreach (var entry in entries)
+        {
+            cumulativeWeight += entry.Weight;
+            if (randomValue <= cumulativeWeight)
+            {
+                return entry;
+            }
+        }
+
+        return null;
     }
 
     private InventoryItem ConvertItemIntoInventoryItem(Item item)

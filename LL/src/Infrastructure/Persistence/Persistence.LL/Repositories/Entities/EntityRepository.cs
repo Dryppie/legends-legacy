@@ -1,6 +1,8 @@
 ﻿using Application.Common.Interfaces;
 using Common.Exceptions;
 using Domain.Models.Entities;
+using Domain.Models.Entities.Creatures;
+using Domain.Models.LootTables;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Entities;
@@ -13,11 +15,14 @@ public class EntityRepository : IEntityRepository
         _context = unitOfWork;
     }
 
-    public async Task<List<Entity>> GetEntitiesByIdsAsync(List<Guid> entityIds)
+    public async Task<List<Entity>> GetEntitiesByIdsForCombatAsync(List<Guid> entityIds)
     {
         var entities = await _context.Entities
             .Include(e => e.BaseAttributes)
-            .Include(e => e.AbilityIds)
+            .Include(e => e.EquippedEssences)
+            .Include(e => (e as Creature).LootTable)
+                .ThenInclude(lt => lt.Entries)
+                .ThenInclude(lt => (lt as LootTable).Entries)
             .Where(e => entityIds.Contains(e.Id))
             .ToListAsync();
 
@@ -34,7 +39,7 @@ public class EntityRepository : IEntityRepository
     {
         var entity = await _context.Entities
             .Include(e => e.BaseAttributes)
-            .Include(e => e.AbilityIds)
+            .Include(e => e.EquippedEssences)
             .FirstOrDefaultAsync(e => e.Id.Equals(entityId), cancellationToken);
         
         NotFoundException.ThrowIfNull(entity, nameof(entity), entityId);

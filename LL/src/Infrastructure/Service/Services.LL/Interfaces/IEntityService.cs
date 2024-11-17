@@ -4,5 +4,5 @@ namespace Services.LL.Interfaces;
 
 public interface IEntityService
 {
-    Task<List<Entity>> GetEntitiesByIdsAsync(List<Guid> entityIds);
+    Task<List<Entity>> GetEntitiesByIdsForCombatAsync(List<Guid> entityIds);
 }

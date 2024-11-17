@@ -4,7 +4,6 @@ using MediatR;
 
 namespace Application.UseCases.Attributes.EventHandlers;
 
-//TODO: Create AttributeService
 public class CharacterCreatedEventHandler : INotificationHandler<CharacterCreatedEvent>
 {
     private readonly IAttributeService _attributesService;

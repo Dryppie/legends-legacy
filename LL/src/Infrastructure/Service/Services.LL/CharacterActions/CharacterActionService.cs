@@ -17,14 +17,14 @@ public class CharacterActionService : ICharacterActionService
     private readonly IGatheringService _gatheringService;
     private readonly ICombatService _combatService;
     private readonly ILootService _lootService;
-    private readonly IMediator _mediator;
-    public CharacterActionService(ICharacterActionRepository characterActionRepository, IGatheringService gatheringService, ICombatService combatService, ILootService lootService, IMediator mediator)
+    private readonly IPublisher _publisher;
+    public CharacterActionService(ICharacterActionRepository characterActionRepository, IGatheringService gatheringService, ICombatService combatService, ILootService lootService, IPublisher publisher)
     {
         _characterActionRepository = characterActionRepository;
         _gatheringService = gatheringService;
         _combatService = combatService;
         _lootService = lootService;
-        _mediator = mediator;
+        _publisher = publisher;
     }
 
     public async Task<bool> StartCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
@@ -93,7 +93,7 @@ public class CharacterActionService : ICharacterActionService
         var actionDetails = characterAction.ActionDetails as GatheringActionDetails;
 
         // Perform the gathering actions
-        var loot = await _gatheringService.PerformGatheringAsync(actionDetails!.LootTable.Id, actionsToPerform, cancellationToken);
+        var loot = await _gatheringService.PerformGatheringAsync(actionDetails!.LootTableId, actionsToPerform, cancellationToken);
 
         // Process the loot
         if (loot.Count > 0)
@@ -106,15 +106,13 @@ public class CharacterActionService : ICharacterActionService
     {
         var totalLoot = new List<InventoryItem>();
         
-        int combatsPerformed = 0;
-        var actionDetails = characterAction.ActionDetails as CombatActionDetails; 
-        var lastCombatResult = await _combatService.PerformCombatAsync(actionDetails, characterAction, now, cancellationToken);
+        var lastCombatResult = await _combatService.PerformIdleCombatAsync(characterAction, now, cancellationToken);
 
-        // Process the accumulated loot
-        if (totalLoot.Count > 0)
-        {
-            //await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
-        }
+        //// Process the accumulated loot
+        //if (totalLoot.Count > 0)
+        //{
+        //    await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
+        //}
 
         return lastCombatResult;
     }
@@ -144,10 +142,9 @@ public class CharacterActionService : ICharacterActionService
     // https://chatgpt.com/c/316198c8-d8a1-40d3-8b91-369e81ddfabc
     private async Task ProcessLootAsync(Guid characterId, List<InventoryItem> loot, CancellationToken cancellationToken)
     {
-
         // Implement how to update the character or game state with the loot
         // For example, updating the character inventory
         //await _InventoryService.AddLootAsync(loot, cancellationToken);
-        await _mediator.Publish(new LootGeneratedEvent(characterId, loot), cancellationToken);
+        await _publisher.Publish(new LootGeneratedEvent(characterId, loot), cancellationToken);
     }
 }

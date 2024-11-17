@@ -1,4 +1,5 @@
-import { CharacterActionType } from '../enums/CharacterActionType';
+import { CharacterActionType } from '../enums/characterActionType';
+import { GatheringType } from '../enums/gatheringType';
 import { CombatResultDto } from './combatResultDto';
 
 export interface CharacterActionDto {
@@ -6,6 +7,8 @@ export interface CharacterActionDto {
   lootTableId: string;
   updatedAt: Date;
   combatResult?: CombatResultDto;
+  combatActionDetails: CombatActionDetails;
+  gatheringActionDetails: GatheringActionDetails;
 }
 
 export interface StartCombatActionRequest {
@@ -16,15 +19,13 @@ export interface StartGatheringActionRequest {
   gatheringActionDetails: GatheringActionDetails;
 }
 
-interface ActionDetails {
-  // Common properties if any
-}
-
-export interface CombatActionDetails extends ActionDetails {
+export interface CombatActionDetails {
   characterTeam: string[]; // or appropriate type
   enemyTeam: string[]; // or appropriate type
 }
 
-export interface GatheringActionDetails extends ActionDetails {
+export interface GatheringActionDetails {
+  name: string;
+  gatheringType: GatheringType;
   lootTableId: string;
 }

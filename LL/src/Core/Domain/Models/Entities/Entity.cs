@@ -16,7 +16,9 @@ public abstract class Entity
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public ICollection<EntityAttribute> BaseAttributes { get; set; } = [];
-    public ICollection<AbilityId> AbilityIds { get; set; } = [];
+    public ICollection<Essence> EquippedEssences { get; set; } = [];
+    [NotMapped]
+    public List<string> AbilityIds { get; set; } = [];
     [NotMapped]
     public List<Ability> Abilities { get; set; } = [];
     [NotMapped]

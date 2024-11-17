@@ -10,8 +10,7 @@ public class CharacterAction
     public Guid CharacterId { get; set; }
     public Character Character { get; set; } = null!;
     public CharacterActionType CharacterActionType { get; set; }
-    public Guid ActionDetailsId { get; set; }
-    public ActionDetails ActionDetails { get; set; }
+    public ActionDetails? ActionDetails { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
     //public bool IsCapped => DateTimeOffset.UtcNow >= UpdatedAt.AddHours(OFFLINE_DURATION);
     [NotMapped]

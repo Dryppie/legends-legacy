@@ -1,10 +1,10 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { NgIf } from '@angular/common';
 import { ProgressBarComponent } from '../../progress-bar/progress-bar.component';
 import { CharacterActionDto } from '../../../models/Dtos/characterActionDto';
 import { Subscription } from 'rxjs';
 import { CharacterActionsService } from '../../../../core/services/character-actions/character-actions.service';
-import { NgIf } from '@angular/common';
-import { CharacterActionType } from '../../../models/enums/CharacterActionType';
+import { CharacterActionType } from '../../../models/enums/characterActionType';
 
 @Component({
   selector: 'app-profession-action',
@@ -18,6 +18,7 @@ export class ProfessionActionComponent implements OnInit, OnDestroy {
   private subscription: Subscription = new Subscription();
   remainingTime: string = '00:00'; // Add a property to track the remaining time
   isGatheringAction = false;
+  performingAction = '';
 
   constructor(private characterActionsService: CharacterActionsService) {}
 
@@ -30,6 +31,7 @@ export class ProfessionActionComponent implements OnInit, OnDestroy {
           CharacterActionType.Gathering
         ) {
           this.isGatheringAction = true;
+          this.performingAction = `Cutting: ${action?.gatheringActionDetails!.name}`;
         } else {
           this.isGatheringAction = false;
         }

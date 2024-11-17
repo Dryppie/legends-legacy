@@ -1,8 +1,10 @@
 ﻿using Domain.Helpers;
+using Domain.Models;
 using Domain.Models.Abilities;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
+using Domain.Models.GatheringNodes;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.LootTables;
@@ -80,71 +82,36 @@ public static class LLDbContextExtensions
             var goblinArcherId = Guid.Parse("00000000-0000-0000-0000-000000000003");
             var largeRatId = Guid.Parse("00000000-0000-0000-0000-000000000004");
 
-            // Create creatures
-            var lumoRuinsCreatures = new List<Creature>
+            var goblinEssence = new Essence()
             {
-                new Creature { Id = goblinId, Name = "Goblin" },
-                new Creature { Id = goblinWarriorId, Name = "Goblin Warrior" },
-                new Creature { Id = goblinArcherId, Name = "Goblin Archer" },
-                new Creature { Id = largeRatId, Name = "Large Rat" }
+                Id = Guid.NewGuid(),
+                EssenceName = "Goblin's Essence",
+                ActiveAbilityId = "sneakAttack",
+                PassiveAbilityId = "pocketDirt"
+            };
+            var goblinWarriorEssence = new Essence()
+            {
+                Id = Guid.NewGuid(),
+                EssenceName = "Goblin Warrior's Essence",
+                ActiveAbilityId = "ragingCleave",
+                PassiveAbilityId = "recklessAssault"
+            };
+            var goblinArcherEssence = new Essence()
+            {
+                Id = Guid.NewGuid(),
+                EssenceName = "Goblin Archer's Warrior",
+                ActiveAbilityId = "snipersStrike",
+                PassiveAbilityId = "poisonedArrows"
+            };
+            var largeRatEssence = new Essence()
+            {
+                Id = Guid.NewGuid(),
+                EssenceName = "Large Rat's Essence",
+                ActiveAbilityId = "tailWrap",
+                PassiveAbilityId = "big",
             };
 
-            await context.Creatures.AddRangeAsync(lumoRuinsCreatures);
-
-            // Create attributes
-            var attributes = new List<EntityAttribute>();
-            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(goblinId));
-            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(goblinWarriorId));
-            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(goblinArcherId));
-            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(largeRatId));
-
-            await context.EntityAttributes.AddRangeAsync(attributes);
-            var abilityIds = new List<AbilityId>()
-            {
-                new AbilityId()
-                {
-                    EntityId = goblinId,
-                    Id = "sneakAttack"
-                },
-                new AbilityId()
-                {
-                    EntityId = goblinId,
-                    Id = "pocketDirt"
-                },
-                new AbilityId()
-                {
-                    EntityId = goblinWarriorId,
-                    Id = "recklessAssault"
-                },
-                new AbilityId()
-                {
-                    EntityId = goblinWarriorId,
-                    Id = "ragingCleave"
-                },
-                new AbilityId()
-                {
-                    EntityId = goblinArcherId,
-                    Id = "poisonedArrows"
-                },
-                new AbilityId()
-                {
-                    EntityId = goblinArcherId,
-                    Id = "snipersStrike"
-                },
-                new AbilityId()
-                {
-                    EntityId = largeRatId,
-                    Id = "big"
-                },
-                new AbilityId()
-                {
-                    EntityId = largeRatId,
-                    Id = "tailWrap"
-                }
-            };
-            await context.AbilityIds.AddRangeAsync(abilityIds);
-
-            var goblinEssence = new Essence
+            var goblinEssenceItem = new EssenceItem
             {
                 Id = Guid.NewGuid(),
                 Name = "Goblin's Essence",
@@ -152,7 +119,7 @@ public static class LLDbContextExtensions
                 ActiveAbilityId = "sneakAttack"
             };
 
-            var goblinWarriorEssence = new Essence
+            var goblinWarriorEssenceItem = new EssenceItem
             {
                 Id = Guid.NewGuid(),
                 Name = "Goblin Warrior's Essence",
@@ -160,7 +127,7 @@ public static class LLDbContextExtensions
                 ActiveAbilityId = "ragingCleave"
             };
 
-            var goblinArcherEssence = new Essence
+            var goblinArcherEssenceItem = new EssenceItem
             {
                 Id = Guid.NewGuid(),
                 Name = "Goblin Archer's Essence",
@@ -168,20 +135,18 @@ public static class LLDbContextExtensions
                 ActiveAbilityId = "snipersStrike"
             };
 
-            var largeRatEssence = new Essence
+            var largeRatEssenceItem = new EssenceItem
             {
                 Id = Guid.NewGuid(),
                 Name = "Large Rat's Essence",
                 PassiveAbilityId = "big",
                 ActiveAbilityId = "tailWrap"
             };
-            // Add items to context
-            await context.Items.AddRangeAsync(goblinEssence, goblinWarriorEssence, goblinArcherEssence, largeRatEssence);
 
-            var goblinEssenceLootTableItem = new LootTableItem { ItemId = goblinEssence.Id, Weight = 2 };
-            var goblinWarriorEssenceLootTableItem = new LootTableItem { ItemId = goblinWarriorEssence.Id, Weight = 1 };
-            var goblinArcherEssenceLootTableItem = new LootTableItem { ItemId = goblinArcherEssence.Id, Weight = 1 };
-            var largeRatEssenceLootTableItem = new LootTableItem { ItemId = largeRatEssence.Id, Weight = 2 };
+            var goblinEssenceLootTableItem = new LootTableItem { ItemId = goblinEssenceItem.Id, Weight = 2 };
+            var goblinWarriorEssenceLootTableItem = new LootTableItem { ItemId = goblinWarriorEssenceItem.Id, Weight = 1 };
+            var goblinArcherEssenceLootTableItem = new LootTableItem { ItemId = goblinArcherEssenceItem.Id, Weight = 1 };
+            var largeRatEssenceLootTableItem = new LootTableItem { ItemId = largeRatEssenceItem.Id, Weight = 2 };
 
             // Create LootTableRarities for Goblin
             var goblinLootTableLegendary = new LootTable
@@ -231,7 +196,30 @@ public static class LLDbContextExtensions
                 Id = Guid.NewGuid(),
                 Entries = [largeRatLootTableLegendary]
             };
+
+
+            await context.Items.AddRangeAsync(goblinEssenceItem, goblinWarriorEssenceItem, goblinArcherEssenceItem, largeRatEssenceItem);
+            await context.Essences.AddRangeAsync(goblinEssence, goblinWarriorEssence, goblinArcherEssence, largeRatEssence);
             await context.LootTables.AddRangeAsync(goblinLootTable, goblinWarriorLootTable, goblinArcherLootTable, largeRatLootTable);
+
+            // Create creatures
+            var lumoRuinsCreatures = new List<Creature>
+            {
+                new Creature { Id = goblinId, Name = "Goblin", LootTableId = goblinLootTable.Id },
+                new Creature { Id = goblinWarriorId, Name = "Goblin Warrior", LootTableId = goblinWarriorLootTable.Id },
+                new Creature { Id = goblinArcherId, Name = "Goblin Archer", LootTableId = goblinArcherLootTable.Id },
+                new Creature { Id = largeRatId, Name = "Large Rat", LootTableId = largeRatLootTable.Id }
+            };
+
+            await context.Creatures.AddRangeAsync(lumoRuinsCreatures);
+
+            // Create attributes
+            var attributes = new List<EntityAttribute>();
+            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(goblinId));
+            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(goblinWarriorId));
+            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(goblinArcherId));
+            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(largeRatId));
+            await context.EntityAttributes.AddRangeAsync(attributes);
 
             if (!context.Regions.Any())
             {
@@ -401,5 +389,11 @@ public static class LLDbContextExtensions
 
         // Add LootTables to context
         await context.LootTables.AddRangeAsync(treeLootTable, oakLootTable, birchLootTable);
+
+        var treeGatheringNode = new GatheringNode { Id = Guid.NewGuid(), Name = "Tree", GatheringType = GatheringType.Woodcutting, LootTableId = treeLootTable.Id };
+        var oakGatheringNode = new GatheringNode { Id = Guid.NewGuid(), Name = "Oak", GatheringType = GatheringType.Woodcutting, LootTableId = oakLootTable.Id };
+        var birchGatheringNode = new GatheringNode { Id = Guid.NewGuid(), Name = "Birch", GatheringType = GatheringType.Woodcutting, LootTableId = birchLootTable.Id };
+
+        await context.GatheringNodes.AddRangeAsync(treeGatheringNode, oakGatheringNode, birchGatheringNode);
     }
 }

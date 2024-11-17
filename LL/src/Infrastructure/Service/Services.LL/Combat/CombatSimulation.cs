@@ -59,8 +59,6 @@ public class CombatSimulation : ICombatContext
         {
             EventLog = _eventLog,
             Outcome = outcome,
-            Loot = GenerateLoot(outcome),
-            ExperienceGained = CalculateExperience(outcome),
             Duration = CurrentTime // CurrentTime 10 equals 1 second
         };
     }
@@ -299,16 +297,6 @@ public class CombatSimulation : ICombatContext
         var random = new Random();
         int index = random.Next(aliveTargets.Count);
         return aliveTargets[index];
-    }
-
-    // Implement loot generation and experience calculation as per your game logic
-    private List<InventoryItem> GenerateLoot(BattleOutcome outcome)
-    {
-        return [];
-    }
-    private int CalculateExperience(BattleOutcome outcome)
-    {
-        return 1;
     }
 
     private BattleOutcome DetermineOutcome()

@@ -1,4 +1,5 @@
-﻿using Domain.Models.Abilities;
+﻿using Domain.Models;
+using Domain.Models.Abilities;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.Entities;
@@ -25,7 +26,8 @@ public interface IDbContext
     DbSet<Creature> Creatures { get; }
     //DbSet<Echo> Echoes { get; }
     DbSet<Entity> Entities { get; }
-
+    DbSet<Essence> Essences { get; }
+    DbSet<EssenceItem> EssenceItems { get; }
     // Effects
     //DbSet<Modifier> Modifiers { get; }
 

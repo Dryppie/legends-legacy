@@ -8,6 +8,8 @@ import {
 } from '../../../models/Dtos/characterActionDto';
 import { Subscription } from 'rxjs';
 import { NgIf } from '@angular/common';
+import { GatheringType } from '../../../models/enums/gatheringType';
+import { CharacterActionType } from '../../../models/enums/characterActionType';
 
 @Component({
   selector: 'app-profession-card',
@@ -17,7 +19,8 @@ import { NgIf } from '@angular/common';
   styleUrl: './profession-card.component.css',
 })
 export class ProfessionCardComponent {
-  @Input() professionNodeLootTable!: string;
+  @Input() gatheringNodeName!: string;
+  @Input() gatheringNodeLootTableId!: string;
   currentAction: CharacterActionDto | null = null;
   private subscription: Subscription = new Subscription();
 
@@ -36,13 +39,16 @@ export class ProfessionCardComponent {
   }
 
   specificCard(): boolean {
-    return this.currentAction?.lootTableId == this.professionNodeLootTable;
+    return this.currentAction?.lootTableId == this.gatheringNodeLootTableId;
   }
 
   startGatheringAction() {
     const gatheringActionDetails: GatheringActionDetails = {
-      lootTableId: this.professionNodeLootTable,
+      name: this.gatheringNodeName,
+      gatheringType: GatheringType.Woodcutting,
+      lootTableId: this.gatheringNodeLootTableId,
     };
+    console.log(this.gatheringNodeLootTableId);
     const startGatheringActionRequest: StartGatheringActionRequest = {
       gatheringActionDetails: gatheringActionDetails,
     };

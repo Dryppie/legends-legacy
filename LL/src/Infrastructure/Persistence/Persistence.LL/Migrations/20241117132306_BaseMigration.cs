@@ -12,6 +12,18 @@ namespace Persistence.LL.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "AbilityIds",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    EntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AbilityIds", x => new { x.Id, x.EntityId });
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
                 {
@@ -53,13 +65,31 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Essences",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EssenceName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PassiveAbilityId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ActiveAbilityId = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Essences", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Items",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ItemType = table.Column<int>(type: "int", nullable: false),
-                    Rarity = table.Column<int>(type: "int", nullable: false)
+                    Rarity = table.Column<int>(type: "int", nullable: false),
+                    ItemTypes = table.Column<int>(type: "int", nullable: false),
+                    DamageType = table.Column<int>(type: "int", nullable: true),
+                    PassiveAbilityId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ActiveAbilityId = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -251,7 +281,8 @@ namespace Persistence.LL.Migrations
                         name: "FK_LootTableEntry_LootTableEntry_LootTableId",
                         column: x => x.LootTableId,
                         principalTable: "LootTableEntry",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -274,31 +305,12 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ActionDetails",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ActionType = table.Column<int>(type: "int", nullable: false),
-                    CharacterTeam = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EnemyTeam = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ActionDetails", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ActionDetails_LootTableEntry_LootTableId",
-                        column: x => x.LootTableId,
-                        principalTable: "LootTableEntry",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "GatheringNodes",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    GatheringType = table.Column<int>(type: "int", nullable: false),
                     LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -322,6 +334,7 @@ namespace Persistence.LL.Migrations
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Experience = table.Column<int>(type: "int", nullable: true),
                     Gold = table.Column<int>(type: "int", nullable: true),
+                    LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     AreaId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -338,22 +351,10 @@ namespace Persistence.LL.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AbilityIds",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    EntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AbilityIds", x => new { x.Id, x.EntityId });
                     table.ForeignKey(
-                        name: "FK_AbilityIds_Entities_EntityId",
-                        column: x => x.EntityId,
-                        principalTable: "Entities",
+                        name: "FK_Entities_LootTableEntry_LootTableId",
+                        column: x => x.LootTableId,
+                        principalTable: "LootTableEntry",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -364,24 +365,17 @@ namespace Persistence.LL.Migrations
                 {
                     CharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CharacterActionType = table.Column<int>(type: "int", nullable: false),
-                    ActionDetailsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CharacterActions", x => x.CharacterId);
                     table.ForeignKey(
-                        name: "FK_CharacterActions_ActionDetails_ActionDetailsId",
-                        column: x => x.ActionDetailsId,
-                        principalTable: "ActionDetails",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_CharacterActions_Entities_CharacterId",
                         column: x => x.CharacterId,
                         principalTable: "Entities",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -404,6 +398,30 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "EntityEssence",
+                columns: table => new
+                {
+                    EntitiesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EquippedEssencesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EntityEssence", x => new { x.EntitiesId, x.EquippedEssencesId });
+                    table.ForeignKey(
+                        name: "FK_EntityEssence_Entities_EntitiesId",
+                        column: x => x.EntitiesId,
+                        principalTable: "Entities",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_EntityEssence_Essences_EquippedEssencesId",
+                        column: x => x.EquippedEssencesId,
+                        principalTable: "Essences",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Inventories",
                 columns: table => new
                 {
@@ -416,6 +434,36 @@ namespace Persistence.LL.Migrations
                         name: "FK_Inventories_Entities_CharacterId",
                         column: x => x.CharacterId,
                         principalTable: "Entities",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ActionDetails",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CharacterActionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ActionType = table.Column<int>(type: "int", nullable: false),
+                    CharacterTeam = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EnemyTeam = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    GatheringType = table.Column<int>(type: "int", nullable: true),
+                    LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ActionDetails", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ActionDetails_CharacterActions_CharacterActionId",
+                        column: x => x.CharacterActionId,
+                        principalTable: "CharacterActions",
+                        principalColumn: "CharacterId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ActionDetails_LootTableEntry_LootTableId",
+                        column: x => x.LootTableId,
+                        principalTable: "LootTableEntry",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -440,9 +488,10 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AbilityIds_EntityId",
-                table: "AbilityIds",
-                column: "EntityId");
+                name: "IX_ActionDetails_CharacterActionId",
+                table: "ActionDetails",
+                column: "CharacterActionId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ActionDetails_LootTableId",
@@ -494,20 +543,24 @@ namespace Persistence.LL.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CharacterActions_ActionDetailsId",
-                table: "CharacterActions",
-                column: "ActionDetailsId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Entities_AreaId",
                 table: "Entities",
                 column: "AreaId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Entities_LootTableId",
+                table: "Entities",
+                column: "LootTableId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Entities_UserId",
                 table: "Entities",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EntityEssence_EquippedEssencesId",
+                table: "EntityEssence",
+                column: "EquippedEssencesId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GatheringNodes_LootTableId",
@@ -542,6 +595,9 @@ namespace Persistence.LL.Migrations
                 name: "AbilityIds");
 
             migrationBuilder.DropTable(
+                name: "ActionDetails");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
             migrationBuilder.DropTable(
@@ -557,10 +613,10 @@ namespace Persistence.LL.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "CharacterActions");
+                name: "EntityAttributes");
 
             migrationBuilder.DropTable(
-                name: "EntityAttributes");
+                name: "EntityEssence");
 
             migrationBuilder.DropTable(
                 name: "GatheringNodes");
@@ -575,22 +631,19 @@ namespace Persistence.LL.Migrations
                 name: "Transaction");
 
             migrationBuilder.DropTable(
+                name: "CharacterActions");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "ActionDetails");
+                name: "Essences");
 
             migrationBuilder.DropTable(
                 name: "Inventories");
 
             migrationBuilder.DropTable(
-                name: "LootTableEntry");
-
-            migrationBuilder.DropTable(
                 name: "Entities");
-
-            migrationBuilder.DropTable(
-                name: "Items");
 
             migrationBuilder.DropTable(
                 name: "Areas");
@@ -599,7 +652,13 @@ namespace Persistence.LL.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
+                name: "LootTableEntry");
+
+            migrationBuilder.DropTable(
                 name: "Regions");
+
+            migrationBuilder.DropTable(
+                name: "Items");
         }
     }
 }

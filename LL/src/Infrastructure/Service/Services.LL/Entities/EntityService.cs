@@ -12,8 +12,8 @@ public class EntityService : IEntityService
         _entityRepository = entityRepository;
     }
 
-    public Task<List<Entity>> GetEntitiesByIdsAsync(List<Guid> entityIds)
+    public Task<List<Entity>> GetEntitiesByIdsForCombatAsync(List<Guid> entityIds)
     {
-        return _entityRepository.GetEntitiesByIdsAsync(entityIds);
+        return _entityRepository.GetEntitiesByIdsForCombatAsync(entityIds);
     }
 }

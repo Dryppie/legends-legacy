@@ -1,7 +1,6 @@
 ﻿namespace Domain.Models.LootTables;
 public class LootTable : LootTableEntry
 {
-    public Guid Id;
     public ICollection<LootTableEntry> Entries { get; set; } = [];
 
     private static readonly Random RandomGenerator = new();
