@@ -22,7 +22,8 @@ public class EntityRepository : IEntityRepository
             .Include(e => e.EquippedEssences)
             .Include(e => (e as Creature).LootTable)
                 .ThenInclude(lt => lt.Entries)
-                .ThenInclude(lt => (lt as LootTable).Entries)
+                .ThenInclude(lt => (lt as LootTable).Entries) // Make sure to include the child LootTable to each creature's LootTable (Rarity tables)
+                .ThenInclude(lte => (lte as LootTableItem).Item) // Make sure to include the items to each LootTableItem
             .Where(e => entityIds.Contains(e.Id))
             .ToListAsync();
 

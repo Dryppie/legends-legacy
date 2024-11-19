@@ -39,7 +39,11 @@ public class CombatSimulation : ICombatContext
             // Process actions for both teams
             ProcessTeamActions(_playerTeam.ToList(), _enemyTeam.ToList(), CurrentTime);
             ProcessTeamActions(_enemyTeam.ToList(), _playerTeam.ToList(), CurrentTime);
-            
+            if (CurrentTime % 10 == 0)
+            {
+                Console.WriteLine("TEST!!!");
+
+            }
             // Advance time
             CurrentTime += TimeStep;
         }

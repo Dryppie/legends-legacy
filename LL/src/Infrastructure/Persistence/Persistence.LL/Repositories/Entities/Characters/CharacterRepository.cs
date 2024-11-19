@@ -1,7 +1,9 @@
 ﻿using Application.Common.Interfaces;
 using Common.Exceptions;
+using Domain.Models;
 using Domain.Models.Abilities;
 using Domain.Models.Entities.Characters;
+using Domain.Models.Inventories;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Entities.Characters;
@@ -22,24 +24,31 @@ public class CharacterRepository : ICharacterRepository
             UserId = userId,
             Name = username
         };
-        _context.Characters.Add(character);
 
         // TODO: This is only temporary, so guests have abilities
 
-        var abilities = new List<AbilityId>()
+        var essences = new List<Essence>()
             {
-                new AbilityId()
+                new Essence()
                 {
-                    EntityId = character.Id,
-                    Id = "fireball_01"
+                    Id = Guid.NewGuid(),
+                    EssenceName = "Starter Essence 1",
+                    ActiveAbilityId = "fireball_01",
+                    PassiveAbilityId = "retaliate_01"
                 },
-                new AbilityId()
+                new Essence()
                 {
-                    EntityId = character.Id,
-                    Id = "heal_01"
+                    Id = Guid.NewGuid(),
+                    EssenceName = "Starter Essence 2",
+                    ActiveAbilityId = "heal_01",
+                    PassiveAbilityId = "pocketDirt"
                 }
             };
-        _context.AbilityIds.AddRange(abilities);
+
+        character.EquippedEssences = essences;
+        await _context.Essences.AddRangeAsync(essences);
+
+        _context.Characters.Add(character);
 
         await _context.SaveChangesAsync(cancellationToken);
 

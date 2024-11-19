@@ -41,27 +41,44 @@ public static class LLDbContextExtensions
                 CharacterId = character.Id,
             };
 
-            context.Characters.Add(character);
-            context.Inventories.Add(inventory);
-
             var attributes = EntityBaseAttributeHelper.CreateEntityAttributes(character.Id);
             await context.EntityAttributes.AddRangeAsync(attributes);
 
-            var abilities = new List<AbilityId>()
+            //var abilities = new List<AbilityId>()
+            //{
+            //    new AbilityId()
+            //    {
+            //        EntityId = character.Id,
+            //        Id = "fireball_01"
+            //    },
+            //    new AbilityId()
+            //    {
+            //        EntityId = character.Id,
+            //        Id = "_01"
+            //    }
+            //};
+            var essences = new List<Essence>()
             {
-                new AbilityId()
+                new Essence()
                 {
-                    EntityId = character.Id,
-                    Id = "fireball_01"
+                    Id = Guid.NewGuid(),
+                    EssenceName = "Starter Essence 1",
+                    ActiveAbilityId = "fireball_01",
+                    PassiveAbilityId = "retaliate_01"
                 },
-                new AbilityId()
+                new Essence()
                 {
-                    EntityId = character.Id,
-                    Id = "heal_01"
+                    Id = Guid.NewGuid(),
+                    EssenceName = "Starter Essence 2",
+                    ActiveAbilityId = "heal_01",
+                    PassiveAbilityId = "pocketDirt"
                 }
             };
 
-            await context.AbilityIds.AddRangeAsync(abilities);
+            character.EquippedEssences = essences;
+            context.Characters.Add(character);
+            context.Inventories.Add(inventory);
+            await context.Essences.AddRangeAsync(essences);
         }
 
         await SeedCreaturesAndLootTablesForShenicRegionLumoRuins(context);
@@ -205,10 +222,10 @@ public static class LLDbContextExtensions
             // Create creatures
             var lumoRuinsCreatures = new List<Creature>
             {
-                new Creature { Id = goblinId, Name = "Goblin", LootTableId = goblinLootTable.Id },
-                new Creature { Id = goblinWarriorId, Name = "Goblin Warrior", LootTableId = goblinWarriorLootTable.Id },
-                new Creature { Id = goblinArcherId, Name = "Goblin Archer", LootTableId = goblinArcherLootTable.Id },
-                new Creature { Id = largeRatId, Name = "Large Rat", LootTableId = largeRatLootTable.Id }
+                new Creature { Id = goblinId, Name = "Goblin", LootTableId = goblinLootTable.Id, EquippedEssences = new List<Essence>() { goblinEssence } },
+                new Creature { Id = goblinWarriorId, Name = "Goblin Warrior", LootTableId = goblinWarriorLootTable.Id, EquippedEssences = new List<Essence>() { goblinWarriorEssence } },
+                new Creature { Id = goblinArcherId, Name = "Goblin Archer", LootTableId = goblinArcherLootTable.Id, EquippedEssences = new List<Essence>() { goblinArcherEssence } },
+                new Creature { Id = largeRatId, Name = "Large Rat", LootTableId = largeRatLootTable.Id, EquippedEssences = new List<Essence>() { largeRatEssence } }
             };
 
             await context.Creatures.AddRangeAsync(lumoRuinsCreatures);

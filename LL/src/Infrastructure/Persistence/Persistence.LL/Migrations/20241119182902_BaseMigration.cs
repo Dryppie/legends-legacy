@@ -401,21 +401,21 @@ namespace Persistence.LL.Migrations
                 name: "EntityEssence",
                 columns: table => new
                 {
-                    EntitiesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    EquippedEssencesId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    EntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EssenceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EntityEssence", x => new { x.EntitiesId, x.EquippedEssencesId });
+                    table.PrimaryKey("PK_EntityEssence", x => new { x.EntityId, x.EssenceId });
                     table.ForeignKey(
-                        name: "FK_EntityEssence_Entities_EntitiesId",
-                        column: x => x.EntitiesId,
+                        name: "FK_EntityEssence_Entities_EntityId",
+                        column: x => x.EntityId,
                         principalTable: "Entities",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_EntityEssence_Essences_EquippedEssencesId",
-                        column: x => x.EquippedEssencesId,
+                        name: "FK_EntityEssence_Essences_EssenceId",
+                        column: x => x.EssenceId,
                         principalTable: "Essences",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -558,9 +558,9 @@ namespace Persistence.LL.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_EntityEssence_EquippedEssencesId",
+                name: "IX_EntityEssence_EssenceId",
                 table: "EntityEssence",
-                column: "EquippedEssencesId");
+                column: "EssenceId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GatheringNodes_LootTableId",

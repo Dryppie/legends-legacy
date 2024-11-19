@@ -132,8 +132,11 @@ public abstract class Entity
     {
         // Create proper formula for taking damage
         CombatAttributes[AttributeType.Health] -= damage;
+        if ("MeleeAttack" == "Tag")
+        {
+            TriggerEffects(TriggerEvent.OnAttacked, attacker, damage);
 
-        TriggerEffects(TriggerEvent.OnAttacked, attacker, damage);
+        }
         TriggerEffects(TriggerEvent.OnHealthChanged, attacker, damage);
 
         if (!IsAlive)

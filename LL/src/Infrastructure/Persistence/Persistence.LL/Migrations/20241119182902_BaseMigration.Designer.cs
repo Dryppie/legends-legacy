@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20241117132306_BaseMigration")]
+    [Migration("20241119182902_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -416,15 +416,15 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("EntityEssence", b =>
                 {
-                    b.Property<Guid>("EntitiesId")
+                    b.Property<Guid>("EntityId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("EquippedEssencesId")
+                    b.Property<Guid>("EssenceId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("EntitiesId", "EquippedEssencesId");
+                    b.HasKey("EntityId", "EssenceId");
 
-                    b.HasIndex("EquippedEssencesId");
+                    b.HasIndex("EssenceId");
 
                     b.ToTable("EntityEssence");
                 });
@@ -776,13 +776,13 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasOne("Domain.Models.Entities.Entity", null)
                         .WithMany()
-                        .HasForeignKey("EntitiesId")
+                        .HasForeignKey("EntityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Domain.Models.Essence", null)
                         .WithMany()
-                        .HasForeignKey("EquippedEssencesId")
+                        .HasForeignKey("EssenceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
