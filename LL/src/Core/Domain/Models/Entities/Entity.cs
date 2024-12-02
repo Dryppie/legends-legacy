@@ -5,7 +5,8 @@ using Domain.Models.Abilities.Effects.Actions;
 using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
-using Domain.Models.DamageTypes;
+using Domain.Models.Damages;
+using Domain.Models.Essences;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -105,7 +106,7 @@ public abstract class Entity
 
     public int BasicAttack(int damage)
     {
-        var weapon = Equipment.FirstOrDefault(e => e.ItemType.Equals(ItemType.Weapon), new Equipment() { DamageType = DamageType.Physical});
+        var weapon = Equipment.FirstOrDefault(e => e.EquipmentType.Equals(EquipmentType.Weapon), new Weapon { DamageType = DamageType.Physical});
 
         damage += (int)CombatAttributes[AttributeType.Strength];
         return damage;

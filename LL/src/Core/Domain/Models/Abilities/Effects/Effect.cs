@@ -3,6 +3,7 @@ using Domain.Models.Abilities.Effects.Conditions;
 using Domain.Models.Abilities.Effects.EffectModifications;
 using Domain.Models.Abilities.Effects.Interval;
 using Domain.Models.Abilities.Effects.Trigger;
+using Domain.Models.Damages;
 using Domain.Models.Entities;
 
 namespace Domain.Models.Abilities.Effects;
@@ -19,9 +20,7 @@ public class Effect
     public bool IsFlatAmount { get; }
     public int Chance { get; }
     public List<EffectModification> EffectModifications { get; } = [];
-    public List<string> Tags { get; } = []; // This could be a list of tags
-                                            // Curse, Poison, Magic, Summon, Permanent, Fire, Lightning, Physical and so on
-                                            // Unsure whether to keep
+    public EffectType EffectType { get; }
     public string Log { get; set; } = string.Empty;
 
     public static event Action<EffectContext> OnEffectExecuted;

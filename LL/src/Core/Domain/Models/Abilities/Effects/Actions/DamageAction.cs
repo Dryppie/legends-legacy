@@ -2,12 +2,16 @@
 using Domain.Interfaces;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
+using Domain.Models.Damages;
 
 namespace Domain.Models.Abilities.Effects.Actions;
 public class DamageAction : IEffectAction
 {
     private readonly int _damageAmount;
     public int Magnitude => _damageAmount;
+    public AttackType AttackType { get; }
+    public DamageType DamageType { get; }
+    public List<DamageTag> DamageTags { get; } = [];
     public AttributeType? DamageScalingAttribute { get; set; }
     public float DamageScalingMultiplier { get; set; }
 

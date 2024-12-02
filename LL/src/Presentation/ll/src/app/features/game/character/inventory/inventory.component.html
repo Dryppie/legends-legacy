@@ -10,15 +10,15 @@
     <app-tab [tabs]="tabLabels" class="flex-none"></app-tab>
 
     <div
-      class="mb-2 grid h-full grid-cols-3 gap-2 overflow-y-auto pt-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-9 2xl:grid-cols-12"
+      class="mb-2 grid h-full grid-cols-3 justify-items-center gap-2 overflow-y-auto pt-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-9 2xl:grid-cols-12"
     >
       <app-inventory-slot
-        *ngFor="let item of items"
-        [item]="item"
+        *ngFor="let inventoryItem of items"
+        [inventoryItem]="inventoryItem"
       ></app-inventory-slot>
       <app-inventory-slot
         *ngFor="let emptySlot of emptySlots"
-        [item]="emptySlot"
+        [inventoryItem]="emptySlot"
       >
       </app-inventory-slot>
     </div>

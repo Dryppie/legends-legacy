@@ -1,6 +1,8 @@
-﻿namespace Domain.Models.Items;
+﻿using Domain.Models.Essences;
+
+namespace Domain.Models.Items;
 public class EssenceItem : Item
 {
-    public string PassiveAbilityId { get; set; } = string.Empty;
-    public string ActiveAbilityId {  get; set; } = string.Empty;
+    public Guid EssenceId { get; set; }
+    public Essence Essence { get; set; } = null!;
 }

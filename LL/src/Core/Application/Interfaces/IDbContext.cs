@@ -1,10 +1,10 @@
-﻿using Domain.Models;
-using Domain.Models.Abilities;
+﻿using Domain.Models.Abilities;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
+using Domain.Models.Essences;
 using Domain.Models.GatheringNodes;
 using Domain.Models.Inventories;
 using Domain.Models.Items;

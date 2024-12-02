@@ -1,9 +1,8 @@
 ﻿using Domain.Helpers;
-using Domain.Models;
-using Domain.Models.Abilities;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
+using Domain.Models.Essences;
 using Domain.Models.GatheringNodes;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
@@ -25,7 +24,8 @@ public static class LLDbContextExtensions
             user = new AppUser
             {
                 UserName = "admin",
-                Email = email
+                Email = email,
+                NormalizedUserName = "admin",
             };
 
             await userManager.CreateAsync(user, "Password123!");
@@ -62,14 +62,14 @@ public static class LLDbContextExtensions
                 new Essence()
                 {
                     Id = Guid.NewGuid(),
-                    EssenceName = "Starter Essence 1",
+                    Name = "Starter Essence 1",
                     ActiveAbilityId = "fireball_01",
                     PassiveAbilityId = "retaliate_01"
                 },
                 new Essence()
                 {
                     Id = Guid.NewGuid(),
-                    EssenceName = "Starter Essence 2",
+                    Name = "Starter Essence 2",
                     ActiveAbilityId = "heal_01",
                     PassiveAbilityId = "pocketDirt"
                 }
@@ -102,28 +102,28 @@ public static class LLDbContextExtensions
             var goblinEssence = new Essence()
             {
                 Id = Guid.NewGuid(),
-                EssenceName = "Goblin's Essence",
+                Name = "Goblin's Essence",
                 ActiveAbilityId = "sneakAttack",
                 PassiveAbilityId = "pocketDirt"
             };
             var goblinWarriorEssence = new Essence()
             {
                 Id = Guid.NewGuid(),
-                EssenceName = "Goblin Warrior's Essence",
+                Name = "Goblin Warrior's Essence",
                 ActiveAbilityId = "ragingCleave",
                 PassiveAbilityId = "recklessAssault"
             };
             var goblinArcherEssence = new Essence()
             {
                 Id = Guid.NewGuid(),
-                EssenceName = "Goblin Archer's Warrior",
+                Name = "Goblin Archer's Warrior",
                 ActiveAbilityId = "snipersStrike",
                 PassiveAbilityId = "poisonedArrows"
             };
             var largeRatEssence = new Essence()
             {
                 Id = Guid.NewGuid(),
-                EssenceName = "Large Rat's Essence",
+                Name = "Large Rat's Essence",
                 ActiveAbilityId = "tailWrap",
                 PassiveAbilityId = "big",
             };
@@ -131,33 +131,29 @@ public static class LLDbContextExtensions
             var goblinEssenceItem = new EssenceItem
             {
                 Id = Guid.NewGuid(),
-                Name = "Goblin's Essence",
-                PassiveAbilityId = "pocketDirt",
-                ActiveAbilityId = "sneakAttack"
+                Name = goblinEssence.Name,
+                Essence = goblinEssence,
             };
 
             var goblinWarriorEssenceItem = new EssenceItem
             {
                 Id = Guid.NewGuid(),
-                Name = "Goblin Warrior's Essence",
-                PassiveAbilityId = "recklessAssault",
-                ActiveAbilityId = "ragingCleave"
+                Name = goblinWarriorEssence.Name,
+                Essence = goblinWarriorEssence,
             };
 
             var goblinArcherEssenceItem = new EssenceItem
             {
                 Id = Guid.NewGuid(),
-                Name = "Goblin Archer's Essence",
-                PassiveAbilityId = "poisonedArrows",
-                ActiveAbilityId = "snipersStrike"
+                Name = goblinArcherEssence.Name,
+                Essence = goblinArcherEssence,
             };
 
             var largeRatEssenceItem = new EssenceItem
             {
                 Id = Guid.NewGuid(),
-                Name = "Large Rat's Essence",
-                PassiveAbilityId = "big",
-                ActiveAbilityId = "tailWrap"
+                Name = largeRatEssence.Name,
+                Essence = largeRatEssence,
             };
 
             var goblinEssenceLootTableItem = new LootTableItem { ItemId = goblinEssenceItem.Id, Weight = 2 };

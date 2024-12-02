@@ -1,7 +1,4 @@
-﻿
-using Domain.Models.Items;
-
-namespace Domain.Models.Inventories;
+﻿namespace Domain.Models.Inventories;
 public interface IInventoryRepository
 {
     /// <summary>

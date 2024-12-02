@@ -11,11 +11,3 @@ export interface SidebarItem {
   description: string;
   rewards?: { icon: string; amount: number }[];
 }
-
-export interface InventoryItem {
-  id: string;
-  name: string;
-  icon: string;
-  description: string;
-  quantity?: number;
-}

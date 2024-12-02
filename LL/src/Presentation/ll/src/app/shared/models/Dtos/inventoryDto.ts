@@ -1,8 +1,5 @@
-export interface InventoryDto {
-  inventoryItems: ItemDto[];
-}
+import { InventoryItem } from '../inventoryItem';
 
-export interface ItemDto {
-  itemId: string;
-  quantity: number;
+export interface InventoryDto {
+  inventoryItems: InventoryItem[];
 }

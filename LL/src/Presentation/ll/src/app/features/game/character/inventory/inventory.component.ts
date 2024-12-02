@@ -1,18 +1,19 @@
-import { NgFor, NgIf } from '@angular/common';
+import { NgFor } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { TabComponent } from '../../../../shared/components/tab/tab.component';
-import { InventoryItem, Tab } from '../../../../shared/models/sidebar-item';
+import { Tab } from '../../../../shared/models/sidebar-item';
 import { InventorySlotComponent } from '../../../../shared/components/inventory-slot/inventory-slot.component';
 import { InventoryService } from '../../../../core/services/inventory/inventory.service';
 import { InventoryDto } from '../../../../shared/models/Dtos/inventoryDto';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
+import { InventoryItem } from '../../../../shared/models/inventoryItem';
+import { EssenceItem } from '../../../../shared/models/item';
 
 @Component({
   selector: 'app-inventory',
   standalone: true,
   imports: [
     NgFor,
-    NgIf,
     TabComponent,
     InventorySlotComponent,
     DefaultHeaderComponent,
@@ -41,7 +42,7 @@ export class InventoryComponent implements OnInit {
   ];
   activeTab: string = '';
   items: InventoryItem[] = [];
-  emptySlots = Array(120).fill(null);
+  emptySlots = Array(180).fill(null);
 
   constructor(private inventoryService: InventoryService) {}
 
@@ -53,15 +54,12 @@ export class InventoryComponent implements OnInit {
     this.inventoryService.getInventory().subscribe({
       next: (inventory: InventoryDto) => {
         // Update the component's items
-        this.items = inventory.inventoryItems.map((item) => ({
-          id: item.itemId, // Assign itemId as the id
-          icon: '', // Assign icons if available or leave empty
-          name: 'Unknown Item', // Replace with actual item name if available from another source
-          description: '', // Add descriptions if needed
-          quantity: item.quantity,
-        }));
+        this.items = inventory.inventoryItems;
+        this.items
+          .map((i) => i)
+          .flatMap((i) => console.log(i.item as EssenceItem));
         // Adjust the number of empty slots based on the items
-        this.emptySlots = Array(90 - this.items.length).fill(null);
+        this.emptySlots = Array(180 - this.items.length).fill(null);
       },
       error: (error) => {
         console.error('Error fetching inventory:', error);

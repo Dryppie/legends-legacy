@@ -1,5 +1,5 @@
-﻿using Domain.Models;
-using Domain.Models.Entities;
+﻿using Domain.Models.Entities;
+using Domain.Models.Essences;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,8 +13,8 @@ public class EntityConfiguration : IEntityTypeConfiguration<Entity>
         .WithMany(e => e.Entities)
         .UsingEntity<Dictionary<string, object>>(
             "EntityEssence",
-            j => j.HasOne<Essence>().WithMany().HasForeignKey("EssenceId"),
-            j => j.HasOne<Entity>().WithMany().HasForeignKey("EntityId")
+            j => j.HasOne<Essence>().WithMany().HasForeignKey("EssenceId").OnDelete(DeleteBehavior.Cascade),
+            j => j.HasOne<Entity>().WithMany().HasForeignKey("EntityId").OnDelete(DeleteBehavior.Restrict)
         );
     }
 }

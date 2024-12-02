@@ -37,13 +37,9 @@ public class CombatSimulation : ICombatContext
         while (CurrentTime < MaxSimulationTime && _playerTeam.Any(c => c.IsAlive) && _enemyTeam.Any(c => c.IsAlive))
         {
             // Process actions for both teams
-            ProcessTeamActions(_playerTeam.ToList(), _enemyTeam.ToList(), CurrentTime);
-            ProcessTeamActions(_enemyTeam.ToList(), _playerTeam.ToList(), CurrentTime);
-            if (CurrentTime % 10 == 0)
-            {
-                Console.WriteLine("TEST!!!");
+            ProcessTeamActions([.. _playerTeam], [.. _enemyTeam], CurrentTime);
+            ProcessTeamActions([.. _enemyTeam], [.. _playerTeam], CurrentTime);
 
-            }
             // Advance time
             CurrentTime += TimeStep;
         }

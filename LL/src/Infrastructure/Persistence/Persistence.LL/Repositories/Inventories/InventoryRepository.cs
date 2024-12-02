@@ -1,6 +1,10 @@
 ﻿using Application.Common.Interfaces;
 using Common.Exceptions;
+using Common.Utilities;
+using Domain.Helpers;
+using Domain.Models.Essences;
 using Domain.Models.Inventories;
+using Domain.Models.Items;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Inventories;
@@ -15,10 +19,20 @@ public class InventoryRepository : IInventoryRepository
     public async Task<Inventory> GetInventoryByIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var inventory = await _context.Inventories
-            .Include(i => i.InventoryItems) // Include the related items
+            .Include(i => i.InventoryItems)
+            .ThenInclude(ii => ii.Item)// Include the related items
+            .ThenInclude(i => (i as EssenceItem).Essence)
             .FirstOrDefaultAsync(i => i.CharacterId == characterId, cancellationToken); // Assuming CharacterId is the foreign key
 
         NotFoundException.ThrowIfNull(inventory, nameof(inventory), characterId);
+
+        foreach (var inventoryItem in inventory.InventoryItems)
+        {
+            if (inventoryItem.Item is EssenceItem essenceItem && essenceItem.Essence != null)
+            {
+                await AbilityLoader.LoadAbilitiesForEssence(essenceItem.Essence);
+            }
+        }
 
         return inventory;
     }

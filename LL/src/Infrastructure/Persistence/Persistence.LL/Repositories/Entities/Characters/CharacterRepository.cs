@@ -1,9 +1,7 @@
 ﻿using Application.Common.Interfaces;
 using Common.Exceptions;
-using Domain.Models;
-using Domain.Models.Abilities;
 using Domain.Models.Entities.Characters;
-using Domain.Models.Inventories;
+using Domain.Models.Essences;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Entities.Characters;
@@ -32,14 +30,14 @@ public class CharacterRepository : ICharacterRepository
                 new Essence()
                 {
                     Id = Guid.NewGuid(),
-                    EssenceName = "Starter Essence 1",
+                    Name = "Starter Essence 1",
                     ActiveAbilityId = "fireball_01",
                     PassiveAbilityId = "retaliate_01"
                 },
                 new Essence()
                 {
                     Id = Guid.NewGuid(),
-                    EssenceName = "Starter Essence 2",
+                    Name = "Starter Essence 2",
                     ActiveAbilityId = "heal_01",
                     PassiveAbilityId = "pocketDirt"
                 }

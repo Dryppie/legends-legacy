@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20241119182902_BaseMigration")]
+    [Migration("20241202200754_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -116,17 +116,25 @@ namespace Persistence.LL.Migrations
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("Domain.Models.Essence", b =>
+            modelBuilder.Entity("Domain.Models.Essences.Essence", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("ActiveAbilityDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ActiveAbilityId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("EssenceName")
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PassiveAbilityDescription")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -184,6 +192,8 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("InventoryId", "ItemId");
+
+                    b.HasIndex("ItemId");
 
                     b.ToTable("InventoryItems");
                 });
@@ -643,7 +653,7 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Items.Item");
 
-                    b.Property<int>("DamageType")
+                    b.Property<int>("EquipmentType")
                         .HasColumnType("int");
 
                     b.HasDiscriminator().HasValue(2);
@@ -653,13 +663,10 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Items.Item");
 
-                    b.Property<string>("ActiveAbilityId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid>("EssenceId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("PassiveAbilityId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasIndex("EssenceId");
 
                     b.HasDiscriminator().HasValue(3);
                 });
@@ -739,8 +746,16 @@ namespace Persistence.LL.Migrations
                     b.HasOne("Domain.Models.Inventories.Inventory", null)
                         .WithMany("InventoryItems")
                         .HasForeignKey("InventoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Items.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Item");
                 });
 
             modelBuilder.Entity("Domain.Models.LootTables.LootTableEntry", b =>
@@ -777,10 +792,10 @@ namespace Persistence.LL.Migrations
                     b.HasOne("Domain.Models.Entities.Entity", null)
                         .WithMany()
                         .HasForeignKey("EntityId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Domain.Models.Essence", null)
+                    b.HasOne("Domain.Models.Essences.Essence", null)
                         .WithMany()
                         .HasForeignKey("EssenceId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -875,6 +890,17 @@ namespace Persistence.LL.Migrations
                     b.Navigation("LootTable");
                 });
 
+            modelBuilder.Entity("Domain.Models.Items.EssenceItem", b =>
+                {
+                    b.HasOne("Domain.Models.Essences.Essence", "Essence")
+                        .WithMany("EssenceItems")
+                        .HasForeignKey("EssenceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Essence");
+                });
+
             modelBuilder.Entity("Domain.Models.LootTables.LootTableItem", b =>
                 {
                     b.HasOne("Domain.Models.Items.Item", "Item")
@@ -894,6 +920,11 @@ namespace Persistence.LL.Migrations
             modelBuilder.Entity("Domain.Models.Entities.Entity", b =>
                 {
                     b.Navigation("BaseAttributes");
+                });
+
+            modelBuilder.Entity("Domain.Models.Essences.Essence", b =>
+                {
+                    b.Navigation("EssenceItems");
                 });
 
             modelBuilder.Entity("Domain.Models.Inventories.Inventory", b =>

@@ -1,20 +1,11 @@
-<div
-  class="group relative flex items-center justify-center"
-  (mouseenter)="showTooltip()"
-  (mouseleave)="hideTooltip()"
->
+<div class="group relative flex w-16 items-center justify-center">
   <img
-    *ngIf="!item"
+    *ngIf="!inventoryItem"
     src="icons/character/inventory/inventoryslot.png"
     class="border-gray-700 rounded object-fill"
   />
-  <img
-    *ngIf="item"
-    src="icons/items/reward-item.png"
-    class="border-gray-700 rounded"
-  />
-  <!-- Quantity Display in the Bottom Right -->
-  <div *ngIf="item" class="absolute bottom-0 rounded-full text-white">
-    {{ item.quantity }}
-  </div>
+  <app-inventory-item
+    *ngIf="inventoryItem"
+    [inventoryItem]="inventoryItem"
+  ></app-inventory-item>
 </div>

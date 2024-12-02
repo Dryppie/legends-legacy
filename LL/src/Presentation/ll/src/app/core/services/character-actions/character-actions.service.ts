@@ -35,11 +35,9 @@ export class CharacterActionsService {
   constructor(
     private apiService: ApiService,
     private combatService: CombatService,
-  ) {
-    this.init();
-  }
+  ) {}
 
-  private init(): void {
+  init(): void {
     if (this.isInitialized) {
       return; // Initialization already done
     }
