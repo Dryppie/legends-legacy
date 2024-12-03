@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { Item } from '../../models/item';
 import { NgClass, NgFor, NgStyle } from '@angular/common';
-import { Rarity } from '../../models/enums/Rarity';
+import { Rarity } from '../../models/enums/rarity';
 
 @Component({
   selector: 'app-tooltip',

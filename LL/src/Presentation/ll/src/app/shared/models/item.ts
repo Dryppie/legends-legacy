@@ -1,5 +1,5 @@
 import { ItemType } from './enums/itemType';
-import { Rarity } from './enums/Rarity';
+import { Rarity } from './enums/rarity';
 import { Essence } from './essence';
 
 export interface Item {
