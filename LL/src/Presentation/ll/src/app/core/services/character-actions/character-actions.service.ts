@@ -188,16 +188,16 @@ export class CharacterActionsService {
 
   setCAT(characterActionType: CharacterActionType): void {
     localStorage.setItem(
-      NamedStorageKeys.CAT,
+      NamedStorageKeys.CharacterActionType,
       JSON.stringify(characterActionType),
     );
   }
 
   getCAT(): string | null {
-    return localStorage.getItem(NamedStorageKeys.CAT);
+    return localStorage.getItem(NamedStorageKeys.CharacterActionType);
   }
 
   clearCAT(): void {
-    localStorage.removeItem(NamedStorageKeys.CAT);
+    localStorage.removeItem(NamedStorageKeys.CharacterActionType);
   }
 }
