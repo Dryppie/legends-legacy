@@ -17,8 +17,8 @@ import {
 } from '../../../shared/models/Dtos/characterActionDto';
 import { environment } from '../../../../environments/environment';
 import { CombatService } from '../combat/combat.service';
-import { CharacterActionType } from '../../../shared/models/enums/characterActionType';
 import { NamedStorageKeys } from '../../common/enums/named-storage-keys';
+import { CharacterActionType } from '../../../shared/models/enums/characterActionType';
 
 @Injectable({
   providedIn: 'root',
@@ -188,16 +188,16 @@ export class CharacterActionsService {
 
   setCAT(characterActionType: CharacterActionType): void {
     localStorage.setItem(
-      NamedStorageKeys.CharacterActionType,
+      NamedStorageKeys.CAT,
       JSON.stringify(characterActionType),
     );
   }
 
   getCAT(): string | null {
-    return localStorage.getItem(NamedStorageKeys.CharacterActionType);
+    return localStorage.getItem(NamedStorageKeys.CAT);
   }
 
   clearCAT(): void {
-    localStorage.removeItem(NamedStorageKeys.CharacterActionType);
+    localStorage.removeItem(NamedStorageKeys.CAT);
   }
 }

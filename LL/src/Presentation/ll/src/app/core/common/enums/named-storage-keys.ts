@@ -1,4 +1,4 @@
 export enum NamedStorageKeys {
   Session = 'session',
-  CharacterActionType = 'cat',
+  CAT = 'cat', // CharacterActionType
 }
