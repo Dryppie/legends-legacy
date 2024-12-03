@@ -9,12 +9,12 @@ import {
   of,
   timer,
 } from 'rxjs';
-import { ApiService } from '../api/api.service'; // Import the shared API service
+import { ApiService } from '../api/api.service';
 import {
   CharacterActionDto,
   StartCombatActionRequest,
   StartGatheringActionRequest,
-} from '../../../shared/models/Dtos/characterActionDto'; // Import CharacterActionDto model
+} from '../../../shared/models/Dtos/characterActionDto';
 import { environment } from '../../../../environments/environment';
 import { CombatService } from '../combat/combat.service';
 import { CharacterActionType } from '../../../shared/models/enums/characterActionType';

@@ -9,7 +9,6 @@ import {
 import { Subscription } from 'rxjs';
 import { NgIf } from '@angular/common';
 import { GatheringType } from '../../../models/enums/gatheringType';
-import { CharacterActionType } from '../../../models/enums/characterActionType';
 
 @Component({
   selector: 'app-profession-card',
