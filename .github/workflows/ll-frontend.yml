@@ -109,7 +109,6 @@ jobs:
         shell: pwsh
         run: |
           docker buildx build `
-            --no-cache `
             --push `
             --file "LL/src/Presentation/ll/Dockerfile" `
             --build-arg name=ll `
