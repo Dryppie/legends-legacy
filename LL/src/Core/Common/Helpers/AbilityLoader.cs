@@ -21,18 +21,6 @@ public static class AbilityLoader
 
         var entityAbilities = abilities.Where(a => ids.Contains(a.Id)).ToList();
         entity.Abilities = entityAbilities;
-        foreach (var ability in entity.Abilities)
-        {
-            ability.RemainingTimeUntilUse = ability.Cooldown;
-            if (ability.Type.Equals(AbilityType.Passive))
-            {
-                foreach(var effect in ability.Effects)
-                {
-                    entity.ActiveEffects.Add(effect);
-                }
-            }
-        }
-
     }
 
     public static async Task LoadAbilitiesForEssence(Essence essence)
@@ -49,7 +37,7 @@ public static class AbilityLoader
     /// </summary>
     /// <param name="tier"></param>
     /// <returns></returns>
-    public static async Task<List<Ability>> _Simulator_PickRandomAbilityCombinations(int tier = 1)
+    public static async Task _Simulator_PickRandomAbilityCombinations(Entity entity, int tier = 1)
     {
         
         // Get all abilities from your data source
@@ -87,7 +75,7 @@ public static class AbilityLoader
             chosenAbilities.Add(chosenActive);
         }
 
-        return chosenAbilities;
+        entity.Abilities = chosenAbilities;
     }
 
 

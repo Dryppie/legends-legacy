@@ -34,6 +34,8 @@ public class CombatSimulation : ICombatContext
 
     public async Task<CombatResult> RunSimulation()
     {
+        ActivatePassiveAbilities([.. _playerTeam, .. _enemyTeam]);
+
         while (CurrentTime < MaxSimulationTime && _playerTeam.Any(c => c.IsAlive) && _enemyTeam.Any(c => c.IsAlive))
         {
             // Process actions for both teams
@@ -58,6 +60,24 @@ public class CombatSimulation : ICombatContext
             Outcome = outcome,
             Duration = CurrentTime // CurrentTime 10 equals 1 second
         };
+    }
+
+    private void ActivatePassiveAbilities(List<Entity> entities)
+    {
+        foreach (var entity in entities)
+        {
+            foreach (var ability in entity.Abilities)
+            {
+                ability.RemainingTimeUntilUse = ability.Cooldown;
+                if (ability.Type.Equals(AbilityType.Passive))
+                {
+                    foreach (var effect in ability.Effects)
+                    {
+                        entity.ActiveEffects.Add(effect);
+                    }
+                }
+            }
+        }
     }
 
     private void ProcessTeamActions(List<Entity> actingTeam, List<Entity> opposingTeam, int currentTime)

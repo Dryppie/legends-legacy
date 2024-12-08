@@ -113,29 +113,15 @@ public class SimulatorService : ISimulatorService
         }
     }
 
-    private async Task PrepareEntitiesForCombat(IEnumerable<Entity> entities)
+    private async Task PrepareEntitiesForCombat(IEnumerable<Entity> entities, int tier)
     {
-        LoadAbilitiesFromEssences(entities);
-
-        // Load abilities
-        var loadedAttributeTasks = entities.Select(entity => Task.Run(() => AbilityLoader.LoadAbilitiesForEntity(entity)));
+        // Load random abilities
+        var attributePickerTasks = entities.Select(entity => Task.Run(() => AbilityLoader._Simulator_PickRandomAbilityCombinations(entity, tier)));
 
         // Calculate attributes
         var calculationTasks = entities.Select(entity => Task.Run(() => AttributeCalculator.CalculateBaseCombatAttributes(entity)));
 
-        await Task.WhenAll(loadedAttributeTasks);
+        await Task.WhenAll(attributePickerTasks);
         await Task.WhenAll(calculationTasks);
-    }
-
-    private void LoadAbilitiesFromEssences(IEnumerable<Entity> entities)
-    {
-        foreach (var entity in entities)
-        {
-            foreach (var essence in entity.EquippedEssences)
-            {
-                entity.AbilityIds.Add(essence.ActiveAbilityId);
-                entity.AbilityIds.Add(essence.PassiveAbilityId);
-            }
-        }
     }
 }
