@@ -1,29 +1,25 @@
-export enum EventType {
-  AbilityUse, // Dryp has cast {Ability}
-  Damage, // Dryp took {Amount} damage
-  DamageOverTime, // Dryp took {Amount} damage // Not sure this should be logged in chat
-  DamageCrit, // Dryp took {Amount} damage
-  Miss, // Dryp missed
-  Parry, // Dryp parried the attack
-  Block, // Dryp blocked the attack, and only took {Amount} damage
-  Heal, // Dryp was healed for {Amount}
-  HealOverTime, // Dryp was healed for {Amount} // Not sure this should be logged in chat
-  HealCrit, // Dryp was healed for {Amount}
-  Summon, // Imp has been summoned
-  SummonExpired, // Imp vanished. Summon effect expired.
-  Buff, // Dryp's strength increased by {Amount}
-  BuffExpired,
-  Debuff, // Dryp's strength decreased by {Amount}
-  DebuffExpired,
-  StatusEffect, // Dryp is stunned
-  StatusEffectExpired, // Dryp is no longer stunned // Is not logged in chat. Maybe something visual instead?
-  Regeneration, // Natural regeneration every x seconds // Is not logged in chat
-  // Add other event types like Lifesteal if needed
-}
+import { ResourceType } from '../enums/resourceType';
 
-export enum ResourceType {
-  Mana,
-  Health,
+export enum EventType {
+  AbilityUse = 'AbilityUse', // Dryp has cast {Ability}
+  Damage = 'Damage', // Dryp took {Amount} damage
+  DamageOverTime = 'DamageOverTime', // Dryp took {Amount} damage // Not sure this should be logged in chat
+  DamageCrit = 'DamageCrit', // Dryp took {Amount} damage
+  Miss = 'Miss', // Dryp missed
+  Parry = 'Parry', // Dryp parried the attack
+  Block = 'Block', // Dryp blocked the attack, and only took {Amount} damage
+  Heal = 'Heal', // Dryp was healed for {Amount}
+  HealOverTime = 'HealOverTime', // Dryp was healed for {Amount} // Not sure this should be logged in chat
+  HealCrit = 'HealCrit', // Dryp was healed for {Amount}
+  Summon = 'Summon', // Imp has been summoned
+  SummonExpired = 'SummonExpired', // Imp vanished. Summon effect expired.
+  Buff = 'Buff', // Dryp's strength increased by {Amount}
+  BuffExpired = 'BuffExpired',
+  Debuff = 'Debuff', // Dryp's strength decreased by {Amount}
+  DebuffExpired = 'DebuffExpired',
+  StatusEffect = 'StatusEffect', // Dryp is stunned
+  StatusEffectExpired = 'StatusEffectExpired', // Dryp is no longer stunned // Is not logged in chat. Maybe something visual instead?
+  Regeneration = 'Regeneration', // Natural regeneration every x seconds // Is not logged in chat
 }
 
 export interface CombatEvent {

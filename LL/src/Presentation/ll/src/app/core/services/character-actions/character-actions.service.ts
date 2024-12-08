@@ -52,7 +52,7 @@ export class CharacterActionsService {
   }
 
   startCombatAction(startCombatActionRequest: StartCombatActionRequest): void {
-    this.setCAT(CharacterActionType.Gathering);
+    this.setCAT(CharacterActionType.Combat);
     this.apiService
       .post('CharacterActions/StartCombat', startCombatActionRequest)
       .pipe(
@@ -67,7 +67,7 @@ export class CharacterActionsService {
   }
 
   startGatheringAction(gatheringAction: StartGatheringActionRequest): void {
-    this.setCAT(CharacterActionType.Combat);
+    this.setCAT(CharacterActionType.Gathering);
     this.apiService
       .post('CharacterActions/StartGathering', gatheringAction)
       .pipe(

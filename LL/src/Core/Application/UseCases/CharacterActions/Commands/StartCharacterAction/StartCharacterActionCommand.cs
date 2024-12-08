@@ -16,6 +16,11 @@ public class StartCharacterActionCommandHandler : IRequestHandler<StartCharacter
     public async Task<bool> Handle(StartCharacterActionCommand request, CancellationToken cancellationToken)
     {
         var characterAction = new CharacterAction(request.CharacterId, request.CharacterActionType, request.ActionDetails);
+        if (characterAction.ActionDetails is GatheringActionDetails gatheringAction)
+        {
+            gatheringAction.LootTable = null;
+        }
+
         if (characterAction.ActionDetails is CombatActionDetails combatAction)
         {
             combatAction.CharacterTeam = new List<Guid>()

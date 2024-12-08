@@ -1,4 +1,4 @@
-<div *ngIf="!currentAction || currentAction.characterActionType !== 0">
+<div *ngIf="!currentAction || currentAction.characterActionType !== 'Combat'">
   <h1 class="text-primary">{{ region.name }}</h1>
   <div *ngFor="let area of region.areas">
     <div class="text-primary">{{ area.name }}</div>
@@ -7,5 +7,7 @@
 </div>
 
 <app-combat
-  *ngIf="currentAction != null && currentAction.characterActionType === 0"
+  *ngIf="
+    currentAction != null && currentAction.characterActionType === 'Combat'
+  "
 ></app-combat>

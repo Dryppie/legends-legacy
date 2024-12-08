@@ -58,10 +58,10 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
             .HasValue<Creature>(3);
 
         modelBuilder.Entity<Item>()
-            .HasDiscriminator<int>("ItemTypes")
-            .HasValue<Item>(1)
-            .HasValue<Equipment>(2)
-            .HasValue<EssenceItem>(3);
+            .HasDiscriminator<ItemType>("ItemType")
+            .HasValue<Item>(ItemType.Misc)
+            .HasValue<Equipment>(ItemType.Equipment)
+            .HasValue<EssenceItem>(ItemType.Essence);
 
         modelBuilder.Entity<ActionDetails>()
             .HasDiscriminator<CharacterActionType>("ActionType")

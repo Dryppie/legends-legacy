@@ -133,6 +133,8 @@ public static class LLDbContextExtensions
                 Id = Guid.NewGuid(),
                 Name = goblinEssence.Name,
                 Essence = goblinEssence,
+                ItemType = ItemType.Essence,
+                Rarity = Rarity.Unique
             };
 
             var goblinWarriorEssenceItem = new EssenceItem
@@ -140,6 +142,8 @@ public static class LLDbContextExtensions
                 Id = Guid.NewGuid(),
                 Name = goblinWarriorEssence.Name,
                 Essence = goblinWarriorEssence,
+                ItemType = ItemType.Essence,
+                Rarity = Rarity.Unique
             };
 
             var goblinArcherEssenceItem = new EssenceItem
@@ -147,6 +151,8 @@ public static class LLDbContextExtensions
                 Id = Guid.NewGuid(),
                 Name = goblinArcherEssence.Name,
                 Essence = goblinArcherEssence,
+                ItemType = ItemType.Essence,
+                Rarity = Rarity.Unique
             };
 
             var largeRatEssenceItem = new EssenceItem
@@ -154,6 +160,8 @@ public static class LLDbContextExtensions
                 Id = Guid.NewGuid(),
                 Name = largeRatEssence.Name,
                 Essence = largeRatEssence,
+                ItemType = ItemType.Essence,
+                Rarity = Rarity.Unique
             };
 
             var goblinEssenceLootTableItem = new LootTableItem { ItemId = goblinEssenceItem.Id, Weight = 2 };
@@ -401,7 +409,7 @@ public static class LLDbContextExtensions
         };
 
         // Add LootTables to context
-        await context.LootTables.AddRangeAsync(treeLootTable, oakLootTable, birchLootTable);
+        await context.LootTables.AddRangeAsync(treeLootTable, treeLootTableCommon, treeLootTableLegendary, oakLootTable, oakLootTableCommon, oakLootTableLegendary, birchLootTable, birchLootTableCommon, birchLootTableRare, birchLootTableLegendary);
 
         var treeGatheringNode = new GatheringNode { Id = Guid.NewGuid(), Name = "Tree", GatheringType = GatheringType.Woodcutting, LootTableId = treeLootTable.Id };
         var oakGatheringNode = new GatheringNode { Id = Guid.NewGuid(), Name = "Oak", GatheringType = GatheringType.Woodcutting, LootTableId = oakLootTable.Id };

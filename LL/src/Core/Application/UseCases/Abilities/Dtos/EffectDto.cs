@@ -1,0 +1,24 @@
+﻿using Application.Common.Mappings;
+using AutoMapper;
+using Domain.Interfaces;
+using Domain.Models.Abilities;
+using Domain.Models.Abilities.Effects;
+using Domain.Models.Abilities.Effects.Trigger;
+
+namespace Application.UseCases.Abilities.Dtos;
+public class EffectDto : IMapFrom<Effect>
+{
+    public IEffectAction Action { get; }
+    public IEffectDuration Duration { get; }
+    public Targeting Targeting { get; }
+    public TriggerEvent Trigger { get; }
+    public IEffectInterval Interval { get; }
+    public IEffectCondition Condition { get; }
+    public int Chance { get; }
+    public EffectType EffectType { get; }
+
+    public void Mapping(Profile profile)
+    {
+        profile.CreateMap<Effect, EffectDto>();
+    }
+}

@@ -119,19 +119,11 @@ namespace Persistence.LL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ActiveAbilityDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("ActiveAbilityId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PassiveAbilityDescription")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -201,10 +193,11 @@ namespace Persistence.LL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("ItemType")
-                        .HasColumnType("int");
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ItemTypes")
+                    b.Property<int>("ItemType")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -218,7 +211,7 @@ namespace Persistence.LL.Migrations
 
                     b.ToTable("Items");
 
-                    b.HasDiscriminator<int>("ItemTypes").HasValue(1);
+                    b.HasDiscriminator<int>("ItemType").HasValue(4);
 
                     b.UseTphMappingStrategy();
                 });
@@ -653,7 +646,7 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("EquipmentType")
                         .HasColumnType("int");
 
-                    b.HasDiscriminator().HasValue(2);
+                    b.HasDiscriminator().HasValue(0);
                 });
 
             modelBuilder.Entity("Domain.Models.Items.EssenceItem", b =>

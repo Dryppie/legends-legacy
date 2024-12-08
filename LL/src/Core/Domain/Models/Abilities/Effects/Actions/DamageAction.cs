@@ -15,11 +15,14 @@ public class DamageAction : IEffectAction
     public AttributeType? DamageScalingAttribute { get; set; }
     public float DamageScalingMultiplier { get; set; }
 
-    public DamageAction(int damageAmount, AttributeType? damageScalingAttribute, float damageScalingMultiplier)
+    public DamageAction(int damageAmount, AttributeType? damageScalingAttribute, float damageScalingMultiplier, AttackType attackType, DamageType damageType, List<DamageTag> damageTags)
     {
         _damageAmount = damageAmount;
         DamageScalingAttribute = damageScalingAttribute;
         DamageScalingMultiplier = damageScalingMultiplier;
+        AttackType = attackType;
+        DamageType = damageType;
+        DamageTags = damageTags;
     }
 
     public void Execute(EffectContext context, Action<EffectContext> action)

@@ -1,17 +1,22 @@
 import { Component, Input } from '@angular/core';
-import { Item } from '../../models/item';
+import { Item } from '../../../models/item';
 import { NgClass, NgFor, NgStyle } from '@angular/common';
-import { Rarity } from '../../models/enums/rarity';
+import { Rarity } from '../../../models/enums/rarity';
+import { ItemType } from '../../../models/enums/itemType';
 
 @Component({
-  selector: 'app-tooltip',
+  selector: 'app-item-tooltip',
   standalone: true,
-  imports: [NgFor, NgClass],
-  templateUrl: './tooltip.component.html',
-  styleUrl: './tooltip.component.css',
+  imports: [NgClass],
+  templateUrl: './itemTooltip.component.html',
+  styleUrl: './itemTooltip.component.css',
 })
-export class TooltipComponent {
+export class ItemTooltipComponent {
   @Input() item!: Item;
+  @Input() title!: string;
+  @Input() rarity!: Rarity;
+  @Input() itemType!: ItemType;
+  @Input() description!: string;
 
   get rarityClasses() {
     switch (this.item.rarity) {

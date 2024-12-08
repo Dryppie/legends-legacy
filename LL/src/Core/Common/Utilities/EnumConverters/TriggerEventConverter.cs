@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Common.Utilities;
+namespace Common.Utilities.EnumConverters;
 public class TriggerEventConverter : JsonConverter<TriggerEvent>
 {
     public override TriggerEvent Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)

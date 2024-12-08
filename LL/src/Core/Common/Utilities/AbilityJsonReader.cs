@@ -1,5 +1,7 @@
-﻿using Domain.Models.Abilities;
+﻿using Common.Utilities.EnumConverters;
+using Domain.Models.Abilities;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Common.Utilities;
 public static class AbilityJsonReader
@@ -13,6 +15,7 @@ public static class AbilityJsonReader
             new TargetingConverter(),
             new TriggerEventConverter(),
             new InterfaceConverterFactory(),
+            new JsonStringEnumConverter()
         },
         PropertyNameCaseInsensitive = true,
     };

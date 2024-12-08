@@ -1,9 +1,9 @@
 ﻿using Domain.Interfaces;
+using Domain.Models.Abilities.Effects.Actions;
 using Domain.Models.Abilities.Effects.Conditions;
 using Domain.Models.Abilities.Effects.EffectModifications;
 using Domain.Models.Abilities.Effects.Interval;
 using Domain.Models.Abilities.Effects.Trigger;
-using Domain.Models.Damages;
 using Domain.Models.Entities;
 
 namespace Domain.Models.Abilities.Effects;
@@ -20,7 +20,16 @@ public class Effect
     public bool IsFlatAmount { get; }
     public int Chance { get; }
     public List<EffectModification> EffectModifications { get; } = [];
-    public EffectType EffectType { get; }
+    public EffectType EffectType => Action switch
+    {
+        ApplyStatusEffectAction => EffectType.StatusEffect,
+        DamageAction => EffectType.Damage,
+        HealingAction => EffectType.Healing,
+        ModifyAttributeAction => EffectType.ModifyAttribute,
+        SummonAction => EffectType.Summon,
+        _ => throw new NotSupportedException($"Unsupported action type {Action?.GetType().Name}")
+    };
+
     public string Log { get; set; } = string.Empty;
 
     public static event Action<EffectContext> OnEffectExecuted;

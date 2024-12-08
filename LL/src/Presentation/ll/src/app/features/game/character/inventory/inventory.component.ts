@@ -55,9 +55,9 @@ export class InventoryComponent implements OnInit {
       next: (inventory: InventoryDto) => {
         // Update the component's items
         this.items = inventory.inventoryItems;
-        this.items
-          .map((i) => i)
-          .flatMap((i) => console.log(i.item as EssenceItem));
+        let test = this.items[0];
+        let test1 = test.item;
+        console.log(test1 as EssenceItem);
         // Adjust the number of empty slots based on the items
         this.emptySlots = Array(180 - this.items.length).fill(null);
       },

@@ -71,9 +71,7 @@ namespace Persistence.LL.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PassiveAbilityId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PassiveAbilityDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ActiveAbilityId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ActiveAbilityDescription = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ActiveAbilityId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -248,9 +246,9 @@ namespace Persistence.LL.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ItemType = table.Column<int>(type: "int", nullable: false),
                     Rarity = table.Column<int>(type: "int", nullable: false),
-                    ItemTypes = table.Column<int>(type: "int", nullable: false),
                     EquipmentType = table.Column<int>(type: "int", nullable: true),
                     EssenceId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },

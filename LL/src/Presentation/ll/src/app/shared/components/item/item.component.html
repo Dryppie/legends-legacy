@@ -6,10 +6,14 @@
   <img src="icons/items/reward-item.png" class="border-gray-700 rounded" />
   <!-- Additional item details -->
   <ng-container *ngIf="itemHovered">
-    <app-tooltip
+    <app-item-tooltip
       *ngIf="itemHovered"
       [item]="item"
+      [title]="item.name"
+      [itemType]="item.itemType"
+      [rarity]="item.rarity"
+      [description]="item.description"
       class="absolute z-10 transform"
-    ></app-tooltip>
+    ></app-item-tooltip>
   </ng-container>
 </div>

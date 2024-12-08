@@ -12,7 +12,10 @@
           "Type": "Damage",
           "Amount": 5,
           "ScalingAttribute": "Agility",
-          "ScalingMultiplier": 0.1
+          "ScalingMultiplier": 0.1,
+          "AttackType": "Melee",
+          "DamageType": "Physical",
+          "DamageTags": ["Piercing"]
         },
         "Duration": {
           "Type": "TimedDuration",
@@ -25,7 +28,10 @@
       {
         "Action": {
           "Type": "Damage",
-          "Amount": 1
+          "Amount": 1,
+          "AttackType": "DamageOverTime",
+          "DamageType": "Bleed",
+          "DamageTags": []
         },
         "Duration": {
           "Type": "TimedDuration",
@@ -79,7 +85,10 @@
       {
         "Action": {
           "Type": "Damage",
-          "Amount": 8
+          "Amount": 8,
+          "AttackType": "Melee",
+          "DamageType": "Physical",
+          "DamageTags": ["Slashing"]
         },
         "Duration": {
           "Type": "TimedDuration",
@@ -140,7 +149,10 @@
       {
         "Action": {
           "Type": "Damage",
-          "Amount": 2
+          "Amount": 2,
+          "AttackType": "Ranged",
+          "DamageType": "Poison",
+          "DamageTags": ["Arrows"]
         },
         "Duration": {
           "Type": "TimedDuration",
@@ -169,7 +181,10 @@
       {
         "Action": {
           "Type": "Damage",
-          "Amount": 15
+          "Amount": 15,
+          "AttackType": "Ranged",
+          "DamageType": "Physical",
+          "DamageTags": ["Arrows"]
         },
         "Duration": {
           "Type": "TimedDuration",
@@ -197,7 +212,10 @@
       {
         "Action": {
           "Type": "Damage",
-          "Amount": 12
+          "Amount": 12,
+          "AttackType": "Melee",
+          "DamageType": "Physical",
+          "DamageTags": ["Blunt"]
         },
         "Duration": {
           "Type": "TimedDuration",
@@ -273,7 +291,10 @@
       {
         "Action": {
           "Type": "Damage",
-          "Amount": 22
+          "Amount": 22,
+          "AttackType": "Ranged",
+          "DamageType": "Magical",
+          "DamageTags": ["Spells"]
         },
         "Duration": {
           "Type": "TimedDuration",
@@ -286,7 +307,10 @@
       {
         "Action": {
           "Type": "Damage",
-          "Amount": 8
+          "Amount": 8,
+          "AttackType": "DamageOverTime",
+          "DamageType": "Burn",
+          "DamageTags": []
         },
         "Duration": {
           "Type": "TimedDuration",

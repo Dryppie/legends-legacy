@@ -16,17 +16,17 @@ export class WoodcuttingComponent {
     {
       id: '1',
       name: 'Tree',
-      lootTableId: 'dfbb3a5b-8ea1-47ab-b71d-92f1dbb4cc85',
+      lootTableId: '825e73e6-d1cd-41c0-9ed8-9980da8ec3b1',
     },
     {
       id: '1',
       name: 'Oak Tree',
-      lootTableId: '34fe102f-139e-4701-af3f-209b9899ef8e',
+      lootTableId: '8d858bf1-7ae1-4210-bdfa-c23f44a56a45',
     },
     {
       id: '1',
       name: 'Birch Tree',
-      lootTableId: '613cb7d0-5a81-45df-b630-03d26f7973b4',
+      lootTableId: 'a80e547f-f4ed-4697-8eb2-73249c85d957',
     },
   ];
 }

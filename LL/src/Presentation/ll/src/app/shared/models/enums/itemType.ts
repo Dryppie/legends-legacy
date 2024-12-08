@@ -1,6 +1,6 @@
 export enum ItemType {
-  Equipment,
-  Consumable,
-  Material,
-  Essence,
+  Equipment = 'Equipment',
+  Consumable = 'Consumable',
+  Material = 'Material',
+  Essence = 'Essence',
 }

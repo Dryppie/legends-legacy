@@ -1,12 +1,12 @@
 import { Component, HostListener, Input } from '@angular/core';
 import { Item } from '../../models/item';
 import { NgIf } from '@angular/common';
-import { TooltipComponent } from '../tooltip/tooltip.component';
+import { ItemTooltipComponent } from '../tooltips/item-tooltip/itemTooltip.component';
 
 @Component({
   selector: 'app-item',
   standalone: true,
-  imports: [TooltipComponent, NgIf],
+  imports: [NgIf, ItemTooltipComponent],
   templateUrl: './item.component.html',
   styleUrl: './item.component.css',
 })

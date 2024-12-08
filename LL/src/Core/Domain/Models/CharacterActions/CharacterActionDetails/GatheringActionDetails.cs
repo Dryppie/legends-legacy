@@ -7,5 +7,5 @@ public class GatheringActionDetails : ActionDetails
     public string Name { get; set; } = string.Empty;
     public GatheringType GatheringType { get; set; }
     public Guid LootTableId { get; set; }
-    public LootTable LootTable { get; set; } = new();
+    public LootTable? LootTable { get; set; }
 }

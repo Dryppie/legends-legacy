@@ -2,6 +2,7 @@
 using Common.Exceptions;
 using Domain.Models.LootTables;
 using Microsoft.EntityFrameworkCore;
+using Persistence.LL.Extensions;
 
 namespace Persistence.LL.Repositories.LootTables;
 public class LootTableRepository : ILootTableRepository
@@ -15,8 +16,10 @@ public class LootTableRepository : ILootTableRepository
 
     public async Task<LootTable> GetLootTableByIdAsync(Guid lootTableId, CancellationToken cancellationToken)
     {
-        var lootTable = await _context.LootTables.Include(lt => lt.Entries)
+        var lootTable = await _context.LootTables
+            .IncludeAllEntries() // LootTable Extension for nested loot tables and items
             .FirstOrDefaultAsync(lt => lt.Id.Equals(lootTableId), cancellationToken);
+
         NotFoundException.ThrowIfNull(lootTable, nameof(lootTable), lootTableId);
 
         return lootTable;

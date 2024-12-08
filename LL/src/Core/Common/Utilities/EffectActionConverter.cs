@@ -2,6 +2,7 @@
 using Domain.Models.Abilities.Effects.Actions;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
+using Domain.Models.Damages;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -37,7 +38,36 @@ public class EffectActionConverter : JsonConverter<IEffectAction>
                         damageScalingMultiplier = damageScalingMultElement.GetSingle();
                     }
 
-                    return new DamageAction(damageAmount, damageScalingAttribute, damageScalingMultiplier);
+                    // Read AttackType
+                    AttackType attackType = AttackType.Melee; // default if not specified
+                    if (root.TryGetProperty("AttackType", out var attackTypeElement))
+                    {
+                        var attackTypeStr = attackTypeElement.GetString()!;
+                        attackType = Enum.Parse<AttackType>(attackTypeStr, ignoreCase: true);
+                    }
+
+                    // Read DamageType
+                    DamageType damageType = DamageType.Physical; // default if not specified
+                    if (root.TryGetProperty("DamageType", out var damageTypeElement))
+                    {
+                        var damageTypeStr = damageTypeElement.GetString()!;
+                        damageType = Enum.Parse<DamageType>(damageTypeStr, ignoreCase: true);
+                    }
+
+                    // Read DamageTags (if any)
+                    var damageTags = new List<DamageTag>();
+                    if (root.TryGetProperty("DamageTags", out var damageTagsElement) && damageTagsElement.ValueKind == JsonValueKind.Array)
+                    {
+                        foreach (var tagElement in damageTagsElement.EnumerateArray())
+                        {
+                            var tagStr = tagElement.GetString()!;
+                            var damageTag = Enum.Parse<DamageTag>(tagStr, ignoreCase: true);
+                            damageTags.Add(damageTag);
+                        }
+                    }
+
+                    return new DamageAction(damageAmount, damageScalingAttribute, damageScalingMultiplier, attackType, damageType, damageTags);
+
 
 
                 case "Healing":

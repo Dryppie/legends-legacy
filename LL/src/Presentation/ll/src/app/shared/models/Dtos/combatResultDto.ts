@@ -19,7 +19,7 @@ export interface CombatEntityDto {
 }
 
 export enum BattleOutcome {
-  Victory,
-  Defeat,
-  Draw,
+  Victory = 'Victory',
+  Defeat = 'Defeat',
+  Draw = 'Draw',
 }

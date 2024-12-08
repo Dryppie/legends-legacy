@@ -1,3 +1,7 @@
+import { EffectType } from './enums/effectType';
+import { ResourceType } from './enums/resourceType';
+import { Targeting } from './enums/targeting';
+
 export interface Essence {
   name: string;
   activeAbility: Ability;
@@ -6,50 +10,35 @@ export interface Essence {
 
 export interface Ability {
   name: string;
-  attackType: AttackType;
-  damageType: DamageType;
-  damageTags: DamageTag[];
+  effectTypes: EffectType[];
+  description: string;
+  attackType?: AttackType;
+  damageType?: DamageType;
+  damageTags?: DamageTag[];
   targeting: Targeting[];
   cooldown: number;
   cost: number;
+  resourceCost: ResourceType;
 }
 
 export enum AttackType {
-  Melee,
-  Ranged,
-  DamageOverTime,
+  Melee = 'Melee',
+  Ranged = 'Ranged',
+  DamageOverTime = 'DamageOverTime',
 }
 
 export enum DamageType {
-  Physical,
-  Magical,
-  Bleed,
-  Burn,
-  Poison,
+  Physical = 'Physical',
+  Magical = 'Magical',
+  Bleed = 'Bleed',
+  Burn = 'Burn',
+  Poison = 'Poison',
 }
 
 export enum DamageTag {
-  Slashing,
-  Blunt,
-  Piercing,
-  Arrows,
-  Spells,
-}
-
-export enum Targeting {
-  None,
-  Self,
-  SingleEnemy,
-  SingleAlly,
-  TwoEnemies,
-  TwoAllies,
-  SingleDeadEnemy,
-  SingleDeadAlly,
-  SingleRandomEnemy,
-  SingleRandomAlly,
-  SingleEnemyLowestHealth,
-  SingleAllyLowestHealth,
-  AllEnemies,
-  AllAllies,
-  AllAlliesAndSelf,
+  Slashing = 'Slashing',
+  Blunt = 'Blunt',
+  Piercing = 'Piercing',
+  Arrows = 'Arrows',
+  Spells = 'Spells',
 }
