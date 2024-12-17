@@ -11,9 +11,9 @@ public class Essence
     public string PassiveAbilityId { get; set; } = string.Empty;
     public string ActiveAbilityId { get; set; } = string.Empty;
     [NotMapped]
-    public Ability PassiveAbility { get; set; } = null!;
+    public Ability Passive { get; set; } = null!;
     [NotMapped]
-    public Ability ActiveAbility { get; set; } = null!;
+    public Ability Active { get; set; } = null!;
 
     public ICollection<Entity> Entities { get; set; } = [];
     public ICollection<EssenceItem> EssenceItems { get; set; } = new List<EssenceItem>();

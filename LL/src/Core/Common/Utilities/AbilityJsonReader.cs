@@ -1,5 +1,5 @@
 ﻿using Common.Utilities.EnumConverters;
-using Domain.Models.Abilities;
+using Domain.Models.Essences;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -20,8 +20,8 @@ public static class AbilityJsonReader
         PropertyNameCaseInsensitive = true,
     };
 
-    public static Ability ReadFromJson(string json)
+    public static Essence ReadFromJson(string json)
     {
-        return JsonSerializer.Deserialize<Ability>(json, Options)!;
+        return JsonSerializer.Deserialize<Essence>(json, Options)!;
     }
 }

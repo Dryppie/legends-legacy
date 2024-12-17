@@ -1,5 +1,5 @@
 ﻿using Common.Utilities;
-using Domain.Models.Abilities;
+using Domain.Models.Essences;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
@@ -19,9 +19,9 @@ public class AbilityController : BaseController
 
         string json = await System.IO.File.ReadAllTextAsync(filePath);
 
-        // Deserialize JSON into a list of abilities
-        List<Ability> abilities = JsonSerializer.Deserialize<List<Ability>>(json, AbilityJsonReader.Options)!;
+        // Deserialize JSON into a list of essences
+        List<Essence> essences = JsonSerializer.Deserialize<List<Essence>>(json, AbilityJsonReader.Options)!;
 
-        return Ok(abilities);
+        return Ok(essences);
     }
 }

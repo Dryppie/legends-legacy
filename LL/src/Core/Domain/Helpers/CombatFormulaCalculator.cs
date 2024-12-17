@@ -85,7 +85,7 @@ public static class CombatFormulaCalculator
 
     private static bool IsCriticalHit(Entity attacker, Entity defender)
     {
-        var critChance = attacker.CombatAttributes[AttributeType.CritChance] - defender.CombatAttributes[AttributeType.CritResistance];
+        var critChance = attacker.CombatAttributes[AttributeType.CritChance];
 
         float roll = (float)RandomGenerator.NextDouble() * 100f;
         return roll < critChance;
@@ -100,6 +100,7 @@ public static class CombatFormulaCalculator
     private static int CalculateDamageReceived(Entity defender, float magnitude, AttackOutcome attackOutcome)
     {
         if (attackOutcome.Equals(AttackOutcome.Block)) return (int)(magnitude * 0.6f);
+        if (attackOutcome.Equals(AttackOutcome.Crit)) return (int)(magnitude * defender.CombatAttributes[AttributeType.CritDamageReduction]);
         return (int)magnitude;
     }
 }

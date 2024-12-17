@@ -40,8 +40,8 @@ public class ItemDto : IMapFrom<Item>
             if (source is EssenceItem essenceItem && essenceItem.Essence != null)
             {
                 // Build description from ActiveAbility and PassiveAbility
-                var activeAbility = essenceItem.Essence.ActiveAbility.Description ?? "No Active Ability";
-                var passiveAbility = essenceItem.Essence.PassiveAbility.Description ?? "No Passive Ability";
+                var activeAbility = essenceItem.Essence.Active.Description ?? "No Active Ability";
+                var passiveAbility = essenceItem.Essence.Passive.Description ?? "No Passive Ability";
 
                 return $"Active: {activeAbility}\n\nPassive: {passiveAbility}";
             }

@@ -1,6 +1,7 @@
 ﻿using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL;
 using Microsoft.Extensions.DependencyInjection;
+using Services.LL._Simulator;
 using Services.LL.Attributes;
 using Services.LL.Authorization;
 using Services.LL.CharacterActions;
@@ -43,6 +44,9 @@ public static class DependencyInjection
 
         //services.AddSingleton(typeof(IJobQueue<>), typeof(ConcurrentJobQueue<>));
         //services.AddHostedService<CombatJobBackgroundService>();
+
+
+        services.AddScoped<ISimulatorService, SimulatorService>();
 
         return services;
     }

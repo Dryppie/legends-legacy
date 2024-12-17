@@ -149,7 +149,7 @@ public class CombatService : ICombatService
         LoadAbilitiesFromEssences(entities);
 
         // Load abilities
-        var loadedAttributeTasks = entities.Select(entity => Task.Run(() => AbilityLoader.LoadAbilitiesForEntity(entity)));
+        var loadedAttributeTasks = entities.Select(entity => Task.Run(() => EssenceLoader.LoadEssencesForEntity(entity)));
 
         // Calculate attributes
         var calculationTasks = entities.Select(entity => Task.Run(() => AttributeCalculator.CalculateBaseCombatAttributes(entity)));

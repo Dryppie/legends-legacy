@@ -1,13 +1,11 @@
 ﻿using Domain.Components.Attributes;
 using Domain.Models.Abilities;
 using Domain.Models.Abilities.Effects;
-using Domain.Models.Abilities.Effects.Actions;
 using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Damages;
 using Domain.Models.Essences;
-using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -23,7 +21,11 @@ public abstract class Entity
     [NotMapped]
     public List<Ability> Abilities { get; set; } = [];
     [NotMapped]
-    public int NextBasicAttackIn = 30; // Set this to be equal to BasicAttackSpeed at combat start
+    public int NextBasicAttackIn = 300; // TODO: Turn 300 into a Constant somewhere, as it is also stored in the CombatSimulator class
+                                        // Every tick, this decrements by BaseAttackSpeed.
+                                        // Start at 300. Whenever it is equal to or lower than 0, perform the attack.
+                                        // If you increase attack speed by 100%, BasicAttackSpeed goes from 10 to 20,
+                                        // and thust counting down faster to the next attack each tick
     public bool IsAlive => CombatAttributes.FirstOrDefault(cm => cm.Key.Equals(AttributeType.Health)).Value > 0;
     [NotMapped]
     public List<Equipment> Equipment { get; set; } = [];
@@ -195,7 +197,7 @@ public abstract class Entity
 
     public void Reset()
     {
-        NextBasicAttackIn = 30;
+        NextBasicAttackIn = 0;
         CombatAttributes.Clear();
 
         foreach (var kvp in BaseCombatAttributes)

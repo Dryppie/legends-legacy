@@ -1,454 +1,502 @@
 [
   {
-    "Id": "sneakAttack",
-    "Name": "Sneak Attack",
-    "Description": "Stab the target in the back, dealing basic attack damage, and apply 30 bleed damage over 10 seconds.",
-    "Type": "Active",
-    "Cooldown": 90,
-    "Cost": 12,
-    "Effects": [
-      {
-        "Action": {
-          "Type": "Damage",
-          "Amount": 5,
-          "ScalingAttribute": "Agility",
-          "ScalingMultiplier": 0.1,
-          "AttackType": "Melee",
-          "DamageType": "Physical",
-          "DamageTags": ["Piercing"]
+    "Name": "Goblin's Essence",
+    "Active": {
+      "Id": "sneakAttack",
+      "Name": "Sneak Attack",
+      "Description": "Stab the target in the back, dealing basic attack damage, and apply 30 bleed damage over 10 seconds.",
+      "Type": "Active",
+      "Cooldown": 90,
+      "Cost": 12,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 5,
+            "ScalingAttribute": "Agility",
+            "ScalingMultiplier": 0.1,
+            "AttackType": "Melee",
+            "DamageType": "Physical",
+            "DamageTags": ["Piercing"]
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 0
+          },
+          "Targeting": "SingleEnemy",
+          "Trigger": "None",
+          "Log": "{Target} received {Amount} damage."
         },
-        "Duration": {
-          "Type": "TimedDuration",
-          "Duration": 0
-        },
-        "Targeting": "SingleEnemy",
-        "Trigger": "None",
-        "Log": "{Target} received {Amount} damage."
-      },
-      {
-        "Action": {
-          "Type": "Damage",
-          "Amount": 1,
-          "AttackType": "DamageOverTime",
-          "DamageType": "Bleed",
-          "DamageTags": []
-        },
-        "Duration": {
-          "Type": "TimedDuration",
-          "Duration": 100
-        },
-        "Interval": {
-          "Type": "Interval",
-          "Interval": 10
-        },
-        "Targeting": "SingleEnemy",
-        "Trigger": "OnTickInterval",
-        "IsFlatAmount": true,
-        "Log": "{Target} is bleeding, and took {Amount} damage."
-      }
-    ]
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 1,
+            "AttackType": "DamageOverTime",
+            "DamageType": "Bleed",
+            "DamageTags": []
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 100
+          },
+          "Interval": {
+            "Type": "Interval",
+            "Interval": 10
+          },
+          "Targeting": "SingleEnemy",
+          "Trigger": "OnTickInterval",
+          "IsFlatAmount": true,
+          "Log": "{Target} is bleeding, and took {Amount} damage."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "pocketDirt",
+      "Name": "Pocket Dirt",
+      "Description": "Whenever you dodge, use the opportunity to throw dirt at the target, decreasing their accuracy by 3% for 6 seconds",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "Accuracy",
+            "Amount": 3,
+            "ModifierType": "Additive"
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration",
+            "Duration": 0
+          },
+          "Targeting": "SingleEnemy",
+          "Trigger": "OnDodge",
+          "ApplyOnSelf": false,
+          "Log": "{Actor} threw dirt in {Target}'s eyes. {Target}'s accuracy decreased by 3%."
+        }
+      ]
+    }
   },
   {
-    "Id": "pocketDirt",
-    "Name": "Pocket Dirt",
-    "Description": "Whenever you dodge, use the opportunity to throw dirt at the target, decreasing their accuracy by 3% for 6 seconds",
-    "Type": "Passive",
-    "Cooldown": 0,
-    "Cost": 0,
-    "Effects": [
-      {
-        "Action": {
-          "Type": "ModifyAttribute",
-          "Attribute": "Accuracy",
-          "Amount": 3,
-          "ModifierType": "Additive"
+    "Name": "Goblin Warrior's Essence",
+    "Active": {
+      "Id": "ragingCleave",
+      "Name": "Raging Cleave",
+      "Description": "Swing your weapon in a wide arc, dealing damage to two enemies.",
+      "Type": "Active",
+      "Cooldown": 120,
+      "Cost": 9,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 8,
+            "AttackType": "Melee",
+            "DamageType": "Physical",
+            "DamageTags": ["Slashing"]
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 0
+          },
+          "Targeting": "TwoEnemies",
+          "Trigger": "None",
+          "Log": "{Target} received {Amount} damage."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "recklessAssault",
+      "Name": "Reckless Assault",
+      "Description": "Increase Strength by 20, but decrease Endurance by 20",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "Strength",
+            "Amount": 20,
+            "ModifierType": "Flat"
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Targeting": "Self",
+          "Trigger": "None",
+          "Log": "{Actor}'s Strength is increased by 20."
         },
-        "Duration": {
-          "Type": "IndefiniteDuraiton",
-          "Duration": 0
-        },
-        "Targeting": "SingleEnemy",
-        "Trigger": "OnDodge",
-        "ApplyOnSelf": false,
-        "Log": "{Actor} threw dirt in {Target}'s eyes. {Target}'s accuracy decreased by 3%."
-      }
-    ]
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "Endurance",
+            "Amount": -20,
+            "ModifierType": "Flat"
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Targeting": "Self",
+          "Trigger": "None",
+          "Log": "{Actor}'s Endurance is decreased by 20."
+        }
+      ]
+    }
   },
   {
-    "Id": "ragingCleave",
-    "Name": "Raging Cleave",
-    "Description": "Swing your weapon in a wide arc, dealing damage to two enemies.",
-    "Type": "Active",
-    "Cooldown": 120,
-    "Cost": 9,
-    "Effects": [
-      {
-        "Action": {
-          "Type": "Damage",
-          "Amount": 8,
-          "AttackType": "Melee",
-          "DamageType": "Physical",
-          "DamageTags": ["Slashing"]
-        },
-        "Duration": {
-          "Type": "TimedDuration",
-          "Duration": 0
-        },
-        "Targeting": "TwoEnemies",
-        "Trigger": "None",
-        "Log": "{Target} received {Amount} damage."
-      }
-    ]
+    "Name": "Goblin Archer's Essence",
+    "Active": {
+      "Id": "snipersStrike",
+      "Name": "Sniper's Strike",
+      "Description": "Unleash a powerful shot with increased critical chance.",
+      "Type": "Active",
+      "Cooldown": 150,
+      "Cost": 12,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 15,
+            "AttackType": "Ranged",
+            "DamageType": "Physical",
+            "DamageTags": ["Arrows"]
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 0
+          },
+          "EffectModifier": {
+            "Attribute": "CritChance",
+            "Amount": 50,
+            "ModifierType": "Additive"
+          },
+          "Targeting": "SingleEnemy",
+          "Trigger": "None",
+          "Log": "{Actor} landed a powerful shot on {Target}, dealing {Amount} damage."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "poisonedArrows",
+      "Name": "Poisoned Arrows",
+      "Description": "Every ranged attack has a 20% chance to apply poison for 3 seconds.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 2,
+            "AttackType": "Ranged",
+            "DamageType": "Poison",
+            "DamageTags": ["Arrows"]
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 30
+          },
+          "Interval": {
+            "Type": "Interval",
+            "Interval": 10
+          },
+          "Targeting": "SingleEnemy",
+          "Trigger": "OnAttack",
+          "Chance": 20,
+          "IsFlatAmount": true,
+          "Log": "{Target} is poisoned by {Actor}'s arrow, taking {Amount} poison damage over time."
+        }
+      ]
+    }
   },
   {
-    "Id": "recklessAssault",
-    "Name": "Reckless Assault",
-    "Description": "Increase Strength by 20, but decrease Endurance by 20",
-    "Type": "Passive",
-    "Cooldown": 0,
-    "Cost": 0,
-    "Effects": [
-      {
-        "Action": {
-          "Type": "ModifyAttribute",
-          "Attribute": "Strength",
-          "Amount": 20,
-          "ModifierType": "Flat"
-        },
-        "Duration": {
-          "Type": "IndefiniteDuration"
-        },
-        "Targeting": "Self",
-        "Trigger": "None",
-        "Log": "{Actor}'s Strength is increased by 20."
-      },
-      {
-        "Action": {
-          "Type": "ModifyAttribute",
-          "Attribute": "Endurance",
-          "Amount": -20,
-          "ModifierType": "Flat"
-        },
-        "Duration": {
-          "Type": "IndefiniteDuration"
-        },
-        "Targeting": "Self",
-        "Trigger": "None",
-        "Log": "{Actor}'s Endurance is decreased by 20."
-      }
-    ]
+    "Name": "Large Rat's Essence",
+    "Active": {
+      "Id": "tailWrap",
+      "Name": "Tail Wrap",
+      "Description": "Apply a crushing force to the target, dealing 50 damage.",
+      "Type": "Active",
+      "Cooldown": 150,
+      "Cost": 10,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 12,
+            "AttackType": "Melee",
+            "DamageType": "Physical",
+            "DamageTags": ["Blunt"]
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 0
+          },
+          "Targeting": "SingleEnemy",
+          "Trigger": "None",
+          "Log": "{Target} received {Amount} damage."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "big",
+      "Name": "Big",
+      "Description": "Health is increased by 50.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "Health",
+            "Amount": 50,
+            "ModifierType": "Flat"
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Targeting": "Self",
+          "Trigger": "None",
+          "Log": "{Actor}'s health is increased by 50 due to being big."
+        }
+      ]
+    }
   },
   {
-    "Id": "poisonedArrows",
-    "Name": "Poisoned Arrows",
-    "Description": "Every ranged attack has a 20% chance to apply poison for 3 seconds.",
-    "Type": "Passive",
-    "Cooldown": 0,
-    "Cost": 0,
-    "Effects": [
-      {
-        "Action": {
-          "Type": "Damage",
-          "Amount": 2,
-          "AttackType": "Ranged",
-          "DamageType": "Poison",
-          "DamageTags": ["Arrows"]
+    "Name": "Beginner's Essence 1",
+    "Active": {
+      "Id": "fireball_01",
+      "Name": "Fireball",
+      "Description": "Hurls a fireball that deals damage over time.",
+      "Type": "Active",
+      "Cooldown": 120,
+      "Cost": 7,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 22,
+            "AttackType": "Ranged",
+            "DamageType": "Magical",
+            "DamageTags": ["Spells"]
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 0
+          },
+          "Targeting": "SingleEnemy",
+          "Trigger": "None",
+          "Log": "{Target} received {Amount} damage."
         },
-        "Duration": {
-          "Type": "TimedDuration",
-          "Duration": 30
-        },
-        "Interval": {
-          "Type": "Interval",
-          "Interval": 10
-        },
-        "Targeting": "SingleEnemy",
-        "Trigger": "OnAttack",
-        "Chance": 20,
-        "IsFlatAmount": true,
-        "Log": "{Target} is poisoned by {Actor}'s arrow, taking {Amount} poison damage over time."
-      }
-    ]
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 8,
+            "AttackType": "DamageOverTime",
+            "DamageType": "Burn",
+            "DamageTags": []
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 40
+          },
+          "Interval": {
+            "Type": "Interval",
+            "Interval": 10
+          },
+          "Targeting": "SingleEnemy",
+          "Trigger": "OnTickInterval",
+          "IsFlatAmount": true,
+          "Log": "{Target} is burning, and took {Amount} fire damage."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "heal_01",
+      "Name": "Heal",
+      "Description": "Restores health to the target every 4 second for 20 seconds.",
+      "Type": "Active",
+      "Cooldown": 120,
+      "Cost": 6,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Healing",
+            "Amount": 19
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 120
+          },
+          "Interval": {
+            "Type": "Interval",
+            "Interval": 30
+          },
+          "Targeting": "Self",
+          "Trigger": "OnTickInterval",
+          "Log": "{Target} was healed for {Amount}."
+        }
+      ]
+    }
   },
   {
-    "Id": "snipersStrike",
-    "Name": "Sniper's Strike",
-    "Description": "Unleash a powerful shot with increased critical chance.",
-    "Type": "Active",
-    "Cooldown": 150,
-    "Cost": 12,
-    "Effects": [
-      {
-        "Action": {
-          "Type": "Damage",
-          "Amount": 15,
-          "AttackType": "Ranged",
-          "DamageType": "Physical",
-          "DamageTags": ["Arrows"]
-        },
-        "Duration": {
-          "Type": "TimedDuration",
-          "Duration": 0
-        },
-        "EffectModifier": {
-          "Attribute": "CritChance",
-          "Amount": 50,
-          "ModifierType": "Additive"
-        },
-        "Targeting": "SingleEnemy",
-        "Trigger": "None",
-        "Log": "{Actor} landed a powerful shot on {Target}, dealing {Amount} damage."
-      }
-    ]
+    "Name": "Beginner's Essence 2",
+    "Active": {
+      "Id": "empower_01",
+      "Name": "Empower",
+      "Description": "Strengthen your attack power.",
+      "Type": "Active",
+      "Cooldown": 190,
+      "Cost": 10,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "Strength",
+            "Amount": 10,
+            "ModifierType": "Flat"
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 600
+          },
+          "Targeting": "Self",
+          "Trigger": "None",
+          "Log": "{Actor}'s strength increased by 10'."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "lastStance",
+      "Name": "Last Stance",
+      "Description": "Defense is increased by 30% when your health is below 20%.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "Health",
+            "Amount": 30,
+            "ModifierType": "Multiplicative"
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Condition": {
+            "Type": "HealthCondition",
+            "HealthPercentage": 80,
+            "ComparisonType": "LessThan"
+          },
+          "Targeting": "Self",
+          "Trigger": "OnHealthChanged",
+          "Log": "{Actor}'s defense is increased by 30% due to falling below 20% health."
+        }
+      ]
+    }
   },
   {
-    "Id": "tailWrap",
-    "Name": "Tail Wrap",
-    "Description": "Apply a crushing force to the target, dealing 50 damage.",
-    "Type": "Active",
-    "Cooldown": 150,
-    "Cost": 10,
-    "Effects": [
-      {
-        "Action": {
-          "Type": "Damage",
-          "Amount": 12,
-          "AttackType": "Melee",
-          "DamageType": "Physical",
-          "DamageTags": ["Blunt"]
-        },
-        "Duration": {
-          "Type": "TimedDuration",
-          "Duration": 0
-        },
-        "Targeting": "SingleEnemy",
-        "Trigger": "None",
-        "Log": "{Target} received {Amount} damage."
-      }
-    ]
+    "Name": "Beginner's Essence 3",
+    "Active": {
+      "Id": "forbiddenRitual",
+      "Name": "Forbidden Ritual",
+      "Description": "Summon a low level demon.",
+      "Type": "Active",
+      "Cooldown": 20,
+      "Cost": 50,
+      "ActivationLog": "{Actor} used {Ability}.",
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Summon",
+            "SummonId": "monster",
+            "SummonDuration": 300
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration",
+            "Duration": 0
+          },
+          "Targeting": "Self",
+          "Trigger": "None",
+          "Log": "{Target} has been summoned by {Actor}."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "retaliate_01",
+      "Name": "Retaliate",
+      "Description": "Deals damage back to the attacker when hit.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 2
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Targeting": "Self",
+          "Trigger": "OnAttacked",
+          "ApplyOnSelf": false,
+          "IsFlatAmount": true,
+          "Log": "{Actor} retaliated against {Target} and dealt {Amount} damage."
+        }
+      ]
+    }
   },
   {
-    "Id": "big",
-    "Name": "Big",
-    "Description": "Health is increased by 50.",
-    "Type": "Passive",
-    "Cooldown": 0,
-    "Cost": 0,
-    "Effects": [
-      {
-        "Action": {
-          "Type": "ModifyAttribute",
-          "Attribute": "Health",
-          "Amount": 50,
-          "ModifierType": "Flat"
-        },
-        "Duration": {
-          "Type": "IndefiniteDuration"
-        },
-        "Targeting": "Self",
-        "Trigger": "None",
-        "Log": "{Actor}'s health is increased by 50 due to being big."
-      }
-    ]
-  },
-  {
-    "Id": "lastStance",
-    "Name": "Last Stance",
-    "Description": "Defense is increased by 30% when your health is below 20%.",
-    "Type": "Passive",
-    "Cooldown": 0,
-    "Cost": 0,
-    "Effects": [
-      {
-        "Action": {
-          "Type": "ModifyAttribute",
-          "Attribute": "Health",
-          "Amount": 30,
-          "ModifierType": "Multiplicative"
-        },
-        "Duration": {
-          "Type": "IndefiniteDuration"
-        },
-        "Condition": {
-          "Type": "HealthCondition",
-          "HealthPercentage": 80,
-          "ComparisonType": "LessThan"
-        },
-        "Targeting": "Self",
-        "Trigger": "OnHealthChanged",
-        "Log": "{Actor}'s defense is increased by 30% due to falling below 20% health."
-      }
-    ]
-  },
-  {
-    "Id": "fireball_01",
-    "Name": "Fireball",
-    "Description": "Hurls a fireball that deals damage over time.",
-    "Type": "Active",
-    "Cooldown": 120,
-    "Cost": 7,
-    "Effects": [
-      {
-        "Action": {
-          "Type": "Damage",
-          "Amount": 22,
-          "AttackType": "Ranged",
-          "DamageType": "Magical",
-          "DamageTags": ["Spells"]
-        },
-        "Duration": {
-          "Type": "TimedDuration",
-          "Duration": 0
-        },
-        "Targeting": "SingleEnemy",
-        "Trigger": "None",
-        "Log": "{Target} received {Amount} damage."
-      },
-      {
-        "Action": {
-          "Type": "Damage",
-          "Amount": 8,
-          "AttackType": "DamageOverTime",
-          "DamageType": "Burn",
-          "DamageTags": []
-        },
-        "Duration": {
-          "Type": "TimedDuration",
-          "Duration": 40
-        },
-        "Interval": {
-          "Type": "Interval",
-          "Interval": 10
-        },
-        "Targeting": "SingleEnemy",
-        "Trigger": "OnTickInterval",
-        "IsFlatAmount": true,
-        "Log": "{Target} is burning, and took {Amount} fire damage."
-      }
-    ]
-  },
-  {
-    "Id": "heal_01",
-    "Name": "Heal",
-    "Description": "Restores health to the target every 4 second for 20 seconds.",
-    "Type": "Active",
-    "Cooldown": 120,
-    "Cost": 6,
-    "Effects": [
-      {
-        "Action": {
-          "Type": "Healing",
-          "Amount": 19
-        },
-        "Duration": {
-          "Type": "TimedDuration",
-          "Duration": 120
-        },
-        "Interval": {
-          "Type": "Interval",
-          "Interval": 30
-        },
-        "Targeting": "Self",
-        "Trigger": "OnTickInterval",
-        "Log": "{Target} was healed for {Amount}."
-      }
-    ]
-  },
-  {
-    "Id": "retaliate_01",
-    "Name": "Retaliate",
-    "Description": "Deals damage back to the attacker when hit.",
-    "Type": "Passive",
-    "Cooldown": 0,
-    "Cost": 0,
-    "Effects": [
-      {
-        "Action": {
-          "Type": "Damage",
-          "Amount": 2
-        },
-        "Duration": {
-          "Type": "IndefiniteDuration"
-        },
-        "Targeting": "Self",
-        "Trigger": "OnAttacked",
-        "ApplyOnSelf": false,
-        "IsFlatAmount": true,
-        "Log": "{Actor} retaliated against {Target} and dealt {Amount} damage."
-      }
-    ]
-  },
-  {
-    "Id": "forbiddenRitual",
-    "Name": "Forbidden Ritual",
-    "Description": "Summon a low level demon.",
-    "Type": "Active",
-    "Cooldown": 20,
-    "Cost": 50,
-    "ActivationLog": "{Actor} used {Ability}.",
-    "Effects": [
-      {
-        "Action": {
-          "Type": "Summon",
-          "SummonId": "monster",
-          "SummonDuration": 300
-        },
-        "Duration": {
-          "Type": "IndefiniteDuration",
-          "Duration": 0
-        },
-        "Targeting": "Self",
-        "Trigger": "None",
-        "Log": "{Target} has been summoned by {Actor}."
-      }
-    ]
-  },
-  {
-    "Id": "empower_01",
-    "Name": "Empower",
-    "Description": "Strengthen your attack power.",
-    "Type": "Active",
-    "Cooldown": 190,
-    "Cost": 10,
-    "Effects": [
-      {
-        "Action": {
-          "Type": "ModifyAttribute",
-          "Attribute": "Strength",
-          "Amount": 10,
-          "ModifierType": "Flat"
-        },
-        "Duration": {
-          "Type": "TimedDuration",
-          "Duration": 600
-        },
-        "Targeting": "Self",
-        "Trigger": "None",
-        "Log": "{Actor}'s strength increased by 10'."
-      }
-    ]
-  },
-  {
-    "Id": "stun_01",
-    "Name": "Stun",
-    "Description": "Stun the enemy.",
-    "Type": "Active",
-    "Cooldown": 300,
-    "Cost": 10,
-    "Effects": [
-      {
-        "Action": {
-          "Type": "ApplyStatusEffect",
-          "Status": "Stun"
-        },
-        "Duration": {
-          "Type": "TimedDuration",
-          "Duration": 200
-        },
-        "Targeting": "SingleEnemy",
-        "Trigger": "None",
-        "Log": "{Actor} stunned {Target}."
-      }
-    ]
+    "Name": "Goblin Shaman's Essence",
+    "Active": {
+      "Id": "stun_01",
+      "Name": "Stun",
+      "Description": "Stun the enemy.",
+      "Type": "Active",
+      "Cooldown": 300,
+      "Cost": 10,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ApplyStatusEffect",
+            "Status": "Stun"
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 200
+          },
+          "Targeting": "SingleEnemy",
+          "Trigger": "None",
+          "Log": "{Actor} stunned {Target}."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "retaliate_01",
+      "Name": "Retaliate",
+      "Description": "Deals damage back to the attacker when hit.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 2
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Targeting": "Self",
+          "Trigger": "OnAttacked",
+          "ApplyOnSelf": false,
+          "IsFlatAmount": true,
+          "Log": "{Actor} retaliated against {Target} and dealt {Amount} damage."
+        }
+      ]
+    }
   }
 ]

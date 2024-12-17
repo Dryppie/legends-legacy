@@ -14,7 +14,7 @@ public class CombatSimulation : ICombatContext
     private List<Entity> _playerTeam;
     private List<Entity> _enemyTeam;
     private List<CombatEvent> _eventLog;
-    private const int MaxSimulationTime = 600; // Max duration in milliseconds
+    private const int MaxSimulationTime = 6000; // Max duration in milliseconds
     private const int TimeStep = 1; // Time step in milliseconds
     private int CurrentTime = 0;
 
@@ -32,7 +32,12 @@ public class CombatSimulation : ICombatContext
         Effect.OnEffectExecuted += LogEffectExecution;
     }
 
-    public async Task<CombatResult> RunSimulation()
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="simulated">Whether this is being simulated for testing purposes</param>
+    /// <returns></returns>
+    public async Task<CombatResult> RunSimulation(bool simulated = false)
     {
         ActivatePassiveAbilities([.. _playerTeam, .. _enemyTeam]);
 
@@ -48,11 +53,16 @@ public class CombatSimulation : ICombatContext
 
         // Determine outcome
         var outcome = DetermineOutcome();
-        //foreach (var log in _eventLog)
-        //{
-        //    Console.WriteLine($"Time: {log.Timestamp} - " + log.Details);
-        //}
-        //Console.WriteLine(outcome);
+        if (simulated)
+        {
+            foreach (var log in _eventLog)
+            {
+                Console.WriteLine($"Time: {log.Timestamp} - " + log.Details);
+            }
+            Console.WriteLine(outcome);
+        }
+
+        Effect.OnEffectExecuted -= LogEffectExecution;
 
         return new CombatResult
         {
@@ -114,10 +124,10 @@ public class CombatSimulation : ICombatContext
                     PerformDamage(entity, new List<Entity>() { target }, currentTime);
                 }
 
-                entity.NextBasicAttackIn = (int)entity.CombatAttributes[AttributeType.BasicAttackSpeed];
+                entity.NextBasicAttackIn = 300; // TODO: Turn 300 into a Constant somewhere, as it is also stored in the Entity class
             }
 
-            entity.NextBasicAttackIn -= TimeStep;
+            entity.NextBasicAttackIn -= (int)entity.CombatAttributes[AttributeType.BasicAttackSpeed];
 
             foreach (var ability in entity.Abilities.Where(a => a.Type.Equals(AbilityType.Active)))
             {

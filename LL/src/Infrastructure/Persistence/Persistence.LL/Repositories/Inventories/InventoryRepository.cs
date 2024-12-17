@@ -30,7 +30,7 @@ public class InventoryRepository : IInventoryRepository
         {
             if (inventoryItem.Item is EssenceItem essenceItem && essenceItem.Essence != null)
             {
-                await AbilityLoader.LoadAbilitiesForEssence(essenceItem.Essence);
+                await EssenceLoader.LoadAbilitiesForEssence(essenceItem.Essence);
             }
         }
 
