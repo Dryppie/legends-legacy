@@ -1,4 +1,5 @@
 ﻿using Domain.Interfaces;
+using Domain.Interfaces.Combat;
 using Domain.Models.Abilities.Effects.Actions;
 using Domain.Models.Abilities.Effects.Conditions;
 using Domain.Models.Abilities.Effects.EffectModifications;
@@ -32,8 +33,6 @@ public class Effect
 
     public string Log { get; set; } = string.Empty;
 
-    public static event Action<EffectContext> OnEffectExecuted;
-
     public Effect(IEffectAction action,
                   IEffectDuration duration,
                   IEffectCondition? condition = null,
@@ -63,22 +62,22 @@ public class Effect
         Interval.Update();
     }
 
-    public void ExecuteAction(EffectContext context)
+    public void ExecuteAction(EffectContext context, ICombatContext combatContext)
     {
         if (!Condition.IsSatisfied(context)) return;
 
         if (Chance == 100 || Random.Shared.Next(1, 101) <= Chance)
         {
             // TODO: Apply EffectModifications properly. This might have to be checked during DamageCalculation and HealCalculation, and not here
-            Action?.Execute(context, OnEffectExecuted);
+            Action?.Execute(context, combatContext);
         }
     }
 
-    public void ExecuteOnExpireAction(EffectContext context)
+    public void ExecuteOnExpireAction(EffectContext context, ICombatContext combatContext)
     {
         if (Chance == 100 || Random.Shared.Next(1, 101) <= Chance)
         {
-            Action?.OnExpireExecute(context, OnEffectExecuted);
+            Action?.OnExpireExecute(context,combatContext);
         }
     }
 

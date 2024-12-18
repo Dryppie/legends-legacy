@@ -1,4 +1,5 @@
 ﻿using Domain.Interfaces;
+using Domain.Interfaces.Combat;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
 
@@ -13,7 +14,7 @@ public class ModifyAttributeAction : IEffectAction
         AttributeModifier = attributeModifier;
     }
 
-    public void Execute(EffectContext context, Action<EffectContext> action)
+    public void Execute(EffectContext context, ICombatContext combatContext)
     {
         context.EventType = AttributeModifier.Amount > 0 ? EventType.Buff : EventType.Debuff;
         context.Details = context.Details
@@ -21,12 +22,12 @@ public class ModifyAttributeAction : IEffectAction
             .Replace("{Target}", context.Target.Name)
             .Replace("{Amount}", AttributeModifier.Amount.ToString());
 
-        action.Invoke(context);
+        combatContext.LogEffectExecution(context);
 
         context.Target.ModifyAttribute(AttributeModifier);
     }
 
-    public void OnExpireExecute(EffectContext context, Action<EffectContext> action)
+    public void OnExpireExecute(EffectContext context, ICombatContext combatContext)
     {
         context.EventType = AttributeModifier.Amount > 0 ? EventType.BuffExpired : EventType.DebuffExpired;
         context.Details = context.Details
@@ -34,7 +35,7 @@ public class ModifyAttributeAction : IEffectAction
             .Replace("{Target}", context.Target.Name)
             .Replace("{Amount}", AttributeModifier.Amount.ToString());
 
-        action.Invoke(context);
+        combatContext.LogEffectExecution(context);
 
         context.Target.ModifyAttribute(AttributeModifier, remove: true);
     }

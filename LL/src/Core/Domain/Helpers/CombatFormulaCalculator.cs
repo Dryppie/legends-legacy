@@ -16,10 +16,16 @@ public static class CombatFormulaCalculator
 
         if ((int)calculatedResult.AttackOutcome <= (int)AttackOutcome.Parry) return calculatedResult;
 
-        calculatedResult.CalculatedDamageDealt = CalculateDamageDealt(attacker, magnitude, calculatedResult.AttackOutcome);
+        calculatedResult.CalculatedDamageToDeal = CalculateDamageDealt(attacker, magnitude, calculatedResult.AttackOutcome);
         calculatedResult.CalculatedDamageReceived = CalculateDamageReceived(defender, magnitude, calculatedResult.AttackOutcome);
 
         return calculatedResult;
+    }
+    public static AttackOutcome CalculateAttackOutcome(Entity attacker, Entity defender)
+    {
+        int levelDifference = defender.Level - attacker.Level;
+
+        return CalculateAttackOutcome(attacker, defender, levelDifference);
     }
 
     private static AttackOutcome CalculateAttackOutcome(Entity attacker, Entity defender, int levelDifference)

@@ -4,6 +4,7 @@ using Domain.Models.Abilities.Effects;
 using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
+using Domain.Models.Combat;
 using Domain.Models.Damages;
 using Domain.Models.Essences;
 using Domain.Models.Items.Equipments;
@@ -36,30 +37,15 @@ public abstract class Entity
     [NotMapped]
     public List<AttributeModifier> TemporaryModifiers { get; set; } = [];
     [NotMapped]
-    public List<Effect> ActiveEffects { get; } = [];
-    [NotMapped]
     public HashSet<string> Statuses { get; } = [];
     [NotMapped]
     public int Level { get; set; } = 1;
     [NotMapped]
     public bool IsSummoned { get; set; } = false;
 
-    public void AddEffect(Effect effect)
-    {
-        if (effect.Trigger == TriggerEvent.None)
-        {
-            // Create an EffectContext for immediate execution
-            var context = CreateEffectContextFromEffect(effect);
-
-            effect.ExecuteAction(context);
-        }
-        ActiveEffects.Add(effect);
-    }
-
     public void IncrementStep()
     {
         UpdateAbilities();
-        UpdateEffects();
     }
 
     private void UpdateAbilities()
@@ -68,108 +54,6 @@ public abstract class Entity
         {
             ability.RemainingTimeUntilUse--;
         }
-    }
-
-    private void UpdateEffects()
-    {
-        foreach (var effect in ActiveEffects.ToList())
-        {
-            if (effect.Interval.ShouldTrigger())
-            {
-                var intervalContext = CreateEffectContextFromEffect(effect);
-
-                effect.ExecuteAction(intervalContext);
-            }
-
-            if (!effect.Duration.IsActive())
-            {
-                var expireContext = CreateEffectContextFromEffect(effect);
-
-                effect.ExecuteOnExpireAction(expireContext);
-
-                ActiveEffects.Remove(effect);
-            }
-
-            effect.Update();
-        }
-    }
-
-    public void TriggerEffects(TriggerEvent triggerEvent, Entity? opponent = null, int magnitude = 0)
-    {
-        foreach (var effect in ActiveEffects)
-        {
-            if (!effect.IsTrigger(triggerEvent)) continue;
-
-            var context = CreateEffectContextFromEffect(effect);
-
-            effect.ExecuteAction(context);
-        }
-    }
-
-    public int BasicAttack(int damage)
-    {
-        var weapon = Equipment.FirstOrDefault(e => e.EquipmentType.Equals(EquipmentType.Weapon), new Weapon { DamageType = DamageType.Physical});
-
-        damage += (int)CombatAttributes[AttributeType.Strength];
-        return damage;
-    }
-
-    public int CalculateDamage(int damage)
-    {
-        damage += (int)CombatAttributes[AttributeType.Strength];
-        return damage;
-    }
-
-    public int CalculateHealing(int healing)
-    {
-        return healing;
-    }
-
-    public int CalculateReceiveDamage(int damage)
-    {
-        // Add logic to calculate damage
-        return damage;
-    }
-
-    public void PerformReceiveDamage(int damage, Entity attacker)
-    {
-        // Create proper formula for taking damage
-        CombatAttributes[AttributeType.Health] -= damage;
-        if ("MeleeAttack" == "Tag")
-        {
-            TriggerEffects(TriggerEvent.OnAttacked, attacker, damage);
-
-        }
-        TriggerEffects(TriggerEvent.OnHealthChanged, attacker, damage);
-
-        if (!IsAlive)
-        {
-            TriggerEffects(TriggerEvent.OnDeath, attacker, damage);
-        }
-    }
-
-    public int CalculateReceiveHealing(int healing)
-    {
-        // Add logic to calculate healing
-        return healing;
-    }
-
-    public int PerformReceiveHealing(int healing)
-    {
-        if (CombatAttributes[AttributeType.Health] + healing > CombatAttributes[AttributeType.MaxHealth])
-        {
-            var extraHealing = (int)CombatAttributes[AttributeType.Health] + healing - (int)CombatAttributes[AttributeType.MaxHealth];
-            healing = (int)CombatAttributes[AttributeType.MaxHealth] - (int)CombatAttributes[AttributeType.Health];
-
-            TriggerEffects(TriggerEvent.OnOverhealed, magnitude: extraHealing);
-            CombatAttributes[AttributeType.Health] = CombatAttributes[AttributeType.MaxHealth];
-        }
-        else
-        {
-            TriggerEffects(TriggerEvent.OnHealed, magnitude: healing);
-            CombatAttributes[AttributeType.Health] += healing;
-        }
-        return healing;
     }
 
     public void ModifyAttribute(AttributeModifier attributeModifier, bool remove = false)
@@ -211,13 +95,7 @@ public abstract class Entity
         }
 
         TemporaryModifiers = [];
-        ActiveEffects.Clear();
         Statuses.Clear();
-    }
-
-    public EffectContext CreateEffectContextFromEffect(Effect effect)
-    {
-        return new EffectContext(effect.Caster ?? this, this, effect.Trigger, effect.Action.Magnitude, effect.IsFlatAmount, effect.Log, effect.EffectModifications);
     }
 
     //public Actor DeepClone()

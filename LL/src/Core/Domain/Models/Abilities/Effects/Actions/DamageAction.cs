@@ -1,5 +1,6 @@
 ﻿using Domain.Helpers;
 using Domain.Interfaces;
+using Domain.Interfaces.Combat;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Damages;
@@ -25,14 +26,14 @@ public class DamageAction : IEffectAction
         DamageTags = damageTags;
     }
 
-    public void Execute(EffectContext context, Action<EffectContext> action)
+    public void Execute(EffectContext context, ICombatContext combatContext)
     {
         var calculatedResult = new CalculatedResult();
         if (context.IsFlatAmount)
         {
             // If it's a flat amount, take the value of the effect itself (_damageAmount)
-            calculatedResult.CalculatedDamageDealt = Magnitude;
-            calculatedResult.CalculatedDamageReceived = context.Target.CalculateReceiveDamage(Magnitude);
+            calculatedResult.CalculatedDamageToDeal = Magnitude;
+            calculatedResult.CalculatedDamageReceived = combatContext.InteractionManager.CalculateDamageReceived(context.Target, Magnitude, AttackOutcome.Hit);
         }
         else
         {
@@ -46,12 +47,13 @@ public class DamageAction : IEffectAction
             .Replace("{Actor}", context.Owner.Name)
             .Replace("{Target}", context.Target.Name)
             .Replace("{Amount}", calculatedResult.CalculatedDamageReceived.ToString());
-        action.Invoke(context);
 
-        context.Target.PerformReceiveDamage(context.Magnitude, context.Owner);
+        combatContext.LogEffectExecution(context);
+        Console.WriteLine(context.Details);
+        combatContext.InteractionManager.ApplyDamage(context.Owner, context.Target, context.Magnitude);
     }
 
-    public void OnExpireExecute(EffectContext context, Action<EffectContext> action)
+    public void OnExpireExecute(EffectContext context, ICombatContext combatContext)
     {
         // Do nothing
     }

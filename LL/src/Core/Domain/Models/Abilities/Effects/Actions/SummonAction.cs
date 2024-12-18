@@ -1,4 +1,5 @@
 ﻿using Domain.Interfaces;
+using Domain.Interfaces.Combat;
 using Domain.Models.Abilities.Effects.Conditions;
 using Domain.Models.Abilities.Effects.Timed;
 using Domain.Models.Abilities.Effects.Trigger;
@@ -27,7 +28,7 @@ public class SummonAction : IEffectAction
         _combatContext = combatContext;
     }
 
-    public void Execute(EffectContext context, Action<EffectContext> action)
+    public void Execute(EffectContext context, ICombatContext combatContext)
     {
         // Create the summoned entity based on the provided type
         Entity summonedCreature = SummonCreatureFactory.CreateCreature(_summonEntityType);
@@ -45,11 +46,11 @@ public class SummonAction : IEffectAction
                 caster: context.Owner,
                 trigger: TriggerEvent.OnTickInterval
             );
-            summonedCreature.AddEffect(selfDestructEffect);
+            combatContext.EffectManager.AddEffect(summonedCreature, selfDestructEffect);
         }
 
         // Add the summoned entity to the caster's team
-        _combatContext!.AddEntityToTeam(_caster!, summonedCreature);
+        combatContext.EntityManager.AddEntityToOwnTeam(context.Owner!, summonedCreature);
 
         context.Target = summonedCreature;
         context.EventType = EventType.Summon;
@@ -57,10 +58,10 @@ public class SummonAction : IEffectAction
             .Replace("{Actor}", context.Owner.Name)
             .Replace("{Target}", summonedCreature.Name);
 
-        action.Invoke(context);
+        combatContext.LogEffectExecution(context);
     }
 
-    public void OnExpireExecute(EffectContext context, Action<EffectContext> action)
+    public void OnExpireExecute(EffectContext context, ICombatContext combatContext)
     {
         // Do nothing
     }

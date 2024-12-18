@@ -1,4 +1,5 @@
 ﻿using Domain.Interfaces;
+using Domain.Interfaces.Combat;
 using Domain.Models.Combat;
 
 namespace Domain.Models.Abilities.Effects.Actions;
@@ -12,18 +13,18 @@ public class SelfDestructAction : IEffectAction
         _combatContext = combatContext;
     }
 
-    public void Execute(EffectContext context, Action<EffectContext> action)
+    public void Execute(EffectContext context, ICombatContext combatContext)
     {
         
     }
 
-    public void OnExpireExecute(EffectContext context, Action<EffectContext> action)
+    public void OnExpireExecute(EffectContext context, ICombatContext combatContext)
     {
-        _combatContext.RemoveEntityFromTeam(context.Target);
+        combatContext.EntityManager.RemoveEntity(context.Target);
 
         context.EventType = EventType.SummonExpired;
         context.Details = $"{context.Target.Name} vanished. Summon effect expired.";
 
-        action.Invoke(context);
+        combatContext.LogEffectExecution(context);
     }
 }

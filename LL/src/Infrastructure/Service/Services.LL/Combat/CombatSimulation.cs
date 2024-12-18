@@ -1,4 +1,4 @@
-﻿using Domain.Interfaces;
+﻿using Domain.Interfaces.Combat;
 using Domain.Models.Abilities;
 using Domain.Models.Abilities.Effects;
 using Domain.Models.Abilities.Effects.Actions;
@@ -9,10 +9,10 @@ using Domain.Models.Entities;
 namespace Services.LL.Combat;
 public class CombatSimulation : ICombatContext
 {
-    private List<Entity> _originalPlayerTeam;
-    private List<Entity> _originalEnemyTeam;
-    private List<Entity> _playerTeam;
-    private List<Entity> _enemyTeam;
+    public ICombatEntityManager EntityManager { get; set; }
+    public ICombatEffectManager EffectManager { get; set; }
+    public ICombatInteractionManager InteractionManager { get; set; }
+
     private List<CombatEvent> _eventLog;
     private const int MaxSimulationTime = 6000; // Max duration in milliseconds
     private const int TimeStep = 1; // Time step in milliseconds
@@ -20,16 +20,12 @@ public class CombatSimulation : ICombatContext
 
     public CombatSimulation(List<Entity> playerTeam, List<Entity> enemyTeam)
     {
-        _originalPlayerTeam = playerTeam;
-        _originalEnemyTeam = enemyTeam;
-
-        // Initialize teams
-        _playerTeam = new List<Entity>(_originalPlayerTeam);
-        _enemyTeam = new List<Entity>(_originalEnemyTeam);
-
         _eventLog = [];
 
-        Effect.OnEffectExecuted += LogEffectExecution;
+        // Managers
+        EntityManager = new CombatEntityManager(playerTeam, enemyTeam);
+        EffectManager = new CombatEffectManager(EntityManager, this, _eventLog);
+        InteractionManager = new CombatInteractionManager(EffectManager);
     }
 
     /// <summary>
@@ -39,13 +35,13 @@ public class CombatSimulation : ICombatContext
     /// <returns></returns>
     public async Task<CombatResult> RunSimulation(bool simulated = false)
     {
-        ActivatePassiveAbilities([.. _playerTeam, .. _enemyTeam]);
+        InitiatePassiveAbilities(EntityManager.AllEntities);
 
-        while (CurrentTime < MaxSimulationTime && _playerTeam.Any(c => c.IsAlive) && _enemyTeam.Any(c => c.IsAlive))
+        while (CurrentTime < MaxSimulationTime && EntityManager.IsCombatActive())
         {
             // Process actions for both teams
-            ProcessTeamActions([.. _playerTeam], [.. _enemyTeam], CurrentTime);
-            ProcessTeamActions([.. _enemyTeam], [.. _playerTeam], CurrentTime);
+            ProcessTeamActions(EntityManager.PlayerTeam, EntityManager.EnemyTeam, CurrentTime);
+            ProcessTeamActions(EntityManager.EnemyTeam, EntityManager.PlayerTeam, CurrentTime);
 
             // Advance time
             CurrentTime += TimeStep;
@@ -62,8 +58,6 @@ public class CombatSimulation : ICombatContext
             Console.WriteLine(outcome);
         }
 
-        Effect.OnEffectExecuted -= LogEffectExecution;
-
         return new CombatResult
         {
             EventLog = _eventLog,
@@ -72,7 +66,7 @@ public class CombatSimulation : ICombatContext
         };
     }
 
-    private void ActivatePassiveAbilities(List<Entity> entities)
+    private void InitiatePassiveAbilities(List<Entity> entities)
     {
         foreach (var entity in entities)
         {
@@ -83,7 +77,7 @@ public class CombatSimulation : ICombatContext
                 {
                     foreach (var effect in ability.Effects)
                     {
-                        entity.ActiveEffects.Add(effect);
+                        EffectManager.AddEffect(entity, effect);
                     }
                 }
             }
@@ -92,8 +86,14 @@ public class CombatSimulation : ICombatContext
 
     private void ProcessTeamActions(List<Entity> actingTeam, List<Entity> opposingTeam, int currentTime)
     {
-        foreach (var entity in actingTeam.Where(c => c.IsAlive))
+        foreach (var entity in actingTeam)
         {
+            if (!entity.IsAlive) // Perform specific logic if a player is currently dead
+            {
+                // PERFORM LOGIC HERE
+                continue;
+            }
+
             if (!entity.CanAct())
             {
                 //_eventLog.Add(new CombatEvent()
@@ -121,7 +121,7 @@ public class CombatSimulation : ICombatContext
                 }
                 else
                 {
-                    PerformDamage(entity, new List<Entity>() { target }, currentTime);
+                    PerformBasicAttackDamage(entity, [target], currentTime);
                 }
 
                 entity.NextBasicAttackIn = 300; // TODO: Turn 300 into a Constant somewhere, as it is also stored in the Entity class
@@ -137,30 +137,32 @@ public class CombatSimulation : ICombatContext
                 }
             }
 
+            EffectManager.UpdateEffectsForEntity(entity);
+
             entity.IncrementStep();
         }
+
     }
 
     private void PerformHealing(Entity entity, List<Entity> targets, int currentTime)
     {
-        foreach (var target in targets)
-        {
-            var healing = entity.CalculateHealing(5);
-            var healingReceived = target.PerformReceiveHealing(healing);
-            CombatEvent(currentTime, entity, target, EventType.Heal, healingReceived);
-        }
+        //foreach (var target in targets)
+        //{
+        //    var healing = entity.CalculateHealing(5);
+        //    var healingReceived = target.PerformReceiveHealing(healing);
+        //    CombatEvent(currentTime, entity, target, EventType.Heal, healingReceived);
+        //}
     }
 
-    private void PerformDamage(Entity actor, List<Entity> targets, int currentTime)
+    private void PerformBasicAttackDamage(Entity actor, List<Entity> targets, int currentTime)
     {
         foreach (var target in targets)
         {
-            var damage = actor.CalculateDamage(5);
+            var damage = InteractionManager.CalculateBasicAttackDamage(actor, 5);
             damage = 5;
-            var damageDealt = target.CalculateReceiveDamage(damage);
-            CombatEvent(currentTime, actor, target, EventType.Damage, damageDealt);
+            CombatEvent(currentTime, actor, target, EventType.Damage, damage);
 
-            target.PerformReceiveDamage(damageDealt, actor);
+            InteractionManager.ApplyDamage(actor, target, damage);
         }
     }
 
@@ -199,6 +201,8 @@ public class CombatSimulation : ICombatContext
 
         // Put ability on cooldown
         ability.RemainingTimeUntilUse = ability.Cooldown;
+
+        var battleContext = new BattleContext(ownTeam, opposingTeam);
 
         var targetNames = new List<string>();
         var effectsToApply = new List<(Entity target, Effect effectInstance)>();
@@ -263,7 +267,7 @@ public class CombatSimulation : ICombatContext
 
         foreach (var (target, effectInstance) in effectsToApply)
         {
-            target.AddEffect(effectInstance);
+            EffectManager.AddEffect(target, effectInstance);
         }
     }
 
@@ -328,37 +332,15 @@ public class CombatSimulation : ICombatContext
 
     private BattleOutcome DetermineOutcome()
     {
-        if (_playerTeam.All(c => !c.IsAlive))
+        if (EntityManager.PlayerTeam.All(c => !c.IsAlive))
             return BattleOutcome.Defeat;
-        else if (_enemyTeam.All(c => !c.IsAlive))
+        else if (EntityManager.EnemyTeam.All(c => !c.IsAlive))
             return BattleOutcome.Victory;
         else
             return BattleOutcome.Draw; // In case max time reached
     }
 
-    public void AddEntityToTeam(Entity caster, Entity newEntity)
-    {
-        if (_playerTeam.Contains(caster))
-        {
-            _playerTeam.Add(newEntity);
-        }
-        else if (_enemyTeam.Contains(caster))
-        {
-            _enemyTeam.Add(newEntity);
-        }
-        else
-        {
-            throw new InvalidOperationException("Caster not found on any team.");
-        }
-    }
-
-    public void RemoveEntityFromTeam(Entity summonedCreature)
-    {
-        _playerTeam.Remove(summonedCreature);
-        _enemyTeam.Remove(summonedCreature);
-    }
-
-    private void LogEffectExecution(EffectContext context)
+    public void LogEffectExecution(EffectContext context)
     {
         var logEntry = new CombatEvent
         {

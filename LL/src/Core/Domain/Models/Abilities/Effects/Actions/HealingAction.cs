@@ -1,4 +1,5 @@
 ﻿using Domain.Interfaces;
+using Domain.Interfaces.Combat;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 
@@ -17,11 +18,11 @@ public class HealingAction : IEffectAction
         HealScalingMultiplier = healScalingMultiplier;
     }
 
-    public void Execute(EffectContext context, Action<EffectContext> action)
+    public void Execute(EffectContext context, ICombatContext combatContext)
     {
         // If it's a flat amount, take the value of the effect itself (_damageAmount),
         // else take the calculated value from the context.Magnitude
-        var healingReceived = context.Target.CalculateReceiveHealing(context.IsFlatAmount ? Magnitude : context.Magnitude);
+        var healingReceived = combatContext.InteractionManager.CalculateHealingReceived(context.Owner, context.Target, context.IsFlatAmount ? Magnitude : context.Magnitude);
 
         context.Magnitude = healingReceived;
         context.EventType = EventType.Heal;
@@ -30,13 +31,12 @@ public class HealingAction : IEffectAction
             .Replace("{Target}", context.Target.Name)
             .Replace("{Amount}", healingReceived.ToString());
 
-        action.Invoke(context);
+        combatContext.LogEffectExecution(context);
 
-        context.Target.PerformReceiveHealing(healingReceived);
-
+        combatContext.InteractionManager.ApplyHealing(context.Owner, context.Target, healingReceived);
     }
 
-    public void OnExpireExecute(EffectContext context, Action<EffectContext> action)
+    public void OnExpireExecute(EffectContext context, ICombatContext combatContext)
     {
         // Do nothing
     }

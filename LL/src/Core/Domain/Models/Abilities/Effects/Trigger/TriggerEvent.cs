@@ -2,7 +2,7 @@
 public enum TriggerEvent
 {
     /// <summary>
-    /// Triggered when a piece of equipment is worn
+    /// Triggered when a piece of equipment is worn, or if an effect is immediate
     /// </summary>
     None,
     /// <summary>
@@ -73,5 +73,9 @@ public enum TriggerEvent
     /// Triggered when an entity's health is changed
     /// Used for HealthCondition effects
     /// </summary>
-    OnHealthChanged
+    OnHealthChanged,
+    /// <summary>
+    /// Triggered when an effect is expired
+    /// </summary>
+    OnEffectExpired,
 }
