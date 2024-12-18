@@ -2,6 +2,7 @@
 using Domain.Models.Abilities.Effects.EffectModifications;
 using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Combat;
+using Domain.Models.Damages;
 using Domain.Models.Entities;
 
 namespace Domain.Models.Abilities.Effects;
@@ -12,7 +13,7 @@ public class EffectContext
     /// <summary>
     /// The Caster, or the Entity with this effect in their ActiveEffects list
     /// </summary>
-    public Entity Owner { get; set; }
+    public Entity Actor { get; set; }
     /// <summary>
     /// Whomever the effect is going to affect
     /// </summary>
@@ -25,6 +26,9 @@ public class EffectContext
     /// Whether the effect in context hits, crits, is dodged, and so on.
     /// </summary>
     public AttackOutcome AttackOutcome { get; set; }
+    public AttackType AttackType { get; set; } = AttackType.None;
+    public DamageType DamageType { get; set; } = DamageType.None;
+    public List<EffectTag> EffectTags { get; set; } = [];
     /// <summary>
     /// How much an effect heals, damages, and so on
     /// </summary>
@@ -53,6 +57,9 @@ public class EffectContext
                          Entity owner,
                          Entity target,
                          TriggerEvent triggerEvent,
+                         AttackType attackType,
+                         DamageType damageType,
+                         List<EffectTag> effectTags,
                          int magnitude,
                          bool isFlatAmount,
                          string details,
@@ -61,9 +68,12 @@ public class EffectContext
     {
         OwnTeam = ownTeam;
         EnemyTeam = enemyTeam;
-        Owner = owner;
+        Actor = owner;
         Target = target;
         TriggerEvent = triggerEvent;
+        AttackType = attackType;
+        DamageType = damageType;
+        EffectTags = effectTags;
         Magnitude = magnitude;
         IsFlatAmount = isFlatAmount;
         Details = details;

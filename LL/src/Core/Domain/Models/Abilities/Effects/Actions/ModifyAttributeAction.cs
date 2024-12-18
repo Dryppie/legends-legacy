@@ -18,7 +18,7 @@ public class ModifyAttributeAction : IEffectAction
     {
         context.EventType = AttributeModifier.Amount > 0 ? EventType.Buff : EventType.Debuff;
         context.Details = context.Details
-            .Replace("{Actor}", context.Owner.Name)
+            .Replace("{Actor}", context.Actor.Name)
             .Replace("{Target}", context.Target.Name)
             .Replace("{Amount}", AttributeModifier.Amount.ToString());
 
@@ -31,7 +31,7 @@ public class ModifyAttributeAction : IEffectAction
     {
         context.EventType = AttributeModifier.Amount > 0 ? EventType.BuffExpired : EventType.DebuffExpired;
         context.Details = context.Details
-            .Replace("{Actor}", context.Owner.Name)
+            .Replace("{Actor}", context.Actor.Name)
             .Replace("{Target}", context.Target.Name)
             .Replace("{Amount}", AttributeModifier.Amount.ToString());
 

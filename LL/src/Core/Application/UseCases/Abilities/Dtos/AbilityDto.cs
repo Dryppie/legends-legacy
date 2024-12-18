@@ -13,7 +13,7 @@ public class AbilityDto : IMapFrom<Ability>
     public AttackType? AttackType { get; set; }
     public DamageType? DamageType { get; set; }
 
-    public List<DamageTag>? DamageTags { get; set; } = [];
+    public List<EffectTag>? DamageTags { get; set; } = [];
     public AbilityType Type { get; set; } // Active or Passive
     public int Cooldown { get; set; }
     public int RemainingTimeUntilUse { get; set; }
@@ -22,26 +22,28 @@ public class AbilityDto : IMapFrom<Ability>
     public void Mapping(Profile profile)
     {
         profile.CreateMap<Ability, AbilityDto>()
-            .ForMember(dto => dto.EffectTypes, opt => opt.MapFrom(src => src.Effects.Select(e => e.EffectType).ToList()))
-            .ForMember(dto => dto.AttackType, opt => opt.MapFrom(src => src.Effects
-               .Where(e => e.EffectType == EffectType.Damage)
-               .Select(e => (e.Action as DamageAction).AttackType)
-               .FirstOrDefault()
-            ))
+            .ForMember(dto => dto.EffectTypes, opt => opt.MapFrom(src => src.Effects.Select(e => e.EffectType).ToList()));
 
-            // Similarly, map DamageType from the first damage effect
-            .ForMember(dto => dto.DamageType, opt => opt.MapFrom(src => src.Effects
-                .Where(e => e.EffectType == EffectType.Damage)
-                .Select(e => (e.Action as DamageAction).DamageType)
-                .FirstOrDefault()
-            ))
+            // TODO: THIS SHOULD BE POSSIBLE TO DELETE
+            //.ForMember(dto => dto.AttackType, opt => opt.MapFrom(src => src.Effects
+            //   .Where(e => e.EffectType == EffectType.Damage)
+            //   .Select(e => (e.Action as DamageAction).AttackType)
+            //   .FirstOrDefault()
+            //))
 
-            // For DamageTags, you might want to combine tags from all damage effects:
-            .ForMember(dto => dto.DamageTags, opt => opt.MapFrom(src => src.Effects
-                .Where(e => e.EffectType == EffectType.Damage)
-                .SelectMany(e => (e.Action as DamageAction).DamageTags ?? new List<DamageTag>())
-                .Distinct()
-                .ToList()
-            ));
+            //// Similarly, map DamageType from the first damage effect
+            //.ForMember(dto => dto.DamageType, opt => opt.MapFrom(src => src.Effects
+            //    .Where(e => e.EffectType == EffectType.Damage)
+            //    .Select(e => (e.Action as DamageAction).DamageType)
+            //    .FirstOrDefault()
+            //))
+
+            //// For DamageTags, you might want to combine tags from all damage effects:
+            //.ForMember(dto => dto.DamageTags, opt => opt.MapFrom(src => src.Effects
+            //    .Where(e => e.EffectType == EffectType.Damage)
+            //    .SelectMany(e => (e.Action as DamageAction).DamageTags ?? new List<EffectTag>())
+            //    .Distinct()
+            //    .ToList()
+            //));
     }
 }

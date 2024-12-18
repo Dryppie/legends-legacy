@@ -2,8 +2,10 @@
 using Domain.Models.Abilities;
 using Domain.Models.Abilities.Effects;
 using Domain.Models.Abilities.Effects.Actions;
+using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
+using Domain.Models.Damages;
 using Domain.Models.Entities;
 
 namespace Services.LL.Combat;
@@ -40,8 +42,8 @@ public class CombatSimulation : ICombatContext
         while (CurrentTime < MaxSimulationTime && EntityManager.IsCombatActive())
         {
             // Process actions for both teams
-            ProcessTeamActions(EntityManager.PlayerTeam, EntityManager.EnemyTeam, CurrentTime);
-            ProcessTeamActions(EntityManager.EnemyTeam, EntityManager.PlayerTeam, CurrentTime);
+            ProcessTeamActions([.. EntityManager.PlayerTeam], [.. EntityManager.EnemyTeam], CurrentTime);
+            ProcessTeamActions([.. EntityManager.EnemyTeam], [.. EntityManager.PlayerTeam], CurrentTime);
 
             // Advance time
             CurrentTime += TimeStep;
@@ -162,7 +164,12 @@ public class CombatSimulation : ICombatContext
             damage = 5;
             CombatEvent(currentTime, actor, target, EventType.Damage, damage);
 
-            InteractionManager.ApplyDamage(actor, target, damage);
+            var effectContext = new EffectContext([], [], actor, target, TriggerEvent.OnAttack, AttackType.Melee,
+                                                  DamageType.Physical, [], damage, false,
+                                                  $"{actor.Name} hit {target.Name} with a basic attack, dealing {damage} damage.",
+                                                  [], new SelfDestructAction(this));
+
+            InteractionManager.ApplyDamage(effectContext);
         }
     }
 
@@ -235,7 +242,10 @@ public class CombatSimulation : ICombatContext
                 caster: actor,
                 applyOnSelf: effectTemplate.ApplyOnSelf,
                 isFlatAmount: effectTemplate.IsFlatAmount,
-                chance: effectTemplate.Chance
+                chance: effectTemplate.Chance,
+                effectTags: effectTemplate.EffectTags,
+                attackType: effectTemplate.AttackType,
+                damageType: effectTemplate.DamageType
                 );
 
                 if (effectTemplate.Action is SummonAction summonEffect)
@@ -345,7 +355,7 @@ public class CombatSimulation : ICombatContext
         var logEntry = new CombatEvent
         {
             Timestamp = CurrentTime,
-            ActorId = context.Owner.Id,
+            ActorId = context.Actor.Id,
             TargetId = context.Target.Id,
             EventType = context.EventType,
             Details = context.Details,

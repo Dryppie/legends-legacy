@@ -1,5 +1,6 @@
 ﻿using Domain.Helpers;
 using Domain.Interfaces.Combat;
+using Domain.Models.Abilities.Effects;
 using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
@@ -44,20 +45,29 @@ public class CombatInteractionManager : ICombatInteractionManager
         return finalDamage;
     }
 
-    public void ApplyDamage(Entity attacker, Entity target, float damage)
+    public void ApplyDamage(EffectContext context)
     {
-        target.CombatAttributes[AttributeType.Health] -= damage;
+        context.Target.CombatAttributes[AttributeType.Health] -= context.Magnitude;
 
         
         // TODO: Make sure something like "Retaliate" is only triggered based on a specific TriggerEvent. And this effect should not return that specific TriggerEvent
-        //if (attackType == "MeleeAttack") { ... }
-        _effectManager.TriggerEffects(TriggerEvent.OnAttacked, target, attacker);
-        _effectManager.TriggerEffects(TriggerEvent.OnHealthChanged, target, attacker);
+        var attackTypeTrigger = TriggerEvent.None;
+        attackTypeTrigger = context.AttackType switch
+        {
+            AttackType.Melee            => TriggerEvent.OnMeleeAttacked,
+            AttackType.Ranged           => TriggerEvent.OnRangedAttacked,
+            AttackType.DamageOverTime   => TriggerEvent.OnDamaged,
+            _                           => TriggerEvent.OnDamaged
+        };
+
+        _effectManager.TriggerEffects(attackTypeTrigger, context.Target, context.Actor);
+
+        _effectManager.TriggerEffects(TriggerEvent.OnHealthChanged, context.Target, context.Actor);
 
         // If target is dead
-        if (!target.IsAlive)
+        if (!context.Target.IsAlive)
         {
-            _effectManager.TriggerEffects(TriggerEvent.OnDeath, target, attacker);
+            _effectManager.TriggerEffects(TriggerEvent.OnDeath, context.Target, context.Actor);
         }
     }
 

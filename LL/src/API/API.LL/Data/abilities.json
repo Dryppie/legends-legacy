@@ -1,5 +1,159 @@
 [
   {
+    "Name": "Goblin's Essence",
+    "Active": {
+      "Id": "sneakAttack",
+      "Name": "Sneak Attack",
+      "Description": "Stab the target in the back, dealing basic attack damage, and apply 30 bleed damage over 10 seconds.",
+      "Type": "Active",
+      "Cooldown": 90,
+      "Cost": 12,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 5,
+            "ScalingAttribute": "Dexterity",
+            "ScalingMultiplier": 0.15
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 0
+          },
+          "Targeting": "SingleEnemy",
+          "Trigger": "None",
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
+          "Log": "{Target} received {Amount} damage."
+        },
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 1
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 100
+          },
+          "Interval": {
+            "Type": "Interval",
+            "Interval": 10
+          },
+          "Targeting": "SingleEnemy",
+          "Trigger": "OnTickInterval",
+          "IsFlatAmount": true,
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
+          "Log": "{Target} is bleeding, and took {Amount} damage."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "pocketDirt",
+      "Name": "Pocket Dirt",
+      "Description": "Whenever you dodge, use the opportunity to throw dirt at the target, decreasing their accuracy by 3% for 6 seconds",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "Accuracy",
+            "Amount": 3,
+            "ModifierType": "Additive"
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration",
+            "Duration": 0
+          },
+          "Targeting": "SingleEnemy",
+          "Trigger": "OnDodge",
+          "ApplyOnSelf": false,
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
+          "Log": "{Actor} threw dirt in {Target}'s eyes. {Target}'s accuracy decreased by 3%."
+        }
+      ]
+    }
+  },
+  {
+    "Name": "Goblin Warrior's Essence",
+    "Active": {
+      "Id": "ragingCleave",
+      "Name": "Raging Cleave",
+      "Description": "Swing your weapon in a wide arc, dealing damage to two enemies.",
+      "Type": "Active",
+      "Cooldown": 120,
+      "Cost": 9,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 8,
+            "AttackType": "Melee",
+            "DamageType": "Physical",
+            "DamageTags": ["Slashing"]
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 0
+          },
+          "Targeting": "TwoEnemies",
+          "Trigger": "None",
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
+          "Log": "{Target} received {Amount} damage."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "recklessAssault",
+      "Name": "Reckless Assault",
+      "Description": "Increase Strength by 20, but decrease Endurance by 20",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "Strength",
+            "Amount": 20,
+            "ModifierType": "Flat"
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Targeting": "Self",
+          "Trigger": "None",
+          "Log": "{Actor}'s Strength is increased by 20."
+        },
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "Endurance",
+            "Amount": -20,
+            "ModifierType": "Flat"
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Targeting": "Self",
+          "Trigger": "None",
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
+          "Log": "{Actor}'s Endurance is decreased by 20."
+        }
+      ]
+    }
+  },
+  {
     "Name": "Goblin Archer's Essence",
     "Active": {
       "Id": "snipersStrike",
@@ -28,6 +182,9 @@
           },
           "Targeting": "SingleEnemy",
           "Trigger": "None",
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
           "Log": "{Actor} landed a powerful shot on {Target}, dealing {Amount} damage."
         }
       ]
@@ -60,6 +217,9 @@
           "Trigger": "OnAttack",
           "Chance": 20,
           "IsFlatAmount": true,
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
           "Log": "{Target} is poisoned by {Actor}'s arrow, taking {Amount} poison damage over time."
         }
       ]
@@ -89,6 +249,9 @@
           },
           "Targeting": "SingleEnemy",
           "Trigger": "None",
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
           "Log": "{Target} received {Amount} damage."
         }
       ]
@@ -113,7 +276,96 @@
           },
           "Targeting": "Self",
           "Trigger": "None",
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
           "Log": "{Actor}'s health is increased by 50 due to being big."
+        }
+      ]
+    }
+  },
+  {
+    "Name": "Beginner's Essence 1",
+    "Active": {
+      "Id": "fireball_01",
+      "Name": "Fireball",
+      "Description": "Hurls a fireball that deals damage over time.",
+      "Type": "Active",
+      "Cooldown": 120,
+      "Cost": 7,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 22,
+            "AttackType": "Ranged",
+            "DamageType": "Magical",
+            "DamageTags": ["Spells"]
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 0
+          },
+          "Targeting": "SingleEnemy",
+          "Trigger": "None",
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
+          "Log": "{Target} received {Amount} damage."
+        },
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 8,
+            "AttackType": "DamageOverTime",
+            "DamageType": "Burn",
+            "DamageTags": []
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 40
+          },
+          "Interval": {
+            "Type": "Interval",
+            "Interval": 10
+          },
+          "Targeting": "SingleEnemy",
+          "Trigger": "OnTickInterval",
+          "IsFlatAmount": true,
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
+          "Log": "{Target} is burning, and took {Amount} fire damage."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "heal_01",
+      "Name": "Heal",
+      "Description": "Restores health to the target every 4 second for 20 seconds.",
+      "Type": "Active",
+      "Cooldown": 120,
+      "Cost": 6,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Healing",
+            "Amount": 19
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 120
+          },
+          "Interval": {
+            "Type": "Interval",
+            "Interval": 30
+          },
+          "Targeting": "Self",
+          "Trigger": "OnTickInterval",
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
+          "Log": "{Target} was healed for {Amount}."
         }
       ]
     }
@@ -141,6 +393,9 @@
           },
           "Targeting": "Self",
           "Trigger": "None",
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
           "Log": "{Actor}'s strength increased by 10'."
         }
       ]
@@ -170,6 +425,9 @@
           },
           "Targeting": "Self",
           "Trigger": "OnHealthChanged",
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
           "Log": "{Actor}'s defense is increased by 30% due to falling below 20% health."
         }
       ]
@@ -198,6 +456,9 @@
           },
           "Targeting": "Self",
           "Trigger": "None",
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
           "Log": "{Target} has been summoned by {Actor}."
         }
       ]
@@ -219,9 +480,12 @@
             "Type": "IndefiniteDuration"
           },
           "Targeting": "Self",
-          "Trigger": "OnAttacked",
+          "Trigger": "OnMeleeAttacked",
           "ApplyOnSelf": false,
           "IsFlatAmount": true,
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
           "Log": "{Actor} retaliated against {Target} and dealt {Amount} damage."
         }
       ]
@@ -248,6 +512,9 @@
           },
           "Targeting": "SingleEnemy",
           "Trigger": "None",
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
           "Log": "{Actor} stunned {Target}."
         }
       ]
@@ -269,9 +536,12 @@
             "Type": "IndefiniteDuration"
           },
           "Targeting": "Self",
-          "Trigger": "OnAttacked",
+          "Trigger": "OnMeleeAttacked",
           "ApplyOnSelf": false,
           "IsFlatAmount": true,
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
           "Log": "{Actor} retaliated against {Target} and dealt {Amount} damage."
         }
       ]

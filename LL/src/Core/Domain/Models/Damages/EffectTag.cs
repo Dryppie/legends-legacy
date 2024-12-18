@@ -1,9 +1,11 @@
 ﻿namespace Domain.Models.Damages;
-public enum DamageTag
+public enum EffectTag
 {
+    None,
     Slashing,
     Blunt,
     Piercing,
     Arrows,
     Spells,
+    SummonExpiration,
 }

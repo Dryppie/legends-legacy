@@ -5,6 +5,8 @@ using Domain.Models.Abilities.Effects.Conditions;
 using Domain.Models.Abilities.Effects.EffectModifications;
 using Domain.Models.Abilities.Effects.Interval;
 using Domain.Models.Abilities.Effects.Trigger;
+using Domain.Models.Combat;
+using Domain.Models.Damages;
 using Domain.Models.Entities;
 
 namespace Domain.Models.Abilities.Effects;
@@ -30,11 +32,15 @@ public class Effect
         SummonAction => EffectType.Summon,
         _ => throw new NotSupportedException($"Unsupported action type {Action?.GetType().Name}")
     };
+    public AttackType AttackType { get; set; }
+    public DamageType DamageType { get; set; }
+    public List<EffectTag> EffectTags { get; set; } = [];
 
     public string Log { get; set; } = string.Empty;
 
     public Effect(IEffectAction action,
                   IEffectDuration duration,
+                  List<EffectTag> effectTags,
                   IEffectCondition? condition = null,
                   Entity? caster = null,
                   Targeting targeting = Targeting.None,
@@ -42,10 +48,13 @@ public class Effect
                   IEffectInterval? interval = null,
                   bool applyOnSelf = true,
                   bool isFlatAmount = false,
-                  int chance = 100)
+                  int chance = 100,
+                  AttackType attackType = AttackType.None,
+                  DamageType damageType = DamageType.None)
     {
         Action = action;
         Duration = duration;
+        EffectTags = effectTags;
         Condition = condition ?? new NoCondition();
         Caster = caster;
         Targeting = targeting;
@@ -54,6 +63,8 @@ public class Effect
         ApplyOnSelf = applyOnSelf;
         IsFlatAmount = isFlatAmount;
         Chance = chance;
+        AttackType = attackType;
+        DamageType = damageType;
     }
 
     public void Update()

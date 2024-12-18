@@ -4,6 +4,7 @@ using Domain.Models.Abilities.Effects.Conditions;
 using Domain.Models.Abilities.Effects.Timed;
 using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Combat;
+using Domain.Models.Damages;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Creatures;
 
@@ -43,19 +44,20 @@ public class SummonAction : IEffectAction
                 action: selfDestructAction,
                 duration: duration,
                 condition: condition,
-                caster: context.Owner,
-                trigger: TriggerEvent.OnTickInterval
+                caster: context.Actor,
+                trigger: TriggerEvent.OnTickInterval,
+                effectTags: [EffectTag.SummonExpiration]
             );
             combatContext.EffectManager.AddEffect(summonedCreature, selfDestructEffect);
         }
 
         // Add the summoned entity to the caster's team
-        combatContext.EntityManager.AddEntityToOwnTeam(context.Owner!, summonedCreature);
+        combatContext.EntityManager.AddEntityToOwnTeam(context.Actor!, summonedCreature);
 
         context.Target = summonedCreature;
         context.EventType = EventType.Summon;
         context.Details = context.Details
-            .Replace("{Actor}", context.Owner.Name)
+            .Replace("{Actor}", context.Actor.Name)
             .Replace("{Target}", summonedCreature.Name);
 
         combatContext.LogEffectExecution(context);

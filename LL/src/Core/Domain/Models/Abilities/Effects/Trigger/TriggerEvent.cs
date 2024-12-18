@@ -6,13 +6,33 @@ public enum TriggerEvent
     /// </summary>
     None,
     /// <summary>
-    /// Triggered when the entity attacks
+    /// Triggered when the entity attacks. Barely ever used
     /// </summary>    
     OnAttack,
+    /// <summary>
+    /// Triggered when the entity attacks with melee
+    /// </summary>    
+    OnMeleeAttack,
+    /// <summary>
+    /// Triggered when the entity attacks with ranged
+    /// </summary>    
+    OnRangedAttack,
     /// <summary>
     /// Triggered when the entity is attacked
     /// </summary>
     OnAttacked,
+    /// <summary>
+    /// Triggered when the entity damaged through DOT, reflect, thorn, and so on.
+    /// </summary>
+    OnDamaged,
+    /// <summary>
+    /// Triggered when the entity is attacked by melee
+    /// </summary>
+    OnMeleeAttacked,
+    /// <summary>
+    /// Triggered when the entity is attacked by ranged
+    /// </summary>
+    OnRangedAttacked,
     /// <summary>
     /// Triggered when the entity heals
     /// </summary>

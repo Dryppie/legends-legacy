@@ -99,15 +99,18 @@ public class CombatEffectManager : ICombatEffectManager
         var ownTeam = _entityManager.GetOwnTeam(target);
         var enemyTeam = _entityManager.GetOpposingTeam(target);
 
-        return new EffectContext(ownTeam,
-                                 enemyTeam,
-                                 effect.Caster ?? target,
-                                 opponent ?? target,
-                                 effect.Trigger,
-                                 magnitude,
-                                 effect.IsFlatAmount,
-                                 effect.Log,
-                                 effect.EffectModifications,
-                                 effect.Action);
+        return new EffectContext(ownTeam: ownTeam,
+                                 enemyTeam: enemyTeam,
+                                 owner: effect.Caster ?? target,
+                                 target: opponent ?? target,
+                                 triggerEvent: effect.Trigger,
+                                 magnitude: magnitude,
+                                 isFlatAmount: effect.IsFlatAmount,
+                                 details: effect.Log,
+                                 effectModifications: effect.EffectModifications,
+                                 action: effect.Action,
+                                 effectTags: effect.EffectTags,
+                                 attackType: effect.AttackType,
+                                 damageType: effect.DamageType);
     }
 }
