@@ -117,9 +117,9 @@ export class CombatComponent implements OnInit, OnDestroy {
       case EventType.DamageCrit:
         this.handleDamageEvent(event);
         break;
-      // case EventType.Miss:
-      //   this.handleBlockEvent(event);
-      //   break;
+      case EventType.Miss:
+        this.handleMissEvent(event);
+        break;
       // case EventType.Parry:
       //   this.handleBlockEvent(event);
       //   break;
@@ -147,6 +147,13 @@ export class CombatComponent implements OnInit, OnDestroy {
       case EventType.BuffExpired:
         const buffExpired = true;
         this.handleBuffEvent(event, buffExpired);
+        break;
+      case EventType.Debuff:
+        this.handleDebuffEvent(event);
+        break;
+      case EventType.DebuffExpired:
+        const debuffExpired = true;
+        this.handleDebuffEvent(event, debuffExpired);
         break;
       // Add other event types as needed
       default:
@@ -182,6 +189,11 @@ export class CombatComponent implements OnInit, OnDestroy {
       );
     }
     // console.log(`Healed: ${event.details}`);
+  }
+
+  private handleMissEvent(event: CombatEvent): void {
+    // Implement specific logic for handling block events
+    // console.log(`Blocked: ${event.details}`);
   }
 
   private handleBlockEvent(event: CombatEvent): void {
@@ -223,6 +235,11 @@ export class CombatComponent implements OnInit, OnDestroy {
   }
 
   private handleBuffEvent(event: CombatEvent, buffExpired: boolean = false) {
+    // if (buffExpired) console.log(`Buff Expired: ${event.details}`);
+    // else console.log(`Buff: ${event.details}`);
+  }
+
+  private handleDebuffEvent(event: CombatEvent, buffExpired: boolean = false) {
     // if (buffExpired) console.log(`Buff Expired: ${event.details}`);
     // else console.log(`Buff: ${event.details}`);
   }

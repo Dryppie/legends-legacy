@@ -19,5 +19,5 @@ public interface ICombatEffectManager
     /// <summary>
     /// Trigger effects that respond to a given event, such as damage taken or healing received.
     /// </summary>
-    void TriggerEffects(TriggerEvent triggerEvent, Entity target, Entity? opponent = null, int magnitude = 0);
+    void TriggerEffects(TriggerEvent triggerEvent, Entity target, Entity? opponent = null, int magnitude = -1);
 }

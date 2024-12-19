@@ -90,13 +90,13 @@ public class CombatInteractionManager : ICombatInteractionManager
         // If overhealing occurs
         if (currentHealth + healing > maxHealth)
         {
-            int extraHealing = (int)(currentHealth + healing - maxHealth);
-            int actualHealing = (int)(maxHealth - currentHealth);
+            float extraHealing = currentHealth + healing - maxHealth;
+            float actualHealing = maxHealth - currentHealth;
 
             target.CombatAttributes[AttributeType.Health] = maxHealth;
 
             // Trigger effects for overhealing
-            _effectManager.TriggerEffects(TriggerEvent.OnOverhealed, target, healer, extraHealing);
+            _effectManager.TriggerEffects(TriggerEvent.OnOverhealed, target, healer, (int)extraHealing);
         }
         else
         {

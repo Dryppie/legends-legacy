@@ -27,21 +27,34 @@ public class DamageAction : IEffectAction
             // If it's a flat amount, take the value of the effect itself (_damageAmount)
             calculatedResult.CalculatedDamageToDeal = Magnitude;
             calculatedResult.CalculatedDamageReceived = combatContext.InteractionManager.CalculateDamageReceived(context.Target, Magnitude, AttackOutcome.Hit);
+            calculatedResult.AttackOutcome = AttackOutcome.Hit;
         }
         else
         {
-            calculatedResult = CombatFormulaCalculator.CalculateCombatInteraction(context.Actor, context.Target, context.Magnitude);
+            calculatedResult = CombatFormulaCalculator.CalculateCombatInteraction(context.Actor, context.Target, Magnitude);
         }
 
-        context.Magnitude = calculatedResult.CalculatedDamageReceived;
-        context.EventType = EventType.Damage;
         context.AttackOutcome = calculatedResult.AttackOutcome;
+        context.Magnitude = calculatedResult.CalculatedDamageReceived;
+
+        if (context.AttackOutcome == AttackOutcome.Miss)
+        {
+            context.EventType = EventType.Miss;
+            context.Details = $"{context.Actor.Name} missed the target.";
+            // Log
+            combatContext.LogEffectExecution(context);
+            return;
+        }
+
+        context.EventType = EventType.Damage;
         context.Details = context.Details
             .Replace("{Actor}", context.Actor.Name)
             .Replace("{Target}", context.Target.Name)
             .Replace("{Amount}", calculatedResult.CalculatedDamageReceived.ToString());
 
         combatContext.LogEffectExecution(context);
+
+        // Log
         combatContext.InteractionManager.ApplyDamage(context);
     }
 

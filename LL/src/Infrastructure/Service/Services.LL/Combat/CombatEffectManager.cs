@@ -77,7 +77,7 @@ public class CombatEffectManager : ICombatEffectManager
         }
     }
 
-    public void TriggerEffects(TriggerEvent triggerEvent, Entity effectTriggeredOn, Entity? causeOfTrigger = null, int magnitude = 0)
+    public void TriggerEffects(TriggerEvent triggerEvent, Entity effectTriggeredOn, Entity? causeOfTrigger = null, int magnitude = -1)
     {
         if (!_entityEffects.TryGetValue(effectTriggeredOn, out var effects))
             return;
@@ -93,18 +93,24 @@ public class CombatEffectManager : ICombatEffectManager
     /// Creates a fully populated EffectContext to be passed to the effect when executing.
     /// You can adjust this to provide OwnTeam, EnemyTeam, CurrentTime, etc.
     /// </summary>
-    private EffectContext CreateEffectContext(Effect effect, Entity target, Entity? opponent = null, int magnitude = 0)
+    private EffectContext CreateEffectContext(Effect effect, Entity target, Entity? opponent = null, int magnitude = -1)
     {
         // Gather any info from the combat context or entity manager:
         var ownTeam = _entityManager.GetOwnTeam(target);
         var enemyTeam = _entityManager.GetOpposingTeam(target);
+
+        if (magnitude == 0 || effect.Action.Magnitude == 0)
+        {
+            Console.WriteLine("MAGNITUDE IS 0");
+
+        }
 
         return new EffectContext(ownTeam: ownTeam,
                                  enemyTeam: enemyTeam,
                                  owner: effect.Caster ?? target,
                                  target: opponent ?? target,
                                  triggerEvent: effect.Trigger,
-                                 magnitude: magnitude,
+                                 magnitude: magnitude != -1 ? magnitude : effect.Action.Magnitude, // If the magnitude is not -1, then use magnitude. Else, use Action.Magnitude
                                  isFlatAmount: effect.IsFlatAmount,
                                  details: effect.Log,
                                  effectModifications: effect.EffectModifications,

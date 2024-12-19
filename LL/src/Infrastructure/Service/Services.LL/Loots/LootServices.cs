@@ -54,8 +54,6 @@ public class LootServices : ILootService
     {
         double totalWeight = entries.Sum(e => e.Weight);
         double randomValue = RandomGenerator.NextSingle() * 100;
-        Console.WriteLine("RANDOM VALUE ROLLED HERE!!!!");
-        Console.WriteLine(randomValue);
         double cumulativeWeight = 0.0;
 
         foreach (var entry in entries)
