@@ -74,17 +74,13 @@ function getCharacterSidebar(): Tab[] {
             { icon: 'path/to/coin-icon.png', amount: 1 },
           ],
         },
-        // {
-        //   id: '3',
-        //   route: 'character/essences',
-        //   icon: 'path/to/quest-icon.png',
-        //   title: 'Essences',
-        //   description: 'More details about the quests',
-        //   rewards: [
-        //     { icon: 'path/to/fire-icon.png', amount: 2 },
-        //     { icon: 'path/to/coin-icon.png', amount: 1 },
-        //   ],
-        // },
+        {
+          id: 'essences',
+          route: 'character',
+          icon: 'path/to/essence-icon.png',
+          title: 'Essences',
+          description: 'View your essences',
+        },
         // {
         //   id: '4',
         //   route: 'character/achievements',
