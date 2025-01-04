@@ -3,6 +3,7 @@ using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
+using Domain.Models.Essences;
 using Domain.Models.Inventories;
 using Domain.Models.LootTables;
 using Domain.Models.Regions;
@@ -14,6 +15,7 @@ using Persistence.LL.Repositories.Attributes;
 using Persistence.LL.Repositories.CharacterActions;
 using Persistence.LL.Repositories.Entities;
 using Persistence.LL.Repositories.Entities.Characters;
+using Persistence.LL.Repositories.Essences;
 using Persistence.LL.Repositories.Inventories;
 using Persistence.LL.Repositories.LootTables;
 using Persistence.LL.Repositories.Regions;
@@ -42,6 +44,8 @@ public static class DependencyInjection
         services.AddScoped<ICharacterActionRepository, CharacterActionRepository>();
 
         services.AddScoped<IEntityRepository, EntityRepository>();
+
+        services.AddScoped<IEssenceRepository, EssenceRepository>();
 
         services.AddScoped<ILootTableRepository, LootTableRepository>();
         services.AddScoped<IInventoryRepository, InventoryRepository>();

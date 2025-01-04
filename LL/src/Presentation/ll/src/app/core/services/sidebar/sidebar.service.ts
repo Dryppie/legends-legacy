@@ -22,7 +22,7 @@ export class SidebarService {
     if (currentRoute.includes('professions')) return 'professions';
     if (currentRoute.includes('world')) return 'world';
     if (currentRoute.includes('team')) return 'team';
-    if (currentRoute.includes('town')) return 'town';
+    if (currentRoute.includes('city')) return 'city';
     if (currentRoute.includes('dungeons')) return 'dungeons';
     if (currentRoute.includes('quests')) return 'quests';
     if (currentRoute.includes('guild')) return 'guild';
@@ -37,6 +37,8 @@ export class SidebarService {
     let tabs: Tab[] = [];
     if (url.includes('character')) {
       tabs = getCharacterSidebar();
+    } else if (url.includes('city')) {
+      tabs = getCitySidebar();
     } else if (url.includes('professions')) {
       tabs = getProfessionSidebar();
     } else if (url.includes('world')) {
@@ -52,17 +54,17 @@ function getCharacterSidebar(): Tab[] {
     {
       label: 'Daily',
       items: [
-        // {
-        //   id: 'inventory',
-        //   route: 'character',
-        //   icon: 'path/to/quest-icon.png',
-        //   title: 'Character Overview',
-        //   description: 'Statistics and Equipment',
-        //   rewards: [
-        //     { icon: 'path/to/fire-icon.png', amount: 2 },
-        //     { icon: 'path/to/coin-icon.png', amount: 1 },
-        //   ],
-        // },
+        {
+          id: 'character-overview',
+          route: 'character',
+          icon: 'path/to/quest-icon.png',
+          title: 'Character Overview',
+          description: 'Statistics and Equipment',
+          rewards: [
+            { icon: 'path/to/fire-icon.png', amount: 2 },
+            { icon: 'path/to/coin-icon.png', amount: 1 },
+          ],
+        },
         {
           id: 'inventory',
           route: 'character',
@@ -110,6 +112,27 @@ function getCharacterSidebar(): Tab[] {
     //     },
     //   ],
     // },
+  ];
+}
+
+function getCitySidebar(): Tab[] {
+  return [
+    {
+      label: 'World',
+      items: [
+        {
+          id: 'temple',
+          route: 'city',
+          icon: 'path/to/quest-icon.png',
+          title: 'Temple',
+          description: 'Temple',
+          rewards: [
+            { icon: 'path/to/fire-icon.png', amount: 2 },
+            { icon: 'path/to/coin-icon.png', amount: 1 },
+          ],
+        },
+      ],
+    },
   ];
 }
 

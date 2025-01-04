@@ -1,57 +1,64 @@
-<div class="flex h-full bg-cover bg-center justify-center"
-style="background-image: url(&quot;backgrounds/background.png&quot;)"
->
-
-  <div
-  class="flex h-full flex-auto flex-col max-w-[1200px]"
->
-  <app-navbar [isScreenSmall]="isScreenSmall" class="p-4"></app-navbar>
-  
-  <div class="flex h-full gap-4 overflow-hidden">
-    <nav
-    [ngClass]="{ hidden: !isSidebarOpen && isScreenSmall }"
-    class="w-full sm:w-auto"
-    >
-    <app-sidebar (itemTapped)="toggleNav()" class="flex h-full"></app-sidebar>
-  </nav>
-  <div
-  [ngClass]="{ hidden: isSidebarOpen }"
-  class="h-full w-full flex-col space-y-4 sm:flex"
-  >
-  <div class="relative h-full w-full flex-auto overflow-hidden sm:pr-4">
-    <div
-    class="border-gradient absolute inset-0 flex w-full items-center py-[1px] sm:rounded-md sm:pr-4 sm:opacity-90"
-    >
-    <div class="h-full w-full bg-texture sm:rounded-md"></div>
-  </div>
-  <main
-  class="relative flex h-full w-full flex-auto flex-col gap-2 overflow-hidden pt-4 sm:rounded-md sm:pt-6"
-  >
-  <app-back-button
-  (click)="toggleNav()"
-  class="ml-6 w-12 sm:hidden"
-  ></app-back-button>
-  <div class="h-full w-full overflow-hidden pl-4 sm:pb-6 sm:pl-6">
-    <router-outlet></router-outlet>
-  </div>
-</main>
-</div>
-<footer
-class="flex h-12 flex-none justify-end rounded-md rounded-b-none text-white"
->
 <div
-class="border-gradient relative flex h-full items-center rounded-md pt-[1px]"
+  class="flex h-full justify-center bg-cover bg-center"
+  style="background-image: url(&quot;backgrounds/background.png&quot;)"
 >
-<div
-class="flex h-full w-80 items-center justify-between rounded-tl-md bg-texture px-3"
->
-<div class="text-primary">CHAT</div>
-<img src="icons/ActivePlus.svg" />
-</div>
-</div>
-</footer>
-</div>
-</div>
-</div>
+  <div class="flex h-full flex-auto flex-col">
+    <app-navbar [isScreenSmall]="isScreenSmall" class="p-4"></app-navbar>
 
+    <div class="flex h-full gap-4 overflow-hidden">
+      <nav
+        [ngClass]="{ hidden: !isSidebarOpen && isScreenSmall }"
+        class="w-full sm:w-auto"
+      >
+        <app-sidebar
+          (itemTapped)="toggleNav()"
+          class="flex h-full"
+        ></app-sidebar>
+      </nav>
+      <div
+        [ngClass]="{ hidden: isSidebarOpen }"
+        class="h-full w-full flex-col space-y-4 sm:flex"
+      >
+        <div
+          class="relative h-full w-full max-w-[1280px] flex-auto overflow-hidden sm:pr-4"
+        >
+          <div
+            class="border-gradient absolute inset-0 flex w-full items-center py-[1px] sm:rounded-md sm:pr-4 sm:opacity-90 2xl:rounded-b-none"
+          >
+            <div
+              class="h-full w-full bg-texture sm:rounded-md 2xl:rounded-b-none"
+            ></div>
+          </div>
+          <main
+            class="relative flex h-full w-full flex-auto flex-col gap-2 overflow-hidden pt-4 sm:rounded-md sm:pt-6 2xl:rounded-b-none"
+          >
+            <app-back-button
+              (click)="toggleNav()"
+              class="ml-6 w-12 sm:hidden"
+            ></app-back-button>
+            <div class="h-full w-full overflow-hidden pl-4 sm:pb-6 sm:pl-6">
+              <router-outlet></router-outlet>
+            </div>
+          </main>
+        </div>
+        <div
+          class="flex h-12 flex-none justify-end rounded-md rounded-b-none text-white 2xl:hidden"
+        >
+          <div
+            class="border-gradient relative flex h-full items-center rounded-md pt-[1px]"
+          >
+            <div
+              class="flex h-full w-80 items-center justify-between rounded-tl-md bg-texture px-3"
+            >
+              <div class="text-primary">CHAT</div>
+              <img src="icons/ActivePlus.svg" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hidden h-full w-80 flex-col 2xl:flex">
+        <div class="hidden h-full w-80 flex-col 2xl:flex"></div>
+      </div>
+    </div>
+  </div>
 </div>

@@ -58,6 +58,7 @@ export class CharacterActionsService {
       .pipe(
         catchError((error) => {
           console.error('Failed to start character action:', error);
+          this.clearCAT();
           return of(null);
         }),
       )

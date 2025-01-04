@@ -23,4 +23,19 @@
         </ul>
     </div> -->
   </div>
+  <div *ngIf="isEssence()" class="flex justify-between">
+    <button
+      (click)="openEssenceModal()"
+      class="mt-2 rounded bg-light px-2 py-1 text-white"
+    >
+      Details
+    </button>
+
+    <button
+      (click)="equipEssence()"
+      class="mt-2 rounded bg-light px-2 py-1 text-white"
+    >
+      Equip Essence
+    </button>
+  </div>
 </div>

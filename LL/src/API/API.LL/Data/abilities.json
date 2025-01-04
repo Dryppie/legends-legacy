@@ -285,7 +285,7 @@
     }
   },
   {
-    "Name": "Beginner's Essence 1",
+    "Name": "Starter Essence 1",
     "Active": {
       "Id": "fireball_01",
       "Name": "Fireball",
@@ -371,7 +371,7 @@
     }
   },
   {
-    "Name": "Beginner's Essence 2",
+    "Name": "Starter Essence 2",
     "Active": {
       "Id": "empower_01",
       "Name": "Empower",
@@ -434,7 +434,7 @@
     }
   },
   {
-    "Name": "Beginner's Essence 3",
+    "Name": "Starter Essence 3",
     "Active": {
       "Id": "forbiddenRitual",
       "Name": "Forbidden Ritual",

@@ -19,6 +19,13 @@ export const DASHBOARD_ROUTES: Routes = [
           ),
       },
       {
+        path: 'city',
+        loadChildren: () =>
+          import('./../../features/game/city/city.routes').then(
+            (m) => m.CITY_ROUTES,
+          ),
+      },
+      {
         path: 'professions',
         loadChildren: () =>
           import('./../../features/game/professions/professions.routes').then(

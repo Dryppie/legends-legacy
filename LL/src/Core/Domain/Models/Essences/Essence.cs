@@ -2,6 +2,7 @@
 using Domain.Models.Entities;
 using Domain.Models.Items;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Domain.Models.Essences;
 public class Essence
@@ -15,6 +16,8 @@ public class Essence
     [NotMapped]
     public Ability Active { get; set; } = null!;
 
+    [JsonIgnore]
     public ICollection<Entity> Entities { get; set; } = [];
-    public ICollection<EssenceItem> EssenceItems { get; set; } = new List<EssenceItem>();
+    [JsonIgnore]
+    public ICollection<EssenceItem> EssenceItems { get; set; } = [];
 }

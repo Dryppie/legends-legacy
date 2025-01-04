@@ -25,4 +25,11 @@ public interface ICharacterService
     /// <param name="UserId"></param>
     /// <returns></returns>
     public Task<Character> GetCharacterByCharacterIdAsync(Guid CharacterId);
+
+    /// <summary>
+    /// Get Character Overview by Character Id
+    /// </summary>
+    /// <param name="UserId"></param>
+    /// <returns></returns>
+    Task<Character> GetMyCharacterOverviewAsync(Guid characterId);
 }

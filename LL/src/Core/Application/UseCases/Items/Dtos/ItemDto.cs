@@ -17,7 +17,7 @@ public class ItemDto : IMapFrom<Item>
     {
         profile.CreateMap<Item, ItemDto>()
             .ForMember(dest => dest.Essence, opt => opt.MapFrom<EssenceResolver>())
-            .ForMember(dest => dest.Description, opt => opt.MapFrom<DescriptionResolver>());
+            /*.ForMember(dest => dest.Description, opt => opt.MapFrom<DescriptionResolver>())*/;
     }
 
     public class EssenceResolver : IValueResolver<Item, ItemDto, EssenceDto?>
@@ -33,21 +33,21 @@ public class ItemDto : IMapFrom<Item>
         }
     }
 
-    public class DescriptionResolver : IValueResolver<Item, ItemDto, string>
-    {
-        public string Resolve(Item source, ItemDto destination, string destMember, ResolutionContext context)
-        {
-            if (source is EssenceItem essenceItem && essenceItem.Essence != null)
-            {
-                // Build description from ActiveAbility and PassiveAbility
-                var activeAbility = essenceItem.Essence.Active.Description ?? "No Active Ability";
-                var passiveAbility = essenceItem.Essence.Passive.Description ?? "No Passive Ability";
+    //public class DescriptionResolver : IValueResolver<Item, ItemDto, string>
+    //{
+    //    public string Resolve(Item source, ItemDto destination, string destMember, ResolutionContext context)
+    //    {
+    //        if (source is EssenceItem essenceItem && essenceItem.Essence != null)
+    //        {
+    //            // Build description from ActiveAbility and PassiveAbility
+    //            var activeAbility = essenceItem.Essence.Active.Description ?? "No Active Ability";
+    //            var passiveAbility = essenceItem.Essence.Passive.Description ?? "No Passive Ability";
 
-                return $"Active: {activeAbility}\n\nPassive: {passiveAbility}";
-            }
+    //            return $"Active: {activeAbility}\n\nPassive: {passiveAbility}";
+    //        }
 
-            // Default description for non-Essence items
-            return source.Description ?? string.Empty;
-        }
-    }
+    //        // Default description for non-Essence items
+    //        return source.Description ?? string.Empty;
+    //    }
+    //}
 }

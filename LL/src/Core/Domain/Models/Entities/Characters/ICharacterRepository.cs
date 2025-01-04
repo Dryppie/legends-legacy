@@ -23,4 +23,11 @@ public interface ICharacterRepository
     /// <param name="UserId"></param>
     /// <returns></returns>
     public Task<Character> GetCharacterByCharacterIdAsync(Guid characterId);
+
+    /// <summary>
+    /// Get Character Overview by Character Id
+    /// </summary>
+    /// <param name="UserId"></param>
+    /// <returns></returns>
+    Task<Character> GetCharacterOverviewByCharacterIdAsync(Guid currentUserId);
 }

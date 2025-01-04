@@ -1,0 +1,23 @@
+<div class="flex h-full flex-col items-center space-y-6 pr-4 sm:pr-6">
+  <div class="flex w-full flex-col sm:gap-6">
+    <app-default-header title="Temple" class="w-full"></app-default-header>
+    <app-banner class="w-full"></app-banner>
+  </div>
+  <div class="flex h-full w-full flex-col justify-between">
+    <div class="text-white">
+      <p>Here again? What do you need this time..</p>
+      <p>Absorbing, or removing an Essence?</p>
+      <p>Quickly, I have more important things to attend.</p>
+    </div>
+    <div class="flex justify-center gap-4">
+      <app-button
+        (click)="openAbsorbEssenceModal()"
+        text="Absorb Essence"
+      ></app-button>
+      <app-button
+        (click)="openRemoveEssenceModal()"
+        text="Delete Essence"
+      ></app-button>
+    </div>
+  </div>
+</div>

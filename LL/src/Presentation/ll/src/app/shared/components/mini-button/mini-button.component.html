@@ -1,6 +1,10 @@
 <button class="relative h-[32px] w-[64px]">
   <div
-    class="h-full w-full rounded-[3px] border border-[#F9DCA0] bg-[#363636] shadow-[inset_0_0_14px_0px_#FF9B2570] after:inset-0 after:content-['']"
+    class="h-full w-full rounded-[3px] border border-[#F9DCA0] bg-[#363636]"
+    [ngClass]="{
+      'shadow-[inset_0_0_14px_0px_#FF9B2570] after:inset-0 after:content-[\'\']':
+        !disabled,
+    }"
   ></div>
   <div class="absolute inset-0 flex w-full items-center justify-center">
     <label class="cursor-pointer text-white">

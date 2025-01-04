@@ -1,9 +1,10 @@
+import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-mini-button',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './mini-button.component.html',
   styleUrl: './mini-button.component.css',
 })

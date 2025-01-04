@@ -4,8 +4,8 @@ import { Targeting } from './enums/targeting';
 
 export interface Essence {
   name: string;
-  activeAbility: Ability;
-  passiveAbility: Ability;
+  active: Ability;
+  passive: Ability;
 }
 
 export interface Ability {

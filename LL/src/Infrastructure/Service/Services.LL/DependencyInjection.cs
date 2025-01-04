@@ -27,6 +27,8 @@ public static class DependencyInjection
 
         services.AddScoped<IEntityService, EntityService>();
 
+        services.AddScoped<IEssenceService, EssenceService>();
+
         services.AddScoped<IGatheringService, GatheringService>();
         
         services.AddScoped<ILootService, LootServices>();

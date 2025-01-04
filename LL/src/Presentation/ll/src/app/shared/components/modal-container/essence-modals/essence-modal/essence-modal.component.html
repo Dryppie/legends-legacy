@@ -1,0 +1,40 @@
+<div class="max-w-xl rounded-lg bg-slate-800 p-6 text-white">
+  <!-- Modal Header -->
+  <div class="mb-4 flex items-center justify-between">
+    <h2 class="text-xl font-bold">Essence Details</h2>
+    <button (click)="onClose()" class="text-xl font-bold">&times;</button>
+  </div>
+
+  <!-- Modal Body -->
+  <div class="space-y-4">
+    <div>
+      <span class="font-semibold">Name: </span>
+      {{ essence.name }}
+    </div>
+    <div>
+      <span class="font-semibold">Active Ability: </span>
+      <p>{{ essence.active.description }}</p>
+    </div>
+    <div>
+      <span class="font-semibold">Passive Ability: </span>
+      <p>{{ essence.passive.description }}</p>
+    </div>
+    <div>
+      <span class="font-semibold">Stats:</span>
+      <ul class="ml-4 list-inside list-disc">
+        <!-- <li *ngFor="let stat of essence.stats">
+          {{ stat.key }}: {{ stat.value }}
+        </li> -->
+        <li>Strength: +10</li>
+        <li>Health: +50</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Modal Footer -->
+  <div class="mt-6 flex justify-end">
+    <button (click)="onClose()" class="rounded bg-light px-4 py-2 text-white">
+      Close
+    </button>
+  </div>
+</div>

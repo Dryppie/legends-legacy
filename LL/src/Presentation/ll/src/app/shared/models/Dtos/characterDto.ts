@@ -1,3 +1,4 @@
+import { Essence } from '../essence';
 import { AttributeDto } from './attributesDto';
 
 export interface CharacterDto {
@@ -9,4 +10,9 @@ export interface CharacterDto {
   gold?: number;
   rawAttributes?: Array<AttributeDto>;
   attributes?: Array<AttributeDto>;
+}
+
+export interface CharacterOverviewDto {
+  baseAttributes: AttributeDto[];
+  equippedEssences: Essence[];
 }

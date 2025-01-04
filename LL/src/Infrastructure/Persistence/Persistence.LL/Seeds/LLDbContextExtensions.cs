@@ -15,6 +15,8 @@ using Microsoft.AspNetCore.Identity;
 namespace Persistence.LL.Seeds;
 public static class LLDbContextExtensions
 {
+    public const string CHARACTER_GUID = "11111111-1111-1111-1111-111111111111";
+
     public static async Task SeedData(this LLDbContext context, UserManager<AppUser> userManager)
     {
         var email = "admin@hotmail.com";
@@ -32,8 +34,9 @@ public static class LLDbContextExtensions
 
             var character = new Character()
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.Parse(CHARACTER_GUID),
                 UserId = user.Id,
+                Name = "admin"
             };
 
             var inventory = new Inventory()
@@ -84,7 +87,9 @@ public static class LLDbContextExtensions
         await SeedCreaturesAndLootTablesForShenicRegionLumoRuins(context);
 
         await SeedItemsAndLootTables(context);
-        
+
+        await SeedInventoryItems(context);
+
         await context.SaveChangesAsync();
     }
 
@@ -130,7 +135,7 @@ public static class LLDbContextExtensions
 
             var goblinEssenceItem = new EssenceItem
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
                 Name = goblinEssence.Name,
                 Essence = goblinEssence,
                 ItemType = ItemType.Essence,
@@ -157,7 +162,7 @@ public static class LLDbContextExtensions
 
             var largeRatEssenceItem = new EssenceItem
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000004"),
                 Name = largeRatEssence.Name,
                 Essence = largeRatEssence,
                 ItemType = ItemType.Essence,
@@ -278,12 +283,41 @@ public static class LLDbContextExtensions
         }
     }
 
+    public static async Task SeedInventoryItems(LLDbContext context)
+    {
+        if (!context.InventoryItems.Any())
+        {
+            var inventoryItemGoblinEssence = new InventoryItem()
+            {
+                InventoryId = Guid.Parse(CHARACTER_GUID),
+                ItemId = Guid.Parse("00000000-0000-0000-0000-000000000001"), // Copied directly from GoblinEssenceItem. Same ID
+                Quantity = 1
+            };
+
+            var inventoryItemRatEssence = new InventoryItem()
+            {
+                InventoryId = Guid.Parse(CHARACTER_GUID),
+                ItemId = Guid.Parse("00000000-0000-0000-0000-000000000004"), // Copied directly from LargeRatEssenceItem. Same ID
+                Quantity = 1
+            };
+
+            var inventoryItemSword = new InventoryItem()
+            {
+                InventoryId = Guid.Parse(CHARACTER_GUID),
+                ItemId = Guid.Parse("00000000-0000-0000-0000-000000000005"), // Copied directly from SwordItem. Same ID
+                Quantity = 1
+            };
+
+            await context.InventoryItems.AddRangeAsync(inventoryItemGoblinEssence, inventoryItemRatEssence, inventoryItemSword);
+        }
+    }
+
     public static async Task SeedOddGear(LLDbContext context)
     {
         // Create Items
         var sword = new Item
         {
-            Id = Guid.NewGuid(),
+            Id = Guid.Parse("00000000-0000-0000-0000-000000000005"),
             Name = "Sword"
         };
 

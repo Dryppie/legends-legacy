@@ -1,0 +1,70 @@
+<div class="flex w-full flex-col gap-2">
+  <div class="flex flex-col items-center justify-center space-y-3 pb-12">
+    <h2 class="primary-gradient text-2xl">Attributes</h2>
+    <img src="core/Divider.svg" alt="Logo" class="center w-60 object-contain" />
+  </div>
+  <div class="flex w-full gap-4">
+    <ul class="flex w-full flex-col">
+      <li
+        class="flex w-full justify-between gap-4"
+        *ngFor="
+          let attribute of (attributes | primaryAttributes).slice(
+            0,
+            (attributes | primaryAttributes).length / 2
+          )
+        "
+      >
+        <app-attribute-display
+          class="w-full"
+          [attribute]="attribute"
+        ></app-attribute-display>
+      </li>
+    </ul>
+    <ul class="flex w-full flex-col">
+      <li
+        class="flex w-full justify-between gap-4"
+        *ngFor="
+          let attribute of (attributes | primaryAttributes).slice(
+            (attributes | primaryAttributes).length / 2
+          )
+        "
+      >
+        <app-attribute-display
+          class="w-full"
+          [attribute]="attribute"
+        ></app-attribute-display>
+      </li>
+    </ul>
+    <ul class="flex w-full flex-col">
+      <li
+        class="flex w-full justify-between"
+        *ngFor="
+          let attribute of (attributes | secondaryAttributes).slice(
+            0,
+            (attributes | secondaryAttributes).length / 2
+          )
+        "
+      >
+        <app-attribute-display
+          class="w-full"
+          [attribute]="attribute"
+        ></app-attribute-display>
+      </li>
+    </ul>
+    <ul class="flex w-full flex-col">
+      <li
+        class="flex w-full justify-between"
+        *ngFor="
+          let attribute of (attributes | secondaryAttributes).slice(
+            (attributes | secondaryAttributes).length / 2
+          )
+        "
+      >
+        <app-attribute-display
+          class="w-full"
+          [attribute]="attribute"
+        ></app-attribute-display>
+      </li>
+    </ul>
+  </div>
+</div>

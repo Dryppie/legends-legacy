@@ -1,5 +1,6 @@
 ﻿using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Characters.Queries.GetCharacter;
+using Application.UseCases.Characters.Queries.GetCharacterOverview;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,6 +14,14 @@ public class CharacterController : BaseController
     {
         var character = await Mediator.Send(new GetCharacterQuery(CurrentUserId));
         
+        return Ok(character);
+    }
+
+    [HttpGet("Overview")]
+    public async Task<ActionResult<CharacterOverviewDto>> Overview()
+    {
+        var character = await Mediator.Send(new GetCharacterOverviewQuery(CurrentCharacterGuid));
+
         return Ok(character);
     }
 }

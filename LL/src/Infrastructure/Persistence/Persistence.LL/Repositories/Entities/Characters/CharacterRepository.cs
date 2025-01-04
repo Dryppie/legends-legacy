@@ -78,4 +78,18 @@ public class CharacterRepository : ICharacterRepository
 
         return character;
     }
+
+    /// <inheritdoc/>
+    public async Task<Character> GetCharacterOverviewByCharacterIdAsync(Guid characterId)
+    {
+        var character = await _context.Characters
+            .Include(c => c.EquippedEssences)
+            .Include(c => c.BaseAttributes)
+            //.Include(c => c.RawAttributes)
+            //.ThenInclude(a => a.AttributeBase)
+            .FirstOrDefaultAsync(c => c.Id.Equals(characterId));
+        NotFoundException.ThrowIfNull(character, nameof(Character), characterId);
+
+        return character;
+    }
 }

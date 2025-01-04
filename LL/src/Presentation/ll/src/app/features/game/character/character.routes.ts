@@ -11,11 +11,11 @@ export const CHARACTER_ROUTES: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'inventory',
+        redirectTo: 'character-overview',
         pathMatch: 'full',
       },
       {
-        path: '',
+        path: 'character-overview',
         component: CharacterOverviewComponent,
       },
       {
@@ -24,8 +24,8 @@ export const CHARACTER_ROUTES: Routes = [
       },
       {
         path: 'essences',
-        component: EssenceviewComponent
-      }
+        component: EssenceviewComponent,
+      },
     ],
   },
 ];

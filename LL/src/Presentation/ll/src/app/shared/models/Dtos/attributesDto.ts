@@ -1,4 +1,6 @@
+import { AttributeType } from '../enums/attributeType';
+
 export interface AttributeDto {
-  name: string;
+  attributeType: AttributeType;
   value: number;
 }

@@ -31,4 +31,12 @@ public class CharacterService : ICharacterService
     {
         return await _characterRepository.GetCharacterByCharacterIdAsync(CharacterId);
     }
+
+    /// <inheritdoc/>
+    public async Task<Character> GetMyCharacterOverviewAsync(Guid CurrentUserId)
+    {
+        var character = await _characterRepository.GetCharacterOverviewByCharacterIdAsync(CurrentUserId);
+        //character.CharacterNextLevelCalculator();
+        return character;
+    }
 }

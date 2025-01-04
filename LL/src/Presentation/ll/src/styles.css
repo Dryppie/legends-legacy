@@ -57,6 +57,10 @@
     );
   }
 
+  .primary-border-gradient {
+    background: linear-gradient(to top, #ffd36e 0%, #6e4500 90%);
+  }
+
   .chat-gradient {
     background: linear-gradient(
       to right,

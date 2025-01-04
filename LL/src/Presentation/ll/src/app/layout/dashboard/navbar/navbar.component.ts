@@ -20,9 +20,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
   activeLabel = 'Character'; // Default active label
   navButtons = [
     { link: '/game/character', label: 'Character' },
+    { link: '/game/city', label: 'City' },
     { link: '/game/professions', label: 'Professions' },
     { link: '/game/world', label: 'World' },
-    // { link: '#', label: 'Team' },
     // { link: '#', label: 'Town' },
   ];
 

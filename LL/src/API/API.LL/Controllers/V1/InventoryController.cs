@@ -13,6 +13,6 @@ public class InventoryController : BaseController
     [HttpGet]
     public async Task<ActionResult<InventoryDto?>> Get()
     {
-        return await Mediator.Send(new GetInventoryByIdQuery(CharacterGuid));
+        return await Mediator.Send(new GetInventoryByIdQuery(CurrentCharacterGuid));
     }
 }
