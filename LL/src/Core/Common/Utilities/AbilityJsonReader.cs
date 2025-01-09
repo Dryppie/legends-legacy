@@ -15,6 +15,7 @@ public static class AbilityJsonReader
             new TargetingConverter(),
             new TriggerEventConverter(),
             new InterfaceConverterFactory(),
+            new EffectConverter(),
             new JsonStringEnumConverter()
         },
         PropertyNameCaseInsensitive = true,

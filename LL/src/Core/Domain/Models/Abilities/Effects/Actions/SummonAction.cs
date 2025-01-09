@@ -11,7 +11,6 @@ using Domain.Models.Entities.Creatures;
 namespace Domain.Models.Abilities.Effects.Actions;
 public class SummonAction : IEffectAction
 {
-    private Entity? _caster;
     private readonly string _summonEntityType; // The type or identifier of the entity to summon
     private readonly int _duration;
     private ICombatContext? _combatContext;
@@ -21,12 +20,6 @@ public class SummonAction : IEffectAction
     {
         _summonEntityType = summonEntityType;
         _duration = duration;
-    }
-
-    public void SetContext(Entity caster, ICombatContext combatContext)
-    {
-        _caster = caster;
-        _combatContext = combatContext;
     }
 
     public void Execute(EffectContext context, ICombatContext combatContext)

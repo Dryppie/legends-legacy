@@ -1,4 +1,5 @@
 ﻿using Domain.Interfaces;
+using Domain.Models.Abilities.Effects;
 using Domain.Models.Abilities.Effects.Actions;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
@@ -65,6 +66,24 @@ public class EffectActionConverter : JsonConverter<IEffectAction>
                     var modifierType = Enum.Parse<ModifierType>(root.GetProperty("ModifierType").GetString()!);
                     var attributeModifier = new AttributeModifier(attribute, amount, modifierType);
                     return new ModifyAttributeAction(attributeModifier);
+
+                case "NestedEffect":
+                    // "Effects" is expected to be a JSON array of `Effect` objects
+                    var effectsArray = root.GetProperty("Effects");
+                    var nestedEffects = new List<Effect>();
+
+                    foreach (var effectElement in effectsArray.EnumerateArray())
+                    {
+                        // Pass each JSON sub-object to `JsonSerializer.Deserialize<Effect>`
+                        // which in turn will handle the `IEffectAction` in effect.Action
+                        var effect = JsonSerializer.Deserialize<Effect>(effectElement.GetRawText(), options);
+                        if (effect == null)
+                            throw new JsonException("Failed to deserialize Effect in NestedEffectAction.");
+
+                        nestedEffects.Add(effect);
+                    }
+
+                    return new NestedEffectAction(nestedEffects);
 
                 case "Summon":
                     var summonId = root.GetProperty("SummonId").GetString()!;

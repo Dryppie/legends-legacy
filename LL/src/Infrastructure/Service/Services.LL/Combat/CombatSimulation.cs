@@ -209,7 +209,7 @@ public class CombatSimulation : ICombatContext
         // Put ability on cooldown
         ability.RemainingTimeUntilUse = ability.Cooldown;
 
-        var battleContext = new BattleContext(ownTeam, opposingTeam);
+        var battleContext = new BattleContext(ownTeam, opposingTeam); // Is this needed???
 
         var targetNames = new List<string>();
         var effectsToApply = new List<(Entity target, Effect effectInstance)>();
@@ -247,11 +247,6 @@ public class CombatSimulation : ICombatContext
                 attackType: effectTemplate.AttackType,
                 damageType: effectTemplate.DamageType
                 );
-
-                if (effectTemplate.Action is SummonAction summonEffect)
-                {
-                    summonEffect.SetContext(actor, this);
-                }
 
                 effectInstance.Log = effectTemplate.Log;
 

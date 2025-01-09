@@ -427,6 +427,7 @@
           },
           "Targeting": "Self",
           "Trigger": "OnHealthChanged",
+          "ApplyOnSelf": true,
           "AttackType": "None",
           "DamageType": "None",
           "EffectTags": [],
@@ -458,6 +459,7 @@
           },
           "Targeting": "Self",
           "Trigger": "None",
+          "ApplyOnSelf": false,
           "AttackType": "None",
           "DamageType": "None",
           "EffectTags": [],
@@ -494,7 +496,7 @@
     }
   },
   {
-    "Name": "Goblin Shaman's Essence",
+    "Name": "Starter Essence 4",
     "Active": {
       "Id": "stun_01",
       "Name": "Stun",
@@ -522,17 +524,40 @@
       ]
     },
     "Passive": {
-      "Id": "retaliate_01",
-      "Name": "Retaliate",
-      "Description": "Deals damage back to the attacker when hit.",
+      "Id": "poison_retaliate",
+      "Name": "Poisonous Retaliation",
+      "Description": "Apply poison to the attacker when hit.",
       "Type": "Passive",
       "Cooldown": 0,
       "Cost": 0,
       "Effects": [
         {
           "Action": {
-            "Type": "Damage",
-            "Amount": 2
+            "Type": "NestedEffect",
+            "Effects": [
+              {
+                "Action": {
+                  "Type": "Damage",
+                  "Amount": 1
+                },
+                "Duration": {
+                  "Type": "TimedDuration",
+                  "Duration": 100
+                },
+                "Interval": {
+                  "Type": "Interval",
+                  "Interval": 10
+                },
+                "Targeting": "Self",
+                "Trigger": "OnTickInterval",
+                "ApplyOnSelf": true,
+                "IsFlatAmount": true,
+                "AttackType": "None",
+                "DamageType": "None",
+                "EffectTags": [],
+                "Log": "{Target} took {Amount} poison damage."
+              }
+            ]
           },
           "Duration": {
             "Type": "IndefiniteDuration"
@@ -544,7 +569,7 @@
           "AttackType": "None",
           "DamageType": "None",
           "EffectTags": [],
-          "Log": "{Actor} retaliated against {Target} and dealt {Amount} damage."
+          "Log": "{Actor} retaliated against {Target} and applied a poison to them."
         }
       ]
     }
