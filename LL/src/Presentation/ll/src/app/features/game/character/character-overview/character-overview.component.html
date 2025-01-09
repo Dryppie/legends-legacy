@@ -1,18 +1,28 @@
-<div
-  class="flex h-full w-full flex-col gap-4 pb-4 pr-4 text-white sm:pb-0 sm:pr-6"
->
+<div class="flex h-full flex-col gap-4 overflow-hidden pb-4 text-white sm:pb-0">
   <app-default-header
+    class="flex-none"
     title="Character Overview"
     text="Slots 3/120"
     image="character/character"
   ></app-default-header>
-  <div class="flex h-full w-full flex-col gap-4 pt-12">
-    <div class="flex w-full justify-between">
+  <div
+    class="flex h-full flex-col justify-between gap-4 overflow-y-auto pr-4 sm:pr-6"
+  >
+    <div class="flex flex-col-reverse justify-between lg:flex-row">
       <app-character-attributes
         class="flex"
         [attributes]="character?.baseAttributes ?? []"
       ></app-character-attributes>
-      <div class="w-96"></div>
+      <div class="">
+        <div class="flex flex-col items-center justify-center space-y-3 pb-4">
+          <h2 class="primary-gradient text-2xl">Equipment</h2>
+          <img
+            src="core/Divider.svg"
+            alt="Logo"
+            class="center w-60 object-contain"
+          />
+        </div>
+      </div>
     </div>
     <app-equipped-essences
       class=""

@@ -36,7 +36,8 @@ public static class LLDbContextExtensions
             {
                 Id = Guid.Parse(CHARACTER_GUID),
                 UserId = user.Id,
-                Name = "admin"
+                Name = "admin",
+                Level = 1
             };
 
             var inventory = new Inventory()
@@ -231,10 +232,10 @@ public static class LLDbContextExtensions
             // Create creatures
             var lumoRuinsCreatures = new List<Creature>
             {
-                new Creature { Id = goblinId, Name = "Goblin", LootTableId = goblinLootTable.Id, EquippedEssences = new List<Essence>() { goblinEssence } },
-                new Creature { Id = goblinWarriorId, Name = "Goblin Warrior", LootTableId = goblinWarriorLootTable.Id, EquippedEssences = new List<Essence>() { goblinWarriorEssence } },
-                new Creature { Id = goblinArcherId, Name = "Goblin Archer", LootTableId = goblinArcherLootTable.Id, EquippedEssences = new List<Essence>() { goblinArcherEssence } },
-                new Creature { Id = largeRatId, Name = "Large Rat", LootTableId = largeRatLootTable.Id, EquippedEssences = new List<Essence>() { largeRatEssence } }
+                new() { Id = goblinId, Name = "Goblin", LootTableId = goblinLootTable.Id, EquippedEssences = [goblinEssence], ExperienceReward = 2 },
+                new() { Id = goblinWarriorId, Name = "Goblin Warrior", LootTableId = goblinWarriorLootTable.Id, EquippedEssences = [goblinWarriorEssence], ExperienceReward = 3 },
+                new() { Id = goblinArcherId, Name = "Goblin Archer", LootTableId = goblinArcherLootTable.Id, EquippedEssences = [goblinArcherEssence], ExperienceReward = 3 },
+                new() { Id = largeRatId, Name = "Large Rat", LootTableId = largeRatLootTable.Id, EquippedEssences = [largeRatEssence], ExperienceReward = 2 }
             };
 
             await context.Creatures.AddRangeAsync(lumoRuinsCreatures);

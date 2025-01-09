@@ -1,12 +1,15 @@
 ﻿using Application.Interfaces.Services.LL;
 using Application.UseCases.Inventories.Events;
 using Domain.Components.Attributes;
+using Domain.Extensions;
 using Domain.Helpers;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Combat;
 using Domain.Models.Entities;
+using Domain.Models.Entities.Characters;
+using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
 using MediatR;
 using Services.LL.Combat;
@@ -29,6 +32,7 @@ public class CombatService : ICombatService
     public async Task<CombatResult> PerformIdleCombatAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
         var totalLoot = new List<InventoryItem>();
+        var totalExp = 0;
 
         var combatAction = characterAction.ActionDetails as CombatActionDetails;
 
@@ -57,6 +61,7 @@ public class CombatService : ICombatService
             // To display the victory/defeat screen before a new fight is initialized
             characterAction.UpdatedAt += TimeSpan.FromSeconds((lastCombatResult.Duration * 0.1) + 2);
 
+
             // Accumulate loot
             //totalLoot.AddRange(lastCombatResult.Loot);
 
@@ -74,6 +79,8 @@ public class CombatService : ICombatService
             {
                 lastCombatResult.Loot = _lootService.GenerateIdleCombatLootAsync(enemyCharacters);
                 totalLoot.AddRange(lastCombatResult.Loot);
+
+                totalExp += enemyCharacters.OfType<Creature>().Sum(e => e.ExperienceReward);
             }
 
             //TODO: OPTIMIZE PERHAPS?
@@ -86,10 +93,8 @@ public class CombatService : ICombatService
         lastCombatResult.PlayerTeam = CreateCombatEntities(playerCharacters);
         lastCombatResult.EnemyTeam = CreateCombatEntities(enemyCharacters);
 
-        if (totalLoot.Count > 0)
-        {
-            await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
-        }
+        await UpdateCharacterStatsAsync(playerCharacters, totalExp, cancellationToken);
+        await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
 
         return lastCombatResult;
     }
@@ -172,28 +177,23 @@ public class CombatService : ICombatService
 
     private async Task ProcessLootAsync(Guid characterId, List<InventoryItem> loot, CancellationToken cancellationToken)
     {
+        if (loot.Count == 0) return;
         // Implement how to update the character or game state with the loot
         // For example, updating the character inventory
         //await _InventoryService.AddLootAsync(loot, cancellationToken);
         await _publisher.Publish(new LootGeneratedEvent(characterId, loot), cancellationToken);
     }
 
-    private async Task UpdateCharacterStatsAsync(List<Entity> playerCharacters, CombatResult combatResult, CancellationToken cancellationToken)
+    private async Task UpdateCharacterStatsAsync(List<Entity> playerCharacters, int totalExp, CancellationToken cancellationToken)
     {
-        //foreach (var combatant in playerCharacters)
-        //{
-        //    // Retrieve character entity from database
-        //    var character = await _characterRepository.GetCharacterByIdAsync(combatant.Id, cancellationToken);
+        if (totalExp == 0) return;
 
-        //    if (combatResult.Outcome == BattleOutcome.Victory)
-        //    {
-        //        // Apply experience gain
-        //        character.Experience += combatResult.ExperienceGained;
-        //        // Handle level-up logic if necessary
-        //    }
-
-        //    // Save changes
-        //    await _characterRepository.UpdateCharacterAsync(character, cancellationToken);
-        //}
+        var characters = playerCharacters.OfType<Character>();
+        foreach (var character in characters)
+        {
+            character.Experience += totalExp / characters.Count();
+            character.UpdateCharacterLevel();
+        }
+        await _entityService.UpdateEntities(playerCharacters, cancellationToken);
     }
 }

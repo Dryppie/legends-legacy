@@ -4,7 +4,6 @@ using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.LootTables;
-using System;
 
 namespace Services.LL.Loots;
 public class LootServices : ILootService

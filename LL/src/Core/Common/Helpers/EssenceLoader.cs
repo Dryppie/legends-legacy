@@ -68,6 +68,18 @@ public static class EssenceLoader
         }
     }
 
+    public static async Task _Simulator_PickSpecificAbility(Entity entity, string essenceName)
+    {
+        List<Essence> allEssences = await DeserializeEssences();
+
+        var chosenEssences = new List<Essence>();
+
+        var chosenEssence = allEssences.FirstOrDefault(e => e.Name.Equals(essenceName));
+
+        entity.EquippedEssences.Add(chosenEssence!);
+        entity.Abilities.Add(chosenEssence!.Active);
+        entity.Abilities.Add(chosenEssence!.Passive);
+    }
 
     public static async Task<List<Essence>> DeserializeEssences()
     {
@@ -78,5 +90,4 @@ public static class EssenceLoader
         // Deserialize JSON into a list of essences
         return JsonSerializer.Deserialize<List<Essence>>(json, AbilityJsonReader.Options)!;
     }
-
 }

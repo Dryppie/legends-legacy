@@ -1,8 +1,13 @@
 <div class="flex flex-col gap-2">
   <h2 class="pl-2 text-primary">Absorbed Essences</h2>
-  <div class="flex gap-4 rounded-md border border-primary p-4">
-    <div class="" *ngFor="let essence of essences">
-      <p>{{ essence.name }}</p>
+  <div
+    class="grid grid-cols-5 gap-4 rounded-md border border-primary p-4 sm:grid-cols-10"
+  >
+    <div
+      class="hover:bg-accent flex flex-col items-center rounded-md p-2 transition"
+      *ngFor="let essence of essences"
+    >
+      <p class="text-center font-bold text-primary">{{ essence.name }}</p>
     </div>
   </div>
 </div>

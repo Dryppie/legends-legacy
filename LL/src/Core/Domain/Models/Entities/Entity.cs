@@ -38,7 +38,6 @@ public abstract class Entity
     public List<AttributeModifier> TemporaryModifiers { get; set; } = [];
     [NotMapped]
     public HashSet<string> Statuses { get; } = [];
-    [NotMapped]
     public int Level { get; set; } = 1;
     [NotMapped]
     public bool IsSummoned { get; set; } = false;

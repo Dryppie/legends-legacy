@@ -12,4 +12,12 @@ public class _SimulateController : BaseController
 
         return Ok();
     }
+
+    [HttpPost("SimulateCombatWithOneEssence")]
+    public async Task<IActionResult> SimulateCombatWithOneEssence(string EssenceName)
+    {
+        await Mediator.Send(new SimulateCombatWithOneEssenceCommand(EssenceName));
+
+        return Ok();
+    }
 }

@@ -100,6 +100,9 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("EntityType")
                         .HasColumnType("int");
 
+                    b.Property<int>("Level")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -620,6 +623,9 @@ namespace Persistence.LL.Migrations
                     b.HasBaseType("Domain.Models.Entities.Entity");
 
                     b.Property<int?>("AreaId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ExperienceReward")
                         .HasColumnType("int");
 
                     b.Property<Guid>("LootTableId")

@@ -55,7 +55,7 @@ public class CombatSimulation : ICombatContext
         {
             foreach (var log in _eventLog)
             {
-                Console.WriteLine($"Time: {log.Timestamp} - " + log.Details);
+                Console.WriteLine($"Time: {log.Timestamp} - {log.Details}");
             }
             Console.WriteLine(outcome);
         }
@@ -64,7 +64,7 @@ public class CombatSimulation : ICombatContext
         {
             EventLog = _eventLog,
             Outcome = outcome,
-            Duration = CurrentTime // CurrentTime 10 equals 1 second
+            Duration = CurrentTime // CurrentTime 10 (10 ticks) equals 1 second
         };
     }
 

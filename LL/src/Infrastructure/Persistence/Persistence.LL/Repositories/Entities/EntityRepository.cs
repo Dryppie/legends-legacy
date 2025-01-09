@@ -15,6 +15,17 @@ public class EntityRepository : IEntityRepository
         _context = unitOfWork;
     }
 
+    public async Task UpdateEntities(List<Entity> entities, CancellationToken cancellationToken)
+    {
+        if (entities == null)
+        {
+            throw new ArgumentNullException(nameof(entities));
+        }
+
+        _context.Entities.UpdateRange(entities);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task<List<Entity>> GetEntitiesByIdsForCombatAsync(List<Guid> entityIds)
     {
         var entities = await _context.Entities

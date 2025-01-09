@@ -1,6 +1,4 @@
-import { NgFor, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
-import { EquipmentSlotComponent } from '../../../../shared/components/equipment-slot/equipment-slot.component';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { EquippedEssencesComponent } from '../../../../shared/components/essences/equipped-essences/equipped-essences.component';
 import { CharacterService } from '../../../../core/services/character/character.service';
@@ -12,9 +10,6 @@ import { CharacterAttributesComponent } from '../../../../shared/components/char
   selector: 'app-character-overview',
   standalone: true,
   imports: [
-    NgIf,
-    NgFor,
-    EquipmentSlotComponent,
     DefaultHeaderComponent,
     EquippedEssencesComponent,
     CharacterAttributesComponent,

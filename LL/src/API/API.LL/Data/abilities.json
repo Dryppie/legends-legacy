@@ -307,6 +307,7 @@
             "Duration": 0
           },
           "Targeting": "SingleEnemy",
+          "ApplyOnSelf": false,
           "Trigger": "None",
           "AttackType": "None",
           "DamageType": "None",
@@ -331,6 +332,7 @@
           },
           "Targeting": "SingleEnemy",
           "Trigger": "OnTickInterval",
+          "ApplyOnSelf": false,
           "IsFlatAmount": true,
           "AttackType": "None",
           "DamageType": "None",
@@ -543,6 +545,61 @@
           "DamageType": "None",
           "EffectTags": [],
           "Log": "{Actor} retaliated against {Target} and dealt {Amount} damage."
+        }
+      ]
+    }
+  },
+  {
+    "Name": "Test Essence",
+    "Active": {
+      "Id": "test_01",
+      "Name": "Test Active",
+      "Description": "Test the enemy.",
+      "Type": "Active",
+      "Cooldown": 300,
+      "Cost": 10,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 1
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 0
+          },
+          "Targeting": "SingleEnemy",
+          "Trigger": "None",
+          "AttackType": "Melee",
+          "DamageType": "Physical",
+          "EffectTags": [],
+          "Log": "{Actor} hit {Target} with a test effect."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "test_02",
+      "Name": "Test Passive",
+      "Description": "Test yourself",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ApplyStatusEffect",
+            "Status": "Test"
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 2000
+          },
+          "Targeting": "SingleEnemy",
+          "Trigger": "None",
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
+          "Log": "{Actor} tests {Target}."
         }
       ]
     }

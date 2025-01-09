@@ -5,4 +5,5 @@ public class Creature : Entity
 {
     public Guid LootTableId { get; set; }
     public LootTable LootTable { get; set; } = null!;
+    public int ExperienceReward {  get; set; }
 }

@@ -99,16 +99,10 @@ public class CombatEffectManager : ICombatEffectManager
         var ownTeam = _entityManager.GetOwnTeam(target);
         var enemyTeam = _entityManager.GetOpposingTeam(target);
 
-        if (magnitude == 0 || effect.Action.Magnitude == 0)
-        {
-            Console.WriteLine("MAGNITUDE IS 0");
-
-        }
-
         return new EffectContext(ownTeam: ownTeam,
                                  enemyTeam: enemyTeam,
                                  owner: effect.Caster ?? target,
-                                 target: opponent ?? target,
+                                 target: effect.ApplyOnSelf ? effect.Caster ?? target : opponent ?? target,
                                  triggerEvent: effect.Trigger,
                                  magnitude: magnitude != -1 ? magnitude : effect.Action.Magnitude, // If the magnitude is not -1, then use magnitude. Else, use Action.Magnitude
                                  isFlatAmount: effect.IsFlatAmount,

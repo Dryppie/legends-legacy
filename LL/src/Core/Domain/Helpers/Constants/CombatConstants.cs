@@ -1,4 +1,4 @@
-﻿namespace Services.LL.Combat;
+﻿namespace Domain.Helpers.Constants;
 public static class CombatConstants
 {
     // Hit

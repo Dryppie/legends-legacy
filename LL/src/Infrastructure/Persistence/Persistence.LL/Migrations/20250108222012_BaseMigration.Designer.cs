@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250104133031_BaseMigration")]
+    [Migration("20250108222012_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -101,6 +101,9 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("EntityType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Level")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -623,6 +626,9 @@ namespace Persistence.LL.Migrations
                     b.HasBaseType("Domain.Models.Entities.Entity");
 
                     b.Property<int?>("AreaId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ExperienceReward")
                         .HasColumnType("int");
 
                     b.Property<Guid>("LootTableId")

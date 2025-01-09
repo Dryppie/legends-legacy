@@ -315,11 +315,13 @@ namespace Persistence.LL.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Level = table.Column<int>(type: "int", nullable: false),
                     EntityType = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Experience = table.Column<int>(type: "int", nullable: true),
                     Gold = table.Column<int>(type: "int", nullable: true),
                     LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ExperienceReward = table.Column<int>(type: "int", nullable: true),
                     AreaId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>

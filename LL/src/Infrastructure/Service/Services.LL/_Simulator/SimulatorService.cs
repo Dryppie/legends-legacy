@@ -4,7 +4,6 @@ using Domain.Helpers;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Entities;
-using Domain.Models.Essences;
 using Services.LL.Combat;
 using Services.LL.Interfaces;
 
@@ -13,10 +12,21 @@ public class SimulatorService : ISimulatorService
 {
     private readonly ICombatService _combatService;
     private readonly IEntityService _entityService;
+    private bool _pickRandomEssences = true;
+    private string _essenceName;
+
     public SimulatorService(ICombatService combatService)
     {
         _combatService = combatService;
     }
+
+    public async Task SimulateCombatWithOneEssence(string essenceName)
+    {
+        _pickRandomEssences = false;
+        _essenceName = essenceName;
+        await SimulateCombat(1, 1, 1, 1, 1);
+    }
+
 
     /// <summary>
     /// 
@@ -47,7 +57,13 @@ public class SimulatorService : ISimulatorService
 
         while (fights > 0)
         {
-            await PickRandomAbilities([.. playerCharacters, .. enemyCharacters], tier);
+            if (_pickRandomEssences)
+                await PickRandomAbilities([.. playerCharacters, .. enemyCharacters], tier);
+            else
+            {
+                await PickSpecificAbility([.. playerCharacters], _essenceName);
+                await PickSpecificAbility([.. enemyCharacters]);
+            }
 
             var combatSimulation = new CombatSimulation(playerCharacters, enemyCharacters);
             lastCombatResult = await combatSimulation.RunSimulation(simulated: true);
@@ -196,12 +212,19 @@ public class SimulatorService : ISimulatorService
         await Task.WhenAll(attributePickerTasks);
     }
 
+    private async Task PickSpecificAbility(IEnumerable<Entity> entities, string essenceName = "Test Essence")
+    {
+        // Load random abilities
+        var attributePickerTasks = entities.Select(entity => Task.Run(() => EssenceLoader._Simulator_PickSpecificAbility(entity, essenceName)));
+
+        await Task.WhenAll(attributePickerTasks);
+    }
+
     public class EssenceStat
     {
-        public string EssenceName { get; set; }
+        public string EssenceName { get; set; } = string.Empty;
         public int TimesUsed { get; set; }
         public int TimesWonWith { get; set; }
-
         public double WinRate => TimesUsed == 0 ? 0.0 : Math.Round((double)TimesWonWith / TimesUsed * 100);
     }
 
