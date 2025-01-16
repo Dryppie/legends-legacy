@@ -1,15 +1,16 @@
 ﻿using Domain.Models.Abilities.Effects;
 using Domain.Models.Combat;
-using Domain.Models.Entities;
 
 namespace Domain.Interfaces.Combat;
 public interface ICombatInteractionManager
 {
-    int CalculateBasicAttackDamage(Entity attacker, float baseDamage);
-    int CalculateDamageToDeal(Entity attacker, Entity defender, float magnitude);
-    int CalculateDamageReceived(Entity defender, float magnitude, AttackOutcome attackOutcome);
-    int CalculateHealingToDo(Entity healer, Entity target, float baseHealing);
-    int CalculateHealingReceived(Entity healer, Entity target, float baseHealing);
+    AttackOutcome CalculateAttackOutcomeForDamage(CombatEntity actor, CombatEntity target);
+    AttackOutcome CalculateAttackOutcomeForHealing(CombatEntity actor, CombatEntity target);
+    int CalculateBasicAttackDamage(CombatEntity attacker, float baseDamage);
+    int CalculateDamageToDeal(CombatEntity attacker, CombatEntity defender, float magnitude);
+    int CalculateHealingToDeal(CombatEntity healer, CombatEntity receiver, float magnitude);
+    int CalculateDamageReceived(CombatEntity defender, float magnitude, AttackOutcome attackOutcome = AttackOutcome.Hit);
+    int CalculateHealingReceived(CombatEntity receiver, float magnitude, AttackOutcome attackOutcome = AttackOutcome.Hit);
     void ApplyDamage(EffectContext context);
-    void ApplyHealing(Entity healer, Entity target, float healing);
+    void ApplyHealing(EffectContext context);
 }

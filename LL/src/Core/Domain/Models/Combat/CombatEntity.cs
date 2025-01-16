@@ -1,20 +1,101 @@
-﻿namespace Domain.Models.Combat;
+﻿using Domain.Components.Attributes;
+using Domain.Models.Abilities;
+using Domain.Models.Attributes;
+using Domain.Models.Attributes.Modifiers;
+using Domain.Models.Entities;
+using Domain.Models.Essences;
+using Domain.Models.Items.Equipments;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Domain.Models.Combat;
+[NotMapped]
 public class CombatEntity
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public int Health { get; set; }
-    public int MaxHealth { get; set; }
-    public int Mana { get; set; }
-    public int MaxMana { get; set; }
+    public ICollection<Essence> EquippedEssences { get; set; } = [];
+    [NotMapped]
+    public List<string> AbilityIds { get; set; } = [];
+    public List<AbilityDefinition> Abilities { get; set; } = [];
+    public int NextBasicAttackIn = 300; // TODO: Turn 300 into a Constant somewhere, as it is also stored in the CombatSimulator class
+                                        // Every tick, this decrements by BaseAttackSpeed.
+                                        // Start at 300. Whenever it is equal to or lower than 0, perform the attack.
+                                        // If you increase attack speed by 100%, BasicAttackSpeed goes from 10 to 20,
+                                        // and thust counting down faster to the next attack each tick
+    public ICollection<EntityAttribute> BaseAttributes { get; set; } = [];
+    public bool IsAlive => CombatAttributes.FirstOrDefault(cm => cm.Key.Equals(AttributeType.Health)).Value > 0;
+    public List<Equipment> Equipment { get; set; } = [];
+    public Dictionary<AttributeType, float> BaseCombatAttributes { get; } = [];
+    public Dictionary<AttributeType, float> CombatAttributes { get; } = [];
+    public List<AttributeModifier> TemporaryModifiers { get; set; } = [];
+    public HashSet<string> Statuses { get; } = [];
+    public int Level { get; set; }
+    public bool IsSummoned = false;
 
-    public CombatEntity(Guid id, string name, int maxHealth, int maxMana)
+    public CombatEntity(Entity entity)
     {
-        Id = id;
-        Name = name;
-        Health = maxHealth;
-        MaxHealth = maxHealth;
-        Mana = maxMana;
-        MaxMana = maxMana;
+        Id = entity.Id;
+        Name = entity.Name;
+        Abilities = new List<AbilityDefinition>(entity.Abilities);
+        BaseAttributes = new List<EntityAttribute>(entity.BaseAttributes);
+        BaseCombatAttributes = new Dictionary<AttributeType, float>(entity.BaseCombatAttributes);
+        CombatAttributes = new Dictionary<AttributeType, float>(entity.CombatAttributes);
+        EquippedEssences = new List<Essence>(entity.EquippedEssences);
+        Level = entity.Level;
+    }
+
+    public void IncrementStep()
+    {
+        UpdateAbilities();
+    }
+
+    private void UpdateAbilities()
+    {
+        foreach (var ability in Abilities)
+        {
+            ability.RemainingTimeUntilUse--;
+        }
+    }
+
+    public void ModifyAttribute(AttributeModifier attributeModifier, bool remove = false)
+    {
+        if (remove)
+            TemporaryModifiers.Remove(attributeModifier);
+        else
+            TemporaryModifiers.Add(attributeModifier);
+
+        AttributeCalculator.CalculateCombatAttributeByType(this, attributeModifier.AttributeType);
+    }
+
+    public void ModifyStatuses(string status, bool remove = false)
+    {
+        if (remove)
+            Statuses.Remove(status);
+        else
+            Statuses.Add(status);
+    }
+
+    public bool CanAct()
+    {
+        return !Statuses.Contains("Stun");
+    }
+
+    public void Reset()
+    {
+        NextBasicAttackIn = 0;
+        CombatAttributes.Clear();
+
+        foreach (var kvp in BaseCombatAttributes)
+        {
+            CombatAttributes.Add(kvp.Key, kvp.Value);
+        }
+
+        foreach (var ability in Abilities)
+        {
+            ability.RemainingTimeUntilUse = ability.Cooldown;
+        }
+
+        TemporaryModifiers = [];
+        Statuses.Clear();
     }
 }

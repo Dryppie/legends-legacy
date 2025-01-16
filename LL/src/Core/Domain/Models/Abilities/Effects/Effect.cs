@@ -1,99 +1,65 @@
-﻿using Domain.Interfaces;
-using Domain.Interfaces.Combat;
-using Domain.Models.Abilities.Effects.Actions;
-using Domain.Models.Abilities.Effects.Conditions;
-using Domain.Models.Abilities.Effects.EffectModifications;
-using Domain.Models.Abilities.Effects.Interval;
+﻿using Domain.Interfaces.Combat;
 using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Combat;
-using Domain.Models.Damages;
-using Domain.Models.Entities;
 
 namespace Domain.Models.Abilities.Effects;
 public class Effect
 {
-    public IEffectAction Action { get; }
-    public IEffectDuration Duration { get; }
-    public Targeting Targeting { get; }
-    public TriggerEvent Trigger { get; }
-    public IEffectInterval Interval { get; }
-    public IEffectCondition Condition { get; }
-    public Entity? Caster { get; }
-    public bool ApplyOnSelf { get; }
-    public bool IsFlatAmount { get; }
-    public int Chance { get; }
-    public List<EffectModification> EffectModifications { get; } = [];
-    public EffectType EffectType => Action switch
-    {
-        ApplyStatusEffectAction => EffectType.StatusEffect,
-        DamageAction => EffectType.Damage,
-        HealingAction => EffectType.Healing,
-        ModifyAttributeAction => EffectType.ModifyAttribute,
-        SummonAction => EffectType.Summon,
-        _ => throw new NotSupportedException($"Unsupported action type {Action?.GetType().Name}")
-    };
-    public AttackType AttackType { get; set; }
-    public DamageType DamageType { get; set; }
-    public List<EffectTag> EffectTags { get; set; } = [];
-
-    public string Log { get; set; } = string.Empty;
-
-    public Effect(IEffectAction action,
-                  IEffectDuration duration,
-                  List<EffectTag> effectTags,
-                  IEffectCondition? condition = null,
-                  Entity? caster = null,
-                  Targeting targeting = Targeting.None,
-                  TriggerEvent trigger = TriggerEvent.None,
-                  IEffectInterval? interval = null,
-                  bool applyOnSelf = true,
-                  bool isFlatAmount = false,
-                  int chance = 100,
-                  AttackType attackType = AttackType.None,
-                  DamageType damageType = DamageType.None)
-    {
-        Action = action;
-        Duration = duration;
-        EffectTags = effectTags;
-        Condition = condition ?? new NoCondition();
-        Caster = caster;
-        Targeting = targeting;
-        Trigger = trigger;
-        Interval = interval ?? new NoInterval();
-        ApplyOnSelf = applyOnSelf;
-        IsFlatAmount = isFlatAmount;
-        Chance = chance;
-        AttackType = attackType;
-        DamageType = damageType;
-    }
+    public EffectDefinition Definition { get; set; }
+    /// <summary>
+    /// The entity that used the ability with this effect
+    /// </summary>
+    public CombatEntity Caster { get; set; }
+    /// <summary>
+    /// The entity this effect is attached to (stored on)
+    /// </summary>
+    public CombatEntity Owner { get; set; }
+    /// <summary>
+    /// The entity this effect affects when Executed
+    /// If null, the target is simply going to be the Owner of the effect
+    /// </summary>
+    public CombatEntity? Target { get; set; }
 
     public void Update()
     {
-        Duration.DecrementDuration();
-        Interval.Update();
+        Definition.Duration.DecrementDuration();
+        Definition.Interval.Update();
+        Definition.Usage.Recharge();
     }
 
     public void ExecuteAction(EffectContext context, ICombatContext combatContext)
     {
-        if (!Condition.IsSatisfied(context)) return;
+        if (!Definition.Usage.CanUse()) return;
+        if (!Definition.Condition.IsSatisfied(context)) return;
 
-        if (Chance == 100 || Random.Shared.Next(1, 101) <= Chance)
+        if (Definition.Chance == 100 || Random.Shared.Next(1, 101) <= Definition.Chance)
         {
             // TODO: Apply EffectModifications properly. This might have to be checked during DamageCalculation and HealCalculation, and not here
-            Action?.Execute(context, combatContext);
+            Definition.Action?.Execute(context, combatContext);
+            Definition.Usage.ConsumeUse();
         }
     }
 
     public void ExecuteOnExpireAction(EffectContext context, ICombatContext combatContext)
     {
-        if (Chance == 100 || Random.Shared.Next(1, 101) <= Chance)
+        if (Definition.Chance == 100 || Random.Shared.Next(1, 101) <= Definition.Chance)
         {
-            Action?.OnExpireExecute(context,combatContext);
+            Definition.Action?.OnExpireExecute(context, combatContext);
         }
     }
 
     public bool IsTrigger(TriggerEvent triggerEvent)
     {
-        return Trigger == triggerEvent;
+        return Definition.Trigger == triggerEvent;
+    }
+
+    public bool IsActive()
+    {
+        return Definition.Duration.IsActive();
+    }
+
+    public bool ShouldTrigger()
+    {
+        return Definition.Interval.ShouldTrigger();
     }
 }

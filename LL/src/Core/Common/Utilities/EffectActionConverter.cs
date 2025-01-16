@@ -70,13 +70,13 @@ public class EffectActionConverter : JsonConverter<IEffectAction>
                 case "NestedEffect":
                     // "Effects" is expected to be a JSON array of `Effect` objects
                     var effectsArray = root.GetProperty("Effects");
-                    var nestedEffects = new List<Effect>();
+                    var nestedEffects = new List<EffectDefinition>();
 
                     foreach (var effectElement in effectsArray.EnumerateArray())
                     {
                         // Pass each JSON sub-object to `JsonSerializer.Deserialize<Effect>`
                         // which in turn will handle the `IEffectAction` in effect.Action
-                        var effect = JsonSerializer.Deserialize<Effect>(effectElement.GetRawText(), options);
+                        var effect = JsonSerializer.Deserialize<EffectDefinition>(effectElement.GetRawText(), options);
                         if (effect == null)
                             throw new JsonException("Failed to deserialize Effect in NestedEffectAction.");
 

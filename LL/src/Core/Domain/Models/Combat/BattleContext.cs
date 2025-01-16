@@ -1,12 +1,10 @@
-﻿using Domain.Models.Entities;
-
-namespace Domain.Models.Combat;
+﻿namespace Domain.Models.Combat;
 public class BattleContext
 {
-    public List<Entity> OwnTeam { get; set; } = [];
-    public List<Entity> EnemyTeam { get; set; } = [];
+    public List<CombatEntity> OwnTeam { get; set; } = [];
+    public List<CombatEntity> EnemyTeam { get; set; } = [];
 
-    public BattleContext(List<Entity> ownTeam, List<Entity> enemyTeam)
+    public BattleContext(List<CombatEntity> ownTeam, List<CombatEntity> enemyTeam)
     {
         OwnTeam = ownTeam;
         EnemyTeam = enemyTeam;

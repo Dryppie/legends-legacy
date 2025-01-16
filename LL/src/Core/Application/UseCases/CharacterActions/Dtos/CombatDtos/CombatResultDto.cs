@@ -6,8 +6,8 @@ using Domain.Models.Inventories;
 namespace Application.UseCases.CharacterActions.Dtos.CombatDtos;
 public class CombatResultDto : IMapFrom<CombatResult>
 {
-    public List<CombatEntityDto> PlayerTeam { get; set; } = [];
-    public List<CombatEntityDto> EnemyTeam { get; set; } = [];
+    public List<SimpleCombatEntityDto> PlayerTeam { get; set; } = [];
+    public List<SimpleCombatEntityDto> EnemyTeam { get; set; } = [];
     public List<CombatEvent> EventLog { get; set; } = [];
     public BattleOutcome Outcome { get; set; }
     public List<InventoryItem> Loot { get; set; } = [];

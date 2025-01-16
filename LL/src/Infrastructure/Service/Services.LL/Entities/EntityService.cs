@@ -1,5 +1,4 @@
 ﻿using Domain.Models.Entities;
-using Services.LL.CharacterActions;
 using Services.LL.Interfaces;
 
 namespace Services.LL.Entities;
@@ -12,9 +11,9 @@ public class EntityService : IEntityService
         _entityRepository = entityRepository;
     }
 
-    public async Task<List<Entity>> GetEntitiesByIdsForCombatAsync(List<Guid> entityIds)
+    public async Task<List<Entity>> GetEntitiesByIdsForCombatAsync(List<Guid> entityIds, CancellationToken cancellationToken)
     {
-        return await _entityRepository.GetEntitiesByIdsForCombatAsync(entityIds);
+        return await _entityRepository.GetEntitiesByIdsForCombatAsync(entityIds, cancellationToken);
     }
 
     public async Task UpdateEntities(List<Entity> playerCharacters, CancellationToken cancellationToken)

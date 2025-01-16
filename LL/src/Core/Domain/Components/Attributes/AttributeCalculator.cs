@@ -1,12 +1,12 @@
 ﻿using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
-using Domain.Models.Entities;
+using Domain.Models.Combat;
 
 namespace Domain.Components.Attributes;
 public static class AttributeCalculator
 {
     // Calculates the attributes for a given entity
-    public static void CalculateBaseCombatAttributes(Entity entity)
+    public static void CalculateBaseCombatAttributes(CombatEntity entity)
     {
         entity.BaseCombatAttributes.Clear();
         // Convert raw attributes to a dictionary for quick access
@@ -23,7 +23,7 @@ public static class AttributeCalculator
     }
 
     // Recalculate a specific attribute for the entity by attribute type
-    public static void CalculateCombatAttributeByType(Entity entity, AttributeType attributeType)
+    public static void CalculateCombatAttributeByType(CombatEntity entity, AttributeType attributeType)
     {
         // Find the attribute in BaseAttributes or CombatAttributes
         var attribute = entity.BaseAttributes.FirstOrDefault(a => a.AttributeType == attributeType);
@@ -39,7 +39,7 @@ public static class AttributeCalculator
         entity.CombatAttributes[attributeType] = calculatedValue;
     }
 
-    private static float GetAttributeValue(Entity entity, AttributeType attributeType, float baseValue)
+    private static float GetAttributeValue(CombatEntity entity, AttributeType attributeType, float baseValue)
     {
         // Filter modifiers that apply to the given attribute
         var validModifiers = entity.TemporaryModifiers

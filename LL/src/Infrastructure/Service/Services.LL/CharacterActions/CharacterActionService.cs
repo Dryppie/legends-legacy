@@ -115,7 +115,7 @@ public class CharacterActionService : ICharacterActionService
         return lastCombatResult;
     }
 
-    private async Task HandleProfessionActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
+    private Task HandleProfessionActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }

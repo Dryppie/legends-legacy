@@ -1,9 +1,7 @@
 ﻿using Domain.Interfaces;
-using Domain.Models.Abilities.Effects.Interval;
-using System.Text.Json.Serialization;
-using System.Text.Json;
 using Domain.Models.Abilities.Effects.Conditions;
-using Domain.Models.Attributes;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Common.Utilities;
 public class EffectConditionConverter : JsonConverter<IEffectCondition>

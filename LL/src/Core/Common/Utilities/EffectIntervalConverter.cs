@@ -1,5 +1,5 @@
 ﻿using Domain.Interfaces;
-using Domain.Models.Abilities.Effects.Interval;
+using Domain.Models.Abilities.Effects.Intervals;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

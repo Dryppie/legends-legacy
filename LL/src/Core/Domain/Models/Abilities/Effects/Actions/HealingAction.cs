@@ -20,20 +20,27 @@ public class HealingAction : IEffectAction
 
     public void Execute(EffectContext context, ICombatContext combatContext)
     {
-        // If it's a flat amount, take the value of the effect itself (_damageAmount),
-        // else take the calculated value from the context.Magnitude
-        var healingReceived = combatContext.InteractionManager.CalculateHealingReceived(context.Actor, context.Target, context.IsFlatAmount ? Magnitude : context.Magnitude);
+        // Attack outcome
+        var attackOutcome = combatContext.InteractionManager.CalculateAttackOutcomeForHealing(context.Actor, context.Target);
 
+        // Potential healing
+        var isFlatAmount = context.Effect.Definition.IsFlatAmount;
+        var healingAmount = isFlatAmount ? Magnitude : combatContext.InteractionManager.CalculateHealingToDeal(context.Actor, context.Target, Magnitude);
+
+        // Healing target will receive
+        var healingReceived = combatContext.InteractionManager.CalculateHealingReceived(context.Target, healingAmount, attackOutcome);
+
+        context.AttackOutcome = attackOutcome;
         context.Magnitude = healingReceived;
         context.EventType = EventType.Heal;
-        context.Details = context.Details
+        context.Details = context.Details   
             .Replace("{Actor}", context.Actor.Name)
             .Replace("{Target}", context.Target.Name)
-            .Replace("{Amount}", healingReceived.ToString());
+            .Replace("{Amount}", context.Magnitude.ToString());
 
         combatContext.LogEffectExecution(context);
 
-        combatContext.InteractionManager.ApplyHealing(context.Actor, context.Target, healingReceived);
+        combatContext.InteractionManager.ApplyHealing(context);
     }
 
     public void OnExpireExecute(EffectContext context, ICombatContext combatContext)

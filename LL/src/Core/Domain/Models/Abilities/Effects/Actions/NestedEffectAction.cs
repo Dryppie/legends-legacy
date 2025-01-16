@@ -1,57 +1,63 @@
 ﻿using Domain.Interfaces;
 using Domain.Interfaces.Combat;
 using Domain.Models.Combat;
-using Domain.Models.Entities;
 
 namespace Domain.Models.Abilities.Effects.Actions;
 public class NestedEffectAction : IEffectAction
 {
     public int Magnitude => 1;
-    public List<Effect> Effects { get; set; } = [];
+    public List<EffectDefinition> Effects { get; set; } = [];
 
-    public NestedEffectAction(List<Effect> effects)
+    public NestedEffectAction(List<EffectDefinition> effects)
     {
         Effects = effects;
     }
 
     public void Execute(EffectContext context, ICombatContext combatContext)
     {
-        var effectsToApply = new List<(Entity target, Effect effectInstance)>();
+        var effectsToApply = new List<(CombatEntity target, Effect effectInstance)>();
 
         // Apply each effect of the ability
         foreach (var effectTemplate in Effects)
         {
-            var effectInstance = new Effect(
+            var effectDefinition = new EffectDefinition(
                 action: effectTemplate.Action,
                 duration: effectTemplate.Duration.Clone(),
                 condition: effectTemplate.Condition.Clone(),
+                interval: effectTemplate.Interval.Clone(),
+                usage: effectTemplate.Usage.Clone(),
                 targeting: effectTemplate.Targeting,
                 trigger: effectTemplate.Trigger,
-                interval: effectTemplate.Interval.Clone(),
-                caster: context.Actor,
-                applyOnSelf: effectTemplate.ApplyOnSelf,
+                triggerTarget: effectTemplate.TriggerTarget,
                 isFlatAmount: effectTemplate.IsFlatAmount,
                 chance: effectTemplate.Chance,
                 effectTags: effectTemplate.EffectTags,
                 attackType: effectTemplate.AttackType,
                 damageType: effectTemplate.DamageType
                 );
+            effectDefinition.Log = effectTemplate.Log;
 
-            effectInstance.Log = effectTemplate.Log;
+            var effectInstance = new Effect()
+            {
+                Definition = effectDefinition,
+                Caster = context.Actor!,
+                Owner = context.Target
+            };
+
 
             // Defer effect application until after logging
             effectsToApply.Add((context.Target, effectInstance));
         }
 
         context.Details = context.Details
-            .Replace("{Actor}", context.Actor.Name)
+            .Replace("{Actor}", context.Actor!.Name)
             .Replace("{Target}", context.Target.Name);
 
         combatContext.LogEffectExecution(context);
 
         foreach (var (target, effectInstance) in effectsToApply)
         {
-            combatContext.EffectManager.AddEffect(target, effectInstance);
+            combatContext.EffectManager.AddEffect(context.Actor, target, effectInstance);
         }
     }
 
@@ -60,9 +66,9 @@ public class NestedEffectAction : IEffectAction
         throw new NotImplementedException();
     }
 
-    private List<Entity> SelectTargets(Targeting target, Entity caster, List<Entity> enemyTeam, List<Entity> allies)
+    private List<CombatEntity> SelectTargets(Targeting target, CombatEntity caster, List<CombatEntity> enemyTeam, List<CombatEntity> allies)
     {
-        List<Entity> targets = [];
+        List<CombatEntity> targets = [];
 
         switch (target)
         {
@@ -109,7 +115,7 @@ public class NestedEffectAction : IEffectAction
         return targets;
     }
 
-    private Entity? SelectTarget(List<Entity> potentialTargets)
+    private CombatEntity? SelectTarget(List<CombatEntity> potentialTargets)
     {
         // Select a random alive target
         var aliveTargets = potentialTargets.Where(c => c.IsAlive).ToList();

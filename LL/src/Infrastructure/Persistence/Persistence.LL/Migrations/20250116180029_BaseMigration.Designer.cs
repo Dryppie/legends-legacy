@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250108222012_BaseMigration")]
+    [Migration("20250116180029_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />

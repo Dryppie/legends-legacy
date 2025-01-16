@@ -5,7 +5,6 @@ using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Damages;
-using Domain.Models.Entities;
 using Domain.Models.Items.Equipments;
 
 namespace Services.LL.Combat;
@@ -18,22 +17,45 @@ public class CombatInteractionManager : ICombatInteractionManager
         _effectManager = effectManager;
     }
 
-    public int CalculateDamageToDeal(Entity attacker, Entity defender, float magnitude)
+    public AttackOutcome CalculateAttackOutcomeForDamage(CombatEntity actor, CombatEntity target)
     {
-        CombatFormulaCalculator.CalculateAttackOutcome(attacker, defender);
+        return CombatFormulaCalculator.CalculateAttackOutcome(actor, target, isDamage: true);
+    }
+
+    public AttackOutcome CalculateAttackOutcomeForHealing(CombatEntity actor, CombatEntity target)
+    {
+        return CombatFormulaCalculator.CalculateAttackOutcome(actor, target, isDamage: false);
+    }
+
+    public int CalculateDamageToDeal(CombatEntity attacker, CombatEntity defender, float magnitude)
+    {
+        CombatFormulaCalculator.CalculateAttackOutcome(attacker, defender, isDamage: true);
         int finalDamage = (int)magnitude + (int)attacker.CombatAttributes[AttributeType.Strength];
         // More logic if needed: defense reduction, armor, etc.
         return finalDamage;
     }
 
-    public int CalculateDamageReceived(Entity defender, float magnitude, AttackOutcome attackOutcome)
+    public int CalculateHealingToDeal(CombatEntity attacker, CombatEntity defender, float magnitude)
     {
-        if (attackOutcome.Equals(AttackOutcome.Block)) return (int)(magnitude * 0.6f);
-        if (attackOutcome.Equals(AttackOutcome.Crit)) return (int)(magnitude * defender.CombatAttributes[AttributeType.CritDamageReduction]);
+        int finalDamage = (int)magnitude + (int)attacker.CombatAttributes[AttributeType.Strength];
+        // More logic if needed: defense reduction, armor, etc.
+        return finalDamage;
+    }
+
+    public int CalculateDamageReceived(CombatEntity target, float magnitude, AttackOutcome attackOutcome)
+    {
+        if (attackOutcome.Equals(AttackOutcome.Crit)) return (int)(magnitude * target.CombatAttributes[AttributeType.CritDamageReduction]);
         return (int)magnitude;
     }
 
-    public int CalculateBasicAttackDamage(Entity attacker, float baseDamage)
+    public int CalculateHealingReceived(CombatEntity target, float magnitude, AttackOutcome attackOutcome)
+    {
+        // Increase / Decrease magnitude based on effects on the target, such as 20% increase healing received, and so on.
+
+        return (int)magnitude;
+    }
+
+    public int CalculateBasicAttackDamage(CombatEntity attacker, float baseDamage)
     {
         // Check equipment
         var weapon = attacker.Equipment.FirstOrDefault(e => e.EquipmentType == EquipmentType.Weapon)
@@ -52,7 +74,7 @@ public class CombatInteractionManager : ICombatInteractionManager
         
         // TODO: Make sure something like "Retaliate" is only triggered based on a specific TriggerEvent. And this effect should not return that specific TriggerEvent
         var attackTypeTrigger = TriggerEvent.None;
-        attackTypeTrigger = context.AttackType switch
+        attackTypeTrigger = context.Effect.Definition.AttackType switch
         {
             AttackType.Melee            => TriggerEvent.OnMeleeAttacked,
             AttackType.Ranged           => TriggerEvent.OnRangedAttacked,
@@ -71,39 +93,31 @@ public class CombatInteractionManager : ICombatInteractionManager
         }
     }
 
-    public int CalculateHealingToDo(Entity healer, Entity target, float baseHealing)
+    public void ApplyHealing(EffectContext context)
     {
-        // Possibly scale with healer's attributes
-        return (int)baseHealing;
-    }
+        var healing = context.Magnitude;
 
-    public int CalculateHealingReceived(Entity healer, Entity target, float baseHealing)
-    {
-        return (int)baseHealing;
-    }
-
-    public void ApplyHealing(Entity healer, Entity target, float healing)
-    {
-        float maxHealth = target.CombatAttributes[AttributeType.MaxHealth];
-        float currentHealth = target.CombatAttributes[AttributeType.Health];
+        float maxHealth = context.Target.CombatAttributes[AttributeType.MaxHealth];
+        float currentHealth = context.Target.CombatAttributes[AttributeType.Health];
 
         // If overhealing occurs
         if (currentHealth + healing > maxHealth)
         {
-            float extraHealing = currentHealth + healing - maxHealth;
-            float actualHealing = maxHealth - currentHealth;
-
-            target.CombatAttributes[AttributeType.Health] = maxHealth;
+            var extraHealing = (int)(currentHealth + healing - maxHealth);
+            var actualHealing = (int)(maxHealth - currentHealth);
+            // Either set Health = MaxHealth, or use 'actualHealing'
+            // as that can also be used for a trigger effect (gain shield per x healing done)
+            context.Target.CombatAttributes[AttributeType.Health] += actualHealing;
 
             // Trigger effects for overhealing
-            _effectManager.TriggerEffects(TriggerEvent.OnOverhealed, target, healer, (int)extraHealing);
+            _effectManager.TriggerEffects(TriggerEvent.OnOverhealed, context.Target, context.Actor, extraHealing);
         }
         else
         {
-            target.CombatAttributes[AttributeType.Health] += healing;
+            context.Target.CombatAttributes[AttributeType.Health] += healing;
 
             // Trigger normal healing effects
-            _effectManager.TriggerEffects(TriggerEvent.OnHealed, target, healer, (int)healing);
+            _effectManager.TriggerEffects(TriggerEvent.OnHealed, context.Target, context.Actor, healing);
         }
     }
 }

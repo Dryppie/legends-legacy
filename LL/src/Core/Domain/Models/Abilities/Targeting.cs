@@ -2,6 +2,7 @@
 public enum Targeting
 {
     None,
+    CauseOfTrigger,
     Self,
     SingleEnemy,
     SingleAlly,

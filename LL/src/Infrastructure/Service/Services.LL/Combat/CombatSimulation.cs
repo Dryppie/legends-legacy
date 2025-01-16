@@ -1,12 +1,9 @@
 ﻿using Domain.Interfaces.Combat;
 using Domain.Models.Abilities;
 using Domain.Models.Abilities.Effects;
-using Domain.Models.Abilities.Effects.Actions;
-using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Damages;
-using Domain.Models.Entities;
 
 namespace Services.LL.Combat;
 public class CombatSimulation : ICombatContext
@@ -15,12 +12,12 @@ public class CombatSimulation : ICombatContext
     public ICombatEffectManager EffectManager { get; set; }
     public ICombatInteractionManager InteractionManager { get; set; }
 
-    private List<CombatEvent> _eventLog;
+    private readonly List<CombatEvent> _eventLog;
     private const int MaxSimulationTime = 6000; // Max duration in milliseconds
     private const int TimeStep = 1; // Time step in milliseconds
     private int CurrentTime = 0;
 
-    public CombatSimulation(List<Entity> playerTeam, List<Entity> enemyTeam)
+    public CombatSimulation(List<CombatEntity> playerTeam, List<CombatEntity> enemyTeam)
     {
         _eventLog = [];
 
@@ -35,7 +32,7 @@ public class CombatSimulation : ICombatContext
     /// </summary>
     /// <param name="simulated">Whether this is being simulated for testing purposes</param>
     /// <returns></returns>
-    public async Task<CombatResult> RunSimulation(bool simulated = false)
+    public CombatResult RunSimulation(bool simulated = false)
     {
         InitiatePassiveAbilities(EntityManager.AllEntities);
 
@@ -68,7 +65,7 @@ public class CombatSimulation : ICombatContext
         };
     }
 
-    private void InitiatePassiveAbilities(List<Entity> entities)
+    private void InitiatePassiveAbilities(List<CombatEntity> entities)
     {
         foreach (var entity in entities)
         {
@@ -77,16 +74,24 @@ public class CombatSimulation : ICombatContext
                 ability.RemainingTimeUntilUse = ability.Cooldown;
                 if (ability.Type.Equals(AbilityType.Passive))
                 {
-                    foreach (var effect in ability.Effects)
+                    foreach (var effectDefinition in ability.Effects)
                     {
-                        EffectManager.AddEffect(entity, effect);
+                        var effect = new Effect()
+                        {
+                            Definition = effectDefinition,
+                            Caster = entity,
+                            Owner = entity,
+                        };
+                        // TODO: Add Targeting logic, since a passive ability might read -
+                        // 'At the start of combat, apply X to Y targets
+                        EffectManager.AddEffect(entity, entity, effect);
                     }
                 }
             }
         }
     }
 
-    private void ProcessTeamActions(List<Entity> actingTeam, List<Entity> opposingTeam, int currentTime)
+    private void ProcessTeamActions(List<CombatEntity> actingTeam, List<CombatEntity> opposingTeam, int currentTime)
     {
         foreach (var entity in actingTeam)
         {
@@ -146,7 +151,7 @@ public class CombatSimulation : ICombatContext
 
     }
 
-    private void PerformHealing(Entity entity, List<Entity> targets, int currentTime)
+    private static void PerformHealing(CombatEntity entity, List<CombatEntity> targets, int currentTime)
     {
         //foreach (var target in targets)
         //{
@@ -156,7 +161,7 @@ public class CombatSimulation : ICombatContext
         //}
     }
 
-    private void PerformBasicAttackDamage(Entity actor, List<Entity> targets, int currentTime)
+    private void PerformBasicAttackDamage(CombatEntity actor, List<CombatEntity> targets, int currentTime)
     {
         foreach (var target in targets)
         {
@@ -164,16 +169,20 @@ public class CombatSimulation : ICombatContext
             damage = 5;
             CombatEvent(currentTime, actor, target, EventType.Damage, damage);
 
-            var effectContext = new EffectContext([], [], actor, target, TriggerEvent.OnAttack, AttackType.Melee,
-                                                  DamageType.Physical, [], damage, false,
-                                                  $"{actor.Name} hit {target.Name} with a basic attack, dealing {damage} damage.",
-                                                  [], new SelfDestructAction(this));
+
+            var effectDefinition = new EffectDefinition(null, null, null, null, null, [], attackType: AttackType.Melee);
+            var effectContext = new EffectContext(
+                new Effect() { Definition = effectDefinition }, [], [], actor, target, damage,
+                $"{actor.Name} hit {target.Name} with a basic attack, dealing {damage} damage.")
+            {
+                AttackType = AttackType.Melee
+            };
 
             InteractionManager.ApplyDamage(effectContext);
         }
     }
 
-    private void CombatEvent(int currentTime, Entity actor, Entity target, EventType actionType, int magnitude)
+    private void CombatEvent(int currentTime, CombatEntity actor, CombatEntity target, EventType actionType, int magnitude)
     {
         _eventLog.Add(new CombatEvent
         {
@@ -186,12 +195,7 @@ public class CombatSimulation : ICombatContext
         });
     }
 
-    private void PerformBasicAttack()
-    {
-
-    }
-
-    private void UseAbility(Entity actor, Ability ability, List<Entity> opposingTeam, List<Entity> ownTeam, int currentTime)
+    private void UseAbility(CombatEntity actor, AbilityDefinition ability, List<CombatEntity> opposingTeam, List<CombatEntity> ownTeam, int currentTime)
     {
         if ((actor.CombatAttributes[AttributeType.Mana] - ability.Cost) < 0)
         {
@@ -212,8 +216,8 @@ public class CombatSimulation : ICombatContext
         var battleContext = new BattleContext(ownTeam, opposingTeam); // Is this needed???
 
         var targetNames = new List<string>();
-        var effectsToApply = new List<(Entity target, Effect effectInstance)>();
-        var targetsPerTargeting = new Dictionary<Targeting, List<Entity>>(); // Cache for targets per Targeting type
+        var effectsToApply = new List<(CombatEntity target, Effect effectInstance)>();
+        var targetsPerTargeting = new Dictionary<Targeting, List<CombatEntity>>(); // Cache for targets per Targeting type
 
         // Apply each effect of the ability
         foreach (var effectTemplate in ability.Effects)
@@ -231,24 +235,48 @@ public class CombatSimulation : ICombatContext
             foreach (var target in targets)
             {
                 targetNames.Add(target.Name);
+                var effectDefinitionCopy = new EffectDefinition(action: effectTemplate.Action,
+                    duration: effectTemplate.Duration.Clone(),
+                    condition: effectTemplate.Condition.Clone(),
+                    interval: effectTemplate.Interval.Clone(),
+                    usage: effectTemplate.Usage.Clone(),
+                    targeting: effectTemplate.Targeting,
+                    trigger: effectTemplate.Trigger,
+                    triggerTarget: effectTemplate.TriggerTarget,
+                    isFlatAmount: effectTemplate.IsFlatAmount,
+                    chance: effectTemplate.Chance,
+                    effectTags: effectTemplate.EffectTags,
+                    attackType: effectTemplate.AttackType,
+                    damageType: effectTemplate.DamageType)
+                {
+                    Log = effectTemplate.Log
+                };
 
-                var effectInstance = new Effect(
-                action: effectTemplate.Action,
-                duration: effectTemplate.Duration.Clone(),
-                condition: effectTemplate.Condition.Clone(),
-                targeting: effectTemplate.Targeting,
-                trigger: effectTemplate.Trigger,
-                interval: effectTemplate.Interval.Clone(),
-                caster: actor,
-                applyOnSelf: effectTemplate.ApplyOnSelf,
-                isFlatAmount: effectTemplate.IsFlatAmount,
-                chance: effectTemplate.Chance,
-                effectTags: effectTemplate.EffectTags,
-                attackType: effectTemplate.AttackType,
-                damageType: effectTemplate.DamageType
-                );
+                var effectInstance = new Effect()
+                {
+                    Definition = effectDefinitionCopy,
+                    Caster = actor,
+                    Owner = target,
+                };
 
-                effectInstance.Log = effectTemplate.Log;
+                //var effectInstance = new EffectDefinition(
+                //action: effectTemplate.Action,
+                //duration: effectTemplate.Duration.Clone(),
+                //condition: effectTemplate.Condition.Clone(),
+                //interval: effectTemplate.Interval.Clone(),
+                //usage: effectTemplate.Usage.Clone(),
+                //targeting: effectTemplate.Targeting,
+                //trigger: effectTemplate.Trigger,
+                //applyOnSelf: effectTemplate.ApplyOnSelf,
+                //isFlatAmount: effectTemplate.IsFlatAmount,
+                //chance: effectTemplate.Chance,
+                //effectTags: effectTemplate.EffectTags,
+                //attackType: effectTemplate.AttackType,
+                //damageType: effectTemplate.DamageType
+                //)
+                //{
+                //    Log = effectTemplate.Log
+                //};
 
                 // Defer effect application until after logging
                 effectsToApply.Add((target, effectInstance));
@@ -272,13 +300,13 @@ public class CombatSimulation : ICombatContext
 
         foreach (var (target, effectInstance) in effectsToApply)
         {
-            EffectManager.AddEffect(target, effectInstance);
+            EffectManager.AddEffect(actor, target, effectInstance);
         }
     }
 
-    private List<Entity> SelectTargets(Targeting target, Entity caster, List<Entity> enemyTeam, List<Entity> allies)
+    private static List<CombatEntity> SelectTargets(Targeting target, CombatEntity caster, List<CombatEntity> enemyTeam, List<CombatEntity> allies)
     {
-        List<Entity> targets = [];
+        List<CombatEntity> targets = [];
 
         switch (target)
         {
@@ -324,7 +352,7 @@ public class CombatSimulation : ICombatContext
         return targets;
     }
 
-    private Entity? SelectTarget(List<Entity> potentialTargets)
+    private static CombatEntity? SelectTarget(List<CombatEntity> potentialTargets)
     {
         // Select a random alive target
         var aliveTargets = potentialTargets.Where(c => c.IsAlive).ToList();

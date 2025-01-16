@@ -1,8 +1,10 @@
 ﻿using Domain.Interfaces;
 using Domain.Interfaces.Combat;
 using Domain.Models.Abilities.Effects.Conditions;
+using Domain.Models.Abilities.Effects.Intervals;
 using Domain.Models.Abilities.Effects.Timed;
 using Domain.Models.Abilities.Effects.Trigger;
+using Domain.Models.Abilities.Effects.Usages;
 using Domain.Models.Combat;
 using Domain.Models.Damages;
 using Domain.Models.Entities;
@@ -25,7 +27,7 @@ public class SummonAction : IEffectAction
     public void Execute(EffectContext context, ICombatContext combatContext)
     {
         // Create the summoned entity based on the provided type
-        Entity summonedCreature = SummonCreatureFactory.CreateCreature(_summonEntityType);
+        CombatEntity summonedCreature = SummonCreatureFactory.CreateCreature(_summonEntityType);
 
         // If the summoned entity has a limited duration, add a self-destruct effect
         if (Magnitude > 0)
@@ -33,15 +35,24 @@ public class SummonAction : IEffectAction
             var selfDestructAction = new SelfDestructAction(_combatContext!);
             var duration = new TimedDuration(Magnitude);
             var condition = new NoCondition();
-            var selfDestructEffect = new Effect(
+            var interval = new NoInterval();
+            var usage = new UnlimitedUsage();
+            var selfDestructEffectDefinition = new EffectDefinition(
                 action: selfDestructAction,
                 duration: duration,
                 condition: condition,
-                caster: context.Actor,
+                interval: interval,
+                usage: usage,
                 trigger: TriggerEvent.OnTickInterval,
                 effectTags: [EffectTag.SummonExpiration]
             );
-            combatContext.EffectManager.AddEffect(summonedCreature, selfDestructEffect);
+            var selfDestructEffect = new Effect()
+            {
+                Definition = selfDestructEffectDefinition,
+                Caster = context.Actor!,
+                Owner = summonedCreature
+            };
+            combatContext.EffectManager.AddEffect(context.Actor!, summonedCreature, selfDestructEffect);
         }
 
         // Add the summoned entity to the caster's team
@@ -50,7 +61,7 @@ public class SummonAction : IEffectAction
         context.Target = summonedCreature;
         context.EventType = EventType.Summon;
         context.Details = context.Details
-            .Replace("{Actor}", context.Actor.Name)
+            .Replace("{Actor}", context.Actor!.Name)
             .Replace("{Target}", summonedCreature.Name);
 
         combatContext.LogEffectExecution(context);

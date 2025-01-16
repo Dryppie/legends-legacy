@@ -1,11 +1,6 @@
-﻿using Domain.Components.Attributes;
-using Domain.Models.Abilities;
-using Domain.Models.Abilities.Effects;
-using Domain.Models.Abilities.Effects.Trigger;
+﻿using Domain.Models.Abilities;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
-using Domain.Models.Combat;
-using Domain.Models.Damages;
 using Domain.Models.Essences;
 using Domain.Models.Items.Equipments;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -20,7 +15,7 @@ public abstract class Entity
     [NotMapped]
     public List<string> AbilityIds { get; set; } = [];
     [NotMapped]
-    public List<Ability> Abilities { get; set; } = [];
+    public List<AbilityDefinition> Abilities { get; set; } = [];
     [NotMapped]
     public int NextBasicAttackIn = 300; // TODO: Turn 300 into a Constant somewhere, as it is also stored in the CombatSimulator class
                                         // Every tick, this decrements by BaseAttackSpeed.
@@ -41,61 +36,6 @@ public abstract class Entity
     public int Level { get; set; } = 1;
     [NotMapped]
     public bool IsSummoned { get; set; } = false;
-
-    public void IncrementStep()
-    {
-        UpdateAbilities();
-    }
-
-    private void UpdateAbilities()
-    {
-        foreach (var ability in Abilities)
-        {
-            ability.RemainingTimeUntilUse--;
-        }
-    }
-
-    public void ModifyAttribute(AttributeModifier attributeModifier, bool remove = false)
-    {
-        if (remove)
-            TemporaryModifiers.Remove(attributeModifier);
-        else
-            TemporaryModifiers.Add(attributeModifier);
-
-        AttributeCalculator.CalculateCombatAttributeByType(this, attributeModifier.AttributeType);
-    }
-
-    public void ModifyStatuses(string status, bool remove = false)
-    {
-        if (remove)
-            Statuses.Remove(status);
-        else
-            Statuses.Add(status);
-    }
-
-    public bool CanAct()
-    {
-        return !Statuses.Contains("Stun");
-    }
-
-    public void Reset()
-    {
-        NextBasicAttackIn = 0;
-        CombatAttributes.Clear();
-
-        foreach (var kvp in BaseCombatAttributes)
-        {
-            CombatAttributes.Add(kvp.Key, kvp.Value);
-        }
-
-        foreach (var ability in Abilities)
-        {
-            ability.RemainingTimeUntilUse = ability.Cooldown;
-        }
-
-        TemporaryModifiers = [];
-        Statuses.Clear();
-    }
 
     //public Actor DeepClone()
     //{

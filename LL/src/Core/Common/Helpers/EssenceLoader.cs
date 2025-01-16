@@ -1,4 +1,5 @@
 ﻿using Common.Utilities;
+using Domain.Models.Combat;
 using Domain.Models.Entities;
 using Domain.Models.Essences;
 using System.Text.Json;
@@ -7,6 +8,25 @@ namespace Domain.Helpers;
 public static class EssenceLoader
 {
     public static async Task LoadEssencesForEntity(Entity entity)
+    {
+        // Deserialize JSON into a list of essences
+        List<Essence> essences = await DeserializeEssences();
+
+        var ids = new List<string>();
+        foreach (var essence in entity.EquippedEssences)
+        {
+            ids.Add(essence.Name);
+        }
+
+        var entityEssences = essences.Where(a => ids.Contains(a.Name)).ToList();
+        foreach (var entityEssence in entityEssences)
+        {
+            entity.Abilities.Add(entityEssence.Active);
+            entity.Abilities.Add(entityEssence.Passive);
+        }
+    }
+
+    public static async Task LoadEssencesForCombatEntity(CombatEntity entity)
     {
         // Deserialize JSON into a list of essences
         List<Essence> essences = await DeserializeEssences();
@@ -40,7 +60,7 @@ public static class EssenceLoader
     /// </summary>
     /// <param name="tier"></param>
     /// <returns></returns>
-    public static async Task _Simulator_PickRandomAbilityCombinations(Entity entity, int tier = 1)
+    public static async Task _Simulator_PickRandomAbilityCombinations(CombatEntity entity, int tier = 1)
     {
         List<Essence> allEssences = await DeserializeEssences();
 
@@ -68,7 +88,7 @@ public static class EssenceLoader
         }
     }
 
-    public static async Task _Simulator_PickSpecificAbility(Entity entity, string essenceName)
+    public static async Task _Simulator_PickSpecificAbility(CombatEntity entity, string essenceName)
     {
         List<Essence> allEssences = await DeserializeEssences();
 

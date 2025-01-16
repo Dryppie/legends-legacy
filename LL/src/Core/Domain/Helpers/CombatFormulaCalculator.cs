@@ -1,35 +1,26 @@
 ﻿using Domain.Models.Attributes;
 using Domain.Models.Combat;
-using Domain.Models.Entities;
 
 namespace Domain.Helpers;
 public static class CombatFormulaCalculator
 {
     private static readonly Random RandomGenerator = new();
 
-    public static CalculatedResult CalculateCombatInteraction(Entity attacker, Entity defender, int magnitude)
-    {
-        var calculatedResult = new CalculatedResult();
-        int levelDifference = defender.Level - attacker.Level;
-
-        calculatedResult.AttackOutcome = CalculateAttackOutcome(attacker, defender, levelDifference);
-
-        if ((int)calculatedResult.AttackOutcome <= (int)AttackOutcome.Parry) return calculatedResult;
-
-        calculatedResult.CalculatedDamageToDeal = CalculateDamageDealt(attacker, magnitude, calculatedResult.AttackOutcome);
-        calculatedResult.CalculatedDamageReceived = CalculateDamageReceived(defender, magnitude, calculatedResult.AttackOutcome);
-
-        return calculatedResult;
-    }
-    public static AttackOutcome CalculateAttackOutcome(Entity attacker, Entity defender)
+    public static AttackOutcome CalculateAttackOutcome(CombatEntity attacker, CombatEntity defender, bool isDamage)
     {
         int levelDifference = defender.Level - attacker.Level;
 
-        return CalculateAttackOutcome(attacker, defender, levelDifference);
+        return CalculateAttackOutcome(attacker, defender, levelDifference, isDamage);
     }
 
-    private static AttackOutcome CalculateAttackOutcome(Entity attacker, Entity defender, int levelDifference)
+    private static AttackOutcome CalculateAttackOutcome(CombatEntity attacker, CombatEntity defender, int levelDifference, bool isDamage)
     {
+        if (!isDamage) // If it's healing, we either crit or hit.
+        {
+            if (IsCriticalHit(attacker, defender)) return AttackOutcome.Crit;
+            return AttackOutcome.Hit;
+        }
+
         if (!CalculateHit(attacker, defender, levelDifference))
         {
             return AttackOutcome.Miss;
@@ -37,12 +28,12 @@ public static class CombatFormulaCalculator
 
         //if (!CalculateDodge(defender, levelDifference)) return;
 
-        if (CalculateParry(defender))
+        if (IsParry(defender))
         {
             return AttackOutcome.Parry;
         };
 
-        if (CalculateBlock(defender))
+        if (IsBlock(defender))
         {
             return AttackOutcome.Block;
         };
@@ -55,7 +46,7 @@ public static class CombatFormulaCalculator
         return AttackOutcome.Hit;
     }
 
-    private static bool CalculateHit(Entity attacker, Entity defender, int levelDifference)
+    private static bool CalculateHit(CombatEntity attacker, CombatEntity defender, int levelDifference)
     {
         float levelDifferenceModifier = levelDifference / 5 * 3.125f; // Decrease hit chance by 3.125% per level difference
         float statDifferenceModifier = (int)((defender.CombatAttributes[AttributeType.Accuracy] - attacker.CombatAttributes[AttributeType.Dodge]) / 5f) * 1.25f;  // Increased impact from stats
@@ -79,17 +70,17 @@ public static class CombatFormulaCalculator
     //    return roll < adjustedDodgeChance;
     //}
 
-    private static bool CalculateParry(Entity defender)
+    private static bool IsParry(CombatEntity defender)
     {
         return false;
     }
 
-    private static bool CalculateBlock(Entity defender)
+    private static bool IsBlock(CombatEntity defender)
     {
         return false;
     }
 
-    private static bool IsCriticalHit(Entity attacker, Entity defender)
+    private static bool IsCriticalHit(CombatEntity attacker, CombatEntity defender)
     {
         var critChance = attacker.CombatAttributes[AttributeType.CritChance];
 
@@ -97,13 +88,13 @@ public static class CombatFormulaCalculator
         return roll < critChance;
     }
 
-    private static int CalculateDamageDealt(Entity attacker, float magnitude, AttackOutcome attackOutcome)
+    private static int CalculateDamageDealt(CombatEntity attacker, float magnitude, AttackOutcome attackOutcome)
     {
         if (attackOutcome.Equals(AttackOutcome.Crit)) return (int)(magnitude * (attacker.CombatAttributes[AttributeType.CritDamage] / 100f));
         return (int)magnitude;
     }
 
-    private static int CalculateDamageReceived(Entity defender, float magnitude, AttackOutcome attackOutcome)
+    private static int CalculateDamageReceived(CombatEntity defender, float magnitude, AttackOutcome attackOutcome)
     {
         if (attackOutcome.Equals(AttackOutcome.Block)) return (int)(magnitude * 0.6f);
         if (attackOutcome.Equals(AttackOutcome.Crit)) return (int)(magnitude * defender.CombatAttributes[AttributeType.CritDamageReduction]);

@@ -1,23 +1,24 @@
 ﻿using Domain.Interfaces.Combat;
+using Domain.Models.Combat;
 using Domain.Models.Entities;
 
 namespace Services.LL.Combat;
 public class CombatEntityManager : ICombatEntityManager
 {
-    private readonly List<Entity> _playerTeam;
-    private readonly List<Entity> _enemyTeam;
+    private readonly List<CombatEntity> _playerTeam;
+    private readonly List<CombatEntity> _enemyTeam;
 
-    public CombatEntityManager(List<Entity> playerTeam, List<Entity> enemyTeam)
+    public CombatEntityManager(List<CombatEntity> playerTeam, List<CombatEntity> enemyTeam)
     {
-        _playerTeam = new List<Entity>(playerTeam);
-        _enemyTeam = new List<Entity>(enemyTeam);
+        _playerTeam = new List<CombatEntity>(playerTeam);
+        _enemyTeam = new List<CombatEntity>(enemyTeam);
     }
 
-    public List<Entity> PlayerTeam => _playerTeam;
-    public List<Entity> EnemyTeam => _enemyTeam;
-    public List<Entity> AllEntities => _playerTeam.Concat(_enemyTeam).ToList();
+    public List<CombatEntity> PlayerTeam => _playerTeam;
+    public List<CombatEntity> EnemyTeam => _enemyTeam;
+    public List<CombatEntity> AllEntities => [.. _playerTeam, .. _enemyTeam];
 
-    public void AddEntityToOwnTeam(Entity self, Entity entityToAdd)
+    public void AddEntityToOwnTeam(CombatEntity self, CombatEntity entityToAdd)
     {
         if (_playerTeam.Contains(self))
         {
@@ -33,18 +34,18 @@ public class CombatEntityManager : ICombatEntityManager
         }
     }
 
-    public void RemoveEntity(Entity entity)
+    public void RemoveEntity(CombatEntity entity)
     {
         _playerTeam.Remove(entity);
         _enemyTeam.Remove(entity);
     }
 
-    public List<Entity> GetOpposingTeam(Entity entity)
+    public List<CombatEntity> GetOpposingTeam(CombatEntity entity)
     {
         return _playerTeam.Contains(entity) ? _enemyTeam : _playerTeam;
     }
 
-    public List<Entity> GetOwnTeam(Entity entity)
+    public List<CombatEntity> GetOwnTeam(CombatEntity entity)
     {
         return _playerTeam.Contains(entity) ? _playerTeam : _enemyTeam;
     }

@@ -37,21 +37,24 @@ public class CombatService : ICombatService
         var combatAction = characterAction.ActionDetails as CombatActionDetails;
 
         // Initialize combatants
-        var playerCharacters = await GetPlayerCharactersAsync(combatAction!.CharacterTeam.ToList(), cancellationToken);
+        var playerCharacters = await GetPlayerCharactersAsync([.. combatAction!.CharacterTeam], cancellationToken);
         // TODO: Instead of getting a random selection here, it should be done in the while loop
         // otherwise it'll be the same selection for 12 hours of idle, instead of random mobs each combat
-        var enemyCharacters = await GetEnemyCharactersAsync(SelectRandom(combatAction.EnemyTeam.ToList()));
+        var enemyCharacters = await GetEnemyCharactersAsync(SelectRandom([.. combatAction.EnemyTeam]), cancellationToken);
+
+        var combatPlayerEntities = CreateCombatEntities(playerCharacters);
+        var combatEnemyEntities = CreateCombatEntities(enemyCharacters);
 
         // Prepare entities for combat
-        await PrepareEntitiesForCombat([.. playerCharacters, ..enemyCharacters]);
+        await PrepareEntitiesForCombat([.. combatPlayerEntities, .. combatEnemyEntities]);
 
         var lastCombatResult = new CombatResult();
 
         while (characterAction.UpdatedAt < now)
         {
 
-            var combatSimulation = new CombatSimulation(playerCharacters, enemyCharacters);
-            lastCombatResult = await combatSimulation.RunSimulation();
+            var combatSimulation = new CombatSimulation(combatPlayerEntities, combatEnemyEntities);
+            lastCombatResult = combatSimulation.RunSimulation();
 
             // StartedAt is 1 second after the action is initialized, so as to have a 'combat starting' screen
             lastCombatResult.StartedAt = characterAction.UpdatedAt.AddSeconds(1);
@@ -72,7 +75,7 @@ public class CombatService : ICombatService
             // If it's a fight where the frontend has yet to display the outcome, the loot should first be processed when the fight is 'over'
             if (characterAction.UpdatedAt < now)
             {
-                ResetEntitiesForCombat([.. playerCharacters, .. enemyCharacters]);
+                ResetEntitiesForCombat([.. combatPlayerEntities, .. combatEnemyEntities]);
             }
 
             if (lastCombatResult.Outcome.Equals(BattleOutcome.Victory))
@@ -90,23 +93,23 @@ public class CombatService : ICombatService
         lastCombatResult.Loot = _lootService.GenerateIdleCombatLootAsync(enemyCharacters);
 
         // Create CombatEntities to keep track of simple data over each entity, such as id, health, mana
-        lastCombatResult.PlayerTeam = CreateCombatEntities(playerCharacters);
-        lastCombatResult.EnemyTeam = CreateCombatEntities(enemyCharacters);
+        lastCombatResult.PlayerTeam = CreateSimpleCombatEntities(combatPlayerEntities);
+        lastCombatResult.EnemyTeam = CreateSimpleCombatEntities(combatEnemyEntities);
 
         await UpdateCharacterStatsAsync(playerCharacters, totalExp, cancellationToken);
         await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
 
         return lastCombatResult;
     }
-    private List<Guid> SelectRandom(List<Guid> enemyTeam)
+    private static List<Guid> SelectRandom(List<Guid> enemyTeam)
     {
         int randomCount = GetWeightedRandom();
         return enemyTeam.OrderBy(x => Guid.NewGuid()).Take(randomCount).ToList();
     }
 
-    private int GetWeightedRandom()
+    private static int GetWeightedRandom()
     {
-        Random rand = new Random();
+        Random rand = new();
         int randomValue = rand.Next(0, 100);
 
         if (randomValue < 25) // 25% chance
@@ -119,13 +122,13 @@ public class CombatService : ICombatService
             return 4;
     }
 
-    private List<CombatEntity> CreateCombatEntities(List<Entity> playerCharacters)
+    private static List<SimpleCombatEntity> CreateSimpleCombatEntities(List<CombatEntity> playerCharacters)
     {
-        var combatEntities = new List<CombatEntity>();
+        var combatEntities = new List<SimpleCombatEntity>();
 
         foreach (var entity in playerCharacters)
         {
-            combatEntities.Add(new CombatEntity(entity.Id, entity.Name, (int)entity.BaseCombatAttributes[AttributeType.MaxHealth], (int)entity.BaseCombatAttributes[AttributeType.MaxMana]));
+            combatEntities.Add(new SimpleCombatEntity(entity.Id, entity.Name, (int)entity.BaseCombatAttributes[AttributeType.MaxHealth], (int)entity.BaseCombatAttributes[AttributeType.MaxMana]));
         }
 
         return combatEntities;
@@ -133,15 +136,26 @@ public class CombatService : ICombatService
 
     private async Task<List<Entity>> GetPlayerCharactersAsync(List<Guid> characterTeam, CancellationToken cancellationToken)
     {
-        return await _entityService.GetEntitiesByIdsForCombatAsync(characterTeam);
+        return await _entityService.GetEntitiesByIdsForCombatAsync(characterTeam, cancellationToken);
     }
 
-    private async Task<List<Entity>> GetEnemyCharactersAsync(List<Guid> enemyTeam)
+    private async Task<List<Entity>> GetEnemyCharactersAsync(List<Guid> enemyTeam, CancellationToken cancellationToken)
     {
-        return await _entityService.GetEntitiesByIdsForCombatAsync(enemyTeam);
+        return await _entityService.GetEntitiesByIdsForCombatAsync(enemyTeam, cancellationToken);
     }
 
-    private void ResetEntitiesForCombat(List<Entity> allEntities)
+    private static List<CombatEntity> CreateCombatEntities(List<Entity> entities)
+    {
+        var combatEntities = new List<CombatEntity>();
+
+        foreach (var entity in entities)
+        {
+            combatEntities.Add(new CombatEntity(entity));
+        }
+        return combatEntities;
+    }
+
+    private static void ResetEntitiesForCombat(List<CombatEntity> allEntities)
     {
         foreach (var entity in allEntities)
         {
@@ -149,12 +163,12 @@ public class CombatService : ICombatService
         }
     }
 
-    private async Task PrepareEntitiesForCombat(IEnumerable<Entity> entities)
+    private static async Task PrepareEntitiesForCombat(IEnumerable<CombatEntity> entities)
     {
         LoadAbilitiesFromEssences(entities);
 
         // Load abilities
-        var loadedAttributeTasks = entities.Select(entity => Task.Run(() => EssenceLoader.LoadEssencesForEntity(entity)));
+        var loadedAttributeTasks = entities.Select(entity => Task.Run(() => EssenceLoader.LoadEssencesForCombatEntity(entity)));
 
         // Calculate attributes
         var calculationTasks = entities.Select(entity => Task.Run(() => AttributeCalculator.CalculateBaseCombatAttributes(entity)));
@@ -163,7 +177,7 @@ public class CombatService : ICombatService
         await Task.WhenAll(calculationTasks);
     }
 
-    private void LoadAbilitiesFromEssences(IEnumerable<Entity> entities)
+    private static void LoadAbilitiesFromEssences(IEnumerable<CombatEntity> entities)
     {
         foreach (var entity in entities)
         {

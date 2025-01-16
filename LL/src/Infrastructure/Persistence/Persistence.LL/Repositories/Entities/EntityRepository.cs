@@ -26,7 +26,7 @@ public class EntityRepository : IEntityRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<List<Entity>> GetEntitiesByIdsForCombatAsync(List<Guid> entityIds)
+    public async Task<List<Entity>> GetEntitiesByIdsForCombatAsync(List<Guid> entityIds, CancellationToken cancellationToken)
     {
         var entities = await _context.Entities
             .Include(e => e.BaseAttributes)
@@ -36,7 +36,7 @@ public class EntityRepository : IEntityRepository
                 .ThenInclude(lt => (lt as LootTable).Entries) // Make sure to include the child LootTable to each creature's LootTable (Rarity tables)
                 .ThenInclude(lte => (lte as LootTableItem).Item) // Make sure to include the items to each LootTableItem
             .Where(e => entityIds.Contains(e.Id))
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         var missingIds = entityIds.Except(entities.Select(e => e.Id)).ToList();
         if (missingIds.Count > 0)

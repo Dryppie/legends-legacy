@@ -6,7 +6,7 @@ using Domain.Models.Abilities.Effects.Actions;
 using Domain.Models.Damages;
 
 namespace Application.UseCases.Abilities.Dtos;
-public class AbilityDto : IMapFrom<Ability>
+public class AbilityDto : IMapFrom<AbilityDefinition>
 {
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -21,7 +21,7 @@ public class AbilityDto : IMapFrom<Ability>
     public List<EffectType> EffectTypes { get; } = [];
     public void Mapping(Profile profile)
     {
-        profile.CreateMap<Ability, AbilityDto>()
+        profile.CreateMap<AbilityDefinition, AbilityDto>()
             .ForMember(dto => dto.EffectTypes, opt => opt.MapFrom(src => src.Effects.Select(e => e.EffectType).ToList()));
 
             // TODO: THIS SHOULD BE POSSIBLE TO DELETE

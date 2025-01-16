@@ -1,10 +1,11 @@
 ﻿using Domain.Components.Attributes;
 using Domain.Helpers;
+using Domain.Models.Combat;
 
 namespace Domain.Models.Entities.Creatures;
 public static class SummonCreatureFactory
 {
-    public static Creature CreateCreature(string entityType)
+    public static CombatEntity CreateCreature(string entityType)
     {
         // Load entity data from a data source (e.g., JSON file, database)
         // For simplicity, create an entity with default values
@@ -12,14 +13,16 @@ public static class SummonCreatureFactory
         var summonedCreature = new Creature
         {
             Id = Guid.Parse("10000000-0000-0000-0000-000000000002"),
-            Name = "Blood Imp",
-            IsSummoned = true,
+            Name = "Blood Imp"
             // Set other properties like health, abilities, stats
         };
 
-        summonedCreature.BaseAttributes = EntityBaseAttributeHelper.CreateEntityAttributes(summonedCreature.Id);
-        AttributeCalculator.CalculateBaseCombatAttributes(summonedCreature);
+        var summonedCombatEntity = new CombatEntity(summonedCreature);
+        summonedCombatEntity.IsSummoned = true;
 
-        return summonedCreature;
+        summonedCombatEntity.BaseAttributes = EntityBaseAttributeHelper.CreateEntityAttributes(summonedCombatEntity.Id);
+        AttributeCalculator.CalculateBaseCombatAttributes(summonedCombatEntity);
+
+        return summonedCombatEntity;
     }
 }

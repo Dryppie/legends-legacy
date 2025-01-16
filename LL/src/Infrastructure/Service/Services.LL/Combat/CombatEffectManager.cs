@@ -1,17 +1,16 @@
 ﻿using Domain.Interfaces.Combat;
+using Domain.Models.Abilities;
 using Domain.Models.Abilities.Effects;
 using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Combat;
-using Domain.Models.Entities;
 
 namespace Services.LL.Combat;
 public class CombatEffectManager : ICombatEffectManager
 {
     private readonly ICombatEntityManager _entityManager;
     private readonly ICombatContext _combatContext;
-    private readonly List<Effect> _activeEffects = new();
     private readonly List<CombatEvent> _eventLog; // Optional, if you want direct access to event logging
-    private readonly Dictionary<Entity, List<Effect>> _entityEffects = new();
+    private readonly Dictionary<CombatEntity, List<Effect>> _entityEffects = [];
 
     public CombatEffectManager(ICombatEntityManager entityManager, ICombatContext combatContext, List<CombatEvent> eventLog)
     {
@@ -20,7 +19,7 @@ public class CombatEffectManager : ICombatEffectManager
         _eventLog = eventLog;
     }
 
-    public void AddEffect(Entity target, Effect effect)
+    public void AddEffect(CombatEntity actor, CombatEntity target, Effect effect)
     {
         if (!_entityEffects.TryGetValue(target, out var effects))
         {
@@ -29,9 +28,9 @@ public class CombatEffectManager : ICombatEffectManager
         }
 
         // If the effect should trigger immediately (no trigger event needed)
-        if (effect.Trigger == TriggerEvent.None)
+        if (effect.Definition.Trigger == TriggerEvent.None)
         {
-            var context = CreateEffectContext(effect, target);
+            var context = CreateEffectContext(effect, target, actor);
             effect.ExecuteAction(context, _combatContext);
             return;
         }
@@ -39,7 +38,7 @@ public class CombatEffectManager : ICombatEffectManager
         effects.Add(effect);
     }
 
-    public void UpdateEffectsForEntity(Entity entity)
+    public void UpdateEffectsForEntity(CombatEntity entity)
     {
         if (_entityEffects.TryGetValue(entity, out var effects))
         {
@@ -51,14 +50,14 @@ public class CombatEffectManager : ICombatEffectManager
             foreach (var effect in effects.ToList())
             {
                 // Interval checks
-                if (effect.Interval.ShouldTrigger())
+                if (effect.ShouldTrigger())
                 {
                     var intervalContext = CreateEffectContext(effect, entity);
                     effect.ExecuteAction(intervalContext, _combatContext);
                 }
 
                 // Duration check
-                if (!effect.Duration.IsActive())
+                if (!effect.IsActive())
                 {
                     var expireContext = CreateEffectContext(effect, entity);
                     effect.ExecuteOnExpireAction(expireContext, _combatContext);
@@ -77,15 +76,60 @@ public class CombatEffectManager : ICombatEffectManager
         }
     }
 
-    public void TriggerEffects(TriggerEvent triggerEvent, Entity effectTriggeredOn, Entity? causeOfTrigger = null, int magnitude = -1)
+    public void TriggerEffects(TriggerEvent triggerEvent, CombatEntity effectTriggeredOn, CombatEntity? causeOfTrigger = null, int magnitude = -1)
     {
         if (!_entityEffects.TryGetValue(effectTriggeredOn, out var effects))
             return;
 
+        // Find the effects on the target with the correct trigger
         foreach (var effect in effects.Where(e => e.IsTrigger(triggerEvent)).ToList())
         {
-            var context = CreateEffectContext(effect, effectTriggeredOn, causeOfTrigger, magnitude);
-            effect.ExecuteAction(context, _combatContext);
+            
+            var targets = new List<CombatEntity>();
+
+            var triggerTarget = effect.Definition.TriggerTarget;
+
+            if (triggerTarget.Equals(Targeting.CauseOfTrigger))
+            {
+                targets.Add(causeOfTrigger!);
+            }
+            else
+            {
+                var ownTeam = _entityManager.GetOwnTeam(effectTriggeredOn);
+                var enemyTeam = _entityManager.GetOpposingTeam(effectTriggeredOn);
+                var targeting = effect.Definition.TriggerTarget.Equals(Targeting.None) ? effect.Definition.Targeting : effect.Definition.TriggerTarget;
+                targets = TargetingManager.SelectTargets(triggerTarget.Equals(Targeting.None) ? effect.Definition.Targeting : triggerTarget, effectTriggeredOn, enemyTeam, ownTeam);
+            }
+
+            foreach ( var target in targets )
+            {
+                var effectDefinition = new EffectDefinition(action: effect.Definition.Action,
+                    duration: effect.Definition.Duration.Clone(),
+                    condition: effect.Definition.Condition.Clone(),
+                    interval: effect.Definition.Interval.Clone(),
+                    usage: effect.Definition.Usage.Clone(),
+                    targeting: effect.Definition.Targeting,
+                    trigger: effect.Definition.Trigger,
+                    triggerTarget: effect.Definition.TriggerTarget,
+                    isFlatAmount: effect.Definition.IsFlatAmount,
+                    chance: effect.Definition.Chance,
+                    effectTags: effect.Definition.EffectTags,
+                    attackType: effect.Definition.AttackType,
+                    damageType: effect.Definition.DamageType)
+                {
+                    Log = effect.Definition.Log
+                };
+
+                var triggeredEffect = new Effect()
+                {
+                    Definition = effectDefinition,
+                    Caster = effectTriggeredOn,
+                    Target = target,
+                };
+
+                var context = CreateEffectContext(effect, target, effectTriggeredOn, magnitude);
+                effect.ExecuteAction(context, _combatContext);
+            }
         }
     }
 
@@ -93,24 +137,21 @@ public class CombatEffectManager : ICombatEffectManager
     /// Creates a fully populated EffectContext to be passed to the effect when executing.
     /// You can adjust this to provide OwnTeam, EnemyTeam, CurrentTime, etc.
     /// </summary>
-    private EffectContext CreateEffectContext(Effect effect, Entity target, Entity? opponent = null, int magnitude = -1)
+    private EffectContext CreateEffectContext(Effect effect, CombatEntity target, CombatEntity? actor = null, int magnitude = -1)
     {
         // Gather any info from the combat context or entity manager:
         var ownTeam = _entityManager.GetOwnTeam(target);
         var enemyTeam = _entityManager.GetOpposingTeam(target);
 
-        return new EffectContext(ownTeam: ownTeam,
-                                 enemyTeam: enemyTeam,
-                                 owner: effect.Caster ?? target,
-                                 target: effect.ApplyOnSelf ? effect.Caster ?? target : opponent ?? target,
-                                 triggerEvent: effect.Trigger,
-                                 magnitude: magnitude != -1 ? magnitude : effect.Action.Magnitude, // If the magnitude is not -1, then use magnitude. Else, use Action.Magnitude
-                                 isFlatAmount: effect.IsFlatAmount,
-                                 details: effect.Log,
-                                 effectModifications: effect.EffectModifications,
-                                 action: effect.Action,
-                                 effectTags: effect.EffectTags,
-                                 attackType: effect.AttackType,
-                                 damageType: effect.DamageType);
+        var effectContext = new EffectContext(effect: effect,
+                                              ownTeam: ownTeam,
+                                              enemyTeam: enemyTeam,
+                                              actor: actor ?? effect.Caster, // Fallback to the caster of the effect, in case there's no actor
+                                              target: target,
+                                              magnitude: magnitude,
+                                              details: effect.Definition.Log
+                                              );
+
+        return effectContext;
     }
 }

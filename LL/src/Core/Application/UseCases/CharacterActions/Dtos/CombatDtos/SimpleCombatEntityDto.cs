@@ -3,7 +3,7 @@ using AutoMapper;
 using Domain.Models.Combat;
 
 namespace Application.UseCases.CharacterActions.Dtos.CombatDtos;
-public class CombatEntityDto : IMapFrom<CombatEntity>
+public class SimpleCombatEntityDto : IMapFrom<SimpleCombatEntity>
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -14,6 +14,6 @@ public class CombatEntityDto : IMapFrom<CombatEntity>
 
     public void Mapping(Profile profile)
     {
-        profile.CreateMap<CombatEntity, CombatEntityDto>();
+        profile.CreateMap<SimpleCombatEntity, SimpleCombatEntityDto>();
     }
 }

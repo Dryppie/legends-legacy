@@ -11,6 +11,7 @@ public class TargetingConverter : JsonConverter<Targeting>
         return stringValue switch
         {
             "None" => Targeting.None,
+            "CauseOfTrigger" => Targeting.CauseOfTrigger,
             "Self" => Targeting.Self,
             "SingleEnemy" => Targeting.SingleEnemy,
             "SingleAlly" => Targeting.SingleAlly,
@@ -34,6 +35,7 @@ public class TargetingConverter : JsonConverter<Targeting>
         var stringValue = value switch
         {
             Targeting.None => "None",
+            Targeting.CauseOfTrigger => "CauseOfTrigger",
             Targeting.Self => "Self",
             Targeting.SingleEnemy => "SingleEnemy",
             Targeting.SingleAlly => "SingleAlly",

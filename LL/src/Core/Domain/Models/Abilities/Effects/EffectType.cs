@@ -6,4 +6,5 @@ public enum EffectType
     ModifyAttribute,
     Summon,
     StatusEffect,
+    NestedEffect,
 }

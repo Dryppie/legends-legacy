@@ -12,9 +12,9 @@ public class Essence
     public string PassiveAbilityId { get; set; } = string.Empty;
     public string ActiveAbilityId { get; set; } = string.Empty;
     [NotMapped]
-    public Ability Passive { get; set; } = null!;
+    public AbilityDefinition Passive { get; set; } = null!;
     [NotMapped]
-    public Ability Active { get; set; } = null!;
+    public AbilityDefinition Active { get; set; } = null!;
 
     [JsonIgnore]
     public ICollection<Entity> Entities { get; set; } = [];

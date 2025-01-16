@@ -1,6 +1,6 @@
 ﻿using Domain.Interfaces;
 
-namespace Domain.Models.Abilities.Effects.Interval;
+namespace Domain.Models.Abilities.Effects.Intervals;
 public class NoInterval : IEffectInterval
 {
     public void Update() { }

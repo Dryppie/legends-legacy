@@ -1,5 +1,4 @@
-﻿using Domain.Helpers;
-using Domain.Interfaces;
+﻿using Domain.Interfaces;
 using Domain.Interfaces.Combat;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
@@ -20,41 +19,35 @@ public class DamageAction : IEffectAction
     }
 
     public void Execute(EffectContext context, ICombatContext combatContext)
-    {
-        var calculatedResult = new CalculatedResult();
-        if (context.IsFlatAmount)
-        {
-            // If it's a flat amount, take the value of the effect itself (_damageAmount)
-            calculatedResult.CalculatedDamageToDeal = Magnitude;
-            calculatedResult.CalculatedDamageReceived = combatContext.InteractionManager.CalculateDamageReceived(context.Target, Magnitude, AttackOutcome.Hit);
-            calculatedResult.AttackOutcome = AttackOutcome.Hit;
-        }
-        else
-        {
-            calculatedResult = CombatFormulaCalculator.CalculateCombatInteraction(context.Actor, context.Target, Magnitude);
-        }
-
-        context.AttackOutcome = calculatedResult.AttackOutcome;
-        context.Magnitude = calculatedResult.CalculatedDamageReceived;
-
-        if (context.AttackOutcome == AttackOutcome.Miss)
+    {   
+        // Attack outcome
+        var attackOutcome = combatContext.InteractionManager.CalculateAttackOutcomeForDamage(context.Actor, context.Target);
+        if (attackOutcome == AttackOutcome.Miss)
         {
             context.EventType = EventType.Miss;
-            context.Details = $"{context.Actor.Name} missed the target.";
+            context.Details = $"{context.Actor?.Name!} missed the target.";
             // Log
             combatContext.LogEffectExecution(context);
             return;
         }
 
+        // Potential damage to deal
+        var isFlatAmount = context.Effect.Definition.IsFlatAmount;
+        var damageAmount = isFlatAmount ? Magnitude : combatContext.InteractionManager.CalculateDamageToDeal(context.Actor, context.Target, Magnitude);
+
+        // Damage opponent will receive
+        var damageReceived = combatContext.InteractionManager.CalculateDamageReceived(context.Target, damageAmount, attackOutcome);
+
+        context.AttackOutcome = attackOutcome;
+        context.Magnitude = damageReceived;
         context.EventType = EventType.Damage;
         context.Details = context.Details
             .Replace("{Actor}", context.Actor.Name)
             .Replace("{Target}", context.Target.Name)
-            .Replace("{Amount}", calculatedResult.CalculatedDamageReceived.ToString());
+            .Replace("{Amount}", context.Magnitude.ToString());
 
         combatContext.LogEffectExecution(context);
 
-        // Log
         combatContext.InteractionManager.ApplyDamage(context);
     }
 

@@ -50,27 +50,30 @@ public class SimulatorService : ISimulatorService
         var playerCharacters = GeneratePlayerTeam(playerTeamSize, tier);
         var enemyCharacters = GenerateEnemyTeam(enemyTeamSize, tier, locationId);
 
+        var combatPlayerEntities = CreateCombatEntities(playerCharacters);
+        var combatEnemyEntities = CreateCombatEntities(enemyCharacters);
+
         // Prepare entities for combat
-        await PrepareEntitiesForCombat([.. playerCharacters, .. enemyCharacters]);
+        await PrepareEntitiesForCombat([.. combatPlayerEntities, .. combatEnemyEntities]);
 
         var lastCombatResult = new CombatResult();
 
         while (fights > 0)
         {
             if (_pickRandomEssences)
-                await PickRandomAbilities([.. playerCharacters, .. enemyCharacters], tier);
+                await PickRandomAbilities([.. combatPlayerEntities, .. combatEnemyEntities], tier);
             else
             {
-                await PickSpecificAbility([.. playerCharacters], _essenceName);
-                await PickSpecificAbility([.. enemyCharacters]);
+                await PickSpecificAbility([.. combatPlayerEntities], _essenceName);
+                await PickSpecificAbility([.. combatEnemyEntities]);
             }
 
-            var combatSimulation = new CombatSimulation(playerCharacters, enemyCharacters);
-            lastCombatResult = await combatSimulation.RunSimulation(simulated: true);
+            var combatSimulation = new CombatSimulation(combatPlayerEntities, combatEnemyEntities);
+            lastCombatResult = combatSimulation.RunSimulation(simulated: true);
 
             // Build the combination keys for the essences
-            var playerCombo = GetEssenceComboKey(playerCharacters);
-            var enemyCombo = GetEssenceComboKey(enemyCharacters);
+            var playerCombo = GetEssenceComboKey(combatPlayerEntities);
+            var enemyCombo = GetEssenceComboKey(combatEnemyEntities);
 
             RecordMatchResult(_essenceStats, playerCombo, lastCombatResult.Outcome == BattleOutcome.Victory);
             RecordMatchResult(_essenceStats, enemyCombo, lastCombatResult.Outcome == BattleOutcome.Defeat);
@@ -84,7 +87,7 @@ public class SimulatorService : ISimulatorService
 
             if (fights > 1)
             {
-                ResetEntitiesForCombat([.. playerCharacters, .. enemyCharacters]);
+                ResetEntitiesForCombat([.. combatPlayerEntities, .. combatEnemyEntities]);
             }
 
             fights--;
@@ -105,15 +108,15 @@ public class SimulatorService : ISimulatorService
         Console.WriteLine($"Time  : {end - start}");
     }
 
-    private List<Guid> SelectRandom(List<Guid> enemyTeam)
+    private static List<Guid> SelectRandom(List<Guid> enemyTeam)
     {
         int randomCount = GetWeightedRandom();
         return enemyTeam.OrderBy(x => Guid.NewGuid()).Take(randomCount).ToList();
     }
 
-    private int GetWeightedRandom()
+    private static int GetWeightedRandom()
     {
-        Random rand = new Random();
+        Random rand = new();
         int randomValue = rand.Next(0, 100);
 
         if (randomValue < 25) // 25% chance
@@ -126,24 +129,24 @@ public class SimulatorService : ISimulatorService
             return 4;
     }
 
-    private List<CombatEntity> CreateCombatEntities(List<Entity> playerCharacters)
+    private static List<SimpleCombatEntity> CreateSimpleCombatEntities(List<Entity> playerCharacters)
     {
-        var combatEntities = new List<CombatEntity>();
+        var combatEntities = new List<SimpleCombatEntity>();
 
         foreach (var entity in playerCharacters)
         {
-            combatEntities.Add(new CombatEntity(entity.Id, entity.Name, (int)entity.BaseCombatAttributes[AttributeType.MaxHealth], (int)entity.BaseCombatAttributes[AttributeType.MaxMana]));
+            combatEntities.Add(new SimpleCombatEntity(entity.Id, entity.Name, (int)entity.BaseCombatAttributes[AttributeType.MaxHealth], (int)entity.BaseCombatAttributes[AttributeType.MaxMana]));
         }
 
         return combatEntities;
     }
 
-    private List<Entity> GeneratePlayerTeam(int teamSize, int tier)
+    private static List<Entity> GeneratePlayerTeam(int teamSize, int tier)
     {
         return GenerateATeam(teamSize, tier, "Player");
     }
 
-    private List<Entity> GenerateEnemyTeam(int teamSize, int tier, int locationId)
+    private static List<Entity> GenerateEnemyTeam(int teamSize, int tier, int locationId)
     {
         //if (locationId > 0)
         //{
@@ -153,7 +156,7 @@ public class SimulatorService : ISimulatorService
         return GenerateATeam(teamSize, tier, "Enemy");
     }
 
-    private List<Entity> GenerateATeam(int teamSize, int tier, string teamName)
+    private static List<Entity> GenerateATeam(int teamSize, int tier, string teamName)
     {
         var team = new List<Entity>();
         for (int i = 0; i < teamSize; i++)
@@ -166,16 +169,28 @@ public class SimulatorService : ISimulatorService
 
     }
 
-    private Entity GenerateEntity(int tier)
+    private static SimulatedEntity GenerateEntity(int tier)
     {
-        var entity = new SimulatedEntity();
-
-        entity.BaseAttributes = CreateAttributes(tier);
+        var entity = new SimulatedEntity
+        {
+            BaseAttributes = CreateAttributes(tier)
+        };
 
         return entity;
     }
 
-    private ICollection<EntityAttribute> CreateAttributes(int tier)
+    private static List<CombatEntity> CreateCombatEntities(List<Entity> entities)
+    {
+        var combatEntities = new List<CombatEntity>();
+
+        foreach (var entity in entities)
+        {
+            combatEntities.Add(new CombatEntity(entity));
+        }
+        return combatEntities;
+    }
+
+    private static List<EntityAttribute> CreateAttributes(int tier)
     {
         return EntityBaseAttributeHelper.CreateSimulatedAttributes(tier);
     }
@@ -186,7 +201,7 @@ public class SimulatorService : ISimulatorService
     //    return await _entityService.GetEntitiesByIdsForCombatAsync(ids);
     //}
 
-    private void ResetEntitiesForCombat(List<Entity> allEntities)
+    private static void ResetEntitiesForCombat(List<CombatEntity> allEntities)
     {
         foreach (var entity in allEntities)
         {
@@ -196,7 +211,7 @@ public class SimulatorService : ISimulatorService
         }
     }
 
-    private async Task PrepareEntitiesForCombat(IEnumerable<Entity> entities)
+    private static async Task PrepareEntitiesForCombat(IEnumerable<CombatEntity> entities)
     {
         // Calculate attributes
         var calculationTasks = entities.Select(entity => Task.Run(() => AttributeCalculator.CalculateBaseCombatAttributes(entity)));
@@ -204,7 +219,7 @@ public class SimulatorService : ISimulatorService
         await Task.WhenAll(calculationTasks);
     }
 
-    private async Task PickRandomAbilities(IEnumerable<Entity> entities, int tier)
+    private static async Task PickRandomAbilities(IEnumerable<CombatEntity> entities, int tier)
     {
         // Load random abilities
         var attributePickerTasks = entities.Select(entity => Task.Run(() => EssenceLoader._Simulator_PickRandomAbilityCombinations(entity, tier)));
@@ -212,7 +227,7 @@ public class SimulatorService : ISimulatorService
         await Task.WhenAll(attributePickerTasks);
     }
 
-    private async Task PickSpecificAbility(IEnumerable<Entity> entities, string essenceName = "Test Essence")
+    private static async Task PickSpecificAbility(IEnumerable<CombatEntity> entities, string essenceName = "Test Essence")
     {
         // Load random abilities
         var attributePickerTasks = entities.Select(entity => Task.Run(() => EssenceLoader._Simulator_PickSpecificAbility(entity, essenceName)));
@@ -228,7 +243,7 @@ public class SimulatorService : ISimulatorService
         public double WinRate => TimesUsed == 0 ? 0.0 : Math.Round((double)TimesWonWith / TimesUsed * 100);
     }
 
-    private static EssenceCombination GetEssenceComboKey(IEnumerable<Entity> characters)
+    private static EssenceCombination GetEssenceComboKey(IEnumerable<CombatEntity> characters)
     {
         var essenceNames = characters
             .SelectMany(c => c.EquippedEssences.Select(e => e.Name))
@@ -269,7 +284,7 @@ public class SimulatorService : ISimulatorService
             return hash.ToHashCode();
         }
     }
-    private Dictionary<EssenceCombination, EssenceStat> _essenceStats = new();
+    private readonly Dictionary<EssenceCombination, EssenceStat> _essenceStats = [];
 
     private static void RecordMatchResult(Dictionary<EssenceCombination, EssenceStat> stats, EssenceCombination key, bool won)
     {

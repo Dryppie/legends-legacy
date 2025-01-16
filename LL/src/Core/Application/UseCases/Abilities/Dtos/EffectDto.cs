@@ -6,19 +6,20 @@ using Domain.Models.Abilities.Effects;
 using Domain.Models.Abilities.Effects.Trigger;
 
 namespace Application.UseCases.Abilities.Dtos;
-public class EffectDto : IMapFrom<Effect>
+public class EffectDto : IMapFrom<EffectDefinition>
 {
     public IEffectAction Action { get; }
     public IEffectDuration Duration { get; }
-    public Targeting Targeting { get; }
-    public TriggerEvent Trigger { get; }
     public IEffectInterval Interval { get; }
     public IEffectCondition Condition { get; }
+    public IEffectUsage Usage { get; }
+    public Targeting Targeting { get; }
+    public TriggerEvent Trigger { get; }
     public int Chance { get; }
     public EffectType EffectType { get; }
 
     public void Mapping(Profile profile)
     {
-        profile.CreateMap<Effect, EffectDto>();
+        profile.CreateMap<EffectDefinition, EffectDto>();
     }
 }

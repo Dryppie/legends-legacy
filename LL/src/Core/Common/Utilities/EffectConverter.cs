@@ -2,23 +2,22 @@
 using Domain.Models.Abilities;
 using Domain.Models.Abilities.Effects;
 using Domain.Models.Abilities.Effects.Conditions;
-using Domain.Models.Abilities.Effects.Interval;
+using Domain.Models.Abilities.Effects.Intervals;
 using Domain.Models.Abilities.Effects.Timed;
 using Domain.Models.Abilities.Effects.Trigger;
+using Domain.Models.Abilities.Effects.Usages;
 using Domain.Models.Damages;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Common.Utilities;
-public class EffectConverter : JsonConverter<Effect>
+public class EffectConverter : JsonConverter<EffectDefinition>
 {
-    public override Effect Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override EffectDefinition Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         using var document = JsonDocument.ParseValue(ref reader);
         var root = document.RootElement;
 
-        // 1) The "Action" property will be a complex object with `"Type" : "Damage"`, `"NestedEffect"`, etc.
-        //    Let the EffectActionConverter handle that for us:
         var action = JsonSerializer.Deserialize<IEffectAction>(root.GetProperty("Action").GetRawText(), options)
                      ?? throw new JsonException("Could not deserialize IEffectAction.");
 
@@ -28,11 +27,11 @@ public class EffectConverter : JsonConverter<Effect>
             && intervalElement.ValueKind != JsonValueKind.Undefined)
         {
             interval = JsonSerializer.Deserialize<IEffectInterval>(intervalElement.GetRawText(), options)
-                       ?? new NoInterval();
+                       ?? new NoInterval(); // Fallback in case of error
         }
         else
         {
-            interval = new NoInterval();
+            interval = new NoInterval(); // Fallback in case of error
         }
 
         // Condition
@@ -42,11 +41,11 @@ public class EffectConverter : JsonConverter<Effect>
             && conditionElement.ValueKind != JsonValueKind.Undefined)
         {
             condition = JsonSerializer.Deserialize<IEffectCondition>(conditionElement.GetRawText(), options)
-                        ?? new NoCondition();
+                        ?? new NoCondition(); // Fallback in case of error
         }
         else
         {
-            condition = new NoCondition();
+            condition = new NoCondition(); // Fallback in case of error
         }
 
         // Duration
@@ -56,17 +55,26 @@ public class EffectConverter : JsonConverter<Effect>
             && durationElement.ValueKind != JsonValueKind.Undefined)
         {
             duration = JsonSerializer.Deserialize<IEffectDuration>(durationElement.GetRawText(), options)
-                       ?? new TimedDuration(0);
+                       ?? new TimedDuration(0); // Fallback in case of error
         }
         else
         {
-            duration = new TimedDuration(0);
+            duration = new TimedDuration(0); // Fallback in case of error
         }
 
-        // 2) Read other properties
-        //    For example, if you store Duration, Condition, Interval, etc., parse them similarly.
-        //    If they’re basic enums or simple types, you can parse them inline or with your 
-        //    existing converters. For example:
+        IEffectUsage usage;
+        if (root.TryGetProperty("Interval", out var usageElement)
+            && usageElement.ValueKind != JsonValueKind.Null
+            && usageElement.ValueKind != JsonValueKind.Undefined)
+        {
+            usage = JsonSerializer.Deserialize<IEffectUsage>(usageElement.GetRawText(), options)
+                       ?? new UnlimitedUsage(); // Fallback in case of error
+        }
+        else
+        {
+            usage = new UnlimitedUsage(); // Fallback in case of error
+        }
+
         var targeting = root.TryGetProperty("Targeting", out var targetingProp)
                             ? Enum.Parse<Targeting>(targetingProp.GetString() ?? "None")
                             : Targeting.None;
@@ -75,12 +83,9 @@ public class EffectConverter : JsonConverter<Effect>
                             ? Enum.Parse<TriggerEvent>(triggerProp.GetString() ?? "None")
                             : TriggerEvent.None;
 
-        bool applyToSelf = false;
-        if (root.TryGetProperty("ApplyToSelf", out var applyToSelfElement) &&
-            (applyToSelfElement.ValueKind == JsonValueKind.True || applyToSelfElement.ValueKind == JsonValueKind.False))
-        {
-            applyToSelf = applyToSelfElement.GetBoolean();
-        }
+        var triggerTarget = root.TryGetProperty("TriggerTarget", out var triggerTargetProp)
+                            ? Enum.Parse<Targeting>(triggerTargetProp.GetString() ?? "None")
+                            : Targeting.None;
 
         bool isFlatAmount = false;
         if (root.TryGetProperty("IsFlatAmount", out var isFlatAmountElement) &&
@@ -96,16 +101,16 @@ public class EffectConverter : JsonConverter<Effect>
         }
 
         // 3) Construct the Effect. (Replace placeholders with actual data as needed.)
-        var effect = new Effect(
+        var effect = new EffectDefinition(
             action: action,
             duration: duration,
-            effectTags: new List<EffectTag>(),
             condition: condition,
-            caster: null,
+            interval: interval,
+            usage: usage,
+            effectTags: new List<EffectTag>(),
             targeting: targeting,
             trigger: trigger,
-            interval: interval,
-            applyOnSelf: applyToSelf,
+            triggerTarget: triggerTarget,
             isFlatAmount: isFlatAmount,
             chance: chance,
             attackType: AttackType.None,
@@ -118,7 +123,7 @@ public class EffectConverter : JsonConverter<Effect>
         return effect;
     }
 
-    public override void Write(Utf8JsonWriter writer, Effect value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, EffectDefinition value, JsonSerializerOptions options)
     {
         throw new NotImplementedException();
     }
