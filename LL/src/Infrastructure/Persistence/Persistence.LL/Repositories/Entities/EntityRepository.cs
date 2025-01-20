@@ -10,9 +10,9 @@ public class EntityRepository : IEntityRepository
 {
     private readonly IDbContext _context;
 
-    public EntityRepository(IDbContext unitOfWork)
+    public EntityRepository(IDbContext context)
     {
-        _context = unitOfWork;
+        _context = context;
     }
 
     public async Task UpdateEntities(List<Entity> entities, CancellationToken cancellationToken)

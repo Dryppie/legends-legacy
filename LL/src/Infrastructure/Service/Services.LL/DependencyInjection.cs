@@ -7,6 +7,7 @@ using Services.LL.Authorization;
 using Services.LL.CharacterActions;
 using Services.LL.Entities;
 using Services.LL.Entities.Characters;
+using Services.LL.Entities.Creatures;
 using Services.LL.Interfaces;
 using Services.LL.Inventories;
 using Services.LL.Loots;
@@ -22,6 +23,8 @@ public static class DependencyInjection
         services.AddScoped<IAttributeService, AttributeService>();
         services.AddScoped<ICharacterService, CharacterService>();
         services.AddScoped<ICharacterActionService, CharacterActionService>();
+        services.AddScoped<IActionDetailsService, ActionDetailsService>();
+        services.AddScoped<ICreatureService, CreatureService>();
         
         services.AddScoped<ICombatService, CombatService>();
 

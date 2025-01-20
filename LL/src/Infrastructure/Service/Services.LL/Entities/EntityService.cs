@@ -1,5 +1,5 @@
-﻿using Domain.Models.Entities;
-using Services.LL.Interfaces;
+﻿using Application.Interfaces.Services.LL;
+using Domain.Models.Entities;
 
 namespace Services.LL.Entities;
 public class EntityService : IEntityService

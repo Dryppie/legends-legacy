@@ -1,5 +1,6 @@
 ﻿using Application.UseCases.CharacterActions.Commands.DeleteCharacterAction;
-using Application.UseCases.CharacterActions.Commands.StartCharacterAction;
+using Application.UseCases.CharacterActions.Commands.StartCombatAction;
+using Application.UseCases.CharacterActions.Commands.StartGatheringAction;
 using Application.UseCases.CharacterActions.Dtos;
 using Application.UseCases.CharacterActions.Queries.GetCharacterAction;
 using Domain.Models.CharacterActions;
@@ -11,26 +12,26 @@ namespace API.LL.Controllers.V1;
 [Authorize]
 public class CharacterActionsController : BaseController
 {
-    public record StartCombatActionRequest(CombatActionDetails CombatActionDetails);
     public record StartGatheringActionRequest(GatheringActionDetails GatheringActionDetails);
     [HttpGet]
     public async Task<ActionResult<CharacterActionDto?>> Get()
     {
         return await Mediator.Send(new GetCharacterActionQuery(CurrentCharacterGuid));
     }
+    public record StartCombatActionRequest(string AreaName);
     // POST api/<CharacterActionsController>
     [HttpPost("StartCombat")]
     public async Task<ActionResult<bool>> StartCombat([FromBody] StartCombatActionRequest request)
     {
 
-        return await Mediator.Send(new StartCharacterActionCommand(CurrentCharacterGuid, CharacterActionType.Combat, request.CombatActionDetails));
+        return await Mediator.Send(new StartCombatActionCommand(CurrentCharacterGuid, CharacterActionType.Combat, request.AreaName));
     }
     // POST api/<CharacterActionsController>
     [HttpPost("StartGathering")]
     public async Task<ActionResult<bool>> StartGathering([FromBody] StartGatheringActionRequest request)
     {
 
-        return await Mediator.Send(new StartCharacterActionCommand(CurrentCharacterGuid, CharacterActionType.Gathering, request.GatheringActionDetails));
+        return await Mediator.Send(new StartGatheringActionCommand(CurrentCharacterGuid, CharacterActionType.Gathering, request.GatheringActionDetails));
     }
 
     [HttpDelete]
