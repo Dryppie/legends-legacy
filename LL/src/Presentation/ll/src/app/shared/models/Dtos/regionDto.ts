@@ -1,11 +1,12 @@
-import { Creature } from "./creature";
+import { Creature } from './creature';
 
-export interface RegionDto {
+export interface Region {
   name: string;
   areas: Area[];
 }
 
 export interface Area {
   name: string;
-  creatures: Creature[];
+  creatures: string[];
+  // creatures: Creature[];
 }

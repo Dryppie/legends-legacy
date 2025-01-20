@@ -5,6 +5,7 @@ import {
   Subscription,
   catchError,
   expand,
+  finalize,
   mergeMap,
   of,
   timer,
@@ -30,6 +31,9 @@ export class CharacterActionsService {
   );
   public currentAction$ = this.currentActionSubject.asObservable();
 
+  private loadingStartCombatSubject = new BehaviorSubject<boolean>(false);
+  public loadingStartCombat$ = this.loadingStartCombatSubject.asObservable();
+
   private pollingSubscription: Subscription | null = null;
 
   constructor(
@@ -53,6 +57,8 @@ export class CharacterActionsService {
 
   startCombatAction(startCombatActionRequest: StartCombatActionRequest): void {
     this.setCAT(CharacterActionType.Combat);
+    this.loadingStartCombatSubject.next(true);
+
     this.apiService
       .post('CharacterActions/StartCombat', startCombatActionRequest)
       .pipe(

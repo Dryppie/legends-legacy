@@ -12,7 +12,7 @@ export interface CharacterActionDto {
 }
 
 export interface StartCombatActionRequest {
-  combatActionDetails: CombatActionDetails;
+  areaName: string;
 }
 
 export interface StartGatheringActionRequest {

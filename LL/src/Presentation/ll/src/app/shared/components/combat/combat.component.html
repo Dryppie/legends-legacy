@@ -1,11 +1,26 @@
 <div
-  *ngIf="!displayCombat"
+  *ngIf="!displayCombat && !isLoading"
   class="flex h-full w-full items-center justify-center bg-black text-center text-primary"
 >
   You are already in combat. Next fight in:
   <app-countdown [targetDate]="nextCombatIn!"></app-countdown>
 </div>
-<div *ngIf="displayCombat" class="flex h-full flex-col gap-4 pr-4 sm:pr-6">
+
+<div
+  *ngIf="isLoading"
+  class="flex h-full w-full flex-col items-center justify-center bg-black text-center text-primary"
+>
+  <app-combat-countdown
+    [startValue]="3"
+    (countdownComplete)="onCountdownComplete()"
+  >
+  </app-combat-countdown>
+</div>
+
+<div
+  *ngIf="displayCombat && !isLoading"
+  class="flex h-full flex-col gap-4 pr-4 sm:pr-6"
+>
   <div
     class="flex h-16 w-full flex-col items-center justify-between gap-4 sm:flex-row"
   >

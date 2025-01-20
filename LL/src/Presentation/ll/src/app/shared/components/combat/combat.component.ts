@@ -12,6 +12,7 @@ import {
 import { Subscription } from 'rxjs';
 import { CountdownComponent } from '../countdown/countdown.component';
 import { CharacterActionsService } from '../../../core/services/character-actions/character-actions.service';
+import { CombatCountdownComponent } from './combat-countdown/combat-countdown.component';
 
 @Component({
   selector: 'app-combat',
@@ -23,19 +24,25 @@ import { CharacterActionsService } from '../../../core/services/character-action
     NgIf,
     NgStyle,
     CountdownComponent,
+    CombatCountdownComponent,
   ],
   templateUrl: './combat.component.html',
   styleUrl: './combat.component.css',
 })
 export class CombatComponent implements OnInit, OnDestroy {
   @Input() combatEvents: CombatEvent[] = [];
+  nextCombatIn: Date | null = null;
   StopCombatButtonText: string = 'Stop Combat';
+
   playerCharacters: CombatEntityDto[] = [];
   enemyCharacters: CombatEntityDto[] = [];
+
   subscriptions: Subscription = new Subscription();
-  nextCombatIn: Date | null = null;
+
   isCombatActive = false;
   displayCombat = false;
+  isDataFetched = false;
+  isLoading = false;
 
   constructor(
     private combatService: CombatService,
@@ -43,10 +50,19 @@ export class CombatComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    const combatIsLoadingSub =
+      this.characterActionService.loadingStartCombat$.subscribe((isLoading) => {
+        this.isLoading = isLoading;
+        console.log('Start loading after starting combat');
+        console.log(isLoading);
+      });
+    this.subscriptions.add(combatIsLoadingSub);
+
     const nextCombatSub = this.combatService.nextCombat$.subscribe((time) => {
       if (time) {
         this.nextCombatIn = time;
         this.displayCombat = false;
+        this.isLoading = false;
       }
     });
     this.subscriptions.add(nextCombatSub);
@@ -54,8 +70,14 @@ export class CombatComponent implements OnInit, OnDestroy {
     const combatResultSub = this.combatService.combatResult$.subscribe(
       (combatResult) => {
         if (combatResult) {
-          this.handleCombatSetup(combatResult);
+          this.isDataFetched = true;
+          if (!this.isLoading) {
+            this.startActualCombat(combatResult);
+          } else {
+            this.handleCombatSetup(combatResult);
+          }
           this.displayCombat = true;
+          this.isLoading = false;
         }
       },
     );
@@ -83,6 +105,30 @@ export class CombatComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscriptions.unsubscribe();
+  }
+
+  startCombat() {
+    if (this.isLoading) return;
+    this.isLoading = true;
+  }
+
+  onCountdownComplete() {
+    if (
+      this.isDataFetched &&
+      this.playerCharacters.length > 0 &&
+      this.enemyCharacters.length > 0
+    ) {
+      this.startActualCombat();
+      this.isLoading = false;
+      console.log('starting actual combat after countdown completed');
+    }
+  }
+
+  private startActualCombat(combatResult?: CombatResultDto) {
+    if (combatResult) {
+      this.handleCombatSetup(combatResult);
+    }
+    this.displayCombat = true;
   }
 
   stopCombat() {

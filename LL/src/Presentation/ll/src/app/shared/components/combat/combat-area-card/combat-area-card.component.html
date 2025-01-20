@@ -1,14 +1,14 @@
 <div
   class="relative flex h-64 w-full overflow-visible rounded-md bg-cover sm:size-64"
   style="
-    background-image: url(&quot;cards/tree.png&quot;);
+    background-image: url(&quot;cards/combatArea.png&quot;);
     box-shadow: 0 6px 6px -3px rgba(0, 0, 0, 0.4);
   "
 >
   <div class="absolute inset-0 p-3">
     <img src="icons/Info.svg" class="size-6" />
   </div>
-  <div class="relative flex h-full w-full items-end">
+  <div class="relative flex w-full items-end">
     <div
       class="border-gradient absolute w-full rounded-md opacity-70"
       style="height: calc(6rem + 2px); bottom: -1px"
@@ -24,7 +24,7 @@
     <div class="relative flex w-full items-end justify-between p-3 text-white">
       <div class="">
         <div class="flex items-center justify-between">
-          <h3>{{ gatheringNodeName }}</h3>
+          <h3>{{ area.name }}</h3>
         </div>
         <small class="text-secondary">Req. LV: 1</small>
         <div class="mt-2 flex items-center">
@@ -41,13 +41,11 @@
           *ngIf="specificCard()"
           class="w-[64px]"
           text="Cancel"
-          (click)="cancelCharacterAction()"
         ></app-mini-button>
         <app-mini-button
-          *ngIf="!currentAction"
           class="w-[64px]"
-          text="Cut"
-          (click)="startGatheringAction()"
+          text="Battle"
+          (click)="startCombat()"
         ></app-mini-button>
       </div>
     </div>
