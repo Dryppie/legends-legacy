@@ -48,7 +48,6 @@ export class RegionComponent implements OnInit {
   getRegionDetails(id: string) {
     this.regionService.getRegionById(id).subscribe((data: any) => {
       this.region = data as Region;
-      console.log(this.region);
     });
   }
 }

@@ -57,7 +57,7 @@ function getCharacterSidebar(): Tab[] {
         {
           id: 'character-overview',
           route: 'character',
-          icon: 'path/to/quest-icon.png',
+          icon: 'character/achievements',
           title: 'Character Overview',
           description: 'Statistics and Equipment',
           rewards: [
@@ -68,7 +68,7 @@ function getCharacterSidebar(): Tab[] {
         {
           id: 'inventory',
           route: 'character',
-          icon: 'path/to/quest-icon.png',
+          icon: 'character/inventory',
           title: 'Inventory',
           description: '60/100',
           rewards: [
@@ -79,7 +79,7 @@ function getCharacterSidebar(): Tab[] {
         {
           id: 'essences',
           route: 'character',
-          icon: 'path/to/essence-icon.png',
+          icon: 'character/essences',
           title: 'Essences',
           description: 'View your essences',
         },
@@ -177,7 +177,7 @@ function getProfessionSidebar(): Tab[] {
         {
           id: 'woodcutting',
           route: 'professions',
-          icon: 'path/to/dynamic-quest-icon.png',
+          icon: 'professions/woodcutting',
           title: 'Woodcutting',
           description: 'LV 0/100',
           rewards: [

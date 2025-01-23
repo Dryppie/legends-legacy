@@ -7,7 +7,6 @@ import { InventoryService } from '../../../../core/services/inventory/inventory.
 import { InventoryDto } from '../../../../shared/models/Dtos/inventoryDto';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
-import { EssenceItem } from '../../../../shared/models/item';
 
 @Component({
   selector: 'app-inventory',
@@ -55,9 +54,6 @@ export class InventoryComponent implements OnInit {
       next: (inventory: InventoryDto) => {
         // Update the component's items
         this.items = inventory.inventoryItems;
-        let test = this.items[0];
-        let test1 = test.item;
-        console.log(test1 as EssenceItem);
         // Adjust the number of empty slots based on the items
         this.emptySlots = Array(180 - this.items.length).fill(null);
       },

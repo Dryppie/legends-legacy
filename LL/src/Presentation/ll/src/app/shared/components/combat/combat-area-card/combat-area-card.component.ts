@@ -1,17 +1,14 @@
 import { Component, Input } from '@angular/core';
 import { Area } from '../../../models/Dtos/regionDto';
 import { MiniButtonComponent } from '../../mini-button/mini-button.component';
-import {
-  CharacterActionDto,
-  CombatActionDetails,
-  StartCombatActionRequest,
-} from '../../../../shared/models/Dtos/characterActionDto';
+import { StartCombatActionRequest } from '../../../../shared/models/Dtos/characterActionDto';
 import { CharacterActionsService } from '../../../../core/services/character-actions/character-actions.service';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-combat-area-card',
   standalone: true,
-  imports: [MiniButtonComponent],
+  imports: [MiniButtonComponent, NgIf],
   templateUrl: './combat-area-card.component.html',
   styleUrl: './combat-area-card.component.css',
 })

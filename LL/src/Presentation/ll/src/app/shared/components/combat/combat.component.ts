@@ -53,8 +53,6 @@ export class CombatComponent implements OnInit, OnDestroy {
     const combatIsLoadingSub =
       this.characterActionService.loadingStartCombat$.subscribe((isLoading) => {
         this.isLoading = isLoading;
-        console.log('Start loading after starting combat');
-        console.log(isLoading);
       });
     this.subscriptions.add(combatIsLoadingSub);
 

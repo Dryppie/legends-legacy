@@ -14,8 +14,16 @@ public class CharacterActionRepository : ICharacterActionRepository
 
     public async Task<bool> StartCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
     {
-        await _context.CharacterActions.AddAsync(characterAction);
-        await _context.SaveChangesAsync(cancellationToken: cancellationToken);
+        bool alreadyExists = await _context.CharacterActions
+        .AnyAsync(a => a.CharacterId == characterAction.CharacterId, cancellationToken);
+
+        // If it doesn't exist, we add it
+        if (!alreadyExists)
+        {
+            await _context.CharacterActions.AddAsync(characterAction, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
         return true;
     }
 

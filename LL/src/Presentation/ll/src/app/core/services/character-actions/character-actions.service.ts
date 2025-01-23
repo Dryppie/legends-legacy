@@ -5,7 +5,6 @@ import {
   Subscription,
   catchError,
   expand,
-  finalize,
   mergeMap,
   of,
   timer,

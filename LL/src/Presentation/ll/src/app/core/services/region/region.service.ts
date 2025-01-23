@@ -10,7 +10,7 @@ export class RegionService {
   constructor(private apiService: ApiService) {}
 
   public getRegionById(url: string): Observable<Region> {
-    let region: Region = { name: '', areas: [] };
+    let region: Region = { name: '', areas: [], dungeons: [], raids: [] };
     if (url.includes('shenic')) {
       region = this.getShenicRegion();
     }
@@ -57,23 +57,29 @@ export class RegionService {
             'Large Rat',
           ],
         },
-        {
-          name: 'Plains',
-          creatures: [],
-        },
-        {
-          name: 'Mountains',
-          creatures: [],
-        },
-        {
-          name: 'Swamp',
-          creatures: [],
-        },
-        {
-          name: 'Desert',
-          creatures: [],
-        },
+        // {
+        //   name: 'Blood Grove',
+        //   creatures: [],
+        // },
+        // {
+        //   name: 'Crystal Creek',
+        //   creatures: [],
+        // },
+        // {
+        //   name: 'Oak Thicket',
+        //   creatures: [],
+        // },
+        // {
+        //   name: 'Old Forest',
+        //   creatures: [],
+        // },
+        // {
+        //   name: 'Twilight Clearing',
+        //   creatures: [],
+        // },
       ],
+      dungeons: [],
+      raids: [],
     };
 
     return shenicRegion;
