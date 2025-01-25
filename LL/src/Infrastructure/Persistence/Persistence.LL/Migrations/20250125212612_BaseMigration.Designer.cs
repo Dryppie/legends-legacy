@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250116180029_BaseMigration")]
+    [Migration("20250125212612_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -144,9 +144,8 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.GatheringNodes.GatheringNode", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("GatheringType")
                         .HasColumnType("int");
@@ -250,11 +249,8 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -625,8 +621,8 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Entities.Entity");
 
-                    b.Property<int?>("AreaId")
-                        .HasColumnType("int");
+                    b.Property<string>("AreaId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("ExperienceReward")
                         .HasColumnType("int");

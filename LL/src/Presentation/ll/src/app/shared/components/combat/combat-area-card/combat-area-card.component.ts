@@ -25,7 +25,7 @@ export class CombatAreaCardComponent {
 
   startCombat() {
     const startCharacterActionRequest: StartCombatActionRequest = {
-      areaName: this.area.name,
+      areaId: this.area.id,
     };
     this.characterActionService.startCombatAction(startCharacterActionRequest);
   }

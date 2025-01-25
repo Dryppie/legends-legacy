@@ -76,13 +76,13 @@ function getCharacterSidebar(): Tab[] {
             { icon: 'path/to/coin-icon.png', amount: 1 },
           ],
         },
-        {
-          id: 'essences',
-          route: 'character',
-          icon: 'character/essences',
-          title: 'Essences',
-          description: 'View your essences',
-        },
+        // {
+        //   id: 'essences',
+        //   route: 'character',
+        //   icon: 'character/essences',
+        //   title: 'Essences',
+        //   description: 'View your essences',
+        // },
         // {
         //   id: '4',
         //   route: 'character/achievements',
@@ -118,7 +118,7 @@ function getCharacterSidebar(): Tab[] {
 function getCitySidebar(): Tab[] {
   return [
     {
-      label: 'World',
+      label: 'City',
       items: [
         {
           id: 'temple',
@@ -198,7 +198,7 @@ function getWorldSidebar(): Tab[] {
         {
           id: '1',
           route: 'world',
-          icon: 'path/to/quest-icon.png',
+          icon: 'world/Quest',
           title: 'Shenic',
           description: 'The Shenic Region',
           rewards: [

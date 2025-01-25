@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { WoodcuttingComponent } from './woodcutting.component';
+import { GatheringComponent } from './gathering.component';
 
-describe('WoodcuttingComponent', () => {
-  let component: WoodcuttingComponent;
-  let fixture: ComponentFixture<WoodcuttingComponent>;
+describe('GatheringComponent', () => {
+  let component: GatheringComponent;
+  let fixture: ComponentFixture<GatheringComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [WoodcuttingComponent]
+      imports: [GatheringComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(WoodcuttingComponent);
+    fixture = TestBed.createComponent(GatheringComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

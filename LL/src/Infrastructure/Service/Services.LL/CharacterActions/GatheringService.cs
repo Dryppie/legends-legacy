@@ -1,6 +1,5 @@
 ﻿using Application.Interfaces.Services.LL;
 using Domain.Models.Inventories;
-using Domain.Models.Items;
 using Services.LL.Interfaces;
 
 namespace Services.LL.CharacterActions;

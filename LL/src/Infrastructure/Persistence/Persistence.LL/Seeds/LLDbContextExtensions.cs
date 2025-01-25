@@ -254,6 +254,7 @@ public static class LLDbContextExtensions
                 {
                     new Area
                     {
+                        Id = "region_01_area_01", // region, [area, dungeon, raid, or rift], area
                         Name = "Lumo Ruins",
                         Creatures = lumoRuinsCreatures
                     }
@@ -378,19 +379,17 @@ public static class LLDbContextExtensions
         // Add items to context
         await context.Items.AddRangeAsync(treeLog, nest, oakLog, birchLog, rareHerb);
 
-        var nestLootTableItem = new LootTableItem { ItemId = nest.Id, Weight = 1 };
-
         // Create LootTableRarities for Tree
         var treeLootTableLegendary = new LootTable
         {
             Id = Guid.NewGuid(),
-            Entries = [nestLootTableItem],
+            Entries = [new LootTableItem { Id = Guid.NewGuid(), ItemId = nest.Id, Weight = 1 }],
             Weight = 1 // 0.01% chance to drop nest. 144%~ chance in 24 hours.
         };
         var treeLootTableCommon = new LootTable
         {
             Id = Guid.NewGuid(),
-            Entries = [new LootTableItem { ItemId = treeLog.Id, Weight = 20 }],
+            Entries = [new LootTableItem { Id = Guid.NewGuid(), ItemId = treeLog.Id, Weight = 20 }],
             Weight = 80 // 16%
         };
         var treeLootTable = new LootTable
@@ -403,13 +402,13 @@ public static class LLDbContextExtensions
         var oakLootTableLegendary = new LootTable
         {
             Id = Guid.NewGuid(),
-            Entries = [nestLootTableItem],
+            Entries = [new LootTableItem { Id = Guid.NewGuid(), ItemId = nest.Id, Weight = 1 }],
             Weight = 2 // 0.02% chance to drop nest. 144%~ chance in 12 hours.
         };
         var oakLootTableCommon = new LootTable
         {
             Id = Guid.NewGuid(),
-            Entries = [new LootTableItem { ItemId = oakLog.Id, Weight = 20 }],
+            Entries = [new LootTableItem { Id = Guid.NewGuid(), ItemId = oakLog.Id, Weight = 20 }],
             Weight = 80 // 16%
         };
         var oakLootTable = new LootTable
@@ -422,19 +421,19 @@ public static class LLDbContextExtensions
         var birchLootTableLegendary = new LootTable
         {
             Id = Guid.NewGuid(),
-            Entries = [nestLootTableItem],
+            Entries = [new LootTableItem { Id = Guid.NewGuid(), ItemId = nest.Id, Weight = 1 }],
             Weight = 3 // 0.04% chance to drop nest. 144%~ chance in 9 hours.
         };
         var birchLootTableRare = new LootTable
         {
             Id = Guid.NewGuid(),
-            Entries = [new LootTableItem { ItemId = rareHerb.Id, Weight = 30 }],
+            Entries = [new LootTableItem { Id = Guid.NewGuid(), ItemId = rareHerb.Id, Weight = 30 }],
             Weight = 15 // 4.5%
         };
         var birchLootTableCommon = new LootTable
         {
             Id = Guid.NewGuid(),
-            Entries = [new LootTableItem { ItemId = birchLog.Id, Weight = 20 }],
+            Entries = [new LootTableItem { Id = Guid.NewGuid(), ItemId = birchLog.Id, Weight = 20 }],
             Weight = 80 // 16%
         };
         var birchLootTable = new LootTable
@@ -446,9 +445,9 @@ public static class LLDbContextExtensions
         // Add LootTables to context
         await context.LootTables.AddRangeAsync(treeLootTable, treeLootTableCommon, treeLootTableLegendary, oakLootTable, oakLootTableCommon, oakLootTableLegendary, birchLootTable, birchLootTableCommon, birchLootTableRare, birchLootTableLegendary);
 
-        var treeGatheringNode = new GatheringNode { Id = Guid.NewGuid(), Name = "Tree", GatheringType = GatheringType.Woodcutting, LootTableId = treeLootTable.Id };
-        var oakGatheringNode = new GatheringNode { Id = Guid.NewGuid(), Name = "Oak", GatheringType = GatheringType.Woodcutting, LootTableId = oakLootTable.Id };
-        var birchGatheringNode = new GatheringNode { Id = Guid.NewGuid(), Name = "Birch", GatheringType = GatheringType.Woodcutting, LootTableId = birchLootTable.Id };
+        var treeGatheringNode = new GatheringNode { Id = "woodcutting_tree", Name = "Tree", GatheringType = GatheringType.Woodcutting, LootTableId = treeLootTable.Id };
+        var oakGatheringNode = new GatheringNode { Id = "woodcutting_oak", Name = "Oak", GatheringType = GatheringType.Woodcutting, LootTableId = oakLootTable.Id };
+        var birchGatheringNode = new GatheringNode { Id = "woodcutting_birch", Name = "Birch", GatheringType = GatheringType.Woodcutting, LootTableId = birchLootTable.Id };
 
         await context.GatheringNodes.AddRangeAsync(treeGatheringNode, oakGatheringNode, birchGatheringNode);
     }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from '../api/api.service';
-import { catchError, map, Observable, of, throwError } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Region } from '../../../shared/models/Dtos/regionDto';
 
 @Injectable({
@@ -9,38 +9,20 @@ import { Region } from '../../../shared/models/Dtos/regionDto';
 export class RegionService {
   constructor(private apiService: ApiService) {}
 
-  public getRegionById(url: string): Observable<Region> {
+  public getRegionById(id: string): Observable<Region> {
     let region: Region = { name: '', areas: [], dungeons: [], raids: [] };
-    if (url.includes('shenic')) {
+    if (id.includes('shenic')) {
       region = this.getShenicRegion();
     }
-    // else if (url.includes('city')) {
+    // else if (id.includes('city')) {
     //   region = getCitySidebar();
-    // } else if (url.includes('professions')) {
+    // } else if (id.includes('professions')) {
     //   region = getProfessionSidebar();
-    // } else if (url.includes('world')) {
+    // } else if (id.includes('world')) {
     //   region = getWorldSidebar();
     // }
 
     return of(region);
-  }
-
-  public getRegionById1(id: string): Observable<any> {
-    return this.apiService.get(`region/${id}`).pipe(
-      map((region) => {
-        return region;
-      }),
-
-      catchError(() => {
-        // this.toastService.showToast(
-        //   'Login Failed',
-        //   'Wrong email or password',
-        //   'error',
-        //   't',
-        // );
-        return throwError(() => new Error(`Failed to get region: ${id}`));
-      }),
-    );
   }
 
   private getShenicRegion(): Region {
@@ -48,6 +30,7 @@ export class RegionService {
       name: 'Shenic',
       areas: [
         {
+          id: 'region_01_area_01',
           name: 'Lumo Ruins',
           creatures: [
             'Goblin',

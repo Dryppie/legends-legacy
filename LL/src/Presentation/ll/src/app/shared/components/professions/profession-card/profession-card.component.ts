@@ -18,8 +18,8 @@ import { GatheringType } from '../../../models/enums/gatheringType';
   styleUrl: './profession-card.component.css',
 })
 export class ProfessionCardComponent {
+  @Input() gatheringNodeId!: string;
   @Input() gatheringNodeName!: string;
-  @Input() gatheringNodeLootTableId!: string;
   currentAction: CharacterActionDto | null = null;
   private subscription: Subscription = new Subscription();
 
@@ -38,18 +38,15 @@ export class ProfessionCardComponent {
   }
 
   specificCard(): boolean {
-    return this.currentAction?.lootTableId == this.gatheringNodeLootTableId;
+    return (
+      this.currentAction?.gatheringActionDetails?.name == this.gatheringNodeId
+    );
   }
 
   startGatheringAction() {
-    const gatheringActionDetails: GatheringActionDetails = {
-      name: this.gatheringNodeName,
-      gatheringType: GatheringType.Woodcutting,
-      lootTableId: this.gatheringNodeLootTableId,
-    };
-    console.log(this.gatheringNodeLootTableId);
     const startGatheringActionRequest: StartGatheringActionRequest = {
-      gatheringActionDetails: gatheringActionDetails,
+      gatheringNodeId: this.gatheringNodeId,
+      gatheringType: GatheringType.Woodcutting,
     };
     this.characterActionsService.startGatheringAction(
       startGatheringActionRequest,

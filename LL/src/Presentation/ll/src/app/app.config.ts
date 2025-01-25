@@ -13,7 +13,7 @@ import {
 } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { AuthService } from './core/services/auth/auth.service';
-import { catchError, firstValueFrom, of } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
 export function initializeApp(authService: AuthService) {
   return () =>

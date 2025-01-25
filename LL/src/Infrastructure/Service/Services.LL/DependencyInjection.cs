@@ -8,6 +8,7 @@ using Services.LL.CharacterActions;
 using Services.LL.Entities;
 using Services.LL.Entities.Characters;
 using Services.LL.Entities.Creatures;
+using Services.LL.Gatherings;
 using Services.LL.Interfaces;
 using Services.LL.Inventories;
 using Services.LL.Loots;
@@ -31,6 +32,8 @@ public static class DependencyInjection
         services.AddScoped<IEntityService, EntityService>();
 
         services.AddScoped<IEssenceService, EssenceService>();
+
+        services.AddScoped<IGatheringNodeService, GatheringNodeService>();
 
         services.AddScoped<IGatheringService, GatheringService>();
         

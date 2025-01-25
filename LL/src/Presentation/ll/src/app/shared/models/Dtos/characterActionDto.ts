@@ -12,11 +12,12 @@ export interface CharacterActionDto {
 }
 
 export interface StartCombatActionRequest {
-  areaName: string;
+  areaId: string;
 }
 
 export interface StartGatheringActionRequest {
-  gatheringActionDetails: GatheringActionDetails;
+  gatheringNodeId: string;
+  gatheringType: GatheringType;
 }
 
 export interface CombatActionDetails {
@@ -27,5 +28,4 @@ export interface CombatActionDetails {
 export interface GatheringActionDetails {
   name: string;
   gatheringType: GatheringType;
-  lootTableId: string;
 }

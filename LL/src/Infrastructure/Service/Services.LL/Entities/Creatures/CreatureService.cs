@@ -9,8 +9,8 @@ public class CreatureService : ICreatureService
     {
         _creatureRepository = creatureRepository;
     }
-    public async Task<List<Guid>> GetCreatureIdsByArea(string areaName, CancellationToken cancellationToken)
+    public async Task<List<Guid>> GetCreatureIdsByArea(string areaId, CancellationToken cancellationToken)
     {
-        return await _creatureRepository.GetCreatureIdsByArea(areaName, cancellationToken);
+        return await _creatureRepository.GetCreatureIdsByArea(areaId, cancellationToken);
     }
 }

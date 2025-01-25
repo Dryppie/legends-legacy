@@ -4,6 +4,7 @@ import { ToastComponent } from './shared/components/toast/toast.component';
 import { ToastService } from './core/services/toast/toast.service';
 import { CharacterActionsService } from './core/services/character-actions/character-actions.service';
 import { ModalContainerComponent } from './shared/components/modal-container/modal-container.component';
+import { AuthService } from './core/services/auth/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -17,12 +18,17 @@ export class AppComponent {
   @ViewChild('toast') toastComponent!: ToastComponent;
 
   constructor(
-    private toastService: ToastService,
+    private authService: AuthService,
     private characterActionsService: CharacterActionsService,
+    private toastService: ToastService,
   ) {}
 
   ngOnInit(): void {
-    this.characterActionsService.init();
+    this.authService.isAuthenticated$.subscribe((isAuthenticated) => {
+      if (isAuthenticated) {
+        this.characterActionsService.init();
+      }
+    });
   }
 
   ngOnDestroy(): void {}

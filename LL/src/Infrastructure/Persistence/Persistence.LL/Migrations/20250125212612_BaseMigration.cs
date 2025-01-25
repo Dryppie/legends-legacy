@@ -267,8 +267,7 @@ namespace Persistence.LL.Migrations
                 name: "Areas",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     RegionId = table.Column<int>(type: "int", nullable: true)
                 },
@@ -322,7 +321,7 @@ namespace Persistence.LL.Migrations
                     Gold = table.Column<int>(type: "int", nullable: true),
                     LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     ExperienceReward = table.Column<int>(type: "int", nullable: true),
-                    AreaId = table.Column<int>(type: "int", nullable: true)
+                    AreaId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -350,7 +349,7 @@ namespace Persistence.LL.Migrations
                 name: "GatheringNodes",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     GatheringType = table.Column<int>(type: "int", nullable: false),
                     LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)

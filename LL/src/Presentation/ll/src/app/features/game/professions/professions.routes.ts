@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { ProfessionsComponent } from './professions.component';
-import { WoodcuttingComponent } from './woodcutting/woodcutting.component';
+import { GatheringComponent } from './gathering/gathering.component';
 
 export const PROFESSIONS_ROUTES: Routes = [
   {
@@ -13,8 +13,8 @@ export const PROFESSIONS_ROUTES: Routes = [
         pathMatch: 'full',
       },
       {
-        path: 'woodcutting',
-        component: WoodcuttingComponent,
+        path: ':id',
+        component: GatheringComponent,
       },
     ],
   },

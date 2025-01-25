@@ -3,7 +3,7 @@
 namespace Domain.Models.GatheringNodes;
 public class GatheringNode
 {
-    public Guid Id { get; set; }
+    public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public GatheringType GatheringType { get; set; }
     public Guid LootTableId { get; set; }

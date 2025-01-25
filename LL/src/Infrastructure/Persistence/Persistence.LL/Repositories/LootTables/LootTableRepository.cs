@@ -25,7 +25,7 @@ public class LootTableRepository : ILootTableRepository
         return lootTable;
     }
 
-    public async Task<LootTable> GetGatheringNodeLootTableAsync(Guid gatheringNodeId, CancellationToken cancellationToken)
+    public async Task<LootTable> GetGatheringNodeLootTableAsync(string gatheringNodeId, CancellationToken cancellationToken)
     {
         var gatheringLootTable = await _context.GatheringNodes
             .Where(gn => gn.Id == gatheringNodeId)

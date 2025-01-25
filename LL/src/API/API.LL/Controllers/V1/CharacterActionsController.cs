@@ -5,6 +5,7 @@ using Application.UseCases.CharacterActions.Dtos;
 using Application.UseCases.CharacterActions.Queries.GetCharacterAction;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
+using Domain.Models.GatheringNodes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,26 +13,26 @@ namespace API.LL.Controllers.V1;
 [Authorize]
 public class CharacterActionsController : BaseController
 {
-    public record StartGatheringActionRequest(GatheringActionDetails GatheringActionDetails);
+    public record StartGatheringActionRequest(string GatheringNodeId, GatheringType GatheringType);
+    public record StartCombatActionRequest(string AreaId);
     [HttpGet]
     public async Task<ActionResult<CharacterActionDto?>> Get()
     {
         return await Mediator.Send(new GetCharacterActionQuery(CurrentCharacterGuid));
     }
-    public record StartCombatActionRequest(string AreaName);
     // POST api/<CharacterActionsController>
     [HttpPost("StartCombat")]
     public async Task<ActionResult<bool>> StartCombat([FromBody] StartCombatActionRequest request)
     {
 
-        return await Mediator.Send(new StartCombatActionCommand(CurrentCharacterGuid, CharacterActionType.Combat, request.AreaName));
+        return await Mediator.Send(new StartCombatActionCommand(CurrentCharacterGuid, CharacterActionType.Combat, request.AreaId));
     }
     // POST api/<CharacterActionsController>
     [HttpPost("StartGathering")]
     public async Task<ActionResult<bool>> StartGathering([FromBody] StartGatheringActionRequest request)
     {
 
-        return await Mediator.Send(new StartGatheringActionCommand(CurrentCharacterGuid, CharacterActionType.Gathering, request.GatheringActionDetails));
+        return await Mediator.Send(new StartGatheringActionCommand(CurrentCharacterGuid, CharacterActionType.Gathering, request.GatheringNodeId, request.GatheringType));
     }
 
     [HttpDelete]

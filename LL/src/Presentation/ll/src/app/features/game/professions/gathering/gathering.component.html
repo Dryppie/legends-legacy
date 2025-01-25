@@ -9,8 +9,8 @@
   >
     <div *ngFor="let gatheringNode of gatheringNodes" class="">
       <app-profession-card
+        [gatheringNodeId]="gatheringNode.id"
         [gatheringNodeName]="gatheringNode.name"
-        [gatheringNodeLootTableId]="gatheringNode.lootTableId"
       ></app-profession-card>
     </div>
   </div>
