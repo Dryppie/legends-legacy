@@ -1,4 +1,4 @@
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import {
   Component,
   EventEmitter,
@@ -7,7 +7,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { SidebarItemComponent } from './sidebar-item/sidebar-item.component';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { SidebarItem, Tab } from '../../../shared/models/sidebar-item';
 import { SidebarService } from '../../../core/services/sidebar/sidebar.service';
 import { TabComponent } from '../../../shared/components/tab/tab.component';
@@ -22,15 +22,7 @@ import { TabComponent } from '../../../shared/components/tab/tab.component';
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [
-    NgFor,
-    NgIf,
-    NgClass,
-    SidebarItemComponent,
-    RouterLink,
-    RouterLinkActive,
-    TabComponent,
-  ],
+  imports: [NgFor, NgIf, SidebarItemComponent, RouterLink, TabComponent],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.css',
 })

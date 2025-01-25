@@ -59,7 +59,7 @@ function getCharacterSidebar(): Tab[] {
           route: 'character',
           icon: 'character/achievements',
           title: 'Character Overview',
-          description: 'Statistics and Equipment',
+          description: 'Statistics and equipment',
           rewards: [
             { icon: 'path/to/fire-icon.png', amount: 2 },
             { icon: 'path/to/coin-icon.png', amount: 1 },
@@ -70,7 +70,7 @@ function getCharacterSidebar(): Tab[] {
           route: 'character',
           icon: 'character/inventory',
           title: 'Inventory',
-          description: '60/100',
+          description: 'Items, gear, misc',
           rewards: [
             { icon: 'path/to/fire-icon.png', amount: 2 },
             { icon: 'path/to/coin-icon.png', amount: 1 },
