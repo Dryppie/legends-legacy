@@ -8,8 +8,8 @@ public class EssenceDto : IMapFrom<Essence>
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public AbilityDto PassiveAbility { get; set; } = null!;
-    public AbilityDto ActiveAbility { get; set; } = null!;
+    public AbilityDto Passive { get; set; } = null!;
+    public AbilityDto Active { get; set; } = null!;
 
     public void Mapping(Profile profile)
     {

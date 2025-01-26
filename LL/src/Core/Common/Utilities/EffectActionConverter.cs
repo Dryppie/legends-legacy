@@ -28,13 +28,13 @@ public class EffectActionConverter : JsonConverter<IEffectAction>
                     AttributeType? damageScalingAttribute = null;
                     float damageScalingMultiplier = 0;
 
-                    if (root.TryGetProperty("DamageScalingAttribute", out var damageScalingAttrElement))
+                    if (root.TryGetProperty("ScalingAttribute", out var damageScalingAttrElement))
                     {
                         var damageScalingAttrStr = damageScalingAttrElement.GetString()!;
                         damageScalingAttribute = Enum.Parse<AttributeType>(damageScalingAttrStr, ignoreCase: true);
                     }
 
-                    if (root.TryGetProperty("DamageScalingMultiplier", out var damageScalingMultElement))
+                    if (root.TryGetProperty("ScalingMultiplier", out var damageScalingMultElement))
                     {
                         damageScalingMultiplier = damageScalingMultElement.GetSingle();
                     }
@@ -47,15 +47,15 @@ public class EffectActionConverter : JsonConverter<IEffectAction>
                     AttributeType? healScalingAttribute = null;
                     float healScalingMultiplier = 0;
 
-                    if (root.TryGetProperty("DamageScalingAttribute", out var healScalingAttrElement))
+                    if (root.TryGetProperty("ScalingAttribute", out var healScalingAttrElement))
                     {
                         var healScalingAttrStr = healScalingAttrElement.GetString()!;
-                        damageScalingAttribute = Enum.Parse<AttributeType>(healScalingAttrStr, ignoreCase: true);
+                        healScalingAttribute = Enum.Parse<AttributeType>(healScalingAttrStr, ignoreCase: true);
                     }
 
-                    if (root.TryGetProperty("DamageScalingMultiplier", out var healScalingMultElement))
+                    if (root.TryGetProperty("ScalingMultiplier", out var healScalingMultElement))
                     {
-                        damageScalingMultiplier = healScalingMultElement.GetSingle();
+                        healScalingMultiplier = healScalingMultElement.GetSingle();
                     }
 
                     return new HealingAction(healAmount, healScalingAttribute, healScalingMultiplier);

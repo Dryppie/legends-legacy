@@ -13,5 +13,5 @@ public interface IAttributeRepository
     /// </summary>
     /// <param name="characterId"></param>
     /// <returns></returns>
-    public IEnumerable<EntityAttribute> GetAttributesByCharacterId(Guid characterId);
+    public Task<List<EntityAttribute>> GetAttributesByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken);
 }

@@ -117,7 +117,10 @@ public class EffectConverter : JsonConverter<EffectDefinition>
             damageType: DamageType.None
         );
 
-         if (root.TryGetProperty("Log", out var logProp))
+        if (root.TryGetProperty("Description", out var descriptionProp))
+            effect.Description = descriptionProp.GetString() ?? string.Empty;
+
+        if (root.TryGetProperty("Log", out var logProp))
             effect.Log = logProp.GetString() ?? string.Empty;
 
         return effect;

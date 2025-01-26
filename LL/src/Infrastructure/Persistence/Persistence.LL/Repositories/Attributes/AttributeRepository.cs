@@ -2,6 +2,7 @@
 using Common.Exceptions;
 using Domain.Helpers;
 using Domain.Models.Attributes;
+using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Attributes;
 public class AttributeRepository : IAttributeRepository
@@ -28,10 +29,10 @@ public class AttributeRepository : IAttributeRepository
     }
 
     // inheritdoc />
-    public IEnumerable<EntityAttribute> GetAttributesByCharacterId(Guid characterId)
+    public async Task<List<EntityAttribute>> GetAttributesByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        var attributes = _context.EntityAttributes.Where(a => a.EntityId.Equals(characterId)).ToList();
-        NotFoundException.ThrowIfNull(attributes, nameof(EntityAttribute), characterId);
+        var attributes = await _context.EntityAttributes.Where(a => a.EntityId.Equals(characterId)).ToListAsync(cancellationToken);
+        NotFoundException.ThrowIfNull(attributes.First(), nameof(EntityAttribute), characterId);
 
         return attributes;
     }

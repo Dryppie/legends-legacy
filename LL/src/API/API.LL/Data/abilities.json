@@ -4,7 +4,7 @@
     "Active": {
       "Id": "sneakAttack",
       "Name": "Sneak Attack",
-      "Description": "Stab the target in the back, dealing basic attack damage, and apply 30 bleed damage over 10 seconds.",
+      "Description": "Stab the target in the back, dealing {damage1} damage, and apply 15 bleed damage over 10 seconds.",
       "Type": "Active",
       "Cooldown": 90,
       "Cost": 12,
@@ -30,7 +30,7 @@
         {
           "Action": {
             "Type": "Damage",
-            "Amount": 1
+            "Amount": 3
           },
           "Duration": {
             "Type": "TimedDuration",
@@ -38,7 +38,7 @@
           },
           "Interval": {
             "Type": "Interval",
-            "Interval": 10
+            "Interval": 20
           },
           "Targeting": "SingleEnemy",
           "Trigger": "OnTickInterval",

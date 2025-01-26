@@ -59,7 +59,7 @@ export class AuthService {
   purgeAuth(): Observable<void> {
     this.currentCharacterSubject.next(null);
     this.isAuthenticatedSubject.next(false);
-    localStorage.removeItem(NamedStorageKeys.Session);
+    localStorage.clear();
 
     if (!location.href.includes('login')) {
       return from(this.router.navigateByUrl('/')).pipe(

@@ -8,14 +8,14 @@ public class DamageAction : IEffectAction
 {
     private readonly int _damageAmount;
     public int Magnitude => _damageAmount;
-    public AttributeType? DamageScalingAttribute { get; set; }
-    public float DamageScalingMultiplier { get; set; }
+    public AttributeType? ScalingAttribute { get; set; }
+    public float ScalingMultiplier { get; set; }
 
-    public DamageAction(int damageAmount, AttributeType? damageScalingAttribute, float damageScalingMultiplier)
+    public DamageAction(int damageAmount, AttributeType? scalingAttribute, float scalingMultiplier)
     {
         _damageAmount = damageAmount;
-        DamageScalingAttribute = damageScalingAttribute;
-        DamageScalingMultiplier = damageScalingMultiplier;
+        this.ScalingAttribute = scalingAttribute;
+        ScalingMultiplier = scalingMultiplier;
     }
 
     public void Execute(EffectContext context, ICombatContext combatContext)

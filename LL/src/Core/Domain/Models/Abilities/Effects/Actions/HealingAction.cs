@@ -8,14 +8,14 @@ public class HealingAction : IEffectAction
 {
     private readonly int _healAmount;
     public int Magnitude => _healAmount;
-    public AttributeType? HealScalingAttribute { get; set; }
-    public float HealScalingMultiplier { get; set; }
+    public AttributeType? scalingAttribute { get; set; }
+    public float scalingMultiplier { get; set; }
 
-    public HealingAction(int healAmount, AttributeType? healScalingAttribute, float healScalingMultiplier)
+    public HealingAction(int healAmount, AttributeType? scalingAttribute, float scalingMultiplier)
     {
         _healAmount = healAmount;
-        HealScalingAttribute = healScalingAttribute;
-        HealScalingMultiplier = healScalingMultiplier;
+        this.scalingAttribute = scalingAttribute;
+        this.scalingMultiplier = scalingMultiplier;
     }
 
     public void Execute(EffectContext context, ICombatContext combatContext)

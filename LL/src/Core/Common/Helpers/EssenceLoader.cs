@@ -45,12 +45,12 @@ public static class EssenceLoader
         }
     }
 
-    public static async Task LoadAbilitiesForEssence(Essence essence)
+    public static async Task<Essence> LoadAbilitiesForEssence(Essence essence)
     {
         // Deserialize JSON into a list of essences
         List<Essence> essences = await DeserializeEssences();
 
-        essence = essences.FirstOrDefault(e => e.Name.Equals(essence.Name))!;
+        return essences.FirstOrDefault(e => e.Name.Equals(essence.Name))!;
     }
 
     private static readonly Random _rand = new Random();

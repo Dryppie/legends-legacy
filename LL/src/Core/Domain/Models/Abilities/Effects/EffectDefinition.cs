@@ -37,7 +37,7 @@ public class EffectDefinition
     public AttackType AttackType { get; set; }
     public DamageType DamageType { get; set; }
     public List<EffectTag> EffectTags { get; set; } = [];
-
+    public string Description { get; set; } = string.Empty;
     public string Log { get; set; } = string.Empty;
 
     public EffectDefinition(IEffectAction action,

@@ -12,13 +12,6 @@ import { SidebarItem, Tab } from '../../../shared/models/sidebar-item';
 import { SidebarService } from '../../../core/services/sidebar/sidebar.service';
 import { TabComponent } from '../../../shared/components/tab/tab.component';
 
-// interface SidebarItem {
-//   title: string;
-//   icon: string;
-//   route: string; // If you have routes, add a 'route' property
-//   messageCount?: number; // Optional property for items like "Messages"
-// }
-
 @Component({
   selector: 'app-sidebar',
   standalone: true,

@@ -20,8 +20,8 @@ public class InventoryRepository : IInventoryRepository
     {
         var inventory = await _context.Inventories
             .Include(i => i.InventoryItems)
-            .ThenInclude(ii => ii.Item)// Include the related items
-            .ThenInclude(i => (i as EssenceItem).Essence)
+                .ThenInclude(ii => ii.Item)
+                    .ThenInclude(i => (i as EssenceItem).Essence)
             .FirstOrDefaultAsync(i => i.CharacterId == characterId, cancellationToken); // Assuming CharacterId is the foreign key
 
         NotFoundException.ThrowIfNull(inventory, nameof(inventory), characterId);
@@ -30,7 +30,7 @@ public class InventoryRepository : IInventoryRepository
         {
             if (inventoryItem.Item is EssenceItem essenceItem && essenceItem.Essence != null)
             {
-                await EssenceLoader.LoadAbilitiesForEssence(essenceItem.Essence);
+                essenceItem.Essence = await EssenceLoader.LoadAbilitiesForEssence(essenceItem.Essence);
             }
         }
 
