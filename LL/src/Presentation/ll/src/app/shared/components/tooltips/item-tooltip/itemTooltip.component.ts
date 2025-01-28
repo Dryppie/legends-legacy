@@ -20,25 +20,22 @@ export class ItemTooltipComponent {
   @Input() itemType!: ItemType;
   @Input() description!: string;
 
-  constructor(
-    private modalService: ModalService,
-    private essencesService: EssencesService,
-  ) {}
+  constructor(private modalService: ModalService) {}
 
   get rarityClasses() {
     switch (this.item.rarity) {
       case Rarity.Common:
-        return 'bg-gray-700 border border-gray-600';
+        return 'border border-gray-600';
       case Rarity.Rare:
-        return 'bg-green-700 border border-green-600';
+        return 'border border-blue-600';
       case Rarity.Unique:
-        return 'bg-blue-700 border border-blue-600';
+        return 'border border-yellow-400';
       case Rarity.Legendary:
-        return 'bg-purple-700 border border-purple-600';
+        return 'border border-orange-600';
       case Rarity.Legacy:
-        return 'bg-yellow-700 border border-yellow-600';
+        return 'border border-red-600';
       default:
-        return 'bg-gray-800';
+        return 'border-gray-600';
     }
   }
 
@@ -48,9 +45,5 @@ export class ItemTooltipComponent {
 
   openEssenceModal() {
     this.modalService.toggleEssenceModal((this.item as EssenceItem).essence); // Pass the essence from the Item to display all necessary info
-  }
-
-  equipEssence() {
-    this.essencesService.equipEssence('00000000-0000-0000-0000-000000000001');
   }
 }

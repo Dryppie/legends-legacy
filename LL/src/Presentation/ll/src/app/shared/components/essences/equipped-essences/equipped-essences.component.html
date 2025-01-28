@@ -7,7 +7,12 @@
       class="hover:bg-accent flex flex-col items-center rounded-md p-2 transition"
       *ngFor="let essence of essences"
     >
-      <p class="text-center font-bold text-primary">{{ essence.name }}</p>
+      <p
+        class="text-center font-bold text-primary hover:cursor-pointer"
+        (click)="openEssenceModal(essence)"
+      >
+        {{ essence.name }}
+      </p>
     </div>
   </div>
 </div>

@@ -1,6 +1,7 @@
 import { NgFor } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { Essence } from '../../../models/essence';
+import { ModalService } from '../../../../core/services/modal/modal.service';
 
 @Component({
   selector: 'app-equipped-essences',
@@ -11,4 +12,10 @@ import { Essence } from '../../../models/essence';
 })
 export class EquippedEssencesComponent {
   @Input() essences: Essence[] = [];
+
+  constructor(private modalService: ModalService) {}
+
+  openEssenceModal(essence: Essence) {
+    this.modalService.toggleEssenceModal(essence); // Pass the essence from the Item to display all necessary info
+  }
 }

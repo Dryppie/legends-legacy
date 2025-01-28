@@ -1,7 +1,10 @@
 ﻿using Application.Common.Interfaces;
 using Common.Exceptions;
+using Domain.Helpers;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
+using Domain.Models.Inventories;
+using Domain.Models.Items;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Entities.Characters;
@@ -85,10 +88,16 @@ public class CharacterRepository : ICharacterRepository
         var character = await _context.Characters
             .Include(c => c.EquippedEssences)
             .Include(c => c.BaseAttributes)
-            //.Include(c => c.RawAttributes)
-            //.ThenInclude(a => a.AttributeBase)
+        //.Include(c => c.RawAttributes)
+        //.ThenInclude(a => a.AttributeBase)
             .FirstOrDefaultAsync(c => c.Id.Equals(characterId));
+
         NotFoundException.ThrowIfNull(character, nameof(Character), characterId);
+
+        character.EquippedEssences = await Task.WhenAll(
+            character.EquippedEssences.Select(async essence =>
+                await EssenceLoader.LoadAbilitiesForEssence(essence))
+        );
 
         return character;
     }

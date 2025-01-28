@@ -12,7 +12,10 @@
     <!-- Tab Content -->
     <div *ngFor="let tab of tabs" class="overflow-auto">
       <div *ngIf="activeTab === tab.label" class="tab-content">
-        <div *ngFor="let item of tab.items" class="flex flex-col">
+        <div
+          *ngFor="let item of tab.items"
+          class="flex flex-col first:border-t first:border-gray"
+        >
           <app-sidebar-item
             (click)="toggleSidebar()"
             [item]="item"

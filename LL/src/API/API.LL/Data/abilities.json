@@ -289,7 +289,7 @@
     "Active": {
       "Id": "fireball_01",
       "Name": "Fireball",
-      "Description": "Hurls a fireball that deals damage over time.",
+      "Description": "Hurls a fireball that deals {damage1} damage on impact and applies a burn to the target.",
       "Type": "Active",
       "Cooldown": 120,
       "Cost": 7,
