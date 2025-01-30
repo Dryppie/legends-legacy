@@ -1,4 +1,5 @@
-﻿using Domain.Models.Combat;
+﻿using Domain.Models.Attributes;
+using Domain.Models.Combat;
 using Domain.Models.Damages;
 
 namespace Domain.Models.Abilities.Effects;
@@ -30,11 +31,15 @@ public class EffectContext
     /// This is being set in each EffectAction during execution
     /// </summary>
     public EventType EventType { get; set; }
+    /// <summary>
+    /// This depends on what attribute is being affected. Usually it's Health, since that's damage / healing
+    /// </summary>
+    public AttributeType Attribute { get; set; }
 
     public EffectContext(Effect effect,
                          List<CombatEntity> ownTeam,
                          List<CombatEntity> enemyTeam,
-                         CombatEntity? actor,
+                         CombatEntity actor,
                          CombatEntity target,
                          int magnitude,
                          string details)

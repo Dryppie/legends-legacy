@@ -1,4 +1,6 @@
+import { AttributeType } from '../enums/attributeType';
 import { ResourceType } from '../enums/resourceType';
+import { SimpleCombatEntityDto } from './combatResultDto';
 
 export enum EventType {
   AbilityUse = 'AbilityUse', // Dryp has cast {Ability}
@@ -25,9 +27,11 @@ export enum EventType {
 export interface CombatEvent {
   eventType: EventType;
   resourceType: ResourceType;
+  attribute: AttributeType;
   magnitude: number;
   actorId: string;
   targetId: string;
   timestamp: number;
   details: string;
+  combatEntity: SimpleCombatEntityDto;
 }

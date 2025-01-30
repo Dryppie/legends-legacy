@@ -98,4 +98,25 @@ public class CombatEntity
         TemporaryModifiers = [];
         Statuses.Clear();
     }
+
+    /// <summary>
+    /// Return the value of the attribute, or 0 if the attribute isn't found
+    /// </summary>
+    /// <param name="attributeType"></param>
+    /// <returns></returns>
+    public int GetAttributeValue(AttributeType attributeType)
+    {
+        return CombatAttributes.TryGetValue(attributeType, out var attributeValue) ? (int)attributeValue : 0;
+    }
+
+    /// <summary>
+    /// Sets the value of the specified attribute, creating or updating it in the dictionary.
+    /// Primarily used for Health and Mana
+    /// </summary>
+    /// <param name="attributeType">The type of attribute to set.</param>
+    /// <param name="value">The new value to set for the attribute.</param>
+    public void SetAttributeValue(AttributeType attributeType, int value)
+    {
+        CombatAttributes[attributeType] = value;
+    }
 }

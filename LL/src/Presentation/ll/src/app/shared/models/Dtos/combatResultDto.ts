@@ -1,15 +1,15 @@
 import { CombatEvent } from './combatEventDto';
 
 export interface CombatResultDto {
-  playerTeam: CombatEntityDto[];
-  enemyTeam: CombatEntityDto[];
+  playerTeam: SimpleCombatEntityDto[];
+  enemyTeam: SimpleCombatEntityDto[];
   duration: number;
   eventLog: CombatEvent[];
   startedAt: Date;
   outcome: BattleOutcome;
 }
 
-export interface CombatEntityDto {
+export interface SimpleCombatEntityDto {
   name: string;
   id: string;
   health: number;

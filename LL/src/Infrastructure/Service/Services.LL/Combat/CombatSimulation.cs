@@ -373,7 +373,7 @@ public class CombatSimulation : ICombatContext
             return BattleOutcome.Draw; // In case max time reached
     }
 
-    public void LogEffectExecution(EffectContext context)
+    public void LogEffectExecution(EffectContext context, SimpleCombatEntity? combatEntity)
     {
         var logEntry = new CombatEvent
         {
@@ -383,6 +383,8 @@ public class CombatSimulation : ICombatContext
             EventType = context.EventType,
             Details = context.Details,
             Magnitude = context.Magnitude,
+            Attribute = context.Attribute,
+            CombatEntity = combatEntity
         };
 
         _eventLog.Add(logEntry);

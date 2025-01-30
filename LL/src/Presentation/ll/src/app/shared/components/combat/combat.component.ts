@@ -6,13 +6,14 @@ import { CombatService } from '../../../core/services/combat/combat.service';
 import { CombatEvent, EventType } from '../../models/Dtos/combatEventDto';
 import { NgFor, NgIf, NgStyle } from '@angular/common';
 import {
-  CombatEntityDto,
+  SimpleCombatEntityDto,
   CombatResultDto,
 } from '../../models/Dtos/combatResultDto';
 import { Subscription } from 'rxjs';
 import { CountdownComponent } from '../countdown/countdown.component';
 import { CharacterActionsService } from '../../../core/services/character-actions/character-actions.service';
 import { CombatCountdownComponent } from './combat-countdown/combat-countdown.component';
+import { AttributeType } from '../../models/enums/attributeType';
 
 @Component({
   selector: 'app-combat',
@@ -34,8 +35,8 @@ export class CombatComponent implements OnInit, OnDestroy {
   nextCombatIn: Date | null = null;
   StopCombatButtonText: string = 'Stop Combat';
 
-  playerCharacters: CombatEntityDto[] = [];
-  enemyCharacters: CombatEntityDto[] = [];
+  playerCharacters: SimpleCombatEntityDto[] = [];
+  enemyCharacters: SimpleCombatEntityDto[] = [];
 
   subscriptions: Subscription = new Subscription();
 
@@ -246,7 +247,7 @@ export class CombatComponent implements OnInit, OnDestroy {
   }
 
   private handleSummonEvent(event: CombatEvent): void {
-    const summonedCharacter: CombatEntityDto = {
+    const summonedCharacter: SimpleCombatEntityDto = {
       name: 'Blood Imp',
       id: event.targetId,
       health: 100,
@@ -279,6 +280,9 @@ export class CombatComponent implements OnInit, OnDestroy {
   }
 
   private handleBuffEvent(event: CombatEvent, buffExpired: boolean = false) {
+    if (event.attribute === AttributeType.MaxHealth) {
+      this.updateCharacter(event.targetId, event.combatEntity);
+    }
     // if (buffExpired) console.log(`Buff Expired: ${event.details}`);
     // else console.log(`Buff: ${event.details}`);
   }
@@ -288,7 +292,20 @@ export class CombatComponent implements OnInit, OnDestroy {
     // else console.log(`Buff: ${event.details}`);
   }
 
-  private findCharacterById(id: string): CombatEntityDto | undefined {
+  private updateCharacter(
+    entityId: string,
+    combatEntity: SimpleCombatEntityDto,
+  ) {
+    const character = this.findCharacterById(entityId);
+    if (!character) return;
+
+    character.health = combatEntity.health;
+    character.maxHealth = combatEntity.maxHealth;
+    character.mana = combatEntity.mana;
+    character.maxMana = combatEntity.maxMana;
+  }
+
+  private findCharacterById(id: string): SimpleCombatEntityDto | undefined {
     return (
       this.playerCharacters.find((c) => c.id === id) ||
       this.enemyCharacters.find((c) => c.id === id)

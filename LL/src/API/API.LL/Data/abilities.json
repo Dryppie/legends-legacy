@@ -267,7 +267,7 @@
         {
           "Action": {
             "Type": "ModifyAttribute",
-            "Attribute": "Health",
+            "Attribute": "MaxHealth",
             "Amount": 50,
             "ModifierType": "Flat"
           },

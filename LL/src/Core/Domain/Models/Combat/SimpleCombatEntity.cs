@@ -17,4 +17,6 @@ public class SimpleCombatEntity
         Mana = maxMana;
         MaxMana = maxMana;
     }
+
+    public SimpleCombatEntity() { }
 }

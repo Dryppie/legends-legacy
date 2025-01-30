@@ -33,9 +33,11 @@ public static class AttributeCalculator
 
         var calculatedValue = GetAttributeValue(entity, attributeType, attribute.Value);
 
+        MaxHealthOrMaxMana(entity, attributeType, calculatedValue);
+
         if (entity.CombatAttributes.TryAdd(attributeType, calculatedValue))
             return;
-        
+
         entity.CombatAttributes[attributeType] = calculatedValue;
     }
 
@@ -71,5 +73,56 @@ public static class AttributeCalculator
         // Return the final rounded attribute value
         float result = MathF.Round((baseValue + flatSum) * (1 + additiveSum) * multiplicativeProduct, MidpointRounding.ToZero);
         return Math.Max(result, 0);
+    }
+
+    private static void MaxHealthOrMaxMana(CombatEntity entity, AttributeType attributeType, float calculatedValue)
+    {
+        switch (attributeType)
+        {
+            case AttributeType.MaxHealth:
+                {
+                    float oldMax = entity.CombatAttributes.TryGetValue(AttributeType.MaxHealth, out var oldMaxObj)
+                        ? oldMaxObj
+                        : 0;
+
+                    float difference = calculatedValue - oldMax;
+
+                    if (entity.CombatAttributes.TryGetValue(AttributeType.Health, out var oldHealth))
+                    {
+                        float newHealth = oldHealth + difference;
+
+                        // Clamp to [0, new MaxHealth]
+                        if (newHealth > calculatedValue) newHealth = calculatedValue;
+                        if (newHealth < 0) newHealth = 0;
+
+                        entity.CombatAttributes[AttributeType.Health] = newHealth;
+                    }
+
+                    break;
+                }
+
+            case AttributeType.MaxMana:
+                {
+                    float oldMax = entity.CombatAttributes.TryGetValue(AttributeType.MaxMana, out var oldMaxObj)
+                        ? oldMaxObj
+                        : 0;
+
+                    float difference = calculatedValue - oldMax;
+
+                    if (entity.CombatAttributes.TryGetValue(AttributeType.Mana, out var oldMana))
+                    {
+                        float newMana = oldMana + difference;
+
+                        if (newMana > calculatedValue) newMana = calculatedValue;
+                        if (newMana < 0) newMana = 0;
+
+                        entity.CombatAttributes[AttributeType.Mana] = newMana;
+                    }
+
+                    break;
+                }
+            default:
+                break;
+        }
     }
 }
