@@ -22,7 +22,7 @@ public class Interval : IEffectInterval
         ticksUntilNextTrigger--;
 
         if (ticksUntilNextTrigger < 0)
-            ticksUntilNextTrigger = interval;
+            ticksUntilNextTrigger = interval - 1; // -1 to counteract Interval + 1, which increments each interval by 1 tick without this
     }
     public IEffectInterval Clone() => new Interval(interval);
 }

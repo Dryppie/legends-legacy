@@ -85,7 +85,7 @@
     "Active": {
       "Id": "ragingCleave",
       "Name": "Raging Cleave",
-      "Description": "Swing your weapon in a wide arc, dealing damage to two enemies.",
+      "Description": "Swing your weapon in a wide arc, dealing {damage1} damage to two enemies.",
       "Type": "Active",
       "Cooldown": 120,
       "Cost": 9,
@@ -158,7 +158,7 @@
     "Active": {
       "Id": "snipersStrike",
       "Name": "Sniper's Strike",
-      "Description": "Unleash a powerful shot with increased critical chance.",
+      "Description": "Unleash a powerful shot with increased critical chance, dealing {damage1} damage.",
       "Type": "Active",
       "Cooldown": 150,
       "Cost": 12,

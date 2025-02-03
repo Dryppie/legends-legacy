@@ -51,7 +51,7 @@ public static class CombatFormulaCalculator
         float levelDifferenceModifier = levelDifference / 5 * 3.125f; // Decrease hit chance by 3.125% per level difference
         float statDifferenceModifier = (int)((defender.CombatAttributes[AttributeType.Accuracy] - attacker.CombatAttributes[AttributeType.Dodge]) / 5f) * 1.25f;  // Increased impact from stats
                                                                                                                                                                   // 98                         - ((100-100) / 5 * 3.125) - ((20 - 20) / 5 * 1.25)
-        float adjustedHitChance = CombatConstants.BaseHitChance - levelDifferenceModifier - statDifferenceModifier;
+        float adjustedHitChance = CombatConstants.BaseHitChance + statDifferenceModifier - levelDifferenceModifier;
         adjustedHitChance = Math.Clamp(adjustedHitChance, CombatConstants.MinHitChance, CombatConstants.MaxHitChance); // Ensure hit chance is between 10% and 100%
 
         float roll = (float)RandomGenerator.NextDouble() * 100f;

@@ -32,6 +32,7 @@ public class Effect
         if (!Definition.Usage.CanUse()) return;
         if (!Definition.Condition.IsSatisfied(context)) return;
 
+        // If the chance fails, no need to log anything. Lack of log should be enough to display something didn't trigger
         if (Definition.Chance == 100 || Random.Shared.Next(1, 101) <= Definition.Chance)
         {
             // TODO: Apply EffectModifications properly. This might have to be checked during DamageCalculation and HealCalculation, and not here

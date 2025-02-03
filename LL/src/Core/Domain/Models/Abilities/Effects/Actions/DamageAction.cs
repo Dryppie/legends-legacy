@@ -19,21 +19,27 @@ public class DamageAction : IEffectAction
     }
 
     public void Execute(EffectContext context, ICombatContext combatContext)
-    {   
-        // Attack outcome
-        var attackOutcome = combatContext.InteractionManager.CalculateAttackOutcomeForDamage(context.Actor, context.Target);
-        if (attackOutcome == AttackOutcome.Miss)
-        {
-            context.EventType = EventType.Miss;
-            context.Details = $"{context.Actor?.Name!} missed the target.";
-            // Log
-            combatContext.LogEffectExecution(context);
-            return;
-        }
-
-        // Potential damage to deal
+    {
         var isFlatAmount = context.Effect.Definition.IsFlatAmount;
-        var damageAmount = isFlatAmount ? Magnitude : combatContext.InteractionManager.CalculateDamageToDeal(context.Actor, context.Target, Magnitude);
+        var attackOutcome = AttackOutcome.Hit;
+        var damageAmount = Magnitude;
+
+        if (!isFlatAmount) // If it isn't a flat amount, perform the necessary calculations for attack outcome and damage
+        {
+            attackOutcome = combatContext.InteractionManager.CalculateAttackOutcomeForDamage(context.Actor, context.Target);
+
+            if (attackOutcome == AttackOutcome.Miss)
+            {
+                context.EventType = EventType.Miss;
+                context.Details = $"{context.Actor?.Name!} missed the target.";
+                // Log
+                combatContext.LogEffectExecution(context);
+                return;
+            }
+
+            // Potential damage to deal before calculating opponent's defenses
+            damageAmount = combatContext.InteractionManager.CalculateDamageToDeal(context.Actor, context.Target, Magnitude);
+        }
 
         // Damage opponent will receive
         var damageReceived = combatContext.InteractionManager.CalculateDamageReceived(context.Target, damageAmount, attackOutcome);

@@ -27,17 +27,16 @@ public class CombatInteractionManager : ICombatInteractionManager
         return CombatFormulaCalculator.CalculateAttackOutcome(actor, target, isDamage: false);
     }
 
-    public int CalculateDamageToDeal(CombatEntity attacker, CombatEntity defender, float magnitude)
+    public int CalculateDamageToDeal(CombatEntity actor, CombatEntity target, float magnitude)
     {
-        CombatFormulaCalculator.CalculateAttackOutcome(attacker, defender, isDamage: true);
-        int finalDamage = (int)magnitude + (int)attacker.CombatAttributes[AttributeType.Strength];
+        int finalDamage = (int)magnitude + (int)actor.CombatAttributes[AttributeType.Strength];
         // More logic if needed: defense reduction, armor, etc.
         return finalDamage;
     }
 
-    public int CalculateHealingToDeal(CombatEntity attacker, CombatEntity defender, float magnitude)
+    public int CalculateHealingToDeal(CombatEntity actor, CombatEntity target, float magnitude)
     {
-        int finalDamage = (int)magnitude + (int)attacker.CombatAttributes[AttributeType.Strength];
+        int finalDamage = (int)magnitude + (int)actor.CombatAttributes[AttributeType.Strength];
         // More logic if needed: defense reduction, armor, etc.
         return finalDamage;
     }
@@ -55,14 +54,13 @@ public class CombatInteractionManager : ICombatInteractionManager
         return (int)magnitude;
     }
 
-    public int CalculateBasicAttackDamage(CombatEntity attacker, float baseDamage)
+    public int CalculateBasicAttackDamage(CombatEntity actor, CombatEntity target, float baseDamage)
     {
         // Check equipment
-        var weapon = attacker.Equipment.FirstOrDefault(e => e.EquipmentType == EquipmentType.Weapon)
+        var weapon = actor.Equipment.FirstOrDefault(e => e.EquipmentType == EquipmentType.Weapon)
                      ?? new Weapon { DamageType = DamageType.Physical };
 
-        // Example calculation:
-        int finalDamage = (int)baseDamage + (int)attacker.CombatAttributes[AttributeType.Strength];
+        int finalDamage = (int)baseDamage + (int)actor.CombatAttributes[AttributeType.Strength];
         // Potential for more complex calculations, crit chance, etc.
         return finalDamage;
     }
@@ -71,7 +69,6 @@ public class CombatInteractionManager : ICombatInteractionManager
     {
         context.Target.CombatAttributes[AttributeType.Health] -= context.Magnitude;
 
-        
         // TODO: Make sure something like "Retaliate" is only triggered based on a specific TriggerEvent. And this effect should not return that specific TriggerEvent
         var attackTypeTrigger = TriggerEvent.None;
         attackTypeTrigger = context.Effect.Definition.AttackType switch

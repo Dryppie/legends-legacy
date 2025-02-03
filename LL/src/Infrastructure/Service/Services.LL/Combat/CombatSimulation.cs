@@ -1,6 +1,7 @@
 ﻿using Domain.Interfaces.Combat;
 using Domain.Models.Abilities;
 using Domain.Models.Abilities.Effects;
+using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Damages;
@@ -39,8 +40,8 @@ public class CombatSimulation : ICombatContext
         while (CurrentTime < MaxSimulationTime && EntityManager.IsCombatActive())
         {
             // Process actions for both teams
-            ProcessTeamActions([.. EntityManager.PlayerTeam], [.. EntityManager.EnemyTeam], CurrentTime);
-            ProcessTeamActions([.. EntityManager.EnemyTeam], [.. EntityManager.PlayerTeam], CurrentTime);
+            ProcessTeamActions([.. EntityManager.PlayerTeam], [.. EntityManager.EnemyTeam]);
+            ProcessTeamActions([.. EntityManager.EnemyTeam], [.. EntityManager.PlayerTeam]);
 
             // Advance time
             CurrentTime += TimeStep;
@@ -91,7 +92,7 @@ public class CombatSimulation : ICombatContext
         }
     }
 
-    private void ProcessTeamActions(List<CombatEntity> actingTeam, List<CombatEntity> opposingTeam, int currentTime)
+    private void ProcessTeamActions(List<CombatEntity> actingTeam, List<CombatEntity> opposingTeam)
     {
         foreach (var entity in actingTeam)
         {
@@ -124,11 +125,11 @@ public class CombatSimulation : ICombatContext
                 if (target == null) continue;
                 if (false/*weapon.Heal*/)
                 {
-                    PerformHealing(entity, [target], currentTime);
+                    PerformHealing(entity, [target]);
                 }
                 else
                 {
-                    PerformBasicAttackDamage(entity, [target], currentTime);
+                    PerformBasicAttackDamage(entity, [target]);
                 }
 
                 entity.NextBasicAttackIn = 300; // TODO: Turn 300 into a Constant somewhere, as it is also stored in the Entity class
@@ -140,7 +141,7 @@ public class CombatSimulation : ICombatContext
             {
                 if (ability.RemainingTimeUntilUse <= 0)
                 {  
-                    UseAbility(entity, ability, opposingTeam, actingTeam, currentTime);
+                    UseAbility(entity, ability, opposingTeam, actingTeam);
                 }
             }
 
@@ -151,7 +152,7 @@ public class CombatSimulation : ICombatContext
 
     }
 
-    private static void PerformHealing(CombatEntity entity, List<CombatEntity> targets, int currentTime)
+    private static void PerformHealing(CombatEntity entity, List<CombatEntity> targets)
     {
         //foreach (var target in targets)
         //{
@@ -161,14 +162,20 @@ public class CombatSimulation : ICombatContext
         //}
     }
 
-    private void PerformBasicAttackDamage(CombatEntity actor, List<CombatEntity> targets, int currentTime)
+    private void PerformBasicAttackDamage(CombatEntity actor, List<CombatEntity> targets)
     {
         foreach (var target in targets)
         {
-            var damage = InteractionManager.CalculateBasicAttackDamage(actor, 5);
+            var attackOutcome = InteractionManager.CalculateAttackOutcomeForDamage(actor, target);
+            if (attackOutcome.Equals(AttackOutcome.Miss))
+            {
+                CombatEvent(actor, target, EventType.Miss, 0, $"{actor.Name} missed {target.Name} with a basic attack.");
+                EffectManager.TriggerEffects(TriggerEvent.OnDodge, target, actor);
+                return;
+            }
+            var damage = InteractionManager.CalculateBasicAttackDamage(actor, target, 5);
             damage = 5;
-            CombatEvent(currentTime, actor, target, EventType.Damage, damage);
-
+            CombatEvent(actor, target, EventType.Damage, damage, $"{actor.Name} hit {target.Name} with a basic attack, dealing {damage} damage.");
 
             var effectDefinition = new EffectDefinition(null, null, null, null, null, [], attackType: AttackType.Melee);
             var effectContext = new EffectContext(
@@ -182,20 +189,20 @@ public class CombatSimulation : ICombatContext
         }
     }
 
-    private void CombatEvent(int currentTime, CombatEntity actor, CombatEntity target, EventType actionType, int magnitude)
+    private void CombatEvent(CombatEntity actor, CombatEntity target, EventType actionType, int magnitude, string details)
     {
         _eventLog.Add(new CombatEvent
         {
-            Timestamp = currentTime,
+            Timestamp = CurrentTime,
             ActorId = actor.Id,
             TargetId = target.Id,
             EventType = actionType,
             Magnitude = magnitude,
-            Details = $"{actor.Name} hit {target.Name} with a basic attack, dealing {magnitude} damage."
+            Details = details
         });
     }
 
-    private void UseAbility(CombatEntity actor, AbilityDefinition ability, List<CombatEntity> opposingTeam, List<CombatEntity> ownTeam, int currentTime)
+    private void UseAbility(CombatEntity actor, AbilityDefinition ability, List<CombatEntity> opposingTeam, List<CombatEntity> ownTeam)
     {
         if ((actor.CombatAttributes[AttributeType.Mana] - ability.Cost) < 0)
         {
@@ -289,7 +296,7 @@ public class CombatSimulation : ICombatContext
         _eventLog.Add(new CombatEvent()
         {
             ActorId = actor.Id,
-            Timestamp = currentTime,
+            Timestamp = CurrentTime,
             EventType = EventType.AbilityUse,
             Magnitude = ability.Cost,
             Details = ability.ActivationLog
