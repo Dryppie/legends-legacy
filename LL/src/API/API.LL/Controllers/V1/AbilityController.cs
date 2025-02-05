@@ -20,7 +20,7 @@ public class AbilityController : BaseController
         string json = await System.IO.File.ReadAllTextAsync(filePath);
 
         // Deserialize JSON into a list of essences
-        List<Essence> essences = JsonSerializer.Deserialize<List<Essence>>(json, AbilityJsonReader.Options)!;
+        List<Essence> essences = JsonSerializer.Deserialize<List<Essence>>(json, EssenceJsonReader.Options)!;
 
         return Ok(essences);
     }

@@ -174,7 +174,7 @@ public class CombatSimulation : ICombatContext
                 return;
             }
             var damage = InteractionManager.CalculateBasicAttackDamage(actor, target, 5);
-            damage = 5;
+
             CombatEvent(actor, target, EventType.Damage, damage, $"{actor.Name} hit {target.Name} with a basic attack, dealing {damage} damage.");
 
             var effectDefinition = new EffectDefinition(null, null, null, null, null, [], attackType: AttackType.Melee);

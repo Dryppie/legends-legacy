@@ -87,9 +87,18 @@ public static class AttributeCalculator
 
                     float difference = calculatedValue - oldMax;
 
-                    if (entity.CombatAttributes.TryGetValue(AttributeType.Health, out var oldHealth))
+                    if (entity.CombatAttributes.TryGetValue(AttributeType.Health, out var currentHealth))
                     {
-                        float newHealth = oldHealth + difference;
+                        if (difference < 0) // This is only applied to scenarios where MaxHealth is decreased
+                        {
+                            // currentHealth is higher than new MaxHealth, cap hp to new MaxHealth
+                            if (currentHealth > calculatedValue)
+                                entity.CombatAttributes[AttributeType.Health] = calculatedValue;
+
+                            break;
+                        }
+
+                        float newHealth = currentHealth + difference;
 
                         // Clamp to [0, new MaxHealth]
                         if (newHealth > calculatedValue) newHealth = calculatedValue;
@@ -109,9 +118,18 @@ public static class AttributeCalculator
 
                     float difference = calculatedValue - oldMax;
 
-                    if (entity.CombatAttributes.TryGetValue(AttributeType.Mana, out var oldMana))
+                    if (entity.CombatAttributes.TryGetValue(AttributeType.Mana, out var currentMana))
                     {
-                        float newMana = oldMana + difference;
+                        if (difference < 0) // This is only applied to scenarios where MaxMana is decreased
+                        {
+                            // If currentMana is higher than new MaxMana, cap mp to new MaxMana
+                            if (currentMana > calculatedValue)
+                                entity.CombatAttributes[AttributeType.Mana] = calculatedValue;
+
+                            break;
+                        }
+
+                        float newMana = currentMana + difference;
 
                         if (newMana > calculatedValue) newMana = calculatedValue;
                         if (newMana < 0) newMana = 0;

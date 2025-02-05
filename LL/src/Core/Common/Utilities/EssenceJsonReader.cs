@@ -4,7 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Common.Utilities;
-public static class AbilityJsonReader
+public static class EssenceJsonReader
 {
     // Cache and reuse JsonSerializerOptions instance
     public static readonly JsonSerializerOptions Options = new()

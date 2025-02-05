@@ -3,7 +3,7 @@ using Domain.Models.Abilities;
 using Domain.Models.Abilities.Effects;
 using Domain.Models.Abilities.Effects.Conditions;
 using Domain.Models.Abilities.Effects.Intervals;
-using Domain.Models.Abilities.Effects.Timed;
+using Domain.Models.Abilities.Effects.Duration;
 using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Abilities.Effects.Usages;
 using Domain.Models.Damages;
@@ -55,11 +55,11 @@ public class EffectConverter : JsonConverter<EffectDefinition>
             && durationElement.ValueKind != JsonValueKind.Undefined)
         {
             duration = JsonSerializer.Deserialize<IEffectDuration>(durationElement.GetRawText(), options)
-                       ?? new TimedDuration(0); // Fallback in case of error
+                       ?? new NoDuration(); // Fallback in case of error
         }
         else
         {
-            duration = new TimedDuration(0); // Fallback in case of error
+            duration = new NoDuration(); // Fallback in case of error
         }
 
         IEffectUsage usage;

@@ -65,7 +65,9 @@ public class EffectActionConverter : JsonConverter<IEffectAction>
                     var amount = root.GetProperty("Amount").GetInt32();
                     var modifierType = Enum.Parse<ModifierType>(root.GetProperty("ModifierType").GetString()!);
                     var attributeModifier = new AttributeModifier(attribute, amount, modifierType);
-                    return new ModifyAttributeAction(attributeModifier);
+                    var isStackable = root.TryGetProperty("IsStackable", out var isStackableElement) && isStackableElement.GetBoolean();
+
+                    return new ModifyAttributeAction(attributeModifier, isStackable);
 
                 case "NestedEffect":
                     // "Effects" is expected to be a JSON array of `Effect` objects

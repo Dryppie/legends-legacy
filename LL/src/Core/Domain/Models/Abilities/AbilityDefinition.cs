@@ -19,7 +19,7 @@ public class AbilityDefinition
     /// <summary>
     /// What resource will be deducted from upon use
     /// </summary>
-    public ResourceType ResourceCostType { get; set; }
+    public ResourceType ResourceTypeCost { get; set; }
     public string ActivationLog { get; set; } = "{Actor} used {Ability} on {Target}.";
 
     public List<EffectDefinition> Effects { get; set; } = [];

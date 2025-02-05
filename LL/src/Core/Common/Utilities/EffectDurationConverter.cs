@@ -1,5 +1,5 @@
 ﻿using Domain.Interfaces;
-using Domain.Models.Abilities.Effects.Timed;
+using Domain.Models.Abilities.Effects.Duration;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -15,6 +15,8 @@ public class EffectDurationConverter : JsonConverter<IEffectDuration>
 
             switch (durationType)
             {
+                case "NoDuration":
+                    return new NoDuration();
                 case "TimedDuration":
                     var duration = root.GetProperty("Duration").GetInt32();
                     return new TimedDuration(duration);
@@ -22,7 +24,7 @@ public class EffectDurationConverter : JsonConverter<IEffectDuration>
                     return new IndefiniteDuration();
 
                 default:
-                    return new IndefiniteDuration();
+                    return new NoDuration();
             }
         }
     }

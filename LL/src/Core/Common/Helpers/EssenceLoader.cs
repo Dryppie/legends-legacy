@@ -4,110 +4,160 @@ using Domain.Models.Entities;
 using Domain.Models.Essences;
 using System.Text.Json;
 
-namespace Domain.Helpers;
-public static class EssenceLoader
+namespace Common.Helpers;
+public sealed class EssenceLoader
 {
-    public static async Task LoadEssencesForEntity(Entity entity)
-    {
-        // Deserialize JSON into a list of essences
-        List<Essence> essences = await DeserializeEssences();
+    private static readonly object _lock = new object();
+    private static EssenceLoader? _instance;
 
-        var ids = new List<string>();
-        foreach (var essence in entity.EquippedEssences)
-        {
-            ids.Add(essence.Name);
-        }
-
-        var entityEssences = essences.Where(a => ids.Contains(a.Name)).ToList();
-        foreach (var entityEssence in entityEssences)
-        {
-            entity.Abilities.Add(entityEssence.Active);
-            entity.Abilities.Add(entityEssence.Passive);
-        }
-    }
-
-    public static async Task LoadEssencesForCombatEntity(CombatEntity entity)
-    {
-        // Deserialize JSON into a list of essences
-        List<Essence> essences = await DeserializeEssences();
-
-        var ids = new List<string>();
-        foreach (var essence in entity.EquippedEssences)
-        {
-            ids.Add(essence.Name);
-        }
-
-        var entityEssences = essences.Where(a => ids.Contains(a.Name)).ToList();
-        foreach (var entityEssence in entityEssences)
-        {
-            entity.Abilities.Add(entityEssence.Active);
-            entity.Abilities.Add(entityEssence.Passive);
-        }
-    }
-
-    public static async Task<Essence> LoadAbilitiesForEssence(Essence essence)
-    {
-        // Deserialize JSON into a list of essences
-        List<Essence> essences = await DeserializeEssences();
-
-        return essences.FirstOrDefault(e => e.Name.Equals(essence.Name))!;
-    }
-
-    private static readonly Random _rand = new Random();
+    private readonly List<Essence> _essences;
+    private readonly Random _rand = new Random();
 
     /// <summary>
-    /// Every increase in 'tier' increases the amount of abilities selected for an entity
+    /// Private constructor so no one can instantiate this class from the outside.
     /// </summary>
-    /// <param name="tier"></param>
-    /// <returns></returns>
-    public static async Task _Simulator_PickRandomAbilityCombinations(CombatEntity entity, int tier = 1)
+    private EssenceLoader()
     {
-        List<Essence> allEssences = await DeserializeEssences();
+        _essences = LoadEssencesFromJson();
+    }
 
+    /// <summary>
+    /// The global access point to this class. Ensures only one instance exists (Singleton).
+    /// </summary>
+    public static EssenceLoader Instance
+    {
+        get
+        {
+            // Double-checked locking for thread safety
+            if (_instance == null)
+            {
+                lock (_lock)
+                {
+                    if (_instance == null)
+                    {
+                        _instance = new EssenceLoader();
+                    }
+                }
+            }
+            return _instance;
+        }
+    }
+
+    /// <summary>
+    /// Reads and deserializes Essences from JSON, once only.
+    /// </summary>
+    private List<Essence> LoadEssencesFromJson()
+    {
+        string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "abilities.json");
+        string json = File.ReadAllText(filePath);
+
+        // Deserialize JSON into a list of essences
+        return JsonSerializer.Deserialize<List<Essence>>(json, EssenceJsonReader.Options)!;
+    }
+
+    public List<Essence> GetEssences()
+    {
+        return _essences;
+    }
+
+    /// <summary>
+    /// Load all Essences that an Entity has equipped and add them to the Entity's ability list.
+    /// </summary>
+    public void LoadEssencesForEntity(Entity entity)
+    {
+        var ids = entity.EquippedEssences.Select(e => e.Name).ToList();
+        var entityEssences = _essences.Where(a => ids.Contains(a.Name)).ToList();
+
+        foreach (var essence in entityEssences)
+        {
+            SetSourceIdForEffects(essence);
+            entity.Abilities.Add(essence.Active);
+            entity.Abilities.Add(essence.Passive);
+        }
+    }
+
+    /// <summary>
+    /// Load all Essences that a CombatEntity has equipped and add them to its ability list.
+    /// </summary>
+    public void LoadEssencesForCombatEntity(CombatEntity entity)
+    {
+        var ids = entity.EquippedEssences.Select(e => e.Name).ToList();
+        var entityEssences = _essences.Where(a => ids.Contains(a.Name)).ToList();
+
+        foreach (var essence in entityEssences)
+        {
+            SetSourceIdForEffects(essence);
+            entity.Abilities.Add(essence.Active);
+            entity.Abilities.Add(essence.Passive);
+        }
+    }
+
+    /// <summary>
+    /// Given an Essence (by name), return the "full" essence (with Active and Passive abilities loaded).
+    /// </summary>
+    public Essence LoadAbilitiesForEssence(Essence essence)
+    {
+        return _essences.FirstOrDefault(e => e.Name.Equals(essence.Name, StringComparison.OrdinalIgnoreCase))!;
+    }
+
+    /// <summary>
+    /// A method for randomly picking tier-based Essences. 
+    /// </summary>
+    public void _Simulator_PickRandomAbilityCombinations(CombatEntity entity, int tier = 1)
+    {
+        // We'll work with a copy of all essences so we don't disturb the original list
+        var allEssences = _essences.ToList();
         var chosenEssences = new List<Essence>();
 
         for (int i = 0; i < tier; i++)
         {
-            // If we run out of either passives or actives, we can't form more combos
-            if (!allEssences.Any())
+            if (allEssences.Count == 0)
                 break;
 
-            // Randomly pick one passive
             int pIndex = _rand.Next(allEssences.Count);
             var chosenEssence = allEssences[pIndex];
             allEssences.RemoveAt(pIndex);
 
-            // Add both to the chosen list
             chosenEssences.Add(chosenEssence);
         }
+
         foreach (var essence in chosenEssences)
         {
+            SetSourceIdForEffects(essence);
             entity.EquippedEssences.Add(essence);
             entity.Abilities.Add(essence.Active);
             entity.Abilities.Add(essence.Passive);
         }
     }
 
-    public static async Task _Simulator_PickSpecificAbility(CombatEntity entity, string essenceName)
+    /// <summary>
+    /// A helper method to pick a specific Essence by name and attach it to a CombatEntity.
+    /// </summary>
+    public void _Simulator_PickSpecificAbility(CombatEntity entity, string essenceName)
     {
-        List<Essence> allEssences = await DeserializeEssences();
-
-        var chosenEssences = new List<Essence>();
-
-        var chosenEssence = allEssences.FirstOrDefault(e => e.Name.Equals(essenceName));
-
-        entity.EquippedEssences.Add(chosenEssence!);
-        entity.Abilities.Add(chosenEssence!.Active);
-        entity.Abilities.Add(chosenEssence!.Passive);
+        var chosenEssence = _essences.FirstOrDefault(e => e.Name.Equals(essenceName, StringComparison.OrdinalIgnoreCase));
+        if (chosenEssence != null)
+        {
+            SetSourceIdForEffects(chosenEssence);
+            entity.EquippedEssences.Add(chosenEssence);
+            entity.Abilities.Add(chosenEssence.Active);
+            entity.Abilities.Add(chosenEssence.Passive);
+        }
     }
 
-    public static async Task<List<Essence>> DeserializeEssences()
+    /// <summary>
+    /// Helper method to set source IDs for effects. 
+    /// </summary>
+    private void SetSourceIdForEffects(Essence essence)
     {
-        string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "abilities.json");
+        for (int i = 0; i < essence.Active.Effects.Count; i++)
+        {
+            essence.Active.Effects[i].SourceId = $"{essence.Active.Id}_{i}";
+        }
 
-        string json = await File.ReadAllTextAsync(filePath);
-
-        // Deserialize JSON into a list of essences
-        return JsonSerializer.Deserialize<List<Essence>>(json, AbilityJsonReader.Options)!;
+        for (int i = 0; i < essence.Passive.Effects.Count; i++)
+        {
+            essence.Passive.Effects[i].SourceId = $"{essence.Passive.Id}_{i}";
+        }
     }
 }

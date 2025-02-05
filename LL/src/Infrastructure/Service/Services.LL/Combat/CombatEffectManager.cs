@@ -1,6 +1,7 @@
 ﻿using Domain.Interfaces.Combat;
 using Domain.Models.Abilities;
 using Domain.Models.Abilities.Effects;
+using Domain.Models.Abilities.Effects.Duration;
 using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Combat;
 
@@ -28,11 +29,17 @@ public class CombatEffectManager : ICombatEffectManager
         }
 
         // If the effect should trigger immediately (no trigger event needed)
-        if (effect.Definition.Trigger == TriggerEvent.None)
+        if (effect.Definition.Duration is NoDuration)
         {
             var context = CreateEffectContext(effect, target, actor);
             effect.ExecuteAction(context, _combatContext);
             return;
+        }
+
+        if (effect.Definition.Trigger.Equals(TriggerEvent.None))
+        {
+            var context = CreateEffectContext(effect, target, actor);
+            effect.ExecuteAction(context, _combatContext);
         }
 
         effects.Add(effect);

@@ -379,7 +379,7 @@
       "Name": "Empower",
       "Description": "Strengthen your attack power.",
       "Type": "Active",
-      "Cooldown": 190,
+      "Cooldown": 150,
       "Cost": 10,
       "Effects": [
         {
@@ -391,7 +391,7 @@
           },
           "Duration": {
             "Type": "TimedDuration",
-            "Duration": 600
+            "Duration": 100
           },
           "Targeting": "Self",
           "Trigger": "None",

@@ -37,8 +37,8 @@ public class Effect
         {
             // TODO: Apply EffectModifications properly. This might have to be checked during DamageCalculation and HealCalculation, and not here
             Definition.Action?.Execute(context, combatContext);
-            Definition.Usage.ConsumeUse();
         }
+        Definition.Usage.ConsumeUse();
     }
 
     public void ExecuteOnExpireAction(EffectContext context, ICombatContext combatContext)

@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces.Services.LL;
+using Common.Helpers;
 using Domain.Components.Attributes;
 using Domain.Helpers;
 using Domain.Models.Attributes;
@@ -44,7 +45,7 @@ public class SimulatorService : ISimulatorService
         var numberOfDraws = 0;
 
         var essenceComboStats = new Dictionary<string, EssenceStat>(StringComparer.OrdinalIgnoreCase);
-        var essences = await EssenceLoader.DeserializeEssences();
+        var essences = EssenceLoader.Instance.GetEssences();
 
         // Initialize combatants
         var playerCharacters = GeneratePlayerTeam(playerTeamSize, tier);
@@ -222,7 +223,7 @@ public class SimulatorService : ISimulatorService
     private static async Task PickRandomAbilities(IEnumerable<CombatEntity> entities, int tier)
     {
         // Load random abilities
-        var attributePickerTasks = entities.Select(entity => Task.Run(() => EssenceLoader._Simulator_PickRandomAbilityCombinations(entity, tier)));
+        var attributePickerTasks = entities.Select(entity => Task.Run(() => EssenceLoader.Instance._Simulator_PickRandomAbilityCombinations(entity, tier)));
 
         await Task.WhenAll(attributePickerTasks);
     }
@@ -230,7 +231,7 @@ public class SimulatorService : ISimulatorService
     private static async Task PickSpecificAbility(IEnumerable<CombatEntity> entities, string essenceName = "Test Essence")
     {
         // Load random abilities
-        var attributePickerTasks = entities.Select(entity => Task.Run(() => EssenceLoader._Simulator_PickSpecificAbility(entity, essenceName)));
+        var attributePickerTasks = entities.Select(entity => Task.Run(() => EssenceLoader.Instance._Simulator_PickSpecificAbility(entity, essenceName)));
 
         await Task.WhenAll(attributePickerTasks);
     }

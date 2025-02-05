@@ -1,13 +1,12 @@
 ﻿using Domain.Interfaces;
 using Domain.Interfaces.Combat;
 using Domain.Models.Abilities.Effects.Conditions;
+using Domain.Models.Abilities.Effects.Duration;
 using Domain.Models.Abilities.Effects.Intervals;
-using Domain.Models.Abilities.Effects.Timed;
 using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Abilities.Effects.Usages;
 using Domain.Models.Combat;
 using Domain.Models.Damages;
-using Domain.Models.Entities;
 using Domain.Models.Entities.Creatures;
 
 namespace Domain.Models.Abilities.Effects.Actions;

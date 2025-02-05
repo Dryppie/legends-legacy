@@ -60,7 +60,7 @@ public class CombatInteractionManager : ICombatInteractionManager
         var weapon = actor.Equipment.FirstOrDefault(e => e.EquipmentType == EquipmentType.Weapon)
                      ?? new Weapon { DamageType = DamageType.Physical };
 
-        int finalDamage = (int)baseDamage + (int)actor.CombatAttributes[AttributeType.Strength];
+        int finalDamage = (int)baseDamage + (int)(actor.CombatAttributes[AttributeType.Strength] / 6); //TODO: Need proper calculation. Likely scaling of weapon
         // Potential for more complex calculations, crit chance, etc.
         return finalDamage;
     }

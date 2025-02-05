@@ -1,8 +1,8 @@
 ﻿using Application.Interfaces.Services.LL;
 using Application.UseCases.Inventories.Events;
+using Common.Helpers;
 using Domain.Components.Attributes;
 using Domain.Extensions;
-using Domain.Helpers;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
@@ -13,7 +13,6 @@ using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
 using MediatR;
 using Services.LL.Combat;
-using Services.LL.Interfaces;
 
 namespace Services.LL.CharacterActions;
 public class CombatService : ICombatService
@@ -168,7 +167,7 @@ public class CombatService : ICombatService
         LoadAbilitiesFromEssences(entities);
 
         // Load abilities
-        var loadedAttributeTasks = entities.Select(entity => Task.Run(() => EssenceLoader.LoadEssencesForCombatEntity(entity)));
+        var loadedAttributeTasks = entities.Select(entity => Task.Run(() => EssenceLoader.Instance.LoadEssencesForCombatEntity(entity)));
 
         // Calculate attributes
         var calculationTasks = entities.Select(entity => Task.Run(() => AttributeCalculator.CalculateBaseCombatAttributes(entity)));

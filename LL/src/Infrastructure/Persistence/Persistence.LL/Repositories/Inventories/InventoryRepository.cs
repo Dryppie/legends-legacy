@@ -1,8 +1,6 @@
 ﻿using Application.Common.Interfaces;
 using Common.Exceptions;
-using Common.Utilities;
-using Domain.Helpers;
-using Domain.Models.Essences;
+using Common.Helpers;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Microsoft.EntityFrameworkCore;
@@ -26,11 +24,12 @@ public class InventoryRepository : IInventoryRepository
 
         NotFoundException.ThrowIfNull(inventory, nameof(inventory), characterId);
 
+        var essenceItems = new List<EssenceItem>();
         foreach (var inventoryItem in inventory.InventoryItems)
         {
             if (inventoryItem.Item is EssenceItem essenceItem && essenceItem.Essence != null)
             {
-                essenceItem.Essence = await EssenceLoader.LoadAbilitiesForEssence(essenceItem.Essence);
+                essenceItem.Essence = EssenceLoader.Instance.LoadAbilitiesForEssence(essenceItem.Essence);
             }
         }
 

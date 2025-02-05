@@ -1,6 +1,6 @@
 ﻿using Domain.Interfaces;
 
-namespace Domain.Models.Abilities.Effects.Timed;
+namespace Domain.Models.Abilities.Effects.Duration;
 public class IndefiniteDuration : IEffectDuration
 {
     public void DecrementDuration() { }
