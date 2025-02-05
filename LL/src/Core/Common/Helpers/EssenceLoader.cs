@@ -148,7 +148,7 @@ public sealed class EssenceLoader
     /// <summary>
     /// Helper method to set source IDs for effects. 
     /// </summary>
-    private void SetSourceIdForEffects(Essence essence)
+    private static void SetSourceIdForEffects(Essence essence)
     {
         for (int i = 0; i < essence.Active.Effects.Count; i++)
         {

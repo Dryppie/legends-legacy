@@ -64,7 +64,7 @@
             "Attribute": "Accuracy",
             "Amount": 3,
             "ModifierType": "Additive",
-            "IsStackable": true
+            "Stackable": true
           },
           "Duration": {
             "Type": "IndefiniteDuration",
@@ -126,7 +126,7 @@
             "Attribute": "Strength",
             "Amount": 20,
             "ModifierType": "Flat",
-            "IsStackable": true
+            "Stackable": true
           },
           "Duration": {
             "Type": "IndefiniteDuration"
@@ -141,7 +141,7 @@
             "Attribute": "Endurance",
             "Amount": -20,
             "ModifierType": "Flat",
-            "IsStackable": true
+            "Stackable": true
           },
           "Duration": {
             "Type": "IndefiniteDuration"
@@ -391,7 +391,7 @@
             "Attribute": "Strength",
             "Amount": 10,
             "ModifierType": "Flat",
-            "IsStackable": true
+            "Stackable": true
           },
           "Duration": {
             "Type": "TimedDuration",
@@ -420,7 +420,7 @@
             "Attribute": "Health",
             "Amount": 30,
             "ModifierType": "Multiplicative",
-            "IsStackable": true
+            "Stackable": true
           },
           "Duration": {
             "Type": "IndefiniteDuration"

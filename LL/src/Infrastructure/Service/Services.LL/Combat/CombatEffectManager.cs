@@ -10,14 +10,13 @@ public class CombatEffectManager : ICombatEffectManager
 {
     private readonly ICombatEntityManager _entityManager;
     private readonly ICombatContext _combatContext;
-    private readonly List<CombatEvent> _eventLog; // Optional, if you want direct access to event logging
     private readonly Dictionary<CombatEntity, List<Effect>> _entityEffects = [];
 
     public CombatEffectManager(ICombatEntityManager entityManager, ICombatContext combatContext, List<CombatEvent> eventLog)
     {
         _entityManager = entityManager;
         _combatContext = combatContext;
-        _eventLog = eventLog;
+        _entityEffects = [];
     }
 
     public void AddEffect(CombatEntity actor, CombatEntity target, Effect effect)
@@ -147,7 +146,7 @@ public class CombatEffectManager : ICombatEffectManager
 
     public Effect? FindEffectForEntity(CombatEntity target, string sourceId)
     {
-        return _entityEffects.TryGetValue(target, out var effects) ? effects.First(e => e.Definition.SourceId.Equals(sourceId)) : null;
+        return _entityEffects.TryGetValue(target, out var effects) ? effects.FirstOrDefault(e => e.Definition.SourceId.Equals(sourceId)) : null;
     }
 
     /// <summary>

@@ -2,6 +2,7 @@
 using Domain.Models.Abilities;
 using Domain.Models.Abilities.Effects;
 using Domain.Models.Abilities.Effects.Trigger;
+using Domain.Models.Abilities.ResourceCosts;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Damages;
@@ -204,7 +205,14 @@ public class CombatSimulation : ICombatContext
 
     private void UseAbility(CombatEntity actor, AbilityDefinition ability, List<CombatEntity> opposingTeam, List<CombatEntity> ownTeam)
     {
-        if ((actor.CombatAttributes[AttributeType.Mana] - ability.Cost) < 0)
+        // Put ability on cooldown even if actor is out of mana/health
+        ability.RemainingTimeUntilUse = ability.Cooldown;
+
+        var abilityResourceTypeCost = ability.ResourceTypeCost.Equals(ResourceType.Mana)
+            ? AttributeType.Mana
+            : AttributeType.Health;
+
+        if ((actor.CombatAttributes[abilityResourceTypeCost] - ability.Cost) < 0)
         {
             //_eventLog.Add(new CombatEvent()
             //{
@@ -215,12 +223,7 @@ public class CombatSimulation : ICombatContext
             return;
         };
         // Deduct mana cost
-        actor.CombatAttributes[AttributeType.Mana] -= ability.Cost;
-
-        // Put ability on cooldown
-        ability.RemainingTimeUntilUse = ability.Cooldown;
-
-        var battleContext = new BattleContext(ownTeam, opposingTeam); // Is this needed???
+        actor.CombatAttributes[abilityResourceTypeCost] -= ability.Cost;
 
         var targetNames = new List<string>();
         var effectsToApply = new List<(CombatEntity target, Effect effectInstance)>();

@@ -12,14 +12,8 @@ public class EffectDefinition
     public IEffectInterval Interval { get; }
     public IEffectCondition Condition { get; }
     public IEffectUsage Usage { get; }
-    /// <summary>
-    /// The target to apply this effect to
-    /// </summary>
     public Targeting Targeting { get; }
     public TriggerEvent Trigger { get; }
-    /// <summary>
-    /// The target to apply the effect to after being triggered
-    /// </summary>
     public Targeting TriggerTarget { get; }
     public bool IsFlatAmount { get; }
     public int Chance { get; }

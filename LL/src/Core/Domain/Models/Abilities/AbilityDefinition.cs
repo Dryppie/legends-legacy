@@ -1,6 +1,6 @@
 ﻿using Domain.Models.Abilities.Effects;
+using Domain.Models.Abilities.ResourceCosts;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Security.AccessControl;
 
 namespace Domain.Models.Abilities;
 [NotMapped]

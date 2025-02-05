@@ -211,28 +211,26 @@ export class CombatComponent implements OnInit, OnDestroy {
 
   private handleAbilityUseEvent(event: CombatEvent) {
     const character = this.findCharacterById(event.actorId);
-    if (character) {
-      character.mana = Math.max(character.mana - event.magnitude, 0);
-    }
+    if (!character) return;
+    character.mana = Math.max(character.mana - event.magnitude, 0);
     // console.log(`Ability Use: ${event.details}`);
   }
 
   private handleDamageEvent(event: CombatEvent): void {
     const character = this.findCharacterById(event.targetId);
-    if (character) {
-      character.health = Math.max(character.health - event.magnitude, 0);
-    }
+    if (!character) return;
+    character.health = Math.max(character.health - event.magnitude, 0);
     // console.log(`Damage: ${event.details}`);
   }
 
   private handleHealEvent(event: CombatEvent): void {
     const character = this.findCharacterById(event.targetId);
-    if (character) {
-      character.health = Math.min(
-        character.health + event.magnitude,
-        character.maxHealth,
-      );
-    }
+    if (!character) return;
+
+    character.health = Math.min(
+      character.health + event.magnitude,
+      character.maxHealth,
+    );
     // console.log(`Healed: ${event.details}`);
   }
 
@@ -280,9 +278,7 @@ export class CombatComponent implements OnInit, OnDestroy {
   }
 
   private handleBuffEvent(event: CombatEvent, buffExpired: boolean = false) {
-    if (event.attribute === AttributeType.MaxHealth) {
-      this.updateCharacter(event.targetId, event.combatEntity);
-    }
+    this.updateCharacter(event.targetId, event.combatEntity);
     // if (buffExpired) console.log(`Buff Expired: ${event.details}`);
     // else console.log(`Buff: ${event.details}`);
   }
@@ -298,7 +294,6 @@ export class CombatComponent implements OnInit, OnDestroy {
   ) {
     const character = this.findCharacterById(entityId);
     if (!character) return;
-
     character.health = combatEntity.health;
     character.maxHealth = combatEntity.maxHealth;
     character.mana = combatEntity.mana;

@@ -39,6 +39,8 @@ public static class AttributeCalculator
             return;
 
         entity.CombatAttributes[attributeType] = calculatedValue;
+
+        HealthOrMana(entity, attributeType);
     }
 
     private static float GetAttributeValue(CombatEntity entity, AttributeType attributeType, float baseValue)
@@ -139,6 +141,30 @@ public static class AttributeCalculator
 
                     break;
                 }
+
+            default:
+                break;
+        }
+    }
+
+    private static void HealthOrMana(CombatEntity entity, AttributeType attribute)
+    {
+        switch (attribute)
+        {
+            case AttributeType.Health:
+                {
+                    if (entity.CombatAttributes[AttributeType.Health] > entity.CombatAttributes[AttributeType.MaxHealth])
+                        entity.CombatAttributes[AttributeType.Health] = entity.CombatAttributes[AttributeType.MaxHealth];
+                    break;
+                }
+
+            case AttributeType.Mana:
+                {
+                    if (entity.CombatAttributes[AttributeType.Mana] > entity.CombatAttributes[AttributeType.MaxMana])
+                        entity.CombatAttributes[AttributeType.Mana] = entity.CombatAttributes[AttributeType.MaxMana];
+                    break;
+                }
+
             default:
                 break;
         }

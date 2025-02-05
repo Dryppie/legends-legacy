@@ -8,30 +8,30 @@ namespace Domain.Models.Abilities.Effects.Actions;
 public class ModifyAttributeAction : IEffectAction
 {
     public AttributeModifier AttributeModifier;
-    public bool IsStackable;
+    public bool Stackable;
     public int Magnitude => 1;
 
-    public ModifyAttributeAction(AttributeModifier attributeModifier, bool isStackable)
+    public ModifyAttributeAction(AttributeModifier attributeModifier, bool stackable)
     {
         AttributeModifier = attributeModifier;
-        IsStackable = isStackable;
+        Stackable = stackable;
     }
 
     public void Execute(EffectContext context, ICombatContext combatContext)
     {
         var target = context.Target;
-
-        target.ModifyAttribute(AttributeModifier);
-
-        if (!IsStackable)
+        
+        var existingEffect = combatContext.EffectManager.FindEffectForEntity(target, context.Effect.Definition.SourceId);
+        
+        if (existingEffect != null && !Stackable) 
         {
-            var existingEffect = combatContext.EffectManager.FindEffectForEntity(target, context.Effect.Definition.SourceId);
-
-            if (existingEffect != null)
-            {
-                combatContext.EffectManager.RenewEffect(existingEffect);
-            }
+            // If an effect exists, renew it, but only if it isn't stackable
+            combatContext.EffectManager.RenewEffect(existingEffect);
+            return;
         }
+
+        // If an effect doesn't exist, always apply it
+        target.ModifyAttribute(AttributeModifier);
 
         context.EventType = AttributeModifier.Amount > 0 ? EventType.Buff : EventType.Debuff;
         LogEvent(context, combatContext, target);
@@ -46,11 +46,6 @@ public class ModifyAttributeAction : IEffectAction
         context.EventType = AttributeModifier.Amount > 0 ? EventType.BuffExpired : EventType.DebuffExpired;
 
         LogEvent(context, combatContext, target);
-    }
-
-    private void RenewEffectDuration(Effect existingEffect)
-    {
-        existingEffect.Definition.Duration.RenewDuration();
     }
 
     private void LogEvent(EffectContext context, ICombatContext combatContext, CombatEntity target)
