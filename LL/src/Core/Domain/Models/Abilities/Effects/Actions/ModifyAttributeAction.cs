@@ -23,8 +23,17 @@ public class ModifyAttributeAction : IEffectAction
 
         target.ModifyAttribute(AttributeModifier);
 
-        context.EventType = AttributeModifier.Amount > 0 ? EventType.Buff : EventType.Debuff;
+        if (!IsStackable)
+        {
+            var existingEffect = combatContext.EffectManager.FindEffectForEntity(target, context.Effect.Definition.SourceId);
 
+            if (existingEffect != null)
+            {
+                combatContext.EffectManager.RenewEffect(existingEffect);
+            }
+        }
+
+        context.EventType = AttributeModifier.Amount > 0 ? EventType.Buff : EventType.Debuff;
         LogEvent(context, combatContext, target);
     }
 
@@ -37,6 +46,11 @@ public class ModifyAttributeAction : IEffectAction
         context.EventType = AttributeModifier.Amount > 0 ? EventType.BuffExpired : EventType.DebuffExpired;
 
         LogEvent(context, combatContext, target);
+    }
+
+    private void RenewEffectDuration(Effect existingEffect)
+    {
+        existingEffect.Definition.Duration.RenewDuration();
     }
 
     private void LogEvent(EffectContext context, ICombatContext combatContext, CombatEntity target)

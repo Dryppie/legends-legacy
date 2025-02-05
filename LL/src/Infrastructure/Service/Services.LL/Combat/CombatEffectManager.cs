@@ -140,6 +140,16 @@ public class CombatEffectManager : ICombatEffectManager
         }
     }
 
+    public void RenewEffect(Effect effect)
+    {
+        effect.Definition.Duration.RenewDuration();
+    }
+
+    public Effect? FindEffectForEntity(CombatEntity target, string sourceId)
+    {
+        return _entityEffects.TryGetValue(target, out var effects) ? effects.First(e => e.Definition.SourceId.Equals(sourceId)) : null;
+    }
+
     /// <summary>
     /// Creates a fully populated EffectContext to be passed to the effect when executing.
     /// You can adjust this to provide OwnTeam, EnemyTeam, CurrentTime, etc.

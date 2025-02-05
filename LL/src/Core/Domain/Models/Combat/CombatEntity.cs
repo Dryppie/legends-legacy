@@ -67,6 +67,11 @@ public class CombatEntity
         AttributeCalculator.CalculateCombatAttributeByType(this, attributeModifier.AttributeType);
     }
 
+    public AttributeModifier? FindModifier(string sourceId)
+    {
+        return TemporaryModifiers.First(m => m.SourceId.Equals(sourceId, StringComparison.OrdinalIgnoreCase));
+    }
+
     public void ModifyStatuses(string status, bool remove = false)
     {
         if (remove)

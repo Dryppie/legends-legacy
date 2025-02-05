@@ -20,4 +20,6 @@ public interface ICombatEffectManager
     /// Trigger effects that respond to a given event, such as damage taken or healing received.
     /// </summary>
     void TriggerEffects(TriggerEvent triggerEvent, CombatEntity target, CombatEntity? actor = null, int magnitude = -1);
+    Effect? FindEffectForEntity(CombatEntity target, string sourceId);
+    void RenewEffect(Effect existingEffect);
 }

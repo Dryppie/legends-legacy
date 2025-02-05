@@ -63,7 +63,8 @@
             "Type": "ModifyAttribute",
             "Attribute": "Accuracy",
             "Amount": 3,
-            "ModifierType": "Additive"
+            "ModifierType": "Additive",
+            "IsStackable": true
           },
           "Duration": {
             "Type": "IndefiniteDuration",
@@ -124,7 +125,8 @@
             "Type": "ModifyAttribute",
             "Attribute": "Strength",
             "Amount": 20,
-            "ModifierType": "Flat"
+            "ModifierType": "Flat",
+            "IsStackable": true
           },
           "Duration": {
             "Type": "IndefiniteDuration"
@@ -138,7 +140,8 @@
             "Type": "ModifyAttribute",
             "Attribute": "Endurance",
             "Amount": -20,
-            "ModifierType": "Flat"
+            "ModifierType": "Flat",
+            "IsStackable": true
           },
           "Duration": {
             "Type": "IndefiniteDuration"
@@ -387,11 +390,12 @@
             "Type": "ModifyAttribute",
             "Attribute": "Strength",
             "Amount": 10,
-            "ModifierType": "Flat"
+            "ModifierType": "Flat",
+            "IsStackable": true
           },
           "Duration": {
             "Type": "TimedDuration",
-            "Duration": 100
+            "Duration": 200
           },
           "Targeting": "Self",
           "Trigger": "None",
@@ -415,7 +419,8 @@
             "Type": "ModifyAttribute",
             "Attribute": "Health",
             "Amount": 30,
-            "ModifierType": "Multiplicative"
+            "ModifierType": "Multiplicative",
+            "IsStackable": true
           },
           "Duration": {
             "Type": "IndefiniteDuration"
