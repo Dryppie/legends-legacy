@@ -21,12 +21,6 @@ public class CombatEffectManager : ICombatEffectManager
 
     public void AddEffect(CombatEntity actor, CombatEntity target, Effect effect)
     {
-        if (!_entityEffects.TryGetValue(target, out var effects))
-        {
-            effects = new List<Effect>();
-            _entityEffects[target] = effects;
-        }
-
         // If the effect should trigger immediately (no trigger event needed)
         if (effect.Definition.Duration is NoDuration)
         {
@@ -39,6 +33,12 @@ public class CombatEffectManager : ICombatEffectManager
         {
             var context = CreateEffectContext(effect, target, actor);
             effect.ExecuteAction(context, _combatContext);
+        }
+
+        if (!_entityEffects.TryGetValue(target, out var effects))
+        {
+            effects = [];
+            _entityEffects[target] = effects;
         }
 
         effects.Add(effect);

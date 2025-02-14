@@ -1,8 +1,9 @@
 ﻿namespace Domain.Interfaces;
-public interface IEffectUsage
+public interface IUsage
 {
     bool CanUse();
     void ConsumeUse();
     void Recharge();
-    IEffectUsage Clone();
+    IUsage Clone();
+    void Reset();
 }

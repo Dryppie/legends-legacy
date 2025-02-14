@@ -43,9 +43,9 @@ public class ModifyAttributeAction : IEffectAction
 
         context.Target.ModifyAttribute(AttributeModifier, remove: true);
 
-        context.EventType = AttributeModifier.Amount > 0 ? EventType.BuffExpired : EventType.DebuffExpired;
-
-        LogEvent(context, combatContext, target);
+        // At the moment it isn't necessary to log the expiration of an effect. It simply just have to disappear
+        // context.EventType = AttributeModifier.Amount > 0 ? EventType.BuffExpired : EventType.DebuffExpired;
+        // LogEvent(context, combatContext, target);
     }
 
     private void LogEvent(EffectContext context, ICombatContext combatContext, CombatEntity target)

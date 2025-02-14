@@ -53,6 +53,7 @@ public class CombatEntity
     {
         foreach (var ability in Abilities)
         {
+            ability.Usage.Recharge();
             ability.RemainingTimeUntilUse--;
         }
     }
@@ -92,7 +93,14 @@ public class CombatEntity
 
         foreach (var ability in Abilities)
         {
+            ability.Usage.Reset();
+
             ability.RemainingTimeUntilUse = ability.Cooldown;
+
+            foreach (var effect in ability.Effects)
+            {
+                effect.Usage.Reset();
+            }
         }
 
         TemporaryModifiers = [];

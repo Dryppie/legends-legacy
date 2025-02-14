@@ -14,6 +14,7 @@ public static class EssenceJsonReader
             new AbilityTypeConverter(),
             new TargetingConverter(),
             new TriggerEventConverter(),
+            new ResourceTypeConverter(),
             new InterfaceConverterFactory(),
             new EffectConverter(),
             new JsonStringEnumConverter()

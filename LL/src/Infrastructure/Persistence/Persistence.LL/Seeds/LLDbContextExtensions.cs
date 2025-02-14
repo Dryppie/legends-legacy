@@ -446,8 +446,8 @@ public static class LLDbContextExtensions
         await context.LootTables.AddRangeAsync(treeLootTable, treeLootTableCommon, treeLootTableLegendary, oakLootTable, oakLootTableCommon, oakLootTableLegendary, birchLootTable, birchLootTableCommon, birchLootTableRare, birchLootTableLegendary);
 
         var treeGatheringNode = new GatheringNode { Id = "woodcutting_tree", Name = "Tree", GatheringType = GatheringType.Woodcutting, LootTableId = treeLootTable.Id };
-        var oakGatheringNode = new GatheringNode { Id = "woodcutting_oak", Name = "Oak", GatheringType = GatheringType.Woodcutting, LootTableId = oakLootTable.Id };
-        var birchGatheringNode = new GatheringNode { Id = "woodcutting_birch", Name = "Birch", GatheringType = GatheringType.Woodcutting, LootTableId = birchLootTable.Id };
+        var oakGatheringNode = new GatheringNode { Id = "woodcutting_oak", Name = "Oak Tree", GatheringType = GatheringType.Woodcutting, LootTableId = oakLootTable.Id };
+        var birchGatheringNode = new GatheringNode { Id = "woodcutting_birch", Name = "Birch Tree", GatheringType = GatheringType.Woodcutting, LootTableId = birchLootTable.Id };
 
         await context.GatheringNodes.AddRangeAsync(treeGatheringNode, oakGatheringNode, birchGatheringNode);
     }

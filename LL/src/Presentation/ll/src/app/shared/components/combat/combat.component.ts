@@ -210,10 +210,7 @@ export class CombatComponent implements OnInit, OnDestroy {
   }
 
   private handleAbilityUseEvent(event: CombatEvent) {
-    const character = this.findCharacterById(event.actorId);
-    if (!character) return;
-    character.mana = Math.max(character.mana - event.magnitude, 0);
-    // console.log(`Ability Use: ${event.details}`);
+    this.updateCharacter(event.actorId, event.combatEntity);
   }
 
   private handleDamageEvent(event: CombatEvent): void {
@@ -245,21 +242,13 @@ export class CombatComponent implements OnInit, OnDestroy {
   }
 
   private handleSummonEvent(event: CombatEvent): void {
-    const summonedCharacter: SimpleCombatEntityDto = {
-      name: 'Blood Imp',
-      id: event.targetId,
-      health: 100,
-      maxHealth: 100,
-      mana: 0,
-      maxMana: 0,
-    };
-
+    const summonedCharacter = event.combatEntity;
+    console.log(summonedCharacter);
     if (this.isEntityInPlayerTeam(event.actorId)) {
       this.playerCharacters.push(summonedCharacter);
     } else {
       this.enemyCharacters.push(summonedCharacter);
     }
-    // console.log(`Summon: ${event.details}`);
   }
 
   private handleSummonExpiredEvent(event: CombatEvent): void {

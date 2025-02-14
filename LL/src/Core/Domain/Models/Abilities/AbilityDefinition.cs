@@ -1,4 +1,6 @@
-﻿using Domain.Models.Abilities.Effects;
+﻿using Domain.Interfaces;
+using Domain.Models.Abilities.Effects;
+using Domain.Models.Abilities.Effects.Usages;
 using Domain.Models.Abilities.ResourceCosts;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -9,6 +11,12 @@ public class AbilityDefinition
     public string Id { get; set; } = string.Empty; // Unique identifier
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    private IUsage? _usage;
+    public IUsage Usage
+    {
+        get => _usage ??= new UnlimitedUsage();
+        set => _usage = value;
+    }
     public AbilityType Type { get; set; } // Active or Passive
     public int Cooldown { get; set; }
     public int RemainingTimeUntilUse { get; set; }

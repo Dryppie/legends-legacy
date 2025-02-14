@@ -62,12 +62,12 @@ public class EffectConverter : JsonConverter<EffectDefinition>
             duration = new NoDuration(); // Fallback in case of error
         }
 
-        IEffectUsage usage;
-        if (root.TryGetProperty("Interval", out var usageElement)
+        IUsage usage;
+        if (root.TryGetProperty("Usage", out var usageElement)
             && usageElement.ValueKind != JsonValueKind.Null
             && usageElement.ValueKind != JsonValueKind.Undefined)
         {
-            usage = JsonSerializer.Deserialize<IEffectUsage>(usageElement.GetRawText(), options)
+            usage = JsonSerializer.Deserialize<IUsage>(usageElement.GetRawText(), options)
                        ?? new UnlimitedUsage(); // Fallback in case of error
         }
         else

@@ -4,9 +4,9 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Common.Utilities;
-public class EffectUsageConverter : JsonConverter<IEffectUsage>
+public class UsageConverter : JsonConverter<IUsage>
 {
-    public override IEffectUsage Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    public override IUsage Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
         using (var jsonDoc = JsonDocument.ParseValue(ref reader))
         {
@@ -30,7 +30,7 @@ public class EffectUsageConverter : JsonConverter<IEffectUsage>
         }
     }
 
-    public override void Write(Utf8JsonWriter writer, IEffectUsage value, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, IUsage value, JsonSerializerOptions options)
     {
         throw new NotImplementedException();
     }

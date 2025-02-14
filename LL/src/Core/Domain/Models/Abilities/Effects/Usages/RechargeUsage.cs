@@ -1,15 +1,17 @@
 ﻿using Domain.Interfaces;
 
 namespace Domain.Models.Abilities.Effects.Usages;
-public class RechargeUsage : IEffectUsage
+public class RechargeUsage : IUsage
 {
+    private readonly int _initialUses;
     private int _remainingUses;
     private readonly int _rechargeInterval;
     private int _ticksUntilNextRecharge;
 
-    public RechargeUsage(int maxUses, int rechargeInterval)
+    public RechargeUsage(int initialUses, int rechargeInterval)
     {
-        _remainingUses = maxUses;
+        _initialUses = initialUses;
+        _remainingUses = initialUses;
         _rechargeInterval = rechargeInterval;
         _ticksUntilNextRecharge = 0;
     }
@@ -25,5 +27,7 @@ public class RechargeUsage : IEffectUsage
             _ticksUntilNextRecharge = 0;
         }
     }
-    public IEffectUsage Clone() => new RechargeUsage(_remainingUses, _rechargeInterval);
+    public IUsage Clone() => new RechargeUsage(_remainingUses, _rechargeInterval);
+
+    public void Reset() => _remainingUses = _initialUses;
 }

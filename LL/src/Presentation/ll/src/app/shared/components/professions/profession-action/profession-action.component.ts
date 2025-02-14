@@ -26,15 +26,12 @@ export class ProfessionActionComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.characterActionsService.currentAction$.subscribe((action) => {
         this.currentAction = action;
-        if (
+        this.isGatheringAction =
           this.currentAction?.characterActionType ===
-          CharacterActionType.Gathering
-        ) {
-          this.isGatheringAction = true;
+          CharacterActionType.Gathering;
+
+        if (this.isGatheringAction)
           this.performingAction = `Cutting: ${action?.gatheringActionDetails!.name}`;
-        } else {
-          this.isGatheringAction = false;
-        }
       }),
     );
   }

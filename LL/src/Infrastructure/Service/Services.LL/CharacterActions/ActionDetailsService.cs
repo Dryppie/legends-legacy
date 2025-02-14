@@ -31,7 +31,7 @@ public class ActionDetailsService : IActionDetailsService
         GatheringNode gatheringNode = await _gatheringNodeService.GetGatheringNodeById(gatheringNodeId, cancellationToken);
         var gatheringDetails = new GatheringActionDetails
         {
-            Name = gatheringNodeId,
+            Name = gatheringNode.Name,
             GatheringType = gatheringType,
             LootTableId = gatheringNode.LootTableId
         };

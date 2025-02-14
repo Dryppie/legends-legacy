@@ -11,7 +11,7 @@ public class EffectDefinition
     public IEffectDuration Duration { get; }
     public IEffectInterval Interval { get; }
     public IEffectCondition Condition { get; }
-    public IEffectUsage Usage { get; }
+    public IUsage Usage { get; }
     public Targeting Targeting { get; }
     public TriggerEvent Trigger { get; }
     public Targeting TriggerTarget { get; }
@@ -39,7 +39,7 @@ public class EffectDefinition
                   IEffectDuration duration,
                   IEffectCondition condition,
                   IEffectInterval interval,
-                  IEffectUsage usage,
+                  IUsage usage,
                   List<EffectTag> effectTags,
                   Targeting targeting = Targeting.None,
                   TriggerEvent trigger = TriggerEvent.None,
@@ -62,5 +62,25 @@ public class EffectDefinition
         Chance = chance;
         AttackType = attackType;
         DamageType = damageType;
+    }
+
+    public EffectDefinition Clone()
+    {
+        var copy = new EffectDefinition(action: Action,
+                            duration: Duration.Clone(),
+                            condition: Condition.Clone(),
+                            interval: Interval.Clone(),
+                            usage: Usage, // Do not close Usage, as we need the reference to the original object. Otherwise Usage never reaches 0
+                            targeting: Targeting,
+                            trigger: Trigger,
+                            triggerTarget: TriggerTarget,
+                            isFlatAmount: IsFlatAmount,
+                            chance: Chance,
+                            effectTags: EffectTags,
+                            attackType: AttackType,
+                            damageType: DamageType);
+        copy.Log = Log;
+
+        return copy;
     }
 }

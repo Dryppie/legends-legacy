@@ -69,14 +69,12 @@ public class CombatService : ICombatService
 
             //combatsPerformed++;
 
-            // Reset entities when combat is over, but only if there's going to be another fight
+            // Reset entities when combat is over
             // Also process loot, since it's fight that should have already happened
             // If it's a fight where the frontend has yet to display the outcome, the loot should first be processed when the fight is 'over'
-            if (characterAction.UpdatedAt < now)
-            {
-                ResetEntitiesForCombat([.. combatPlayerEntities, .. combatEnemyEntities]);
-            }
-
+            
+            ResetEntitiesForCombat([.. combatPlayerEntities, .. combatEnemyEntities]);
+            
             if (lastCombatResult.Outcome.Equals(BattleOutcome.Victory))
             {
                 lastCombatResult.Loot = _lootService.GenerateIdleCombatLootAsync(enemyCharacters);

@@ -292,10 +292,15 @@
     "Active": {
       "Id": "fireball_01",
       "Name": "Fireball",
-      "Description": "Hurls a fireball that deals {damage1} damage on impact and applies a burn to the target.",
+      "Description": "Hurls a fireball that deals {damage1} damage on impact and applies a burn to the target. 3 uses.",
       "Type": "Active",
-      "Cooldown": 120,
+      "Cooldown": 1,
       "Cost": 7,
+      "Usage": {
+        "Type": "LimitedUsage",
+        "Uses": 3
+      },
+      "ResourceTypeCost": "Mana",
       "Effects": [
         {
           "Action": {
@@ -384,6 +389,7 @@
       "Type": "Active",
       "Cooldown": 150,
       "Cost": 10,
+      "ResourceTypeCost": "Mana",
       "Effects": [
         {
           "Action": {
@@ -395,7 +401,11 @@
           },
           "Duration": {
             "Type": "TimedDuration",
-            "Duration": 200
+            "Duration": 50
+          },
+          "Usage": {
+            "Type": "LimitedUsage",
+            "Uses": 1
           },
           "Targeting": "Self",
           "Trigger": "None",
@@ -425,6 +435,10 @@
           "Duration": {
             "Type": "IndefiniteDuration"
           },
+          "Usage": {
+            "Type": "LimitedUsage",
+            "Uses": 1
+          },
           "Condition": {
             "Type": "HealthCondition",
             "HealthPercentage": 80,
@@ -448,14 +462,15 @@
       "Description": "Summon a low level demon.",
       "Type": "Active",
       "Cooldown": 20,
-      "Cost": 50,
+      "Cost": 30,
+      "ResourceTypeCost": "Health",
       "ActivationLog": "{Actor} used {Ability}.",
       "Effects": [
         {
           "Action": {
             "Type": "Summon",
             "SummonId": "monster",
-            "SummonDuration": 300
+            "SummonDuration": 150
           },
           "Duration": {
             "Type": "IndefiniteDuration",

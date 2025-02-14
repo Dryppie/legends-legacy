@@ -1,13 +1,20 @@
 ﻿using Domain.Interfaces;
 
 namespace Domain.Models.Abilities.Effects.Usages;
-public class LimitedUsage : IEffectUsage
+public class LimitedUsage : IUsage
 {
+    private readonly int _initialUses;
     private int _remainingUses;
-    public LimitedUsage(int maxUses) => _remainingUses = maxUses;
+    public LimitedUsage(int initialUses)
+    {
+        _initialUses = initialUses;
+        _remainingUses = initialUses;
+    }
 
     public bool CanUse() => _remainingUses > 0;
     public void ConsumeUse() => _remainingUses--;
     public void Recharge() { }
-    public IEffectUsage Clone() => new LimitedUsage(_remainingUses);
+    public IUsage Clone() => new LimitedUsage(_remainingUses);
+
+    public void Reset() => _remainingUses = _initialUses;
 }

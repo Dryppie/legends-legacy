@@ -76,17 +76,19 @@ public class CombatSimulation : ICombatContext
                 ability.RemainingTimeUntilUse = ability.Cooldown;
                 if (ability.Type.Equals(AbilityType.Passive))
                 {
-                    foreach (var effectDefinition in ability.Effects)
+                    foreach (var effectTemplate in ability.Effects)
                     {
-                        var effect = new Effect()
+                        var effectDefinitionCopy = effectTemplate.Clone();
+
+                        var effectInstance = new Effect()
                         {
-                            Definition = effectDefinition,
+                            Definition = effectDefinitionCopy,
                             Caster = entity,
                             Owner = entity,
                         };
                         // TODO: Add Targeting logic, since a passive ability might read -
                         // 'At the start of combat, apply X to Y targets
-                        EffectManager.AddEffect(entity, entity, effect);
+                        EffectManager.AddEffect(entity, entity, effectInstance);
                     }
                 }
             }
@@ -212,7 +214,11 @@ public class CombatSimulation : ICombatContext
             ? AttributeType.Mana
             : AttributeType.Health;
 
-        if ((actor.CombatAttributes[abilityResourceTypeCost] - ability.Cost) < 0)
+        // Determine the minimum resource value allowed after paying the cost
+        var minimumResourceAfterCost = (abilityResourceTypeCost == AttributeType.Mana) ? 0 : 1;
+
+        // Check if subtracting the cost would drop below the minimum
+        if ((actor.CombatAttributes[abilityResourceTypeCost] - ability.Cost) < minimumResourceAfterCost)
         {
             //_eventLog.Add(new CombatEvent()
             //{
@@ -222,16 +228,23 @@ public class CombatSimulation : ICombatContext
             //});
             return;
         };
-        // Deduct mana cost
-        actor.CombatAttributes[abilityResourceTypeCost] -= ability.Cost;
+
+        // An ability must be able to be used
+        if (!ability.Usage.CanUse()) return;
+        ability.Usage.ConsumeUse();
 
         var targetNames = new List<string>();
         var effectsToApply = new List<(CombatEntity target, Effect effectInstance)>();
         var targetsPerTargeting = new Dictionary<Targeting, List<CombatEntity>>(); // Cache for targets per Targeting type
 
+
         // Apply each effect of the ability
         foreach (var effectTemplate in ability.Effects)
         {
+            if (!effectTemplate.Usage.CanUse())
+            {
+                continue;
+            }
             // If multiple effects on the same ability has the same targeting,
             // the effects should be applied to the same targets
             if (!targetsPerTargeting.TryGetValue(effectTemplate.Targeting, out var targets))
@@ -245,22 +258,7 @@ public class CombatSimulation : ICombatContext
             foreach (var target in targets)
             {
                 targetNames.Add(target.Name);
-                var effectDefinitionCopy = new EffectDefinition(action: effectTemplate.Action,
-                    duration: effectTemplate.Duration.Clone(),
-                    condition: effectTemplate.Condition.Clone(),
-                    interval: effectTemplate.Interval.Clone(),
-                    usage: effectTemplate.Usage.Clone(),
-                    targeting: effectTemplate.Targeting,
-                    trigger: effectTemplate.Trigger,
-                    triggerTarget: effectTemplate.TriggerTarget,
-                    isFlatAmount: effectTemplate.IsFlatAmount,
-                    chance: effectTemplate.Chance,
-                    effectTags: effectTemplate.EffectTags,
-                    attackType: effectTemplate.AttackType,
-                    damageType: effectTemplate.DamageType)
-                {
-                    Log = effectTemplate.Log
-                };
+                var effectDefinitionCopy = effectTemplate.Clone();
 
                 var effectInstance = new Effect()
                 {
@@ -269,31 +267,24 @@ public class CombatSimulation : ICombatContext
                     Owner = target,
                 };
 
-                //var effectInstance = new EffectDefinition(
-                //action: effectTemplate.Action,
-                //duration: effectTemplate.Duration.Clone(),
-                //condition: effectTemplate.Condition.Clone(),
-                //interval: effectTemplate.Interval.Clone(),
-                //usage: effectTemplate.Usage.Clone(),
-                //targeting: effectTemplate.Targeting,
-                //trigger: effectTemplate.Trigger,
-                //applyOnSelf: effectTemplate.ApplyOnSelf,
-                //isFlatAmount: effectTemplate.IsFlatAmount,
-                //chance: effectTemplate.Chance,
-                //effectTags: effectTemplate.EffectTags,
-                //attackType: effectTemplate.AttackType,
-                //damageType: effectTemplate.DamageType
-                //)
-                //{
-                //    Log = effectTemplate.Log
-                //};
-
                 // Defer effect application until after logging
                 effectsToApply.Add((target, effectInstance));
             }
         }
         var uniqueNames = targetNames.Distinct();
         var formattedNames = string.Join(", ", uniqueNames);
+
+        // Deduct mana cost in the end, as this should only happen if the ability has actually been used
+        actor.CombatAttributes[abilityResourceTypeCost] -= ability.Cost;
+
+        var simpleCombatEntity = new SimpleCombatEntity()
+        {
+            Id = actor.Id,
+            MaxHealth = actor.GetAttributeValue(AttributeType.MaxHealth),
+            Health = actor.GetAttributeValue(AttributeType.Health),
+            MaxMana = actor.GetAttributeValue(AttributeType.MaxMana),
+            Mana = actor.GetAttributeValue(AttributeType.Mana)
+        };
 
         // Actor has cast Ability log
         _eventLog.Add(new CombatEvent()
@@ -302,6 +293,7 @@ public class CombatSimulation : ICombatContext
             Timestamp = CurrentTime,
             EventType = EventType.AbilityUse,
             Magnitude = ability.Cost,
+            CombatEntity = simpleCombatEntity,
             Details = ability.ActivationLog
             .Replace("{Actor}", actor.Name)
             .Replace("{Target}", formattedNames)

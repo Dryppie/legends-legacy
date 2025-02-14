@@ -5,6 +5,7 @@ using Domain.Models.Essences;
 using System.Text.Json;
 
 namespace Common.Helpers;
+// TODO: Make it such that whenever I edit the json file, it'll trigger an endpoint that causes this to reload all the essences.
 public sealed class EssenceLoader
 {
     private static readonly object _lock = new object();

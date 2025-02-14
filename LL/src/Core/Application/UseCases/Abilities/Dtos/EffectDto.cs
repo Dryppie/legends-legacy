@@ -12,7 +12,7 @@ public class EffectDto : IMapFrom<EffectDefinition>
     public IEffectDuration Duration { get; }
     public IEffectInterval Interval { get; }
     public IEffectCondition Condition { get; }
-    public IEffectUsage Usage { get; }
+    public IUsage Usage { get; }
     public Targeting Targeting { get; }
     public TriggerEvent Trigger { get; }
     public int Chance { get; }

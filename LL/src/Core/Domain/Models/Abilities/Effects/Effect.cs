@@ -29,7 +29,10 @@ public class Effect
 
     public void ExecuteAction(EffectContext context, ICombatContext combatContext)
     {
-        if (!Definition.Usage.CanUse()) return;
+        if (!Definition.Usage.CanUse())
+        {
+            return;
+        }
         if (!Definition.Condition.IsSatisfied(context)) return;
 
         // If the chance fails, no need to log anything. Lack of log should be enough to display something didn't trigger

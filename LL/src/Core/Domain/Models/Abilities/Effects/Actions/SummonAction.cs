@@ -5,6 +5,7 @@ using Domain.Models.Abilities.Effects.Duration;
 using Domain.Models.Abilities.Effects.Intervals;
 using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Abilities.Effects.Usages;
+using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Damages;
 using Domain.Models.Entities.Creatures;
@@ -57,13 +58,23 @@ public class SummonAction : IEffectAction
         // Add the summoned entity to the caster's team
         combatContext.EntityManager.AddEntityToOwnTeam(context.Actor!, summonedCreature);
 
+        var simpleCombatEntity = new SimpleCombatEntity()
+        {
+            Id = summonedCreature.Id,
+            Name = summonedCreature.Name,
+            MaxHealth = summonedCreature.GetAttributeValue(AttributeType.MaxHealth),
+            Health = summonedCreature.GetAttributeValue(AttributeType.Health),
+            MaxMana = summonedCreature.GetAttributeValue(AttributeType.MaxMana),
+            Mana = summonedCreature.GetAttributeValue(AttributeType.Mana)
+        };
+
         context.Target = summonedCreature;
         context.EventType = EventType.Summon;
         context.Details = context.Details
             .Replace("{Actor}", context.Actor!.Name)
             .Replace("{Target}", summonedCreature.Name);
 
-        combatContext.LogEffectExecution(context);
+        combatContext.LogEffectExecution(context, simpleCombatEntity);
     }
 
     public void OnExpireExecute(EffectContext context, ICombatContext combatContext)
