@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 
-namespace Persistence.LL.Configurations;
+namespace Persistence.LL.Configurations.CharacterActions;
 public class CharacterActionConfiguration : IEntityTypeConfiguration<CharacterAction>
 {
     public void Configure(EntityTypeBuilder<CharacterAction> builder)

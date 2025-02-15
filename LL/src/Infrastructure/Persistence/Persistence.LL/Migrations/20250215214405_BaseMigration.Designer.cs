@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250214173838_BaseMigration")]
+    [Migration("20250215214405_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -259,11 +259,33 @@ namespace Persistence.LL.Migrations
                     b.Property<int?>("RegionId")
                         .HasColumnType("int");
 
+                    b.Property<string>("SpawnProbabilities")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("RegionId");
 
                     b.ToTable("Areas");
+                });
+
+            modelBuilder.Entity("Domain.Models.Regions.Areas.AreaCreature", b =>
+                {
+                    b.Property<string>("AreaId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("CreatureId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<float>("WeightedSpawnRate")
+                        .HasColumnType("real");
+
+                    b.HasKey("AreaId", "CreatureId");
+
+                    b.HasIndex("CreatureId");
+
+                    b.ToTable("AreaCreature");
                 });
 
             modelBuilder.Entity("Domain.Models.Regions.Region", b =>
@@ -576,6 +598,10 @@ namespace Persistence.LL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("SpawnProbabilities")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasDiscriminator().HasValue(0);
                 });
 
@@ -621,16 +647,11 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Entities.Entity");
 
-                    b.Property<string>("AreaId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<int>("ExperienceReward")
                         .HasColumnType("int");
 
                     b.Property<Guid>("LootTableId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.HasIndex("AreaId");
 
                     b.HasIndex("LootTableId");
 
@@ -768,6 +789,21 @@ namespace Persistence.LL.Migrations
                         .HasForeignKey("RegionId");
                 });
 
+            modelBuilder.Entity("Domain.Models.Regions.Areas.AreaCreature", b =>
+                {
+                    b.HasOne("Domain.Models.Regions.Areas.Area", null)
+                        .WithMany("Creatures")
+                        .HasForeignKey("AreaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Entities.Creatures.Creature", null)
+                        .WithMany()
+                        .HasForeignKey("CreatureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Domain.Models.Users.IPAddresses.IPAddress", b =>
                 {
                     b.HasOne("Domain.Models.Users.AppUser", null)
@@ -872,10 +908,6 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.Entities.Creatures.Creature", b =>
                 {
-                    b.HasOne("Domain.Models.Regions.Areas.Area", null)
-                        .WithMany("Creatures")
-                        .HasForeignKey("AreaId");
-
                     b.HasOne("Domain.Models.LootTables.LootTable", "LootTable")
                         .WithMany()
                         .HasForeignKey("LootTableId")

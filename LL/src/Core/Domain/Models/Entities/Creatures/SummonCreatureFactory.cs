@@ -20,7 +20,7 @@ public static class SummonCreatureFactory
         var summonedCombatEntity = new CombatEntity(summonedCreature);
         summonedCombatEntity.IsSummoned = true;
 
-        summonedCombatEntity.BaseAttributes = EntityBaseAttributeHelper.CreateEntityAttributes(summonedCombatEntity.Id);
+        summonedCombatEntity.BaseAttributes = EntityBaseAttributeHelper.CreateEntityAttributes(Guid.Parse(summonedCombatEntity.Id));
         AttributeCalculator.CalculateBaseCombatAttributes(summonedCombatEntity);
 
         return summonedCombatEntity;

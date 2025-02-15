@@ -240,6 +240,14 @@ public static class LLDbContextExtensions
 
             await context.Creatures.AddRangeAsync(lumoRuinsCreatures);
 
+            var lumoRuinsAreaCreatures = new List<AreaCreature>
+            {
+                new AreaCreature() { AreaId = " region_01_area_01", CreatureId = goblinId, WeightedSpawnRate = 0.45f },
+                new AreaCreature() { AreaId = " region_01_area_01", CreatureId = goblinWarriorId, WeightedSpawnRate = 0.2f },
+                new AreaCreature() { AreaId = " region_01_area_01", CreatureId = goblinArcherId, WeightedSpawnRate = 0.2f },
+                new AreaCreature() { AreaId = " region_01_area_01", CreatureId = largeRatId, WeightedSpawnRate = 0.25f },
+            };
+
             // Create attributes
             var attributes = new List<EntityAttribute>();
             attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(goblinId));
@@ -256,10 +264,17 @@ public static class LLDbContextExtensions
                     {
                         Id = "region_01_area_01", // region, [area, dungeon, raid, or rift], area
                         Name = "Lumo Ruins",
-                        Creatures = lumoRuinsCreatures
+                        Creatures = lumoRuinsAreaCreatures,
+                        SpawnProbabilities = new List<float>
+                        {
+                            0.85f,
+                            0.08f,
+                            0.05f,
+                            0.02f,
+                        }
                     }
                 };
-
+                
                 await context.Areas.AddRangeAsync(areas);
 
                 var regions = new List<Region>

@@ -176,7 +176,7 @@ public class CombatSimulation : ICombatContext
                 EffectManager.TriggerEffects(TriggerEvent.OnDodge, target, actor);
                 return;
             }
-            var damage = InteractionManager.CalculateBasicAttackDamage(actor, target, 5);
+            var damage = InteractionManager.CalculateBasicAttackDamage(actor, target, 4);
 
             CombatEvent(actor, target, EventType.Damage, damage, $"{actor.Name} hit {target.Name} with a basic attack, dealing {damage} damage.");
 

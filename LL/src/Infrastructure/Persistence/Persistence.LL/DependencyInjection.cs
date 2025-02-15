@@ -9,6 +9,7 @@ using Domain.Models.GatheringNodes;
 using Domain.Models.Inventories;
 using Domain.Models.LootTables;
 using Domain.Models.Regions;
+using Domain.Models.Regions.Areas;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -23,6 +24,7 @@ using Persistence.LL.Repositories.GatheringNodes;
 using Persistence.LL.Repositories.Inventories;
 using Persistence.LL.Repositories.LootTables;
 using Persistence.LL.Repositories.Regions;
+using Persistence.LL.Repositories.Regions.Areas;
 using Persistence.LL.Repositories.Users;
 
 namespace Persistence.LL;
@@ -42,6 +44,8 @@ public static class DependencyInjection
 
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
+        // Related to regions
+        services.AddScoped<IAreaRepository, AreaRepository>();
 
         services.AddScoped<IAttributeRepository, AttributeRepository>();
         services.AddScoped<ICharacterRepository, CharacterRepository>();

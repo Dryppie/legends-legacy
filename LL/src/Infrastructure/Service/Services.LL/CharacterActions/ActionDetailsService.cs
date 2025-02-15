@@ -9,18 +9,22 @@ public class ActionDetailsService : IActionDetailsService
     private readonly IEntityService _entityService;
     private readonly IGatheringNodeService _gatheringNodeService;
     private readonly ICreatureService _creatureService;
-    public ActionDetailsService(IEntityService entityService, IGatheringNodeService gatheringNodeService, ICreatureService creatureService)
+    private readonly IAreaService _areaService;
+    public ActionDetailsService(IEntityService entityService, IGatheringNodeService gatheringNodeService, ICreatureService creatureService, IAreaService areaService)
     {
         _entityService = entityService;
         _gatheringNodeService = gatheringNodeService;
         _creatureService = creatureService;
+        _areaService = areaService;
     }
     public async Task<CombatActionDetails> CreateCombatActionDetailsAsync(string areaId, Guid characterId, CancellationToken cancellationToken)
     {
+        var area = await _areaService.GetAreaByIdAsync(areaId);
         var combatDetails = new CombatActionDetails
         {
             CharacterTeam = [characterId], /*_entityService.FindCharacterTeamById();*/
-            EnemyTeam = await _creatureService.GetCreatureIdsByArea(areaId, cancellationToken)
+            EnemyTeam = area.Creatures.Select(c => c.CreatureId).ToList(),
+            SpawnProbabilities = area.SpawnProbabilities,
         };
 
         return combatDetails;

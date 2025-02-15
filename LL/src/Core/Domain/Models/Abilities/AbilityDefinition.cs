@@ -31,4 +31,27 @@ public class AbilityDefinition
     public string ActivationLog { get; set; } = "{Actor} used {Ability} on {Target}.";
 
     public List<EffectDefinition> Effects { get; set; } = [];
+
+    public AbilityDefinition Clone()
+    {
+        // Create a new instance
+        var copy = new AbilityDefinition
+        {
+            Id = Id,
+            Name = Name,
+            Description = Description,
+            Type = Type,
+            Cooldown = Cooldown,
+            RemainingTimeUntilUse = RemainingTimeUntilUse,
+            Cost = Cost,
+            ResourceTypeCost = ResourceTypeCost,
+            ActivationLog = ActivationLog,
+            Usage = Usage.Clone(),
+            Effects = Effects
+                .Select(effect => effect.Clone())
+                .ToList()
+        };
+
+        return copy;
+    }
 }

@@ -8,14 +8,14 @@ public class HealingAction : IEffectAction
 {
     private readonly int _healAmount;
     public int Magnitude => _healAmount;
-    public AttributeType? scalingAttribute { get; set; }
-    public float scalingMultiplier { get; set; }
+    public AttributeType? ScalingAttribute { get; set; }
+    public float ScalingMultiplier { get; set; }
 
     public HealingAction(int healAmount, AttributeType? scalingAttribute, float scalingMultiplier)
     {
         _healAmount = healAmount;
-        this.scalingAttribute = scalingAttribute;
-        this.scalingMultiplier = scalingMultiplier;
+        ScalingAttribute = scalingAttribute;
+        ScalingMultiplier = scalingMultiplier;
     }
 
     public void Execute(EffectContext context, ICombatContext combatContext)
@@ -25,7 +25,9 @@ public class HealingAction : IEffectAction
 
         // Potential healing
         var isFlatAmount = context.Effect.Definition.IsFlatAmount;
-        var healingAmount = isFlatAmount ? Magnitude : combatContext.InteractionManager.CalculateHealingToDeal(context.Actor, context.Target, Magnitude);
+        var healingAmount = isFlatAmount
+                            ? Magnitude
+                            : combatContext.InteractionManager.CalculateHealingToDeal(context.Actor, context.Target, Magnitude, ScalingAttribute!.Value, ScalingMultiplier);
 
         // Healing target will receive
         var healingReceived = combatContext.InteractionManager.CalculateHealingReceived(context.Target, healingAmount, attackOutcome);

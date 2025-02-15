@@ -269,6 +269,7 @@ namespace Persistence.LL.Migrations
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SpawnProbabilities = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     RegionId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -320,17 +321,11 @@ namespace Persistence.LL.Migrations
                     Experience = table.Column<int>(type: "int", nullable: true),
                     Gold = table.Column<int>(type: "int", nullable: true),
                     LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ExperienceReward = table.Column<int>(type: "int", nullable: true),
-                    AreaId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    ExperienceReward = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Entities", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Entities_Areas_AreaId",
-                        column: x => x.AreaId,
-                        principalTable: "Areas",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Entities_AspNetUsers_UserId",
                         column: x => x.UserId,
@@ -361,6 +356,31 @@ namespace Persistence.LL.Migrations
                         name: "FK_GatheringNodes_LootTableEntry_LootTableId",
                         column: x => x.LootTableId,
                         principalTable: "LootTableEntry",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AreaCreature",
+                columns: table => new
+                {
+                    AreaId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CreatureId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    WeightedSpawnRate = table.Column<float>(type: "real", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AreaCreature", x => new { x.AreaId, x.CreatureId });
+                    table.ForeignKey(
+                        name: "FK_AreaCreature_Areas_AreaId",
+                        column: x => x.AreaId,
+                        principalTable: "Areas",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AreaCreature_Entities_CreatureId",
+                        column: x => x.CreatureId,
+                        principalTable: "Entities",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -453,6 +473,7 @@ namespace Persistence.LL.Migrations
                     ActionType = table.Column<int>(type: "int", nullable: false),
                     CharacterTeam = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     EnemyTeam = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SpawnProbabilities = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     GatheringType = table.Column<int>(type: "int", nullable: true),
                     LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
@@ -511,6 +532,11 @@ namespace Persistence.LL.Migrations
                 column: "LootTableId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AreaCreature_CreatureId",
+                table: "AreaCreature",
+                column: "CreatureId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Areas_RegionId",
                 table: "Areas",
                 column: "RegionId");
@@ -553,11 +579,6 @@ namespace Persistence.LL.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Entities_AreaId",
-                table: "Entities",
-                column: "AreaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Entities_LootTableId",
@@ -620,6 +641,9 @@ namespace Persistence.LL.Migrations
                 name: "ActionDetails");
 
             migrationBuilder.DropTable(
+                name: "AreaCreature");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
             migrationBuilder.DropTable(
@@ -656,25 +680,25 @@ namespace Persistence.LL.Migrations
                 name: "CharacterActions");
 
             migrationBuilder.DropTable(
+                name: "Areas");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "Inventories");
 
             migrationBuilder.DropTable(
-                name: "Entities");
+                name: "Regions");
 
             migrationBuilder.DropTable(
-                name: "Areas");
+                name: "Entities");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "LootTableEntry");
-
-            migrationBuilder.DropTable(
-                name: "Regions");
 
             migrationBuilder.DropTable(
                 name: "Items");

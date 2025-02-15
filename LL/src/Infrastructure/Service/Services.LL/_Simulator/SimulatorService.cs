@@ -6,7 +6,6 @@ using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Entities;
 using Services.LL.Combat;
-using Services.LL.Interfaces;
 
 namespace Services.LL._Simulator;
 public class SimulatorService : ISimulatorService
@@ -86,10 +85,7 @@ public class SimulatorService : ISimulatorService
                 numberOfDraws++;
             }
 
-            if (fights > 1)
-            {
-                ResetEntitiesForCombat([.. combatPlayerEntities, .. combatEnemyEntities]);
-            }
+            ResetEntitiesForCombat([.. combatPlayerEntities, .. combatEnemyEntities]);
 
             fights--;
         }
@@ -136,7 +132,7 @@ public class SimulatorService : ISimulatorService
 
         foreach (var entity in playerCharacters)
         {
-            combatEntities.Add(new SimpleCombatEntity(entity.Id, entity.Name, (int)entity.BaseCombatAttributes[AttributeType.MaxHealth], (int)entity.BaseCombatAttributes[AttributeType.MaxMana]));
+            combatEntities.Add(new SimpleCombatEntity(entity.Id.ToString(), entity.Name, (int)entity.BaseCombatAttributes[AttributeType.MaxHealth], (int)entity.BaseCombatAttributes[AttributeType.MaxMana]));
         }
 
         return combatEntities;

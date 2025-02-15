@@ -15,6 +15,8 @@ using Services.LL.Inventories;
 using Services.LL.Loots;
 using Services.LL.LootTables;
 using Services.LL.Regions;
+using Services.LL.Regions.Areas;
+using Services.LL.Spawnings;
 using Services.LL.Users;
 
 namespace Services.LL;
@@ -22,6 +24,10 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddServices(this IServiceCollection services)
     {
+        // Related to regions
+        services.AddScoped<IRegionService, RegionService>();
+        services.AddScoped<IAreaService, AreaService>();
+
         services.AddScoped<IAttributeService, AttributeService>();
         services.AddScoped<ICharacterService, CharacterService>();
         services.AddScoped<ICharacterActionService, CharacterActionService>();
@@ -42,10 +48,11 @@ public static class DependencyInjection
         services.AddScoped<ILootService, LootServices>();
         services.AddScoped<ILootTableService, LootTableService>();
         services.AddScoped<IInventoryService, InventoryService>();
-        services.AddScoped<IRegionService, RegionService>();
 
         //services.AddScoped<ICombatManager, CombatManager>();
         //services.AddScoped<ICombatService, CombatService>();
+
+        services.AddScoped<ISpawningService, SpawningService>();
 
         //services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 

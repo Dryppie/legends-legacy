@@ -14,7 +14,7 @@ public class DamageAction : IEffectAction
     public DamageAction(int damageAmount, AttributeType? scalingAttribute, float scalingMultiplier)
     {
         _damageAmount = damageAmount;
-        this.ScalingAttribute = scalingAttribute;
+        ScalingAttribute = scalingAttribute;
         ScalingMultiplier = scalingMultiplier;
     }
 
@@ -38,7 +38,7 @@ public class DamageAction : IEffectAction
             }
 
             // Potential damage to deal before calculating opponent's defenses
-            damageAmount = combatContext.InteractionManager.CalculateDamageToDeal(context.Actor, context.Target, Magnitude);
+            damageAmount = combatContext.InteractionManager.CalculateDamageToDeal(context.Actor, context.Target, Magnitude, ScalingAttribute!.Value, ScalingMultiplier);
         }
 
         // Damage opponent will receive

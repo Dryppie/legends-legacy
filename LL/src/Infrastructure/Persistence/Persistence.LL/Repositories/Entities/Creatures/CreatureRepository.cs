@@ -17,7 +17,7 @@ public class CreatureRepository : ICreatureRepository
         var creatures = await _context.Areas
             .Include(a => a.Creatures)
             .Where(a => a.Id == areaId)
-            .SelectMany(a => a.Creatures.Select(c => c.Id)).ToListAsync(cancellationToken);
+            .SelectMany(a => a.Creatures.Select(c => c.CreatureId)).ToListAsync(cancellationToken);
 
         if (creatures.Count == 0)
             NotFoundException.ThrowIfNull(creatures.First(), nameof(Area), areaId);

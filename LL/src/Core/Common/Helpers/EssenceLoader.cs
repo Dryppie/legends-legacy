@@ -72,8 +72,8 @@ public sealed class EssenceLoader
         foreach (var essence in entityEssences)
         {
             SetSourceIdForEffects(essence);
-            entity.Abilities.Add(essence.Active);
-            entity.Abilities.Add(essence.Passive);
+            entity.Abilities.Add(essence.Active.Clone());
+            entity.Abilities.Add(essence.Passive.Clone());
         }
     }
 
@@ -88,8 +88,8 @@ public sealed class EssenceLoader
         foreach (var essence in entityEssences)
         {
             SetSourceIdForEffects(essence);
-            entity.Abilities.Add(essence.Active);
-            entity.Abilities.Add(essence.Passive);
+            entity.Abilities.Add(essence.Active.Clone());
+            entity.Abilities.Add(essence.Passive.Clone());
         }
     }
 
@@ -126,8 +126,8 @@ public sealed class EssenceLoader
         {
             SetSourceIdForEffects(essence);
             entity.EquippedEssences.Add(essence);
-            entity.Abilities.Add(essence.Active);
-            entity.Abilities.Add(essence.Passive);
+            entity.Abilities.Add(essence.Active.Clone());
+            entity.Abilities.Add(essence.Passive.Clone());
         }
     }
 
@@ -141,8 +141,8 @@ public sealed class EssenceLoader
         {
             SetSourceIdForEffects(chosenEssence);
             entity.EquippedEssences.Add(chosenEssence);
-            entity.Abilities.Add(chosenEssence.Active);
-            entity.Abilities.Add(chosenEssence.Passive);
+            entity.Abilities.Add(chosenEssence.Active.Clone());
+            entity.Abilities.Add(chosenEssence.Passive.Clone());
         }
     }
 

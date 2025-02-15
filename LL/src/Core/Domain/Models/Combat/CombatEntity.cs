@@ -11,7 +11,7 @@ namespace Domain.Models.Combat;
 [NotMapped]
 public class CombatEntity
 {
-    public Guid Id { get; set; }
+    public string Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public ICollection<Essence> EquippedEssences { get; set; } = [];
     [NotMapped]
@@ -34,7 +34,7 @@ public class CombatEntity
 
     public CombatEntity(Entity entity)
     {
-        Id = entity.Id;
+        Id = entity.Id.ToString();
         Name = entity.Name;
         Abilities = new List<AbilityDefinition>(entity.Abilities);
         BaseAttributes = new List<EntityAttribute>(entity.BaseAttributes);
@@ -103,7 +103,7 @@ public class CombatEntity
             }
         }
 
-        TemporaryModifiers = [];
+        TemporaryModifiers.Clear();
         Statuses.Clear();
     }
 

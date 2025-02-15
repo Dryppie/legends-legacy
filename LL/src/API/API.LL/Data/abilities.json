@@ -95,6 +95,8 @@
           "Action": {
             "Type": "Damage",
             "Amount": 8,
+            "ScalingAttribute": "Strength",
+            "ScalingMultiplier": 0.2,
             "AttackType": "Melee",
             "DamageType": "Physical",
             "DamageTags": ["Slashing"]
@@ -161,7 +163,7 @@
     "Active": {
       "Id": "snipersStrike",
       "Name": "Sniper's Strike",
-      "Description": "Unleash a powerful shot with increased critical chance, dealing {damage1} damage.",
+      "Description": "Unleash a powerful shot dealing {damage1} damage. 50% increases critical chance.",
       "Type": "Active",
       "Cooldown": 150,
       "Cost": 12,
@@ -170,6 +172,8 @@
           "Action": {
             "Type": "Damage",
             "Amount": 15,
+            "ScalingAttribute": "Agility",
+            "ScalingMultiplier": 0.1,
             "AttackType": "Ranged",
             "DamageType": "Physical",
             "DamageTags": ["Arrows"]
@@ -195,7 +199,7 @@
     "Passive": {
       "Id": "poisonedArrows",
       "Name": "Poisoned Arrows",
-      "Description": "Every ranged attack has a 20% chance to apply poison for 3 seconds.",
+      "Description": "Every ranged attack has a 20% chance to apply poison, dealing 6 damage over 3 seconds.",
       "Type": "Passive",
       "Cooldown": 0,
       "Cost": 0,
@@ -233,7 +237,7 @@
     "Active": {
       "Id": "tailWrap",
       "Name": "Tail Wrap",
-      "Description": "Apply a crushing force to the target, dealing 50 damage.",
+      "Description": "Apply a crushing force to the target, dealing {damage1} damage.",
       "Type": "Active",
       "Cooldown": 150,
       "Cost": 10,
@@ -242,6 +246,8 @@
           "Action": {
             "Type": "Damage",
             "Amount": 12,
+            "ScalingAttribute": "Strength",
+            "ScalingMultiplier": 0.2,
             "AttackType": "Melee",
             "DamageType": "Physical",
             "DamageTags": ["Blunt"]
@@ -294,7 +300,7 @@
       "Name": "Fireball",
       "Description": "Hurls a fireball that deals {damage1} damage on impact and applies a burn to the target. 3 uses.",
       "Type": "Active",
-      "Cooldown": 1,
+      "Cooldown": 120,
       "Cost": 7,
       "Usage": {
         "Type": "LimitedUsage",
@@ -305,7 +311,9 @@
         {
           "Action": {
             "Type": "Damage",
-            "Amount": 22,
+            "Amount": 11,
+            "ScalingAttribute": "Intelligence",
+            "ScalingMultiplier": 0.2,
             "AttackType": "Ranged",
             "DamageType": "Magical",
             "DamageTags": ["Spells"]
@@ -325,7 +333,7 @@
         {
           "Action": {
             "Type": "Damage",
-            "Amount": 8,
+            "Amount": 4,
             "AttackType": "DamageOverTime",
             "DamageType": "Burn",
             "DamageTags": []
@@ -352,15 +360,17 @@
     "Passive": {
       "Id": "heal_01",
       "Name": "Heal",
-      "Description": "Restores health to the target every 4 second for 20 seconds.",
+      "Description": "Restores {heal1} to the target every 4 second for 20 seconds.",
       "Type": "Active",
-      "Cooldown": 120,
+      "Cooldown": 140,
       "Cost": 6,
       "Effects": [
         {
           "Action": {
             "Type": "Healing",
-            "Amount": 19
+            "Amount": 12,
+            "ScalingAttribute": "Wisdom",
+            "ScalingMultiplier": 0.3
           },
           "Duration": {
             "Type": "TimedDuration",
@@ -419,7 +429,7 @@
     "Passive": {
       "Id": "lastStance",
       "Name": "Last Stance",
-      "Description": "Defense is increased by 30% when your health is below 20%.",
+      "Description": "Defense is increased by 30% when your health is below 20% for the first time.",
       "Type": "Passive",
       "Cooldown": 0,
       "Cost": 0,
@@ -429,7 +439,7 @@
             "Type": "ModifyAttribute",
             "Attribute": "Health",
             "Amount": 30,
-            "ModifierType": "Multiplicative",
+            "ModifierType": "Flat",
             "Stackable": true
           },
           "Duration": {
@@ -441,7 +451,7 @@
           },
           "Condition": {
             "Type": "HealthCondition",
-            "HealthPercentage": 80,
+            "HealthPercentage": 20,
             "ComparisonType": "LessThan"
           },
           "Targeting": "Self",
@@ -459,7 +469,7 @@
     "Active": {
       "Id": "forbiddenRitual",
       "Name": "Forbidden Ritual",
-      "Description": "Summon a low level demon.",
+      "Description": "Summon a low level demon, Blood Imp.",
       "Type": "Active",
       "Cooldown": 20,
       "Cost": 30,
@@ -488,7 +498,7 @@
     "Passive": {
       "Id": "retaliate_01",
       "Name": "Retaliate",
-      "Description": "Deals damage back to the attacker when hit.",
+      "Description": "Deals 2 damage back to the attacker when hit.",
       "Type": "Passive",
       "Cooldown": 0,
       "Cost": 0,
@@ -544,7 +554,7 @@
     "Passive": {
       "Id": "poison_retaliate",
       "Name": "Poisonous Retaliation",
-      "Description": "Apply poison to the attacker when hit.",
+      "Description": "Apply poison to the attacker when hit, dealing 10 damage over 10 seconds.",
       "Type": "Passive",
       "Cooldown": 0,
       "Cost": 0,
@@ -604,7 +614,9 @@
         {
           "Action": {
             "Type": "Damage",
-            "Amount": 1
+            "Amount": 1,
+            "ScalingAttribute": "Dexterity",
+            "ScalingMultiplier": 0.15
           },
           "Duration": {
             "Type": "TimedDuration",

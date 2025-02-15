@@ -1,4 +1,5 @@
-﻿using Domain.Models.Abilities;
+﻿using Domain.Helpers.Constants;
+using Domain.Models.Abilities;
 using Domain.Models.Abilities.Effects;
 using Domain.Models.Abilities.Effects.Actions;
 using Domain.Models.Attributes;
@@ -59,10 +60,10 @@ public class EssenceDescriptionService : IEssenceDescriptionService
                     // Calculate final healing if necessary
                     double finalHealing = healingAction.Magnitude;
 
-                    if (healingAction.scalingAttribute.HasValue)
+                    if (healingAction.ScalingAttribute.HasValue)
                     {
-                        var scaleValue = stats.FirstOrDefault(ea => ea.AttributeType.Equals(healingAction.scalingAttribute))!.Value;
-                        finalHealing += healingAction.Magnitude + (scaleValue * healingAction.scalingMultiplier);
+                        var scaleValue = stats.FirstOrDefault(ea => ea.AttributeType.Equals(healingAction.ScalingAttribute))!.Value;
+                        finalHealing += healingAction.Magnitude + (scaleValue * healingAction.ScalingMultiplier);
                     }
 
                     string healKey = $"{{heal{healIndex}}}";
@@ -126,10 +127,10 @@ public class EssenceDescriptionService : IEssenceDescriptionService
                 healIndex++;
                 double finalHealing = healingAction.Magnitude;
 
-                if (healingAction.scalingAttribute.HasValue)
+                if (healingAction.ScalingAttribute.HasValue)
                 {
-                    var scaleValue = stats.FirstOrDefault(ea => ea.AttributeType.Equals(healingAction.scalingAttribute))!.Value;
-                    finalHealing += healingAction.Magnitude + (scaleValue * healingAction.scalingMultiplier);
+                    var scaleValue = stats.FirstOrDefault(ea => ea.AttributeType.Equals(healingAction.ScalingAttribute))!.Value;
+                    finalHealing += healingAction.Magnitude + (scaleValue * healingAction.ScalingMultiplier);
                 }
                 string healKey = $"{{heal{healIndex}}}";
                 placeholders[healKey] = BuildRange(finalHealing);

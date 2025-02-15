@@ -1,4 +1,5 @@
-﻿using Domain.Models.Attributes;
+﻿using Domain.Helpers.Constants;
+using Domain.Models.Attributes;
 using Domain.Models.Combat;
 
 namespace Domain.Helpers;

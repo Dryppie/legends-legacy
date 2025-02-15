@@ -1,4 +1,5 @@
 ﻿using Domain.Helpers;
+using Domain.Helpers.Constants;
 using Domain.Interfaces.Combat;
 using Domain.Models.Abilities.Effects;
 using Domain.Models.Abilities.Effects.Trigger;
@@ -27,18 +28,20 @@ public class CombatInteractionManager : ICombatInteractionManager
         return CombatFormulaCalculator.CalculateAttackOutcome(actor, target, isDamage: false);
     }
 
-    public int CalculateDamageToDeal(CombatEntity actor, CombatEntity target, float magnitude)
+    public int CalculateDamageToDeal(CombatEntity actor, CombatEntity target, float magnitude, AttributeType scalingAttribute, float scalingMultiplier)
     {
-        int finalDamage = (int)magnitude + (int)actor.CombatAttributes[AttributeType.Strength];
-        // More logic if needed: defense reduction, armor, etc.
-        return finalDamage;
+        var finalDamage = magnitude + (actor.CombatAttributes[scalingAttribute] * scalingMultiplier);
+        finalDamage = CombatConstants.GetRandomValue(finalDamage);
+
+        return (int)finalDamage;
     }
 
-    public int CalculateHealingToDeal(CombatEntity actor, CombatEntity target, float magnitude)
+    public int CalculateHealingToDeal(CombatEntity actor, CombatEntity target, float magnitude, AttributeType scalingAttribute, float scalingMultiplier)
     {
-        int finalDamage = (int)magnitude + (int)actor.CombatAttributes[AttributeType.Strength];
-        // More logic if needed: defense reduction, armor, etc.
-        return finalDamage;
+        var finalHealing = magnitude + (actor.CombatAttributes[scalingAttribute] * scalingMultiplier);
+        finalHealing = CombatConstants.GetRandomValue(finalHealing);
+
+        return (int)finalHealing;
     }
 
     public int CalculateDamageReceived(CombatEntity target, float magnitude, AttackOutcome attackOutcome)
@@ -60,9 +63,11 @@ public class CombatInteractionManager : ICombatInteractionManager
         var weapon = actor.Equipment.FirstOrDefault(e => e.EquipmentType == EquipmentType.Weapon)
                      ?? new Weapon { DamageType = DamageType.Physical };
 
-        int finalDamage = (int)baseDamage + (int)(actor.CombatAttributes[AttributeType.Strength] / 6); //TODO: Need proper calculation. Likely scaling of weapon
+        var finalDamage = baseDamage + (actor.CombatAttributes[AttributeType.Strength] / 6); //TODO: Need proper calculation. Likely scaling of weapon
+        finalDamage = CombatConstants.GetRandomValue(finalDamage);
+
         // Potential for more complex calculations, crit chance, etc.
-        return finalDamage;
+        return (int)finalDamage;
     }
 
     public void ApplyDamage(EffectContext context)

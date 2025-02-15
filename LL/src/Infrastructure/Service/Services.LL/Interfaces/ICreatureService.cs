@@ -1,4 +1,6 @@
-﻿namespace Services.LL.Interfaces;
+﻿using Domain.Models.Regions.Areas;
+
+namespace Services.LL.Interfaces;
 public interface ICreatureService
 {
     Task<List<Guid>> GetCreatureIdsByArea(string areaId, CancellationToken cancellationToken);

@@ -1,14 +1,14 @@
 ﻿namespace Domain.Models.Combat;
 public class SimpleCombatEntity
 {
-    public Guid Id { get; set; }
+    public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public int Health { get; set; }
     public int MaxHealth { get; set; }
     public int Mana { get; set; }
     public int MaxMana { get; set; }
 
-    public SimpleCombatEntity(Guid id, string name, int maxHealth, int maxMana)
+    public SimpleCombatEntity(string id, string name, int maxHealth, int maxMana)
     {
         Id = id;
         Name = name;

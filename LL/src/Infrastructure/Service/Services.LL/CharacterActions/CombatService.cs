@@ -11,6 +11,7 @@ using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
+using Domain.Models.Regions.Areas;
 using MediatR;
 using Services.LL.Combat;
 
@@ -19,12 +20,14 @@ public class CombatService : ICombatService
 {
     private readonly IEntityService _entityService;
     private readonly ILootService _lootService;
+    private readonly ISpawningService _spawningService;
     private readonly IPublisher _publisher;
 
-    public CombatService(IEntityService entityService, ILootService lootService, IPublisher publisher)
+    public CombatService(IEntityService entityService, ILootService lootService, ISpawningService spawningService, IPublisher publisher)
     {
         _entityService = entityService;
         _lootService = lootService;
+        _spawningService = spawningService;
         _publisher = publisher;
     }
 
@@ -34,12 +37,22 @@ public class CombatService : ICombatService
         var totalExp = 0;
 
         var combatAction = characterAction.ActionDetails as CombatActionDetails;
+        var monsterCount = _spawningService.HowManyMonstersToSpawn(combatAction!.SpawnProbabilities);
+        var lumoRuinsAreaCreatures = new List<AreaCreature>
+            {
+                new AreaCreature() { AreaId = " region_01_area_01", CreatureId = combatAction.EnemyTeam[0], WeightedSpawnRate = 0.99f },
+                new AreaCreature() { AreaId = " region_01_area_01", CreatureId = combatAction.EnemyTeam[1], WeightedSpawnRate = 0.01f },
+                new AreaCreature() { AreaId = " region_01_area_01", CreatureId = combatAction.EnemyTeam[2], WeightedSpawnRate = 0.01f },
+                new AreaCreature() { AreaId = " region_01_area_01", CreatureId = combatAction.EnemyTeam[3], WeightedSpawnRate = 0.01f },
+            };
+        var areaCreatures = _spawningService.WhatAreaCreaturesToSpawn(lumoRuinsAreaCreatures, monsterCount);
+        var enemyIds = areaCreatures.Select(c => c.CreatureId).ToList();
 
         // Initialize combatants
-        var playerCharacters = await GetPlayerCharactersAsync([.. combatAction!.CharacterTeam], cancellationToken);
+        var playerCharacters = await GetPlayerCharactersAsync([.. combatAction.CharacterTeam], cancellationToken);
         // TODO: Instead of getting a random selection here, it should be done in the while loop
         // otherwise it'll be the same selection for 12 hours of idle, instead of random mobs each combat
-        var enemyCharacters = await GetEnemyCharactersAsync(SelectRandom([.. combatAction.EnemyTeam]), cancellationToken);
+        var enemyCharacters = await GetEnemyCharactersAsync(enemyIds, cancellationToken);
 
         var combatPlayerEntities = CreateCombatEntities(playerCharacters);
         var combatEnemyEntities = CreateCombatEntities(enemyCharacters);
@@ -122,7 +135,6 @@ public class CombatService : ICombatService
     private static List<SimpleCombatEntity> CreateSimpleCombatEntities(List<CombatEntity> playerCharacters)
     {
         var combatEntities = new List<SimpleCombatEntity>();
-
         foreach (var entity in playerCharacters)
         {
             combatEntities.Add(new SimpleCombatEntity(entity.Id, entity.Name, (int)entity.BaseCombatAttributes[AttributeType.MaxHealth], (int)entity.BaseCombatAttributes[AttributeType.MaxMana]));
@@ -144,10 +156,13 @@ public class CombatService : ICombatService
     private static List<CombatEntity> CreateCombatEntities(List<Entity> entities)
     {
         var combatEntities = new List<CombatEntity>();
-
+        var increment = 1;
         foreach (var entity in entities)
         {
-            combatEntities.Add(new CombatEntity(entity));
+            var combatEntity = new CombatEntity(entity);
+            combatEntity.Id = $"{entity.Id}_{increment}";
+            combatEntities.Add(combatEntity);
+            increment++;
         }
         return combatEntities;
     }
