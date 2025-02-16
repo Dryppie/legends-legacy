@@ -44,7 +44,7 @@
           (click)="cancelCharacterAction()"
         ></app-mini-button>
         <app-mini-button
-          *ngIf="!currentAction"
+          *ngIf="!currentAction || currentAction?.isDeleted"
           class="w-[64px]"
           text="Cut"
           (click)="startGatheringAction()"

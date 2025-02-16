@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250215214405_BaseMigration")]
+    [Migration("20250216200019_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -61,6 +61,9 @@ namespace Persistence.LL.Migrations
 
                     b.Property<int>("CharacterActionType")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
@@ -199,6 +202,10 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IconPath")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

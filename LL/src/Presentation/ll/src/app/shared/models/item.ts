@@ -9,7 +9,7 @@ export interface Item {
   itemType: ItemType;
   description: string;
   // ability: Ability;
-  icon: string;
+  iconPath: string;
 }
 
 export interface EssenceItem extends Item {

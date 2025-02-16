@@ -11,5 +11,5 @@ import { ProfessionIconComponent } from '../professions/profession-icon/professi
 export class DefaultHeaderComponent {
   @Input() title: string = '';
   @Input() text: string = '';
-  @Input() image: string = '';
+  @Input() icon: string = '';
 }

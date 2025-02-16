@@ -1,9 +1,9 @@
 <div class="flex h-24">
   <app-character-badge
     class="z-10 -mr-12"
-    [level]="12"
-    [currentExperience]="100"
-    [maxExperience]="100"
+    [level]="currentCharacter?.level"
+    [currentExperience]="currentCharacter?.experience"
+    [maxExperience]="currentCharacter?.experienceUntilNextLevel"
   ></app-character-badge>
   <div
     class="border-gradient relative flex h-24 w-full items-center rounded-r-md py-[1px]"

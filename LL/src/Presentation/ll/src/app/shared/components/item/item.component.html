@@ -3,7 +3,7 @@
   (mouseenter)="showTooltip()"
   (mouseleave)="hideTooltip()"
 >
-  <img src="icons/items/reward-item.png" class="border-gray-700 rounded" />
+  <img src="icons/items/{{ item.iconPath }}" class="border-gray-700 rounded" />
   <!-- Additional item details -->
   <ng-container *ngIf="itemHovered">
     <app-item-tooltip

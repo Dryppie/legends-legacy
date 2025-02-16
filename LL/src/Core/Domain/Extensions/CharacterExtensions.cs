@@ -6,7 +6,7 @@ public static class CharacterExtensions
 {
     public static void UpdateCharacterLevel(this Character character)
     {
-        var xpRequired = (int)EntityLevelConstants.XP_REQUIRED(character.Level);
+        var xpRequired = EntityLevelConstants.XP_REQUIRED(character.Level);
 
         while (character.Experience >= xpRequired)
         {
@@ -14,7 +14,7 @@ public static class CharacterExtensions
             character.Experience -= xpRequired;
 
             // After leveling up and adjusting current experience, calculate whether there's enough experience left for more level ups
-            xpRequired = (int)EntityLevelConstants.XP_REQUIRED(character.Level);
+            xpRequired = EntityLevelConstants.XP_REQUIRED(character.Level);
 
             //TODO: Add Publish Event to notify listeners that listen to level ups
         }

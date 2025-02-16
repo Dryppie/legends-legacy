@@ -1,7 +1,6 @@
 ﻿using Application.Common.Mappings;
 using Application.UseCases.Essences.Dtos;
 using AutoMapper;
-using Domain.Models.Essences;
 using Domain.Models.Items;
 
 namespace Application.UseCases.Items.Dtos;
@@ -9,6 +8,7 @@ public class ItemDto : IMapFrom<Item>
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
+    public string IconPath { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public ItemType ItemType { get; set; }
     public Rarity Rarity { get; set; }

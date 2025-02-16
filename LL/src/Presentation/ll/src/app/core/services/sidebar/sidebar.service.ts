@@ -123,7 +123,7 @@ function getCitySidebar(): Tab[] {
         {
           id: 'temple',
           route: 'city',
-          icon: 'path/to/quest-icon.png',
+          icon: 'city/temple',
           title: 'Temple',
           description: 'Temple',
           rewards: [

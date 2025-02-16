@@ -246,6 +246,7 @@ namespace Persistence.LL.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IconPath = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ItemType = table.Column<int>(type: "int", nullable: false),
                     Rarity = table.Column<int>(type: "int", nullable: false),
@@ -391,7 +392,8 @@ namespace Persistence.LL.Migrations
                 {
                     CharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CharacterActionType = table.Column<int>(type: "int", nullable: false),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {

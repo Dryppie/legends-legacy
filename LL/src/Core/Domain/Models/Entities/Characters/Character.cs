@@ -11,7 +11,7 @@ public class Character : Entity
     public CharacterAction? CharacterAction { get; set; }
     public int Experience { get; set; } = 0;
     [NotMapped]
-    public float ExperienceRequiredToLevelUp { get; set; }
+    public float ExperienceUntilNextLevel { get; set; }
     public int Gold { get; set; } = 0;
     public Inventory Inventory { get; set; } = null!;
 

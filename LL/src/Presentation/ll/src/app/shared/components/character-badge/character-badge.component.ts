@@ -1,4 +1,3 @@
-import { NgStyle } from '@angular/common';
 import { Component, Input } from '@angular/core';
 
 @Component({
@@ -9,15 +8,19 @@ import { Component, Input } from '@angular/core';
   styleUrl: './character-badge.component.css',
 })
 export class CharacterBadgeComponent {
-  @Input() level: number = 1;
-  @Input() currentExperience: number = 77;
-  @Input() maxExperience: number = 1;
+  @Input() level?: number = 1;
+  @Input() currentExperience?: number = 0;
+  @Input() maxExperience?: number = 1;
+  usableCircumference = 78.9;
 
   calculateOffset(): string {
-    const circumference = 2 * Math.PI * 15;
-    const progress =
-      (this.currentExperience / 100) /*<-- max experience */ * 100;
-    const offset = circumference - (progress / 100) * circumference;
+    if (this.currentExperience == null || this.maxExperience == null) return '';
+    const progress = this.currentExperience / this.maxExperience;
+
+    // offset = (total dash) - (progress * total dash)
+    const offset =
+      this.usableCircumference - progress * this.usableCircumference;
+
     return offset.toString();
   }
 }

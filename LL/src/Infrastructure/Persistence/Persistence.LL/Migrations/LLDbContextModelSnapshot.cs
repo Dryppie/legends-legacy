@@ -59,6 +59,9 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("CharacterActionType")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("datetimeoffset");
 
@@ -196,6 +199,10 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IconPath")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

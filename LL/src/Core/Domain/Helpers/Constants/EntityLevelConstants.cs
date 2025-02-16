@@ -6,5 +6,5 @@ public static class EntityLevelConstants
     private const int NTH = 4;
     private static float HUNDREDTH(int level) => MathF.Ceiling(level / 100f);
 
-    public static float XP_REQUIRED(int level) => MathF.Floor(XP_RATE * MathF.Pow(HUNDREDTH(level), 2) * XP_RATE * MathF.Sqrt(MathF.Pow(level, NTH)) + BASE_XP + MathF.Pow(level, 2) * (5 - HUNDREDTH(level)));
+    public static int XP_REQUIRED(int level) => (int)MathF.Floor(XP_RATE * MathF.Pow(HUNDREDTH(level), 2) * XP_RATE * MathF.Sqrt(MathF.Pow(level, NTH)) + BASE_XP + MathF.Pow(level, 2) * (5 - HUNDREDTH(level)));
 }
