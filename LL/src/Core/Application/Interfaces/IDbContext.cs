@@ -1,6 +1,7 @@
 ﻿using Domain.Models.Abilities;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
+using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
@@ -13,6 +14,7 @@ using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Application.Common.Interfaces;
 public interface IDbContext
@@ -33,6 +35,7 @@ public interface IDbContext
 
     // Player Actions
     DbSet<CharacterAction> CharacterActions { get; }
+    DbSet<ActionDetails> ActionDetails { get; }
 
     DbSet<GatheringNode> GatheringNodes { get; }
 
@@ -68,4 +71,9 @@ public interface IDbContext
     /// <param name="sqlParams"></param>
     /// <returns></returns>
     Task<int> ExecuteSqlRawAsync(string sql, CancellationToken token = default, params object[] sqlParams);
+
+    /// <summary>
+    /// Exposes EF Core's Entry method to allow property state manipulation.
+    /// </summary>
+    EntityEntry<TEntity> GetEntry<TEntity>(TEntity entity) where TEntity : class;
 }

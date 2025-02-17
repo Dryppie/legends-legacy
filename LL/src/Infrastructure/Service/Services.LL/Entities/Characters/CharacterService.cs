@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces.Services.LL;
+using Domain.Helpers.Constants;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
@@ -28,7 +29,7 @@ public class CharacterService : ICharacterService
     public async Task<Character> GetMyCharacterAsync(Guid CurrentUserId)
     {
         var character = await _characterRepository.GetCharacterByUserIdAsync(CurrentUserId);
-        //character.CharacterNextLevelCalculator();
+        character.ExperienceUntilNextLevel = EntityLevelConstants.XP_REQUIRED(character.Level);
         return character;
     }
 

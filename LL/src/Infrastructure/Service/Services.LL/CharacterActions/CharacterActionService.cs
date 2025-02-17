@@ -42,7 +42,7 @@ public class CharacterActionService : ICharacterActionService
 
         var characterAction = await _characterActionRepository.GetCharacterActionAsync(characterId, cancellationToken);
 
-        if (characterAction == null) return null;
+        if (characterAction == null || characterAction.ActionDetails == null) return null;
 
         // If it's been longer than 12 hours since the player checked in, their action is capped
         // Actions are only calculated from UpdatedAt, to the capped time (12 hours ahead)

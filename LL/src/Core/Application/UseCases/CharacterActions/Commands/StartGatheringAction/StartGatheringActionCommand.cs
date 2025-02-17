@@ -5,7 +5,7 @@ using Domain.Models.GatheringNodes;
 using MediatR;
 
 namespace Application.UseCases.CharacterActions.Commands.StartGatheringAction;
-public record StartGatheringActionCommand(Guid CharacterId, CharacterActionType CharacterActionType, string GatheringNodeId, GatheringType GatheringType) : IRequest<bool>;
+public record StartGatheringActionCommand(Guid CharacterId, string GatheringNodeId, GatheringType GatheringType) : IRequest<bool>;
 public class StartGatheringActionCommandHandler : IRequestHandler<StartGatheringActionCommand, bool>
 {
     private readonly ICharacterActionService _characterActionService;
@@ -20,7 +20,7 @@ public class StartGatheringActionCommandHandler : IRequestHandler<StartGathering
         var gatheringActionDetails = await _actionDetailsService
             .CreateGatheringActionDetailsAsync(request.GatheringNodeId, request.GatheringType, request.CharacterId, cancellationToken);
 
-        var characterAction = new CharacterAction(request.CharacterId, request.CharacterActionType, gatheringActionDetails);
+        var characterAction = new CharacterAction(request.CharacterId, gatheringActionDetails);
 
         if (characterAction.ActionDetails is GatheringActionDetails gatheringAction)
         {

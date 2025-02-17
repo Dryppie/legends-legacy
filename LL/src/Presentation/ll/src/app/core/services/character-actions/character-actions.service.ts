@@ -67,8 +67,8 @@ export class CharacterActionsService {
           return of(null);
         }),
       )
-      .subscribe(() => {
-        this.getCharacterAction();
+      .subscribe((success) => {
+        if (success) this.getCharacterAction();
       });
   }
 
@@ -83,8 +83,8 @@ export class CharacterActionsService {
           return of(null);
         }),
       )
-      .subscribe(() => {
-        this.getCharacterAction();
+      .subscribe((success) => {
+        if (success) this.getCharacterAction();
       });
   }
 
@@ -116,7 +116,7 @@ export class CharacterActionsService {
       .get('CharacterActions')
       .pipe(
         expand((action: CharacterActionDto | null) => {
-          if (!action) {
+          if (!action?.isDeleted) {
             this.stopPolling();
             return EMPTY;
           }

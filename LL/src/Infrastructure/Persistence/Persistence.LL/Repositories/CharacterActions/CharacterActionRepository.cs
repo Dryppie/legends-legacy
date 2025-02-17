@@ -1,4 +1,5 @@
 ﻿using Application.Common.Interfaces;
+using Common.Exceptions;
 using Domain.Models.CharacterActions;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,17 +15,60 @@ public class CharacterActionRepository : ICharacterActionRepository
 
     public async Task<bool> StartCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
     {
-        bool alreadyExists = await _context.CharacterActions
-        .AnyAsync(a => a.CharacterId == characterAction.CharacterId, cancellationToken);
+        var existingAction = await _context.CharacterActions
+            .Include(a => a.ActionDetails)  // Ensure ActionDetails is loaded
+            .FirstOrDefaultAsync(a => a.CharacterId == characterAction.CharacterId, cancellationToken);
 
-        // If it doesn't exist, we add it
-        if (!alreadyExists)
+        if (existingAction == null)
         {
+            characterAction.IsDeleted = false; // Ensure it's not marked as deleted on creation
             await _context.CharacterActions.AddAsync(characterAction, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
+            return true;
         }
 
+        if (existingAction.UpdatedAt > DateTimeOffset.UtcNow)
+        {
+            return false;
+        }
+
+        _context.GetEntry(existingAction).CurrentValues.SetValues(characterAction);
+
+        existingAction.IsDeleted = false;
+
+        if (existingAction.ActionDetails == null)
+        {
+            // If existing action had no details, add new details
+            existingAction.ActionDetails = characterAction.ActionDetails!;
+            _context.ActionDetails.Add(existingAction.ActionDetails);
+        }
+        else
+        {
+            // If existing action has details, update them
+            _context.GetEntry(existingAction.ActionDetails).CurrentValues.SetValues(characterAction.ActionDetails!);
+        }
+
+        _context.CharacterActions.Update(existingAction);
+
+        await _context.SaveChangesAsync(cancellationToken);
         return true;
+    }
+
+    public async Task DeleteCharacterActionAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        var characterAction = await _context.CharacterActions
+            .Include(ca => ca.ActionDetails)
+            .FirstOrDefaultAsync(ca => ca.CharacterId.Equals(characterId), cancellationToken);
+
+        NotFoundException.ThrowIfNull(characterAction, nameof(characterAction), characterId);
+
+        if (characterAction.ActionDetails != null)
+            _context.ActionDetails.Remove(characterAction.ActionDetails);  // Explicitly remove the related entity
+
+        characterAction.IsDeleted = true;
+        characterAction.ActionDetails = null;
+        _context.CharacterActions.Update(characterAction!);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<CharacterAction?> GetCharacterActionAsync(Guid characterId, CancellationToken cancellationToken)
@@ -38,13 +82,6 @@ public class CharacterActionRepository : ICharacterActionRepository
     public async Task UpdateCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
     {
         _context.CharacterActions.Update(characterAction);
-        await _context.SaveChangesAsync(cancellationToken);
-    }
-
-    public async Task DeleteCharacterActionAsync(Guid characterId, CancellationToken cancellationToken)
-    {
-        var characterAction = await _context.CharacterActions.FindAsync([characterId], cancellationToken);
-        _context.CharacterActions.Remove(characterAction!);
         await _context.SaveChangesAsync(cancellationToken);
     }
 }

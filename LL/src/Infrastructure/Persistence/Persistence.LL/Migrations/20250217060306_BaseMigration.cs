@@ -391,7 +391,6 @@ namespace Persistence.LL.Migrations
                 columns: table => new
                 {
                     CharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CharacterActionType = table.Column<int>(type: "int", nullable: false),
                     UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },

@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250216200019_BaseMigration")]
+    [Migration("20250217060306_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -58,9 +58,6 @@ namespace Persistence.LL.Migrations
                 {
                     b.Property<Guid>("CharacterId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("CharacterActionType")
-                        .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");

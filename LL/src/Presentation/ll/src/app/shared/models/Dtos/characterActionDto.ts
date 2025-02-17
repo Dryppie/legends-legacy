@@ -6,6 +6,7 @@ export interface CharacterActionDto {
   characterActionType: CharacterActionType;
   lootTableId: string;
   updatedAt: Date;
+  isDeleted: boolean;
   combatResult?: CombatResultDto;
   combatActionDetails: CombatActionDetails;
   gatheringActionDetails: GatheringActionDetails;

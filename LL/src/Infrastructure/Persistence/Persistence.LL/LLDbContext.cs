@@ -18,6 +18,7 @@ using Domain.Models.Regions.Areas;
 using Domain.Models.Users;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
@@ -36,6 +37,9 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
     {
         return await Database.ExecuteSqlRawAsync(sql, sqlParams);
     }
+
+    public EntityEntry<TEntity> GetEntry<TEntity>(TEntity entity) where TEntity : class
+        => Entry(entity);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -120,6 +124,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
 
     // Player Actions
     public DbSet<CharacterAction> CharacterActions => Set<CharacterAction>();
+    public DbSet<ActionDetails> ActionDetails => Set<ActionDetails>();
 
     public DbSet<GatheringNode> GatheringNodes => Set<GatheringNode>();
 

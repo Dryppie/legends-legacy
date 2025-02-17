@@ -137,6 +137,7 @@ public static class LLDbContextExtensions
             var goblinEssenceItem = new EssenceItem
             {
                 Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+                IconPath = "essence-item.svg",
                 Name = goblinEssence.Name,
                 Essence = goblinEssence,
                 ItemType = ItemType.Essence,
@@ -146,6 +147,7 @@ public static class LLDbContextExtensions
             var goblinWarriorEssenceItem = new EssenceItem
             {
                 Id = Guid.NewGuid(),
+                IconPath = "essence-item.svg",
                 Name = goblinWarriorEssence.Name,
                 Essence = goblinWarriorEssence,
                 ItemType = ItemType.Essence,
@@ -155,6 +157,7 @@ public static class LLDbContextExtensions
             var goblinArcherEssenceItem = new EssenceItem
             {
                 Id = Guid.NewGuid(),
+                IconPath = "essence-item.svg",
                 Name = goblinArcherEssence.Name,
                 Essence = goblinArcherEssence,
                 ItemType = ItemType.Essence,
@@ -164,6 +167,7 @@ public static class LLDbContextExtensions
             var largeRatEssenceItem = new EssenceItem
             {
                 Id = Guid.Parse("00000000-0000-0000-0000-000000000004"),
+                IconPath = "essence-item.svg",
                 Name = largeRatEssence.Name,
                 Essence = largeRatEssence,
                 ItemType = ItemType.Essence,
@@ -335,18 +339,21 @@ public static class LLDbContextExtensions
         var sword = new Item
         {
             Id = Guid.Parse("00000000-0000-0000-0000-000000000005"),
+            IconPath = "reward-item.png",
             Name = "Sword"
         };
 
         var shield = new Item
         {
             Id = Guid.NewGuid(),
+            IconPath = "reward-item.png",
             Name = "Shield"
         };
 
         var potion = new Item
         {
             Id = Guid.NewGuid(),
+            IconPath = "reward-item.png",
             Name = "Potion"
         };
 

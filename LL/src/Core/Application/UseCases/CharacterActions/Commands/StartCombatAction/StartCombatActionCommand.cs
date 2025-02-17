@@ -3,7 +3,7 @@ using Domain.Models.CharacterActions;
 using MediatR;
 
 namespace Application.UseCases.CharacterActions.Commands.StartCombatAction;
-public record StartCombatActionCommand(Guid CharacterId, CharacterActionType CharacterActionType, string AreaId) : IRequest<bool>;
+public record StartCombatActionCommand(Guid CharacterId, string AreaId) : IRequest<bool>;
 public class StartCombatActionCommandHandler : IRequestHandler<StartCombatActionCommand, bool>
 {
     private readonly ICharacterActionService _characterActionService;
@@ -17,7 +17,7 @@ public class StartCombatActionCommandHandler : IRequestHandler<StartCombatAction
     {
         var combatActionDetails = await _actionDetailsService.CreateCombatActionDetailsAsync(request.AreaId, request.CharacterId, cancellationToken);
 
-        var characterAction = new CharacterAction(request.CharacterId, request.CharacterActionType, combatActionDetails);
+        var characterAction = new CharacterAction(request.CharacterId, combatActionDetails);
 
         return await _characterActionService.StartCharacterActionAsync(characterAction, cancellationToken);
     }
