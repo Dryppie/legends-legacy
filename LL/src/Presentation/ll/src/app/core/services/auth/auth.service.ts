@@ -43,13 +43,14 @@ export class AuthService {
     private toastService: ToastService,
   ) {}
 
+  updateCharacter(updatedCharacter: CharacterDto): void {
+    this.currentCharacterSubject.next(updatedCharacter);
+  }
+
   setAuth(): void {
     this.isAuthenticatedSubject.next(true);
 
     this.getLoggedInCharacter().subscribe({
-      next: (character) => {
-        this.currentCharacterSubject.next(character);
-      },
       error: () => {
         this.isAuthenticatedSubject.next(false); // Set as not authenticated in case of an error
       },
@@ -138,7 +139,7 @@ export class AuthService {
   getLoggedInCharacter(): Observable<CharacterDto> {
     return this.apiService.get('character').pipe(
       tap((character) => {
-        return character;
+        this.currentCharacterSubject.next(character);
       }),
 
       catchError(() => {

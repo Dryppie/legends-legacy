@@ -27,13 +27,13 @@ public class CharacterActionRepository : ICharacterActionRepository
             return true;
         }
 
+        // If combat or any other action ends in the future, it is not possible to start a new action until that time has passed
         if (existingAction.UpdatedAt > DateTimeOffset.UtcNow)
         {
             return false;
         }
 
-        _context.GetEntry(existingAction).CurrentValues.SetValues(characterAction);
-
+        existingAction.UpdatedAt = characterAction.UpdatedAt;
         existingAction.IsDeleted = false;
 
         if (existingAction.ActionDetails == null)

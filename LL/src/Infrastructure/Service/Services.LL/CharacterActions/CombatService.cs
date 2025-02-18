@@ -105,6 +105,7 @@ public class CombatService : ICombatService
         // Create CombatEntities to keep track of simple data over each entity, such as id, health, mana
         lastCombatResult.PlayerTeam = CreateSimpleCombatEntities(combatPlayerEntities);
         lastCombatResult.EnemyTeam = CreateSimpleCombatEntities(combatEnemyEntities);
+        lastCombatResult.ExperienceGained = totalExp;
 
         await UpdateCharacterStatsAsync(playerCharacters, totalExp, cancellationToken);
         await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);

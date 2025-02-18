@@ -1,7 +1,11 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from '../api/api.service';
-import { BehaviorSubject } from 'rxjs';
-import { CharacterOverviewDto } from '../../../shared/models/Dtos/characterDto';
+import { BehaviorSubject, Observable } from 'rxjs';
+import {
+  CharacterDto,
+  CharacterOverviewDto,
+} from '../../../shared/models/Dtos/characterDto';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -12,7 +16,22 @@ export class CharacterService {
 
   public characterOverview$ = this.characterOverviewSubject.asObservable();
 
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    private authService: AuthService,
+  ) {}
+
+  updateCharacter(updatedCharacter: CharacterDto): void {
+    this.authService.updateCharacter(updatedCharacter);
+  }
+
+  getCurrentCharacter(): Observable<CharacterDto | null> {
+    return this.authService.currentCharacter$;
+  }
+
+  fetchCharacterData() {
+    this.authService.getLoggedInCharacter();
+  }
 
   public getCharacterOverview() {
     this.apiService.get('Character/Overview').subscribe((character) => {

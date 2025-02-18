@@ -1,4 +1,4 @@
-<div class="relative flex h-24 w-24 items-center justify-center">
+<div class="group relative flex h-24 w-24 items-center justify-center">
   <!-- Circular Progress Bar -->
 
   <img src="portrait/InnerEllipse.svg" class="absolute" />
@@ -43,5 +43,9 @@
     {{ level }}
   </span>
 
-  <!-- Level Display -->
+  <div
+    class="absolute bottom-0 flex-col items-center justify-center rounded-lg border border-primary bg-black bg-texture px-2 py-1 text-xs text-primary opacity-0 transition-opacity group-hover:opacity-100"
+  >
+    <span>XP: {{ currentExperience }} / {{ maxExperience }}</span>
+  </div>
 </div>

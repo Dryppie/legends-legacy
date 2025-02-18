@@ -13,7 +13,7 @@ import { Subscription } from 'rxjs';
 import { CountdownComponent } from '../countdown/countdown.component';
 import { CharacterActionsService } from '../../../core/services/character-actions/character-actions.service';
 import { CombatCountdownComponent } from './combat-countdown/combat-countdown.component';
-import { AttributeType } from '../../models/enums/attributeType';
+import { LevelingService } from '../../../core/services/leveling/leveling.service';
 
 @Component({
   selector: 'app-combat',
@@ -37,17 +37,19 @@ export class CombatComponent implements OnInit, OnDestroy {
 
   playerCharacters: SimpleCombatEntityDto[] = [];
   enemyCharacters: SimpleCombatEntityDto[] = [];
-
+  experienceGained: number = 0;
   subscriptions: Subscription = new Subscription();
 
   isCombatActive = false;
   displayCombat = false;
   isDataFetched = false;
   isLoading = false;
+  isStoppingCombat = false;
 
   constructor(
     private combatService: CombatService,
     private characterActionService: CharacterActionsService,
+    private levelingService: LevelingService,
   ) {}
 
   ngOnInit(): void {
@@ -69,6 +71,7 @@ export class CombatComponent implements OnInit, OnDestroy {
     const combatResultSub = this.combatService.combatResult$.subscribe(
       (combatResult) => {
         if (combatResult) {
+          this.experienceGained = combatResult.experienceGained;
           this.isDataFetched = true;
           if (!this.isLoading) {
             this.startActualCombat(combatResult);
@@ -93,9 +96,15 @@ export class CombatComponent implements OnInit, OnDestroy {
       (outcome) => {
         if (outcome !== null) {
           // Add some kind of animation during this this. Then after one second, reset the teams and empty combat events
-          setTimeout(() => {
+          this.levelingService.gainExperience(this.experienceGained);
+          if (this.isStoppingCombat) {
+            this.stopCombat();
             this.combatEnded();
-          }, 1000);
+          } else {
+            setTimeout(() => {
+              this.combatEnded();
+            }, 1000);
+          }
         }
       },
     );
@@ -130,11 +139,18 @@ export class CombatComponent implements OnInit, OnDestroy {
     this.displayCombat = true;
   }
 
-  stopCombat() {
+  initiateStoppingCombat() {
+    this.isStoppingCombat = true;
+    this.StopCombatButtonText = 'Stopping combat..';
     this.characterActionService.stopCharacterAction();
+  }
+
+  stopCombat() {
     this.combatEnded();
     this.subscriptions.unsubscribe();
+    this.combatService.clearCurrentCombat();
   }
+
   combatEnded() {
     this.combatEvents = [];
     this.resetTeams();

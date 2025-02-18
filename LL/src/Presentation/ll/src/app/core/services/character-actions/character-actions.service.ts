@@ -90,7 +90,6 @@ export class CharacterActionsService {
 
   stopCharacterAction(): void {
     this.clearCurrentAction();
-    this.combatService.clearCurrentCombat();
     this.apiService
       .delete('CharacterActions')
       .pipe(
@@ -107,16 +106,18 @@ export class CharacterActionsService {
   }
 
   private startPolling(): void {
+    console.log('starting polling');
     if (this.pollingSubscription && !this.pollingSubscription.closed) {
       // Polling is already active
       return;
     }
 
+    console.log('polling started');
     this.pollingSubscription = this.apiService
       .get('CharacterActions')
       .pipe(
         expand((action: CharacterActionDto | null) => {
-          if (!action?.isDeleted) {
+          if (!action || action.isDeleted) {
             this.stopPolling();
             return EMPTY;
           }
@@ -180,6 +181,7 @@ export class CharacterActionsService {
   }
 
   private stopPolling(): void {
+    console.log('stopping polling');
     if (this.pollingSubscription) {
       this.pollingSubscription.unsubscribe();
       this.pollingSubscription = null;
@@ -188,7 +190,6 @@ export class CharacterActionsService {
 
   clearCurrentAction(): void {
     this.clearCAT();
-    this.setCurrentAction(null);
     this.stopPolling();
   }
 

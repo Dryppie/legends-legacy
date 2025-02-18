@@ -7,6 +7,7 @@ export interface CombatResultDto {
   eventLog: CombatEvent[];
   startedAt: Date;
   outcome: BattleOutcome;
+  experienceGained: number;
 }
 
 export interface SimpleCombatEntityDto {
