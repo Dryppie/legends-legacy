@@ -19,6 +19,7 @@ import { environment } from '../../../../environments/environment';
 import { CombatService } from '../combat/combat.service';
 import { NamedStorageKeys } from '../../common/enums/named-storage-keys';
 import { CharacterActionType } from '../../../shared/models/enums/characterActionType';
+import { GameService } from '../game/game.service';
 
 @Injectable({
   providedIn: 'root',
@@ -38,6 +39,7 @@ export class CharacterActionsService {
   constructor(
     private apiService: ApiService,
     private combatService: CombatService,
+    private gameService: GameService,
   ) {}
 
   init(): void {
@@ -68,7 +70,10 @@ export class CharacterActionsService {
         }),
       )
       .subscribe((success) => {
-        if (success) this.getCharacterAction();
+        if (success) {
+          this.getCharacterAction();
+          this.gameService.startCombat();
+        }
       });
   }
 
@@ -106,13 +111,10 @@ export class CharacterActionsService {
   }
 
   private startPolling(): void {
-    console.log('starting polling');
     if (this.pollingSubscription && !this.pollingSubscription.closed) {
       // Polling is already active
       return;
     }
-
-    console.log('polling started');
     this.pollingSubscription = this.apiService
       .get('CharacterActions')
       .pipe(
@@ -181,7 +183,6 @@ export class CharacterActionsService {
   }
 
   private stopPolling(): void {
-    console.log('stopping polling');
     if (this.pollingSubscription) {
       this.pollingSubscription.unsubscribe();
       this.pollingSubscription = null;
@@ -191,12 +192,13 @@ export class CharacterActionsService {
   clearCurrentAction(): void {
     this.clearCAT();
     this.stopPolling();
+    this.setCurrentAction(null);
   }
 
   setCAT(characterActionType: CharacterActionType): void {
     localStorage.setItem(
       NamedStorageKeys.CharacterActionType,
-      JSON.stringify(characterActionType),
+      characterActionType,
     );
   }
 

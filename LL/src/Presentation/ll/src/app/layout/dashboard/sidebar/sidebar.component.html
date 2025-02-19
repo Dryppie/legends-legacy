@@ -2,7 +2,17 @@
   <div
     class="mt-[1px] flex flex-auto flex-col bg-texture bg-auto text-primary sm:rounded-tr-md"
   >
-    <div class="min-h-16 p-2 text-white"></div>
+    <div class="flex min-h-16 items-center justify-center p-2">
+      <div *ngIf="currentAction" class="flex items-center">
+        <h3
+          class="rounded-lg px-4 py-2 hover:cursor-pointer"
+          (click)="toggleSidebar()"
+          (click)="navigateToCombat()"
+        >
+          Active {{ currentAction.characterActionType }}
+        </h3>
+      </div>
+    </div>
     <app-tab
       [tabs]="tabLabels"
       [activeTab]="activeTab"

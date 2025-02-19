@@ -37,7 +37,12 @@
               class="ml-6 w-12 sm:hidden"
             ></app-back-button>
             <div class="h-full w-full overflow-hidden pl-4 sm:pb-6 sm:pl-6">
-              <router-outlet></router-outlet>
+              <ng-container *ngIf="combatVisible$ | async; else mainView">
+                <app-combat></app-combat>
+              </ng-container>
+              <ng-template #mainView>
+                <router-outlet></router-outlet>
+              </ng-template>
             </div>
           </main>
         </div>

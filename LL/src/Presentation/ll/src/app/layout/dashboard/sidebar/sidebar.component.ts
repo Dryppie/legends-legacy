@@ -11,6 +11,9 @@ import { RouterLink } from '@angular/router';
 import { SidebarItem, Tab } from '../../../shared/models/sidebar-item';
 import { SidebarService } from '../../../core/services/sidebar/sidebar.service';
 import { TabComponent } from '../../../shared/components/tab/tab.component';
+import { GameService } from '../../../core/services/game/game.service';
+import { CharacterActionsService } from '../../../core/services/character-actions/character-actions.service';
+import { CharacterActionDto } from '../../../shared/models/Dtos/characterActionDto';
 
 @Component({
   selector: 'app-sidebar',
@@ -20,16 +23,28 @@ import { TabComponent } from '../../../shared/components/tab/tab.component';
   styleUrl: './sidebar.component.css',
 })
 export class SidebarComponent implements OnInit {
+  navigateToCombat() {
+    this.gameService.showCombat();
+  }
   @Output() itemTapped = new EventEmitter<void>();
 
   @ViewChild('tabComponent') tabComponent!: TabComponent;
   tabs: Tab[] = [{ label: '', items: [] as SidebarItem[] }];
   activeTab: string = '';
   activeItem: string = '';
+  currentAction: CharacterActionDto | null = {} as CharacterActionDto;
 
-  constructor(private sidebarService: SidebarService) {}
+  constructor(
+    private sidebarService: SidebarService,
+    private gameService: GameService,
+    private actionService: CharacterActionsService,
+  ) {}
 
   ngOnInit() {
+    this.actionService.currentAction$.subscribe((action) => {
+      this.currentAction = action;
+    });
+
     this.sidebarService.currentContent$.subscribe((link) => {
       this.tabs = [];
       this.updateSidebar(link);

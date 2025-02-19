@@ -1,7 +1,4 @@
-<div
-  *ngIf="!currentAction || currentAction.characterActionType !== 'Combat'"
-  class="flex h-full w-full flex-col gap-4"
->
+<div class="flex h-full w-full flex-col gap-4">
   <h1 class="text-primary">{{ region.name }}</h1>
 
   <div *ngIf="region.raids.length > 0" class="flex w-full flex-col gap-2">
@@ -21,9 +18,3 @@
     </div>
   </div>
 </div>
-
-<app-combat
-  *ngIf="
-    currentAction != null && currentAction.characterActionType === 'Combat'
-  "
-></app-combat>

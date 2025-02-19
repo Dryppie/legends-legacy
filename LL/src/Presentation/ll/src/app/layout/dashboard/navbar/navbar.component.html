@@ -42,7 +42,7 @@
           <h3 class="cursor-pointer pl-2 text-primary">{{ activeLabel }}</h3>
         </div>
         <div
-          class="flex flex-col items-center text-nowrap bg-transparent p-2 text-[#6D6D6D] sm:flex-row sm:space-x-6 sm:p-6"
+          class="flex flex-col items-center text-nowrap rounded-md bg-transparent p-2 text-[#6D6D6D] sm:flex-row sm:space-x-6 sm:p-6"
           *ngIf="(showList && isScreenSmall) || !isScreenSmall"
         >
           <app-navbutton
@@ -52,8 +52,7 @@
             (click)="toggleList()"
             (itemTapped)="activeNavbar(button.label)"
           ></app-navbutton>
-        </div>
-        <div>
+
           <button (click)="logout()" class="pr-2 text-[#6D6D6D]">
             Log out
           </button>
@@ -65,7 +64,7 @@
 
 <div
   #menuContent
-  class="right-0 top-full hidden flex-col space-y-2 rounded-md bg-[#121216CC] p-4 text-white"
+  class="right-0 top-full z-10 hidden flex-col space-y-2 rounded-md bg-[#121216CC] p-4 text-white"
 >
   <app-navbutton link="character" label="Character"></app-navbutton>
   <app-navbutton link="#" label="Quests"></app-navbutton>

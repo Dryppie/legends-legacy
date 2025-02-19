@@ -14,6 +14,7 @@ import { CountdownComponent } from '../countdown/countdown.component';
 import { CharacterActionsService } from '../../../core/services/character-actions/character-actions.service';
 import { CombatCountdownComponent } from './combat-countdown/combat-countdown.component';
 import { LevelingService } from '../../../core/services/leveling/leveling.service';
+import { GameService } from '../../../core/services/game/game.service';
 
 @Component({
   selector: 'app-combat',
@@ -50,6 +51,7 @@ export class CombatComponent implements OnInit, OnDestroy {
     private combatService: CombatService,
     private characterActionService: CharacterActionsService,
     private levelingService: LevelingService,
+    private gameService: GameService,
   ) {}
 
   ngOnInit(): void {
@@ -97,14 +99,15 @@ export class CombatComponent implements OnInit, OnDestroy {
         if (outcome !== null) {
           // Add some kind of animation during this this. Then after one second, reset the teams and empty combat events
           this.levelingService.gainExperience(this.experienceGained);
-          if (this.isStoppingCombat) {
-            this.stopCombat();
+
+          setTimeout(() => {
             this.combatEnded();
-          } else {
-            setTimeout(() => {
-              this.combatEnded();
-            }, 1000);
-          }
+            if (this.isStoppingCombat) {
+              this.stopCombat();
+              this.gameService.endCombat();
+              this.characterActionService.clearCurrentAction();
+            }
+          }, 1000);
         }
       },
     );
