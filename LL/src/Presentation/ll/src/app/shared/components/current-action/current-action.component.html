@@ -1,0 +1,26 @@
+<div class="border-gradient w-full rounded-md py-[1px]">
+  <div
+    class="rounded-md bg-cover bg-center px-3 py-2 text-white"
+    style="
+      background-image: linear-gradient(to bottom, #00000095 50%, #1f150c95),
+        url(&quot;core/Light.svg&quot;);
+    "
+  >
+    <label>{{ getPerformingAction() }}</label>
+    <div class="flex gap-2">
+      <div class="flex w-full items-center gap-2 rounded-md">
+        <label class="block w-14 text-nowrap text-center">{{
+          remainingTime
+        }}</label>
+        <app-progress-bar
+          class="w-full"
+          (remainingTimeChange)="onRemainingTimeChange($event)"
+        >
+        </app-progress-bar>
+      </div>
+      <label class="cursor-pointer text-nowrap text-primary underline"
+        >Go to action</label
+      >
+    </div>
+  </div>
+</div>

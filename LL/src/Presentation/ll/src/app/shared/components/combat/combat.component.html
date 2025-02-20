@@ -6,7 +6,7 @@
   <app-countdown [targetDate]="nextCombatIn!"></app-countdown>
 </div>
 
-<div
+<!-- <div
   *ngIf="isLoading"
   class="flex h-full w-full flex-col items-center justify-center bg-black text-center text-primary"
 >
@@ -15,7 +15,7 @@
     (countdownComplete)="onCountdownComplete()"
   >
   </app-combat-countdown>
-</div>
+</div> -->
 
 <div
   *ngIf="displayCombat && !isLoading"
@@ -94,11 +94,12 @@
   </div>
   <div class="flex h-full w-full overflow-hidden">
     <app-combat-overview
+      *ngIf="combatStateService.combatEvents$ | async as combatEvents"
       [combatEvents]="combatEvents"
       class="h-full w-full"
     ></app-combat-overview>
     <button (click)="initiateStoppingCombat()" class="text-primary">
-      {{ StopCombatButtonText }}
+      {{ stopCombatButtonText }}
     </button>
   </div>
 </div>

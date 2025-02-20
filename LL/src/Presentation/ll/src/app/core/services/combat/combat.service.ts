@@ -1,52 +1,37 @@
 import { Injectable } from '@angular/core';
-import {
-  BattleOutcome,
-  CombatResultDto,
-} from '../../../shared/models/Dtos/combatResultDto';
 import { BehaviorSubject, delay, of, Subscription } from 'rxjs';
-import { CombatEvent } from '../../../shared/models/Dtos/combatEventDto';
 import { CharacterActionDto } from '../../../shared/models/Dtos/characterActionDto';
+import { CombatStateService } from '../../state/combat-state/combat-state.service';
+import { LevelingService } from '../leveling/leveling.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CombatService {
-  clearCurrentCombat() {
-    this.combatEventSubject.next(null);
-    this.combatResultSubject.next(null);
-    this.combatOutcomeSubject.next(null);
-    this.nextCombatSubject.next(null);
-
-    this.allSubscriptions.forEach((subscription) => subscription.unsubscribe());
-    this.allSubscriptions = [];
-  }
-
-  private combatEventSubject = new BehaviorSubject<CombatEvent | null>(null);
-  private combatResultSubject = new BehaviorSubject<CombatResultDto | null>(
-    null,
-  );
-  private combatOutcomeSubject = new BehaviorSubject<BattleOutcome | null>(
-    null,
-  );
-  private nextCombatSubject = new BehaviorSubject<Date | null>(null);
-
-  public combatEvents$ = this.combatEventSubject.asObservable();
-  public combatResult$ = this.combatResultSubject.asObservable();
-  public combatOutcome$ = this.combatOutcomeSubject.asObservable();
-  public nextCombat$ = this.nextCombatSubject.asObservable();
-
   private allSubscriptions: Subscription[] = [];
-  constructor() {}
+
+  constructor(
+    private combatStateService: CombatStateService,
+    private levelingService: LevelingService,
+  ) {}
 
   startCombatSimulation(characterAction: CharacterActionDto): void {
     if (!characterAction.combatResult) return;
-    this.nextCombatSubject.next(characterAction.updatedAt);
+
+    this.combatStateService.setNextCombatIn(characterAction.updatedAt);
+
+    this.combatStateService.setCombatActive(true);
+    this.combatStateService.setPlayerCharacters(
+      characterAction.combatResult.playerTeam,
+    );
+    this.combatStateService.setEnemyCharacters(
+      characterAction.combatResult.enemyTeam,
+    );
 
     const combatAction = characterAction.combatResult;
     if (combatAction.eventLog.length < 1) {
       return;
     }
-    // Emit the entire combat result
 
     // Convert StartedAt to milliseconds
     const combatStartTime = new Date(combatAction.startedAt).getTime();
@@ -60,12 +45,12 @@ export class CombatService {
 
       const eventSubscription = (
         delayTime <= 0 ? of(event) : of(event).pipe(delay(delayTime))
-      ).subscribe((e) => this.combatEventSubject.next(e));
+      ).subscribe((e) => this.combatStateService.addCombatEvent(e));
 
       this.allSubscriptions.push(eventSubscription);
     });
 
-    this.combatResultSubject.next(combatAction);
+    this.combatStateService.setCombatResult(combatAction);
 
     // Calculate remaining combat duration
     const combatDurationMs = combatAction.duration * 100; // Corrected to 100ms per unit
@@ -76,7 +61,8 @@ export class CombatService {
         ? of(combatAction.outcome)
         : of(combatAction.outcome).pipe(delay(remainingDuration))
     ).subscribe((outcome) => {
-      this.combatOutcomeSubject.next(outcome);
+      this.combatStateService.setCombatOutcome(outcome);
+      this.levelingService.gainExperience(combatAction.experienceGained);
     });
 
     this.allSubscriptions.push(outcomeSubscription); // Track outcome subscription

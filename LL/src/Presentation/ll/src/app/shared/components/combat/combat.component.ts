@@ -1,20 +1,15 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { DefaultHeaderComponent } from '../default-header/default-header.component';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CombatAvatarComponent } from './combat-avatar/combat-avatar.component';
 import { CombatOverviewComponent } from './combat-overview/combat-overview.component';
-import { CombatService } from '../../../core/services/combat/combat.service';
 import { CombatEvent, EventType } from '../../models/Dtos/combatEventDto';
-import { NgFor, NgIf, NgStyle } from '@angular/common';
-import {
-  SimpleCombatEntityDto,
-  CombatResultDto,
-} from '../../models/Dtos/combatResultDto';
+import { AsyncPipe, NgFor, NgIf, NgStyle } from '@angular/common';
+import { SimpleCombatEntityDto } from '../../models/Dtos/combatResultDto';
 import { Subscription } from 'rxjs';
 import { CountdownComponent } from '../countdown/countdown.component';
 import { CharacterActionsService } from '../../../core/services/character-actions/character-actions.service';
 import { CombatCountdownComponent } from './combat-countdown/combat-countdown.component';
-import { LevelingService } from '../../../core/services/leveling/leveling.service';
 import { GameService } from '../../../core/services/game/game.service';
+import { CombatStateService } from '../../../core/state/combat-state/combat-state.service';
 
 @Component({
   selector: 'app-combat',
@@ -27,18 +22,20 @@ import { GameService } from '../../../core/services/game/game.service';
     NgStyle,
     CountdownComponent,
     CombatCountdownComponent,
+    AsyncPipe,
   ],
   templateUrl: './combat.component.html',
   styleUrl: './combat.component.css',
 })
 export class CombatComponent implements OnInit, OnDestroy {
-  @Input() combatEvents: CombatEvent[] = [];
+  combatEvents: CombatEvent[] = [];
+  private lastEventsLength = 0;
+
   nextCombatIn: Date | null = null;
-  StopCombatButtonText: string = 'Stop Combat';
+  stopCombatButtonText: string = 'Stop Combat';
 
   playerCharacters: SimpleCombatEntityDto[] = [];
   enemyCharacters: SimpleCombatEntityDto[] = [];
-  experienceGained: number = 0;
   subscriptions: Subscription = new Subscription();
 
   isCombatActive = false;
@@ -48,67 +45,80 @@ export class CombatComponent implements OnInit, OnDestroy {
   isStoppingCombat = false;
 
   constructor(
-    private combatService: CombatService,
     private characterActionService: CharacterActionsService,
-    private levelingService: LevelingService,
     private gameService: GameService,
+    public combatStateService: CombatStateService,
   ) {}
 
   ngOnInit(): void {
+    const playerCharactersSub =
+      this.combatStateService.playerCharacters$.subscribe(
+        (entities) => (this.playerCharacters = entities),
+      );
+    this.subscriptions.add(playerCharactersSub);
+
+    const enemyCharactersSub =
+      this.combatStateService.enemyCharacters$.subscribe((entities) => {
+        this.enemyCharacters = entities;
+        console.log(entities);
+      });
+    this.subscriptions.add(enemyCharactersSub);
+
+    const combatIsActiveSub = this.combatStateService.isCombatActive$.subscribe(
+      (isActive) => (this.isCombatActive = isActive),
+    );
+    this.subscriptions.add(combatIsActiveSub);
+
     const combatIsLoadingSub =
       this.characterActionService.loadingStartCombat$.subscribe((isLoading) => {
         this.isLoading = isLoading;
       });
     this.subscriptions.add(combatIsLoadingSub);
 
-    const nextCombatSub = this.combatService.nextCombat$.subscribe((time) => {
-      if (time) {
+    const nextCombatSub = this.combatStateService.nextCombat$.subscribe(
+      (time) => {
+        if (time == null) return;
         this.nextCombatIn = time;
         this.displayCombat = false;
         this.isLoading = false;
-      }
-    });
+      },
+    );
     this.subscriptions.add(nextCombatSub);
 
-    const combatResultSub = this.combatService.combatResult$.subscribe(
+    const combatResultSub = this.combatStateService.combatResult$.subscribe(
       (combatResult) => {
-        if (combatResult) {
-          this.experienceGained = combatResult.experienceGained;
-          this.isDataFetched = true;
-          if (!this.isLoading) {
-            this.startActualCombat(combatResult);
-          } else {
-            this.handleCombatSetup(combatResult);
-          }
-          this.displayCombat = true;
-          this.isLoading = false;
-        }
+        if (combatResult == null) return;
+        this.isDataFetched = true;
+        this.displayCombat = true;
       },
     );
     this.subscriptions.add(combatResultSub);
 
-    const combatEventsSub = this.combatService.combatEvents$.subscribe(
-      (event) => {
-        this.handleCombatEvent(event);
+    const combatEventsSub = this.combatStateService.combatEvents$.subscribe(
+      (allEvents) => {
+        // 1) Identify newly arrived events by slicing from lastEventsLength
+        const newEvents = allEvents.slice(this.lastEventsLength);
+        this.lastEventsLength = allEvents.length;
+
+        // 2) Handle only these new events
+        newEvents.forEach((event) => {
+          this.handleCombatEvent(event);
+        });
       },
     );
     this.subscriptions.add(combatEventsSub);
 
-    const combatOutcomeSub = this.combatService.combatOutcome$.subscribe(
+    const combatOutcomeSub = this.combatStateService.combatOutcome$.subscribe(
       (outcome) => {
-        if (outcome !== null) {
-          // Add some kind of animation during this this. Then after one second, reset the teams and empty combat events
-          this.levelingService.gainExperience(this.experienceGained);
+        if (outcome == null) return;
 
-          setTimeout(() => {
-            this.combatEnded();
-            if (this.isStoppingCombat) {
-              this.stopCombat();
-              this.gameService.endCombat();
-              this.characterActionService.clearCurrentAction();
-            }
-          }, 1000);
-        }
+        // Add some kind of animation during this this. Then after one second, reset the teams and empty combat events
+        setTimeout(() => {
+          this.combatEnded();
+          if (this.isStoppingCombat) {
+            this.stopCombat();
+          }
+        }, 1000);
       },
     );
     this.subscriptions.add(combatOutcomeSub);
@@ -123,46 +133,23 @@ export class CombatComponent implements OnInit, OnDestroy {
     this.isLoading = true;
   }
 
-  onCountdownComplete() {
-    if (
-      this.isDataFetched &&
-      this.playerCharacters.length > 0 &&
-      this.enemyCharacters.length > 0
-    ) {
-      this.startActualCombat();
-      this.isLoading = false;
-      console.log('starting actual combat after countdown completed');
-    }
-  }
-
-  private startActualCombat(combatResult?: CombatResultDto) {
-    if (combatResult) {
-      this.handleCombatSetup(combatResult);
-    }
-    this.displayCombat = true;
-  }
-
   initiateStoppingCombat() {
     this.isStoppingCombat = true;
-    this.StopCombatButtonText = 'Stopping combat..';
+    this.stopCombatButtonText = 'Stopping combat..';
     this.characterActionService.stopCharacterAction();
   }
 
   stopCombat() {
     this.combatEnded();
     this.subscriptions.unsubscribe();
-    this.combatService.clearCurrentCombat();
+    this.gameService.endCombat();
+    this.characterActionService.clearCurrentAction();
+    this.combatStateService.resetCombatState();
   }
 
   combatEnded() {
-    this.combatEvents = [];
-    this.resetTeams();
-  }
-
-  handleCombatSetup(combatResult: CombatResultDto | null) {
-    if (!combatResult) return;
-    this.playerCharacters = combatResult.playerTeam;
-    this.enemyCharacters = combatResult.enemyTeam;
+    this.combatStateService.resetCombatState();
+    this.resetTeamSelections();
   }
 
   private handleCombatEvent(event: CombatEvent | null): void {
@@ -223,9 +210,6 @@ export class CombatComponent implements OnInit, OnDestroy {
       default:
         console.warn(`Unhandled event type: ${event.eventType}`);
     }
-
-    // Always push to the events list so the UI can display it
-    this.combatEvents.push(event);
   }
 
   private handleAbilityUseEvent(event: CombatEvent) {
@@ -319,7 +303,7 @@ export class CombatComponent implements OnInit, OnDestroy {
     return this.playerCharacters.some((c) => c.id === actorId);
   }
 
-  private resetTeams(): void {
+  private resetTeamSelections(): void {
     this.selectedPlayerCharacterIndex = 0;
     this.selectedEnemyCharacterIndex = 0;
   }

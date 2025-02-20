@@ -1,5 +1,6 @@
 export enum CharacterActionType {
+  Idle = 'Idle',
   Combat = 'Combat',
   Gathering = 'Gathering',
-  // other action types...
+  Crafting = 'Crafting',
 }

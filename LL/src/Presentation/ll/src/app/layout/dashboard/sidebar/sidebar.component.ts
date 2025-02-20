@@ -14,11 +14,19 @@ import { TabComponent } from '../../../shared/components/tab/tab.component';
 import { GameService } from '../../../core/services/game/game.service';
 import { CharacterActionsService } from '../../../core/services/character-actions/character-actions.service';
 import { CharacterActionDto } from '../../../shared/models/Dtos/characterActionDto';
+import { CurrentActionComponent } from '../../../shared/components/current-action/current-action.component';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [NgFor, NgIf, SidebarItemComponent, RouterLink, TabComponent],
+  imports: [
+    NgFor,
+    NgIf,
+    SidebarItemComponent,
+    RouterLink,
+    TabComponent,
+    CurrentActionComponent,
+  ],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.css',
 })

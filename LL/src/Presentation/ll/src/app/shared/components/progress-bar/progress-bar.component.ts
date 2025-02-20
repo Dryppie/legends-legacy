@@ -2,6 +2,7 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  Input,
   OnDestroy,
   OnInit,
   Output,
@@ -11,6 +12,7 @@ import { CharacterActionsService } from '../../../core/services/character-action
 import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
 import { Subscription } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { CharacterActionType } from '../../models/enums/characterActionType';
 
 @Component({
   selector: 'app-progress-bar',
@@ -48,7 +50,12 @@ export class ProgressBarComponent implements OnInit, OnDestroy {
   }
   private startProgressBar(action: CharacterActionDto): void {
     const progressBarElement = this.progressBar.nativeElement;
-    const duration = environment.baseDuration; // Duration in seconds
+    let duration = environment.baseDuration;
+    if (action.characterActionType === CharacterActionType.Combat) {
+      const updatedAt = new Date(action.updatedAt).getTime();
+      const timeUntilFinished = (updatedAt - Date.now()) / 1000;
+      duration = timeUntilFinished; // Duration in seconds
+    }
 
     // Calculate how much time has passed since the action was last updated
     const actionUpdatedAt = new Date(action.updatedAt).getTime();
