@@ -1,12 +1,29 @@
-<div class="bg-gray-300 flex h-full flex-col items-center justify-center">
-  <h1 class="text-gray-800 text-6xl font-bold">404</h1>
-  <p class="text-gray-600 mt-4 text-xl">
-    Oops! The page you're looking for doesn't exist.
+<div
+  class="flex h-screen flex-col items-center justify-center bg-slate-300 p-6 dark:bg-slate-900"
+>
+  <h1 class="text-gray-800 dark:text-gray-200 text-7xl font-extrabold">404</h1>
+  <p class="text-gray-700 mt-4 max-w-md text-center text-xl dark:text-white">
+    Oops! The page you're looking for doesn't exist. This might be an error.
   </p>
-  <button
-    class="mt-6 rounded-md bg-blue-500 px-6 py-3 text-white transition duration-300 hover:bg-blue-600"
-    (click)="goBack()"
-  >
-    Go Back
-  </button>
+  <p class="text-gray-600 mt-2 max-w-md text-center text-lg dark:text-white">
+    If you believe this is a mistake, report it on
+    <a
+      href="https://discord.gg/HXN4xnJUp3"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="text-blue-700 hover:underline dark:text-blue-300"
+    >
+      Discord
+    </a>
+    with a screenshot, a link to the site, and your in-game username.
+  </p>
+  <div class="mt-6 flex space-x-4">
+    <button
+      class="rounded-md bg-blue-500 px-6 py-3 text-white transition duration-300 hover:bg-blue-600"
+      aria-label="Go Back"
+      (click)="goBack()"
+    >
+      Go Back
+    </button>
+  </div>
 </div>
