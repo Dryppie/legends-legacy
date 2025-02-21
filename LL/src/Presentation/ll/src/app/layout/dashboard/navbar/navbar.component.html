@@ -42,7 +42,7 @@
           <h3 class="cursor-pointer pl-2 text-primary">{{ activeLabel }}</h3>
         </div>
         <div
-          class="flex flex-col items-center text-nowrap rounded-md bg-transparent p-2 text-[#6D6D6D] sm:flex-row sm:space-x-6 sm:p-6"
+          class="z-10 flex flex-col text-nowrap rounded-md border bg-texture p-2 text-[#6D6D6D] sm:flex-row sm:items-center sm:space-x-6 sm:border-none sm:bg-none sm:p-6"
           *ngIf="(showList && isScreenSmall) || !isScreenSmall"
         >
           <app-navbutton
@@ -53,23 +53,19 @@
             (itemTapped)="activeNavbar(button.label)"
           ></app-navbutton>
 
-          <button (click)="logout()" class="pr-2 text-[#6D6D6D]">
-            Log out
+          <button
+            (click)="logout()"
+            class="mt-16 flex space-x-1 pl-2 text-[#6D6D6D] sm:hidden"
+          >
+            <img [src]="'icons/InactivePlus.svg'" class="max-h-8 max-w-8" />
+            <h3>Log out</h3>
           </button>
         </div>
+        <button (click)="logout()" class="hidden pr-4 text-[#6D6D6D] sm:flex">
+          <img [src]="'icons/InactivePlus.svg'" class="max-h-8 max-w-8" />
+          <h3>Log out</h3>
+        </button>
       </div>
     </div>
   </div>
-</div>
-
-<div
-  #menuContent
-  class="right-0 top-full z-10 hidden flex-col space-y-2 rounded-md bg-[#121216CC] p-4 text-white"
->
-  <app-navbutton link="character" label="Character"></app-navbutton>
-  <app-navbutton link="#" label="Quests"></app-navbutton>
-  <app-navbutton link="#" label="Town"></app-navbutton>
-  <app-navbutton link="#" label="Dungeons"></app-navbutton>
-  <app-navbutton link="#" label="Team"></app-navbutton>
-  <app-navbutton link="#" label="Guild"></app-navbutton>
 </div>

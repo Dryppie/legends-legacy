@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, delay, of, Subscription } from 'rxjs';
+import { delay, of, Subscription } from 'rxjs';
 import { CharacterActionDto } from '../../../shared/models/Dtos/characterActionDto';
 import { CombatStateService } from '../../state/combat-state/combat-state.service';
 import { LevelingService } from '../leveling/leveling.service';
+import { EventBusService } from '../event-bus/event-bus.service';
 
 @Injectable({
   providedIn: 'root',
@@ -13,11 +14,18 @@ export class CombatService {
   constructor(
     private combatStateService: CombatStateService,
     private levelingService: LevelingService,
-  ) {}
+    private eventBusService: EventBusService,
+  ) {
+    this.eventBusService.logout$.subscribe(() => {
+      this.handleLogout();
+    });
+  }
+
   clearCurrentCombat() {
     this.allSubscriptions.forEach((subscription) => subscription.unsubscribe());
     this.allSubscriptions = [];
   }
+
   startCombatSimulation(characterAction: CharacterActionDto): void {
     if (!characterAction.combatResult) return;
     this.clearCurrentCombat();
@@ -71,5 +79,9 @@ export class CombatService {
     });
 
     this.allSubscriptions.push(outcomeSubscription); // Track outcome subscription
+  }
+
+  handleLogout() {
+    this.clearCurrentCombat();
   }
 }

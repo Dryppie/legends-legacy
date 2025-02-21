@@ -72,6 +72,8 @@ export class SidebarComponent implements OnInit {
   }
   navigateTo(tabLabel: string) {
     this.activeItem = tabLabel;
+    // TODO: Can be optimized. Check whether CombatVisible before sending a new call to hide combat
+    this.gameService.hideCombat();
   }
 
   toggleSidebar() {

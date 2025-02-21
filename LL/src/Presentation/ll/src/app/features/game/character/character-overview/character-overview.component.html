@@ -10,8 +10,9 @@
   >
     <div class="flex flex-col-reverse justify-between lg:flex-row">
       <app-character-attributes
+        *ngIf="character$ | async as CharacterOverview"
         class="flex"
-        [attributes]="character?.baseAttributes ?? []"
+        [attributes]="CharacterOverview?.baseAttributes ?? []"
       ></app-character-attributes>
       <div class="">
         <div class="flex flex-col items-center justify-center space-y-3 pb-4">
@@ -25,8 +26,8 @@
       </div>
     </div>
     <app-equipped-essences
-      class=""
-      [essences]="character?.equippedEssences ?? []"
+      *ngIf="character$ | async as CharacterOverview"
+      [essences]="CharacterOverview?.equippedEssences ?? []"
     ></app-equipped-essences>
   </div>
 </div>

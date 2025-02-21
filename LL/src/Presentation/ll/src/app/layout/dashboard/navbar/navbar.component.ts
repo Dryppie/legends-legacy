@@ -1,4 +1,11 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { CharacterBadgeComponent } from '../../../shared/components/character-badge/character-badge.component';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { NavbuttonComponent } from './navbutton/navbutton.component';
@@ -15,6 +22,7 @@ import { CharacterDto } from '../../../shared/models/Dtos/characterDto';
   styleUrls: ['./navbar.component.css'], // Corrected to `styleUrls`
 })
 export class NavbarComponent implements OnInit, OnDestroy {
+  @Output() itemTapped = new EventEmitter<void>();
   @Input() isScreenSmall!: boolean;
   showList = false;
   activeLabel = 'Character'; // Default active label
@@ -49,6 +57,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   activeNavbar(activeLabel: string) {
     this.activeLabel = activeLabel;
+    this.itemTapped.emit();
   }
 
   logout() {

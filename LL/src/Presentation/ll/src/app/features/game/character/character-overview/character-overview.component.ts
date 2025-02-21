@@ -3,8 +3,9 @@ import { DefaultHeaderComponent } from '../../../../shared/components/default-he
 import { EquippedEssencesComponent } from '../../../../shared/components/essences/equipped-essences/equipped-essences.component';
 import { CharacterService } from '../../../../core/services/character/character.service';
 import { CharacterOverviewDto } from '../../../../shared/models/Dtos/characterDto';
-import { Subscription } from 'rxjs';
+import { Observable } from 'rxjs';
 import { CharacterAttributesComponent } from '../../../../shared/components/character/character-attributes/character-attributes.component';
+import { AsyncPipe, NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-character-overview',
@@ -13,6 +14,8 @@ import { CharacterAttributesComponent } from '../../../../shared/components/char
     DefaultHeaderComponent,
     EquippedEssencesComponent,
     CharacterAttributesComponent,
+    AsyncPipe,
+    NgIf,
   ],
   templateUrl: './character-overview.component.html',
   styleUrl: './character-overview.component.css',
@@ -23,24 +26,14 @@ export class CharacterOverviewComponent {
   itemDescription = '';
   itemImage = '';
 
-  private subscriptions: Subscription[] = [];
-
-  character: CharacterOverviewDto | null = null;
+  character$!: Observable<CharacterOverviewDto | null>;
 
   constructor(private characterService: CharacterService) {}
 
   ngOnInit() {
-    this.subscriptions.push(
-      this.characterService.characterOverview$.subscribe((character) => {
-        this.character = character;
-      }),
-    );
+    this.character$ = this.characterService.characterOverview$;
 
     this.characterService.getCharacterOverview();
-  }
-
-  ngOnDestroy() {
-    this.subscriptions.forEach((sub) => sub.unsubscribe());
   }
 
   equipmentSlots = [

@@ -19,6 +19,7 @@ import { ApiService } from '../api/api.service';
 import { CharacterDto } from '../../../shared/models/Dtos/characterDto';
 import { NamedStorageKeys } from '../../common/enums/named-storage-keys';
 import { ToastService } from '../toast/toast.service';
+import { EventBusService } from '../event-bus/event-bus.service';
 
 @Injectable({
   providedIn: 'root',
@@ -41,6 +42,7 @@ export class AuthService {
     private router: Router,
     private apiService: ApiService,
     private toastService: ToastService,
+    private eventBusService: EventBusService, // inject event bus
   ) {}
 
   updateCharacter(updatedCharacter: CharacterDto): void {
@@ -61,6 +63,8 @@ export class AuthService {
     this.currentCharacterSubject.next(null);
     this.isAuthenticatedSubject.next(false);
     localStorage.clear();
+    // Emit an event that'll trigger through all services using this
+    this.eventBusService.emitLogout();
 
     if (!location.href.includes('login')) {
       return from(this.router.navigateByUrl('/')).pipe(

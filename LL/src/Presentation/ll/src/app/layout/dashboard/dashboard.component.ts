@@ -49,4 +49,8 @@ export class DashboardComponent implements OnInit {
   toggleNav() {
     this.isSidebarOpen = !this.isSidebarOpen;
   }
+
+  openSidebar() {
+    this.isSidebarOpen = true;
+  }
 }

@@ -1,10 +1,10 @@
 import { Component, AfterViewInit } from '@angular/core';
-import { ButtonComponent } from '../../button/button.component';
+import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { EssencesService } from '../../../../core/services/essences/essences.service';
-import { BannerComponent } from '../../banner/banner.component';
-import { DefaultHeaderComponent } from '../../default-header/default-header.component';
+import { BannerComponent } from '../../../../shared/components/banner/banner.component';
+import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { ModalService } from '../../../../core/services/modal/modal.service';
-import { Essence } from '../../../models/essence';
+import { Essence } from '../../../../shared/models/essence';
 
 @Component({
   selector: 'app-temple',

@@ -20,6 +20,7 @@ import { CombatService } from '../combat/combat.service';
 import { NamedStorageKeys } from '../../common/enums/named-storage-keys';
 import { CharacterActionType } from '../../../shared/models/enums/characterActionType';
 import { GameService } from '../game/game.service';
+import { EventBusService } from '../event-bus/event-bus.service';
 
 @Injectable({
   providedIn: 'root',
@@ -40,7 +41,12 @@ export class CharacterActionsService {
     private apiService: ApiService,
     private combatService: CombatService,
     private gameService: GameService,
-  ) {}
+    private eventBusService: EventBusService,
+  ) {
+    this.eventBusService.logout$.subscribe(() => {
+      this.handleLogout();
+    });
+  }
 
   init(): void {
     if (this.isInitialized) {
@@ -108,6 +114,7 @@ export class CharacterActionsService {
 
   private setCurrentAction(action: CharacterActionDto | null): void {
     this.currentActionSubject.next(action);
+    if (action) this.setCAT(action.characterActionType);
   }
 
   private startPolling(): void {
@@ -182,7 +189,7 @@ export class CharacterActionsService {
       });
   }
 
-  private stopPolling(): void {
+  stopPolling(): void {
     if (this.pollingSubscription) {
       this.pollingSubscription.unsubscribe();
       this.pollingSubscription = null;
@@ -208,5 +215,13 @@ export class CharacterActionsService {
 
   clearCAT(): void {
     localStorage.removeItem(NamedStorageKeys.CharacterActionType);
+  }
+
+  private handleLogout(): void {
+    this.stopPolling();
+    this.clearCurrentAction();
+
+    this.isInitialized = false;
+    // Then call init() again once a new user logs in (if that’s your intended flow).
   }
 }
