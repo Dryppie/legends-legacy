@@ -41,7 +41,6 @@ export class LoginComponent {
   ) {}
   loginError: boolean = false;
   validatorError: boolean | undefined = false;
-  isLocal = environment.isLocal;
 
   loginForm = new FormGroup({
     email: new FormControl(environment.isLocal ? 'admin@hotmail.com' : '', [
