@@ -196,7 +196,7 @@ function getWorldSidebar(): Tab[] {
       label: 'World',
       items: [
         {
-          id: '1',
+          id: 'shenic',
           route: 'world',
           icon: 'world/Quest',
           title: 'Shenic',
