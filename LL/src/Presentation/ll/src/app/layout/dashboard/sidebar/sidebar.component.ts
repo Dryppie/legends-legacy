@@ -7,7 +7,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { SidebarItemComponent } from './sidebar-item/sidebar-item.component';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { SidebarItem, Tab } from '../../../shared/models/sidebar-item';
 import { SidebarService } from '../../../core/services/sidebar/sidebar.service';
 import { TabComponent } from '../../../shared/components/tab/tab.component';
@@ -15,6 +15,7 @@ import { GameService } from '../../../core/services/game/game.service';
 import { CharacterActionsService } from '../../../core/services/character-actions/character-actions.service';
 import { CharacterActionDto } from '../../../shared/models/Dtos/characterActionDto';
 import { CurrentActionComponent } from '../../../shared/components/current-action/current-action.component';
+import { NamedStorageKeys } from '../../../core/common/enums/named-storage-keys';
 
 @Component({
   selector: 'app-sidebar',
@@ -31,9 +32,6 @@ import { CurrentActionComponent } from '../../../shared/components/current-actio
   styleUrl: './sidebar.component.css',
 })
 export class SidebarComponent implements OnInit {
-  navigateToCombat() {
-    this.gameService.showCombat();
-  }
   @Output() itemTapped = new EventEmitter<void>();
 
   @ViewChild('tabComponent') tabComponent!: TabComponent;
@@ -46,6 +44,7 @@ export class SidebarComponent implements OnInit {
     private sidebarService: SidebarService,
     private gameService: GameService,
     private actionService: CharacterActionsService,
+    private router: Router,
   ) {}
 
   ngOnInit() {
@@ -81,5 +80,14 @@ export class SidebarComponent implements OnInit {
 
   get tabLabels(): string[] {
     return this.tabs.map((tab) => tab.label);
+  }
+
+  navigateToAction() {
+    const actionType = localStorage.getItem(
+      NamedStorageKeys.CharacterActionType,
+    );
+    if (actionType === 'Combat') this.gameService.showCombat();
+    else if (actionType === 'Gathering')
+      this.router.navigate(['game/professions']);
   }
 }

@@ -2,12 +2,12 @@
   <div
     class="mt-[1px] flex flex-auto flex-col bg-texture bg-auto text-primary sm:rounded-tr-md"
   >
-    <div class="flex min-h-16 items-center p-2">
+    <div class="flex min-h-20 p-2">
       <app-current-action
         *ngIf="currentAction"
         class="w-full"
         (click)="toggleSidebar()"
-        (click)="navigateToCombat()"
+        (click)="navigateToAction()"
       ></app-current-action>
     </div>
     <app-tab

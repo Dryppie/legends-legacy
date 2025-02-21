@@ -60,7 +60,6 @@ export class CombatComponent implements OnInit, OnDestroy {
     const enemyCharactersSub =
       this.combatStateService.enemyCharacters$.subscribe((entities) => {
         this.enemyCharacters = entities;
-        console.log(entities);
       });
     this.subscriptions.add(enemyCharactersSub);
 
@@ -111,7 +110,6 @@ export class CombatComponent implements OnInit, OnDestroy {
     const combatOutcomeSub = this.combatStateService.combatOutcome$.subscribe(
       (outcome) => {
         if (outcome == null) return;
-
         // Add some kind of animation during this this. Then after one second, reset the teams and empty combat events
         setTimeout(() => {
           this.combatEnded();
@@ -128,11 +126,6 @@ export class CombatComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
-  startCombat() {
-    if (this.isLoading) return;
-    this.isLoading = true;
-  }
-
   initiateStoppingCombat() {
     this.isStoppingCombat = true;
     this.stopCombatButtonText = 'Stopping combat..';
@@ -140,15 +133,12 @@ export class CombatComponent implements OnInit, OnDestroy {
   }
 
   stopCombat() {
-    this.combatEnded();
     this.subscriptions.unsubscribe();
     this.gameService.endCombat();
     this.characterActionService.clearCurrentAction();
-    this.combatStateService.resetCombatState();
   }
 
   combatEnded() {
-    this.combatStateService.resetCombatState();
     this.resetTeamSelections();
   }
 
