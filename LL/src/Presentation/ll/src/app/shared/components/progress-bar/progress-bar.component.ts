@@ -51,35 +51,39 @@ export class ProgressBarComponent implements OnInit, OnDestroy {
   private startProgressBar(action: CharacterActionDto): void {
     const progressBarElement = this.progressBar.nativeElement;
     let duration = environment.baseDuration;
+    let startTime: number;
+
     if (action.characterActionType === CharacterActionType.Combat) {
+      // Combat: updatedAt is in the future, meaning time left is from now until then
       const updatedAt = new Date(action.updatedAt).getTime();
-      const timeUntilFinished = (updatedAt - Date.now()) / 1000;
-      duration = timeUntilFinished; // Duration in seconds
+      const timeUntilFinished = (updatedAt - Date.now()) / 1000; // Remaining time
+      duration = Math.max(timeUntilFinished, 0); // Ensure non-negative duration
+      startTime = Date.now(); // Start now, since the fight is ongoing
+    } else {
+      // Non-combat: updatedAt is in the past, meaning it started before and has 6 seconds duration
+      const actionUpdatedAt = new Date(action.updatedAt).getTime();
+      startTime = actionUpdatedAt; // The action started in the past
+      duration = 6; // Fixed duration of 6 seconds
     }
 
-    // Calculate how much time has passed since the action was last updated
-    const actionUpdatedAt = new Date(action.updatedAt).getTime();
-    const timeSinceUpdate = (Date.now() - actionUpdatedAt) / 1000; // Convert to seconds
-    const initialProgress = Math.min((timeSinceUpdate / duration) * 100, 100); // Calculate initial progress based on the time elapsed since update
+    // Calculate initial progress
+    const elapsedTime = (Date.now() - startTime) / 1000;
+    const initialProgress = Math.min((elapsedTime / duration) * 100, 100);
 
-    // Set the progress bar's initial width based on time since update
+    // Set initial progress bar width
     progressBarElement.style.width = `${initialProgress}%`;
 
-    let startTime = Date.now() - timeSinceUpdate * 1000; // Adjust start time to account for elapsed time
-
     const updateProgress = () => {
-      const elapsed = (Date.now() - startTime) / 1000; // Calculate elapsed time since the adjusted start time
+      const elapsed = (Date.now() - startTime) / 1000; // Elapsed time since action started
       const progress = Math.min((elapsed / duration) * 100, 100);
 
       progressBarElement.style.width = `${progress}%`;
 
-      const remainingSeconds = Math.max(duration - Math.floor(elapsed), 1);
+      const remainingSeconds = Math.max(duration - Math.floor(elapsed), 0);
       this.remainingTimeChange.emit(this.formatTime(remainingSeconds));
 
       if (progress < 100) {
         this.animationFrameId = requestAnimationFrame(updateProgress);
-      } else {
-        startTime = Date.now(); // Reset start time if needed for future progress
       }
     };
 

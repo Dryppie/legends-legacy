@@ -4,7 +4,7 @@
 >
   <div class="flex h-full flex-auto flex-col">
     <app-navbar
-      *ngIf="!(combatVisible$ | async) || isSidebarOpen"
+      *ngIf="!(combatVisible$ | async) || isSidebarOpen || !isScreenSmall"
       (itemTapped)="openSidebar()"
       [isScreenSmall]="isScreenSmall"
       class="p-4"

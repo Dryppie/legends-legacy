@@ -1,9 +1,15 @@
 <div
   *ngIf="!displayCombat && !isLoading"
-  class="flex h-full w-full items-center justify-center bg-black text-center text-primary"
+  class="flex h-full w-full flex-col items-center justify-center bg-black text-center text-primary"
 >
-  You are already in combat. Next fight in:
-  <app-countdown [targetDate]="nextCombatIn!"></app-countdown>
+  <div class="flex">
+    You are already in combat. Next fight in:
+    <app-countdown [targetDate]="nextCombatIn!"></app-countdown>
+  </div>
+
+  <button (click)="initiateStoppingCombat()" class="text-primary">
+    {{ stopCombatButtonText }}
+  </button>
 </div>
 
 <!-- <div
