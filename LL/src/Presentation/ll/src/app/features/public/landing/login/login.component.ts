@@ -34,6 +34,15 @@ import { environment } from '../../../../../environments/environment';
   styleUrl: './login.component.css',
 })
 export class LoginComponent {
+  document: any;
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+  ) {}
+  loginError: boolean = false;
+  validatorError: boolean | undefined = false;
+  isLocal = environment.isLocal;
+
   loginForm = new FormGroup({
     email: new FormControl(environment.isLocal ? 'admin@hotmail.com' : '', [
       Validators.required,
@@ -45,13 +54,6 @@ export class LoginComponent {
       Validators.minLength(8),
     ]),
   });
-  document: any;
-  constructor(
-    private authService: AuthService,
-    private router: Router,
-  ) {}
-  loginError: boolean = false;
-  validatorError: boolean | undefined = false;
 
   login() {
     const email = this.loginForm.value.email;

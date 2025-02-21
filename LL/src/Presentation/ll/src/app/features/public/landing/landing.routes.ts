@@ -14,20 +14,25 @@ export const LANDING_ROUTES: Routes = [
     children: [
       {
         path: '',
-        component: LandingHeroComponent,
+        redirectTo: 'login',
+        pathMatch: 'full',
       },
-      {
-        path: 'world',
-        component: WorldComponent,
-      },
-      {
-        path: 'roadmap',
-        component: RoadmapComponent,
-      },
-      {
-        path: 'faq',
-        component: FaqComponent,
-      },
+      // {
+      //   path: '',
+      //   component: LandingHeroComponent,
+      // },
+      // {
+      //   path: 'world',
+      //   component: WorldComponent,
+      // },
+      // {
+      //   path: 'roadmap',
+      //   component: RoadmapComponent,
+      // },
+      // {
+      //   path: 'faq',
+      //   component: FaqComponent,
+      // },
       {
         path: 'login',
         component: LoginComponent,
