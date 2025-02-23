@@ -38,6 +38,13 @@ public class EssenceRepository : IEssenceRepository
         var essence = essenceItem.Essence;
         NotFoundException.ThrowIfNull(essence, nameof(essence), essenceItemId);
 
+        // Check if the character has already equipped this essence
+        if (character.EquippedEssences.Any(e => e.Id == essence.Id))
+        {
+            // You can throw an exception, or return false, or handle it however you'd like.
+            throw new InvalidOperationException($"Essence with ID {essence.Id} is already equipped.");
+        }
+
         // 4) Add the essence to the character's EquippedEssences
         character.EquippedEssences.Add(essence);
 

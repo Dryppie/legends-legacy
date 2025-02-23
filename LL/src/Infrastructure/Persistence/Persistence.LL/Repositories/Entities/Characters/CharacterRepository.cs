@@ -26,26 +26,26 @@ public class CharacterRepository : ICharacterRepository
 
         // TODO: This is only temporary, so guests have abilities
 
-        //var essences = new List<Essence>()
-        //    {
-        //        new Essence()
-        //        {
-        //            Id = Guid.NewGuid(),
-        //            Name = "Starter Essence 1",
-        //            ActiveAbilityId = "fireball_01",
-        //            PassiveAbilityId = "retaliate_01"
-        //        },
-        //        new Essence()
-        //        {
-        //            Id = Guid.NewGuid(),
-        //            Name = "Starter Essence 2",
-        //            ActiveAbilityId = "heal_01",
-        //            PassiveAbilityId = "pocketDirt"
-        //        }
-        //    };
+        var essences = new List<Essence>()
+            {
+                new Essence()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Goblin's Essence",
+                    ActiveAbilityId = "sneakAttack",
+                    PassiveAbilityId = "pocketDirt"
+                },
+                //new Essence()
+                //{
+                //    Id = Guid.NewGuid(),
+                //    Name = "Starter Essence 2",
+                //    ActiveAbilityId = "heal_01",
+                //    PassiveAbilityId = "pocketDirt"
+                //}
+            };
 
-        //character.EquippedEssences = essences;
-        //await _context.Essences.AddRangeAsync(essences);
+        character.EquippedEssences = essences;
+        await _context.Essences.AddRangeAsync(essences);
 
         _context.Characters.Add(character);
 
