@@ -11,6 +11,7 @@ public class SimpleCombatEntityDto : IMapFrom<SimpleCombatEntity>
     public int MaxHealth { get; set; }
     public int Mana { get; set; }
     public int MaxMana { get; set; }
+    public int Barrier { get; set; }
 
     public void Mapping(Profile profile)
     {

@@ -2,7 +2,7 @@
 using MediatR;
 
 namespace Application.UseCases._Simulates;
-public record SimulateCombatWithOneEssenceCommand(string EssenceName) : IRequest;
+public record SimulateCombatWithOneEssenceCommand(string EssenceName, int TeamSize) : IRequest;
 
 public class SimulateCombatWithOneEssenceCommandHandler : IRequestHandler<SimulateCombatWithOneEssenceCommand>
 {
@@ -13,6 +13,6 @@ public class SimulateCombatWithOneEssenceCommandHandler : IRequestHandler<Simula
     }
     public async Task Handle(SimulateCombatWithOneEssenceCommand request, CancellationToken cancellationToken)
     {
-        await _simulatorService.SimulateCombatWithOneEssence(request.EssenceName);
+        await _simulatorService.SimulateCombatWithOneEssence(request.EssenceName, request.TeamSize);
     }
 }

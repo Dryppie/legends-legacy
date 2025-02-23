@@ -55,7 +55,7 @@ public class EssenceDescriptionService : IEssenceDescriptionService
                     placeholders[dmgKey] = BuildRange(finalDamage);
                     break;
 
-                case HealingAction healingAction:
+                case ResourceRestoreAction healingAction:
                     healIndex++;
                     // Calculate final healing if necessary
                     double finalHealing = healingAction.Magnitude;
@@ -123,7 +123,7 @@ public class EssenceDescriptionService : IEssenceDescriptionService
                 placeholders[dmgKey] = BuildRange(finalDamage);
                 break;
 
-            case HealingAction healingAction:
+            case ResourceRestoreAction healingAction:
                 healIndex++;
                 double finalHealing = healingAction.Magnitude;
 

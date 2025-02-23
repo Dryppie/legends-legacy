@@ -12,12 +12,13 @@ public static class EssenceJsonReader
         Converters =
         {
             new AbilityTypeConverter(),
+            new EffectConverter(),
+            new EffectModificationTypeConverter(),
+            new InterfaceConverterFactory(),
+            new ResourceTypeConverter(),
             new TargetingConverter(),
             new TriggerEventConverter(),
-            new ResourceTypeConverter(),
-            new InterfaceConverterFactory(),
-            new EffectConverter(),
-            new JsonStringEnumConverter()
+            new JsonStringEnumConverter(),
         },
         PropertyNameCaseInsensitive = true,
     };

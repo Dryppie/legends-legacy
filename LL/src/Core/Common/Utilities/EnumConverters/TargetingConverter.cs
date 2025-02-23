@@ -23,9 +23,11 @@ public class TargetingConverter : JsonConverter<Targeting>
             "SingleRandomAlly" => Targeting.SingleRandomAlly,
             "SingleEnemyLowestHealth" => Targeting.SingleEnemyLowestHealth,
             "SingleAllyLowestHealth" => Targeting.SingleAllyLowestHealth,
+            "AllyHighestMaxHealth" => Targeting.AllyHighestMaxHealth,
             "AllEnemies" => Targeting.AllEnemies,
             "AllAllies" => Targeting.AllAllies,
             "AllAlliesAndSelf" => Targeting.AllAlliesAndSelf,
+            "EveryoneButYou" => Targeting.EveryoneButYou,
             _ => throw new JsonException($"Unknown targeting type: {stringValue}")
         };
     }
@@ -45,9 +47,11 @@ public class TargetingConverter : JsonConverter<Targeting>
             Targeting.SingleRandomAlly => "SingleRandomAlly",
             Targeting.SingleEnemyLowestHealth => "SingleEnemyLowestHealth",
             Targeting.SingleAllyLowestHealth => "SingleAllyLowestHealth",
+            Targeting.AllyHighestMaxHealth => "AllyHighestMaxHealth",
             Targeting.AllEnemies => "AllEnemies",
             Targeting.AllAllies => "AllAllies",
             Targeting.AllAlliesAndSelf => "AllAlliesAndSelf",
+            Targeting.EveryoneButYou => "EveryoneButYou",
             _ => throw new JsonException($"Unknown targeting type: {value}")
         };
         writer.WriteStringValue(stringValue);

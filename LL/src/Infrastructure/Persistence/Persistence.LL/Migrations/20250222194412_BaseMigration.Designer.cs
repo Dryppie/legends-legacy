@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250217060306_BaseMigration")]
+    [Migration("20250222194412_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -606,7 +606,7 @@ namespace Persistence.LL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasDiscriminator().HasValue(0);
+                    b.HasDiscriminator().HasValue(1);
                 });
 
             modelBuilder.Entity("Domain.Models.CharacterActions.CharacterActionDetails.GatheringActionDetails", b =>
@@ -625,7 +625,7 @@ namespace Persistence.LL.Migrations
 
                     b.HasIndex("LootTableId");
 
-                    b.HasDiscriminator().HasValue(1);
+                    b.HasDiscriminator().HasValue(2);
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Characters.Character", b =>

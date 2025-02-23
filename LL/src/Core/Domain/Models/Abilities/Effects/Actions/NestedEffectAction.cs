@@ -31,6 +31,7 @@ public class NestedEffectAction : IEffectAction
                 triggerTarget: effectTemplate.TriggerTarget,
                 isFlatAmount: effectTemplate.IsFlatAmount,
                 chance: effectTemplate.Chance,
+                effectModifications: effectTemplate.EffectModifications,
                 effectTags: effectTemplate.EffectTags,
                 attackType: effectTemplate.AttackType,
                 damageType: effectTemplate.DamageType

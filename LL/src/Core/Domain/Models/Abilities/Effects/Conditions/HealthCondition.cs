@@ -2,7 +2,7 @@
 using Domain.Models.Attributes;
 
 namespace Domain.Models.Abilities.Effects.Conditions;
-public class HealthCondition : IEffectCondition
+public class HealthCondition : ICondition
 {
     public int HealthPercentage { get; }
     public ComparisonType Comparison { get; }
@@ -26,8 +26,10 @@ public class HealthCondition : IEffectCondition
         };
     }
 
-    public IEffectCondition Clone()
+    public ICondition Clone()
     {
         return new HealthCondition(HealthPercentage, Comparison);
     }
+
+    public void PerformCondition(EffectContext context) { }
 }

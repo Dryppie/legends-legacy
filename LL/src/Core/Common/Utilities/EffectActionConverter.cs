@@ -1,6 +1,8 @@
 ﻿using Domain.Interfaces;
 using Domain.Models.Abilities.Effects;
 using Domain.Models.Abilities.Effects.Actions;
+using Domain.Models.Abilities.Effects.StatusEffects;
+using Domain.Models.Abilities.ResourceCosts;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Damages;
@@ -20,8 +22,15 @@ public class EffectActionConverter : JsonConverter<IEffectAction>
             switch (actionType)
             {
                 case "ApplyStatusEffect":
-                    var status = root.GetProperty("Status").GetString()!;
-                    return new ApplyStatusEffectAction(status);
+                    var status = Enum.Parse<StatusEffectType>(root.GetProperty("Status").GetString()!);
+                    int stacks = 0;
+                    if (root.TryGetProperty("Stacks", out var stacksElement))
+                    {
+                        stacks = stacksElement.GetInt32();
+                    }
+
+                    return new ApplyStatusEffectAction(status, stacks);
+
                 case "Damage":
                     var damageAmount = root.GetProperty("Amount").GetInt32();
 
@@ -39,26 +48,32 @@ public class EffectActionConverter : JsonConverter<IEffectAction>
                         damageScalingMultiplier = damageScalingMultElement.GetSingle();
                     }
 
-                    return new DamageAction(damageAmount, damageScalingAttribute, damageScalingMultiplier);
-
-                case "Healing":
-                    var healAmount = root.GetProperty("Amount").GetInt32();
-
-                    AttributeType? healScalingAttribute = null;
-                    float healScalingMultiplier = 0;
-
-                    if (root.TryGetProperty("ScalingAttribute", out var healScalingAttrElement))
+                    int lifesteal = 0;
+                    if (root.TryGetProperty("Lifesteal", out var lifestealElement))
                     {
-                        var healScalingAttrStr = healScalingAttrElement.GetString()!;
-                        healScalingAttribute = Enum.Parse<AttributeType>(healScalingAttrStr, ignoreCase: true);
+                        lifesteal = lifestealElement.GetInt32();
                     }
 
-                    if (root.TryGetProperty("ScalingMultiplier", out var healScalingMultElement))
+                    return new DamageAction(damageAmount, damageScalingAttribute, damageScalingMultiplier, lifesteal);
+
+                case "ResourceRestore":
+                    var restoreAmount = root.GetProperty("Amount").GetInt32();
+                    var resourceType = Enum.Parse<ResourceType>(root.GetProperty("ResourceType").GetString()!);
+                    AttributeType? restoreScalingAttribute = null;
+                    float restoreScalingMultiplier = 0;
+
+                    if (root.TryGetProperty("ScalingAttribute", out var restoreScalingAttrElement))
                     {
-                        healScalingMultiplier = healScalingMultElement.GetSingle();
+                        var restoreScalingAttrStr = restoreScalingAttrElement.GetString()!;
+                        restoreScalingAttribute = Enum.Parse<AttributeType>(restoreScalingAttrStr, ignoreCase: true);
                     }
 
-                    return new HealingAction(healAmount, healScalingAttribute, healScalingMultiplier);
+                    if (root.TryGetProperty("ScalingMultiplier", out var restoreScalingMultElement))
+                    {
+                        restoreScalingMultiplier = restoreScalingMultElement.GetSingle();
+                    }
+
+                    return new ResourceRestoreAction(restoreAmount, resourceType, restoreScalingAttribute, restoreScalingMultiplier);
 
                 case "ModifyAttribute":
                     var attribute = Enum.Parse<AttributeType>(root.GetProperty("Attribute").GetString()!);

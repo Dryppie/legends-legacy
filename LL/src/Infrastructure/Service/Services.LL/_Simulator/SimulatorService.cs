@@ -20,11 +20,11 @@ public class SimulatorService : ISimulatorService
         _combatService = combatService;
     }
 
-    public async Task SimulateCombatWithOneEssence(string essenceName)
+    public async Task SimulateCombatWithOneEssence(string essenceName, int teamSize = 1)
     {
         _pickRandomEssences = false;
         _essenceName = essenceName;
-        await SimulateCombat(1, 1, 1, 1, 1);
+        await SimulateCombat(teamSize, teamSize, 1, 1, 1);
     }
 
 
@@ -132,7 +132,7 @@ public class SimulatorService : ISimulatorService
 
         foreach (var entity in playerCharacters)
         {
-            combatEntities.Add(new SimpleCombatEntity(entity.Id.ToString(), entity.Name, (int)entity.BaseCombatAttributes[AttributeType.MaxHealth], (int)entity.BaseCombatAttributes[AttributeType.MaxMana]));
+            combatEntities.Add(new SimpleCombatEntity(entity.Id.ToString(), entity.Name, (int)entity.BaseCombatAttributes[AttributeType.MaxHealth], (int)entity.BaseCombatAttributes[AttributeType.MaxMana], (int)entity.BaseCombatAttributes[AttributeType.Barrier]));
         }
 
         return combatEntities;
@@ -159,11 +159,11 @@ public class SimulatorService : ISimulatorService
         for (int i = 0; i < teamSize; i++)
         {
             var entity = GenerateEntity(tier);
+            entity.Id = Guid.NewGuid();
             entity.Name = $"{teamName}{i + 1}";
             team.Add(entity);
         }
         return team;
-
     }
 
     private static SimulatedEntity GenerateEntity(int tier)
@@ -226,10 +226,13 @@ public class SimulatorService : ISimulatorService
 
     private static async Task PickSpecificAbility(IEnumerable<CombatEntity> entities, string essenceName = "Test Essence")
     {
-        // Load random abilities
-        var attributePickerTasks = entities.Select(entity => Task.Run(() => EssenceLoader.Instance._Simulator_PickSpecificAbility(entity, essenceName)));
+        // Pick ability for the first entity
+        var tasks = new List<Task> { Task.Run(() => EssenceLoader.Instance._Simulator_PickSpecificAbility(entities.First(), essenceName)) };
 
-        await Task.WhenAll(attributePickerTasks);
+        // Pick abilities for the remaining entities
+        tasks.AddRange(entities.Skip(1).Select(entity => Task.Run(() => EssenceLoader.Instance._Simulator_PickRandomAbilityCombinations(entity))));
+
+        await Task.WhenAll(tasks);
     }
 
     public class EssenceStat

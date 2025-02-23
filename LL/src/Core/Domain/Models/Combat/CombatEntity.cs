@@ -1,5 +1,6 @@
 ﻿using Domain.Components.Attributes;
 using Domain.Models.Abilities;
+using Domain.Models.Abilities.Effects.StatusEffects;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Entities;
@@ -28,7 +29,7 @@ public class CombatEntity
     public Dictionary<AttributeType, float> BaseCombatAttributes { get; } = [];
     public Dictionary<AttributeType, float> CombatAttributes { get; } = [];
     public List<AttributeModifier> TemporaryModifiers { get; set; } = [];
-    public HashSet<string> Statuses { get; } = [];
+    public Dictionary<StatusEffectType, int> Statuses { get; } = [];
     public int Level { get; set; }
     public bool IsSummoned = false;
 
@@ -68,17 +69,32 @@ public class CombatEntity
         AttributeCalculator.CalculateCombatAttributeByType(this, attributeModifier.AttributeType);
     }
 
-    public void ModifyStatuses(string status, bool remove = false)
+    public void ModifyStatuses(StatusEffectType status, int amount)
     {
-        if (remove)
-            Statuses.Remove(status);
+        if (amount == 0)
+            return;
+
+        // If we already have this status in the dictionary:
+        if (Statuses.ContainsKey(status))
+        {
+            // Update its stack count
+            Statuses[status] += amount;
+
+            // If stacks drop to 0 or below, remove the status entirely
+            if (Statuses[status] <= 0)
+                Statuses.Remove(status);
+        }
         else
-            Statuses.Add(status);
+        {
+            // We only add if we have a positive amount
+            if (amount > 0)
+                Statuses[status] = amount;
+        }
     }
 
     public bool CanAct()
     {
-        return !Statuses.Contains("Stun");
+        return !Statuses.ContainsKey(StatusEffectType.Stunned) && !Statuses.ContainsKey(StatusEffectType.Frozen);
     }
 
     public void Reset()

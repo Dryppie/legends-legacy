@@ -7,8 +7,9 @@ public class SimpleCombatEntity
     public int MaxHealth { get; set; }
     public int Mana { get; set; }
     public int MaxMana { get; set; }
+    public int Barrier { get; set; }
 
-    public SimpleCombatEntity(string id, string name, int maxHealth, int maxMana)
+    public SimpleCombatEntity(string id, string name, int maxHealth, int maxMana, int barrier)
     {
         Id = id;
         Name = name;
@@ -16,6 +17,7 @@ public class SimpleCombatEntity
         MaxHealth = maxHealth;
         Mana = maxMana;
         MaxMana = maxMana;
+        Barrier = barrier;
     }
 
     public SimpleCombatEntity() { }

@@ -2,5 +2,6 @@
 public enum ResourceType
 {
     Mana,
-    Health
+    Health,
+    Barrier,
 }

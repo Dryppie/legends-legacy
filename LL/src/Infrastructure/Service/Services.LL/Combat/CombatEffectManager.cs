@@ -119,6 +119,7 @@ public class CombatEffectManager : ICombatEffectManager
                     triggerTarget: effect.Definition.TriggerTarget,
                     isFlatAmount: effect.Definition.IsFlatAmount,
                     chance: effect.Definition.Chance,
+                    effectModifications: effect.Definition.EffectModifications,
                     effectTags: effect.Definition.EffectTags,
                     attackType: effect.Definition.AttackType,
                     damageType: effect.Definition.DamageType)

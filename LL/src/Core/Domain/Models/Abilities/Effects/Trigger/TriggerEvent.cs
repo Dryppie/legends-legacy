@@ -46,6 +46,10 @@ public enum TriggerEvent
     /// </summary>
     OnOverhealed,
     /// <summary>
+    /// Triggered when healing through lifesteal
+    /// </summary>
+    OnLifestealHeal,
+    /// <summary>
     /// Triggered at an interval
     /// </summary>
     OnTickInterval,

@@ -57,6 +57,8 @@ public static class EntityBaseAttributeHelper
             case AttributeType.PhysicalDefense:
             case AttributeType.MagicalDefense:
                 return 50; // Base defense
+            case AttributeType.FlatDamageReduction:
+                return 0;
             case AttributeType.DamageReduction:
                 return 0;
             case AttributeType.CritChance:

@@ -9,6 +9,8 @@ using Domain.Models.Abilities.Effects.Usages;
 using Domain.Models.Damages;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Domain.Models.Abilities.Effects.EffectModifications;
+using Domain.Models.Attributes.Modifiers;
 
 namespace Common.Utilities;
 public class EffectConverter : JsonConverter<EffectDefinition>
@@ -35,12 +37,12 @@ public class EffectConverter : JsonConverter<EffectDefinition>
         }
 
         // Condition
-        IEffectCondition condition;
+        ICondition condition;
         if (root.TryGetProperty("Condition", out var conditionElement)
             && conditionElement.ValueKind != JsonValueKind.Null
             && conditionElement.ValueKind != JsonValueKind.Undefined)
         {
-            condition = JsonSerializer.Deserialize<IEffectCondition>(conditionElement.GetRawText(), options)
+            condition = JsonSerializer.Deserialize<ICondition>(conditionElement.GetRawText(), options)
                         ?? new NoCondition(); // Fallback in case of error
         }
         else
@@ -100,6 +102,39 @@ public class EffectConverter : JsonConverter<EffectDefinition>
             chance = chanceElement.GetInt32();
         }
 
+        // **Effect Modifications Parsing**
+        List<EffectModification> effectModifications = new();
+        if (root.TryGetProperty("EffectModifiers", out var effectModifiersElement) && effectModifiersElement.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var modifierElement in effectModifiersElement.EnumerateArray())
+            {
+                if (!modifierElement.TryGetProperty("Type", out var typeElement) ||
+                    !modifierElement.TryGetProperty("Amount", out var amountElement) ||
+                    !modifierElement.TryGetProperty("ModifierType", out var modifierTypeElement))
+                {
+                    continue; // Skip if properties are missing
+                }
+
+                if (!Enum.TryParse<EffectModificationType>(typeElement.GetString(), true, out var modificationType))
+                {
+                    throw new JsonException($"Invalid EffectModificationType: {typeElement.GetString()}");
+                }
+
+                int amount = amountElement.GetInt32();
+                if (!Enum.TryParse<ModifierType>(modifierTypeElement.GetString(), true, out var modifierType))
+                {
+                    throw new JsonException($"Invalid ModifierType: {modifierTypeElement.GetString()}");
+                }
+
+                effectModifications.Add(new EffectModification
+                {
+                    Amount = amount,
+                    ModifierType = modifierType,
+                    EffectModificationType = modificationType
+                });
+            }
+        }
+
         // 3) Construct the Effect. (Replace placeholders with actual data as needed.)
         var effect = new EffectDefinition(
             action: action,
@@ -108,6 +143,7 @@ public class EffectConverter : JsonConverter<EffectDefinition>
             interval: interval,
             usage: usage,
             effectTags: new List<EffectTag>(),
+            effectModifications: effectModifications,
             targeting: targeting,
             trigger: trigger,
             triggerTarget: triggerTarget,

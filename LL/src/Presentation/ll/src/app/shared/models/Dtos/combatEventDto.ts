@@ -13,6 +13,9 @@ export enum EventType {
   Heal = 'Heal', // Dryp was healed for {Amount}
   HealOverTime = 'HealOverTime', // Dryp was healed for {Amount} // Not sure this should be logged in chat
   HealCrit = 'HealCrit', // Dryp was healed for {Amount}
+  RestoreMana = 'RestoreMana', // Dryp restored {Amount} mana
+  RestoreBarrier = 'RestoreBarrier', // Dryp received {Amount} barrier
+  Lifesteal = 'Lifesteal', // Dryp gained {Amount} health through lifesteal
   Summon = 'Summon', // Imp has been summoned
   SummonExpired = 'SummonExpired', // Imp vanished. Summon effect expired.
   Buff = 'Buff', // Dryp's strength increased by {Amount}

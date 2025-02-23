@@ -1,5 +1,6 @@
 ﻿using Domain.Interfaces;
 using Domain.Models.Abilities.Effects;
+using Domain.Models.Abilities.Effects.Conditions;
 using Domain.Models.Abilities.Effects.Usages;
 using Domain.Models.Abilities.ResourceCosts;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -16,6 +17,12 @@ public class AbilityDefinition
     {
         get => _usage ??= new UnlimitedUsage();
         set => _usage = value;
+    }
+    private ICondition? _condition;
+    public ICondition Condition
+    {
+        get => _condition ??= new NoCondition();
+        set => _condition = value;
     }
     public AbilityType Type { get; set; } // Active or Passive
     public int Cooldown { get; set; }
@@ -47,6 +54,7 @@ public class AbilityDefinition
             ResourceTypeCost = ResourceTypeCost,
             ActivationLog = ActivationLog,
             Usage = Usage.Clone(),
+            Condition = Condition.Clone(),
             Effects = Effects
                 .Select(effect => effect.Clone())
                 .ToList()

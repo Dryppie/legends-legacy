@@ -11,7 +11,7 @@ public class EffectDto : IMapFrom<EffectDefinition>
     public IEffectAction Action { get; }
     public IEffectDuration Duration { get; }
     public IEffectInterval Interval { get; }
-    public IEffectCondition Condition { get; }
+    public ICondition Condition { get; }
     public IUsage Usage { get; }
     public Targeting Targeting { get; }
     public TriggerEvent Trigger { get; }

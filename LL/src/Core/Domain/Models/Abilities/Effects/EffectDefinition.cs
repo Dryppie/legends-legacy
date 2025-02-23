@@ -10,7 +10,7 @@ public class EffectDefinition
     public IEffectAction Action { get; }
     public IEffectDuration Duration { get; }
     public IEffectInterval Interval { get; }
-    public IEffectCondition Condition { get; }
+    public ICondition Condition { get; }
     public IUsage Usage { get; }
     public Targeting Targeting { get; }
     public TriggerEvent Trigger { get; }
@@ -22,7 +22,7 @@ public class EffectDefinition
     {
         ApplyStatusEffectAction => EffectType.StatusEffect,
         DamageAction => EffectType.Damage,
-        HealingAction => EffectType.Healing,
+        ResourceRestoreAction => EffectType.Healing,
         ModifyAttributeAction => EffectType.ModifyAttribute,
         NestedEffectAction => EffectType.NestedEffect,
         SummonAction => EffectType.Summon,
@@ -36,10 +36,11 @@ public class EffectDefinition
 
     public EffectDefinition(IEffectAction action,
                   IEffectDuration duration,
-                  IEffectCondition condition,
+                  ICondition condition,
                   IEffectInterval interval,
                   IUsage usage,
                   List<EffectTag> effectTags,
+                  List<EffectModification> effectModifications,
                   Targeting targeting = Targeting.None,
                   TriggerEvent trigger = TriggerEvent.None,
                   Targeting triggerTarget = Targeting.None,
@@ -51,6 +52,7 @@ public class EffectDefinition
         Action = action;
         Duration = duration;
         EffectTags = effectTags;
+        EffectModifications = effectModifications;
         Condition = condition;
         Interval = interval;
         Usage = usage;
@@ -75,10 +77,12 @@ public class EffectDefinition
                             triggerTarget: TriggerTarget,
                             isFlatAmount: IsFlatAmount,
                             chance: Chance,
+                            effectModifications: EffectModifications,
                             effectTags: EffectTags,
                             attackType: AttackType,
                             damageType: DamageType);
         copy.Log = Log;
+        copy.SourceId = SourceId;
 
         return copy;
     }

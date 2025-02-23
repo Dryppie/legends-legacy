@@ -66,7 +66,8 @@ public class ModifyAttributeAction : IEffectAction
             MaxHealth = target.GetAttributeValue(AttributeType.MaxHealth),
             Health = target.GetAttributeValue(AttributeType.Health),
             MaxMana = target.GetAttributeValue(AttributeType.MaxMana),
-            Mana = target.GetAttributeValue(AttributeType.Mana)
+            Mana = target.GetAttributeValue(AttributeType.Mana),
+            Barrier = target.GetAttributeValue(AttributeType.Barrier)
         };
 
         combatContext.LogEffectExecution(context, simpleCombatEntity);

@@ -1,8 +1,9 @@
 ﻿using Domain.Models.Abilities.Effects;
 
 namespace Domain.Interfaces;
-public interface IEffectCondition
+public interface ICondition
 {
     bool IsSatisfied(EffectContext context);
-    IEffectCondition Clone();
+    void PerformCondition(EffectContext context);
+    ICondition Clone();
 }

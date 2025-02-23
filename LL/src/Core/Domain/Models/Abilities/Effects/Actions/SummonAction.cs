@@ -43,6 +43,7 @@ public class SummonAction : IEffectAction
                 condition: condition,
                 interval: interval,
                 usage: usage,
+                effectModifications: [],
                 trigger: TriggerEvent.OnTickInterval,
                 effectTags: [EffectTag.SummonExpiration]
             );
@@ -65,7 +66,8 @@ public class SummonAction : IEffectAction
             MaxHealth = summonedCreature.GetAttributeValue(AttributeType.MaxHealth),
             Health = summonedCreature.GetAttributeValue(AttributeType.Health),
             MaxMana = summonedCreature.GetAttributeValue(AttributeType.MaxMana),
-            Mana = summonedCreature.GetAttributeValue(AttributeType.Mana)
+            Mana = summonedCreature.GetAttributeValue(AttributeType.Mana),
+            Barrier = summonedCreature.GetAttributeValue(AttributeType.Barrier)
         };
 
         context.Target = summonedCreature;

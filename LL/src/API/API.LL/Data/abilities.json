@@ -17,13 +17,12 @@
             "ScalingMultiplier": 0.15
           },
           "Duration": {
-            "Type": "TimedDuration",
-            "Duration": 0
+            "Type": "NoDuration"
           },
           "Targeting": "SingleEnemy",
           "Trigger": "None",
-          "AttackType": "None",
-          "DamageType": "None",
+          "AttackType": "Melee",
+          "DamageType": "Physical",
           "EffectTags": [],
           "Log": "{Target} received {Amount} damage."
         },
@@ -43,8 +42,8 @@
           "Targeting": "SingleEnemy",
           "Trigger": "OnTickInterval",
           "IsFlatAmount": true,
-          "AttackType": "None",
-          "DamageType": "None",
+          "AttackType": "DamageOverTime",
+          "DamageType": "Bleed",
           "EffectTags": [],
           "Log": "{Target} is bleeding, and took {Amount} damage."
         }
@@ -67,8 +66,7 @@
             "Stackable": true
           },
           "Duration": {
-            "Type": "IndefiniteDuration",
-            "Duration": 0
+            "Type": "IndefiniteDuration"
           },
           "Targeting": "SingleEnemy",
           "Trigger": "OnDodge",
@@ -102,13 +100,12 @@
             "DamageTags": ["Slashing"]
           },
           "Duration": {
-            "Type": "TimedDuration",
-            "Duration": 0
+            "Type": "NoDuration"
           },
           "Targeting": "TwoEnemies",
           "Trigger": "None",
-          "AttackType": "None",
-          "DamageType": "None",
+          "AttackType": "Melee",
+          "DamageType": "Physical",
           "EffectTags": [],
           "Log": "{Target} received {Amount} damage."
         }
@@ -179,18 +176,19 @@
             "DamageTags": ["Arrows"]
           },
           "Duration": {
-            "Type": "TimedDuration",
-            "Duration": 0
+            "Type": "NoDuration"
           },
-          "EffectModifier": {
-            "Attribute": "CritChance",
-            "Amount": 50,
-            "ModifierType": "Additive"
-          },
+          "EffectModifiers": [
+            {
+              "Type": "CritChance",
+              "Amount": 50,
+              "ModifierType": "Flat"
+            }
+          ],
           "Targeting": "SingleEnemy",
           "Trigger": "None",
-          "AttackType": "None",
-          "DamageType": "None",
+          "AttackType": "Ranged",
+          "DamageType": "Physical",
           "EffectTags": [],
           "Log": "{Actor} landed a powerful shot on {Target}, dealing {Amount} damage."
         }
@@ -224,8 +222,8 @@
           "Trigger": "OnAttack",
           "Chance": 20,
           "IsFlatAmount": true,
-          "AttackType": "None",
-          "DamageType": "None",
+          "AttackType": "DamageOverTime",
+          "DamageType": "Poison",
           "EffectTags": [],
           "Log": "{Target} is poisoned by {Actor}'s arrow, taking {Amount} poison damage over time."
         }
@@ -247,19 +245,15 @@
             "Type": "Damage",
             "Amount": 12,
             "ScalingAttribute": "Strength",
-            "ScalingMultiplier": 0.2,
-            "AttackType": "Melee",
-            "DamageType": "Physical",
-            "DamageTags": ["Blunt"]
+            "ScalingMultiplier": 0.2
           },
           "Duration": {
-            "Type": "TimedDuration",
-            "Duration": 0
+            "Type": "NoDuration"
           },
           "Targeting": "SingleEnemy",
           "Trigger": "None",
-          "AttackType": "None",
-          "DamageType": "None",
+          "AttackType": "Melee",
+          "DamageType": "Physical",
           "EffectTags": [],
           "Log": "{Target} received {Amount} damage."
         }
@@ -289,6 +283,675 @@
           "DamageType": "None",
           "EffectTags": [],
           "Log": "{Actor}'s health is increased by 50 due to being big."
+        }
+      ]
+    }
+  },
+  {
+    "Name": "Flame Imp's Essence",
+    "Active": {
+      "Id": "firebombToss",
+      "Name": "Firebomb Toss",
+      "Description": "Throw a flaming sphere, dealing {damage1} damage.",
+      "Type": "Active",
+      "Cooldown": 110,
+      "Cost": 7,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 11,
+            "ScalingAttribute": "Intelligence",
+            "ScalingMultiplier": 0.2
+          },
+          "Duration": {
+            "Type": "NoDuration"
+          },
+          "Targeting": "SingleEnemy",
+          "Trigger": "None",
+          "AttackType": "Ranged",
+          "DamageType": "Magical",
+          "EffectTags": [],
+          "Log": "{Target} received {Amount} damage."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "hotAura",
+      "Name": "Hot Aura",
+      "Description": "Enemies that attack you in melee range has a 30% chance of receiving 4 burn damage",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 4
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Targeting": "Self",
+          "Trigger": "OnMeleeAttacked",
+          "TriggerTarget": "CauseOfTrigger",
+          "IsFlatAmount": true,
+          "Chance": 30,
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
+          "Log": "{Target} received {Amount} burn damage."
+        }
+      ]
+    }
+  },
+  {
+    "Name": "Frost Imp's Essence",
+    "Active": {
+      "Id": "iceTouch",
+      "Name": "Ice Touch",
+      "Description": "If the target has 5 stacks of Cold, remove that amount and apply Freeze for 4 seconds.",
+      "Type": "Active",
+      "Cooldown": 150,
+      "Cost": 4,
+      "ResourceTypeCost": "Mana",
+      "Effects": [
+        {
+          "Action": {
+            "Type": "NestedEffect",
+            "Effects": [
+              {
+                "Action": {
+                  "Type": "ApplyStatusEffect",
+                  "Status": "Frozen",
+                  "Stacks": 1
+                },
+                "Duration": {
+                  "Type": "TimedDuration",
+                  "Duration": 40
+                },
+                "Targeting": "Self",
+                "Trigger": "None",
+                "Log": "{Target} is frozen"
+              }
+            ]
+          },
+          "Duration": {
+            "Type": "NoDuration"
+          },
+          "Condition": {
+            "Type": "StatusEffectCondition",
+            "Status": "Cold",
+            "StacksRequired": 2,
+            "ComparisonType": "GreaterThan"
+          },
+          "Targeting": "SingleEnemy",
+          "Trigger": "None",
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
+          "Log": "{Actor} froze {Target} solid!"
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "coldAura",
+      "Name": "Cold Aura",
+      "Description": "Enemies that attack you in melee range receive a Cold status effect that does not expire.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "NestedEffect",
+            "Effects": [
+              {
+                "Action": {
+                  "Type": "ApplyStatusEffect",
+                  "Status": "Cold",
+                  "Stacks": 1
+                },
+                "Duration": {
+                  "Type": "IndefiniteDuration"
+                },
+                "Targeting": "Self",
+                "Trigger": "None",
+                "Log": "{Target} has received 1 stack of Cold."
+              }
+            ]
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Targeting": "Self",
+          "Trigger": "OnMeleeAttacked",
+          "TriggerTarget": "CauseOfTrigger",
+          "Log": "{Target} is chilled by {Actor}'s aura."
+        }
+      ]
+    }
+  },
+  {
+    "Name": "Shadow Imp's Essence",
+    "Active": {
+      "Id": "shadowImage",
+      "Name": "Shadow Image",
+      "Description": "Summon a shadow illusion of yourself with 1 health.",
+      "Type": "Active",
+      "Cooldown": 150,
+      "Cost": 5,
+      "ResourceTypeCost": "Mana",
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Summon",
+            "SummonId": "shadowImage",
+            "SummonDuration": 100
+          },
+          "Duration": {
+            "Type": "NoDuration"
+          },
+          "Targeting": "Self",
+          "Trigger": "None",
+          "Log": "{Actor} summoned a shadowy illusion of themselves."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "shadowyPresence",
+      "Name": "Shadowy Presence",
+      "Description": "Increase chance of dodging by 2%.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "Dodge",
+            "Amount": 2,
+            "ModifierType": "Flat"
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Targeting": "Self",
+          "Trigger": "None",
+          "Log": "{Actor} moves with an elusive shadowy presence, increasing dodge chance by 2%."
+        }
+      ]
+    }
+  },
+  {
+    "Name": "Vampire Bat's Essence",
+    "Active": {
+      "Id": "bloodthirstyFangs",
+      "Name": "Bloodthirsty Fangs",
+      "Description": "Deal {damage1} damage to the target, with 30% lifesteal.",
+      "Type": "Active",
+      "Cooldown": 200,
+      "Cost": 6,
+      "ResourceTypeCost": "Mana",
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 11,
+            "ScalingAttribute": "Strength",
+            "ScalingMultiplier": 0.2,
+            "Lifesteal": 30
+          },
+          "Duration": {
+            "Type": "NoDuration"
+          },
+          "Targeting": "SingleEnemy",
+          "Trigger": "None",
+          "AttackType": "Melee",
+          "DamageType": "Physical",
+          "EffectTags": [],
+          "Log": "{Actor} bit {Target}, dealing {Amount} damage."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "darkVitality",
+      "Name": "Dark Vitality",
+      "Description": "Whenever you heal through lifesteal, gain an extra 4 health.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ResourceRestore",
+            "ResourceType": "Health",
+            "Amount": 4
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "IsFlatAmount": true,
+          "Targeting": "Self",
+          "Trigger": "OnLifestealHeal",
+          "Log": "{Actor} gained an additional {Amount} health from lifesteal."
+        }
+      ]
+    }
+  },
+  {
+    "Name": "Blue Slime's Essence",
+    "Active": {
+      "Id": "sweetWater",
+      "Name": "Sweet Water",
+      "Description": "Restores {heal1} Health to all allies every 2 seconds for 8 seconds.",
+      "Type": "Active",
+      "Cooldown": 240,
+      "Cost": 8,
+      "ResourceTypeCost": "Mana",
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ResourceRestore",
+            "ResourceType": "Health",
+            "Amount": 2,
+            "ScalingAttribute": "Intelligence",
+            "ScalingMultiplier": 0.2
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 80
+          },
+          "Interval": {
+            "Type": "Interval",
+            "Interval": 20
+          },
+          "Targeting": "AllAllies",
+          "Trigger": "OnTickInterval",
+          "Log": "{Target} is soothed by {Actor}'s Sweet Water, restoring {Amount} health."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "absorptiveShell",
+      "Name": "Absorptive Shell",
+      "Description": "Whenever you are attacked, restore 2 mana.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ResourceRestore",
+            "ResourceType": "Mana",
+            "Amount": 2
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Targeting": "Self",
+          "Trigger": "OnAttacked",
+          "TriggerTarget": "Self",
+          "Log": "{Actor}'s Absorptive Shell restored 2 mana."
+        }
+      ]
+    }
+  },
+  {
+    "Name": "Brown Slime's Essence",
+    "Active": {
+      "Id": "mudArmor",
+      "Name": "Mud Armor",
+      "Description": "Decrease all damage taken by 2 for 6.5 seconds.",
+      "Type": "Active",
+      "Cooldown": 140,
+      "Cost": 6,
+      "ResourceTypeCost": "Mana",
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "FlatDamageReduction",
+            "Amount": 2,
+            "ModifierType": "Flat"
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 65
+          },
+          "Targeting": "Self",
+          "Trigger": "None",
+          "Log": "{Actor} is covered in thick mud, reducing all damage taken by 2."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "earthlyFortitude",
+      "Name": "Earthly Fortitude",
+      "Description": "Increase Physical Defense by 15.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "PhysicalDefense",
+            "Amount": 15,
+            "ModifierType": "Flat"
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Targeting": "Self",
+          "Trigger": "None",
+          "Log": "{Actor}'s body hardens like stone, increasing Physical Defense by 15."
+        }
+      ]
+    }
+  },
+  {
+    "Name": "Green Slime's Essence",
+    "Active": {
+      "Id": "acidSplash",
+      "Name": "Acid Splash",
+      "Description": "Apply poison to all enemies, dealing 12 damage over 9 seconds.",
+      "Type": "Active",
+      "Cooldown": 170,
+      "Cost": 7,
+      "ResourceTypeCost": "Mana",
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 4
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 90
+          },
+          "Interval": {
+            "Type": "Interval",
+            "Interval": 30
+          },
+          "IsFlatAmount": true,
+          "Targeting": "AllEnemies",
+          "Trigger": "OnTickInterval",
+          "AttackType": "DamageOverTime",
+          "DamageType": "Poison",
+          "Log": "{Target} took {Amount} poison damage."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "corrosiveOoze",
+      "Name": "Corrosive Ooze",
+      "Description": "Whenever damaged by a melee attack, apply poison to the target, dealing 6 damage over 12 seconds.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "NestedEffect",
+            "Effects": [
+              {
+                "Action": {
+                  "Type": "Damage",
+                  "Amount": 1
+                },
+                "Duration": {
+                  "Type": "TimedDuration",
+                  "Duration": 120
+                },
+                "Interval": {
+                  "Type": "Interval",
+                  "Interval": 20
+                },
+                "Targeting": "Self",
+                "Trigger": "OnTickInterval",
+                "IsFlatAmount": true,
+                "AttackType": "None",
+                "DamageType": "None",
+                "EffectTags": [],
+                "Log": "{Target} took {Amount} poison damage."
+              }
+            ]
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Targeting": "Self",
+          "Trigger": "OnMeleeAttacked",
+          "TriggerTarget": "CauseOfTrigger",
+          "IsFlatAmount": true,
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
+          "Log": "{Actor} was attacked by {Target} and applied corrosize ooze on them."
+        }
+      ]
+    }
+  },
+  {
+    "Name": "Rainbow Slime's Essence",
+    "Active": {
+      "Id": "unstableColors",
+      "Name": "Unstable Colors",
+      "Description": "30% chance to apply a buff to everyone on your team, increasing Strength and Intelligence by 20 for 10 seconds.",
+      "Type": "Active",
+      "Cooldown": 150,
+      "Cost": 8,
+      "ResourceTypeCost": "Mana",
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "Intelligence",
+            "Amount": 20,
+            "ModifierType": "Flat"
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 100
+          },
+          "Targeting": "AllAllies",
+          "Trigger": "None",
+          "Chance": 30,
+          "Log": "{Actor} radiates a blue energy, increasing {Target}'s Intelligence by 20!"
+        },
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "Strength",
+            "Amount": 20,
+            "ModifierType": "Flat"
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 100
+          },
+          "Targeting": "AllAllies",
+          "Trigger": "None",
+          "Chance": 30,
+          "Log": "{Actor} radiates a red energy, increasing {Target}'s Strength by 20!"
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "colorfulShield",
+      "Name": "Colorful Shield",
+      "Description": "Whenever you use an ability, apply 20 Barrier to the ally with the highest Max Health.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ResourceRestore",
+            "ResourceType": "Barrier",
+            "Amount": 20
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Targeting": "AllyHighestMaxHealth",
+          "Trigger": "OnAbilityUsed",
+          "Log": "{Actor} creates a colorful shield around {Target}, granting 20 Barrier."
+        }
+      ]
+    }
+  },
+  {
+    "Name": "Red Slime's Essence",
+    "Active": {
+      "Id": "igniteCore",
+      "Name": "Ignite Core",
+      "Description": "Ignite and apply a fire aura to yourself. Deal 3 burn damage to everyone every second. Lasts 10 seconds.",
+      "Type": "Active",
+      "Cooldown": 180,
+      "Cost": 8,
+      "ResourceTypeCost": "Mana",
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 3,
+            "AttackType": "DamageOverTime",
+            "DamageType": "Burn"
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 100
+          },
+          "Interval": {
+            "Type": "Interval",
+            "Interval": 10
+          },
+          "Targeting": "EveryoneButYou",
+          "Trigger": "OnTickInterval",
+          "IsFlatAmount": true,
+          "Log": "{Target} is scorched by {Actor}'s fiery aura, taking {Amount} burn damage!"
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "fireBody",
+      "Name": "Fire Body",
+      "Description": "Increase Fire Resistance by 5.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "FireResistance",
+            "Amount": 5,
+            "ModifierType": "Flat"
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Targeting": "Self",
+          "Trigger": "None",
+          "Log": "{Actor}'s body hardens against fire, increasing Fire Resistance by 5."
+        }
+      ]
+    }
+  },
+  {
+    "Name": "Transparent Slime's Essence",
+    "Active": {
+      "Id": "transparentEngulf",
+      "Name": "Transparent Engulf",
+      "Description": "Trap a single enemy inside your body, stunning them for 3 seconds and dealing 9 damage over time.",
+      "Type": "Active",
+      "Cooldown": 250,
+      "Cost": 8,
+      "ResourceTypeCost": "Mana",
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ApplyStatusEffect",
+            "Status": "Stunned"
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 30
+          },
+          "Targeting": "SingleEnemy",
+          "Trigger": "None",
+          "Log": "{Actor} engulfs {Target}, trapping them inside and stunning them!"
+        },
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 3
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 30
+          },
+          "Interval": {
+            "Type": "Interval",
+            "Interval": 10
+          },
+          "Targeting": "SingleEnemy",
+          "Trigger": "OnTickInterval",
+          "AttackType": "DamageOverTime",
+          "IsFlatAmount": true,
+          "Log": "{Target} struggles inside {Actor}, taking {Amount} damage!"
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "transparentShift",
+      "Name": "Transparent Shift",
+      "Description": "When below 30% health, increase dodge chance by 40% for 3 seconds. This effect can only be used once.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "NestedEffect",
+            "Effects": [
+              {
+                "Action": {
+                  "Type": "ModifyAttribute",
+                  "Attribute": "Dodge",
+                  "Amount": 40,
+                  "ModifierType": "Flat"
+                },
+                "Duration": {
+                  "Type": "TimedDuration",
+                  "Duration": 30
+                },
+                "Targeting": "Self",
+                "Trigger": "None",
+                "Log": "{Actor}'s dodge chance is increased by 40% for 3 seconds."
+              }
+            ]
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Condition": {
+            "Type": "HealthCondition",
+            "HealthPercentage": 30,
+            "ComparisonType": "LessThan"
+          },
+          "Usage": {
+            "Type": "LimitedUsage",
+            "Uses": 1
+          },
+          "Targeting": "Self",
+          "Trigger": "OnHealthChanged",
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
+          "Log": "{Actor}'s health has dropped below 30%."
         }
       ]
     }
@@ -367,7 +1030,8 @@
       "Effects": [
         {
           "Action": {
-            "Type": "Healing",
+            "Type": "ResourceRestore",
+            "ResourceType": "Health",
             "Amount": 12,
             "ScalingAttribute": "Wisdom",
             "ScalingMultiplier": 0.3
@@ -429,7 +1093,7 @@
     "Passive": {
       "Id": "lastStance",
       "Name": "Last Stance",
-      "Description": "Defense is increased by 30% when your health is below 20% for the first time.",
+      "Description": "Defense is increased by 30% when your health drops below 20% for the first time.",
       "Type": "Passive",
       "Cooldown": 0,
       "Cost": 0,
@@ -483,8 +1147,7 @@
             "SummonDuration": 150
           },
           "Duration": {
-            "Type": "IndefiniteDuration",
-            "Duration": 0
+            "Type": "NoDuration"
           },
           "Targeting": "Self",
           "Trigger": "None",
@@ -536,7 +1199,8 @@
         {
           "Action": {
             "Type": "ApplyStatusEffect",
-            "Status": "Stun"
+            "Status": "Stunned",
+            "Stacks": 1
           },
           "Duration": {
             "Type": "TimedDuration",
@@ -608,7 +1272,7 @@
       "Name": "Test Active",
       "Description": "Test the enemy.",
       "Type": "Active",
-      "Cooldown": 300,
+      "Cooldown": 3000,
       "Cost": 0,
       "Effects": [
         {
@@ -642,7 +1306,8 @@
         {
           "Action": {
             "Type": "ApplyStatusEffect",
-            "Status": "Test"
+            "Status": "Asleep",
+            "Stacks": 1
           },
           "Duration": {
             "Type": "TimedDuration",

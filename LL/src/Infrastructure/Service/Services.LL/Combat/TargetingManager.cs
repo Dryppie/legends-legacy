@@ -1,4 +1,5 @@
 ﻿using Domain.Models.Abilities;
+using Domain.Models.Attributes;
 using Domain.Models.Combat;
 
 namespace Services.LL.Combat;
@@ -18,6 +19,7 @@ public static class TargetingManager
             case Targeting.AllEnemies:
                 targets = enemyTeam.Where(e => e.IsAlive).ToList();
                 break;
+
             case Targeting.TwoEnemies:
                 if (enemyTeam.Where(e => e.IsAlive).Count() >= 2)
                 {
@@ -29,6 +31,7 @@ public static class TargetingManager
                     if (enemyTargets != null) targets.Add(enemyTargets);
                 }
                 break;
+
             case Targeting.TwoAllies:
                 targets = enemyTeam.Where(e => e.IsAlive).ToList();
                 break;
@@ -43,9 +46,18 @@ public static class TargetingManager
                 break;
 
             case Targeting.AllAllies:
-                targets = allies.Where(a => a.IsAlive).ToList();
+                targets = allies.Where(a => a.IsAlive && !a.Id.Equals(actor.Id)).ToList();
                 break;
 
+            case Targeting.AllyHighestMaxHealth:
+                var maxHealthAlly = allies.MaxBy(a => a.GetAttributeValue(AttributeType.MaxHealth));
+                if (maxHealthAlly != null) targets.Add(maxHealthAlly);
+                break;
+            case Targeting.EveryoneButYou:
+                var allEnemies = enemyTeam.Where(e => e.IsAlive);
+                var allAllies = allies.Where(a => a.IsAlive && !a.Id.Equals(actor.Id)).ToList();
+                targets.AddRange([.. allEnemies, .. allAllies]);
+                break;
             default:
                 throw new NotSupportedException($"Targeting type '{targeting}' is not supported.");
         }
@@ -53,7 +65,7 @@ public static class TargetingManager
         return targets;
     }
 
-    private static CombatEntity? SelectTarget(List<CombatEntity> potentialTargets)
+    public static CombatEntity? SelectTarget(List<CombatEntity> potentialTargets)
     {
         // Select a random alive target
         var aliveTargets = potentialTargets.Where(c => c.IsAlive).ToList();

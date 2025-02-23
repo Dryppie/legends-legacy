@@ -31,6 +31,7 @@ public enum AttributeType
             //              WIS (Supports),
     PhysicalDefense, // 100 maxed out from END - Primarily gotten through Essences and Equipment
     MagicalDefense, // 100 maxed out from WIL - Primarily gotten through Essences and Equipment
+    FlatDamageReduction,
     DamageReduction,
     CritChance,
     CritDamage,

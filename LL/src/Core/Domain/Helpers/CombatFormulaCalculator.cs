@@ -1,5 +1,7 @@
 ﻿using Domain.Helpers.Constants;
+using Domain.Models.Abilities.Effects.EffectModifications;
 using Domain.Models.Attributes;
+using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
 
 namespace Domain.Helpers;
@@ -7,18 +9,18 @@ public static class CombatFormulaCalculator
 {
     private static readonly Random RandomGenerator = new();
 
-    public static AttackOutcome CalculateAttackOutcome(CombatEntity attacker, CombatEntity defender, bool isDamage)
+    public static AttackOutcome CalculateAttackOutcome(CombatEntity attacker, CombatEntity defender, List<EffectModification> effectModifications, bool isDamage)
     {
         int levelDifference = defender.Level - attacker.Level;
 
-        return CalculateAttackOutcome(attacker, defender, levelDifference, isDamage);
+        return CalculateAttackOutcome(attacker, defender, effectModifications, levelDifference, isDamage);
     }
 
-    private static AttackOutcome CalculateAttackOutcome(CombatEntity attacker, CombatEntity defender, int levelDifference, bool isDamage)
+    private static AttackOutcome CalculateAttackOutcome(CombatEntity attacker, CombatEntity defender, List<EffectModification> effectModifications, int levelDifference, bool isDamage)
     {
         if (!isDamage) // If it's healing, we either crit or hit.
         {
-            if (IsCriticalHit(attacker, defender)) return AttackOutcome.Crit;
+            if (IsCriticalHit(attacker, defender, effectModifications)) return AttackOutcome.Crit;
             return AttackOutcome.Hit;
         }
 
@@ -39,7 +41,7 @@ public static class CombatFormulaCalculator
             return AttackOutcome.Block;
         };
 
-        if (IsCriticalHit(attacker, defender))
+        if (IsCriticalHit(attacker, defender, effectModifications))
         {
             return AttackOutcome.Crit;
         };
@@ -81,12 +83,15 @@ public static class CombatFormulaCalculator
         return false;
     }
 
-    private static bool IsCriticalHit(CombatEntity attacker, CombatEntity defender)
+    private static bool IsCriticalHit(CombatEntity attacker, CombatEntity defender, List<EffectModification> effectModifications)
     {
         var critChance = attacker.CombatAttributes[AttributeType.CritChance];
+        var modifications = effectModifications.Where(em => em.EffectModificationType.Equals(EffectModificationType.CritChance)).ToList();
+
+        var modifiedCritChance = GetModifiedValue(modifications, critChance);
 
         float roll = (float)RandomGenerator.NextDouble() * 100f;
-        return roll < critChance;
+        return roll < modifiedCritChance;
     }
 
     private static int CalculateDamageDealt(CombatEntity attacker, float magnitude, AttackOutcome attackOutcome)
@@ -100,5 +105,35 @@ public static class CombatFormulaCalculator
         if (attackOutcome.Equals(AttackOutcome.Block)) return (int)(magnitude * 0.6f);
         if (attackOutcome.Equals(AttackOutcome.Crit)) return (int)(magnitude * defender.CombatAttributes[AttributeType.CritDamageReduction]);
         return (int)magnitude;
+    }
+
+    private static float GetModifiedValue(List<EffectModification> effectModifications, float baseValue)
+    {
+        if (effectModifications.Count == 0) return baseValue;
+
+        float flatSum = 0f;
+        float additiveSum = 0f;
+        float multiplicativeProduct = 1f;
+
+        // Iterate through each modifier once and calculate sums and product
+        foreach (var modifier in effectModifications)
+        {
+            switch (modifier.ModifierType)
+            {
+                case ModifierType.Flat:
+                    flatSum += modifier.Amount;
+                    break;
+                case ModifierType.Additive:
+                    additiveSum += modifier.Amount / 100f;
+                    break;
+                case ModifierType.Multiplicative:
+                    multiplicativeProduct *= (1 + modifier.Amount / 100f);
+                    break;
+            }
+        }
+
+        // Return the final rounded attribute value
+        float result = MathF.Round((baseValue + flatSum) * (1 + additiveSum) * multiplicativeProduct, MidpointRounding.ToZero);
+        return Math.Max(result, 0);
     }
 }

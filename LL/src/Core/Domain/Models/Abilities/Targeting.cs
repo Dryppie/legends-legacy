@@ -17,4 +17,6 @@ public enum Targeting
     AllEnemies,
     AllAllies,
     AllAlliesAndSelf,
+    AllyHighestMaxHealth,
+    EveryoneButYou,
 }

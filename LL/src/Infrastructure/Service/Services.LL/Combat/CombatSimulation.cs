@@ -114,6 +114,8 @@ public class CombatSimulation : ICombatContext
                 //    Timestamp = currentTime,
                 //    Details = $"{entity.Name} is stunned, and can not act."
                 //});
+                            EffectManager.UpdateEffectsForEntity(entity);
+
                 entity.IncrementStep();
 
                 continue;
@@ -124,7 +126,7 @@ public class CombatSimulation : ICombatContext
                 // Perform basic
                 //var weapon = entity.Equipment.FirstOrDefault(e => e.Type.Equals(ItemType.Weapon));
                 //var target = SelectTarget(weapon.Targeting);
-                var target = SelectTarget(opposingTeam); // Replace this with the two previous lines
+                var target = TargetingManager.SelectTarget(opposingTeam); // Replace this with the two previous lines
                 if (target == null) continue;
                 if (false/*weapon.Heal*/)
                 {
@@ -149,7 +151,6 @@ public class CombatSimulation : ICombatContext
             }
 
             EffectManager.UpdateEffectsForEntity(entity);
-
             entity.IncrementStep();
         }
 
@@ -169,7 +170,7 @@ public class CombatSimulation : ICombatContext
     {
         foreach (var target in targets)
         {
-            var attackOutcome = InteractionManager.CalculateAttackOutcomeForDamage(actor, target);
+            var attackOutcome = InteractionManager.CalculateAttackOutcomeForDamage(actor, target, []);
             if (attackOutcome.Equals(AttackOutcome.Miss))
             {
                 CombatEvent(actor, target, EventType.Miss, 0, $"{actor.Name} missed {target.Name} with a basic attack.");
@@ -177,13 +178,14 @@ public class CombatSimulation : ICombatContext
                 return;
             }
             var damage = InteractionManager.CalculateBasicAttackDamage(actor, target, 4);
+            var damageReceived = InteractionManager.CalculateDamageReceived(target, damage);
 
-            CombatEvent(actor, target, EventType.Damage, damage, $"{actor.Name} hit {target.Name} with a basic attack, dealing {damage} damage.");
+            CombatEvent(actor, target, EventType.Damage, damageReceived, $"{actor.Name} hit {target.Name} with a basic attack, dealing {damageReceived} damage.");
 
-            var effectDefinition = new EffectDefinition(null, null, null, null, null, [], attackType: AttackType.Melee);
+            var effectDefinition = new EffectDefinition(null, null, null, null, null, [], [], attackType: AttackType.Melee);
             var effectContext = new EffectContext(
-                new Effect() { Definition = effectDefinition }, [], [], actor, target, damage,
-                $"{actor.Name} hit {target.Name} with a basic attack, dealing {damage} damage.")
+                new Effect() { Definition = effectDefinition }, [], [], actor, target, damageReceived,
+                $"{actor.Name} hit {target.Name} with a basic attack, dealing {damageReceived} damage.")
             {
                 AttackType = AttackType.Melee
             };
@@ -231,7 +233,6 @@ public class CombatSimulation : ICombatContext
 
         // An ability must be able to be used
         if (!ability.Usage.CanUse()) return;
-        ability.Usage.ConsumeUse();
 
         var targetNames = new List<string>();
         var effectsToApply = new List<(CombatEntity target, Effect effectInstance)>();
@@ -249,7 +250,7 @@ public class CombatSimulation : ICombatContext
             // the effects should be applied to the same targets
             if (!targetsPerTargeting.TryGetValue(effectTemplate.Targeting, out var targets))
             {
-                targets = SelectTargets(effectTemplate.Targeting, actor, opposingTeam, ownTeam);
+                targets = TargetingManager.SelectTargets(effectTemplate.Targeting, actor, opposingTeam, ownTeam);
                 targetsPerTargeting[effectTemplate.Targeting] = targets;
             }
 
@@ -274,8 +275,10 @@ public class CombatSimulation : ICombatContext
         var uniqueNames = targetNames.Distinct();
         var formattedNames = string.Join(", ", uniqueNames);
 
+        if (effectsToApply.Count == 0) return;
         // Deduct mana cost in the end, as this should only happen if the ability has actually been used
         actor.CombatAttributes[abilityResourceTypeCost] -= ability.Cost;
+        ability.Usage.ConsumeUse();
 
         var simpleCombatEntity = new SimpleCombatEntity()
         {
@@ -300,69 +303,12 @@ public class CombatSimulation : ICombatContext
             .Replace("{Ability}", ability.Name)
         });
 
+        EffectManager.TriggerEffects(TriggerEvent.OnAbilityUsed, actor, actor);
+
         foreach (var (target, effectInstance) in effectsToApply)
         {
             EffectManager.AddEffect(actor, target, effectInstance);
         }
-    }
-
-    private static List<CombatEntity> SelectTargets(Targeting target, CombatEntity caster, List<CombatEntity> enemyTeam, List<CombatEntity> allies)
-    {
-        List<CombatEntity> targets = [];
-
-        switch (target)
-        {
-            case Targeting.SingleEnemy:
-                var enemyTarget = SelectTarget(enemyTeam);
-                if (enemyTarget != null) targets.Add(enemyTarget);
-                break;
-
-            case Targeting.AllEnemies:
-                targets = enemyTeam.Where(e => e.IsAlive).ToList();
-                break;
-            case Targeting.TwoEnemies:
-                if(enemyTeam.Where(e => e.IsAlive).Count() >= 2) {
-                    targets = enemyTeam.Where(e => e.IsAlive).Take(2).ToList();
-                }
-                else
-                {
-                    var enemyTargets = SelectTarget(enemyTeam);
-                    if (enemyTargets != null) targets.Add(enemyTargets);
-                }
-                break;
-            case Targeting.TwoAllies:
-                targets = enemyTeam.Where(e => e.IsAlive).ToList();
-                break;
-
-            case Targeting.Self:
-                targets.Add(caster);
-                break;
-
-            case Targeting.SingleAlly:
-                var allyTarget = SelectTarget(allies);
-                if (allyTarget != null) targets.Add(allyTarget);
-                break;
-
-            case Targeting.AllAllies:
-                targets = allies.Where(a => a.IsAlive).ToList();
-                break;
-
-            default:
-                throw new NotSupportedException($"Targeting type '{target}' is not supported.");
-        }
-
-        return targets;
-    }
-
-    private static CombatEntity? SelectTarget(List<CombatEntity> potentialTargets)
-    {
-        // Select a random alive target
-        var aliveTargets = potentialTargets.Where(c => c.IsAlive).ToList();
-        if (aliveTargets.Count == 0) return null;
-
-        var random = new Random();
-        int index = random.Next(aliveTargets.Count);
-        return aliveTargets[index];
     }
 
     private BattleOutcome DetermineOutcome()
