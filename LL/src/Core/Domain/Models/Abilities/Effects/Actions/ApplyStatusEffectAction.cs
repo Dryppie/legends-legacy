@@ -20,6 +20,7 @@ public class ApplyStatusEffectAction : IEffectAction
     {
         context.Target.ModifyStatuses(_status, Magnitude);
 
+        context.EventType = EventType.StatusEffect;
         context.Details = context.Details
            .Replace("{Actor}", context.Actor.Name)
            .Replace("{Target}", context.Target.Name)

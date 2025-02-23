@@ -1100,11 +1100,9 @@
       "Effects": [
         {
           "Action": {
-            "Type": "ModifyAttribute",
-            "Attribute": "Health",
-            "Amount": 30,
-            "ModifierType": "Flat",
-            "Stackable": true
+            "Type": "ResourceRestore",
+            "ResourceType": "Health",
+            "Amount": 30
           },
           "Duration": {
             "Type": "IndefiniteDuration"

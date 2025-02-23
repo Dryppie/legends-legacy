@@ -2,7 +2,7 @@
 using Services.LL.Interfaces;
 
 namespace Services.LL.Regions.Areas;
-internal class AreaService : IAreaService
+public class AreaService : IAreaService
 {
     public IAreaRepository _areaRepository;
     public AreaService(IAreaRepository areaRepository)

@@ -1,10 +1,7 @@
 ﻿using Application.Interfaces.Services.LL;
 using Domain.Helpers.Constants;
 using Domain.Models.Entities.Characters;
-using Domain.Models.Inventories;
-using Domain.Models.Items;
 using Services.LL.Interfaces;
-using System.Threading;
 
 namespace Services.LL.Entities.Characters;
 public class CharacterService : ICharacterService
@@ -40,7 +37,7 @@ public class CharacterService : ICharacterService
     }
 
     /// <inheritdoc/>
-    public async Task<Character> GetMyCharacterOverviewAsync(Guid CurrentUserId)
+    public async Task<Character> GetMyCharacterOverviewAsync(Guid CurrentUserId, CancellationToken cancellationToken)
     {
         var character = await _characterRepository.GetCharacterOverviewByCharacterIdAsync(CurrentUserId);
         foreach (var essence in character.EquippedEssences)
@@ -50,5 +47,10 @@ public class CharacterService : ICharacterService
         }
         //character.CharacterNextLevelCalculator();
         return character;
+    }
+
+    public async Task<List<CharacterLeaderboardItem>> GetLeaderboardCharactersAsync(CancellationToken cancellationToken)
+    {
+        return await _characterRepository.GetLeaderboardCharactersAsync(cancellationToken);
     }
 }

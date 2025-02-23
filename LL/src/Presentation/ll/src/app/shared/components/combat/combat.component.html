@@ -43,7 +43,7 @@
         <ng-container *ngFor="let character of playerCharacters; let i = index">
           <div
             (click)="focusCharacter('player', i)"
-            class="h-10 w-10 cursor-pointer rounded bg-cover"
+            class="h-8 w-8 cursor-pointer rounded bg-cover"
             [ngStyle]="{
               'background-image': 'url(\'assets/combat/thumbnail-' + '\')',
               border:
@@ -55,13 +55,15 @@
         </ng-container>
       </div>
       <app-combat-avatar
-        *ngIf="selectedPlayerCharacter"
+        class="w-full"
         imagePath="placeholder2.png"
+        *ngIf="selectedPlayerCharacter"
         [name]="selectedPlayerCharacter.name"
         [hp]="selectedPlayerCharacter.health"
         [maxHp]="selectedPlayerCharacter.maxHealth"
         [mp]="selectedPlayerCharacter.mana"
         [maxMp]="selectedPlayerCharacter.maxMana"
+        [barrier]="selectedPlayerCharacter.barrier"
       ></app-combat-avatar>
     </div>
     <div class="flex flex-col items-center justify-center">
@@ -76,7 +78,7 @@
         <ng-container *ngFor="let character of enemyCharacters; let i = index">
           <div
             (click)="focusCharacter('enemy', i)"
-            class="h-10 w-10 cursor-pointer rounded bg-cover"
+            class="h-8 w-8 cursor-pointer rounded bg-cover"
             [ngStyle]="{
               'background-image': 'url(\'assets/combat/thumbnail-' + '\')',
               border:
@@ -88,13 +90,15 @@
         </ng-container>
       </div>
       <app-combat-avatar
+        class="w-full"
+        imagePath="placeholder1.png"
         *ngIf="selectedEnemyCharacter"
         [name]="selectedEnemyCharacter.name"
-        imagePath="placeholder1.png"
         [hp]="selectedEnemyCharacter.health"
         [maxHp]="selectedEnemyCharacter.maxHealth"
         [mp]="selectedEnemyCharacter.mana"
         [maxMp]="selectedEnemyCharacter.maxMana"
+        [barrier]="selectedEnemyCharacter.barrier"
       ></app-combat-avatar>
     </div>
   </div>

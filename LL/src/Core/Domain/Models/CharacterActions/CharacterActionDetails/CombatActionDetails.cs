@@ -4,13 +4,12 @@ namespace Domain.Models.CharacterActions.CharacterActionDetails;
 public class CombatActionDetails : ActionDetails
 {
     public List<Guid> CharacterTeam { get; set; } = [];
-    public List<Guid> EnemyTeam { get; set; } = [];
-    public List<float> SpawnProbabilities { get; set; } = [];
+    public Area Area { get; set; }
 
-    public CombatActionDetails(List<Guid> characterTeam, List<Guid> enemyTeam)
+    public CombatActionDetails(List<Guid> characterTeam, Area area)
     {
         CharacterTeam = characterTeam;
-        EnemyTeam = enemyTeam;
+        Area = area;
     }
     public CombatActionDetails()
     {

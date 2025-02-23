@@ -176,6 +176,15 @@ export class CombatComponent implements OnInit, OnDestroy {
       case EventType.HealCrit:
         this.handleHealEvent(event);
         break;
+      case EventType.RestoreMana:
+        this.handleRestoreManaEvent(event);
+        break;
+      case EventType.RestoreBarrier:
+        this.handleRestoreBarrierEvent(event);
+        break;
+      case EventType.Lifesteal:
+        this.handleHealEvent(event);
+        break;
       case EventType.Summon:
         this.handleSummonEvent(event);
         break;
@@ -196,6 +205,13 @@ export class CombatComponent implements OnInit, OnDestroy {
         const debuffExpired = true;
         this.handleDebuffEvent(event, debuffExpired);
         break;
+      case EventType.StatusEffect:
+        this.handleStatusEffectEvent(event);
+        break;
+      case EventType.StatusEffectExpired:
+        const statusEffectExpired = true;
+        this.handleStatusEffectEvent(event, statusEffectExpired);
+        break;
       // Add other event types as needed
       default:
         console.warn(`Unhandled event type: ${event.eventType}`);
@@ -203,40 +219,35 @@ export class CombatComponent implements OnInit, OnDestroy {
   }
 
   private handleAbilityUseEvent(event: CombatEvent) {
-    this.updateCharacter(event.actorId, event.combatEntity);
+    this.updateCharacter(event.combatEntity);
   }
 
   private handleDamageEvent(event: CombatEvent): void {
-    const character = this.findCharacterById(event.targetId);
-    if (!character) return;
-    character.health = Math.max(character.health - event.magnitude, 0);
-    // console.log(`Damage: ${event.details}`);
+    this.updateCharacter(event.combatEntity);
   }
 
   private handleHealEvent(event: CombatEvent): void {
-    const character = this.findCharacterById(event.targetId);
-    if (!character) return;
+    this.updateCharacter(event.combatEntity);
+  }
 
-    character.health = Math.min(
-      character.health + event.magnitude,
-      character.maxHealth,
-    );
-    // console.log(`Healed: ${event.details}`);
+  private handleRestoreManaEvent(event: CombatEvent): void {
+    this.updateCharacter(event.combatEntity);
+  }
+
+  private handleRestoreBarrierEvent(event: CombatEvent): void {
+    this.updateCharacter(event.combatEntity);
   }
 
   private handleMissEvent(event: CombatEvent): void {
     // Implement specific logic for handling block events
-    // console.log(`Blocked: ${event.details}`);
   }
 
   private handleBlockEvent(event: CombatEvent): void {
     // Implement specific logic for handling block events
-    // console.log(`Blocked: ${event.details}`);
   }
 
   private handleSummonEvent(event: CombatEvent): void {
     const summonedCharacter = event.combatEntity;
-    console.log(summonedCharacter);
     if (this.isEntityInPlayerTeam(event.actorId)) {
       this.playerCharacters.push(summonedCharacter);
     } else {
@@ -256,30 +267,36 @@ export class CombatComponent implements OnInit, OnDestroy {
       );
       this.focusCharacter('enemy', 0);
     }
-    // console.log(`Summon Expired: ${event.details}`);
   }
 
   private handleBuffEvent(event: CombatEvent, buffExpired: boolean = false) {
-    this.updateCharacter(event.targetId, event.combatEntity);
+    this.updateCharacter(event.combatEntity);
     // if (buffExpired) console.log(`Buff Expired: ${event.details}`);
     // else console.log(`Buff: ${event.details}`);
   }
 
   private handleDebuffEvent(event: CombatEvent, buffExpired: boolean = false) {
+    this.updateCharacter(event.combatEntity);
     // if (buffExpired) console.log(`Buff Expired: ${event.details}`);
     // else console.log(`Buff: ${event.details}`);
   }
 
-  private updateCharacter(
-    entityId: string,
-    combatEntity: SimpleCombatEntityDto,
+  handleStatusEffectEvent(
+    event: CombatEvent,
+    statusEffectExpired: boolean = false,
   ) {
-    const character = this.findCharacterById(entityId);
+    // if (buffExpired) console.log(`Buff Expired: ${event.details}`);
+    // else console.log(`Buff: ${event.details}`);
+  }
+
+  private updateCharacter(combatEntity: SimpleCombatEntityDto) {
+    const character = this.findCharacterById(combatEntity.id);
     if (!character) return;
     character.health = combatEntity.health;
     character.maxHealth = combatEntity.maxHealth;
     character.mana = combatEntity.mana;
     character.maxMana = combatEntity.maxMana;
+    character.barrier = combatEntity.barrier;
   }
 
   private findCharacterById(id: string): SimpleCombatEntityDto | undefined {

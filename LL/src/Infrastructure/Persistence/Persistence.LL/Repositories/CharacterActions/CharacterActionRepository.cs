@@ -1,6 +1,7 @@
 ﻿using Application.Common.Interfaces;
 using Common.Exceptions;
 using Domain.Models.CharacterActions;
+using Domain.Models.CharacterActions.CharacterActionDetails;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.CharacterActions;
@@ -75,6 +76,8 @@ public class CharacterActionRepository : ICharacterActionRepository
     {
         var characterAction = await _context.CharacterActions
             .Include(ca => ca.ActionDetails)
+                .ThenInclude(ad => (ad as CombatActionDetails).Area)
+                    .ThenInclude(a => a.Creatures)
             .FirstOrDefaultAsync(ca => ca.CharacterId.Equals(characterId), cancellationToken);
         return characterAction;
     }

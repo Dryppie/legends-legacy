@@ -99,12 +99,23 @@ public static class LLDbContextExtensions
     {
         if (!context.Creatures.Any())
         {
-            // Define creature IDs
+            // Step 1 - Creature Ids
             var goblinId = Guid.Parse("00000000-0000-0000-0000-000000000001");
             var goblinWarriorId = Guid.Parse("00000000-0000-0000-0000-000000000002");
             var goblinArcherId = Guid.Parse("00000000-0000-0000-0000-000000000003");
             var largeRatId = Guid.Parse("00000000-0000-0000-0000-000000000004");
+            var flameImpId = Guid.Parse("00000000-0000-0000-0000-000000000005");
+            var frostImpId = Guid.Parse("00000000-0000-0000-0000-000000000006");
+            var shadowImpId = Guid.Parse("00000000-0000-0000-0000-000000000007");
+            var vampireBatId = Guid.Parse("00000000-0000-0000-0000-000000000008");
+            var blueSlimeId = Guid.Parse("00000000-0000-0000-0000-000000000009");
+            var brownSlimeId = Guid.Parse("00000000-0000-0000-0000-000000000010");
+            var greenSlimeId = Guid.Parse("00000000-0000-0000-0000-000000000011");
+            var rainbowSlimeId = Guid.Parse("00000000-0000-0000-0000-000000000012");
+            var redSlimeId = Guid.Parse("00000000-0000-0000-0000-000000000013");
+            var transparentSlimeId = Guid.Parse("00000000-0000-0000-0000-000000000014");
 
+            // Step 2 - Essences
             var goblinEssence = new Essence()
             {
                 Id = Guid.NewGuid(),
@@ -133,7 +144,78 @@ public static class LLDbContextExtensions
                 ActiveAbilityId = "tailWrap",
                 PassiveAbilityId = "big",
             };
+            var flameImpEssence = new Essence()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Flame Imp's Essence",
+                ActiveAbilityId = "firebombToss",
+                PassiveAbilityId = "hotAura",
+            };
+            var frostImpEssence = new Essence()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Frost Imp's Essence",
+                ActiveAbilityId = "iceTouch",
+                PassiveAbilityId = "coldAura",
+            };
+            var shadowImpEssence = new Essence()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Shadow Imp's Essence",
+                ActiveAbilityId = "shadowImage",
+                PassiveAbilityId = "shadowyPresence",
+            };
+            var vampireBatEssence = new Essence()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Vampire Bat's Essence",
+                ActiveAbilityId = "bloodthirstyFangs",
+                PassiveAbilityId = "darkVitality",
+            };
+            var blueSlimeEssence = new Essence()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Blue Slime's Essence",
+                ActiveAbilityId = "sweetWater",
+                PassiveAbilityId = "absorptiveShell",
+            };
+            var brownSlimeEssence = new Essence()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Brown Slime's Essence",
+                ActiveAbilityId = "mudArmor",
+                PassiveAbilityId = "earthlyFortitude",
+            };
+            var greenSlimeEssence = new Essence()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Green Slime's Essence",
+                ActiveAbilityId = "acidSplash",
+                PassiveAbilityId = "corrosiveOoze",
+            };
+            var rainbowSlimeEssence = new Essence()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Rainbow Slime's Essence",
+                ActiveAbilityId = "unstableColors",
+                PassiveAbilityId = "colorfulShield",
+            };
+            var redSlimeEssence = new Essence()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Red Slime's Essence",
+                ActiveAbilityId = "igniteCore",
+                PassiveAbilityId = "fireBody",
+            };
+            var transparentSlimeEssence = new Essence()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Transparent Slime's Essence",
+                ActiveAbilityId = "transparentEngulf",
+                PassiveAbilityId = "transparentShift",
+            };
 
+            // Step 3 - Essence Items
             var goblinEssenceItem = new EssenceItem
             {
                 Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
@@ -143,7 +225,6 @@ public static class LLDbContextExtensions
                 ItemType = ItemType.Essence,
                 Rarity = Rarity.Unique
             };
-
             var goblinWarriorEssenceItem = new EssenceItem
             {
                 Id = Guid.NewGuid(),
@@ -153,7 +234,6 @@ public static class LLDbContextExtensions
                 ItemType = ItemType.Essence,
                 Rarity = Rarity.Unique
             };
-
             var goblinArcherEssenceItem = new EssenceItem
             {
                 Id = Guid.NewGuid(),
@@ -163,7 +243,6 @@ public static class LLDbContextExtensions
                 ItemType = ItemType.Essence,
                 Rarity = Rarity.Unique
             };
-
             var largeRatEssenceItem = new EssenceItem
             {
                 Id = Guid.Parse("00000000-0000-0000-0000-000000000004"),
@@ -173,18 +252,119 @@ public static class LLDbContextExtensions
                 ItemType = ItemType.Essence,
                 Rarity = Rarity.Unique
             };
+            var flameImpEssenceItem = new EssenceItem
+            {
+                Id = flameImpId,
+                IconPath = "essence-item.svg",
+                Name = flameImpEssence.Name,
+                Essence = flameImpEssence,
+                ItemType = ItemType.Essence,
+                Rarity = Rarity.Unique
+            };
+            var frostImpEssenceItem = new EssenceItem
+            {
+                Id = frostImpId,
+                IconPath = "essence-item.svg",
+                Name = frostImpEssence.Name,
+                Essence = frostImpEssence,
+                ItemType = ItemType.Essence,
+                Rarity = Rarity.Unique
+            };
+            var shadowImpEssenceItem = new EssenceItem
+            {
+                Id = shadowImpId,
+                IconPath = "essence-item.svg",
+                Name = shadowImpEssence.Name,
+                Essence = shadowImpEssence,
+                ItemType = ItemType.Essence,
+                Rarity = Rarity.Unique
+            };
+            var vampireBatEssenceItem = new EssenceItem
+            {
+                Id = vampireBatId,
+                IconPath = "essence-item.svg",
+                Name = vampireBatEssence.Name,
+                Essence = vampireBatEssence,
+                ItemType = ItemType.Essence,
+                Rarity = Rarity.Unique
+            };
+            var blueSlimeEssenceItem = new EssenceItem
+            {
+                Id = blueSlimeId,
+                IconPath = "essence-item.svg",
+                Name = blueSlimeEssence.Name,
+                Essence = blueSlimeEssence,
+                ItemType = ItemType.Essence,
+                Rarity = Rarity.Unique
+            };
+            var brownSlimeEssenceItem = new EssenceItem
+            {
+                Id = brownSlimeId,
+                IconPath = "essence-item.svg",
+                Name = brownSlimeEssence.Name,
+                Essence = brownSlimeEssence,
+                ItemType = ItemType.Essence,
+                Rarity = Rarity.Unique
+            };
+            var greenSlimeEssenceItem = new EssenceItem
+            {
+                Id = greenSlimeId,
+                IconPath = "essence-item.svg",
+                Name = greenSlimeEssence.Name,
+                Essence = greenSlimeEssence,
+                ItemType = ItemType.Essence,
+                Rarity = Rarity.Unique
+            };
+            var rainbowSlimeEssenceItem = new EssenceItem
+            {
+                Id = rainbowSlimeId,
+                IconPath = "essence-item.svg",
+                Name = rainbowSlimeEssence.Name,
+                Essence = rainbowSlimeEssence,
+                ItemType = ItemType.Essence,
+                Rarity = Rarity.Unique
+            };
+            var redSlimeEssenceItem = new EssenceItem
+            {
+                Id = redSlimeId,
+                IconPath = "essence-item.svg",
+                Name = redSlimeEssence.Name,
+                Essence = redSlimeEssence,
+                ItemType = ItemType.Essence,
+                Rarity = Rarity.Unique
+            };
+            var transparentSlimeEssenceItem = new EssenceItem
+            {
+                Id = transparentSlimeId,
+                IconPath = "essence-item.svg",
+                Name = transparentSlimeEssence.Name,
+                Essence = transparentSlimeEssence,
+                ItemType = ItemType.Essence,
+                Rarity = Rarity.Unique
+            };
 
-            var goblinEssenceLootTableItem = new LootTableItem { ItemId = goblinEssenceItem.Id, Weight = 2 };
-            var goblinWarriorEssenceLootTableItem = new LootTableItem { ItemId = goblinWarriorEssenceItem.Id, Weight = 1 };
-            var goblinArcherEssenceLootTableItem = new LootTableItem { ItemId = goblinArcherEssenceItem.Id, Weight = 1 };
-            var largeRatEssenceLootTableItem = new LootTableItem { ItemId = largeRatEssenceItem.Id, Weight = 2 };
+            // Step 4 - Loot Tables
+            var goblinEssenceLootTableItem = new LootTableItem { ItemId = goblinEssenceItem.Id, Weight = 50 };
+            var goblinWarriorEssenceLootTableItem = new LootTableItem { ItemId = goblinWarriorEssenceItem.Id, Weight = 50 };
+            var goblinArcherEssenceLootTableItem = new LootTableItem { ItemId = goblinArcherEssenceItem.Id, Weight = 50 };
+            var largeRatEssenceLootTableItem = new LootTableItem { ItemId = largeRatEssenceItem.Id, Weight = 50 };
+            var flameImpEssenceLootTableItem = new LootTableItem { ItemId = flameImpEssenceItem.Id, Weight = 50 };
+            var frostImpEssenceLootTableItem = new LootTableItem { ItemId = frostImpEssenceItem.Id, Weight = 50 };
+            var shadowImpEssenceLootTableItem = new LootTableItem { ItemId = shadowImpEssenceItem.Id, Weight = 50 };
+            var vampireBatEssenceLootTableItem = new LootTableItem { ItemId = vampireBatEssenceItem.Id, Weight = 50 };
+            var blueSlimeEssenceLootTableItem = new LootTableItem { ItemId = blueSlimeEssenceItem.Id, Weight = 50 };
+            var brownSlimeEssenceLootTableItem = new LootTableItem { ItemId = brownSlimeEssenceItem.Id, Weight = 50 };
+            var greenSlimeEssenceLootTableItem = new LootTableItem { ItemId = greenSlimeEssenceItem.Id, Weight = 50 };
+            var rainbowSlimeEssenceLootTableItem = new LootTableItem { ItemId = rainbowSlimeEssenceItem.Id, Weight = 50 };
+            var redSlimeEssenceLootTableItem = new LootTableItem { ItemId = redSlimeEssenceItem.Id, Weight = 50 };
+            var transparentSlimeEssenceLootTableItem = new LootTableItem { ItemId = transparentSlimeEssenceItem.Id, Weight = 50 };
 
             // Create LootTableRarities for Goblin
             var goblinLootTableLegendary = new LootTable
             {
                 Id = Guid.NewGuid(),
                 Entries = [goblinEssenceLootTableItem],
-                Weight = 1 // 0.02%
+                Weight = 30 // 0.02%
             };
             var goblinLootTable = new LootTable
             {
@@ -196,7 +376,7 @@ public static class LLDbContextExtensions
             {
                 Id = Guid.NewGuid(),
                 Entries = [goblinWarriorEssenceLootTableItem],
-                Weight = 1 // 0.01%
+                Weight = 30 // 0.01%
             };
             var goblinWarriorLootTable = new LootTable
             {
@@ -208,7 +388,7 @@ public static class LLDbContextExtensions
             {
                 Id = Guid.NewGuid(),
                 Entries = [goblinArcherEssenceLootTableItem],
-                Weight = 1 // 0.01%
+                Weight = 30 // 0.01%
             };
             var goblinArcherLootTable = new LootTable
             {
@@ -220,20 +400,146 @@ public static class LLDbContextExtensions
             {
                 Id = Guid.NewGuid(),
                 Entries = [largeRatEssenceLootTableItem],
-                Weight = 1 // 0.02%
+                Weight = 30 // 0.02%
             };
             var largeRatLootTable = new LootTable
             {
                 Id = Guid.NewGuid(),
                 Entries = [largeRatLootTableLegendary]
             };
+            // Create LootTableRarities for Flame Imp
+            var flameImpLootTableLegendary = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [flameImpEssenceLootTableItem],
+                Weight = 30 // 0.02%
+            };
+            var flameImpLootTable = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [flameImpLootTableLegendary]
+            };
+            // Create LootTableRarities for Frost Imp
+            var frostImpLootTableLegendary = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [frostImpEssenceLootTableItem],
+                Weight = 30 // 0.02%
+            };
+            var frostImpLootTable = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [frostImpLootTableLegendary]
+            };
+            // Create LootTableRarities for Shadow Imp
+            var shadowImpLootTableLegendary = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [shadowImpEssenceLootTableItem],
+                Weight = 30 // 0.02%
+            };
+            var shadowImpLootTable = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [shadowImpLootTableLegendary]
+            };
+            // Create LootTableRarities for Vampire Bat
+            var vampireBatLootTableLegendary = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [vampireBatEssenceLootTableItem],
+                Weight = 30 // 0.02%
+            };
+            var vampireBatLootTable = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [vampireBatLootTableLegendary]
+            };
+            // Create LootTableRarities for Blue Slime
+            var blueSlimeLootTableLegendary = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [blueSlimeEssenceLootTableItem],
+                Weight = 30 // 0.02%
+            };
+            var blueSlimeLootTable = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [blueSlimeLootTableLegendary]
+            };
+            // Create LootTableRarities for Brown Slime
+            var brownSlimeLootTableLegendary = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [brownSlimeEssenceLootTableItem],
+                Weight = 30 // 0.02%
+            };
+            var brownSlimeLootTable = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [brownSlimeLootTableLegendary]
+            };
+            // Create LootTableRarities for Green Slime
+            var greenSlimeLootTableLegendary = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [greenSlimeEssenceLootTableItem],
+                Weight = 30 // 0.02%
+            };
+            var greenSlimeLootTable = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [greenSlimeLootTableLegendary]
+            };
+            // Create LootTableRarities for Rainbow Slime
+            var rainbowSlimeLootTableLegendary = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [rainbowSlimeEssenceLootTableItem],
+                Weight = 30 // 0.02%
+            };
+            var rainbowSlimeLootTable = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [rainbowSlimeLootTableLegendary]
+            };
+            // Create LootTableRarities for Red Slime
+            var redSlimeLootTableLegendary = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [redSlimeEssenceLootTableItem],
+                Weight = 30 // 0.02%
+            };
+            var redSlimeLootTable = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [redSlimeLootTableLegendary]
+            };
+            // Create LootTableRarities for Transparent Slime
+            var transparentSlimeLootTableLegendary = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [transparentSlimeEssenceLootTableItem],
+                Weight = 30 // 0.02%
+            };
+            var transparentSlimeLootTable = new LootTable
+            {
+                Id = Guid.NewGuid(),
+                Entries = [transparentSlimeLootTableLegendary]
+            };
 
 
             await context.Items.AddRangeAsync(goblinEssenceItem, goblinWarriorEssenceItem, goblinArcherEssenceItem, largeRatEssenceItem);
+            await context.Items.AddRangeAsync(flameImpEssenceItem, frostImpEssenceItem, shadowImpEssenceItem, vampireBatEssenceItem);
+            await context.Items.AddRangeAsync(blueSlimeEssenceItem, brownSlimeEssenceItem, greenSlimeEssenceItem, rainbowSlimeEssenceItem, redSlimeEssenceItem, transparentSlimeEssenceItem);
             await context.Essences.AddRangeAsync(goblinEssence, goblinWarriorEssence, goblinArcherEssence, largeRatEssence);
+            await context.Essences.AddRangeAsync(flameImpEssence, frostImpEssence, shadowImpEssence, vampireBatEssence);
+            await context.Essences.AddRangeAsync(blueSlimeEssence, brownSlimeEssence, greenSlimeEssence, rainbowSlimeEssence, redSlimeEssence, transparentSlimeEssence);
             await context.LootTables.AddRangeAsync(goblinLootTable, goblinWarriorLootTable, goblinArcherLootTable, largeRatLootTable);
+            await context.LootTables.AddRangeAsync(flameImpLootTable, frostImpLootTable, shadowImpLootTable, vampireBatLootTable);
+            await context.LootTables.AddRangeAsync(blueSlimeLootTable, brownSlimeLootTable, greenSlimeLootTable, rainbowSlimeLootTable, redSlimeLootTable, transparentSlimeLootTable);
 
-            // Create creatures
+            // Step 5 - Create creatures
             var lumoRuinsCreatures = new List<Creature>
             {
                 new() { Id = goblinId, Name = "Goblin", LootTableId = goblinLootTable.Id, EquippedEssences = [goblinEssence], ExperienceReward = 2 },
@@ -242,14 +548,56 @@ public static class LLDbContextExtensions
                 new() { Id = largeRatId, Name = "Large Rat", LootTableId = largeRatLootTable.Id, EquippedEssences = [largeRatEssence], ExperienceReward = 2 }
             };
 
-            await context.Creatures.AddRangeAsync(lumoRuinsCreatures);
+            var bloodGroveCreatures = new List<Creature>
+            {
+                new() { Id = flameImpId, Name = "Flame Imp", LootTableId = flameImpLootTable.Id, EquippedEssences = [flameImpEssence], ExperienceReward = 2 },
+                new() { Id = frostImpId, Name = "Frost Imp", LootTableId = frostImpLootTable.Id, EquippedEssences = [frostImpEssence], ExperienceReward = 2 },
+                new() { Id = shadowImpId, Name = "Shadow Imp", LootTableId = shadowImpLootTable.Id, EquippedEssences = [shadowImpEssence], ExperienceReward = 2 },
+                new() { Id = vampireBatId, Name = "Vampire Bat", LootTableId = vampireBatLootTable.Id, EquippedEssences = [vampireBatEssence], ExperienceReward = 4 }
+            };
 
+            var crystalCreekCreatures = new List<Creature>
+            {
+                new() { Id = blueSlimeId, Name = "Blue Slime", LootTableId = blueSlimeLootTable.Id, EquippedEssences = [blueSlimeEssence], ExperienceReward = 3 },
+                new() { Id = brownSlimeId, Name = "Brown Slime", LootTableId = brownSlimeLootTable.Id, EquippedEssences = [brownSlimeEssence], ExperienceReward = 4 },
+                new() { Id = greenSlimeId, Name = "Green Slime", LootTableId = greenSlimeLootTable.Id, EquippedEssences = [greenSlimeEssence], ExperienceReward = 3 },
+                new() { Id = rainbowSlimeId, Name = "Rainbow Slime", LootTableId = rainbowSlimeLootTable.Id, EquippedEssences = [rainbowSlimeEssence], ExperienceReward = 4 },
+                new() { Id = redSlimeId, Name = "Red Slime", LootTableId = redSlimeLootTable.Id, EquippedEssences = [redSlimeEssence], ExperienceReward = 3 },
+                new() { Id = transparentSlimeId, Name = "Transparent Slime", LootTableId = transparentSlimeLootTable.Id, EquippedEssences = [transparentSlimeEssence], ExperienceReward = 4 },
+            };
+
+            await context.Creatures.AddRangeAsync(lumoRuinsCreatures);
+            await context.Creatures.AddRangeAsync(bloodGroveCreatures);
+            await context.Creatures.AddRangeAsync(crystalCreekCreatures);
+
+            // Step 6 - Create area
+            var lumoRuinsAreaId = "region_01_area_01";
             var lumoRuinsAreaCreatures = new List<AreaCreature>
             {
-                new AreaCreature() { AreaId = " region_01_area_01", CreatureId = goblinId, WeightedSpawnRate = 0.45f },
-                new AreaCreature() { AreaId = " region_01_area_01", CreatureId = goblinWarriorId, WeightedSpawnRate = 0.2f },
-                new AreaCreature() { AreaId = " region_01_area_01", CreatureId = goblinArcherId, WeightedSpawnRate = 0.2f },
-                new AreaCreature() { AreaId = " region_01_area_01", CreatureId = largeRatId, WeightedSpawnRate = 0.25f },
+                new AreaCreature() { AreaId = lumoRuinsAreaId, CreatureId = goblinId, WeightedSpawnRate = 0.45f },
+                new AreaCreature() { AreaId = lumoRuinsAreaId, CreatureId = goblinWarriorId, WeightedSpawnRate = 0.2f },
+                new AreaCreature() { AreaId = lumoRuinsAreaId, CreatureId = goblinArcherId, WeightedSpawnRate = 0.2f },
+                new AreaCreature() { AreaId = lumoRuinsAreaId, CreatureId = largeRatId, WeightedSpawnRate = 0.25f },
+            };
+
+            var bloodGroveAreaId = "region_01_area_02";
+            var bloodGroveAreaCreatures = new List<AreaCreature>
+            {
+                new AreaCreature() { AreaId = bloodGroveAreaId, CreatureId = flameImpId, WeightedSpawnRate = 0.31f },
+                new AreaCreature() { AreaId = bloodGroveAreaId, CreatureId = frostImpId, WeightedSpawnRate = 0.3f },
+                new AreaCreature() { AreaId = bloodGroveAreaId, CreatureId = shadowImpId, WeightedSpawnRate = 0.3f },
+                new AreaCreature() { AreaId = bloodGroveAreaId, CreatureId = vampireBatId, WeightedSpawnRate = 0.09f },
+            };
+
+            var crystalCreekAreaId = "region_01_area_03";
+            var crystalCreekAreaCreatures = new List<AreaCreature>
+            {
+                new AreaCreature() { AreaId = crystalCreekAreaId, CreatureId = blueSlimeId, WeightedSpawnRate = 0.20f },
+                new AreaCreature() { AreaId = crystalCreekAreaId, CreatureId = brownSlimeId, WeightedSpawnRate = 0.20f },
+                new AreaCreature() { AreaId = crystalCreekAreaId, CreatureId = greenSlimeId, WeightedSpawnRate = 0.20f },
+                new AreaCreature() { AreaId = crystalCreekAreaId, CreatureId = rainbowSlimeId, WeightedSpawnRate = 0.10f },
+                new AreaCreature() { AreaId = crystalCreekAreaId, CreatureId = redSlimeId, WeightedSpawnRate = 0.20f },
+                new AreaCreature() { AreaId = crystalCreekAreaId, CreatureId = transparentSlimeId, WeightedSpawnRate = 0.10f },
             };
 
             // Create attributes
@@ -258,6 +606,16 @@ public static class LLDbContextExtensions
             attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(goblinWarriorId));
             attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(goblinArcherId));
             attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(largeRatId));
+            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(flameImpId));
+            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(frostImpId));
+            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(shadowImpId));
+            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(vampireBatId));
+            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(blueSlimeId));
+            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(brownSlimeId));
+            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(greenSlimeId));
+            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(rainbowSlimeId));
+            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(redSlimeId));
+            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(transparentSlimeId));
             await context.EntityAttributes.AddRangeAsync(attributes);
 
             if (!context.Regions.Any())
@@ -266,15 +624,42 @@ public static class LLDbContextExtensions
                 {
                     new Area
                     {
-                        Id = "region_01_area_01", // region, [area, dungeon, raid, or rift], area
+                        Id = lumoRuinsAreaId, // region, [area, dungeon, raid, or rift], area
                         Name = "Lumo Ruins",
                         Creatures = lumoRuinsAreaCreatures,
                         SpawnProbabilities = new List<float>
                         {
-                            0.85f,
-                            0.08f,
+                            0.87f,
+                            0.09f,
+                            0.03f,
+                            0.01f,
+                        }
+                    },
+                    new Area
+                    {
+                        Id = bloodGroveAreaId, // region, [area, dungeon, raid, or rift], area
+                        Name = "Blood Grove",
+                        Creatures = bloodGroveAreaCreatures,
+                        SpawnProbabilities = new List<float>
+                        {
+                            0.82f,
+                            0.12f,
+                            0.04f,
+                            0.02f,
+                        }
+                    },
+                    new Area
+                    {
+                        Id = crystalCreekAreaId, // region, [area, dungeon, raid, or rift], area
+                        Name = "Crystal Creek",
+                        Creatures = crystalCreekAreaCreatures,
+                        SpawnProbabilities = new List<float>
+                        {
+                            0.75f,
+                            0.17f,
                             0.05f,
                             0.02f,
+                            0.01f,
                         }
                     }
                 };
@@ -338,7 +723,7 @@ public static class LLDbContextExtensions
         // Create Items
         var sword = new Item
         {
-            Id = Guid.Parse("00000000-0000-0000-0000-000000000005"),
+            Id = Guid.NewGuid(),
             IconPath = "reward-item.png",
             Name = "Sword"
         };
@@ -390,13 +775,23 @@ public static class LLDbContextExtensions
     public static async Task SeedWoodcuttingLootTables(LLDbContext context)
     {
         // Create Items for Tree Drops
-        var treeLog = new Item { Id = Guid.NewGuid(), Name = "Tree Log" };
-        var nest = new Item { Id = Guid.NewGuid(), Name = "Nest" };
+        var treeLog = new Item { Id = Guid.NewGuid(),
+            IconPath = "reward-item.png",
+            Name = "Tree Log" };
+        var nest = new Item { Id = Guid.NewGuid(),
+            IconPath = "reward-item.png",
+            Name = "Nest" };
         
-        var oakLog = new Item { Id = Guid.NewGuid(), Name = "Oak Log" };
+        var oakLog = new Item { Id = Guid.NewGuid(),
+            IconPath = "reward-item.png",
+            Name = "Oak Log" };
         
-        var birchLog = new Item { Id = Guid.NewGuid(), Name = "Birch Log" };
-        var rareHerb = new Item { Id = Guid.NewGuid(), Name = "Rare Herb" };
+        var birchLog = new Item { Id = Guid.NewGuid(),
+            IconPath = "reward-item.png",
+            Name = "Birch Log" };
+        var rareHerb = new Item { Id = Guid.NewGuid(),
+            IconPath = "reward-item.png",
+            Name = "Rare Herb" };
 
         // Add items to context
         await context.Items.AddRangeAsync(treeLog, nest, oakLog, birchLog, rareHerb);

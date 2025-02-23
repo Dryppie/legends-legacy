@@ -26,26 +26,26 @@ public class CharacterRepository : ICharacterRepository
 
         // TODO: This is only temporary, so guests have abilities
 
-        var essences = new List<Essence>()
-            {
-                new Essence()
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Starter Essence 1",
-                    ActiveAbilityId = "fireball_01",
-                    PassiveAbilityId = "retaliate_01"
-                },
-                new Essence()
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Starter Essence 2",
-                    ActiveAbilityId = "heal_01",
-                    PassiveAbilityId = "pocketDirt"
-                }
-            };
+        //var essences = new List<Essence>()
+        //    {
+        //        new Essence()
+        //        {
+        //            Id = Guid.NewGuid(),
+        //            Name = "Starter Essence 1",
+        //            ActiveAbilityId = "fireball_01",
+        //            PassiveAbilityId = "retaliate_01"
+        //        },
+        //        new Essence()
+        //        {
+        //            Id = Guid.NewGuid(),
+        //            Name = "Starter Essence 2",
+        //            ActiveAbilityId = "heal_01",
+        //            PassiveAbilityId = "pocketDirt"
+        //        }
+        //    };
 
-        character.EquippedEssences = essences;
-        await _context.Essences.AddRangeAsync(essences);
+        //character.EquippedEssences = essences;
+        //await _context.Essences.AddRangeAsync(essences);
 
         _context.Characters.Add(character);
 
@@ -96,5 +96,22 @@ public class CharacterRepository : ICharacterRepository
                 EssenceLoader.Instance.LoadAbilitiesForEssence(essence)).ToList();
 
         return character;
+    }
+
+    public async Task<List<CharacterLeaderboardItem>> GetLeaderboardCharactersAsync(CancellationToken cancellationToken)
+    {
+        var leaderboard = await _context.Characters
+            .OrderByDescending(c => c.Level)
+            .ThenByDescending(c => c.Experience)
+            .Take(10)
+            .Select(c => new CharacterLeaderboardItem
+            {
+                Name = c.Name,
+                Level = c.Level,
+                Experience = c.Experience
+            })
+            .ToListAsync(cancellationToken);
+
+        return leaderboard;
     }
 }

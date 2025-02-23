@@ -473,8 +473,7 @@ namespace Persistence.LL.Migrations
                     CharacterActionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ActionType = table.Column<int>(type: "int", nullable: false),
                     CharacterTeam = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EnemyTeam = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SpawnProbabilities = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AreaId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     GatheringType = table.Column<int>(type: "int", nullable: true),
                     LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
@@ -482,6 +481,12 @@ namespace Persistence.LL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ActionDetails", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ActionDetails_Areas_AreaId",
+                        column: x => x.AreaId,
+                        principalTable: "Areas",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_ActionDetails_CharacterActions_CharacterActionId",
                         column: x => x.CharacterActionId,
@@ -520,6 +525,11 @@ namespace Persistence.LL.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ActionDetails_AreaId",
+                table: "ActionDetails",
+                column: "AreaId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ActionDetails_CharacterActionId",

@@ -10,8 +10,8 @@ public interface ICombatInteractionManager
     AttackOutcome CalculateAttackOutcomeForHealing(CombatEntity actor, CombatEntity target, List<EffectModification> effectModifications);
     int CalculateBasicAttackDamage(CombatEntity actor, CombatEntity target, float baseDamage);
     int CalculateDamageToDeal(CombatEntity actor, CombatEntity target, float magnitude, AttackOutcome attackOutcome, AttributeType scalingAttribute, float scalingMultiplier);
-    int CalculateHealingToDeal(CombatEntity actor, CombatEntity target, float magnitude, AttackOutcome attackOutcome, AttributeType scalingAttribute, float scalingMultiplier);
-    int CalculateDamageReceived(CombatEntity target, float magnitude, AttackOutcome attackOutcome = AttackOutcome.Hit);
+    int CalculateHealingToDeal(CombatEntity actor, CombatEntity target, float magnitude, AttackOutcome attackOutcome, AttributeType? scalingAttribute, float scalingMultiplier);
+    DamageResult CalculateDamageBreakdown(CombatEntity target, float baseDamage, AttackOutcome outcome);
     int CalculateHealingReceived(CombatEntity target, float magnitude, AttackOutcome attackOutcome = AttackOutcome.Hit);
     void ApplyDamage(EffectContext context);
     void ApplyHealing(EffectContext context);

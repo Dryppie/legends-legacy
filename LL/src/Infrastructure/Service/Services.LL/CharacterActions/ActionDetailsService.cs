@@ -23,8 +23,7 @@ public class ActionDetailsService : IActionDetailsService
         var combatDetails = new CombatActionDetails
         {
             CharacterTeam = [characterId], /*_entityService.FindCharacterTeamById();*/
-            EnemyTeam = area.Creatures.Select(c => c.CreatureId).ToList(),
-            SpawnProbabilities = area.SpawnProbabilities,
+            Area = area,
         };
 
         return combatDetails;

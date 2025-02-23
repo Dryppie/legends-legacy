@@ -31,5 +31,6 @@ public interface ICharacterService
     /// </summary>
     /// <param name="UserId"></param>
     /// <returns></returns>
-    Task<Character> GetMyCharacterOverviewAsync(Guid characterId);
+    Task<Character> GetMyCharacterOverviewAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<List<CharacterLeaderboardItem>> GetLeaderboardCharactersAsync(CancellationToken cancellationToken);
 }

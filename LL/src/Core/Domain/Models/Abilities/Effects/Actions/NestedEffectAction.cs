@@ -1,5 +1,6 @@
 ﻿using Domain.Interfaces;
 using Domain.Interfaces.Combat;
+using Domain.Models.Attributes;
 using Domain.Models.Combat;
 
 namespace Domain.Models.Abilities.Effects.Actions;
@@ -50,11 +51,21 @@ public class NestedEffectAction : IEffectAction
             effectsToApply.Add((context.Target, effectInstance));
         }
 
+        var combatEntity = new SimpleCombatEntity()
+        {
+            Id = context.Target.Id,
+            MaxHealth = context.Target.GetAttributeValue(AttributeType.MaxHealth),
+            Health = context.Target.GetAttributeValue(AttributeType.Health),
+            MaxMana = context.Target.GetAttributeValue(AttributeType.MaxMana),
+            Mana = context.Target.GetAttributeValue(AttributeType.Mana),
+            Barrier = context.Target.GetAttributeValue(AttributeType.Barrier)
+        };
+
         context.Details = context.Details
             .Replace("{Actor}", context.Actor!.Name)
             .Replace("{Target}", context.Target.Name);
 
-        combatContext.LogEffectExecution(context);
+        combatContext.LogEffectExecution(context, combatEntity);
 
         foreach (var (target, effectInstance) in effectsToApply)
         {

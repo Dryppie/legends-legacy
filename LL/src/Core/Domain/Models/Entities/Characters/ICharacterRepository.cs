@@ -1,4 +1,5 @@
-﻿namespace Domain.Models.Entities.Characters;
+﻿
+namespace Domain.Models.Entities.Characters;
 public interface ICharacterRepository
 {
     /// <summary>
@@ -30,4 +31,5 @@ public interface ICharacterRepository
     /// <param name="UserId"></param>
     /// <returns></returns>
     Task<Character> GetCharacterOverviewByCharacterIdAsync(Guid currentUserId);
+    Task<List<CharacterLeaderboardItem>> GetLeaderboardCharactersAsync(CancellationToken cancellationToken);
 }

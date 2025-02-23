@@ -37,15 +37,8 @@ public class CombatService : ICombatService
         var totalExp = 0;
 
         var combatAction = characterAction.ActionDetails as CombatActionDetails;
-        var monsterCount = _spawningService.HowManyMonstersToSpawn(combatAction!.SpawnProbabilities);
-        var lumoRuinsAreaCreatures = new List<AreaCreature>
-            {
-                new AreaCreature() { AreaId = " region_01_area_01", CreatureId = combatAction.EnemyTeam[0], WeightedSpawnRate = 0.99f },
-                new AreaCreature() { AreaId = " region_01_area_01", CreatureId = combatAction.EnemyTeam[1], WeightedSpawnRate = 0.01f },
-                new AreaCreature() { AreaId = " region_01_area_01", CreatureId = combatAction.EnemyTeam[2], WeightedSpawnRate = 0.01f },
-                new AreaCreature() { AreaId = " region_01_area_01", CreatureId = combatAction.EnemyTeam[3], WeightedSpawnRate = 0.01f },
-            };
-        var areaCreatures = _spawningService.WhatAreaCreaturesToSpawn(lumoRuinsAreaCreatures, monsterCount);
+        var monsterCount = _spawningService.HowManyMonstersToSpawn(combatAction!.Area.SpawnProbabilities);
+        var areaCreatures = _spawningService.WhatAreaCreaturesToSpawn([.. combatAction.Area.Creatures], monsterCount);
         var enemyIds = areaCreatures.Select(c => c.CreatureId).ToList();
 
         // Initialize combatants

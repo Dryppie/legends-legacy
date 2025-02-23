@@ -3,7 +3,6 @@ using Domain.Interfaces.Combat;
 using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
-using System.Net.Mime;
 
 namespace Domain.Models.Abilities.Effects.Actions;
 public class DamageAction : IEffectAction
@@ -46,26 +45,27 @@ public class DamageAction : IEffectAction
         }
 
         // Damage opponent will receive
-        var damageReceived = combatContext.InteractionManager.CalculateDamageReceived(context.Target, damageAmount, attackOutcome);
+        var damageResult = combatContext.InteractionManager.CalculateDamageBreakdown(context.Target, damageAmount, attackOutcome);
 
         context.AttackOutcome = attackOutcome;
-        context.Magnitude = damageReceived;
+        context.Magnitude = damageResult.HealthDamage; // Only set HealthDamage, as that's what we'll use to deduct from Health. TotalDamage is only for the Log
         context.EventType = EventType.Damage;
         context.Details = context.Details
             .Replace("{Actor}", context.Actor.Name)
             .Replace("{Target}", context.Target.Name);
 
-        if (attackOutcome.Equals(AttackOutcome.Crit))
+        if (damageResult.IsCrit)
             context.Details = context.Details.Replace("{Amount}", $"{context.Magnitude} critical");
         else
             context.Details = context.Details.Replace("{Amount}", context.Magnitude.ToString());
 
         var simpleCombatEntity = CreateSimpleCombatEntity(context.Target);
+        simpleCombatEntity.Health = Math.Max(0, simpleCombatEntity.Health - context.Magnitude);
         combatContext.LogEffectExecution(context, simpleCombatEntity);
         
         combatContext.InteractionManager.ApplyDamage(context);
 
-        ApplyLifeStealIfAny(context, combatContext, damageReceived);
+        ApplyLifeStealIfAny(context, combatContext, damageResult.HealthDamage);
     }
 
     private void ApplyLifeStealIfAny(EffectContext context, ICombatContext combatContext, int finalDamageDealt)
@@ -80,6 +80,7 @@ public class DamageAction : IEffectAction
         if (lifeStolen <= 0)
             return;
 
+        context.Magnitude += lifeStolen;
         context.Actor = context.Actor;
         context.Target = context.Actor;
         context.EventType = EventType.Heal;
@@ -89,7 +90,8 @@ public class DamageAction : IEffectAction
         combatContext.InteractionManager.ApplyHealing(context);
 
         // Log the healing event
-        var simpleCombatEntity = CreateSimpleCombatEntity(context.Target);
+        var simpleCombatEntity = CreateSimpleCombatEntity(context.Actor);
+        simpleCombatEntity.Health += context.Magnitude;
         combatContext.LogEffectExecution(context, simpleCombatEntity);
 
         // Trigger OnLifesteal

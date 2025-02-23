@@ -131,6 +131,17 @@ function getCitySidebar(): Tab[] {
             { icon: 'path/to/coin-icon.png', amount: 1 },
           ],
         },
+        {
+          id: 'tavern',
+          route: 'city',
+          icon: 'city/temple',
+          title: 'Tavern',
+          description: 'Leaderboard',
+          rewards: [
+            { icon: 'path/to/fire-icon.png', amount: 2 },
+            { icon: 'path/to/coin-icon.png', amount: 1 },
+          ],
+        },
       ],
     },
   ];

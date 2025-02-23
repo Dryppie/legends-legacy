@@ -20,7 +20,7 @@ public class GetCharacterOverviewQueryHandler : IRequestHandler<GetCharacterOver
 
     public async Task<CharacterOverviewDto> Handle(GetCharacterOverviewQuery request, CancellationToken cancellationToken)
     {
-        var character = await _characterService.GetMyCharacterOverviewAsync(request.CharacterId);
+        var character = await _characterService.GetMyCharacterOverviewAsync(request.CharacterId, cancellationToken);
 
         return _mapper.Map<CharacterOverviewDto>(character);
     }

@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250222194412_BaseMigration")]
+    [Migration("20250223202751_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -594,17 +594,15 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.CharacterActions.CharacterActionDetails.ActionDetails");
 
+                    b.Property<string>("AreaId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("CharacterTeam")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("EnemyTeam")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SpawnProbabilities")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasIndex("AreaId");
 
                     b.HasDiscriminator().HasValue(1);
                 });
@@ -886,6 +884,17 @@ namespace Persistence.LL.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.CharacterActions.CharacterActionDetails.CombatActionDetails", b =>
+                {
+                    b.HasOne("Domain.Models.Regions.Areas.Area", "Area")
+                        .WithMany()
+                        .HasForeignKey("AreaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Area");
                 });
 
             modelBuilder.Entity("Domain.Models.CharacterActions.CharacterActionDetails.GatheringActionDetails", b =>

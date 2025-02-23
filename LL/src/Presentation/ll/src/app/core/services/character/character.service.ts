@@ -33,6 +33,10 @@ export class CharacterService {
     this.authService.getLoggedInCharacter();
   }
 
+  getLeaderboard() {
+    return this.apiService.get('Character/Leaderboard');
+  }
+
   public getCharacterOverview() {
     this.apiService.get('Character/Overview').subscribe((character) => {
       this.characterOverviewSubject.next(character);

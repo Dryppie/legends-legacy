@@ -8,7 +8,6 @@ using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Damages;
 using Domain.Models.Items.Equipments;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Services.LL.Combat;
 public class CombatInteractionManager : ICombatInteractionManager
@@ -41,9 +40,11 @@ public class CombatInteractionManager : ICombatInteractionManager
         return (int)finalDamage;
     }
 
-    public int CalculateHealingToDeal(CombatEntity actor, CombatEntity target, float magnitude, AttackOutcome attackOutcome, AttributeType scalingAttribute, float scalingMultiplier)
+    public int CalculateHealingToDeal(CombatEntity actor, CombatEntity target, float magnitude, AttackOutcome attackOutcome, AttributeType? scalingAttribute, float scalingMultiplier)
     {
-        var finalHealing = magnitude + (actor.CombatAttributes[scalingAttribute] * scalingMultiplier);
+        var finalHealing = magnitude;
+        if (scalingAttribute != null)
+            finalHealing *= (actor.CombatAttributes[scalingAttribute.Value] * scalingMultiplier);
 
         if (attackOutcome.Equals(AttackOutcome.Crit))
             finalHealing = finalHealing * (1 + (actor.CombatAttributes[AttributeType.CritDamage] / 100));
@@ -53,20 +54,62 @@ public class CombatInteractionManager : ICombatInteractionManager
         return (int)finalHealing;
     }
 
-    public int CalculateDamageReceived(CombatEntity target, float magnitude, AttackOutcome attackOutcome)
+    public DamageResult CalculateDamageBreakdown(CombatEntity target, float baseDamage, AttackOutcome outcome)
     {
-        magnitude -= target.CombatAttributes[AttributeType.FlatDamageReduction];
+        // 1) Subtract flat damage reduction
+        baseDamage -= target.CombatAttributes[AttributeType.FlatDamageReduction];
 
-        magnitude = GoThroughBarrier(target, magnitude);
+        // 2) Store total so you can display it later (in case it's partially blocked).
+        //    Make sure it isn't negative here.
+        int totalSoFar = (int)Math.Max(baseDamage, 0);
 
-        if (attackOutcome == AttackOutcome.Crit)
+        // 3) Let the barrier do its work, but keep track of how much barrier absorbed
+        float damageAfterBarrier = GoThroughBarrier(target, baseDamage, out float barrierAbsorbed);
+
+        // 4) If crit, apply crit damage reduction
+        bool isCrit = (outcome == AttackOutcome.Crit);
+        if (isCrit)
         {
-            float critReductionMultiplier = 1 - (target.CombatAttributes[AttributeType.CritDamageReduction] / 100f);
-            critReductionMultiplier = Math.Clamp(critReductionMultiplier, 0, 1); // Ensure it doesn't go below 0
-            return (int)(magnitude * critReductionMultiplier);
+            float critReductionMultiplier =
+                1 - (target.CombatAttributes[AttributeType.CritDamageReduction] / 100f);
+            critReductionMultiplier = Math.Clamp(critReductionMultiplier, 0, 1);
+            damageAfterBarrier *= critReductionMultiplier;
         }
 
-        return (int)Math.Max(magnitude, 0);
+        // 5) Final health damage cannot go below zero
+        int healthDamage = (int)Math.Max(damageAfterBarrier, 0);
+
+        return new DamageResult
+        {
+            TotalDamage = totalSoFar,
+            BarrierAbsorbed = (int)barrierAbsorbed,
+            HealthDamage = healthDamage,
+            IsCrit = isCrit
+        };
+    }
+
+    private float GoThroughBarrier(CombatEntity target, float incomingDamage, out float absorbedByBarrier)
+    {
+        absorbedByBarrier = 0;
+
+        // If no barrier, just return
+        if (!target.CombatAttributes.TryGetValue(AttributeType.Barrier, out float barrier) || barrier <= 0)
+            return incomingDamage;
+
+        if (incomingDamage >= barrier)
+        {
+            // Barrier fully consumed
+            absorbedByBarrier = barrier;
+            target.CombatAttributes[AttributeType.Barrier] = 0;
+            return incomingDamage - barrier;
+        }
+        else
+        {
+            // Barrier partially absorbs damage, but still remains
+            absorbedByBarrier = incomingDamage;
+            target.CombatAttributes[AttributeType.Barrier] = barrier - incomingDamage;
+            return 0;
+        }
     }
 
     public int CalculateHealingReceived(CombatEntity target, float magnitude, AttackOutcome attackOutcome)
@@ -116,24 +159,6 @@ public class CombatInteractionManager : ICombatInteractionManager
         {
             _effectManager.TriggerEffects(TriggerEvent.OnDeath, target, context.Actor);
         }
-    }
-
-    private float GoThroughBarrier(CombatEntity target, float damage)
-    {
-        if (target.CombatAttributes.TryGetValue(AttributeType.Barrier, out var barrier) && barrier > 0)
-        {
-            if (damage >= barrier)
-            {
-                damage -= barrier;
-                target.CombatAttributes[AttributeType.Barrier] = 0;
-            }
-            else
-            {
-                target.CombatAttributes[AttributeType.Barrier] -= damage;
-                damage = 0;
-            }
-        }
-        return damage;
     }
 
     public void ApplyHealing(EffectContext context)

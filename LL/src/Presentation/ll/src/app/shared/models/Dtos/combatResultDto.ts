@@ -17,6 +17,7 @@ export interface SimpleCombatEntityDto {
   maxHealth: number;
   mana: number;
   maxMana: number;
+  barrier: number;
 }
 
 export enum BattleOutcome {

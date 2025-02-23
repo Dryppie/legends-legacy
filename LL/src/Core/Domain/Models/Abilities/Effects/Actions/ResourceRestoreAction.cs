@@ -3,6 +3,7 @@ using Domain.Interfaces.Combat;
 using Domain.Models.Abilities.ResourceCosts;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
+using System.Threading;
 
 namespace Domain.Models.Abilities.Effects.Actions;
 public class ResourceRestoreAction : IEffectAction
@@ -41,20 +42,25 @@ public class ResourceRestoreAction : IEffectAction
         var simpleCombatEntity = CreateSimpleCombatEntity(context.Target);
         combatContext.LogEffectExecution(context, simpleCombatEntity);
 
-        combatContext.InteractionManager.ApplyHealing(context);
+        if (_resourceType == ResourceType.Health)
+        {
+            combatContext.InteractionManager.ApplyHealing(context);
+        }
     }
 
     private EffectContext HandleBarrier(EffectContext context, ICombatContext combatContext)
     {
         var restoreAmount = Magnitude;
 
-        if (context.Target.CombatAttributes.TryGetValue(AttributeType.Barrier, out var barrier)) {
+        if (context.Target.CombatAttributes.TryGetValue(AttributeType.Barrier, out var barrier))
+        {
             barrier += restoreAmount;
+            context.Target.CombatAttributes[AttributeType.Barrier] = barrier;  // <-- Write it back
         }
 
         context.AttackOutcome = AttackOutcome.Hit;
         context.Magnitude = restoreAmount;
-        context.EventType = EventType.RestoreMana;
+        context.EventType = EventType.RestoreBarrier;
 
         return context;
     }
@@ -67,7 +73,7 @@ public class ResourceRestoreAction : IEffectAction
         var isFlatAmount = context.Effect.Definition.IsFlatAmount;
         var healingAmount = isFlatAmount
                             ? Magnitude
-                            : combatContext.InteractionManager.CalculateHealingToDeal(context.Actor, context.Target, Magnitude, attackOutcome, ScalingAttribute!.Value, ScalingMultiplier);
+                            : combatContext.InteractionManager.CalculateHealingToDeal(context.Actor, context.Target, Magnitude, attackOutcome, ScalingAttribute, ScalingMultiplier);
 
         // Healing target will receive
         var healingReceived = combatContext.InteractionManager.CalculateHealingReceived(context.Target, healingAmount, attackOutcome);
@@ -90,6 +96,7 @@ public class ResourceRestoreAction : IEffectAction
             {
                 mana = maxMana;
             }
+            context.Target.CombatAttributes[AttributeType.Mana] = mana;
         }
 
         context.AttackOutcome = AttackOutcome.Hit;

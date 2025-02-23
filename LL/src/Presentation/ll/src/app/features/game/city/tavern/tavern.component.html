@@ -1,0 +1,39 @@
+<div class="flex h-full flex-col items-center space-y-6 pr-4 sm:pr-6">
+  <div class="flex w-full flex-col sm:gap-6">
+    <app-default-header
+      title="Tavern"
+      icon="city/temple"
+      class="w-full"
+    ></app-default-header>
+  </div>
+  <div class="flex h-full w-full flex-col gap-4 overflow-hidden">
+    <div class="flex-none text-white"></div>
+    <div class="flex flex-col gap-2 overflow-y-auto">
+      <!-- Repeat for each leaderboard item -->
+      <div
+        class="flex flex-col gap-2 border border-primary p-4 text-white"
+        *ngFor="let item of leaderboard; let i = index"
+      >
+        <h2 class="flex gap-2 text-primary">
+          Rank:
+          <h2 class="text-white">{{ i + 1 }}</h2>
+        </h2>
+        <div class="flex flex-col">
+          <div class="flex gap-2 text-primary">
+            Name:
+            <h3 class="text-white">{{ item.name }}</h3>
+          </div>
+          <div class="flex gap-2 text-primary">
+            Level:
+            <h3 class="text-white">{{ item.level }}</h3>
+          </div>
+          <div class="flex gap-2 text-primary">
+            EXP:
+            <h3 class="text-white">{{ item.experience }}</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-col items-center justify-center gap-4"></div>
+  </div>
+</div>

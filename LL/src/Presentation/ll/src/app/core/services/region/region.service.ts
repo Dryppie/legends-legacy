@@ -32,22 +32,25 @@ export class RegionService {
         {
           id: 'region_01_area_01',
           name: 'Lumo Ruins',
+          creatures: ['Goblin', 'Goblin Archer', 'Goblin Warrior', 'Large Rat'],
+        },
+        {
+          id: 'region_01_area_02',
+          name: 'Blood Grove',
+          creatures: ['Flame Imp', 'Frost Imp', 'Shadow Imp', 'Vampire Bat'],
+        },
+        {
+          id: 'region_01_area_03',
+          name: 'Crystal Creek',
           creatures: [
-            'Goblin',
-            'Goblin Archer',
-            'Goblin Warrior',
-            'Goblin Shaman',
-            'Large Rat',
+            'Blue Slime',
+            'Brown Slime',
+            'Green Slime',
+            'Rainbow Slime',
+            'Red Slime',
+            'Transparent Slime',
           ],
         },
-        // {
-        //   name: 'Blood Grove',
-        //   creatures: [],
-        // },
-        // {
-        //   name: 'Crystal Creek',
-        //   creatures: [],
-        // },
         // {
         //   name: 'Oak Thicket',
         //   creatures: [],

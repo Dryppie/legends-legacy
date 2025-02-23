@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { TempleComponent } from './temple/temple.component';
 import { CityComponent } from './city.component';
+import { TavernComponent } from './tavern/tavern.component';
 
 export const CITY_ROUTES: Routes = [
   {
@@ -15,6 +16,10 @@ export const CITY_ROUTES: Routes = [
       {
         path: 'temple',
         component: TempleComponent,
+      },
+      {
+        path: 'tavern',
+        component: TavernComponent,
       },
     ],
   },

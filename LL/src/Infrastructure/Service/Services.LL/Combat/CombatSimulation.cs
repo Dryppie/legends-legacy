@@ -178,33 +178,51 @@ public class CombatSimulation : ICombatContext
                 return;
             }
             var damage = InteractionManager.CalculateBasicAttackDamage(actor, target, 4);
-            var damageReceived = InteractionManager.CalculateDamageReceived(target, damage);
+            var damageResult = InteractionManager.CalculateDamageBreakdown(target, damage, attackOutcome);
 
-            CombatEvent(actor, target, EventType.Damage, damageReceived, $"{actor.Name} hit {target.Name} with a basic attack, dealing {damageReceived} damage.");
+            var combatEvent = CombatEvent(actor, target, EventType.Damage, damageResult.HealthDamage, $"{actor.Name} hit {target.Name} with a basic attack, dealing {damageResult.TotalDamage} damage.");
 
             var effectDefinition = new EffectDefinition(null, null, null, null, null, [], [], attackType: AttackType.Melee);
             var effectContext = new EffectContext(
-                new Effect() { Definition = effectDefinition }, [], [], actor, target, damageReceived,
-                $"{actor.Name} hit {target.Name} with a basic attack, dealing {damageReceived} damage.")
+                new Effect() { Definition = effectDefinition }, [], [], actor, target, damageResult.HealthDamage,
+                $"{actor.Name} hit {target.Name} with a basic attack, dealing {damageResult.TotalDamage} damage.")
             {
                 AttackType = AttackType.Melee
             };
 
             InteractionManager.ApplyDamage(effectContext);
+
+            var combatEntity = new SimpleCombatEntity()
+            {
+                Id = target.Id,
+                MaxHealth = target.GetAttributeValue(AttributeType.MaxHealth),
+                Health = target.GetAttributeValue(AttributeType.Health),
+                MaxMana = target.GetAttributeValue(AttributeType.MaxMana),
+                Mana = target.GetAttributeValue(AttributeType.Mana),
+                Barrier = target.GetAttributeValue(AttributeType.Barrier)
+            };
+            combatEntity.Health = Math.Max(0, combatEntity.Health - damageResult.HealthDamage);
+
+            combatEvent.CombatEntity = combatEntity;
         }
     }
 
-    private void CombatEvent(CombatEntity actor, CombatEntity target, EventType actionType, int magnitude, string details)
+    private CombatEvent CombatEvent(CombatEntity actor, CombatEntity target, EventType actionType, int magnitude, string details, SimpleCombatEntity? combatEntity = null)
     {
-        _eventLog.Add(new CombatEvent
+        var combatEvent = new CombatEvent
         {
             Timestamp = CurrentTime,
             ActorId = actor.Id,
             TargetId = target.Id,
             EventType = actionType,
             Magnitude = magnitude,
-            Details = details
-        });
+            Details = details,
+            CombatEntity = combatEntity
+        };
+
+        _eventLog.Add(combatEvent);
+
+        return combatEvent;
     }
 
     private void UseAbility(CombatEntity actor, AbilityDefinition ability, List<CombatEntity> opposingTeam, List<CombatEntity> ownTeam)
@@ -276,7 +294,9 @@ public class CombatSimulation : ICombatContext
         var formattedNames = string.Join(", ", uniqueNames);
 
         if (effectsToApply.Count == 0) return;
-        // Deduct mana cost in the end, as this should only happen if the ability has actually been used
+
+        // Deduct resource cost and usages in the end, as this should only happen if the ability
+        // has actually been used and if there were any targets to use it on
         actor.CombatAttributes[abilityResourceTypeCost] -= ability.Cost;
         ability.Usage.ConsumeUse();
 
@@ -303,12 +323,13 @@ public class CombatSimulation : ICombatContext
             .Replace("{Ability}", ability.Name)
         });
 
-        EffectManager.TriggerEffects(TriggerEvent.OnAbilityUsed, actor, actor);
-
         foreach (var (target, effectInstance) in effectsToApply)
         {
             EffectManager.AddEffect(actor, target, effectInstance);
         }
+
+        // Only trigger OnAbility used after all the ability's effects have been used
+        EffectManager.TriggerEffects(TriggerEvent.OnAbilityUsed, actor, actor);
     }
 
     private BattleOutcome DetermineOutcome()
