@@ -382,7 +382,7 @@
           "Condition": {
             "Type": "StatusEffectCondition",
             "Status": "Cold",
-            "StacksRequired": 2,
+            "StacksRequired": 5,
             "ComparisonType": "GreaterThan"
           },
           "Targeting": "SingleEnemy",

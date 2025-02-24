@@ -133,7 +133,7 @@ public static class LLDbContextExtensions
             var goblinArcherEssence = new Essence()
             {
                 Id = Guid.NewGuid(),
-                Name = "Goblin Archer's Warrior",
+                Name = "Goblin Archer's Essence",
                 ActiveAbilityId = "snipersStrike",
                 PassiveAbilityId = "poisonedArrows"
             };
