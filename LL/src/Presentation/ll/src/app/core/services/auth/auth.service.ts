@@ -51,12 +51,12 @@ export class AuthService {
 
   setAuth(): void {
     this.isAuthenticatedSubject.next(true);
-
     this.getLoggedInCharacter().subscribe({
       error: () => {
         this.isAuthenticatedSubject.next(false); // Set as not authenticated in case of an error
       },
     });
+    this.eventBusService.emitFetchCurrentAction();
   }
 
   purgeAuth(): Observable<void> {
@@ -143,7 +143,7 @@ export class AuthService {
   getLoggedInCharacter(): Observable<CharacterDto> {
     return this.apiService.get('character').pipe(
       tap((character) => {
-        this.currentCharacterSubject.next(character);
+        this.updateCharacter(character);
       }),
 
       catchError(() => {

@@ -6,11 +6,18 @@ import {
 } from '../../../shared/models/Dtos/combatResultDto';
 import { BehaviorSubject } from 'rxjs';
 import { CombatEvent } from '../../../shared/models/Dtos/combatEventDto';
+import { EventBusService } from '../../services/event-bus/event-bus.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CombatStateService {
+  constructor(private eventBusService: EventBusService) {
+    this.eventBusService.logout$.subscribe(() => {
+      this.handleLogout();
+    });
+  }
+
   private playerCharactersSubject = new BehaviorSubject<
     SimpleCombatEntityDto[]
   >([]);
@@ -75,5 +82,9 @@ export class CombatStateService {
     this.combatResultSubject.next(null);
     this.combatOutcomeSubject.next(null);
     this.nextCombatSubject.next(null);
+  }
+
+  handleLogout() {
+    this.resetCombatState();
   }
 }

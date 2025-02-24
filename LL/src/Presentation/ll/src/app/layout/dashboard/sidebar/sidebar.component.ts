@@ -1,4 +1,4 @@
-import { NgFor, NgIf } from '@angular/common';
+import { AsyncPipe, NgFor, NgIf } from '@angular/common';
 import {
   Component,
   EventEmitter,
@@ -16,6 +16,7 @@ import { CharacterActionsService } from '../../../core/services/character-action
 import { CharacterActionDto } from '../../../shared/models/Dtos/characterActionDto';
 import { CurrentActionComponent } from '../../../shared/components/current-action/current-action.component';
 import { NamedStorageKeys } from '../../../core/common/enums/named-storage-keys';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-sidebar',
@@ -27,6 +28,7 @@ import { NamedStorageKeys } from '../../../core/common/enums/named-storage-keys'
     RouterLink,
     TabComponent,
     CurrentActionComponent,
+    AsyncPipe,
   ],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.css',
@@ -38,7 +40,7 @@ export class SidebarComponent implements OnInit {
   tabs: Tab[] = [{ label: '', items: [] as SidebarItem[] }];
   activeTab: string = '';
   activeItem: string = '';
-  currentAction: CharacterActionDto | null = {} as CharacterActionDto;
+  currentAction$!: Observable<CharacterActionDto | null>;
 
   constructor(
     private sidebarService: SidebarService,
@@ -48,9 +50,7 @@ export class SidebarComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.actionService.currentAction$.subscribe((action) => {
-      this.currentAction = action;
-    });
+    this.currentAction$ = this.actionService.currentAction$;
 
     this.sidebarService.currentContent$.subscribe((link) => {
       this.tabs = [];

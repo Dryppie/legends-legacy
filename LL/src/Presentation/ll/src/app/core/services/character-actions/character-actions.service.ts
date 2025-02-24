@@ -46,6 +46,9 @@ export class CharacterActionsService {
     this.eventBusService.logout$.subscribe(() => {
       this.handleLogout();
     });
+    this.eventBusService.currentActionSubject$.subscribe(() => {
+      this.getCharacterAction();
+    });
   }
 
   init(): void {
@@ -218,7 +221,6 @@ export class CharacterActionsService {
   }
 
   private handleLogout(): void {
-    this.stopPolling();
     this.clearCurrentAction();
 
     this.isInitialized = false;
