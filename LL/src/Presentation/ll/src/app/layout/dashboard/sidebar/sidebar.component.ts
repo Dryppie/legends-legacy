@@ -40,7 +40,7 @@ export class SidebarComponent implements OnInit {
   tabs: Tab[] = [{ label: '', items: [] as SidebarItem[] }];
   activeTab: string = '';
   activeItem: string = '';
-  currentAction$!: Observable<CharacterActionDto | null>;
+  displayCurrentAction$!: Observable<boolean>;
 
   constructor(
     private sidebarService: SidebarService,
@@ -48,9 +48,8 @@ export class SidebarComponent implements OnInit {
     private actionService: CharacterActionsService,
     private router: Router,
   ) {}
-
   ngOnInit() {
-    this.currentAction$ = this.actionService.currentAction$;
+    this.displayCurrentAction$ = this.actionService.displayCurrentAction$;
 
     this.sidebarService.currentContent$.subscribe((link) => {
       this.tabs = [];

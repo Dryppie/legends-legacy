@@ -69,6 +69,12 @@ export class CurrentActionComponent implements OnInit, OnDestroy {
     if (!this.currentAction) {
       return 'Idle';
     }
+    if (
+      this.currentAction.isDeleted &&
+      new Date(this.currentAction.updatedAt).getTime() > Date.now()
+    ) {
+      return 'Engaged in Combat - Stopping..';
+    }
 
     switch (this.currentAction.characterActionType) {
       case CharacterActionType.Combat:
@@ -78,7 +84,7 @@ export class CurrentActionComponent implements OnInit, OnDestroy {
       case CharacterActionType.Crafting:
         return 'Crafting Items';
       case CharacterActionType.Idle:
-        return 'Crafting Items';
+        return 'Idle';
       default:
         return 'Idle';
     }

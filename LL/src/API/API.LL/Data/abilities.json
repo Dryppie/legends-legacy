@@ -204,28 +204,41 @@
       "Effects": [
         {
           "Action": {
-            "Type": "Damage",
-            "Amount": 2,
-            "AttackType": "Ranged",
-            "DamageType": "Poison",
-            "DamageTags": ["Arrows"]
+            "Type": "NestedEffect",
+            "Effects": [
+              {
+                "Action": {
+                  "Type": "Damage",
+                  "Amount": 2,
+                  "AttackType": "Ranged",
+                  "DamageType": "Poison",
+                  "DamageTags": ["Arrows"]
+                },
+                "Duration": {
+                  "Type": "TimedDuration",
+                  "Duration": 30
+                },
+                "Interval": {
+                  "Type": "Interval",
+                  "Interval": 10
+                },
+                "Targeting": "Self",
+                "Trigger": "None",
+                "Log": "{Target} has received 2 poison damage."
+              }
+            ]
           },
           "Duration": {
-            "Type": "TimedDuration",
-            "Duration": 30
+            "Type": "IndefiniteDuration"
           },
-          "Interval": {
-            "Type": "Interval",
-            "Interval": 10
-          },
-          "Targeting": "SingleEnemy",
+          "Targeting": "Self",
           "Trigger": "OnAttack",
           "Chance": 20,
           "IsFlatAmount": true,
           "AttackType": "DamageOverTime",
           "DamageType": "Poison",
           "EffectTags": [],
-          "Log": "{Target} is poisoned by {Actor}'s arrow, taking {Amount} poison damage over time."
+          "Log": "{Target} is poisoned by {Actor}'s arrow, taking 6 poison damage over time."
         }
       ]
     }

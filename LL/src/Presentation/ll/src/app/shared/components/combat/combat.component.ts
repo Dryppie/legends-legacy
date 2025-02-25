@@ -139,7 +139,7 @@ export class CombatComponent implements OnInit, OnDestroy {
   stopCombat() {
     this.subscriptions.unsubscribe();
     this.gameService.endCombat();
-    this.characterActionService.clearCurrentAction();
+    this.characterActionService.stopCurrentAction();
   }
 
   combatEnded() {

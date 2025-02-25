@@ -30,7 +30,11 @@ export class CharacterActionsService {
   private currentActionSubject = new BehaviorSubject<CharacterActionDto | null>(
     null,
   );
+  private displayCurrentActionSubject = new BehaviorSubject<boolean>(false);
+
   public currentAction$ = this.currentActionSubject.asObservable();
+  public displayCurrentAction$ =
+    this.displayCurrentActionSubject.asObservable();
 
   private loadingStartCombatSubject = new BehaviorSubject<boolean>(false);
   public loadingStartCombat$ = this.loadingStartCombatSubject.asObservable();
@@ -103,7 +107,7 @@ export class CharacterActionsService {
   }
 
   stopCharacterAction(): void {
-    this.clearCurrentAction();
+    this.stopCurrentAction();
     this.apiService
       .delete('CharacterActions')
       .pipe(
@@ -182,14 +186,41 @@ export class CharacterActionsService {
         }),
       )
       .subscribe((action: CharacterActionDto | null) => {
-        if (!action) this.stopPolling();
+        if (!action || action.isDeleted) this.stopPolling();
 
         this.setCurrentAction(action);
 
         if (action?.characterActionType === CharacterActionType.Combat) {
           this.combatService.startCombatSimulation(action);
         }
+
+        this.setDisplayCurrentAction(action);
       });
+  }
+
+  setDisplayCurrentAction(action: CharacterActionDto | null) {
+    if (!action) {
+      this.displayCurrentActionSubject.next(false);
+      return;
+    }
+
+    if (!action.isDeleted) {
+      this.displayCurrentActionSubject.next(true);
+      return;
+    }
+
+    if (new Date(action.updatedAt).getTime() < Date.now()) {
+      this.displayCurrentActionSubject.next(false);
+    } else {
+      this.displayCurrentActionSubject.next(true);
+      const updatedAt = new Date(action.updatedAt).getTime();
+      const now = Date.now();
+      const delay = Math.max(updatedAt - now, 0);
+
+      setTimeout(() => {
+        this.displayCurrentActionSubject.next(false);
+      }, delay);
+    }
   }
 
   stopPolling(): void {
@@ -199,10 +230,13 @@ export class CharacterActionsService {
     }
   }
 
-  clearCurrentAction(): void {
+  stopCurrentAction(): void {
     this.clearCAT();
     this.stopPolling();
-    this.setCurrentAction(null);
+    this.currentAction$.subscribe((action) => {
+      if (action) action.isDeleted = true;
+      this.setDisplayCurrentAction(action);
+    });
   }
 
   setCAT(characterActionType: CharacterActionType): void {
@@ -221,9 +255,9 @@ export class CharacterActionsService {
   }
 
   private handleLogout(): void {
-    this.clearCurrentAction();
+    this.stopCurrentAction();
+    this.setCurrentAction(null);
 
     this.isInitialized = false;
-    // Then call init() again once a new user logs in (if that’s your intended flow).
   }
 }

@@ -11,7 +11,6 @@ using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
-using Domain.Models.Regions.Areas;
 using MediatR;
 using Services.LL.Combat;
 
@@ -37,28 +36,31 @@ public class CombatService : ICombatService
         var totalExp = 0;
 
         var combatAction = characterAction.ActionDetails as CombatActionDetails;
-        var monsterCount = _spawningService.HowManyMonstersToSpawn(combatAction!.Area.SpawnProbabilities);
-        var areaCreatures = _spawningService.WhatAreaCreaturesToSpawn([.. combatAction.Area.Creatures], monsterCount);
-        var enemyIds = areaCreatures.Select(c => c.CreatureId).ToList();
 
         // Initialize combatants
         var playerCharacters = await GetPlayerCharactersAsync([.. combatAction.CharacterTeam], cancellationToken);
-        // TODO: Instead of getting a random selection here, it should be done in the while loop
-        // otherwise it'll be the same selection for 12 hours of idle, instead of random mobs each combat
-        var enemyCharacters = await GetEnemyCharactersAsync(enemyIds, cancellationToken);
+
+        var allEnemyCharacters = await GetEnemyCharactersAsync(combatAction.Area.Creatures.Select(c => c.CreatureId).ToList(), cancellationToken);
 
         var combatPlayerEntities = CreateCombatEntities(playerCharacters);
-        var combatEnemyEntities = CreateCombatEntities(enemyCharacters);
+        var allCombatEnemyEntities = CreateCombatEntities(allEnemyCharacters);
 
         // Prepare entities for combat
-        await PrepareEntitiesForCombat([.. combatPlayerEntities, .. combatEnemyEntities]);
+        await PrepareEntitiesForCombat([.. combatPlayerEntities, .. allCombatEnemyEntities]);
 
         var lastCombatResult = new CombatResult();
+        var selectedCombatEnemyEntities = new List<CombatEntity>();
 
         while (characterAction.UpdatedAt < now)
         {
+            // Initialize both teams
+            var monsterCount = _spawningService.HowManyMonstersToSpawn(combatAction!.Area.SpawnProbabilities);
+            var selectedAreaCreatures = _spawningService.WhatAreaCreaturesToSpawn([.. combatAction.Area.Creatures], monsterCount);
+            var selectedEnemyIds = selectedAreaCreatures.Select(c => c.CreatureId).ToList();
 
-            var combatSimulation = new CombatSimulation(combatPlayerEntities, combatEnemyEntities);
+            selectedCombatEnemyEntities = selectedEnemyIds.Select(id => allCombatEnemyEntities.First(ee => ee.OriginalId.Equals(id))).ToList();
+
+            var combatSimulation = new CombatSimulation(combatPlayerEntities, selectedCombatEnemyEntities);
             lastCombatResult = combatSimulation.RunSimulation();
 
             // StartedAt is 1 second after the action is initialized, so as to have a 'combat starting' screen
@@ -78,52 +80,36 @@ public class CombatService : ICombatService
             // Reset entities when combat is over
             // Also process loot, since it's fight that should have already happened
             // If it's a fight where the frontend has yet to display the outcome, the loot should first be processed when the fight is 'over'
-
-            ResetEntitiesForCombat([.. combatPlayerEntities, .. combatEnemyEntities]);
-
+            
+            ResetEntitiesForCombat([.. combatPlayerEntities, .. selectedCombatEnemyEntities]);
+            
             if (lastCombatResult.Outcome.Equals(BattleOutcome.Victory))
             {
-                lastCombatResult.Loot = _lootService.GenerateIdleCombatLootAsync(enemyCharacters);
-                totalLoot.AddRange(lastCombatResult.Loot);
+                var selectedEnemyEntities = new List<Entity>();
+                selectedEnemyIds.ForEach(id => selectedEnemyEntities.Add(allEnemyCharacters.First(ee => ee.Id.Equals(id))));
 
-                totalExp += enemyCharacters.OfType<Creature>().Sum(e => e.ExperienceReward);
+                var lootThisBattle = _lootService.GenerateIdleCombatLootAsync(selectedEnemyEntities);
+                lastCombatResult.Loot = lootThisBattle;
+
+                // Accumulate total loot
+                totalLoot.AddRange(lootThisBattle);
+
+                totalExp += selectedEnemyEntities.OfType<Creature>().Sum(e => e.ExperienceReward);
             }
 
             //TODO: OPTIMIZE PERHAPS?
             // https://chatgpt.com/c/671943b1-0958-800d-9234-32c45632490e
         }
 
-        lastCombatResult.Loot = _lootService.GenerateIdleCombatLootAsync(enemyCharacters);
-
         // Create CombatEntities to keep track of simple data over each entity, such as id, health, mana
         lastCombatResult.PlayerTeam = CreateSimpleCombatEntities(combatPlayerEntities);
-        lastCombatResult.EnemyTeam = CreateSimpleCombatEntities(combatEnemyEntities);
+        lastCombatResult.EnemyTeam = CreateSimpleCombatEntities(selectedCombatEnemyEntities);
         lastCombatResult.ExperienceGained = totalExp;
 
         await UpdateCharacterStatsAsync(playerCharacters, totalExp, cancellationToken);
         await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
 
         return lastCombatResult;
-    }
-    private static List<Guid> SelectRandom(List<Guid> enemyTeam)
-    {
-        int randomCount = GetWeightedRandom();
-        return enemyTeam.OrderBy(x => Guid.NewGuid()).Take(randomCount).ToList();
-    }
-
-    private static int GetWeightedRandom()
-    {
-        Random rand = new();
-        int randomValue = rand.Next(0, 100);
-
-        if (randomValue < 25) // 25% chance
-            return 1;
-        else if (randomValue < 80) // 55% chance
-            return 2;
-        else if (randomValue < 95) // 15% chance
-            return 3;
-        else // 5% chance
-            return 4;
     }
 
     private static List<SimpleCombatEntity> CreateSimpleCombatEntities(List<CombatEntity> playerCharacters)
