@@ -1,6 +1,7 @@
 import { CharacterActionType } from '../enums/characterActionType';
 import { GatheringType } from '../enums/gatheringType';
 import { CombatResultDto } from './combatResultDto';
+import { Area } from './regionDto';
 
 export interface CharacterActionDto {
   characterActionType: CharacterActionType;
@@ -23,7 +24,7 @@ export interface StartGatheringActionRequest {
 
 export interface CombatActionDetails {
   characterTeam: string[]; // or appropriate type
-  enemyTeam: string[]; // or appropriate type
+  area: Area;
 }
 
 export interface GatheringActionDetails {

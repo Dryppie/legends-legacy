@@ -38,6 +38,11 @@ public class EssenceRepository : IEssenceRepository
         var essence = essenceItem.Essence;
         NotFoundException.ThrowIfNull(essence, nameof(essence), essenceItemId);
 
+        if (inventoryItem.Quantity < 1)
+        {
+            throw new InvalidOperationException($"You do not have this item in your inventory. Item with ID {inventoryItem.ItemId}.");
+        }
+
         // Check if the character has already equipped this essence
         if (character.EquippedEssences.Any(e => e.Id == essence.Id))
         {
@@ -48,8 +53,16 @@ public class EssenceRepository : IEssenceRepository
         // 4) Add the essence to the character's EquippedEssences
         character.EquippedEssences.Add(essence);
 
-        // 5) Remove the inventoryItem so it’s no longer in the user’s inventory
-        _context.InventoryItems.Remove(inventoryItem);
+        // Decrease the quantity of the inventory item
+        if (inventoryItem.Quantity > 1)
+        {
+            inventoryItem.Quantity -= 1; // Reduce quantity by 1
+        }
+        else
+        {
+            // Remove the inventory item if quantity reaches 0
+            _context.InventoryItems.Remove(inventoryItem);
+        }
 
         // 6) Save changes and return status
         var changes = await _context.SaveChangesAsync(cancellationToken);

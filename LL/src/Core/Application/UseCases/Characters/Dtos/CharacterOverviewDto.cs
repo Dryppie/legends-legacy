@@ -7,6 +7,7 @@ using Domain.Models.Essences;
 namespace Application.UseCases.Characters.Dtos;
 public class CharacterOverviewDto : IMapFrom<Character>
 {
+    public int Level { get; set; }
     public List<EntityAttribute> BaseAttributes { get; set; } = [];
     public List<Essence> EquippedEssences { get; set; } = [];
 

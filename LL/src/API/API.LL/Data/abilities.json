@@ -350,11 +350,11 @@
     "Active": {
       "Id": "iceTouch",
       "Name": "Ice Touch",
-      "Description": "If the target has 5 stacks of Cold, remove that amount and apply Freeze for 4 seconds.",
+      "Description": "If the target has 5 stacks of Cold, apply Freeze for 4 seconds. Then remove 5 stacks of Cold.",
       "Type": "Active",
       "Cooldown": 150,
       "Cost": 4,
-      "ResourceTypeCost": "Mana",
+      "CostType": "Mana",
       "Effects": [
         {
           "Action": {
@@ -441,7 +441,7 @@
       "Type": "Active",
       "Cooldown": 150,
       "Cost": 5,
-      "ResourceTypeCost": "Mana",
+      "CostType": "Mana",
       "Effects": [
         {
           "Action": {
@@ -492,7 +492,7 @@
       "Type": "Active",
       "Cooldown": 200,
       "Cost": 6,
-      "ResourceTypeCost": "Mana",
+      "CostType": "Mana",
       "Effects": [
         {
           "Action": {
@@ -548,7 +548,7 @@
       "Type": "Active",
       "Cooldown": 240,
       "Cost": 8,
-      "ResourceTypeCost": "Mana",
+      "CostType": "Mana",
       "Effects": [
         {
           "Action": {
@@ -606,7 +606,7 @@
       "Type": "Active",
       "Cooldown": 140,
       "Cost": 6,
-      "ResourceTypeCost": "Mana",
+      "CostType": "Mana",
       "Effects": [
         {
           "Action": {
@@ -659,7 +659,7 @@
       "Type": "Active",
       "Cooldown": 170,
       "Cost": 7,
-      "ResourceTypeCost": "Mana",
+      "CostType": "Mana",
       "Effects": [
         {
           "Action": {
@@ -742,7 +742,7 @@
       "Type": "Active",
       "Cooldown": 150,
       "Cost": 8,
-      "ResourceTypeCost": "Mana",
+      "CostType": "Mana",
       "Effects": [
         {
           "Action": {
@@ -811,7 +811,7 @@
       "Type": "Active",
       "Cooldown": 180,
       "Cost": 8,
-      "ResourceTypeCost": "Mana",
+      "CostType": "Mana",
       "Effects": [
         {
           "Action": {
@@ -869,7 +869,7 @@
       "Type": "Active",
       "Cooldown": 250,
       "Cost": 8,
-      "ResourceTypeCost": "Mana",
+      "CostType": "Mana",
       "Effects": [
         {
           "Action": {
@@ -969,7 +969,7 @@
         "Type": "LimitedUsage",
         "Uses": 3
       },
-      "ResourceTypeCost": "Mana",
+      "CostType": "Mana",
       "Effects": [
         {
           "Action": {
@@ -1063,7 +1063,7 @@
       "Type": "Active",
       "Cooldown": 150,
       "Cost": 10,
-      "ResourceTypeCost": "Mana",
+      "CostType": "Mana",
       "Effects": [
         {
           "Action": {
@@ -1135,7 +1135,7 @@
       "Type": "Active",
       "Cooldown": 20,
       "Cost": 30,
-      "ResourceTypeCost": "Health",
+      "CostType": "Health",
       "ActivationLog": "{Actor} used {Ability}.",
       "Effects": [
         {

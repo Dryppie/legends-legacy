@@ -1,10 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Essence } from '../../../../models/essence';
+import { TicksToSecondsPipe } from '../../../../pipes/ticks-to-seconds/ticks-to-seconds.pipe';
 
 @Component({
   selector: 'app-essence-modal',
   standalone: true,
-  imports: [],
+  imports: [TicksToSecondsPipe],
   templateUrl: './essence-modal.component.html',
   styleUrl: './essence-modal.component.css',
 })

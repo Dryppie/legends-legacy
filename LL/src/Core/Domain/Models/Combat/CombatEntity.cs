@@ -12,6 +12,8 @@ namespace Domain.Models.Combat;
 [NotMapped]
 public class CombatEntity
 {
+    // This is only set to ensure it's possible to compare a CombatEntity with the LocationCreature
+    public Guid OriginalId { get; set; }
     public string Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public ICollection<Essence> EquippedEssences { get; set; } = [];
@@ -35,6 +37,7 @@ public class CombatEntity
 
     public CombatEntity(Entity entity)
     {
+        OriginalId = entity.Id;
         Id = entity.Id.ToString();
         Name = entity.Name;
         Abilities = new List<AbilityDefinition>(entity.Abilities);

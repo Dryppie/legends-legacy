@@ -38,7 +38,13 @@ export class TempleComponent implements AfterViewInit {
   }
 
   openAbsorbEssenceModal() {
-    this.modalService.toggleAbsorbEssenceModal(this.inventoryEssences);
+    const filteredEssences = this.inventoryEssences.filter(
+      (essence) =>
+        !this.equippedEssences.some(
+          (equipped) => equipped.name === essence.name,
+        ),
+    );
+    this.modalService.toggleAbsorbEssenceModal(filteredEssences);
   }
 
   openRemoveEssenceModal() {

@@ -42,7 +42,9 @@ public class CharacterActionService : ICharacterActionService
 
         var characterAction = await _characterActionRepository.GetCharacterActionAsync(characterId, cancellationToken);
 
-        if (characterAction == null || characterAction.ActionDetails == null) return null;
+        if (characterAction == null) return null;
+        if (characterAction.ActionDetails == null) return characterAction; // Simply just record the character action.It might contain useful information,
+                                                                           // such as if the UpdatedAt is in the future (Combat was canceled, and immediately refreshed)
 
         // If it's been longer than 12 hours since the player checked in, their action is capped
         // Actions are only calculated from UpdatedAt, to the capped time (12 hours ahead)

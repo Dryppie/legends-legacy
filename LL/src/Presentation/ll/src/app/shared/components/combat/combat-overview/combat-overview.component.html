@@ -4,6 +4,7 @@
   <div class="overflow-y-scroll" appStickyScroll>
     <app-combat-overview-item
       *ngFor="let combatEvent of combatEvents"
+      class="animate-fade-in-up"
       [combatEvent]="combatEvent"
     ></app-combat-overview-item>
     <div #sentinel></div>

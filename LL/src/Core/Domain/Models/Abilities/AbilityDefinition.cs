@@ -34,7 +34,7 @@ public class AbilityDefinition
     /// <summary>
     /// What resource will be deducted from upon use
     /// </summary>
-    public ResourceType ResourceTypeCost { get; set; }
+    public ResourceType CostType { get; set; }
     public string ActivationLog { get; set; } = "{Actor} used {Ability} on {Target}.";
 
     public List<EffectDefinition> Effects { get; set; } = [];
@@ -51,7 +51,7 @@ public class AbilityDefinition
             Cooldown = Cooldown,
             RemainingTimeUntilUse = RemainingTimeUntilUse,
             Cost = Cost,
-            ResourceTypeCost = ResourceTypeCost,
+            CostType = CostType,
             ActivationLog = ActivationLog,
             Usage = Usage.Clone(),
             Condition = Condition.Clone(),

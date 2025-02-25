@@ -230,15 +230,15 @@ public class CombatSimulation : ICombatContext
         // Put ability on cooldown even if actor is out of mana/health
         ability.RemainingTimeUntilUse = ability.Cooldown;
 
-        var abilityResourceTypeCost = ability.ResourceTypeCost.Equals(ResourceType.Mana)
+        var costType = ability.CostType.Equals(ResourceType.Mana)
             ? AttributeType.Mana
             : AttributeType.Health;
 
         // Determine the minimum resource value allowed after paying the cost
-        var minimumResourceAfterCost = (abilityResourceTypeCost == AttributeType.Mana) ? 0 : 1;
+        var minimumResourceAfterCost = (costType == AttributeType.Mana) ? 0 : 1;
 
         // Check if subtracting the cost would drop below the minimum
-        if ((actor.CombatAttributes[abilityResourceTypeCost] - ability.Cost) < minimumResourceAfterCost)
+        if ((actor.CombatAttributes[costType] - ability.Cost) < minimumResourceAfterCost)
         {
             //_eventLog.Add(new CombatEvent()
             //{
@@ -297,7 +297,7 @@ public class CombatSimulation : ICombatContext
 
         // Deduct resource cost and usages in the end, as this should only happen if the ability
         // has actually been used and if there were any targets to use it on
-        actor.CombatAttributes[abilityResourceTypeCost] -= ability.Cost;
+        actor.CombatAttributes[costType] -= ability.Cost;
         ability.Usage.ConsumeUse();
 
         var simpleCombatEntity = new SimpleCombatEntity()

@@ -33,7 +33,12 @@
     <div class="flex w-full items-center justify-center gap-6 text-white">
       <div class="flex flex-col items-center gap-1">
         <span>Battle</span>
-        <h2 class="text-primary">Shenic - Area 2 - Orc</h2>
+        <h2
+          *ngIf="currentAction$ | async as CurrentAction"
+          class="text-primary"
+        >
+          Shenic - {{ CurrentAction.combatActionDetails.area.name }}
+        </h2>
       </div>
     </div>
   </div>

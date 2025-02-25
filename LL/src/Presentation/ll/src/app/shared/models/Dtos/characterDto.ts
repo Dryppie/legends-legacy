@@ -13,6 +13,7 @@ export interface CharacterDto {
 }
 
 export interface CharacterOverviewDto {
+  level: number;
   baseAttributes: AttributeDto[];
   equippedEssences: Essence[];
 }

@@ -4,12 +4,13 @@ import { CombatOverviewComponent } from './combat-overview/combat-overview.compo
 import { CombatEvent, EventType } from '../../models/Dtos/combatEventDto';
 import { AsyncPipe, NgFor, NgIf, NgStyle } from '@angular/common';
 import { SimpleCombatEntityDto } from '../../models/Dtos/combatResultDto';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { CountdownComponent } from '../countdown/countdown.component';
 import { CharacterActionsService } from '../../../core/services/character-actions/character-actions.service';
 import { CombatCountdownComponent } from './combat-countdown/combat-countdown.component';
 import { GameService } from '../../../core/services/game/game.service';
 import { CombatStateService } from '../../../core/state/combat-state/combat-state.service';
+import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
 
 @Component({
   selector: 'app-combat',
@@ -37,6 +38,7 @@ export class CombatComponent implements OnInit, OnDestroy {
   playerCharacters: SimpleCombatEntityDto[] = [];
   enemyCharacters: SimpleCombatEntityDto[] = [];
   subscriptions: Subscription = new Subscription();
+  currentAction$!: Observable<CharacterActionDto | null>;
 
   isCombatActive = false;
   displayCombat = false;
@@ -73,6 +75,8 @@ export class CombatComponent implements OnInit, OnDestroy {
         this.isLoading = isLoading;
       });
     this.subscriptions.add(combatIsLoadingSub);
+
+    this.currentAction$ = this.characterActionService.currentAction$;
 
     const nextCombatSub = this.combatStateService.nextCombat$.subscribe(
       (time) => {
@@ -144,7 +148,6 @@ export class CombatComponent implements OnInit, OnDestroy {
 
   private handleCombatEvent(event: CombatEvent | null): void {
     if (!event) return;
-
     switch (event.eventType) {
       case EventType.AbilityUse:
         this.handleAbilityUseEvent(event);

@@ -18,7 +18,7 @@ export interface Ability {
   targeting: Targeting[];
   cooldown: number;
   cost: number;
-  resourceCost: ResourceType;
+  costType: ResourceType;
 }
 
 export enum AttackType {

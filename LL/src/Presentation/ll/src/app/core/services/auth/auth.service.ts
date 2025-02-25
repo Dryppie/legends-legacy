@@ -29,9 +29,7 @@ export class AuthService {
     null,
   );
 
-  public currentCharacter$ = this.currentCharacterSubject
-    .asObservable()
-    .pipe(distinctUntilChanged());
+  public currentCharacter$ = this.currentCharacterSubject.asObservable();
 
   private isAuthenticatedSubject = new BehaviorSubject<boolean | null>(false); // Start with false
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();

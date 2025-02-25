@@ -1,8 +1,8 @@
 <div class="flex h-full flex-col gap-4 overflow-hidden pb-4 text-white sm:pb-0">
   <app-default-header
+    *ngIf="character$ | async as CharacterOverview"
     class="flex-none"
     title="Character Overview"
-    text="Slots 3/120"
     icon="character/achievements"
   ></app-default-header>
   <div
