@@ -33,6 +33,14 @@ export class ProfessionCardComponent {
     );
   }
 
+  // TODO: Rework this. Html is calling this continuously
+  canStartAction(): boolean {
+    return (
+      this.currentAction == null ||
+      (new Date(this.currentAction.updatedAt).getTime() <= Date.now() &&
+        this.currentAction.isDeleted)
+    );
+  }
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }

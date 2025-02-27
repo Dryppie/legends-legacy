@@ -43,7 +43,7 @@
           text="Cancel"
         ></app-mini-button>
         <app-mini-button
-          *ngIf="!currentAction || currentAction?.isDeleted"
+          *ngIf="canStartAction()"
           class="w-[64px]"
           text="Battle"
           (click)="startCombat()"

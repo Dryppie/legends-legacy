@@ -237,6 +237,7 @@ export class CharacterActionsService {
       setTimeout(() => {
         this.displayCurrentActionSubject.next(false);
         this.combatService.clearCurrentCombat();
+        this.gameService.hideCombat();
       }, delay);
     }
   }

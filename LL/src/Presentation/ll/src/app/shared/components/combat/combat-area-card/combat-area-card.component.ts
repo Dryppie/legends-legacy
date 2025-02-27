@@ -17,6 +17,13 @@ import { Subscription } from 'rxjs';
   styleUrl: './combat-area-card.component.css',
 })
 export class CombatAreaCardComponent {
+  canStartAction(): boolean {
+    return (
+      this.currentAction == null ||
+      (new Date(this.currentAction.updatedAt).getTime() <= Date.now() &&
+        this.currentAction.isDeleted)
+    );
+  }
   @Input() area!: Area;
   currentAction: CharacterActionDto | null = null;
   private subscription: Subscription = new Subscription();

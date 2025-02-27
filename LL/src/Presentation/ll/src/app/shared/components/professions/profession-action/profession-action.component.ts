@@ -25,6 +25,10 @@ export class ProfessionActionComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.subscription.add(
       this.characterActionsService.currentAction$.subscribe((action) => {
+        if (action?.isDeleted) {
+          this.isGatheringAction = false;
+          return;
+        }
         this.currentAction = action;
         this.isGatheringAction =
           this.currentAction?.characterActionType ===
@@ -46,6 +50,7 @@ export class ProfessionActionComponent implements OnInit, OnDestroy {
   }
 
   stopAction(): void {
+    this.isGatheringAction == false;
     this.characterActionsService.stopCharacterAction();
   }
 }
