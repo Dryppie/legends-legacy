@@ -169,8 +169,8 @@ export class AuthService {
 
   getLoggedInCharacter(): Observable<CharacterDto> {
     return this.apiService.get('character').pipe(
-      tap((character) => {
-        this.updateCharacter(character);
+      tap((response) => {
+        this.updateCharacter(response.data);
       }),
 
       catchError(() => {
