@@ -9,8 +9,8 @@ export interface CharacterActionDto {
   updatedAt: Date;
   isDeleted: boolean;
   combatResult?: CombatResultDto;
-  combatActionDetails: CombatActionDetails;
-  gatheringActionDetails: GatheringActionDetails;
+  combatActionDetails?: CombatActionDetails;
+  gatheringActionDetails?: GatheringActionDetails;
 }
 
 export interface StartCombatActionRequest {

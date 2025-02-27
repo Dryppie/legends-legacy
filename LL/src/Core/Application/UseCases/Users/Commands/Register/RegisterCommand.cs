@@ -1,12 +1,13 @@
 ﻿using Application.Authorization.Interfaces;
+using Application.Common.Responses;
 using Application.Interfaces.Services.LL;
 using Application.UseCases.Users.Events;
 using MediatR;
 
 namespace Application.UseCases.Users.Commands.Register;
-public record RegisterCommand(string Username, string Email, string Password) : IRequest;
+public record RegisterCommand(string Username, string Email, string Password) : IRequest<Response<Unit>>;
 
-public class RegisterCommandHandler : IRequestHandler<RegisterCommand>
+public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Response<Unit>>
 {
     private readonly IUserService _userService;
     private readonly IJwtGenerator _jwtGenerator;
@@ -19,7 +20,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand>
         _publisher = publisher;
     }
 
-    public async Task Handle(RegisterCommand request, CancellationToken cancellationToken)
+    public async Task<Response<Unit>> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         try
         {
@@ -29,11 +30,11 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand>
             // Create a character for the registered user
             await _publisher.Publish(new UserCreatedEvent(user.Id, user.Name), cancellationToken);
 
-            
+            return Response<Unit>.Success(Unit.Value);
         }
-        catch
+        catch (Exception ex)
         {
-            throw new Exception($"Problem creating user {request.Username}");
+            return Response<Unit>.Fail(ex.Message);
         }
     }
 }

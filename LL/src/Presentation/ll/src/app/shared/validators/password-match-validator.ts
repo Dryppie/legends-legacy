@@ -5,13 +5,6 @@ export function passwordMatchValidator(): ValidatorFn {
     const password = formGroup.get('password')?.value;
     const confirmPassword = formGroup.get('confirmPassword')?.value;
 
-    return password === confirmPassword
-      ? null
-      : {
-          invalidCustomEmail: {
-            password: password,
-            confirmPassword: confirmPassword,
-          },
-        };
+    return password === confirmPassword ? null : { passwordMismatch: true };
   };
 }

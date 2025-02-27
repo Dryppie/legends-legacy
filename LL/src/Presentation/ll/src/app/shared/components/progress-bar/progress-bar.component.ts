@@ -54,7 +54,8 @@ export class ProgressBarComponent implements OnInit, OnDestroy {
     let startTime: number;
 
     if (
-      action.characterActionType === CharacterActionType.Combat &&
+      (action.characterActionType === CharacterActionType.Combat ||
+        action.isDeleted) &&
       new Date(action.updatedAt).getTime() > Date.now()
     ) {
       // Combat: updatedAt is in the future, meaning time left is from now until then

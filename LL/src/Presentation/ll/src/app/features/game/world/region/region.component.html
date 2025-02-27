@@ -1,19 +1,27 @@
 <div class="flex h-full w-full flex-col gap-4">
   <h1 class="text-primary">{{ region.name }}</h1>
 
-  <div *ngIf="region.raids.length > 0" class="flex w-full flex-col gap-2">
-    <h3 class="text-primary">Raids</h3>
-  </div>
-  <div *ngIf="region.dungeons.length > 0" class="flex w-full flex-col gap-2">
-    <h3 class="text-primary">Dungeons</h3>
-  </div>
-  <div *ngIf="region.areas.length > 0" class="flex w-full flex-col gap-2">
-    <h3 class="text-primary">Areas</h3>
+  <div class="flex h-full w-full overflow-y-auto">
+    <div *ngIf="region.raids.length > 0" class="flex w-full flex-col gap-2">
+      <h3 class="text-primary">Raids</h3>
+    </div>
+    <div *ngIf="region.dungeons.length > 0" class="flex w-full flex-col gap-2">
+      <h3 class="text-primary">Dungeons</h3>
+    </div>
     <div
-      class="grid h-full w-full gap-4 pr-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      *ngIf="region.areas.length > 0"
+      class="flex h-full w-full flex-col gap-2"
     >
-      <div *ngFor="let area of region.areas" class="flex">
-        <app-combat-area-card [area]="area"></app-combat-area-card>
+      <h3 class="text-primary">Areas</h3>
+      <div
+        class="grid h-full w-full gap-4 pr-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      >
+        <div *ngFor="let area of region.areas" class="flex w-full">
+          <app-combat-area-card
+            class="w-full"
+            [area]="area"
+          ></app-combat-area-card>
+        </div>
       </div>
     </div>
   </div>

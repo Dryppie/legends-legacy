@@ -90,6 +90,10 @@ export class SignupComponent {
     return this.validateField('password');
   }
 
+  validateConfirmPassword() {
+    return this.registerForm.hasError('passwordMismatch');
+  }
+
   private validateField(field: string) {
     const control = this.registerForm.get(field);
     return control?.invalid && (control.dirty || control.touched);

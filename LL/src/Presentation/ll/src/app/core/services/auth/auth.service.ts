@@ -4,9 +4,9 @@ import {
   BehaviorSubject,
   Observable,
   catchError,
-  distinctUntilChanged,
   from,
   map,
+  mergeMap,
   of,
   switchMap,
   take,
@@ -82,22 +82,31 @@ export class AuthService {
       Password: password,
     };
     return this.apiService.post('auth/login', userCredentials).pipe(
-      tap((newTokens) => {
-        this.setAuth();
-        this.setToken(newTokens);
-        this.toastService.showToast(
-          'Action completed successfully!',
-          'success',
-        );
+      tap((response) => {
+        if (response.isSuccess) {
+          this.setAuth();
+          this.setToken(response.data);
+          this.toastService.showToast(
+            'Action completed successfully!',
+            'Login succesful',
+            response.isSuccess,
+          );
 
-        this.router.navigateByUrl(`/game`);
+          this.router.navigateByUrl(`/game`);
+        } else {
+          this.toastService.showToast(
+            'Login failed!',
+            response.errorMessage,
+            response.isSuccess,
+          );
+        }
       }),
 
       catchError(() => {
         this.toastService.showToast(
           'Login Failed',
           'Wrong email or password',
-          'error',
+          false,
           't',
         );
         return throwError(() => new Error('Failed to login'));
@@ -112,12 +121,32 @@ export class AuthService {
       Password: password,
     };
     return this.apiService.post('auth/register', userCredentials).pipe(
-      tap((newTokens) => {
-        this.setToken(newTokens);
+      mergeMap((response) => {
+        if (response.isSuccess) {
+          this.setToken(response.data);
+          this.toastService.showToast(
+            'Registration Success',
+            'Your account has been created.',
+            response.isSuccess,
+          );
+          return of(response);
+        } else {
+          this.toastService.showToast(
+            'Registration Failed',
+            response.errorMessage,
+            response.isSuccess,
+          );
+          return throwError(() => new Error('Failed to login'));
+        }
       }),
 
-      catchError(() => {
-        return throwError(() => new Error('Failed to register'));
+      catchError((response) => {
+        this.toastService.showToast(
+          'Registration Failed',
+          'Contact the developer',
+          response.isSuccess,
+        );
+        return throwError(() => new Error('Failed to login'));
       }),
     );
   }
@@ -159,7 +188,7 @@ export class AuthService {
       return this.purgeAuth().pipe(map(() => null));
     }
 
-    let tokens;
+    let tokens: any;
     try {
       tokens = JSON.parse(jsonString);
     } catch (error) {
@@ -167,14 +196,24 @@ export class AuthService {
       return this.purgeAuth().pipe(map(() => null));
     }
 
-    const accessToken = tokens.find(
-      (token: { key: string; value: string }) => token.key === 'AccessToken',
-    )?.value;
-    const refreshToken = tokens.find(
-      (token: { key: string; value: string }) => token.key === 'RefreshToken',
-    )?.value;
+    if (!tokens || typeof tokens !== 'object') {
+      // Tokens is not a valid object
+      return this.purgeAuth().pipe(map(() => null));
+    }
+
+    // Convert tokens to an array for easier lookup if tokens is stored as an object
+    const tokensArray = Object.entries(tokens).map(([key, value]) => ({
+      key,
+      value,
+    }));
+
+    const accessToken =
+      tokensArray.find((token) => token.key === 'accessToken')?.value ?? null;
+    const refreshToken =
+      tokensArray.find((token) => token.key === 'refreshToken')?.value ?? null;
 
     if (!accessToken || !refreshToken) {
+      // Missing required tokens
       return this.purgeAuth().pipe(map(() => null));
     }
 
@@ -183,7 +222,7 @@ export class AuthService {
         next: (res) => this.handleAuthSuccess(res),
         error: () => {
           // In case of error, attempt to refresh tokens
-          this.refreshTokens(refreshToken).subscribe();
+          this.refreshTokens(refreshToken as string).subscribe();
         },
       }),
       map((res) => res as CharacterDto),
@@ -231,12 +270,13 @@ export class AuthService {
     return this.apiService
       .post('auth/convertGuestToUser', userCredentials)
       .pipe(
-        tap((newTokens) => {
-          this.setToken(newTokens);
+        tap((response) => {
+          this.setToken(response.newTokens);
           // Update local state if necessary
           this.toastService.showToast(
             'Account created successfully!',
-            'success',
+            'Success',
+            response.isSuccess,
           );
         }),
         catchError(() => {

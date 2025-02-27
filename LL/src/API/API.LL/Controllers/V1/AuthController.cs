@@ -1,4 +1,5 @@
 ﻿using API.LL.Controllers;
+using Application.Common.Responses;
 using Application.UseCases.Authorization.Commands.CreateNewTokens;
 using Application.UseCases.Authorization.Queries.ValidateToken;
 using Application.UseCases.Users.Commands.ConvertGuestToUser;
@@ -7,6 +8,7 @@ using Application.UseCases.Users.Commands.Register;
 using Application.UseCases.Users.Queries.Login;
 using Common.Authorization.Security;
 using Common.Exceptions;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -19,18 +21,20 @@ public class AuthController : BaseController
 
     [AllowAnonymous]
     [HttpPost("login")]
-    public async Task<ActionResult<Tokens>> Login([FromBody] UserLoginDto input)
+    public async Task<ActionResult<Response<Tokens>>> Login([FromBody] UserLoginDto input)
     {
         var tokens = await Mediator.Send(new LoginQuery(input.Email, input.Password));
+        if (tokens.Data == null) return BadRequest(tokens);
+
         var cookies = new List<KeyValuePair<string, string>>
         {
-            new KeyValuePair<string, string>("AccessToken", tokens.AccessToken),
-            new KeyValuePair<string, string>("RefreshToken", tokens.RefreshToken)
+            new KeyValuePair<string, string>("AccessToken", tokens.Data.AccessToken),
+            new KeyValuePair<string, string>("RefreshToken", tokens.Data.RefreshToken)
         };
 
         Response.Cookies.Append(cookies.ToArray(), GetCookieOptions());
 
-        return Ok(cookies);
+        return Ok(tokens);
     }
 
     [AllowAnonymous]
@@ -46,7 +50,7 @@ public class AuthController : BaseController
 
         Response.Cookies.Append(cookies.ToArray(), GetCookieOptions());
 
-        return Ok(cookies);
+        return Ok(tokens);
     }
 
     [Authorize] // User must be authenticated
@@ -68,11 +72,11 @@ public class AuthController : BaseController
 
     [AllowAnonymous]
     [HttpPost("register")]
-    public async Task<ActionResult> Register([FromBody] UserRegisterDto input)
+    public async Task<ActionResult<Response<Unit>>> Register([FromBody] UserRegisterDto input)
     {
-        await Mediator.Send(new RegisterCommand(input.Username, input.Email, input.Password));
+        var response = await Mediator.Send(new RegisterCommand(input.Username, input.Email, input.Password));
 
-        return Ok();
+        return Ok(response);
     }
 
     /// <summary>

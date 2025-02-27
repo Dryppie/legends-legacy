@@ -1,5 +1,5 @@
 <div
-  *ngIf="!displayCombat && !isLoading"
+  *ngIf="!displayCombat"
   class="flex h-full w-full flex-col items-center justify-center bg-black text-center text-primary"
 >
   <div class="flex">
@@ -12,33 +12,25 @@
   </button>
 </div>
 
-<!-- <div
-  *ngIf="isLoading"
-  class="flex h-full w-full flex-col items-center justify-center bg-black text-center text-primary"
->
-  <app-combat-countdown
-    [startValue]="3"
-    (countdownComplete)="onCountdownComplete()"
-  >
-  </app-combat-countdown>
-</div> -->
-
-<div
-  *ngIf="displayCombat && !isLoading"
-  class="flex h-full flex-col gap-4 pr-4 sm:pr-6"
->
+<div class="flex h-full flex-col gap-4 pr-4 sm:pr-6">
   <div
     class="flex h-16 w-full flex-col items-center justify-between gap-4 sm:flex-row"
   >
     <div class="flex w-full items-center justify-center gap-6 text-white">
       <div class="flex flex-col items-center gap-1">
         <span>Battle</span>
-        <h2
-          *ngIf="currentAction$ | async as CurrentAction"
-          class="text-primary"
-        >
-          Shenic - {{ CurrentAction.combatActionDetails.area.name }}
-        </h2>
+        <ng-container *ngIf="isLoading; else areaDisplay">
+          <h2 class="text-primary">Loading area details...</h2>
+        </ng-container>
+        <!-- Display area details once loading is complete -->
+        <ng-template #areaDisplay>
+          <h2
+            *ngIf="currentAction$ | async as currentAction"
+            class="text-primary"
+          >
+            Shenic - {{ currentAction.combatActionDetails?.area?.name }}
+          </h2>
+        </ng-template>
       </div>
     </div>
   </div>
@@ -50,7 +42,7 @@
             (click)="focusCharacter('player', i)"
             class="h-8 w-8 cursor-pointer rounded bg-cover"
             [ngStyle]="{
-              'background-image': 'url(\'assets/combat/thumbnail-' + '\')',
+              'background-image': 'url(\'assets/combat/thumbnail-\')',
               border:
                 selectedPlayerCharacterIndex === i
                   ? '2px solid gold'
@@ -69,13 +61,14 @@
         [mp]="selectedPlayerCharacter.mana"
         [maxMp]="selectedPlayerCharacter.maxMana"
         [barrier]="selectedPlayerCharacter.barrier"
+        [isLoading]="isLoading"
       ></app-combat-avatar>
     </div>
     <div class="flex flex-col items-center justify-center">
       <img
         src="combat/CombatVS.svg"
         alt="Logo"
-        class="center -my-24 w-44 object-contain sm:-my-0"
+        class="center -my-24 min-h-12 w-44 object-contain sm:-my-0"
       />
     </div>
     <div class="flex items-center sm:flex-col">
@@ -85,7 +78,7 @@
             (click)="focusCharacter('enemy', i)"
             class="h-8 w-8 cursor-pointer rounded bg-cover"
             [ngStyle]="{
-              'background-image': 'url(\'assets/combat/thumbnail-' + '\')',
+              'background-image': 'url(\'assets/combat/thumbnail-\')',
               border:
                 selectedEnemyCharacterIndex === i
                   ? '2px solid red'
@@ -104,6 +97,7 @@
         [mp]="selectedEnemyCharacter.mana"
         [maxMp]="selectedEnemyCharacter.maxMana"
         [barrier]="selectedEnemyCharacter.barrier"
+        [isLoading]="isLoading"
       ></app-combat-avatar>
     </div>
   </div>
@@ -111,6 +105,7 @@
     <app-combat-overview
       *ngIf="combatStateService.combatEvents$ | async as combatEvents"
       [combatEvents]="combatEvents"
+      [isLoading]="isLoading"
       class="h-full w-full"
     ></app-combat-overview>
     <button (click)="initiateStoppingCombat()" class="text-primary">

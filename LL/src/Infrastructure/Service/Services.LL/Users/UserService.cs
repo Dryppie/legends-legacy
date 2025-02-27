@@ -42,7 +42,8 @@ public class UserService : IUserService
 
     public async Task<AuthInfo> Register(string username, string email, string password)
     {
-        if (_userRepository.DoesUserExist(email)) throw new Exception("User exists already");
+        if (_userRepository.DoesUsernameExist(username)) throw new Exception("Username has already been used.");
+        if (_userRepository.DoesEmailExist(email)) throw new Exception("Email has already been used.");
 
         var user = new AppUser { UserName = username, Email = email };
 
@@ -105,7 +106,7 @@ public class UserService : IUserService
     public async Task<AuthInfo> ConvertGuestToUser(string userId, string username, string email, string password)
     {
         if (!_userRepository.DoesGuestExist(userId)) throw new Exception("User does not exist");
-        if (!_userRepository.DoesUserExist(email)) throw new Exception("Email is already in use");
+        if (!_userRepository.DoesEmailExist(email)) throw new Exception("Email is already in use");
 
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)

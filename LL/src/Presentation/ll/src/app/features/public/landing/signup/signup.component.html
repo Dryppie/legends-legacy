@@ -18,7 +18,11 @@
         class="center w-60 object-contain"
       />
     </div>
-    <form [formGroup]="registerForm" (ngSubmit)="register()" class="mt-2">
+    <form
+      [formGroup]="registerForm"
+      (ngSubmit)="register()"
+      class="mt-2 flex flex-col justify-center"
+    >
       <label
         class="group relative flex h-12 w-full items-center border border-[#494949] bg-gray focus-within:border-[#B57D0B]"
         [ngClass]="{
@@ -98,16 +102,14 @@
           type="password"
           required
           class="relative ml-auto h-full w-full appearance-none bg-gray pr-3 text-right text-white focus:z-10 focus:outline-none sm:text-sm sm:leading-5"
-          formControlName="password"
+          formControlName="confirmPassword"
         />
       </label>
-      <div *ngIf="validatePassword()" class="mt-1 text-sm text-[#D72E34]">
-        Incorrect Password format
-      </div>
-      <div *ngIf="loginError" class="mt-4">
-        <span class="text-blood-primary"
-          >Registration failed. Please try again.</span
-        >
+      <div
+        *ngIf="validateConfirmPassword()"
+        class="mt-1 text-sm text-[#D72E34]"
+      >
+        Password does not match
       </div>
       <div class="mt-12">
         <app-button

@@ -28,6 +28,7 @@ export class CurrentActionComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.characterActionsService.currentAction$.subscribe((action) => {
         this.currentAction = action;
+        this.setPerformingAction();
       }),
     );
   }
@@ -45,48 +46,34 @@ export class CurrentActionComponent implements OnInit, OnDestroy {
     this.characterActionsService.stopCharacterAction();
   }
 
-  getDuration(): number {
+  setPerformingAction() {
     if (!this.currentAction) {
-      return 0;
-    }
-    switch (this.currentAction.characterActionType) {
-      case CharacterActionType.Combat:
-        const updatedAt = new Date(this.currentAction.updatedAt).getTime();
-        const timeUntilFinished = (updatedAt - Date.now()) / 1000;
-        return Math.floor(timeUntilFinished);
-      case CharacterActionType.Gathering:
-        return environment.baseDuration;
-      case CharacterActionType.Crafting:
-        return environment.baseDuration;
-      case CharacterActionType.Idle:
-        return 0;
-      default:
-        return 0;
-    }
-  }
-
-  getPerformingAction(): string {
-    if (!this.currentAction) {
-      return 'Idle';
+      this.performingAction = 'Idle';
+      return;
     }
     if (
       this.currentAction.isDeleted &&
       new Date(this.currentAction.updatedAt).getTime() > Date.now()
     ) {
-      return 'Engaged in Combat - Stopping..';
+      this.performingAction = 'Engaged in Combat - Stopping..';
+      return;
     }
 
     switch (this.currentAction.characterActionType) {
       case CharacterActionType.Combat:
-        return 'Engaged in Combat';
+        this.performingAction = 'Engaged in Combat';
+        break;
       case CharacterActionType.Gathering:
-        return 'Gathering Resources';
+        this.performingAction = 'Gathering Resources';
+        break;
       case CharacterActionType.Crafting:
-        return 'Crafting Items';
+        this.performingAction = 'Crafting Items';
+        break;
       case CharacterActionType.Idle:
-        return 'Idle';
+        this.performingAction = 'Idle';
+        break;
       default:
-        return 'Idle';
+        this.performingAction = 'Idle';
     }
   }
 }

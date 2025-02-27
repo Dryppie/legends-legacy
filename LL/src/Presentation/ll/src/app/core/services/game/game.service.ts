@@ -9,6 +9,7 @@ export class GameService {
   private combatActiveSubject = new BehaviorSubject<boolean>(false);
   combatActive$ = this.combatActiveSubject.asObservable();
 
+  // Handles whether to display the combat screen
   private combatVisibleSubject = new BehaviorSubject<boolean>(false);
   combatVisible$ = this.combatVisibleSubject.asObservable();
 

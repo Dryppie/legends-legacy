@@ -15,9 +15,14 @@ export class ToastService {
   showToast(
     title: string,
     message: string,
-    type: 'success' | 'error' = 'success',
+    isSuccess: boolean,
     position: 't' | 'tl' | 'tr' | 'b' | 'bl' | 'br' = 'tr',
   ) {
-    this.toastComponent?.addToast(title, message, type, position);
+    this.toastComponent?.addToast(
+      title,
+      message,
+      isSuccess ? 'success' : 'error',
+      position,
+    );
   }
 }

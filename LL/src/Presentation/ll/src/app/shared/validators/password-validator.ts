@@ -5,7 +5,7 @@ export function passwordValidator(): ValidatorFn {
     const password = control.value;
 
     // Regular expression for allowed characters
-    const validCharactersRegex = /^[A-Za-z0-9@#!$%&*]+$/;
+    const validCharactersRegex = /^.+$/;
 
     const isValid =
       password &&

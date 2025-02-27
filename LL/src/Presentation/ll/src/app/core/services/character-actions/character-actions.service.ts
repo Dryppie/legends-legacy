@@ -7,6 +7,7 @@ import {
   expand,
   mergeMap,
   of,
+  take,
   timer,
 } from 'rxjs';
 import { ApiService } from '../api/api.service';
@@ -36,8 +37,8 @@ export class CharacterActionsService {
   public displayCurrentAction$ =
     this.displayCurrentActionSubject.asObservable();
 
-  private loadingStartCombatSubject = new BehaviorSubject<boolean>(false);
-  public loadingStartCombat$ = this.loadingStartCombatSubject.asObservable();
+  private loadingCombatActionSubject = new BehaviorSubject<boolean>(false);
+  public loadingCombatAction$ = this.loadingCombatActionSubject.asObservable();
 
   private pollingSubscription: Subscription | null = null;
 
@@ -71,8 +72,9 @@ export class CharacterActionsService {
 
   startCombatAction(startCombatActionRequest: StartCombatActionRequest): void {
     this.setCAT(CharacterActionType.Combat);
-    this.loadingStartCombatSubject.next(true);
+    this.loadingCombatActionSubject.next(true);
 
+    this.gameService.startCombat();
     this.apiService
       .post('CharacterActions/StartCombat', startCombatActionRequest)
       .pipe(
@@ -85,13 +87,13 @@ export class CharacterActionsService {
       .subscribe((success) => {
         if (success) {
           this.getCharacterAction();
-          this.gameService.startCombat();
         }
       });
   }
 
   startGatheringAction(gatheringAction: StartGatheringActionRequest): void {
     this.setCAT(CharacterActionType.Gathering);
+
     this.apiService
       .post('CharacterActions/StartGathering', gatheringAction)
       .pipe(
@@ -107,7 +109,7 @@ export class CharacterActionsService {
   }
 
   stopCharacterAction(): void {
-    this.stopCurrentAction();
+    this.clearCurrentAction();
     this.apiService
       .delete('CharacterActions')
       .pipe(
@@ -124,16 +126,30 @@ export class CharacterActionsService {
     if (action) this.setCAT(action.characterActionType);
   }
 
+  // Helper to wrap API GET call with loading logic.
+  private fetchCharacterAction() {
+    // Turn on loading before making the call
+    return this.apiService.get('CharacterActions').pipe(
+      catchError(() => {
+        this.stopPolling();
+        return EMPTY;
+      }),
+    );
+  }
+
   private startPolling(): void {
     if (this.pollingSubscription && !this.pollingSubscription.closed) {
       // Polling is already active
       return;
     }
-    this.pollingSubscription = this.apiService
-      .get('CharacterActions')
+    this.pollingSubscription = this.fetchCharacterAction()
       .pipe(
         expand((action: CharacterActionDto | null) => {
-          if (!action || action.isDeleted) {
+          if (
+            !action ||
+            action.isDeleted ||
+            action.characterActionType === CharacterActionType.Idle
+          ) {
             this.stopPolling();
             return EMPTY;
           }
@@ -151,7 +167,7 @@ export class CharacterActionsService {
             }
 
             return timer(nextInterval).pipe(
-              mergeMap(() => this.apiService.get('CharacterActions')),
+              mergeMap(() => this.fetchCharacterAction()),
               catchError((error) => {
                 console.error('Polling error:', error);
                 this.stopPolling();
@@ -171,7 +187,7 @@ export class CharacterActionsService {
           }
 
           return timer(nextInterval).pipe(
-            mergeMap(() => this.apiService.get('CharacterActions')),
+            mergeMap(() => this.fetchCharacterAction()),
             catchError((error) => {
               console.error('Polling error:', error);
               this.stopPolling();
@@ -187,7 +203,7 @@ export class CharacterActionsService {
       )
       .subscribe((action: CharacterActionDto | null) => {
         if (!action || action.isDeleted) this.stopPolling();
-
+        this.loadingCombatActionSubject.next(false);
         this.setCurrentAction(action);
 
         if (action?.characterActionType === CharacterActionType.Combat) {
@@ -212,6 +228,7 @@ export class CharacterActionsService {
     if (new Date(action.updatedAt).getTime() < Date.now()) {
       this.displayCurrentActionSubject.next(false);
     } else {
+      // If updatedAt is after now(), we know it's a combat action, and therefore, we hide current action after a dynamic delay
       this.displayCurrentActionSubject.next(true);
       const updatedAt = new Date(action.updatedAt).getTime();
       const now = Date.now();
@@ -219,6 +236,7 @@ export class CharacterActionsService {
 
       setTimeout(() => {
         this.displayCurrentActionSubject.next(false);
+        this.combatService.clearCurrentCombat();
       }, delay);
     }
   }
@@ -230,12 +248,14 @@ export class CharacterActionsService {
     }
   }
 
-  stopCurrentAction(): void {
+  clearCurrentAction(): void {
     this.clearCAT();
     this.stopPolling();
-    this.currentAction$.subscribe((action) => {
-      if (action) action.isDeleted = true;
+    this.currentAction$.pipe(take(1)).subscribe((action) => {
+      if (!action) return;
+      action.isDeleted = true;
       this.setDisplayCurrentAction(action);
+      this.setCurrentAction(action);
     });
   }
 
@@ -255,7 +275,7 @@ export class CharacterActionsService {
   }
 
   private handleLogout(): void {
-    this.stopCurrentAction();
+    this.clearCurrentAction();
     this.setCurrentAction(null);
 
     this.isInitialized = false;

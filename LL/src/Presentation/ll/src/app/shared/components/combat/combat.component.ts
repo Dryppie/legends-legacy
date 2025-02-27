@@ -7,7 +7,6 @@ import { SimpleCombatEntityDto } from '../../models/Dtos/combatResultDto';
 import { Observable, Subscription } from 'rxjs';
 import { CountdownComponent } from '../countdown/countdown.component';
 import { CharacterActionsService } from '../../../core/services/character-actions/character-actions.service';
-import { CombatCountdownComponent } from './combat-countdown/combat-countdown.component';
 import { GameService } from '../../../core/services/game/game.service';
 import { CombatStateService } from '../../../core/state/combat-state/combat-state.service';
 import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
@@ -22,7 +21,6 @@ import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
     NgIf,
     NgStyle,
     CountdownComponent,
-    CombatCountdownComponent,
     AsyncPipe,
   ],
   templateUrl: './combat.component.html',
@@ -32,6 +30,7 @@ export class CombatComponent implements OnInit, OnDestroy {
   combatEvents: CombatEvent[] = [];
   private lastEventsLength = 0;
 
+  isStoppingCombat = false;
   nextCombatIn: Date | null = null;
   stopCombatButtonText: string = 'Stop Combat';
 
@@ -40,11 +39,10 @@ export class CombatComponent implements OnInit, OnDestroy {
   subscriptions: Subscription = new Subscription();
   currentAction$!: Observable<CharacterActionDto | null>;
 
-  isCombatActive = false;
+  // Only set to true if a combat result has been received, or if start combat has been
   displayCombat = false;
-  isDataFetched = false;
+  isCombatVisible$!: Observable<boolean>;
   isLoading = false;
-  isStoppingCombat = false;
 
   constructor(
     private characterActionService: CharacterActionsService,
@@ -53,37 +51,66 @@ export class CombatComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    const playerCharactersSub =
-      this.combatStateService.playerCharacters$.subscribe(
-        (entities) => (this.playerCharacters = entities),
+    this.currentAction$ = this.characterActionService.currentAction$;
+
+    const isLoadingSub =
+      this.characterActionService.loadingCombatAction$.subscribe(
+        (isLoading) => {
+          this.isLoading = isLoading;
+        },
       );
+    this.subscriptions.add(isLoadingSub);
+
+    this.playerCharacters = [
+      {
+        name: '',
+        id: '',
+        health: 100,
+        maxHealth: 100,
+        mana: 100,
+        maxMana: 100,
+        barrier: 0,
+      },
+    ];
+    this.enemyCharacters = [
+      {
+        name: '',
+        id: '',
+        health: 100,
+        maxHealth: 100,
+        mana: 100,
+        maxMana: 100,
+        barrier: 0,
+      },
+    ];
+    const isCombatActiveSub = this.gameService.combatActive$.subscribe(
+      (isCombatActive) => {
+        this.displayCombat = isCombatActive;
+      },
+    );
+    this.subscriptions.add(isCombatActiveSub);
+
+    const playerCharactersSub =
+      this.combatStateService.playerCharacters$.subscribe((entities) => {
+        if (entities.length > 0) {
+          this.playerCharacters = entities;
+        }
+      });
     this.subscriptions.add(playerCharactersSub);
 
     const enemyCharactersSub =
       this.combatStateService.enemyCharacters$.subscribe((entities) => {
-        this.enemyCharacters = entities;
+        if (entities.length > 0) {
+          this.enemyCharacters = entities;
+        }
       });
     this.subscriptions.add(enemyCharactersSub);
-
-    const combatIsActiveSub = this.combatStateService.isCombatActive$.subscribe(
-      (isActive) => (this.isCombatActive = isActive),
-    );
-    this.subscriptions.add(combatIsActiveSub);
-
-    const combatIsLoadingSub =
-      this.characterActionService.loadingStartCombat$.subscribe((isLoading) => {
-        this.isLoading = isLoading;
-      });
-    this.subscriptions.add(combatIsLoadingSub);
-
-    this.currentAction$ = this.characterActionService.currentAction$;
 
     const nextCombatSub = this.combatStateService.nextCombat$.subscribe(
       (time) => {
         if (time == null) return;
         this.nextCombatIn = time;
         this.displayCombat = false;
-        this.isLoading = false;
       },
     );
     this.subscriptions.add(nextCombatSub);
@@ -91,7 +118,6 @@ export class CombatComponent implements OnInit, OnDestroy {
     const combatResultSub = this.combatStateService.combatResult$.subscribe(
       (combatResult) => {
         if (combatResult == null) return;
-        this.isDataFetched = true;
         this.displayCombat = true;
       },
     );
@@ -134,12 +160,14 @@ export class CombatComponent implements OnInit, OnDestroy {
     this.isStoppingCombat = true;
     this.stopCombatButtonText = 'Stopping combat..';
     this.characterActionService.stopCharacterAction();
+    // If we're seeing the "You're already in combat screen", and click to stop combat from there, it should call all the stop logic
+    if (!this.displayCombat) this.stopCombat();
   }
 
   stopCombat() {
     this.subscriptions.unsubscribe();
     this.gameService.endCombat();
-    this.characterActionService.stopCurrentAction();
+    this.characterActionService.clearCurrentAction();
   }
 
   combatEnded() {

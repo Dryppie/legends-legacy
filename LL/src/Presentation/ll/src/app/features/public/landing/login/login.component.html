@@ -18,7 +18,11 @@
       />
     </div>
 
-    <form [formGroup]="loginForm" (ngSubmit)="login()" class="mt-2">
+    <form
+      [formGroup]="loginForm"
+      (ngSubmit)="login()"
+      class="mt-2 flex flex-col justify-center"
+    >
       <label
         class="group relative flex h-12 w-full items-center border border-[#494949] bg-gray focus-within:border-[#B57D0B]"
         [ngClass]="{

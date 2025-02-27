@@ -24,12 +24,12 @@ export class CombatService {
   clearCurrentCombat() {
     this.allSubscriptions.forEach((subscription) => subscription.unsubscribe());
     this.allSubscriptions = [];
+    this.combatStateService.resetCombatState();
   }
 
   startCombatSimulation(characterAction: CharacterActionDto): void {
     if (!characterAction.combatResult) return;
     this.clearCurrentCombat();
-    this.combatStateService.resetCombatState();
 
     this.combatStateService.setNextCombatIn(characterAction.updatedAt);
 

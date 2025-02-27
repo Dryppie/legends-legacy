@@ -1,9 +1,13 @@
 import { Component, Input } from '@angular/core';
 import { Area } from '../../../models/Dtos/regionDto';
 import { MiniButtonComponent } from '../../mini-button/mini-button.component';
-import { StartCombatActionRequest } from '../../../../shared/models/Dtos/characterActionDto';
+import {
+  CharacterActionDto,
+  StartCombatActionRequest,
+} from '../../../../shared/models/Dtos/characterActionDto';
 import { CharacterActionsService } from '../../../../core/services/character-actions/character-actions.service';
 import { NgIf } from '@angular/common';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-combat-area-card',
@@ -14,12 +18,22 @@ import { NgIf } from '@angular/common';
 })
 export class CombatAreaCardComponent {
   @Input() area!: Area;
+  currentAction: CharacterActionDto | null = null;
+  private subscription: Subscription = new Subscription();
 
   constructor(private characterActionService: CharacterActionsService) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.subscription.add(
+      this.characterActionService.currentAction$.subscribe((action) => {
+        this.currentAction = action;
+      }),
+    );
+  }
 
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
 
   specificCard(): void {}
 

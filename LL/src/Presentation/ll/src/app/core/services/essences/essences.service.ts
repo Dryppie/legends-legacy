@@ -53,6 +53,7 @@ export class EssencesService {
           this.toastService.showToast(
             'Essence equipped successfully!',
             'success',
+            true,
           );
         },
         error: (error) => {
@@ -71,6 +72,7 @@ export class EssencesService {
           this.toastService.showToast(
             'Essence removed successfully!',
             'success',
+            true,
           );
         },
         error: (error) => {

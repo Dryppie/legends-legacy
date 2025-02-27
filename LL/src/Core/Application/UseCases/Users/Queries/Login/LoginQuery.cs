@@ -1,13 +1,15 @@
 ﻿using Application.Authorization.Interfaces;
+using Application.Common.Responses;
 using Application.Interfaces.Services.LL;
+using Application.UseCases.Characters.Dtos;
 using Common.Authorization.Security;
 using Common.Exceptions;
 using MediatR;
 
 namespace Application.UseCases.Users.Queries.Login;
-public record LoginQuery(string Email, string Password) : IRequest<Tokens>;
+public record LoginQuery(string Email, string Password) : IRequest<Response<Tokens>>;
 
-public class LoginQueryHandler : IRequestHandler<LoginQuery, Tokens>
+public class LoginQueryHandler : IRequestHandler<LoginQuery, Response<Tokens>>
 {
     private readonly IUserService _userService;
     private readonly IJwtGenerator _jwtGenerator;
@@ -20,7 +22,7 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, Tokens>
         _characterService = characterService;
     }
 
-    public async Task<Tokens> Handle(LoginQuery request, CancellationToken cancellationToken)
+    public async Task<Response<Tokens>> Handle(LoginQuery request, CancellationToken cancellationToken)
     {
         try
         {
@@ -29,11 +31,12 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, Tokens>
 
             user.CharacterId = character.Id.ToString();
 
-            return _jwtGenerator.GenerateTokens(user);
+            var tokens = _jwtGenerator.GenerateTokens(user);
+            return Response<Tokens>.Success(tokens);
         }
         catch
         {
-            throw new NotFoundException();
+            return Response<Tokens>.Fail("Token Error");
         }
     }
 }
