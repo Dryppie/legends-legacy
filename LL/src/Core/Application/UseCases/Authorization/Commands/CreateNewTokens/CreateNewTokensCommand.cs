@@ -1,4 +1,5 @@
 ﻿using Application.Authorization.Interfaces;
+using Application.Common.Responses;
 using Common.Authorization.Security;
 using MediatR;
 
@@ -7,9 +8,9 @@ namespace Application.UseCases.Authorization.Commands.CreateNewTokens;
 /// Generate new tokens
 /// </summary>
 /// <param name="Token"></param>
-public record CreateNewTokensCommand(string RefreshToken) : IRequest<Tokens>;
+public record CreateNewTokensCommand(string RefreshToken) : IRequest<Response<Tokens>>;
 
-public class CreateNewTokensCommandHandler : IRequestHandler<CreateNewTokensCommand, Tokens>
+public class CreateNewTokensCommandHandler : IRequestHandler<CreateNewTokensCommand, Response<Tokens>>
 {
     private readonly IJwtGenerator _jwtGenerator;
 
@@ -18,8 +19,9 @@ public class CreateNewTokensCommandHandler : IRequestHandler<CreateNewTokensComm
         _jwtGenerator = jwtGenerator;
     }
 
-    public Task<Tokens> Handle(CreateNewTokensCommand request, CancellationToken cancellationToken)
+    public async Task<Response<Tokens>> Handle(CreateNewTokensCommand request, CancellationToken cancellationToken)
     {
-        return Task.FromResult(_jwtGenerator.RefreshTokens(request.RefreshToken));
+        var tokens = await Task.FromResult(_jwtGenerator.RefreshTokens(request.RefreshToken));
+        return Response<Tokens>.Success(tokens);
     }
 }

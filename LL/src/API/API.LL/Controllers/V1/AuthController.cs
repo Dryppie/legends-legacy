@@ -99,7 +99,7 @@ public class AuthController : BaseController
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public ActionResult<Tokens> CreateNewTokens()
+    public async Task<ActionResult<Response<Tokens>>> CreateNewTokens()
     {
         var refreshToken = HttpContext.Request.Cookies["RefreshToken"];
 
@@ -108,18 +108,18 @@ public class AuthController : BaseController
 
         try
         {
-            var result = Mediator.Send(new CreateNewTokensCommand(refreshToken));
-            var tokens = result.Result;
+            var tokens = await Mediator.Send(new CreateNewTokensCommand(refreshToken));
+            if (tokens.Data == null) return BadRequest(tokens);
 
             var cookies = new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>("AccessToken", tokens.AccessToken),
-                new KeyValuePair<string, string>("RefreshToken", tokens.RefreshToken)
+                new KeyValuePair<string, string>("AccessToken", tokens.Data.AccessToken),
+                new KeyValuePair<string, string>("RefreshToken", tokens.Data.RefreshToken)
             };
 
             Response.Cookies.Append(cookies.ToArray(), GetCookieOptions());
 
-            return Ok(cookies);
+            return Ok(tokens);
         }
         catch (InvalidRefreshTokenException)
         {
@@ -158,7 +158,7 @@ public class AuthController : BaseController
         Secure = true,
         HttpOnly = true,
         Path = "/",
-        //Domain = "hi", //_configuration["HostedDomain"], // the top level domain such as bupl.dk or webtestbupl.dk
+        //Domain = _configuration["HostedDomain"], // the top level domain 
         SameSite = IsLocal() ? SameSiteMode.None : SameSiteMode.Strict,
         IsEssential = true,
         Expires = DateTimeOffset.UtcNow.AddYears(1),

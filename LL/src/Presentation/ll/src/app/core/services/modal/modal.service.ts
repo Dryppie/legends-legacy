@@ -10,9 +10,14 @@ export class ModalService {
   private absorbEssenceModalState = new BehaviorSubject<Essence[] | null>(null);
   private removeEssenceModalState = new BehaviorSubject<Essence[] | null>(null);
 
+  private editCombatFiltersModalState = new BehaviorSubject<boolean>(false);
+
   essenceModalState$ = this.essenceModalState.asObservable();
   absorbEssenceModalState$ = this.absorbEssenceModalState.asObservable();
   removeEssenceModalState$ = this.removeEssenceModalState.asObservable();
+
+  editCombatFiltersModalState$ =
+    this.editCombatFiltersModalState.asObservable();
 
   toggleEssenceModal(essence: Essence | null = null): void {
     this.essenceModalState.next(essence);
@@ -24,5 +29,9 @@ export class ModalService {
 
   toggleRemoveEssenceModal(equippedEssences: Essence[] | null = null): void {
     this.removeEssenceModalState.next(equippedEssences);
+  }
+
+  toggleCombatFiltersModal(state: boolean = false): void {
+    this.editCombatFiltersModalState.next(state);
   }
 }

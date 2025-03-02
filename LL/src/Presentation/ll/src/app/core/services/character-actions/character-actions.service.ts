@@ -7,6 +7,7 @@ import {
   expand,
   mergeMap,
   of,
+  retry,
   take,
   timer,
 } from 'rxjs';
@@ -128,10 +129,24 @@ export class CharacterActionsService {
 
   // Helper to wrap API GET call with loading logic.
   private fetchCharacterAction() {
-    // Turn on loading before making the call
     return this.apiService.get('CharacterActions').pipe(
-      catchError(() => {
+      retry({
+        count: 3, // Retry up to 3 times (total attempts = 4)
+        delay: (error, retryCount) => {
+          // Exponential backoff: 0.5s, 1s, 2s...
+          const backoffTime = Math.pow(2, retryCount) * 500;
+          console.warn(
+            `Retry attempt #${retryCount}. Backing off for ${backoffTime}ms.`,
+          );
+          return timer(backoffTime);
+        },
+
+        resetOnSuccess: true, // If true, a successful request resets the retry counter
+      }),
+      catchError((error) => {
+        console.error('Error fetching character action:', error);
         this.stopPolling();
+        // Returning EMPTY will terminate the polling observable
         return EMPTY;
       }),
     );
@@ -214,6 +229,13 @@ export class CharacterActionsService {
       });
   }
 
+  stopPolling(): void {
+    if (this.pollingSubscription) {
+      this.pollingSubscription.unsubscribe();
+      this.pollingSubscription = null;
+    }
+  }
+
   setDisplayCurrentAction(action: CharacterActionDto | null) {
     if (!action) {
       this.displayCurrentActionSubject.next(false);
@@ -239,13 +261,6 @@ export class CharacterActionsService {
         this.combatService.clearCurrentCombat();
         this.gameService.hideCombat();
       }, delay);
-    }
-  }
-
-  stopPolling(): void {
-    if (this.pollingSubscription) {
-      this.pollingSubscription.unsubscribe();
-      this.pollingSubscription = null;
     }
   }
 

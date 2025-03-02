@@ -6,6 +6,7 @@ import { Essence } from '../../models/essence';
 import { EssenceModalComponent } from './essence-modals/essence-modal/essence-modal.component';
 import { AbsorbEssenceModalComponent } from './essence-modals/absorb-essence-modal/absorb-essence-modal.component';
 import { RemoveEssenceModalComponent } from './essence-modals/remove-essence-modal/remove-essence-modal.component';
+import { CombatFiltersModalComponent } from './combat-modals/combat-filters-modal/combat-filters-modal.component';
 
 @Component({
   selector: 'app-modal-container',
@@ -15,6 +16,7 @@ import { RemoveEssenceModalComponent } from './essence-modals/remove-essence-mod
     EssenceModalComponent,
     AbsorbEssenceModalComponent,
     RemoveEssenceModalComponent,
+    CombatFiltersModalComponent,
   ],
   templateUrl: './modal-container.component.html',
   styleUrl: './modal-container.component.css',
@@ -25,6 +27,7 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
   essence: Essence | null = null;
   absorbEssence: Essence[] | null = null;
   removeEssence: Essence[] | null = null;
+  filterCombat: boolean = false;
 
   constructor(private modalService: ModalService) {}
 
@@ -46,6 +49,12 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
         (data: Essence[] | null) => (this.removeEssence = data),
       ),
     );
+    this.subscriptions.push(
+      this.modalService.editCombatFiltersModalState$.subscribe((state) => {
+        this.filterCombat = state;
+        console.log(this.filterCombat);
+      }),
+    );
   }
 
   ngOnDestroy(): void {
@@ -55,7 +64,12 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
   // This can be as simple as checking if any modal is open
   // (here, we just have the essenceData for example).
   get isModalOpen(): boolean {
-    return !!this.essence || !!this.absorbEssence || !!this.removeEssence;
+    return (
+      !!this.essence ||
+      !!this.absorbEssence ||
+      !!this.removeEssence ||
+      !!this.filterCombat
+    );
   }
 
   onOverlayClick(event: MouseEvent) {
@@ -66,6 +80,7 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
       this.onEssenceModalClose();
       this.onAbsorbEssenceModalClose();
       this.onRemoveEssenceModalClose();
+      this.onEditCombatFiltersModalClose();
     }
   }
 
@@ -79,5 +94,9 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
 
   onRemoveEssenceModalClose() {
     this.modalService.toggleRemoveEssenceModal();
+  }
+
+  onEditCombatFiltersModalClose() {
+    this.modalService.toggleCombatFiltersModal();
   }
 }

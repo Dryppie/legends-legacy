@@ -3,7 +3,7 @@
   *ngIf="isModalOpen"
   (click)="onOverlayClick($event)"
 >
-  <div class="w-full sm:w-1/3" (click)="$event.stopPropagation()">
+  <div class="w-full sm:w-2/3 lg:w-2/5" (click)="$event.stopPropagation()">
     <app-essence-modal
       *ngIf="essence"
       [essence]="essence"
@@ -21,5 +21,10 @@
       [essences]="removeEssence"
       (close)="onRemoveEssenceModalClose()"
     ></app-remove-essence-modal>
+
+    <app-combat-filters-modal
+      *ngIf="filterCombat"
+      (close)="onEditCombatFiltersModalClose()"
+    ></app-combat-filters-modal>
   </div>
 </div>
