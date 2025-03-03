@@ -42,7 +42,7 @@
           <h3 class="cursor-pointer pl-2 text-primary">{{ activeLabel }}</h3>
         </div>
         <div
-          class="z-10 flex flex-col text-nowrap rounded-md border bg-texture p-2 text-[#6D6D6D] sm:flex-row sm:items-center sm:space-x-6 sm:border-none sm:bg-none sm:p-6"
+          class="z-10 flex flex-col text-nowrap rounded-md border bg-texture p-2 text-[#a1a1a1] sm:flex-row sm:items-center sm:space-x-6 sm:border-none sm:bg-none sm:p-6"
           *ngIf="(showList && isScreenSmall) || !isScreenSmall"
         >
           <app-navbutton
@@ -55,13 +55,13 @@
 
           <button
             (click)="logout()"
-            class="mt-16 flex space-x-1 pl-2 text-[#6D6D6D] sm:hidden"
+            class="mt-16 flex space-x-1 pl-2 text-[#a1a1a1] sm:hidden"
           >
             <img [src]="'icons/InactivePlus.svg'" class="max-h-8 max-w-8" />
             <h3>Log out</h3>
           </button>
         </div>
-        <button (click)="logout()" class="hidden pr-4 text-[#6D6D6D] sm:flex">
+        <button (click)="logout()" class="hidden pr-4 text-[#a1a1a1] sm:flex">
           <img [src]="'icons/InactivePlus.svg'" class="max-h-8 max-w-8" />
           <h3>Log out</h3>
         </button>

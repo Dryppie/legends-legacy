@@ -62,8 +62,16 @@ export class SidebarComponent implements OnInit {
       this.tabs = Sidebar;
     });
 
+    const activeSidebarItem = this.tabs
+      .flatMap((tab) => tab.items.map((item) => item))
+      .filter((item) => url.includes(item.id));
+
     this.setActiveTab(this.tabs[0]?.label || '');
-    this.navigateTo((this.tabs[0].items[0] as SidebarItem).id || '');
+    this.navigateTo(
+      (activeSidebarItem[0] as SidebarItem)?.id ||
+        (this.tabs[0].items[0] as SidebarItem).id ||
+        '',
+    ); // Navigating to a Navbar item displays the first item in the sidebar. If you simply refresh the page, display the sidebar item you're already on
   }
 
   setActiveTab(tabLabel: string) {

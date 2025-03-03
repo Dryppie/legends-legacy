@@ -13,20 +13,7 @@ export class SidebarService {
 
   constructor(private router: Router) {
     // Listen for navigation events to set the sidebar content initially
-    this.updateContent(this.getContentFromRoute());
-  }
-
-  private getContentFromRoute(): string {
-    const currentRoute = this.router.url;
-    if (currentRoute.includes('character')) return 'character';
-    if (currentRoute.includes('professions')) return 'professions';
-    if (currentRoute.includes('world')) return 'world';
-    if (currentRoute.includes('team')) return 'team';
-    if (currentRoute.includes('city')) return 'city';
-    if (currentRoute.includes('dungeons')) return 'dungeons';
-    if (currentRoute.includes('quests')) return 'quests';
-    if (currentRoute.includes('guild')) return 'guild';
-    return 'character';
+    this.updateContent(this.router.url);
   }
 
   updateContent(content: string) {

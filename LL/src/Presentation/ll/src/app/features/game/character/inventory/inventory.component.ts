@@ -35,7 +35,7 @@ export class InventoryComponent implements OnInit {
       items: [],
     },
     {
-      label: 'Other',
+      label: 'Essences',
       items: [],
     },
   ];
@@ -47,6 +47,7 @@ export class InventoryComponent implements OnInit {
 
   ngOnInit(): void {
     this.getInventory();
+    this.setActiveTab(this.tabs[0]?.label || '');
   }
 
   getInventory(): void {
@@ -61,6 +62,37 @@ export class InventoryComponent implements OnInit {
         console.error('Error fetching inventory:', error);
       },
     });
+  }
+
+  setActiveTab(tabLabel: string) {
+    this.activeTab = tabLabel;
+  }
+
+  get filteredItems(): InventoryItem[] {
+    switch (this.activeTab) {
+      case 'All':
+        return this.items;
+
+      case 'Equipment':
+        return this.items.filter(
+          (inventoryItem) => inventoryItem.item.itemType === 'Equipment',
+        );
+
+      case 'Resources':
+        return this.items.filter(
+          (inventoryItem) => inventoryItem.item.itemType === 'Material',
+        );
+
+      case 'Essences':
+        return this.items.filter(
+          (inventoryItem) => inventoryItem.item.itemType === 'Essence',
+        );
+
+      default:
+        // Fallback if no matching case; you can decide what makes sense
+        // E.g., return an empty array, or return all items
+        return this.items;
+    }
   }
 
   get tabLabels(): string[] {

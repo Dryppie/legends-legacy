@@ -7,13 +7,18 @@
   ></app-default-header>
   <!--inventory-->
   <div class="flex h-full flex-col overflow-hidden rounded-md bg-black/40 pt-2">
-    <app-tab [tabs]="tabLabels" class="flex-none"></app-tab>
+    <app-tab
+      [tabs]="tabLabels"
+      [activeTab]="activeTab"
+      (tabSelected)="setActiveTab($event)"
+      class="flex-none"
+    ></app-tab>
 
     <div
       class="mb-2 grid h-full grid-cols-3 justify-items-center gap-2 overflow-y-auto pt-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-9 2xl:grid-cols-12"
     >
       <app-inventory-slot
-        *ngFor="let inventoryItem of items"
+        *ngFor="let inventoryItem of filteredItems"
         [inventoryItem]="inventoryItem"
       ></app-inventory-slot>
       <app-inventory-slot
