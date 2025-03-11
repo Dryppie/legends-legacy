@@ -9,7 +9,7 @@ public class Character : Entity
     public AppUser User { get; set; } = null!;
     public string UserId { get; set; } = string.Empty;
     public CharacterAction? CharacterAction { get; set; }
-    public int Experience { get; set; } = 0;
+    public float Experience { get; set; } = 0;
     [NotMapped]
     public float ExperienceUntilNextLevel { get; set; }
     public int Gold { get; set; } = 0;

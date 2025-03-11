@@ -1,5 +1,4 @@
 ﻿using Domain.Models.Inventories;
-using Domain.Models.Items;
 using MediatR;
 
 namespace Application.UseCases.Inventories.Events;

@@ -52,7 +52,6 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.modalService.editCombatFiltersModalState$.subscribe((state) => {
         this.filterCombat = state;
-        console.log(this.filterCombat);
       }),
     );
   }

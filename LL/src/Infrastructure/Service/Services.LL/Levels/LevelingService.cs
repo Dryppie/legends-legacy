@@ -1,10 +1,22 @@
-﻿using Domain.Helpers.Constants;
+﻿using Application.UseCases.Characters.Events;
+using Domain.Helpers.Constants;
+using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
+using Domain.Models.Entities.NPCs;
+using MediatR;
+using Services.LL.Interfaces;
 
-namespace Domain.Extensions;
-public static class CharacterExtensions
+namespace Services.LL.Levels;
+public class LevelingService : ILevelingService
 {
-    public static void UpdateCharacterLevel(this Character character)
+    private readonly IPublisher _publisher;
+    
+    public LevelingService(IPublisher publisher)
+    {
+        _publisher = publisher;
+    }
+
+    public async void UpdateCharacterLevel(Character character)
     {
         var xpRequired = EntityLevelConstants.XP_REQUIRED(character.Level);
 
@@ -17,6 +29,7 @@ public static class CharacterExtensions
             xpRequired = EntityLevelConstants.XP_REQUIRED(character.Level);
 
             //TODO: Add Publish Event to notify listeners that listen to level ups
+            await _publisher.Publish(new CharacterLevelUpEvent(character.Id, character.Level));
         }
     }
 }

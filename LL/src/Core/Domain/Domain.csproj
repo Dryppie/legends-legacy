@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Extensions\" />
     <Folder Include="Models\Abilities\Usages\" />
     <Folder Include="Models\Regions\Dungeons\" />
     <Folder Include="Models\Regions\Raids\" />
