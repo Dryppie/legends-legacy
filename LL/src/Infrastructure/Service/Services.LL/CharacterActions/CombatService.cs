@@ -2,7 +2,6 @@
 using Application.UseCases.Inventories.Events;
 using Common.Helpers;
 using Domain.Components.Attributes;
-using Domain.Extensions;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
@@ -13,18 +12,21 @@ using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
 using MediatR;
 using Services.LL.Combat;
+using Services.LL.Interfaces;
 
 namespace Services.LL.CharacterActions;
 public class CombatService : ICombatService
 {
     private readonly IEntityService _entityService;
+    private readonly ILevelingService _levelingService;
     private readonly ILootService _lootService;
     private readonly ISpawningService _spawningService;
     private readonly IPublisher _publisher;
 
-    public CombatService(IEntityService entityService, ILootService lootService, ISpawningService spawningService, IPublisher publisher)
+    public CombatService(IEntityService entityService, ILevelingService levelingService, ILootService lootService, ISpawningService spawningService, IPublisher publisher)
     {
         _entityService = entityService;
+        _levelingService = levelingService;
         _lootService = lootService;
         _spawningService = spawningService;
         _publisher = publisher;
@@ -198,7 +200,7 @@ public class CombatService : ICombatService
         foreach (var character in characters)
         {
             character.Experience += totalExp / characters.Count();
-            character.UpdateCharacterLevel();
+            _levelingService.UpdateCharacterLevel(character);
         }
         await _entityService.UpdateEntities(playerCharacters, cancellationToken);
     }

@@ -12,6 +12,7 @@ using Services.LL.Essences;
 using Services.LL.Gatherings;
 using Services.LL.Interfaces;
 using Services.LL.Inventories;
+using Services.LL.Levels;
 using Services.LL.Loots;
 using Services.LL.LootTables;
 using Services.LL.Regions;
@@ -45,6 +46,8 @@ public static class DependencyInjection
 
         services.AddScoped<IGatheringService, GatheringService>();
         
+        services.AddScoped<ILevelingService, LevelingService>();
+
         services.AddScoped<ILootService, LootServices>();
         services.AddScoped<ILootTableService, LootTableService>();
         services.AddScoped<IInventoryService, InventoryService>();
