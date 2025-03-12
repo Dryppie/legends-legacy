@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250223202751_BaseMigration")]
+    [Migration("20250312060029_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -630,8 +630,8 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Entities.Entity");
 
-                    b.Property<int>("Experience")
-                        .HasColumnType("int");
+                    b.Property<float>("Experience")
+                        .HasColumnType("real");
 
                     b.Property<int>("Gold")
                         .HasColumnType("int");
