@@ -108,7 +108,7 @@ public class CharacterRepository : ICharacterRepository
             {
                 Name = c.Name,
                 Level = c.Level,
-                Experience = c.Experience
+                Experience = (int)c.Experience
             })
             .ToListAsync(cancellationToken);
 

@@ -7,9 +7,9 @@ public class CharacterLevelUpEventHandler : INotificationHandler<CharacterLevelU
 {
     private readonly List<LevelTrigger> _triggers;
 
-    public CharacterLevelUpEventHandler(List<LevelTrigger> triggers)
+    public CharacterLevelUpEventHandler()
     {
-        _triggers = triggers;
+        //_triggers = triggers;
     }
 
     public Task Handle(CharacterLevelUpEvent notification, CancellationToken cancellationToken)
