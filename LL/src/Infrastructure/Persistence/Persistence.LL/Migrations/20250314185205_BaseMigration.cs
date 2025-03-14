@@ -425,27 +425,30 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "EntityEssence",
+                name: "EssenceSlots",
                 columns: table => new
                 {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SlotType = table.Column<int>(type: "int", nullable: false),
+                    SlotState = table.Column<int>(type: "int", nullable: false),
                     EntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     EssenceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EntityEssence", x => new { x.EntityId, x.EssenceId });
+                    table.PrimaryKey("PK_EssenceSlots", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_EntityEssence_Entities_EntityId",
+                        name: "FK_EssenceSlots_Entities_EntityId",
                         column: x => x.EntityId,
                         principalTable: "Entities",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_EntityEssence_Essences_EssenceId",
+                        name: "FK_EssenceSlots_Essences_EssenceId",
                         column: x => x.EssenceId,
                         principalTable: "Essences",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -602,8 +605,13 @@ namespace Persistence.LL.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_EntityEssence_EssenceId",
-                table: "EntityEssence",
+                name: "IX_EssenceSlots_EntityId",
+                table: "EssenceSlots",
+                column: "EntityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EssenceSlots_EssenceId",
+                table: "EssenceSlots",
                 column: "EssenceId");
 
             migrationBuilder.CreateIndex(
@@ -673,7 +681,7 @@ namespace Persistence.LL.Migrations
                 name: "EntityAttributes");
 
             migrationBuilder.DropTable(
-                name: "EntityEssence");
+                name: "EssenceSlots");
 
             migrationBuilder.DropTable(
                 name: "GatheringNodes");

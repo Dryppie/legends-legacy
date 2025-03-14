@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Services.LL;
+﻿using Application.Interfaces.Services.LL.Essences;
 using MediatR;
 
 namespace Application.UseCases.Essences.Commands.EquipEssence;

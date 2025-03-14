@@ -1,4 +1,4 @@
-﻿using Domain.Interfaces;
+﻿using Domain.Interfaces.Abilities;
 
 namespace Domain.Models.Abilities.Effects.Conditions;
 // Effects default to this if they have no condition specified

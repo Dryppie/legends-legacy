@@ -1,5 +1,4 @@
-﻿using Domain.Interfaces;
-using Domain.Models.Abilities;
+﻿using Domain.Models.Abilities;
 using Domain.Models.Abilities.Effects;
 using Domain.Models.Abilities.Effects.Conditions;
 using Domain.Models.Abilities.Effects.Intervals;
@@ -11,6 +10,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Domain.Models.Abilities.Effects.EffectModifications;
 using Domain.Models.Attributes.Modifiers;
+using Domain.Interfaces.Abilities;
 
 namespace Common.Utilities;
 public class EffectConverter : JsonConverter<EffectDefinition>

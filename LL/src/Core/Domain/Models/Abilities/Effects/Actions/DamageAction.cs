@@ -1,4 +1,4 @@
-﻿using Domain.Interfaces;
+﻿using Domain.Interfaces.Abilities;
 using Domain.Interfaces.Combat;
 using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Attributes;

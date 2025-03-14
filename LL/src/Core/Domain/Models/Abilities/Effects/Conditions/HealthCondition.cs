@@ -1,4 +1,4 @@
-﻿using Domain.Interfaces;
+﻿using Domain.Interfaces.Abilities;
 using Domain.Models.Attributes;
 
 namespace Domain.Models.Abilities.Effects.Conditions;

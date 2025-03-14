@@ -1,5 +1,5 @@
 ﻿using Application.Interfaces.Services.LL;
-using Common.Helpers;
+using Common.Helpers.Essences;
 using Domain.Components.Attributes;
 using Domain.Helpers;
 using Domain.Models.Attributes;
@@ -103,39 +103,6 @@ public class SimulatorService : ISimulatorService
 
         Console.WriteLine($"Draws : {numberOfDraws}");
         Console.WriteLine($"Time  : {end - start}");
-    }
-
-    private static List<Guid> SelectRandom(List<Guid> enemyTeam)
-    {
-        int randomCount = GetWeightedRandom();
-        return enemyTeam.OrderBy(x => Guid.NewGuid()).Take(randomCount).ToList();
-    }
-
-    private static int GetWeightedRandom()
-    {
-        Random rand = new();
-        int randomValue = rand.Next(0, 100);
-
-        if (randomValue < 25) // 25% chance
-            return 1;
-        else if (randomValue < 80) // 55% chance
-            return 2;
-        else if (randomValue < 95) // 15% chance
-            return 3;
-        else // 5% chance
-            return 4;
-    }
-
-    private static List<SimpleCombatEntity> CreateSimpleCombatEntities(List<Entity> playerCharacters)
-    {
-        var combatEntities = new List<SimpleCombatEntity>();
-
-        foreach (var entity in playerCharacters)
-        {
-            combatEntities.Add(new SimpleCombatEntity(entity.Id.ToString(), entity.Name, (int)entity.BaseCombatAttributes[AttributeType.MaxHealth], (int)entity.BaseCombatAttributes[AttributeType.MaxMana], (int)entity.BaseCombatAttributes[AttributeType.Barrier]));
-        }
-
-        return combatEntities;
     }
 
     private static List<Entity> GeneratePlayerTeam(int teamSize, int tier)

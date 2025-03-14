@@ -1,6 +1,6 @@
 ﻿using Application.Common.Interfaces;
 using Common.Exceptions;
-using Common.Helpers;
+using Common.Helpers.Essences;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Microsoft.EntityFrameworkCore;
@@ -29,7 +29,7 @@ public class InventoryRepository : IInventoryRepository
         {
             if (inventoryItem.Item is EssenceItem essenceItem && essenceItem.Essence != null)
             {
-                essenceItem.Essence = EssenceLoader.Instance.LoadAbilitiesForEssence(essenceItem.Essence);
+                EssenceLoader.Instance.LoadAbilitiesForEssence(essenceItem.Essence);
             }
         }
 

@@ -40,9 +40,9 @@ public class CharacterService : ICharacterService
     public async Task<Character> GetMyCharacterOverviewAsync(Guid CurrentUserId, CancellationToken cancellationToken)
     {
         var character = await _characterRepository.GetCharacterOverviewByCharacterIdAsync(CurrentUserId);
-        foreach (var essence in character.EquippedEssences)
+        foreach (var essence in character.EssenceSlots.Where(es => es.OccupiedEssence != null).Select(es => es.OccupiedEssence))
         {
-            essence.Active.Description = _essenceDescriptionService.BuildAbilityDescription(essence.Active, [.. character.BaseAttributes]);
+            essence!.Active.Description = _essenceDescriptionService.BuildAbilityDescription(essence.Active, [.. character.BaseAttributes]);
             essence.Passive.Description = _essenceDescriptionService.BuildAbilityDescription(essence.Passive, [.. character.BaseAttributes]);
         }
         //character.CharacterNextLevelCalculator();

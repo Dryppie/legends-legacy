@@ -2,6 +2,7 @@ import { NgFor } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { Essence } from '../../../models/essence';
 import { ModalService } from '../../../../core/services/modal/modal.service';
+import { EssenceSlot } from '../../../models/essenceSlot';
 
 @Component({
   selector: 'app-equipped-essences',
@@ -11,7 +12,7 @@ import { ModalService } from '../../../../core/services/modal/modal.service';
   styleUrl: './equipped-essences.component.css',
 })
 export class EquippedEssencesComponent {
-  @Input() essences: Essence[] = [];
+  @Input() essenceSlots: EssenceSlot[] = [];
 
   constructor(private modalService: ModalService) {}
 

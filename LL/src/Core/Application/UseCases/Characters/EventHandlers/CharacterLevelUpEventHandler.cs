@@ -9,23 +9,36 @@ public class CharacterLevelUpEventHandler : INotificationHandler<CharacterLevelU
 
     public CharacterLevelUpEventHandler()
     {
-        //_triggers = triggers;
+        //_triggers = LevelTriggerLoader.Instance.GetLevelTriggers();
     }
 
-    public Task Handle(CharacterLevelUpEvent notification, CancellationToken cancellationToken)
+    public async Task Handle(CharacterLevelUpEvent notification, CancellationToken cancellationToken)
     {
         int newLevel = notification.Level;
         Guid characterId = notification.CharacterId;
         
-        var validTriggers = _triggers.Where(t => t.Condition(newLevel));
+        //var validTriggers = _triggers.Where(t => t.Condition.IsSatisfied(newLevel));
 
-        // Check each trigger
-        foreach (var trigger in validTriggers)
+        //// Check each trigger
+        //foreach (var trigger in validTriggers)
+        //{
+        //    // Fire the configured action
+        //    await trigger.Action.Execute(characterId);
+        //}
+
+        if (newLevel % 10  == 0 && newLevel <= 100)
         {
-            // Fire the configured action
-            trigger.Action(characterId);
+
         }
-        // TODO: Temporary
-        return Task.CompletedTask;
+
+        if (newLevel % 30 == 90)
+        {
+
+        }
+
+        //if (newLevel % 10 == 0)
+        //{
+
+        //}
     }
 }

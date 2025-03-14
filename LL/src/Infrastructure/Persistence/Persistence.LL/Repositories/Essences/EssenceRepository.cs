@@ -1,6 +1,7 @@
 ﻿using Application.Common.Interfaces;
 using Common.Exceptions;
 using Domain.Models.Essences;
+using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Items;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,7 +17,8 @@ public class EssenceRepository : IEssenceRepository
     public async Task<bool> EquipEssence(Guid characterId, Guid essenceItemId, CancellationToken cancellationToken)
     {
         var character = await _context.Characters
-            .Include(c => c.EquippedEssences)
+            .Include(c => c.EssenceSlots)
+                .ThenInclude(es => es.OccupiedEssence)
             .Include(c => c.Inventory)
                 .ThenInclude(inv => inv.InventoryItems)
                     .ThenInclude(ii => ii.Item)
@@ -44,14 +46,20 @@ public class EssenceRepository : IEssenceRepository
         }
 
         // Check if the character has already equipped this essence
-        if (character.EquippedEssences.Any(e => e.Id == essence.Id))
+        if (character.EssenceSlots.Any(es => es.OccupiedEssence?.Id == essence.Id))
         {
             // You can throw an exception, or return false, or handle it however you'd like.
             throw new InvalidOperationException($"Essence with ID {essence.Id} is already equipped.");
         }
 
-        // 4) Add the essence to the character's EquippedEssences
-        character.EquippedEssences.Add(essence);
+        // Check if all active slots already contain an essence
+        if (character.EssenceSlots.Where(es => es.SlotState == SlotState.Active).All(es => es.OccupiedEssence != null))
+        {
+            throw new InvalidOperationException($"You do not have any available Essence Slot to equip Essence with ID {essence.Id}.");
+        }
+
+        // 4) Add the essence to the character's first EssenceSlot that is both Active and has no occupied Essence
+        character.EssenceSlots.Where(es => es.SlotState == SlotState.Active && es.OccupiedEssence == null).First().OccupiedEssence = essence;
 
         // Decrease the quantity of the inventory item
         if (inventoryItem.Quantity > 1)
@@ -72,26 +80,28 @@ public class EssenceRepository : IEssenceRepository
     public async Task<bool> DeleteEquippedEssence(Guid characterId, Guid essenceId, CancellationToken cancellationToken)
     {
         var character = await _context.Characters
-            .Include(c => c.EquippedEssences)
+            .Include(c => c.EssenceSlots)
+                .ThenInclude(es => es.OccupiedEssence)
             .FirstOrDefaultAsync(c => c.Id.Equals(characterId), cancellationToken);
 
         NotFoundException.ThrowIfNull(character, nameof(character), characterId);
 
-        var essenceToDelete = character.EquippedEssences.First(essence => essence.Id.Equals(essenceId));
+        character.EssenceSlots.First(es => es.OccupiedEssence != null && es.OccupiedEssence.Id.Equals(essenceId)).OccupiedEssence = null;
 
-        NotFoundException.ThrowIfNull(essenceToDelete, nameof(essenceToDelete), essenceId);
+        //NotFoundException.ThrowIfNull(essenceSlotToEmpty, nameof(essenceSlotToEmpty), essenceId);
 
-        var removed = character.EquippedEssences.Remove(essenceToDelete);
+        //var removed = character.EssenceSlots.Remove(essenceToDelete);
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return removed; // Return true if it was successfully removed
+        return true; // Return true if it was successfully removed
     }
 
     public async Task<EquippedEssencesAndInventoryEssences> GetEquippedEssencesAndInventoryEssences(Guid characterId, CancellationToken cancellationToken)
     {
         var character = await _context.Characters
-            .Include(c => c.EquippedEssences)
+            .Include(c => c.EssenceSlots)
+                .ThenInclude(es => es.OccupiedEssence)
             .Include(c => c.Inventory)
                 .ThenInclude(inv => inv.InventoryItems)
                     .ThenInclude(ii => ii.Item)
@@ -102,7 +112,7 @@ public class EssenceRepository : IEssenceRepository
 
         var equippedEssencesAndInventoryEssences = new EquippedEssencesAndInventoryEssences
         {
-            EquippedEssences = [.. character.EquippedEssences],
+            EquippedEssences = [.. character.EssenceSlots.Where(es => es.OccupiedEssence != null).Select(es => es.OccupiedEssence)],
             InventoryEssences = [.. character.Inventory.InventoryItems.Where(ii => ii.Item is EssenceItem).Select(ii => (ii.Item as EssenceItem).Essence)]
         };
 

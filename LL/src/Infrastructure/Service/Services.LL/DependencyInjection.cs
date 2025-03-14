@@ -1,5 +1,6 @@
 ﻿using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Essences;
 using Microsoft.Extensions.DependencyInjection;
 using Services.LL._Simulator;
 using Services.LL.Attributes;

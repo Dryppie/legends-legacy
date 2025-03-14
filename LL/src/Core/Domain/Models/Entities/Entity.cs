@@ -1,7 +1,7 @@
 ﻿using Domain.Models.Abilities;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
-using Domain.Models.Essences;
+using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Items.Equipments;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -11,7 +11,7 @@ public abstract class Entity
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public ICollection<EntityAttribute> BaseAttributes { get; set; } = [];
-    public ICollection<Essence> EquippedEssences { get; set; } = [];
+    public ICollection<EssenceSlot> EssenceSlots { get; set; } = [];
     [NotMapped]
     public List<string> AbilityIds { get; set; } = [];
     [NotMapped]

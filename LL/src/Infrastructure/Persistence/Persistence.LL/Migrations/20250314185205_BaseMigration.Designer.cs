@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250312060029_BaseMigration")]
+    [Migration("20250314185205_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -140,6 +140,33 @@ namespace Persistence.LL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Essences");
+                });
+
+            modelBuilder.Entity("Domain.Models.Essences.EssenceSlots.EssenceSlot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("EssenceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("SlotState")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SlotType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId");
+
+                    b.HasIndex("EssenceId");
+
+                    b.ToTable("EssenceSlots");
                 });
 
             modelBuilder.Entity("Domain.Models.GatheringNodes.GatheringNode", b =>
@@ -442,21 +469,6 @@ namespace Persistence.LL.Migrations
                     b.ToTable("Transaction");
                 });
 
-            modelBuilder.Entity("EntityEssence", b =>
-                {
-                    b.Property<Guid>("EntityId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("EssenceId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("EntityId", "EssenceId");
-
-                    b.HasIndex("EssenceId");
-
-                    b.ToTable("EntityEssence");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -737,6 +749,23 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Domain.Models.Essences.EssenceSlots.EssenceSlot", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Entity", null)
+                        .WithMany("EssenceSlots")
+                        .HasForeignKey("EntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Essences.Essence", "OccupiedEssence")
+                        .WithMany("EssenceSlots")
+                        .HasForeignKey("EssenceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("OccupiedEssence");
+                });
+
             modelBuilder.Entity("Domain.Models.GatheringNodes.GatheringNode", b =>
                 {
                     b.HasOne("Domain.Models.LootTables.LootTable", "LootTable")
@@ -818,21 +847,6 @@ namespace Persistence.LL.Migrations
                     b.HasOne("Domain.Models.Users.AppUser", null)
                         .WithMany("Transactions")
                         .HasForeignKey("AppUserId");
-                });
-
-            modelBuilder.Entity("EntityEssence", b =>
-                {
-                    b.HasOne("Domain.Models.Entities.Entity", null)
-                        .WithMany()
-                        .HasForeignKey("EntityId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Models.Essences.Essence", null)
-                        .WithMany()
-                        .HasForeignKey("EssenceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -960,11 +974,15 @@ namespace Persistence.LL.Migrations
             modelBuilder.Entity("Domain.Models.Entities.Entity", b =>
                 {
                     b.Navigation("BaseAttributes");
+
+                    b.Navigation("EssenceSlots");
                 });
 
             modelBuilder.Entity("Domain.Models.Essences.Essence", b =>
                 {
                     b.Navigation("EssenceItems");
+
+                    b.Navigation("EssenceSlots");
                 });
 
             modelBuilder.Entity("Domain.Models.Inventories.Inventory", b =>

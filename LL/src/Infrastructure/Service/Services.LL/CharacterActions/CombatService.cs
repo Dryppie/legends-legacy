@@ -1,6 +1,6 @@
 ﻿using Application.Interfaces.Services.LL;
 using Application.UseCases.Inventories.Events;
-using Common.Helpers;
+using Common.Helpers.Essences;
 using Domain.Components.Attributes;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
@@ -200,7 +200,7 @@ public class CombatService : ICombatService
         foreach (var character in characters)
         {
             character.Experience += totalExp / characters.Count();
-            _levelingService.UpdateCharacterLevel(character);
+            //_levelingService.UpdateCharacterLevel(character);
         }
         await _entityService.UpdateEntities(playerCharacters, cancellationToken);
     }

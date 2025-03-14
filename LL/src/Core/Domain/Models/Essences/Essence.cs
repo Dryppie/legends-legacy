@@ -1,5 +1,5 @@
 ﻿using Domain.Models.Abilities;
-using Domain.Models.Entities;
+using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Items;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
@@ -17,7 +17,7 @@ public class Essence
     public AbilityDefinition Active { get; set; } = null!;
 
     [JsonIgnore]
-    public ICollection<Entity> Entities { get; set; } = [];
+    public ICollection<EssenceSlot> EssenceSlots { get; set; } = [];
     [JsonIgnore]
     public ICollection<EssenceItem> EssenceItems { get; set; } = [];
 }

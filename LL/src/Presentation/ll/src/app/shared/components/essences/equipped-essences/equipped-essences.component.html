@@ -5,13 +5,13 @@
   >
     <div
       class="hover:bg-accent flex flex-col items-center border-b-[1px] border-b-transparent p-2 transition hover:border-primary"
-      *ngFor="let essence of essences"
+      *ngFor="let essenceSlot of essenceSlots"
     >
       <p
         class="text-center font-bold text-primary hover:cursor-pointer"
-        (click)="openEssenceModal(essence)"
+        (click)="openEssenceModal(essenceSlot.occupiedEssence)"
       >
-        {{ essence.name }}
+        {{ essenceSlot.occupiedEssence?.name }}
       </p>
     </div>
   </div>

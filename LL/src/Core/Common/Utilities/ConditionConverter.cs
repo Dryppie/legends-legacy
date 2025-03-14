@@ -1,4 +1,4 @@
-﻿using Domain.Interfaces;
+﻿using Domain.Interfaces.Abilities;
 using Domain.Models.Abilities.Effects.Conditions;
 using Domain.Models.Abilities.Effects.StatusEffects;
 using System.Text.Json;

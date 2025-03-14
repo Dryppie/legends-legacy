@@ -1,6 +1,6 @@
 ﻿using Application.Common.Mappings;
 using AutoMapper;
-using Domain.Interfaces;
+using Domain.Interfaces.Abilities;
 using Domain.Models.Abilities;
 using Domain.Models.Abilities.Effects;
 using Domain.Models.Abilities.Effects.Trigger;

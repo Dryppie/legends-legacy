@@ -1,8 +1,9 @@
 ﻿using Application.Common.Interfaces;
 using Common.Exceptions;
-using Common.Helpers;
+using Common.Helpers.Essences;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
+using Domain.Models.Essences.EssenceSlots;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Entities.Characters;
@@ -25,6 +26,7 @@ public class CharacterRepository : ICharacterRepository
         };
 
         // TODO: This is only temporary, so guests have abilities
+        
 
         var essences = new List<Essence>()
             {
@@ -35,19 +37,23 @@ public class CharacterRepository : ICharacterRepository
                     ActiveAbilityId = "sneakAttack",
                     PassiveAbilityId = "pocketDirt"
                 },
-                //new Essence()
-                //{
-                //    Id = Guid.NewGuid(),
-                //    Name = "Starter Essence 2",
-                //    ActiveAbilityId = "heal_01",
-                //    PassiveAbilityId = "pocketDirt"
-                //}
             };
 
-        character.EquippedEssences = essences;
-        await _context.Essences.AddRangeAsync(essences);
+        var essenceSlots = new List<EssenceSlot>()
+        {
+            new EssenceSlot()
+            {
+                SlotState = SlotState.Active,
+                SlotType = SlotType.Standard,
+                OccupiedEssence = essences.First()
+            },
+        };
 
-        _context.Characters.Add(character);
+        character.EssenceSlots = essenceSlots;
+
+        await _context.Essences.AddRangeAsync(essences);
+        await _context.EssenceSlots.AddRangeAsync(essenceSlots);
+        await _context.Characters.AddAsync(character);
 
         await _context.SaveChangesAsync(cancellationToken);
 
@@ -84,7 +90,8 @@ public class CharacterRepository : ICharacterRepository
     public async Task<Character> GetCharacterOverviewByCharacterIdAsync(Guid characterId)
     {
         var character = await _context.Characters
-            .Include(c => c.EquippedEssences)
+            .Include(c => c.EssenceSlots)
+                .ThenInclude(es => es.OccupiedEssence)
             .Include(c => c.BaseAttributes)
         //.Include(c => c.RawAttributes)
         //.ThenInclude(a => a.AttributeBase)
@@ -92,8 +99,10 @@ public class CharacterRepository : ICharacterRepository
 
         NotFoundException.ThrowIfNull(character, nameof(Character), characterId);
 
-        character.EquippedEssences = character.EquippedEssences.Select(essence =>
-                EssenceLoader.Instance.LoadAbilitiesForEssence(essence)).ToList();
+        foreach (var essenceSlot in character.EssenceSlots.Where(es => es.OccupiedEssence != null))
+        {
+            EssenceLoader.Instance.LoadAbilitiesForEssence(essenceSlot.OccupiedEssence!);
+        }
 
         return character;
     }

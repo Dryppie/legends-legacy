@@ -1,6 +1,6 @@
 ﻿using Domain.Models.Essences;
 
-namespace Application.Interfaces.Services.LL;
+namespace Application.Interfaces.Services.LL.Essences;
 public interface IEssenceService
 {
     Task<bool> EquipEssence(Guid characterId, Guid essenceItemId, CancellationToken cancellationToken);

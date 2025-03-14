@@ -27,7 +27,7 @@
     </div>
     <app-equipped-essences
       *ngIf="character$ | async as CharacterOverview"
-      [essences]="CharacterOverview?.equippedEssences ?? []"
+      [essenceSlots]="CharacterOverview?.essenceSlots ?? []"
     ></app-equipped-essences>
   </div>
 </div>

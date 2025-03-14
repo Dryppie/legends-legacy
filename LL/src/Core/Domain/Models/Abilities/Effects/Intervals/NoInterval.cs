@@ -1,4 +1,4 @@
-﻿using Domain.Interfaces;
+﻿using Domain.Interfaces.Abilities;
 
 namespace Domain.Models.Abilities.Effects.Intervals;
 public class NoInterval : IEffectInterval

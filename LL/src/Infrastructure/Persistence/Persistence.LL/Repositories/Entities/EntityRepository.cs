@@ -1,7 +1,10 @@
 ﻿using Application.Common.Interfaces;
 using Common.Exceptions;
+using Common.Helpers.Essences;
 using Domain.Models.Entities;
+using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
+using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.LootTables;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,10 +20,7 @@ public class EntityRepository : IEntityRepository
 
     public async Task UpdateEntities(List<Entity> entities, CancellationToken cancellationToken)
     {
-        if (entities == null)
-        {
-            throw new ArgumentNullException(nameof(entities));
-        }
+        ArgumentNullException.ThrowIfNull(entities);
 
         _context.Entities.UpdateRange(entities);
         await _context.SaveChangesAsync(cancellationToken);
@@ -31,7 +31,8 @@ public class EntityRepository : IEntityRepository
         // Query only distinct IDs
         var entities = await _context.Entities
             .Include(e => e.BaseAttributes)
-            .Include(e => e.EquippedEssences)
+            .Include(e => e.EssenceSlots)
+                .ThenInclude(es => es.OccupiedEssence)
             .Include(e => (e as Creature).LootTable)
                 .ThenInclude(lt => lt.Entries)
                 .ThenInclude(lt => (lt as LootTable).Entries)
@@ -60,6 +61,14 @@ public class EntityRepository : IEntityRepository
             finalList.Add(entityLookup[id]);
         }
 
+        foreach (var entity in finalList)
+        {
+            foreach (var essenceSlot in entity.EssenceSlots.Where(es => es.OccupiedEssence != null && es.SlotState == SlotState.Active))
+            {
+                EssenceLoader.Instance.LoadAbilitiesForEssence(essenceSlot.OccupiedEssence!);
+            }
+        }
+
         return finalList;
     }
 
@@ -67,7 +76,8 @@ public class EntityRepository : IEntityRepository
     {
         var entity = await _context.Entities
             .Include(e => e.BaseAttributes)
-            .Include(e => e.EquippedEssences)
+            .Include(e => e.EssenceSlots)
+                .ThenInclude(es => es.OccupiedEssence)
             .FirstOrDefaultAsync(e => e.Id.Equals(entityId), cancellationToken);
         
         NotFoundException.ThrowIfNull(entity, nameof(entity), entityId);

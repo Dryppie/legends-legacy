@@ -1,4 +1,4 @@
-﻿using Domain.Interfaces;
+﻿using Domain.Interfaces.Abilities;
 using Domain.Models.Abilities.Effects.Duration;
 using System.Text.Json;
 using System.Text.Json.Serialization;

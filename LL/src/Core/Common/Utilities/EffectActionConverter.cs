@@ -1,11 +1,10 @@
-﻿using Domain.Interfaces;
+﻿using Domain.Interfaces.Abilities;
 using Domain.Models.Abilities.Effects;
 using Domain.Models.Abilities.Effects.Actions;
 using Domain.Models.Abilities.Effects.StatusEffects;
 using Domain.Models.Abilities.ResourceCosts;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
-using Domain.Models.Damages;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Services.LL;
+﻿using Application.Interfaces.Services.LL.Essences;
 using Application.UseCases.Essences.Dtos;
 using AutoMapper;
 using MediatR;

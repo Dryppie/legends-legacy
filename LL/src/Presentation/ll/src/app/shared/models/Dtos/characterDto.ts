@@ -1,4 +1,4 @@
-import { Essence } from '../essence';
+import { EssenceSlot } from '../essenceSlot';
 import { AttributeDto } from './attributesDto';
 
 export interface CharacterDto {
@@ -15,5 +15,5 @@ export interface CharacterDto {
 export interface CharacterOverviewDto {
   level: number;
   baseAttributes: AttributeDto[];
-  equippedEssences: Essence[];
+  essenceSlots: EssenceSlot[];
 }

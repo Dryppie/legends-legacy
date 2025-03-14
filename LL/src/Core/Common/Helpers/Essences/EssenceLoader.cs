@@ -2,9 +2,10 @@
 using Domain.Models.Combat;
 using Domain.Models.Entities;
 using Domain.Models.Essences;
+using Domain.Models.Essences.EssenceSlots;
 using System.Text.Json;
 
-namespace Common.Helpers;
+namespace Common.Helpers.Essences;
 // TODO: Make it such that whenever I edit the json file, it'll trigger an endpoint that causes this to reload all the essences.
 public sealed class EssenceLoader
 {
@@ -66,7 +67,7 @@ public sealed class EssenceLoader
     /// </summary>
     public void LoadEssencesForEntity(Entity entity)
     {
-        var ids = entity.EquippedEssences.Select(e => e.Name).ToList();
+        var ids = entity.EssenceSlots.Where(es => es.OccupiedEssence != null && es.SlotState == SlotState.Active).Select(es => es.OccupiedEssence!).Select(e => e.Name).ToList();
         var entityEssences = _essences.Where(a => ids.Contains(a.Name)).ToList();
 
         foreach (var essence in entityEssences)
@@ -96,9 +97,14 @@ public sealed class EssenceLoader
     /// <summary>
     /// Given an Essence (by name), return the "full" essence (with Active and Passive abilities loaded).
     /// </summary>
-    public Essence LoadAbilitiesForEssence(Essence essence)
+    public void LoadAbilitiesForEssence(Essence essence)
     {
-        return _essences.FirstOrDefault(e => e.Name.Equals(essence.Name, StringComparison.OrdinalIgnoreCase))!;
+        var essenceFromMemory = _essences.FirstOrDefault(e => e.Name.Equals(essence.Name, StringComparison.OrdinalIgnoreCase))!;
+
+        if (essenceFromMemory == null) return;
+
+        essence.Active = essenceFromMemory.Active;
+        essence.Passive = essenceFromMemory.Passive;
     }
 
     /// <summary>

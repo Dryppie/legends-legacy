@@ -8,6 +8,7 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Entities.NPCs;
 using Domain.Models.Essences;
+using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.GatheringNodes;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
@@ -115,6 +116,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
     public DbSet<Entity> Entities => Set<Entity>();
 
     public DbSet<Essence> Essences => Set<Essence>();
+    public DbSet<EssenceSlot> EssenceSlots => Set<EssenceSlot>();
     public DbSet<EssenceItem> EssenceItems => Set<EssenceItem>();
 
     // Effects

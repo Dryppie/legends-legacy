@@ -1,7 +1,7 @@
-﻿using Application.Interfaces.Services.LL;
+﻿using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Essences;
 
-namespace Services.LL;
+namespace Services.LL.Essences;
 public class EssenceService : IEssenceService
 {
     private readonly IEssenceRepository _essenceRepository;

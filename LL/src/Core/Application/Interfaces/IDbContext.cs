@@ -6,6 +6,7 @@ using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
+using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.GatheringNodes;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
@@ -29,6 +30,7 @@ public interface IDbContext
     //DbSet<Echo> Echoes { get; }
     DbSet<Entity> Entities { get; }
     DbSet<Essence> Essences { get; }
+    DbSet<EssenceSlot> EssenceSlots { get; }
     DbSet<EssenceItem> EssenceItems { get; }
     // Effects
     //DbSet<Modifier> Modifiers { get; }
