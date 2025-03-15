@@ -42,6 +42,7 @@ public static class DependencyInjection
 
         services.AddScoped<IEssenceService, EssenceService>();
         services.AddScoped<IEssenceDescriptionService, EssenceDescriptionService>();
+        services.AddScoped<IEssenceSlotService, EssenceSlotService>();
 
         services.AddScoped<IGatheringNodeService, GatheringNodeService>();
 

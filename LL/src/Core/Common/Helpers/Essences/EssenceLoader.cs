@@ -1,4 +1,5 @@
 ﻿using Common.Utilities;
+using Domain.Extensions;
 using Domain.Models.Combat;
 using Domain.Models.Entities;
 using Domain.Models.Essences;
@@ -67,7 +68,7 @@ public sealed class EssenceLoader
     /// </summary>
     public void LoadEssencesForEntity(Entity entity)
     {
-        var ids = entity.EssenceSlots.Where(es => es.OccupiedEssence != null && es.SlotState == SlotState.Active).Select(es => es.OccupiedEssence!).Select(e => e.Name).ToList();
+        var ids = entity.EssenceSlots.ActiveSlotsWithEssences().Select(es => es.OccupiedEssence!).Select(e => e.Name).ToList();
         var entityEssences = _essences.Where(a => ids.Contains(a.Name)).ToList();
 
         foreach (var essence in entityEssences)

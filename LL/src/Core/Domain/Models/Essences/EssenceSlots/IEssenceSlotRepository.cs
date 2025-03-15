@@ -17,4 +17,9 @@ public interface IEssenceSlotRepository
     Task<bool> ToggleActiveReserved(Guid entityId, Guid essenceSlotId, CancellationToken cancellationToken);
     void LockSlot();
     void UnlockSlot();
+
+    /// <summary>
+    /// Create a new essence slot for a character - Either Active or Reserved - Upon leveling
+    /// </summary>
+    Task CreateEssenceSlotOnLevelUp(Guid characterId, SlotState slotState, CancellationToken cancellationToken);
 }

@@ -5,6 +5,7 @@ using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
+using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.GatheringNodes;
 using Domain.Models.Inventories;
 using Domain.Models.LootTables;
@@ -55,6 +56,7 @@ public static class DependencyInjection
         services.AddScoped<IEntityRepository, EntityRepository>();
 
         services.AddScoped<IEssenceRepository, EssenceRepository>();
+        services.AddScoped<IEssenceSlotRepository, EssenceSlotRepository>();
 
         services.AddScoped<IGatheringNodeRepository, GatheringNodeRepository>();
 

@@ -200,7 +200,7 @@ public class CombatService : ICombatService
         foreach (var character in characters)
         {
             character.Experience += totalExp / characters.Count();
-            //_levelingService.UpdateCharacterLevel(character);
+            await _levelingService.UpdateCharacterLevel(character);
         }
         await _entityService.UpdateEntities(playerCharacters, cancellationToken);
     }

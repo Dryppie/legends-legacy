@@ -112,4 +112,19 @@ public class EssenceSlotRepository : IEssenceSlotRepository
     {
         throw new NotImplementedException();
     }
+
+    public async Task CreateEssenceSlotOnLevelUp(Guid characterId, SlotState slotState, CancellationToken cancellationToken)
+    {
+        var newEssenceSlot = new EssenceSlot()
+        {
+            EntityId = characterId,
+            SlotState = slotState,
+            SlotType = SlotType.Standard,
+            OccupiedEssence = null
+        };
+
+        await _context.EssenceSlots.AddAsync(newEssenceSlot, cancellationToken);
+
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 }

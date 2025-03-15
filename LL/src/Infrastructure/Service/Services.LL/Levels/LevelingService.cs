@@ -16,7 +16,7 @@ public class LevelingService : ILevelingService
         _publisher = publisher;
     }
 
-    public async void UpdateCharacterLevel(Character character)
+    public async Task UpdateCharacterLevel(Character character)
     {
         var xpRequired = EntityLevelConstants.XP_REQUIRED(character.Level);
 

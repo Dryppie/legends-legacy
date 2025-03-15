@@ -148,7 +148,7 @@ namespace Persistence.LL.Migrations
                     b.Property<Guid>("EntityId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("EssenceId")
+                    b.Property<Guid?>("EssenceId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("SlotState")
@@ -757,8 +757,7 @@ namespace Persistence.LL.Migrations
                     b.HasOne("Domain.Models.Essences.Essence", "OccupiedEssence")
                         .WithMany("EssenceSlots")
                         .HasForeignKey("EssenceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("OccupiedEssence");
                 });

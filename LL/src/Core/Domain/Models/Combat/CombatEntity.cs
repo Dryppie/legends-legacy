@@ -1,11 +1,11 @@
 ﻿using Domain.Components.Attributes;
+using Domain.Extensions;
 using Domain.Models.Abilities;
 using Domain.Models.Abilities.Effects.StatusEffects;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Entities;
 using Domain.Models.Essences;
-using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Items.Equipments;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -45,7 +45,7 @@ public class CombatEntity
         BaseAttributes = new List<EntityAttribute>(entity.BaseAttributes);
         BaseCombatAttributes = new Dictionary<AttributeType, float>(entity.BaseCombatAttributes);
         CombatAttributes = new Dictionary<AttributeType, float>(entity.CombatAttributes);
-        EquippedEssences = new List<Essence>(entity.EssenceSlots.Where(es => es.OccupiedEssence != null && es.SlotState == SlotState.Active).Select(es => es.OccupiedEssence!));
+        EquippedEssences = new List<Essence>(entity.EssenceSlots.ActiveSlotsWithEssences().Select(es => es.OccupiedEssence!));
         Level = entity.Level;
     }
 

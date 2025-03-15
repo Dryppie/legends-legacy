@@ -1,4 +1,5 @@
 ﻿using Domain.Models.Essences;
+using Domain.Models.Essences.EssenceSlots;
 
 namespace Application.Interfaces.Services.LL.Essences;
 public interface IEssenceSlotService
@@ -21,10 +22,15 @@ public interface IEssenceSlotService
     /// <summary>
     ///  Lock slots
     /// </summary>
-    void LockSlot();
+    Task LockSlot();
 
     /// <summary>
     ///  Switch this slot’s active/reserved state if it’s not locked.
     /// </summary>
-    void UnlockSlot();
+    Task UnlockSlot();
+
+    /// <summary>
+    /// Create a new essence slot for a character - Either Active or Reserved - Upon leveling
+    /// </summary>
+    Task CreateEssenceSlotOnLevelUp(Guid characterId, SlotState slotState, CancellationToken cancellationToken);
 }

@@ -1,4 +1,5 @@
-﻿using Application.UseCases.Characters.Events;
+﻿using Application.Interfaces.Services.LL.Essences;
+using Application.UseCases.Characters.Events;
 using Domain.Components.Leveling;
 using MediatR;
 
@@ -6,10 +7,12 @@ namespace Application.UseCases.Characters.EventHandlers;
 public class CharacterLevelUpEventHandler : INotificationHandler<CharacterLevelUpEvent>
 {
     private readonly List<LevelTrigger> _triggers;
+    private readonly IEssenceSlotService _essenceSlotService;
 
-    public CharacterLevelUpEventHandler()
+    public CharacterLevelUpEventHandler(IEssenceSlotService essenceSlotService)
     {
         //_triggers = LevelTriggerLoader.Instance.GetLevelTriggers();
+        _essenceSlotService = essenceSlotService;
     }
 
     public async Task Handle(CharacterLevelUpEvent notification, CancellationToken cancellationToken)
@@ -26,14 +29,14 @@ public class CharacterLevelUpEventHandler : INotificationHandler<CharacterLevelU
         //    await trigger.Action.Execute(characterId);
         //}
 
-        if (newLevel % 10  == 0 && newLevel <= 100)
+        if (newLevel % 5 == 0 && newLevel <= 100)
         {
-
+            await _essenceSlotService.CreateEssenceSlotOnLevelUp(characterId, Domain.Models.Essences.EssenceSlots.SlotState.Active, cancellationToken);
         }
 
-        if (newLevel % 30 == 90)
+        if (newLevel % 10 == 0 && newLevel <= 90)
         {
-
+            await _essenceSlotService.CreateEssenceSlotOnLevelUp(characterId, Domain.Models.Essences.EssenceSlots.SlotState.Reserved, cancellationToken);
         }
 
         //if (newLevel % 10 == 0)

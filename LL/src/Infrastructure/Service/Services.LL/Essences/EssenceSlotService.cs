@@ -17,11 +17,6 @@ public class EssenceSlotService : IEssenceSlotService
         throw new NotImplementedException();
     }
 
-    public void LockSlot()
-    {
-        throw new NotImplementedException();
-    }
-
     public Task<bool> ToggleActiveReserved(Guid entityId, Guid essenceSlotId, CancellationToken cancellationToken)
     {
         return _essenceSlotRepository.ToggleActiveReserved(entityId, essenceSlotId, cancellationToken);
@@ -32,8 +27,18 @@ public class EssenceSlotService : IEssenceSlotService
         throw new NotImplementedException();
     }
 
-    public void UnlockSlot()
+    public Task LockSlot()
     {
         throw new NotImplementedException();
+    }
+
+    public Task UnlockSlot()
+    {
+        throw new NotImplementedException();
+    }
+
+    public async Task CreateEssenceSlotOnLevelUp(Guid characterId, SlotState slotState, CancellationToken cancellationToken)
+    {
+        await _essenceSlotRepository.CreateEssenceSlotOnLevelUp(characterId, slotState, cancellationToken);
     }
 }

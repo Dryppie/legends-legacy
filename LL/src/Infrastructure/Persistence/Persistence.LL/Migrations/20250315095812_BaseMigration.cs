@@ -432,7 +432,7 @@ namespace Persistence.LL.Migrations
                     SlotType = table.Column<int>(type: "int", nullable: false),
                     SlotState = table.Column<int>(type: "int", nullable: false),
                     EntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    EssenceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    EssenceId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {

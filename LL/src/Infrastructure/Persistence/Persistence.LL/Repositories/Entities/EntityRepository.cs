@@ -1,10 +1,9 @@
 ﻿using Application.Common.Interfaces;
 using Common.Exceptions;
 using Common.Helpers.Essences;
+using Domain.Extensions;
 using Domain.Models.Entities;
-using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
-using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.LootTables;
 using Microsoft.EntityFrameworkCore;
 
@@ -40,20 +39,18 @@ public class EntityRepository : IEntityRepository
             .Where(e => entityIds.Contains(e.Id))
             .ToListAsync(cancellationToken);
 
-        // Step 2: Check for any missing IDs
+        // Check for any missing IDs
         var foundIds = entities.Select(e => e.Id).ToHashSet();
         var missingIds = entityIds.Where(id => !foundIds.Contains(id)).ToList();
         if (missingIds.Count > 0)
         {
-            // Handle however you wish:
-            // throw new NotFoundException(...);
             NotFoundException.ThrowIfNull(missingIds, nameof(entities), entityIds);
         }
 
-        // Step 3: Build a dictionary from Id to Entity
+        // Build a dictionary from Id to Entity
         var entityLookup = entities.ToDictionary(e => e.Id, e => e);
 
-        // Step 4: Reconstruct final list, preserving duplicates
+        // Reconstruct final list, preserving duplicates
         var finalList = new List<Entity>(entityIds.Count);
         foreach (var id in entityIds)
         {
@@ -63,7 +60,7 @@ public class EntityRepository : IEntityRepository
 
         foreach (var entity in finalList)
         {
-            foreach (var essenceSlot in entity.EssenceSlots.Where(es => es.OccupiedEssence != null && es.SlotState == SlotState.Active))
+            foreach (var essenceSlot in entity.EssenceSlots.ActiveSlotsWithEssences())
             {
                 EssenceLoader.Instance.LoadAbilitiesForEssence(essenceSlot.OccupiedEssence!);
             }

@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250314185205_BaseMigration")]
+    [Migration("20250315095812_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -151,7 +151,7 @@ namespace Persistence.LL.Migrations
                     b.Property<Guid>("EntityId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("EssenceId")
+                    b.Property<Guid?>("EssenceId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("SlotState")
@@ -760,8 +760,7 @@ namespace Persistence.LL.Migrations
                     b.HasOne("Domain.Models.Essences.Essence", "OccupiedEssence")
                         .WithMany("EssenceSlots")
                         .HasForeignKey("EssenceId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("OccupiedEssence");
                 });
