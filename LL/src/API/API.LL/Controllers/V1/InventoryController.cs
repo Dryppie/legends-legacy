@@ -1,4 +1,5 @@
-﻿using Application.UseCases.CharacterActions.Dtos;
+﻿using Application.Common.Responses;
+using Application.UseCases.CharacterActions.Dtos;
 using Application.UseCases.CharacterActions.Queries.GetCharacterAction;
 using Application.UseCases.Inventories.Dtos;
 using Application.UseCases.Inventories.Queries.GetInventoryById;
@@ -11,8 +12,8 @@ namespace API.LL.Controllers.V1;
 public class InventoryController : BaseController
 {
     [HttpGet]
-    public async Task<ActionResult<InventoryDto?>> Get()
+    public async Task<ActionResult<Response<InventoryDto?>>> Get()
     {
-        return await Mediator.Send(new GetInventoryByIdQuery(CurrentCharacterGuid));
+        return Ok(await Mediator.Send(new GetInventoryByIdQuery(CurrentCharacterGuid)));
     }
 }

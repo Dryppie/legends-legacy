@@ -1,4 +1,5 @@
-﻿using Application.UseCases.Characters.Dtos;
+﻿using Application.Common.Responses;
+using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Characters.Queries.GetCharacter;
 using Application.UseCases.Characters.Queries.GetCharacterOverview;
 using Application.UseCases.Characters.Queries.GetLeaderboard;
@@ -11,7 +12,7 @@ namespace API.LL.Controllers.V1;
 public class CharacterController : BaseController
 {
     [HttpGet]
-    public async Task<ActionResult<CharacterDto>> Get()
+    public async Task<ActionResult<Response<CharacterDto>>> Get()
     {
         var character = await Mediator.Send(new GetCharacterQuery(CurrentUserId));
         
@@ -19,7 +20,7 @@ public class CharacterController : BaseController
     }
 
     [HttpGet("Overview")]
-    public async Task<ActionResult<CharacterOverviewDto>> Overview()
+    public async Task<ActionResult<Response<CharacterOverviewDto>>> Overview()
     {
         var character = await Mediator.Send(new GetCharacterOverviewQuery(CurrentCharacterGuid));
 

@@ -1,4 +1,5 @@
-﻿using Application.UseCases.CharacterActions.Commands.DeleteCharacterAction;
+﻿using Application.Common.Responses;
+using Application.UseCases.CharacterActions.Commands.DeleteCharacterAction;
 using Application.UseCases.CharacterActions.Commands.StartCombatAction;
 using Application.UseCases.CharacterActions.Commands.StartGatheringAction;
 using Application.UseCases.CharacterActions.Dtos;
@@ -6,6 +7,7 @@ using Application.UseCases.CharacterActions.Queries.GetCharacterAction;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.GatheringNodes;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,27 +18,30 @@ public class CharacterActionsController : BaseController
     public record StartGatheringActionRequest(string GatheringNodeId, GatheringType GatheringType);
     public record StartCombatActionRequest(string AreaId);
     [HttpGet]
-    public async Task<ActionResult<CharacterActionDto?>> Get()
+    public async Task<ActionResult<Response<CharacterActionDto?>>> Get()
     {
-        return await Mediator.Send(new GetCharacterActionQuery(CurrentCharacterGuid));
+        var characterAction = await Mediator.Send(new GetCharacterActionQuery(CurrentCharacterGuid));
+        return Ok(characterAction);
     }
+
     // POST api/<CharacterActionsController>
     [HttpPost("StartCombat")]
-    public async Task<ActionResult<bool>> StartCombat([FromBody] StartCombatActionRequest request)
+    public async Task<ActionResult<Response<bool>>> StartCombat([FromBody] StartCombatActionRequest request)
     {
-
-        return await Mediator.Send(new StartCombatActionCommand(CurrentCharacterGuid, request.AreaId));
+        var startCombat = await Mediator.Send(new StartCombatActionCommand(CurrentCharacterGuid, request.AreaId));
+        return Ok(startCombat);
     }
+
     // POST api/<CharacterActionsController>
     [HttpPost("StartGathering")]
-    public async Task<ActionResult<bool>> StartGathering([FromBody] StartGatheringActionRequest request)
+    public async Task<ActionResult<Response<bool>>> StartGathering([FromBody] StartGatheringActionRequest request)
     {
-
-        return await Mediator.Send(new StartGatheringActionCommand(CurrentCharacterGuid, request.GatheringNodeId, request.GatheringType));
+        var startGathering = await Mediator.Send(new StartGatheringActionCommand(CurrentCharacterGuid, request.GatheringNodeId, request.GatheringType));
+        return Ok(startGathering);
     }
 
     [HttpDelete]
-    public async Task<ActionResult> Delete()
+    public async Task<ActionResult<Response<Unit>>> Delete()
     {
         await Mediator.Send(new DeleteCharacterActionCommand(CurrentCharacterGuid));
 

@@ -1,4 +1,5 @@
-﻿using Application.Authorization.Interfaces;
+﻿using Application.Common.Responses;
+using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL;
 using Application.UseCases.Users.Events;
 using Common.Authorization.Security;
@@ -6,9 +7,9 @@ using Domain.Models.Users;
 using MediatR;
 
 namespace Application.UseCases.Users.Commands.GuestLogin;
-public record GuestLoginCommand() : IRequest<Tokens>;
+public record GuestLoginCommand() : IRequest<Response<Tokens>>;
 
-public class GuestLoginCommandHandler : IRequestHandler<GuestLoginCommand, Tokens>
+public class GuestLoginCommandHandler : IRequestHandler<GuestLoginCommand, Response<Tokens>>
 {
     private readonly IUserService _userService;
     private readonly IJwtGenerator _jwtGenerator;
@@ -23,19 +24,27 @@ public class GuestLoginCommandHandler : IRequestHandler<GuestLoginCommand, Token
         _characterService = characterService;
     }
 
-    public async Task<Tokens> Handle(GuestLoginCommand request, CancellationToken cancellationToken)
+    public async Task<Response<Tokens>> Handle(GuestLoginCommand request, CancellationToken cancellationToken)
     {
-        // Create a new guest user
-        var user = await _userService.RegisterGuest();
+        try
+        {
+            // Create a new guest user
+            var user = await _userService.RegisterGuest();
 
-        await _publisher.Publish(new UserCreatedEvent(user.Id, user.Name), cancellationToken);
+            await _publisher.Publish(new UserCreatedEvent(user.Id, user.Name), cancellationToken);
 
-        var character = await _characterService.GetMyCharacterAsync(Guid.Parse(user.Id));
-        user.CharacterId = character.Id.ToString();
+            var character = await _characterService.GetMyCharacterAsync(Guid.Parse(user.Id));
+            user.CharacterId = character.Id.ToString();
 
-        // Generate tokens
-        var tokens = _jwtGenerator.GenerateTokens(user);
+            // Generate tokens
+            var tokens = _jwtGenerator.GenerateTokens(user);
 
-        return tokens;
+            return Response<Tokens>.Success(tokens);
+        }
+        catch (Exception)
+        {
+            return Response<Tokens>.Fail("Guest Login Error");
+        }
+        
     }
 }
