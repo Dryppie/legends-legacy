@@ -3,7 +3,7 @@ import { Essence } from './essence';
 export interface EssenceSlot {
   slotType: SlotType;
   slotState: SlotState;
-  occupiedEssence: Essence;
+  occupiedEssence?: Essence;
 }
 
 export enum SlotType {

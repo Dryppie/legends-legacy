@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using Persistence.LL;
 using Persistence.LL.Seeds;
 using Services.LL;
+using Services.AdminDashboard;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -102,6 +103,8 @@ builder.Services.AddPersistence(config);
 builder.Services.AddRepositories();
 builder.Services.AddApplication();
 builder.Services.AddServices();
+builder.Services.AddAdminDashboardServices(); // TODO: Application layer makes use of AdminDashboard services, so this is necessary at the moment.
+                                              // At some point the application layer should perhaps be split up into two? One for LL, another for Dashboard
 builder.Services.AddCommonServices();
 
 builder.Services.SetupSwagger("Legends Legacy", config);

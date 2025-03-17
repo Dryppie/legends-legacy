@@ -1,0 +1,5 @@
+@API.AdminDashboard_HostAddress = http://localhost:7080
+GET {{API.AdminDashboard_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

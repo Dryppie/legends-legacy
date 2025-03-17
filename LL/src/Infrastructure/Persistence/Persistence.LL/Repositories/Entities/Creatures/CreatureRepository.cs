@@ -24,4 +24,12 @@ public class CreatureRepository : ICreatureRepository
 
         return creatures;
     }
+
+    public async Task<List<Creature>> GetCreaturesAsync(CancellationToken cancellationToken)
+    {
+        var creatures = await _context.Creatures
+            .Include(c => c.BaseAttributes)
+            .ToListAsync(cancellationToken);
+        return creatures;
+    }
 }

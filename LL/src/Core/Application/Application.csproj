@@ -24,6 +24,7 @@
     <Folder Include="UseCases\Regions\Dtos\" />
     <Folder Include="UseCases\Regions\Commands\" />
     <Folder Include="UseCases\Users\Commands\Delete\" />
+    <Folder Include="UseCases\_AdminDashboard\Creatures\Commands\" />
   </ItemGroup>
 
 </Project>
