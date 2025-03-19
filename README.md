@@ -1,8 +1,5 @@
 # legends-legacy
 
-Overview
-Briefly describe your project, its purpose, and key features.
-
 ## Backend Requirements:
 
 - Visual Studio (Recommended)
