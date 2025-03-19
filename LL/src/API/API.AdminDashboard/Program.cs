@@ -4,6 +4,7 @@ using Persistence.LL;
 using Services.LL;
 using Services.AdminDashboard;
 using Domain.Models.Users;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -33,6 +34,10 @@ builder.Services.AddCors(options =>
 });
 
 // Add services to the container.
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

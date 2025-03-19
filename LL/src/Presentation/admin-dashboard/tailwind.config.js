@@ -3,6 +3,9 @@ module.exports = {
   content: ["./src/**/*.{html,ts}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Lato'], // Lato will now be the default sans-serif font
+      },
       keyframes: {
         fadeInUp: {
           "0%": {

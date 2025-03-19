@@ -21,6 +21,7 @@ export enum AttributeType {
   Power = 'Power',
   PhysicalDefense = 'PhysicalDefense',
   MagicalDefense = 'MagicalDefense',
+  FlatDamageReduction = 'FlatDamageReduction',
   DamageReduction = 'DamageReduction',
   CritChance = 'CritChance',
   CritDamage = 'CritDamage',

@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { DashboardComponent } from './dashboard.component';
 import { RegionsComponent } from '../../features/regions/regions.component';
 import { CreaturesComponent } from '../../features/creatures/creatures.component';
+import { MainLayoutComponent } from '../main-layout/main-layout.component';
 
 export const DASHBOARD_ROUTES: Routes = [
   {
@@ -10,8 +11,7 @@ export const DASHBOARD_ROUTES: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full',
+        component: MainLayoutComponent,
       },
       {
         path: 'creatures',
