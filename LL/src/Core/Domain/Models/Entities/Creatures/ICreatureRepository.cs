@@ -5,4 +5,5 @@ public interface ICreatureRepository
 {
     Task<List<Guid>> GetCreatureIdsByArea(string areaId, CancellationToken cancellationToken);
     Task<List<Creature>> GetCreaturesAsync(CancellationToken cancellationToken);
+    Task<Creature> UpdateCreatureAsync(CancellationToken cancellationToken);
 }

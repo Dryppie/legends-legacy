@@ -14,4 +14,9 @@ public class CreatureService : ICreatureService
     {
         return await _creatureRepository.GetCreaturesAsync(cancellationToken);
     }
+
+    public async Task<Creature> UpdateCreatureAsync(CancellationToken cancellationToken)
+    {
+        return await _creatureRepository.UpdateCreatureAsync(cancellationToken);
+    }
 }
