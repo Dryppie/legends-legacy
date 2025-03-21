@@ -1,24 +1,39 @@
-<div class="flex justify-center items-center h-full">
-  <div class="flex-col">
-    <h1 class="text-3xl font-bold mb-4">Select a Creature</h1>
-    <select class="mb-6 p-2 border-2 border-gray-400" [(ngModel)]="selectedCreature" (change)="selectCreature(selectedCreature)">
-      <option *ngFor="let creature of creatures" [ngValue]="creature">
-        {{ creature.name }}
-      </option>
-    </select>
-  </div>
+<div class="flex flex-col items-center justify-center min-h-screen p-6 text-white" style="font-family: Lato">
+  <h1 class="text-3xl font-bold mb-4">Select a Creature</h1>
+  <select class="mb-6 p-2 border-2 border-gray-400 bg-gray-800" [formControl]="selectedCreatureControl">
+    <option *ngFor="let creature of creatures" [ngValue]="creature">
+      {{ creature.name }}
+    </option>
+  </select>
 
-  <!-- Detailed view of the selected creature -->
-  <div *ngIf="selectedCreature">
+  <!-- Creature Form -->
+  <form *ngIf="selectedCreature" [formGroup]="creatureForm" class="bg-gray-800 p-6 rounded-lg shadow-lg">
     <h2 class="text-2xl font-semibold mb-2">{{ selectedCreature!.name }}</h2>
-    <p><strong>Level:</strong> {{ selectedCreature!.level }}</p>
-    <p><strong>Experience Reward:</strong> {{ selectedCreature!.experienceReward }}</p>
 
-    <h3 class="text-xl font-semibold mt-4">Base Attributes</h3>
-    <ul class="list-disc pl-5">
-      <li *ngFor="let attribute of selectedCreature.baseAttributes">
-        {{ attribute.attributeType | splitCamelCase}}: {{ attribute.value }}
-      </li>
-    </ul>
-  </div>
+    <!-- Level and Experience Reward -->
+    <div class="grid grid-cols-2 gap-4 mb-4">
+      <div class="flex flex-col">
+        <label class="font-medium">Level</label>
+        <input type="number" class="p-2 border-2 border-gray-600 bg-gray-700 rounded" formControlName="level">
+      </div>
+
+      <div class="flex flex-col">
+        <label class="font-medium">Experience Reward</label>
+        <input type="number" class="p-2 border-2 border-gray-600 bg-gray-700 rounded" formControlName="experienceReward">
+      </div>
+    </div>
+
+    <!-- Attributes -->
+    <div class="grid grid-cols-6 gap-2">
+      <div *ngFor="let attr of attributeKeys" class="flex flex-col">
+        <label class="font-medium">{{ attr | splitCamelCase }}</label>
+        <input type="number" class="p-2 border-2 border-gray-600 bg-gray-700 rounded"
+               [formControlName]="attr">
+      </div>
+    </div>
+
+    <button type="button" (click)="saveCreature()" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+      Save Changes
+    </button>
+  </form>
 </div>
