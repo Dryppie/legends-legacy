@@ -1,10 +1,9 @@
-﻿using Common.Utilities;
+﻿using System.Text.Json;
+using Common.Utilities;
 using Domain.Extensions;
 using Domain.Models.Combat;
 using Domain.Models.Entities;
 using Domain.Models.Essences;
-using Domain.Models.Essences.EssenceSlots;
-using System.Text.Json;
 
 namespace Common.Helpers.Essences;
 // TODO: Make it such that whenever I edit the json file, it'll trigger an endpoint that causes this to reload all the essences.

@@ -1,6 +1,5 @@
 ﻿using Application.UseCases._AdminDashboard.Creatures.Queries.GetCreatures;
 using Domain.Models.Entities.Creatures;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.AdminDashboard.Controllers.V1;
