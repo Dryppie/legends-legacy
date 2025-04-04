@@ -5,7 +5,6 @@ using Application.UseCases.Essences.Queries.GetEquippedEssencesAndInventoryEssen
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.LL.Controllers.V1;
-
 public class EssenceController : BaseController
 {
 

@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <Folder Include="UseCases\Characters\Commands\" />
+    <Folder Include="UseCases\Equipments\Commands\" />
     <Folder Include="UseCases\Inventories\Commands\" />
     <Folder Include="UseCases\Regions\Dtos\" />
     <Folder Include="UseCases\Regions\Commands\" />
