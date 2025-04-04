@@ -9,11 +9,11 @@ namespace Common.Helpers.Essences;
 // TODO: Make it such that whenever I edit the json file, it'll trigger an endpoint that causes this to reload all the essences.
 public sealed class EssenceLoader
 {
-    private static readonly object _lock = new object();
+    private static readonly object _lock = new();
     private static EssenceLoader? _instance;
 
     private readonly List<Essence> _essences;
-    private readonly Random _rand = new Random();
+    private readonly Random _rand = new();
 
     /// <summary>
     /// Private constructor so no one can instantiate this class from the outside.
@@ -35,10 +35,7 @@ public sealed class EssenceLoader
             {
                 lock (_lock)
                 {
-                    if (_instance == null)
-                    {
-                        _instance = new EssenceLoader();
-                    }
+                    _instance ??= new EssenceLoader();
                 }
             }
             return _instance;
@@ -48,7 +45,7 @@ public sealed class EssenceLoader
     /// <summary>
     /// Reads and deserializes Essences from JSON, once only.
     /// </summary>
-    private List<Essence> LoadEssencesFromJson()
+    private static List<Essence> LoadEssencesFromJson()
     {
         string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "abilities.json");
         string json = File.ReadAllText(filePath);
@@ -67,7 +64,7 @@ public sealed class EssenceLoader
     /// </summary>
     public void LoadEssencesForEntity(Entity entity)
     {
-        var ids = entity.EssenceSlots.ActiveSlotsWithEssences().Select(es => es.OccupiedEssence!).Select(e => e.Name).ToList();
+        var ids = entity.EssenceSlots.ActiveSlotsWithOccupiedEssences().Select(es => es.OccupiedEssence!).Select(e => e.Name).ToList();
         var entityEssences = _essences.Where(a => ids.Contains(a.Name)).ToList();
 
         foreach (var essence in entityEssences)
@@ -103,6 +100,7 @@ public sealed class EssenceLoader
 
         if (essenceFromMemory == null) return;
 
+        essence.AttributeModifiers = essenceFromMemory.AttributeModifiers;
         essence.Active = essenceFromMemory.Active;
         essence.Passive = essenceFromMemory.Passive;
     }

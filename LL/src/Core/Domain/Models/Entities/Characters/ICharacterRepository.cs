@@ -16,20 +16,20 @@ public interface ICharacterRepository
     /// </summary>
     /// <param name="UserId"></param>
     /// <returns></returns>
-    public Task<Character> GetCharacterByUserIdAsync(Guid currentUserId);
+    public Task<Character> GetCharacterByUserIdAsync(Guid currentUserId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Get Character by Character Id
     /// </summary>
     /// <param name="UserId"></param>
     /// <returns></returns>
-    public Task<Character> GetCharacterByCharacterIdAsync(Guid characterId);
+    public Task<Character> GetCharacterByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Get Character Overview by Character Id
     /// </summary>
     /// <param name="UserId"></param>
     /// <returns></returns>
-    Task<Character> GetCharacterOverviewByCharacterIdAsync(Guid currentUserId);
+    Task<Character> GetCharacterOverviewByCharacterIdAsync(Guid currentUserId, CancellationToken cancellationToken);
     Task<List<CharacterLeaderboardItem>> GetLeaderboardCharactersAsync(CancellationToken cancellationToken);
 }

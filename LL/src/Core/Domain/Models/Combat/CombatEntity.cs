@@ -17,6 +17,7 @@ public class CombatEntity
     public Guid OriginalId { get; set; }
     public string Id { get; set; }
     public string Name { get; set; } = string.Empty;
+    public string ImagePath { get; set; } = string.Empty;
     public ICollection<Essence> EquippedEssences { get; set; } = [];
     [NotMapped]
     public List<string> AbilityIds { get; set; } = [];
@@ -26,6 +27,7 @@ public class CombatEntity
                                         // Start at 300. Whenever it is equal to or lower than 0, perform the attack.
                                         // If you increase attack speed by 100%, BasicAttackSpeed goes from 10 to 20,
                                         // and thust counting down faster to the next attack each tick
+    public int NextRecoveryIn = 500; // This defines when the character regenerates health and mana.
     public ICollection<EntityAttribute> BaseAttributes { get; set; } = [];
     public bool IsAlive => CombatAttributes.FirstOrDefault(cm => cm.Key.Equals(AttributeType.Health)).Value > 0;
     public List<Equipment> Equipment { get; set; } = [];
@@ -41,11 +43,12 @@ public class CombatEntity
         OriginalId = entity.Id;
         Id = entity.Id.ToString();
         Name = entity.Name;
-        Abilities = new List<AbilityDefinition>(entity.Abilities);
-        BaseAttributes = new List<EntityAttribute>(entity.BaseAttributes);
+        ImagePath = entity.ImagePath;
+        Abilities = [.. entity.Abilities];
+        BaseAttributes = [.. entity.BaseAttributes];
         BaseCombatAttributes = new Dictionary<AttributeType, float>(entity.BaseCombatAttributes);
         CombatAttributes = new Dictionary<AttributeType, float>(entity.CombatAttributes);
-        EquippedEssences = new List<Essence>(entity.EssenceSlots.ActiveSlotsWithEssences().Select(es => es.OccupiedEssence!));
+        EquippedEssences = [.. entity.EssenceSlots.ActiveSlotsWithOccupiedEssences().Select(es => es.OccupiedEssence!)];
         Level = entity.Level;
     }
 
@@ -135,16 +138,5 @@ public class CombatEntity
     public int GetAttributeValue(AttributeType attributeType)
     {
         return CombatAttributes.TryGetValue(attributeType, out var attributeValue) ? (int)attributeValue : 0;
-    }
-
-    /// <summary>
-    /// Sets the value of the specified attribute, creating or updating it in the dictionary.
-    /// Primarily used for Health and Mana
-    /// </summary>
-    /// <param name="attributeType">The type of attribute to set.</param>
-    /// <param name="value">The new value to set for the attribute.</param>
-    public void SetAttributeValue(AttributeType attributeType, int value)
-    {
-        CombatAttributes[attributeType] = value;
     }
 }

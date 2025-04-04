@@ -8,20 +8,21 @@
   <div
     class="flex h-full flex-col justify-between gap-4 overflow-y-auto pr-4 sm:pr-6"
   >
-    <div class="flex flex-col-reverse justify-between lg:flex-row">
+    <div class="flex flex-col-reverse justify-evenly lg:flex-row">
       <app-character-attributes
         *ngIf="character$ | async as CharacterOverview"
-        class="flex"
-        [attributes]="CharacterOverview?.baseAttributes ?? []"
+        class="flex w-full"
+        [attributes]="CharacterOverview.baseCombatAttributes"
       ></app-character-attributes>
-      <div class="">
-        <div class="flex flex-col items-center justify-center space-y-3 pb-4">
+      <div class="flex w-full">
+        <div class="flex flex-col w-full items-center space-y-3 pb-4">
           <h2 class="primary-gradient text-2xl">Equipment</h2>
           <img
-            src="core/Divider.svg"
-            alt="Logo"
-            class="center w-60 object-contain"
+          src="core/Divider.svg"
+          alt="Logo"
+          class="center w-60 object-contain"
           />
+          <app-equipment-overview></app-equipment-overview>
         </div>
       </div>
     </div>

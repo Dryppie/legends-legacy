@@ -53,7 +53,7 @@
       </div>
       <app-combat-avatar
         class="w-full"
-        imagePath="placeholder2.png"
+        [imagePath]="selectedPlayerCharacter.imagePath"
         *ngIf="selectedPlayerCharacter"
         [name]="selectedPlayerCharacter.name"
         [hp]="selectedPlayerCharacter.health"
@@ -89,7 +89,7 @@
       </div>
       <app-combat-avatar
         class="w-full"
-        imagePath="placeholder1.png"
+        [imagePath]="selectedEnemyCharacter.imagePath"
         *ngIf="selectedEnemyCharacter"
         [name]="selectedEnemyCharacter.name"
         [hp]="selectedEnemyCharacter.health"

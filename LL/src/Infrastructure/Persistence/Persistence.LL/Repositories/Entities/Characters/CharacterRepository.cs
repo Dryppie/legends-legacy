@@ -61,7 +61,7 @@ public class CharacterRepository : ICharacterRepository
     }
 
     /// <inheritdoc/>
-    public async Task<Character> GetCharacterByUserIdAsync(Guid userId)
+    public async Task<Character> GetCharacterByUserIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         var character = await _context.Characters
             //.Include(c => c.Modifiers)
@@ -74,7 +74,7 @@ public class CharacterRepository : ICharacterRepository
     }
 
     /// <inheritdoc/>
-    public async Task<Character> GetCharacterByCharacterIdAsync(Guid characterId)
+    public async Task<Character> GetCharacterByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var character = await _context.Characters
             //.Include(c => c.Modifiers)
@@ -87,7 +87,7 @@ public class CharacterRepository : ICharacterRepository
     }
 
     /// <inheritdoc/>
-    public async Task<Character> GetCharacterOverviewByCharacterIdAsync(Guid characterId)
+    public async Task<Character> GetCharacterOverviewByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var character = await _context.Characters
             .Include(c => c.EssenceSlots)

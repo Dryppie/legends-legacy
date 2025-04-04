@@ -38,6 +38,7 @@ public static class LLDbContextExtensions
                 Id = Guid.Parse(CHARACTER_GUID),
                 UserId = user.Id,
                 Name = "admin",
+                ImagePath = "player",
                 Level = 1
             };
 
@@ -96,6 +97,33 @@ public static class LLDbContextExtensions
                     SlotState = SlotState.Active,
                     SlotType = SlotType.Standard,
                     OccupiedEssence = essences.Last(),
+                    EntityId = character.Id,
+                },
+                new EssenceSlot()
+                {
+                    Id = Guid.NewGuid(),
+                    SlotState = SlotState.Active,
+                    SlotType = SlotType.Standard,
+                    EntityId = character.Id,
+                },
+                new EssenceSlot()
+                {
+                    Id = Guid.NewGuid(),
+                    SlotState = SlotState.Active,
+                    SlotType = SlotType.Standard,
+                    EntityId = character.Id,
+                },new EssenceSlot()
+                {
+                    Id = Guid.NewGuid(),
+                    SlotState = SlotState.Active,
+                    SlotType = SlotType.Standard,
+                    EntityId = character.Id,
+                },
+                new EssenceSlot()
+                {
+                    Id = Guid.NewGuid(),
+                    SlotState = SlotState.Active,
+                    SlotType = SlotType.Standard,
                     EntityId = character.Id,
                 },
             };
@@ -678,28 +706,28 @@ public static class LLDbContextExtensions
             // Step 5 - Create creatures
             var lumoRuinsCreatures = new List<Creature>
             {
-                new() { Id = goblinId, Name = "Goblin", LootTableId = goblinLootTable.Id, EssenceSlots = [goblinEssenceSlot], ExperienceReward = 2 },
-                new() { Id = goblinWarriorId, Name = "Goblin Warrior", LootTableId = goblinWarriorLootTable.Id, EssenceSlots = [goblinWarriorEssenceSlot], ExperienceReward = 3 },
-                new() { Id = goblinArcherId, Name = "Goblin Archer", LootTableId = goblinArcherLootTable.Id, EssenceSlots = [goblinArcherEssenceSlot], ExperienceReward = 3 },
-                new() { Id = largeRatId, Name = "Large Rat", LootTableId = largeRatLootTable.Id, EssenceSlots = [largeRatEssenceSlot], ExperienceReward = 2 }
+                new() { Id = goblinId, Name = "Goblin", ImagePath = "goblin", LootTableId = goblinLootTable.Id, EssenceSlots = [goblinEssenceSlot], ExperienceReward = 2 },
+                new() { Id = goblinWarriorId, Name = "Goblin Warrior", ImagePath = "goblin_warrior", LootTableId = goblinWarriorLootTable.Id, EssenceSlots = [goblinWarriorEssenceSlot], ExperienceReward = 3 },
+                new() { Id = goblinArcherId, Name = "Goblin Archer", ImagePath = "goblin_archer", LootTableId = goblinArcherLootTable.Id, EssenceSlots = [goblinArcherEssenceSlot], ExperienceReward = 3 },
+                new() { Id = largeRatId, Name = "Large Rat", ImagePath = "large_rat", LootTableId = largeRatLootTable.Id, EssenceSlots = [largeRatEssenceSlot], ExperienceReward = 2 }
             };
 
             var bloodGroveCreatures = new List<Creature>
             {
-                new() { Id = flameImpId, Name = "Flame Imp", LootTableId = flameImpLootTable.Id, EssenceSlots = [flameImpEssenceSlot], ExperienceReward = 2 },
-                new() { Id = frostImpId, Name = "Frost Imp", LootTableId = frostImpLootTable.Id, EssenceSlots = [frostImpEssenceSlot], ExperienceReward = 2 },
-                new() { Id = shadowImpId, Name = "Shadow Imp", LootTableId = shadowImpLootTable.Id, EssenceSlots = [shadowImpEssenceSlot], ExperienceReward = 2 },
-                new() { Id = vampireBatId, Name = "Vampire Bat", LootTableId = vampireBatLootTable.Id, EssenceSlots = [vampireBatEssenceSlot], ExperienceReward = 4 }
+                new() { Id = flameImpId, Name = "Flame Imp", ImagePath = "flame_imp", LootTableId = flameImpLootTable.Id, EssenceSlots = [flameImpEssenceSlot], ExperienceReward = 2 },
+                new() { Id = frostImpId, Name = "Frost Imp", ImagePath = "frost_imp", LootTableId = frostImpLootTable.Id, EssenceSlots = [frostImpEssenceSlot], ExperienceReward = 2 },
+                new() { Id = shadowImpId, Name = "Shadow Imp", ImagePath = "shadow_imp", LootTableId = shadowImpLootTable.Id, EssenceSlots = [shadowImpEssenceSlot], ExperienceReward = 2 },
+                new() { Id = vampireBatId, Name = "Vampire Bat", ImagePath = "vampire_bat", LootTableId = vampireBatLootTable.Id, EssenceSlots = [vampireBatEssenceSlot], ExperienceReward = 4 }
             };
 
             var crystalCreekCreatures = new List<Creature>
             {
-                new() { Id = blueSlimeId, Name = "Blue Slime", LootTableId = blueSlimeLootTable.Id, EssenceSlots = [blueSlimeEssenceSlot], ExperienceReward = 3 },
-                new() { Id = brownSlimeId, Name = "Brown Slime", LootTableId = brownSlimeLootTable.Id, EssenceSlots = [brownSlimeEssenceSlot], ExperienceReward = 4 },
-                new() { Id = greenSlimeId, Name = "Green Slime", LootTableId = greenSlimeLootTable.Id, EssenceSlots = [greenSlimeEssenceSlot], ExperienceReward = 3 },
-                new() { Id = rainbowSlimeId, Name = "Rainbow Slime", LootTableId = rainbowSlimeLootTable.Id, EssenceSlots = [rainbowSlimeEssenceSlot], ExperienceReward = 4 },
-                new() { Id = redSlimeId, Name = "Red Slime", LootTableId = redSlimeLootTable.Id, EssenceSlots = [redSlimeEssenceSlot], ExperienceReward = 3 },
-                new() { Id = transparentSlimeId, Name = "Transparent Slime", LootTableId = transparentSlimeLootTable.Id, EssenceSlots = [transparentSlimeEssenceSlot], ExperienceReward = 4 },
+                new() { Id = blueSlimeId, Name = "Blue Slime", ImagePath = "blue_slime", LootTableId = blueSlimeLootTable.Id, EssenceSlots = [blueSlimeEssenceSlot], ExperienceReward = 3 },
+                new() { Id = brownSlimeId, Name = "Brown Slime", ImagePath = "brown_slime", LootTableId = brownSlimeLootTable.Id, EssenceSlots = [brownSlimeEssenceSlot], ExperienceReward = 4 },
+                new() { Id = greenSlimeId, Name = "Green Slime", ImagePath = "green_slime", LootTableId = greenSlimeLootTable.Id, EssenceSlots = [greenSlimeEssenceSlot], ExperienceReward = 3 },
+                new() { Id = rainbowSlimeId, Name = "Rainbow Slime", ImagePath = "rainbow_slime", LootTableId = rainbowSlimeLootTable.Id, EssenceSlots = [rainbowSlimeEssenceSlot], ExperienceReward = 4 },
+                new() { Id = redSlimeId, Name = "Red Slime", ImagePath = "red_slime", LootTableId = redSlimeLootTable.Id, EssenceSlots = [redSlimeEssenceSlot], ExperienceReward = 3 },
+                new() { Id = transparentSlimeId, Name = "Transparent Slime", ImagePath = "transparent_slime", LootTableId = transparentSlimeLootTable.Id, EssenceSlots = [transparentSlimeEssenceSlot], ExperienceReward = 4 },
             };
 
             await context.Creatures.AddRangeAsync(lumoRuinsCreatures);

@@ -1,4 +1,6 @@
 ﻿using Domain.Models.Abilities;
+using Domain.Models.Attributes;
+using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Items;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -15,6 +17,8 @@ public class Essence
     public AbilityDefinition Passive { get; set; } = null!;
     [NotMapped]
     public AbilityDefinition Active { get; set; } = null!;
+    [NotMapped]
+    public List<AttributeModifier> AttributeModifiers { get; set; } = [];
 
     [JsonIgnore]
     public ICollection<EssenceSlot> EssenceSlots { get; set; } = [];

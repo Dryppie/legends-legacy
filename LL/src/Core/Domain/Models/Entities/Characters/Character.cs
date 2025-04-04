@@ -1,7 +1,7 @@
-﻿using Domain.Models.CharacterActions;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Models.CharacterActions;
 using Domain.Models.Inventories;
 using Domain.Models.Users;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Models.Entities.Characters;
 public class Character : Entity

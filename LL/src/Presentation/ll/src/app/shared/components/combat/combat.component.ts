@@ -65,6 +65,7 @@ export class CombatComponent implements OnInit, OnDestroy {
       {
         name: '',
         id: '',
+        imagePath: '',
         health: 100,
         maxHealth: 100,
         mana: 100,
@@ -76,6 +77,7 @@ export class CombatComponent implements OnInit, OnDestroy {
       {
         name: '',
         id: '',
+        imagePath: '',
         health: 100,
         maxHealth: 100,
         mana: 100,
@@ -192,9 +194,9 @@ export class CombatComponent implements OnInit, OnDestroy {
       case EventType.Miss:
         this.handleMissEvent(event);
         break;
-      // case EventType.Parry:
-      //   this.handleBlockEvent(event);
-      //   break;
+      case EventType.Parry:
+        this.handleBlockEvent(event);
+        break;
       case EventType.Block:
         this.handleBlockEvent(event);
         break;
@@ -242,6 +244,9 @@ export class CombatComponent implements OnInit, OnDestroy {
       case EventType.StatusEffectExpired:
         const statusEffectExpired = true;
         this.handleStatusEffectEvent(event, statusEffectExpired);
+        break;
+      case EventType.Regeneration:
+        this.handleRegeneration(event);
         break;
       // Add other event types as needed
       default:
@@ -318,6 +323,10 @@ export class CombatComponent implements OnInit, OnDestroy {
   ) {
     // if (buffExpired) console.log(`Buff Expired: ${event.details}`);
     // else console.log(`Buff: ${event.details}`);
+  }
+
+  handleRegeneration(event: CombatEvent) {
+    this.updateCharacter(event.combatEntity);
   }
 
   private updateCharacter(combatEntity: SimpleCombatEntityDto) {

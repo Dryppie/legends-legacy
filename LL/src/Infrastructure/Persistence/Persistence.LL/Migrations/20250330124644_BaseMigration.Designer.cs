@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250315095812_BaseMigration")]
+    [Migration("20250330124644_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -102,6 +102,10 @@ namespace Persistence.LL.Migrations
 
                     b.Property<int>("EntityType")
                         .HasColumnType("int");
+
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Level")
                         .HasColumnType("int");

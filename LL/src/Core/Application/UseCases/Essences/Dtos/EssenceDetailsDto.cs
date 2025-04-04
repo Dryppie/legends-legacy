@@ -1,5 +1,6 @@
 ﻿using Application.Common.Mappings;
 using AutoMapper;
+using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Essences;
 
 namespace Application.UseCases.Essences.Dtos;
@@ -10,6 +11,8 @@ public class EssenceDetailsDto : IMapFrom<Essence>
     public string Description { get; set; } = string.Empty;
     public AbilityDescriptionDto Active { get; set; } = null!;
     public AbilityDescriptionDto Passive { get; set; } = null!;
+    public List<AttributeModifier> AttributeModifiers { get; set; } = [];
+
     public void Mapping(Profile profile)
     {
         profile.CreateMap<Essence, EssenceDetailsDto>();

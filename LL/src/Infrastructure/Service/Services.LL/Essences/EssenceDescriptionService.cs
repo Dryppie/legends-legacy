@@ -9,14 +9,24 @@ namespace Services.LL.Essences;
 public class EssenceDescriptionService : IEssenceDescriptionService
 {
     private const float MAGNITUDE_RANGE = 0.2f;
+
+    public string BuildAbilityDescription(AbilityDefinition ability, Dictionary<AttributeType, float> attributes)
+    {
+        var dictAttributes = attributes.Select(kvp => new EntityAttribute
+        {
+            AttributeType = kvp.Key,
+            Value = kvp.Value
+        }).ToList();
+        return BuildAbilityDescription(ability, dictAttributes);
+    }
     /// <summary>
     /// Generates a final description string from the ability's description template and effects.
     /// This handles multiple effects of the same type by using indexed placeholders like {damage1}, {damage2}, {heal1}, etc.
     /// </summary>
     /// <param name="ability">The ability definition containing a Description and Effects.</param>
-    /// <param name="stats">A dictionary of relevant stats (e.g., Strength, Dex) for scaling calculations.</param>
+    /// <param name="attributes">A dictionary of relevant stats (e.g., Strength, Dex) for scaling calculations.</param>
     /// <returns>The final string with placeholders replaced by computed values.</returns>
-    public string BuildAbilityDescription(AbilityDefinition ability, List<EntityAttribute> stats)
+    private string BuildAbilityDescription(AbilityDefinition ability, List<EntityAttribute> attributes)
     {
         // Fallback if there's no description
         string template = ability.Description ?? string.Empty;
@@ -47,7 +57,7 @@ public class EssenceDescriptionService : IEssenceDescriptionService
                     double finalDamage = damageAction.Magnitude;
                     if (damageAction.ScalingAttribute.HasValue)
                     {
-                        var scaleValue = stats.FirstOrDefault(ea => ea.AttributeType.Equals(damageAction.ScalingAttribute))!.Value;
+                        var scaleValue = attributes.FirstOrDefault(ea => ea.AttributeType.Equals(damageAction.ScalingAttribute))!.Value;
                         finalDamage += damageAction.Magnitude + (scaleValue * damageAction.ScalingMultiplier);
                     }
                     // e.g. {damage1}, {damage2}, etc.
@@ -62,7 +72,7 @@ public class EssenceDescriptionService : IEssenceDescriptionService
 
                     if (healingAction.ScalingAttribute.HasValue)
                     {
-                        var scaleValue = stats.FirstOrDefault(ea => ea.AttributeType.Equals(healingAction.ScalingAttribute))!.Value;
+                        var scaleValue = attributes.FirstOrDefault(ea => ea.AttributeType.Equals(healingAction.ScalingAttribute))!.Value;
                         finalHealing += healingAction.Magnitude + (scaleValue * healingAction.ScalingMultiplier);
                     }
 
@@ -78,7 +88,7 @@ public class EssenceDescriptionService : IEssenceDescriptionService
                         foreach (var nestedEffect in nestedEffectAction.Effects)
                         {
                             // Optionally call the same logic or a helper:
-                            HandleNestedEffect(nestedEffect, placeholders, stats, ref damageIndex, ref healIndex, ref modifyIndex);
+                            HandleNestedEffect(nestedEffect, placeholders, attributes, ref damageIndex, ref healIndex, ref modifyIndex);
                         }
                     }
                     break;

@@ -13,6 +13,7 @@ export interface CombatResultDto {
 export interface SimpleCombatEntityDto {
   name: string;
   id: string;
+  imagePath: string;
   health: number;
   maxHealth: number;
   mana: number;

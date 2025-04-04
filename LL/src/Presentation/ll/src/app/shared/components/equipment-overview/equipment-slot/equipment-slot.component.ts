@@ -1,6 +1,6 @@
 import { NgIf } from '@angular/common';
-import { Component, Input, ViewChild } from '@angular/core';
-import { InfoBoxComponent } from '../info-box/info-box.component';
+import { Component, Input } from '@angular/core';
+import { InfoBoxComponent } from '../../info-box/info-box.component';
 
 @Component({
   selector: 'app-equipment-slot',

@@ -30,7 +30,7 @@ public class GuestLoginCommandHandler : IRequestHandler<GuestLoginCommand, Token
 
         await _publisher.Publish(new UserCreatedEvent(user.Id, user.Name), cancellationToken);
 
-        var character = await _characterService.GetMyCharacterAsync(Guid.Parse(user.Id));
+        var character = await _characterService.GetMyCharacterAsync(Guid.Parse(user.Id), cancellationToken);
         user.CharacterId = character.Id.ToString();
 
         // Generate tokens

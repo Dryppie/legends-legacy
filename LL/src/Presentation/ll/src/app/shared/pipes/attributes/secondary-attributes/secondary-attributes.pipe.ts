@@ -13,6 +13,7 @@ export class SecondaryAttributesPipe implements PipeTransform {
     AttributeType.Mana,
     AttributeType.ManaRegeneration,
     AttributeType.BasicAttackSpeed,
+    AttributeType.RecoveryRate,
     AttributeType.Power,
     AttributeType.PhysicalDefense,
     AttributeType.MagicalDefense,

@@ -77,7 +77,29 @@
           "Log": "{Actor} threw dirt in {Target}'s eyes. {Target}'s accuracy decreased by 3%."
         }
       ]
-    }
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Agility",
+        "Amount": 4,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Dexterity",
+        "Amount": 5,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Perception",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Instinct",
+        "Amount": 1,
+        "ModifierType": "Flat"
+      }
+    ]
   },
   {
     "Name": "Goblin Warrior's Essence",
@@ -153,7 +175,24 @@
           "Log": "{Actor}'s Endurance is decreased by 20."
         }
       ]
-    }
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "FightingSpirit",
+        "Amount": 10,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Endurance",
+        "Amount": 4,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Threat",
+        "Amount": 6,
+        "ModifierType": "Flat"
+      }
+    ]
   },
   {
     "Name": "Goblin Archer's Essence",
@@ -224,6 +263,7 @@
                 },
                 "Targeting": "Self",
                 "Trigger": "None",
+                "IsFlatAmount": true,
                 "Log": "{Target} has received 2 poison damage."
               }
             ]
@@ -233,15 +273,27 @@
           },
           "Targeting": "Self",
           "Trigger": "OnAttack",
+          "TriggerTarget": "CauseOfTrigger",
           "Chance": 20,
-          "IsFlatAmount": true,
           "AttackType": "DamageOverTime",
           "DamageType": "Poison",
           "EffectTags": [],
           "Log": "{Target} is poisoned by {Actor}'s arrow, taking 6 poison damage over time."
         }
       ]
-    }
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Agility",
+        "Amount": 10,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Perception",
+        "Amount": 6,
+        "ModifierType": "Flat"
+      }
+    ]
   },
   {
     "Name": "Large Rat's Essence",
@@ -298,7 +350,19 @@
           "Log": "{Actor}'s health is increased by 50 due to being big."
         }
       ]
-    }
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Willpower",
+        "Amount": 4,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Endurance",
+        "Amount": 13,
+        "ModifierType": "Flat"
+      }
+    ]
   },
   {
     "Name": "Flame Imp's Essence",
@@ -356,7 +420,19 @@
           "Log": "{Target} received {Amount} burn damage."
         }
       ]
-    }
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 9,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Willpower",
+        "Amount": 4,
+        "ModifierType": "Flat"
+      }
+    ]
   },
   {
     "Name": "Frost Imp's Essence",
@@ -443,7 +519,19 @@
           "Log": "{Target} is chilled by {Actor}'s aura."
         }
       ]
-    }
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Wisdom",
+        "Amount": 8,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 6,
+        "ModifierType": "Flat"
+      }
+    ]
   },
   {
     "Name": "Shadow Imp's Essence",
@@ -494,7 +582,24 @@
           "Log": "{Actor} moves with an elusive shadowy presence, increasing dodge chance by 2%."
         }
       ]
-    }
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Luck",
+        "Amount": 6,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Threat",
+        "Amount": -1,
+        "ModifierType": "Flat"
+      }
+    ]
   },
   {
     "Name": "Vampire Bat's Essence",
@@ -550,7 +655,19 @@
           "Log": "{Actor} gained an additional {Amount} health from lifesteal."
         }
       ]
-    }
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Agility",
+        "Amount": 8,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Strength",
+        "Amount": 4,
+        "ModifierType": "Flat"
+      }
+    ]
   },
   {
     "Name": "Blue Slime's Essence",
@@ -568,7 +685,7 @@
             "Type": "ResourceRestore",
             "ResourceType": "Health",
             "Amount": 2,
-            "ScalingAttribute": "Intelligence",
+            "ScalingAttribute": "Wisdom",
             "ScalingMultiplier": 0.2
           },
           "Duration": {
@@ -608,7 +725,19 @@
           "Log": "{Actor}'s Absorptive Shell restored 2 mana."
         }
       ]
-    }
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Wisdom",
+        "Amount": 7,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Willpower",
+        "Amount": 7,
+        "ModifierType": "Flat"
+      }
+    ]
   },
   {
     "Name": "Brown Slime's Essence",
@@ -661,7 +790,19 @@
           "Log": "{Actor}'s body hardens like stone, increasing Physical Defense by 15."
         }
       ]
-    }
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Constitution",
+        "Amount": 6,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Endurance",
+        "Amount": 8,
+        "ModifierType": "Flat"
+      }
+    ]
   },
   {
     "Name": "Green Slime's Essence",
@@ -744,7 +885,19 @@
           "Log": "{Actor} was attacked by {Target} and applied corrosize ooze on them."
         }
       ]
-    }
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Wisdom",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 11,
+        "ModifierType": "Flat"
+      }
+    ]
   },
   {
     "Name": "Rainbow Slime's Essence",
@@ -813,7 +966,34 @@
           "Log": "{Actor} creates a colorful shield around {Target}, granting 20 Barrier."
         }
       ]
-    }
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Constitution",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Strength",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Dexterity",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Luck",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      }
+    ]
   },
   {
     "Name": "Red Slime's Essence",
@@ -871,7 +1051,19 @@
           "Log": "{Actor}'s body hardens against fire, increasing Fire Resistance by 5."
         }
       ]
-    }
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Instinct",
+        "Amount": 7,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 6,
+        "ModifierType": "Flat"
+      }
+    ]
   },
   {
     "Name": "Transparent Slime's Essence",
@@ -967,7 +1159,19 @@
           "Log": "{Actor}'s health has dropped below 30%."
         }
       ]
-    }
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Endurance",
+        "Amount": 9,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Wisdom",
+        "Amount": 8,
+        "ModifierType": "Flat"
+      }
+    ]
   },
   {
     "Name": "Starter Essence 1",
@@ -1065,7 +1269,29 @@
           "Log": "{Target} was healed for {Amount}."
         }
       ]
-    }
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Constitution",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Strength",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Dexterity",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      }
+    ]
   },
   {
     "Name": "Starter Essence 2",
@@ -1137,7 +1363,29 @@
           "Log": "{Actor}'s defense is increased by 30% due to falling below 20% health."
         }
       ]
-    }
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Constitution",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Strength",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Dexterity",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      }
+    ]
   },
   {
     "Name": "Starter Essence 3",
@@ -1195,7 +1443,29 @@
           "Log": "{Actor} retaliated against {Target} and dealt {Amount} damage."
         }
       ]
-    }
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Constitution",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Strength",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Dexterity",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      }
+    ]
   },
   {
     "Name": "Starter Essence 4",
@@ -1274,7 +1544,29 @@
           "Log": "{Actor} retaliated against {Target} and applied a poison to them."
         }
       ]
-    }
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Constitution",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Strength",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Dexterity",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      }
+    ]
   },
   {
     "Name": "Test Essence",
@@ -1332,6 +1624,28 @@
           "Log": "{Actor} tests {Target}."
         }
       ]
-    }
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Constitution",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Strength",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Dexterity",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      }
+    ]
   }
 ]

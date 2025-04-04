@@ -100,6 +100,10 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("EntityType")
                         .HasColumnType("int");
 
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Level")
                         .HasColumnType("int");
 

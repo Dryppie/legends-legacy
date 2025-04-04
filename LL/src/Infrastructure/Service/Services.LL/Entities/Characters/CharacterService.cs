@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces.Services.LL;
+using Domain.Components.Attributes;
 using Domain.Helpers.Constants;
 using Domain.Models.Entities.Characters;
 using Services.LL.Interfaces;
@@ -23,29 +24,29 @@ public class CharacterService : ICharacterService
         return character;
     }
     /// <inheritdoc/>
-    public async Task<Character> GetMyCharacterAsync(Guid CurrentUserId)
+    public async Task<Character> GetMyCharacterAsync(Guid CurrentUserId, CancellationToken cancellationToken)
     {
-        var character = await _characterRepository.GetCharacterByUserIdAsync(CurrentUserId);
+        var character = await _characterRepository.GetCharacterByUserIdAsync(CurrentUserId, cancellationToken);
         character.ExperienceUntilNextLevel = EntityLevelConstants.XP_REQUIRED(character.Level);
         return character;
     }
 
     /// <inheritdoc/>
-    public async Task<Character> GetCharacterByCharacterIdAsync(Guid CharacterId)
+    public async Task<Character> GetCharacterByCharacterIdAsync(Guid CharacterId, CancellationToken cancellationToken)
     {
-        return await _characterRepository.GetCharacterByCharacterIdAsync(CharacterId);
+        return await _characterRepository.GetCharacterByCharacterIdAsync(CharacterId, cancellationToken);
     }
 
     /// <inheritdoc/>
     public async Task<Character> GetMyCharacterOverviewAsync(Guid CurrentUserId, CancellationToken cancellationToken)
     {
-        var character = await _characterRepository.GetCharacterOverviewByCharacterIdAsync(CurrentUserId);
+        var character = await _characterRepository.GetCharacterOverviewByCharacterIdAsync(CurrentUserId, cancellationToken);
+        AttributeCalculator.CalculateBaseAttributes(character);
         foreach (var essence in character.EssenceSlots.Where(es => es.OccupiedEssence != null).Select(es => es.OccupiedEssence))
         {
-            essence!.Active.Description = _essenceDescriptionService.BuildAbilityDescription(essence.Active, [.. character.BaseAttributes]);
-            essence.Passive.Description = _essenceDescriptionService.BuildAbilityDescription(essence.Passive, [.. character.BaseAttributes]);
+            essence!.Active.Description = _essenceDescriptionService.BuildAbilityDescription(essence.Active, character.BaseCombatAttributes);
+            essence.Passive.Description = _essenceDescriptionService.BuildAbilityDescription(essence.Passive, character.BaseCombatAttributes);
         }
-        //character.CharacterNextLevelCalculator();
         return character;
     }
 

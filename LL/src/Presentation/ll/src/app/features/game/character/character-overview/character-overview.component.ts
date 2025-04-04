@@ -6,6 +6,7 @@ import { CharacterOverviewDto } from '../../../../shared/models/Dtos/characterDt
 import { Observable } from 'rxjs';
 import { CharacterAttributesComponent } from '../../../../shared/components/character/character-attributes/character-attributes.component';
 import { AsyncPipe, NgIf } from '@angular/common';
+import { EquipmentOverviewComponent } from "../../../../shared/components/equipment-overview/equipment-overview.component";
 
 @Component({
   selector: 'app-character-overview',
@@ -16,7 +17,8 @@ import { AsyncPipe, NgIf } from '@angular/common';
     CharacterAttributesComponent,
     AsyncPipe,
     NgIf,
-  ],
+    EquipmentOverviewComponent
+],
   templateUrl: './character-overview.component.html',
   styleUrl: './character-overview.component.css',
 })

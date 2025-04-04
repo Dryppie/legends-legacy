@@ -114,10 +114,8 @@ public class CombatSimulation : ICombatContext
                 //    Timestamp = currentTime,
                 //    Details = $"{entity.Name} is stunned, and can not act."
                 //});
-                            EffectManager.UpdateEffectsForEntity(entity);
-
-                entity.IncrementStep();
-
+                
+                EndTick(entity);
                 continue;
             }
 
@@ -150,10 +148,49 @@ public class CombatSimulation : ICombatContext
                 }
             }
 
-            EffectManager.UpdateEffectsForEntity(entity);
-            entity.IncrementStep();
+            EndTick(entity);
         }
 
+    }
+
+    private void EndTick(CombatEntity entity)
+    {
+        EffectManager.UpdateEffectsForEntity(entity);
+        entity.IncrementStep();
+        TickRecoveryRate(entity);
+    }
+
+    private void TickRecoveryRate(CombatEntity entity)
+    {
+        if (entity.NextRecoveryIn <= 0)
+        {
+            RegenerateHealthAndMana(entity);
+            entity.NextRecoveryIn = 500;
+        }
+        entity.NextRecoveryIn -= (int)entity.CombatAttributes[AttributeType.RecoveryRate];
+    }
+
+    private void RegenerateHealthAndMana(CombatEntity entity)
+    {
+        entity.CombatAttributes[AttributeType.Health] += entity.CombatAttributes[AttributeType.HealthRegeneration];
+        entity.CombatAttributes[AttributeType.Mana] += entity.CombatAttributes[AttributeType.ManaRegeneration];
+        if (entity.CombatAttributes[AttributeType.Health] > entity.CombatAttributes[AttributeType.MaxHealth]) entity.CombatAttributes[AttributeType.Health] = entity.CombatAttributes[AttributeType.MaxHealth];
+        if (entity.CombatAttributes[AttributeType.Mana] > entity.CombatAttributes[AttributeType.MaxMana]) entity.CombatAttributes[AttributeType.Mana] = entity.CombatAttributes[AttributeType.MaxMana];
+
+        var combatEvent = CombatEvent(entity, entity, EventType.Regeneration, 0, $"{entity.Name} regenerated {entity.CombatAttributes[AttributeType.HealthRegeneration]} health and {entity.CombatAttributes[AttributeType.ManaRegeneration]} mana.");
+        var combatEntity = new SimpleCombatEntity()
+        {
+            Id = entity.Id,
+            MaxHealth = entity.GetAttributeValue(AttributeType.MaxHealth),
+            Health = entity.GetAttributeValue(AttributeType.Health),
+            MaxMana = entity.GetAttributeValue(AttributeType.MaxMana),
+            Mana = entity.GetAttributeValue(AttributeType.Mana),
+            Barrier = entity.GetAttributeValue(AttributeType.Barrier)
+        };
+
+        if (combatEntity.Health < 0) combatEntity.Health = 0;
+
+        combatEvent.CombatEntity = combatEntity;
     }
 
     private static void PerformHealing(CombatEntity entity, List<CombatEntity> targets)
@@ -178,7 +215,7 @@ public class CombatSimulation : ICombatContext
                 return;
             }
             var damage = InteractionManager.CalculateBasicAttackDamage(actor, target, 4);
-            var damageResult = InteractionManager.CalculateDamageBreakdown(target, damage, attackOutcome);
+            var damageResult = InteractionManager.CalculateDamageBreakdown(target, damage, attackOutcome, DamageType.Physical);
 
             var combatEvent = CombatEvent(actor, target, EventType.Damage, damageResult.HealthDamage, $"{actor.Name} hit {target.Name} with a basic attack, dealing {damageResult.TotalDamage} damage.");
 
@@ -192,6 +229,8 @@ public class CombatSimulation : ICombatContext
 
             InteractionManager.ApplyDamage(effectContext);
 
+            EffectManager.TriggerEffects(TriggerEvent.OnAttack, actor, target);
+
             var combatEntity = new SimpleCombatEntity()
             {
                 Id = target.Id,
@@ -201,7 +240,8 @@ public class CombatSimulation : ICombatContext
                 Mana = target.GetAttributeValue(AttributeType.Mana),
                 Barrier = target.GetAttributeValue(AttributeType.Barrier)
             };
-            combatEntity.Health = Math.Max(0, combatEntity.Health - damageResult.HealthDamage);
+
+            if (combatEntity.Health < 0) combatEntity.Health = 0;
 
             combatEvent.CombatEntity = combatEntity;
         }

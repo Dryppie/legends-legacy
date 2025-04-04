@@ -99,6 +99,10 @@ public class CombatEffectManager : ICombatEffectManager
             {
                 targets.Add(causeOfTrigger!);
             }
+            else if (triggerTarget.Equals(Targeting.AttackedEnemy))
+            {
+                targets.Add(causeOfTrigger!);
+            }
             else
             {
                 var ownTeam = _entityManager.GetOwnTeam(effectTriggeredOn);

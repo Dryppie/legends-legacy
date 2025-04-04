@@ -18,6 +18,7 @@ export enum AttributeType {
   Mana = 'Mana',
   ManaRegeneration = 'ManaRegeneration',
   BasicAttackSpeed = 'BasicAttackSpeed',
+  RecoveryRate = 'RecoveryRate',
   Power = 'Power',
   PhysicalDefense = 'PhysicalDefense',
   MagicalDefense = 'MagicalDefense',

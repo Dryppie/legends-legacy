@@ -4,5 +4,5 @@ using Domain.Models.Attributes;
 namespace Services.LL.Interfaces;
 public interface IEssenceDescriptionService
 {
-    string BuildAbilityDescription(AbilityDefinition ability, List<EntityAttribute> stats);
+    string BuildAbilityDescription(AbilityDefinition ability, Dictionary<AttributeType, float> attributes);
 }

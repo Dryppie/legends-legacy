@@ -60,7 +60,7 @@ public class CombatService : ICombatService
             var selectedAreaCreatures = _spawningService.WhatAreaCreaturesToSpawn([.. combatAction.Area.Creatures], monsterCount);
             var selectedEnemyIds = selectedAreaCreatures.Select(c => c.CreatureId).ToList();
 
-            selectedCombatEnemyEntities = selectedEnemyIds.Select(id => allCombatEnemyEntities.First(ee => ee.OriginalId.Equals(id))).ToList();
+            selectedCombatEnemyEntities = [.. selectedEnemyIds.Select(id => allCombatEnemyEntities.First(ee => ee.OriginalId.Equals(id)))];
 
             var combatSimulation = new CombatSimulation(combatPlayerEntities, selectedCombatEnemyEntities);
             lastCombatResult = combatSimulation.RunSimulation();
@@ -119,7 +119,7 @@ public class CombatService : ICombatService
         var combatEntities = new List<SimpleCombatEntity>();
         foreach (var entity in playerCharacters)
         {
-            combatEntities.Add(new SimpleCombatEntity(entity.Id, entity.Name, (int)entity.BaseCombatAttributes[AttributeType.MaxHealth], (int)entity.BaseCombatAttributes[AttributeType.MaxMana], (int)entity.BaseCombatAttributes[AttributeType.Barrier]));
+            combatEntities.Add(new SimpleCombatEntity(entity.Id, entity.Name, entity.ImagePath, (int)entity.BaseCombatAttributes[AttributeType.MaxHealth], (int)entity.BaseCombatAttributes[AttributeType.MaxMana], (int)entity.BaseCombatAttributes[AttributeType.Barrier]));
         }
 
         return combatEntities;
@@ -159,7 +159,7 @@ public class CombatService : ICombatService
 
     private static async Task PrepareEntitiesForCombat(IEnumerable<CombatEntity> entities)
     {
-        LoadAbilitiesFromEssences(entities);
+        //LoadAbilitiesFromEssences(entities);
 
         // Load abilities
         var loadedAttributeTasks = entities.Select(entity => Task.Run(() => EssenceLoader.Instance.LoadEssencesForCombatEntity(entity)));

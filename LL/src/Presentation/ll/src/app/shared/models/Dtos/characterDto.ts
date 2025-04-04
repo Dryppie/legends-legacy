@@ -15,5 +15,6 @@ export interface CharacterDto {
 export interface CharacterOverviewDto {
   level: number;
   baseAttributes: AttributeDto[];
+  baseCombatAttributes: AttributeDto[];
   essenceSlots: EssenceSlot[];
 }

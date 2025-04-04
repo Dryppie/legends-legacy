@@ -8,6 +8,6 @@ public static class EssenceSlotExtension
     /// </summary>
     /// <param name="slots"></param>
     /// <returns></returns>
-    public static IEnumerable<EssenceSlot> ActiveSlotsWithEssences(this IEnumerable<EssenceSlot> slots) =>
+    public static IEnumerable<EssenceSlot> ActiveSlotsWithOccupiedEssences(this IEnumerable<EssenceSlot> slots) =>
         slots.Where(s => s.OccupiedEssence != null && s.SlotState == SlotState.Active);
 }
