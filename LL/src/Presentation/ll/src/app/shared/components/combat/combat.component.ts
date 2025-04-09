@@ -6,8 +6,8 @@ import { AsyncPipe, NgFor, NgIf, NgStyle } from '@angular/common';
 import { SimpleCombatEntityDto } from '../../models/Dtos/combatResultDto';
 import { Observable, Subscription } from 'rxjs';
 import { CountdownComponent } from '../countdown/countdown.component';
-import { CharacterActionsService } from '../../../core/services/character-actions/character-actions.service';
-import { GameService } from '../../../core/services/game/game.service';
+import { CharacterActionsService } from '../../../core/services/api/character-actions/character-actions.service';
+import { GameService } from '../../../core/services/client-side/game/game.service';
 import { CombatStateService } from '../../../core/state/combat-state/combat-state.service';
 import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
 

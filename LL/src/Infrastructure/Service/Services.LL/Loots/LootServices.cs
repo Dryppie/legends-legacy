@@ -67,11 +67,11 @@ public class LootServices : ILootService
         return null;
     }
 
-    private InventoryItem ConvertItemIntoInventoryItem(Item item)
+    private InventoryItem ConvertItemIntoInventoryItem(ItemBase item)
     {
         return new InventoryItem()
         {
-            ItemId = item.Id,
+            ItemInstanceId = item.Id,
             Quantity = 1
         };
     }

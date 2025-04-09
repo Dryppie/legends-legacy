@@ -2,7 +2,7 @@
 using Domain.Components.Attributes;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Inventories;
-using Domain.Models.Items;
+using Domain.Models.Items.EssenceItems;
 using Services.LL.Interfaces;
 
 namespace Services.LL.Inventories;
@@ -26,10 +26,10 @@ public class InventoryService : IInventoryService
         AttributeCalculator.CalculateBaseAttributes(character);
         foreach (var inventoryItem in inventory.InventoryItems)
         {
-            if (inventoryItem.Item is EssenceItem essenceItem)
+            if (inventoryItem.ItemInstance is EssenceItemInstance ei && ei.ItemBase is EssenceItemBase eib)
             {
-                essenceItem.Essence.Active.Description = _essenceDescriptionService.BuildAbilityDescription(essenceItem.Essence.Active, character.BaseCombatAttributes);
-                essenceItem.Essence.Passive.Description = _essenceDescriptionService.BuildAbilityDescription(essenceItem.Essence.Passive, character.BaseCombatAttributes);
+                eib.Essence.Active.Description = _essenceDescriptionService.BuildAbilityDescription(eib.Essence.Active, character.BaseCombatAttributes);
+                eib.Essence.Passive.Description = _essenceDescriptionService.BuildAbilityDescription(eib.Essence.Passive, character.BaseCombatAttributes);
             }
         }
 

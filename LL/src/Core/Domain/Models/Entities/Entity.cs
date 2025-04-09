@@ -3,7 +3,7 @@ using Domain.Models.Abilities;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Essences.EssenceSlots;
-using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Slots;
 
 namespace Domain.Models.Entities;
 public abstract class Entity
@@ -12,6 +12,7 @@ public abstract class Entity
     public string Name { get; set; } = string.Empty;
     public ICollection<EntityAttribute> BaseAttributes { get; set; } = [];
     public ICollection<EssenceSlot> EssenceSlots { get; set; } = [];
+    public ICollection<EquipmentSlot> EquipmentSlots { get; set; } = [];
     [NotMapped]
     public List<string> AbilityIds { get; set; } = [];
     [NotMapped]
@@ -23,8 +24,6 @@ public abstract class Entity
                                         // If you increase attack speed by 100%, BasicAttackSpeed goes from 10 to 20,
                                         // and thust counting down faster to the next attack each tick
     public bool IsAlive => CombatAttributes.FirstOrDefault(cm => cm.Key.Equals(AttributeType.Health)).Value > 0;
-    [NotMapped]
-    public List<Equipment> Equipment { get; set; } = [];
     [NotMapped]
     public Dictionary<AttributeType, float> BaseCombatAttributes { get; } = [];
     [NotMapped]

@@ -5,7 +5,7 @@ import {
   CharacterActionDto,
   StartCombatActionRequest,
 } from '../../../../shared/models/Dtos/characterActionDto';
-import { CharacterActionsService } from '../../../../core/services/character-actions/character-actions.service';
+import { CharacterActionsService } from '../../../../core/services/api/character-actions/character-actions.service';
 import { NgIf } from '@angular/common';
 import { Subscription } from 'rxjs';
 

@@ -13,6 +13,8 @@ using Domain.Models.GatheringNodes;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Slots;
+using Domain.Models.Items.EssenceItems;
 using Domain.Models.LootTables;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
@@ -61,11 +63,17 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
             .HasValue<NPC>(2)
             .HasValue<Creature>(3);
 
-        modelBuilder.Entity<Item>()
+        modelBuilder.Entity<ItemBase>()
             .HasDiscriminator<ItemType>("ItemType")
-            .HasValue<Item>(ItemType.Misc)
-            .HasValue<Equipment>(ItemType.Equipment)
-            .HasValue<EssenceItem>(ItemType.Essence);
+            .HasValue<ItemBase>(ItemType.Misc)
+            .HasValue<EquipmentBase>(ItemType.Equipment)
+            .HasValue<EssenceItemBase>(ItemType.Essence);
+
+        modelBuilder.Entity<ItemInstance>()
+            .HasDiscriminator<ItemType>("ItemType")
+            .HasValue<ItemInstance>(ItemType.Misc)
+            .HasValue<EquipmentInstance>(ItemType.Equipment)
+            .HasValue<EssenceItemInstance>(ItemType.Essence);
 
         modelBuilder.Entity<ActionDetails>()
             .HasDiscriminator<CharacterActionType>("ActionType")
@@ -114,10 +122,11 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
     //public DbSet<Echo> Echoes => Set<Echo>();
 
     public DbSet<Entity> Entities => Set<Entity>();
+    public DbSet<EquipmentSlot> EquipmentSlots => Set<EquipmentSlot>();
 
     public DbSet<Essence> Essences => Set<Essence>();
     public DbSet<EssenceSlot> EssenceSlots => Set<EssenceSlot>();
-    public DbSet<EssenceItem> EssenceItems => Set<EssenceItem>();
+    public DbSet<EssenceItemBase> EssenceItems => Set<EssenceItemBase>();
 
     // Effects
 
@@ -141,7 +150,8 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
 
     public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
 
-    public DbSet<Item> Items => Set<Item>();
+    public DbSet<ItemBase> ItemBases => Set<ItemBase>();
+    public DbSet<ItemInstance> ItemInstances => Set<ItemInstance>();
     public DbSet<LootTable> LootTables => Set<LootTable>();
     public DbSet<LootTableItem> LootTableItems => Set<LootTableItem>();
 

@@ -1,8 +1,17 @@
+import { AttributeModifier } from './Dtos/attributesDto';
+import { EquipmentType } from './Dtos/equipmentSlot';
 import { ItemType } from './enums/itemType';
 import { Rarity } from './enums/rarity';
 import { Essence } from './essence';
 
-export interface Item {
+export interface ItemInstance {
+  id: string;
+  itemBase: ItemBase;
+}
+
+export interface EquipmentInstance extends ItemInstance {}
+
+export interface ItemBase {
   id: string;
   name: string;
   rarity: Rarity;
@@ -12,6 +21,11 @@ export interface Item {
   iconPath: string;
 }
 
-export interface EssenceItem extends Item {
+export interface Equipment extends ItemBase {
+  equipmentType: EquipmentType;
+  attributeModifiers: AttributeModifier[];
+}
+
+export interface EssenceItem extends ItemBase {
   essence: Essence;
 }

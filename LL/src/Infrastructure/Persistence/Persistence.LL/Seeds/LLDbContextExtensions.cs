@@ -1,5 +1,6 @@
 ﻿using Domain.Helpers;
 using Domain.Models.Attributes;
+using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
@@ -7,6 +8,9 @@ using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.GatheringNodes;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
+using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Slots;
+using Domain.Models.Items.EssenceItems;
 using Domain.Models.LootTables;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
@@ -19,6 +23,18 @@ public static class LLDbContextExtensions
     public const string CHARACTER_GUID = "11111111-1111-1111-1111-111111111111";
 
     public static async Task SeedData(this LLDbContext context, UserManager<AppUser> userManager)
+    {
+        await SeedCreaturesAndLootTablesForShenicRegionLumoRuins(context);
+
+        await SeedItemsAndLootTables(context);
+        await SeedAdminData(context, userManager);
+
+        await SeedInventoryItems(context);
+
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedAdminData(LLDbContext context, UserManager<AppUser> userManager)
     {
         var email = "admin@hotmail.com";
         var user = await userManager.FindByEmailAsync(email);
@@ -127,20 +143,36 @@ public static class LLDbContextExtensions
                     EntityId = character.Id,
                 },
             };
-
+            SeedEquipmentSlots(character);
             character.EssenceSlots = essenceSlots;
             context.Characters.Add(character);
             context.Inventories.Add(inventory);
             await context.Essences.AddRangeAsync(essences);
         }
+    }
 
-        await SeedCreaturesAndLootTablesForShenicRegionLumoRuins(context);
+    private static void SeedEquipmentSlots(Entity entity)
+    {
 
-        await SeedItemsAndLootTables(context);
+        var slotTypes = Enum.GetValues(typeof(EquipmentType)).Cast<EquipmentType>();
 
-        await SeedInventoryItems(context);
+        // Create an equipment slot for each enum value
+        var equipmentSlots = slotTypes
+            .Select(type => new EquipmentSlot
+            {
+                EntityId = entity.Id,
+                EquipmentType = type
+            })
+            .ToList();
 
-        await context.SaveChangesAsync();
+        //foreach (var equipmentSlot in equipmentSlots)
+        //{
+        //    if (equipmentSlot.EquipmentType == EquipmentType.MainHand)
+        //    {
+        //        equipmentSlot.EquipmentId = Guid.Parse("00000000-1000-0000-0000-000000000001");
+        //    }
+        //}
+        entity.EquipmentSlots = equipmentSlots;
     }
 
 
@@ -265,7 +297,7 @@ public static class LLDbContextExtensions
             };
 
             // Step 3 - Essence Items
-            var goblinEssenceItem = new EssenceItem
+            var goblinEssenceItem = new EssenceItemBase
             {
                 Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
                 IconPath = "essence-item.svg",
@@ -274,7 +306,7 @@ public static class LLDbContextExtensions
                 ItemType = ItemType.Essence,
                 Rarity = Rarity.Unique
             };
-            var goblinWarriorEssenceItem = new EssenceItem
+            var goblinWarriorEssenceItem = new EssenceItemBase
             {
                 Id = Guid.NewGuid(),
                 IconPath = "essence-item.svg",
@@ -283,7 +315,7 @@ public static class LLDbContextExtensions
                 ItemType = ItemType.Essence,
                 Rarity = Rarity.Unique
             };
-            var goblinArcherEssenceItem = new EssenceItem
+            var goblinArcherEssenceItem = new EssenceItemBase
             {
                 Id = Guid.NewGuid(),
                 IconPath = "essence-item.svg",
@@ -292,7 +324,7 @@ public static class LLDbContextExtensions
                 ItemType = ItemType.Essence,
                 Rarity = Rarity.Unique
             };
-            var largeRatEssenceItem = new EssenceItem
+            var largeRatEssenceItem = new EssenceItemBase
             {
                 Id = Guid.Parse("00000000-0000-0000-0000-000000000004"),
                 IconPath = "essence-item.svg",
@@ -301,7 +333,7 @@ public static class LLDbContextExtensions
                 ItemType = ItemType.Essence,
                 Rarity = Rarity.Unique
             };
-            var flameImpEssenceItem = new EssenceItem
+            var flameImpEssenceItem = new EssenceItemBase
             {
                 Id = flameImpId,
                 IconPath = "essence-item.svg",
@@ -310,7 +342,7 @@ public static class LLDbContextExtensions
                 ItemType = ItemType.Essence,
                 Rarity = Rarity.Unique
             };
-            var frostImpEssenceItem = new EssenceItem
+            var frostImpEssenceItem = new EssenceItemBase
             {
                 Id = frostImpId,
                 IconPath = "essence-item.svg",
@@ -319,7 +351,7 @@ public static class LLDbContextExtensions
                 ItemType = ItemType.Essence,
                 Rarity = Rarity.Unique
             };
-            var shadowImpEssenceItem = new EssenceItem
+            var shadowImpEssenceItem = new EssenceItemBase
             {
                 Id = shadowImpId,
                 IconPath = "essence-item.svg",
@@ -328,7 +360,7 @@ public static class LLDbContextExtensions
                 ItemType = ItemType.Essence,
                 Rarity = Rarity.Unique
             };
-            var vampireBatEssenceItem = new EssenceItem
+            var vampireBatEssenceItem = new EssenceItemBase
             {
                 Id = vampireBatId,
                 IconPath = "essence-item.svg",
@@ -337,7 +369,7 @@ public static class LLDbContextExtensions
                 ItemType = ItemType.Essence,
                 Rarity = Rarity.Unique
             };
-            var blueSlimeEssenceItem = new EssenceItem
+            var blueSlimeEssenceItem = new EssenceItemBase
             {
                 Id = blueSlimeId,
                 IconPath = "essence-item.svg",
@@ -346,7 +378,7 @@ public static class LLDbContextExtensions
                 ItemType = ItemType.Essence,
                 Rarity = Rarity.Unique
             };
-            var brownSlimeEssenceItem = new EssenceItem
+            var brownSlimeEssenceItem = new EssenceItemBase
             {
                 Id = brownSlimeId,
                 IconPath = "essence-item.svg",
@@ -355,7 +387,7 @@ public static class LLDbContextExtensions
                 ItemType = ItemType.Essence,
                 Rarity = Rarity.Unique
             };
-            var greenSlimeEssenceItem = new EssenceItem
+            var greenSlimeEssenceItem = new EssenceItemBase
             {
                 Id = greenSlimeId,
                 IconPath = "essence-item.svg",
@@ -364,7 +396,7 @@ public static class LLDbContextExtensions
                 ItemType = ItemType.Essence,
                 Rarity = Rarity.Unique
             };
-            var rainbowSlimeEssenceItem = new EssenceItem
+            var rainbowSlimeEssenceItem = new EssenceItemBase
             {
                 Id = rainbowSlimeId,
                 IconPath = "essence-item.svg",
@@ -373,7 +405,7 @@ public static class LLDbContextExtensions
                 ItemType = ItemType.Essence,
                 Rarity = Rarity.Unique
             };
-            var redSlimeEssenceItem = new EssenceItem
+            var redSlimeEssenceItem = new EssenceItemBase
             {
                 Id = redSlimeId,
                 IconPath = "essence-item.svg",
@@ -382,7 +414,7 @@ public static class LLDbContextExtensions
                 ItemType = ItemType.Essence,
                 Rarity = Rarity.Unique
             };
-            var transparentSlimeEssenceItem = new EssenceItem
+            var transparentSlimeEssenceItem = new EssenceItemBase
             {
                 Id = transparentSlimeId,
                 IconPath = "essence-item.svg",
@@ -578,9 +610,9 @@ public static class LLDbContextExtensions
             };
 
 
-            await context.Items.AddRangeAsync(goblinEssenceItem, goblinWarriorEssenceItem, goblinArcherEssenceItem, largeRatEssenceItem);
-            await context.Items.AddRangeAsync(flameImpEssenceItem, frostImpEssenceItem, shadowImpEssenceItem, vampireBatEssenceItem);
-            await context.Items.AddRangeAsync(blueSlimeEssenceItem, brownSlimeEssenceItem, greenSlimeEssenceItem, rainbowSlimeEssenceItem, redSlimeEssenceItem, transparentSlimeEssenceItem);
+            await context.ItemBases.AddRangeAsync(goblinEssenceItem, goblinWarriorEssenceItem, goblinArcherEssenceItem, largeRatEssenceItem);
+            await context.ItemBases.AddRangeAsync(flameImpEssenceItem, frostImpEssenceItem, shadowImpEssenceItem, vampireBatEssenceItem);
+            await context.ItemBases.AddRangeAsync(blueSlimeEssenceItem, brownSlimeEssenceItem, greenSlimeEssenceItem, rainbowSlimeEssenceItem, redSlimeEssenceItem, transparentSlimeEssenceItem);
             await context.Essences.AddRangeAsync(goblinEssence, goblinWarriorEssence, goblinArcherEssence, largeRatEssence);
             await context.Essences.AddRangeAsync(flameImpEssence, frostImpEssence, shadowImpEssence, vampireBatEssence);
             await context.Essences.AddRangeAsync(blueSlimeEssence, brownSlimeEssence, greenSlimeEssence, rainbowSlimeEssence, redSlimeEssence, transparentSlimeEssence);
@@ -845,7 +877,7 @@ public static class LLDbContextExtensions
 
     public static async Task SeedItemsAndLootTables(LLDbContext context)
     {
-        if (!context.LootTables.Any() && !context.Items.Any())
+        if (!context.LootTables.Any() && !context.ItemBases.Any())
         {
             await SeedOddGear(context);
 
@@ -857,27 +889,42 @@ public static class LLDbContextExtensions
     {
         if (!context.InventoryItems.Any())
         {
+            var goblinEssenceItemInstance = new EssenceItemInstance
+            {
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+                ItemBaseId = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+            };
+            var ratEssenceItemInstance = new EssenceItemInstance
+            {
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000004"),
+                ItemBaseId = Guid.Parse("00000000-0000-0000-0000-000000000004"),
+            };
+            var swordEquipmentInstance = new EquipmentInstance
+            {
+                Id = Guid.Parse("00000000-1000-0000-0000-000000000001"),
+                ItemBaseId = Guid.Parse("00000000-1000-0000-0000-000000000001"),
+            };
             var inventoryItemGoblinEssence = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemId = Guid.Parse("00000000-0000-0000-0000-000000000001"), // Copied directly from GoblinEssenceItem. Same ID
+                ItemInstanceId = Guid.Parse("00000000-0000-0000-0000-000000000001"), // Copied directly from GoblinEssenceItem. Same ID
                 Quantity = 1
             };
 
             var inventoryItemRatEssence = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemId = Guid.Parse("00000000-0000-0000-0000-000000000004"), // Copied directly from LargeRatEssenceItem. Same ID
+                ItemInstanceId = Guid.Parse("00000000-0000-0000-0000-000000000004"), // Copied directly from LargeRatEssenceItem. Same ID
                 Quantity = 1
             };
 
             var inventoryItemSword = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemId = Guid.Parse("00000000-0000-0000-0000-000000000005"), // Copied directly from SwordItem. Same ID
+                ItemInstanceId = Guid.Parse("00000000-1000-0000-0000-000000000001"), // Copied directly from SwordItem. Same ID
                 Quantity = 1
             };
-
+            await context.ItemInstances.AddRangeAsync(goblinEssenceItemInstance, ratEssenceItemInstance, swordEquipmentInstance);
             await context.InventoryItems.AddRangeAsync(inventoryItemGoblinEssence, inventoryItemRatEssence, inventoryItemSword);
         }
     }
@@ -885,21 +932,24 @@ public static class LLDbContextExtensions
     public static async Task SeedOddGear(LLDbContext context)
     {
         // Create Items
-        var sword = new Item
+        var sword = new EquipmentBase
         {
-            Id = Guid.NewGuid(),
-            IconPath = "reward-item.png",
-            Name = "Sword"
+            Id = Guid.Parse("00000000-1000-0000-0000-000000000001"),
+            IconPath = "iron_sword.png",
+            Name = "Iron Sword",
+            Description = "Worn down through years of use.",
+            Rarity = Rarity.Common,
+            EquipmentType = EquipmentType.MainHand
         };
 
-        var shield = new Item
+        var shield = new ItemBase
         {
             Id = Guid.NewGuid(),
             IconPath = "reward-item.png",
             Name = "Shield"
         };
 
-        var potion = new Item
+        var potion = new ItemBase
         {
             Id = Guid.NewGuid(),
             IconPath = "reward-item.png",
@@ -922,7 +972,7 @@ public static class LLDbContextExtensions
         };
 
 
-        await context.Items.AddRangeAsync(sword, shield, potion);
+        await context.ItemBases.AddRangeAsync(sword, shield, potion);
 
         await context.LootTableItems.AddRangeAsync(swordLTI, shieldLTI, potionLTI);
 
@@ -930,35 +980,35 @@ public static class LLDbContextExtensions
         var lootTable = new LootTable
         {
             Id = Guid.NewGuid(),
-            Entries = new List<LootTableEntry> { swordLTI, shieldLTI, potionLTI }
+            Entries = [swordLTI, shieldLTI, potionLTI]
         };
 
-        context.LootTables.Add(lootTable);
+        await context.LootTables.AddAsync(lootTable);
     }
 
     public static async Task SeedWoodcuttingLootTables(LLDbContext context)
     {
         // Create Items for Tree Drops
-        var treeLog = new Item { Id = Guid.NewGuid(),
+        var treeLog = new ItemBase { Id = Guid.NewGuid(),
             IconPath = "reward-item.png",
             Name = "Tree Log" };
-        var nest = new Item { Id = Guid.NewGuid(),
+        var nest = new ItemBase { Id = Guid.NewGuid(),
             IconPath = "reward-item.png",
             Name = "Nest" };
         
-        var oakLog = new Item { Id = Guid.NewGuid(),
+        var oakLog = new ItemBase { Id = Guid.NewGuid(),
             IconPath = "reward-item.png",
             Name = "Oak Log" };
         
-        var birchLog = new Item { Id = Guid.NewGuid(),
+        var birchLog = new ItemBase { Id = Guid.NewGuid(),
             IconPath = "reward-item.png",
             Name = "Birch Log" };
-        var rareHerb = new Item { Id = Guid.NewGuid(),
+        var rareHerb = new ItemBase { Id = Guid.NewGuid(),
             IconPath = "reward-item.png",
             Name = "Rare Herb" };
 
         // Add items to context
-        await context.Items.AddRangeAsync(treeLog, nest, oakLog, birchLog, rareHerb);
+        await context.ItemBases.AddRangeAsync(treeLog, nest, oakLog, birchLog, rareHerb);
 
         // Create LootTableRarities for Tree
         var treeLootTableLegendary = new LootTable

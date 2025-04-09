@@ -1,10 +1,9 @@
-﻿using Domain.Models.Abilities;
-using Domain.Models.Attributes;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using Domain.Models.Abilities;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Essences.EssenceSlots;
-using Domain.Models.Items;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
+using Domain.Models.Items.EssenceItems;
 
 namespace Domain.Models.Essences;
 public class Essence
@@ -23,5 +22,5 @@ public class Essence
     [JsonIgnore]
     public ICollection<EssenceSlot> EssenceSlots { get; set; } = [];
     [JsonIgnore]
-    public ICollection<EssenceItem> EssenceItems { get; set; } = [];
+    public ICollection<EssenceItemBase> EssenceItems { get; set; } = [];
 }

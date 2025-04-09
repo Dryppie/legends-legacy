@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { EquippedEssencesComponent } from '../../../../shared/components/essences/equipped-essences/equipped-essences.component';
-import { CharacterService } from '../../../../core/services/character/character.service';
+import { CharacterService } from '../../../../core/services/api/character/character.service';
 import { CharacterOverviewDto } from '../../../../shared/models/Dtos/characterDto';
 import { Observable } from 'rxjs';
 import { CharacterAttributesComponent } from '../../../../shared/components/character/character-attributes/character-attributes.component';
 import { AsyncPipe, NgIf } from '@angular/common';
-import { EquipmentOverviewComponent } from "../../../../shared/components/equipment-overview/equipment-overview.component";
+import { EquipmentOverviewComponent } from '../../../../shared/components/equipment-overview/equipment-overview.component';
 
 @Component({
   selector: 'app-character-overview',
@@ -17,8 +17,8 @@ import { EquipmentOverviewComponent } from "../../../../shared/components/equipm
     CharacterAttributesComponent,
     AsyncPipe,
     NgIf,
-    EquipmentOverviewComponent
-],
+    EquipmentOverviewComponent,
+  ],
   templateUrl: './character-overview.component.html',
   styleUrl: './character-overview.component.css',
 })

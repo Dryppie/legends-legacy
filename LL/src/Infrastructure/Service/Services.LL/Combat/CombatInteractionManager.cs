@@ -140,8 +140,8 @@ public class CombatInteractionManager : ICombatInteractionManager
     public int CalculateBasicAttackDamage(CombatEntity actor, CombatEntity target, float baseDamage)
     {
         // Check equipment
-        var weapon = actor.Equipment.FirstOrDefault(e => e.EquipmentType == EquipmentType.Weapon)
-                     ?? new Weapon { DamageType = DamageType.Physical };
+        //var weapon = actor.Equipment.FirstOrDefault(e => e.EquipmentBase.EquipmentType == EquipmentType.MainHand)
+        //             ?? new Weapon { DamageType = DamageType.Physical };
 
         var finalDamage = baseDamage + (actor.CombatAttributes[AttributeType.Strength] / 6); //TODO: Need proper calculation. Likely scaling of weapon
         finalDamage = CombatConstants.GetRandomValue(finalDamage);

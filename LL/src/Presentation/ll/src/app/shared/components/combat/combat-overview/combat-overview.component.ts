@@ -3,7 +3,7 @@ import { Component, Input, SimpleChanges } from '@angular/core';
 import { CombatOverviewItemComponent } from './combat-overview-item/combat-overview-item.component';
 import { CombatEvent, EventType } from '../../../models/Dtos/combatEventDto';
 import { StickyScrollDirective } from '../../../directives/sticky-scroll/sticky-scroll.directive';
-import { ModalService } from '../../../../core/services/modal/modal.service';
+import { ModalService } from '../../../../core/services/client-side/modal/modal.service';
 
 @Component({
   selector: 'app-combat-overview',

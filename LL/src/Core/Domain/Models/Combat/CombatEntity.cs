@@ -30,7 +30,7 @@ public class CombatEntity
     public int NextRecoveryIn = 500; // This defines when the character regenerates health and mana.
     public ICollection<EntityAttribute> BaseAttributes { get; set; } = [];
     public bool IsAlive => CombatAttributes.FirstOrDefault(cm => cm.Key.Equals(AttributeType.Health)).Value > 0;
-    public List<Equipment> Equipment { get; set; } = [];
+    public List<EquipmentInstance> Equipment { get; set; } = [];
     public Dictionary<AttributeType, float> BaseCombatAttributes { get; } = [];
     public Dictionary<AttributeType, float> CombatAttributes { get; } = [];
     public List<AttributeModifier> TemporaryModifiers { get; set; } = [];

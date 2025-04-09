@@ -1,6 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { ModalService } from '../../../../core/services/modal/modal.service';
-import { EssencesService } from '../../../../core/services/essences/essences.service';
+import { ModalService } from '../../../../core/services/client-side/modal/modal.service';
 import { Essence } from '../../../models/essence';
 
 @Component({

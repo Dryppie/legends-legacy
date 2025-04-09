@@ -1,6 +1,7 @@
 ﻿using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Essences;
+using Application.Interfaces.Services.LL.Items;
 using Microsoft.Extensions.DependencyInjection;
 using Services.LL._Simulator;
 using Services.LL.Attributes;
@@ -13,6 +14,7 @@ using Services.LL.Essences;
 using Services.LL.Gatherings;
 using Services.LL.Interfaces;
 using Services.LL.Inventories;
+using Services.LL.Items;
 using Services.LL.Levels;
 using Services.LL.Loots;
 using Services.LL.LootTables;
@@ -39,6 +41,7 @@ public static class DependencyInjection
         services.AddScoped<ICombatService, CombatService>();
 
         services.AddScoped<IEntityService, EntityService>();
+        services.AddScoped<IEquipmentSlotService, EquipmentSlotService>();
 
         services.AddScoped<IEssenceService, EssenceService>();
         services.AddScoped<IEssenceDescriptionService, EssenceDescriptionService>();

@@ -7,6 +7,6 @@ public class InventoryItemConfiguration : IEntityTypeConfiguration<InventoryItem
 {
     public void Configure(EntityTypeBuilder<InventoryItem> builder)
     {
-        builder.HasKey(ii => new { ii.InventoryId, ii.ItemId });
+        builder.HasKey(ii => new { ii.InventoryId, ii.ItemInstanceId });
     }
 }

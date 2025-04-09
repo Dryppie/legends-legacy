@@ -1,27 +1,29 @@
-<div class="bg-gray-900 text-white flex flex-col items-center py-6">
-    <div class="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-12">
-      <!-- Equipment Slots -->
-      <div class="grid grid-cols-2 gap-4">
-        <div
-          *ngFor="let slot of slots; let i = index"
-          class="relative w-20 h-20 bg-gray-700 border border-primary rounded flex items-center justify-center"
-        >
-          <span class="text-sm text-gray-300 pointer-events-none">
-            <img
-                src="icons/equipment-slots/{{slot.icon}}.svg"
-                alt="Logo"
-                class="center w-60 object-contain"/>
-          </span>
-          <!-- Example: if something is already equipped, show it -->
-          <!--
+<div class="flex flex-col items-center py-6">
+  <div
+    class="flex flex-col items-center space-y-6 md:flex-row md:items-start md:space-x-12 md:space-y-0"
+  >
+    <!-- Equipment Slots -->
+    <div class="grid grid-cols-2 gap-4">
+      <div
+        *ngFor="let slot of slots; let i = index"
+        (click)="handleSlotClick(slot)"
+        class="bg-gray-700 relative flex h-20 w-20 cursor-pointer items-center justify-center rounded border border-primary"
+      >
+        <ng-container *ngIf="!slot.equipmentInstance; else equippedTemplate">
           <img
-            *ngIf="equippedItems[i]"
-            [src]="equippedItems[i].icon"
-            alt="{{equippedItems[i].name}}"
-            class="absolute object-contain w-3/4 h-3/4"
+            src="icons/equipment-slots/{{ slot.iconPath }}.svg"
+            alt="empty_equipment"
+            class="center w-60 object-contain"
           />
-          -->
-        </div>
+        </ng-container>
+        <ng-template #equippedTemplate>
+          <img
+            src="icons/items/{{ slot.equipmentInstance!.itemBase!.iconPath }}"
+            alt="equipment"
+            class="center w-60 object-contain"
+          />
+        </ng-template>
       </div>
     </div>
   </div>
+</div>

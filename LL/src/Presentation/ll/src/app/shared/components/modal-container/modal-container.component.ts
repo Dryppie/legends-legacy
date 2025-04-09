@@ -1,12 +1,14 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { ModalService } from '../../../core/services/modal/modal.service';
+import { ModalService } from '../../../core/services/client-side/modal/modal.service';
 import { NgIf } from '@angular/common';
 import { Essence } from '../../models/essence';
 import { EssenceModalComponent } from './essence-modals/essence-modal/essence-modal.component';
 import { AbsorbEssenceModalComponent } from './essence-modals/absorb-essence-modal/absorb-essence-modal.component';
 import { RemoveEssenceModalComponent } from './essence-modals/remove-essence-modal/remove-essence-modal.component';
 import { CombatFiltersModalComponent } from './combat-modals/combat-filters-modal/combat-filters-modal.component';
+import { EquipmentModalComponent } from './equipment-modals/equipment-modal/equipment-modal.component';
+import { Equipment } from '../../models/item';
 
 @Component({
   selector: 'app-modal-container',
@@ -17,6 +19,7 @@ import { CombatFiltersModalComponent } from './combat-modals/combat-filters-moda
     AbsorbEssenceModalComponent,
     RemoveEssenceModalComponent,
     CombatFiltersModalComponent,
+    EquipmentModalComponent,
   ],
   templateUrl: './modal-container.component.html',
   styleUrl: './modal-container.component.css',
@@ -24,6 +27,7 @@ import { CombatFiltersModalComponent } from './combat-modals/combat-filters-moda
 export class ModalContainerComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
 
+  equipment: Equipment | null = null;
   essence: Essence | null = null;
   absorbEssence: Essence[] | null = null;
   removeEssence: Essence[] | null = null;
@@ -32,7 +36,11 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
   constructor(private modalService: ModalService) {}
 
   ngOnInit() {
-    // Subscribe to Essence modal changes
+    this.subscriptions.push(
+      this.modalService.equipmentModalState$.subscribe(
+        (data: Equipment | null) => (this.equipment = data),
+      ),
+    );
     this.subscriptions.push(
       this.modalService.essenceModalState$.subscribe(
         (data: Essence | null) => (this.essence = data),
@@ -64,6 +72,7 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
   // (here, we just have the essenceData for example).
   get isModalOpen(): boolean {
     return (
+      !!this.equipment ||
       !!this.essence ||
       !!this.absorbEssence ||
       !!this.removeEssence ||
@@ -76,11 +85,16 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
     if (event.target === event.currentTarget) {
       // Closes whichever modal is open. If you have multiple modals open,
       // you'd close them accordingly.
+      this.onEquipmentModalClose();
       this.onEssenceModalClose();
       this.onAbsorbEssenceModalClose();
       this.onRemoveEssenceModalClose();
       this.onEditCombatFiltersModalClose();
     }
+  }
+
+  onEquipmentModalClose() {
+    this.modalService.toggleEquipItemModal();
   }
 
   onEssenceModalClose() {

@@ -1,0 +1,8 @@
+﻿using Domain.Models.Items.Equipments.Slots;
+
+namespace Domain.Models.Items.Equipments;
+public interface IEquipmentSlotRepository
+{
+    Task<List<EquipmentSlot>> GetEquipmentSlotsByEntityIdAsync(Guid entityId, CancellationToken cancellationToken);
+    Task<bool> EquipEquipmentAsync(Guid entityId, Guid equipmentId, CancellationToken cancellationToken);
+}

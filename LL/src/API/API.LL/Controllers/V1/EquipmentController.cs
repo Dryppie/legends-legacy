@@ -1,14 +1,13 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Application.UseCases.Equipments.Commands.EquipEquipment;
+using Application.UseCases.Equipments.Dtos;
+using Application.UseCases.Equipments.Queries.GetMyEquipment;
 using Microsoft.AspNetCore.Mvc;
-using MediatR;
-using System.Threading.Tasks;
-using System;
 
 namespace API.LL.Controllers.V1;
 public class EquipmentController : BaseController
 {
-    [HttpGet("{id}")]
-    public async Task<IActionResult> Get()
+    [HttpGet]
+    public async Task<List<EquipmentSlotDto>> Get()
     {
         return await Mediator.Send(new GetMyEquipmentQuery(CurrentCharacterGuid));
     }
@@ -21,12 +20,11 @@ public class EquipmentController : BaseController
     //    return Ok(result);
     //}
 
-    //[HttpPost]
-    //public async Task<IActionResult> Create([FromBody] CreateEquipmentCommand command)
-    //{
-    //    var result = await _mediator.Send(command);
-    //    return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
-    //}
+    [HttpPost("Equip")]
+    public async Task<bool> Equip([FromBody] string equipmentItemId)
+    {
+        return await Mediator.Send(new EquipEquipmentCommand(CurrentCharacterGuid, equipmentItemId));
+    }
 
     //[HttpDelete("{id}")]
     //public async Task<IActionResult> Delete(Guid id)

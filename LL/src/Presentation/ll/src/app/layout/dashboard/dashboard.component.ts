@@ -1,12 +1,11 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { RouterOutlet } from '@angular/router';
-import { InventoryComponent } from '../../features/game/character/inventory/inventory.component';
 import { NavbarComponent } from './navbar/navbar.component';
 import { BackButtonComponent } from '../../shared/components/back-button/back-button.component';
 import { AsyncPipe, NgClass, NgIf } from '@angular/common';
 import { Observable } from 'rxjs';
-import { GameService } from '../../core/services/game/game.service';
+import { GameService } from '../../core/services/client-side/game/game.service';
 import { CombatComponent } from '../../shared/components/combat/combat.component';
 
 @Component({

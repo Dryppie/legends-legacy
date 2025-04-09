@@ -1,30 +1,26 @@
-﻿using Application.UseCases.Equipments.Dtos;
+﻿using Application.Interfaces.Services.LL.Items;
+using Application.UseCases.Equipments.Dtos;
 using AutoMapper;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.UseCases.Equipments.Queries.GetMyEquipment;
-public record GetEquipmentQuery(Guid EquipmentId) : IRequest<EquipmentDto>;
+public record GetMyEquipmentQuery(Guid EntityId) : IRequest<List<EquipmentSlotDto>>;
 
-public class GetEquipmentQueryHandler : IRequestHandler<GetEquipmentQuery, EquipmentDto>
+public class GetEquipmentQueryHandler : IRequestHandler<GetMyEquipmentQuery, List<EquipmentSlotDto>>
 {
-    private readonly IEquipmentService _equipmentService;
+    private readonly IEquipmentSlotService _equipmentService;
     private readonly IMapper _mapper;
 
-    public GetEquipmentQueryHandler(IEquipmentService equipmentService, IMapper mapper)
+    public GetEquipmentQueryHandler(IEquipmentSlotService equipmentService, IMapper mapper)
     {
         _equipmentService = equipmentService;
         _mapper = mapper;
     }
 
-    public async Task<EquipmentDto> Handle(GetEquipmentQuery request, CancellationToken cancellationToken)
+    public async Task<List<EquipmentSlotDto>> Handle(GetMyEquipmentQuery request, CancellationToken cancellationToken)
     {
-        var equipment = await _equipmentService.GetEquipmentByIdAsync(request.EquipmentId, cancellationToken);
+        var equipment = await _equipmentService.GetEquipmentSlotsByEntityIdAsync(request.EntityId, cancellationToken);
 
-        return _mapper.Map<EquipmentDto>(equipment);
+        return _mapper.Map<List<EquipmentSlotDto>>(equipment);
     }
 }

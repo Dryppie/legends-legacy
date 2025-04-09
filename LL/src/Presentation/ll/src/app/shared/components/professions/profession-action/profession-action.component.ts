@@ -3,7 +3,7 @@ import { NgIf } from '@angular/common';
 import { ProgressBarComponent } from '../../progress-bar/progress-bar.component';
 import { CharacterActionDto } from '../../../models/Dtos/characterActionDto';
 import { Subscription } from 'rxjs';
-import { CharacterActionsService } from '../../../../core/services/character-actions/character-actions.service';
+import { CharacterActionsService } from '../../../../core/services/api/character-actions/character-actions.service';
 import { CharacterActionType } from '../../../models/enums/characterActionType';
 
 @Component({

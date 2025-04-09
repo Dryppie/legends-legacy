@@ -2,7 +2,7 @@
 using Common.Exceptions;
 using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
-using Domain.Models.Items;
+using Domain.Models.Items.EssenceItems;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Essences;
@@ -21,28 +21,29 @@ public class EssenceRepository : IEssenceRepository
                 .ThenInclude(es => es.OccupiedEssence)
             .Include(c => c.Inventory)
                 .ThenInclude(inv => inv.InventoryItems)
-                    .ThenInclude(ii => ii.Item)
-                        .ThenInclude(i => (i as EssenceItem).Essence)
+                    .ThenInclude(ii => ii.ItemInstance)
+                        .ThenInclude(ii => ii.ItemBase)
+                            .ThenInclude(ib => (ib as EssenceItemBase).Essence)
             .FirstOrDefaultAsync(c => c.Id == characterId, cancellationToken);
 
         // Throw if the character does not exist
         NotFoundException.ThrowIfNull(character, nameof(character), characterId);
 
         var inventoryItem = character.Inventory.InventoryItems
-            .FirstOrDefault(ii => ii.Item is EssenceItem ei && ei.Essence.Id.Equals(essenceItemId));
+            .FirstOrDefault(ii => ii.ItemInstance is EssenceItemInstance ei && ei.ItemBase is EssenceItemBase eib && eib.Id.Equals(essenceItemId));
 
         // Throw if the item was not found
         NotFoundException.ThrowIfNull(inventoryItem, nameof(inventoryItem), essenceItemId);
 
-        var essenceItem = inventoryItem.Item as EssenceItem;
+        var essenceItem = inventoryItem.ItemInstance as EssenceItemInstance;
         NotFoundException.ThrowIfNull(essenceItem, nameof(essenceItem), essenceItemId);
 
-        var essence = essenceItem.Essence;
+        var essence = (essenceItem.ItemBase as EssenceItemBase)!.Essence;
         NotFoundException.ThrowIfNull(essence, nameof(essence), essenceItemId);
 
         if (inventoryItem.Quantity < 1)
         {
-            throw new InvalidOperationException($"You do not have this item in your inventory. Item with ID {inventoryItem.ItemId}.");
+            throw new InvalidOperationException($"You do not have this item in your inventory. Item with ID {inventoryItem.ItemInstanceId}.");
         }
 
         // Check if the character has already equipped this essence
@@ -104,8 +105,9 @@ public class EssenceRepository : IEssenceRepository
                 .ThenInclude(es => es.OccupiedEssence)
             .Include(c => c.Inventory)
                 .ThenInclude(inv => inv.InventoryItems)
-                    .ThenInclude(ii => ii.Item)
-                        .ThenInclude(i => (i as EssenceItem).Essence)
+                    .ThenInclude(ii => ii.ItemInstance)
+                        .ThenInclude(ii => ii.ItemBase)
+                            .ThenInclude(i => (i as EssenceItemBase).Essence)
             .FirstOrDefaultAsync(c => c.Id == characterId, cancellationToken);
 
         NotFoundException.ThrowIfNull(character, nameof(character), characterId);
@@ -113,7 +115,9 @@ public class EssenceRepository : IEssenceRepository
         var equippedEssencesAndInventoryEssences = new EquippedEssencesAndInventoryEssences
         {
             EquippedEssences = [.. character.EssenceSlots.Where(es => es.OccupiedEssence != null).Select(es => es.OccupiedEssence)],
-            InventoryEssences = [.. character.Inventory.InventoryItems.Where(ii => ii.Item is EssenceItem).Select(ii => (ii.Item as EssenceItem).Essence)]
+            InventoryEssences = [.. character.Inventory.InventoryItems
+                .Where(ii => ii.ItemInstance is EssenceItemInstance eii && eii.ItemBase is EssenceItemBase)
+                    .Select(ii => ((ii.ItemInstance as EssenceItemInstance)!.ItemBase as EssenceItemBase)!.Essence)]
         };
 
         return equippedEssencesAndInventoryEssences;

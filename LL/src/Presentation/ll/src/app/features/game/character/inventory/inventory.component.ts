@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { TabComponent } from '../../../../shared/components/tab/tab.component';
 import { Tab } from '../../../../shared/models/sidebar-item';
 import { InventorySlotComponent } from '../../../../shared/components/inventory-slot/inventory-slot.component';
-import { InventoryService } from '../../../../core/services/inventory/inventory.service';
+import { InventoryService } from '../../../../core/services/api/inventory/inventory.service';
 import { InventoryDto } from '../../../../shared/models/Dtos/inventoryDto';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
@@ -75,17 +75,20 @@ export class InventoryComponent implements OnInit {
 
       case 'Equipment':
         return this.items.filter(
-          (inventoryItem) => inventoryItem.item.itemType === 'Equipment',
+          (inventoryItem) =>
+            inventoryItem.itemInstance.itemBase.itemType === 'Equipment',
         );
 
       case 'Resources':
         return this.items.filter(
-          (inventoryItem) => inventoryItem.item.itemType === 'Material',
+          (inventoryItem) =>
+            inventoryItem.itemInstance.itemBase.itemType === 'Material',
         );
 
       case 'Essences':
         return this.items.filter(
-          (inventoryItem) => inventoryItem.item.itemType === 'Essence',
+          (inventoryItem) =>
+            inventoryItem.itemInstance.itemBase.itemType === 'Essence',
         );
 
       default:
