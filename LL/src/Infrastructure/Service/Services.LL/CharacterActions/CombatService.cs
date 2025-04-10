@@ -60,8 +60,8 @@ public class CombatService : ICombatService
             var selectedAreaCreatures = _spawningService.WhatAreaCreaturesToSpawn([.. combatAction.Area.Creatures], monsterCount);
             var selectedEnemyIds = selectedAreaCreatures.Select(c => c.CreatureId).ToList();
 
-            selectedCombatEnemyEntities = [.. selectedEnemyIds.Select(id => allCombatEnemyEntities.First(ee => ee.OriginalId.Equals(id)))];
-
+            selectedCombatEnemyEntities = [.. selectedEnemyIds.Select(id => allCombatEnemyEntities.First(ee => ee.OriginalId.Equals(id)).Copy())];
+            AppendPrefixToId(selectedCombatEnemyEntities);
             var combatSimulation = new CombatSimulation(combatPlayerEntities, selectedCombatEnemyEntities);
             lastCombatResult = combatSimulation.RunSimulation();
 
@@ -82,9 +82,9 @@ public class CombatService : ICombatService
             // Reset entities when combat is over
             // Also process loot, since it's fight that should have already happened
             // If it's a fight where the frontend has yet to display the outcome, the loot should first be processed when the fight is 'over'
-            
+
             ResetEntitiesForCombat([.. combatPlayerEntities, .. selectedCombatEnemyEntities]);
-            
+
             if (lastCombatResult.Outcome.Equals(BattleOutcome.Victory))
             {
                 var selectedEnemyEntities = new List<Entity>();
@@ -124,6 +124,22 @@ public class CombatService : ICombatService
 
         return combatEntities;
     }
+    private void AppendPrefixToId(List<CombatEntity> selectedCombatEnemyEntities)
+    {
+        var groupedEntities = selectedCombatEnemyEntities
+            .GroupBy(e => e.Id);
+
+        foreach (var group in groupedEntities)
+        {
+            int increment = 1;
+            foreach (var entity in group)
+            {
+                entity.Id = $"{entity.Id}_{increment}";
+                increment++;
+            }
+        }
+    }
+
 
     private async Task<List<Entity>> GetPlayerCharactersAsync(List<Guid> characterTeam, CancellationToken cancellationToken)
     {
@@ -138,13 +154,10 @@ public class CombatService : ICombatService
     private static List<CombatEntity> CreateCombatEntities(List<Entity> entities)
     {
         var combatEntities = new List<CombatEntity>();
-        var increment = 1;
         foreach (var entity in entities)
         {
             var combatEntity = new CombatEntity(entity);
-            combatEntity.Id = $"{entity.Id}_{increment}";
             combatEntities.Add(combatEntity);
-            increment++;
         }
         return combatEntities;
     }
@@ -159,8 +172,6 @@ public class CombatService : ICombatService
 
     private static async Task PrepareEntitiesForCombat(IEnumerable<CombatEntity> entities)
     {
-        //LoadAbilitiesFromEssences(entities);
-
         // Load abilities
         var loadedAttributeTasks = entities.Select(entity => Task.Run(() => EssenceLoader.Instance.LoadEssencesForCombatEntity(entity)));
 
@@ -169,18 +180,6 @@ public class CombatService : ICombatService
 
         await Task.WhenAll(loadedAttributeTasks);
         await Task.WhenAll(calculationTasks);
-    }
-
-    private static void LoadAbilitiesFromEssences(IEnumerable<CombatEntity> entities)
-    {
-        foreach (var entity in entities)
-        {
-            foreach (var essence in entity.EquippedEssences)
-            {
-                entity.AbilityIds.Add(essence.ActiveAbilityId);
-                entity.AbilityIds.Add(essence.PassiveAbilityId);
-            }
-        }
     }
 
     private async Task ProcessLootAsync(Guid characterId, List<InventoryItem> loot, CancellationToken cancellationToken)

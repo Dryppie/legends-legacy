@@ -34,7 +34,6 @@ export class EquipmentOverviewComponent implements OnInit {
             matchingSlot.equipmentInstance = equipmentSlot.equipmentInstance;
           }
         });
-        console.log(equipmentList);
       });
   }
 

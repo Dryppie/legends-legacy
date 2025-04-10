@@ -957,37 +957,37 @@ public static class LLDbContextExtensions
             var inventoryItemBow = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-2000-0000-0000-000000000002"), // Copied directly from SwordItem. Same ID
+                ItemInstanceId = Guid.Parse("00000000-2000-0000-0000-000000000002"), // Copied directly from BowItem. Same ID
                 Quantity = 1
             };
             var inventoryItemAxe = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-3000-0000-0000-000000000003"), // Copied directly from SwordItem. Same ID
+                ItemInstanceId = Guid.Parse("00000000-3000-0000-0000-000000000003"), // Copied directly from AxeItem. Same ID
                 Quantity = 1
             };
             var inventoryItemDagger = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-4000-0000-0000-000000000004"), // Copied directly from SwordItem. Same ID
+                ItemInstanceId = Guid.Parse("00000000-4000-0000-0000-000000000004"), // Copied directly from DaggerItem. Same ID
                 Quantity = 1
             };
             var inventoryItemHammer = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-5000-0000-0000-000000000005"), // Copied directly from SwordItem. Same ID
+                ItemInstanceId = Guid.Parse("00000000-5000-0000-0000-000000000005"), // Copied directly from HammerItem. Same ID
                 Quantity = 1
             };
             var inventoryItemShield = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-6000-0000-0000-000000000006"), // Copied directly from SwordItem. Same ID
+                ItemInstanceId = Guid.Parse("00000000-6000-0000-0000-000000000006"), // Copied directly from ShieldItem. Same ID
                 Quantity = 1
             };
             var inventoryItemStaff = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-7000-0000-0000-000000000007"), // Copied directly from SwordItem. Same ID
+                ItemInstanceId = Guid.Parse("00000000-7000-0000-0000-000000000007"), // Copied directly from StaffItem. Same ID
                 Quantity = 1
             };
             await context.ItemInstances.AddRangeAsync(goblinEssenceItemInstance, ratEssenceItemInstance, swordEquipmentInstance, bowEquipmentInstance, axeEquipmentInstance, daggerEquipmentInstance, hammerEquipmentInstance, shieldEquipmentInstance, staffEquipmentInstance);

@@ -1,13 +1,12 @@
 ﻿using Application.Common.Mappings;
+using Application.UseCases.Inventories.Dtos;
 using AutoMapper;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 
 namespace Application.UseCases.Equipments.Dtos;
-public class EquipmentInstanceDto : IMapFrom<EquipmentInstance>
+public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
 {
-    public Guid Id { get; set; }
-    public ItemBase ItemBase { get; set; } = null!;
 
     public void Mapping(Profile profile)
     {

@@ -7,8 +7,8 @@ import { EssenceModalComponent } from './essence-modals/essence-modal/essence-mo
 import { AbsorbEssenceModalComponent } from './essence-modals/absorb-essence-modal/absorb-essence-modal.component';
 import { RemoveEssenceModalComponent } from './essence-modals/remove-essence-modal/remove-essence-modal.component';
 import { CombatFiltersModalComponent } from './combat-modals/combat-filters-modal/combat-filters-modal.component';
-import { EquipmentModalComponent } from './equipment-modals/equipment-modal/equipment-modal.component';
 import { Equipment } from '../../models/item';
+import { InventoryEquipmentModalComponent } from './equipment-modals/equipment-modal/inventory-equipment-modal.component';
 
 @Component({
   selector: 'app-modal-container',
@@ -19,7 +19,7 @@ import { Equipment } from '../../models/item';
     AbsorbEssenceModalComponent,
     RemoveEssenceModalComponent,
     CombatFiltersModalComponent,
-    EquipmentModalComponent,
+    InventoryEquipmentModalComponent,
   ],
   templateUrl: './modal-container.component.html',
   styleUrl: './modal-container.component.css',

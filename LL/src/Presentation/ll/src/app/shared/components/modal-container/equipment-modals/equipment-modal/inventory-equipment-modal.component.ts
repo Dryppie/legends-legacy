@@ -4,13 +4,13 @@ import { NgFor } from '@angular/common';
 import { Equipment } from '../../../../models/item';
 
 @Component({
-  selector: 'app-equipment-modal',
+  selector: 'app-inventory-equipment-modal',
   standalone: true,
   imports: [NgFor],
-  templateUrl: './equipment-modal.component.html',
-  styleUrl: './equipment-modal.component.css',
+  templateUrl: './inventory-equipment-modal.component.html',
+  styleUrl: './inventory-equipment-modal.component.css',
 })
-export class EquipmentModalComponent {
+export class InventoryEquipmentModalComponent {
   @Input() equipment!: Equipment;
   @Output() close = new EventEmitter<void>();
 

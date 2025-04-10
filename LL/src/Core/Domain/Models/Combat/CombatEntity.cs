@@ -6,6 +6,7 @@ using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Entities;
 using Domain.Models.Essences;
+using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Items.Equipments;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -19,8 +20,6 @@ public class CombatEntity
     public string Name { get; set; } = string.Empty;
     public string ImagePath { get; set; } = string.Empty;
     public ICollection<Essence> EquippedEssences { get; set; } = [];
-    [NotMapped]
-    public List<string> AbilityIds { get; set; } = [];
     public List<AbilityDefinition> Abilities { get; set; } = [];
     public int NextBasicAttackIn = 300; // TODO: Turn 300 into a Constant somewhere, as it is also stored in the CombatSimulator class
                                         // Every tick, this decrements by BaseAttackSpeed.
@@ -138,5 +137,30 @@ public class CombatEntity
     public int GetAttributeValue(AttributeType attributeType)
     {
         return CombatAttributes.TryGetValue(attributeType, out var attributeValue) ? (int)attributeValue : 0;
+    }
+
+    public CombatEntity(CombatEntity entity)
+    {
+        OriginalId = entity.OriginalId;
+        Id = entity.Id.ToString();
+        Name = entity.Name;
+        ImagePath = entity.ImagePath;
+        Abilities = [.. entity.Abilities.Select(a => a.Clone())];
+        NextBasicAttackIn = entity.NextBasicAttackIn;
+        NextRecoveryIn = entity.NextRecoveryIn;
+        Equipment = entity.Equipment.Select(e => e).ToList();
+        TemporaryModifiers = entity.TemporaryModifiers.Select(tm => tm).ToList();
+        BaseAttributes = [.. entity.BaseAttributes];
+        BaseCombatAttributes = new Dictionary<AttributeType, float>(entity.BaseCombatAttributes);
+        CombatAttributes = new Dictionary<AttributeType, float>(entity.CombatAttributes);
+        EquippedEssences = [.. entity.EquippedEssences];
+        Statuses = new Dictionary<StatusEffectType, int>(entity.Statuses);
+        Level = entity.Level;
+        IsSummoned = entity.IsSummoned;
+    }
+
+    public CombatEntity Copy()
+    {
+        return new CombatEntity(this);
     }
 }
