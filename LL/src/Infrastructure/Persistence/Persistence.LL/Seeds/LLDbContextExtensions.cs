@@ -904,6 +904,36 @@ public static class LLDbContextExtensions
                 Id = Guid.Parse("00000000-1000-0000-0000-000000000001"),
                 ItemBaseId = Guid.Parse("00000000-1000-0000-0000-000000000001"),
             };
+            var bowEquipmentInstance = new EquipmentInstance
+            {
+                Id = Guid.Parse("00000000-2000-0000-0000-000000000002"),
+                ItemBaseId = Guid.Parse("00000000-2000-0000-0000-000000000002"),
+            };
+            var axeEquipmentInstance = new EquipmentInstance
+            {
+                Id = Guid.Parse("00000000-3000-0000-0000-000000000003"),
+                ItemBaseId = Guid.Parse("00000000-3000-0000-0000-000000000003"),
+            };
+            var daggerEquipmentInstance = new EquipmentInstance
+            {
+                Id = Guid.Parse("00000000-4000-0000-0000-000000000004"),
+                ItemBaseId = Guid.Parse("00000000-4000-0000-0000-000000000004"),
+            };
+            var hammerEquipmentInstance = new EquipmentInstance
+            {
+                Id = Guid.Parse("00000000-5000-0000-0000-000000000005"),
+                ItemBaseId = Guid.Parse("00000000-5000-0000-0000-000000000005"),
+            };
+            var shieldEquipmentInstance = new EquipmentInstance
+            {
+                Id = Guid.Parse("00000000-6000-0000-0000-000000000006"),
+                ItemBaseId = Guid.Parse("00000000-6000-0000-0000-000000000006"),
+            };
+            var staffEquipmentInstance = new EquipmentInstance
+            {
+                Id = Guid.Parse("00000000-7000-0000-0000-000000000007"),
+                ItemBaseId = Guid.Parse("00000000-7000-0000-0000-000000000007"),
+            };
             var inventoryItemGoblinEssence = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
@@ -924,14 +954,77 @@ public static class LLDbContextExtensions
                 ItemInstanceId = Guid.Parse("00000000-1000-0000-0000-000000000001"), // Copied directly from SwordItem. Same ID
                 Quantity = 1
             };
-            await context.ItemInstances.AddRangeAsync(goblinEssenceItemInstance, ratEssenceItemInstance, swordEquipmentInstance);
-            await context.InventoryItems.AddRangeAsync(inventoryItemGoblinEssence, inventoryItemRatEssence, inventoryItemSword);
+            var inventoryItemBow = new InventoryItem()
+            {
+                InventoryId = Guid.Parse(CHARACTER_GUID),
+                ItemInstanceId = Guid.Parse("00000000-2000-0000-0000-000000000002"), // Copied directly from SwordItem. Same ID
+                Quantity = 1
+            };
+            var inventoryItemAxe = new InventoryItem()
+            {
+                InventoryId = Guid.Parse(CHARACTER_GUID),
+                ItemInstanceId = Guid.Parse("00000000-3000-0000-0000-000000000003"), // Copied directly from SwordItem. Same ID
+                Quantity = 1
+            };
+            var inventoryItemDagger = new InventoryItem()
+            {
+                InventoryId = Guid.Parse(CHARACTER_GUID),
+                ItemInstanceId = Guid.Parse("00000000-4000-0000-0000-000000000004"), // Copied directly from SwordItem. Same ID
+                Quantity = 1
+            };
+            var inventoryItemHammer = new InventoryItem()
+            {
+                InventoryId = Guid.Parse(CHARACTER_GUID),
+                ItemInstanceId = Guid.Parse("00000000-5000-0000-0000-000000000005"), // Copied directly from SwordItem. Same ID
+                Quantity = 1
+            };
+            var inventoryItemShield = new InventoryItem()
+            {
+                InventoryId = Guid.Parse(CHARACTER_GUID),
+                ItemInstanceId = Guid.Parse("00000000-6000-0000-0000-000000000006"), // Copied directly from SwordItem. Same ID
+                Quantity = 1
+            };
+            var inventoryItemStaff = new InventoryItem()
+            {
+                InventoryId = Guid.Parse(CHARACTER_GUID),
+                ItemInstanceId = Guid.Parse("00000000-7000-0000-0000-000000000007"), // Copied directly from SwordItem. Same ID
+                Quantity = 1
+            };
+            await context.ItemInstances.AddRangeAsync(goblinEssenceItemInstance, ratEssenceItemInstance, swordEquipmentInstance, bowEquipmentInstance, axeEquipmentInstance, daggerEquipmentInstance, hammerEquipmentInstance, shieldEquipmentInstance, staffEquipmentInstance);
+            await context.InventoryItems.AddRangeAsync(inventoryItemGoblinEssence, inventoryItemRatEssence, inventoryItemSword, inventoryItemBow, inventoryItemAxe, inventoryItemDagger, inventoryItemHammer, inventoryItemShield, inventoryItemStaff);
         }
     }
 
     public static async Task SeedOddGear(LLDbContext context)
     {
         // Create Items
+        var axe = new EquipmentBase
+        {
+            Id = Guid.Parse("00000000-3000-0000-0000-000000000003"),
+            IconPath = "iron_axe.png",
+            Name = "Iron Axe",
+            Description = "Worn down through years of use.",
+            Rarity = Rarity.Common,
+            EquipmentType = EquipmentType.MainHand
+        };
+        var dagger = new EquipmentBase
+        {
+            Id = Guid.Parse("00000000-4000-0000-0000-000000000004"),
+            IconPath = "iron_dagger.png",
+            Name = "Iron Dagger",
+            Description = "Worn down through years of use.",
+            Rarity = Rarity.Common,
+            EquipmentType = EquipmentType.MainHand
+        };
+        var hammer = new EquipmentBase
+        {
+            Id = Guid.Parse("00000000-5000-0000-0000-000000000005"),
+            IconPath = "iron_hammer.png",
+            Name = "Iron Hammer",
+            Description = "Worn down through years of use.",
+            Rarity = Rarity.Common,
+            EquipmentType = EquipmentType.MainHand
+        };
         var sword = new EquipmentBase
         {
             Id = Guid.Parse("00000000-1000-0000-0000-000000000001"),
@@ -941,12 +1034,32 @@ public static class LLDbContextExtensions
             Rarity = Rarity.Common,
             EquipmentType = EquipmentType.MainHand
         };
-
-        var shield = new ItemBase
+        var bow = new EquipmentBase
         {
-            Id = Guid.NewGuid(),
-            IconPath = "reward-item.png",
-            Name = "Shield"
+            Id = Guid.Parse("00000000-2000-0000-0000-000000000002"),
+            IconPath = "bow.png",
+            Name = "Bow",
+            Description = "Worn down through years of use.",
+            Rarity = Rarity.Common,
+            EquipmentType = EquipmentType.MainHand
+        };
+        var shield = new EquipmentBase
+        {
+            Id = Guid.Parse("00000000-6000-0000-0000-000000000006"),
+            IconPath = "shield.png",
+            Name = "Shield",
+            Description = "Worn down through years of use.",
+            Rarity = Rarity.Common,
+            EquipmentType = EquipmentType.OffHand
+        };
+        var staff = new EquipmentBase
+        {
+            Id = Guid.Parse("00000000-7000-0000-0000-000000000007"),
+            IconPath = "staff.png",
+            Name = "Staff",
+            Description = "Worn down through years of use.",
+            Rarity = Rarity.Common,
+            EquipmentType = EquipmentType.MainHand
         };
 
         var potion = new ItemBase
@@ -960,10 +1073,30 @@ public static class LLDbContextExtensions
         {
             ItemId = sword.Id,
         };
-
+        var axeLTI = new LootTableItem
+        {
+            ItemId = axe.Id,
+        };
+        var daggerLTI = new LootTableItem
+        {
+            ItemId = dagger.Id,
+        };
+        var hammerLTI = new LootTableItem
+        {
+            ItemId = hammer.Id,
+        };
         var shieldLTI = new LootTableItem
         {
             ItemId = shield.Id,
+        };
+        var staffLTI = new LootTableItem
+        {
+            ItemId = staff.Id,
+        };
+
+        var bowLTI = new LootTableItem
+        {
+            ItemId = bow.Id,
         };
 
         var potionLTI = new LootTableItem
@@ -972,15 +1105,15 @@ public static class LLDbContextExtensions
         };
 
 
-        await context.ItemBases.AddRangeAsync(sword, shield, potion);
+        await context.ItemBases.AddRangeAsync(axe, dagger, hammer, sword, bow, shield, staff, potion);
 
-        await context.LootTableItems.AddRangeAsync(swordLTI, shieldLTI, potionLTI);
+        await context.LootTableItems.AddRangeAsync(swordLTI, bowLTI, axeLTI, daggerLTI, hammerLTI, shieldLTI, staffLTI, potionLTI);
 
         // Create LootTable and associate items with it
         var lootTable = new LootTable
         {
             Id = Guid.NewGuid(),
-            Entries = [swordLTI, shieldLTI, potionLTI]
+            Entries = [swordLTI, bowLTI, potionLTI]
         };
 
         await context.LootTables.AddAsync(lootTable);
