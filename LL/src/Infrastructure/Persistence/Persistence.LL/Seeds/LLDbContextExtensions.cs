@@ -1,5 +1,6 @@
 ﻿using Domain.Helpers;
 using Domain.Models.Attributes;
+using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
@@ -998,6 +999,10 @@ public static class LLDbContextExtensions
     public static async Task SeedOddGear(LLDbContext context)
     {
         // Create Items
+        var axeAttributes = new List<ItemAttributeModifier>()
+        {
+            new(AttributeType.Strength, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = Guid.Parse("00000000-3000-0000-0000-000000000003") },
+        };
         var axe = new EquipmentBase
         {
             Id = Guid.Parse("00000000-3000-0000-0000-000000000003"),
@@ -1005,7 +1010,12 @@ public static class LLDbContextExtensions
             Name = "Iron Axe",
             Description = "Worn down through years of use.",
             Rarity = Rarity.Common,
-            EquipmentType = EquipmentType.MainHand
+            EquipmentType = EquipmentType.MainHand,
+            AttributeModifiers = axeAttributes,
+        };
+        var daggerAttributes = new List<ItemAttributeModifier>()
+        {
+            new(AttributeType.Dexterity, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = Guid.Parse("00000000-4000-0000-0000-000000000004") },
         };
         var dagger = new EquipmentBase
         {
@@ -1014,7 +1024,12 @@ public static class LLDbContextExtensions
             Name = "Iron Dagger",
             Description = "Worn down through years of use.",
             Rarity = Rarity.Common,
-            EquipmentType = EquipmentType.MainHand
+            EquipmentType = EquipmentType.MainHand,
+            AttributeModifiers = daggerAttributes,
+        };
+        var hammerAttributes = new List<ItemAttributeModifier>()
+        {
+            new(AttributeType.Endurance, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = Guid.Parse("00000000-5000-0000-0000-000000000005") },
         };
         var hammer = new EquipmentBase
         {
@@ -1023,7 +1038,12 @@ public static class LLDbContextExtensions
             Name = "Iron Hammer",
             Description = "Worn down through years of use.",
             Rarity = Rarity.Common,
-            EquipmentType = EquipmentType.MainHand
+            EquipmentType = EquipmentType.MainHand,
+            AttributeModifiers = hammerAttributes,
+        };
+        var swordAttributes = new List<ItemAttributeModifier>()
+        {
+            new(AttributeType.FightingSpirit, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = Guid.Parse("00000000-1000-0000-0000-000000000001") } ,
         };
         var sword = new EquipmentBase
         {
@@ -1032,7 +1052,12 @@ public static class LLDbContextExtensions
             Name = "Iron Sword",
             Description = "Worn down through years of use.",
             Rarity = Rarity.Common,
-            EquipmentType = EquipmentType.MainHand
+            EquipmentType = EquipmentType.MainHand,
+            AttributeModifiers = swordAttributes,
+        };
+        var bowAttributes = new List<ItemAttributeModifier>()
+        {
+            new(AttributeType.Agility, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = Guid.Parse("00000000-2000-0000-0000-000000000002") } ,
         };
         var bow = new EquipmentBase
         {
@@ -1041,7 +1066,12 @@ public static class LLDbContextExtensions
             Name = "Bow",
             Description = "Worn down through years of use.",
             Rarity = Rarity.Common,
-            EquipmentType = EquipmentType.MainHand
+            EquipmentType = EquipmentType.MainHand,
+            AttributeModifiers = bowAttributes,
+        };
+        var shieldAttributes = new List<ItemAttributeModifier>()
+        {
+            new(AttributeType.Constitution, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = Guid.Parse("00000000-6000-0000-0000-000000000006") } ,
         };
         var shield = new EquipmentBase
         {
@@ -1050,7 +1080,12 @@ public static class LLDbContextExtensions
             Name = "Shield",
             Description = "Worn down through years of use.",
             Rarity = Rarity.Common,
-            EquipmentType = EquipmentType.OffHand
+            EquipmentType = EquipmentType.OffHand,
+            AttributeModifiers = shieldAttributes,
+        };
+        var staffAttributes = new List<ItemAttributeModifier>()
+        {
+            new(AttributeType.Intelligence, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = Guid.Parse("00000000-7000-0000-0000-000000000007") } ,
         };
         var staff = new EquipmentBase
         {
@@ -1059,7 +1094,8 @@ public static class LLDbContextExtensions
             Name = "Staff",
             Description = "Worn down through years of use.",
             Rarity = Rarity.Common,
-            EquipmentType = EquipmentType.MainHand
+            EquipmentType = EquipmentType.MainHand,
+            AttributeModifiers = staffAttributes,
         };
 
         var potion = new ItemBase

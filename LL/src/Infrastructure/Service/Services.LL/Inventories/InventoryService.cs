@@ -1,6 +1,4 @@
 ﻿using Application.Interfaces.Services.LL;
-using Domain.Components.Attributes;
-using Domain.Models.Entities.Characters;
 using Domain.Models.Inventories;
 using Domain.Models.Items.EssenceItems;
 using Services.LL.Interfaces;
@@ -21,9 +19,8 @@ public class InventoryService : IInventoryService
     public async Task<Inventory> GetInventoryByIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var inventory = await _inventoryRepository.GetInventoryByIdAsync(characterId, cancellationToken);
-        var character = await _characterService.GetMyCharacterOverviewAsync(characterId, cancellationToken);
-        //var stats = await _attributeService.GetAttributesByCharacterIdAsync(characterId, cancellationToken);
-        AttributeCalculator.CalculateBaseAttributes(character);
+        var character = await _characterService.GetMyCharacterOverviewAsync(characterId, cancellationToken); // Called to calculate correct description for abilities (X-Y damage / heal)
+        
         foreach (var inventoryItem in inventory.InventoryItems)
         {
             if (inventoryItem.ItemInstance is EssenceItemInstance ei && ei.ItemBase is EssenceItemBase eib)

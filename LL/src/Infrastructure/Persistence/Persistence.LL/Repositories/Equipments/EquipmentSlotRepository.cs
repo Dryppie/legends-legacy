@@ -28,6 +28,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
 
     public async Task<bool> EquipEquipmentAsync(Guid entityId, Guid equipmentId, CancellationToken cancellationToken)
     {
+        // Include all equipped items, and all items from inventory
         var character = await _context.Characters
             .Include(c => c.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)

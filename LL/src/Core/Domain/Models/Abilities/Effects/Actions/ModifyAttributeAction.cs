@@ -7,11 +7,11 @@ using Domain.Models.Combat;
 namespace Domain.Models.Abilities.Effects.Actions;
 public class ModifyAttributeAction : IEffectAction
 {
-    public AttributeModifier AttributeModifier;
+    public AbilityAttributeModifier AttributeModifier;
     public bool Stackable;
     public int Magnitude => 1;
 
-    public ModifyAttributeAction(AttributeModifier attributeModifier, bool stackable)
+    public ModifyAttributeAction(AbilityAttributeModifier attributeModifier, bool stackable)
     {
         AttributeModifier = attributeModifier;
         Stackable = stackable;

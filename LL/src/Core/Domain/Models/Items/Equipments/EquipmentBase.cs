@@ -5,6 +5,6 @@ namespace Domain.Models.Items.Equipments;
 public class EquipmentBase : ItemBase
 {
     public EquipmentType EquipmentType { get; set; }
-    public ICollection<AttributeModifier> AttributeModifiers { get; set; } = [];
+    public ICollection<ItemAttributeModifier> AttributeModifiers { get; set; } = [];
     //public EquipmentBehavior EquipmentBehavior { get; set; } = null!;
 }

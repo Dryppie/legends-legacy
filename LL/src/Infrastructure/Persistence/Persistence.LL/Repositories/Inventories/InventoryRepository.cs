@@ -2,6 +2,7 @@
 using Common.Exceptions;
 using Common.Helpers.Essences;
 using Domain.Models.Inventories;
+using Domain.Models.Items.Equipments;
 using Domain.Models.Items.EssenceItems;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +22,10 @@ public class InventoryRepository : IInventoryRepository
                 .ThenInclude(ii => ii.ItemInstance)
                     .ThenInclude(ii => ii.ItemBase)
                         .ThenInclude(ib => (ib as EssenceItemBase).Essence)
+            .Include(i => i.InventoryItems)
+                .ThenInclude(ii => ii.ItemInstance)
+                    .ThenInclude(ii => ii.ItemBase)
+                        .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
             .FirstOrDefaultAsync(i => i.CharacterId == characterId, cancellationToken); // Assuming CharacterId is the foreign key
 
         NotFoundException.ThrowIfNull(inventory, nameof(inventory), characterId);

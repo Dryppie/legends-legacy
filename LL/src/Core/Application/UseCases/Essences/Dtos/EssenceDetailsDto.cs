@@ -10,7 +10,7 @@ public class EssenceDetailsDto : IMapFrom<Essence>
     public string Name { get; set; } = string.Empty;
     public AbilityDescriptionDto Active { get; set; } = null!;
     public AbilityDescriptionDto Passive { get; set; } = null!;
-    public List<AttributeModifier> AttributeModifiers { get; set; } = [];
+    public List<AbilityAttributeModifier> AttributeModifiers { get; set; } = [];
 
     public void Mapping(Profile profile)
     {

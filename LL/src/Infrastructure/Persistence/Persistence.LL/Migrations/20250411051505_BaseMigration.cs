@@ -284,6 +284,33 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ItemAttributeModifier",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ItemBaseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EquipmentBaseId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    AttributeType = table.Column<int>(type: "int", nullable: false),
+                    Amount = table.Column<float>(type: "real", nullable: false),
+                    ModifierType = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ItemAttributeModifier", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ItemAttributeModifier_ItemBases_EquipmentBaseId",
+                        column: x => x.EquipmentBaseId,
+                        principalTable: "ItemBases",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ItemAttributeModifier_ItemBases_ItemBaseId",
+                        column: x => x.ItemBaseId,
+                        principalTable: "ItemBases",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ItemInstances",
                 columns: table => new
                 {
@@ -679,6 +706,16 @@ namespace Persistence.LL.Migrations
                 column: "AppUserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ItemAttributeModifier_EquipmentBaseId",
+                table: "ItemAttributeModifier",
+                column: "EquipmentBaseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ItemAttributeModifier_ItemBaseId",
+                table: "ItemAttributeModifier",
+                column: "ItemBaseId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ItemBases_EssenceId",
                 table: "ItemBases",
                 column: "EssenceId");
@@ -748,6 +785,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "IPAddress");
+
+            migrationBuilder.DropTable(
+                name: "ItemAttributeModifier");
 
             migrationBuilder.DropTable(
                 name: "Transaction");

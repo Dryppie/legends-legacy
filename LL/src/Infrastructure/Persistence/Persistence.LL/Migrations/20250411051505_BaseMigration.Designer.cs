@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250410045656_BaseMigration")]
+    [Migration("20250411051505_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -52,6 +52,36 @@ namespace Persistence.LL.Migrations
                     b.HasKey("EntityId", "AttributeType");
 
                     b.ToTable("EntityAttributes");
+                });
+
+            modelBuilder.Entity("Domain.Models.Attributes.Modifiers.ItemAttributeModifier", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<float>("Amount")
+                        .HasColumnType("real");
+
+                    b.Property<int>("AttributeType")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("EquipmentBaseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ItemBaseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ModifierType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EquipmentBaseId");
+
+                    b.HasIndex("ItemBaseId");
+
+                    b.ToTable("ItemAttributeModifier");
                 });
 
             modelBuilder.Entity("Domain.Models.CharacterActions.CharacterAction", b =>
@@ -788,6 +818,21 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Domain.Models.Attributes.Modifiers.ItemAttributeModifier", b =>
+                {
+                    b.HasOne("Domain.Models.Items.Equipments.EquipmentBase", null)
+                        .WithMany("AttributeModifiers")
+                        .HasForeignKey("EquipmentBaseId");
+
+                    b.HasOne("Domain.Models.Items.ItemBase", "ItemBase")
+                        .WithMany()
+                        .HasForeignKey("ItemBaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ItemBase");
+                });
+
             modelBuilder.Entity("Domain.Models.CharacterActions.CharacterAction", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Characters.Character", "Character")
@@ -1108,6 +1153,11 @@ namespace Persistence.LL.Migrations
 
                     b.Navigation("Inventory")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.EquipmentBase", b =>
+                {
+                    b.Navigation("AttributeModifiers");
                 });
 
             modelBuilder.Entity("Domain.Models.LootTables.LootTable", b =>

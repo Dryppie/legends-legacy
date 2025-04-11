@@ -1,5 +1,4 @@
-﻿
-namespace Domain.Models.Attributes;
+﻿namespace Domain.Models.Attributes;
 public class EntityAttribute
 {
     public Guid EntityId { get; set; }

@@ -2,7 +2,6 @@
 using AutoMapper;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Characters;
-using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
 
 namespace Application.UseCases.Characters.Dtos;

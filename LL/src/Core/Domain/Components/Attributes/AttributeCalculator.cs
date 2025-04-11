@@ -3,7 +3,7 @@ using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
 using Domain.Models.Entities;
-using Domain.Models.Essences.EssenceSlots;
+using Domain.Models.Items.Equipments;
 
 namespace Domain.Components.Attributes;
 public static class AttributeCalculator
@@ -24,6 +24,11 @@ public static class AttributeCalculator
         }
 
         foreach (var attributeModifier in entity.EssenceSlots.ActiveSlotsWithOccupiedEssences().Select(es => es.OccupiedEssence).SelectMany(e => e.AttributeModifiers))
+        {
+            entity.BaseCombatAttributes[attributeModifier.AttributeType] += attributeModifier.Amount;
+        }
+
+        foreach (var attributeModifier in entity.EquipmentSlots.Where(es => es.EquipmentInstance != null).Select(es => es.EquipmentInstance.ItemBase as EquipmentBase).SelectMany(eb => eb.AttributeModifiers))
         {
             entity.BaseCombatAttributes[attributeModifier.AttributeType] += attributeModifier.Amount;
         }

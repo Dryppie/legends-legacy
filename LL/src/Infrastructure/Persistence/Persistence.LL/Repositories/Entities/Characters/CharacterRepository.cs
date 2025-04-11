@@ -4,6 +4,7 @@ using Common.Helpers.Essences;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
+using Domain.Models.Items.Equipments;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Entities.Characters;
@@ -93,9 +94,11 @@ public class CharacterRepository : ICharacterRepository
             .Include(c => c.EssenceSlots)
                 .ThenInclude(es => es.OccupiedEssence)
             .Include(c => c.BaseAttributes)
-        //.Include(c => c.RawAttributes)
-        //.ThenInclude(a => a.AttributeBase)
-            .FirstOrDefaultAsync(c => c.Id.Equals(characterId));
+            .Include(c => c.EquipmentSlots)
+                .ThenInclude(es => es.EquipmentInstance)
+                    .ThenInclude(ei => ei.ItemBase)
+                        .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
+            .FirstOrDefaultAsync(c => c.Id.Equals(characterId), cancellationToken);
 
         NotFoundException.ThrowIfNull(character, nameof(Character), characterId);
 

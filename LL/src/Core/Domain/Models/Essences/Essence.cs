@@ -17,7 +17,7 @@ public class Essence
     [NotMapped]
     public AbilityDefinition Active { get; set; } = null!;
     [NotMapped]
-    public List<AttributeModifier> AttributeModifiers { get; set; } = [];
+    public List<AbilityAttributeModifier> AttributeModifiers { get; set; } = [];
 
     [JsonIgnore]
     public ICollection<EssenceSlot> EssenceSlots { get; set; } = [];

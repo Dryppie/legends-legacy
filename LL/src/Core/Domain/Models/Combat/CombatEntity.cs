@@ -1,4 +1,5 @@
-﻿using Domain.Components.Attributes;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Components.Attributes;
 using Domain.Extensions;
 using Domain.Models.Abilities;
 using Domain.Models.Abilities.Effects.StatusEffects;
@@ -6,9 +7,7 @@ using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Entities;
 using Domain.Models.Essences;
-using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Items.Equipments;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Models.Combat;
 [NotMapped]
@@ -32,7 +31,7 @@ public class CombatEntity
     public List<EquipmentInstance> Equipment { get; set; } = [];
     public Dictionary<AttributeType, float> BaseCombatAttributes { get; } = [];
     public Dictionary<AttributeType, float> CombatAttributes { get; } = [];
-    public List<AttributeModifier> TemporaryModifiers { get; set; } = [];
+    public List<AttributeModifierBase> TemporaryModifiers { get; set; } = [];
     public Dictionary<StatusEffectType, int> Statuses { get; } = [];
     public int Level { get; set; }
     public bool IsSummoned = false;
@@ -65,7 +64,7 @@ public class CombatEntity
         }
     }
 
-    public void ModifyAttribute(AttributeModifier attributeModifier, bool remove = false)
+    public void ModifyAttribute(AttributeModifierBase attributeModifier, bool remove = false)
     {
         if (remove)
             TemporaryModifiers.Remove(attributeModifier);
