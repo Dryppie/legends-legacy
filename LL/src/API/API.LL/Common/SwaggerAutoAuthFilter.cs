@@ -60,7 +60,7 @@ public class SwaggerAutoAuthFilter : IOperationFilter
         var userEmail = _configuration["SwaggerOptions:UserEmail"];
         if (!string.IsNullOrEmpty(userEmail))
         {
-            var token = GenerateTokenForUserByEmail(userEmail).Result;
+            var token = GenerateTokenForUserByEmail(userEmail, CancellationToken.None).Result;
             if (token != null)
             {
                 // Add a default value to swagger's Authorization here
@@ -80,7 +80,7 @@ public class SwaggerAutoAuthFilter : IOperationFilter
         }
     }
 
-    private async Task<Tokens?> GenerateTokenForUserByEmail(string email)
+    private async Task<Tokens?> GenerateTokenForUserByEmail(string email, CancellationToken cancellationToken)
     {
         using (var scope = _serviceProvider.CreateScope())
         {
@@ -94,7 +94,7 @@ public class SwaggerAutoAuthFilter : IOperationFilter
                 return null;
             }
 
-            var character = await characterService.GetMyCharacterAsync(Guid.Parse(user.Id));
+            var character = await characterService.GetMyCharacterAsync(Guid.Parse(user.Id), cancellationToken);
 
             var authInfo = new AuthInfo
             {

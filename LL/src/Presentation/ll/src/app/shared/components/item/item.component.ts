@@ -1,5 +1,5 @@
-import { Component, HostListener, Input } from '@angular/core';
-import { Item } from '../../models/item';
+import { Component, Input } from '@angular/core';
+import { ItemInstance } from '../../models/item';
 import { NgIf } from '@angular/common';
 import { ItemTooltipComponent } from '../tooltips/item-tooltip/itemTooltip.component';
 
@@ -11,7 +11,7 @@ import { ItemTooltipComponent } from '../tooltips/item-tooltip/itemTooltip.compo
   styleUrl: './item.component.css',
 })
 export class ItemComponent {
-  @Input() item!: Item;
+  @Input() item!: ItemInstance;
   itemHovered: boolean = false;
   tooltipPosition = {};
 

@@ -45,7 +45,7 @@ public class DamageAction : IEffectAction
         }
 
         // Damage opponent will receive
-        var damageResult = combatContext.InteractionManager.CalculateDamageBreakdown(context.Target, damageAmount, attackOutcome);
+        var damageResult = combatContext.InteractionManager.CalculateDamageBreakdown(context.Target, damageAmount, attackOutcome, context.Effect.Definition.DamageType);
 
         context.AttackOutcome = attackOutcome;
         context.Magnitude = damageResult.HealthDamage; // Only set HealthDamage, as that's what we'll use to deduct from Health. TotalDamage is only for the Log
@@ -56,6 +56,10 @@ public class DamageAction : IEffectAction
 
         if (damageResult.IsCrit)
             context.Details = context.Details.Replace("{Amount}", $"{context.Magnitude} critical");
+        else if (context.AttackOutcome == AttackOutcome.Parry)
+            context.Details = context.Details.Replace("{Amount}", $"{context.Magnitude} parried");
+        else if (context.AttackOutcome == AttackOutcome.Block)
+            context.Details = context.Details.Replace("{Amount}", $"{context.Magnitude} blocked");
         else
             context.Details = context.Details.Replace("{Amount}", context.Magnitude.ToString());
 

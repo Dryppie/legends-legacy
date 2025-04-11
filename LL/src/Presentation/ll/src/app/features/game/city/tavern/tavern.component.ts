@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
-import { CharacterService } from '../../../../core/services/character/character.service';
+import { CharacterService } from '../../../../core/services/api/character/character.service';
 import { CharacterLeaderboardDto } from '../../../../shared/models/Dtos/characterLeaderboardDto';
 import { NgFor } from '@angular/common';
 

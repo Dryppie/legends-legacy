@@ -17,14 +17,14 @@ public interface ICharacterService
     /// </summary>
     /// <param name="CurrentUserId"></param>
     /// <returns></returns>
-    public Task<Character> GetMyCharacterAsync(Guid CurrentUserId);
+    public Task<Character> GetMyCharacterAsync(Guid CurrentUserId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Get Character by Character Id
     /// </summary>
     /// <param name="UserId"></param>
     /// <returns></returns>
-    public Task<Character> GetCharacterByCharacterIdAsync(Guid CharacterId);
+    public Task<Character> GetCharacterByCharacterIdAsync(Guid CharacterId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Get Character Overview by Character Id

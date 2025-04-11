@@ -6,7 +6,7 @@ import {
 } from '../../../shared/models/Dtos/combatResultDto';
 import { BehaviorSubject } from 'rxjs';
 import { CombatEvent } from '../../../shared/models/Dtos/combatEventDto';
-import { EventBusService } from '../../services/event-bus/event-bus.service';
+import { EventBusService } from '../../services/client-side/event-bus/event-bus.service';
 
 @Injectable({
   providedIn: 'root',

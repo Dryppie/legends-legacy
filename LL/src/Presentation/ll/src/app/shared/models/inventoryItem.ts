@@ -1,7 +1,7 @@
-import { Item } from './item';
+import { ItemInstance } from './item';
 
 export interface InventoryItem {
   id: string;
-  item: Item;
+  itemInstance: ItemInstance;
   quantity?: number;
 }

@@ -2,7 +2,8 @@
 using Common.Exceptions;
 using Common.Helpers.Essences;
 using Domain.Models.Inventories;
-using Domain.Models.Items;
+using Domain.Models.Items.Equipments;
+using Domain.Models.Items.EssenceItems;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Inventories;
@@ -18,18 +19,23 @@ public class InventoryRepository : IInventoryRepository
     {
         var inventory = await _context.Inventories
             .Include(i => i.InventoryItems)
-                .ThenInclude(ii => ii.Item)
-                    .ThenInclude(i => (i as EssenceItem).Essence)
+                .ThenInclude(ii => ii.ItemInstance)
+                    .ThenInclude(ii => ii.ItemBase)
+                        .ThenInclude(ib => (ib as EssenceItemBase).Essence)
+            .Include(i => i.InventoryItems)
+                .ThenInclude(ii => ii.ItemInstance)
+                    .ThenInclude(ii => ii.ItemBase)
+                        .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
             .FirstOrDefaultAsync(i => i.CharacterId == characterId, cancellationToken); // Assuming CharacterId is the foreign key
 
         NotFoundException.ThrowIfNull(inventory, nameof(inventory), characterId);
 
-        var essenceItems = new List<EssenceItem>();
+        var essenceItems = new List<EssenceItemBase>();
         foreach (var inventoryItem in inventory.InventoryItems)
         {
-            if (inventoryItem.Item is EssenceItem essenceItem && essenceItem.Essence != null)
+            if (inventoryItem.ItemInstance is EssenceItemInstance ei && ei.ItemBase is EssenceItemBase eib && eib.Essence != null)
             {
-                EssenceLoader.Instance.LoadAbilitiesForEssence(essenceItem.Essence);
+                EssenceLoader.Instance.LoadAbilitiesForEssence(eib.Essence);
             }
         }
 
@@ -40,24 +46,24 @@ public class InventoryRepository : IInventoryRepository
     {
         // Aggregate the loot list to combine quantities of the same items
         var aggregatedLoot = loot
-            .GroupBy(item => item.ItemId)
+            .GroupBy(item => item.ItemInstanceId)
             .Select(group => new InventoryItem
             {
                 InventoryId = characterId,  // Assuming InventoryId is characterId
-                ItemId = group.Key,
+                ItemInstanceId = group.Key,
                 Quantity = group.Sum(item => item.Quantity)
             }).ToList();
 
         // Get all relevant InventoryItems in one database call
-        var itemIds = aggregatedLoot.Select(i => i.ItemId);
+        var itemIds = aggregatedLoot.Select(i => i.ItemInstanceId);
         var existingItems = _context.InventoryItems
-            .Where(i => i.InventoryId == characterId && itemIds.Contains(i.ItemId));
+            .Where(i => i.InventoryId == characterId && itemIds.Contains(i.ItemInstanceId));
 
         foreach (var item in aggregatedLoot)
         {
             // Check if the item already exists in the retrieved list of existing items
             var existingItem = existingItems
-                .FirstOrDefault(i => i.ItemId == item.ItemId);
+                .FirstOrDefault(i => i.ItemInstanceId == item.ItemInstanceId);
 
             if (existingItem != null)
             {

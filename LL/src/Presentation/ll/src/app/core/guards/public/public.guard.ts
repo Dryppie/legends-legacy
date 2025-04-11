@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthService } from '../../services/auth/auth.service';
+import { AuthService } from '../../services/api/auth/auth.service';
 import { filter, firstValueFrom, take } from 'rxjs';
 
 export const publicGuard: CanActivateFn = async (): Promise<boolean> => {

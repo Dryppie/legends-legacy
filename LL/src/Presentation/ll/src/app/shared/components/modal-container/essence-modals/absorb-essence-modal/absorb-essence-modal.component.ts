@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { Essence } from '../../../../models/essence';
-import { EssencesService } from '../../../../../core/services/essences/essences.service';
+import { EssencesService } from '../../../../../core/services/api/essences/essences.service';
 
 @Component({
   selector: 'app-absorb-essence-modal',

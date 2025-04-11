@@ -21,7 +21,6 @@ public static class EntityBaseAttributeHelper
     private static int GetBaseValueForAttribute(AttributeType attributeType)
     {
         // Define base values for each attribute type
-        // You can customize this logic as per your game's mechanics
         switch (attributeType)
         {
             // Primary Stats
@@ -37,26 +36,28 @@ public static class EntityBaseAttributeHelper
             case AttributeType.Instinct:
             case AttributeType.Perception:
             case AttributeType.Luck:
-                return 10; // Base value for primary stats
+                return 0; // Base value for primary stats
 
             // Combat Stats
             case AttributeType.MaxHealth:
             case AttributeType.Health:
-                return 100; // 10 Constition x 10 = 100
+                return 50;
             case AttributeType.HealthRegeneration:
-                return 3;
+                return 2;
             case AttributeType.MaxMana:
             case AttributeType.Mana:
-                return 50; // Base mana
+                return 20;
             case AttributeType.ManaRegeneration:
-                return 3;
+                return 2;
             case AttributeType.BasicAttackSpeed:
                 return 10;
+            case AttributeType.RecoveryRate:
+                return 10; // Determines how often you naturally recover health and mana (HealthRegeneration, ManaRegeneration)
             case AttributeType.Power:
-                return 50; // Base power
+                return 10; // Base power
             case AttributeType.PhysicalDefense:
             case AttributeType.MagicalDefense:
-                return 50; // Base defense
+                return 10; // Base defense
             case AttributeType.FlatDamageReduction:
                 return 0;
             case AttributeType.DamageReduction:

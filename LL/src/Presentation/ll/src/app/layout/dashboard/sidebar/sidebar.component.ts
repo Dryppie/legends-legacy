@@ -9,11 +9,10 @@ import {
 import { SidebarItemComponent } from './sidebar-item/sidebar-item.component';
 import { Router, RouterLink } from '@angular/router';
 import { SidebarItem, Tab } from '../../../shared/models/sidebar-item';
-import { SidebarService } from '../../../core/services/sidebar/sidebar.service';
+import { SidebarService } from '../../../core/services/client-side/sidebar/sidebar.service';
 import { TabComponent } from '../../../shared/components/tab/tab.component';
-import { GameService } from '../../../core/services/game/game.service';
-import { CharacterActionsService } from '../../../core/services/character-actions/character-actions.service';
-import { CharacterActionDto } from '../../../shared/models/Dtos/characterActionDto';
+import { GameService } from '../../../core/services/client-side/game/game.service';
+import { CharacterActionsService } from '../../../core/services/api/character-actions/character-actions.service';
 import { CurrentActionComponent } from '../../../shared/components/current-action/current-action.component';
 import { NamedStorageKeys } from '../../../core/common/enums/named-storage-keys';
 import { Observable } from 'rxjs';

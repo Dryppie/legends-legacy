@@ -1,7 +1,7 @@
 import { NgFor } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { Essence } from '../../../models/essence';
-import { ModalService } from '../../../../core/services/modal/modal.service';
+import { ModalService } from '../../../../core/services/client-side/modal/modal.service';
 import { EssenceSlot, SlotState } from '../../../models/essenceSlot';
 
 @Component({

@@ -11,14 +11,6 @@
       <div class="flex flex-col gap-1">
         <h3 class="font-semibold text-primary">Active Ability</h3>
         <div class="flex gap-1">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-primary"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <circle cx="12" cy="12" r="6" />
-          </svg>
           <div class="flex flex-col gap-1">
             <p>
               {{ essence.active.description }}
@@ -36,31 +28,26 @@
       </div>
 
       <div class="flex flex-col gap-1">
-        <h3 class="font-semibold text-primary">Active Ability</h3>
+        <h3 class="font-semibold text-primary">Passive Ability</h3>
         <div class="flex gap-1">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-5 w-5 text-primary"
-            fill="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <circle cx="12" cy="12" r="6" />
-          </svg>
-          <p>
-            {{ essence.passive.description }}
-          </p>
+            <div>
+              {{ essence.passive.description }}
+            </div>
         </div>
       </div>
-      <!-- <div>
-        <h3 class="pb-1 font-semibold text-primary">Stats</h3>
-        <ul class="ml-4 list-inside list-disc"> -->
-      <!-- <li *ngFor="let stat of essence.stats">
-          {{ stat.key }}: {{ stat.value }}
-        </li> -->
-      <!-- <li>Health: +50</li> -->
-      <!-- <li>Dexterity: +3</li>
-        </ul>
-      </div> -->
+      <div>
+        <h3 class="pb-1 font-semibold text-primary">Attributes</h3>
+      <div *ngFor="let attribute of essence.attributeModifiers" class="text-primary">
+        <div class="flex gap-2 text-white">
+          <div>
+            {{attribute.amount > 0 ? '+' : '-'}}{{ attribute.amount }}
+          </div>
+          <div>
+            {{ attribute.attributeType }}
+          </div>
+        </div>
+      </div>
+      </div>
     </div>
 
     <!-- Modal Footer -->

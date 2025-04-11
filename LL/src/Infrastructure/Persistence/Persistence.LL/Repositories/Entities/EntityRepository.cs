@@ -60,7 +60,7 @@ public class EntityRepository : IEntityRepository
 
         foreach (var entity in finalList)
         {
-            foreach (var essenceSlot in entity.EssenceSlots.ActiveSlotsWithEssences())
+            foreach (var essenceSlot in entity.EssenceSlots.ActiveSlotsWithOccupiedEssences())
             {
                 EssenceLoader.Instance.LoadAbilitiesForEssence(essenceSlot.OccupiedEssence!);
             }

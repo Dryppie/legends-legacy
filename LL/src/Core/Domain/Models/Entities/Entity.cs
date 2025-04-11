@@ -1,9 +1,9 @@
-﻿using Domain.Models.Abilities;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Models.Abilities;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Essences.EssenceSlots;
-using Domain.Models.Items.Equipments;
-using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Models.Items.Equipments.Slots;
 
 namespace Domain.Models.Entities;
 public abstract class Entity
@@ -12,6 +12,7 @@ public abstract class Entity
     public string Name { get; set; } = string.Empty;
     public ICollection<EntityAttribute> BaseAttributes { get; set; } = [];
     public ICollection<EssenceSlot> EssenceSlots { get; set; } = [];
+    public ICollection<EquipmentSlot> EquipmentSlots { get; set; } = [];
     [NotMapped]
     public List<string> AbilityIds { get; set; } = [];
     [NotMapped]
@@ -24,18 +25,17 @@ public abstract class Entity
                                         // and thust counting down faster to the next attack each tick
     public bool IsAlive => CombatAttributes.FirstOrDefault(cm => cm.Key.Equals(AttributeType.Health)).Value > 0;
     [NotMapped]
-    public List<Equipment> Equipment { get; set; } = [];
-    [NotMapped]
     public Dictionary<AttributeType, float> BaseCombatAttributes { get; } = [];
     [NotMapped]
     public Dictionary<AttributeType, float> CombatAttributes { get; } = [];
     [NotMapped]
-    public List<AttributeModifier> TemporaryModifiers { get; set; } = [];
+    public List<ItemAttributeModifier> TemporaryModifiers { get; set; } = [];
     [NotMapped]
     public HashSet<string> Statuses { get; } = [];
     public int Level { get; set; } = 1;
     [NotMapped]
     public bool IsSummoned { get; set; } = false;
+    public string ImagePath { get; set; } = string.Empty;
 
     //public Actor DeepClone()
     //{

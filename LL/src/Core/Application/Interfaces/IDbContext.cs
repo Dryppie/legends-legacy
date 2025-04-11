@@ -10,6 +10,8 @@ using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.GatheringNodes;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
+using Domain.Models.Items.Equipments.Slots;
+using Domain.Models.Items.EssenceItems;
 using Domain.Models.LootTables;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
@@ -29,9 +31,10 @@ public interface IDbContext
     DbSet<Creature> Creatures { get; }
     //DbSet<Echo> Echoes { get; }
     DbSet<Entity> Entities { get; }
+    DbSet<EquipmentSlot> EquipmentSlots { get; }
     DbSet<Essence> Essences { get; }
     DbSet<EssenceSlot> EssenceSlots { get; }
-    DbSet<EssenceItem> EssenceItems { get; }
+    DbSet<EssenceItemBase> EssenceItems { get; }
     // Effects
     //DbSet<Modifier> Modifiers { get; }
 
@@ -47,7 +50,8 @@ public interface IDbContext
     //DbSet<GuildMember> GuildMembers { get; }
     DbSet<Inventory> Inventories { get; }
     DbSet<InventoryItem> InventoryItems { get; }
-    DbSet<Item> Items { get; }
+    DbSet<ItemBase> ItemBases { get; }
+    DbSet<ItemInstance> ItemInstances { get; }
     DbSet<LootTable> LootTables { get; }
     DbSet<LootTableItem> LootTableItems { get; }
     //DbSet<Party> Parties { get; }

@@ -27,7 +27,7 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, Response<Tokens>>
         try
         {
             var user = await _userService.Login(request.Email, request.Password);
-            var character = await _characterService.GetMyCharacterAsync(Guid.Parse(user.Id));
+            var character = await _characterService.GetMyCharacterAsync(Guid.Parse(user.Id), cancellationToken);
 
             user.CharacterId = character.Id.ToString();
 

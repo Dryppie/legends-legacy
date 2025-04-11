@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { MiniButtonComponent } from '../../mini-button/mini-button.component';
-import { CharacterActionsService } from '../../../../core/services/character-actions/character-actions.service';
+import { CharacterActionsService } from '../../../../core/services/api/character-actions/character-actions.service';
 import {
   CharacterActionDto,
   GatheringActionDetails,

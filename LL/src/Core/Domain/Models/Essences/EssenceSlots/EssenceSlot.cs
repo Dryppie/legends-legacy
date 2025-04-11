@@ -1,6 +1,4 @@
-﻿using Domain.Models.Entities;
-
-namespace Domain.Models.Essences.EssenceSlots;
+﻿namespace Domain.Models.Essences.EssenceSlots;
 public class EssenceSlot
 {
     public Guid Id { get; set; }

@@ -6,8 +6,8 @@ import { AsyncPipe, NgFor, NgIf, NgStyle } from '@angular/common';
 import { SimpleCombatEntityDto } from '../../models/Dtos/combatResultDto';
 import { Observable, Subscription } from 'rxjs';
 import { CountdownComponent } from '../countdown/countdown.component';
-import { CharacterActionsService } from '../../../core/services/character-actions/character-actions.service';
-import { GameService } from '../../../core/services/game/game.service';
+import { CharacterActionsService } from '../../../core/services/api/character-actions/character-actions.service';
+import { GameService } from '../../../core/services/client-side/game/game.service';
 import { CombatStateService } from '../../../core/state/combat-state/combat-state.service';
 import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
 
@@ -65,6 +65,7 @@ export class CombatComponent implements OnInit, OnDestroy {
       {
         name: '',
         id: '',
+        imagePath: '',
         health: 100,
         maxHealth: 100,
         mana: 100,
@@ -76,6 +77,7 @@ export class CombatComponent implements OnInit, OnDestroy {
       {
         name: '',
         id: '',
+        imagePath: '',
         health: 100,
         maxHealth: 100,
         mana: 100,
@@ -192,9 +194,9 @@ export class CombatComponent implements OnInit, OnDestroy {
       case EventType.Miss:
         this.handleMissEvent(event);
         break;
-      // case EventType.Parry:
-      //   this.handleBlockEvent(event);
-      //   break;
+      case EventType.Parry:
+        this.handleBlockEvent(event);
+        break;
       case EventType.Block:
         this.handleBlockEvent(event);
         break;
@@ -242,6 +244,9 @@ export class CombatComponent implements OnInit, OnDestroy {
       case EventType.StatusEffectExpired:
         const statusEffectExpired = true;
         this.handleStatusEffectEvent(event, statusEffectExpired);
+        break;
+      case EventType.Regeneration:
+        this.handleRegeneration(event);
         break;
       // Add other event types as needed
       default:
@@ -318,6 +323,10 @@ export class CombatComponent implements OnInit, OnDestroy {
   ) {
     // if (buffExpired) console.log(`Buff Expired: ${event.details}`);
     // else console.log(`Buff: ${event.details}`);
+  }
+
+  handleRegeneration(event: CombatEvent) {
+    this.updateCharacter(event.combatEntity);
   }
 
   private updateCharacter(combatEntity: SimpleCombatEntityDto) {

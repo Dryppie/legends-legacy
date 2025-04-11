@@ -1,11 +1,12 @@
-﻿using Application.Interfaces.Services.AdminDashboard;
+﻿using Application.Common.Interfaces;
+using Application.Interfaces.Services.AdminDashboard;
 using Domain.Models.Entities.Creatures;
 
 namespace Services.AdminDashboard.Creatures;
 public class CreatureService : ICreatureService
 {
     private readonly ICreatureRepository _creatureRepository;
-    public CreatureService(ICreatureRepository creatureRepository)
+    public CreatureService(ICreatureRepository creatureRepository, IDbContext context)
     {
         _creatureRepository = creatureRepository;
     }

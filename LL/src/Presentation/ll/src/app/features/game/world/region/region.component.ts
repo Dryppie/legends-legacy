@@ -2,7 +2,7 @@ import { NgFor, NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Region } from '../../../../shared/models/Dtos/regionDto';
-import { RegionService } from '../../../../core/services/region/region.service';
+import { RegionService } from '../../../../core/services/client-side/region/region.service';
 import { CombatAreaCardComponent } from '../../../../shared/components/combat/combat-area-card/combat-area-card.component';
 
 @Component({

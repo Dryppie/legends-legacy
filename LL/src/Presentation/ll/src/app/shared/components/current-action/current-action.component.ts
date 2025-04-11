@@ -1,16 +1,14 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CharacterActionsService } from '../../../core/services/character-actions/character-actions.service';
+import { CharacterActionsService } from '../../../core/services/api/character-actions/character-actions.service';
 import { Subscription } from 'rxjs';
 import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
 import { CharacterActionType } from '../../models/enums/characterActionType';
-import { NgIf } from '@angular/common';
 import { ProgressBarComponent } from '../progress-bar/progress-bar.component';
-import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-current-action',
   standalone: true,
-  imports: [NgIf, ProgressBarComponent],
+  imports: [ProgressBarComponent],
   templateUrl: './current-action.component.html',
   styleUrl: './current-action.component.css',
 })

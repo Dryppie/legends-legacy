@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { SidebarService } from '../../../../core/services/sidebar/sidebar.service';
+import { SidebarService } from '../../../../core/services/client-side/sidebar/sidebar.service';
 
 @Component({
   selector: 'app-navbutton',

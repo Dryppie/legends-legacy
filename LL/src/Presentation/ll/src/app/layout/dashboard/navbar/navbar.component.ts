@@ -7,10 +7,9 @@ import {
   Output,
 } from '@angular/core';
 import { CharacterBadgeComponent } from '../../../shared/components/character-badge/character-badge.component';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { NavbuttonComponent } from './navbutton/navbutton.component';
 import { NgFor, NgIf } from '@angular/common';
-import { AuthService } from '../../../core/services/auth/auth.service';
+import { AuthService } from '../../../core/services/api/auth/auth.service';
 import { Subscription } from 'rxjs';
 import { CharacterDto } from '../../../shared/models/Dtos/characterDto';
 

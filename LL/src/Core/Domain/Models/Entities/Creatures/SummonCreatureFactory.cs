@@ -15,7 +15,8 @@ public static class SummonCreatureFactory
         var summonedCreature = new Creature
         {
             Id = Guid.Parse("10000000-0000-0000-0000-000000000002"),
-            Name = "Blood Imp"
+            Name = "Blood Imp",
+            ImagePath = "blood_imp"
             // Set other properties like health, abilities, stats
         };
 
@@ -27,6 +28,7 @@ public static class SummonCreatureFactory
         if (entityType.Equals("shadowImage"))
         {
             summonedCombatEntity.Name = "Shadow Image";
+            summonedCombatEntity.ImagePath = "shadow_image";
             var maxHealth = summonedCombatEntity.BaseAttributes.First(ba => ba.AttributeType.Equals(AttributeType.MaxHealth));
             var health = summonedCombatEntity.BaseAttributes.First(ba => ba.AttributeType.Equals(AttributeType.Health));
             var baseAttack = summonedCombatEntity.BaseAttributes.First(ba => ba.AttributeType.Equals(AttributeType.BasicAttackSpeed));

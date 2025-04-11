@@ -44,7 +44,7 @@ public class CombatInteractionManager : ICombatInteractionManager
     {
         var finalHealing = magnitude;
         if (scalingAttribute != null)
-            finalHealing *= (actor.CombatAttributes[scalingAttribute.Value] * scalingMultiplier);
+            finalHealing += actor.CombatAttributes[scalingAttribute.Value] * scalingMultiplier;
 
         if (attackOutcome.Equals(AttackOutcome.Crit))
             finalHealing = finalHealing * (1 + (actor.CombatAttributes[AttributeType.CritDamage] / 100));
@@ -54,29 +54,47 @@ public class CombatInteractionManager : ICombatInteractionManager
         return (int)finalHealing;
     }
 
-    public DamageResult CalculateDamageBreakdown(CombatEntity target, float baseDamage, AttackOutcome outcome)
+    public DamageResult CalculateDamageBreakdown(CombatEntity target, float baseDamage, AttackOutcome outcome, DamageType damageType)
     {
-        // 1) Subtract flat damage reduction
+        // Subtract flat damage reduction
         baseDamage -= target.CombatAttributes[AttributeType.FlatDamageReduction];
 
-        // 2) Store total so you can display it later (in case it's partially blocked).
+        // Subtract damage if it's blocked or parried
+        if (outcome == AttackOutcome.Block)
+            baseDamage = baseDamage * (1 - CombatConstants.BLOCK_DAMAGE_DECREASE);
+        if (outcome == AttackOutcome.Parry)
+            baseDamage = baseDamage * (1 - CombatConstants.PARRY_DAMAGE_DECREASE);
+
+        baseDamage *= 1 - (target.CombatAttributes[AttributeType.DamageReduction] / 100f);
+
+        // TODO: Add damage reduction based on bleed, burn, and poison as well. (Bleed and burn physical, poison magical)
+        var defenseValue = damageType switch
+        {
+            DamageType.Physical => target.GetAttributeValue(AttributeType.PhysicalDefense),
+            DamageType.Magical => target.GetAttributeValue(AttributeType.MagicalDefense),
+            _ => 0
+        };
+
+        var damageReductionFromArmor = ArmorDamageReductionConstants.CalculateEffectiveDefense(defenseValue, 0);
+        baseDamage = (int)Math.Round(baseDamage * (1 - damageReductionFromArmor), 0);
+
+        // Store total so you can display it later (in case it's partially blocked by barrier)
         //    Make sure it isn't negative here.
         int totalSoFar = (int)Math.Max(baseDamage, 0);
 
-        // 3) Let the barrier do its work, but keep track of how much barrier absorbed
+        // Let the barrier do its work, but keep track of how much barrier absorbed
         float damageAfterBarrier = GoThroughBarrier(target, baseDamage, out float barrierAbsorbed);
 
-        // 4) If crit, apply crit damage reduction
+        // If crit, apply crit damage reduction
         bool isCrit = (outcome == AttackOutcome.Crit);
         if (isCrit)
         {
-            float critReductionMultiplier =
-                1 - (target.CombatAttributes[AttributeType.CritDamageReduction] / 100f);
+            float critReductionMultiplier = 1 - (target.CombatAttributes[AttributeType.CritDamageReduction] / 100f);
             critReductionMultiplier = Math.Clamp(critReductionMultiplier, 0, 1);
             damageAfterBarrier *= critReductionMultiplier;
         }
 
-        // 5) Final health damage cannot go below zero
+        // Final health damage cannot go below zero
         int healthDamage = (int)Math.Max(damageAfterBarrier, 0);
 
         return new DamageResult
@@ -122,8 +140,8 @@ public class CombatInteractionManager : ICombatInteractionManager
     public int CalculateBasicAttackDamage(CombatEntity actor, CombatEntity target, float baseDamage)
     {
         // Check equipment
-        var weapon = actor.Equipment.FirstOrDefault(e => e.EquipmentType == EquipmentType.Weapon)
-                     ?? new Weapon { DamageType = DamageType.Physical };
+        //var weapon = actor.Equipment.FirstOrDefault(e => e.EquipmentBase.EquipmentType == EquipmentType.MainHand)
+        //             ?? new Weapon { DamageType = DamageType.Physical };
 
         var finalDamage = baseDamage + (actor.CombatAttributes[AttributeType.Strength] / 6); //TODO: Need proper calculation. Likely scaling of weapon
         finalDamage = CombatConstants.GetRandomValue(finalDamage);

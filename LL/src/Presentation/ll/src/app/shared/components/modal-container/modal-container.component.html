@@ -26,5 +26,11 @@
       *ngIf="filterCombat"
       (close)="onEditCombatFiltersModalClose()"
     ></app-combat-filters-modal>
+    <app-inventory-equipment-modal
+      *ngIf="equipment"
+      [equipment]="equipment"
+      (close)="onEquipmentModalClose()"
+    >
+    </app-inventory-equipment-modal>
   </div>
 </div>

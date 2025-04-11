@@ -8,6 +8,7 @@ using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.GatheringNodes;
 using Domain.Models.Inventories;
+using Domain.Models.Items.Equipments;
 using Domain.Models.LootTables;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
@@ -20,6 +21,7 @@ using Persistence.LL.Repositories.CharacterActions;
 using Persistence.LL.Repositories.Entities;
 using Persistence.LL.Repositories.Entities.Characters;
 using Persistence.LL.Repositories.Entities.Creatures;
+using Persistence.LL.Repositories.Equipments;
 using Persistence.LL.Repositories.Essences;
 using Persistence.LL.Repositories.GatheringNodes;
 using Persistence.LL.Repositories.Inventories;
@@ -54,6 +56,7 @@ public static class DependencyInjection
         services.AddScoped<ICreatureRepository, CreatureRepository>();
 
         services.AddScoped<IEntityRepository, EntityRepository>();
+        services.AddScoped<IEquipmentSlotRepository, EquipmentSlotRepository>();
 
         services.AddScoped<IEssenceRepository, EssenceRepository>();
         services.AddScoped<IEssenceSlotRepository, EssenceSlotRepository>();

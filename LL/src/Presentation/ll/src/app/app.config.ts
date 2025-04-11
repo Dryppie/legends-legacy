@@ -12,7 +12,7 @@ import {
   withInterceptorsFromDi,
 } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
-import { AuthService } from './core/services/auth/auth.service';
+import { AuthService } from './core/services/api/auth/auth.service';
 import { firstValueFrom } from 'rxjs';
 
 export function initializeApp(authService: AuthService) {

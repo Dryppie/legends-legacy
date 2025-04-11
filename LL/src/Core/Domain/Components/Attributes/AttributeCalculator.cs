@@ -1,24 +1,241 @@
-﻿using Domain.Models.Attributes;
+﻿using Domain.Extensions;
+using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
+using Domain.Models.Entities;
+using Domain.Models.Items.Equipments;
 
 namespace Domain.Components.Attributes;
 public static class AttributeCalculator
 {
-    // Calculates the attributes for a given entity
+    /// <summary>
+    /// This is used to get an overview of the entity's attributes after applying equipment, essences, etc.
+    /// </summary>
+    /// <param name="entity"></param>
+    public static void CalculateBaseAttributes(Entity entity)
+    {
+        entity.BaseCombatAttributes.Clear();
+
+        var baseAttributes = entity.BaseAttributes.ToDictionary(a => a.AttributeType, a => a.Value);
+
+        foreach (var (attributeType, attributeValue) in baseAttributes )
+        {
+            entity.BaseCombatAttributes.Add(attributeType, attributeValue);
+        }
+
+        foreach (var attributeModifier in entity.EssenceSlots.ActiveSlotsWithOccupiedEssences().Select(es => es.OccupiedEssence).SelectMany(e => e.AttributeModifiers))
+        {
+            entity.BaseCombatAttributes[attributeModifier.AttributeType] += attributeModifier.Amount;
+        }
+
+        foreach (var attributeModifier in entity.EquipmentSlots.Where(es => es.EquipmentInstance != null).Select(es => es.EquipmentInstance.ItemBase as EquipmentBase).SelectMany(eb => eb.AttributeModifiers))
+        {
+            entity.BaseCombatAttributes[attributeModifier.AttributeType] += attributeModifier.Amount;
+        }
+
+        // First calculate all baseCombatAttributes based on BaseAttributes + Temporary modifiers (Equipment, Essences, etc.)
+
+        // Then find the derivedAttributes based on all Primary Attributes, and add those to BaseCombatAttributes
+        var derivedAttributes = CalculateSecondaryAttributesFromPrimaryAttributes(entity.BaseCombatAttributes);
+
+        foreach (var (attributeType, attributeValue) in derivedAttributes)
+        {
+            entity.BaseCombatAttributes[attributeType] += attributeValue;
+        }
+
+        entity.BaseCombatAttributes[AttributeType.Health] = entity.BaseCombatAttributes[AttributeType.MaxHealth];
+        entity.BaseCombatAttributes[AttributeType.Mana] = entity.BaseCombatAttributes[AttributeType.MaxMana];
+    }
+
+    /// <summary>
+    /// This calculates the secondary attributes based on base primary attributes. They should then be added to the final list of BaseCombatAttributes
+    /// </summary>
+    /// <param name="baseAttributes"></param>
+    /// <returns></returns>
+    private static Dictionary<AttributeType, float> CalculateSecondaryAttributesFromPrimaryAttributes(IReadOnlyDictionary<AttributeType, float> baseAttributes)
+    {
+
+        var derived = new Dictionary<AttributeType, float>();
+
+        float constitution = baseAttributes.GetValueOrDefault(AttributeType.Constitution);
+        float endurance = baseAttributes.GetValueOrDefault(AttributeType.Endurance);
+        float willpower = baseAttributes.GetValueOrDefault(AttributeType.Willpower);
+        float strength = baseAttributes.GetValueOrDefault(AttributeType.Strength);
+        float dexterity = baseAttributes.GetValueOrDefault(AttributeType.Dexterity);
+        float fightingSpirit = baseAttributes.GetValueOrDefault(AttributeType.FightingSpirit);
+        float agility = baseAttributes.GetValueOrDefault(AttributeType.Agility);
+        float intelligence = baseAttributes.GetValueOrDefault(AttributeType.Intelligence);
+        float wisdom = baseAttributes.GetValueOrDefault(AttributeType.Wisdom);
+        float instinct = baseAttributes.GetValueOrDefault(AttributeType.Instinct);
+        float perception = baseAttributes.GetValueOrDefault(AttributeType.Perception);
+        float luck = baseAttributes.GetValueOrDefault(AttributeType.Luck);
+
+        // ---------------------------------------------------------------------
+        //  - 1 Constitution = 8 MaxHealth
+        //  - 1 Endurance    = 2 MaxHealth
+        // ---------------------------------------------------------------------
+        float maxHealthFromCon = constitution * 8.0f;
+        float maxHealthFromEnd = endurance * 2.0f;
+        float totalMaxHealth = maxHealthFromCon + maxHealthFromEnd;
+
+        // ---------------------------------------------------------------------
+        //  - Every 10 Constitution = +2 HP Regen
+        //  - Every 10 FightingSpirit = +1 HP Regen
+        // ---------------------------------------------------------------------
+        float hpRegenFromCon = (int)(constitution / 10 * 2.0f);
+        float hpRegenFromSpirit = (int)(fightingSpirit / 10 * 1.0f);
+        float totalHPRegen = hpRegenFromCon + hpRegenFromSpirit;
+
+        // ---------------------------------------------------------------------
+        //  - 1 Intelligence = 2 MaxMana
+        //  - 1 Wisdom       = 1 MaxMana
+        // ---------------------------------------------------------------------
+        float maxManaFromInt = intelligence * 2.0f;
+        float maxManaFromWis = wisdom * 1.0f;
+        float totalMaxMana = maxManaFromInt + maxManaFromWis;
+
+        // ---------------------------------------------------------------------
+        //  - Every 10 Constitution = +2 HP Regen
+        //  - Every 10 FightingSpirit = +1 HP Regen
+        // ---------------------------------------------------------------------
+        float mpRegenFromWil = (int)(willpower / 10 * 2.0f);
+        float mpRegenFromWis = (int)(wisdom / 10 * 1.0f);
+        float totalMPRegen = mpRegenFromWil + mpRegenFromWis;
+
+        // ---------------------------------------------------------------------
+        //  - Every 12 Constitution = +1
+        //  - Every 20 FightingSpirit = +1
+        // ---------------------------------------------------------------------
+        float ccResFromCon = (int)(constitution / 12);
+        float ccResFromSpirit = (int)(fightingSpirit / 20);
+        float totalCCResistance = ccResFromCon + ccResFromSpirit;
+
+        // ---------------------------------------------------------------------
+        //  - Every 5 Dexterity = +0.4% Crit Chance
+        //  - Every 9 Perception = +0.3% Crit Chance
+        //  - Every 3 Luck = +0.2% Crit Chance
+        // ---------------------------------------------------------------------
+        float critChance =
+            ((int)(dexterity / 5) * 0.4f)
+          + ((int)(perception / 9) * 0.3f)
+          + ((int)(luck / 3) * 0.2f);
+
+        // ---------------------------------------------------------------------
+        //  - Every 10 Strength = +1% Crit Damage
+        //  - Every 10 Intelligence = +1% Crit Damage
+        //  - Every 10 Perception = +1% Crit Damage
+        // ---------------------------------------------------------------------
+        float critDamage =
+            (int)(strength / 10)
+          + (int)(intelligence / 10)
+          + (int)(perception / 10);
+
+        // ---------------------------------------------------------------------
+        //  - Every 10 Agility = +1% Dodge
+        //  - Every 10 Instinct = +1% Dodge
+        // ---------------------------------------------------------------------
+        float dodgeChance =
+            (int)(agility / 10)
+          + (int)(instinct / 10);
+
+        // ---------------------------------------------------------------------
+        //  - Every 25 Agility = +1 BasicAttackSpeed
+        // ---------------------------------------------------------------------
+        float basicAttackSpeed =
+            (int)(agility / 25);
+
+        // ---------------------------------------------------------------------
+        //  - Every 4 Endurance = +3 Physical Defense
+        // ---------------------------------------------------------------------
+        float physicalDefense =
+          + ((int)(endurance / 4) * 3.0f);
+
+        // ---------------------------------------------------------------------
+        //  - Every 4 Willpower = +3 Magical Defense
+        // ---------------------------------------------------------------------
+        float magicalDefense =
+          + ((int)(willpower / 4) * 3.0f);
+
+        // ---------------------------------------------------------------------
+        //  - Every 10 Endurance = +0.5 Crit Damage Reduction
+        //  - Every 10 Willpower = +0.5 Crit Damage Reduction
+        // ---------------------------------------------------------------------
+        float critDamageReduction =
+          + ((int)(endurance / 10) * 0.5f)
+          + ((int)(willpower / 10) * 0.5f);
+
+        // ---------------------------------------------------------------------
+        //  - Every 1 Strength = +1 Physical Defense
+        // ---------------------------------------------------------------------
+        float block =
+          + (int)strength;
+
+        // ---------------------------------------------------------------------
+        //  - Every 4 Fighting Spirit = +1 Parry
+        //  - Every 4 Dexterity = +1 Parry
+        //  - Every 2 Instinct = +1 Parry
+        // ---------------------------------------------------------------------
+        float parry =
+          + (int)(fightingSpirit / 4)
+          + (int)(dexterity / 4)
+          + (int)(instinct / 2);
+
+        // ---------------------------------------------------------------------
+        // Add these derived stats into entity.CombatAttributes
+        // ---------------------------------------------------------------------
+        derived.Add(AttributeType.MaxHealth, totalMaxHealth);
+        derived.Add(AttributeType.HealthRegeneration, totalHPRegen);
+        derived.Add(AttributeType.MaxMana, totalMaxMana);
+        derived.Add(AttributeType.ManaRegeneration, totalMPRegen);
+        derived.Add(AttributeType.CrowdControlResistance, totalCCResistance);
+        derived.Add(AttributeType.CritChance, critChance);
+        derived.Add(AttributeType.CritDamage, critDamage);
+        derived.Add(AttributeType.Dodge, dodgeChance);
+        derived.Add(AttributeType.BasicAttackSpeed, basicAttackSpeed);
+        derived.Add(AttributeType.PhysicalDefense, physicalDefense);
+        derived.Add(AttributeType.MagicalDefense, magicalDefense);
+        derived.Add(AttributeType.CritDamageReduction, critDamageReduction);
+        derived.Add(AttributeType.Block, block);
+        derived.Add(AttributeType.Parry, parry);
+
+        return derived;
+    }
+
+    // Calculates all combat attributes for a given entity
     public static void CalculateBaseCombatAttributes(CombatEntity entity)
     {
         entity.BaseCombatAttributes.Clear();
+        entity.CombatAttributes.Clear();
         // Convert raw attributes to a dictionary for quick access
-        var baseAttributes = entity.BaseAttributes.ToDictionary(a => a.AttributeType, a => a);
+        var baseAttributes = entity.BaseAttributes.ToDictionary(a => a.AttributeType, a => a.Value);
 
-        // Iterate over each attribute of the entity
-        foreach (var attribute in baseAttributes.Values)
+        foreach (var (attributeType, attributeValue) in baseAttributes)
         {
-            var calculatedValue = GetAttributeValue(entity, attribute.AttributeType, attribute.Value);
+            entity.BaseCombatAttributes.Add(attributeType, attributeValue);
+        }
 
-            entity.CombatAttributes[attribute.AttributeType] = calculatedValue;
-            entity.BaseCombatAttributes[attribute.AttributeType] = calculatedValue;
+        foreach (var attributeModifier in entity.EquippedEssences.SelectMany(ee => ee.AttributeModifiers))
+        {
+            entity.BaseCombatAttributes[attributeModifier.AttributeType] += attributeModifier.Amount;
+        }
+
+        var derivedAttributes = CalculateSecondaryAttributesFromPrimaryAttributes(entity.BaseCombatAttributes);
+
+        // Iterate over each attribute of the entity, and add the derivedAttributes to the BaseCombatAttributes
+        foreach (var (attributeType, attributeValue) in derivedAttributes)
+        {
+            entity.BaseCombatAttributes[attributeType] += attributeValue;
+        }
+
+        entity.BaseCombatAttributes[AttributeType.Health] = entity.BaseCombatAttributes[AttributeType.MaxHealth];
+        entity.BaseCombatAttributes[AttributeType.Mana] = entity.BaseCombatAttributes[AttributeType.MaxMana];
+
+        // Iterate over each attribute of the entity, and calculate baseAttributes
+        foreach (var (attributeType, attributeValue) in entity.BaseCombatAttributes)
+        {
+            var calculatedValue = GetCombatAttributeValue(entity, attributeType, attributeValue);
+
+            entity.CombatAttributes.TryAdd(attributeType, attributeValue);
         }
     }
 
@@ -26,12 +243,9 @@ public static class AttributeCalculator
     public static void CalculateCombatAttributeByType(CombatEntity entity, AttributeType attributeType)
     {
         // Find the attribute in BaseAttributes or CombatAttributes
-        var attribute = entity.BaseAttributes.FirstOrDefault(a => a.AttributeType == attributeType);
+        if (!entity.BaseCombatAttributes.TryGetValue(attributeType, out var attribute)) return;
 
-        // Calculate and update the attribute's value
-        if (attribute == null) return;
-
-        var calculatedValue = GetAttributeValue(entity, attributeType, attribute.Value);
+        var calculatedValue = GetCombatAttributeValue(entity, attributeType, attribute);
 
         MaxHealthOrMaxMana(entity, attributeType, calculatedValue);
 
@@ -43,7 +257,7 @@ public static class AttributeCalculator
         HealthOrMana(entity, attributeType);
     }
 
-    private static float GetAttributeValue(CombatEntity entity, AttributeType attributeType, float baseValue)
+    private static float GetCombatAttributeValue(CombatEntity entity, AttributeType attributeType, float baseValue)
     {
         // Filter modifiers that apply to the given attribute
         var validModifiers = entity.TemporaryModifiers
@@ -168,5 +382,15 @@ public static class AttributeCalculator
             default:
                 break;
         }
+    }
+
+    /// <summary>
+    /// Helper to safely retrieve an attribute from a dictionary, returning 0 if not found.
+    /// </summary>
+    private static float SafeGet(Dictionary<AttributeType, float> dict, AttributeType type)
+    {
+        if (dict.TryGetValue(type, out float value))
+            return value;
+        return 0;
     }
 }

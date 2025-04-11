@@ -22,7 +22,7 @@ public class GetCharacterQueryHandler : IRequestHandler<GetCharacterQuery, Respo
 
     public async Task<Response<CharacterDto>> Handle(GetCharacterQuery request, CancellationToken cancellationToken)
     {
-        var character =  await _characterService.GetMyCharacterAsync(request.CharacterId);
+        var character =  await _characterService.GetMyCharacterAsync(request.CharacterId, cancellationToken);
 
         var dto = _mapper.Map<CharacterDto>(character);
 

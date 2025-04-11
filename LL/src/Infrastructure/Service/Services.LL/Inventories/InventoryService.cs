@@ -1,6 +1,6 @@
 ﻿using Application.Interfaces.Services.LL;
 using Domain.Models.Inventories;
-using Domain.Models.Items;
+using Domain.Models.Items.EssenceItems;
 using Services.LL.Interfaces;
 
 namespace Services.LL.Inventories;
@@ -8,24 +8,25 @@ public class InventoryService : IInventoryService
 {
     private readonly IInventoryRepository _inventoryRepository;
     private readonly IEssenceDescriptionService _essenceDescriptionService;
-    private readonly IAttributeService _attributeService;
-    public InventoryService(IInventoryRepository inventoryRepository, IEssenceDescriptionService essenceDescriptionService, IAttributeService attributeService)
+    private readonly ICharacterService _characterService;
+    public InventoryService(IInventoryRepository inventoryRepository, IEssenceDescriptionService essenceDescriptionService, ICharacterService characterService)
     {
         _inventoryRepository = inventoryRepository;
         _essenceDescriptionService = essenceDescriptionService;
-        _attributeService = attributeService;
+        _characterService = characterService;
     }
 
     public async Task<Inventory> GetInventoryByIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var inventory = await _inventoryRepository.GetInventoryByIdAsync(characterId, cancellationToken);
-        var stats = await _attributeService.GetAttributesByCharacterIdAsync(characterId, cancellationToken);
+        var character = await _characterService.GetMyCharacterOverviewAsync(characterId, cancellationToken); // Called to calculate correct description for abilities (X-Y damage / heal)
+        
         foreach (var inventoryItem in inventory.InventoryItems)
         {
-            if (inventoryItem.Item is EssenceItem essenceItem)
+            if (inventoryItem.ItemInstance is EssenceItemInstance ei && ei.ItemBase is EssenceItemBase eib)
             {
-                essenceItem.Essence.Active.Description = _essenceDescriptionService.BuildAbilityDescription(essenceItem.Essence.Active, stats);
-                essenceItem.Essence.Passive.Description = _essenceDescriptionService.BuildAbilityDescription(essenceItem.Essence.Passive, stats);
+                eib.Essence.Active.Description = _essenceDescriptionService.BuildAbilityDescription(eib.Essence.Active, character.BaseCombatAttributes);
+                eib.Essence.Passive.Description = _essenceDescriptionService.BuildAbilityDescription(eib.Essence.Passive, character.BaseCombatAttributes);
             }
         }
 

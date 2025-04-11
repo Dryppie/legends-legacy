@@ -12,6 +12,7 @@ public class TargetingConverter : JsonConverter<Targeting>
         {
             "None" => Targeting.None,
             "CauseOfTrigger" => Targeting.CauseOfTrigger,
+            "AttackedEnemy" => Targeting.AttackedEnemy,
             "Self" => Targeting.Self,
             "SingleEnemy" => Targeting.SingleEnemy,
             "SingleAlly" => Targeting.SingleAlly,
@@ -38,6 +39,7 @@ public class TargetingConverter : JsonConverter<Targeting>
         {
             Targeting.None => "None",
             Targeting.CauseOfTrigger => "CauseOfTrigger",
+            Targeting.AttackedEnemy => "AttackedEnemy",
             Targeting.Self => "Self",
             Targeting.SingleEnemy => "SingleEnemy",
             Targeting.SingleAlly => "SingleAlly",

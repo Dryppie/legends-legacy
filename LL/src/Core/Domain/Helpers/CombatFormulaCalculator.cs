@@ -54,8 +54,8 @@ public static class CombatFormulaCalculator
         float levelDifferenceModifier = levelDifference / 5 * 3.125f; // Decrease hit chance by 3.125% per level difference
         float statDifferenceModifier = (int)((defender.CombatAttributes[AttributeType.Accuracy] - attacker.CombatAttributes[AttributeType.Dodge]) / 5f) * 1.25f;  // Increased impact from stats
                                                                                                                                                                   // 98                         - ((100-100) / 5 * 3.125) - ((20 - 20) / 5 * 1.25)
-        float adjustedHitChance = CombatConstants.BaseHitChance + statDifferenceModifier - levelDifferenceModifier;
-        adjustedHitChance = Math.Clamp(adjustedHitChance, CombatConstants.MinHitChance, CombatConstants.MaxHitChance); // Ensure hit chance is between 10% and 100%
+        float adjustedHitChance = CombatConstants.BASE_HIT_CHANCE + statDifferenceModifier - levelDifferenceModifier;
+        adjustedHitChance = Math.Clamp(adjustedHitChance, CombatConstants.MIN_HIT_CHANCE, CombatConstants.MAX_HIT_CHANCE); // Ensure hit chance is between 10% and 100%
 
         float roll = (float)RandomGenerator.NextDouble() * 100f;
         return roll < adjustedHitChance;
@@ -75,12 +75,20 @@ public static class CombatFormulaCalculator
 
     private static bool IsParry(CombatEntity defender)
     {
-        return false;
+        var parryChance = defender.GetAttributeValue(AttributeType.Parry) * CombatConstants.BASE_PARRY_VALUE;
+        var adjustedParryChance = Math.Min(parryChance, CombatConstants.MAX_PARRY_CHANCE);
+
+        float roll = (float)RandomGenerator.NextDouble() * 100f;
+        return roll < adjustedParryChance;
     }
 
     private static bool IsBlock(CombatEntity defender)
     {
-        return false;
+        var blockChance = defender.GetAttributeValue(AttributeType.Parry) * CombatConstants.BASE_BLOCK_VALUE;
+        var adjustedBlockChance = Math.Min(blockChance, CombatConstants.MAX_BLOCK_CHANCE);
+
+        float roll = (float)RandomGenerator.NextDouble() * 100f;
+        return roll < adjustedBlockChance;
     }
 
     private static bool IsCriticalHit(CombatEntity attacker, CombatEntity defender, List<EffectModification> effectModifications)

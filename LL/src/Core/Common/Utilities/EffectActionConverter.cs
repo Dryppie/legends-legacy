@@ -78,7 +78,7 @@ public class EffectActionConverter : JsonConverter<IEffectAction>
                     var attribute = Enum.Parse<AttributeType>(root.GetProperty("Attribute").GetString()!);
                     var amount = root.GetProperty("Amount").GetInt32();
                     var modifierType = Enum.Parse<ModifierType>(root.GetProperty("ModifierType").GetString()!);
-                    var attributeModifier = new AttributeModifier(attribute, amount, modifierType);
+                    var attributeModifier = new AbilityAttributeModifier(attribute, amount, modifierType);
                     var stackable = root.TryGetProperty("Stackable", out var stackableElement) && stackableElement.GetBoolean();
 
                     return new ModifyAttributeAction(attributeModifier, stackable);

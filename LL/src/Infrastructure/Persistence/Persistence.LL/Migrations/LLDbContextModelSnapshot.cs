@@ -51,6 +51,36 @@ namespace Persistence.LL.Migrations
                     b.ToTable("EntityAttributes");
                 });
 
+            modelBuilder.Entity("Domain.Models.Attributes.Modifiers.ItemAttributeModifier", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<float>("Amount")
+                        .HasColumnType("real");
+
+                    b.Property<int>("AttributeType")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("EquipmentBaseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ItemBaseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ModifierType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EquipmentBaseId");
+
+                    b.HasIndex("ItemBaseId");
+
+                    b.ToTable("ItemAttributeModifier");
+                });
+
             modelBuilder.Entity("Domain.Models.CharacterActions.CharacterAction", b =>
                 {
                     b.Property<Guid>("CharacterId")
@@ -99,6 +129,10 @@ namespace Persistence.LL.Migrations
 
                     b.Property<int>("EntityType")
                         .HasColumnType("int");
+
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Level")
                         .HasColumnType("int");
@@ -203,20 +237,38 @@ namespace Persistence.LL.Migrations
                     b.Property<Guid>("InventoryId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ItemId")
+                    b.Property<Guid>("ItemInstanceId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.HasKey("InventoryId", "ItemId");
+                    b.HasKey("InventoryId", "ItemInstanceId");
 
-                    b.HasIndex("ItemId");
+                    b.HasIndex("ItemInstanceId");
 
                     b.ToTable("InventoryItems");
                 });
 
-            modelBuilder.Entity("Domain.Models.Items.Item", b =>
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Slots.EquipmentSlot", b =>
+                {
+                    b.Property<Guid>("EntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("EquipmentType")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("EquipmentInstanceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("EntityId", "EquipmentType");
+
+                    b.HasIndex("EquipmentInstanceId");
+
+                    b.ToTable("EquipmentSlots");
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.ItemBase", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -242,7 +294,30 @@ namespace Persistence.LL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Items");
+                    b.ToTable("ItemBases");
+
+                    b.HasDiscriminator<int>("ItemType").HasValue(4);
+
+                    b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.ItemInstance", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ItemBaseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ItemType")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemBaseId");
+
+                    b.ToTable("ItemInstances");
 
                     b.HasDiscriminator<int>("ItemType").HasValue(4);
 
@@ -676,9 +751,9 @@ namespace Persistence.LL.Migrations
                     b.HasDiscriminator().HasValue(2);
                 });
 
-            modelBuilder.Entity("Domain.Models.Items.Equipments.Equipment", b =>
+            modelBuilder.Entity("Domain.Models.Items.Equipments.EquipmentBase", b =>
                 {
-                    b.HasBaseType("Domain.Models.Items.Item");
+                    b.HasBaseType("Domain.Models.Items.ItemBase");
 
                     b.Property<int>("EquipmentType")
                         .HasColumnType("int");
@@ -686,14 +761,28 @@ namespace Persistence.LL.Migrations
                     b.HasDiscriminator().HasValue(0);
                 });
 
-            modelBuilder.Entity("Domain.Models.Items.EssenceItem", b =>
+            modelBuilder.Entity("Domain.Models.Items.EssenceItems.EssenceItemBase", b =>
                 {
-                    b.HasBaseType("Domain.Models.Items.Item");
+                    b.HasBaseType("Domain.Models.Items.ItemBase");
 
                     b.Property<Guid>("EssenceId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasIndex("EssenceId");
+
+                    b.HasDiscriminator().HasValue(3);
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.EquipmentInstance", b =>
+                {
+                    b.HasBaseType("Domain.Models.Items.ItemInstance");
+
+                    b.HasDiscriminator().HasValue(0);
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.EssenceItems.EssenceItemInstance", b =>
+                {
+                    b.HasBaseType("Domain.Models.Items.ItemInstance");
 
                     b.HasDiscriminator().HasValue(3);
                 });
@@ -724,6 +813,21 @@ namespace Persistence.LL.Migrations
                         .HasForeignKey("EntityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Attributes.Modifiers.ItemAttributeModifier", b =>
+                {
+                    b.HasOne("Domain.Models.Items.Equipments.EquipmentBase", null)
+                        .WithMany("AttributeModifiers")
+                        .HasForeignKey("EquipmentBaseId");
+
+                    b.HasOne("Domain.Models.Items.ItemBase", "ItemBase")
+                        .WithMany()
+                        .HasForeignKey("ItemBaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ItemBase");
                 });
 
             modelBuilder.Entity("Domain.Models.CharacterActions.CharacterAction", b =>
@@ -792,13 +896,41 @@ namespace Persistence.LL.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Domain.Models.Items.Item", "Item")
+                    b.HasOne("Domain.Models.Items.ItemInstance", "ItemInstance")
                         .WithMany()
-                        .HasForeignKey("ItemId")
+                        .HasForeignKey("ItemInstanceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Item");
+                    b.Navigation("ItemInstance");
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Slots.EquipmentSlot", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Entity", "Entity")
+                        .WithMany("EquipmentSlots")
+                        .HasForeignKey("EntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Items.Equipments.EquipmentInstance", "EquipmentInstance")
+                        .WithMany()
+                        .HasForeignKey("EquipmentInstanceId");
+
+                    b.Navigation("Entity");
+
+                    b.Navigation("EquipmentInstance");
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.ItemInstance", b =>
+                {
+                    b.HasOne("Domain.Models.Items.ItemBase", "ItemBase")
+                        .WithMany("ItemInstances")
+                        .HasForeignKey("ItemBaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ItemBase");
                 });
 
             modelBuilder.Entity("Domain.Models.LootTables.LootTableEntry", b =>
@@ -940,7 +1072,7 @@ namespace Persistence.LL.Migrations
                     b.Navigation("LootTable");
                 });
 
-            modelBuilder.Entity("Domain.Models.Items.EssenceItem", b =>
+            modelBuilder.Entity("Domain.Models.Items.EssenceItems.EssenceItemBase", b =>
                 {
                     b.HasOne("Domain.Models.Essences.Essence", "Essence")
                         .WithMany("EssenceItems")
@@ -953,7 +1085,7 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.LootTables.LootTableItem", b =>
                 {
-                    b.HasOne("Domain.Models.Items.Item", "Item")
+                    b.HasOne("Domain.Models.Items.ItemBase", "Item")
                         .WithMany("LootTablesItems")
                         .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -971,6 +1103,8 @@ namespace Persistence.LL.Migrations
                 {
                     b.Navigation("BaseAttributes");
 
+                    b.Navigation("EquipmentSlots");
+
                     b.Navigation("EssenceSlots");
                 });
 
@@ -986,8 +1120,10 @@ namespace Persistence.LL.Migrations
                     b.Navigation("InventoryItems");
                 });
 
-            modelBuilder.Entity("Domain.Models.Items.Item", b =>
+            modelBuilder.Entity("Domain.Models.Items.ItemBase", b =>
                 {
+                    b.Navigation("ItemInstances");
+
                     b.Navigation("LootTablesItems");
                 });
 
@@ -1014,6 +1150,11 @@ namespace Persistence.LL.Migrations
 
                     b.Navigation("Inventory")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.EquipmentBase", b =>
+                {
+                    b.Navigation("AttributeModifiers");
                 });
 
             modelBuilder.Entity("Domain.Models.LootTables.LootTable", b =>

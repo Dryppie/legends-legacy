@@ -31,4 +31,12 @@
       Details
     </button>
   </div>
+  <div *ngIf="isEquipment()" class="flex justify-between">
+    <button
+      (click)="openEquipItemModal()"
+      class="mt-2 rounded bg-light px-2 py-1 text-white"
+    >
+      Details
+    </button>
+  </div>
 </div>

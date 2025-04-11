@@ -1,6 +1,5 @@
-﻿using MediatR.NotificationPublishers;
+﻿using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
-using System.Reflection;
 
 namespace Application;
 public static class DependencyInjection

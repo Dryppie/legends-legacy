@@ -1,10 +1,9 @@
 import { Component, Input } from '@angular/core';
-import { EssenceItem, Item } from '../../../models/item';
+import { Equipment, EssenceItem, ItemInstance } from '../../../models/item';
 import { NgClass, NgIf } from '@angular/common';
 import { Rarity } from '../../../models/enums/rarity';
 import { ItemType } from '../../../models/enums/itemType';
-import { ModalService } from '../../../../core/services/modal/modal.service';
-import { EssencesService } from '../../../../core/services/essences/essences.service';
+import { ModalService } from '../../../../core/services/client-side/modal/modal.service';
 
 @Component({
   selector: 'app-item-tooltip',
@@ -14,7 +13,7 @@ import { EssencesService } from '../../../../core/services/essences/essences.ser
   styleUrl: './itemTooltip.component.css',
 })
 export class ItemTooltipComponent {
-  @Input() item!: Item;
+  @Input() item!: ItemInstance;
   @Input() title!: string;
   @Input() rarity!: Rarity;
   @Input() itemType!: ItemType;
@@ -23,7 +22,7 @@ export class ItemTooltipComponent {
   constructor(private modalService: ModalService) {}
 
   get rarityClasses() {
-    switch (this.item.rarity) {
+    switch (this.item.itemBase.rarity) {
       case Rarity.Common:
         return 'border border-gray-600';
       case Rarity.Rare:
@@ -39,11 +38,21 @@ export class ItemTooltipComponent {
     }
   }
 
+  isEquipment(): any {
+    return this.itemType === ItemType.Equipment;
+  }
+
+  openEquipItemModal() {
+    this.modalService.toggleEquipItemModal(this.item.itemBase as Equipment);
+  }
+
   isEssence() {
     return this.itemType === ItemType.Essence;
   }
 
   openEssenceModal() {
-    this.modalService.toggleEssenceModal((this.item as EssenceItem).essence); // Pass the essence from the Item to display all necessary info
+    this.modalService.toggleEssenceModal(
+      (this.item.itemBase as EssenceItem).essence,
+    ); // Pass the essence from the Item to display all necessary info
   }
 }

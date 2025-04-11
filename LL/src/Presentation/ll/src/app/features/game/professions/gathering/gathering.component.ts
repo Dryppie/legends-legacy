@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { ProfessionsService } from '../../../../core/services/professions/professions.service';
-import { CharacterActionsService } from '../../../../core/services/character-actions/character-actions.service';
+import { ProfessionsService } from '../../../../core/services/api/professions/professions.service';
+import { CharacterActionsService } from '../../../../core/services/api/character-actions/character-actions.service';
 import { Subscription } from 'rxjs';
 import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
 import { GatheringNode } from '../../../../shared/models/Dtos/gatheringNode';
 import { ProfessionHeaderComponent } from '../../../../shared/components/professions/profession-header/profession-header.component';
-import { ProfessionCardComponent } from '../../../../shared/components/professions/profession-card/profession-card.component';
 import { NgFor } from '@angular/common';
+import { ProfessionCardComponent } from '../../../../shared/components/professions/profession-card/profession-card.component';
 
 @Component({
   selector: 'app-gathering',

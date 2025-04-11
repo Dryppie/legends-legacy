@@ -5,7 +5,7 @@ import {
   CharacterDto,
   CharacterOverviewDto,
 } from '../../../shared/models/Dtos/characterDto';
-import { AuthService } from '../auth/auth.service';
+import { AuthService } from '../api/auth/auth.service';
 
 @Injectable({
   providedIn: 'root',
