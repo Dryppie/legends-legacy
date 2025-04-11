@@ -1,28 +1,45 @@
 ﻿using System.Text.Json;
+using Application.UseCases._AdminDashboard.Creatures.Dtos;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Creatures;
 
 namespace Services.AdminDashboard.JsonReaders;
 public class CreatureJsonReader
 {
+    public List<Creature> AllCreatures { get; set; } = [];
+    private string _filePath { get; set; }
+
+    public CreatureJsonReader()
+    {
+        _filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "creatures.json");
+        string json = File.ReadAllText(_filePath);
+
+        AllCreatures = JsonSerializer.Deserialize<List<Creature>>(json);
+        ValidateAndFixCreatureAttributes(AllCreatures);
+
+        OverWriteJSON();
+    }
     public List<Creature> GetCreaturesFromJson()
     {
-        string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "creatures.json");
-        string json = File.ReadAllText(filePath);
+        return AllCreatures;
+    }
 
-        var creatures = JsonSerializer.Deserialize<List<Creature>>(json);
+    public void UpdateCreatureFromCreature(CreatureDto creatureToUpdate)
+    {
 
-        if (creatures == null || creatures.Count == 0)
+        var index = AllCreatures.FindIndex(c => c.Id == creatureToUpdate.Id);
+        if (index != -1)
         {
-            return [];
+            creatureToUpdate.UpdateProperties(AllCreatures[index]);
         }
 
-        ValidateAndFixCreatureAttributes(creatures);
+        OverWriteJSON();
+    }
 
+    private void OverWriteJSON()
+    {
         var options = new JsonSerializerOptions { WriteIndented = true };
-        File.WriteAllText(filePath, JsonSerializer.Serialize(creatures, options));
-
-        return creatures;
+        File.WriteAllText(_filePath, JsonSerializer.Serialize(AllCreatures, options));
     }
 
     private void ValidateAndFixCreatureAttributes(List<Creature> creatures)

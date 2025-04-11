@@ -230,19 +230,25 @@
         "EntityId": "00000000-0000-0000-0000-000000000001",
         "AttributeType": 44,
         "Value": 0
+      },
+      {
+        "EntityId": "00000000-0000-0000-0000-000000000001",
+        "AttributeType": 45,
+        "Value": 0
       }
     ],
     "EssenceSlots": [],
+    "EquipmentSlots": [],
     "AbilityIds": [],
     "Abilities": [],
     "IsAlive": false,
-    "Equipment": [],
     "BaseCombatAttributes": {},
     "CombatAttributes": {},
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
-    "IsSummoned": false
+    "IsSummoned": false,
+    "ImagePath": ""
   },
   {
     "LootTableId": "b598bbf1-ecd0-4f27-8f78-95c675f36131",
@@ -475,19 +481,25 @@
         "EntityId": "00000000-0000-0000-0000-000000000002",
         "AttributeType": 44,
         "Value": 0
+      },
+      {
+        "EntityId": "00000000-0000-0000-0000-000000000002",
+        "AttributeType": 45,
+        "Value": 0
       }
     ],
     "EssenceSlots": [],
+    "EquipmentSlots": [],
     "AbilityIds": [],
     "Abilities": [],
     "IsAlive": false,
-    "Equipment": [],
     "BaseCombatAttributes": {},
     "CombatAttributes": {},
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
-    "IsSummoned": false
+    "IsSummoned": false,
+    "ImagePath": ""
   },
   {
     "LootTableId": "d7841d15-2a8d-42c7-9691-6749b8319a5f",
@@ -720,19 +732,25 @@
         "EntityId": "00000000-0000-0000-0000-000000000003",
         "AttributeType": 44,
         "Value": 0
+      },
+      {
+        "EntityId": "00000000-0000-0000-0000-000000000003",
+        "AttributeType": 45,
+        "Value": 0
       }
     ],
     "EssenceSlots": [],
+    "EquipmentSlots": [],
     "AbilityIds": [],
     "Abilities": [],
     "IsAlive": false,
-    "Equipment": [],
     "BaseCombatAttributes": {},
     "CombatAttributes": {},
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
-    "IsSummoned": false
+    "IsSummoned": false,
+    "ImagePath": ""
   },
   {
     "LootTableId": "0503b809-8966-49ab-83a7-42e3831e9732",
@@ -965,19 +983,25 @@
         "EntityId": "00000000-0000-0000-0000-000000000004",
         "AttributeType": 44,
         "Value": 0
+      },
+      {
+        "EntityId": "00000000-0000-0000-0000-000000000004",
+        "AttributeType": 45,
+        "Value": 0
       }
     ],
     "EssenceSlots": [],
+    "EquipmentSlots": [],
     "AbilityIds": [],
     "Abilities": [],
     "IsAlive": false,
-    "Equipment": [],
     "BaseCombatAttributes": {},
     "CombatAttributes": {},
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
-    "IsSummoned": false
+    "IsSummoned": false,
+    "ImagePath": ""
   },
   {
     "LootTableId": "a4c45d2e-b6a3-40ab-8dc2-a57912938cc8",
@@ -1210,19 +1234,25 @@
         "EntityId": "00000000-0000-0000-0000-000000000005",
         "AttributeType": 44,
         "Value": 0
+      },
+      {
+        "EntityId": "00000000-0000-0000-0000-000000000005",
+        "AttributeType": 45,
+        "Value": 0
       }
     ],
     "EssenceSlots": [],
+    "EquipmentSlots": [],
     "AbilityIds": [],
     "Abilities": [],
     "IsAlive": false,
-    "Equipment": [],
     "BaseCombatAttributes": {},
     "CombatAttributes": {},
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
-    "IsSummoned": false
+    "IsSummoned": false,
+    "ImagePath": ""
   },
   {
     "LootTableId": "ff9915e3-614b-4dae-832f-3897c41d6f66",
@@ -1455,19 +1485,25 @@
         "EntityId": "00000000-0000-0000-0000-000000000006",
         "AttributeType": 44,
         "Value": 0
+      },
+      {
+        "EntityId": "00000000-0000-0000-0000-000000000006",
+        "AttributeType": 45,
+        "Value": 0
       }
     ],
     "EssenceSlots": [],
+    "EquipmentSlots": [],
     "AbilityIds": [],
     "Abilities": [],
     "IsAlive": false,
-    "Equipment": [],
     "BaseCombatAttributes": {},
     "CombatAttributes": {},
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
-    "IsSummoned": false
+    "IsSummoned": false,
+    "ImagePath": ""
   },
   {
     "LootTableId": "0985c465-fe98-4420-a931-9544ad209229",
@@ -1700,19 +1736,25 @@
         "EntityId": "00000000-0000-0000-0000-000000000007",
         "AttributeType": 44,
         "Value": 0
+      },
+      {
+        "EntityId": "00000000-0000-0000-0000-000000000007",
+        "AttributeType": 45,
+        "Value": 0
       }
     ],
     "EssenceSlots": [],
+    "EquipmentSlots": [],
     "AbilityIds": [],
     "Abilities": [],
     "IsAlive": false,
-    "Equipment": [],
     "BaseCombatAttributes": {},
     "CombatAttributes": {},
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
-    "IsSummoned": false
+    "IsSummoned": false,
+    "ImagePath": ""
   },
   {
     "LootTableId": "a590e9dd-05c6-4d2b-acf1-1e2a8da5693e",
@@ -1945,19 +1987,25 @@
         "EntityId": "00000000-0000-0000-0000-000000000008",
         "AttributeType": 44,
         "Value": 0
+      },
+      {
+        "EntityId": "00000000-0000-0000-0000-000000000008",
+        "AttributeType": 45,
+        "Value": 0
       }
     ],
     "EssenceSlots": [],
+    "EquipmentSlots": [],
     "AbilityIds": [],
     "Abilities": [],
     "IsAlive": false,
-    "Equipment": [],
     "BaseCombatAttributes": {},
     "CombatAttributes": {},
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
-    "IsSummoned": false
+    "IsSummoned": false,
+    "ImagePath": ""
   },
   {
     "LootTableId": "4f292452-425e-4c8f-b999-23d9dbebfb64",
@@ -2190,19 +2238,25 @@
         "EntityId": "00000000-0000-0000-0000-000000000009",
         "AttributeType": 44,
         "Value": 0
+      },
+      {
+        "EntityId": "00000000-0000-0000-0000-000000000009",
+        "AttributeType": 45,
+        "Value": 0
       }
     ],
     "EssenceSlots": [],
+    "EquipmentSlots": [],
     "AbilityIds": [],
     "Abilities": [],
     "IsAlive": false,
-    "Equipment": [],
     "BaseCombatAttributes": {},
     "CombatAttributes": {},
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
-    "IsSummoned": false
+    "IsSummoned": false,
+    "ImagePath": ""
   },
   {
     "LootTableId": "0cfdad66-d46b-49f9-b2a4-b01984dc9873",
@@ -2435,19 +2489,25 @@
         "EntityId": "00000000-0000-0000-0000-000000000010",
         "AttributeType": 44,
         "Value": 0
+      },
+      {
+        "EntityId": "00000000-0000-0000-0000-000000000010",
+        "AttributeType": 45,
+        "Value": 0
       }
     ],
     "EssenceSlots": [],
+    "EquipmentSlots": [],
     "AbilityIds": [],
     "Abilities": [],
     "IsAlive": false,
-    "Equipment": [],
     "BaseCombatAttributes": {},
     "CombatAttributes": {},
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
-    "IsSummoned": false
+    "IsSummoned": false,
+    "ImagePath": ""
   },
   {
     "LootTableId": "882e26f2-cc3e-4273-958c-0eede8fb5b59",
@@ -2680,19 +2740,25 @@
         "EntityId": "00000000-0000-0000-0000-000000000011",
         "AttributeType": 44,
         "Value": 0
+      },
+      {
+        "EntityId": "00000000-0000-0000-0000-000000000011",
+        "AttributeType": 45,
+        "Value": 0
       }
     ],
     "EssenceSlots": [],
+    "EquipmentSlots": [],
     "AbilityIds": [],
     "Abilities": [],
     "IsAlive": false,
-    "Equipment": [],
     "BaseCombatAttributes": {},
     "CombatAttributes": {},
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
-    "IsSummoned": false
+    "IsSummoned": false,
+    "ImagePath": ""
   },
   {
     "LootTableId": "d8b981f0-b589-4e3b-a972-9cd51e900bff",
@@ -2925,19 +2991,25 @@
         "EntityId": "00000000-0000-0000-0000-000000000012",
         "AttributeType": 44,
         "Value": 0
+      },
+      {
+        "EntityId": "00000000-0000-0000-0000-000000000012",
+        "AttributeType": 45,
+        "Value": 0
       }
     ],
     "EssenceSlots": [],
+    "EquipmentSlots": [],
     "AbilityIds": [],
     "Abilities": [],
     "IsAlive": false,
-    "Equipment": [],
     "BaseCombatAttributes": {},
     "CombatAttributes": {},
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
-    "IsSummoned": false
+    "IsSummoned": false,
+    "ImagePath": ""
   },
   {
     "LootTableId": "42c55f54-5e29-4323-80ce-01762c27ad98",
@@ -3170,19 +3242,25 @@
         "EntityId": "00000000-0000-0000-0000-000000000013",
         "AttributeType": 44,
         "Value": 0
+      },
+      {
+        "EntityId": "00000000-0000-0000-0000-000000000013",
+        "AttributeType": 45,
+        "Value": 0
       }
     ],
     "EssenceSlots": [],
+    "EquipmentSlots": [],
     "AbilityIds": [],
     "Abilities": [],
     "IsAlive": false,
-    "Equipment": [],
     "BaseCombatAttributes": {},
     "CombatAttributes": {},
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
-    "IsSummoned": false
+    "IsSummoned": false,
+    "ImagePath": ""
   },
   {
     "LootTableId": "bd5fb1df-380f-4a09-865c-5f0fee704e2e",
@@ -3415,18 +3493,24 @@
         "EntityId": "00000000-0000-0000-0000-000000000014",
         "AttributeType": 44,
         "Value": 0
+      },
+      {
+        "EntityId": "00000000-0000-0000-0000-000000000014",
+        "AttributeType": 45,
+        "Value": 0
       }
     ],
     "EssenceSlots": [],
+    "EquipmentSlots": [],
     "AbilityIds": [],
     "Abilities": [],
     "IsAlive": false,
-    "Equipment": [],
     "BaseCombatAttributes": {},
     "CombatAttributes": {},
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
-    "IsSummoned": false
+    "IsSummoned": false,
+    "ImagePath": ""
   }
 ]

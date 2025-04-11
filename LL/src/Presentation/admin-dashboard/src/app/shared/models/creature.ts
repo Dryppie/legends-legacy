@@ -1,7 +1,7 @@
 import { AttributeType } from './enums/attributeType';
 
 export interface Creature {
-  id: number;
+  id: string;
   name: string;
   level: number;
   experienceReward: number;
@@ -11,4 +11,5 @@ export interface Creature {
 export interface AttributeDto {
   attributeType: AttributeType;
   value: number;
+  entityId: string;
 }

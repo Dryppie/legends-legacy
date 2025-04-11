@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CreatureService } from '../../core/services/creatures/creature.service';
-import { Creature } from '../../shared/models/creature';
+import { AttributeDto, Creature } from '../../shared/models/creature';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl, FormsModule, FormGroup, FormBuilder } from '@angular/forms';
 import { AttributeType } from '../../shared/models/enums/attributeType';
@@ -56,15 +56,38 @@ export class CreaturesComponent implements OnInit {
     if(this.selectedCreature) {
       let updatedAttributes = this.attributeKeys.map(key => ({
         attributeType: AttributeType[key as keyof typeof AttributeType],
-        value: this.creatureForm.value[key]
+        value: this.creatureForm.value[key],
+        entityId: this.selectedCreature!.id,
       }));
 
       this.selectedCreature.level = this.creatureForm.value.level;
       this.selectedCreature.experienceReward = this.creatureForm.value.experienceReward;
       this.selectedCreature.baseAttributes = updatedAttributes;
-      console.log("Updated Creature:", this.selectedCreature);
+
+      
+      this.creatureService.updateCreature(this.createNewCreature());
+      // console.log("Updated Creature:", this.selectedCreature);
     }
   }
+
+  createNewCreature(): Creature {
+
+  const attributes: AttributeDto[] = this.attributeKeys.map(key => ({
+    attributeType: AttributeType[key as keyof typeof AttributeType],
+    value: this.creatureForm.value[key],
+    entityId: this.selectedCreature!.id,
+  }));
+
+  const newCreature: Creature = {
+    id: this.selectedCreature!.id,
+    name: this.creatureForm.value.name, // make sure you have a 'name' control in your form
+    level: this.creatureForm.value.level,
+    experienceReward: this.creatureForm.value.experienceReward,
+    baseAttributes: attributes,
+  };
+
+  return newCreature;
+}
 
   // Method to select a creature to display its details
   selectCreature(creature: Creature | null): void {
