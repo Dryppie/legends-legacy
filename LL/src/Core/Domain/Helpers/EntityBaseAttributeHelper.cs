@@ -3,6 +3,17 @@
 namespace Domain.Helpers;
 public static class EntityBaseAttributeHelper
 {
+    public static List<EntityAttribute> CreateEntityAttributesWithIncrease(Guid entityId, float percentage)
+    {
+        var entityAttributes = CreateEntityAttributes(entityId);
+        foreach (var entityAttribute in entityAttributes)
+        {
+            // Increase the value by the specified percentage
+            entityAttribute.Value += (int)(entityAttribute.Value * percentage);
+        }
+
+        return entityAttributes;
+    }
     public static List<EntityAttribute> CreateEntityAttributes(Guid entityId)
     {
         var entityAttributes = Enum.GetValues(typeof(AttributeType))

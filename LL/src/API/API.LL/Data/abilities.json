@@ -1174,6 +1174,264 @@
     ]
   },
   {
+    "Name": "Enchanted Fairy's Essence",
+    "Active": {
+      "Id": "faesEmbrace",
+      "Name": "Fae's Embrace",
+      "Description": "Create a protective barrier around two allies, blocking up to 20 damage.",
+      "Type": "Active",
+      "Cooldown": 220,
+      "Cost": 14,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ResourceRestore",
+            "ResourceType": "Barrier",
+            "Amount": 20
+          },
+          "Duration": {
+            "Type": "NoDuration"
+          },
+          "IsFlatAmount": true,
+          "Targeting": "TwoAllies",
+          "Trigger": "None",
+          "Log": "{Target} received {Amount} barrier."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "enchantedCharm",
+      "Name": "Enchanted Charm",
+      "Description": "Every 20 seconds, enemies have to resist your charms, or become stunned for 3 seconds.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "NestedEffect",
+            "Effects": [
+              {
+                "Action": {
+                  "Type": "ApplyStatusEffect",
+                  "Status": "Stunned",
+                  "Stacks": 1
+                },
+                "Duration": {
+                  "Type": "TimedDuration",
+                  "Duration": 100
+                },
+                "Targeting": "AllEnemies",
+                "Trigger": "None",
+                "Chance": 30,
+                "Log": "{Actor} stunned {Target}."
+              }
+            ]
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Interval": {
+            "Type": "Interval",
+            "Interval": 180
+          },
+          
+          "Targeting": "Self",
+          "Trigger": "OnTickInterval",
+          "Log": "{Actor} flaunts their charms again, tempting the enemies."
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Wisdom",
+        "Amount": 8,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Willpower",
+        "Amount": 8,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Glade Panther's Essence",
+    "Active": {
+      "Id": "ambushStrike",
+      "Name": "Ambush Strike",
+      "Description": "Strike at the target, with 20% increased Crit Chance. Deal {damage1} damage.",
+      "Type": "Active",
+      "Cooldown": 200,
+      "Cost": 10,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 15,
+            "ScalingAttribute": "Agility",
+            "ScalingMultiplier": 0.2,
+            "AttackType": "Melee",
+            "DamageType": "Physical"
+          },
+          "Duration": {
+            "Type": "NoDuration"
+          },
+          "EffectModifiers": [
+            {
+              "Type": "CritChance",
+              "Amount": 80,
+              "ModifierType": "Flat"
+            }
+          ],
+          "Targeting": "SingleEnemy",
+          "Trigger": "None",
+          "AttackType": "Melee",
+          "DamageType": "Physical",
+          "EffectTags": [],
+          "Log": "{Actor} swiped at {Target}, dealing {Amount} damage."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "razorClaws",
+      "Name": "Razor Claws",
+      "Description": "Increase Critical Damage by 15%.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "CritDamage",
+            "Amount": 15,
+            "ModifierType": "Flat",
+            "Stackable": true
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Targeting": "Self",
+          "Trigger": "None",
+          "Log": "{Target} has their critical damage increased by {Amount}."
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Agility",
+        "Amount": 12,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Dexterity",
+        "Amount": 9,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Hobgoblin's Essence",
+    "Active": {
+      "Id": "frenzy",
+      "Name": "Frenzy",
+      "Description": "Increase Attack Speed by 18% and Critical Hit Chance by 14% for 10 seconds.",
+      "Type": "Active",
+      "Cooldown": 140,
+      "Cost": 18,
+      "CostType": "Mana",
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "BasicAttackSpeed",
+            "Amount": 18,
+            "ModifierType": "Additive",
+            "Stackable": true
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 100
+          },
+          "Targeting": "Self",
+          "Log": "{Actor}'s Attack Speed increased by 18%."
+        },
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "CritChance",
+            "Amount": 14,
+            "ModifierType": "Additive",
+            "Stackable": true
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 100
+          },
+          "Targeting": "Self",
+          "Trigger": "None",
+          "Log": "{Actor}'s Critical Chance increased by 14%."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "savageOnslaught",
+      "Name": "Savage Onslaught",
+      "Description": "Increase Strength by 75 the first time dropping below 60% Health.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "Strength",
+            "Amount": 75,
+            "ModifierType": "Flat",
+            "Stackable": true
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Usage": {
+            "Type": "LimitedUsage",
+            "Uses": 1
+          },
+          "Condition": {
+            "Type": "HealthCondition",
+            "HealthPercentage": 60,
+            "ComparisonType": "LessThan"
+          },
+          "Targeting": "Self",
+          "Trigger": "OnHealthChanged",
+          "AttackType": "None",
+          "DamageType": "None",
+          "EffectTags": [],
+          "Log": "{Actor}'s Strength is increased by 75 due to falling below 60% health."
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Constitution",
+        "Amount": 13,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "FightingSpirit",
+        "Amount": 7,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Willpower",
+        "Amount": 11,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
     "Name": "Starter Essence 1",
     "Active": {
       "Id": "fireball_01",

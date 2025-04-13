@@ -33,7 +33,15 @@ public static class TargetingManager
                 break;
 
             case Targeting.TwoAllies:
-                targets = enemyTeam.Where(e => e.IsAlive).ToList();
+                if (allies.Where(e => e.IsAlive).Count() >= 2)
+                {
+                    targets = allies.Where(e => e.IsAlive).Take(2).ToList();
+                }
+                else
+                {
+                    var allyTargets = SelectTarget(allies);
+                    if (allyTargets != null) targets.Add(allyTargets);
+                }
                 break;
 
             case Targeting.Self:
