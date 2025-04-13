@@ -1,0 +1,83 @@
+<div
+  class="max-w-xl rounded-lg border border-primary bg-texture p-6 text-primary"
+>
+  <!-- Modal Header -->
+  <div class="mb-4 flex items-start justify-between">
+    <div>
+      <h2 class="text-xl font-bold">Equipment</h2>
+      <p class="italic">Choose which piece of item to equip.</p>
+    </div>
+    <button (click)="onClose()" class="text-xl font-bold">&times;</button>
+  </div>
+  <div class="border-t border-light_gray pb-2"></div>
+  <!-- Modal Body -->
+
+  <!-- List of Equipment -->
+  <div class="space-y-4">
+    <!-- Iterate over all equipment instances -->
+    <div
+      *ngIf="equipmentInstances && equipmentInstances.length; else noEquipment"
+      class="flex flex-col gap-2"
+    >
+      <div
+        class="flex items-center gap-2"
+        *ngFor="let equipment of equipmentInstances"
+      >
+        <div
+          (click)="selectEquipment(equipment)"
+          class="h-full w-full rounded-md border border-primary p-2 hover:cursor-pointer"
+          [ngClass]="{
+            'border-transparent hover:border-primary/30':
+              equipment !== selectedEquipmentInstance,
+            'border-primary': equipment === selectedEquipmentInstance,
+          }"
+        >
+          <div class="text-lg font-bold">
+            {{ equipment.itemBase.name }}
+          </div>
+          <div
+            *ngFor="let attribute of equipment.itemBase.attributeModifiers"
+            class="flex gap-2"
+          >
+            <span class="text-white">
+              {{ attribute.amount > 0 ? "+" : "-" }}{{ attribute.amount }}
+            </span>
+            <span class="text-white">
+              {{ attribute.attributeType | attributeTypeFormat }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ng-template #noEquipment>
+      <p class="text-slate-300">No equipment available.</p>
+    </ng-template>
+  </div>
+
+  <!-- Footer Buttons -->
+  <div class="mt-6 flex place-items-end justify-end gap-2">
+    <button (click)="onClose()" class="rounded bg-light px-4 py-2 text-white">
+      Close
+    </button>
+    <button
+      (click)="onUnequip()"
+      [ngClass]="{
+        'bg-light_gray/10 text-white/10': !currentEquippedEquipment,
+      }"
+      [disabled]="!currentEquippedEquipment"
+      class="rounded bg-light px-4 py-2 text-white"
+    >
+      Unequip
+    </button>
+    <button
+      (click)="onEquip()"
+      [ngClass]="{
+        'bg-light_gray/10 text-white/10': !selectedEquipmentInstance,
+      }"
+      [disabled]="!selectedEquipmentInstance"
+      class="rounded bg-light px-4 py-2 text-white"
+    >
+      Equip
+    </button>
+  </div>
+</div>

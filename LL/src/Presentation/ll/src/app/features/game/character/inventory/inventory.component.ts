@@ -7,6 +7,7 @@ import { InventoryService } from '../../../../core/services/api/inventory/invent
 import { InventoryDto } from '../../../../shared/models/Dtos/inventoryDto';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
+import { CharacterManagerService } from '../../../../core/services/client-side/character-manager/character-manager.service';
 
 @Component({
   selector: 'app-inventory',
@@ -43,10 +44,23 @@ export class InventoryComponent implements OnInit {
   items: InventoryItem[] = [];
   emptySlots = Array(180).fill(null);
 
-  constructor(private inventoryService: InventoryService) {}
+  constructor(
+    private inventoryService: InventoryService,
+    private characterManager: CharacterManagerService,
+  ) {}
 
   ngOnInit(): void {
-    this.getInventory();
+    this.characterManager.inventory$.subscribe({
+      next: (inventory) => {
+        if (!inventory) return;
+        this.items = inventory.inventoryItems;
+        this.emptySlots = Array(180 - this.items.length).fill(null);
+      },
+      error: (err) => {
+        console.error('Error getting inventory from CharacterManager:', err);
+      },
+    });
+
     this.setActiveTab(this.tabs[0]?.label || '');
   }
 

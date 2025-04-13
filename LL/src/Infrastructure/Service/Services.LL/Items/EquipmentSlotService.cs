@@ -20,4 +20,10 @@ public class EquipmentSlotService : IEquipmentSlotService
     {
         return await _equipmentSlotRepository.EquipEquipmentAsync(entityId, equipmentId, cancellationToken);
     }
+
+    public async Task<bool> UnequipEquipmentAsync(Guid entityId, EquipmentType equipmentType, CancellationToken cancellationToken)
+    {
+        return await _equipmentSlotRepository.UnequipEquipmentAsync(entityId, equipmentType, cancellationToken);
+    }
+
 }

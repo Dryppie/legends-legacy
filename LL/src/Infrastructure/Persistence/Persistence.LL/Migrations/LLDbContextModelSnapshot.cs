@@ -350,6 +350,28 @@ namespace Persistence.LL.Migrations
                     b.UseTphMappingStrategy();
                 });
 
+            modelBuilder.Entity("Domain.Models.Masteries.Mastery", b =>
+                {
+                    b.Property<Guid>("EntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("MasteryType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AttributeType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CurrentXP")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("int");
+
+                    b.HasKey("EntityId", "MasteryType");
+
+                    b.ToTable("Mastery");
+                });
+
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
                 {
                     b.Property<string>("Id")
@@ -755,6 +777,9 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Items.ItemBase");
 
+                    b.Property<int>("CombatMastery")
+                        .HasColumnType("int");
+
                     b.Property<int>("EquipmentType")
                         .HasColumnType("int");
 
@@ -941,6 +966,17 @@ namespace Persistence.LL.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
+            modelBuilder.Entity("Domain.Models.Masteries.Mastery", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Entity", "Entity")
+                        .WithMany("Masteries")
+                        .HasForeignKey("EntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Entity");
+                });
+
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
                 {
                     b.HasOne("Domain.Models.Regions.Region", null)
@@ -1106,6 +1142,8 @@ namespace Persistence.LL.Migrations
                     b.Navigation("EquipmentSlots");
 
                     b.Navigation("EssenceSlots");
+
+                    b.Navigation("Masteries");
                 });
 
             modelBuilder.Entity("Domain.Models.Essences.Essence", b =>

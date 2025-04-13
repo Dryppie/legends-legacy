@@ -3,6 +3,8 @@ using Domain.Models.Entities;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
+using Domain.Models.Items.Equipments;
+using Domain.Models.Items.EssenceItems;
 using Domain.Models.LootTables;
 
 namespace Services.LL.Loots;
@@ -69,10 +71,17 @@ public class LootServices : ILootService
 
     private InventoryItem ConvertItemIntoInventoryItem(ItemBase item)
     {
+        var itemInstance = item.ItemType switch
+        {
+            ItemType.Equipment => new EquipmentInstance() { Id = Guid.NewGuid(), ItemBaseId = item.Id },
+            ItemType.Essence => new EssenceItemInstance() { Id = Guid.NewGuid(), ItemBaseId = item.Id },
+            _ => new ItemInstance() { Id = Guid.NewGuid(), ItemBaseId = item.Id },
+        };
         return new InventoryItem()
         {
-            ItemInstanceId = item.Id,
-            Quantity = 1
+            ItemInstanceId = itemInstance.Id,
+            Quantity = 1,
+            ItemInstance = itemInstance,
         };
     }
 }

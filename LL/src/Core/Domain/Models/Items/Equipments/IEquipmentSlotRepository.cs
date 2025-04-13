@@ -5,4 +5,5 @@ public interface IEquipmentSlotRepository
 {
     Task<List<EquipmentSlot>> GetEquipmentSlotsByEntityIdAsync(Guid entityId, CancellationToken cancellationToken);
     Task<bool> EquipEquipmentAsync(Guid entityId, Guid equipmentId, CancellationToken cancellationToken);
+    Task<bool> UnequipEquipmentAsync(Guid entityId, EquipmentType equipmentType, CancellationToken cancellationToken);
 }

@@ -2,6 +2,9 @@ import { NgFor, NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { EquipmentService } from '../../../core/services/api/equipment/equipment.service';
 import { EquipmentSlot, EquipmentType } from '../../models/Dtos/equipmentSlot';
+import { ModalService } from '../../../core/services/client-side/modal/modal.service';
+import { CharacterManagerService } from '../../../core/services/client-side/character-manager/character-manager.service';
+import { Equipment, EquipmentInstance } from '../../models/item';
 
 @Component({
   selector: 'app-equipment-overview',
@@ -11,30 +14,50 @@ import { EquipmentSlot, EquipmentType } from '../../models/Dtos/equipmentSlot';
   styleUrl: './equipment-overview.component.css',
 })
 export class EquipmentOverviewComponent implements OnInit {
-  handleSlotClick(equipmentSlot: EquipmentSlot) {
-    throw new Error('Method not implemented.');
-  }
-  constructor(private equipmentService: EquipmentService) {}
+  constructor(
+    private equipmentService: EquipmentService,
+    private modalService: ModalService,
+    private characterManager: CharacterManagerService,
+  ) {}
   slots = this.setInitialEquipmentSlots();
 
   ngOnInit(): void {
+    this.characterManager.equipment$.subscribe((equipmentList) => {
+      if (!equipmentList) return;
+      equipmentList.forEach((equipmentSlot) => {
+        const matchingSlot = this.slots.find(
+          (s) => s.equipmentType === equipmentSlot.equipmentType,
+        );
+        if (matchingSlot) {
+          matchingSlot.equipmentInstance = equipmentSlot.equipmentInstance;
+        }
+      });
+    });
     this.loadEquipment();
   }
 
   private loadEquipment(): void {
-    this.equipmentService
-      .getEquipment()
-      .subscribe((equipmentList: EquipmentSlot[]) => {
-        equipmentList.forEach((equipmentSlot) => {
-          // Here, assume equipmentItem has something like: { slotName: 'Head', ... }
-          const matchingSlot = this.slots.find(
-            (s) => s.equipmentType === equipmentSlot.equipmentType,
-          );
-          if (matchingSlot) {
-            matchingSlot.equipmentInstance = equipmentSlot.equipmentInstance;
-          }
-        });
-      });
+    this.equipmentService.getEquipment();
+  }
+
+  handleSlotClick(equipmentSlot: EquipmentSlot) {
+    // const inventory = this.characterManager.getInventory();
+    // if (!inventory) return;
+    // const matchingItems = inventory.inventoryItems
+    //   .map((ii) => ii.itemInstance)
+    //   .filter(
+    //     (item) =>
+    //       (item.itemBase as Equipment).equipmentType ===
+    //       equipmentSlot.equipmentType,
+    //   ) as EquipmentInstance[];
+    // if (!matchingItems) {
+    //   const filler: EquipmentInstance {
+
+    //   }
+    //   matchingItems.push();
+    // }
+    // You can pass the filtered items to your modal, if needed
+    this.modalService.toggleOverviewEquipItemModal(equipmentSlot.equipmentType);
   }
 
   private setInitialEquipmentSlots(): EquipmentSlot[] {

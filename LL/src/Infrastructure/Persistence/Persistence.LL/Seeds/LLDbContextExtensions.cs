@@ -1,9 +1,7 @@
 ﻿using Domain.Helpers;
 using Domain.Models.Attributes;
-using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
-using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.GatheringNodes;
@@ -13,8 +11,7 @@ using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.LootTables;
-using Domain.Models.Regions;
-using Domain.Models.Regions.Areas;
+using Domain.Models.Masteries;
 using Domain.Models.Users;
 using Microsoft.AspNetCore.Identity;
 
@@ -27,12 +24,12 @@ public static class LLDbContextExtensions
     {
         if (!context.Entities.Any())
         {
-            //await SeedCreatures.SeedCreaturesData(context);
-            //await SeedItems.SeedItemsData(context);
-            //await SeedItemsAndLootTables(context);
+            await SeedCreatures.SeedCreaturesData(context);
+            await SeedItems.SeedItemsData(context);
+            await SeedItemsAndLootTables(context);
             await SeedAdminData(context, userManager);
 
-            //await SeedInventoryItems(context);
+            await SeedInventoryItems(context);
 
             await context.SaveChangesAsync();
         }
@@ -147,15 +144,82 @@ public static class LLDbContextExtensions
                     EntityId = character.Id,
                 },
             };
-            SeedEquipmentSlots(character);
+            var equipmentSlots = SeedEquipmentSlots(character);
+            var masteries = SeedMasteries(character);
+            context.EquipmentSlots.AddRange(equipmentSlots);
             character.EssenceSlots = essenceSlots;
+            character.Masteries = masteries;
             context.Characters.Add(character);
             context.Inventories.Add(inventory);
             await context.Essences.AddRangeAsync(essences);
         }
     }
+    private static List<Mastery> SeedMasteries(Entity entity)
+    {
+        var masteries = new List<Mastery>()
+        {
+            new Mastery()
+            {
+                EntityId = entity.Id,
+                Level = 0,
+                CurrentXP = 0,
+                MasteryType = CombatMastery.Axe,
+                AttributeType = AttributeType.Strength,
+            },
+            new Mastery()
+            {
+                EntityId = entity.Id,
+                Level = 0,
+                CurrentXP = 0,
+                MasteryType = CombatMastery.Bow,
+                AttributeType = AttributeType.Agility,
+            },
+            new Mastery()
+            {
+                EntityId = entity.Id,
+                Level = 0,
+                CurrentXP = 0,
+                MasteryType = CombatMastery.Dagger,
+                AttributeType = AttributeType.Dexterity,
+            },
+            new Mastery()
+            {
+                EntityId = entity.Id,
+                Level = 0,
+                CurrentXP = 0,
+                MasteryType = CombatMastery.Hammer,
+                AttributeType = AttributeType.Endurance,
+            },
+            new Mastery()
+            {
+                EntityId = entity.Id,
+                Level = 0,
+                CurrentXP = 0,
+                MasteryType = CombatMastery.Shield,
+                AttributeType = AttributeType.Constitution,
+            },
+            new Mastery()
+            {
+                EntityId = entity.Id,
+                Level = 0,
+                CurrentXP = 0,
+                MasteryType = CombatMastery.Staff,
+                AttributeType = AttributeType.Intelligence,
+            },
+            new Mastery()
+            {
+                EntityId = entity.Id,
+                Level = 0,
+                CurrentXP = 0,
+                MasteryType = CombatMastery.Sword,
+                AttributeType = AttributeType.FightingSpirit,
+            },
+        };
 
-    private static void SeedEquipmentSlots(Entity entity)
+        return masteries;
+    }
+
+    private static List<EquipmentSlot> SeedEquipmentSlots(Entity entity)
     {
 
         var slotTypes = Enum.GetValues(typeof(EquipmentType)).Cast<EquipmentType>();
@@ -169,14 +233,7 @@ public static class LLDbContextExtensions
             })
             .ToList();
 
-        //foreach (var equipmentSlot in equipmentSlots)
-        //{
-        //    if (equipmentSlot.EquipmentType == EquipmentType.MainHand)
-        //    {
-        //        equipmentSlot.EquipmentId = Guid.Parse("00000000-1000-0000-0000-000000000001");
-        //    }
-        //}
-        entity.EquipmentSlots = equipmentSlots;
+        return equipmentSlots;
     }
 
     public static async Task SeedItemsAndLootTables(LLDbContext context)
@@ -200,38 +257,38 @@ public static class LLDbContextExtensions
             };
             var swordEquipmentInstance = new EquipmentInstance
             {
-                Id = Guid.Parse("00000000-1000-0000-0000-000000000001"),
-                ItemBaseId = Guid.Parse("00000000-1000-0000-0000-000000000001"),
+                Id = Guid.Parse(SeedItems.SWORD_GUID),
+                ItemBaseId = Guid.Parse(SeedItems.SWORD_GUID),
             };
             var bowEquipmentInstance = new EquipmentInstance
             {
-                Id = Guid.Parse("00000000-2000-0000-0000-000000000002"),
-                ItemBaseId = Guid.Parse("00000000-2000-0000-0000-000000000002"),
+                Id = Guid.Parse(SeedItems.BOW_GUID),
+                ItemBaseId = Guid.Parse(SeedItems.BOW_GUID),
             };
             var axeEquipmentInstance = new EquipmentInstance
             {
-                Id = Guid.Parse("00000000-3000-0000-0000-000000000003"),
-                ItemBaseId = Guid.Parse("00000000-3000-0000-0000-000000000003"),
+                Id = Guid.Parse(SeedItems.AXE_GUID),
+                ItemBaseId = Guid.Parse(SeedItems.AXE_GUID),
             };
             var daggerEquipmentInstance = new EquipmentInstance
             {
-                Id = Guid.Parse("00000000-4000-0000-0000-000000000004"),
-                ItemBaseId = Guid.Parse("00000000-4000-0000-0000-000000000004"),
+                Id = Guid.Parse(SeedItems.DAGGER_GUID),
+                ItemBaseId = Guid.Parse(SeedItems.DAGGER_GUID),
             };
             var hammerEquipmentInstance = new EquipmentInstance
             {
-                Id = Guid.Parse("00000000-5000-0000-0000-000000000005"),
-                ItemBaseId = Guid.Parse("00000000-5000-0000-0000-000000000005"),
+                Id = Guid.Parse(SeedItems.HAMMER_GUID),
+                ItemBaseId = Guid.Parse(SeedItems.HAMMER_GUID),
             };
             var shieldEquipmentInstance = new EquipmentInstance
             {
-                Id = Guid.Parse("00000000-6000-0000-0000-000000000006"),
-                ItemBaseId = Guid.Parse("00000000-6000-0000-0000-000000000006"),
+                Id = Guid.Parse(SeedItems.SHIELD_GUID),
+                ItemBaseId = Guid.Parse(SeedItems.SHIELD_GUID),
             };
             var staffEquipmentInstance = new EquipmentInstance
             {
-                Id = Guid.Parse("00000000-7000-0000-0000-000000000007"),
-                ItemBaseId = Guid.Parse("00000000-7000-0000-0000-000000000007"),
+                Id = Guid.Parse(SeedItems.STAFF_GUID),
+                ItemBaseId = Guid.Parse(SeedItems.STAFF_GUID),
             };
             var inventoryItemGoblinEssence = new InventoryItem()
             {
@@ -250,43 +307,43 @@ public static class LLDbContextExtensions
             var inventoryItemSword = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-1000-0000-0000-000000000001"), // Copied directly from SwordItem. Same ID
+                ItemInstanceId = Guid.Parse(SeedItems.SWORD_GUID), // Copied directly from SwordItem. Same ID
                 Quantity = 1
             };
             var inventoryItemBow = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-2000-0000-0000-000000000002"), // Copied directly from BowItem. Same ID
+                ItemInstanceId = Guid.Parse(SeedItems.BOW_GUID), // Copied directly from BowItem. Same ID
                 Quantity = 1
             };
             var inventoryItemAxe = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-3000-0000-0000-000000000003"), // Copied directly from AxeItem. Same ID
+                ItemInstanceId = Guid.Parse(SeedItems.AXE_GUID), // Copied directly from AxeItem. Same ID
                 Quantity = 1
             };
             var inventoryItemDagger = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-4000-0000-0000-000000000004"), // Copied directly from DaggerItem. Same ID
+                ItemInstanceId = Guid.Parse(SeedItems.DAGGER_GUID), // Copied directly from DaggerItem. Same ID
                 Quantity = 1
             };
             var inventoryItemHammer = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-5000-0000-0000-000000000005"), // Copied directly from HammerItem. Same ID
+                ItemInstanceId = Guid.Parse(SeedItems.HAMMER_GUID), // Copied directly from HammerItem. Same ID
                 Quantity = 1
             };
             var inventoryItemShield = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-6000-0000-0000-000000000006"), // Copied directly from ShieldItem. Same ID
+                ItemInstanceId = Guid.Parse(SeedItems.SHIELD_GUID), // Copied directly from ShieldItem. Same ID
                 Quantity = 1
             };
             var inventoryItemStaff = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-7000-0000-0000-000000000007"), // Copied directly from StaffItem. Same ID
+                ItemInstanceId = Guid.Parse(SeedItems.STAFF_GUID), // Copied directly from StaffItem. Same ID
                 Quantity = 1
             };
             await context.ItemInstances.AddRangeAsync(goblinEssenceItemInstance, ratEssenceItemInstance, swordEquipmentInstance, bowEquipmentInstance, axeEquipmentInstance, daggerEquipmentInstance, hammerEquipmentInstance, shieldEquipmentInstance, staffEquipmentInstance);

@@ -7,6 +7,7 @@ using Services.LL._Simulator;
 using Services.LL.Attributes;
 using Services.LL.Authorization;
 using Services.LL.CharacterActions;
+using Services.LL.Combat;
 using Services.LL.Entities;
 using Services.LL.Entities.Characters;
 using Services.LL.Entities.Creatures;

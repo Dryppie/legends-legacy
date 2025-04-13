@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Essence } from '../../../../shared/models/essence';
-import { Equipment } from '../../../../shared/models/item';
+import { EquipmentInstance } from '../../../../shared/models/item';
+import { EquipmentType } from '../../../../shared/models/Dtos/equipmentSlot';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +12,10 @@ export class ModalService {
   private absorbEssenceModalState = new BehaviorSubject<Essence[] | null>(null);
   private removeEssenceModalState = new BehaviorSubject<Essence[] | null>(null);
 
-  private equipmentModalState = new BehaviorSubject<Equipment | null>(null);
+  private inventoryEquipmentModalState =
+    new BehaviorSubject<EquipmentInstance | null>(null);
+  private overviewEquipmentModalState =
+    new BehaviorSubject<EquipmentType | null>(null);
 
   private editCombatFiltersModalState = new BehaviorSubject<boolean>(false);
 
@@ -19,7 +23,11 @@ export class ModalService {
   absorbEssenceModalState$ = this.absorbEssenceModalState.asObservable();
   removeEssenceModalState$ = this.removeEssenceModalState.asObservable();
 
-  equipmentModalState$ = this.equipmentModalState.asObservable();
+  inventoryEquipmentModalState$ =
+    this.inventoryEquipmentModalState.asObservable();
+
+  overviewEquipmentModalState$ =
+    this.overviewEquipmentModalState.asObservable();
 
   editCombatFiltersModalState$ =
     this.editCombatFiltersModalState.asObservable();
@@ -40,7 +48,11 @@ export class ModalService {
     this.editCombatFiltersModalState.next(state);
   }
 
-  toggleEquipItemModal(equipment: Equipment | null = null) {
-    this.equipmentModalState.next(equipment);
+  toggleInventoryEquipItemModal(equipment: EquipmentInstance | null = null) {
+    this.inventoryEquipmentModalState.next(equipment);
+  }
+
+  toggleOverviewEquipItemModal(equipment: EquipmentType | null = null) {
+    this.overviewEquipmentModalState.next(equipment);
   }
 }

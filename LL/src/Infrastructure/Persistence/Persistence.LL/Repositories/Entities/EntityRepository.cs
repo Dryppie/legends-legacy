@@ -4,6 +4,7 @@ using Common.Helpers.Essences;
 using Domain.Extensions;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Creatures;
+using Domain.Models.Items.Equipments;
 using Domain.Models.LootTables;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,6 +31,9 @@ public class EntityRepository : IEntityRepository
         // Query only distinct IDs
         var entities = await _context.Entities
             .Include(e => e.BaseAttributes)
+            .Include(e => e.Masteries)
+            .Include(e => e.EquipmentSlots)
+                .ThenInclude(es => (es.EquipmentInstance.ItemBase as EquipmentBase).AttributeModifiers)
             .Include(e => e.EssenceSlots)
                 .ThenInclude(es => es.OccupiedEssence)
             .Include(e => (e as Creature).LootTable)

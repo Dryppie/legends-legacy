@@ -251,6 +251,7 @@ namespace Persistence.LL.Migrations
                     ItemType = table.Column<int>(type: "int", nullable: false),
                     Rarity = table.Column<int>(type: "int", nullable: false),
                     EquipmentType = table.Column<int>(type: "int", nullable: true),
+                    CombatMastery = table.Column<int>(type: "int", nullable: true),
                     EssenceId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
@@ -540,6 +541,27 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Mastery",
+                columns: table => new
+                {
+                    EntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MasteryType = table.Column<int>(type: "int", nullable: false),
+                    Level = table.Column<int>(type: "int", nullable: false),
+                    CurrentXP = table.Column<int>(type: "int", nullable: false),
+                    AttributeType = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Mastery", x => new { x.EntityId, x.MasteryType });
+                    table.ForeignKey(
+                        name: "FK_Mastery_Entities_EntityId",
+                        column: x => x.EntityId,
+                        principalTable: "Entities",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ActionDetails",
                 columns: table => new
                 {
@@ -788,6 +810,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "ItemAttributeModifier");
+
+            migrationBuilder.DropTable(
+                name: "Mastery");
 
             migrationBuilder.DropTable(
                 name: "Transaction");

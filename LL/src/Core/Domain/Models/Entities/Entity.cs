@@ -4,6 +4,7 @@ using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Items.Equipments.Slots;
+using Domain.Models.Masteries;
 
 namespace Domain.Models.Entities;
 public abstract class Entity
@@ -33,6 +34,7 @@ public abstract class Entity
     [NotMapped]
     public HashSet<string> Statuses { get; } = [];
     public int Level { get; set; } = 1;
+    public ICollection<Mastery> Masteries { get; set; } = [];
     [NotMapped]
     public bool IsSummoned { get; set; } = false;
     public string ImagePath { get; set; } = string.Empty;

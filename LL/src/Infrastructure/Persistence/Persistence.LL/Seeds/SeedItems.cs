@@ -4,6 +4,7 @@ using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.LootTables;
+using Domain.Models.Masteries;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,6 +43,7 @@ public static class SeedItems
             Rarity = Rarity.Common,
             EquipmentType = EquipmentType.MainHand,
             AttributeModifiers = axeAttributes,
+            CombatMastery = CombatMastery.Axe
         };
         var daggerAttributes = new List<ItemAttributeModifier>()
         {
@@ -56,6 +58,7 @@ public static class SeedItems
             Rarity = Rarity.Common,
             EquipmentType = EquipmentType.MainHand,
             AttributeModifiers = daggerAttributes,
+            CombatMastery = CombatMastery.Dagger
         };
         var hammerAttributes = new List<ItemAttributeModifier>()
         {
@@ -70,6 +73,7 @@ public static class SeedItems
             Rarity = Rarity.Common,
             EquipmentType = EquipmentType.MainHand,
             AttributeModifiers = hammerAttributes,
+            CombatMastery = CombatMastery.Hammer
         };
         var swordAttributes = new List<ItemAttributeModifier>()
         {
@@ -84,6 +88,7 @@ public static class SeedItems
             Rarity = Rarity.Common,
             EquipmentType = EquipmentType.MainHand,
             AttributeModifiers = swordAttributes,
+            CombatMastery = CombatMastery.Sword
         };
         var bowAttributes = new List<ItemAttributeModifier>()
         {
@@ -98,6 +103,7 @@ public static class SeedItems
             Rarity = Rarity.Common,
             EquipmentType = EquipmentType.MainHand,
             AttributeModifiers = bowAttributes,
+            CombatMastery = CombatMastery.Bow
         };
         var shieldAttributes = new List<ItemAttributeModifier>()
         {
@@ -112,6 +118,7 @@ public static class SeedItems
             Rarity = Rarity.Common,
             EquipmentType = EquipmentType.OffHand,
             AttributeModifiers = shieldAttributes,
+            CombatMastery = CombatMastery.Shield
         };
         var staffAttributes = new List<ItemAttributeModifier>()
         {
@@ -126,6 +133,7 @@ public static class SeedItems
             Rarity = Rarity.Common,
             EquipmentType = EquipmentType.MainHand,
             AttributeModifiers = staffAttributes,
+            CombatMastery = CombatMastery.Staff
         };
 
         var potion = new ItemBase

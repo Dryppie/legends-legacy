@@ -9,7 +9,9 @@ export interface ItemInstance {
   itemBase: ItemBase;
 }
 
-export interface EquipmentInstance extends ItemInstance {}
+export interface EquipmentInstance extends ItemInstance {
+  itemBase: Equipment;
+}
 
 export interface ItemBase {
   id: string;

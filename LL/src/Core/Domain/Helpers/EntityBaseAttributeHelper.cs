@@ -9,7 +9,10 @@ public static class EntityBaseAttributeHelper
         foreach (var entityAttribute in entityAttributes)
         {
             // Increase the value by the specified percentage
-            entityAttribute.Value += (int)(entityAttribute.Value * percentage);
+            if (entityAttribute.AttributeType != AttributeType.BasicAttackSpeed && entityAttribute.AttributeType != AttributeType.RecoveryRate)
+            {
+                entityAttribute.Value = (int)(entityAttribute.Value * (1 + percentage));
+            }
         }
 
         return entityAttributes;
@@ -47,19 +50,19 @@ public static class EntityBaseAttributeHelper
             case AttributeType.Instinct:
             case AttributeType.Perception:
             case AttributeType.Luck:
-                return 0; // Base value for primary stats
+                return 10; // Base value for primary stats
 
             // Combat Stats
             case AttributeType.MaxHealth:
             case AttributeType.Health:
                 return 50;
             case AttributeType.HealthRegeneration:
-                return 2;
+                return 1;
             case AttributeType.MaxMana:
             case AttributeType.Mana:
-                return 20;
+                return 50;
             case AttributeType.ManaRegeneration:
-                return 2;
+                return 1;
             case AttributeType.BasicAttackSpeed:
                 return 10;
             case AttributeType.RecoveryRate:

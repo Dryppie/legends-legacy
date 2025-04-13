@@ -10,11 +10,13 @@ using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
+using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Slots;
 using MediatR;
-using Services.LL.Combat;
+using Services.LL.CharacterActions;
 using Services.LL.Interfaces;
 
-namespace Services.LL.CharacterActions;
+namespace Services.LL.Combat;
 public class CombatService : ICombatService
 {
     private readonly IEntityService _entityService;
@@ -71,7 +73,7 @@ public class CombatService : ICombatService
             // Update the UpdatedAt timestamp based on combat duration
             // And add 2 seconds to have a delay of one second before and after the fight
             // To display the victory/defeat screen before a new fight is initialized
-            characterAction.UpdatedAt += TimeSpan.FromSeconds((lastCombatResult.Duration * 0.1) + 2);
+            characterAction.UpdatedAt += TimeSpan.FromSeconds(lastCombatResult.Duration * 0.1 + 2);
 
 
             // Accumulate loot
@@ -199,6 +201,19 @@ public class CombatService : ICombatService
         foreach (var character in characters)
         {
             character.Experience += totalExp / characters.Count();
+            var wepAndShield = character.EquipmentSlots.Where(eq => (eq.EquipmentType == EquipmentType.MainHand || eq.EquipmentType == EquipmentType.OffHand) && eq.EquipmentInstance != null).ToList();
+            foreach (var mastery in character.Masteries)
+            {
+                if (wepAndShield != null && wepAndShield.Select(we => (we.EquipmentInstance.ItemBase as EquipmentBase).CombatMastery).ToList().Contains(mastery.MasteryType))
+                {
+                    mastery.CurrentXP++;
+                    if (mastery.CurrentXP >= mastery.XPThresholdForNextLevel)
+                    {
+                        mastery.CurrentXP -= mastery.XPThresholdForNextLevel;
+                        mastery.Level++;
+                    }
+                }
+            }
             await _levelingService.UpdateCharacterLevel(character);
         }
         await _entityService.UpdateEntities(playerCharacters, cancellationToken);

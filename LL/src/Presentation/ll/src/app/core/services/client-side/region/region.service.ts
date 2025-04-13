@@ -52,16 +52,20 @@ export class RegionService {
           ],
         },
         // {
-        //   name: 'Oak Thicket',
-        //   creatures: [],
-        // },
-        // {
-        //   name: 'Old Forest',
-        //   creatures: [],
-        // },
-        // {
+        //   id: 'region_01_area_04',
         //   name: 'Twilight Clearing',
-        //   creatures: [],
+        //   creatures: [
+        //     'Enchanted Fairy',
+        //     'Glade Panther',
+        //     'Illusion Fox',
+        //     'Nightshade Blossom',
+        //     'Pixie',
+        //   ],
+        // },
+        // {
+        //   id: 'region_01_area_05',
+        //   name: 'Goblin Mines',
+        //   creatures: ['Hobgoblin'],
         // },
       ],
       dungeons: [],

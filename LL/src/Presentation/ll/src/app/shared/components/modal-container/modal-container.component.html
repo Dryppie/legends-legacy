@@ -27,10 +27,16 @@
       (close)="onEditCombatFiltersModalClose()"
     ></app-combat-filters-modal>
     <app-inventory-equipment-modal
-      *ngIf="equipment"
-      [equipment]="equipment"
-      (close)="onEquipmentModalClose()"
+      *ngIf="inventoryEquipment"
+      [equipmentInstance]="inventoryEquipment"
+      (close)="onInventoryEquipmentModalClose()"
     >
     </app-inventory-equipment-modal>
+    <app-overview-equipment-modal
+      *ngIf="overviewEquipment"
+      [equipmentType]="overviewEquipment"
+      (close)="onOverviewEquipmentModalClose()"
+      >>
+    </app-overview-equipment-modal>
   </div>
 </div>

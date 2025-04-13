@@ -30,7 +30,7 @@ public class EssenceRepository : IEssenceRepository
         NotFoundException.ThrowIfNull(character, nameof(character), characterId);
 
         var inventoryItem = character.Inventory.InventoryItems
-            .FirstOrDefault(ii => ii.ItemInstance is EssenceItemInstance ei && ei.ItemBase is EssenceItemBase eib && eib.Id.Equals(essenceItemId));
+            .FirstOrDefault(ii => ii.ItemInstance is EssenceItemInstance ei && ei.ItemBase is EssenceItemBase eib && eib.Essence.Id.Equals(essenceItemId));
 
         // Throw if the item was not found
         NotFoundException.ThrowIfNull(inventoryItem, nameof(inventoryItem), essenceItemId);

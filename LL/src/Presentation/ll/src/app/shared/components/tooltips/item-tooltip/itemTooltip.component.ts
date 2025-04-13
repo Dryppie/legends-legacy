@@ -1,5 +1,10 @@
 import { Component, Input } from '@angular/core';
-import { Equipment, EssenceItem, ItemInstance } from '../../../models/item';
+import {
+  Equipment,
+  EquipmentInstance,
+  EssenceItem,
+  ItemInstance,
+} from '../../../models/item';
 import { NgClass, NgIf } from '@angular/common';
 import { Rarity } from '../../../models/enums/rarity';
 import { ItemType } from '../../../models/enums/itemType';
@@ -43,7 +48,9 @@ export class ItemTooltipComponent {
   }
 
   openEquipItemModal() {
-    this.modalService.toggleEquipItemModal(this.item.itemBase as Equipment);
+    this.modalService.toggleInventoryEquipItemModal(
+      this.item as EquipmentInstance,
+    );
   }
 
   isEssence() {

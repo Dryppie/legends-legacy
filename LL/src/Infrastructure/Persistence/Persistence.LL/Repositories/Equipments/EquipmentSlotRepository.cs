@@ -65,6 +65,40 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         return await EquipEquipmentAsync(character, inventory, equipmentInstance, inventoryItem, cancellationToken);
     }
 
+    public async Task<bool> UnequipEquipmentAsync(Guid entityId, EquipmentType equipmentType, CancellationToken cancellationToken)
+    {
+        var character = await _context.Characters
+            .Include(c => c.EquipmentSlots)
+                .ThenInclude(es => es.EquipmentInstance)
+                    .ThenInclude(ei => ei.ItemBase)
+            .Include(c => c.Inventory)
+                .ThenInclude(i => i.InventoryItems)
+                    .ThenInclude(ii => ii.ItemInstance)
+                        .ThenInclude(ii => ii.ItemBase)
+            .SingleOrDefaultAsync(c => c.Id == entityId, cancellationToken);
+
+        if (character == null)
+        {
+            return false;
+        }
+        var inventory = character.Inventory;
+        if (inventory == null)
+        {
+            return false;
+        }
+        var equipmentSlot = character.EquipmentSlots
+            .FirstOrDefault(es => es.EquipmentType == equipmentType && es.EquipmentInstance != null);
+        if (equipmentSlot == null)
+        {
+            return false;
+        }
+        AddOrIncrementItemInInventory(character.Inventory, equipmentSlot.EquipmentInstance.Id);
+        equipmentSlot.EquipmentInstance = null;
+        equipmentSlot.EquipmentInstanceId = null;
+        await _context.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
     private async Task<bool> EquipEquipmentAsync(Character character, Inventory inventory, EquipmentInstance equipmentInstance, InventoryItem inventoryItem, CancellationToken cancellationToken)
     {
         var equipmentBase = equipmentInstance.ItemBase as EquipmentBase;

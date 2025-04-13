@@ -1,10 +1,14 @@
 ﻿using Application.Common.Interfaces;
 using Common.Exceptions;
 using Common.Helpers.Essences;
+using Domain.Models.Attributes;
+using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Slots;
+using Domain.Models.Masteries;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Entities.Characters;
@@ -23,7 +27,9 @@ public class CharacterRepository : ICharacterRepository
         var character = new Character()
         {
             UserId = userId,
-            Name = username
+            Name = username,
+            ImagePath = "player",
+            Level = 1
         };
 
         // TODO: This is only temporary, so guests have abilities
@@ -48,16 +54,22 @@ public class CharacterRepository : ICharacterRepository
                 SlotType = SlotType.Standard,
                 OccupiedEssence = essences.First()
             },
+            new EssenceSlot()
+            {
+                SlotState = SlotState.Active,
+                SlotType = SlotType.Standard,
+            },
         };
 
         character.EssenceSlots = essenceSlots;
 
         await _context.Essences.AddRangeAsync(essences);
         await _context.EssenceSlots.AddRangeAsync(essenceSlots);
+        character.Masteries = SeedMasteries(character);
+        SeedEquipmentSlots(character);
         await _context.Characters.AddAsync(character);
 
         await _context.SaveChangesAsync(cancellationToken);
-
         return character;
     }
 
@@ -125,5 +137,87 @@ public class CharacterRepository : ICharacterRepository
             .ToListAsync(cancellationToken);
 
         return leaderboard;
+    }
+
+    private static void SeedEquipmentSlots(Entity entity)
+    {
+
+        var slotTypes = Enum.GetValues(typeof(EquipmentType)).Cast<EquipmentType>();
+
+        // Create an equipment slot for each enum value
+        var equipmentSlots = slotTypes
+            .Select(type => new EquipmentSlot
+            {
+                EntityId = entity.Id,
+                EquipmentType = type
+            })
+            .ToList();
+
+        entity.EquipmentSlots = equipmentSlots;
+    }
+
+    private static List<Mastery> SeedMasteries(Entity entity)
+    {
+        var masteries = new List<Mastery>()
+        {
+            new Mastery()
+            {
+                EntityId = entity.Id,
+                Level = 0,
+                CurrentXP = 0,
+                MasteryType = CombatMastery.Axe,
+                AttributeType = AttributeType.Strength,
+            },
+            new Mastery()
+            {
+                EntityId = entity.Id,
+                Level = 0,
+                CurrentXP = 0,
+                MasteryType = CombatMastery.Bow,
+                AttributeType = AttributeType.Agility,
+            },
+            new Mastery()
+            {
+                EntityId = entity.Id,
+                Level = 0,
+                CurrentXP = 0,
+                MasteryType = CombatMastery.Dagger,
+                AttributeType = AttributeType.Dexterity,
+            },
+            new Mastery()
+            {
+                EntityId = entity.Id,
+                Level = 0,
+                CurrentXP = 0,
+                MasteryType = CombatMastery.Hammer,
+                AttributeType = AttributeType.Endurance,
+            },
+            new Mastery()
+            {
+                EntityId = entity.Id,
+                Level = 0,
+                CurrentXP = 0,
+                MasteryType = CombatMastery.Shield,
+                AttributeType = AttributeType.Constitution,
+            },
+            new Mastery()
+            {
+                EntityId = entity.Id,
+                Level = 0,
+                CurrentXP = 0,
+                MasteryType = CombatMastery.Staff,
+                AttributeType = AttributeType.Intelligence,
+            },
+            new Mastery()
+            {
+                EntityId = entity.Id,
+                Level = 0,
+                CurrentXP = 0,
+                MasteryType = CombatMastery.Sword,
+                AttributeType = AttributeType.FightingSpirit,
+            },
+        };
+
+        return masteries;
     }
 }
