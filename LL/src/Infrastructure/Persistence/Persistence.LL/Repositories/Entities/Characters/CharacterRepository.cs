@@ -103,6 +103,7 @@ public class CharacterRepository : ICharacterRepository
     public async Task<Character> GetCharacterOverviewByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var character = await _context.Characters
+            .Include(c => c.Masteries)
             .Include(c => c.EssenceSlots)
                 .ThenInclude(es => es.OccupiedEssence)
             .Include(c => c.BaseAttributes)
