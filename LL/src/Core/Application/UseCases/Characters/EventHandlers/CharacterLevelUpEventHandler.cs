@@ -34,10 +34,10 @@ public class CharacterLevelUpEventHandler : INotificationHandler<CharacterLevelU
             await _essenceSlotService.CreateEssenceSlotOnLevelUp(characterId, Domain.Models.Essences.EssenceSlots.SlotState.Active, cancellationToken);
         }
 
-        if (newLevel % 10 == 0 && newLevel <= 90)
-        {
-            await _essenceSlotService.CreateEssenceSlotOnLevelUp(characterId, Domain.Models.Essences.EssenceSlots.SlotState.Reserved, cancellationToken);
-        }
+        //if (newLevel % 10 == 0 && newLevel <= 90)
+        //{
+        //    await _essenceSlotService.CreateEssenceSlotOnLevelUp(characterId, Domain.Models.Essences.EssenceSlots.SlotState.Reserved, cancellationToken);
+        //}
 
         //if (newLevel % 10 == 0)
         //{

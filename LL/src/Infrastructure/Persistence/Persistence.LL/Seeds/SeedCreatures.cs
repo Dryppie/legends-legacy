@@ -371,26 +371,26 @@ public static class SeedCreatures
         };
 
         // Step 4 - Loot Tables
-        var goblinEssenceLootTableItem = new LootTableItem { ItemId = goblinEssenceItem.Id, Weight = 50 };
-        var goblinWarriorEssenceLootTableItem = new LootTableItem { ItemId = goblinWarriorEssenceItem.Id, Weight = 50 };
-        var goblinArcherEssenceLootTableItem = new LootTableItem { ItemId = goblinArcherEssenceItem.Id, Weight = 50 };
-        var largeRatEssenceLootTableItem = new LootTableItem { ItemId = largeRatEssenceItem.Id, Weight = 50 };
-        var flameImpEssenceLootTableItem = new LootTableItem { ItemId = flameImpEssenceItem.Id, Weight = 50 };
-        var frostImpEssenceLootTableItem = new LootTableItem { ItemId = frostImpEssenceItem.Id, Weight = 50 };
-        var shadowImpEssenceLootTableItem = new LootTableItem { ItemId = shadowImpEssenceItem.Id, Weight = 50 };
-        var vampireBatEssenceLootTableItem = new LootTableItem { ItemId = vampireBatEssenceItem.Id, Weight = 50 };
-        var blueSlimeEssenceLootTableItem = new LootTableItem { ItemId = blueSlimeEssenceItem.Id, Weight = 50 };
-        var brownSlimeEssenceLootTableItem = new LootTableItem { ItemId = brownSlimeEssenceItem.Id, Weight = 50 };
-        var greenSlimeEssenceLootTableItem = new LootTableItem { ItemId = greenSlimeEssenceItem.Id, Weight = 50 };
-        var rainbowSlimeEssenceLootTableItem = new LootTableItem { ItemId = rainbowSlimeEssenceItem.Id, Weight = 50 };
-        var redSlimeEssenceLootTableItem = new LootTableItem { ItemId = redSlimeEssenceItem.Id, Weight = 50 };
-        var transparentSlimeEssenceLootTableItem = new LootTableItem { ItemId = transparentSlimeEssenceItem.Id, Weight = 50 };
-        var enchantedFairyEssenceLootTableItem = new LootTableItem { ItemId = enchantedFairyEssenceItem.Id, Weight = 50 };
-        var gladePantherEssenceLootTableItem = new LootTableItem { ItemId = gladePantherEssenceItem.Id, Weight = 50 };
-        var illusionFoxEssenceLootTableItem = new LootTableItem { ItemId = illusionFoxEssenceItem.Id, Weight = 50 };
-        var nightshadeBlossomEssenceLootTableItem = new LootTableItem { ItemId = nightshadeBlossomEssenceItem.Id, Weight = 50 };
-        var pixieEssenceLootTableItem = new LootTableItem { ItemId = pixieEssenceItem.Id, Weight = 50 };
-        var hobgoblinEssenceLootTableItem = new LootTableItem { ItemId = hobgoblinEssenceItem.Id, Weight = 50 };
+        var goblinEssenceLootTableItem = new LootTableItem { ItemId = goblinEssenceItem.Id, Weight = 25 };
+        var goblinWarriorEssenceLootTableItem = new LootTableItem { ItemId = goblinWarriorEssenceItem.Id, Weight = 25 };
+        var goblinArcherEssenceLootTableItem = new LootTableItem { ItemId = goblinArcherEssenceItem.Id, Weight = 25 };
+        var largeRatEssenceLootTableItem = new LootTableItem { ItemId = largeRatEssenceItem.Id, Weight = 25 };
+        var flameImpEssenceLootTableItem = new LootTableItem { ItemId = flameImpEssenceItem.Id, Weight = 25 };
+        var frostImpEssenceLootTableItem = new LootTableItem { ItemId = frostImpEssenceItem.Id, Weight = 25 };
+        var shadowImpEssenceLootTableItem = new LootTableItem { ItemId = shadowImpEssenceItem.Id, Weight = 25 };
+        var vampireBatEssenceLootTableItem = new LootTableItem { ItemId = vampireBatEssenceItem.Id, Weight = 25 };
+        var blueSlimeEssenceLootTableItem = new LootTableItem { ItemId = blueSlimeEssenceItem.Id, Weight = 25 };
+        var brownSlimeEssenceLootTableItem = new LootTableItem { ItemId = brownSlimeEssenceItem.Id, Weight = 25 };
+        var greenSlimeEssenceLootTableItem = new LootTableItem { ItemId = greenSlimeEssenceItem.Id, Weight = 25 };
+        var rainbowSlimeEssenceLootTableItem = new LootTableItem { ItemId = rainbowSlimeEssenceItem.Id, Weight = 25 };
+        var redSlimeEssenceLootTableItem = new LootTableItem { ItemId = redSlimeEssenceItem.Id, Weight = 25 };
+        var transparentSlimeEssenceLootTableItem = new LootTableItem { ItemId = transparentSlimeEssenceItem.Id, Weight = 25 };
+        var enchantedFairyEssenceLootTableItem = new LootTableItem { ItemId = enchantedFairyEssenceItem.Id, Weight = 25 };
+        var gladePantherEssenceLootTableItem = new LootTableItem { ItemId = gladePantherEssenceItem.Id, Weight = 25 };
+        var illusionFoxEssenceLootTableItem = new LootTableItem { ItemId = illusionFoxEssenceItem.Id, Weight = 25 };
+        var nightshadeBlossomEssenceLootTableItem = new LootTableItem { ItemId = nightshadeBlossomEssenceItem.Id, Weight = 25 };
+        var pixieEssenceLootTableItem = new LootTableItem { ItemId = pixieEssenceItem.Id, Weight = 25 };
+        var hobgoblinEssenceLootTableItem = new LootTableItem { ItemId = hobgoblinEssenceItem.Id, Weight = 25 };
 
 
         // Create LootTableRarities for Goblin
@@ -398,7 +398,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [goblinEssenceLootTableItem],
-            Weight = 30 // 0.02%
+            Weight = 15 // 0.02%
         };
         var goblinLootTable = new LootTable
         {
@@ -410,7 +410,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [goblinWarriorEssenceLootTableItem],
-            Weight = 30 // 0.01%
+            Weight = 15 // 0.01%
         };
         var goblinWarriorLootTable = new LootTable
         {
@@ -422,7 +422,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [goblinArcherEssenceLootTableItem],
-            Weight = 30 // 0.01%
+            Weight = 15 // 0.01%
         };
         var goblinArcherLootTable = new LootTable
         {
@@ -434,7 +434,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [largeRatEssenceLootTableItem],
-            Weight = 30 // 0.02%
+            Weight = 15 // 0.02%
         };
         var largeRatLootTable = new LootTable
         {
@@ -446,7 +446,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [flameImpEssenceLootTableItem],
-            Weight = 30 // 0.02%
+            Weight = 15 // 0.02%
         };
         var flameImpLootTable = new LootTable
         {
@@ -458,7 +458,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [frostImpEssenceLootTableItem],
-            Weight = 30 // 0.02%
+            Weight = 15 // 0.02%
         };
         var frostImpLootTable = new LootTable
         {
@@ -470,7 +470,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [shadowImpEssenceLootTableItem],
-            Weight = 30 // 0.02%
+            Weight = 15 // 0.02%
         };
         var shadowImpLootTable = new LootTable
         {
@@ -482,7 +482,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [vampireBatEssenceLootTableItem],
-            Weight = 30 // 0.02%
+            Weight = 15 // 0.02%
         };
         var vampireBatLootTable = new LootTable
         {
@@ -494,7 +494,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [blueSlimeEssenceLootTableItem],
-            Weight = 30 // 0.02%
+            Weight = 15 // 0.02%
         };
         var blueSlimeLootTable = new LootTable
         {
@@ -506,7 +506,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [brownSlimeEssenceLootTableItem],
-            Weight = 30 // 0.02%
+            Weight = 15 // 0.02%
         };
         var brownSlimeLootTable = new LootTable
         {
@@ -518,7 +518,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [greenSlimeEssenceLootTableItem],
-            Weight = 30 // 0.02%
+            Weight = 15 // 0.02%
         };
         var greenSlimeLootTable = new LootTable
         {
@@ -530,7 +530,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [rainbowSlimeEssenceLootTableItem],
-            Weight = 30 // 0.02%
+            Weight = 15 // 0.02%
         };
         var rainbowSlimeLootTable = new LootTable
         {
@@ -542,7 +542,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [redSlimeEssenceLootTableItem],
-            Weight = 30 // 0.02%
+            Weight = 15 // 0.02%
         };
         var redSlimeLootTable = new LootTable
         {
@@ -554,7 +554,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [transparentSlimeEssenceLootTableItem],
-            Weight = 30 // 0.02%
+            Weight = 15 // 0.02%
         };
         var transparentSlimeLootTable = new LootTable
         {
@@ -566,7 +566,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [enchantedFairyEssenceLootTableItem],
-            Weight = 30 // 0.02%
+            Weight = 15 // 0.02%
         };
         var enchantedFairyLootTable = new LootTable
         {
@@ -578,7 +578,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [gladePantherEssenceLootTableItem],
-            Weight = 30 // 0.02%
+            Weight = 15 // 0.02%
         };
         var gladePantherLootTable = new LootTable
         {
@@ -590,7 +590,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [illusionFoxEssenceLootTableItem],
-            Weight = 30 // 0.02%
+            Weight = 15 // 0.02%
         };
         var illusionFoxLootTable = new LootTable
         {
@@ -602,7 +602,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [nightshadeBlossomEssenceLootTableItem],
-            Weight = 30 // 0.02%
+            Weight = 15 // 0.02%
         };
         var nightshadeBlossomLootTable = new LootTable
         {
@@ -614,7 +614,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [pixieEssenceLootTableItem],
-            Weight = 30 // 0.02%
+            Weight = 15 // 0.02%
         };
         var pixieLootTable = new LootTable
         {
@@ -626,7 +626,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [hobgoblinEssenceLootTableItem],
-            Weight = 30 // 0.02%
+            Weight = 15 // 0.02%
         };
         var hobgoblinLootTable = new LootTable
         {
@@ -843,16 +843,16 @@ public static class SeedCreatures
 
         var twilightClearingCreatures = new List<Creature>
         {
-            new() { Id = enchantedFairyId, Name = "Enchanted Fairy", ImagePath = "enchanted_fairy", LootTableId = enchantedFairyLootTable.Id, EssenceSlots = [enchantedFairyEssenceSlot], ExperienceReward = 4 },
-            new() { Id = gladePantherId, Name = "Glade Panther", ImagePath = "glade_panther", LootTableId = gladePantherLootTable.Id, EssenceSlots = [gladePantherEssenceSlot], ExperienceReward = 4 },
-            new() { Id = illusionFoxId, Name = "Illusion Fox", ImagePath = "illusion_fox", LootTableId = illusionFoxLootTable.Id, EssenceSlots = [illusionFoxEssenceSlot], ExperienceReward = 4 },
-            new() { Id = nightshadeBlossomId, Name = "Nightshade Blossom", ImagePath = "nightshade_blossom", LootTableId = nightshadeBlossomLootTable.Id, EssenceSlots = [nightshadeBlossomEssenceSlot], ExperienceReward = 4 },
-            new() { Id = pixieId, Name = "Pixie", ImagePath = "pixie", LootTableId = pixieLootTable.Id, EssenceSlots = [pixieEssenceSlot], ExperienceReward = 4 },
+            new() { Id = enchantedFairyId, Name = "Enchanted Fairy", ImagePath = "enchanted_fairy", LootTableId = enchantedFairyLootTable.Id, EssenceSlots = [enchantedFairyEssenceSlot], ExperienceReward = 6 },
+            new() { Id = gladePantherId, Name = "Glade Panther", ImagePath = "glade_panther", LootTableId = gladePantherLootTable.Id, EssenceSlots = [gladePantherEssenceSlot], ExperienceReward = 6 },
+            new() { Id = illusionFoxId, Name = "Illusion Fox", ImagePath = "illusion_fox", LootTableId = illusionFoxLootTable.Id, EssenceSlots = [illusionFoxEssenceSlot], ExperienceReward = 7 },
+            new() { Id = nightshadeBlossomId, Name = "Nightshade Blossom", ImagePath = "nightshade_blossom", LootTableId = nightshadeBlossomLootTable.Id, EssenceSlots = [nightshadeBlossomEssenceSlot], ExperienceReward = 5 },
+            new() { Id = pixieId, Name = "Pixie", ImagePath = "pixie", LootTableId = pixieLootTable.Id, EssenceSlots = [pixieEssenceSlot], ExperienceReward = 6 },
         };
 
         var goblinMinesCreatures = new List<Creature>
         {
-            new() { Id = hobgoblinId, Name = "Hobgoblin", ImagePath = "hobgoblin", LootTableId = hobgoblinLootTable.Id, EssenceSlots = [hobgoblinEssenceSlot], ExperienceReward = 4 },
+            new() { Id = hobgoblinId, Name = "Hobgoblin", ImagePath = "hobgoblin", LootTableId = hobgoblinLootTable.Id, EssenceSlots = [hobgoblinEssenceSlot], ExperienceReward = 20 },
         };
 
         await context.Creatures.AddRangeAsync(lumoRuinsCreatures);
