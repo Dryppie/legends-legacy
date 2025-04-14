@@ -152,6 +152,12 @@ export class CombatComponent implements OnInit, OnDestroy {
       },
     );
     this.subscriptions.add(combatOutcomeSub);
+
+    //Flavor text for when not in combat
+    this.pickRandomFlavorText();
+
+    // Optional: change it every few seconds
+    setInterval(() => this.pickRandomFlavorText(), 5000);
   }
 
   ngOnDestroy() {
@@ -375,4 +381,27 @@ export class CombatComponent implements OnInit, OnDestroy {
       this.selectedEnemyCharacterIndex = index;
     }
   }
+
+  flavorMessages: string[] = [
+  "Sharpening your blade...",
+  "Sizing up your next foe...",
+  "The tension thickens in the air...",
+  "Your stance tightens...",
+  "A shadow moves in the fog..."
+];
+
+flavorText: string = '';
+
+pickRandomFlavorText(): void {
+  const newText = this.flavorMessages[
+    Math.floor(Math.random() * this.flavorMessages.length)
+  ];
+
+  // avoid repeating the same text twice in a row
+  if (newText === this.flavorText && this.flavorMessages.length > 1) {
+    this.pickRandomFlavorText(); // try again
+  } else {
+    this.flavorText = newText;
+  }
+}
 }
