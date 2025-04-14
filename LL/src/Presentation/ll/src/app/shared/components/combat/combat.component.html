@@ -1,15 +1,27 @@
 <div
   *ngIf="!displayCombat"
-  class="flex h-full w-full flex-col items-center justify-center bg-black text-center text-primary"
+  class="relative flex h-full w-full flex-col items-center justify-center bg-black text-center text-primary overflow-hidden"
 >
-  <div class="flex">
-    You are already in combat. Next fight in:
-    <app-countdown [targetDate]="nextCombatIn!"></app-countdown>
+  <!-- Aura background here -->
+  <div class="absolute inset-0 z-0 bg-texture pointer-events-none"></div>
+
+  <!-- Content -->
+  <div class="relative z-10 flex items-center justify-center mb-4">
+    <div class="text-lg font-bold">
+      You are already in combat. Next fight in:
+      <app-countdown [targetDate]="nextCombatIn!"></app-countdown>
+    </div>
   </div>
 
-  <button (click)="initiateStoppingCombat()" class="text-primary">
-    {{ stopCombatButtonText }}
-  </button>
+  <p class="mt-2 italic text-secondary animate-fade-in z-10">{{ flavorText }}</p>
+
+  <app-mini-button
+  [text]="stopCombatButtonText"
+  [disabled]="false"
+  [width]="'128px'"
+  (click)="initiateStoppingCombat()"
+  class="mt-6 w-64 z-10"
+></app-mini-button>
 </div>
 
 <div class="flex h-full flex-col gap-4 pr-4 sm:pr-6">
