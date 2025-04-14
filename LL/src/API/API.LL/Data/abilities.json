@@ -68,8 +68,9 @@
           "Duration": {
             "Type": "IndefiniteDuration"
           },
-          "Targeting": "SingleEnemy",
+          "Targeting": "Self",
           "Trigger": "OnDodge",
+          "TriggerTarget": "SingleEnemy",
           "ApplyOnSelf": false,
           "AttackType": "None",
           "DamageType": "None",

@@ -58,49 +58,8 @@ public class CombatEffectManager : ICombatEffectManager
                 // Interval checks
                 if (effect.ShouldTrigger())
                 {
-                    var targets = new List<CombatEntity>();
-
-                    var triggerTarget = effect.Definition.TriggerTarget;
-
-                    var ownTeam = _entityManager.GetOwnTeam(entity);
-                    var enemyTeam = _entityManager.GetOpposingTeam(entity);
-                    var targeting = triggerTarget.Equals(Targeting.None) ? effect.Definition.Targeting : effect.Definition.TriggerTarget;
-                    targets = TargetingManager.SelectTargets(targeting, entity, enemyTeam, ownTeam);
-
-
-                    foreach (var target in targets)
-                    {
-                        var effectDefinition = new EffectDefinition(action: effect.Definition.Action,
-                            duration: effect.Definition.Duration.Clone(),
-                            condition: effect.Definition.Condition.Clone(),
-                            interval: effect.Definition.Interval.Clone(),
-                            usage: effect.Definition.Usage.Clone(),
-                            targeting: effect.Definition.Targeting,
-                            trigger: effect.Definition.Trigger,
-                            triggerTarget: effect.Definition.TriggerTarget,
-                            isFlatAmount: effect.Definition.IsFlatAmount,
-                            chance: effect.Definition.Chance,
-                            effectModifications: effect.Definition.EffectModifications,
-                            effectTags: effect.Definition.EffectTags,
-                            attackType: effect.Definition.AttackType,
-                            damageType: effect.Definition.DamageType)
-                        {
-                            Log = effect.Definition.Log
-                        };
-
-                        var triggeredEffect = new Effect()
-                        {
-                            Definition = effectDefinition,
-                            Caster = entity,
-                            Target = target,
-                        };
-
-                        var context = CreateEffectContext(triggeredEffect, target, entity, effect.Definition.Action.Magnitude);
-                        effect.ExecuteAction(context, _combatContext);
-                    }
-
-                    //var intervalContext = CreateEffectContext(effect, entity);
-                    //effect.ExecuteAction(intervalContext, _combatContext);
+                    var intervalContext = CreateEffectContext(effect, entity);
+                    effect.ExecuteAction(intervalContext, _combatContext);
                 }
 
                 // Duration check
@@ -148,8 +107,8 @@ public class CombatEffectManager : ICombatEffectManager
             {
                 var ownTeam = _entityManager.GetOwnTeam(effectTriggeredOn);
                 var enemyTeam = _entityManager.GetOpposingTeam(effectTriggeredOn);
-                var targeting = triggerTarget.Equals(Targeting.None) ? effect.Definition.Targeting : effect.Definition.TriggerTarget;
-                targets = TargetingManager.SelectTargets(targeting, effectTriggeredOn, enemyTeam, ownTeam);
+                var targeting = effect.Definition.TriggerTarget.Equals(Targeting.None) ? effect.Definition.Targeting : effect.Definition.TriggerTarget;
+                targets = TargetingManager.SelectTargets(triggerTarget.Equals(Targeting.None) ? effect.Definition.Targeting : triggerTarget, effectTriggeredOn, enemyTeam, ownTeam);
             }
 
             foreach ( var target in targets )
@@ -179,7 +138,7 @@ public class CombatEffectManager : ICombatEffectManager
                     Target = target,
                 };
 
-                var context = CreateEffectContext(triggeredEffect, target, effectTriggeredOn, magnitude);
+                var context = CreateEffectContext(effect, target, effectTriggeredOn, magnitude);
                 effect.ExecuteAction(context, _combatContext);
             }
         }

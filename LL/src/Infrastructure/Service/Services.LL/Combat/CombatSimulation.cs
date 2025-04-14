@@ -129,20 +129,6 @@ public class CombatSimulation : ICombatContext
                         Mana = entity.GetAttributeValue(AttributeType.Mana)
                     };
 
-                    // Actor has cast Ability log
-                    _eventLog.Add(new CombatEvent()
-                    {
-                        ActorId = entity.Id,
-                        Timestamp = CurrentTime,
-                        EventType = EventType.AbilityUse,
-                        Magnitude = ability.Cost,
-                        CombatEntity = simpleCombatEntity,
-                        Details = ability.ActivationLog
-                        .Replace("{Actor}", entity.Name)
-                        .Replace("{Target}", formattedNames)
-                        .Replace("{Ability}", ability.Name)
-                    });
-
                     foreach (var (target, effectInstance) in effectsToApply)
                     {
                         EffectManager.AddEffect(entity, target, effectInstance);
