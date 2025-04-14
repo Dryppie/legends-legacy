@@ -43,6 +43,7 @@ export class CreaturesComponent implements OnInit {
 
     formControls['level'] = new FormControl(creature.level);
     formControls['experienceReward'] = new FormControl(creature.experienceReward);
+    formControls['name'] = new FormControl(creature.name);
 
     this.attributeKeys.forEach((key) => {
       const foundAttribute = creature.baseAttributes.find(attr => AttributeType[attr.attributeType] === key);
@@ -64,9 +65,10 @@ export class CreaturesComponent implements OnInit {
       this.selectedCreature.experienceReward = this.creatureForm.value.experienceReward;
       this.selectedCreature.baseAttributes = updatedAttributes;
 
-      
-      this.creatureService.updateCreature(this.createNewCreature());
-      // console.log("Updated Creature:", this.selectedCreature);
+      this.creatureService.updateCreature(this.createNewCreature()).subscribe({
+        next: res => console.log('Creature updated successfully:', res),
+        error: err => console.error('Error updating creature:', err),
+      });
     }
   }
 

@@ -11,10 +11,9 @@ export class CreatureService {
 
   public getCreatures(): Observable<Creature[]> {
     return this.apiService.get('creature');
-  }
-  
-  public updateCreature(creature:Creature): void {
-    console.log("Updating Creature: ", creature);
-    this.apiService.post('creature', creature);
+  } 
+
+  public updateCreature(creature: Creature): Observable<any> {
+    return this.apiService.post('creature/updateCreature', creature);
   }
 }

@@ -9,7 +9,7 @@ export interface Creature {
 }
 
 export interface AttributeDto {
+  entityId: string;
   attributeType: AttributeType;
   value: number;
-  entityId: string;
 }

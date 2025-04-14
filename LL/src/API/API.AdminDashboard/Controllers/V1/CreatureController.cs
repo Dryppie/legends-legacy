@@ -14,7 +14,7 @@ public class CreatureController : BaseController
         return await Mediator.Send(new GetCreaturesQuery());
     }
 
-    [HttpPost]
+    [HttpPost("updateCreature")]
     public async Task Update([FromBody] CreatureDto creature)
     {
         await Mediator.Send(new UpdateCreatureQuery(creature));
