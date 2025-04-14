@@ -27,7 +27,7 @@ public class TargetingConverter : JsonConverter<Targeting>
             "AllyHighestMaxHealth" => Targeting.AllyHighestMaxHealth,
             "AllEnemies" => Targeting.AllEnemies,
             "AllAllies" => Targeting.AllAllies,
-            "AllAlliesAndSelf" => Targeting.AllAlliesAndSelf,
+            "YourTeam" => Targeting.YourTeam,
             "EveryoneButYou" => Targeting.EveryoneButYou,
             _ => throw new JsonException($"Unknown targeting type: {stringValue}")
         };
@@ -52,7 +52,7 @@ public class TargetingConverter : JsonConverter<Targeting>
             Targeting.AllyHighestMaxHealth => "AllyHighestMaxHealth",
             Targeting.AllEnemies => "AllEnemies",
             Targeting.AllAllies => "AllAllies",
-            Targeting.AllAlliesAndSelf => "AllAlliesAndSelf",
+            Targeting.YourTeam => "YourTeam",
             Targeting.EveryoneButYou => "EveryoneButYou",
             _ => throw new JsonException($"Unknown targeting type: {value}")
         };

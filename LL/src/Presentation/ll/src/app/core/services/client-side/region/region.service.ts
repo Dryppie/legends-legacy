@@ -51,22 +51,22 @@ export class RegionService {
             'Transparent Slime',
           ],
         },
-        // {
-        //   id: 'region_01_area_04',
-        //   name: 'Twilight Clearing',
-        //   creatures: [
-        //     'Enchanted Fairy',
-        //     'Glade Panther',
-        //     'Illusion Fox',
-        //     'Nightshade Blossom',
-        //     'Pixie',
-        //   ],
-        // },
-        // {
-        //   id: 'region_01_area_05',
-        //   name: 'Goblin Mines',
-        //   creatures: ['Hobgoblin'],
-        // },
+        {
+          id: 'region_01_area_04',
+          name: 'Twilight Clearing',
+          creatures: [
+            'Enchanted Fairy',
+            'Glade Panther',
+            'Illusion Fox',
+            'Nightshade Blossom',
+            'Pixie',
+          ],
+        },
+        {
+          id: 'region_01_area_05',
+          name: 'Goblin Mines',
+          creatures: ['Hobgoblin'],
+        },
       ],
       dungeons: [],
       raids: [],

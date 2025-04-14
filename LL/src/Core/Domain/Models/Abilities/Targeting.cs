@@ -17,7 +17,7 @@ public enum Targeting
     SingleAllyLowestHealth,
     AllEnemies,
     AllAllies,
-    AllAlliesAndSelf,
+    YourTeam,
     AllyHighestMaxHealth,
     EveryoneButYou,
 }

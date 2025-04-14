@@ -66,6 +66,10 @@ public static class TargetingManager
                 var allAllies = allies.Where(a => a.IsAlive && !a.Id.Equals(actor.Id)).ToList();
                 targets.AddRange([.. allEnemies, .. allAllies]);
                 break;
+            case Targeting.YourTeam:
+                var yourTeam = allies.Where(a => a.IsAlive).ToList();
+                targets.AddRange(yourTeam);
+                break;
             default:
                 throw new NotSupportedException($"Targeting type '{targeting}' is not supported.");
         }

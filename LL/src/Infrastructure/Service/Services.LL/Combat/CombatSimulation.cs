@@ -401,9 +401,9 @@ public class CombatSimulation : ICombatContext
             Magnitude = ability.Cost,
             CombatEntity = simpleCombatEntity,
             Details = ability.ActivationLog
-            .Replace("{Actor}", actor.Name)
-            .Replace("{Target}", formattedNames)
-            .Replace("{Ability}", ability.Name)
+                .Replace("{Actor}", actor.Name)
+                .Replace("{Target}", formattedNames)
+                .Replace("{Ability}", ability.Name)
         });
 
         foreach (var (target, effectInstance) in effectsToApply)

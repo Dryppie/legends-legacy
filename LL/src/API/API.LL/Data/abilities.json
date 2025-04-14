@@ -41,6 +41,7 @@
           },
           "Targeting": "SingleEnemy",
           "Trigger": "OnTickInterval",
+          "TriggerTarget": "Self",
           "IsFlatAmount": true,
           "AttackType": "DamageOverTime",
           "DamageType": "Bleed",
@@ -117,10 +118,7 @@
             "Type": "Damage",
             "Amount": 8,
             "ScalingAttribute": "Strength",
-            "ScalingMultiplier": 0.2,
-            "AttackType": "Melee",
-            "DamageType": "Physical",
-            "DamageTags": ["Slashing"]
+            "ScalingMultiplier": 0.2
           },
           "Duration": {
             "Type": "NoDuration"
@@ -129,7 +127,7 @@
           "Trigger": "None",
           "AttackType": "Melee",
           "DamageType": "Physical",
-          "EffectTags": [],
+          "EffectTags": ["Slashing"],
           "Log": "{Target} received {Amount} damage."
         }
       ]
@@ -210,10 +208,7 @@
             "Type": "Damage",
             "Amount": 15,
             "ScalingAttribute": "Agility",
-            "ScalingMultiplier": 0.1,
-            "AttackType": "Ranged",
-            "DamageType": "Physical",
-            "DamageTags": ["Arrows"]
+            "ScalingMultiplier": 0.1
           },
           "Duration": {
             "Type": "NoDuration"
@@ -229,7 +224,7 @@
           "Trigger": "None",
           "AttackType": "Ranged",
           "DamageType": "Physical",
-          "EffectTags": [],
+          "EffectTags": ["Arrows"],
           "Log": "{Actor} landed a powerful shot on {Target}, dealing {Amount} damage."
         }
       ]
@@ -249,10 +244,7 @@
               {
                 "Action": {
                   "Type": "Damage",
-                  "Amount": 2,
-                  "AttackType": "Ranged",
-                  "DamageType": "Poison",
-                  "DamageTags": ["Arrows"]
+                  "Amount": 2
                 },
                 "Duration": {
                   "Type": "TimedDuration",
@@ -265,7 +257,10 @@
                 "Targeting": "Self",
                 "Trigger": "None",
                 "IsFlatAmount": true,
-                "Log": "{Target} has received 2 poison damage."
+                "AttackType": "DamageOverTime",
+                "DamageType": "Poison",
+                "EffectTags": ["Arrows"],
+                "Log": "{Target} takes 2 poison damage."
               }
             ]
           },
@@ -273,12 +268,9 @@
             "Type": "IndefiniteDuration"
           },
           "Targeting": "Self",
-          "Trigger": "OnAttack",
+          "Trigger": "OnRangedAttack",
           "TriggerTarget": "CauseOfTrigger",
           "Chance": 20,
-          "AttackType": "DamageOverTime",
-          "DamageType": "Poison",
-          "EffectTags": [],
           "Log": "{Target} is poisoned by {Actor}'s arrow, taking 6 poison damage over time."
         }
       ]
@@ -345,9 +337,6 @@
           },
           "Targeting": "Self",
           "Trigger": "None",
-          "AttackType": "None",
-          "DamageType": "None",
-          "EffectTags": [],
           "Log": "{Actor}'s health is increased by 50 due to being big."
         }
       ]
@@ -415,8 +404,8 @@
           "TriggerTarget": "CauseOfTrigger",
           "IsFlatAmount": true,
           "Chance": 30,
-          "AttackType": "None",
-          "DamageType": "None",
+          "AttackType": "Melee",
+          "DamageType": "Burn",
           "EffectTags": [],
           "Log": "{Target} received {Amount} burn damage."
         }
@@ -477,9 +466,6 @@
           },
           "Targeting": "SingleEnemy",
           "Trigger": "None",
-          "AttackType": "None",
-          "DamageType": "None",
-          "EffectTags": [],
           "Log": "{Actor} froze {Target} solid!"
         }
       ]
@@ -832,6 +818,7 @@
           "IsFlatAmount": true,
           "Targeting": "AllEnemies",
           "Trigger": "OnTickInterval",
+          "TriggerTarget": "Self",
           "AttackType": "DamageOverTime",
           "DamageType": "Poison",
           "Log": "{Target} took {Amount} poison damage."
@@ -866,8 +853,8 @@
                 "Targeting": "Self",
                 "Trigger": "OnTickInterval",
                 "IsFlatAmount": true,
-                "AttackType": "None",
-                "DamageType": "None",
+                "AttackType": "DamageOverTime",
+                "DamageType": "Poison",
                 "EffectTags": [],
                 "Log": "{Target} took {Amount} poison damage."
               }
@@ -879,10 +866,6 @@
           "Targeting": "Self",
           "Trigger": "OnMeleeAttacked",
           "TriggerTarget": "CauseOfTrigger",
-          "IsFlatAmount": true,
-          "AttackType": "None",
-          "DamageType": "None",
-          "EffectTags": [],
           "Log": "{Actor} was attacked by {Target} and applied corrosize ooze on them."
         }
       ]
@@ -962,8 +945,9 @@
           "Duration": {
             "Type": "IndefiniteDuration"
           },
-          "Targeting": "AllyHighestMaxHealth",
+          "Targeting": "Self",
           "Trigger": "OnAbilityUsed",
+          "TriggerTarget": "AllyHighestMaxHealth",
           "Log": "{Actor} creates a colorful shield around {Target}, granting 20 Barrier."
         }
       ]
@@ -1010,9 +994,7 @@
         {
           "Action": {
             "Type": "Damage",
-            "Amount": 3,
-            "AttackType": "DamageOverTime",
-            "DamageType": "Burn"
+            "Amount": 3
           },
           "Duration": {
             "Type": "TimedDuration",
@@ -1022,8 +1004,11 @@
             "Type": "Interval",
             "Interval": 10
           },
-          "Targeting": "EveryoneButYou",
+          "Targeting": "Self",
           "Trigger": "OnTickInterval",
+          "TriggerTarget": "EveryoneButYou",
+          "AttackType": "DamageOverTime",
+          "DamageType": "Burn",
           "IsFlatAmount": true,
           "Log": "{Target} is scorched by {Actor}'s fiery aura, taking {Amount} burn damage!"
         }
@@ -1105,9 +1090,11 @@
           },
           "Targeting": "SingleEnemy",
           "Trigger": "OnTickInterval",
+          "TriggerTarget": "Self",
           "AttackType": "DamageOverTime",
+          "DamageType": "Physical",
           "IsFlatAmount": true,
-          "Log": "{Target} struggles inside {Actor}, taking {Amount} damage!"
+          "Log": "{Target} struggles while being engulfed, taking {Amount} damage!"
         }
       ]
     },
@@ -1154,9 +1141,6 @@
           },
           "Targeting": "Self",
           "Trigger": "OnHealthChanged",
-          "AttackType": "None",
-          "DamageType": "None",
-          "EffectTags": [],
           "Log": "{Actor}'s health has dropped below 30%."
         }
       ]
@@ -1203,7 +1187,7 @@
     "Passive": {
       "Id": "enchantedCharm",
       "Name": "Enchanted Charm",
-      "Description": "Every 20 seconds, enemies have to resist your charms, or become stunned for 3 seconds.",
+      "Description": "Every 18 seconds, enemies have to resist your charms, or become stunned for 6 seconds.",
       "Type": "Passive",
       "Cooldown": 0,
       "Cost": 0,
@@ -1220,12 +1204,12 @@
                 },
                 "Duration": {
                   "Type": "TimedDuration",
-                  "Duration": 100
+                  "Duration": 60
                 },
                 "Targeting": "Self",
                 "Trigger": "None",
                 "Chance": 30,
-                "Log": "{Actor} charmed {Target}, stunning them."
+                "Log": "{Target} was charmed, unable to act for a short while."
               }
             ]
           },
@@ -1236,9 +1220,9 @@
             "Type": "Interval",
             "Interval": 180
           },
-
-          "Targeting": "AllEnemies",
+          "Targeting": "Self",
           "Trigger": "OnTickInterval",
+          "TriggerTarget": "AllEnemies",
           "Log": "{Actor} flaunts their charms, tempting the enemies."
         }
       ]
@@ -1271,9 +1255,7 @@
             "Type": "Damage",
             "Amount": 15,
             "ScalingAttribute": "Agility",
-            "ScalingMultiplier": 0.2,
-            "AttackType": "Melee",
-            "DamageType": "Physical"
+            "ScalingMultiplier": 0.2
           },
           "Duration": {
             "Type": "NoDuration"
@@ -1333,21 +1315,279 @@
     ]
   },
   {
+    "Name": "Illusion Fox's Essence",
+    "Active": {
+      "Id": "distractingIllusion",
+      "Name": "Distracting Illusion",
+      "Description": "Create an illusion that has a chance to distract all enemies, reducing their accuracy by 10% for 5 seconds.",
+      "Type": "Active",
+      "Cooldown": 160,
+      "Cost": 20,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "Accuracy",
+            "Amount": 10,
+            "ModifierType": "Additive",
+            "Stackable": true
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 50
+          },
+          "Targeting": "AllEnemies",
+          "Trigger": "None",
+          "Chance": 35,
+          "Log": "{Target} has been distracted, reducing their accuracy."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "foxfireWisp",
+      "Name": "Foxfire Wisp",
+      "Description": "Every 5 second, a small wisp appears around you. When damaged, the attacker receives 8 Magical damage per stack, and decreases the stack by 1.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "NestedEffect",
+            "Effects": [
+              {
+                "Action": {
+                  "Type": "Damage",
+                  "Amount": 8,
+                  "AttackType": "Melee",
+                  "DamageType": "Magical"
+                },
+                "Duration": {
+                  "Type": "IndefiniteDuration"
+                },
+                "Usage": {
+                  "Type": "LimitedUsage",
+                  "Uses": 1
+                },
+                "IsFlatAmount": true,
+                "Targeting": "Self",
+                "Trigger": "OnAttacked",
+                "TriggerTarget": "CauseOfTrigger",
+                "Log": "{Target} was hit by a Foxfire Wisp, taking {Amount} damage."
+              }
+            ]
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Interval": {
+            "Type": "Interval",
+            "Interval": 50
+          },
+          "Targeting": "Self",
+          "Trigger": "OnTickInterval",
+          "Log": "A small wisp appears around {Actor}."
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 14,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Agility",
+        "Amount": 7,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Nightshade Blossom's Essence",
+    "Active": {
+      "Id": "necroticSpores",
+      "Name": "Necrotic Spores",
+      "Description": "Release a burst of spores that reduce the natural regeneration of all enemies by 40% for 8 seconds.",
+      "Type": "Active",
+      "Cooldown": 140,
+      "Cost": 12,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "HealthRegeneration",
+            "Amount": -40,
+            "ModifierType": "Multiplicative"
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 8
+          },
+          "Targeting": "AllEnemies",
+          "Trigger": "None",
+          "Log": "{Target}'s natural health regeneration has been reduced by 40%."
+        },
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "ManaRegeneration",
+            "Amount": -40,
+            "ModifierType": "Multiplicative"
+          },
+          "Duration": {
+            "Type": "TimedDuration",
+            "Duration": 8
+          },
+          "Targeting": "AllEnemies",
+          "Trigger": "None",
+          "Log": "{Target}'s natural mana regeneration has been reduced by 40%."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "twilightBloom",
+      "Name": "Twilight Bloom",
+      "Description": "Produce a seed that blooms every 11 seconds, releasing a scent that heals your team by {heal1}.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "NestedEffect",
+            "Effects": [
+              {
+                "Action": {
+                  "Type": "ResourceRestore",
+                  "ResourceType": "Health",
+                  "Amount": 29
+                },
+                "Duration": {
+                  "Type": "IndefiniteDuration"
+                },
+                "Interval": {
+                  "Type": "Interval",
+                  "Interval": 110
+                },
+                "IsFlatAmount": true,
+                "Targeting": "Self",
+                "Trigger": "OnTickInterval",
+                "TriggerTarget": "YourTeam",
+                "Log": "{Target} received {Amount} healing from the blooming Twilight Seed."
+              }
+            ]
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Targeting": "Self",
+          "Trigger": "None",
+          "Log": "{Actor} plants a Twilight Seed."
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Willpower",
+        "Amount": 11,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 7,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Wisdom",
+        "Amount": 7,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Pixie's Essence",
+    "Active": {
+      "Id": "pixieBurst",
+      "Name": "Pixie Burst",
+      "Description": "Deal {damage1} damage to all enemies.",
+      "Type": "Active",
+      "Cooldown": 80,
+      "Cost": 9,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "Damage",
+            "Amount": 15,
+            "ScalingAttribute": "Intelligence",
+            "ScalingMultiplier": 0.3
+          },
+          "Duration": {
+            "Type": "NoDuration"
+          },
+          "Targeting": "AllEnemies",
+          "Trigger": "None",
+          "AttackType": "Ranged",
+          "DamageType": "Magical",
+          "Log": "{Target} took {Amount} damage from {Actor}'s Pixie Burst."
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "resonantChime",
+      "Name": "Resonant Chime",
+      "Description": "Every time you use an ability, all allies gain +1 Crit Chance.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Cost": 0,
+      "Effects": [
+        {
+          "Action": {
+            "Type": "ModifyAttribute",
+            "Attribute": "CritChance",
+            "Amount": 1,
+            "ModifierType": "Flat",
+            "Stackable": true
+          },
+          "Duration": {
+            "Type": "IndefiniteDuration"
+          },
+          "Targeting": "Self",
+          "Trigger": "OnAbilityUsed",
+          "TriggerTarget": "AllAllies",
+          "Log": "{Target}'s crit chance increased by 1."
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 11,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Luck",
+        "Amount": 12,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
     "Name": "Hobgoblin's Essence",
     "Active": {
       "Id": "frenzy",
       "Name": "Frenzy",
-      "Description": "Increase Attack Speed by 18% and Critical Hit Chance by 14% for 10 seconds.",
+      "Description": "Increase Attack Speed by 24% and Critical Hit Chance by 25% for 10 seconds.",
       "Type": "Active",
       "Cooldown": 140,
-      "Cost": 18,
+      "Cost": 24,
       "CostType": "Mana",
       "Effects": [
         {
           "Action": {
             "Type": "ModifyAttribute",
             "Attribute": "BasicAttackSpeed",
-            "Amount": 18,
+            "Amount": 24,
             "ModifierType": "Additive",
             "Stackable": true
           },
@@ -1356,13 +1596,13 @@
             "Duration": 100
           },
           "Targeting": "Self",
-          "Log": "{Actor}'s Attack Speed increased by 18%."
+          "Log": "{Actor}'s Attack Speed increased by 24%."
         },
         {
           "Action": {
             "Type": "ModifyAttribute",
             "Attribute": "CritChance",
-            "Amount": 14,
+            "Amount": 25,
             "ModifierType": "Additive",
             "Stackable": true
           },
@@ -1372,14 +1612,14 @@
           },
           "Targeting": "Self",
           "Trigger": "None",
-          "Log": "{Actor}'s Critical Chance increased by 14%."
+          "Log": "{Actor}'s Critical Chance increased by 25%."
         }
       ]
     },
     "Passive": {
       "Id": "savageOnslaught",
       "Name": "Savage Onslaught",
-      "Description": "Increase Strength by 75 the first time dropping below 60% Health.",
+      "Description": "Increase Strength by 95 the first time dropping below 80% Health.",
       "Type": "Passive",
       "Cooldown": 0,
       "Cost": 0,
@@ -1388,7 +1628,7 @@
           "Action": {
             "Type": "ModifyAttribute",
             "Attribute": "Strength",
-            "Amount": 75,
+            "Amount": 95,
             "ModifierType": "Flat",
             "Stackable": true
           },
@@ -1401,15 +1641,12 @@
           },
           "Condition": {
             "Type": "HealthCondition",
-            "HealthPercentage": 60,
+            "HealthPercentage": 80,
             "ComparisonType": "LessThan"
           },
           "Targeting": "Self",
           "Trigger": "OnHealthChanged",
-          "AttackType": "None",
-          "DamageType": "None",
-          "EffectTags": [],
-          "Log": "{Actor}'s Strength is increased by 75 due to falling below 60% health."
+          "Log": "{Actor}'s Strength is increased by 95 due to falling below 80% health."
         }
       ]
     },
@@ -1451,10 +1688,7 @@
             "Type": "Damage",
             "Amount": 11,
             "ScalingAttribute": "Intelligence",
-            "ScalingMultiplier": 0.2,
-            "AttackType": "Ranged",
-            "DamageType": "Magical",
-            "DamageTags": ["Spells"]
+            "ScalingMultiplier": 0.2
           },
           "Duration": {
             "Type": "TimedDuration",
@@ -1463,18 +1697,15 @@
           "Targeting": "SingleEnemy",
           "ApplyOnSelf": false,
           "Trigger": "None",
-          "AttackType": "None",
-          "DamageType": "None",
+          "AttackType": "Ranged",
+          "DamageType": "Magical",
           "EffectTags": [],
           "Log": "{Target} received {Amount} damage."
         },
         {
           "Action": {
             "Type": "Damage",
-            "Amount": 4,
-            "AttackType": "DamageOverTime",
-            "DamageType": "Burn",
-            "DamageTags": []
+            "Amount": 4
           },
           "Duration": {
             "Type": "TimedDuration",
@@ -1488,8 +1719,8 @@
           "Trigger": "OnTickInterval",
           "ApplyOnSelf": false,
           "IsFlatAmount": true,
-          "AttackType": "None",
-          "DamageType": "None",
+          "AttackType": "DamageOverTime",
+          "DamageType": "Burn",
           "EffectTags": [],
           "Log": "{Target} is burning, and took {Amount} fire damage."
         }
@@ -1696,7 +1927,7 @@
           "TriggerTarget": "CauseOfTrigger",
           "IsFlatAmount": true,
           "AttackType": "None",
-          "DamageType": "None",
+          "DamageType": "Physical",
           "EffectTags": [],
           "Log": "{Actor} retaliated against {Target} and dealt {Amount} damage."
         }
@@ -1782,8 +2013,8 @@
                 "Targeting": "Self",
                 "Trigger": "OnTickInterval",
                 "IsFlatAmount": true,
-                "AttackType": "None",
-                "DamageType": "None",
+                "AttackType": "DamageOverTime",
+                "DamageType": "Poison",
                 "EffectTags": [],
                 "Log": "{Target} took {Amount} poison damage."
               }
@@ -1795,10 +2026,6 @@
           "Targeting": "Self",
           "Trigger": "OnMeleeAttacked",
           "TriggerTarget": "CauseOfTrigger",
-          "IsFlatAmount": true,
-          "AttackType": "None",
-          "DamageType": "None",
-          "EffectTags": [],
           "Log": "{Actor} retaliated against {Target} and applied a poison to them."
         }
       ]
