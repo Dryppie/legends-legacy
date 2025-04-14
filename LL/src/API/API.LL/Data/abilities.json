@@ -1359,7 +1359,7 @@
                 "Action": {
                   "Type": "Damage",
                   "Amount": 8,
-                  "AttackType": "Melee",
+                  "AttackType": "None",
                   "DamageType": "Magical"
                 },
                 "Duration": {
