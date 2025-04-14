@@ -42,10 +42,13 @@ public class AuthController : BaseController
     public async Task<ActionResult<Tokens>> LoginAsGuest()
     {
         var tokens = await Mediator.Send(new GuestLoginCommand());
+
+        if (tokens.Data == null) return BadRequest(tokens);
+
         var cookies = new List<KeyValuePair<string, string>>
         {
-            new KeyValuePair<string, string>("AccessToken", tokens.AccessToken),
-            new KeyValuePair<string, string>("RefreshToken", tokens.RefreshToken)
+            new KeyValuePair<string, string>("AccessToken", tokens.Data.AccessToken),
+            new KeyValuePair<string, string>("RefreshToken", tokens.Data.RefreshToken)
         };
 
         Response.Cookies.Append(cookies.ToArray(), GetCookieOptions());

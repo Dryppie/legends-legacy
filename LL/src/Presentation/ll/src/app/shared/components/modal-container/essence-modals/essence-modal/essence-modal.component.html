@@ -30,23 +30,26 @@
       <div class="flex flex-col gap-1">
         <h3 class="font-semibold text-primary">Passive Ability</h3>
         <div class="flex gap-1">
-            <div>
-              {{ essence.passive.description }}
-            </div>
+          <div>
+            {{ essence.passive.description }}
+          </div>
         </div>
       </div>
       <div>
         <h3 class="pb-1 font-semibold text-primary">Attributes</h3>
-      <div *ngFor="let attribute of essence.attributeModifiers" class="text-primary">
-        <div class="flex gap-2 text-white">
-          <div>
-            {{attribute.amount > 0 ? '+' : '-'}}{{ attribute.amount }}
-          </div>
-          <div>
-            {{ attribute.attributeType }}
+        <div
+          *ngFor="let attribute of essence.attributeModifiers"
+          class="text-primary"
+        >
+          <div class="flex gap-2 text-white">
+            <div>
+              {{ attribute.amount > 0 ? "+" : "" }}{{ attribute.amount }}
+            </div>
+            <div>
+              {{ attribute.attributeType }}
+            </div>
           </div>
         </div>
-      </div>
       </div>
     </div>
 

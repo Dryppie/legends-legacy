@@ -245,16 +245,39 @@ export class AuthService {
   }
 
   loginAsGuest() {
-    this.apiService.post('auth/loginAsGuest').subscribe({
-      next: (newTokens) => {
-        this.setToken(newTokens);
-        this.setAuth();
-        this.router.navigateByUrl('/game');
-      },
-      error: (error) => {
-        throw new Error('Failed to login as guest');
-      },
-    });
+    this.apiService
+      .post('auth/loginAsGuest')
+      .pipe(
+        mergeMap((response) => {
+          if (response.isSuccess) {
+            this.setToken(response.data);
+            this.setAuth();
+            this.router.navigateByUrl('/game');
+            this.toastService.showToast(
+              'Guest login success',
+              'Your guest account has been created.',
+              response.isSuccess,
+            );
+            return of(response);
+          } else {
+            this.toastService.showToast(
+              'Registration Failed',
+              response.errorMessage,
+              response.isSuccess,
+            );
+            return throwError(() => new Error('Failed to login'));
+          }
+        }),
+        catchError((response) => {
+          this.toastService.showToast(
+            'Registration Failed',
+            'Contact the developer',
+            response.isSuccess,
+          );
+          return throwError(() => new Error('Failed to login'));
+        }),
+      )
+      .subscribe();
   }
 
   convertGuestToUser(
