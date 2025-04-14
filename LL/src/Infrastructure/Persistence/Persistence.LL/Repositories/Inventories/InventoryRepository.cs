@@ -45,9 +45,9 @@ public class InventoryRepository : IInventoryRepository
 
     public async Task AddItemsToInventory(Guid characterId, List<InventoryItem> loot, CancellationToken cancellationToken)
     {
-        // Aggregate the loot list to combine quantities of the same items
+        // Aggregate the loot list to combine quantities of the same ItemBase
         var aggregatedLoot = loot
-            .GroupBy(item => item.ItemInstanceId)
+            .GroupBy(item => item.ItemInstance.ItemBaseId)
             .Select(g =>
             {
                 // "first" to preserve the existing ItemInstance reference 

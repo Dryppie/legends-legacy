@@ -38,8 +38,8 @@ public class EntityRepository : IEntityRepository
                 .ThenInclude(es => es.OccupiedEssence)
             .Include(e => (e as Creature).LootTable)
                 .ThenInclude(lt => lt.Entries)
-                .ThenInclude(lt => (lt as LootTable).Entries)
-                .ThenInclude(lte => (lte as LootTableItem).Item)
+                    .ThenInclude(lt => (lt as LootTable).Entries)
+                        .ThenInclude(lte => (lte as LootTableItem).Item)
             .Where(e => entityIds.Contains(e.Id))
             .ToListAsync(cancellationToken);
 
