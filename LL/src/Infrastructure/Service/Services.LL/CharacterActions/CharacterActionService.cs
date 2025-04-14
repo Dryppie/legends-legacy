@@ -43,6 +43,11 @@ public class CharacterActionService : ICharacterActionService
         var characterAction = await _characterActionRepository.GetCharacterActionAsync(characterId, cancellationToken);
 
         if (characterAction == null) return null;
+        if (characterAction.ActionDetails == null && !characterAction.IsDeleted)
+        {
+            characterAction.IsDeleted = true;
+            return characterAction;
+        }
         if (characterAction.ActionDetails == null) return characterAction; // Simply just record the character action.It might contain useful information,
                                                                            // such as if the UpdatedAt is in the future (Combat was canceled, and immediately refreshed)
 
