@@ -1221,10 +1221,10 @@
                   "Type": "TimedDuration",
                   "Duration": 100
                 },
-                "Targeting": "AllEnemies",
+                "Targeting": "Self",
                 "Trigger": "None",
                 "Chance": 30,
-                "Log": "{Actor} stunned {Target}."
+                "Log": "{Actor} charmed {Target}, stunning them."
               }
             ]
           },
@@ -1235,10 +1235,10 @@
             "Type": "Interval",
             "Interval": 180
           },
-          
-          "Targeting": "Self",
+
+          "Targeting": "AllEnemies",
           "Trigger": "OnTickInterval",
-          "Log": "{Actor} flaunts their charms again, tempting the enemies."
+          "Log": "{Actor} flaunts their charms, tempting the enemies."
         }
       ]
     },
@@ -1302,7 +1302,6 @@
       "Cost": 0,
       "Effects": [
         {
-          
           "Action": {
             "Type": "ModifyAttribute",
             "Attribute": "CritDamage",

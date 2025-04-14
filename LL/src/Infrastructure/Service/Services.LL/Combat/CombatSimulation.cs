@@ -76,19 +76,76 @@ public class CombatSimulation : ICombatContext
                 ability.RemainingTimeUntilUse = ability.Cooldown;
                 if (ability.Type.Equals(AbilityType.Passive))
                 {
+                    var targetNames = new List<string>();
+                    var effectsToApply = new List<(CombatEntity target, Effect effectInstance)>();
+                    var targetsPerTargeting = new Dictionary<Targeting, List<CombatEntity>>();
+
                     foreach (var effectTemplate in ability.Effects)
                     {
-                        var effectDefinitionCopy = effectTemplate.Clone();
-
-                        var effectInstance = new Effect()
+                        if (!effectTemplate.Usage.CanUse())
                         {
-                            Definition = effectDefinitionCopy,
-                            Caster = entity,
-                            Owner = entity,
-                        };
-                        // TODO: Add Targeting logic, since a passive ability might read -
-                        // 'At the start of combat, apply X to Y targets
-                        EffectManager.AddEffect(entity, entity, effectInstance);
+                            continue;
+                        }
+                        // If multiple effects on the same ability has the same targeting,
+                        // the effects should be applied to the same targets
+                        if (!targetsPerTargeting.TryGetValue(effectTemplate.Targeting, out var targets))
+                        {
+                            targets = TargetingManager.SelectTargets(effectTemplate.Targeting, entity, EntityManager.GetOpposingTeam(entity), EntityManager.GetOwnTeam(entity));
+                            targetsPerTargeting[effectTemplate.Targeting] = targets;
+                        }
+
+                        if (targets.Count == 0) return;
+
+                        foreach (var target in targets)
+                        {
+                            targetNames.Add(target.Name);
+                            var effectDefinitionCopy = effectTemplate.Clone();
+
+                            var effectInstance = new Effect()
+                            {
+                                Definition = effectDefinitionCopy,
+                                Caster = entity,
+                                Owner = target,
+                            };
+
+                            // Defer effect application until after logging
+                            effectsToApply.Add((target, effectInstance));
+                        }
+                    }
+                    var uniqueNames = targetNames.Distinct();
+                    var formattedNames = string.Join(", ", uniqueNames);
+
+                    if (effectsToApply.Count == 0) return;
+
+                    // has actually been used and if there were any targets to use it on
+                    ability.Usage.ConsumeUse();
+
+                    var simpleCombatEntity = new SimpleCombatEntity()
+                    {
+                        Id = entity.Id,
+                        MaxHealth = entity.GetAttributeValue(AttributeType.MaxHealth),
+                        Health = entity.GetAttributeValue(AttributeType.Health),
+                        MaxMana = entity.GetAttributeValue(AttributeType.MaxMana),
+                        Mana = entity.GetAttributeValue(AttributeType.Mana)
+                    };
+
+                    // Actor has cast Ability log
+                    _eventLog.Add(new CombatEvent()
+                    {
+                        ActorId = entity.Id,
+                        Timestamp = CurrentTime,
+                        EventType = EventType.AbilityUse,
+                        Magnitude = ability.Cost,
+                        CombatEntity = simpleCombatEntity,
+                        Details = ability.ActivationLog
+                        .Replace("{Actor}", entity.Name)
+                        .Replace("{Target}", formattedNames)
+                        .Replace("{Ability}", ability.Name)
+                    });
+
+                    foreach (var (target, effectInstance) in effectsToApply)
+                    {
+                        EffectManager.AddEffect(entity, target, effectInstance);
                     }
                 }
             }
