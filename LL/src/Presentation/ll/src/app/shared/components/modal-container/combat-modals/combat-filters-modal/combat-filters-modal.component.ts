@@ -10,6 +10,14 @@ import { NgFor } from '@angular/common';
   styleUrl: './combat-filters-modal.component.css',
 })
 export class CombatFiltersModalComponent implements OnInit {
+  
+  deselectAll(): void {
+    this.selectedEventTypes = [];
+  }
+  selectAll(): void {
+    this.selectedEventTypes = [...this.eventTypes];
+  }
+
   @Output() close = new EventEmitter<void>();
   eventTypes = Object.values(EventType);
 

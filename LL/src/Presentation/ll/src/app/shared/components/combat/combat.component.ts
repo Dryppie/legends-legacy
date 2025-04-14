@@ -10,6 +10,7 @@ import { CharacterActionsService } from '../../../core/services/api/character-ac
 import { GameService } from '../../../core/services/client-side/game/game.service';
 import { CombatStateService } from '../../../core/state/combat-state/combat-state.service';
 import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
+import { MiniButtonComponent } from "../mini-button/mini-button.component";
 
 @Component({
   selector: 'app-combat',
@@ -22,7 +23,8 @@ import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
     NgStyle,
     CountdownComponent,
     AsyncPipe,
-  ],
+    MiniButtonComponent
+],
   templateUrl: './combat.component.html',
   styleUrl: './combat.component.css',
 })
@@ -152,6 +154,12 @@ export class CombatComponent implements OnInit, OnDestroy {
       },
     );
     this.subscriptions.add(combatOutcomeSub);
+
+    //Flavor text for when not in combat
+    this.pickRandomFlavorText();
+
+    // Optional: change it every few seconds
+    setInterval(() => this.pickRandomFlavorText(), 5000);
   }
 
   ngOnDestroy() {
@@ -375,4 +383,27 @@ export class CombatComponent implements OnInit, OnDestroy {
       this.selectedEnemyCharacterIndex = index;
     }
   }
+
+  flavorMessages: string[] = [
+  "Sharpening your blade...",
+  "Sizing up your next foe...",
+  "The tension thickens in the air...",
+  "Your stance tightens...",
+  "A shadow moves in the fog..."
+];
+
+flavorText: string = '';
+
+pickRandomFlavorText(): void {
+  const newText = this.flavorMessages[
+    Math.floor(Math.random() * this.flavorMessages.length)
+  ];
+
+  // avoid repeating the same text twice in a row
+  if (newText === this.flavorText && this.flavorMessages.length > 1) {
+    this.pickRandomFlavorText(); // try again
+  } else {
+    this.flavorText = newText;
+  }
+}
 }
