@@ -20,6 +20,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         var equipmentList = await _context.EquipmentSlots
             .Include(es => es.EquipmentInstance)
                 .ThenInclude(ei => ei.ItemBase)
+                    .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
             .Where(es => es.EntityId.Equals(entityId))
             .ToListAsync(cancellationToken);
 

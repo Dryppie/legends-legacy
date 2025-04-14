@@ -60,7 +60,7 @@ export class InventoryComponent implements OnInit {
         console.error('Error getting inventory from CharacterManager:', err);
       },
     });
-
+    this.getInventory();
     this.setActiveTab(this.tabs[0]?.label || '');
   }
 

@@ -1,7 +1,6 @@
 ﻿using Application.Common.Mappings;
 using Application.UseCases.Inventories.Dtos;
 using AutoMapper;
-using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 
 namespace Application.UseCases.Equipments.Dtos;

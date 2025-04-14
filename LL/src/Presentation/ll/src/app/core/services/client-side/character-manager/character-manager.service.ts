@@ -8,6 +8,7 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { Equipment, EquipmentInstance } from '../../../../shared/models/item';
+import { EventBusService } from '../event-bus/event-bus.service';
 
 @Injectable({
   providedIn: 'root',
@@ -22,7 +23,11 @@ export class CharacterManagerService {
   private equipmentSubject = new BehaviorSubject<EquipmentSlot[]>([]);
   equipment$ = this.equipmentSubject.asObservable();
 
-  constructor() {}
+  constructor(private eventBusService: EventBusService) {
+    this.eventBusService.logout$.subscribe(() => {
+      this.handleLogout();
+    });
+  }
 
   setCharacter(character: CharacterDto | null) {
     this.characterSubject.next(character);
@@ -101,5 +106,11 @@ export class CharacterManagerService {
 
   getEquipment(): EquipmentSlot[] {
     return this.equipmentSubject.value;
+  }
+
+  handleLogout() {
+    this.characterSubject.next(null);
+    this.inventorySubject.next(null);
+    this.equipmentSubject.next([]);
   }
 }
