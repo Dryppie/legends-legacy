@@ -11,4 +11,5 @@ import { Component, Input } from '@angular/core';
 export class MiniButtonComponent {
   @Input() disabled = false;
   @Input() text = '';
+  @Input() width = '64px'; // default width
 }

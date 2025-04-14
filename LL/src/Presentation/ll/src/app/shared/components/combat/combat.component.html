@@ -7,7 +7,6 @@
 
   <!-- Content -->
   <div class="relative z-10 flex items-center justify-center mb-4">
-    <div class="absolute h-64 w-64 animate-ping rounded-full bg-red-500 opacity-10"></div>
     <div class="text-lg font-bold">
       You are already in combat. Next fight in:
       <app-countdown [targetDate]="nextCombatIn!"></app-countdown>
@@ -16,12 +15,13 @@
 
   <p class="mt-2 italic text-secondary animate-fade-in z-10">{{ flavorText }}</p>
 
-  <button
-    (click)="initiateStoppingCombat()"
-    class="mt-6 rounded bg-red-700 px-4 py-2 font-semibold text-white hover:bg-red-800 transition z-10"
-  >
-    {{ stopCombatButtonText }}
-  </button>
+  <app-mini-button
+  [text]="stopCombatButtonText"
+  [disabled]="false"
+  [width]="'128px'"
+  (click)="initiateStoppingCombat()"
+  class="mt-6 w-64 z-10"
+></app-mini-button>
 </div>
 
 <div class="flex h-full flex-col gap-4 pr-4 sm:pr-6">

@@ -10,6 +10,7 @@ import { CharacterActionsService } from '../../../core/services/api/character-ac
 import { GameService } from '../../../core/services/client-side/game/game.service';
 import { CombatStateService } from '../../../core/state/combat-state/combat-state.service';
 import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
+import { MiniButtonComponent } from "../mini-button/mini-button.component";
 
 @Component({
   selector: 'app-combat',
@@ -22,7 +23,8 @@ import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
     NgStyle,
     CountdownComponent,
     AsyncPipe,
-  ],
+    MiniButtonComponent
+],
   templateUrl: './combat.component.html',
   styleUrl: './combat.component.css',
 })
