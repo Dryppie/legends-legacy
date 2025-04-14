@@ -10,7 +10,7 @@ import { CharacterActionsService } from '../../../core/services/api/character-ac
 import { GameService } from '../../../core/services/client-side/game/game.service';
 import { CombatStateService } from '../../../core/state/combat-state/combat-state.service';
 import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
-import { MiniButtonComponent } from "../mini-button/mini-button.component";
+import { MiniButtonComponent } from '../mini-button/mini-button.component';
 
 @Component({
   selector: 'app-combat',
@@ -23,8 +23,8 @@ import { MiniButtonComponent } from "../mini-button/mini-button.component";
     NgStyle,
     CountdownComponent,
     AsyncPipe,
-    MiniButtonComponent
-],
+    MiniButtonComponent,
+  ],
   templateUrl: './combat.component.html',
   styleUrl: './combat.component.css',
 })
@@ -385,25 +385,46 @@ export class CombatComponent implements OnInit, OnDestroy {
   }
 
   flavorMessages: string[] = [
-  "Sharpening your blade...",
-  "Sizing up your next foe...",
-  "The tension thickens in the air...",
-  "Your stance tightens...",
-  "A shadow moves in the fog..."
-];
-
-flavorText: string = '';
-
-pickRandomFlavorText(): void {
-  const newText = this.flavorMessages[
-    Math.floor(Math.random() * this.flavorMessages.length)
+    'Your blade clashes against steel!',
+    'You dodge a heavy blow just in time!',
+    'The battlefield roars around you!',
+    'Your stance shifts as you parry another strike!',
+    'A shadow lunges from the fog, and you counter!',
+    'Sparks fly as weapons collide!',
+    'You grit your teeth and press the attack!',
+    'Blood spatters across your armor!',
+    'You barely deflect a vicious strike!',
+    'A roar erupts as your enemy charges!',
+    'You lunge forward, blade aimed at their heart!',
+    'Pain flares as you take a hit!',
+    'Your opponent stumbles back from your blow!',
+    'You circle, looking for an opening!',
+    'Sweat drips into your eyes as the fight rages on!',
+    'You unleash a flurry of rapid strikes!',
+    'A powerful blow sends you skidding backward!',
+    'Your shout echoes over the chaos of battle!',
+    'You feel the rhythm of combat take hold!',
+    'Your blade finds a gap in their defense!',
   ];
 
-  // avoid repeating the same text twice in a row
-  if (newText === this.flavorText && this.flavorMessages.length > 1) {
-    this.pickRandomFlavorText(); // try again
-  } else {
-    this.flavorText = newText;
+  flavorText: string = '';
+  flavorTextVisible = false;
+
+  pickRandomFlavorText(): void {
+    this.flavorTextVisible = false;
+    const newText =
+      this.flavorMessages[
+        Math.floor(Math.random() * this.flavorMessages.length)
+      ];
+
+    // avoid repeating the same text twice in a row
+    if (newText === this.flavorText && this.flavorMessages.length > 1) {
+      this.pickRandomFlavorText(); // try again
+    } else {
+      this.flavorText = newText;
+    }
+    setTimeout(() => {
+      this.flavorTextVisible = true;
+    });
   }
-}
 }
