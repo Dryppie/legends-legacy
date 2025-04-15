@@ -1,5 +1,11 @@
 import { NgFor, NgIf } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  HostListener,
+  OnInit,
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Region } from '../../../../shared/models/Dtos/regionDto';
 import { RegionService } from '../../../../core/services/client-side/region/region.service';
@@ -12,13 +18,14 @@ import { CombatAreaCardComponent } from '../../../../shared/components/combat/co
   templateUrl: './region.component.html',
   styleUrl: './region.component.css',
 })
-export class RegionComponent implements OnInit {
+export class RegionComponent implements OnInit, AfterViewInit {
   regionId!: string;
   region!: Region; // You can define a more specific type based on your item data structure
 
   constructor(
     private route: ActivatedRoute,
     private regionService: RegionService,
+    private elRef: ElementRef,
   ) {}
 
   ngOnInit(): void {
@@ -34,5 +41,31 @@ export class RegionComponent implements OnInit {
     this.regionService.getRegionById(id).subscribe((data: any) => {
       this.region = data as Region;
     });
+  }
+
+  columnCount = 1;
+  @HostListener('window:resize')
+  onResize() {
+    this.setColumnCount();
+  }
+
+  ngAfterViewInit() {
+    this.setColumnCount();
+  }
+
+  private setColumnCount() {
+    const width = window.innerWidth;
+
+    if (width >= 1280)
+      this.columnCount = 4; // xl
+    else if (width >= 1024)
+      this.columnCount = 3; // lg
+    else if (width >= 768)
+      this.columnCount = 2; // md
+    else this.columnCount = 0; // base
+  }
+
+  isLastInRow(index: number): boolean {
+    return (index + 1) % this.columnCount === 0;
   }
 }
