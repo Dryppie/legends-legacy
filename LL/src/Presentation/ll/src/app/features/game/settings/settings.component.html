@@ -1,0 +1,100 @@
+<div class="flex w-full min-h-screen text-white rounded-md border border-gray-700 pr-6">
+
+  <!-- LEFT PROFILE PANEL -->
+  <aside class="w-64 p-12">
+    <div class="flex flex-col items-center space-y-2">
+      <img src="./../../../../assets/portrait/Avatar.svg" alt="Avatar" class="w-24 h-24 rounded-full border-2 border-yellow-500" />
+      <div class="text-center">
+        <h2 class="text-xl font-semibold">admin</h2>
+        <p class="text-sm text-orange-300">🛡️ 10</p>
+        <p class="text-gray-400 mt-2">Soist</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- RIGHT SETTINGS PANEL -->
+  <main class="flex-1 p-10 flex gap-10 overflow-hidden">
+
+    <!-- Settings Buttons -->
+    <div class="w-96 space-y-6">
+
+      <!-- Account Settings -->
+      <section>
+        <h2 class="text-lg font-bold mb-4">Account Settings</h2>
+        <div class="space-y-2">
+          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="setPanel('credentials')">
+            🛠️ Settings
+          </button>
+          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="convertToRegistered()">
+            🔐 Convert Guest to Registered Account
+          </button>
+          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="logout()">
+            🚪 Logout
+          </button>
+          <button class="text-red-400 hover:text-red-500 font-medium mt-2" (click)="deleteAccount()">🗑️ Delete Account</button>
+        </div>
+      </section>
+
+      <!-- Beta & Support -->
+      <section>
+        <h2 class="text-lg font-bold mb-4">Beta & Support</h2>
+        <div class="space-y-2">
+          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="sendFeedback()">
+            💬 Send Feedback
+          </button>
+          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="reportBug()">
+            🐞 Report a Bug
+          </button>
+          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="setPanel('patchNotes')">
+            📜 View Patch Notes
+          </button>
+        </div>
+      </section>
+
+      <!-- Social -->
+      <section>
+        <h2 class="text-lg font-bold mb-4">Social</h2>
+        <div class="space-y-2">
+          <a href="https://discord.gg/HXN4xnJUp3" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-[#5865F2] hover:bg-[#4752c4] rounded-md text-white transition">
+            💬 Join our Discord
+          </a>
+        </div>
+      </section>
+
+      <!-- Legal & Misc -->
+      <section>
+        <h2 class="text-lg font-bold mb-4">Legal & Misc</h2>
+        <div class="space-y-2">
+          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition">
+            📄 Terms of Service
+          </button>
+          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition">
+            🔒 Privacy Policy
+          </button>
+          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="setPanel('patchNotes')">
+            🧾 Credits
+          </button>
+          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="setPanel('patchNotes')">
+            🧩 {{ version }}
+          </button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Content Panel -->
+    <div class="flex-1 max-h-full bg-[#111] bg-opacity-50 p-6 rounded-md border border-gray-700 overflow-y-auto" *ngIf="activePanel">
+      <ng-container [ngSwitch]="activePanel">
+        <div *ngSwitchCase="'patchNotes'">
+          <h3 class="text-xl font-semibold mb-4">Patch Notes</h3>
+          <p>Here are the latest patch notes...</p>
+        </div>
+        <div *ngSwitchCase="'credentials'">
+          <h3 class="text-xl font-semibold mb-4">Change Email / Password</h3>
+          <p>Form coming soon...</p>
+        </div>
+      </ng-container>
+    </div>
+
+  </main>
+</div>

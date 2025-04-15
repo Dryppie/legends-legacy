@@ -31,6 +31,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     // { link: '/game/professions', label: 'Professions' },
     { link: '/game/world', label: 'World' },
     // { link: '#', label: 'Town' },
+    { link: '/game/settings', label: 'Settings' },
   ];
 
   currentCharacter: CharacterDto | null = null;
