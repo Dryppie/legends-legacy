@@ -1,4 +1,4 @@
-import { NgFor, NgIf } from '@angular/common';
+import { NgFor } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { Essence } from '../../../models/essence';
 import { ModalService } from '../../../../core/services/client-side/modal/modal.service';
@@ -7,7 +7,7 @@ import { EssenceSlot, SlotState } from '../../../models/essenceSlot';
 @Component({
   selector: 'app-equipped-essences',
   standalone: true,
-  imports: [NgFor, NgIf],
+  imports: [NgFor],
   templateUrl: './equipped-essences.component.html',
   styleUrl: './equipped-essences.component.css',
 })

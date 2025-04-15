@@ -4,12 +4,12 @@ import { EquipmentService } from '../../../core/services/api/equipment/equipment
 import { EquipmentSlot, EquipmentType } from '../../models/Dtos/equipmentSlot';
 import { ModalService } from '../../../core/services/client-side/modal/modal.service';
 import { CharacterManagerService } from '../../../core/services/client-side/character-manager/character-manager.service';
-import { Equipment, EquipmentInstance } from '../../models/item';
+import { ItemComponent } from '../item/item.component';
 
 @Component({
   selector: 'app-equipment-overview',
   standalone: true,
-  imports: [NgFor, NgIf],
+  imports: [NgFor, NgIf, ItemComponent],
   templateUrl: './equipment-overview.component.html',
   styleUrl: './equipment-overview.component.css',
 })

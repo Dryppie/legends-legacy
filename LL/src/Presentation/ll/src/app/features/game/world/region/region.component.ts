@@ -1,11 +1,5 @@
 import { NgFor, NgIf } from '@angular/common';
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  HostListener,
-  OnInit,
-} from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Region } from '../../../../shared/models/Dtos/regionDto';
 import { RegionService } from '../../../../core/services/client-side/region/region.service';
@@ -18,17 +12,18 @@ import { CombatAreaCardComponent } from '../../../../shared/components/combat/co
   templateUrl: './region.component.html',
   styleUrl: './region.component.css',
 })
-export class RegionComponent implements OnInit, AfterViewInit {
+export class RegionComponent implements OnInit {
   regionId!: string;
   region!: Region; // You can define a more specific type based on your item data structure
 
   constructor(
     private route: ActivatedRoute,
     private regionService: RegionService,
-    private elRef: ElementRef,
   ) {}
 
   ngOnInit(): void {
+    this.setColumnCount();
+
     this.route.paramMap.subscribe((params) => {
       this.regionId = params.get('id') ?? '';
       this.getRegionDetails(this.regionId);
@@ -46,10 +41,6 @@ export class RegionComponent implements OnInit, AfterViewInit {
   columnCount = 1;
   @HostListener('window:resize')
   onResize() {
-    this.setColumnCount();
-  }
-
-  ngAfterViewInit() {
     this.setColumnCount();
   }
 
