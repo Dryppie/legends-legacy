@@ -9,6 +9,7 @@ export interface Area {
   id: string;
   name: string;
   creatures: string[];
+  description: string;
   // creatures: Creature[];
 }
 
