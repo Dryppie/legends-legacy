@@ -66,12 +66,14 @@
       <section>
         <h2 class="text-lg font-bold mb-4">Account Settings</h2>
         <div class="space-y-2">
+          <!-- TODO: Implement -->
           <!-- Show this button if the user is a registered user -->
-          <button *ngIf="userInfo?.isRegisteredUser"
+          <!-- <button *ngIf="userInfo?.isRegisteredUser"
             class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition"
             (click)="setPanel('credentials')">
             🛠️ Change Email or Password
-          </button>
+          </button> -->
+
           <!-- Show this button if the user is NOT a registered user -->
           <button *ngIf="userInfo && !userInfo.isRegisteredUser"
             class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition"
@@ -81,7 +83,6 @@
           <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="logout()">
             🚪 Logout
           </button>
-          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-red-400 hover:text-red-500 font-medium mt-2" (click)="deleteAccount()">🗑️ Delete Account</button>
         </div>
       </section>
 

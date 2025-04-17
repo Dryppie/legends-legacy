@@ -90,7 +90,7 @@ public class UserService : IUserService
 
         var username = $"{prefix}{animal}{suffix}_{random.Next(1000, 9999)}";
 
-        var user = new AppUser { UserName = username, Email = $"{username}@hotmail.com" };
+        var user = new AppUser { UserName = username, Email = $"{username}@hotmail.com", IsGuest = true };
 
         var result = await _userManager.CreateAsync(user);
 
