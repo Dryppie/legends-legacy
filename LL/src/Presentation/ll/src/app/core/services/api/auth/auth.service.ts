@@ -20,6 +20,7 @@ import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { NamedStorageKeys } from '../../../common/enums/named-storage-keys';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { ToastService } from '../../client-side/toast/toast.service';
+import { UserInfoDto } from '../../../../shared/models/Dtos/userInfoDto';
 
 @Injectable({
   providedIn: 'root',
@@ -330,5 +331,13 @@ export class AuthService {
 
   getToken(): string | null {
     return localStorage.getItem(NamedStorageKeys.Session);
+  }
+
+  getUserInfo(): Observable<UserInfoDto> {
+    return this.apiService.get('auth/getUserInfo').pipe(
+      catchError(() => {
+        return throwError(() => new Error('Failed to register'));
+      }),
+    );
   }
 }

@@ -1,4 +1,6 @@
-﻿using Common.Authorization.Security;
+﻿using Application.UseCases.Users.Dtos;
+using Common.Authorization.Security;
+using Domain.Models.Users;
 
 namespace Application.Interfaces.Services.LL;
 public interface IUserService
@@ -10,6 +12,7 @@ public interface IUserService
     /// <param name="userId"></param>
     /// <returns></returns>
     Task<AuthInfo> ConvertGuestToUser(string userId, string username, string email, string password);
+    Task<UserInfo> GetUserInfo(Guid UserId);
 
     /// <summary>
     /// Login with the given Email and Password

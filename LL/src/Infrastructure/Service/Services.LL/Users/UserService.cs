@@ -127,4 +127,9 @@ public class UserService : IUserService
             IsPlayer = true
         };
     }
+
+    public async Task<UserInfo> GetUserInfo(Guid userId)
+    {
+        return await _userRepository.GetUserInfo(userId);
+    }
 }

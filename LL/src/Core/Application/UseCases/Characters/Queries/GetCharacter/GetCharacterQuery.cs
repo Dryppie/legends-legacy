@@ -2,7 +2,6 @@
 using Application.Interfaces.Services.LL;
 using Application.UseCases.Characters.Dtos;
 using AutoMapper;
-using Domain.Models.Entities.Characters;
 using MediatR;
 
 namespace Application.UseCases.Characters.Queries.GetCharacter;

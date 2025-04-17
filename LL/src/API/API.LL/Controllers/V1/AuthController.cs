@@ -5,13 +5,16 @@ using Application.UseCases.Authorization.Queries.ValidateToken;
 using Application.UseCases.Users.Commands.ConvertGuestToUser;
 using Application.UseCases.Users.Commands.GuestLogin;
 using Application.UseCases.Users.Commands.Register;
+using Application.UseCases.Users.Dtos;
 using Application.UseCases.Users.Queries.Login;
+using Application.UseCases.Users.Queries.GetUserInfo;
 using Common.Authorization.Security;
 using Common.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 [Authorize]
 public class AuthController : BaseController
@@ -154,6 +157,12 @@ public class AuthController : BaseController
         }
 
         return Ok();
+    }
+
+    [HttpGet("getUserInfo")]
+    public async Task<ActionResult<UserInfoDto>> GetCurrentUserInfo()
+    {
+        return await Mediator.Send(new GetUserInfoQuery(CurrentUserId));
     }
 
     private CookieOptions GetCookieOptions() => new()

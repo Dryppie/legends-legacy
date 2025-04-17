@@ -1,13 +1,14 @@
-<div class="flex w-full min-h-screen text-white rounded-md border border-gray-700 pr-6">
+<div class="flex w-full h-full text-white rounded-md border border-gray-700 mr-12">
 
   <!-- LEFT PROFILE PANEL -->
   <aside class="w-64 p-12">
     <div class="flex flex-col items-center space-y-2">
       <img src="./../../../../assets/portrait/Avatar.svg" alt="Avatar" class="w-24 h-24 rounded-full border-2 border-yellow-500" />
       <div class="text-center">
-        <h2 class="text-xl font-semibold">admin</h2>
-        <p class="text-sm text-orange-300">🛡️ 10</p>
-        <p class="text-gray-400 mt-2">Soist</p>
+        <h2 class="text-xl font-semibold">{{character?.name}}</h2>
+        <p class="text-sm text-orange-300">LEVEL: {{character?.level}}</p>
+        <p class="text-sm text-orange-300">XP: {{character?.experience}}/{{character?.experienceUntilNextLevel}}</p>
+        <p class="text-gray-400 mt-2">GUILD: BASED</p>
       </div>
     </div>
   </aside>
@@ -16,37 +17,26 @@
   <main class="flex-1 p-10 flex gap-10 overflow-hidden">
 
     <!-- Settings Buttons -->
-    <div class="w-96 space-y-6">
+    <div class="space-y-6">
 
-      <!-- Account Settings -->
-      <section>
-        <h2 class="text-lg font-bold mb-4">Account Settings</h2>
-        <div class="space-y-2">
-          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="setPanel('credentials')">
-            🛠️ Settings
-          </button>
-          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="convertToRegistered()">
-            🔐 Convert Guest to Registered Account
-          </button>
-          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="logout()">
-            🚪 Logout
-          </button>
-          <button class="text-red-400 hover:text-red-500 font-medium mt-2" (click)="deleteAccount()">🗑️ Delete Account</button>
-        </div>
-      </section>
+      
 
       <!-- Beta & Support -->
       <section>
         <h2 class="text-lg font-bold mb-4">Beta & Support</h2>
         <div class="space-y-2">
-          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="sendFeedback()">
+          <!-- TODO: Implement later: -->
+          <!-- <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="sendFeedback()">
             💬 Send Feedback
-          </button>
-          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="reportBug()">
+          </button> -->
+
+          <!-- TODO: Implement later: -->
+          <!-- <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="reportBug()">
             🐞 Report a Bug
-          </button>
+          </button> -->
+
           <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="setPanel('patchNotes')">
-            📜 View Patch Notes
+            📜Patch Notes: {{ version }}
           </button>
         </div>
       </section>
@@ -61,33 +51,50 @@
         </div>
       </section>
 
+      <!-- TODO: Implement -->
       <!-- Legal & Misc -->
-      <section>
+      <!-- <section>
         <h2 class="text-lg font-bold mb-4">Legal & Misc</h2>
         <div class="space-y-2">
           <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition">
             📄 Terms of Service
           </button>
-          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition">
-            🔒 Privacy Policy
+        </div>
+      </section> -->
+
+      <!-- Account Settings -->
+      <section>
+        <h2 class="text-lg font-bold mb-4">Account Settings</h2>
+        <div class="space-y-2">
+          <!-- Show this button if the user is a registered user -->
+          <button *ngIf="userInfo?.isRegisteredUser"
+            class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition"
+            (click)="setPanel('credentials')">
+            🛠️ Change Email or Password
           </button>
-          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="setPanel('patchNotes')">
-            🧾 Credits
+          <!-- Show this button if the user is NOT a registered user -->
+          <button *ngIf="userInfo && !userInfo.isRegisteredUser"
+            class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition"
+            (click)="convertToRegistered()">
+            🔐 Convert Guest to Registered Account
           </button>
-          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="setPanel('patchNotes')">
-            🧩 {{ version }}
+          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="logout()">
+            🚪 Logout
           </button>
+          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-red-400 hover:text-red-500 font-medium mt-2" (click)="deleteAccount()">🗑️ Delete Account</button>
         </div>
       </section>
 
     </div>
 
     <!-- Content Panel -->
-    <div class="flex-1 h-5/6 bg-[#111] bg-opacity-50 p-6 rounded-md border border-gray-700 overflow-y-auto" *ngIf="activePanel">
+    <div class="flex-1 h-full bg-[#111] bg-opacity-50 p-6 rounded-md border border-gray-700 overflow-y-auto" *ngIf="activePanel">
       <ng-container [ngSwitch]="activePanel">
         <div *ngSwitchCase="'patchNotes'">
-          <h3 class="text-xl font-semibold mb-4">Patch Notes</h3>
-          <p>Here are the latest patch notes...</p>
+          <h3 class="text-xl font-semibold mb-4">Patch Notes for: {{ version }} </h3>
+          <p>Here are the latest patch notes...<br>
+             Settings page introduced.. Hooray!
+          </p>
         </div>
         <div *ngSwitchCase="'credentials'">
           <h3 class="text-xl font-semibold mb-4">Change Email / Password</h3>

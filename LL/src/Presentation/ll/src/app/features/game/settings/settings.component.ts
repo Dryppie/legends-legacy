@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
+import { UserInfoDto } from '../../../shared/models/Dtos/userInfoDto';
+import { AuthService } from '../../../core/services/api/auth/auth.service';
+import { CharacterDto } from '../../../shared/models/Dtos/characterDto';
+ 
 @Component({
   selector: 'app-settings',
   standalone: true,
@@ -9,10 +12,29 @@ import { CommonModule } from '@angular/common';
   styleUrl: './settings.component.css'
 })
 export class SettingsComponent {
+  userInfo: UserInfoDto | null = null; // Initialize it to null first
+  character: CharacterDto | null = null; // Initialize it to null first
+
+  constructor(
+    private authService : AuthService,
+  ) {}
+
   version = '1.0.0'; // or pull from environment
 
+  ngOnInit() {
+  this.authService.getUserInfo().subscribe(userInfo => {
+    this.userInfo = userInfo;
+    console.log(this.userInfo);
+  });
+
+  this.authService.currentCharacter$.subscribe(character => {
+    this.character = character;
+    console.log(this.character);
+  })
+}
+
   logout() {
-    console.log('Logging out...');
+    this.authService.logout();
   }
 
   convertToRegistered() {
