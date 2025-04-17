@@ -866,7 +866,7 @@
           "Targeting": "Self",
           "Trigger": "OnMeleeAttacked",
           "TriggerTarget": "CauseOfTrigger",
-          "Log": "{Actor} was attacked by {Target} and applied corrosize ooze on them."
+          "Log": "{Actor} was attacked by {Target} and applied corrosive ooze on them."
         }
       ]
     },
