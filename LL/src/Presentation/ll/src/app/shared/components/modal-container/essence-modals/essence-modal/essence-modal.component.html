@@ -9,12 +9,16 @@
     <!-- Modal Body -->
     <div class="space-y-4">
       <div class="flex flex-col gap-1">
-        <h3 class="font-semibold text-primary">Active Ability - {{essence.active.name}}</h3>
+        <h3 class="font-semibold text-primary">
+          Active Ability - {{ essence.active.name }}
+        </h3>
         <div class="flex gap-1">
           <div class="flex flex-col gap-1">
-            <p>
-              {{ essence.active.description }}
-            </p>
+            <p
+              class="whitespace-pre-line"
+              [innerHTML]="safeActiveDescription"
+              abilityTooltipContainer
+            ></p>
             <p>
               Cost: {{ essence.active.cost }}
               {{ essence.active.costType }}
@@ -28,11 +32,15 @@
       </div>
 
       <div class="flex flex-col gap-1">
-        <h3 class="font-semibold text-primary">Passive Ability - {{essence.passive.name}}</h3>
+        <h3 class="font-semibold text-primary">
+          Passive Ability - {{ essence.passive.name }}
+        </h3>
         <div class="flex gap-1">
-          <div>
-            {{ essence.passive.description }}
-          </div>
+          <p
+            [innerHTML]="safePassiveDescription"
+            class="whitespace-pre-line"
+            abilityTooltipContainer
+          ></p>
         </div>
       </div>
       <div>

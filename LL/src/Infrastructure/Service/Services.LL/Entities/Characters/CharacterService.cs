@@ -42,9 +42,9 @@ public class CharacterService : ICharacterService
     {
         var character = await _characterRepository.GetCharacterOverviewByCharacterIdAsync(CurrentUserId, cancellationToken);
         AttributeCalculator.CalculateBaseAttributes(character);
-        foreach (var essence in character.EssenceSlots.Where(es => es.OccupiedEssence != null).Select(es => es.OccupiedEssence))
+        foreach (var essence in character.EssenceSlots.Where(es => es.OccupiedEssence != null).Select(es => es.OccupiedEssence!))
         {
-            essence!.Active.Description = _essenceDescriptionService.BuildAbilityDescription(essence.Active, character.BaseCombatAttributes);
+            essence.Active.Description = _essenceDescriptionService.BuildAbilityDescription(essence.Active, character.BaseCombatAttributes);
             essence.Passive.Description = _essenceDescriptionService.BuildAbilityDescription(essence.Passive, character.BaseCombatAttributes);
         }
         return character;
