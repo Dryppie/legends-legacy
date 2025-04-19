@@ -66,8 +66,8 @@ public static class AttributeCalculator
         float endurance = baseAttributes.GetValueOrDefault(AttributeType.Endurance);
         float willpower = baseAttributes.GetValueOrDefault(AttributeType.Willpower);
         float strength = baseAttributes.GetValueOrDefault(AttributeType.Strength);
-        float dexterity = baseAttributes.GetValueOrDefault(AttributeType.Dexterity);
         float fightingSpirit = baseAttributes.GetValueOrDefault(AttributeType.FightingSpirit);
+        float dexterity = baseAttributes.GetValueOrDefault(AttributeType.Dexterity);
         float agility = baseAttributes.GetValueOrDefault(AttributeType.Agility);
         float intelligence = baseAttributes.GetValueOrDefault(AttributeType.Intelligence);
         float wisdom = baseAttributes.GetValueOrDefault(AttributeType.Wisdom);
@@ -117,12 +117,12 @@ public static class AttributeCalculator
 
         // ---------------------------------------------------------------------
         //  - Every 5 Dexterity = +0.4% Crit Chance
-        //  - Every 9 Perception = +0.3% Crit Chance
+        //  - Every 3 Perception = +0.1% Crit Chance
         //  - Every 3 Luck = +0.2% Crit Chance
         // ---------------------------------------------------------------------
         float critChance =
             ((int)(dexterity / 5) * 0.4f)
-          + ((int)(perception / 9) * 0.3f)
+          + ((int)(perception / 3) * 0.1f)
           + ((int)(luck / 3) * 0.2f);
 
         // ---------------------------------------------------------------------
