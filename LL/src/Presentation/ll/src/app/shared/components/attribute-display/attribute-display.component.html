@@ -16,10 +16,10 @@
 
     <!-- bubble -->
     <div
-      class="space-y-1 whitespace-pre rounded-md border border-light_gray bg-zinc-800/90 p-1 text-white shadow-lg backdrop-blur-sm"
+      class="space-y-1 whitespace-pre rounded-md border border-light_gray bg-zinc-800/90 p-1 text-zinc-200 shadow-lg backdrop-blur-sm"
     >
       <div *ngFor="let c of tooltip">
-        +{{ c.value }} {{ c.to | attributeTypeFormat }}
+        <span> +{{ c.value }} {{ c.to | attributeTypeFormat }} </span>
       </div>
     </div>
   </div>
