@@ -8,7 +8,8 @@
       class="flex w-full max-w-md flex-col justify-center rounded-xl border border-light_gray bg-texture p-4 text-white shadow-lg"
     >
       <h3 class="mb-2 text-center text-primary">
-        While you were gone, you performed a total of
+        You were gone for {{ getDuration(session.from, session.to) }} and
+        performed
         <h3 class="text-white">{{ session.combatSummary.totalBattles }}</h3>
         battles.
       </h3>

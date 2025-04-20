@@ -84,7 +84,6 @@ public class CharacterActionService : ICharacterActionService
         if (isCapped)
         {
             characterAction.UpdatedAt = originalNow;
-            characterAction.CombatSession = null;
         }
 
         await _characterActionRepository.UpdateCharacterActionAsync(characterAction, cancellationToken);

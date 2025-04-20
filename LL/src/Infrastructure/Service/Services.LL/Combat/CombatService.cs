@@ -122,7 +122,7 @@ public class CombatService : ICombatService
             CombatSummary = combatSummary,
         };
 
-        await UpdateCharacterStatsAsync(playerCharacters, totalExp, cancellationToken);
+        await UpdateCharacterStatsAsync(playerCharacters, combatSession.CombatSummary.TotalExperience, cancellationToken);
         await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
 
         return combatSession;
@@ -149,7 +149,7 @@ public class CombatService : ICombatService
 
         return combatEntities;
     }
-    private void AppendPrefixToId(List<CombatEntity> selectedCombatEnemyEntities)
+    private static void AppendPrefixToId(List<CombatEntity> selectedCombatEnemyEntities)
     {
         var groupedEntities = selectedCombatEnemyEntities
             .GroupBy(e => e.Id);
