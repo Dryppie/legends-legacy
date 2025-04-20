@@ -1,0 +1,12 @@
+<section
+  class="flex gap-2 rounded-lg border border-light_gray p-2 shadow-inner"
+  *ngIf="stats() as s"
+>
+  <app-combat-stats-card label="Wins" [value]="s.wins"></app-combat-stats-card>
+  <app-combat-stats-card
+    label="Losses"
+    [value]="s.losses"
+  ></app-combat-stats-card>
+  <!-- <app-combat-stats-card label="Gold" [value]="s.gold"></app-combat-stats-card> -->
+  <app-combat-stats-card label="XP" [value]="s.xp"></app-combat-stats-card>
+</section>

@@ -11,7 +11,7 @@ public class CharacterActionDto : IMapFrom<CharacterAction>
     public Guid LootTableId { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
     public bool IsDeleted { get; set; }
-    public CombatResultDto? CombatResult { get; set; }
+    public CombatSessionDto? CombatSession { get; set; }
     public CombatActionDetails? CombatActionDetails { get; set; }
     public GatheringActionDetails? GatheringActionDetails { get; set; }
 

@@ -5,6 +5,7 @@ using Domain.Components.Attributes;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
+using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Combat;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
@@ -34,10 +35,12 @@ public class CombatService : ICombatService
         _publisher = publisher;
     }
 
-    public async Task<CombatResult> PerformIdleCombatAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
+    public async Task<CombatSession> PerformIdleCombatAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
         var totalLoot = new List<InventoryItem>();
         var totalExp = 0;
+
+        var sessionStartedAt = characterAction.UpdatedAt;
 
         var combatAction = characterAction.ActionDetails as CombatActionDetails;
 
@@ -53,6 +56,7 @@ public class CombatService : ICombatService
         await PrepareEntitiesForCombat([.. combatPlayerEntities, .. allCombatEnemyEntities]);
 
         var lastCombatResult = new CombatResult();
+        var combatSummary = new CombatSummary();
         var selectedCombatEnemyEntities = new List<CombatEntity>();
 
         while (characterAction.UpdatedAt < now)
@@ -98,8 +102,9 @@ public class CombatService : ICombatService
                 // Accumulate total loot
                 totalLoot.AddRange(lootThisBattle);
 
-                totalExp += selectedEnemyEntities.OfType<Creature>().Sum(e => e.ExperienceReward);
+                lastCombatResult.ExperienceGained = selectedEnemyEntities.OfType<Creature>().Sum(e => e.ExperienceReward);
             }
+            AddToCombatSummary(combatSummary, lastCombatResult);
 
             //TODO: OPTIMIZE PERHAPS?
             // https://chatgpt.com/c/671943b1-0958-800d-9234-32c45632490e
@@ -108,12 +113,30 @@ public class CombatService : ICombatService
         // Create CombatEntities to keep track of simple data over each entity, such as id, health, mana
         lastCombatResult.PlayerTeam = CreateSimpleCombatEntities(combatPlayerEntities);
         lastCombatResult.EnemyTeam = CreateSimpleCombatEntities(selectedCombatEnemyEntities);
-        lastCombatResult.ExperienceGained = totalExp;
+
+        var combatSession = new CombatSession()
+        {
+            From = sessionStartedAt,
+            To = now,
+            CombatResult = lastCombatResult,
+            CombatSummary = combatSummary,
+        };
 
         await UpdateCharacterStatsAsync(playerCharacters, totalExp, cancellationToken);
         await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
 
-        return lastCombatResult;
+        return combatSession;
+    }
+
+    private static void AddToCombatSummary(CombatSummary combatSummary, CombatResult lastCombatResult)
+    {
+        combatSummary.TotalBattles++;
+
+        if (lastCombatResult.Outcome.Equals(BattleOutcome.Victory)) combatSummary.Wins++;
+        else if (lastCombatResult.Outcome.Equals(BattleOutcome.Defeat)) combatSummary.Losses--;
+        else combatSummary.Draws++;
+
+        combatSummary.TotalExperience += lastCombatResult.ExperienceGained;
     }
 
     private static List<SimpleCombatEntity> CreateSimpleCombatEntities(List<CombatEntity> playerCharacters)

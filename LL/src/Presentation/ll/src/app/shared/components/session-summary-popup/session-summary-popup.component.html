@@ -1,0 +1,43 @@
+<ng-container *ngIf="svc.session() as session">
+  <!-- overlay -->
+  <div
+    class="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+  >
+    <!-- card -->
+    <div
+      class="flex w-full max-w-md flex-col justify-center rounded-xl border border-light_gray bg-texture p-4 text-white shadow-lg"
+    >
+      <h3 class="mb-2 text-center text-primary">
+        While you were gone, you performed a total of
+        <h3 class="text-white">{{ session.combatSummary.totalBattles }}</h3>
+        battles.
+      </h3>
+
+      <div class="flex flex-row justify-center gap-3 text-center">
+        <div class="min-w-16 rounded-lg p-1">
+          <div class="text-emerald-300">{{ session.combatSummary.wins }}</div>
+          <div class="uppercase text-neutral-400">Wins</div>
+        </div>
+        <div class="min-w-16 rounded-lg p-1">
+          <div class="text-rose-500">
+            {{ session.combatSummary.losses }}
+          </div>
+          <div class="uppercase text-neutral-400">Losses</div>
+        </div>
+        <div class="min-w-16 rounded-lg p-1">
+          <div class="text-amber-400">
+            {{ session.combatSummary.totalExperience }}
+          </div>
+          <div class="uppercase text-neutral-400">XP</div>
+        </div>
+      </div>
+
+      <button
+        class="mt-2 w-full rounded-md py-2 font-medium"
+        (click)="svc.dismiss()"
+      >
+        Dismiss
+      </button>
+    </div>
+  </div>
+</ng-container>

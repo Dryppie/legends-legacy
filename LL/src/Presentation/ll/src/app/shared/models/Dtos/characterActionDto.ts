@@ -1,6 +1,6 @@
 import { CharacterActionType } from '../enums/characterActionType';
 import { GatheringType } from '../enums/gatheringType';
-import { CombatResultDto } from './combatResultDto';
+import { CombatSessionDto } from './combatResultDto';
 import { Area } from './regionDto';
 
 export interface CharacterActionDto {
@@ -8,7 +8,7 @@ export interface CharacterActionDto {
   lootTableId: string;
   updatedAt: Date;
   isDeleted: boolean;
-  combatResult?: CombatResultDto;
+  combatSession?: CombatSessionDto;
   combatActionDetails?: CombatActionDetails;
   gatheringActionDetails?: GatheringActionDetails;
 }

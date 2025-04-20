@@ -21,6 +21,23 @@ export interface SimpleCombatEntityDto {
   barrier: number;
 }
 
+export interface CombatSessionDto {
+  from: Date;
+  to: Date;
+
+  combatResult: CombatResultDto;
+  combatSummary: SessionSummary;
+}
+
+export interface SessionSummary {
+  totalBattles: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  totalExperience: number;
+  totalGold: number;
+}
+
 export enum BattleOutcome {
   Victory = 'Victory',
   Defeat = 'Defeat',

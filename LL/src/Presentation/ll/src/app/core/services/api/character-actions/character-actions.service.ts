@@ -23,6 +23,7 @@ import { CharacterActionType } from '../../../../shared/models/enums/characterAc
 import { GameService } from '../../client-side/game/game.service';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { CombatService } from '../../client-side/combat/combat.service';
+import { SessionSummaryService } from '../../client-side/session-summary/session-summary.service';
 
 @Injectable({
   providedIn: 'root',
@@ -48,6 +49,7 @@ export class CharacterActionsService {
     private combatService: CombatService,
     private gameService: GameService,
     private eventBusService: EventBusService,
+    private sessionSummaryService: SessionSummaryService,
   ) {
     this.eventBusService.logout$.subscribe(() => {
       this.handleLogout();
@@ -222,7 +224,9 @@ export class CharacterActionsService {
         this.setCurrentAction(action);
 
         if (action?.characterActionType === CharacterActionType.Combat) {
+          console.log(action.combatSession);
           this.combatService.startCombatSimulation(action);
+          this.sessionSummaryService.loadSince(action.combatSession);
         }
 
         this.setDisplayCurrentAction(action);
@@ -258,7 +262,7 @@ export class CharacterActionsService {
 
       setTimeout(() => {
         this.displayCurrentActionSubject.next(false);
-        this.combatService.clearCurrentCombat();
+        this.combatService.clearAllCombat();
         this.gameService.hideCombat();
       }, delay);
     }
