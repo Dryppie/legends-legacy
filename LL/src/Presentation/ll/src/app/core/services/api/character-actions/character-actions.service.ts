@@ -224,7 +224,6 @@ export class CharacterActionsService {
         this.setCurrentAction(action);
 
         if (action?.characterActionType === CharacterActionType.Combat) {
-          console.log(action.combatSession);
           this.combatService.startCombatSimulation(action);
           this.sessionSummaryService.loadSince(action.combatSession);
         }
