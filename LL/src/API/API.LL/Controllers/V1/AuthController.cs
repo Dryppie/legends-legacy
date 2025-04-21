@@ -71,9 +71,23 @@ public class AuthController : BaseController
         var result = await Mediator.Send(new ConvertGuestToUserCommand(userId, input.Username, input.Email, input.Password));
 
         if (result)
-            return Ok();
+        {
+            var response = new
+            {
+                isValid = true,
+                message = "Account succesfully converted",
+            };
+            return Ok(response);
+        }
         else
-            return BadRequest();
+        {
+            var response = new
+            {
+                isValid = false,
+                message = "Failed to convert guest to user",
+            };
+            return BadRequest(response);
+        }
     }
 
     [AllowAnonymous]
