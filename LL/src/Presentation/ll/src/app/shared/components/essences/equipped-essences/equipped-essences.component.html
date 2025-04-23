@@ -1,26 +1,28 @@
-<div class="flex flex-col gap-2">
-  <h2 class="pl-2 text-primary">Absorbed Essences</h2>
-
+<div class="flex h-full w-72 flex-col gap-2">
+  <div class="flex flex-col items-center justify-center space-y-3 pb-2">
+    <h2 class="primary-gradient text-2xl">Absorbed Essences</h2>
+    <img src="core/Divider.svg" alt="Logo" class="center w-60 object-contain" />
+  </div>
   <!-- Active Slots -->
   <h3 class="pl-2 text-secondary">Active slots {{ activeSlotsAmount }}</h3>
-  <div
-    class="grid grid-cols-5 gap-4 rounded-md border border-primary p-4 sm:grid-cols-7 lg:grid-cols-10"
-  >
+  <div class="flex flex-col gap-4 rounded-md border border-primary p-4">
     <div
-      class="hover:bg-accent flex flex-col items-center border-b-[1px] border-b-transparent p-2 transition hover:border-primary"
+      class="flex flex-col items-center justify-center transition"
       *ngFor="let essenceSlot of activeEssenceSlots"
     >
-      <p
-        class="text-center font-bold text-primary hover:cursor-pointer"
-        (click)="openEssenceModal(essenceSlot.occupiedEssence)"
-      >
-        {{ essenceSlot.occupiedEssence?.name || "Empty" }}
-      </p>
+      <div class="flex w-36 justify-center">
+        <p
+          class="border-b border-b-transparent text-center font-bold text-primary hover:cursor-pointer hover:border-primary"
+          (click)="openEssenceModal(essenceSlot.occupiedEssence)"
+        >
+          {{ essenceSlot.occupiedEssence?.name || "Empty" }}
+        </p>
+      </div>
     </div>
   </div>
 
   <!-- Reserved Slots -->
-  <div *ngIf="reservedEssenceSlots.length > 0">
+  <!-- <div *ngIf="reservedEssenceSlots.length > 0">
     <h3 class="pl-2 text-secondary">
       Reserved slots {{ reservedSlotsAmount }}
     </h3>
@@ -39,5 +41,5 @@
         </p>
       </div>
     </div>
-  </div>
+  </div> -->
 </div>

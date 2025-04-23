@@ -46,10 +46,12 @@ public class Effect
 
     public void ExecuteOnExpireAction(EffectContext context, ICombatContext combatContext)
     {
-        if (Definition.Chance == 100 || Random.Shared.Next(1, 101) <= Definition.Chance)
-        {
-            Definition.Action?.OnExpireExecute(context, combatContext);
-        }
+        // Chance effect ExecuteOnExpire causes an issue. If an effect has a chance to stun the opponent,
+        // then this chance also applies to when it tries to unstun the opponent again.
+        //if (Definition.Chance == 100 || Random.Shared.Next(1, 101) <= Definition.Chance)
+        //{
+        //}
+        Definition.Action?.OnExpireExecute(context, combatContext);
     }
 
     public bool IsTrigger(TriggerEvent triggerEvent)

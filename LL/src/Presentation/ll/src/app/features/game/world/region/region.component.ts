@@ -1,5 +1,5 @@
 import { NgFor, NgIf } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Region } from '../../../../shared/models/Dtos/regionDto';
 import { RegionService } from '../../../../core/services/client-side/region/region.service';
@@ -22,6 +22,8 @@ export class RegionComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.setColumnCount();
+
     this.route.paramMap.subscribe((params) => {
       this.regionId = params.get('id') ?? '';
       this.getRegionDetails(this.regionId);
@@ -34,5 +36,27 @@ export class RegionComponent implements OnInit {
     this.regionService.getRegionById(id).subscribe((data: any) => {
       this.region = data as Region;
     });
+  }
+
+  columnCount = 1;
+  @HostListener('window:resize')
+  onResize() {
+    this.setColumnCount();
+  }
+
+  private setColumnCount() {
+    const width = window.innerWidth;
+
+    if (width >= 1280)
+      this.columnCount = 4; // xl
+    else if (width >= 1024)
+      this.columnCount = 3; // lg
+    else if (width >= 768)
+      this.columnCount = 2; // md
+    else this.columnCount = 0; // base
+  }
+
+  isLastInRow(index: number): boolean {
+    return (index + 1) % this.columnCount === 0;
   }
 }

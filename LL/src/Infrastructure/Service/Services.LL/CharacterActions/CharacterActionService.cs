@@ -3,7 +3,7 @@ using Application.UseCases.Inventories.Events;
 using Common.Extensions;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
-using Domain.Models.Combat;
+using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Inventories;
 using MediatR;
 using Services.LL.Interfaces;
@@ -68,7 +68,7 @@ public class CharacterActionService : ICharacterActionService
                 break;
 
             case CharacterActionType.Combat:
-                characterAction.CombatResult = await HandleCombatActionAsync(characterAction, now, cancellationToken);
+                characterAction.CombatSession = await HandleCombatActionAsync(characterAction, now, cancellationToken);
                 break;
 
             //case CharacterActionType.Profession:
@@ -84,7 +84,6 @@ public class CharacterActionService : ICharacterActionService
         if (isCapped)
         {
             characterAction.UpdatedAt = originalNow;
-            characterAction.CombatResult = null;
         }
 
         await _characterActionRepository.UpdateCharacterActionAsync(characterAction, cancellationToken);
@@ -112,19 +111,9 @@ public class CharacterActionService : ICharacterActionService
         }
     }
 
-    private async Task<CombatResult> HandleCombatActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
+    private async Task<CombatSession> HandleCombatActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        var totalLoot = new List<InventoryItem>();
-        
-        var lastCombatResult = await _combatService.PerformIdleCombatAsync(characterAction, now, cancellationToken);
-
-        //// Process the accumulated loot
-        //if (totalLoot.Count > 0)
-        //{
-        //    await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
-        //}
-
-        return lastCombatResult;
+        return await _combatService.PerformIdleCombatAsync(characterAction, now, cancellationToken);
     }
 
     private Task HandleProfessionActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)

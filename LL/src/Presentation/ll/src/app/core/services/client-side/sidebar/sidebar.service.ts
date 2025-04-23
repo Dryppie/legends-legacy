@@ -46,7 +46,7 @@ function getCharacterSidebar(): Tab[] {
           route: 'character',
           icon: 'character/achievements',
           title: 'Character Overview',
-          description: 'Attributes and equipment',
+          description: 'Attributes and essences',
           rewards: [
             { icon: 'path/to/fire-icon.png', amount: 2 },
             { icon: 'path/to/coin-icon.png', amount: 1 },

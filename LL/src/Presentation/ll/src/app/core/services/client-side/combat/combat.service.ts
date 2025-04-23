@@ -4,6 +4,7 @@ import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActi
 import { CombatStateService } from '../../../state/combat-state/combat-state.service';
 import { LevelingService } from '../leveling/leveling.service';
 import { EventBusService } from '../event-bus/event-bus.service';
+import { CombatLogService } from './combat-log/combat-log.service';
 
 @Injectable({
   providedIn: 'root',
@@ -12,6 +13,7 @@ export class CombatService {
   private allSubscriptions: Subscription[] = [];
 
   constructor(
+    private combatLogService: CombatLogService,
     private combatStateService: CombatStateService,
     private levelingService: LevelingService,
     private eventBusService: EventBusService,
@@ -21,6 +23,11 @@ export class CombatService {
     });
   }
 
+  clearAllCombat() {
+    this.clearCurrentCombat();
+    this.combatLogService.clear();
+  }
+
   clearCurrentCombat() {
     this.allSubscriptions.forEach((subscription) => subscription.unsubscribe());
     this.allSubscriptions = [];
@@ -28,20 +35,20 @@ export class CombatService {
   }
 
   startCombatSimulation(characterAction: CharacterActionDto): void {
-    if (!characterAction.combatResult) return;
+    if (!characterAction.combatSession?.combatResult) return;
     this.clearCurrentCombat();
 
     this.combatStateService.setNextCombatIn(characterAction.updatedAt);
 
     this.combatStateService.setCombatActive(true);
     this.combatStateService.setPlayerCharacters(
-      characterAction.combatResult.playerTeam,
+      characterAction.combatSession.combatResult.playerTeam,
     );
     this.combatStateService.setEnemyCharacters(
-      characterAction.combatResult.enemyTeam,
+      characterAction.combatSession.combatResult.enemyTeam,
     );
 
-    const combatAction = characterAction.combatResult;
+    const combatAction = characterAction.combatSession.combatResult;
     if (combatAction.eventLog.length < 1) {
       return;
     }
@@ -67,15 +74,19 @@ export class CombatService {
 
     // Calculate remaining combat duration
     const combatDurationMs = combatAction.duration * 100; // Corrected to 100ms per unit
-    const remainingDuration = combatStartTime + combatDurationMs - now;
+    const remainingDuration = combatStartTime + combatDurationMs + 1000 - now;
 
     const outcomeSubscription = (
       remainingDuration <= 0
-        ? of(combatAction.outcome)
-        : of(combatAction.outcome).pipe(delay(remainingDuration))
-    ).subscribe((outcome) => {
-      this.combatStateService.setCombatOutcome(outcome);
+        ? of(combatAction)
+        : of(combatAction).pipe(delay(remainingDuration))
+    ).subscribe((combatResult) => {
+      this.combatStateService.setCombatOutcome(combatResult.outcome);
       this.levelingService.gainExperience(combatAction.experienceGained);
+      this.combatLogService.add({
+        outcome: combatResult.outcome,
+        xp: combatAction.experienceGained,
+      });
     });
 
     this.allSubscriptions.push(outcomeSubscription); // Track outcome subscription

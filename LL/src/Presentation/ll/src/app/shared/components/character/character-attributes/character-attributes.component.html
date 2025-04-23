@@ -7,7 +7,7 @@
     <div class="flex w-full flex-col gap-4 sm:flex-row">
       <ul class="flex w-full flex-col">
         <li
-          class="flex w-full justify-between gap-4 px-1 py-[2px] odd:bg-secondary/10 even:bg-secondary/5"
+          class="flex w-full justify-between gap-4 odd:bg-secondary/10 even:bg-secondary/5"
           *ngFor="
             let attribute of (attributes | primaryAttributes).slice(
               0,
@@ -23,7 +23,7 @@
       </ul>
       <ul class="flex w-full flex-col">
         <li
-          class="flex w-full justify-between gap-4 px-1 py-[2px] odd:bg-secondary/5 even:bg-secondary/10"
+          class="flex w-full justify-between gap-4 odd:bg-secondary/5 even:bg-secondary/10"
           *ngFor="
             let attribute of (attributes | primaryAttributes).slice(
               (attributes | primaryAttributes).length / 2
@@ -40,7 +40,7 @@
     <div class="flex w-full flex-col gap-4 sm:flex-row">
       <ul class="flex w-full flex-col">
         <li
-          class="flex w-full justify-between gap-4 px-1 py-[2px] odd:bg-secondary/10 even:bg-secondary/5"
+          class="flex w-full justify-between gap-4 odd:bg-secondary/10 even:bg-secondary/5"
           *ngFor="
             let attribute of (attributes | secondaryAttributes).slice(
               0,
@@ -56,7 +56,7 @@
       </ul>
       <ul class="flex w-full flex-col">
         <li
-          class="flex w-full justify-between gap-4 px-1 py-[2px] odd:bg-secondary/5 even:bg-secondary/10"
+          class="flex w-full justify-between gap-4 odd:bg-secondary/5 even:bg-secondary/10"
           *ngFor="
             let attribute of (attributes | secondaryAttributes).slice(
               (attributes | secondaryAttributes).length / 2

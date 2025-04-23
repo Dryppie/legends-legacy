@@ -11,6 +11,7 @@ import { GameService } from '../../../core/services/client-side/game/game.servic
 import { CombatStateService } from '../../../core/state/combat-state/combat-state.service';
 import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
 import { MiniButtonComponent } from '../mini-button/mini-button.component';
+import { CombatLogComponent } from './combat-log/combat-log.component';
 
 @Component({
   selector: 'app-combat',
@@ -24,6 +25,7 @@ import { MiniButtonComponent } from '../mini-button/mini-button.component';
     CountdownComponent,
     AsyncPipe,
     MiniButtonComponent,
+    CombatLogComponent,
   ],
   templateUrl: './combat.component.html',
   styleUrl: './combat.component.css',
