@@ -129,6 +129,17 @@ function getCitySidebar(): Tab[] {
             { icon: 'path/to/coin-icon.png', amount: 1 },
           ],
         },
+        {
+          id: 'colosseum',
+          route: 'city',
+          icon: 'city/temple',
+          title: 'Colosseum',
+          description: 'Tournaments and Battles',
+          rewards: [
+            { icon: 'path/to/fire-icon.png', amount: 2 },
+            { icon: 'path/to/coin-icon.png', amount: 1 },
+          ],
+        },
       ],
     },
   ];

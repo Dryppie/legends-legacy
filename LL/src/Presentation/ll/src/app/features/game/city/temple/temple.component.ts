@@ -1,7 +1,6 @@
 import { Component, AfterViewInit } from '@angular/core';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { BannerComponent } from '../../../../shared/components/banner/banner.component';
-import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { Essence } from '../../../../shared/models/essence';
 import { EssencesService } from '../../../../core/services/api/essences/essences.service';
 import { ModalService } from '../../../../core/services/client-side/modal/modal.service';
@@ -9,7 +8,7 @@ import { ModalService } from '../../../../core/services/client-side/modal/modal.
 @Component({
   selector: 'app-temple',
   standalone: true,
-  imports: [ButtonComponent, BannerComponent, DefaultHeaderComponent],
+  imports: [ButtonComponent, BannerComponent],
   templateUrl: './temple.component.html',
   styleUrl: './temple.component.css',
 })

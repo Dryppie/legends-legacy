@@ -14,21 +14,23 @@ using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using MediatR;
-using Services.LL.CharacterActions;
+using Services.LL.Combat;
 using Services.LL.Interfaces;
 
-namespace Services.LL.Combat;
+namespace Services.LL.CharacterActions;
 public class CombatService : ICombatService
 {
     private readonly IEntityService _entityService;
+    private readonly ICombatSetupService _combatSetupService;
     private readonly ILevelingService _levelingService;
     private readonly ILootService _lootService;
     private readonly ISpawningService _spawningService;
     private readonly IPublisher _publisher;
 
-    public CombatService(IEntityService entityService, ILevelingService levelingService, ILootService lootService, ISpawningService spawningService, IPublisher publisher)
+    public CombatService(IEntityService entityService, ICombatSetupService combatPreparationService, ILevelingService levelingService, ILootService lootService, ISpawningService spawningService, IPublisher publisher)
     {
         _entityService = entityService;
+        _combatSetupService = combatPreparationService;
         _levelingService = levelingService;
         _lootService = lootService;
         _spawningService = spawningService;
@@ -45,15 +47,15 @@ public class CombatService : ICombatService
         var combatAction = characterAction.ActionDetails as CombatActionDetails;
 
         // Initialize combatants
-        var playerCharacters = await GetPlayerCharactersAsync([.. combatAction.CharacterTeam], cancellationToken);
+        var playerCharacters = await GetEntitiesAsync([.. combatAction.CharacterTeam], cancellationToken);
 
-        var allEnemyCharacters = await GetEnemyCharactersAsync(combatAction.Area.Creatures.Select(c => c.CreatureId).ToList(), cancellationToken);
+        var allEnemyCharacters = await GetEntitiesAsync([.. combatAction.Area.Creatures.Select(c => c.CreatureId)], cancellationToken);
 
-        var combatPlayerEntities = CreateCombatEntities(playerCharacters);
-        var allCombatEnemyEntities = CreateCombatEntities(allEnemyCharacters);
+        var combatPlayerEntities = _combatSetupService.CreateCombatEntities(playerCharacters);
+        var allCombatEnemyEntities = _combatSetupService.CreateCombatEntities(allEnemyCharacters);
 
         // Prepare entities for combat
-        await PrepareEntitiesForCombat([.. combatPlayerEntities, .. allCombatEnemyEntities]);
+        await _combatSetupService.PrepareEntitiesForCombat([.. combatPlayerEntities, .. allCombatEnemyEntities]);
 
         var lastCombatResult = new CombatResult();
         var combatSummary = new CombatSummary();
@@ -67,7 +69,7 @@ public class CombatService : ICombatService
             var selectedEnemyIds = selectedAreaCreatures.Select(c => c.CreatureId).ToList();
 
             selectedCombatEnemyEntities = [.. selectedEnemyIds.Select(id => allCombatEnemyEntities.First(ee => ee.OriginalId.Equals(id)).Copy())];
-            AppendPrefixToId(selectedCombatEnemyEntities);
+            _combatSetupService.AppendPrefixToId(selectedCombatEnemyEntities);
             var combatSimulation = new CombatSimulation(combatPlayerEntities, selectedCombatEnemyEntities);
             lastCombatResult = combatSimulation.RunSimulation();
 
@@ -111,8 +113,8 @@ public class CombatService : ICombatService
         }
 
         // Create CombatEntities to keep track of simple data over each entity, such as id, health, mana
-        lastCombatResult.PlayerTeam = CreateSimpleCombatEntities(combatPlayerEntities);
-        lastCombatResult.EnemyTeam = CreateSimpleCombatEntities(selectedCombatEnemyEntities);
+        lastCombatResult.PlayerTeam = _combatSetupService.CreateSimpleCombatEntities(combatPlayerEntities);
+        lastCombatResult.EnemyTeam = _combatSetupService.CreateSimpleCombatEntities(selectedCombatEnemyEntities);
 
         var combatSession = new CombatSession()
         {
@@ -139,52 +141,9 @@ public class CombatService : ICombatService
         combatSummary.TotalExperience += lastCombatResult.ExperienceGained;
     }
 
-    private static List<SimpleCombatEntity> CreateSimpleCombatEntities(List<CombatEntity> playerCharacters)
+    private async Task<List<Entity>> GetEntitiesAsync(List<Guid> entityIds, CancellationToken cancellationToken)
     {
-        var combatEntities = new List<SimpleCombatEntity>();
-        foreach (var entity in playerCharacters)
-        {
-            combatEntities.Add(new SimpleCombatEntity(entity.Id, entity.Name, entity.ImagePath, (int)entity.BaseCombatAttributes[AttributeType.MaxHealth], (int)entity.BaseCombatAttributes[AttributeType.MaxMana], (int)entity.BaseCombatAttributes[AttributeType.Barrier]));
-        }
-
-        return combatEntities;
-    }
-    private static void AppendPrefixToId(List<CombatEntity> selectedCombatEnemyEntities)
-    {
-        var groupedEntities = selectedCombatEnemyEntities
-            .GroupBy(e => e.Id);
-
-        foreach (var group in groupedEntities)
-        {
-            int increment = 1;
-            foreach (var entity in group)
-            {
-                entity.Id = $"{entity.Id}_{increment}";
-                increment++;
-            }
-        }
-    }
-
-
-    private async Task<List<Entity>> GetPlayerCharactersAsync(List<Guid> characterTeam, CancellationToken cancellationToken)
-    {
-        return await _entityService.GetEntitiesByIdsForCombatAsync(characterTeam, cancellationToken);
-    }
-
-    private async Task<List<Entity>> GetEnemyCharactersAsync(List<Guid> enemyTeam, CancellationToken cancellationToken)
-    {
-        return await _entityService.GetEntitiesByIdsForCombatAsync(enemyTeam, cancellationToken);
-    }
-
-    private static List<CombatEntity> CreateCombatEntities(List<Entity> entities)
-    {
-        var combatEntities = new List<CombatEntity>();
-        foreach (var entity in entities)
-        {
-            var combatEntity = new CombatEntity(entity);
-            combatEntities.Add(combatEntity);
-        }
-        return combatEntities;
+        return await _entityService.GetEntitiesByIdsForCombatAsync(entityIds, cancellationToken);
     }
 
     private static void ResetEntitiesForCombat(List<CombatEntity> allEntities)
@@ -195,17 +154,6 @@ public class CombatService : ICombatService
         }
     }
 
-    private static async Task PrepareEntitiesForCombat(IEnumerable<CombatEntity> entities)
-    {
-        // Load abilities
-        var loadedAttributeTasks = entities.Select(entity => Task.Run(() => EssenceLoader.Instance.LoadEssencesForCombatEntity(entity)));
-
-        // Calculate attributes
-        var calculationTasks = entities.Select(entity => Task.Run(() => AttributeCalculator.CalculateBaseCombatAttributes(entity)));
-
-        await Task.WhenAll(loadedAttributeTasks);
-        await Task.WhenAll(calculationTasks);
-    }
 
     private async Task ProcessLootAsync(Guid characterId, List<InventoryItem> loot, CancellationToken cancellationToken)
     {

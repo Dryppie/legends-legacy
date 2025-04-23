@@ -1,6 +1,7 @@
 ﻿using Application.Common.Interfaces;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
+using Domain.Models.Colosseum;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
@@ -18,6 +19,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Persistence.LL.Repositories.Attributes;
 using Persistence.LL.Repositories.CharacterActions;
+using Persistence.LL.Repositories.Colosseum;
 using Persistence.LL.Repositories.Entities;
 using Persistence.LL.Repositories.Entities.Characters;
 using Persistence.LL.Repositories.Entities.Creatures;
@@ -54,6 +56,8 @@ public static class DependencyInjection
         services.AddScoped<ICharacterRepository, CharacterRepository>();
         services.AddScoped<ICharacterActionRepository, CharacterActionRepository>();
         services.AddScoped<ICreatureRepository, CreatureRepository>();
+
+        services.AddScoped<IColosseumRepository, ColosseumRepository>();
 
         services.AddScoped<IEntityRepository, EntityRepository>();
         services.AddScoped<IEquipmentSlotRepository, EquipmentSlotRepository>();

@@ -1,0 +1,70 @@
+<ng-container
+  *ngIf="
+    combatStateService.getIsCombatActive$(battleType) | async as isCombatActive;
+    else showNonCombat
+  "
+>
+  <app-combat class="flex h-full w-full" [battleType]="battleType"></app-combat>
+</ng-container>
+<ng-template #showNonCombat>
+  <div
+    class="flex h-full flex-col items-center space-y-3 overflow-hidden pr-4 sm:pr-6"
+  >
+    <div class="flex w-full flex-col sm:gap-6">
+      <app-banner image="colosseum" class="w-full"></app-banner>
+    </div>
+    <app-tab
+      [tabs]="tabLabels"
+      [activeTab]="activeTab"
+      (tabSelected)="setActiveTab($event)"
+      class="w-full flex-none"
+    ></app-tab>
+    <div class="flex h-full w-full flex-col overflow-y-scroll">
+      <div class="text-white">
+        <p>
+          Ah, a challenger approaches! Looking to test your might in the arena?
+        </p>
+        <p>Glory awaits, champion.</p>
+      </div>
+      <div class="flex h-full items-center justify-between">
+        <!-- Sidebar Panel -->
+        <!-- <div
+        class="sidebar bg-gray-900 w-48 place-self-start rounded-xl p-4 text-white"
+      >
+        <div>
+          <h3 class="text-lg font-bold">Current Status</h3>
+          <p>Rank: <span class="text-amber-300">Silver Duelist</span></p>
+          <p>Streak: 3 Wins</p>
+          <p>Glory: 1420</p>
+        </div>
+      </div> -->
+        <div
+          class="flex h-full w-full flex-col items-center justify-center gap-4 pt-4"
+        >
+          <div
+            class="panel h-full w-full rounded-xl p-4 text-white shadow-inner"
+          >
+            <h2 class="mb-2 text-xl font-semibold">Colosseum Battles</h2>
+            <div class="grid grid-cols-3 border-b border-light_gray p-2">
+              <div>Name</div>
+              <div>Level</div>
+            </div>
+            <div
+              class="grid grid-cols-3 items-center border-b border-light_gray p-2"
+              *ngFor="let o of opponents"
+            >
+              <div>{{ o.name }}</div>
+              <div>{{ o.level }}</div>
+              <div
+                class="justify-self-end rounded-md border border-light_gray p-2 text-primary hover:cursor-pointer hover:bg-zinc-600/30"
+                (click)="challenge(o.id)"
+              >
+                Challenge
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>

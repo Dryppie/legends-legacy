@@ -7,6 +7,7 @@ using Services.LL._Simulator;
 using Services.LL.Attributes;
 using Services.LL.Authorization;
 using Services.LL.CharacterActions;
+using Services.LL.Colosseum;
 using Services.LL.Combat;
 using Services.LL.Entities;
 using Services.LL.Entities.Characters;
@@ -39,7 +40,10 @@ public static class DependencyInjection
         services.AddScoped<IActionDetailsService, ActionDetailsService>();
         services.AddScoped<ICreatureService, CreatureService>();
         
+        services.AddScoped<IColosseumService, ColosseumService>();
+
         services.AddScoped<ICombatService, CombatService>();
+        services.AddScoped<ICombatSetupService, CombatSetupService>();
 
         services.AddScoped<IEntityService, EntityService>();
         services.AddScoped<IEquipmentSlotService, EquipmentSlotService>();
