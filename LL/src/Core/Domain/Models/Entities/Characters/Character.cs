@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Models.CharacterActions;
+using Domain.Models.Colosseum;
 using Domain.Models.Inventories;
 using Domain.Models.Users;
 
@@ -14,6 +15,8 @@ public class Character : Entity
     public float ExperienceUntilNextLevel { get; set; }
     public int Gold { get; set; } = 0;
     public Inventory Inventory { get; set; } = null!;
+    public int ArenaRating { get; set; } = 1000;
+    public ICollection<ColosseumMatchResult> ColosseumMatches { get; set; } = [];
 
     //public List<Effect> ActiveEffects { get; set; } = [];
 

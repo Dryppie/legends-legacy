@@ -4,6 +4,8 @@ import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { catchError, map, Observable, of, throwError } from 'rxjs';
 import { CombatResultDto } from '../../../../shared/models/Dtos/combatResultDto';
 import { CombatService } from '../../client-side/combat/combat.service';
+import { ColosseumMatchResult } from '../../../../shared/models/Dtos/colosseum/colosseumMatchResult';
+import { ColosseumRank } from '../../../../shared/models/Dtos/colosseum/colosseumRank';
 
 @Injectable({
   providedIn: 'root',
@@ -16,6 +18,50 @@ export class ColosseumService {
 
   public getArenaOpponents(): Observable<CharacterDto[]> {
     return this.apiService.get('colosseum/getArenaOpponents').pipe(
+      map((opponents) => {
+        // this.toastService.showToast(
+        //   'Action completed successfully!',
+        //   'success',
+        // );
+        return opponents;
+      }),
+
+      catchError(() => {
+        // this.toastService.showToast(
+        //   'Login Failed',
+        //   'Wrong email or password',
+        //   'error',
+        //   't',
+        // );
+        return throwError(() => new Error('Failed to get arena opponents'));
+      }),
+    );
+  }
+
+  getColosseumRankings(): Observable<ColosseumRank[]> {
+    return this.apiService.get('colosseum/getRankings').pipe(
+      map((opponents) => {
+        // this.toastService.showToast(
+        //   'Action completed successfully!',
+        //   'success',
+        // );
+        return opponents;
+      }),
+
+      catchError(() => {
+        // this.toastService.showToast(
+        //   'Login Failed',
+        //   'Wrong email or password',
+        //   'error',
+        //   't',
+        // );
+        return throwError(() => new Error('Failed to get arena opponents'));
+      }),
+    );
+  }
+
+  getColosseumMatchResults(): Observable<ColosseumMatchResult[]> {
+    return this.apiService.get('colosseum/getColosseumMatchResults').pipe(
       map((opponents) => {
         // this.toastService.showToast(
         //   'Action completed successfully!',

@@ -1,0 +1,39 @@
+<div
+  class="flex w-full flex-col justify-center rounded-xl p-4 text-white shadow"
+>
+  <h2 class="mb-4 text-2xl font-bold">Glory Rankings</h2>
+  <div *ngIf="rankings?.length; else noRankings">
+    <!-- Rankings Header -->
+    <div class="mb-2 grid grid-cols-3 gap-2 border-b border-light_gray pb-2">
+      <div>Rank</div>
+      <div>Name</div>
+      <div>Rating</div>
+    </div>
+
+    <!-- Top 50 Rankings -->
+    <div
+      *ngFor="let player of rankings; let i = index"
+      class="grid grid-cols-3 items-center gap-2 rounded p-2"
+    >
+      <div>{{ player.rank }}</div>
+      <div>{{ player.name }}</div>
+      <div>{{ player.rating }}</div>
+    </div>
+
+    <!-- Your Ranking, if not in Top 50 -->
+    <ng-container *ngIf="myRanking && myRanking.rank > 50">
+      <div class="my-2 border-t border-light_gray"></div>
+      <div
+        class="grid grid-cols-3 items-center gap-2 rounded bg-blue-900 p-2 font-semibold"
+      >
+        <div>{{ myRanking.rank }}</div>
+        <div>{{ myRanking.name }} (You)</div>
+        <div>{{ myRanking.rating }}</div>
+      </div>
+    </ng-container>
+  </div>
+
+  <ng-template #noRankings>
+    <p>No rankings available.</p>
+  </ng-template>
+</div>

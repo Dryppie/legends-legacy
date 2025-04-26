@@ -24,5 +24,4 @@ public class Elo32Calculator : IRatingCalculator
 
         return (newA, newB);
     }
-
 }

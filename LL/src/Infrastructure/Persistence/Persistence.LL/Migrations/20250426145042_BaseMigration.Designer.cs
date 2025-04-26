@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250414134026_BaseMigration")]
+    [Migration("20250426145042_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -122,6 +122,43 @@ namespace Persistence.LL.Migrations
                     b.HasDiscriminator<int>("ActionType");
 
                     b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("Domain.Models.Colosseum.ColosseumMatchResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CharacterAId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CharacterAName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("CharacterBId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CharacterBName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("PlayedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("WinnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("WinnerName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterBId");
+
+                    b.ToTable("ColosseumMatches");
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Entity", b =>
@@ -739,6 +776,9 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Entities.Entity");
 
+                    b.Property<int>("ArenaRating")
+                        .HasColumnType("int");
+
                     b.Property<float>("Experience")
                         .HasColumnType("real");
 
@@ -874,6 +914,15 @@ namespace Persistence.LL.Migrations
                     b.HasOne("Domain.Models.CharacterActions.CharacterAction", null)
                         .WithOne("ActionDetails")
                         .HasForeignKey("Domain.Models.CharacterActions.CharacterActionDetails.ActionDetails", "CharacterActionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Colosseum.ColosseumMatchResult", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", null)
+                        .WithMany("ColosseumMatches")
+                        .HasForeignKey("CharacterBId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -1188,6 +1237,8 @@ namespace Persistence.LL.Migrations
             modelBuilder.Entity("Domain.Models.Entities.Characters.Character", b =>
                 {
                     b.Navigation("CharacterAction");
+
+                    b.Navigation("ColosseumMatches");
 
                     b.Navigation("Inventory")
                         .IsRequired();

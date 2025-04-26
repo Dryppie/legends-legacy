@@ -1,0 +1,32 @@
+<div class="panel h-full w-full rounded-xl p-4 text-white shadow-inner">
+  <div class="pb-2 italic text-white">
+    <p>Ah, a challenger approaches! Looking to test your might in the arena?</p>
+    <p>Glory awaits, champion.</p>
+  </div>
+  <h2 class="mb-2 text-xl font-semibold">Colosseum Battles</h2>
+  <div class="grid grid-cols-4 items-center border-b border-light_gray p-2">
+    <div>Name</div>
+    <div>Level</div>
+    <div>Arena Rating</div>
+    <div
+      class="justify-self-end rounded-md border border-light_gray px-5 py-2 text-rose-500 hover:cursor-pointer hover:bg-zinc-600/30"
+      (click)="onRefresh()"
+    >
+      Refresh
+    </div>
+  </div>
+  <div
+    class="grid grid-cols-4 items-center border-b border-light_gray p-2"
+    *ngFor="let o of opponents"
+  >
+    <div>{{ o.name }}</div>
+    <div>{{ o.level }}</div>
+    <div>{{ o.arenaRating }}</div>
+    <div
+      class="justify-self-end rounded-md border border-light_gray p-2 text-primary hover:cursor-pointer hover:bg-zinc-600/30"
+      (click)="onChallenge(o.id)"
+    >
+      Challenge
+    </div>
+  </div>
+</div>

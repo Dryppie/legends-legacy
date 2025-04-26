@@ -58,6 +58,7 @@ public static class DependencyInjection
         services.AddScoped<ICreatureRepository, CreatureRepository>();
 
         services.AddScoped<IColosseumRepository, ColosseumRepository>();
+        services.AddScoped<IRatingRepository, RatingRepository>();
 
         services.AddScoped<IEntityRepository, EntityRepository>();
         services.AddScoped<IEquipmentSlotRepository, EquipmentSlotRepository>();

@@ -221,4 +221,13 @@ public class CharacterRepository : ICharacterRepository
 
         return masteries;
     }
+
+    public async Task<Character> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        var character = await _context.Characters
+            .FirstOrDefaultAsync(c => c.Id.Equals(characterId));
+        NotFoundException.ThrowIfNull(character, nameof(Character), characterId);
+
+        return character;
+    }
 }

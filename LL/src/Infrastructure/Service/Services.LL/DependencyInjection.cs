@@ -1,4 +1,5 @@
 ﻿using Application.Authorization.Interfaces;
+using Application.Interfaces.Services;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Items;
@@ -41,6 +42,7 @@ public static class DependencyInjection
         services.AddScoped<ICreatureService, CreatureService>();
         
         services.AddScoped<IColosseumService, ColosseumService>();
+        services.AddScoped<IRatingService, RatingService>();
 
         services.AddScoped<ICombatService, CombatService>();
         services.AddScoped<ICombatSetupService, CombatSetupService>();

@@ -2,6 +2,7 @@
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
+using Domain.Models.Colosseum;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
@@ -27,6 +28,7 @@ public interface IDbContext
     DbSet<Area> Areas { get; }
     DbSet<EntityAttribute> EntityAttributes { get; }
     //DbSet<Building> Buildings { get; }
+    DbSet<ColosseumMatchResult> ColosseumMatches { get; }
     DbSet<Character> Characters { get; }
     DbSet<Creature> Creatures { get; }
     //DbSet<Echo> Echoes { get; }

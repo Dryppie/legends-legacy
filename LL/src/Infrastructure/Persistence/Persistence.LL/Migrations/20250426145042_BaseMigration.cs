@@ -369,6 +369,7 @@ namespace Persistence.LL.Migrations
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Experience = table.Column<float>(type: "real", nullable: true),
                     Gold = table.Column<int>(type: "int", nullable: true),
+                    ArenaRating = table.Column<int>(type: "int", nullable: true),
                     LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     ExperienceReward = table.Column<int>(type: "int", nullable: true)
                 },
@@ -451,6 +452,30 @@ namespace Persistence.LL.Migrations
                         principalTable: "Entities",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ColosseumMatches",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CharacterAId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CharacterAName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CharacterBId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CharacterBName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    WinnerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    WinnerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PlayedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ColosseumMatches", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ColosseumMatches_Entities_CharacterBId",
+                        column: x => x.CharacterBId,
+                        principalTable: "Entities",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -688,6 +713,11 @@ namespace Persistence.LL.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ColosseumMatches_CharacterBId",
+                table: "ColosseumMatches",
+                column: "CharacterBId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Entities_LootTableId",
                 table: "Entities",
                 column: "LootTableId");
@@ -789,6 +819,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
+                name: "ColosseumMatches");
 
             migrationBuilder.DropTable(
                 name: "EntityAttributes");

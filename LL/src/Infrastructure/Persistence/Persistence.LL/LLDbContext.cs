@@ -3,6 +3,7 @@ using Domain.Models.Abilities;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
+using Domain.Models.Colosseum;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
@@ -115,7 +116,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
     public DbSet<EntityAttribute> EntityAttributes => Set<EntityAttribute>();
 
     //public DbSet<Building> Buildings => Set<Building>();
-
+    public DbSet<ColosseumMatchResult> ColosseumMatches => Set<ColosseumMatchResult>();
     public DbSet<Character> Characters => Set<Character>();
     public DbSet<Creature> Creatures => Set<Creature>();
 

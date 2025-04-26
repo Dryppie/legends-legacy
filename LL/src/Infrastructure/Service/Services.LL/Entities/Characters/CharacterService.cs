@@ -54,4 +54,9 @@ public class CharacterService : ICharacterService
     {
         return await _characterRepository.GetLeaderboardCharactersAsync(cancellationToken);
     }
+
+    public async Task<Character> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        return await _characterRepository.GetBaseCharacterByIdAsync(characterId, cancellationToken);
+    }
 }

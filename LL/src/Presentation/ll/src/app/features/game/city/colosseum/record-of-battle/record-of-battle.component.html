@@ -1,0 +1,30 @@
+<div class="panel h-full w-full rounded-xl p-4 text-white shadow-inner">
+  <h2 class="mb-2 text-xl font-semibold">Previous Battles</h2>
+
+  <div *ngIf="previousMatches?.length; else noMatches">
+    <div class="grid grid-cols-4 items-center border-b border-light_gray p-2">
+      <div>Attacker</div>
+      <div>Defender</div>
+      <div>Winner</div>
+      <div>Played At</div>
+    </div>
+    <div
+      class="grid grid-cols-4 items-center border-b border-light_gray p-2"
+      *ngFor="let match of previousMatches"
+    >
+      <div>{{ match.characterAName }}</div>
+      <div>{{ match.characterBName }}</div>
+      <ng-container *ngIf="match.winnerName; else draw">
+        {{ match.winnerName }}
+      </ng-container>
+
+      <ng-template #draw>Draw</ng-template>
+      <div>
+        {{ match.playedAt | date: "mediumDate" }}
+      </div>
+    </div>
+  </div>
+  <ng-template #noMatches>
+    <p>No previous matches.</p>
+  </ng-template>
+</div>
