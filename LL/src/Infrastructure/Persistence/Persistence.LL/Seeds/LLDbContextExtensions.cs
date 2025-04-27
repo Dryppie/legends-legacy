@@ -1,5 +1,6 @@
 ﻿using Domain.Helpers;
 using Domain.Models.Attributes;
+using Domain.Models.Colosseum;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
@@ -144,6 +145,15 @@ public static class LLDbContextExtensions
                     EntityId = character.Id,
                 },
             };
+
+            var arenaTicketStatus = new ArenaTicketStatus()
+            {
+                CharacterId = character.Id,
+                CurrentTickets = 5,
+                LastTicketUpdate = DateTime.UtcNow,
+            };
+            character.ArenaTicketStatus = arenaTicketStatus;
+
             var equipmentSlots = SeedEquipmentSlots(character);
             var masteries = SeedMasteries(character);
             context.EquipmentSlots.AddRange(equipmentSlots);

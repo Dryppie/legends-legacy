@@ -3,7 +3,20 @@
     <p>Ah, a challenger approaches! Looking to test your might in the arena?</p>
     <p>Glory awaits, champion.</p>
   </div>
-  <h2 class="mb-2 text-xl font-semibold">Colosseum Battles</h2>
+  <div class="flex items-center justify-between">
+    <h2 class="text-primary">Arena Battles</h2>
+    <div
+      *ngIf="arenaTicketStatus"
+      class="flex flex-col items-end text-lg font-medium"
+    >
+      <span class="bg-gold rounded-full px-2 py-1 text-emerald-400 shadow-lg">
+        {{ arenaTicketStatus.currentTickets }} /
+        {{ arenaTicketStatus.maxTickets }} tickets
+      </span>
+      <span class="">{{ newTicketsIn }} </span>
+    </div>
+  </div>
+
   <div class="grid grid-cols-4 items-center border-b border-light_gray p-2">
     <div>Name</div>
     <div>Level</div>
@@ -16,15 +29,20 @@
     </div>
   </div>
   <div
-    class="grid grid-cols-4 items-center border-b border-light_gray p-2"
+    class="grid grid-cols-4 items-center border-b border-light_gray p-2 transition-colors duration-150"
     *ngFor="let o of opponents"
   >
-    <div>{{ o.name }}</div>
+    <div class="break-words pr-2">{{ o.name }}</div>
     <div>{{ o.level }}</div>
     <div>{{ o.arenaRating }}</div>
     <div
       class="justify-self-end rounded-md border border-light_gray p-2 text-primary hover:cursor-pointer hover:bg-zinc-600/30"
       (click)="onChallenge(o.id)"
+      [ngClass]="{
+        'pointer-events-none cursor-not-allowed opacity-40 hover:bg-transparent':
+          arenaTicketStatus == undefined ||
+          arenaTicketStatus.currentTickets < 1,
+      }"
     >
       Challenge
     </div>

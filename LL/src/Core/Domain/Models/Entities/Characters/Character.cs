@@ -17,6 +17,7 @@ public class Character : Entity
     public Inventory Inventory { get; set; } = null!;
     public int ArenaRating { get; set; } = 1000;
     public ICollection<ColosseumMatchResult> ColosseumMatches { get; set; } = [];
+    public ArenaTicketStatus ArenaTicketStatus { get; set; } = null!;
 
     //public List<Effect> ActiveEffects { get; set; } = [];
 

@@ -121,6 +121,22 @@ namespace Persistence.LL.Migrations
                     b.UseTphMappingStrategy();
                 });
 
+            modelBuilder.Entity("Domain.Models.Colosseum.ArenaTicketStatus", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("CurrentTickets")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("LastTicketUpdate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("CharacterId");
+
+                    b.ToTable("ArenaTicketStatus");
+                });
+
             modelBuilder.Entity("Domain.Models.Colosseum.ColosseumMatchResult", b =>
                 {
                     b.Property<Guid>("Id")
@@ -915,6 +931,17 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Domain.Models.Colosseum.ArenaTicketStatus", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", "Character")
+                        .WithOne("ArenaTicketStatus")
+                        .HasForeignKey("Domain.Models.Colosseum.ArenaTicketStatus", "CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+                });
+
             modelBuilder.Entity("Domain.Models.Colosseum.ColosseumMatchResult", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Characters.Character", null)
@@ -1233,6 +1260,9 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.Entities.Characters.Character", b =>
                 {
+                    b.Navigation("ArenaTicketStatus")
+                        .IsRequired();
+
                     b.Navigation("CharacterAction");
 
                     b.Navigation("ColosseumMatches");

@@ -436,6 +436,25 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ArenaTicketStatus",
+                columns: table => new
+                {
+                    CharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CurrentTickets = table.Column<int>(type: "int", nullable: false),
+                    LastTicketUpdate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ArenaTicketStatus", x => x.CharacterId);
+                    table.ForeignKey(
+                        name: "FK_ArenaTicketStatus_Entities_CharacterId",
+                        column: x => x.CharacterId,
+                        principalTable: "Entities",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CharacterActions",
                 columns: table => new
                 {
@@ -804,6 +823,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "AreaCreature");
+
+            migrationBuilder.DropTable(
+                name: "ArenaTicketStatus");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");

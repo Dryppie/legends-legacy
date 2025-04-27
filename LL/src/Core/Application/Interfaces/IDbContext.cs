@@ -28,6 +28,7 @@ public interface IDbContext
     DbSet<Area> Areas { get; }
     DbSet<EntityAttribute> EntityAttributes { get; }
     //DbSet<Building> Buildings { get; }
+    DbSet<ArenaTicketStatus> ArenaTicketStatus { get; }
     DbSet<ColosseumMatchResult> ColosseumMatches { get; }
     DbSet<Character> Characters { get; }
     DbSet<Creature> Creatures { get; }

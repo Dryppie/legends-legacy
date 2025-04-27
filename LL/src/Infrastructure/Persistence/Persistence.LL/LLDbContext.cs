@@ -116,6 +116,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
     public DbSet<EntityAttribute> EntityAttributes => Set<EntityAttribute>();
 
     //public DbSet<Building> Buildings => Set<Building>();
+    public DbSet<ArenaTicketStatus> ArenaTicketStatus => Set<ArenaTicketStatus>();
     public DbSet<ColosseumMatchResult> ColosseumMatches => Set<ColosseumMatchResult>();
     public DbSet<Character> Characters => Set<Character>();
     public DbSet<Creature> Creatures => Set<Creature>();

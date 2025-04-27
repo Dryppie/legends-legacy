@@ -26,7 +26,12 @@ public class ColosseumService : IColosseumService
     {
         var now = DateTimeOffset.UtcNow;
 
-        var matchResult = new ColosseumMatchResult();
+        var arenaTicketStatus = await _colosseumRepository.GetArenaTicketStatusAsync(characterId, cancellationToken);
+
+        if (arenaTicketStatus.CurrentTickets < 1) throw new Exception();
+        arenaTicketStatus.CurrentTickets--;
+        await _colosseumRepository.UpdateArenaTicketStatusAsync(arenaTicketStatus, cancellationToken);
+
         var playerTeam = await _entityService.GetEntitiesByIdsForCombatAsync([characterId], cancellationToken);
         var enemyTeam = await _entityService.GetEntitiesByIdsForCombatAsync([enemyId], cancellationToken);
 
@@ -40,6 +45,7 @@ public class ColosseumService : IColosseumService
 
         combatResult.PlayerTeam = _combatSetupService.CreateSimpleCombatEntities(combatPlayerEntities);
         combatResult.EnemyTeam = _combatSetupService.CreateSimpleCombatEntities(combatEnemyEntities);
+
 
         return combatResult;
     }
@@ -114,5 +120,26 @@ public class ColosseumService : IColosseumService
 
 
         return rankings;
+    }
+
+    public async Task<ArenaTicketStatus> GetArenaTicketStatusAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        var now = DateTimeOffset.UtcNow;
+        var arenaTicketStatus = await _colosseumRepository.GetArenaTicketStatusAsync(characterId, cancellationToken);
+        
+        var restoreInterval = TimeSpan.FromHours(3);
+        var timePassed = now - arenaTicketStatus.LastTicketUpdate;
+        var ticketsToRestore = (int)(timePassed.TotalHours / restoreInterval.TotalHours);
+
+        if (ticketsToRestore > 0)
+        {
+            arenaTicketStatus.CurrentTickets = Math.Min(arenaTicketStatus.CurrentTickets + ticketsToRestore, arenaTicketStatus.MaxTickets);
+            // Update LastTicketUpdate based on restored tickets. Even if capped, a new ticket might still restore in..  17 minutes
+            arenaTicketStatus.LastTicketUpdate = arenaTicketStatus.LastTicketUpdate.AddHours(ticketsToRestore * restoreInterval.TotalHours);
+
+            await _colosseumRepository.UpdateArenaTicketStatusAsync(arenaTicketStatus, cancellationToken);
+        }
+
+        return arenaTicketStatus;
     }
 }

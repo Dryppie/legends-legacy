@@ -12,6 +12,7 @@ public class ColosseumRepository : IColosseumRepository
     {
         _context = context;
     }
+
     public async Task<List<Character>> GetArenaOpponents(Guid characterId, CancellationToken cancellationToken)
     {
         // First, get the current character's ArenaRating
@@ -58,6 +59,37 @@ public class ColosseumRepository : IColosseumRepository
     public async Task SaveArenaMatchResult(ColosseumMatchResult arenaMatchResult, CancellationToken cancellationToken)
     {
         await _context.ColosseumMatches.AddAsync(arenaMatchResult, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<ArenaTicketStatus> GetArenaTicketStatusAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        var arenaTicketStatus = await _context.ArenaTicketStatus
+            .FindAsync([characterId], cancellationToken);
+
+        if (arenaTicketStatus == null) // Create new arena ticket status in case a player has none
+        {
+            arenaTicketStatus = new ArenaTicketStatus()
+            {
+                CharacterId = characterId,
+                CurrentTickets = 5,
+                LastTicketUpdate = DateTimeOffset.UtcNow,
+            };
+            await CreateArenaTicketStatusAsync(arenaTicketStatus, cancellationToken);
+        }
+
+        return arenaTicketStatus;
+    }
+
+    private async Task CreateArenaTicketStatusAsync(ArenaTicketStatus arenaTicketStatus, CancellationToken cancellationToken)
+    {
+        await _context.ArenaTicketStatus.AddAsync(arenaTicketStatus, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task UpdateArenaTicketStatusAsync(ArenaTicketStatus arenaTicketStatus, CancellationToken cancellationToken)
+    {
+        _context.ArenaTicketStatus.Update(arenaTicketStatus);
         await _context.SaveChangesAsync(cancellationToken);
     }
 }

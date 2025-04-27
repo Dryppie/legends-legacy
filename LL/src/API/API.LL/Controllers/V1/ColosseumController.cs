@@ -3,9 +3,9 @@ using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Colosseum.Commands.StartArenaBattle;
 using Application.UseCases.Colosseum.Dtos;
 using Application.UseCases.Colosseum.Queries.GetArenaOpponents;
+using Application.UseCases.Colosseum.Queries.GetArenaTickets;
 using Application.UseCases.Colosseum.Queries.GetColosseumMatchResults;
 using Application.UseCases.Colosseum.Queries.GetRankings;
-using Domain.Models.Colosseum;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.LL.Controllers.V1;
@@ -15,6 +15,12 @@ public class ColosseumController : BaseController
     public async Task<List<CharacterDto>> GetArenaOpponents()
     {
         return await Mediator.Send(new GetArenaOpponentsQuery(CurrentCharacterGuid));
+    }
+
+    [HttpGet("GetArenaTicketStatus")]
+    public async Task<ArenaTicketStatusDto> GetArenaTicketStatus()
+    {
+        return await Mediator.Send(new GetArenaTicketsQuery(CurrentCharacterGuid));
     }
 
     [HttpGet("GetRankings")]

@@ -21,6 +21,7 @@ import { RecordOfBattleComponent } from './record-of-battle/record-of-battle.com
 import { TournamentGroundsComponent } from './tournament-grounds/tournament-grounds.component';
 import { ColosseumMatchResult } from '../../../../shared/models/Dtos/colosseum/colosseumMatchResult';
 import { ColosseumRank } from '../../../../shared/models/Dtos/colosseum/colosseumRank';
+import { ArenaTicketStatus } from '../../../../shared/models/Dtos/colosseum/arenaTicketStatus';
 
 @Component({
   selector: 'app-colosseum',
@@ -46,6 +47,7 @@ import { ColosseumRank } from '../../../../shared/models/Dtos/colosseum/colosseu
 export class ColosseumComponent implements OnInit {
   allOpponents: CharacterDto[] = [];
   opponents: CharacterDto[] = [];
+  arenaTicketStatus!: ArenaTicketStatus;
 
   rankings: ColosseumRank[] = [];
 
@@ -83,6 +85,8 @@ export class ColosseumComponent implements OnInit {
         this.rankings = data.sort((a, b) => a.rank - b.rank);
       },
     });
+
+    this.colosseumService.getArenaTicketStatus();
   }
 
   pickRandomOpponents(): void {
