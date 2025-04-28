@@ -89,38 +89,41 @@ public class ColosseumService : IColosseumService
     {
         var characters = await _colosseumRepository.GetRankings(characterId, cancellationToken);
 
-        var top50 = characters.Take(50).ToList();
+        // Assign the real rank to each character
+        var rankedCharacters = characters
+            .Select((character, index) => new { Character = character, Rank = index + 1 })
+            .ToList();
+
+        // Take the top 50
+        var top50 = rankedCharacters.Take(50).ToList();
 
         // Check if requester is in the top 50
-        var inTop50 = top50.Any(r => r.Id == characterId);
+        var inTop50 = top50.Any(r => r.Character.Id == characterId);
 
         if (!inTop50)
         {
-            // Find the requester's ranking (anywhere in the list)
-            var requesterRank = characters.FirstOrDefault(r => r.Id == characterId);
+            // Find the requester's actual ranking
+            var requesterRank = rankedCharacters.FirstOrDefault(r => r.Character.Id == characterId);
             if (requesterRank != null)
             {
-                top50.Add(requesterRank);
+                top50.Add(requesterRank); // Add requester to the bottom of the list, with their true rank
             }
         }
 
-        var rankings = new List<ColosseumArenaRank>();
-        var count = 1;
-        foreach (var ranking in top50)
-        {
-            rankings.Add(new ColosseumArenaRank()
+        // Create the result list
+        var rankings = top50
+            .Select(ranking => new ColosseumArenaRank()
             {
-                CharacterId = characterId,
-                Character = ranking,
-                Rating = ranking.ArenaRating,
-                Rank = count++,
-            });
-        }
-        // Get the top 50
-
+                CharacterId = ranking.Character.Id,
+                Character = ranking.Character,
+                Rating = ranking.Character.ArenaRating,
+                Rank = ranking.Rank,
+            })
+            .ToList();
 
         return rankings;
     }
+
 
     public async Task<ArenaTicketStatus> GetArenaTicketStatusAsync(Guid characterId, CancellationToken cancellationToken)
     {

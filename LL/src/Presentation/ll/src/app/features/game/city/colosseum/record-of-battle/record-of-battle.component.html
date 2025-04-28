@@ -1,21 +1,25 @@
 <div class="panel h-full w-full rounded-xl p-4 text-white shadow-inner">
-  <h2 class="mb-2 text-xl font-semibold">Previous Battles</h2>
+  <h2 class="mb-4 text-primary">Previous Battles</h2>
 
   <div *ngIf="previousMatches?.length; else noMatches">
-    <div class="grid grid-cols-4 items-center border-b border-light_gray p-2">
+    <div
+      class="grid grid-cols-4 items-center gap-2 border-b border-light_gray p-2"
+    >
       <div>Attacker</div>
       <div>Defender</div>
       <div>Winner</div>
       <div>Played At</div>
     </div>
     <div
-      class="grid grid-cols-4 items-center border-b border-light_gray p-2"
+      class="grid grid-cols-4 items-center gap-2 border-b border-light_gray p-2"
       *ngFor="let match of previousMatches"
     >
-      <div>{{ match.characterAName }}</div>
-      <div>{{ match.characterBName }}</div>
+      <div class="break-words">{{ match.characterAName }}</div>
+      <div class="break-words">{{ match.characterBName }}</div>
       <ng-container *ngIf="match.winnerName; else draw">
-        {{ match.winnerName }}
+        <div class="break-words">
+          {{ match.winnerName }}
+        </div>
       </ng-container>
 
       <ng-template #draw>Draw</ng-template>

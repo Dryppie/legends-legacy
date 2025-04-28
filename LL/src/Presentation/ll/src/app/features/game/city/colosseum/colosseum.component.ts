@@ -29,7 +29,6 @@ import { ArenaTicketStatus } from '../../../../shared/models/Dtos/colosseum/aren
   imports: [
     BannerComponent,
     TabComponent,
-    NgFor,
     CombatComponent,
     NgIf,
     AsyncPipe,

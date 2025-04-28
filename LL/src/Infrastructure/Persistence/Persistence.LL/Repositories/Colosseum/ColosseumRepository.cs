@@ -30,8 +30,6 @@ public class ColosseumRepository : IColosseumRepository
         var characters = await _context.Characters
             .Where(c => c.Id != characterId)
             .OrderBy(c => Math.Abs(c.ArenaRating - myArenaRating))
-            .ThenByDescending(c => c.Level)
-            .ThenByDescending(c => c.Experience)
             .Take(25)
             .ToListAsync(cancellationToken);
 

@@ -1,23 +1,38 @@
-import { NgFor, NgIf } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { NgClass, NgFor, NgIf } from '@angular/common';
+import { Component, Input, OnInit } from '@angular/core';
+import { CharacterService } from '../../../../../core/services/api/character/character.service';
+import { Subscription } from 'rxjs';
+import { ColosseumRank } from '../../../../../shared/models/Dtos/colosseum/colosseumRank';
 
 @Component({
   selector: 'app-rankings-glory',
   standalone: true,
-  imports: [NgIf, NgFor],
+  imports: [NgIf, NgFor, NgClass],
   templateUrl: './rankings-glory.component.html',
   styleUrl: './rankings-glory.component.css',
 })
-export class RankingsGloryComponent {
-  @Input() rankings: {
-    rank: number;
-    name: string;
-    rating: number;
-    playerId: string;
-  }[] = [];
-  @Input() playerId!: string;
+export class RankingsGloryComponent implements OnInit {
+  @Input() rankings: ColosseumRank[] = [];
+  @Input() name!: string;
+  myRanking: ColosseumRank | undefined;
+  subscriptions: Subscription = new Subscription();
 
-  get myRanking() {
-    return this.rankings.find((r) => r.playerId === this.playerId);
+  constructor(private characterService: CharacterService) {}
+
+  ngOnInit(): void {
+    this.subscriptions.add(
+      this.characterService.getCurrentCharacter().subscribe((character) => {
+        if (character) this.name = character.name;
+      }),
+    );
+    this.myRanking = this.getMyRanking();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
+  getMyRanking(): ColosseumRank | undefined {
+    return this.rankings.find((r) => r.name === this.name);
   }
 }
