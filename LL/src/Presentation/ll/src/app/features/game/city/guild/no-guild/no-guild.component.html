@@ -1,0 +1,34 @@
+<div class="flex h-full w-full flex-col gap-2">
+  <div class="flex flex-col gap-2">
+    <h2 class="text-primary">Guilds</h2>
+    <div class="italic text-white">
+      Create or join a guild, gain powerful allies, and challenge difficult
+      raids.
+    </div>
+  </div>
+  <div class="flex">
+    <div
+      class="rounded-md border border-light_gray p-4 text-primary hover:cursor-pointer hover:bg-zinc-300/10"
+      (click)="openCreateGuildModal()"
+    >
+      Create Guild
+    </div>
+  </div>
+
+  <div class="guilds-list">
+    <!-- <app-guild-card 
+      *ngFor="let guild of guilds"
+      [guild]="guild"
+      (joinRequest)="onJoinRequest(guild)">
+    </app-guild-card> -->
+
+    <div *ngIf="guilds.length === 0" class="text-white">
+      <p>No guilds available yet. Be the first to create one!</p>
+    </div>
+  </div>
+</div>
+<!-- <app-create-guild-modal 
+  *ngIf="showCreateGuildModal"
+  (close)="closeCreateGuildModal()"
+  (guildCreated)="refreshGuilds()">
+</app-create-guild-modal> -->

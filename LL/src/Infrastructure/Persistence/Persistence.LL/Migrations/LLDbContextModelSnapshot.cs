@@ -275,6 +275,82 @@ namespace Persistence.LL.Migrations
                     b.ToTable("GatheringNodes");
                 });
 
+            modelBuilder.Entity("Domain.Models.Guilds.Guild", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MaxMembers")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("OwnerCharacterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Tag")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerCharacterId");
+
+                    b.ToTable("Guilds");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.GuildInvite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("GuildId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("GuildId");
+
+                    b.ToTable("GuildInvites");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.GuildMember", b =>
+                {
+                    b.Property<Guid>("GuildId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.HasKey("GuildId", "CharacterId");
+
+                    b.HasIndex("CharacterId");
+
+                    b.ToTable("GuildMembers");
+                });
+
             modelBuilder.Entity("Domain.Models.Inventories.Inventory", b =>
                 {
                     b.Property<Guid>("CharacterId")
@@ -978,6 +1054,55 @@ namespace Persistence.LL.Migrations
                     b.Navigation("LootTable");
                 });
 
+            modelBuilder.Entity("Domain.Models.Guilds.Guild", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", "OwnerCharacter")
+                        .WithMany()
+                        .HasForeignKey("OwnerCharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("OwnerCharacter");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.GuildInvite", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", "Character")
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Guilds.Guild", "Guild")
+                        .WithMany("Invites")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+
+                    b.Navigation("Guild");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.GuildMember", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", "Character")
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Guilds.Guild", "Guild")
+                        .WithMany("Members")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+
+                    b.Navigation("Guild");
+                });
+
             modelBuilder.Entity("Domain.Models.Inventories.Inventory", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Characters.Character", "Character")
@@ -1227,6 +1352,13 @@ namespace Persistence.LL.Migrations
                     b.Navigation("EssenceItems");
 
                     b.Navigation("EssenceSlots");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.Guild", b =>
+                {
+                    b.Navigation("Invites");
+
+                    b.Navigation("Members");
                 });
 
             modelBuilder.Entity("Domain.Models.Inventories.Inventory", b =>

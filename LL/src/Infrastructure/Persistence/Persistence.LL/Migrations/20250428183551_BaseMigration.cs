@@ -568,6 +568,29 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Guilds",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Tag = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MaxMembers = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    OwnerCharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Guilds", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Guilds_Entities_OwnerCharacterId",
+                        column: x => x.OwnerCharacterId,
+                        principalTable: "Entities",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Inventories",
                 columns: table => new
                 {
@@ -639,6 +662,57 @@ namespace Persistence.LL.Migrations
                         principalTable: "LootTableEntry",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GuildInvites",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    GuildId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GuildInvites", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_GuildInvites_Entities_CharacterId",
+                        column: x => x.CharacterId,
+                        principalTable: "Entities",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_GuildInvites_Guilds_GuildId",
+                        column: x => x.GuildId,
+                        principalTable: "Guilds",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GuildMembers",
+                columns: table => new
+                {
+                    GuildId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Role = table.Column<int>(type: "int", nullable: false),
+                    JoinedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GuildMembers", x => new { x.GuildId, x.CharacterId });
+                    table.ForeignKey(
+                        name: "FK_GuildMembers_Entities_CharacterId",
+                        column: x => x.CharacterId,
+                        principalTable: "Entities",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_GuildMembers_Guilds_GuildId",
+                        column: x => x.GuildId,
+                        principalTable: "Guilds",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -767,6 +841,26 @@ namespace Persistence.LL.Migrations
                 column: "LootTableId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_GuildInvites_CharacterId",
+                table: "GuildInvites",
+                column: "CharacterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_GuildInvites_GuildId",
+                table: "GuildInvites",
+                column: "GuildId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_GuildMembers_CharacterId",
+                table: "GuildMembers",
+                column: "CharacterId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Guilds_OwnerCharacterId",
+                table: "Guilds",
+                column: "OwnerCharacterId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_InventoryItems_ItemInstanceId",
                 table: "InventoryItems",
                 column: "ItemInstanceId");
@@ -858,6 +952,12 @@ namespace Persistence.LL.Migrations
                 name: "GatheringNodes");
 
             migrationBuilder.DropTable(
+                name: "GuildInvites");
+
+            migrationBuilder.DropTable(
+                name: "GuildMembers");
+
+            migrationBuilder.DropTable(
                 name: "InventoryItems");
 
             migrationBuilder.DropTable(
@@ -880,6 +980,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "Guilds");
 
             migrationBuilder.DropTable(
                 name: "Inventories");

@@ -1,4 +1,4 @@
-<div class="panel h-full w-full rounded-xl p-4 text-white shadow-inner">
+<div class="panel h-full w-full rounded-xl p-4 text-white">
   <div class="pb-2 italic text-white">
     <p>Ah, a challenger approaches! Looking to test your might in the arena?</p>
     <p>Glory awaits, champion.</p>
@@ -9,7 +9,7 @@
       *ngIf="arenaTicketStatus"
       class="flex flex-col items-end text-lg font-medium"
     >
-      <span class="bg-gold rounded-full px-2 py-1 text-emerald-400 shadow-lg">
+      <span class="bg-gold rounded-full px-2 py-1 text-emerald-400">
         {{ arenaTicketStatus.currentTickets }} /
         {{ arenaTicketStatus.maxTickets }} tickets
       </span>

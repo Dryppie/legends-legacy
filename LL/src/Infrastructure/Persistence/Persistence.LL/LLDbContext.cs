@@ -11,6 +11,7 @@ using Domain.Models.Entities.NPCs;
 using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.GatheringNodes;
+using Domain.Models.Guilds;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
@@ -144,9 +145,10 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
 
     //public DbSet<Essence> Essences => Set<Essence>();
 
-    //public DbSet<Guild> Guilds => Set<Guild>();
+    public DbSet<Guild> Guilds => Set<Guild>();
+    public DbSet<GuildInvite> GuildInvites => Set<GuildInvite>();
 
-    //public DbSet<GuildMember> GuildMembers => Set<GuildMember>();
+    public DbSet<GuildMember> GuildMembers => Set<GuildMember>();
 
     public DbSet<Inventory> Inventories => Set<Inventory>();
 

@@ -15,6 +15,7 @@ using Services.LL.Entities.Characters;
 using Services.LL.Entities.Creatures;
 using Services.LL.Essences;
 using Services.LL.Gatherings;
+using Services.LL.Guilds;
 using Services.LL.Interfaces;
 using Services.LL.Inventories;
 using Services.LL.Items;
@@ -57,6 +58,8 @@ public static class DependencyInjection
         services.AddScoped<IGatheringNodeService, GatheringNodeService>();
 
         services.AddScoped<IGatheringService, GatheringService>();
+
+        services.AddScoped<IGuildService, GuildService>();
         
         services.AddScoped<ILevelingService, LevelingService>();
 

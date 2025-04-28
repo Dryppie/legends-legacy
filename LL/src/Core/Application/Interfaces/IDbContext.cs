@@ -9,6 +9,7 @@ using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.GatheringNodes;
+using Domain.Models.Guilds;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments.Slots;
@@ -49,8 +50,9 @@ public interface IDbContext
 
     //DbSet<Equipment> Equipments { get; }
     //DbSet<Essence> Essences { get; }
-    //DbSet<Guild> Guilds { get; }
-    //DbSet<GuildMember> GuildMembers { get; }
+    DbSet<Guild> Guilds { get; }
+    DbSet<GuildInvite> GuildInvites { get; }
+    DbSet<GuildMember> GuildMembers { get; }
     DbSet<Inventory> Inventories { get; }
     DbSet<InventoryItem> InventoryItems { get; }
     DbSet<ItemBase> ItemBases { get; }

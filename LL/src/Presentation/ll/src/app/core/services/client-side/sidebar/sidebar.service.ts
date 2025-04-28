@@ -113,10 +113,6 @@ function getCitySidebar(): Tab[] {
           icon: 'city/temple',
           title: 'Temple',
           description: 'Temple',
-          rewards: [
-            { icon: 'path/to/fire-icon.png', amount: 2 },
-            { icon: 'path/to/coin-icon.png', amount: 1 },
-          ],
         },
         {
           id: 'tavern',
@@ -124,10 +120,6 @@ function getCitySidebar(): Tab[] {
           icon: 'city/temple',
           title: 'Tavern',
           description: 'Leaderboard',
-          rewards: [
-            { icon: 'path/to/fire-icon.png', amount: 2 },
-            { icon: 'path/to/coin-icon.png', amount: 1 },
-          ],
         },
         {
           id: 'colosseum',
@@ -135,10 +127,13 @@ function getCitySidebar(): Tab[] {
           icon: 'city/temple',
           title: 'Colosseum',
           description: 'Tournaments and Battles',
-          rewards: [
-            { icon: 'path/to/fire-icon.png', amount: 2 },
-            { icon: 'path/to/coin-icon.png', amount: 1 },
-          ],
+        },
+        {
+          id: 'guild',
+          route: 'city',
+          icon: 'city/temple',
+          title: 'Guild',
+          description: 'Guild info',
         },
       ],
     },

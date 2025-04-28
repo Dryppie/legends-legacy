@@ -1,0 +1,6 @@
+<div class="flex h-full flex-col overflow-hidden pr-4 sm:pr-6">
+  <app-in-a-guild *ngIf="guild$ | async; else noGuild"></app-in-a-guild>
+  <ng-template #noGuild>
+    <app-no-guild #noGuild></app-no-guild>
+  </ng-template>
+</div>

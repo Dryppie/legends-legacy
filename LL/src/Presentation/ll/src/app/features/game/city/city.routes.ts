@@ -3,6 +3,7 @@ import { TempleComponent } from './temple/temple.component';
 import { CityComponent } from './city.component';
 import { TavernComponent } from './tavern/tavern.component';
 import { ColosseumComponent } from './colosseum/colosseum.component';
+import { GuildComponent } from './guild/guild.component';
 
 export const CITY_ROUTES: Routes = [
   {
@@ -25,6 +26,10 @@ export const CITY_ROUTES: Routes = [
       {
         path: 'colosseum',
         component: ColosseumComponent,
+      },
+      {
+        path: 'guild',
+        component: GuildComponent,
       },
     ],
   },
