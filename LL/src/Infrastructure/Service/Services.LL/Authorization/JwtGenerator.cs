@@ -85,7 +85,6 @@ public class JwtGenerator : IJwtGenerator
             new(ClaimTypes.UserData, info.Id),
             new(ClaimTypes.Name, info.Name),
             new("CharacterId", info.CharacterId),
-            new("CharacterEId", info.CharacterEId),
             new("IsPlayer", info.IsPlayer.ToString(), ClaimValueTypes.Boolean)
         };
     }
@@ -143,7 +142,6 @@ public class JwtGenerator : IJwtGenerator
             Id = id,
             Name = user!.UserName!,
             CharacterId = character.Id.ToString(),
-            CharacterEId = character.Id.ToString(),
         };
 
         return GenerateTokens(authInfo);

@@ -26,7 +26,6 @@ public abstract class BaseController : ControllerBase
 
     protected Guid CurrentUserId => Guid.Parse(User.FindFirstValue(ClaimTypes.UserData)!);
     protected Guid CurrentCharacterGuid => Guid.Parse(User.FindFirstValue("CharacterId")!);
-    protected Guid CurrentCharacterEId => Guid.Parse(User.FindFirstValue("CharacterEId")!);
     protected string CurrentUserName => User.FindFirstValue(ClaimTypes.Name)!;
 
     protected bool IsLocal()

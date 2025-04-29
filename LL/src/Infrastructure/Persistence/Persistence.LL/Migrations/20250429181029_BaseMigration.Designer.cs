@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250429175151_BaseMigration")]
+    [Migration("20250429181029_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -181,9 +181,6 @@ namespace Persistence.LL.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("EId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("EntityType")
@@ -881,9 +878,6 @@ namespace Persistence.LL.Migrations
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
-
-                    b.HasIndex("EId")
-                        .IsUnique();
 
                     b.HasIndex("UserId");
 

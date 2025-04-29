@@ -10,11 +10,7 @@ namespace Domain.Models.Entities;
 public abstract class Entity
 {
     /// <summary>
-    /// Hidden ID. Used for authentication
-    /// </summary>
-    public Guid EId { get; set; } = Guid.NewGuid();
-    /// <summary>
-    /// Public / Exposed ID used to identify entities. It will not be used for Commands. Only Queries.
+    /// This does not need to be hidden
     /// </summary>
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Name { get; set; } = string.Empty;

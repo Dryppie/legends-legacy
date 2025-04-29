@@ -30,7 +30,6 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, Response<Tokens>>
             var character = await _characterService.GetMyCharacterAsync(Guid.Parse(user.Id), cancellationToken);
 
             user.CharacterId = character.Id.ToString();
-            user.CharacterEId = character.EId.ToString();
 
             var tokens = _jwtGenerator.GenerateTokens(user);
             return Response<Tokens>.Success(tokens);

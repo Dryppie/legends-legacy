@@ -180,9 +180,6 @@ namespace Persistence.LL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("EId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int>("EntityType")
                         .HasColumnType("int");
 
@@ -878,9 +875,6 @@ namespace Persistence.LL.Migrations
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
-
-                    b.HasIndex("EId")
-                        .IsUnique();
 
                     b.HasIndex("UserId");
 

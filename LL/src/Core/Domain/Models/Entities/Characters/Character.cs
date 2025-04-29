@@ -9,6 +9,9 @@ namespace Domain.Models.Entities.Characters;
 public class Character : Entity
 {
     public AppUser User { get; set; } = null!;
+    /// <summary>
+    /// This should only ever be used in the backend, as it's used for authentication
+    /// </summary>
     public string UserId { get; set; } = string.Empty;
     public CharacterAction? CharacterAction { get; set; }
     public float Experience { get; set; } = 0;

@@ -8,12 +8,7 @@ public class CharacterConfiguration : IEntityTypeConfiguration<Character>
     public void Configure(EntityTypeBuilder<Character> builder)
     {
         builder
-            .Property(c => c.EId)
-            .IsRequired();
-
-        builder
-            .HasIndex(c => c.EId)
-            .IsUnique();
+            .HasIndex(c => c.UserId);
 
         builder
             .HasMany(c => c.ColosseumMatches)

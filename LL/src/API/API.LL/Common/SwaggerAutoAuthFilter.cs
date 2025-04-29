@@ -102,7 +102,6 @@ public class SwaggerAutoAuthFilter : IOperationFilter
                 Id = user.Id,
                 Name = user.UserName!,
                 CharacterId = character.Id.ToString(),
-                CharacterEId = character.EId.ToString(),
             };
 
             var token = jwtTokenService.GenerateTokens(authInfo);
