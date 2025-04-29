@@ -18,6 +18,6 @@ export class GuildComponent implements OnInit {
 
   constructor(private guildService: GuildService) {}
   ngOnInit(): void {
-    this.guild$ = this.guildService.get('');
+    this.guild$ = this.guildService.getMyGuild();
   }
 }

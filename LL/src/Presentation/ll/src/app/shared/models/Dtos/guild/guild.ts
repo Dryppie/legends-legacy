@@ -6,4 +6,5 @@ export interface Guild {
   tag: string;
   description?: string;
   members: GuildMember[];
+  maxMembers: number;
 }

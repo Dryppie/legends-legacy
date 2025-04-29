@@ -16,19 +16,19 @@ public class GuildService : IGuildService
         await _guildRepository.AcceptInviteAsync(guildId, characterId, cancellationToken);
     }
 
-    public async Task CreateAsync(Guid ownerCharacterId, Guild guild, CancellationToken cancellationToken)
+    public async Task CreateAsync(Guid characterId, string name, CancellationToken cancellationToken)
     {
-        await _guildRepository.CreateAsync(ownerCharacterId, guild, cancellationToken);
+        await _guildRepository.CreateAsync(characterId, name, cancellationToken);
     }
 
-    public async Task<Guild> GetAsync(Guid guildId, CancellationToken cancellationToken)
+    public async Task<Guild?> GetAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        return await _guildRepository.GetAsync(guildId, cancellationToken);
+        return await _guildRepository.GetAsync(characterId, cancellationToken);
     }
 
-    public async Task<List<Guild>> GetGuildsAsync(CancellationToken cancellationToken)
+    public async Task<List<Guild>> GetAllGuildsAsync(CancellationToken cancellationToken)
     {
-        return await _guildRepository.GetGuildsAsync(cancellationToken);
+        return await _guildRepository.GetAllGuildsAsync(cancellationToken);
     }
 
     public async Task InviteAsync(Guid guildId, Guid targetCharacterId, CancellationToken cancellationToken)

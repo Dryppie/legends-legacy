@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250428183551_BaseMigration")]
+    [Migration("20250429040648_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -298,7 +298,7 @@ namespace Persistence.LL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("OwnerCharacterId")
+                    b.Property<Guid>("OwnerId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Tag")
@@ -307,28 +307,26 @@ namespace Persistence.LL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OwnerCharacterId");
+                    b.HasIndex("OwnerId")
+                        .IsUnique();
 
                     b.ToTable("Guilds");
                 });
 
             modelBuilder.Entity("Domain.Models.Guilds.GuildInvite", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<Guid>("GuildId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("CharacterId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("GuildId")
+                    b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("Id");
+                    b.HasKey("GuildId", "CharacterId");
 
                     b.HasIndex("CharacterId");
-
-                    b.HasIndex("GuildId");
 
                     b.ToTable("GuildInvites");
                 });
@@ -341,8 +339,8 @@ namespace Persistence.LL.Migrations
                     b.Property<Guid>("CharacterId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("JoinedAt")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("JoinedAt")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int>("Role")
                         .HasColumnType("int");
@@ -1059,13 +1057,13 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.Guilds.Guild", b =>
                 {
-                    b.HasOne("Domain.Models.Entities.Characters.Character", "OwnerCharacter")
-                        .WithMany()
-                        .HasForeignKey("OwnerCharacterId")
+                    b.HasOne("Domain.Models.Entities.Characters.Character", "Owner")
+                        .WithOne("Guild")
+                        .HasForeignKey("Domain.Models.Guilds.Guild", "OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("OwnerCharacter");
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("Domain.Models.Guilds.GuildInvite", b =>
@@ -1401,6 +1399,8 @@ namespace Persistence.LL.Migrations
                     b.Navigation("CharacterAction");
 
                     b.Navigation("ColosseumMatches");
+
+                    b.Navigation("Guild");
 
                     b.Navigation("Inventory")
                         .IsRequired();

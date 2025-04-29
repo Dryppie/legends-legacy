@@ -577,14 +577,14 @@ namespace Persistence.LL.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     MaxMembers = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    OwnerCharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    OwnerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Guilds", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Guilds_Entities_OwnerCharacterId",
-                        column: x => x.OwnerCharacterId,
+                        name: "FK_Guilds_Entities_OwnerId",
+                        column: x => x.OwnerId,
                         principalTable: "Entities",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -668,13 +668,13 @@ namespace Persistence.LL.Migrations
                 name: "GuildInvites",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     GuildId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    CharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GuildInvites", x => x.Id);
+                    table.PrimaryKey("PK_GuildInvites", x => new { x.GuildId, x.CharacterId });
                     table.ForeignKey(
                         name: "FK_GuildInvites_Entities_CharacterId",
                         column: x => x.CharacterId,
@@ -696,7 +696,7 @@ namespace Persistence.LL.Migrations
                     GuildId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Role = table.Column<int>(type: "int", nullable: false),
-                    JoinedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    JoinedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -846,19 +846,15 @@ namespace Persistence.LL.Migrations
                 column: "CharacterId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_GuildInvites_GuildId",
-                table: "GuildInvites",
-                column: "GuildId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_GuildMembers_CharacterId",
                 table: "GuildMembers",
                 column: "CharacterId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Guilds_OwnerCharacterId",
+                name: "IX_Guilds_OwnerId",
                 table: "Guilds",
-                column: "OwnerCharacterId");
+                column: "OwnerId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryItems_ItemInstanceId",

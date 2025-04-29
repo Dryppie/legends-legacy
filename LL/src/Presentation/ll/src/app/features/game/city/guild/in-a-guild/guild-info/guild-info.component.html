@@ -1,0 +1,19 @@
+<div class="flex h-full w-full flex-col gap-2 text-white">
+  <div class="h-32 w-96 rounded-lg border border-light_gray p-4">
+    <h2 class="text-primary">
+      {{ guild.name }}
+    </h2>
+    <span>{{ guild.members.length }} / {{ guild.maxMembers }} members</span>
+  </div>
+  <div class="grid grid-cols-4 gap-2 p-2">
+    <div>Name</div>
+    <div class="col-start-2 col-end-7">Role</div>
+  </div>
+  <div
+    class="grid grid-cols-4 items-center border-t border-light_gray p-2 text-white"
+    *ngFor="let m of guild.members"
+  >
+    <div class="break-words pr-2">{{ m.name }}</div>
+    <div>{{ m.role }}</div>
+  </div>
+</div>

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Models.CharacterActions;
 using Domain.Models.Colosseum;
+using Domain.Models.Guilds;
 using Domain.Models.Inventories;
 using Domain.Models.Users;
 
@@ -18,7 +19,9 @@ public class Character : Entity
     public int ArenaRating { get; set; } = 1000;
     public ICollection<ColosseumMatchResult> ColosseumMatches { get; set; } = [];
     public ArenaTicketStatus ArenaTicketStatus { get; set; } = null!;
-
+    public Guild? Guild { get; set; }
+    //public GuildMember? GuildMember { get; set; }
+    //public ICollection<GuildInvite> GuildInvites { get; set; } = [];
     //public List<Effect> ActiveEffects { get; set; } = [];
 
     //public void AddEffect(Effect effect)

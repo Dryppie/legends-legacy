@@ -31,38 +31,36 @@ public class GuildRepository : IGuildRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task CreateAsync(Guid ownerCharacterId, Guild guild, CancellationToken cancellationToken)
+    public async Task CreateAsync(Guid ownerCharacterId, string name, CancellationToken cancellationToken)
     {
-        if (await _context.Guilds.AnyAsync(g => g.Name == guild.Name || g.Tag == guild.Tag, cancellationToken))
+        if (await _context.Guilds.AnyAsync(g => g.Name == name, cancellationToken))
             throw new Exception("Name or tag already exists.");
 
         var newGuild = new Guild
         {
-            Name = guild.Name,
-            Tag = guild.Tag,
-            Description = guild.Description,
-            OwnerCharacterId = ownerCharacterId,
+            Name = name,
+            OwnerId = ownerCharacterId,
             Members =
             {
                 new GuildMember { CharacterId = ownerCharacterId, Role = GuildRole.Leader }
             }
         };
 
-        _context.Guilds.Add(guild);
+        _context.Guilds.Add(newGuild);
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<Guild> GetAsync(Guid guildId, CancellationToken cancellationToken)
+    public async Task<Guild?> GetAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var guild = await _context.Guilds
-           .SingleOrDefaultAsync(g => g.Id == guildId, cancellationToken);
-
-        NotFoundException.ThrowIfNull(guild, nameof(guild), guildId);
+            .Include(g => g.Members)
+                .ThenInclude(m => m.Character)
+            .SingleOrDefaultAsync(g => g.Members.Select(gm => gm.CharacterId).Contains(characterId), cancellationToken);
 
         return guild;
     }
 
-    public async Task<List<Guild>> GetGuildsAsync(CancellationToken cancellationToken)
+    public async Task<List<Guild>> GetAllGuildsAsync(CancellationToken cancellationToken)
     {
         return await _context.Guilds.ToListAsync(cancellationToken);
     }

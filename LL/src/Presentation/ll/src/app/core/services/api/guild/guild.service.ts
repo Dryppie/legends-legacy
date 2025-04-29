@@ -9,12 +9,31 @@ import { Guild } from '../../../../shared/models/Dtos/guild/guild';
 export class GuildService {
   constructor(private api: ApiService) {}
 
-  create(dto: string): Observable<string> {
-    return this.api.post('guilds/create', dto);
+  create(name: string): Observable<void> {
+    return this.api.post('guild/createGuild', name).pipe(
+      map((opponents) => {
+        console.log('testing');
+        // this.toastService.showToast(
+        //   'Action completed successfully!',
+        //   'success',
+        // );
+        return opponents;
+      }),
+
+      catchError(() => {
+        // this.toastService.showToast(
+        //   'Login Failed',
+        //   'Wrong email or password',
+        //   'error',
+        //   't',
+        // );
+        return throwError(() => new Error('Failed to get arena opponents'));
+      }),
+    );
   }
 
-  get(id: string): Observable<Guild> {
-    return this.api.get('guild').pipe(
+  getMyGuild(): Observable<Guild> {
+    return this.api.get('guild/getMyGuild').pipe(
       map((opponents) => {
         // this.toastService.showToast(
         //   'Action completed successfully!',
@@ -36,7 +55,7 @@ export class GuildService {
   }
 
   getAll(): Observable<Guild[]> {
-    return this.api.get('guild/getAll').pipe(
+    return this.api.get('guild/getAllGuilds').pipe(
       map((opponents) => {
         // this.toastService.showToast(
         //   'Action completed successfully!',

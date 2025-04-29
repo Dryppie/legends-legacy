@@ -21,6 +21,6 @@ export class NoGuildComponent implements OnInit {
   }
 
   openCreateGuildModal() {
-    throw new Error('Method not implemented.');
+    this.guildService.create('Testing').subscribe();
   }
 }

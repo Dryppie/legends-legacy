@@ -1,0 +1,25 @@
+﻿using Application.Interfaces.Services.LL;
+using Application.UseCases.Guilds.Dtos;
+using AutoMapper;
+using MediatR;
+
+namespace Application.UseCases.Guilds.Queries.GetMyGuild;
+public record GetMyGuildQuery(Guid CharacterId) : IRequest<GuildDto?>;
+public class GetMyGuildQueryHandler : IRequestHandler<GetMyGuildQuery, GuildDto?>
+{
+    private readonly IGuildService _guildService;
+    private readonly IMapper _mapper;
+
+    public GetMyGuildQueryHandler(IGuildService guildService, IMapper mapper)
+    {
+        _guildService = guildService;
+        _mapper = mapper;
+    }
+
+    public async Task<GuildDto?> Handle(GetMyGuildQuery request, CancellationToken cancellationToken)
+    {
+        var guild = await _guildService.GetAsync(request.CharacterId, cancellationToken);
+
+        return _mapper.Map<GuildDto?>(guild);
+    }
+}

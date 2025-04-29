@@ -1,1 +1,13 @@
-<p>in-a-guild works!</p>
+<div class="flex h-full w-full flex-col gap-2">
+  <app-tab
+    [tabs]="tabLabels"
+    [activeTab]="activeTab"
+    (tabSelected)="setActiveTab($event)"
+    class="w-full flex-none"
+  ></app-tab>
+  <div class="flex h-full w-full flex-col overflow-y-scroll">
+    <ng-container [ngSwitch]="activeTab">
+      <app-guild-info *ngSwitchCase="'Info'" [guild]="guild"></app-guild-info>
+    </ng-container>
+  </div>
+</div>

@@ -7,6 +7,8 @@ public class GuildInviteConfiguration : IEntityTypeConfiguration<GuildInvite>
 {
     public void Configure(EntityTypeBuilder<GuildInvite> builder)
     {
+        builder.HasKey(gi => new { gi.GuildId, gi.CharacterId });
+
         builder.HasOne(x => x.Guild)
                .WithMany(e => e.Invites)
                .HasForeignKey(x => x.GuildId)

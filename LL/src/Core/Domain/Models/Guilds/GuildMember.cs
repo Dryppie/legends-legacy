@@ -8,5 +8,5 @@ public class GuildMember
     public Guid CharacterId { get; set; }
     public Character Character { get; set; } = null!;
     public GuildRole Role { get; set; } = GuildRole.Member;
-    public DateTime JoinedAt { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset JoinedAt { get; set; } = DateTimeOffset.UtcNow;
 }
