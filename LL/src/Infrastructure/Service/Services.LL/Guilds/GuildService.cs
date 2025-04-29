@@ -21,9 +21,9 @@ public class GuildService : IGuildService
         await _guildRepository.CreateAsync(characterId, name, cancellationToken);
     }
 
-    public async Task<Guild?> GetAsync(Guid characterId, CancellationToken cancellationToken)
+    public async Task<Guild?> GetMyGuildAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        return await _guildRepository.GetAsync(characterId, cancellationToken);
+        return await _guildRepository.GetMyGuildAsync(characterId, cancellationToken);
     }
 
     public async Task<List<Guild>> GetAllGuildsAsync(CancellationToken cancellationToken)

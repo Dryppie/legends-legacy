@@ -5,6 +5,6 @@ public interface IGuildRepository
     Task InviteAsync(Guid guildId, Guid targetCharacterId, CancellationToken cancellationToken);
     Task AcceptInviteAsync(Guid guildId, Guid characterId, CancellationToken cancellationToken);
     Task LeaveGuildAsync(Guid guildId, Guid characterId, CancellationToken cancellationToken);
-    Task<Guild?> GetAsync(Guid guildId, CancellationToken cancellationToken);
+    Task<Guild?> GetMyGuildAsync(Guid characterId, CancellationToken cancellationToken);
     Task<List<Guild>> GetAllGuildsAsync(CancellationToken cancellationToken);
 }

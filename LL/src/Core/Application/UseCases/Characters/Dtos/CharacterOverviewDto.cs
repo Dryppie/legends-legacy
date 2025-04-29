@@ -7,6 +7,7 @@ using Domain.Models.Essences.EssenceSlots;
 namespace Application.UseCases.Characters.Dtos;
 public class CharacterOverviewDto : IMapFrom<Character>
 {
+    public Guid Id { get; set; }
     public int Level { get; set; }
     public List<EntityAttribute> BaseAttributes { get; set; } = [];
     public List<EntityAttribute> BaseCombatAttributes { get; set; } = [];

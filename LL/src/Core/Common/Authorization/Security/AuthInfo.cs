@@ -5,6 +5,7 @@ public record AuthInfo
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string CharacterId { get; set; } = string.Empty;
+    public string CharacterEId { get; set; } = string.Empty;
     /// <summary>
     /// False if Guest account, true if Registered Account
     /// </summary>

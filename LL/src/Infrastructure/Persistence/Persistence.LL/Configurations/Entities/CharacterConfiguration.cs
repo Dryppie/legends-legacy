@@ -8,6 +8,14 @@ public class CharacterConfiguration : IEntityTypeConfiguration<Character>
     public void Configure(EntityTypeBuilder<Character> builder)
     {
         builder
+            .Property(c => c.EId)
+            .IsRequired();
+
+        builder
+            .HasIndex(c => c.EId)
+            .IsUnique();
+
+        builder
             .HasMany(c => c.ColosseumMatches)
             .WithOne()
             .HasForeignKey(c => c.CharacterAId);
