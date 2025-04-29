@@ -133,7 +133,7 @@ function getCitySidebar(): Tab[] {
           route: 'city',
           icon: 'city/temple',
           title: 'Guild',
-          description: 'Guild info',
+          description: 'Guild headquarters',
         },
       ],
     },
