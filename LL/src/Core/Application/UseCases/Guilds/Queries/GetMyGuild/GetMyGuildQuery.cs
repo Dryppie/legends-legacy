@@ -18,7 +18,7 @@ public class GetMyGuildQueryHandler : IRequestHandler<GetMyGuildQuery, GuildDto?
 
     public async Task<GuildDto?> Handle(GetMyGuildQuery request, CancellationToken cancellationToken)
     {
-        var guild = await _guildService.GetAsync(request.CharacterId, cancellationToken);
+        var guild = await _guildService.GetMyGuildAsync(request.CharacterId, cancellationToken);
 
         return _mapper.Map<GuildDto?>(guild);
     }

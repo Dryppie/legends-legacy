@@ -50,7 +50,7 @@ public class GuildRepository : IGuildRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<Guild?> GetAsync(Guid characterId, CancellationToken cancellationToken)
+    public async Task<Guild?> GetMyGuildAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var guild = await _context.Guilds
             .Include(g => g.Members)

@@ -362,6 +362,7 @@ namespace Persistence.LL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Level = table.Column<int>(type: "int", nullable: false),
                     ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -809,6 +810,12 @@ namespace Persistence.LL.Migrations
                 name: "IX_ColosseumMatches_CharacterBId",
                 table: "ColosseumMatches",
                 column: "CharacterBId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Entities_EId",
+                table: "Entities",
+                column: "EId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Entities_LootTableId",
