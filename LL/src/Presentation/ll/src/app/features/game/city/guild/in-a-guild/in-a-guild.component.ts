@@ -5,6 +5,7 @@ import { NgSwitch, NgSwitchCase } from '@angular/common';
 import { GuildMembersComponent } from './guild-members/guild-members.component';
 import { GuildInfoComponent } from './guild-info/guild-info.component';
 import { Guild } from '../../../../../shared/models/Dtos/guild/guild';
+import { GuildService } from '../../../../../core/services/api/guild/guild.service';
 
 @Component({
   selector: 'app-in-a-guild',
@@ -16,8 +17,14 @@ import { Guild } from '../../../../../shared/models/Dtos/guild/guild';
 export class InAGuildComponent implements OnInit {
   @Input() guild!: Guild;
 
+  constructor(private guildService: GuildService) {}
+
   ngOnInit(): void {
     this.setActiveTab(this.tabs[0]?.label || '');
+  }
+
+  invite($event: string) {
+    this.guildService.invite(this.guild.id, $event).subscribe();
   }
 
   tabs: Tab[] = [

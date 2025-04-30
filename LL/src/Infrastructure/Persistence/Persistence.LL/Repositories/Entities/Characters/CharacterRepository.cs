@@ -131,6 +131,7 @@ public class CharacterRepository : ICharacterRepository
             .Take(10)
             .Select(c => new CharacterLeaderboardItem
             {
+                Id = c.Id,
                 Name = c.Name,
                 Level = c.Level,
                 Experience = (int)c.Experience

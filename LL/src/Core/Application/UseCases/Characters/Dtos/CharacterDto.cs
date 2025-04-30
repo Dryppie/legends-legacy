@@ -12,8 +12,6 @@ public class CharacterDto : IMapFrom<Character>
     public float ExperienceUntilNextLevel { get; set; }
     public int Gold { get; set; }
     public int ArenaRating { get; set; }
-    //public List<AttributeDto> RawAttributes { get; set; } = [];
-    //public List<AttributeDto> Attributes { get; set; } = [];
 
     public void Mapping(Profile profile)
     {

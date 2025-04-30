@@ -14,11 +14,31 @@
       class="grid grid-cols-4 items-center gap-2 border-b border-light_gray p-2"
       *ngFor="let match of previousMatches"
     >
-      <div class="break-words">{{ match.characterAName }}</div>
-      <div class="break-words">{{ match.characterBName }}</div>
+      <div
+        class="break-words"
+        [ngClass]="{
+          'font-bold text-primary': match.characterAId === id,
+        }"
+      >
+        {{ match.characterAName }}
+      </div>
+      <div
+        class="break-words"
+        [ngClass]="{
+          'font-bold text-primary': match.characterBId === id,
+        }"
+      >
+        {{ match.characterBName }}
+      </div>
       <ng-container *ngIf="match.winnerName; else draw">
-        <div class="break-words">
-          {{ match.winnerName }}
+        <div
+          class="break-words"
+          [ngClass]="{
+            'font-bold text-primary': match.winnerId === id,
+          }"
+        >
+          {{ match.winnerName
+          }}<span *ngIf="match.winnerId === id"> (You)</span>
         </div>
       </ng-container>
 

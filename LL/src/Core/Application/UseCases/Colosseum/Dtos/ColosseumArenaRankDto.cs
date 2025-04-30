@@ -5,8 +5,9 @@ using Domain.Models.Colosseum;
 namespace Application.UseCases.Colosseum.Dtos;
 public class ColosseumArenaRankDto : IMapFrom<ColosseumArenaRank>
 {
-    public int Rank { get; set; }
+    public Guid CharacterId { get; set; }
     public string Name { get; set; } = null!;
+    public int Rank { get; set; }
     public int Rating { get; set; }
     public Guid SeasonId { get; set; }
     public void Mapping(Profile profile)

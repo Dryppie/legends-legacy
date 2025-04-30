@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250429181029_BaseMigration")]
+    [Migration("20250430052540_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -323,6 +323,9 @@ namespace Persistence.LL.Migrations
 
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsInvite")
+                        .HasColumnType("bit");
 
                     b.HasKey("GuildId", "CharacterId");
 

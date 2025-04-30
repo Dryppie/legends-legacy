@@ -321,6 +321,9 @@ namespace Persistence.LL.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("IsInvite")
+                        .HasColumnType("bit");
+
                     b.HasKey("GuildId", "CharacterId");
 
                     b.HasIndex("CharacterId");

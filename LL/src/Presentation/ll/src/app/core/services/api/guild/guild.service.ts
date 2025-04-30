@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ApiService } from '../api.service';
 import { catchError, map, Observable, throwError } from 'rxjs';
 import { Guild } from '../../../../shared/models/Dtos/guild/guild';
+import { GuildInvite } from '../../../../shared/models/Dtos/guild/guildInvite';
 
 @Injectable({
   providedIn: 'root',
@@ -77,7 +78,11 @@ export class GuildService {
   }
 
   invite(guildId: string, characterId: string): Observable<void> {
-    return this.api.post('guild', guildId).pipe(
+    const inviteDto = {
+      GuildId: guildId,
+      CharacterId: characterId,
+    };
+    return this.api.post('guild/invite', inviteDto).pipe(
       map((opponents) => {
         // this.toastService.showToast(
         //   'Action completed successfully!',
@@ -98,7 +103,29 @@ export class GuildService {
     );
   }
 
-  accept(guildId: string): Observable<void> {
+  getMyInvites(): Observable<GuildInvite[]> {
+    return this.api.get('guild/getMyinvites').pipe(
+      map((opponents) => {
+        // this.toastService.showToast(
+        //   'Action completed successfully!',
+        //   'success',
+        // );
+        return opponents;
+      }),
+
+      catchError(() => {
+        // this.toastService.showToast(
+        //   'Login Failed',
+        //   'Wrong email or password',
+        //   'error',
+        //   't',
+        // );
+        return throwError(() => new Error('Failed to get arena opponents'));
+      }),
+    );
+  }
+
+  acceptInvite(guildId: string): Observable<void> {
     return this.api.post('guild/acceptInvite', guildId).pipe(
       map((opponents) => {
         // this.toastService.showToast(

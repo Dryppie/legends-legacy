@@ -13,7 +13,7 @@ public class GuildRepository : IGuildRepository
         _context = context;
     }
 
-    public async Task AcceptInviteAsync(Guid guildId, Guid characterId, CancellationToken cancellationToken)
+    public async Task AcceptInviteAsync(Guid characterId, Guid guildId, CancellationToken cancellationToken)
     {
         var invite = await _context.GuildInvites
             .FirstOrDefaultAsync(i => i.GuildId == guildId && i.CharacterId == characterId, cancellationToken);
@@ -65,7 +65,7 @@ public class GuildRepository : IGuildRepository
         return await _context.Guilds.ToListAsync(cancellationToken);
     }
 
-    public async Task InviteAsync(Guid guildId, Guid targetCharacterId, CancellationToken cancellationToken)
+    public async Task InviteAsync(Guid currentCharacterId, Guid guildId, Guid invitedCharacterId, CancellationToken cancellationToken)
     {
         var guild = await _context.Guilds
             .Include(g => g.Members)
@@ -77,12 +77,11 @@ public class GuildRepository : IGuildRepository
         if (guild.Members.Count >= guild.MaxMembers)
             throw new InvalidOperationException("Guild is full.");
 
-        guild.Invites.Remove(guild.Invites.Where(i => i.CharacterId == targetCharacterId).First());
-
         guild.Invites.Add(new GuildInvite
         {
             GuildId = guildId,
-            CharacterId = targetCharacterId,
+            CharacterId = invitedCharacterId,
+            IsInvite = true,
         });
         await _context.SaveChangesAsync(cancellationToken);
     }
@@ -95,5 +94,22 @@ public class GuildRepository : IGuildRepository
 
         _context.GuildMembers.Remove(member);
         await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<GuildMember> GetGuildMember(Guid guildId, Guid currentCharacterId, CancellationToken cancellationToken)
+    {
+        var member = await _context.GuildMembers.FindAsync([guildId, currentCharacterId], cancellationToken);
+
+        NotFoundException.ThrowIfNull(member, nameof(member), currentCharacterId);
+
+        return member;
+    }
+
+    public async Task<List<GuildInvite>> GetMyInvitesAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        return await _context.GuildInvites
+            .Include(gi => gi.Guild)
+            .Where(gi => gi.CharacterId == characterId && gi.IsInvite)
+            .ToListAsync(cancellationToken);
     }
 }

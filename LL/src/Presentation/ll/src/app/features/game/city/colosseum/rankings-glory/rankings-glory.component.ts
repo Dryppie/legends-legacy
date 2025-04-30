@@ -13,7 +13,7 @@ import { ColosseumRank } from '../../../../../shared/models/Dtos/colosseum/colos
 })
 export class RankingsGloryComponent implements OnInit {
   @Input() rankings: ColosseumRank[] = [];
-  @Input() name!: string;
+  id!: string;
   myRanking: ColosseumRank | undefined;
   subscriptions: Subscription = new Subscription();
 
@@ -22,7 +22,7 @@ export class RankingsGloryComponent implements OnInit {
   ngOnInit(): void {
     this.subscriptions.add(
       this.characterService.getCurrentCharacter().subscribe((character) => {
-        if (character) this.name = character.name;
+        if (character) this.id = character.id;
       }),
     );
     this.myRanking = this.getMyRanking();
@@ -33,6 +33,6 @@ export class RankingsGloryComponent implements OnInit {
   }
 
   getMyRanking(): ColosseumRank | undefined {
-    return this.rankings.find((r) => r.name === this.name);
+    return this.rankings.find((r) => r.characterId === this.id);
   }
 }

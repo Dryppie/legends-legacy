@@ -1,5 +1,6 @@
 export interface ColosseumRank {
-  rank: number;
+  characterId: string;
   name: string;
+  rank: number;
   rating: number;
 }

@@ -14,7 +14,21 @@
       Create Guild
     </div>
   </div>
-
+  <div class="pt-4 text-white">Invites</div>
+  <div
+    *ngFor="let invite of guildInvites"
+    class="flex items-center justify-between text-primary"
+  >
+    <div>
+      {{ invite.guildName }}
+    </div>
+    <div
+      (click)="acceptInvite(invite.guildId)"
+      class="rounded-md border border-light_gray p-2 text-primary hover:cursor-pointer hover:bg-zinc-300/10"
+    >
+      Accept Invite
+    </div>
+  </div>
   <div class="guilds-list">
     <!-- <app-guild-card 
       *ngFor="let guild of guilds"

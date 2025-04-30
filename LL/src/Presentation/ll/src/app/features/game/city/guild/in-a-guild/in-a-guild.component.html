@@ -3,11 +3,15 @@
     [tabs]="tabLabels"
     [activeTab]="activeTab"
     (tabSelected)="setActiveTab($event)"
-    class="w-full flex-none"
+    class="w-full flex-none pb-2"
   ></app-tab>
   <div class="flex h-full w-full flex-col overflow-y-scroll">
     <ng-container [ngSwitch]="activeTab">
-      <app-guild-info *ngSwitchCase="'Info'" [guild]="guild"></app-guild-info>
+      <app-guild-info
+        *ngSwitchCase="'Info'"
+        [guild]="guild"
+        (inviteEvent)="invite($event)"
+      ></app-guild-info>
     </ng-container>
   </div>
 </div>

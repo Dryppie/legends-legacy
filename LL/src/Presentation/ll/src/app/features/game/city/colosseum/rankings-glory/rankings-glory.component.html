@@ -13,13 +13,15 @@
       *ngFor="let player of rankings"
       class="grid grid-cols-7 items-center gap-2 border-t border-light_gray p-2"
       [ngClass]="{
-        'font-bold text-primary': player.name === myRanking?.name,
+        'font-bold text-primary': player.characterId === myRanking?.characterId,
       }"
     >
       <div>{{ player.rank }}</div>
       <div class="col-start-2 col-end-7 break-words">
         {{ player.name
-        }}<span *ngIf="player.name === myRanking?.name"> (You)</span>
+        }}<span *ngIf="player.characterId === myRanking?.characterId">
+          (You)</span
+        >
       </div>
       <div class="justify-self-end">{{ player.rating }}</div>
     </div>

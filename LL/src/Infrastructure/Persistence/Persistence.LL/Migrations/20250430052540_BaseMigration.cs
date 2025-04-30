@@ -670,7 +670,8 @@ namespace Persistence.LL.Migrations
                 {
                     GuildId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IsInvite = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
