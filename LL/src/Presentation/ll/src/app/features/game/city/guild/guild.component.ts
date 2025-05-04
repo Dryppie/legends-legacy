@@ -14,10 +14,11 @@ import { AsyncPipe, NgIf } from '@angular/common';
   styleUrl: './guild.component.css',
 })
 export class GuildComponent implements OnInit {
-  guild$!: Observable<Guild>;
+  guild$!: Observable<Guild | null>;
 
   constructor(private guildService: GuildService) {}
   ngOnInit(): void {
-    this.guild$ = this.guildService.getMyGuild();
+    this.guild$ = this.guildService.guild$;
+    this.guildService.getMyGuild();
   }
 }

@@ -3,7 +3,7 @@ using AutoMapper;
 using Domain.Models.Combat;
 using Domain.Models.Inventories;
 
-namespace Application.UseCases.CharacterActions.Dtos.CombatDtos;
+namespace Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 public class CombatResultDto : IMapFrom<CombatResult>
 {
     public List<SimpleCombatEntityDto> PlayerTeam { get; set; } = [];

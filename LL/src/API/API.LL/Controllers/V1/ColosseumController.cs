@@ -1,4 +1,4 @@
-﻿using Application.UseCases.CharacterActions.Dtos.CombatDtos;
+﻿using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Colosseum.Commands.StartArenaBattle;
 using Application.UseCases.Colosseum.Dtos;

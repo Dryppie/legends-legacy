@@ -2,7 +2,7 @@
 using AutoMapper;
 using Domain.Models.CharacterActions.Sessions;
 
-namespace Application.UseCases.CharacterActions.Dtos.CombatDtos;
+namespace Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 public class CombatSessionDto : IMapFrom<CombatSession>
 {
     public DateTimeOffset From { get; set; }

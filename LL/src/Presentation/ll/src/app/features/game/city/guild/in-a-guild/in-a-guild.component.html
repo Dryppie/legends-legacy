@@ -10,7 +10,11 @@
       <app-guild-info
         *ngSwitchCase="'Info'"
         [guild]="guild"
-        (inviteEvent)="invite($event)"
+        (inviteEvent)="inviteCharacterByName($event)"
+        (leaveEvent)="leaveGuild()"
+        (disbandEvent)="disbandGuild()"
+        (rejectEvent)="rejectApplication($event)"
+        (approveEvent)="approveApplication($event)"
       ></app-guild-info>
     </ng-container>
   </div>

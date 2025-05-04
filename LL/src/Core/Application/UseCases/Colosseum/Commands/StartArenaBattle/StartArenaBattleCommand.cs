@@ -1,5 +1,5 @@
 ﻿using Application.Interfaces.Services.LL;
-using Application.UseCases.CharacterActions.Dtos.CombatDtos;
+using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 using Application.UseCases.Colosseum.Events;
 using AutoMapper;
 using MediatR;

@@ -2,7 +2,7 @@
 using AutoMapper;
 using Domain.Models.Combat;
 
-namespace Application.UseCases.CharacterActions.Dtos.CombatDtos;
+namespace Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 public class SimpleCombatEntityDto : IMapFrom<SimpleCombatEntity>
 {
     public string Id { get; set; } = string.Empty;

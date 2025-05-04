@@ -1,10 +1,10 @@
 ﻿using Application.Common.Mappings;
-using Application.UseCases.CharacterActions.Dtos.CombatDtos;
+using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 using AutoMapper;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 
-namespace Application.UseCases.CharacterActions.Dtos;
+namespace Application.UseCases.CharacterActions.Dtos.Responses;
 public class CharacterActionDto : IMapFrom<CharacterAction>
 {
     public CharacterActionType CharacterActionType { get; set; }

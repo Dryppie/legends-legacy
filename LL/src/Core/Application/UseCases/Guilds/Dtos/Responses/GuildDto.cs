@@ -2,7 +2,7 @@
 using AutoMapper;
 using Domain.Models.Guilds;
 
-namespace Application.UseCases.Guilds.Dtos;
+namespace Application.UseCases.Guilds.Dtos.Responses;
 public class GuildDto : IMapFrom<Guild>
 {
     public Guid Id { get; set; }
@@ -19,6 +19,7 @@ public class GuildDto : IMapFrom<Guild>
     public void Mapping(Profile profile)
     {
         profile.CreateMap<Guild, GuildDto>()
-            .ForMember(dto => dto.OwnerName, opt => opt.MapFrom(src => src.Owner.Name));
+            .ForMember(dto => dto.OwnerName, opt => opt.MapFrom(src => src.Owner.Name))
+            .ForMember(dto => dto.Invites, opt => opt.MapFrom(src => src.Invites.Where(i => !i.IsInvite)));
     }
 }

@@ -2,10 +2,10 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Tab } from '../../../../../shared/models/sidebar-item';
 import { TabComponent } from '../../../../../shared/components/tab/tab.component';
 import { NgSwitch, NgSwitchCase } from '@angular/common';
-import { GuildMembersComponent } from './guild-members/guild-members.component';
 import { GuildInfoComponent } from './guild-info/guild-info.component';
 import { Guild } from '../../../../../shared/models/Dtos/guild/guild';
 import { GuildService } from '../../../../../core/services/api/guild/guild.service';
+import { InviteToGuild } from '../../../../../shared/models/requestDtos/guilds/inviteToGuild';
 
 @Component({
   selector: 'app-in-a-guild',
@@ -23,8 +23,28 @@ export class InAGuildComponent implements OnInit {
     this.setActiveTab(this.tabs[0]?.label || '');
   }
 
-  invite($event: string) {
-    this.guildService.invite(this.guild.id, $event).subscribe();
+  inviteCharacterByName($event: string) {
+    const invite: InviteToGuild = {
+      guildId: this.guild.id,
+      characterNameOrId: $event,
+    };
+    this.guildService.inviteCharacterByName(invite);
+  }
+
+  leaveGuild() {
+    this.guildService.leave();
+  }
+
+  disbandGuild() {
+    this.guildService.disband();
+  }
+
+  rejectApplication($event: string) {
+    this.guildService.rejectApplication($event);
+  }
+
+  approveApplication($event: string) {
+    this.guildService.approveApplication($event);
   }
 
   tabs: Tab[] = [

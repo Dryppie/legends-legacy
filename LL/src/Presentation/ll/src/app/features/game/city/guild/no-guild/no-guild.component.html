@@ -1,4 +1,7 @@
-<div class="flex h-full w-full flex-col gap-2">
+<div
+  *ngIf="guilds$ | async as guilds"
+  class="flex h-full w-full flex-col gap-2"
+>
   <div class="flex flex-col gap-2">
     <h2 class="text-primary">Guilds</h2>
     <div class="italic text-white">
@@ -8,41 +11,105 @@
   </div>
   <div class="flex">
     <div
-      class="rounded-md border border-light_gray p-4 text-primary hover:cursor-pointer hover:bg-zinc-300/10"
-      (click)="openCreateGuildModal()"
+      class="rounded-md border border-light_gray p-2 text-primary hover:cursor-pointer hover:bg-zinc-300/10"
+      (click)="openModal()"
     >
       Create Guild
     </div>
   </div>
-  <div class="pt-4 text-white">Invites</div>
-  <div
-    *ngFor="let invite of guildInvites"
-    class="flex items-center justify-between text-primary"
-  >
-    <div>
-      {{ invite.guildName }}
-    </div>
+  <div *ngIf="guildInvites.length > 0" class="flex flex-col py-4 text-white">
+    <h3 class="p-2">Invites</h3>
     <div
-      (click)="acceptInvite(invite.guildId)"
-      class="rounded-md border border-light_gray p-2 text-primary hover:cursor-pointer hover:bg-zinc-300/10"
+      *ngFor="let invite of guildInvites"
+      class="flex items-center justify-between border-t border-light_gray p-2 hover:bg-zinc-300/10"
     >
-      Accept Invite
+      <div>
+        {{ invite.guildName }}
+      </div>
+      <div class="flex gap-2">
+        <div
+          (click)="rejectInvite(invite.guildId)"
+          class="rounded-md border border-light_gray p-2 text-primary hover:cursor-pointer hover:bg-zinc-300/10"
+        >
+          Reject
+        </div>
+        <div
+          (click)="acceptInvite(invite.guildId)"
+          class="rounded-md border border-light_gray p-2 text-primary hover:cursor-pointer hover:bg-zinc-300/10"
+        >
+          Accept
+        </div>
+      </div>
     </div>
   </div>
-  <div class="guilds-list">
-    <!-- <app-guild-card 
-      *ngFor="let guild of guilds"
-      [guild]="guild"
-      (joinRequest)="onJoinRequest(guild)">
-    </app-guild-card> -->
+  <div *ngIf="guilds.length > 0" class="flex flex-col text-white">
+    <h3 class="p-2 text-primary">Guilds</h3>
+    <div class="flex flex-col">
+      <div class="grid grid-cols-4 items-center gap-2 p-2">
+        <div>Name</div>
+        <div>Owner</div>
+        <div>Members</div>
+      </div>
+      <div
+        class="grid grid-cols-4 items-center justify-between gap-2 border-t border-light_gray p-2 hover:bg-zinc-300/10"
+        *ngFor="let guild of guilds"
+      >
+        <div class="break-words">
+          {{ guild.name }}
+        </div>
+        <div class="break-words">
+          {{ guild.ownerName }}
+        </div>
+        <div>{{ guild.memberCount }}/{{ guild.maxMembers }}</div>
 
-    <div *ngIf="guilds.length === 0" class="text-white">
-      <p>No guilds available yet. Be the first to create one!</p>
+        <div
+          class="justify-self-end rounded-md border border-light_gray p-2 text-white hover:cursor-pointer hover:bg-zinc-300/10"
+          (click)="!isGuildAppliedTo(guild.id) && applyToGuild(guild.id)"
+        >
+          <ng-container
+            *ngIf="!isGuildAppliedTo(guild.id); else appliedTemplate"
+          >
+            Apply
+          </ng-container>
+          <ng-template #appliedTemplate> Applied </ng-template>
+        </div>
+
+        <div *ngIf="guilds.length === 0" class="text-white">
+          <p>No guilds available yet. Be the first to create one!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    *ngIf="showModal"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+    (click)="closeModal()"
+  >
+    <div
+      class="w-96 rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
+      (click)="$event.stopPropagation()"
+    >
+      <h3 class="mb-4 text-primary">Create Guild</h3>
+      <input
+        type="text"
+        [(ngModel)]="guildName"
+        placeholder="Enter guild name"
+        class="mb-4 w-full rounded border border-light_gray bg-texture p-2 text-white"
+      />
+      <div class="flex justify-end gap-2">
+        <button
+          class="rounded border border-light_gray px-4 py-2 text-white hover:bg-zinc-600/30 hover:bg-opacity-80"
+          (click)="closeModal()"
+        >
+          Cancel
+        </button>
+        <button
+          class="rounded border border-light_gray px-4 py-2 text-white hover:bg-zinc-600/30 hover:bg-opacity-80"
+          (click)="create()"
+        >
+          Confirm
+        </button>
+      </div>
     </div>
   </div>
 </div>
-<!-- <app-create-guild-modal 
-  *ngIf="showCreateGuildModal"
-  (close)="closeCreateGuildModal()"
-  (guildCreated)="refreshGuilds()">
-</app-create-guild-modal> -->

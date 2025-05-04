@@ -2,7 +2,7 @@
 using AutoMapper;
 using Domain.Models.Guilds;
 
-namespace Application.UseCases.Guilds.Dtos;
+namespace Application.UseCases.Guilds.Dtos.Responses;
 public class GuildMemberDto : IMapFrom<GuildMember>
 {
     public Guid CharacterId { get; set; }

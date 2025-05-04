@@ -1,5 +1,5 @@
 ﻿using Application.Interfaces.Services.LL;
-using Application.UseCases.Guilds.Dtos;
+using Application.UseCases.Guilds.Dtos.Responses;
 using AutoMapper;
 using MediatR;
 

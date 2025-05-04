@@ -1,36 +1,72 @@
 import { Component, OnInit } from '@angular/core';
-import { Guild } from '../../../../../shared/models/Dtos/guild/guild';
+import { GuildSimple } from '../../../../../shared/models/Dtos/guild/guild';
 import { GuildService } from '../../../../../core/services/api/guild/guild.service';
-import { NgFor, NgIf } from '@angular/common';
+import { AsyncPipe, NgFor, NgIf } from '@angular/common';
 import { GuildInvite } from '../../../../../shared/models/Dtos/guild/guildInvite';
+import { FormsModule } from '@angular/forms';
+import { Observable, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-no-guild',
   standalone: true,
-  imports: [NgIf, NgFor],
+  imports: [NgIf, NgFor, FormsModule, AsyncPipe],
   templateUrl: './no-guild.component.html',
   styleUrl: './no-guild.component.css',
 })
 export class NoGuildComponent implements OnInit {
-  guilds: Guild[] = [];
-  guildInvites: GuildInvite[] = [];
+  guilds$!: Observable<GuildSimple[]>;
+  guildInvites!: GuildInvite[];
+  guildApplications!: GuildInvite[];
+  subscription: Subscription = new Subscription();
+  showModal = false;
+  guildName = '';
 
   constructor(private guildService: GuildService) {}
+
   ngOnInit(): void {
-    this.guildService.getAll().subscribe((guilds) => {
-      this.guilds = guilds;
-    });
-    this.guildService.getMyInvites().subscribe((guildInvites) => {
-      console.log(guildInvites);
-      this.guildInvites = guildInvites;
-    });
+    this.guilds$ = this.guildService.allGuilds$;
+    this.subscription.add(
+      this.guildService.invites$.subscribe((invites) => {
+        this.guildInvites = invites.filter((i) => i.isInvite);
+        this.guildApplications = invites.filter((i) => !i.isInvite);
+      }),
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
+
+  isGuildAppliedTo(guildId: string): boolean {
+    return this.guildApplications.some((invite) => invite.guildId === guildId);
   }
 
   acceptInvite(guildId: string) {
-    this.guildService.acceptInvite(guildId).subscribe();
+    this.guildService.acceptInvite(guildId);
   }
 
-  openCreateGuildModal() {
-    this.guildService.create('Testing').subscribe();
+  rejectInvite(guildId: string) {
+    this.guildService.rejectInvite(guildId);
+  }
+
+  applyToGuild(guildId: string) {
+    this.guildService.applyToGuild(guildId);
+  }
+
+  create() {
+    if (this.guildName.trim()) {
+      this.guildService.create(this.guildName);
+
+      this.closeModal();
+    }
+  }
+
+  openModal() {
+    this.showModal = true;
+  }
+
+  closeModal() {
+    this.showModal = false;
+    this.guildName = '';
   }
 }

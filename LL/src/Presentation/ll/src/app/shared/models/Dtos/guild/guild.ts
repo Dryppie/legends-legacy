@@ -1,3 +1,4 @@
+import { GuildInvite } from './guildInvite';
 import { GuildMember } from './guildMember';
 
 export interface Guild {
@@ -6,5 +7,14 @@ export interface Guild {
   tag: string;
   description?: string;
   members: GuildMember[];
+  maxMembers: number;
+  invites: GuildInvite[];
+}
+
+export interface GuildSimple {
+  id: string;
+  name: string;
+  ownerName: string;
+  memberCount: number;
   maxMembers: number;
 }
