@@ -33,4 +33,5 @@ public interface ICharacterRepository
     Task<Character> GetCharacterOverviewByCharacterIdAsync(Guid currentUserId, CancellationToken cancellationToken);
     Task<List<CharacterLeaderboardItem>> GetLeaderboardCharactersAsync(CancellationToken cancellationToken);
     Task<Character> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken);
+    Task UpdateCharacterNameAsync(string userId, string username, CancellationToken cancellationToken);
 }

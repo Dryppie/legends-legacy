@@ -1,5 +1,6 @@
 ﻿using Application.Common.Interfaces;
 using Domain.Models.Users;
+using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Users;
 public class UserRepository : IUserRepository
@@ -30,5 +31,21 @@ public class UserRepository : IUserRepository
     public bool DoesGuestExist(string userId)
     {
         return _context.Users.Any(x => x.Id == userId);
+    }
+
+    public async Task<UserInfo> GetUserInfo(Guid userId)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(x => x.Id.Equals(userId.ToString()));
+        //TODO: Implement exception
+        if (user == null)
+        {
+            throw new Exception();
+        }
+
+        return new UserInfo
+        {
+            Email = user.Email ?? string.Empty,
+            IsRegisteredUser = !user.IsGuest,
+        };
     }
 }

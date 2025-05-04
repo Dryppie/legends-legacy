@@ -33,6 +33,7 @@ public interface ICharacterService
     /// <returns></returns>
     Task<Character> GetMyCharacterOverviewAsync(Guid characterId, CancellationToken cancellationToken);
     Task<List<CharacterLeaderboardItem>> GetLeaderboardCharactersAsync(CancellationToken cancellationToken);
+    Task UpdateCharacterNameAsync(string userId, string username, CancellationToken cancellationToken);
     /// <summary>
     /// Get a bare minimum character, with no includes
     /// </summary>

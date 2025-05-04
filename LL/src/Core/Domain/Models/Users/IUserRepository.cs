@@ -21,4 +21,6 @@ public interface IUserRepository
     /// <param name="userId"></param>
     /// <returns></returns>
     bool DoesGuestExist(string userId);
+
+    public Task<UserInfo> GetUserInfo(Guid userId);
 }

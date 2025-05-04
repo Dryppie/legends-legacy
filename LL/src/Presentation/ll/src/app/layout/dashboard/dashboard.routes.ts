@@ -39,6 +39,13 @@ export const DASHBOARD_ROUTES: Routes = [
             (m) => m.WORLD_ROUTES,
           ),
       },
+      {
+        path: 'settings',
+        loadChildren: () =>
+          import('./../../features/game/settings/settings.routes').then(
+            (m) => m.SETTINGS_ROUTES,
+          ),
+      },
     ],
   },
 ];

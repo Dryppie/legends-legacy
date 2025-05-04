@@ -90,7 +90,7 @@ public class UserService : IUserService
 
         var username = $"{prefix}{animal}{suffix}_{random.Next(1000, 9999)}";
 
-        var user = new AppUser { UserName = username, Email = $"{username}@hotmail.com" };
+        var user = new AppUser { UserName = username, Email = $"{username}@hotmail.com", IsGuest = true };
 
         var result = await _userManager.CreateAsync(user);
 
@@ -106,7 +106,7 @@ public class UserService : IUserService
     public async Task<AuthInfo> ConvertGuestToUser(string userId, string username, string email, string password)
     {
         if (!_userRepository.DoesGuestExist(userId)) throw new Exception("User does not exist");
-        if (!_userRepository.DoesEmailExist(email)) throw new Exception("Email is already in use");
+        if (_userRepository.DoesEmailExist(email)) throw new Exception("Email is already in use");
 
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null)
@@ -119,6 +119,10 @@ public class UserService : IUserService
         await _userManager.SetUserNameAsync(user, username);
         await _userManager.UpdateNormalizedUserNameAsync(user);
 
+        user.IsGuest = false;
+
+        await _userManager.UpdateAsync(user);
+
         return new AuthInfo
         {
             IsValid = true,
@@ -126,5 +130,10 @@ public class UserService : IUserService
             Name = username,
             IsPlayer = true
         };
+    }
+
+    public async Task<UserInfo> GetUserInfo(Guid userId)
+    {
+        return await _userRepository.GetUserInfo(userId);
     }
 }

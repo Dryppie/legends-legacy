@@ -1,5 +1,6 @@
 ﻿using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL;
+using Application.UseCases.Users.Events;
 using Domain.Models.Users;
 using MediatR;
 
@@ -25,6 +26,7 @@ public class ConvertGuestToUserCommandHandler : IRequestHandler<ConvertGuestToUs
         var user = await _userService.ConvertGuestToUser(request.UserId, request.Username, request.Email, request.Password);
 
         // TODO: Change character name after the user has changed theirs
+        await _publisher.Publish(new ConvertedGuestToUserEvent(user.Id, user.Name));
 
         return true;
     }

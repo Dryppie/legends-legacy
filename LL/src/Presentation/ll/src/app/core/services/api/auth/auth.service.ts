@@ -20,6 +20,7 @@ import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { NamedStorageKeys } from '../../../common/enums/named-storage-keys';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { ToastService } from '../../client-side/toast/toast.service';
+import { UserInfoDto } from '../../../../shared/models/Dtos/userInfoDto';
 
 @Injectable({
   providedIn: 'root',
@@ -280,33 +281,31 @@ export class AuthService {
       .subscribe();
   }
 
-  convertGuestToUser(
-    username: string,
-    email: string,
-    password: string,
-  ): Observable<any> {
-    const userCredentials = {
-      Username: username,
-      Email: email,
-      Password: password,
-    };
-    return this.apiService
-      .post('auth/convertGuestToUser', userCredentials)
-      .pipe(
-        tap((response) => {
-          this.setToken(response.newTokens);
-          // Update local state if necessary
-          this.toastService.showToast(
-            'Account created successfully!',
-            'Success',
-            response.isSuccess,
-          );
-        }),
-        catchError(() => {
-          return throwError(() => new Error('Failed to convert guest to user'));
-        }),
-      );
-  }
+  convertGuestToUser(username: string, email: string, password: string): Observable<any> {
+  const userCredentials = { Username: username, Email: email, Password: password };
+
+  return this.apiService.post('auth/convertGuestToUser', userCredentials).pipe(
+    tap((response) => {
+      console.log('Backend response:', response);  // Log the full response to debug
+    }),
+    mergeMap((response) => {
+      if (response.isValid) {  // Check for 'isValid' in the response
+        this.setToken(response.newTokens);  // If you’re setting tokens, otherwise update as needed
+        this.toastService.showToast('Account created successfully!', 'Success', true);
+        return of(response);
+      } else {
+        this.toastService.showToast('Conversion failed', response.message, false);  // Show the failure message
+        return throwError(() => new Error('Failed to convert guest to user'));
+      }
+    }),
+    catchError((error) => {
+      console.error('Error during conversion:', error);
+      this.toastService.showToast('Conversion error', 'Contact the developer', false);
+      return throwError(() => new Error('Failed to convert guest to user'));
+    }),
+  );
+}
+
 
   private handleAuthSuccess(res: any): Observable<CharacterDto> {
     this.setAuth();
@@ -330,5 +329,13 @@ export class AuthService {
 
   getToken(): string | null {
     return localStorage.getItem(NamedStorageKeys.Session);
+  }
+
+  getUserInfo(): Observable<UserInfoDto> {
+    return this.apiService.get('auth/getUserInfo').pipe(
+      catchError(() => {
+        return throwError(() => new Error('Failed to register'));
+      }),
+    );
   }
 }

@@ -59,4 +59,9 @@ public class CharacterService : ICharacterService
     {
         return await _characterRepository.GetBaseCharacterByIdAsync(characterId, cancellationToken);
     }
+
+    public async Task UpdateCharacterNameAsync(string userId, string username, CancellationToken cancellationToken)
+    {
+        await _characterRepository.UpdateCharacterNameAsync(userId, username, cancellationToken);
+    }
 }
