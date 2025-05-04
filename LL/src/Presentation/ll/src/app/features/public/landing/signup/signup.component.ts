@@ -38,8 +38,8 @@ export class SignupComponent {
   @Input() convertAccount: boolean = false;
   @Input() prefilledUsername: string | null = null;
   @Input() disableLoginLink: boolean = false;
-  @Input() headerText1: string = "Join the adventure and";
-  @Input() headerText2: string = "create your legend!";
+  @Input() headerText1: string = 'Join the adventure and';
+  @Input() headerText2: string = 'create your legend!';
 
   registerForm = new FormGroup(
     {
@@ -72,15 +72,15 @@ export class SignupComponent {
 
   submitForm() {
     if (this.registerForm.invalid) {
-    this.registerForm.markAllAsTouched(); // <-- This will show validation errors nicely
-    return; // Stop the form from submitting if it's invalid
-  }
+      this.registerForm.markAllAsTouched(); // <-- This will show validation errors nicely
+      return; // Stop the form from submitting if it's invalid
+    }
 
-  if (this.convertAccount) {
-    this.convertAcc();
-  } else {
-    this.register();
-  }
+    if (this.convertAccount) {
+      this.convertAcc();
+    } else {
+      this.register();
+    }
   }
 
   register() {
@@ -105,7 +105,6 @@ export class SignupComponent {
   }
 
   convertAcc() {
-    console.log("Convert account");
     const username = this.registerForm.value.username;
     const email = this.registerForm.value.email;
     const password = this.registerForm.value.password;

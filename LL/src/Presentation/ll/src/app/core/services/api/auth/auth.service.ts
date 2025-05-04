@@ -281,31 +281,52 @@ export class AuthService {
       .subscribe();
   }
 
-  convertGuestToUser(username: string, email: string, password: string): Observable<any> {
-  const userCredentials = { Username: username, Email: email, Password: password };
+  convertGuestToUser(
+    username: string,
+    email: string,
+    password: string,
+  ): Observable<any> {
+    const userCredentials = {
+      Username: username,
+      Email: email,
+      Password: password,
+    };
 
-  return this.apiService.post('auth/convertGuestToUser', userCredentials).pipe(
-    tap((response) => {
-      console.log('Backend response:', response);  // Log the full response to debug
-    }),
-    mergeMap((response) => {
-      if (response.isValid) {  // Check for 'isValid' in the response
-        this.setToken(response.newTokens);  // If you’re setting tokens, otherwise update as needed
-        this.toastService.showToast('Account created successfully!', 'Success', true);
-        return of(response);
-      } else {
-        this.toastService.showToast('Conversion failed', response.message, false);  // Show the failure message
-        return throwError(() => new Error('Failed to convert guest to user'));
-      }
-    }),
-    catchError((error) => {
-      console.error('Error during conversion:', error);
-      this.toastService.showToast('Conversion error', 'Contact the developer', false);
-      return throwError(() => new Error('Failed to convert guest to user'));
-    }),
-  );
-}
-
+    return this.apiService
+      .post('auth/convertGuestToUser', userCredentials)
+      .pipe(
+        mergeMap((response) => {
+          if (response.isValid) {
+            // Check for 'isValid' in the response
+            this.setToken(response.newTokens); // If you’re setting tokens, otherwise update as needed
+            this.toastService.showToast(
+              'Account created successfully!',
+              'Success',
+              true,
+            );
+            return of(response);
+          } else {
+            this.toastService.showToast(
+              'Conversion failed',
+              response.message,
+              false,
+            ); // Show the failure message
+            return throwError(
+              () => new Error('Failed to convert guest to user'),
+            );
+          }
+        }),
+        catchError((error) => {
+          console.error('Error during conversion:', error);
+          this.toastService.showToast(
+            'Conversion error',
+            'Contact the developer',
+            false,
+          );
+          return throwError(() => new Error('Failed to convert guest to user'));
+        }),
+      );
+  }
 
   private handleAuthSuccess(res: any): Observable<CharacterDto> {
     this.setAuth();
