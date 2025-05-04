@@ -43,7 +43,7 @@ function getCharacterSidebar(): Tab[] {
       items: [
         {
           id: 'character-overview',
-          route: 'character',
+          route: ['/game', 'character', 'character-overview'],
           icon: 'character/achievements',
           title: 'Character Overview',
           description: 'Attributes and essences',
@@ -54,7 +54,7 @@ function getCharacterSidebar(): Tab[] {
         },
         {
           id: 'inventory',
-          route: 'character',
+          route: ['/game', 'character', 'inventory'],
           icon: 'character/inventory',
           title: 'Inventory',
           description: 'Items, gear, misc',
@@ -109,28 +109,28 @@ function getCitySidebar(): Tab[] {
       items: [
         {
           id: 'temple',
-          route: 'city',
+          route: ['/game', 'city', 'temple'],
           icon: 'city/temple',
           title: 'Temple',
           description: 'Temple',
         },
         {
           id: 'tavern',
-          route: 'city',
+          route: ['/game', 'city', 'tavern'],
           icon: 'city/temple',
           title: 'Tavern',
           description: 'Leaderboard',
         },
         {
           id: 'colosseum',
-          route: 'city',
+          route: ['/game', 'city', 'colosseum'],
           icon: 'city/temple',
           title: 'Colosseum',
           description: 'Tournaments and Battles',
         },
         {
           id: 'guild',
-          route: 'city',
+          route: ['/game', 'city', 'guild'],
           icon: 'city/temple',
           title: 'Guild',
           description: 'Guild headquarters',
@@ -167,28 +167,36 @@ function getProfessionSidebar(): Tab[] {
         //     { icon: 'path/to/coin-icon.png', amount: 2 },
         //   ],
         // },
-        // {
-        //   id: '3',
-        //   route: 'professions/mining',
-        //   icon: 'path/to/dynamic-quest-icon.png',
-        //   title: 'Mining',
-        //   description: 'LV 0/100',
-        //   rewards: [
-        //     { icon: 'path/to/fire-icon.png', amount: 5 },
-        //     { icon: 'path/to/coin-icon.png', amount: 3 },
-        //   ],
-        // },
+        {
+          id: 'mining',
+          route: ['/game', 'professions', 'gathering', 'mining'],
+          icon: 'professions/mining',
+          title: 'Mining',
+        },
         {
           id: 'woodcutting',
-          route: 'professions',
+          route: ['/game', 'professions', 'gathering', 'woodcutting'],
           icon: 'professions/woodcutting',
           title: 'Woodcutting',
-          description: 'LV 0/100',
-          rewards: [
-            { icon: 'path/to/fire-icon.png', amount: 4 },
-            { icon: 'path/to/coin-icon.png', amount: 2 },
-          ],
         },
+        {
+          id: 'weaponsmithing',
+          route: ['/game', 'professions', 'crafting', 'weaponsmithing'],
+          icon: 'professions/mining',
+          title: 'Weaponsmithing',
+        },
+        // {
+        //   id: 'armorforging',
+        //   route: ['/game', 'professions', 'crafting', 'armorforging'],
+        //   icon: 'professions/mining',
+        //   title: 'Armorforging',
+        // },
+        // {
+        //   id: 'jewelcrafting',
+        //   route: ['/game', 'professions', 'crafting', 'jewelcrafting'],
+        //   icon: 'professions/mining',
+        //   title: 'Jewelcrafting',
+        // },
       ],
     },
   ];
@@ -201,7 +209,7 @@ function getWorldSidebar(): Tab[] {
       items: [
         {
           id: 'shenic',
-          route: 'world',
+          route: ['/game', 'world', 'shenic'],
           icon: 'world/Quest',
           title: 'Shenic',
           description: 'The Shenic Region',

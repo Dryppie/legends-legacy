@@ -28,7 +28,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   navButtons = [
     { link: '/game/character', label: 'Character' },
     { link: '/game/city', label: 'City' },
-    // { link: '/game/professions', label: 'Professions' },
+    { link: '/game/professions', label: 'Professions' },
     { link: '/game/world', label: 'World' },
     // { link: '#', label: 'Town' },
   ];

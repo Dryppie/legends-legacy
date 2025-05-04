@@ -8,6 +8,7 @@ import { GatheringNode } from '../../../../shared/models/Dtos/gatheringNode';
 import { ProfessionHeaderComponent } from '../../../../shared/components/professions/profession-header/profession-header.component';
 import { NgFor } from '@angular/common';
 import { ProfessionCardComponent } from '../../../../shared/components/professions/profession-card/profession-card.component';
+import { GatheringProfession } from '../../../../shared/models/profession';
 
 @Component({
   selector: 'app-gathering',
@@ -18,6 +19,7 @@ import { ProfessionCardComponent } from '../../../../shared/components/professio
 })
 export class GatheringComponent {
   professionId!: string;
+  profession!: GatheringProfession;
   gatheringNodes!: GatheringNode[];
   combatStarted = false;
   private subscription: Subscription = new Subscription();
@@ -46,8 +48,9 @@ export class GatheringComponent {
   }
 
   getProfessionDetails(id: string) {
-    this.professionService.getGatheringNodesById(id).subscribe((data: any) => {
-      this.gatheringNodes = data as GatheringNode[];
-    });
+    this.profession = this.professionService.getProfessionById(
+      id,
+    ) as GatheringProfession;
+    this.gatheringNodes = this.profession.gatheringNodes;
   }
 }

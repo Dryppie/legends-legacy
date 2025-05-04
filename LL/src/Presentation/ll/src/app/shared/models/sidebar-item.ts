@@ -5,7 +5,7 @@ export interface Tab {
 
 export interface SidebarItem {
   id: string;
-  route: string;
+  route: string[];
   icon: string;
   title: string;
   description: string;
