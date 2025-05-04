@@ -10,6 +10,7 @@ export interface CharacterDto {
   gold: number;
   rawAttributes?: Array<AttributeDto>;
   attributes?: Array<AttributeDto>;
+  arenaRating: number;
 }
 
 export interface CharacterOverviewDto {

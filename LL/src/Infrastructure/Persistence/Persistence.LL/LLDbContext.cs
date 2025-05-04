@@ -3,6 +3,7 @@ using Domain.Models.Abilities;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
+using Domain.Models.Colosseum;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
@@ -10,6 +11,7 @@ using Domain.Models.Entities.NPCs;
 using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.GatheringNodes;
+using Domain.Models.Guilds;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
@@ -115,7 +117,8 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
     public DbSet<EntityAttribute> EntityAttributes => Set<EntityAttribute>();
 
     //public DbSet<Building> Buildings => Set<Building>();
-
+    public DbSet<ArenaTicketStatus> ArenaTicketStatus => Set<ArenaTicketStatus>();
+    public DbSet<ColosseumMatchResult> ColosseumMatches => Set<ColosseumMatchResult>();
     public DbSet<Character> Characters => Set<Character>();
     public DbSet<Creature> Creatures => Set<Creature>();
 
@@ -142,9 +145,10 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
 
     //public DbSet<Essence> Essences => Set<Essence>();
 
-    //public DbSet<Guild> Guilds => Set<Guild>();
+    public DbSet<Guild> Guilds => Set<Guild>();
+    public DbSet<GuildInvite> GuildInvites => Set<GuildInvite>();
 
-    //public DbSet<GuildMember> GuildMembers => Set<GuildMember>();
+    public DbSet<GuildMember> GuildMembers => Set<GuildMember>();
 
     public DbSet<Inventory> Inventories => Set<Inventory>();
 

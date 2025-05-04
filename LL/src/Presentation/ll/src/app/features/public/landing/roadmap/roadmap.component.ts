@@ -1,6 +1,4 @@
-import { DatePipe, NgFor } from '@angular/common';
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 
 interface RoadmapItem {
   title: string;
@@ -11,7 +9,7 @@ interface RoadmapItem {
 @Component({
   selector: 'app-roadmap',
   standalone: true,
-  imports: [RouterLink, NgFor, DatePipe],
+  imports: [],
   templateUrl: './roadmap.component.html',
   styleUrl: './roadmap.component.css',
 })

@@ -161,7 +161,7 @@ public class JwtGenerator : IJwtGenerator
         var claims = jwtSecurityToken.Claims.ToList();
         try
         {
-            var idClaim = claims.SingleOrDefault(x => x.Type.Equals("CharacterId"))!;
+            var idClaim = claims.SingleOrDefault(x => x.Type.Equals(ClaimTypes.UserData))!;
 
             if (idClaim == null || !Guid.TryParse(idClaim.Value, out var characterId))
             {

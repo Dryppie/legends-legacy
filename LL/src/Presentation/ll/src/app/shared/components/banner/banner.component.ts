@@ -1,12 +1,14 @@
-import { Component } from '@angular/core';
+import { NgClass } from '@angular/common';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-banner',
   standalone: true,
-  imports: [],
+  imports: [NgClass],
   templateUrl: './banner.component.html',
-  styleUrl: './banner.component.css'
+  styleUrl: './banner.component.css',
 })
 export class BannerComponent {
-
+  @Input() image: string = '';
+  @Input() bgPosition = 'bg-center';
 }

@@ -1,12 +1,14 @@
 ﻿using Application.Common.Interfaces;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
+using Domain.Models.Colosseum;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.GatheringNodes;
+using Domain.Models.Guilds;
 using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
 using Domain.Models.LootTables;
@@ -18,12 +20,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Persistence.LL.Repositories.Attributes;
 using Persistence.LL.Repositories.CharacterActions;
+using Persistence.LL.Repositories.Colosseum;
 using Persistence.LL.Repositories.Entities;
 using Persistence.LL.Repositories.Entities.Characters;
 using Persistence.LL.Repositories.Entities.Creatures;
 using Persistence.LL.Repositories.Equipments;
 using Persistence.LL.Repositories.Essences;
 using Persistence.LL.Repositories.GatheringNodes;
+using Persistence.LL.Repositories.Guilds;
 using Persistence.LL.Repositories.Inventories;
 using Persistence.LL.Repositories.LootTables;
 using Persistence.LL.Repositories.Regions;
@@ -55,11 +59,16 @@ public static class DependencyInjection
         services.AddScoped<ICharacterActionRepository, CharacterActionRepository>();
         services.AddScoped<ICreatureRepository, CreatureRepository>();
 
+        services.AddScoped<IColosseumRepository, ColosseumRepository>();
+        services.AddScoped<IRatingRepository, RatingRepository>();
+
         services.AddScoped<IEntityRepository, EntityRepository>();
         services.AddScoped<IEquipmentSlotRepository, EquipmentSlotRepository>();
 
         services.AddScoped<IEssenceRepository, EssenceRepository>();
         services.AddScoped<IEssenceSlotRepository, EssenceSlotRepository>();
+
+        services.AddScoped<IGuildRepository, GuildRepository>();
 
         services.AddScoped<IGatheringNodeRepository, GatheringNodeRepository>();
 

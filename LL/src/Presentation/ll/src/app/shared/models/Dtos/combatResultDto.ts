@@ -1,3 +1,4 @@
+import { BattleType } from '../../../core/state/combat-state/combatState';
 import { CombatEvent } from './combatEventDto';
 
 export interface CombatResultDto {
@@ -8,6 +9,7 @@ export interface CombatResultDto {
   startedAt: Date;
   outcome: BattleOutcome;
   experienceGained: number;
+  battleType: BattleType;
 }
 
 export interface SimpleCombatEntityDto {

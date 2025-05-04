@@ -7,6 +7,16 @@ public class CharacterConfiguration : IEntityTypeConfiguration<Character>
 {
     public void Configure(EntityTypeBuilder<Character> builder)
     {
+        builder
+            .HasIndex(c => c.UserId);
 
+        builder
+            .HasMany(c => c.ColosseumMatches)
+            .WithOne()
+            .HasForeignKey(c => c.CharacterAId);
+        builder
+            .HasMany(c => c.ColosseumMatches)
+            .WithOne()
+            .HasForeignKey(c => c.CharacterBId);
     }
 }

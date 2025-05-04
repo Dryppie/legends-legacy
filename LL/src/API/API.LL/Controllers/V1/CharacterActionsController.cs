@@ -1,7 +1,7 @@
 ﻿using Application.UseCases.CharacterActions.Commands.DeleteCharacterAction;
 using Application.UseCases.CharacterActions.Commands.StartCombatAction;
 using Application.UseCases.CharacterActions.Commands.StartGatheringAction;
-using Application.UseCases.CharacterActions.Dtos;
+using Application.UseCases.CharacterActions.Dtos.Responses;
 using Application.UseCases.CharacterActions.Queries.GetCharacterAction;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;

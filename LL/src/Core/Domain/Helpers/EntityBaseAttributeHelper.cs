@@ -50,7 +50,7 @@ public static class EntityBaseAttributeHelper
             case AttributeType.Instinct:
             case AttributeType.Perception:
             case AttributeType.Luck:
-                return 10; // Base value for primary stats
+                return 0; // Base value for primary stats
 
             // Combat Stats
             case AttributeType.MaxHealth:

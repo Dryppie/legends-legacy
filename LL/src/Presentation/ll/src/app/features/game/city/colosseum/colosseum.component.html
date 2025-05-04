@@ -1,0 +1,52 @@
+<ng-container
+  *ngIf="
+    combatStateService.getIsCombatActive$(battleType) | async as isCombatActive;
+    else showNonCombat
+  "
+>
+  <app-combat class="flex h-full w-full" [battleType]="battleType"></app-combat>
+</ng-container>
+<ng-template #showNonCombat>
+  <div
+    class="flex h-full flex-col items-center space-y-3 overflow-hidden pr-4 sm:pr-6"
+  >
+    <div class="flex w-full flex-col sm:gap-6">
+      <app-banner image="colosseum" class="w-full"></app-banner>
+    </div>
+    <app-tab
+      [tabs]="tabLabels"
+      [activeTab]="activeTab"
+      (tabSelected)="setActiveTab($event)"
+      class="w-full flex-none"
+    ></app-tab>
+    <div class="flex h-full w-full flex-col overflow-y-scroll">
+      <ng-container [ngSwitch]="activeTab">
+        <app-arena-battle
+          *ngSwitchCase="'Arena'"
+          [opponents]="opponents"
+          (refreshOpponents)="onRefreshOpponents()"
+          (challenge)="challenge($event)"
+        >
+        </app-arena-battle>
+
+        <app-tournament-grounds *ngSwitchCase="'Tournament Grounds'">
+        </app-tournament-grounds>
+
+        <app-champions-market *ngSwitchCase="'Champion\'s Market'">
+        </app-champions-market>
+
+        <app-rankings-glory
+          *ngSwitchCase="'Rankings & Glory'"
+          [rankings]="rankings"
+        >
+        </app-rankings-glory>
+
+        <app-record-of-battle
+          *ngSwitchCase="'Record of Battles'"
+          [previousMatches]="previousMatches"
+        >
+        </app-record-of-battle>
+      </ng-container>
+    </div>
+  </div>
+</ng-template>

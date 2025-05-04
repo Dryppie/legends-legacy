@@ -131,6 +131,7 @@ public class CharacterRepository : ICharacterRepository
             .Take(10)
             .Select(c => new CharacterLeaderboardItem
             {
+                Id = c.Id,
                 Name = c.Name,
                 Level = c.Level,
                 Experience = (int)c.Experience
@@ -220,6 +221,15 @@ public class CharacterRepository : ICharacterRepository
         };
 
         return masteries;
+    }
+
+    public async Task<Character> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        var character = await _context.Characters
+            .FirstOrDefaultAsync(c => c.Id.Equals(characterId));
+        NotFoundException.ThrowIfNull(character, nameof(Character), characterId);
+
+        return character;
     }
 
     public async Task UpdateCharacterNameAsync(string userId, string username, CancellationToken cancellationToken)
