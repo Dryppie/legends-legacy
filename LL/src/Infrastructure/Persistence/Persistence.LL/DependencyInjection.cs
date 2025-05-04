@@ -1,4 +1,5 @@
-﻿using Application.Common.Interfaces;
+﻿using Application.Authorization.Interfaces;
+using Application.Common.Interfaces;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.Colosseum;
@@ -77,6 +78,10 @@ public static class DependencyInjection
         services.AddScoped<IRegionRepository, RegionRepository>();
 
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IExternalLoginRepository, ExternalLoginRepository>();
+        services.AddSingleton<ITokenHasher, Sha256TokenHasher>();
+
 
         return services;
     }

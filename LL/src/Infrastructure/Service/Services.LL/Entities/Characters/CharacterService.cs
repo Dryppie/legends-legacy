@@ -17,7 +17,7 @@ public class CharacterService : ICharacterService
     }
 
     /// <inheritdoc/>
-    public async Task<Character> CreateCharacterAsync(string userId, string username, CancellationToken cancellationToken)
+    public async Task<Character> CreateCharacterAsync(Guid userId, string username, CancellationToken cancellationToken)
     {
         var character = await _characterRepository.CreateCharacterAsync(userId, username, cancellationToken);
 

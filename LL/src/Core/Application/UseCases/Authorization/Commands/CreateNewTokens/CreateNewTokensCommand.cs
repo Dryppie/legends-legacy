@@ -21,7 +21,7 @@ public class CreateNewTokensCommandHandler : IRequestHandler<CreateNewTokensComm
 
     public async Task<Response<Tokens>> Handle(CreateNewTokensCommand request, CancellationToken cancellationToken)
     {
-        var tokens = await Task.FromResult(_jwtGenerator.RefreshTokens(request.RefreshToken));
+        var tokens = await _jwtGenerator.RefreshAsync(request.RefreshToken, cancellationToken);
         return Response<Tokens>.Success(tokens);
     }
 }

@@ -29,7 +29,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
 
 namespace Persistence.LL;
-public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbContext<AppUser>(options), IDbContext
+public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbContext(options), IDbContext
 {
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -180,6 +180,8 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
     public DbSet<Region> Regions => Set<Region>();
 
     public new DbSet<AppUser> Users => Set<AppUser>();
+    public DbSet<ExternalLogin> ExternalLogins => Set<ExternalLogin>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 }
 
 // Used by design time, eg. dotnet ef migrations add Stuff

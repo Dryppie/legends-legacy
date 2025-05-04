@@ -10,7 +10,7 @@ public interface ICharacterService
     /// <param name="username"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Task<Character> CreateCharacterAsync(string userId, string username, CancellationToken cancellationToken);
+    public Task<Character> CreateCharacterAsync(Guid userId, string username, CancellationToken cancellationToken);
 
     /// <summary>
     /// Get the current User's Character through the User's Id

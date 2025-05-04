@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Application.Interfaces.Services.LL;
+﻿using Application.Interfaces.Services.LL;
 using Application.UseCases.Users.Dtos;
 using MediatR;
 
@@ -21,12 +16,12 @@ public class GetUserInfoQueryHandler : IRequestHandler<GetUserInfoQuery, UserInf
     }
     public async Task<UserInfoDto> Handle(GetUserInfoQuery request, CancellationToken cancellationToken)
     {
-        var userInfo = await _userService.GetUserInfo(request.UserId);
+        //var userInfo = await _userService.GetUserInfo(request.UserId);
 
         var userInfoDto = new UserInfoDto
         {
-            Email = userInfo.Email,
-            IsRegisteredUser = userInfo.IsRegisteredUser,
+            Email = /*userInfo.Email*/"",
+            IsRegisteredUser = /*userInfo.IsRegisteredUser*/true,
         };
 
         return userInfoDto;

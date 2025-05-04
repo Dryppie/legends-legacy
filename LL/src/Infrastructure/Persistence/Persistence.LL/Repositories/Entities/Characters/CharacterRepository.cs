@@ -22,7 +22,7 @@ public class CharacterRepository : ICharacterRepository
     }
 
     /// <inheritdoc/>
-    public async Task<Character> CreateCharacterAsync(string userId, string username, CancellationToken cancellationToken)
+    public async Task<Character> CreateCharacterAsync(Guid userId, string username, CancellationToken cancellationToken)
     {
         var character = new Character()
         {
@@ -80,7 +80,7 @@ public class CharacterRepository : ICharacterRepository
             //.Include(c => c.Modifiers)
             //.Include(c => c.RawAttributes)
             //.ThenInclude(a => a.AttributeBase)
-            .FirstOrDefaultAsync(c => c.UserId.Equals(userId.ToString()));
+            .FirstOrDefaultAsync(c => c.UserId.Equals(userId));
         NotFoundException.ThrowIfNull(character, nameof(Character), userId);
 
         return character;

@@ -3,12 +3,10 @@ using Application.Common.Responses;
 using Application.Interfaces.Services.LL;
 using Application.UseCases.Users.Events;
 using Common.Authorization.Security;
-using Domain.Models.Users;
 using MediatR;
 
 namespace Application.UseCases.Users.Commands.GuestLogin;
 public record GuestLoginCommand() : IRequest<Response<Tokens>>;
-
 public class GuestLoginCommandHandler : IRequestHandler<GuestLoginCommand, Response<Tokens>>
 {
     private readonly IUserService _userService;
@@ -29,15 +27,15 @@ public class GuestLoginCommandHandler : IRequestHandler<GuestLoginCommand, Respo
         try
         {
             // Create a new guest user
-            var user = await _userService.RegisterGuest();
+            var user = await _userService.RegisterGuestAsync(cancellationToken);
 
-            await _publisher.Publish(new UserCreatedEvent(user.Id, user.Name), cancellationToken);
+            await _publisher.Publish(new UserCreatedEvent(user.Id, user.Username!), cancellationToken);
 
-            var character = await _characterService.GetMyCharacterAsync(Guid.Parse(user.Id), cancellationToken);
-            user.CharacterId = character.Id.ToString();
+            var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
+            user.CharacterId = character.Id;
 
             // Generate tokens
-            var tokens = _jwtGenerator.GenerateTokens(user);
+            var tokens = _jwtGenerator.IssueTokens(user);
 
             return Response<Tokens>.Success(tokens);
         }

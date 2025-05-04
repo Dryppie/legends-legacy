@@ -1,7 +1,5 @@
 ﻿using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL;
-using Application.UseCases.Users.Events;
-using Domain.Models.Users;
 using MediatR;
 
 namespace Application.UseCases.Users.Commands.ConvertGuestToUser;
@@ -23,10 +21,10 @@ public class ConvertGuestToUserCommandHandler : IRequestHandler<ConvertGuestToUs
     public async Task<bool> Handle(ConvertGuestToUserCommand request, CancellationToken cancellationToken)
     {
         // TODO: Ensure the username isn't already taken
-        var user = await _userService.ConvertGuestToUser(request.UserId, request.Username, request.Email, request.Password);
+        //var user = await _userService.ConvertGuestToUser(request.UserId, request.Username, request.Email, request.Password);
 
-        // TODO: Change character name after the user has changed theirs
-        await _publisher.Publish(new ConvertedGuestToUserEvent(user.Id, user.Name));
+        //// TODO: Change character name after the user has changed theirs
+        //await _publisher.Publish(new ConvertedGuestToUserEvent(user.Id, user.Name));
 
         return true;
     }

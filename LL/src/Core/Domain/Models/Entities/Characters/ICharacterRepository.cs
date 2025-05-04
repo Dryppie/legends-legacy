@@ -1,5 +1,4 @@
-﻿
-namespace Domain.Models.Entities.Characters;
+﻿namespace Domain.Models.Entities.Characters;
 public interface ICharacterRepository
 {
     /// <summary>
@@ -9,7 +8,7 @@ public interface ICharacterRepository
     /// <param name="Username"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Task<Character> CreateCharacterAsync(string userId, string username, CancellationToken cancellationToken);
+    public Task<Character> CreateCharacterAsync(Guid userId, string username, CancellationToken cancellationToken);
 
     /// <summary>
     /// Get Character by User Id

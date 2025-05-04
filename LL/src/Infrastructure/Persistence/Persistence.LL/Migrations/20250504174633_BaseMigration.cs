@@ -42,8 +42,6 @@ namespace Persistence.LL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    BannedUntil = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    IsGuest = table.Column<bool>(type: "bit", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -89,6 +87,24 @@ namespace Persistence.LL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Regions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Username = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsGuest = table.Column<bool>(type: "bit", nullable: false),
+                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedUtc = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -198,49 +214,6 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "IPAddress",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TimeOfAccess = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    AppUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_IPAddress", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_IPAddress_AspNetUsers_AppUserId",
-                        column: x => x.AppUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Transaction",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ItemPurchased = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Cost = table.Column<float>(type: "real", nullable: false),
-                    Currency = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TimeOfPurchase = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    PaymentMethod = table.Column<int>(type: "int", nullable: false),
-                    TransactionStatus = table.Column<int>(type: "int", nullable: false),
-                    AppUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Transaction", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Transaction_AspNetUsers_AppUserId",
-                        column: x => x.AppUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ItemBases",
                 columns: table => new
                 {
@@ -281,6 +254,55 @@ namespace Persistence.LL.Migrations
                         name: "FK_Areas_Regions_RegionId",
                         column: x => x.RegionId,
                         principalTable: "Regions",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ExternalLogins",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Provider = table.Column<int>(type: "int", nullable: false),
+                    ProviderUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    AccessToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExpiresUtc = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ExternalLogins", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ExternalLogins_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RefreshTokens",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TokenHash = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ExpiresUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    RevokedUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ReplacedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AppUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RefreshTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RefreshTokens_Users_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "Users",
                         principalColumn: "Id");
                 });
 
@@ -366,7 +388,7 @@ namespace Persistence.LL.Migrations
                     Level = table.Column<int>(type: "int", nullable: false),
                     ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EntityType = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Experience = table.Column<float>(type: "real", nullable: true),
                     Gold = table.Column<int>(type: "int", nullable: true),
                     ArenaRating = table.Column<int>(type: "int", nullable: true),
@@ -377,15 +399,15 @@ namespace Persistence.LL.Migrations
                 {
                     table.PrimaryKey("PK_Entities", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Entities_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_Entities_LootTableEntry_LootTableId",
                         column: x => x.LootTableId,
                         principalTable: "LootTableEntry",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Entities_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -837,6 +859,17 @@ namespace Persistence.LL.Migrations
                 column: "EssenceId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ExternalLogins_Provider_ProviderUserId",
+                table: "ExternalLogins",
+                columns: new[] { "Provider", "ProviderUserId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ExternalLogins_UserId",
+                table: "ExternalLogins",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_GatheringNodes_LootTableId",
                 table: "GatheringNodes",
                 column: "LootTableId");
@@ -861,11 +894,6 @@ namespace Persistence.LL.Migrations
                 name: "IX_InventoryItems_ItemInstanceId",
                 table: "InventoryItems",
                 column: "ItemInstanceId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_IPAddress_AppUserId",
-                table: "IPAddress",
-                column: "AppUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ItemAttributeModifier_EquipmentBaseId",
@@ -898,9 +926,14 @@ namespace Persistence.LL.Migrations
                 column: "LootTableId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Transaction_AppUserId",
-                table: "Transaction",
+                name: "IX_RefreshTokens_AppUserId",
+                table: "RefreshTokens",
                 column: "AppUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RefreshTokens_TokenHash",
+                table: "RefreshTokens",
+                column: "TokenHash");
         }
 
         /// <inheritdoc />
@@ -946,6 +979,9 @@ namespace Persistence.LL.Migrations
                 name: "EssenceSlots");
 
             migrationBuilder.DropTable(
+                name: "ExternalLogins");
+
+            migrationBuilder.DropTable(
                 name: "GatheringNodes");
 
             migrationBuilder.DropTable(
@@ -958,16 +994,13 @@ namespace Persistence.LL.Migrations
                 name: "InventoryItems");
 
             migrationBuilder.DropTable(
-                name: "IPAddress");
-
-            migrationBuilder.DropTable(
                 name: "ItemAttributeModifier");
 
             migrationBuilder.DropTable(
                 name: "Mastery");
 
             migrationBuilder.DropTable(
-                name: "Transaction");
+                name: "RefreshTokens");
 
             migrationBuilder.DropTable(
                 name: "CharacterActions");
@@ -977,6 +1010,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Guilds");
@@ -994,10 +1030,10 @@ namespace Persistence.LL.Migrations
                 name: "Entities");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "LootTableEntry");
 
             migrationBuilder.DropTable(
-                name: "LootTableEntry");
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "ItemBases");

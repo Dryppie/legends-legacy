@@ -15,20 +15,21 @@ using Domain.Models.LootTables;
 using Domain.Models.Masteries;
 using Domain.Models.Users;
 using Microsoft.AspNetCore.Identity;
+using Persistence.LL.Repositories.Users;
 
 namespace Persistence.LL.Seeds;
 public static class LLDbContextExtensions
 {
     public const string CHARACTER_GUID = "11111111-1111-1111-1111-111111111111";
 
-    public static async Task SeedData(this LLDbContext context, UserManager<AppUser> userManager)
+    public static async Task SeedData(this LLDbContext context, IPasswordHasher<AppUser> hasher)
     {
         if (!context.Entities.Any())
         {
             await SeedCreatures.SeedCreaturesData(context);
             await SeedItems.SeedItemsData(context);
             await SeedItemsAndLootTables(context);
-            await SeedAdminData(context, userManager);
+            await SeedAdminData(context, hasher);
 
             await SeedInventoryItems(context);
 
@@ -36,133 +37,131 @@ public static class LLDbContextExtensions
         }
     }
 
-    private static async Task SeedAdminData(LLDbContext context, UserManager<AppUser> userManager)
+    private static async Task SeedAdminData(LLDbContext context, IPasswordHasher<AppUser> hasher)
     {
         var email = "admin@hotmail.com";
-        var user = await userManager.FindByEmailAsync(email);
-        if (user == null)
+        var user = new AppUser
         {
-            user = new AppUser
+            Username = "admin",
+            Email = email,
+            PasswordHash = hasher.HashPassword(null!, "Password123!"),
+            EmailConfirmed = true,
+            IsGuest = false,
+        };
+
+        await context.Users.AddAsync(user);
+
+        var character = new Character()
+        {
+            Id = Guid.Parse(CHARACTER_GUID),
+            UserId = user.Id,
+            Name = "admin",
+            ImagePath = "player",
+            Level = 1
+        };
+
+        var inventory = new Inventory()
+        {
+            CharacterId = character.Id,
+        };
+
+        var attributes = EntityBaseAttributeHelper.CreateEntityAttributes(character.Id);
+        await context.EntityAttributes.AddRangeAsync(attributes);
+
+        //var abilities = new List<AbilityId>()
+        //{
+        //    new AbilityId()
+        //    {
+        //        EntityId = character.Id,
+        //        Id = "fireball_01"
+        //    },
+        //    new AbilityId()
+        //    {
+        //        EntityId = character.Id,
+        //        Id = "_01"
+        //    }
+        //};
+        var essences = new List<Essence>()
+        {
+            new Essence()
             {
-                UserName = "admin",
-                Email = email,
-                NormalizedUserName = "admin",
-            };
-
-            await userManager.CreateAsync(user, "Password123!");
-
-            var character = new Character()
+                Id = Guid.NewGuid(),
+                Name = "Starter Essence 1",
+                ActiveAbilityId = "fireball_01",
+                PassiveAbilityId = "retaliate_01"
+            },
+            new Essence()
             {
-                Id = Guid.Parse(CHARACTER_GUID),
-                UserId = user.Id,
-                Name = "admin",
-                ImagePath = "player",
-                Level = 1
-            };
+                Id = Guid.NewGuid(),
+                Name = "Starter Essence 2",
+                ActiveAbilityId = "heal_01",
+                PassiveAbilityId = "pocketDirt"
+            }
+        };
 
-            var inventory = new Inventory()
+        var essenceSlots = new List<EssenceSlot>()
+        {
+            new EssenceSlot()
             {
-                CharacterId = character.Id,
-            };
-
-            var attributes = EntityBaseAttributeHelper.CreateEntityAttributes(character.Id);
-            await context.EntityAttributes.AddRangeAsync(attributes);
-
-            //var abilities = new List<AbilityId>()
-            //{
-            //    new AbilityId()
-            //    {
-            //        EntityId = character.Id,
-            //        Id = "fireball_01"
-            //    },
-            //    new AbilityId()
-            //    {
-            //        EntityId = character.Id,
-            //        Id = "_01"
-            //    }
-            //};
-            var essences = new List<Essence>()
+                Id = Guid.NewGuid(),
+                SlotState = SlotState.Active,
+                SlotType = SlotType.Standard,
+                OccupiedEssence = essences.First(),
+                EntityId = character.Id,
+            },
+            new EssenceSlot()
             {
-                new Essence()
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Starter Essence 1",
-                    ActiveAbilityId = "fireball_01",
-                    PassiveAbilityId = "retaliate_01"
-                },
-                new Essence()
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Starter Essence 2",
-                    ActiveAbilityId = "heal_01",
-                    PassiveAbilityId = "pocketDirt"
-                }
-            };
-
-            var essenceSlots = new List<EssenceSlot>()
+                Id = Guid.NewGuid(),
+                SlotState = SlotState.Active,
+                SlotType = SlotType.Standard,
+                OccupiedEssence = essences.Last(),
+                EntityId = character.Id,
+            },
+            new EssenceSlot()
             {
-                new EssenceSlot()
-                {
-                    Id = Guid.NewGuid(),
-                    SlotState = SlotState.Active,
-                    SlotType = SlotType.Standard,
-                    OccupiedEssence = essences.First(),
-                    EntityId = character.Id,
-                },
-                new EssenceSlot()
-                {
-                    Id = Guid.NewGuid(),
-                    SlotState = SlotState.Active,
-                    SlotType = SlotType.Standard,
-                    OccupiedEssence = essences.Last(),
-                    EntityId = character.Id,
-                },
-                new EssenceSlot()
-                {
-                    Id = Guid.NewGuid(),
-                    SlotState = SlotState.Active,
-                    SlotType = SlotType.Standard,
-                    EntityId = character.Id,
-                },
-                new EssenceSlot()
-                {
-                    Id = Guid.NewGuid(),
-                    SlotState = SlotState.Active,
-                    SlotType = SlotType.Standard,
-                    EntityId = character.Id,
-                },new EssenceSlot()
-                {
-                    Id = Guid.NewGuid(),
-                    SlotState = SlotState.Active,
-                    SlotType = SlotType.Standard,
-                    EntityId = character.Id,
-                },
-                new EssenceSlot()
-                {
-                    Id = Guid.NewGuid(),
-                    SlotState = SlotState.Active,
-                    SlotType = SlotType.Standard,
-                    EntityId = character.Id,
-                },
-            };
-
-            var arenaTicketStatus = new ArenaTicketStatus()
+                Id = Guid.NewGuid(),
+                SlotState = SlotState.Active,
+                SlotType = SlotType.Standard,
+                EntityId = character.Id,
+            },
+            new EssenceSlot()
             {
-                CharacterId = character.Id,
-                CurrentTickets = 5,
-                LastTicketUpdate = DateTime.UtcNow,
-            };
-            character.ArenaTicketStatus = arenaTicketStatus;
+                Id = Guid.NewGuid(),
+                SlotState = SlotState.Active,
+                SlotType = SlotType.Standard,
+                EntityId = character.Id,
+            },new EssenceSlot()
+            {
+                Id = Guid.NewGuid(),
+                SlotState = SlotState.Active,
+                SlotType = SlotType.Standard,
+                EntityId = character.Id,
+            },
+            new EssenceSlot()
+            {
+                Id = Guid.NewGuid(),
+                SlotState = SlotState.Active,
+                SlotType = SlotType.Standard,
+                EntityId = character.Id,
+            },
+        };
 
-            var equipmentSlots = SeedEquipmentSlots(character);
-            var masteries = SeedMasteries(character);
-            context.EquipmentSlots.AddRange(equipmentSlots);
-            character.EssenceSlots = essenceSlots;
-            character.Masteries = masteries;
-            context.Characters.Add(character);
-            context.Inventories.Add(inventory);
-            await context.Essences.AddRangeAsync(essences);
-        }
+        var arenaTicketStatus = new ArenaTicketStatus()
+        {
+            CharacterId = character.Id,
+            CurrentTickets = 5,
+            LastTicketUpdate = DateTime.UtcNow,
+        };
+        character.ArenaTicketStatus = arenaTicketStatus;
+
+        var equipmentSlots = SeedEquipmentSlots(character);
+        var masteries = SeedMasteries(character);
+        context.EquipmentSlots.AddRange(equipmentSlots);
+        character.EssenceSlots = essenceSlots;
+        character.Masteries = masteries;
+        context.Characters.Add(character);
+        context.Inventories.Add(inventory);
+        await context.Essences.AddRangeAsync(essences);
     }
     private static List<Mastery> SeedMasteries(Entity entity)
     {

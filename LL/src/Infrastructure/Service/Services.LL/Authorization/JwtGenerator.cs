@@ -1,191 +1,134 @@
-﻿using Application.Authorization.Interfaces;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using Application.Authorization.Interfaces;
 using Application.Common.Interfaces;
 using Common.Authorization.Security;
 using Common.DateTimeProvider;
 using Common.Exceptions;
-using Domain.Models.Entities.Characters;
 using Domain.Models.Users;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
 namespace Services.LL.Authorization;
 public class JwtGenerator : IJwtGenerator
 {
+    private readonly IRefreshTokenRepository _repo;
+    private readonly IUserRepository _userRepo;
+    private readonly ITokenHasher _hasher;
+
+    private readonly JwtSecurityTokenHandler _handler = new();
+    private readonly SymmetricSecurityKey _signingKey;
+    private readonly TokenValidationParameters _parameters;
+
     private readonly IDateTimeProviderService _dateTimeProvider;
     private readonly IDbContext _context;
+    private readonly TimeSpan _accessLifespan;
+    private readonly TimeSpan _refreshLifespan;
     private readonly string _topSecretAccessKey;
-    private readonly string _topSecretRefreshKey;
-    public JwtGenerator(IDateTimeProviderService dateTimeProvider, IDbContext context, IConfiguration config)
+    public JwtGenerator(IRefreshTokenRepository repo, IUserRepository userRepo, ITokenHasher hasher, IDateTimeProviderService dateTimeProvider, IDbContext context, IConfiguration config)
     {
+        _repo = repo;
+        _userRepo = userRepo;
+        _hasher = hasher;
+
         _dateTimeProvider = dateTimeProvider;
         _context = context;
+
+        _accessLifespan = TimeSpan.FromMinutes(60);
+        _refreshLifespan = TimeSpan.FromDays(30);
+
         _topSecretAccessKey = config.GetSection("Jwt").GetValue<string>("AccessTokenSecretKey")!;
-        _topSecretRefreshKey = config.GetSection("Jwt").GetValue<string>("RefreshTokenSecretKeyV2")!;
+        _signingKey = GetSymmetricSecurityKey(_topSecretAccessKey);
+
+        _parameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = true,
+            ValidIssuer = "",
+            ValidAudience = "",
+            IssuerSigningKey = _signingKey,
+            ClockSkew = TimeSpan.FromSeconds(10)
+        };
     }
 
-    public string CreateAccessToken(AppUser appUser)
+    public Tokens IssueTokens(AppUser user)
     {
+        var now = DateTime.UtcNow;
+
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.UserData, appUser.Id),
-            new Claim(ClaimTypes.Name, appUser.UserName!),
+            new(JwtRegisteredClaimNames.Sub,   user.Id.ToString()),
+            new(ClaimTypes.NameIdentifier,     user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+            new("guest",                       user.IsGuest.ToString()),
+            new(ClaimTypes.UserData,           user.Id.ToString()),
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_topSecretAccessKey));
-        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+         if (!string.IsNullOrWhiteSpace(user.CharacterId.ToString()))
+            claims.Add(new Claim("CharacterId", user.CharacterId.ToString()!));
 
-        var tokenDescriptor = new SecurityTokenDescriptor
+        var jwt = new JwtSecurityToken(
+            issuer: /*_cfg["Jwt:Issuer"]*/ "",
+            audience: /*_cfg["Jwt:Audience"]*/ "",
+            claims: claims,
+            notBefore: now,
+            expires: now.Add(_accessLifespan),
+            signingCredentials: new SigningCredentials(GetSymmetricSecurityKey(_topSecretAccessKey), SecurityAlgorithms.HmacSha256)
+        );
+
+        var access = _handler.WriteToken(jwt);
+        var refresh = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N");
+        var refreshEntity = new RefreshToken
         {
-            Subject = new ClaimsIdentity(claims),
-            Expires = DateTimeOffset.UtcNow.AddDays(7).Date,
-            SigningCredentials = creds
+            UserId = user.Id,
+            TokenHash = _hasher.Hash(refresh),
+            ExpiresUtc = now.Add(_refreshLifespan)
         };
 
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var token = tokenHandler.CreateToken(tokenDescriptor);
+        _repo.AddAsync(refreshEntity, CancellationToken.None).GetAwaiter().GetResult();
 
-        return tokenHandler.WriteToken(token);
+        return new Tokens(access, refresh);
     }
 
-    public string CreateRefreshToken(AppUser appUser)
+    public async Task<Tokens> RefreshAsync(string refreshToken, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
-    }
+        var record = await _repo.FindAsync(refreshToken, cancellationToken)
+                     ?? throw new InvalidRefreshTokenException();
 
-    public Tokens GenerateTokens(AuthInfo authInfo)
-    {
-        var accessTokenClaims = GenerateAccessTokenClaims(authInfo);
-        var accessToken = GenerateToken(accessTokenClaims, _topSecretAccessKey, "", "", 60 * 12);
+        if (!record.IsActive) throw new InvalidRefreshTokenException();
 
-        var refreshTokenClaims = GenerateRefreshTokenClaims(authInfo);
-        var refreshToken = GenerateToken(refreshTokenClaims, _topSecretRefreshKey, "", "", 60 * 12 * 30);
-        return new Tokens(accessToken, refreshToken);
-    }
+        // revoke current token, issue new pair
+        record.RevokedUtc = DateTime.UtcNow;
 
-    private string GenerateToken(List<Claim> claims, string key, string issuer, string audience, long expires)
-    {
-        var expire = _dateTimeProvider
-            .Now()
-            .AddMinutes(expires)
-            .UtcDateTime;
+        var userId = record.UserId; // needed for new token
 
-        var credentials = new SigningCredentials(GetSymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
-        var tokenDescriptor = new JwtSecurityToken(issuer, audience, claims,
-            expires: expire, signingCredentials: credentials);
-        return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
-    }
+        // you likely have an IUserRepository already:
+        var user = await _userRepo.FindByIdAsync(userId, cancellationToken)
+                   ?? throw new InvalidRefreshTokenException();
 
-    private static List<Claim> GenerateAccessTokenClaims(AuthInfo info)
-    {
-        return new()
-        {
-            new(ClaimTypes.UserData, info.Id),
-            new(ClaimTypes.Name, info.Name),
-            new("CharacterId", info.CharacterId),
-            new("IsPlayer", info.IsPlayer.ToString(), ClaimValueTypes.Boolean)
-        };
-    }
+        var newTokens = IssueTokens(user);
+        // store the hash of the *new* refresh token inside the old one (`ReplacedBy`) – optional
+        record.ReplacedBy = _hasher.Hash(newTokens.RefreshToken);
+        await _repo.SaveChangesAsync(cancellationToken);
 
-    private List<Claim> GenerateRefreshTokenClaims(AuthInfo info)
-    {
-        return new()
-        {
-            new(ClaimTypes.UserData, info.Id),
-            new Claim("iat", _dateTimeProvider.Now().ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
-        };
-    }
-
-
-    /// <inheritdoc />
-    public Tokens RefreshTokens(string refreshToken, bool isRefreshFromWeb = false)
-    {
-        var isNewRefreshTokenValid = ValidateToken(_topSecretRefreshKey, "", "", refreshToken);
-
-        if (!isNewRefreshTokenValid)
-        {
-            //_logger.LogWarning("Attempt to refresh invalid or expired refresh token {RefreshToken}", refreshToken);
-            //throw new InvalidRefreshTokenException("Invalid refresh token");
-        }
-
-        var handler = new JwtSecurityTokenHandler();
-        var jwtSecurityToken = handler.ReadJwtToken(refreshToken);
-
-        var claims = jwtSecurityToken.Claims.ToList();
-        var id = claims.SingleOrDefault(x => x.Type == ClaimTypes.UserData)!.Value;
-        var user = _context.Users
-            .FirstOrDefault(x => x.Id == id && !x.BannedUntil.HasValue);
-        NotFoundException.ThrowIfNull(user, nameof(AppUser), id);
-        var character = _context.Characters
-            .FirstOrDefault(x => x.UserId == user.Id);
-        NotFoundException.ThrowIfNull(character, nameof(Character), user.Id);
-
-
-
-        var userIsCurrentlyBanned = user is null;
-        if (userIsCurrentlyBanned)
-        {
-            //_logger.LogWarning("Attempt to refresh tokens for deleted or soft-deleted user {Id}", id);
-            //throw new InvalidRefreshTokenException("Cannot issue new tokens for deleted or softdeleted users");
-        }
-
-        //if (member!.RefreshTokensRevokedBefore.HasValue && jwtSecurityToken.IssuedAt <= member!.RefreshTokensRevokedBefore.Value)
-        //{
-        //    _logger.LogWarning("Attempt to refresh tokens for user with {RefreshTokensRevokedBefore} for {Id}", member.RefreshTokensRevokedBefore, id);
-        //    throw new InvalidRefreshTokenException("Cannot issue new tokens with refresh token that has been revoked");
-        //}
-
-        var authInfo = new AuthInfo()
-        {
-            Id = id,
-            Name = user!.UserName!,
-            CharacterId = character.Id.ToString(),
-        };
-
-        return GenerateTokens(authInfo);
+        return newTokens;
     }
 
     /// <inheritdoc />
     public bool ValidateAccessToken(string token)
     {
-        return ValidateToken(_topSecretAccessKey, "", "", token);
-    }
-
-    private static bool ValidateToken(string key, string issuer, string audience, string token)
-    {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var jwtSecurityToken = tokenHandler.ReadJwtToken(token);
-
-        var claims = jwtSecurityToken.Claims.ToList();
         try
         {
-            var idClaim = claims.SingleOrDefault(x => x.Type.Equals(ClaimTypes.UserData))!;
-
-            if (idClaim == null || !Guid.TryParse(idClaim.Value, out var characterId))
-            {
-                return false;
-            }
-
-            tokenHandler.ValidateToken(token,
-                new()
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = GetSymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    //ValidIssuer = issuer,
-                    //ValidAudience = audience,
-                    ClockSkew = TimeSpan.Zero,
-                }, out var validatedToken);
+            _handler.ValidateToken(token, _parameters, out _);
+            return true;
         }
         catch
         {
-            return false;
+            return false; // expired, malformed, wrong key, etc.
         }
-
-        return true;
     }
 
     private static SymmetricSecurityKey GetSymmetricSecurityKey(string key)

@@ -1,14 +1,11 @@
 ﻿using Application.Authorization.Interfaces;
 using Application.Common.Responses;
 using Application.Interfaces.Services.LL;
-using Application.UseCases.Characters.Dtos;
 using Common.Authorization.Security;
-using Common.Exceptions;
 using MediatR;
 
 namespace Application.UseCases.Users.Queries.Login;
 public record LoginQuery(string Email, string Password) : IRequest<Response<Tokens>>;
-
 public class LoginQueryHandler : IRequestHandler<LoginQuery, Response<Tokens>>
 {
     private readonly IUserService _userService;
@@ -26,12 +23,12 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, Response<Tokens>>
     {
         try
         {
-            var user = await _userService.Login(request.Email, request.Password);
-            var character = await _characterService.GetMyCharacterAsync(Guid.Parse(user.Id), cancellationToken);
+            var user = await _userService.ValidateCredentialsAsync(request.Email, request.Password, cancellationToken);
 
-            user.CharacterId = character.Id.ToString();
+            var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
+            user.CharacterId = character.Id;
 
-            var tokens = _jwtGenerator.GenerateTokens(user);
+            var tokens = _jwtGenerator.IssueTokens(user);
             return Response<Tokens>.Success(tokens);
         }
         catch

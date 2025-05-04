@@ -2,6 +2,8 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Items;
+using Domain.Models.Users;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Services.LL._Simulator;
 using Services.LL.Attributes;
@@ -66,19 +68,13 @@ public static class DependencyInjection
         services.AddScoped<ILootTableService, LootTableService>();
         services.AddScoped<IInventoryService, InventoryService>();
 
-        //services.AddScoped<ICombatManager, CombatManager>();
-        //services.AddScoped<ICombatService, CombatService>();
-
         services.AddScoped<ISpawningService, SpawningService>();
-
-        //services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
         services.AddScoped<IJwtGenerator, JwtGenerator>();
         services.AddScoped<IUserService, UserService>();
-
-        //services.AddSingleton(typeof(IJobQueue<>), typeof(ConcurrentJobQueue<>));
-        //services.AddHostedService<CombatJobBackgroundService>();
-
+        services.AddSingleton<IPasswordHasher<AppUser>, PasswordHasher<AppUser>>();
+        services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
+        services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 
         services.AddScoped<ISimulatorService, SimulatorService>();
 

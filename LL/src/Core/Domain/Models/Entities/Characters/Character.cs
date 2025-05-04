@@ -12,7 +12,7 @@ public class Character : Entity
     /// <summary>
     /// This should only ever be used in the backend, as it's used for authentication
     /// </summary>
-    public string UserId { get; set; } = string.Empty;
+    public Guid UserId { get; set; }
     public CharacterAction? CharacterAction { get; set; }
     public float Experience { get; set; } = 0;
     [NotMapped]

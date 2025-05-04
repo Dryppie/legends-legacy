@@ -70,6 +70,8 @@ public interface IDbContext
     //DbSet<TownBuilding> TownBuildings { get; }
     DbSet<Region> Regions { get; }
     DbSet<AppUser> Users { get; }
+    DbSet<ExternalLogin> ExternalLogins { get; }
+    DbSet<RefreshToken> RefreshTokens { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 
