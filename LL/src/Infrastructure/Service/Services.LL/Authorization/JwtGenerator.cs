@@ -2,12 +2,11 @@
 using System.Security.Claims;
 using System.Text;
 using Application.Authorization.Interfaces;
-using Application.Common.Interfaces;
 using Common.Authorization.Security;
-using Common.DateTimeProvider;
 using Common.Exceptions;
+using Common.Options;
 using Domain.Models.Users;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Services.LL.Authorization;
@@ -21,25 +20,23 @@ public class JwtGenerator : IJwtGenerator
     private readonly SymmetricSecurityKey _signingKey;
     private readonly TokenValidationParameters _parameters;
 
-    private readonly IDateTimeProviderService _dateTimeProvider;
-    private readonly IDbContext _context;
     private readonly TimeSpan _accessLifespan;
     private readonly TimeSpan _refreshLifespan;
-    private readonly string _topSecretAccessKey;
-    public JwtGenerator(IRefreshTokenRepository repo, IUserRepository userRepo, ITokenHasher hasher, IDateTimeProviderService dateTimeProvider, IDbContext context, IConfiguration config)
+    private readonly string _validIssuer;
+    public readonly string _validAudience;
+    public JwtGenerator(IRefreshTokenRepository repo, IUserRepository userRepo, ITokenHasher hasher, IOptions<JwtOptions> jwtOpt)
     {
         _repo = repo;
         _userRepo = userRepo;
         _hasher = hasher;
 
-        _dateTimeProvider = dateTimeProvider;
-        _context = context;
+        var opt = jwtOpt.Value;
 
-        _accessLifespan = TimeSpan.FromMinutes(60);
-        _refreshLifespan = TimeSpan.FromDays(30);
-
-        _topSecretAccessKey = config.GetSection("Jwt").GetValue<string>("AccessTokenSecretKey")!;
-        _signingKey = GetSymmetricSecurityKey(_topSecretAccessKey);
+        _accessLifespan = TimeSpan.FromMinutes(opt.AccessMinutes);
+        _refreshLifespan = TimeSpan.FromDays(opt.RefreshDays);
+        _validIssuer = opt.Issuer;
+        _validAudience = opt.Audience;
+        _signingKey = GetSymmetricSecurityKey(opt.SigningKey);
 
         _parameters = new TokenValidationParameters
         {
@@ -47,8 +44,8 @@ public class JwtGenerator : IJwtGenerator
             ValidateAudience = true,
             ValidateIssuerSigningKey = true,
             ValidateLifetime = true,
-            ValidIssuer = "",
-            ValidAudience = "",
+            ValidIssuer = _validIssuer,
+            ValidAudience = _validAudience,
             IssuerSigningKey = _signingKey,
             ClockSkew = TimeSpan.FromSeconds(10)
         };
@@ -67,16 +64,16 @@ public class JwtGenerator : IJwtGenerator
             new(ClaimTypes.UserData,           user.Id.ToString()),
         };
 
-         if (!string.IsNullOrWhiteSpace(user.CharacterId.ToString()))
+        if (!string.IsNullOrWhiteSpace(user.CharacterId.ToString()))
             claims.Add(new Claim("CharacterId", user.CharacterId.ToString()!));
 
         var jwt = new JwtSecurityToken(
-            issuer: /*_cfg["Jwt:Issuer"]*/ "",
-            audience: /*_cfg["Jwt:Audience"]*/ "",
+            issuer: _validIssuer,
+            audience: _validAudience,
             claims: claims,
             notBefore: now,
             expires: now.Add(_accessLifespan),
-            signingCredentials: new SigningCredentials(GetSymmetricSecurityKey(_topSecretAccessKey), SecurityAlgorithms.HmacSha256)
+            signingCredentials: new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256)
         );
 
         var access = _handler.WriteToken(jwt);

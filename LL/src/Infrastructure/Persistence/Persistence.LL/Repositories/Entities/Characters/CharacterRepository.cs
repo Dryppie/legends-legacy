@@ -232,7 +232,7 @@ public class CharacterRepository : ICharacterRepository
         return character;
     }
 
-    public async Task UpdateCharacterNameAsync(string userId, string username, CancellationToken cancellationToken)
+    public async Task UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken)
     {
         var character = await _context.Characters
             .FirstOrDefaultAsync(c => c.UserId.Equals(userId));

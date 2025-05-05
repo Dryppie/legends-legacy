@@ -4,7 +4,8 @@ public interface IUserRepository
     Task<AppUser?> FindByEmailAsync(string email, CancellationToken cancellationToken);
     Task<AppUser?> FindByIdAsync(Guid id, CancellationToken cancellationToken);
     Task AddAsync(AppUser user, CancellationToken cancellationToken);
-
+    Task<UserInfo> GetUserInfo(Guid userId, CancellationToken cancellationToken);
+    Task SaveChangesAsync(CancellationToken cancellationToken);
     /// <summary>
     /// Check if the User exists through an email
     /// </summary>
@@ -26,5 +27,4 @@ public interface IUserRepository
     ///// <returns></returns>
     //bool DoesGuestExist(string userId);
 
-    //public Task<UserInfo> GetUserInfo(Guid userId);
 }

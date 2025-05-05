@@ -1,7 +1,8 @@
 ﻿using Application.Authorization.Interfaces;
+using Common.Options;
 using Google.Apis.Auth;
 using Google.Apis.Util;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Services.LL.Authorization;
 public sealed class GoogleTokenValidator : IGoogleTokenValidator
@@ -9,10 +10,9 @@ public sealed class GoogleTokenValidator : IGoogleTokenValidator
     private readonly string _clientId;
     private readonly IClock _clock = SystemClock.Default;
 
-    public GoogleTokenValidator(IConfiguration cfg)
+    public GoogleTokenValidator(IOptions<GoogleOAuthOptions> opt)
     {
-        _clientId = cfg["Google:ClientId"] ??
-                    throw new InvalidOperationException("Google:ClientId missing");
+        _clientId = opt.Value.ClientId;
     }
 
     public Task<GoogleJsonWebSignature.Payload> ValidateAsync(string idToken, CancellationToken cancellationToken)
@@ -22,6 +22,7 @@ public sealed class GoogleTokenValidator : IGoogleTokenValidator
             Audience = new[] { _clientId },
             Clock = _clock
         };
+
         return GoogleJsonWebSignature.ValidateAsync(idToken, _clock, false);
     }
 }

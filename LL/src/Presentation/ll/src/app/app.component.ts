@@ -9,6 +9,7 @@ import { forkJoin, switchMap, take } from 'rxjs';
 import { InventoryService } from './core/services/api/inventory/inventory.service';
 import { EquipmentService } from './core/services/api/equipment/equipment.service';
 import { SessionSummaryPopupComponent } from './shared/components/session-summary-popup/session-summary-popup.component';
+import { GoogleAuthService } from './core/services/api/auth/google-auth.service';
 
 @Component({
   selector: 'app-root',
@@ -28,32 +29,24 @@ export class AppComponent {
 
   constructor(
     private authService: AuthService,
+    private googleAuth: GoogleAuthService,
     private characterActionsService: CharacterActionsService,
     private toastService: ToastService,
-    private inventoryService: InventoryService,
-    private equipmentService: EquipmentService,
   ) {}
 
   ngOnInit(): void {
+    this.googleAuth.init();
     this.authService.isAuthenticated$
       .pipe(
         switchMap((isAuthenticated) => {
           if (isAuthenticated) {
             this.characterActionsService.init();
-            return this.loadInitialCharacterData();
           }
           return [];
         }),
         take(1),
       )
       .subscribe();
-  }
-
-  loadInitialCharacterData() {
-    return forkJoin({
-      inventory: this.inventoryService.getInventory(),
-      equipment: this.equipmentService.getEquipment(),
-    });
   }
 
   ngOnDestroy(): void {}

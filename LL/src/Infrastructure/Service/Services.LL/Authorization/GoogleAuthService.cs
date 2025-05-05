@@ -18,20 +18,21 @@ public sealed class GoogleAuthService : IGoogleAuthService
         _userService = userService;
     }
 
-    public async Task<AppUser> LoginOrCreateAsync(string idToken, CancellationToken cancellationToken)
+    public async Task<GoogleLoginResult> LoginOrCreateAsync(string idToken, CancellationToken cancellationToken)
     {
         var payload = await _validator.ValidateAsync(idToken, cancellationToken);
         var googleId = payload.Subject;
 
-        // 1) known Google account?
         var ext = await _externals.FindAsync(AuthProvider.Google, googleId, cancellationToken);
-        if (ext is not null) return ext.User;
+        if (ext is not null) return new GoogleLoginResult(ext.User, false);
 
-        // 2) do we have a user with the same e‑mail?
         var user = await _users.FindByEmailAsync(payload.Email, cancellationToken);
+        var isNew = false;
+
         if (user is null)
         {
             // new user
+            isNew = true;
             user = await _userService.RegisterAsync(
                        username: payload.Email!.Split('@')[0],
                        email: payload.Email!,
@@ -39,14 +40,14 @@ public sealed class GoogleAuthService : IGoogleAuthService
                        cancellationToken);
         }
 
-        // 3) link Google account
         await _externals.AddAsync(new ExternalLogin
         {
             UserId = user.Id,
             Provider = AuthProvider.Google,
             ProviderUserId = googleId
         }, cancellationToken);
-        return user;
+
+        return new GoogleLoginResult(user, isNew);
     }
 
     public async Task<bool> BindAsync(Guid userId, string idToken, CancellationToken cancellationToken)

@@ -6,12 +6,10 @@ using MediatR;
 
 namespace Application.UseCases.Characters.Queries.GetCharacter;
 public record GetCharacterQuery(Guid UserId) : IRequest<Response<CharacterDto>>;
-
 public class GetCharacterQueryHandler : IRequestHandler<GetCharacterQuery, Response<CharacterDto>>
 {
     private readonly ICharacterService _characterService;
     private readonly IMapper _mapper;
-
 
     public GetCharacterQueryHandler(ICharacterService characterService, IMapper mapper)
     {

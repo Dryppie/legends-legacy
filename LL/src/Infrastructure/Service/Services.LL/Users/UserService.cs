@@ -1,6 +1,5 @@
 ﻿using Application.Interfaces.Services.LL;
 using Common.Authorization.Security;
-using Common.Exceptions;
 using Domain.Models.Users;
 using Microsoft.AspNetCore.Identity;
 
@@ -48,45 +47,32 @@ public sealed class UserService : IUserService
         return user;
     }
 
-    //// inheritdoc />
-    //public async Task<AuthInfo> Login(string email, string password)
-    //{
-    //    // Throw NotFound exception if no user is found by the specified email
-    //    var user = await _userManager.FindByEmailAsync(email) ?? throw new NotFoundException();
+    public async Task<AppUser> ConvertGuestToUser(Guid userId, string username, string email, string password, CancellationToken cancellationToken)
+    {
+        if (_userRepository.FindByIdAsync(userId, cancellationToken) == null) throw new Exception("User does not exist");
+        if (_userRepository.FindByEmailAsync(email, cancellationToken) != null) throw new Exception("Email is already in use");
 
-    //    // Return the found user if the given password is valid for said user, else throw NotFound exception
-    //    if (await _userManager.CheckPasswordAsync(user, password))
-    //    {
-    //        return new AuthInfo
-    //        {
-    //            IsValid = true,
-    //            Id = user.Id,
-    //            Name = user.UserName!,
-    //            IsPlayer = true,
-    //        };
-    //    }
+        var user = await _userRepository.FindByIdAsync(userId, cancellationToken);
+        if (user == null)
+            throw new Exception();
 
-    //    throw new NotFoundException();
-    //}
+        user.ConvertGuestToAccount(username, email,
+                     _hasher.HashPassword(null!, password));
 
-    //public async Task<AuthInfo> Register(string username, string email, string password)
-    //{
-    //    if (_userRepository.DoesUsernameExist(username)) throw new Exception("Username has already been used.");
-    //    if (_userRepository.DoesEmailExist(email)) throw new Exception("Email has already been used.");
 
-    //    var user = new AppUser { UserName = username, Email = email };
+        user.IsGuest = false;
 
-    //    var result = await _userManager.CreateAsync(user, password);
+        await _userRepository.SaveChangesAsync(cancellationToken);
 
-    //    return new AuthInfo
-    //    {
-    //        IsValid = true,
-    //        Id = user.Id,
-    //        Name = user.UserName,
-    //    };
-    //}
+        return user;
+    }
 
-    public string GenerateGuestName()
+    public async Task<UserInfo> GetUserInfo(Guid userId, CancellationToken cancellationToken)
+    {
+        return await _userRepository.GetUserInfo(userId, cancellationToken);
+    }
+
+    private string GenerateGuestName()
     {
         var prefixes = new[]
             {
@@ -119,38 +105,4 @@ public sealed class UserService : IUserService
 
         return $"{prefix}{animal}{suffix}_{random.Next(1000, 9999)}";
     }
-
-    //public async Task<AuthInfo> ConvertGuestToUser(string userId, string username, string email, string password)
-    //{
-    //    if (!_userRepository.DoesGuestExist(userId)) throw new Exception("User does not exist");
-    //    if (_userRepository.DoesEmailExist(email)) throw new Exception("Email is already in use");
-
-    //    var user = await _userManager.FindByIdAsync(userId);
-    //    if (user == null)
-    //    {
-    //        return new AuthInfo { IsValid = false };
-    //    }
-
-    //    await _userManager.AddPasswordAsync(user, password);
-    //    await _userManager.SetEmailAsync(user, email);
-    //    await _userManager.SetUserNameAsync(user, username);
-    //    await _userManager.UpdateNormalizedUserNameAsync(user);
-
-    //    user.IsGuest = false;
-
-    //    await _userManager.UpdateAsync(user);
-
-    //    return new AuthInfo
-    //    {
-    //        IsValid = true,
-    //        Id = userId,
-    //        Name = username,
-    //        IsPlayer = true
-    //    };
-    //}
-
-    //public async Task<UserInfo> GetUserInfo(Guid userId)
-    //{
-    //    return await _userRepository.GetUserInfo(userId);
-    //}
 }

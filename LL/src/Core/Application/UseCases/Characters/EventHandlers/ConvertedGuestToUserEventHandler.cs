@@ -1,5 +1,4 @@
 ﻿using Application.Interfaces.Services.LL;
-using Application.UseCases.Characters.Events;
 using Application.UseCases.Users.Events;
 using MediatR;
 

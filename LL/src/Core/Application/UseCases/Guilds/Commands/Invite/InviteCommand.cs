@@ -21,8 +21,6 @@ public class InviteCommandHandler : IRequestHandler<InviteCommand>
         if (!Guid.TryParse(request.Invite.CharacterNameOrId, out var invitedCharacterId))
             throw new ArgumentException("Invalid InvitedCharacterId");
 
-        // Assuming your IGuildService has a method like:
-        // Task InviteCharacterAsync(Guid inviterId, Guid guildId, Guid invitedCharacterId);
         await _guildService.InviteAsync(request.CurrentCharacterId, guildId, invitedCharacterId, cancellationToken);
     }
 }

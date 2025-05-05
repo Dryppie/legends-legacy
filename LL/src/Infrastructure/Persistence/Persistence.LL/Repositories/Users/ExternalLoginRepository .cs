@@ -9,8 +9,9 @@ public sealed class ExternalLoginRepository : IExternalLoginRepository
     public ExternalLoginRepository(IDbContext db) => _context = db;
 
     public Task<ExternalLogin?> FindAsync(AuthProvider p, string id, CancellationToken cancellationToken) =>
-        _context.ExternalLogins.SingleOrDefaultAsync(l => l.Provider == p &&
-                                                     l.ProviderUserId == id, cancellationToken);
+        _context.ExternalLogins
+            .Include(l => l.User)
+            .SingleOrDefaultAsync(l => l.Provider == p && l.ProviderUserId == id, cancellationToken);
 
     public async Task AddAsync(ExternalLogin login, CancellationToken cancellationToken)
     {

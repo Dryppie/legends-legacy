@@ -16,12 +16,13 @@ public class GetUserInfoQueryHandler : IRequestHandler<GetUserInfoQuery, UserInf
     }
     public async Task<UserInfoDto> Handle(GetUserInfoQuery request, CancellationToken cancellationToken)
     {
-        //var userInfo = await _userService.GetUserInfo(request.UserId);
+        var userInfo = await _userService.GetUserInfo(request.UserId, cancellationToken);
 
         var userInfoDto = new UserInfoDto
         {
-            Email = /*userInfo.Email*/"",
-            IsRegisteredUser = /*userInfo.IsRegisteredUser*/true,
+            Email = userInfo.Email,
+            IsRegisteredUser = userInfo.IsRegisteredUser,
+            IsGmailBound = userInfo.IsGmailBound,
         };
 
         return userInfoDto;

@@ -9,6 +9,7 @@ import { environment } from '../../../../environments/environment';
 import { emailValidator } from '../../../shared/validators/email-validator';
 import { passwordValidator } from '../../../shared/validators/password-validator';
 import { passwordMatchValidator } from '../../../shared/validators/password-match-validator';
+import { GoogleAuthService } from '../../../core/services/api/auth/google-auth.service';
 
 @Component({
   selector: 'app-settings',
@@ -23,7 +24,10 @@ export class SettingsComponent {
 
   disableLoginLink: boolean = false;
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private googleService: GoogleAuthService,
+  ) {}
 
   version = '1.0.0'; // or pull from environment
 
@@ -43,6 +47,10 @@ export class SettingsComponent {
 
   convertToRegistered() {
     this.setPanel('convertAccount');
+  }
+
+  bindGmail() {
+    this.googleService.prompt();
   }
 
   changeCredentials() {}

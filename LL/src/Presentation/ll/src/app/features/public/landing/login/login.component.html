@@ -17,19 +17,6 @@
         class="center w-60 object-contain"
       />
     </div>
-    <div class="text-center text-primary">
-      Testing is over, so the game is not available at the moment. For updates,
-      head to
-      <a
-        href="https://discord.gg/HXN4xnJUp3"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="underline"
-      >
-        Discord
-      </a>
-    </div>
-
     <form
       [formGroup]="loginForm"
       (ngSubmit)="login()"
@@ -99,6 +86,7 @@
           <button
             href="#"
             class="font-medium text-ancient-secondary hover:text-ancient-primary focus:underline focus:outline-none"
+            (click)="('do nothing')"
           >
             Forgot password?
           </button>
@@ -115,26 +103,27 @@
 
       <button
         routerLink="/signup"
-        class="my-8 w-full text-center text-primary underline focus:outline-none"
+        class="my-4 w-full text-center text-primary underline focus:outline-none"
       >
         New to Legend's Legacy? Sign up!
       </button>
     </form>
 
-    <!-- <div class="mt-4 flex justify-center">
+    <div class="mt-4 flex justify-center">
       <button
         type="button"
-        class="hover:bg-gray-200 focus:ring-gray-500 flex items-center rounded-lg bg-white px-4 py-2 text-black shadow-md focus:outline-none focus:ring-2 focus:ring-opacity-75"
+        (click)="onGoogleClick()"
+        class="flex items-center rounded-lg bg-white px-4 py-2 text-black shadow-md hover:bg-light_gray focus:outline-none"
       >
-        <img src="/assets/google-logo.png" alt="Google Logo" class="mr-2 h-5" />
+        <img src="/assets/google-logo.png" alt="Google Logo" class="mr-2 h-6" />
         Continue with Google
       </button>
-    </div> -->
+    </div>
     <div class="mt-4 flex justify-center">
       <button
         (click)="loginAsGuest()"
         type="button"
-        class="hover:bg-gray-200 focus:ring-gray-500 flex items-center rounded-lg bg-white px-4 py-2 text-black shadow-md focus:outline-none focus:ring-2 focus:ring-opacity-75"
+        class="flex items-center rounded-lg bg-white px-4 py-2 text-black shadow-md hover:bg-light_gray focus:outline-none"
       >
         Login as Guest
       </button>

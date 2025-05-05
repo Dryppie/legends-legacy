@@ -28,4 +28,12 @@ public sealed class AppUser
             PasswordHash = hash,
             IsGuest = false
         };
+    public void ConvertGuestToAccount(string username, string email, string hash)
+    {
+        Username = username;
+        Email = email;
+        PasswordHash = hash;
+        UpdatedUtc = DateTime.UtcNow;
+        IsGuest = false;
+    }
 }

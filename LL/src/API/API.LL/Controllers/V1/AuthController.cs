@@ -1,5 +1,4 @@
-﻿using System.Security.Claims;
-using API.LL.Controllers;
+﻿using API.LL.Controllers;
 using Application.Common.Responses;
 using Application.UseCases.Authorization.Commands.CreateNewTokens;
 using Application.UseCases.Authorization.Queries.ValidateToken;
@@ -68,13 +67,14 @@ public class AuthController : BaseController
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult> ConvertGuestToUser([FromBody] UserRegisterDto input)
+    public async Task<ActionResult<Response<Tokens>>> ConvertGuestToUser([FromBody] UserRegisterDto input)
     {
-        var succeeded = await Mediator.Send(new ConvertGuestToUserCommand(CurrentUserId.ToString(), input.Username, input.Email, input.Password));
+        var result = await Mediator.Send(new ConvertGuestToUserCommand(CurrentUserId, input.Username, input.Email, input.Password));
 
-        return succeeded
-             ? Ok(new { isValid = true, message = "Account successfully converted" })
-             : BadRequest(new { isValid = false, message = "Failed to convert guest to user" });
+        if (result.Data is null) return BadRequest(result);
+
+        SetAuthCookies(result.Data);
+        return Ok(result);
     }
 
     [HttpPost("google")]
@@ -91,8 +91,7 @@ public class AuthController : BaseController
     [Authorize]
     public async Task<IActionResult> BindGoogle([FromBody] string idToken)
     {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.UserData)!);
-        var res = await Mediator.Send(new BindGoogleCommand(userId, idToken));
+        var res = await Mediator.Send(new BindGoogleCommand(CurrentUserId, idToken));
         return res.IsSuccess ? Ok(res) : BadRequest(res);
     }
 

@@ -1,6 +1,4 @@
-﻿using Application.UseCases.Users.Dtos;
-using Common.Authorization.Security;
-using Domain.Models.Users;
+﻿using Domain.Models.Users;
 
 namespace Application.Interfaces.Services.LL;
 public interface IUserService
@@ -8,15 +6,15 @@ public interface IUserService
     Task<AppUser> RegisterAsync(string username, string email, string password, CancellationToken cancellationToken);
     Task<AppUser> RegisterGuestAsync(CancellationToken cancellationToken);
     Task<AppUser> ValidateCredentialsAsync(string email, string password, CancellationToken cancellationToken);
+    Task<UserInfo> GetUserInfo(Guid UserId, CancellationToken cancellationToken);
 
 
-    ///// <summary>
-    ///// Convert a guest into a user account
-    ///// </summary>
-    ///// <param name="userId"></param>
-    ///// <returns></returns>
-    //Task<AuthInfo> ConvertGuestToUser(string userId, string username, string email, string password);
-    //Task<UserInfo> GetUserInfo(Guid UserId);
+    /// <summary>
+    /// Convert a guest into a user account
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    Task<AppUser> ConvertGuestToUser(Guid userId, string username, string email, string password, CancellationToken cancellationToken);
 
     ///// <summary>
     ///// Login with the given Email and Password

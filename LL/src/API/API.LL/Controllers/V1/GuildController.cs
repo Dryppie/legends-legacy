@@ -52,6 +52,7 @@ public class GuildController : BaseController
 
         return Ok();
     }
+
     [HttpPost("InviteCharacterByName")]
     public async Task<ActionResult> InviteCharacterByName([FromBody] InviteToGuildDto invite)
     {
