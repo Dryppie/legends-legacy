@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using Application.Interfaces.Services.LL;
+﻿using Application.Interfaces.Services.LL;
 using Domain.Models.Colosseum;
 using Domain.Models.Combat;
 using Domain.Models.Entities.Characters;
@@ -22,7 +21,7 @@ public class ColosseumService : IColosseumService
         _colosseumRepository = colosseumRepository;
     }
 
-    public async Task<CombatResult> StartArenaBattle(Guid characterId, Guid enemyId, CancellationToken cancellationToken)
+    public async Task<CombatResult?> StartArenaBattle(Guid characterId, Guid enemyId, CancellationToken cancellationToken)
     {
         var now = DateTimeOffset.UtcNow;
 
@@ -33,7 +32,9 @@ public class ColosseumService : IColosseumService
         await _colosseumRepository.UpdateArenaTicketStatusAsync(arenaTicketStatus, cancellationToken);
 
         var playerTeam = await _entityService.GetEntitiesByIdsForCombatAsync([characterId], cancellationToken);
+        if (playerTeam.Count == 0) return null;
         var enemyTeam = await _entityService.GetEntitiesByIdsForCombatAsync([enemyId], cancellationToken);
+        if (enemyTeam.Count == 0) return null;
 
         var combatPlayerEntities = _combatSetupService.CreateCombatEntities(playerTeam);
         var combatEnemyEntities = _combatSetupService.CreateCombatEntities(enemyTeam);
@@ -41,11 +42,12 @@ public class ColosseumService : IColosseumService
 
         var combatSimulation = new CombatSimulation(combatPlayerEntities, combatEnemyEntities);
         var combatResult = combatSimulation.RunSimulation();
+        if (combatResult == null) return null;
+
         combatResult.StartedAt = now;
 
         combatResult.PlayerTeam = _combatSetupService.CreateSimpleCombatEntities(combatPlayerEntities);
         combatResult.EnemyTeam = _combatSetupService.CreateSimpleCombatEntities(combatEnemyEntities);
-
 
         return combatResult;
     }
@@ -64,7 +66,9 @@ public class ColosseumService : IColosseumService
     public async Task SaveArenaMatchResult(Guid characterId, Guid enemyId, BattleOutcome outcome, CancellationToken cancellationToken)
     {
         var characterA = await _characterService.GetBaseCharacterByIdAsync(characterId, cancellationToken);
+        if (characterA == null) return; // TODO: Log errors
         var characterB = await _characterService.GetBaseCharacterByIdAsync(enemyId, cancellationToken);
+        if (characterB == null) return; // TODO: Log errors
 
         var arenaMatchResult = new ColosseumMatchResult()
         {

@@ -1,6 +1,6 @@
 ﻿using Application.Authorization.Interfaces;
-using Application.Common.Responses;
 using Common.Authorization.Security;
+using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Authorization.Commands.CreateNewTokens;
@@ -22,6 +22,9 @@ public class CreateNewTokensCommandHandler : IRequestHandler<CreateNewTokensComm
     public async Task<Response<Tokens>> Handle(CreateNewTokensCommand request, CancellationToken cancellationToken)
     {
         var tokens = await _jwtGenerator.RefreshAsync(request.RefreshToken, cancellationToken);
-        return Response<Tokens>.Success(tokens);
+
+        return tokens != null
+            ? Response<Tokens>.Success(tokens)
+            : Response<Tokens>.Fail("Token failure.");
     }
 }

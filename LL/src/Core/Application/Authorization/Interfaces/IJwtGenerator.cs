@@ -5,12 +5,12 @@ namespace Application.Authorization.Interfaces;
 public interface IJwtGenerator
 {
     Tokens IssueTokens(AppUser user);
-    Task<Tokens> RefreshAsync(string refreshToken, CancellationToken cancellationToken);
+    Task<Tokens?> RefreshAsync(string refreshToken, CancellationToken cancellationToken);
 
     /// <summary>
     /// Validates a jwt access token
     /// </summary>
     /// <param name="token"></param>
     /// <returns>Validity bool</returns>
-    bool ValidateAccessToken(string token);
+    Task<bool> ValidateAccessToken(string token);
 }

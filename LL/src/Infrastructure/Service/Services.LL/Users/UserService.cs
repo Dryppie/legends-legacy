@@ -1,5 +1,4 @@
 ﻿using Application.Interfaces.Services.LL;
-using Common.Authorization.Security;
 using Domain.Models.Users;
 using Microsoft.AspNetCore.Identity;
 
@@ -15,10 +14,10 @@ public sealed class UserService : IUserService
         _hasher = hasher;
     }
 
-    public async Task<AppUser> RegisterAsync(string username, string email, string password, CancellationToken cancellationToken)
+    public async Task<AppUser?> RegisterAsync(string username, string email, string password, CancellationToken cancellationToken)
     {
         if (await _userRepository.FindByEmailAsync(email, cancellationToken) is not null)
-            throw new InvalidOperationException("E‑mail already used");
+            return null;
 
         var user = AppUser.Register(username, email,
                      _hasher.HashPassword(null!, password));
@@ -27,7 +26,7 @@ public sealed class UserService : IUserService
         return user;
     }
 
-    public async Task<AppUser> RegisterGuestAsync(CancellationToken cancellationToken)
+    public async Task<AppUser?> RegisterGuestAsync(CancellationToken cancellationToken)
     {
         var guest = AppUser.Guest();
         guest.Username = GenerateGuestName();
@@ -35,31 +34,27 @@ public sealed class UserService : IUserService
         return guest;
     }
 
-    public async Task<AppUser> ValidateCredentialsAsync(string email, string password, CancellationToken cancellationToken)
+    public async Task<AppUser?> ValidateCredentialsAsync(string email, string password, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.FindByEmailAsync(email, cancellationToken)
-                   ?? throw new InvalidOperationException("Invalid login");
+        var user = await _userRepository.FindByEmailAsync(email, cancellationToken);
+        if (user == null) return null;
 
         var vr = _hasher.VerifyHashedPassword(user, user.PasswordHash!, password);
         if (vr != PasswordVerificationResult.Success)
-            throw new InvalidOperationException("Invalid login");
+            return null;
 
         return user;
     }
 
-    public async Task<AppUser> ConvertGuestToUser(Guid userId, string username, string email, string password, CancellationToken cancellationToken)
+    public async Task<AppUser?> ConvertGuestToUser(Guid userId, string username, string email, string password, CancellationToken cancellationToken)
     {
-        if (_userRepository.FindByIdAsync(userId, cancellationToken) == null) throw new Exception("User does not exist");
-        if (_userRepository.FindByEmailAsync(email, cancellationToken) != null) throw new Exception("Email is already in use");
-
         var user = await _userRepository.FindByIdAsync(userId, cancellationToken);
-        if (user == null)
-            throw new Exception();
+        if (user == null) return null;
+        if (await _userRepository.FindByEmailAsync(email, cancellationToken) != null) return null;
+
 
         user.ConvertGuestToAccount(username, email,
                      _hasher.HashPassword(null!, password));
-
-
         user.IsGuest = false;
 
         await _userRepository.SaveChangesAsync(cancellationToken);
@@ -67,7 +62,7 @@ public sealed class UserService : IUserService
         return user;
     }
 
-    public async Task<UserInfo> GetUserInfo(Guid userId, CancellationToken cancellationToken)
+    public async Task<UserInfo?> GetUserInfo(Guid userId, CancellationToken cancellationToken)
     {
         return await _userRepository.GetUserInfo(userId, cancellationToken);
     }

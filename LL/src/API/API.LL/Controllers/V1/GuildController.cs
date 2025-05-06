@@ -13,107 +13,62 @@ using Application.UseCases.Guilds.Dtos.Responses;
 using Application.UseCases.Guilds.Queries.GetAllGuilds;
 using Application.UseCases.Guilds.Queries.GetMyGuild;
 using Application.UseCases.Guilds.Queries.GetMyInvites;
+using Common.Primitives;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.LL.Controllers.V1;
 public class GuildController : BaseController
 {
     [HttpGet("GetMyGuild")]
-    public async Task<GuildDto?> GetMyGuild()
-    {
-        return await Mediator.Send(new GetMyGuildQuery(CurrentCharacterGuid));
-    }
+    public async Task<GuildDto?> GetMyGuild() =>
+        await Mediator.Send(new GetMyGuildQuery(CurrentCharacterGuid));
 
     [HttpGet("GetAllGuilds")]
-    public async Task<List<GuildSimpleDto>> GetAllGuilds()
-    {
-        return await Mediator.Send(new GetAllGuildsQuery());
-    }
+    public async Task<List<GuildSimpleDto>> GetAllGuilds() =>
+        await Mediator.Send(new GetAllGuildsQuery());
 
     [HttpPost("CreateGuild")]
-    public async Task<ActionResult> CreateGuild([FromBody] string name)
-    {
+    public async Task<ActionResult<Response<bool>>> CreateGuild([FromBody] string name) =>
         await Mediator.Send(new CreateGuildCommand(CurrentCharacterGuid, name));
 
-        return Ok();
-    }
-
     [HttpGet("GetMyInvites")]
-    public async Task<List<GuildInviteDto>> GetMyInvites()
-    {
-        return await Mediator.Send(new GetMyInvitesQuery(CurrentCharacterGuid));
-    }
+    public async Task<List<GuildInviteDto>> GetMyInvites() =>
+        await Mediator.Send(new GetMyInvitesQuery(CurrentCharacterGuid));
 
 
     [HttpPost("Invite")]
-    public async Task<ActionResult> Invite([FromBody] InviteToGuildDto invite)
-    {
+    public async Task<ActionResult<Response<bool>>> Invite([FromBody] InviteToGuildDto invite) =>
         await Mediator.Send(new InviteCommand(CurrentCharacterGuid, invite));
 
-        return Ok();
-    }
-
     [HttpPost("InviteCharacterByName")]
-    public async Task<ActionResult> InviteCharacterByName([FromBody] InviteToGuildDto invite)
-    {
+    public async Task<ActionResult<Response<bool>>> InviteCharacterByName([FromBody] InviteToGuildDto invite) => 
         await Mediator.Send(new InviteCharacterByNameCommand(CurrentCharacterGuid, invite));
 
-        return Ok();
-    }
-
     [HttpPost("AcceptInvite")]
-    public async Task<ActionResult> AcceptInvite([FromBody] string guildId)
-    {
+    public async Task<ActionResult<Response<bool>>> AcceptInvite([FromBody] string guildId) => 
         await Mediator.Send(new AcceptInviteCommand(CurrentCharacterGuid, guildId));
 
-        return Ok();
-    }
-
     [HttpPost("RejectInvite")]
-    public async Task<ActionResult> RejectInvite([FromBody] string guildId)
-    {
+    public async Task<ActionResult<Response<bool>>> RejectInvite([FromBody] string guildId) => 
         await Mediator.Send(new RejectInviteCommand(CurrentCharacterGuid, guildId));
 
-        return Ok();
-    }
-
     [HttpPost("ApproveApplication")]
-    public async Task<ActionResult> ApproveApplication([FromBody] string characterId)
-    {
+    public async Task<ActionResult<Response<bool>>> ApproveApplication([FromBody] string characterId) => 
         await Mediator.Send(new ApproveApplicationCommand(CurrentCharacterGuid, characterId));
 
-        return Ok();
-    }
-
     [HttpPost("RejectApplication")]
-    public async Task<ActionResult> RejectApplication([FromBody] string characterId)
-    {
+    public async Task<ActionResult<Response<bool>>> RejectApplication([FromBody] string characterId) => 
         await Mediator.Send(new RejectApplicationCommand(CurrentCharacterGuid, characterId));
 
-        return Ok();
-    }
-
     [HttpPost("ApplyToGuild")]
-    public async Task<ActionResult> ApplyToGuild([FromBody] string guildId)
-    {
+    public async Task<ActionResult<Response<bool>>> ApplyToGuild([FromBody] string guildId) => 
         await Mediator.Send(new ApplyToGuildCommand(CurrentCharacterGuid, guildId));
 
-        return Ok();
-    }
-
     [HttpPost("LeaveGuild")]
-    public async Task<ActionResult> LeaveGuild()
-    {
+    public async Task<ActionResult<Response<bool>>> LeaveGuild() => 
         await Mediator.Send(new LeaveGuildCommand(CurrentCharacterGuid));
 
-        return Ok();
-    }
-
     [HttpPost("DisbandGuild")]
-    public async Task<ActionResult> DisbandGuild()
-    {
+    public async Task<ActionResult<Response<bool>>> DisbandGuild() =>
         await Mediator.Send(new DisbandGuildCommand(CurrentCharacterGuid));
-
-        return Ok();
-    }
 }

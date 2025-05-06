@@ -1,4 +1,5 @@
 ﻿using Application.Authorization.Interfaces;
+using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Authorization.Queries.ValidateToken;
@@ -6,9 +7,9 @@ namespace Application.UseCases.Authorization.Queries.ValidateToken;
 /// Validate whether a token is valid
 /// </summary>
 /// <param name="Token"></param>
-public record ValidateTokenQuery(string Token) : IRequest<bool>;
+public record ValidateTokenQuery(string Token) : IRequest<Response<bool>>;
 
-public class ValidateTokenQueryHandler : IRequestHandler<ValidateTokenQuery, bool>
+public class ValidateTokenQueryHandler : IRequestHandler<ValidateTokenQuery, Response<bool>>
 {
     private readonly IJwtGenerator _jwtGenerator;
 
@@ -17,8 +18,11 @@ public class ValidateTokenQueryHandler : IRequestHandler<ValidateTokenQuery, boo
         _jwtGenerator = jwtGenerator;
     }
 
-    public Task<bool> Handle(ValidateTokenQuery request, CancellationToken cancellationToken)
+    public async Task<Response<bool>> Handle(ValidateTokenQuery request, CancellationToken cancellationToken)
     {
-        return Task.FromResult(_jwtGenerator.ValidateAccessToken(request.Token));
+        return await _jwtGenerator.ValidateAccessToken(request.Token)
+            ? Response<bool>.Success(true)
+            : Response<bool>.Fail("Failed token validation");
+
     }
 }

@@ -1,12 +1,13 @@
 ﻿using Application.Interfaces.Services.LL;
 using Application.UseCases.Users.Dtos;
+using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Users.Queries.GetUserInfo;
 
-public record GetUserInfoQuery(Guid UserId) : IRequest<UserInfoDto>;
+public record GetUserInfoQuery(Guid UserId) : IRequest<Response<UserInfoDto>>;
 
-public class GetUserInfoQueryHandler : IRequestHandler<GetUserInfoQuery, UserInfoDto>
+public class GetUserInfoQueryHandler : IRequestHandler<GetUserInfoQuery, Response<UserInfoDto>>
 {
     private readonly IUserService _userService;
     
@@ -14,9 +15,10 @@ public class GetUserInfoQueryHandler : IRequestHandler<GetUserInfoQuery, UserInf
     {
         _userService = userService;
     }
-    public async Task<UserInfoDto> Handle(GetUserInfoQuery request, CancellationToken cancellationToken)
+    public async Task<Response<UserInfoDto>> Handle(GetUserInfoQuery request, CancellationToken cancellationToken)
     {
         var userInfo = await _userService.GetUserInfo(request.UserId, cancellationToken);
+        if (userInfo == null) return Response<UserInfoDto>.Fail("Failed getting user info.");
 
         var userInfoDto = new UserInfoDto
         {
@@ -25,6 +27,6 @@ public class GetUserInfoQueryHandler : IRequestHandler<GetUserInfoQuery, UserInf
             IsGmailBound = userInfo.IsGmailBound,
         };
 
-        return userInfoDto;
+        return Response<UserInfoDto>.Success(userInfoDto);
     }
 }

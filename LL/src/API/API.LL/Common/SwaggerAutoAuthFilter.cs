@@ -1,8 +1,6 @@
 ﻿using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL;
 using Common.Authorization.Security;
-using Domain.Models.Users;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
@@ -90,14 +88,10 @@ public class SwaggerAutoAuthFilter : IOperationFilter
             var jwtTokenService = scope.ServiceProvider.GetRequiredService<IJwtGenerator>();
             var characterService = scope.ServiceProvider.GetRequiredService<ICharacterService>();
 
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Email!.Equals(email));
-            if (user == null)
-            {
-                return null;
-            }
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Email!.Equals(email), cancellationToken);
 
-            var character = await characterService.GetMyCharacterAsync(user.Id, cancellationToken);
-            user.CharacterId = character.Id;
+            var character = await characterService.GetMyCharacterAsync(user!.Id, cancellationToken);
+            user.CharacterId = character!.Id;
 
             var token = jwtTokenService.IssueTokens(user);
             return token;

@@ -24,12 +24,11 @@ public class UserRepository : IUserRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<UserInfo> GetUserInfo(Guid userId, CancellationToken cancellationToken)
+    public async Task<UserInfo?> GetUserInfo(Guid userId, CancellationToken cancellationToken)
     {
         var user = await _context.Users.Include(u => u.ExternalLogins).FirstOrDefaultAsync(x => x.Id.Equals(userId), cancellationToken);
         //TODO: Implement exception
-        if (user == null)
-            throw new Exception();
+        if (user == null) return null;
 
         return new UserInfo
         {

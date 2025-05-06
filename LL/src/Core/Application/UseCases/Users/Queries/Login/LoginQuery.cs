@@ -1,7 +1,7 @@
 ﻿using Application.Authorization.Interfaces;
-using Application.Common.Responses;
 using Application.Interfaces.Services.LL;
 using Common.Authorization.Security;
+using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Users.Queries.Login;
@@ -21,19 +21,15 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, Response<Tokens>>
 
     public async Task<Response<Tokens>> Handle(LoginQuery request, CancellationToken cancellationToken)
     {
-        try
-        {
-            var user = await _userService.ValidateCredentialsAsync(request.Email, request.Password, cancellationToken);
+        var user = await _userService.ValidateCredentialsAsync(request.Email, request.Password, cancellationToken);
+        if (user == null) return Response<Tokens>.Fail("Login error. Check your credentials.");
 
-            var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
-            user.CharacterId = character.Id;
+        var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
+        if (character == null) return Response<Tokens>.Fail("No character exists with this account.");
 
-            var tokens = _jwtGenerator.IssueTokens(user);
-            return Response<Tokens>.Success(tokens);
-        }
-        catch
-        {
-            return Response<Tokens>.Fail("Token Error");
-        }
+        user.CharacterId = character.Id;
+
+        var tokens = _jwtGenerator.IssueTokens(user);
+        return Response<Tokens>.Success(tokens);
     }
 }

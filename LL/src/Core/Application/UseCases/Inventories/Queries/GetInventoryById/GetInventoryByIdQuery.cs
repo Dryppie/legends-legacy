@@ -1,12 +1,13 @@
 ﻿using Application.Interfaces.Services.LL;
 using Application.UseCases.Inventories.Dtos;
 using AutoMapper;
+using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Inventories.Queries.GetInventoryById;
-public record GetInventoryByIdQuery(Guid characterId) : IRequest<InventoryDto>;
+public record GetInventoryByIdQuery(Guid characterId) : IRequest<Response<InventoryDto>>;
 
-public class GetInventoryByIdQueryHandler : IRequestHandler<GetInventoryByIdQuery, InventoryDto>
+public class GetInventoryByIdQueryHandler : IRequestHandler<GetInventoryByIdQuery, Response<InventoryDto>>
 {
     private readonly IInventoryService _inventoryService;
     private readonly IMapper _mapper;
@@ -15,10 +16,12 @@ public class GetInventoryByIdQueryHandler : IRequestHandler<GetInventoryByIdQuer
         _inventoryService = inventoryService;
         _mapper = mapper;
     }
-    public async Task<InventoryDto> Handle(GetInventoryByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Response<InventoryDto>> Handle(GetInventoryByIdQuery request, CancellationToken cancellationToken)
     {
         var inventory = await _inventoryService.GetInventoryByIdAsync(request.characterId, cancellationToken);
+        if (inventory == null) return Response<InventoryDto>.Fail("Failed to get inventory.");
+
         var inventoryDto =  _mapper.Map<InventoryDto>(inventory);
-        return inventoryDto;
+        return Response<InventoryDto>.Success(inventoryDto);
     }
 }

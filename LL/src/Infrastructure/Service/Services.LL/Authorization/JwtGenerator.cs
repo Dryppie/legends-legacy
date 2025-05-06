@@ -3,7 +3,6 @@ using System.Security.Claims;
 using System.Text;
 using Application.Authorization.Interfaces;
 using Common.Authorization.Security;
-using Common.Exceptions;
 using Common.Options;
 using Domain.Models.Users;
 using Microsoft.Extensions.Options;
@@ -90,12 +89,12 @@ public class JwtGenerator : IJwtGenerator
         return new Tokens(access, refresh);
     }
 
-    public async Task<Tokens> RefreshAsync(string refreshToken, CancellationToken cancellationToken)
+    public async Task<Tokens?> RefreshAsync(string refreshToken, CancellationToken cancellationToken)
     {
-        var record = await _repo.FindAsync(refreshToken, cancellationToken)
-                     ?? throw new InvalidRefreshTokenException();
+        var record = await _repo.FindAsync(refreshToken, cancellationToken);
 
-        if (!record.IsActive) throw new InvalidRefreshTokenException();
+        if (record == null) return null;
+        if (!record.IsActive) return null;
 
         // revoke current token, issue new pair
         record.RevokedUtc = DateTime.UtcNow;
@@ -103,8 +102,8 @@ public class JwtGenerator : IJwtGenerator
         var userId = record.UserId; // needed for new token
 
         // you likely have an IUserRepository already:
-        var user = await _userRepo.FindByIdAsync(userId, cancellationToken)
-                   ?? throw new InvalidRefreshTokenException();
+        var user = await _userRepo.FindByIdAsync(userId, cancellationToken);
+        if (user == null) return null;
 
         var newTokens = IssueTokens(user);
         // store the hash of the *new* refresh token inside the old one (`ReplacedBy`) – optional
@@ -115,11 +114,11 @@ public class JwtGenerator : IJwtGenerator
     }
 
     /// <inheritdoc />
-    public bool ValidateAccessToken(string token)
+    public async Task<bool> ValidateAccessToken(string token)
     {
         try
         {
-            _handler.ValidateToken(token, _parameters, out _);
+            await _handler.ValidateTokenAsync(token, _parameters);
             return true;
         }
         catch

@@ -18,7 +18,7 @@ public sealed class GoogleAuthService : IGoogleAuthService
         _userService = userService;
     }
 
-    public async Task<GoogleLoginResult> LoginOrCreateAsync(string idToken, CancellationToken cancellationToken)
+    public async Task<GoogleLoginResult?> LoginOrCreateAsync(string idToken, CancellationToken cancellationToken)
     {
         var payload = await _validator.ValidateAsync(idToken, cancellationToken);
         var googleId = payload.Subject;
@@ -38,6 +38,7 @@ public sealed class GoogleAuthService : IGoogleAuthService
                        email: payload.Email!,
                        password: Guid.NewGuid().ToString(), // won't be used yet
                        cancellationToken);
+            if (user == null) return null;
         }
 
         await _externals.AddAsync(new ExternalLogin
@@ -54,7 +55,7 @@ public sealed class GoogleAuthService : IGoogleAuthService
     {
         var payload = await _validator.ValidateAsync(idToken, cancellationToken);
 
-        // already linked elsewhere?
+        // already linked elsewhere? return false (error)
         if (await _externals.FindAsync(AuthProvider.Google, payload.Subject, cancellationToken) is not null)
             return false;
 

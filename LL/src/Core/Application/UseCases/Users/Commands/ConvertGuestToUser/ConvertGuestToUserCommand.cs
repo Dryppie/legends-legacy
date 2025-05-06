@@ -1,8 +1,8 @@
 ﻿using Application.Authorization.Interfaces;
-using Application.Common.Responses;
 using Application.Interfaces.Services.LL;
 using Application.UseCases.Users.Events;
 using Common.Authorization.Security;
+using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Users.Commands.ConvertGuestToUser;
@@ -26,11 +26,13 @@ public class ConvertGuestToUserCommandHandler : IRequestHandler<ConvertGuestToUs
     public async Task<Response<Tokens>> Handle(ConvertGuestToUserCommand request, CancellationToken cancellationToken)
     {
         var user = await _userService.ConvertGuestToUser(request.UserId, request.Username, request.Email, request.Password, cancellationToken);
+        if (user == null) return Response<Tokens>.Fail("Username or email might already be in use.");
 
         var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
+        if (character == null) return Response<Tokens>.Fail("No character is bound to this account.");
+
         user.CharacterId = character.Id;
-        // TODO: Change character name after the user has changed theirs
-        await _publisher.Publish(new ConvertedGuestToUserEvent(user.Id, user.Username!));
+        await _publisher.Publish(new ConvertedGuestToUserEvent(user.Id, user.Username!), cancellationToken);
 
 
         var tokens = _jwtGenerator.IssueTokens(user);

@@ -1,15 +1,11 @@
 ﻿using Application.Interfaces.Services.LL;
+using Common.Primitives;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.UseCases.CharacterActions.Commands.DeleteCharacterAction;
-public record DeleteCharacterActionCommand(Guid CharacterId) : IRequest;
+public record DeleteCharacterActionCommand(Guid CharacterId) : IRequest<Response<bool>>;
 
-public class DeleteCharacterActionCommandHandler : IRequestHandler<DeleteCharacterActionCommand>
+public class DeleteCharacterActionCommandHandler : IRequestHandler<DeleteCharacterActionCommand, Response<bool>>
 {
     private readonly ICharacterActionService _characterActionService;
 
@@ -18,8 +14,12 @@ public class DeleteCharacterActionCommandHandler : IRequestHandler<DeleteCharact
         _characterActionService = characterActionService;
     }
 
-    public async Task Handle(DeleteCharacterActionCommand request, CancellationToken cancellationToken)
+    public async Task<Response<bool>> Handle(DeleteCharacterActionCommand request, CancellationToken cancellationToken)
     {
-        await _characterActionService.DeleteCharacterActionAsync(request.CharacterId, cancellationToken);
+        var success = await _characterActionService.DeleteCharacterActionAsync(request.CharacterId, cancellationToken);
+        
+        return success
+            ? Response<bool>.Success(success)
+            : Response<bool>.Fail("No action to delete.");
     }
 }

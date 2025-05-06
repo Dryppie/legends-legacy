@@ -60,15 +60,15 @@ export class AuthService {
     return this.api
       .post('auth/login', { Email: email, Password: password })
       .pipe(
-        tap((r) => {
-          if (r.isSuccess) {
-            this.toast.showToast('Login successful', '', true);
-            this.afterSuccessfulAuth();
-          } else {
-            this.toast.showToast('Login failed', r.errorMessage, false);
-          }
+        tap(() => {
+          this.toast.showToast('Login successful', '', true);
+          this.afterSuccessfulAuth();
         }),
-        map(() => undefined),
+        catchError((e) => {
+          console.log(e);
+          this.toast.showToast('Login failed', e.message, false);
+          return throwError(() => e);
+        }),
       );
   }
 
@@ -85,14 +85,14 @@ export class AuthService {
       })
       .pipe(
         tap((r) => {
-          if (r.isSuccess) {
-            this.toast.showToast('Registration success', '', true);
-            this.afterSuccessfulAuth();
-          } else {
-            this.toast.showToast('Registration failed', r.errorMessage, false);
-          }
+          this.toast.showToast('Registration success', '', true);
+          this.afterSuccessfulAuth();
         }),
         map(() => undefined),
+        catchError((e) => {
+          this.toast.showToast('Registration failed', e.errorMessage, false);
+          return throwError(() => e);
+        }),
       );
   }
 

@@ -14,14 +14,12 @@ public class CharacterActionService : ICharacterActionService
     private readonly ICharacterActionRepository _characterActionRepository;
     private readonly IGatheringService _gatheringService;
     private readonly ICombatService _combatService;
-    private readonly ILootService _lootService;
     private readonly IPublisher _publisher;
-    public CharacterActionService(ICharacterActionRepository characterActionRepository, IGatheringService gatheringService, ICombatService combatService, ILootService lootService, IPublisher publisher)
+    public CharacterActionService(ICharacterActionRepository characterActionRepository, IGatheringService gatheringService, ICombatService combatService, IPublisher publisher)
     {
         _characterActionRepository = characterActionRepository;
         _gatheringService = gatheringService;
         _combatService = combatService;
-        _lootService = lootService;
         _publisher = publisher;
     }
 
@@ -30,9 +28,9 @@ public class CharacterActionService : ICharacterActionService
         return await _characterActionRepository.StartCharacterActionAsync(characterAction, cancellationToken);
     }
 
-    public async Task DeleteCharacterActionAsync(Guid characterId, CancellationToken cancellationToken)
+    public async Task<bool> DeleteCharacterActionAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        await _characterActionRepository.DeleteCharacterActionAsync(characterId, cancellationToken);
+        return await _characterActionRepository.DeleteCharacterActionAsync(characterId, cancellationToken);
     }
 
     public async Task<CharacterAction?> GetCharacterActionAsync(Guid characterId, CancellationToken cancellationToken)
@@ -77,7 +75,7 @@ public class CharacterActionService : ICharacterActionService
 
             // Add other action types as needed
             default:
-                throw new InvalidOperationException("Unknown action type.");
+                return null;
         }
 
         // If the action is capped, simply set the updatedAt to the original time, as their actiontime is reset to now

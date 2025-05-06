@@ -1,12 +1,13 @@
 ﻿using Application.Interfaces.Services.LL;
 using Application.UseCases.CharacterActions.Dtos.Responses;
 using AutoMapper;
+using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.CharacterActions.Queries.GetCharacterAction;
-public record GetCharacterActionQuery(Guid CharacterId) : IRequest<CharacterActionDto?>;
+public record GetCharacterActionQuery(Guid CharacterId) : IRequest<Response<CharacterActionDto?>>;
 
-public class GetCharacterActionQueryHandler : IRequestHandler<GetCharacterActionQuery, CharacterActionDto?>
+public class GetCharacterActionQueryHandler : IRequestHandler<GetCharacterActionQuery, Response<CharacterActionDto?>>
 {
     private readonly ICharacterActionService _characterActionService;
     private readonly IMapper _mapper;
@@ -15,10 +16,10 @@ public class GetCharacterActionQueryHandler : IRequestHandler<GetCharacterAction
         _characterActionService = characterActionService;
         _mapper = mapper;
     }
-    public async Task<CharacterActionDto?> Handle(GetCharacterActionQuery request, CancellationToken cancellationToken)
+    public async Task<Response<CharacterActionDto?>> Handle(GetCharacterActionQuery request, CancellationToken cancellationToken)
     {
         var characterAction = await _characterActionService.GetCharacterActionAsync(request.CharacterId, cancellationToken);
 
-        return _mapper.Map<CharacterActionDto>(characterAction);
+        return Response<CharacterActionDto?>.Success(_mapper.Map<CharacterActionDto?>(characterAction));
     }
 }

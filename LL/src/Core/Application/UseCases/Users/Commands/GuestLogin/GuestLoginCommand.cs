@@ -1,8 +1,8 @@
 ﻿using Application.Authorization.Interfaces;
-using Application.Common.Responses;
 using Application.Interfaces.Services.LL;
 using Application.UseCases.Users.Events;
 using Common.Authorization.Security;
+using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Users.Commands.GuestLogin;
@@ -28,10 +28,13 @@ public class GuestLoginCommandHandler : IRequestHandler<GuestLoginCommand, Respo
         {
             // Create a new guest user
             var user = await _userService.RegisterGuestAsync(cancellationToken);
+            if (user == null) return Response<Tokens>.Fail("Failed to register guest");
 
             await _publisher.Publish(new UserCreatedEvent(user.Id, user.Username!), cancellationToken);
 
             var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
+            if (character == null) return Response<Tokens>.Fail("Character creation failed during guest registration");
+
             user.CharacterId = character.Id;
 
             // Generate tokens

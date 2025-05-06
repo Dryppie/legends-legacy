@@ -1,7 +1,7 @@
-﻿using Application.Common.Responses;
-using Application.Interfaces.Services.LL;
+﻿using Application.Interfaces.Services.LL;
 using Application.UseCases.Characters.Dtos;
 using AutoMapper;
+using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Characters.Queries.GetCharacter;

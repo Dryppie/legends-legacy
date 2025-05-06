@@ -93,7 +93,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         {
             return false;
         }
-        AddOrIncrementItemInInventory(character.Inventory, equipmentSlot.EquipmentInstance.Id);
+        AddOrIncrementItemInInventory(character.Inventory, equipmentSlot.EquipmentInstance!.Id);
         equipmentSlot.EquipmentInstance = null;
         equipmentSlot.EquipmentInstanceId = null;
         await _context.SaveChangesAsync(cancellationToken);

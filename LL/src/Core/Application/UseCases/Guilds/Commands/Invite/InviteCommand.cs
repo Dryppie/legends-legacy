@@ -1,10 +1,11 @@
 ﻿using Application.Interfaces.Services.LL;
 using Application.UseCases.Guilds.Dtos.Requests;
+using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Guilds.Commands.Invite;
-public record InviteCommand(Guid CurrentCharacterId, InviteToGuildDto Invite) : IRequest;
-public class InviteCommandHandler : IRequestHandler<InviteCommand>
+public record InviteCommand(Guid CurrentCharacterId, InviteToGuildDto Invite) : IRequest<Response<bool>>;
+public class InviteCommandHandler : IRequestHandler<InviteCommand, Response<bool>>
 {
     private readonly IGuildService _guildService;
 
@@ -13,14 +14,14 @@ public class InviteCommandHandler : IRequestHandler<InviteCommand>
         _guildService = guildService;
     }
 
-    public async Task Handle(InviteCommand request, CancellationToken cancellationToken)
+    public async Task<Response<bool>> Handle(InviteCommand request, CancellationToken cancellationToken)
     {
-        if (!Guid.TryParse(request.Invite.GuildId, out var guildId))
-            throw new ArgumentException("Invalid GuildId");
+        if (!Guid.TryParse(request.Invite.GuildId, out var guildId)) return Response<bool>.Fail("Invalid guild.");
 
-        if (!Guid.TryParse(request.Invite.CharacterNameOrId, out var invitedCharacterId))
-            throw new ArgumentException("Invalid InvitedCharacterId");
+        if (!Guid.TryParse(request.Invite.CharacterNameOrId, out var invitedCharacterId)) return Response<bool>.Fail("Invalid character.");
 
-        await _guildService.InviteAsync(request.CurrentCharacterId, guildId, invitedCharacterId, cancellationToken);
+        return await _guildService.InviteAsync(request.CurrentCharacterId, guildId, invitedCharacterId, cancellationToken)
+            ? Response<bool>.Success(true)
+            : Response<bool>.Fail("Failed to invite character.");
     }
 }

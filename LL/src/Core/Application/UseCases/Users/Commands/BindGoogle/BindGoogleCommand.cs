@@ -1,5 +1,5 @@
 ﻿using Application.Authorization.Interfaces;
-using Application.Common.Responses;
+using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Users.Commands.BindGoogle;
@@ -18,6 +18,6 @@ public class BindGoogleCommandHandler
         var success = await _google.BindAsync(c.UserId, c.IdToken, ct);
         return success
              ? Response<Unit>.Success(Unit.Value)
-             : Response<Unit>.Fail("That Google account is already linked to another user.");
+             : Response<Unit>.Fail("This gmail is already bound to a different account.");
     }
 }

@@ -17,21 +17,21 @@ public interface ICharacterService
     /// </summary>
     /// <param name="currentUserId"></param>
     /// <returns></returns>
-    public Task<Character> GetMyCharacterAsync(Guid currentUserId, CancellationToken cancellationToken);
+    public Task<Character?> GetMyCharacterAsync(Guid currentUserId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Get Character by Character Id
     /// </summary>
     /// <param name="characterId"></param>
     /// <returns></returns>
-    public Task<Character> GetCharacterByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken);
+    public Task<Character?> GetCharacterByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Get Character Overview by Character Id
     /// </summary>
     /// <param name="characterId"></param>
     /// <returns></returns>
-    Task<Character> GetMyCharacterOverviewAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<Character?> GetMyCharacterOverviewAsync(Guid characterId, CancellationToken cancellationToken);
     Task<List<CharacterLeaderboardItem>> GetLeaderboardCharactersAsync(CancellationToken cancellationToken);
     Task UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken);
     /// <summary>
@@ -40,5 +40,5 @@ public interface ICharacterService
     /// <param name="characterId"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<Character> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<Character?> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken);
 }

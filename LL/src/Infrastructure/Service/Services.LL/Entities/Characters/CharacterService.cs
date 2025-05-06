@@ -24,23 +24,26 @@ public class CharacterService : ICharacterService
         return character;
     }
     /// <inheritdoc/>
-    public async Task<Character> GetMyCharacterAsync(Guid currentUserId, CancellationToken cancellationToken)
+    public async Task<Character?> GetMyCharacterAsync(Guid currentUserId, CancellationToken cancellationToken)
     {
         var character = await _characterRepository.GetCharacterByUserIdAsync(currentUserId, cancellationToken);
-        character.ExperienceUntilNextLevel = EntityLevelConstants.XP_REQUIRED(character.Level);
+        if (character != null) character.ExperienceUntilNextLevel = EntityLevelConstants.XP_REQUIRED(character.Level);
+
         return character;
     }
 
     /// <inheritdoc/>
-    public async Task<Character> GetCharacterByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken)
+    public async Task<Character?> GetCharacterByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
         return await _characterRepository.GetCharacterByCharacterIdAsync(characterId, cancellationToken);
     }
 
     /// <inheritdoc/>
-    public async Task<Character> GetMyCharacterOverviewAsync(Guid currentUserId, CancellationToken cancellationToken)
+    public async Task<Character?> GetMyCharacterOverviewAsync(Guid currentUserId, CancellationToken cancellationToken)
     {
         var character = await _characterRepository.GetCharacterOverviewByCharacterIdAsync(currentUserId, cancellationToken);
+        if (character == null) return null;
+
         AttributeCalculator.CalculateBaseAttributes(character);
         foreach (var essence in character.EssenceSlots.Where(es => es.OccupiedEssence != null).Select(es => es.OccupiedEssence!))
         {
@@ -55,7 +58,7 @@ public class CharacterService : ICharacterService
         return await _characterRepository.GetLeaderboardCharactersAsync(cancellationToken);
     }
 
-    public async Task<Character> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken)
+    public async Task<Character?> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
         return await _characterRepository.GetBaseCharacterByIdAsync(characterId, cancellationToken);
     }

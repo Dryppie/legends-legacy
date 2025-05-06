@@ -1,5 +1,4 @@
 ﻿using Domain.Models.Inventories;
-using Domain.Models.Items;
 
 namespace Application.Interfaces.Services.LL;
 public interface IInventoryService
@@ -10,7 +9,7 @@ public interface IInventoryService
     /// </summary>
     /// <param name="characterId"></param>
     /// <returns></returns>
-    Task<Inventory> GetInventoryByIdAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<Inventory?> GetInventoryByIdAsync(Guid characterId, CancellationToken cancellationToken);
     /// <summary>
     /// Add Items to the Inventory based on Character Id
     /// </summary>

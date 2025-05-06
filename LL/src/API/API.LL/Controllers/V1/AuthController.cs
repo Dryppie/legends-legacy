@@ -1,5 +1,4 @@
 ﻿using API.LL.Controllers;
-using Application.Common.Responses;
 using Application.UseCases.Authorization.Commands.CreateNewTokens;
 using Application.UseCases.Authorization.Queries.ValidateToken;
 using Application.UseCases.Users.Commands.BindGoogle;
@@ -12,6 +11,7 @@ using Application.UseCases.Users.Queries.GetUserInfo;
 using Application.UseCases.Users.Queries.Login;
 using Common.Authorization.Security;
 using Common.Exceptions;
+using Common.Primitives;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,12 +28,8 @@ public class AuthController : BaseController
     [HttpPost("register")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(Response<Unit>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<Response<Unit>>> Register([FromBody] UserRegisterDto input)
-    {
-        var response = await Mediator.Send(new RegisterCommand(input.Username, input.Email, input.Password));
-
-        return Ok(response);
-    }
+    public async Task<ActionResult<Response<Unit>>> Register([FromBody] UserRegisterDto input) =>
+        await Mediator.Send(new RegisterCommand(input.Username, input.Email, input.Password));
 
     [HttpPost("login")]
     [AllowAnonymous]
@@ -52,14 +48,13 @@ public class AuthController : BaseController
     [AllowAnonymous]
     [ProducesResponseType(typeof(Response<Tokens>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Response<Tokens>), StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<Tokens>> LoginAsGuest()
+    public async Task<ActionResult<Response<Tokens>>> LoginAsGuest()
     {
         var result = await Mediator.Send(new GuestLoginCommand());
-
-        if (result.Data is null) return BadRequest(result);
+        if (result.Data is null) return result;
 
         SetAuthCookies(result.Data);
-        return Ok(result);
+        return result;
     }
 
     [HttpPost("convertGuestToUser")]
@@ -70,11 +65,10 @@ public class AuthController : BaseController
     public async Task<ActionResult<Response<Tokens>>> ConvertGuestToUser([FromBody] UserRegisterDto input)
     {
         var result = await Mediator.Send(new ConvertGuestToUserCommand(CurrentUserId, input.Username, input.Email, input.Password));
-
-        if (result.Data is null) return BadRequest(result);
+        if (result.Data is null) return result;
 
         SetAuthCookies(result.Data);
-        return Ok(result);
+        return result;
     }
 
     [HttpPost("google")]
@@ -89,11 +83,8 @@ public class AuthController : BaseController
 
     [HttpPost("bind-google")]
     [Authorize]
-    public async Task<IActionResult> BindGoogle([FromBody] string idToken)
-    {
-        var res = await Mediator.Send(new BindGoogleCommand(CurrentUserId, idToken));
-        return res.IsSuccess ? Ok(res) : BadRequest(res);
-    }
+    public async Task<ActionResult<Response<Unit>>> BindGoogle([FromBody] string idToken) =>
+        await Mediator.Send(new BindGoogleCommand(CurrentUserId, idToken));
 
     /// <summary>
     /// Logs out a user from Web
@@ -144,23 +135,19 @@ public class AuthController : BaseController
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public ActionResult<bool> ValidateToken([FromBody] string token)
+    public async Task<ActionResult<Response<bool>>> ValidateToken([FromBody] string token)
     {
         if (string.IsNullOrWhiteSpace(token)) return BadRequest();
 
-        var result = Mediator.Send(new ValidateTokenQuery(token));
-
-        return result.Result ? Ok() : Unauthorized();
+        return await Mediator.Send(new ValidateTokenQuery(token));
 
     }
 
     [HttpGet("getUserInfo")]
     [Authorize]
     [ProducesResponseType(typeof(UserInfoDto), StatusCodes.Status200OK)]
-    public async Task<ActionResult<UserInfoDto>> GetCurrentUserInfo()
-    {
-        return await Mediator.Send(new GetUserInfoQuery(CurrentUserId));
-    }
+    public async Task<ActionResult<Response<UserInfoDto>>> GetCurrentUserInfo() =>
+        await Mediator.Send(new GetUserInfoQuery(CurrentUserId));
 
     private void SetAuthCookies(Tokens t)
     {

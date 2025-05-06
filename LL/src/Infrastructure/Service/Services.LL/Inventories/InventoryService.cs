@@ -16,11 +16,12 @@ public class InventoryService : IInventoryService
         _characterService = characterService;
     }
 
-    public async Task<Inventory> GetInventoryByIdAsync(Guid characterId, CancellationToken cancellationToken)
+    public async Task<Inventory?> GetInventoryByIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var inventory = await _inventoryRepository.GetInventoryByIdAsync(characterId, cancellationToken);
         var character = await _characterService.GetMyCharacterOverviewAsync(characterId, cancellationToken); // Called to calculate correct description for abilities (X-Y damage / heal)
-        
+        if (character == null) return null;
+
         foreach (var inventoryItem in inventory.InventoryItems)
         {
             if (inventoryItem.ItemInstance is EssenceItemInstance ei && ei.ItemBase is EssenceItemBase eib)

@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Application.Interfaces.Services.LL;
+﻿using Application.Interfaces.Services.LL;
 using Application.UseCases.Colosseum.Dtos;
-using Application.UseCases.Colosseum.Queries.GetColosseumMatchResults;
 using AutoMapper;
-using Domain.Models.Colosseum;
 using MediatR;
 
 namespace Application.UseCases.Colosseum.Queries.GetArenaTickets;

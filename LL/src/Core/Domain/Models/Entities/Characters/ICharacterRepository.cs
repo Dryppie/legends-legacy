@@ -15,7 +15,7 @@ public interface ICharacterRepository
     /// </summary>
     /// <param name="UserId"></param>
     /// <returns></returns>
-    public Task<Character> GetCharacterByUserIdAsync(Guid currentUserId, CancellationToken cancellationToken);
+    public Task<Character?> GetCharacterByUserIdAsync(Guid currentUserId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Get Character by Character Id
@@ -29,7 +29,7 @@ public interface ICharacterRepository
     /// </summary>
     /// <param name="UserId"></param>
     /// <returns></returns>
-    Task<Character> GetCharacterOverviewByCharacterIdAsync(Guid currentUserId, CancellationToken cancellationToken);
+    Task<Character?> GetCharacterOverviewByCharacterIdAsync(Guid currentUserId, CancellationToken cancellationToken);
     Task<List<CharacterLeaderboardItem>> GetLeaderboardCharactersAsync(CancellationToken cancellationToken);
     Task<Character> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken);
     Task UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken);

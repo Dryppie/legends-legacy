@@ -74,14 +74,13 @@ public class CharacterRepository : ICharacterRepository
     }
 
     /// <inheritdoc/>
-    public async Task<Character> GetCharacterByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+    public async Task<Character?> GetCharacterByUserIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         var character = await _context.Characters
             //.Include(c => c.Modifiers)
             //.Include(c => c.RawAttributes)
             //.ThenInclude(a => a.AttributeBase)
-            .FirstOrDefaultAsync(c => c.UserId.Equals(userId));
-        NotFoundException.ThrowIfNull(character, nameof(Character), userId);
+            .FirstOrDefaultAsync(c => c.UserId.Equals(userId), cancellationToken);
 
         return character;
     }
@@ -100,7 +99,7 @@ public class CharacterRepository : ICharacterRepository
     }
 
     /// <inheritdoc/>
-    public async Task<Character> GetCharacterOverviewByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken)
+    public async Task<Character?> GetCharacterOverviewByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var character = await _context.Characters
             .Include(c => c.Masteries)
@@ -113,7 +112,7 @@ public class CharacterRepository : ICharacterRepository
                         .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
             .FirstOrDefaultAsync(c => c.Id.Equals(characterId), cancellationToken);
 
-        NotFoundException.ThrowIfNull(character, nameof(Character), characterId);
+        if (character == null) return character;
 
         foreach (var essenceSlot in character.EssenceSlots.Where(es => es.OccupiedEssence != null))
         {

@@ -1,10 +1,11 @@
 ﻿using Application.Interfaces.Services.LL;
+using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Guilds.Commands.CreateGuild;
-public record CreateGuildCommand(Guid CharacterId, string Name) : IRequest;
+public record CreateGuildCommand(Guid CharacterId, string Name) : IRequest<Response<bool>>;
 
-public record CreateGuildCommandHandler : IRequestHandler<CreateGuildCommand>
+public record CreateGuildCommandHandler : IRequestHandler<CreateGuildCommand, Response<bool>>
 {
     private readonly IGuildService _guildService;
 
@@ -13,8 +14,10 @@ public record CreateGuildCommandHandler : IRequestHandler<CreateGuildCommand>
         _guildService = guildService;
     }
 
-    public async Task Handle(CreateGuildCommand request, CancellationToken cancellationToken)
+    public async Task<Response<bool>> Handle(CreateGuildCommand request, CancellationToken cancellationToken)
     {
-        await _guildService.CreateAsync(request.CharacterId, request.Name, cancellationToken);
+        return await _guildService.CreateAsync(request.CharacterId, request.Name, cancellationToken)
+            ? Response<bool>.Success(true)
+            : Response<bool>.Fail("Could not create guild.");
     }
 }

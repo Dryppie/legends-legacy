@@ -1,9 +1,10 @@
 ﻿using Application.Interfaces.Services.LL;
+using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Guilds.Commands.DisbandGuild;
-public record DisbandGuildCommand(Guid CharacterId) : IRequest;
-public class DisbandGuildCommandHandler : IRequestHandler<DisbandGuildCommand>
+public record DisbandGuildCommand(Guid CharacterId) : IRequest<Response<bool>>;
+public class DisbandGuildCommandHandler : IRequestHandler<DisbandGuildCommand, Response<bool>>
 {
     private readonly IGuildService _guildService;
 
@@ -12,8 +13,10 @@ public class DisbandGuildCommandHandler : IRequestHandler<DisbandGuildCommand>
         _guildService = guildService;
     }
 
-    public async Task Handle(DisbandGuildCommand request, CancellationToken cancellationToken)
+    public async Task<Response<bool>> Handle(DisbandGuildCommand request, CancellationToken cancellationToken)
     {
-        await _guildService.DisbandGuildAsync(request.CharacterId, cancellationToken);
+        return await _guildService.DisbandGuildAsync(request.CharacterId, cancellationToken)
+            ? Response<bool>.Success(true)
+            : Response<bool>.Fail("Failed to reject application");
     }
 }

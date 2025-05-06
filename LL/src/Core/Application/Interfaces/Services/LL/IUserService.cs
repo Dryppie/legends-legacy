@@ -3,10 +3,10 @@
 namespace Application.Interfaces.Services.LL;
 public interface IUserService
 {
-    Task<AppUser> RegisterAsync(string username, string email, string password, CancellationToken cancellationToken);
-    Task<AppUser> RegisterGuestAsync(CancellationToken cancellationToken);
-    Task<AppUser> ValidateCredentialsAsync(string email, string password, CancellationToken cancellationToken);
-    Task<UserInfo> GetUserInfo(Guid UserId, CancellationToken cancellationToken);
+    Task<AppUser?> RegisterAsync(string username, string email, string password, CancellationToken cancellationToken);
+    Task<AppUser?> RegisterGuestAsync(CancellationToken cancellationToken);
+    Task<AppUser?> ValidateCredentialsAsync(string email, string password, CancellationToken cancellationToken);
+    Task<UserInfo?> GetUserInfo(Guid UserId, CancellationToken cancellationToken);
 
 
     /// <summary>
@@ -14,7 +14,7 @@ public interface IUserService
     /// </summary>
     /// <param name="userId"></param>
     /// <returns></returns>
-    Task<AppUser> ConvertGuestToUser(Guid userId, string username, string email, string password, CancellationToken cancellationToken);
+    Task<AppUser?> ConvertGuestToUser(Guid userId, string username, string email, string password, CancellationToken cancellationToken);
 
     ///// <summary>
     ///// Login with the given Email and Password

@@ -1,7 +1,6 @@
 ﻿using Application.Interfaces.Services.LL;
 using Application.UseCases.Colosseum.Dtos;
 using AutoMapper;
-using Domain.Models.Colosseum;
 using MediatR;
 
 namespace Application.UseCases.Colosseum.Queries.GetRankings;
