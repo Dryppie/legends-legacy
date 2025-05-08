@@ -14,7 +14,7 @@ public class CreatureJsonReader
         _filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "creatures.json");
         string json = File.ReadAllText(_filePath);
 
-        AllCreatures = JsonSerializer.Deserialize<List<Creature>>(json);
+        AllCreatures = JsonSerializer.Deserialize<List<Creature>>(json)!;
         ValidateAndFixCreatureAttributes(AllCreatures);
 
         OverWriteJSON();

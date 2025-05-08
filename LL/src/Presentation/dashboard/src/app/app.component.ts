@@ -2,7 +2,6 @@ import { Component, ViewChild } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ToastComponent } from './shared/components/toast/toast.component';
 import { ToastService } from './core/services/client-side/toast/toast.service';
-import { AuthService } from './core/services/api/auth/auth.service';
 
 @Component({
   selector: 'app-root',

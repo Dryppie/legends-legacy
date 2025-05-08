@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces.Services.AdminDashboard;
 using Microsoft.Extensions.DependencyInjection;
 using Services.AdminDashboard.Creatures;
+using Services.AdminDashboard.Items;
 
 namespace Services.AdminDashboard;
 public static class DependencyInjection
@@ -9,7 +10,7 @@ public static class DependencyInjection
     {
 
         services.AddScoped<ICreatureService, CreatureService>();
-        
+        services.AddScoped<IItemService, ItemService>();
 
         return services;
     }

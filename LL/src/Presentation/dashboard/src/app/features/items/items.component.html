@@ -1,0 +1,177 @@
+<div class="flex h-full items-center p-6 text-white">
+  <!-- Item List -->
+  <div class="flex h-full flex-col overflow-hidden">
+    <div class="flex items-center justify-between pr-4">
+      <h2 class="p-2 text-primary">Items</h2>
+      <button
+        class="rounded bg-emerald-600 px-3 py-1 text-sm font-semibold hover:bg-emerald-700"
+        (click)="newItem()"
+      >
+        + New
+      </button>
+    </div>
+
+    <div class="overflow-y-auto">
+      <div *ngFor="let item of items">
+        <div
+          class="border-t border-light_gray p-2 hover:cursor-pointer hover:bg-zinc-300/10"
+          (click)="selectItem(item)"
+        >
+          {{ item.name }}
+          <span class="text-gray-400 ml-2 text-xs">({{ item.itemType }})</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Item Form -->
+  <div class="ml-6 h-full w-[32rem]" *ngIf="itemForm">
+    <form [formGroup]="itemForm" class="rounded-lg p-6" (ngSubmit)="saveItem()">
+      <h2 class="mb-2 text-2xl font-semibold">
+        {{ isCreating ? "Create Item" : "Edit: " + itemForm.value.name }}
+      </h2>
+
+      <!-- Base fields -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col">
+          <label class="font-medium">Name</label>
+          <input
+            type="text"
+            class="rounded border border-light_gray bg-zinc-300/10 p-2"
+            formControlName="name"
+          />
+        </div>
+
+        <div class="flex flex-col">
+          <label class="font-medium">Rarity</label>
+          <select
+            class="rounded border border-light_gray bg-zinc-300/10 p-2"
+            formControlName="rarity"
+          >
+            <option
+              *ngFor="let r of rarities"
+              [ngValue]="r"
+              [innerText]="r"
+              class="bg-black text-primary"
+            ></option>
+          </select>
+        </div>
+
+        <div class="col-span-2 flex flex-col">
+          <label class="font-medium">Item Type</label>
+          <select
+            class="rounded border border-light_gray bg-zinc-300/10 p-2"
+            formControlName="itemType"
+          >
+            <option
+              *ngFor="let t of itemTypes"
+              [ngValue]="t"
+              [innerText]="t"
+              class="bg-black text-primary"
+            ></option>
+          </select>
+        </div>
+
+        <div class="col-span-2 flex flex-col">
+          <label class="font-medium">Description</label>
+          <textarea
+            class="rounded border border-light_gray bg-zinc-300/10 p-2"
+            formControlName="description"
+            rows="3"
+          ></textarea>
+        </div>
+      </div>
+
+      <!-- Equipment specific -->
+      <div *ngIf="itemForm.get('itemType')!.value === 'Equipment'" class="mt-6">
+        <h3 class="mb-2 text-lg font-semibold">Equipment Details</h3>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="flex flex-col">
+            <label class="font-medium">Equipment Type</label>
+            <select
+              class="rounded border border-light_gray bg-zinc-300/10 p-2"
+              formControlName="equipmentType"
+            >
+              <option
+                *ngFor="let e of equipmentTypes"
+                [ngValue]="e"
+                [innerText]="e"
+                class="bg-black text-primary"
+              ></option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Attribute Modifiers -->
+        <div class="mt-4">
+          <div
+            formArrayName="attributeModifiers"
+            *ngFor="
+              let mod of attributeModifiers.controls;
+              let i = index;
+              trackBy: trackByIndex
+            "
+            class="mb-2 grid grid-cols-3 gap-2"
+          >
+            <div [formGroupName]="i" class="contents">
+              <input
+                type="text"
+                class="rounded border border-light_gray bg-zinc-300/10 p-2"
+                placeholder="Attribute"
+                formControlName="attribute"
+              />
+              <input
+                type="number"
+                class="rounded border border-light_gray bg-zinc-300/10 p-2"
+                placeholder="Value"
+                formControlName="value"
+              />
+              <button
+                type="button"
+                class="rounded bg-red-600 px-2 py-1 text-xs font-bold hover:bg-red-700"
+                (click)="removeModifier(i)"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="mt-2 rounded bg-blue-500 px-3 py-1 text-sm font-semibold hover:bg-blue-600"
+            (click)="addModifier()"
+          >
+            + Add Modifier
+          </button>
+        </div>
+      </div>
+
+      <!-- Essence specific -->
+      <!-- <div *ngIf="itemForm.get('itemType')!.value === 'Essence'" class="mt-6">
+        <h3 class="mb-2 text-lg font-semibold">Essence Details</h3>
+        <div class="flex flex-col">
+          <label class="font-medium">Essence</label>
+          <select
+            class="rounded border border-light_gray bg-zinc-300/10 p-2"
+            formControlName="essence"
+          >
+            <option
+              *ngFor="let es of essences"
+              [ngValue]="es"
+              [innerText]="es"
+            ></option>
+          </select>
+        </div>
+      </div> -->
+
+      <!-- Save -->
+      <button
+        type="submit"
+        class="mt-6 w-full rounded bg-blue-500 px-4 py-2 font-bold hover:bg-blue-600"
+        [disabled]="itemForm.invalid"
+      >
+        {{ isCreating ? "Create Item" : "Save Changes" }}
+      </button>
+    </form>
+  </div>
+</div>

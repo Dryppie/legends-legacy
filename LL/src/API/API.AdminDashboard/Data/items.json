@@ -1,0 +1,18 @@
+[
+  {
+    "Id": "iron_ingot",
+    "Name": "Iron Ingot",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "iron_ore",
+    "Name": "Iron Ore",
+    "IconPath": "",
+    "Description": "Test",
+    "ItemType": 2,
+    "Rarity": 0
+  }
+]

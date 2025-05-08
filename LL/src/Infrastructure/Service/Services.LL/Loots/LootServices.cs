@@ -71,7 +71,7 @@ public class LootServices : ILootService
     {
         return new InventoryItem()
         {
-            ItemInstanceId = item.Id,
+            ItemInstanceId = Guid.Parse(item.Id), // TODO: Fix correct ID???
             Quantity = 1
         };
     }

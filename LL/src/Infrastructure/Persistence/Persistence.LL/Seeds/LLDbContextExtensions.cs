@@ -300,7 +300,7 @@ public static class LLDbContextExtensions
             // Step 3 - Essence Items
             var goblinEssenceItem = new EssenceItemBase
             {
-                Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+                Id = "00000000-0000-0000-0000-000000000001",
                 IconPath = "essence-item.svg",
                 Name = goblinEssence.Name,
                 Essence = goblinEssence,
@@ -309,7 +309,7 @@ public static class LLDbContextExtensions
             };
             var goblinWarriorEssenceItem = new EssenceItemBase
             {
-                Id = Guid.NewGuid(),
+                Id = "Guid.NewGuid()",
                 IconPath = "essence-item.svg",
                 Name = goblinWarriorEssence.Name,
                 Essence = goblinWarriorEssence,
@@ -318,7 +318,7 @@ public static class LLDbContextExtensions
             };
             var goblinArcherEssenceItem = new EssenceItemBase
             {
-                Id = Guid.NewGuid(),
+                Id = "Guid.NewGuid()",
                 IconPath = "essence-item.svg",
                 Name = goblinArcherEssence.Name,
                 Essence = goblinArcherEssence,
@@ -327,7 +327,7 @@ public static class LLDbContextExtensions
             };
             var largeRatEssenceItem = new EssenceItemBase
             {
-                Id = Guid.Parse("00000000-0000-0000-0000-000000000004"),
+                Id = "00000000-0000-0000-0000-000000000004",
                 IconPath = "essence-item.svg",
                 Name = largeRatEssence.Name,
                 Essence = largeRatEssence,
@@ -336,7 +336,7 @@ public static class LLDbContextExtensions
             };
             var flameImpEssenceItem = new EssenceItemBase
             {
-                Id = flameImpId,
+                Id = "flameImpId",
                 IconPath = "essence-item.svg",
                 Name = flameImpEssence.Name,
                 Essence = flameImpEssence,
@@ -345,7 +345,7 @@ public static class LLDbContextExtensions
             };
             var frostImpEssenceItem = new EssenceItemBase
             {
-                Id = frostImpId,
+                Id = "frostImpId",
                 IconPath = "essence-item.svg",
                 Name = frostImpEssence.Name,
                 Essence = frostImpEssence,
@@ -354,7 +354,7 @@ public static class LLDbContextExtensions
             };
             var shadowImpEssenceItem = new EssenceItemBase
             {
-                Id = shadowImpId,
+                Id = "shadowImpId",
                 IconPath = "essence-item.svg",
                 Name = shadowImpEssence.Name,
                 Essence = shadowImpEssence,
@@ -363,7 +363,7 @@ public static class LLDbContextExtensions
             };
             var vampireBatEssenceItem = new EssenceItemBase
             {
-                Id = vampireBatId,
+                Id = "vampireBatId",
                 IconPath = "essence-item.svg",
                 Name = vampireBatEssence.Name,
                 Essence = vampireBatEssence,
@@ -372,7 +372,7 @@ public static class LLDbContextExtensions
             };
             var blueSlimeEssenceItem = new EssenceItemBase
             {
-                Id = blueSlimeId,
+                Id = "blueSlimeId",
                 IconPath = "essence-item.svg",
                 Name = blueSlimeEssence.Name,
                 Essence = blueSlimeEssence,
@@ -381,7 +381,7 @@ public static class LLDbContextExtensions
             };
             var brownSlimeEssenceItem = new EssenceItemBase
             {
-                Id = brownSlimeId,
+                Id = "brownSlimeId",
                 IconPath = "essence-item.svg",
                 Name = brownSlimeEssence.Name,
                 Essence = brownSlimeEssence,
@@ -390,7 +390,7 @@ public static class LLDbContextExtensions
             };
             var greenSlimeEssenceItem = new EssenceItemBase
             {
-                Id = greenSlimeId,
+                Id = "greenSlimeId",
                 IconPath = "essence-item.svg",
                 Name = greenSlimeEssence.Name,
                 Essence = greenSlimeEssence,
@@ -399,7 +399,7 @@ public static class LLDbContextExtensions
             };
             var rainbowSlimeEssenceItem = new EssenceItemBase
             {
-                Id = rainbowSlimeId,
+                Id = "rainbowSlimeId",
                 IconPath = "essence-item.svg",
                 Name = rainbowSlimeEssence.Name,
                 Essence = rainbowSlimeEssence,
@@ -408,7 +408,7 @@ public static class LLDbContextExtensions
             };
             var redSlimeEssenceItem = new EssenceItemBase
             {
-                Id = redSlimeId,
+                Id = "redSlimeId",
                 IconPath = "essence-item.svg",
                 Name = redSlimeEssence.Name,
                 Essence = redSlimeEssence,
@@ -417,7 +417,7 @@ public static class LLDbContextExtensions
             };
             var transparentSlimeEssenceItem = new EssenceItemBase
             {
-                Id = transparentSlimeId,
+                Id = "transparentSlimeId",
                 IconPath = "essence-item.svg",
                 Name = transparentSlimeEssence.Name,
                 Essence = transparentSlimeEssence,
@@ -893,47 +893,47 @@ public static class LLDbContextExtensions
             var goblinEssenceItemInstance = new EssenceItemInstance
             {
                 Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
-                ItemBaseId = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+                ItemBaseId = "00000000-0000-0000-0000-000000000001",
             };
             var ratEssenceItemInstance = new EssenceItemInstance
             {
                 Id = Guid.Parse("00000000-0000-0000-0000-000000000004"),
-                ItemBaseId = Guid.Parse("00000000-0000-0000-0000-000000000004"),
+                ItemBaseId = "00000000-0000-0000-0000-000000000004",
             };
             var swordEquipmentInstance = new EquipmentInstance
             {
                 Id = Guid.Parse("00000000-1000-0000-0000-000000000001"),
-                ItemBaseId = Guid.Parse("00000000-1000-0000-0000-000000000001"),
+                ItemBaseId = "00000000-1000-0000-0000-000000000001",
             };
             var bowEquipmentInstance = new EquipmentInstance
             {
                 Id = Guid.Parse("00000000-2000-0000-0000-000000000002"),
-                ItemBaseId = Guid.Parse("00000000-2000-0000-0000-000000000002"),
+                ItemBaseId = "00000000-2000-0000-0000-000000000002",
             };
             var axeEquipmentInstance = new EquipmentInstance
             {
                 Id = Guid.Parse("00000000-3000-0000-0000-000000000003"),
-                ItemBaseId = Guid.Parse("00000000-3000-0000-0000-000000000003"),
+                ItemBaseId = "00000000-3000-0000-0000-000000000003",
             };
             var daggerEquipmentInstance = new EquipmentInstance
             {
                 Id = Guid.Parse("00000000-4000-0000-0000-000000000004"),
-                ItemBaseId = Guid.Parse("00000000-4000-0000-0000-000000000004"),
+                ItemBaseId = "00000000-4000-0000-0000-000000000004",
             };
             var hammerEquipmentInstance = new EquipmentInstance
             {
                 Id = Guid.Parse("00000000-5000-0000-0000-000000000005"),
-                ItemBaseId = Guid.Parse("00000000-5000-0000-0000-000000000005"),
+                ItemBaseId = "00000000-5000-0000-0000-000000000005",
             };
             var shieldEquipmentInstance = new EquipmentInstance
             {
                 Id = Guid.Parse("00000000-6000-0000-0000-000000000006"),
-                ItemBaseId = Guid.Parse("00000000-6000-0000-0000-000000000006"),
+                ItemBaseId = "00000000-6000-0000-0000-000000000006",
             };
             var staffEquipmentInstance = new EquipmentInstance
             {
                 Id = Guid.Parse("00000000-7000-0000-0000-000000000007"),
-                ItemBaseId = Guid.Parse("00000000-7000-0000-0000-000000000007"),
+                ItemBaseId = "00000000-7000-0000-0000-000000000007",
             };
             var inventoryItemGoblinEssence = new InventoryItem()
             {
@@ -1005,7 +1005,7 @@ public static class LLDbContextExtensions
         };
         var axe = new EquipmentBase
         {
-            Id = Guid.Parse("00000000-3000-0000-0000-000000000003"),
+            Id = "00000000-3000-0000-0000-000000000003",
             IconPath = "iron_axe.png",
             Name = "Iron Axe",
             Description = "Worn down through years of use.",
@@ -1019,7 +1019,7 @@ public static class LLDbContextExtensions
         };
         var dagger = new EquipmentBase
         {
-            Id = Guid.Parse("00000000-4000-0000-0000-000000000004"),
+            Id = "00000000-4000-0000-0000-000000000004",
             IconPath = "iron_dagger.png",
             Name = "Iron Dagger",
             Description = "Worn down through years of use.",
@@ -1033,7 +1033,7 @@ public static class LLDbContextExtensions
         };
         var hammer = new EquipmentBase
         {
-            Id = Guid.Parse("00000000-5000-0000-0000-000000000005"),
+            Id = "00000000-5000-0000-0000-000000000005",
             IconPath = "iron_hammer.png",
             Name = "Iron Hammer",
             Description = "Worn down through years of use.",
@@ -1047,7 +1047,7 @@ public static class LLDbContextExtensions
         };
         var sword = new EquipmentBase
         {
-            Id = Guid.Parse("00000000-1000-0000-0000-000000000001"),
+            Id = "00000000-1000-0000-0000-000000000001",
             IconPath = "iron_sword.png",
             Name = "Iron Sword",
             Description = "Worn down through years of use.",
@@ -1061,7 +1061,7 @@ public static class LLDbContextExtensions
         };
         var bow = new EquipmentBase
         {
-            Id = Guid.Parse("00000000-2000-0000-0000-000000000002"),
+            Id = "00000000-2000-0000-0000-000000000002",
             IconPath = "bow.png",
             Name = "Bow",
             Description = "Worn down through years of use.",
@@ -1075,7 +1075,7 @@ public static class LLDbContextExtensions
         };
         var shield = new EquipmentBase
         {
-            Id = Guid.Parse("00000000-6000-0000-0000-000000000006"),
+            Id = "00000000-6000-0000-0000-000000000006",
             IconPath = "shield.png",
             Name = "Shield",
             Description = "Worn down through years of use.",
@@ -1089,7 +1089,7 @@ public static class LLDbContextExtensions
         };
         var staff = new EquipmentBase
         {
-            Id = Guid.Parse("00000000-7000-0000-0000-000000000007"),
+            Id = "00000000-7000-0000-0000-000000000007",
             IconPath = "staff.png",
             Name = "Staff",
             Description = "Worn down through years of use.",
@@ -1100,7 +1100,7 @@ public static class LLDbContextExtensions
 
         var potion = new ItemBase
         {
-            Id = Guid.NewGuid(),
+            Id = "Guid.NewGuid()",
             IconPath = "reward-item.png",
             Name = "Potion"
         };
@@ -1158,22 +1158,22 @@ public static class LLDbContextExtensions
     public static async Task SeedWoodcuttingLootTables(LLDbContext context)
     {
         // Create Items for Tree Drops
-        var treeLog = new ItemBase { Id = Guid.NewGuid(),
+        var treeLog = new ItemBase { Id = "Guid.NewGuid()151345",
             IconPath = "reward-item.png",
             Name = "Tree Log" };
-        var nest = new ItemBase { Id = Guid.NewGuid(),
+        var nest = new ItemBase { Id = "Guid.NewGuid()312514",
             IconPath = "reward-item.png",
             Name = "Nest" };
         
-        var oakLog = new ItemBase { Id = Guid.NewGuid(),
+        var oakLog = new ItemBase { Id = "Guid.NewGuid()2223",
             IconPath = "reward-item.png",
             Name = "Oak Log" };
         
-        var birchLog = new ItemBase { Id = Guid.NewGuid(),
+        var birchLog = new ItemBase { Id = "Guid.NewGuid()321",
             IconPath = "reward-item.png",
             Name = "Birch Log" };
-        var rareHerb = new ItemBase { Id = Guid.NewGuid(),
-            IconPath = "reward-item.png",
+        var rareHerb = new ItemBase { Id = "Guid.NewGuid()123",
+            IconPath = "reward-item.png",   
             Name = "Rare Herb" };
 
         // Add items to context
