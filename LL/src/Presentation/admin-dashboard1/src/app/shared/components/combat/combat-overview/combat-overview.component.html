@@ -1,0 +1,25 @@
+<div
+  class="flex h-full flex-col overflow-hidden rounded-md bg-black/40"
+  [ngClass]="{ 'animate-pulse': isLoading }"
+>
+  <div class="flex items-center justify-between">
+    <h3 class="h-16 min-h-16 content-center p-4 text-primary">
+      Battle overview
+    </h3>
+    <img
+      src="icons/settings/filters.svg"
+      alt="Logo"
+      class="h-10 w-10 object-contain pr-4 hover:cursor-pointer"
+      (click)="openFilters()"
+    />
+  </div>
+  <div class="chat-gradient mb-4 h-[1px]"></div>
+  <div class="overflow-y-scroll" appStickyScroll>
+    <app-combat-overview-item
+      *ngFor="let combatEvent of filteredCombatEvents"
+      class="animate-fade-in-up"
+      [combatEvent]="combatEvent"
+    ></app-combat-overview-item>
+    <div #sentinel></div>
+  </div>
+</div>

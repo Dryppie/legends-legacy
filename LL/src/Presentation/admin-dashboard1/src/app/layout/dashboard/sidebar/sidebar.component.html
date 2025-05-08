@@ -1,0 +1,28 @@
+<aside class="border-gradient flex w-full sm:w-80">
+  <div class="mt-[1px] flex flex-auto flex-col bg-texture bg-auto text-primary">
+    <app-tab
+      [tabs]="tabLabels"
+      [activeTab]="activeTab"
+      (tabSelected)="setActiveTab($event)"
+    >
+    </app-tab>
+    <!-- Tab Content -->
+    <div *ngFor="let tab of tabs" class="overflow-auto">
+      <div *ngIf="activeTab === tab.label" class="tab-content">
+        <div
+          *ngFor="let item of tab.items"
+          class="flex flex-col first:border-t first:border-gray"
+        >
+          <app-sidebar-item
+            (click)="toggleSidebar()"
+            [item]="item"
+            [routerLink]="[item.route]"
+            (click)="navigateTo(item.id)"
+            class="text-light_gray"
+            [isActive]="activeItem === item.id"
+          ></app-sidebar-item>
+        </div>
+      </div>
+    </div>
+  </div>
+</aside>

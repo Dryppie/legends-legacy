@@ -1,13 +1,25 @@
-<nav class="sidebar w-64 h-screen flex flex-col items-center justify-center p-4 bg-white/20" style="font-family: Lato;">
-  <ul class="space-y-4 text-center">
-    <li>
-      <a routerLink="/" routerLinkActive="active" class="text-white hover:bg-gray-700 rounded-lg p-2">Dashboard</a>
-    </li>
-    <li>
-      <a routerLink="/creatures" routerLinkActive="active" class="text-white hover:bg-gray-700 rounded-lg p-2">Creatures</a>
-    </li>
-    <li>
-      <a routerLink="/regions" routerLinkActive="active" class="text-white hover:bg-gray-700 rounded-lg p-2">Regions</a>
-    </li>
-  </ul>
-</nav>
+<div class="flex h-screen w-64 items-center justify-center p-4">
+  <div class="flex flex-col gap-2 space-y-4 text-center">
+    <div
+      routerLink="/"
+      routerLinkActive="active"
+      class="text-white hover:bg-zinc-300/10 rounded-lg p-2 hover:cursor-pointer border border-light_gray"
+    >
+      Dashboard
+    </div>
+    <div
+      routerLink="/creatures"
+      routerLinkActive="active"
+      class="text-white hover:bg-zinc-300/10 rounded-lg p-2 hover:cursor-pointer border border-light_gray"
+    >
+      Creatures
+    </div>
+    <div
+      routerLink="/regions"
+      routerLinkActive="active"
+      class="text-white hover:bg-zinc-300/10 rounded-lg p-2 hover:cursor-pointer border border-light_gray"
+    >
+      Regions
+    </div>
+  </div>
+</div>

@@ -1,0 +1,66 @@
+<svg
+    width="64"
+    height="64"
+    viewBox="0 0 64 64"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-labelledby="title"
+    role="img"
+>
+  <title>Monster Essence - Misty Soul</title>
+  
+  <defs>
+    <!-- Soft, misty gradient for the orb -->
+    <radialGradient id="orbGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#E0F7FF"/>
+      <stop offset="100%" stop-color="#8FB8CF"/>
+    </radialGradient>
+    
+    <!-- Gradient for the soul shape -->
+    <linearGradient id="soulGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <!-- You can tweak these colors and opacities to get different ghostly effects -->
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.2"/>
+    </linearGradient>
+  </defs>
+
+  <!-- The orb background -->
+  <circle
+    cx="32"
+    cy="32"
+    r="28"
+    fill="url(#orbGradient)"
+    stroke="#4C6880"
+    stroke-width="2"
+  />
+
+  <!-- A subtle highlight near the top-left to suggest shine -->
+  <circle
+    cx="24"
+    cy="24"
+    r="10"
+    fill="#FFFFFF"
+    fill-opacity="0.15"
+  />
+
+  <!-- Ghostly soul shape inside the orb -->
+  <path
+    d="
+      M 32,42
+      C 28,37 25,29 32,24
+      C 39,19 37,14 36,12
+      C 35,10 29,8  29,15
+      C 29,22 19,26 20,36
+      C 21,46 26,46 32,50
+      C 38,54 42,54 40,47
+      C 38,40 36,47 32,42
+      Z
+    "
+    fill="url(#soulGradient)"
+  />
+
+  <!-- Optional small sparkles -->
+  <circle cx="40" cy="28" r="2" fill="#FFFFFF" fill-opacity="0.8" />
+  <circle cx="24" cy="44" r="1.5" fill="#FFFFFF" fill-opacity="0.7" />
+  <circle cx="45" cy="38" r="1.5" fill="#FFFFFF" fill-opacity="0.6" />
+
+</svg>

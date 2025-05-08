@@ -1,0 +1,17 @@
+export enum Targeting {
+  None = 'None',
+  Self = 'Self',
+  SingleEnemy = 'SingleEnemy',
+  SingleAlly = 'SingleAlly',
+  TwoEnemies = 'TwoEnemies',
+  TwoAllies = 'TwoAllies',
+  SingleDeadEnemy = 'SingleDeadEnemy',
+  SingleDeadAlly = 'SingleDeadAlly',
+  SingleRandomEnemy = 'SingleRandomEnemy',
+  SingleRandomAlly = 'SingleRandomAlly',
+  SingleEnemyLowestHealth = 'SingleEnemyLowestHealth',
+  SingleAllyLowestHealth = 'SingleAllyLowestHealth',
+  AllEnemies = 'AllEnemies',
+  AllAllies = 'AllAllies',
+  AllAlliesAndSelf = 'AllAlliesAndSelf',
+}

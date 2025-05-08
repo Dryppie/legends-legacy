@@ -1,0 +1,29 @@
+<div class="flex flex-col items-center py-6">
+  <div
+    class="flex flex-col items-center space-y-6 md:flex-row md:items-start md:space-x-12 md:space-y-0"
+  >
+    <!-- Equipment Slots -->
+    <div class="grid grid-cols-2 gap-4">
+      <div
+        *ngFor="let slot of slots; let i = index"
+        (click)="handleSlotClick(slot)"
+        class="bg-gray-700 relative flex h-20 w-20 cursor-pointer items-center justify-center rounded border border-primary"
+      >
+        <ng-container *ngIf="!slot.equipmentInstance; else equippedTemplate">
+          <img
+            src="icons/equipment-slots/{{ slot.iconPath }}.svg"
+            alt="empty_equipment"
+            class="center w-60 object-contain"
+          />
+        </ng-container>
+        <ng-template #equippedTemplate>
+          <img
+            src="icons/items/{{ slot.equipmentInstance!.itemBase!.iconPath }}"
+            alt="equipment"
+            class="center w-60 object-contain"
+          />
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>

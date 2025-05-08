@@ -1,0 +1,46 @@
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, filter, Observable, of } from 'rxjs';
+import { SidebarItem, Tab } from '../../../../shared/models/sidebar-item';
+import { Router } from '@angular/router';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class SidebarService {
+  private sidebarContentSource = new BehaviorSubject<string>('default');
+
+  currentContent$ = this.sidebarContentSource.asObservable();
+
+  constructor(private router: Router) {
+    // Listen for navigation events to set the sidebar content initially
+    this.updateContent(this.router.url);
+  }
+
+  updateContent(content: string) {
+    this.sidebarContentSource.next(content);
+  }
+
+  getSidebar(): Tab[] {
+    let tabs: Tab[] = [
+      {
+        label: 'Daily',
+        items: [
+          {
+            id: 'creatures',
+            route: 'creatures',
+            icon: 'character/achievements',
+            title: 'Character Overview',
+          },
+          {
+            id: 'inventory',
+            route: 'character',
+            icon: 'character/inventory',
+            title: 'Inventory',
+          },
+        ],
+      },
+    ];
+
+    return tabs;
+  }
+}

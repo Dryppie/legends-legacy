@@ -1,0 +1,21 @@
+<div
+  class="group relative flex justify-center"
+  (mouseenter)="showTooltip()"
+  (mouseleave)="hideTooltip()"
+>
+  <img
+    src="icons/items/{{ item.itemBase.iconPath }}"
+    class="border-gray-700 rounded"
+  />
+  <!-- Additional item details -->
+  <ng-container *ngIf="itemHovered">
+    <app-item-tooltip
+      [item]="item"
+      [title]="item.itemBase.name"
+      [itemType]="item.itemBase.itemType"
+      [rarity]="item.itemBase.rarity"
+      [description]="item.itemBase.description"
+      class="absolute z-10 transform"
+    ></app-item-tooltip>
+  </ng-container>
+</div>
