@@ -1,0 +1,53 @@
+<div class="group relative flex h-24 w-24 items-center justify-center">
+  <!-- Circular Progress Bar -->
+
+  <img src="portrait/InnerEllipse.svg" class="absolute" />
+
+  <img src="portrait/FillerEllipse.svg" class="absolute" />
+  <svg
+    class="absolute inset-0 h-full w-full transform"
+    viewBox="0 0 36 36"
+    style="transform: rotate(119deg)"
+  >
+    <!-- Background circle -->
+    <circle
+      class="stroke-current text-[#353535]"
+      stroke-width="0.8"
+      cx="18"
+      cy="18"
+      r="15"
+      fill="none"
+    ></circle>
+    <!-- Progress circle -->
+    <circle
+      class="stroke-current text-primary"
+      stroke-width="0.8"
+      cx="18"
+      cy="18"
+      r="15"
+      fill="none"
+      stroke-dasharray="78.9"
+      [attr.stroke-dashoffset]="calculateOffset()"
+    ></circle>
+  </svg>
+  <img src="portrait/OuterEllipse.svg" class="absolute" />
+
+  <!-- Profile Image -->
+  <img
+    src="portrait/Avatar.svg"
+    alt="Profile"
+    class="absolute h-[66px] w-[66px] rounded-full"
+  />
+  <img src="portrait/BottomEllipse.svg" class="absolute bottom-0 w-12" />
+  <span class="absolute bottom-0 items-center text-[8px] text-primary">
+    {{ level }}
+  </span>
+
+  <div
+    class="absolute bottom-0 left-0 flex-col items-center justify-center rounded-lg border border-primary bg-black bg-texture px-2 py-1 text-xs text-primary opacity-0 transition-opacity group-hover:opacity-100"
+  >
+    <span class="text-nowrap"
+      >XP: {{ currentExperience }} / {{ maxExperience }}</span
+    >
+  </div>
+</div>

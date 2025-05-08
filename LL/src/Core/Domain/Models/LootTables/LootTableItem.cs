@@ -3,6 +3,6 @@
 namespace Domain.Models.LootTables;
 public class LootTableItem : LootTableEntry
 {
-    public Guid ItemId { get; set; }
+    public string ItemId { get; set; } = string.Empty;
     public ItemBase Item { get; set; } = null!;
 }

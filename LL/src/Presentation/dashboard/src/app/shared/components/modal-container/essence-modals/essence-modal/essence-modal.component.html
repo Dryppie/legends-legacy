@@ -1,0 +1,60 @@
+<div class="max-w-xl rounded-lg border-primary bg-texture p-6 text-white">
+  <!-- Modal Header -->
+  <div class="flex w-full items-center justify-center pb-2">
+    <h2 class="text-primary">{{ essence.name }}</h2>
+  </div>
+  <div class="border-t border-light_gray pb-3"></div>
+
+  <div class="flex flex-row justify-between gap-2">
+    <!-- Modal Body -->
+    <div class="space-y-4">
+      <div class="flex flex-col gap-1">
+        <h3 class="font-semibold text-primary">Active Ability</h3>
+        <div class="flex gap-1">
+          <div class="flex flex-col gap-1">
+            <p>
+              {{ essence.active.description }}
+            </p>
+            <p>
+              Cost: {{ essence.active.cost }}
+              {{ essence.active.costType }}
+            </p>
+            <p>
+              Cooldown: {{ essence.active.cooldown | ticksToSeconds }} seconds
+            </p>
+          </div>
+        </div>
+        <div></div>
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <h3 class="font-semibold text-primary">Passive Ability</h3>
+        <div class="flex gap-1">
+            <div>
+              {{ essence.passive.description }}
+            </div>
+        </div>
+      </div>
+      <div>
+        <h3 class="pb-1 font-semibold text-primary">Attributes</h3>
+      <div *ngFor="let attribute of essence.attributeModifiers" class="text-primary">
+        <div class="flex gap-2 text-white">
+          <div>
+            {{attribute.amount > 0 ? '+' : '-'}}{{ attribute.amount }}
+          </div>
+          <div>
+            {{ attribute.attributeType }}
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="flex place-items-end">
+      <button (click)="onClose()" class="rounded bg-light px-4 py-2 text-white">
+        Close
+      </button>
+    </div>
+  </div>
+</div>

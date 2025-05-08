@@ -1,0 +1,26 @@
+<div
+  class="flex h-full justify-center bg-cover bg-center"
+  style="background-image: url(&quot;backgrounds/background.png&quot;)"
+>
+  <div class="flex h-full flex-auto flex-col">
+    <div class="flex h-full gap-4 overflow-hidden">
+      <app-sidebar class="flex h-full"></app-sidebar>
+      <div class="h-full w-full flex-col space-y-4 sm:flex">
+        <div class="relative h-full w-full flex-auto overflow-hidden sm:pr-4">
+          <div
+            class="border-gradient absolute inset-0 flex w-full items-center rounded-b-none pt-[1px] sm:pr-4 sm:opacity-90"
+          >
+            <div class="h-full w-full rounded-b-none bg-texture"></div>
+          </div>
+          <main
+            class="relative flex h-full w-full flex-auto flex-col gap-2 overflow-hidden rounded-b-none pt-4 sm:pt-6"
+          >
+            <div class="h-full w-full overflow-hidden pl-4 sm:pb-6 sm:pl-6">
+              <router-outlet></router-outlet>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,39 @@
+<div class="flex flex-col gap-2">
+  <h2 class="pl-2 text-primary">Absorbed Essences</h2>
+
+  <!-- Active Slots -->
+  <h3 class="pl-2 text-secondary">Active Slots</h3>
+  <div
+    class="grid grid-cols-5 gap-4 rounded-md border border-primary p-4 sm:grid-cols-7 lg:grid-cols-10"
+  >
+    <div
+      class="hover:bg-accent flex flex-col items-center border-b-[1px] border-b-transparent p-2 transition hover:border-primary"
+      *ngFor="let essenceSlot of activeEssenceSlots"
+    >
+      <p
+        class="text-center font-bold text-primary hover:cursor-pointer"
+        (click)="openEssenceModal(essenceSlot.occupiedEssence)"
+      >
+        {{ essenceSlot.occupiedEssence?.name || "Empty" }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Reserved Slots -->
+  <h3 class="pl-2 text-secondary">Reserved Slots</h3>
+  <div
+    class="grid grid-cols-5 gap-4 rounded-md border border-primary p-4 sm:grid-cols-10"
+  >
+    <div
+      class="hover:bg-accent flex flex-col items-center border-b-[1px] border-b-transparent p-2 transition hover:border-primary"
+      *ngFor="let essenceSlot of reservedEssenceSlots"
+    >
+      <p
+        class="text-center font-bold text-primary hover:cursor-pointer"
+        (click)="openEssenceModal(essenceSlot.occupiedEssence)"
+      >
+        {{ essenceSlot.occupiedEssence?.name || "Empty" }}
+      </p>
+    </div>
+  </div>
+</div>

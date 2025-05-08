@@ -32,4 +32,10 @@ public class CreatureRepository : ICreatureRepository
             .ToListAsync(cancellationToken);
         return creatures;
     }
+
+    public Task<Creature> UpdateCreatureAsync(CancellationToken cancellationToken)
+    {
+        //TODO: Implement
+        throw new NotImplementedException();
+    }
 }

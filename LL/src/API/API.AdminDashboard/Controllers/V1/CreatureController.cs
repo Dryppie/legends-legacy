@@ -1,4 +1,6 @@
-﻿using Application.UseCases._AdminDashboard.Creatures.Queries.GetCreatures;
+﻿using Application.UseCases._AdminDashboard.Creatures.Commands.UpdateCreatures;
+using Application.UseCases._AdminDashboard.Creatures.Dtos;
+using Application.UseCases._AdminDashboard.Creatures.Queries.GetCreatures;
 using Domain.Models.Entities.Creatures;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,5 +12,11 @@ public class CreatureController : BaseController
     public async Task<ActionResult<List<Creature>>> Get()
     {
         return await Mediator.Send(new GetCreaturesQuery());
+    }
+
+    [HttpPost("updateCreature")]
+    public async Task Update([FromBody] CreatureDto creature)
+    {
+        await Mediator.Send(new UpdateCreatureCommand(creature));
     }
 }

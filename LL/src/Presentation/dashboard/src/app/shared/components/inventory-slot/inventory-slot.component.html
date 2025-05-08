@@ -1,0 +1,11 @@
+<div class="group relative flex w-16 items-center justify-center">
+  <img
+    *ngIf="!inventoryItem"
+    src="icons/character/inventory/inventoryslot.png"
+    class="border-gray-700 rounded object-fill"
+  />
+  <app-inventory-item
+    *ngIf="inventoryItem"
+    [inventoryItem]="inventoryItem"
+  ></app-inventory-item>
+</div>
