@@ -16,7 +16,7 @@ public class _SimulateController : BaseController
     [HttpPost("SimulateCombatWithOneEssence")]
     public async Task<IActionResult> SimulateCombatWithOneEssence(string EssenceName, int teamSize = 1)
     {
-        await Mediator.Send(new SimulateCombatWithOneEssenceCommand(EssenceName, teamSize));
+        await Mediator.Send(new SimulateCombatWithOneEssenceCommand(EssenceName + "'s Essence", teamSize));
 
         return Ok();
     }

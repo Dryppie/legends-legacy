@@ -27,37 +27,27 @@ public class EssenceRepository : IEssenceRepository
             .FirstOrDefaultAsync(c => c.Id == characterId, cancellationToken);
 
         // Throw if the character does not exist
-        NotFoundException.ThrowIfNull(character, nameof(character), characterId);
+        if (character == null) return false;
 
         var inventoryItem = character.Inventory.InventoryItems
-            .FirstOrDefault(ii => ii.ItemInstance is EssenceItemInstance ei && ei.ItemBase is EssenceItemBase eib && eib.Id.Equals(essenceItemId));
+            .FirstOrDefault(ii => ii.ItemInstance is EssenceItemInstance ei && ei.ItemBase is EssenceItemBase eib && eib.Essence.Id.Equals(essenceItemId));
 
         // Throw if the item was not found
-        NotFoundException.ThrowIfNull(inventoryItem, nameof(inventoryItem), essenceItemId);
+        if (inventoryItem == null) return false;
 
         var essenceItem = inventoryItem.ItemInstance as EssenceItemInstance;
-        NotFoundException.ThrowIfNull(essenceItem, nameof(essenceItem), essenceItemId);
+        if (essenceItem == null) return false;
 
         var essence = (essenceItem.ItemBase as EssenceItemBase)!.Essence;
-        NotFoundException.ThrowIfNull(essence, nameof(essence), essenceItemId);
+        if (essence == null) return false;
 
-        if (inventoryItem.Quantity < 1)
-        {
-            throw new InvalidOperationException($"You do not have this item in your inventory. Item with ID {inventoryItem.ItemInstanceId}.");
-        }
+        if (inventoryItem.Quantity < 1) return false;
 
         // Check if the character has already equipped this essence
-        if (character.EssenceSlots.Any(es => es.OccupiedEssence?.Id == essence.Id))
-        {
-            // You can throw an exception, or return false, or handle it however you'd like.
-            throw new InvalidOperationException($"Essence with ID {essence.Id} is already equipped.");
-        }
+        if (character.EssenceSlots.Any(es => es.OccupiedEssence?.Id == essence.Id)) return false;
 
         // Check if all active slots already contain an essence
-        if (character.EssenceSlots.Where(es => es.SlotState == SlotState.Active).All(es => es.OccupiedEssence != null))
-        {
-            throw new InvalidOperationException($"You do not have any available Essence Slot to equip Essence with ID {essence.Id}.");
-        }
+        if (character.EssenceSlots.Where(es => es.SlotState == SlotState.Active).All(es => es.OccupiedEssence != null)) return false;
 
         // 4) Add the essence to the character's first EssenceSlot that is both Active and has no occupied Essence
         character.EssenceSlots.Where(es => es.SlotState == SlotState.Active && es.OccupiedEssence == null).First().OccupiedEssence = essence;

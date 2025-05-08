@@ -89,6 +89,14 @@ public class EffectConverter : JsonConverter<EffectDefinition>
                             ? Enum.Parse<Targeting>(triggerTargetProp.GetString() ?? "None")
                             : Targeting.None;
 
+        var attackType = root.TryGetProperty("AttackType", out var attackTypeProp)
+                            ? Enum.Parse<AttackType>(attackTypeProp.GetString() ?? "None")
+                            : AttackType.None;
+
+        var damageType = root.TryGetProperty("DamageType", out var damageTypeProp)
+                            ? Enum.Parse<DamageType>(damageTypeProp.GetString() ?? "None")
+                            : DamageType.None;
+
         bool isFlatAmount = false;
         if (root.TryGetProperty("IsFlatAmount", out var isFlatAmountElement) &&
             (isFlatAmountElement.ValueKind == JsonValueKind.True || isFlatAmountElement.ValueKind == JsonValueKind.False))
@@ -149,8 +157,8 @@ public class EffectConverter : JsonConverter<EffectDefinition>
             triggerTarget: triggerTarget,
             isFlatAmount: isFlatAmount,
             chance: chance,
-            attackType: AttackType.None,
-            damageType: DamageType.None
+            attackType: attackType,
+            damageType: damageType
         );
 
         if (root.TryGetProperty("Log", out var logProp))

@@ -1,10 +1,10 @@
 ﻿using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL;
 using Common.Authorization.Security;
-using Domain.Models.Users;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+using Persistence.LL;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace API.LL.Common;
@@ -84,27 +84,16 @@ public class SwaggerAutoAuthFilter : IOperationFilter
     {
         using (var scope = _serviceProvider.CreateScope())
         {
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+            var context = scope.ServiceProvider.GetRequiredService<LLDbContext>();
             var jwtTokenService = scope.ServiceProvider.GetRequiredService<IJwtGenerator>();
             var characterService = scope.ServiceProvider.GetRequiredService<ICharacterService>();
 
-            var user = await userManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                return null;
-            }
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Email!.Equals(email), cancellationToken);
 
-            var character = await characterService.GetMyCharacterAsync(Guid.Parse(user.Id), cancellationToken);
+            var character = await characterService.GetMyCharacterAsync(user!.Id, cancellationToken);
+            user.CharacterId = character!.Id;
 
-            var authInfo = new AuthInfo
-            {
-                IsValid = true,
-                Id = user.Id,
-                Name = user.UserName!,
-                CharacterId = character.Id.ToString()
-            };
-
-            var token = jwtTokenService.GenerateTokens(authInfo);
+            var token = jwtTokenService.IssueTokens(user);
             return token;
         }
     }

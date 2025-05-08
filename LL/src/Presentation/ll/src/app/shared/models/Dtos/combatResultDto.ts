@@ -1,3 +1,4 @@
+import { BattleType } from '../../../core/state/combat-state/combatState';
 import { CombatEvent } from './combatEventDto';
 
 export interface CombatResultDto {
@@ -8,6 +9,7 @@ export interface CombatResultDto {
   startedAt: Date;
   outcome: BattleOutcome;
   experienceGained: number;
+  battleType: BattleType;
 }
 
 export interface SimpleCombatEntityDto {
@@ -19,6 +21,23 @@ export interface SimpleCombatEntityDto {
   mana: number;
   maxMana: number;
   barrier: number;
+}
+
+export interface CombatSessionDto {
+  from: Date;
+  to: Date;
+
+  combatResult: CombatResultDto;
+  combatSummary: SessionSummary;
+}
+
+export interface SessionSummary {
+  totalBattles: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  totalExperience: number;
+  totalGold: number;
 }
 
 export enum BattleOutcome {

@@ -4,16 +4,18 @@ import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActi
 import { CombatStateService } from '../../../state/combat-state/combat-state.service';
 import { LevelingService } from '../leveling/leveling.service';
 import { EventBusService } from '../event-bus/event-bus.service';
+import { CombatLogService } from './combat-log/combat-log.service';
+import { BattleType } from '../../../state/combat-state/combatState';
+import { CombatPlaybackService } from './combat-playback/combat-playback-service';
+import { CombatResultDto } from '../../../../shared/models/Dtos/combatResultDto';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CombatService {
-  private allSubscriptions: Subscription[] = [];
-
   constructor(
+    private playback: CombatPlaybackService,
     private combatStateService: CombatStateService,
-    private levelingService: LevelingService,
     private eventBusService: EventBusService,
   ) {
     this.eventBusService.logout$.subscribe(() => {
@@ -21,27 +23,49 @@ export class CombatService {
     });
   }
 
+  clearAllCombat() {
+    this.clearCurrentCombat();
+  }
+
   clearCurrentCombat() {
-    this.allSubscriptions.forEach((subscription) => subscription.unsubscribe());
-    this.allSubscriptions = [];
-    this.combatStateService.resetCombatState();
+    this.combatStateService.resetCombatState(BattleType.Idle);
+  }
+
+  startColosseumMatchSimulation(combatResult: CombatResultDto): void {
+    if (!combatResult) return;
+    combatResult.battleType = BattleType.Colosseum;
+    this.combatStateService.setCombatActive(combatResult.battleType, true);
+
+    this.simulateFight(combatResult);
   }
 
   startCombatSimulation(characterAction: CharacterActionDto): void {
-    if (!characterAction.combatResult) return;
+    const combatResult = characterAction.combatSession?.combatResult;
+    if (!combatResult) return;
+    combatResult.battleType = BattleType.Idle;
     this.clearCurrentCombat();
 
-    this.combatStateService.setNextCombatIn(characterAction.updatedAt);
+    this.combatStateService.setNextCombatIn(
+      combatResult.battleType,
+      characterAction.updatedAt,
+    );
 
-    this.combatStateService.setCombatActive(true);
+    this.combatStateService.setCombatActive(combatResult.battleType, true);
+
+    this.simulateFight(combatResult);
+  }
+
+  simulateFight(combatResult: CombatResultDto) {
     this.combatStateService.setPlayerCharacters(
-      characterAction.combatResult.playerTeam,
+      combatResult.battleType,
+      combatResult.playerTeam,
     );
     this.combatStateService.setEnemyCharacters(
-      characterAction.combatResult.enemyTeam,
+      combatResult.battleType,
+      combatResult.enemyTeam,
     );
 
-    const combatAction = characterAction.combatResult;
+    const combatAction = combatResult;
     if (combatAction.eventLog.length < 1) {
       return;
     }
@@ -49,36 +73,48 @@ export class CombatService {
     // Convert StartedAt to milliseconds
     const combatStartTime = new Date(combatAction.startedAt).getTime();
     const now = Date.now();
-    const elapsedTime = (now - combatStartTime) / 1000; // in seconds
 
-    // Process each event
-    combatAction.eventLog.forEach((event) => {
-      const eventTime = event.timestamp / 10; // in seconds since combat started
-      const delayTime = (eventTime - elapsedTime) * 1000; // Convert to milliseconds
-
-      const eventSubscription = (
-        delayTime <= 0 ? of(event) : of(event).pipe(delay(delayTime))
-      ).subscribe((e) => this.combatStateService.addCombatEvent(e));
-
-      this.allSubscriptions.push(eventSubscription);
+    this.playback.play(combatResult).subscribe({
+      next: (ev) =>
+        this.combatStateService.addCombatEvent(combatResult.battleType, ev),
+      // complete: () => this.onFinished(combatResult.battleType, combatResult),
     });
 
-    this.combatStateService.setCombatResult(combatAction);
+    this.combatStateService.setCombatResult(
+      combatResult.battleType,
+      combatAction,
+    );
 
     // Calculate remaining combat duration
     const combatDurationMs = combatAction.duration * 100; // Corrected to 100ms per unit
-    const remainingDuration = combatStartTime + combatDurationMs - now;
+    const remainingDuration = combatStartTime + combatDurationMs + 1000 - now;
 
-    const outcomeSubscription = (
-      remainingDuration <= 0
-        ? of(combatAction.outcome)
-        : of(combatAction.outcome).pipe(delay(remainingDuration))
-    ).subscribe((outcome) => {
-      this.combatStateService.setCombatOutcome(outcome);
-      this.levelingService.gainExperience(combatAction.experienceGained);
-    });
+    const onComplete = (combatResult: CombatResultDto) => {
+      this.combatStateService.setCombatOutcome(
+        combatResult.battleType,
+        combatResult.outcome,
+      );
+      this.handleCombatComplete(combatResult);
+    };
 
-    this.allSubscriptions.push(outcomeSubscription); // Track outcome subscription
+    if (remainingDuration <= 0) {
+      of(combatAction).subscribe(onComplete);
+    } else {
+      of(combatAction).pipe(delay(remainingDuration)).subscribe(onComplete);
+    }
+  }
+
+  private handleCombatComplete(combatResult: CombatResultDto) {
+    if (combatResult.battleType === BattleType.Colosseum) {
+      this.combatStateService.setCombatActive(combatResult.battleType, false);
+      this.combatStateService.resetCombatState(combatResult.battleType);
+    }
+  }
+
+  /** stop & forget a particular fight (e.g. UI tab closed) */
+  stop(battleType: BattleType) {
+    this.playback.stop(); // cancels *all* streams; adapt if you need per‑session cancel
+    this.combatStateService.resetCombatState(battleType);
   }
 
   handleLogout() {

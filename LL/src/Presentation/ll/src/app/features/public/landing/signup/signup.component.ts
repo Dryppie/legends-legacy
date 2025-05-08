@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { NgClass, NgIf } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -35,6 +35,12 @@ import { environment } from '../../../../../environments/environment';
   styleUrl: './signup.component.css',
 })
 export class SignupComponent {
+  @Input() convertAccount: boolean = false;
+  @Input() prefilledUsername: string | null = null;
+  @Input() disableLoginLink: boolean = false;
+  @Input() headerText1: string = 'Join the adventure and';
+  @Input() headerText2: string = 'create your legend!';
+
   registerForm = new FormGroup(
     {
       username: new FormControl(environment.isLocal ? 'Dryp' : ''),
@@ -51,11 +57,31 @@ export class SignupComponent {
     },
     { validators: passwordMatchValidator() },
   );
+
+  ngOnInit() {
+    if (this.prefilledUsername) {
+      this.registerForm.patchValue({ username: this.prefilledUsername });
+    }
+  }
+
   constructor(
     private authService: AuthService,
     private router: Router,
   ) {}
   loginError: boolean = false;
+
+  submitForm() {
+    if (this.registerForm.invalid) {
+      this.registerForm.markAllAsTouched(); // <-- This will show validation errors nicely
+      return; // Stop the form from submitting if it's invalid
+    }
+
+    if (this.convertAccount) {
+      this.convertAcc();
+    } else {
+      this.register();
+    }
+  }
 
   register() {
     const username = this.registerForm.value.username;
@@ -70,6 +96,27 @@ export class SignupComponent {
       this.authService.register(username, email, password).subscribe({
         next: () => {
           this.router.navigateByUrl('/login');
+        },
+        error: () => {
+          this.loginError = true;
+        },
+      });
+    }
+  }
+
+  convertAcc() {
+    const username = this.registerForm.value.username;
+    const email = this.registerForm.value.email;
+    const password = this.registerForm.value.password;
+    const confirmPassword = this.registerForm.value.confirmPassword;
+    if (
+      typeof username === 'string' &&
+      typeof email === 'string' &&
+      typeof password === 'string'
+    ) {
+      this.authService.convertGuestToUser(username, email, password).subscribe({
+        next: () => {
+          // window.location.reload();
         },
         error: () => {
           this.loginError = true;

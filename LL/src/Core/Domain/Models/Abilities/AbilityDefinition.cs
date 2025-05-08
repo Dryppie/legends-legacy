@@ -1,9 +1,10 @@
-﻿using Domain.Interfaces.Abilities;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Interfaces.Abilities;
 using Domain.Models.Abilities.Effects;
+using Domain.Models.Abilities.Effects.Actions;
 using Domain.Models.Abilities.Effects.Conditions;
 using Domain.Models.Abilities.Effects.Usages;
 using Domain.Models.Abilities.ResourceCosts;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Models.Abilities;
 [NotMapped]
@@ -35,7 +36,8 @@ public class AbilityDefinition
     /// What resource will be deducted from upon use
     /// </summary>
     public ResourceType CostType { get; set; }
-    public string ActivationLog { get; set; } = "{Actor} used {Ability} on {Target}.";
+    // If it's a summon ability, don't say who the ability is used on.
+    public string ActivationLog => Effects.All(e => e.Action is SummonAction) ? "{Actor} used {Ability}." :  "{Actor} used {Ability} on {Target}.";
 
     public List<EffectDefinition> Effects { get; set; } = [];
 
@@ -52,7 +54,6 @@ public class AbilityDefinition
             RemainingTimeUntilUse = RemainingTimeUntilUse,
             Cost = Cost,
             CostType = CostType,
-            ActivationLog = ActivationLog,
             Usage = Usage.Clone(),
             Condition = Condition.Clone(),
             Effects = Effects

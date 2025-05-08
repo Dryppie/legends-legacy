@@ -1,5 +1,4 @@
-﻿
-namespace Domain.Models.Entities.Characters;
+﻿namespace Domain.Models.Entities.Characters;
 public interface ICharacterRepository
 {
     /// <summary>
@@ -9,14 +8,14 @@ public interface ICharacterRepository
     /// <param name="Username"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Task<Character> CreateCharacterAsync(string userId, string username, CancellationToken cancellationToken);
+    public Task<Character> CreateCharacterAsync(Guid userId, string username, CancellationToken cancellationToken);
 
     /// <summary>
     /// Get Character by User Id
     /// </summary>
     /// <param name="UserId"></param>
     /// <returns></returns>
-    public Task<Character> GetCharacterByUserIdAsync(Guid currentUserId, CancellationToken cancellationToken);
+    public Task<Character?> GetCharacterByUserIdAsync(Guid currentUserId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Get Character by Character Id
@@ -30,6 +29,8 @@ public interface ICharacterRepository
     /// </summary>
     /// <param name="UserId"></param>
     /// <returns></returns>
-    Task<Character> GetCharacterOverviewByCharacterIdAsync(Guid currentUserId, CancellationToken cancellationToken);
+    Task<Character?> GetCharacterOverviewByCharacterIdAsync(Guid currentUserId, CancellationToken cancellationToken);
     Task<List<CharacterLeaderboardItem>> GetLeaderboardCharactersAsync(CancellationToken cancellationToken);
+    Task<Character> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken);
+    Task UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken);
 }

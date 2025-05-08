@@ -5,6 +5,7 @@ using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.EssenceItems;
 using Microsoft.EntityFrameworkCore;
+using Persistence.LL.Seeds;
 
 namespace Persistence.LL.Repositories.Inventories;
 public class InventoryRepository : IInventoryRepository
@@ -44,26 +45,48 @@ public class InventoryRepository : IInventoryRepository
 
     public async Task AddItemsToInventory(Guid characterId, List<InventoryItem> loot, CancellationToken cancellationToken)
     {
-        // Aggregate the loot list to combine quantities of the same items
+        // Aggregate the loot list to combine quantities of the same ItemBase
         var aggregatedLoot = loot
-            .GroupBy(item => item.ItemInstanceId)
-            .Select(group => new InventoryItem
+            .GroupBy(item => item.ItemInstance.ItemBaseId)
+            .Select(g =>
             {
-                InventoryId = characterId,  // Assuming InventoryId is characterId
-                ItemInstanceId = group.Key,
-                Quantity = group.Sum(item => item.Quantity)
+                // "first" to preserve the existing ItemInstance reference 
+                // (and any other properties it may have)
+                var first = g.First();
+
+                return new InventoryItem
+                {
+                    InventoryId = characterId,
+                    ItemInstanceId = first.ItemInstanceId,
+                    // preserve the reference to the actual ItemInstance:
+                    ItemInstance = first.ItemInstance,
+                    // sum up the total quantity
+                    Quantity = g.Sum(x => x.Quantity)
+                };
             }).ToList();
 
         // Get all relevant InventoryItems in one database call
-        var itemIds = aggregatedLoot.Select(i => i.ItemInstanceId);
-        var existingItems = _context.InventoryItems
-            .Where(i => i.InventoryId == characterId && itemIds.Contains(i.ItemInstanceId));
+        var itemBaseIds = aggregatedLoot.Select(l => l.ItemInstance.ItemBaseId).Distinct().ToList();
+        //var itemInstances = await _context.ItemInstances
+        //    .Where(ii => itemInstanceIds.Contains(ii.Id))
+        //    .Include(ii => ii.ItemBase) // <-- only if you need the ItemBase eagerly
+        //    .ToListAsync(cancellationToken);
+
+        //var existingInventoryItems = await _context.InventoryItems
+        //    .Where(inv => inv.InventoryId == characterId && itemInstanceIds.Contains(inv.ItemInstanceId))
+        //    .Include(inv => inv.ItemInstance) // So we have the existing linked ItemInstance
+        //    .ToListAsync(cancellationToken);
+
+        var existingInventoryItems = await _context.InventoryItems
+            .Include(ii => ii.ItemInstance)
+            .Where(ii => ii.InventoryId == characterId && itemBaseIds.Contains(ii.ItemInstance.ItemBaseId))
+            .ToListAsync(cancellationToken);
 
         foreach (var item in aggregatedLoot)
         {
             // Check if the item already exists in the retrieved list of existing items
-            var existingItem = existingItems
-                .FirstOrDefault(i => i.ItemInstanceId == item.ItemInstanceId);
+            var existingItem = existingInventoryItems
+                .FirstOrDefault(i => i.ItemInstance.ItemBaseId == item.ItemInstance.ItemBaseId);
 
             if (existingItem != null)
             {
@@ -72,7 +95,9 @@ public class InventoryRepository : IInventoryRepository
             }
             else
             {
+
                 // If item doesn't exist, add it to the database
+                await _context.ItemInstances.AddAsync(item.ItemInstance, cancellationToken);
                 await _context.InventoryItems.AddAsync(item, cancellationToken);
             }
         }
@@ -89,8 +114,91 @@ public class InventoryRepository : IInventoryRepository
         };
 
         await _context.Inventories.AddAsync(inventory, cancellationToken);
-
+        await SeedStarterItems(characterId);
         await _context.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task SeedStarterItems(Guid characterId)
+    {
+        var swordEquipmentInstance = new EquipmentInstance
+        {
+            Id = Guid.NewGuid(),
+            ItemBaseId = Guid.Parse(SeedItems.SWORD_GUID),
+        };
+        var bowEquipmentInstance = new EquipmentInstance
+        {
+            Id = Guid.NewGuid(),
+            ItemBaseId = Guid.Parse(SeedItems.BOW_GUID),
+        };
+        var axeEquipmentInstance = new EquipmentInstance
+        {
+            Id = Guid.NewGuid(),
+            ItemBaseId = Guid.Parse(SeedItems.AXE_GUID),
+        };
+        var daggerEquipmentInstance = new EquipmentInstance
+        {
+            Id = Guid.NewGuid(),
+            ItemBaseId = Guid.Parse(SeedItems.DAGGER_GUID),
+        };
+        var hammerEquipmentInstance = new EquipmentInstance
+        {
+            Id = Guid.NewGuid(),
+            ItemBaseId = Guid.Parse(SeedItems.HAMMER_GUID),
+        };
+        var shieldEquipmentInstance = new EquipmentInstance
+        {
+            Id = Guid.NewGuid(),
+            ItemBaseId = Guid.Parse(SeedItems.SHIELD_GUID),
+        };
+        var staffEquipmentInstance = new EquipmentInstance
+        {
+            Id = Guid.NewGuid(),
+            ItemBaseId = Guid.Parse(SeedItems.STAFF_GUID),
+        };
+
+        var inventoryItemSword = new InventoryItem()
+        {
+            InventoryId = characterId,
+            ItemInstanceId = swordEquipmentInstance.Id, // Copied directly from SwordItem. Same ID
+            Quantity = 1
+        };
+        var inventoryItemBow = new InventoryItem()
+        {
+            InventoryId = characterId,
+            ItemInstanceId = bowEquipmentInstance.Id, // Copied directly from BowItem. Same ID
+            Quantity = 1
+        };
+        var inventoryItemAxe = new InventoryItem()
+        {
+            InventoryId = characterId,
+            ItemInstanceId = axeEquipmentInstance.Id, // Copied directly from AxeItem. Same ID
+            Quantity = 1
+        };
+        var inventoryItemDagger = new InventoryItem()
+        {
+            InventoryId = characterId,
+            ItemInstanceId = daggerEquipmentInstance.Id, // Copied directly from DaggerItem. Same ID
+            Quantity = 1
+        };
+        var inventoryItemHammer = new InventoryItem()
+        {
+            InventoryId = characterId,
+            ItemInstanceId = hammerEquipmentInstance.Id, // Copied directly from HammerItem. Same ID
+            Quantity = 1
+        };
+        var inventoryItemShield = new InventoryItem()
+        {
+            InventoryId = characterId,
+            ItemInstanceId = shieldEquipmentInstance.Id, // Copied directly from ShieldItem. Same ID
+            Quantity = 1
+        };
+        var inventoryItemStaff = new InventoryItem()
+        {
+            InventoryId = characterId,
+            ItemInstanceId = staffEquipmentInstance.Id, // Copied directly from StaffItem. Same ID
+            Quantity = 1
+        };
+        await _context.ItemInstances.AddRangeAsync(swordEquipmentInstance, bowEquipmentInstance, axeEquipmentInstance, daggerEquipmentInstance, hammerEquipmentInstance, shieldEquipmentInstance, staffEquipmentInstance);
+        await _context.InventoryItems.AddRangeAsync(inventoryItemSword, inventoryItemBow, inventoryItemAxe, inventoryItemDagger, inventoryItemHammer, inventoryItemShield, inventoryItemStaff);
+    }
 }

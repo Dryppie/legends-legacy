@@ -1,9 +1,8 @@
 ﻿using Domain.Helpers;
 using Domain.Models.Attributes;
-using Domain.Models.Attributes.Modifiers;
+using Domain.Models.Colosseum;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
-using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.GatheringNodes;
@@ -13,249 +12,210 @@ using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.LootTables;
-using Domain.Models.Regions;
-using Domain.Models.Regions.Areas;
+using Domain.Models.Masteries;
 using Domain.Models.Users;
 using Microsoft.AspNetCore.Identity;
+using Persistence.LL.Repositories.Users;
 
 namespace Persistence.LL.Seeds;
 public static class LLDbContextExtensions
 {
     public const string CHARACTER_GUID = "11111111-1111-1111-1111-111111111111";
 
-    public static async Task SeedData(this LLDbContext context, UserManager<AppUser> userManager)
+    public static async Task SeedData(this LLDbContext context, IPasswordHasher<AppUser> hasher)
     {
-        await SeedCreaturesAndLootTablesForShenicRegionLumoRuins(context);
-
-        await SeedItemsAndLootTables(context);
-        await SeedAdminData(context, userManager);
-
-        await SeedInventoryItems(context);
-
-        await context.SaveChangesAsync();
-    }
-
-    private static async Task SeedAdminData(LLDbContext context, UserManager<AppUser> userManager)
-    {
-        var email = "admin@hotmail.com";
-        var user = await userManager.FindByEmailAsync(email);
-        if (user == null)
+        if (!context.Entities.Any())
         {
-            user = new AppUser
-            {
-                UserName = "admin",
-                Email = email,
-                NormalizedUserName = "admin",
-            };
+            await SeedCreatures.SeedCreaturesData(context);
+            await SeedItems.SeedItemsData(context);
+            await SeedItemsAndLootTables(context);
+            await SeedAdminData(context, hasher);
 
-            await userManager.CreateAsync(user, "Password123!");
+            await SeedInventoryItems(context);
 
-            var character = new Character()
-            {
-                Id = Guid.Parse(CHARACTER_GUID),
-                UserId = user.Id,
-                Name = "admin",
-                ImagePath = "player",
-                Level = 1
-            };
-
-            var inventory = new Inventory()
-            {
-                CharacterId = character.Id,
-            };
-
-            var attributes = EntityBaseAttributeHelper.CreateEntityAttributes(character.Id);
-            await context.EntityAttributes.AddRangeAsync(attributes);
-
-            //var abilities = new List<AbilityId>()
-            //{
-            //    new AbilityId()
-            //    {
-            //        EntityId = character.Id,
-            //        Id = "fireball_01"
-            //    },
-            //    new AbilityId()
-            //    {
-            //        EntityId = character.Id,
-            //        Id = "_01"
-            //    }
-            //};
-            var essences = new List<Essence>()
-            {
-                new Essence()
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Starter Essence 1",
-                    ActiveAbilityId = "fireball_01",
-                    PassiveAbilityId = "retaliate_01"
-                },
-                new Essence()
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Starter Essence 2",
-                    ActiveAbilityId = "heal_01",
-                    PassiveAbilityId = "pocketDirt"
-                }
-            };
-
-            var essenceSlots = new List<EssenceSlot>()
-            {
-                new EssenceSlot()
-                {
-                    Id = Guid.NewGuid(),
-                    SlotState = SlotState.Active,
-                    SlotType = SlotType.Standard,
-                    OccupiedEssence = essences.First(),
-                    EntityId = character.Id,
-                },
-                new EssenceSlot()
-                {
-                    Id = Guid.NewGuid(),
-                    SlotState = SlotState.Active,
-                    SlotType = SlotType.Standard,
-                    OccupiedEssence = essences.Last(),
-                    EntityId = character.Id,
-                },
-                new EssenceSlot()
-                {
-                    Id = Guid.NewGuid(),
-                    SlotState = SlotState.Active,
-                    SlotType = SlotType.Standard,
-                    EntityId = character.Id,
-                },
-                new EssenceSlot()
-                {
-                    Id = Guid.NewGuid(),
-                    SlotState = SlotState.Active,
-                    SlotType = SlotType.Standard,
-                    EntityId = character.Id,
-                },new EssenceSlot()
-                {
-                    Id = Guid.NewGuid(),
-                    SlotState = SlotState.Active,
-                    SlotType = SlotType.Standard,
-                    EntityId = character.Id,
-                },
-                new EssenceSlot()
-                {
-                    Id = Guid.NewGuid(),
-                    SlotState = SlotState.Active,
-                    SlotType = SlotType.Standard,
-                    EntityId = character.Id,
-                },
-            };
-            SeedEquipmentSlots(character);
-            character.EssenceSlots = essenceSlots;
-            context.Characters.Add(character);
-            context.Inventories.Add(inventory);
-            await context.Essences.AddRangeAsync(essences);
+            await context.SaveChangesAsync();
         }
     }
 
-    private static void SeedEquipmentSlots(Entity entity)
+    private static async Task SeedAdminData(LLDbContext context, IPasswordHasher<AppUser> hasher)
     {
+        var email = "admin@hotmail.com";
+        var user = new AppUser
+        {
+            Username = "admin",
+            Email = email,
+            PasswordHash = hasher.HashPassword(null!, "Password123!"),
+            EmailConfirmed = true,
+            IsGuest = false,
+        };
 
-        var slotTypes = Enum.GetValues(typeof(EquipmentType)).Cast<EquipmentType>();
+        await context.Users.AddAsync(user);
 
-        // Create an equipment slot for each enum value
-        var equipmentSlots = slotTypes
-            .Select(type => new EquipmentSlot
+        var character = new Character()
+        {
+            Id = Guid.Parse(CHARACTER_GUID),
+            UserId = user.Id,
+            Name = "admin",
+            ImagePath = "player",
+            Level = 1
+        };
+
+        var inventory = new Inventory()
+        {
+            CharacterId = character.Id,
+        };
+
+        var attributes = EntityBaseAttributeHelper.CreateEntityAttributes(character.Id);
+        await context.EntityAttributes.AddRangeAsync(attributes);
+
+        //var abilities = new List<AbilityId>()
+        //{
+        //    new AbilityId()
+        //    {
+        //        EntityId = character.Id,
+        //        Id = "fireball_01"
+        //    },
+        //    new AbilityId()
+        //    {
+        //        EntityId = character.Id,
+        //        Id = "_01"
+        //    }
+        //};
+        var essences = new List<Essence>()
+        {
+            new Essence()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Starter Essence 1",
+                ActiveAbilityId = "fireball_01",
+                PassiveAbilityId = "retaliate_01"
+            },
+            new Essence()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Starter Essence 2",
+                ActiveAbilityId = "heal_01",
+                PassiveAbilityId = "pocketDirt"
+            }
+        };
+
+        var essenceSlots = new List<EssenceSlot>()
+        {
+            new EssenceSlot()
+            {
+                Id = Guid.NewGuid(),
+                SlotState = SlotState.Active,
+                SlotType = SlotType.Standard,
+                OccupiedEssence = essences.First(),
+                EntityId = character.Id,
+            },
+            new EssenceSlot()
+            {
+                Id = Guid.NewGuid(),
+                SlotState = SlotState.Active,
+                SlotType = SlotType.Standard,
+                OccupiedEssence = essences.Last(),
+                EntityId = character.Id,
+            },
+            new EssenceSlot()
+            {
+                Id = Guid.NewGuid(),
+                SlotState = SlotState.Active,
+                SlotType = SlotType.Standard,
+                EntityId = character.Id,
+            },
+            new EssenceSlot()
+            {
+                Id = Guid.NewGuid(),
+                SlotState = SlotState.Active,
+                SlotType = SlotType.Standard,
+                EntityId = character.Id,
+            },new EssenceSlot()
+            {
+                Id = Guid.NewGuid(),
+                SlotState = SlotState.Active,
+                SlotType = SlotType.Standard,
+                EntityId = character.Id,
+            },
+            new EssenceSlot()
+            {
+                Id = Guid.NewGuid(),
+                SlotState = SlotState.Active,
+                SlotType = SlotType.Standard,
+                EntityId = character.Id,
+            },
+        };
+
+        var arenaTicketStatus = new ArenaTicketStatus()
+        {
+            CharacterId = character.Id,
+            CurrentTickets = 5,
+            LastTicketUpdate = DateTime.UtcNow,
+        };
+        character.ArenaTicketStatus = arenaTicketStatus;
+
+        var equipmentSlots = SeedEquipmentSlots(character);
+        var masteries = SeedMasteries(character);
+        context.EquipmentSlots.AddRange(equipmentSlots);
+        character.EssenceSlots = essenceSlots;
+        character.Masteries = masteries;
+        context.Characters.Add(character);
+        context.Inventories.Add(inventory);
+        await context.Essences.AddRangeAsync(essences);
+    }
+    private static List<Mastery> SeedMasteries(Entity entity)
+    {
+        var masteries = new List<Mastery>()
+        {
+            new Mastery()
             {
                 EntityId = entity.Id,
-                EquipmentType = type
-            })
-            .ToList();
-
-        //foreach (var equipmentSlot in equipmentSlots)
-        //{
-        //    if (equipmentSlot.EquipmentType == EquipmentType.MainHand)
-        //    {
-        //        equipmentSlot.EquipmentId = Guid.Parse("00000000-1000-0000-0000-000000000001");
-        //    }
-        //}
-        entity.EquipmentSlots = equipmentSlots;
-    }
-
-
-    private static async Task SeedCreaturesAndLootTablesForShenicRegionLumoRuins(LLDbContext context)
-    {
-        if (!context.Creatures.Any())
-        {
-            // Step 1 - Creature Ids
-            var goblinId = Guid.Parse("00000000-0000-0000-0000-000000000001");
-            var goblinWarriorId = Guid.Parse("00000000-0000-0000-0000-000000000002");
-            var goblinArcherId = Guid.Parse("00000000-0000-0000-0000-000000000003");
-            var largeRatId = Guid.Parse("00000000-0000-0000-0000-000000000004");
-            var flameImpId = Guid.Parse("00000000-0000-0000-0000-000000000005");
-            var frostImpId = Guid.Parse("00000000-0000-0000-0000-000000000006");
-            var shadowImpId = Guid.Parse("00000000-0000-0000-0000-000000000007");
-            var vampireBatId = Guid.Parse("00000000-0000-0000-0000-000000000008");
-            var blueSlimeId = Guid.Parse("00000000-0000-0000-0000-000000000009");
-            var brownSlimeId = Guid.Parse("00000000-0000-0000-0000-000000000010");
-            var greenSlimeId = Guid.Parse("00000000-0000-0000-0000-000000000011");
-            var rainbowSlimeId = Guid.Parse("00000000-0000-0000-0000-000000000012");
-            var redSlimeId = Guid.Parse("00000000-0000-0000-0000-000000000013");
-            var transparentSlimeId = Guid.Parse("00000000-0000-0000-0000-000000000014");
-
-            // Step 2 - Essences
-            var goblinEssence = new Essence()
+                Level = 0,
+                CurrentXP = 0,
+                MasteryType = CombatMastery.Axe,
+                AttributeType = AttributeType.Strength,
+            },
+            new Mastery()
             {
-                Id = Guid.NewGuid(),
-                Name = "Goblin's Essence",
-                ActiveAbilityId = "sneakAttack",
-                PassiveAbilityId = "pocketDirt"
-            };
-            var goblinWarriorEssence = new Essence()
+                EntityId = entity.Id,
+                Level = 0,
+                CurrentXP = 0,
+                MasteryType = CombatMastery.Bow,
+                AttributeType = AttributeType.Agility,
+            },
+            new Mastery()
             {
-                Id = Guid.NewGuid(),
-                Name = "Goblin Warrior's Essence",
-                ActiveAbilityId = "ragingCleave",
-                PassiveAbilityId = "recklessAssault"
-            };
-            var goblinArcherEssence = new Essence()
+                EntityId = entity.Id,
+                Level = 0,
+                CurrentXP = 0,
+                MasteryType = CombatMastery.Dagger,
+                AttributeType = AttributeType.Dexterity,
+            },
+            new Mastery()
             {
-                Id = Guid.NewGuid(),
-                Name = "Goblin Archer's Essence",
-                ActiveAbilityId = "snipersStrike",
-                PassiveAbilityId = "poisonedArrows"
-            };
-            var largeRatEssence = new Essence()
+                EntityId = entity.Id,
+                Level = 0,
+                CurrentXP = 0,
+                MasteryType = CombatMastery.Hammer,
+                AttributeType = AttributeType.Endurance,
+            },
+            new Mastery()
             {
-                Id = Guid.NewGuid(),
-                Name = "Large Rat's Essence",
-                ActiveAbilityId = "tailWrap",
-                PassiveAbilityId = "big",
-            };
-            var flameImpEssence = new Essence()
+                EntityId = entity.Id,
+                Level = 0,
+                CurrentXP = 0,
+                MasteryType = CombatMastery.Shield,
+                AttributeType = AttributeType.Constitution,
+            },
+            new Mastery()
             {
-                Id = Guid.NewGuid(),
-                Name = "Flame Imp's Essence",
-                ActiveAbilityId = "firebombToss",
-                PassiveAbilityId = "hotAura",
-            };
-            var frostImpEssence = new Essence()
-            {
-                Id = Guid.NewGuid(),
-                Name = "Frost Imp's Essence",
-                ActiveAbilityId = "iceTouch",
-                PassiveAbilityId = "coldAura",
-            };
-            var shadowImpEssence = new Essence()
-            {
-                Id = Guid.NewGuid(),
-                Name = "Shadow Imp's Essence",
-                ActiveAbilityId = "shadowImage",
-                PassiveAbilityId = "shadowyPresence",
-            };
-            var vampireBatEssence = new Essence()
-            {
-                Id = Guid.NewGuid(),
-                Name = "Vampire Bat's Essence",
-                ActiveAbilityId = "bloodthirstyFangs",
-                PassiveAbilityId = "darkVitality",
-            };
-            var blueSlimeEssence = new Essence()
-            {
+                EntityId = entity.Id,
+                Level = 0,
+                CurrentXP = 0,
+                MasteryType = CombatMastery.Staff,
+                AttributeType = AttributeType.Intelligence,
+            },
+            new Mastery()
                 Id = Guid.NewGuid(),
                 Name = "Blue Slime's Essence",
                 ActiveAbilityId = "sweetWater",
@@ -656,234 +616,37 @@ public static class LLDbContextExtensions
 
             var flameImpEssenceSlot = new EssenceSlot()
             {
-                Id = Guid.NewGuid(),
-                SlotState = SlotState.Active,
-                SlotType = SlotType.Standard,
-                OccupiedEssence = flameImpEssence,
-                EntityId = flameImpId
-            };
-            var frostImpEssenceSlot = new EssenceSlot()
-            {
-                Id = Guid.NewGuid(),
-                SlotState = SlotState.Active,
-                SlotType = SlotType.Standard,
-                OccupiedEssence = frostImpEssence,
-                EntityId = frostImpId
-            };
-            var shadowImpEssenceSlot = new EssenceSlot()
-            {
-                Id = Guid.NewGuid(),
-                SlotState = SlotState.Active,
-                SlotType = SlotType.Standard,
-                OccupiedEssence = shadowImpEssence,
-                EntityId = shadowImpId
-            };
-            var vampireBatEssenceSlot = new EssenceSlot()
-            {
-                Id = Guid.NewGuid(),
-                SlotState = SlotState.Active,
-                SlotType = SlotType.Standard,
-                OccupiedEssence = vampireBatEssence,
-                EntityId = vampireBatId
-            };
+                EntityId = entity.Id,
+                Level = 0,
+                CurrentXP = 0,
+                MasteryType = CombatMastery.Sword,
+                AttributeType = AttributeType.FightingSpirit,
+            },
+        };
 
-            var blueSlimeEssenceSlot = new EssenceSlot()
-            {
-                Id = Guid.NewGuid(),
-                SlotState = SlotState.Active,
-                SlotType = SlotType.Standard,
-                OccupiedEssence = blueSlimeEssence,
-                EntityId = blueSlimeId
-            };
-            var brownSlimeEssenceSlot = new EssenceSlot()
-            {
-                Id = Guid.NewGuid(),
-                SlotState = SlotState.Active,
-                SlotType = SlotType.Standard,
-                OccupiedEssence = brownSlimeEssence,
-                EntityId = brownSlimeId
-            };
-            var greenSlimeEssenceSlot = new EssenceSlot()
-            {
-                Id = Guid.NewGuid(),
-                SlotState = SlotState.Active,
-                SlotType = SlotType.Standard,
-                OccupiedEssence = greenSlimeEssence,
-                EntityId = greenSlimeId
-            };
-            var rainbowSlimeEssenceSlot = new EssenceSlot()
-            {
-                Id = Guid.NewGuid(),
-                SlotState = SlotState.Active,
-                SlotType = SlotType.Standard,
-                OccupiedEssence = rainbowSlimeEssence,
-                EntityId = rainbowSlimeId
-            };
-            var redSlimeEssenceSlot = new EssenceSlot()
-            {
-                Id = Guid.NewGuid(),
-                SlotState = SlotState.Active,
-                SlotType = SlotType.Standard,
-                OccupiedEssence = redSlimeEssence,
-                EntityId = redSlimeId
-            };
-            var transparentSlimeEssenceSlot = new EssenceSlot()
-            {
-                Id = Guid.NewGuid(),
-                SlotState = SlotState.Active,
-                SlotType = SlotType.Standard,
-                OccupiedEssence = transparentSlimeEssence,
-                EntityId = transparentSlimeId
-            };
+        return masteries;
+    }
 
-            // Step 5 - Create creatures
-            var lumoRuinsCreatures = new List<Creature>
+    private static List<EquipmentSlot> SeedEquipmentSlots(Entity entity)
+    {
+
+        var slotTypes = Enum.GetValues(typeof(EquipmentType)).Cast<EquipmentType>();
+
+        // Create an equipment slot for each enum value
+        var equipmentSlots = slotTypes
+            .Select(type => new EquipmentSlot
             {
-                new() { Id = goblinId, Name = "Goblin", ImagePath = "goblin", LootTableId = goblinLootTable.Id, EssenceSlots = [goblinEssenceSlot], ExperienceReward = 2 },
-                new() { Id = goblinWarriorId, Name = "Goblin Warrior", ImagePath = "goblin_warrior", LootTableId = goblinWarriorLootTable.Id, EssenceSlots = [goblinWarriorEssenceSlot], ExperienceReward = 3 },
-                new() { Id = goblinArcherId, Name = "Goblin Archer", ImagePath = "goblin_archer", LootTableId = goblinArcherLootTable.Id, EssenceSlots = [goblinArcherEssenceSlot], ExperienceReward = 3 },
-                new() { Id = largeRatId, Name = "Large Rat", ImagePath = "large_rat", LootTableId = largeRatLootTable.Id, EssenceSlots = [largeRatEssenceSlot], ExperienceReward = 2 }
-            };
+                EntityId = entity.Id,
+                EquipmentType = type
+            })
+            .ToList();
 
-            var bloodGroveCreatures = new List<Creature>
-            {
-                new() { Id = flameImpId, Name = "Flame Imp", ImagePath = "flame_imp", LootTableId = flameImpLootTable.Id, EssenceSlots = [flameImpEssenceSlot], ExperienceReward = 2 },
-                new() { Id = frostImpId, Name = "Frost Imp", ImagePath = "frost_imp", LootTableId = frostImpLootTable.Id, EssenceSlots = [frostImpEssenceSlot], ExperienceReward = 2 },
-                new() { Id = shadowImpId, Name = "Shadow Imp", ImagePath = "shadow_imp", LootTableId = shadowImpLootTable.Id, EssenceSlots = [shadowImpEssenceSlot], ExperienceReward = 2 },
-                new() { Id = vampireBatId, Name = "Vampire Bat", ImagePath = "vampire_bat", LootTableId = vampireBatLootTable.Id, EssenceSlots = [vampireBatEssenceSlot], ExperienceReward = 4 }
-            };
-
-            var crystalCreekCreatures = new List<Creature>
-            {
-                new() { Id = blueSlimeId, Name = "Blue Slime", ImagePath = "blue_slime", LootTableId = blueSlimeLootTable.Id, EssenceSlots = [blueSlimeEssenceSlot], ExperienceReward = 3 },
-                new() { Id = brownSlimeId, Name = "Brown Slime", ImagePath = "brown_slime", LootTableId = brownSlimeLootTable.Id, EssenceSlots = [brownSlimeEssenceSlot], ExperienceReward = 4 },
-                new() { Id = greenSlimeId, Name = "Green Slime", ImagePath = "green_slime", LootTableId = greenSlimeLootTable.Id, EssenceSlots = [greenSlimeEssenceSlot], ExperienceReward = 3 },
-                new() { Id = rainbowSlimeId, Name = "Rainbow Slime", ImagePath = "rainbow_slime", LootTableId = rainbowSlimeLootTable.Id, EssenceSlots = [rainbowSlimeEssenceSlot], ExperienceReward = 4 },
-                new() { Id = redSlimeId, Name = "Red Slime", ImagePath = "red_slime", LootTableId = redSlimeLootTable.Id, EssenceSlots = [redSlimeEssenceSlot], ExperienceReward = 3 },
-                new() { Id = transparentSlimeId, Name = "Transparent Slime", ImagePath = "transparent_slime", LootTableId = transparentSlimeLootTable.Id, EssenceSlots = [transparentSlimeEssenceSlot], ExperienceReward = 4 },
-            };
-
-            await context.Creatures.AddRangeAsync(lumoRuinsCreatures);
-            await context.Creatures.AddRangeAsync(bloodGroveCreatures);
-            await context.Creatures.AddRangeAsync(crystalCreekCreatures);
-
-            // Step 6 - Create area
-            var lumoRuinsAreaId = "region_01_area_01";
-            var lumoRuinsAreaCreatures = new List<AreaCreature>
-            {
-                new AreaCreature() { AreaId = lumoRuinsAreaId, CreatureId = goblinId, WeightedSpawnRate = 0.45f },
-                new AreaCreature() { AreaId = lumoRuinsAreaId, CreatureId = goblinWarriorId, WeightedSpawnRate = 0.2f },
-                new AreaCreature() { AreaId = lumoRuinsAreaId, CreatureId = goblinArcherId, WeightedSpawnRate = 0.2f },
-                new AreaCreature() { AreaId = lumoRuinsAreaId, CreatureId = largeRatId, WeightedSpawnRate = 0.25f },
-            };
-
-            var bloodGroveAreaId = "region_01_area_02";
-            var bloodGroveAreaCreatures = new List<AreaCreature>
-            {
-                new AreaCreature() { AreaId = bloodGroveAreaId, CreatureId = flameImpId, WeightedSpawnRate = 0.31f },
-                new AreaCreature() { AreaId = bloodGroveAreaId, CreatureId = frostImpId, WeightedSpawnRate = 0.3f },
-                new AreaCreature() { AreaId = bloodGroveAreaId, CreatureId = shadowImpId, WeightedSpawnRate = 0.3f },
-                new AreaCreature() { AreaId = bloodGroveAreaId, CreatureId = vampireBatId, WeightedSpawnRate = 0.09f },
-            };
-
-            var crystalCreekAreaId = "region_01_area_03";
-            var crystalCreekAreaCreatures = new List<AreaCreature>
-            {
-                new AreaCreature() { AreaId = crystalCreekAreaId, CreatureId = blueSlimeId, WeightedSpawnRate = 0.20f },
-                new AreaCreature() { AreaId = crystalCreekAreaId, CreatureId = brownSlimeId, WeightedSpawnRate = 0.20f },
-                new AreaCreature() { AreaId = crystalCreekAreaId, CreatureId = greenSlimeId, WeightedSpawnRate = 0.20f },
-                new AreaCreature() { AreaId = crystalCreekAreaId, CreatureId = rainbowSlimeId, WeightedSpawnRate = 0.10f },
-                new AreaCreature() { AreaId = crystalCreekAreaId, CreatureId = redSlimeId, WeightedSpawnRate = 0.20f },
-                new AreaCreature() { AreaId = crystalCreekAreaId, CreatureId = transparentSlimeId, WeightedSpawnRate = 0.10f },
-            };
-
-            // Create attributes
-            var attributes = new List<EntityAttribute>();
-            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(goblinId));
-            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(goblinWarriorId));
-            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(goblinArcherId));
-            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(largeRatId));
-            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(flameImpId));
-            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(frostImpId));
-            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(shadowImpId));
-            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(vampireBatId));
-            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(blueSlimeId));
-            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(brownSlimeId));
-            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(greenSlimeId));
-            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(rainbowSlimeId));
-            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(redSlimeId));
-            attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributes(transparentSlimeId));
-            await context.EntityAttributes.AddRangeAsync(attributes);
-
-            if (!context.Regions.Any())
-            {
-                var areas = new List<Area>()
-                {
-                    new Area
-                    {
-                        Id = lumoRuinsAreaId, // region, [area, dungeon, raid, or rift], area
-                        Name = "Lumo Ruins",
-                        Creatures = lumoRuinsAreaCreatures,
-                        SpawnProbabilities = new List<float>
-                        {
-                            0.87f,
-                            0.09f,
-                            0.03f,
-                            0.01f,
-                        }
-                    },
-                    new Area
-                    {
-                        Id = bloodGroveAreaId, // region, [area, dungeon, raid, or rift], area
-                        Name = "Blood Grove",
-                        Creatures = bloodGroveAreaCreatures,
-                        SpawnProbabilities = new List<float>
-                        {
-                            0.82f,
-                            0.12f,
-                            0.04f,
-                            0.02f,
-                        }
-                    },
-                    new Area
-                    {
-                        Id = crystalCreekAreaId, // region, [area, dungeon, raid, or rift], area
-                        Name = "Crystal Creek",
-                        Creatures = crystalCreekAreaCreatures,
-                        SpawnProbabilities = new List<float>
-                        {
-                            0.75f,
-                            0.17f,
-                            0.05f,
-                            0.02f,
-                            0.01f,
-                        }
-                    }
-                };
-                
-                await context.Areas.AddRangeAsync(areas);
-
-                var regions = new List<Region>
-                {
-                    new Region()
-                    {
-                        Name = "Shenic",
-                        Areas = areas
-                    }
-                };
-                await context.Regions.AddRangeAsync(regions);
-            }
-        }
+        return equipmentSlots;
     }
 
     public static async Task SeedItemsAndLootTables(LLDbContext context)
     {
-        if (!context.LootTables.Any() && !context.ItemBases.Any())
-        {
-            await SeedOddGear(context);
-
-            await SeedWoodcuttingLootTables(context);
-        }
+        await SeedWoodcuttingLootTables(context);
     }
 
     public static async Task SeedInventoryItems(LLDbContext context)
@@ -902,38 +665,38 @@ public static class LLDbContextExtensions
             };
             var swordEquipmentInstance = new EquipmentInstance
             {
-                Id = Guid.Parse("00000000-1000-0000-0000-000000000001"),
-                ItemBaseId = "00000000-1000-0000-0000-000000000001",
+                Id = Guid.Parse(SeedItems.SWORD_GUID),
+                ItemBaseId = SeedItems.SWORD_GUID,
             };
             var bowEquipmentInstance = new EquipmentInstance
             {
-                Id = Guid.Parse("00000000-2000-0000-0000-000000000002"),
-                ItemBaseId = "00000000-2000-0000-0000-000000000002",
+                Id = Guid.Parse(SeedItems.BOW_GUID),
+                ItemBaseId = SeedItems.BOW_GUID,
             };
             var axeEquipmentInstance = new EquipmentInstance
             {
-                Id = Guid.Parse("00000000-3000-0000-0000-000000000003"),
-                ItemBaseId = "00000000-3000-0000-0000-000000000003",
+                Id = Guid.Parse(SeedItems.AXE_GUID),
+                ItemBaseId = SeedItems.AXE_GUID,
             };
             var daggerEquipmentInstance = new EquipmentInstance
             {
-                Id = Guid.Parse("00000000-4000-0000-0000-000000000004"),
-                ItemBaseId = "00000000-4000-0000-0000-000000000004",
+                Id = Guid.Parse(SeedItems.DAGGER_GUID),
+                ItemBaseId = SeedItems.DAGGER_GUID,
             };
             var hammerEquipmentInstance = new EquipmentInstance
             {
-                Id = Guid.Parse("00000000-5000-0000-0000-000000000005"),
-                ItemBaseId = "00000000-5000-0000-0000-000000000005",
+                Id = Guid.Parse(SeedItems.HAMMER_GUID),
+                ItemBaseId = SeedItems.HAMMER_GUID,
             };
             var shieldEquipmentInstance = new EquipmentInstance
             {
-                Id = Guid.Parse("00000000-6000-0000-0000-000000000006"),
-                ItemBaseId = "00000000-6000-0000-0000-000000000006",
+                Id = Guid.Parse(SeedItems.SHIELD_GUID),
+                ItemBaseId = SeedItems.SHIELD_GUID,
             };
             var staffEquipmentInstance = new EquipmentInstance
             {
-                Id = Guid.Parse("00000000-7000-0000-0000-000000000007"),
-                ItemBaseId = "00000000-7000-0000-0000-000000000007",
+                Id = Guid.Parse(SeedItems.STAFF_GUID),
+                ItemBaseId = SeedItems.STAFF_GUID,
             };
             var inventoryItemGoblinEssence = new InventoryItem()
             {
@@ -952,43 +715,43 @@ public static class LLDbContextExtensions
             var inventoryItemSword = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-1000-0000-0000-000000000001"), // Copied directly from SwordItem. Same ID
+                ItemInstanceId = Guid.Parse(SeedItems.SWORD_GUID), // Copied directly from SwordItem. Same ID
                 Quantity = 1
             };
             var inventoryItemBow = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-2000-0000-0000-000000000002"), // Copied directly from BowItem. Same ID
+                ItemInstanceId = Guid.Parse(SeedItems.BOW_GUID), // Copied directly from BowItem. Same ID
                 Quantity = 1
             };
             var inventoryItemAxe = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-3000-0000-0000-000000000003"), // Copied directly from AxeItem. Same ID
+                ItemInstanceId = Guid.Parse(SeedItems.AXE_GUID), // Copied directly from AxeItem. Same ID
                 Quantity = 1
             };
             var inventoryItemDagger = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-4000-0000-0000-000000000004"), // Copied directly from DaggerItem. Same ID
+                ItemInstanceId = Guid.Parse(SeedItems.DAGGER_GUID), // Copied directly from DaggerItem. Same ID
                 Quantity = 1
             };
             var inventoryItemHammer = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-5000-0000-0000-000000000005"), // Copied directly from HammerItem. Same ID
+                ItemInstanceId = Guid.Parse(SeedItems.HAMMER_GUID), // Copied directly from HammerItem. Same ID
                 Quantity = 1
             };
             var inventoryItemShield = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-6000-0000-0000-000000000006"), // Copied directly from ShieldItem. Same ID
+                ItemInstanceId = Guid.Parse(SeedItems.SHIELD_GUID), // Copied directly from ShieldItem. Same ID
                 Quantity = 1
             };
             var inventoryItemStaff = new InventoryItem()
             {
                 InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-7000-0000-0000-000000000007"), // Copied directly from StaffItem. Same ID
+                ItemInstanceId = Guid.Parse(SeedItems.STAFF_GUID), // Copied directly from StaffItem. Same ID
                 Quantity = 1
             };
             await context.ItemInstances.AddRangeAsync(goblinEssenceItemInstance, ratEssenceItemInstance, swordEquipmentInstance, bowEquipmentInstance, axeEquipmentInstance, daggerEquipmentInstance, hammerEquipmentInstance, shieldEquipmentInstance, staffEquipmentInstance);

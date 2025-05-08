@@ -1,3 +1,5 @@
+using System.Text;
+using System.Text.Json.Serialization;
 using API.LL;
 using Application;
 using Asp.Versioning;
@@ -11,10 +13,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Persistence.LL;
 using Persistence.LL.Seeds;
-using Services.LL;
 using Services.AdminDashboard;
-using System.Text;
-using System.Text.Json.Serialization;
+using Services.LL;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -54,8 +54,8 @@ builder.Services.AddAuthorization(); // For Identity
 // TODO: Apply policies during release
 builder.Services.AddAuthorizationBuilder().SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 
-builder.Services.AddIdentityApiEndpoints<AppUser>()
-    .AddEntityFrameworkStores<LLDbContext>();
+//builder.Services.AddIdentityApiEndpoints<AppUser>()
+//    .AddEntityFrameworkStores<LLDbContext>();
 
 builder.Services.AddCors(options =>
 {
@@ -106,7 +106,7 @@ builder.Services.AddServices();
 builder.Services.AddAdminDashboardServices(); // TODO: Application layer makes use of AdminDashboard services, so this is necessary at the moment.
                                               // At some point the application layer should perhaps be split up into two? One for LL, another for Dashboard
 builder.Services.AddCommonServices();
-
+builder.Services.SetupApi();
 builder.Services.SetupSwagger("Legends Legacy", config);
 
 // TODO: Make an extension method
@@ -116,7 +116,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = new()
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:AccessTokenSecretKey"]!)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SigningKey"]!)),
             ValidateIssuer = false, // Needs to be true
             ValidateAudience = false, // Needs to be true
             ValidateLifetime = true,
@@ -171,11 +171,11 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<LLDbContext>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+    var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher<AppUser>>();
 
     // Migrate and Seed
     await context.Database.MigrateAsync();
-    await context.SeedData(userManager);
+    await context.SeedData(hasher);
 }
 
 // Configure the HTTP request pipeline.

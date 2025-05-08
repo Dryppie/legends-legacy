@@ -1,0 +1,155 @@
+<div class="flex h-full w-full text-white">
+  <!-- LEFT PROFILE PANEL -->
+  <aside class="w-64 p-12">
+    <div class="flex flex-col items-center space-y-2">
+      <img
+        src="./../../../../assets/portrait/Avatar.svg"
+        alt="Avatar"
+        class="h-24 w-24 rounded-full border-2 border-yellow-500"
+      />
+      <div class="text-center">
+        <h2 class="text-xl font-semibold">{{ character?.name }}</h2>
+        <p class="text-sm text-orange-300">LEVEL: {{ character?.level }}</p>
+        <p class="text-sm text-orange-300">
+          XP: {{ character?.experience }}/{{
+            character?.experienceUntilNextLevel
+          }}
+        </p>
+        <p class="text-gray-400 mt-2">GUILD: BASED</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- RIGHT SETTINGS PANEL -->
+  <main class="flex gap-10 overflow-hidden p-10">
+    <!-- Settings Buttons -->
+    <div class="flex flex-col space-y-6">
+      <!-- Beta & Support -->
+      <section>
+        <h2 class="mb-4 text-lg font-bold">Beta & Support</h2>
+        <div class="space-y-2">
+          <!-- TODO: Implement later: -->
+          <!-- <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="sendFeedback()">
+            💬 Send Feedback
+          </button> -->
+
+          <!-- TODO: Implement later: -->
+          <!-- <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="reportBug()">
+            🐞 Report a Bug
+          </button> -->
+
+          <button
+            class="rounded-md bg-[#2a2a2a] px-4 py-2 text-white transition hover:bg-[#383838]"
+            (click)="viewPatchNotes()"
+          >
+            📜Patch Notes: {{ version }}
+          </button>
+        </div>
+      </section>
+
+      <!-- Social -->
+      <section>
+        <h2 class="mb-4 text-lg font-bold">Social</h2>
+        <div class="space-y-2">
+          <a
+            href="https://discord.gg/HXN4xnJUp3"
+            target="_blank"
+            class="gap-2 rounded-md bg-[#5865F2] px-4 py-2 text-white transition hover:bg-[#4752c4]"
+          >
+            💬 Join our Discord
+          </a>
+        </div>
+      </section>
+
+      <!-- TODO: Implement -->
+      <!-- Legal & Misc -->
+      <!-- <section>
+        <h2 class="text-lg font-bold mb-4">Legal & Misc</h2>
+        <div class="space-y-2">
+          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition">
+            📄 Terms of Service
+          </button>
+        </div>
+      </section> -->
+
+      <!-- Account Settings -->
+      <section>
+        <h2 class="mb-4 text-lg font-bold">Account Settings</h2>
+        <div class="space-y-2">
+          <!-- TODO: Implement -->
+          <!-- Show this button if the user is a registered user -->
+          <!-- <button *ngIf="userInfo?.isRegisteredUser"
+            class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition"
+            (click)="setPanel('credentials')">
+            🛠️ Change Email or Password
+          </button> -->
+          <div class="flex items-center gap-2">
+            <button
+              class="flex items-center gap-2 rounded-md bg-[#2a2a2a] px-4 py-2 text-white transition hover:bg-[#383838]"
+              (click)="!userInfo?.isGmailBound && bindGmail()"
+              [disabled]="userInfo?.isGmailBound"
+            >
+              <img
+                src="/assets/google-logo.png"
+                alt="Google Logo"
+                class="h-5"
+              />
+              Bind Gmail
+            </button>
+            <div *ngIf="userInfo?.isGmailBound">
+              Account is already bound to a gmail
+            </div>
+          </div>
+          <!-- Show this button if the user is NOT a registered user -->
+          <button
+            *ngIf="userInfo && !userInfo.isRegisteredUser"
+            class="flex items-center gap-2 rounded-md bg-[#2a2a2a] px-4 py-2 text-white transition hover:bg-[#383838]"
+            (click)="convertToRegistered()"
+          >
+            🔐 Convert Guest to Registered Account
+          </button>
+          <button
+            class="flex items-center gap-2 rounded-md bg-[#2a2a2a] px-4 py-2 text-white transition hover:bg-[#383838]"
+            (click)="logout()"
+          >
+            🚪 Logout
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Content Panel -->
+    <div
+      class="border-gray-700 h-full flex-1 overflow-y-auto rounded-md border bg-[#111] bg-opacity-50 p-6"
+      *ngIf="activePanel"
+    >
+      <ng-container [ngSwitch]="activePanel">
+        <div *ngSwitchCase="'patchNotes'">
+          <h3 class="mb-4 text-xl font-semibold">
+            Patch Notes for: {{ version }}
+          </h3>
+          <p>
+            Here are the latest patch notes...<br />
+            Settings page introduced.. Hooray!
+          </p>
+        </div>
+        <div *ngSwitchCase="'changeCredentials'">
+          <h3 class="mb-4 text-xl font-semibold">Change Email / Password</h3>
+          <p>Form coming soon...</p>
+        </div>
+        <div *ngSwitchCase="'convertAccount'">
+          <div class="flex max-h-full flex-1 flex-col overflow-hidden">
+            <app-signup
+              [convertAccount]="true"
+              [prefilledUsername]="character?.name ?? null"
+              [disableLoginLink]="true"
+              [headerText1]="'Register your account'"
+              [headerText2]="'and continue your legend!'"
+            >
+            </app-signup>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </main>
+</div>

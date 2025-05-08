@@ -28,5 +28,5 @@ public interface ICharacterActionRepository
     /// </summary>
     /// <param name="characterId"></param>
     /// <returns></returns>
-    public Task DeleteCharacterActionAsync(Guid characterId, CancellationToken cancellationToken);
+    public Task<bool> DeleteCharacterActionAsync(Guid characterId, CancellationToken cancellationToken);
 }

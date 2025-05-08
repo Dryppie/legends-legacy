@@ -3,6 +3,20 @@
 namespace Domain.Helpers;
 public static class EntityBaseAttributeHelper
 {
+    public static List<EntityAttribute> CreateEntityAttributesWithIncrease(Guid entityId, float percentage)
+    {
+        var entityAttributes = CreateEntityAttributes(entityId);
+        foreach (var entityAttribute in entityAttributes)
+        {
+            // Increase the value by the specified percentage
+            if (entityAttribute.AttributeType != AttributeType.BasicAttackSpeed && entityAttribute.AttributeType != AttributeType.RecoveryRate)
+            {
+                entityAttribute.Value = (int)(entityAttribute.Value * (1 + percentage));
+            }
+        }
+
+        return entityAttributes;
+    }
     public static List<EntityAttribute> CreateEntityAttributes(Guid entityId)
     {
         var entityAttributes = Enum.GetValues(typeof(AttributeType))
@@ -43,12 +57,12 @@ public static class EntityBaseAttributeHelper
             case AttributeType.Health:
                 return 50;
             case AttributeType.HealthRegeneration:
-                return 2;
+                return 1;
             case AttributeType.MaxMana:
             case AttributeType.Mana:
-                return 20;
+                return 50;
             case AttributeType.ManaRegeneration:
-                return 2;
+                return 1;
             case AttributeType.BasicAttackSpeed:
                 return 10;
             case AttributeType.RecoveryRate:

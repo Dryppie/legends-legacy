@@ -1,8 +1,6 @@
 ﻿using Application.UseCases.Characters.Events;
 using Domain.Helpers.Constants;
-using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
-using Domain.Models.Entities.NPCs;
 using MediatR;
 using Services.LL.Interfaces;
 

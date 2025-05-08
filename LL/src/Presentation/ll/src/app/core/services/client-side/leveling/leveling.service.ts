@@ -32,10 +32,6 @@ export class LevelingService {
         };
 
         this.characterService.updateCharacter(updatedCharacter);
-
-        if (newLevel > currentLevel) {
-          this.characterService.fetchCharacterData();
-        }
       });
   }
 }

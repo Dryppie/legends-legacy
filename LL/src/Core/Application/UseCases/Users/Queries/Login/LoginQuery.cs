@@ -1,14 +1,11 @@
 ﻿using Application.Authorization.Interfaces;
-using Application.Common.Responses;
 using Application.Interfaces.Services.LL;
-using Application.UseCases.Characters.Dtos;
 using Common.Authorization.Security;
-using Common.Exceptions;
+using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Users.Queries.Login;
 public record LoginQuery(string Email, string Password) : IRequest<Response<Tokens>>;
-
 public class LoginQueryHandler : IRequestHandler<LoginQuery, Response<Tokens>>
 {
     private readonly IUserService _userService;
@@ -24,19 +21,15 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, Response<Tokens>>
 
     public async Task<Response<Tokens>> Handle(LoginQuery request, CancellationToken cancellationToken)
     {
-        try
-        {
-            var user = await _userService.Login(request.Email, request.Password);
-            var character = await _characterService.GetMyCharacterAsync(Guid.Parse(user.Id), cancellationToken);
+        var user = await _userService.ValidateCredentialsAsync(request.Email, request.Password, cancellationToken);
+        if (user == null) return Response<Tokens>.Fail("Login error. Check your credentials.");
 
-            user.CharacterId = character.Id.ToString();
+        var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
+        if (character == null) return Response<Tokens>.Fail("No character exists with this account.");
 
-            var tokens = _jwtGenerator.GenerateTokens(user);
-            return Response<Tokens>.Success(tokens);
-        }
-        catch
-        {
-            return Response<Tokens>.Fail("Token Error");
-        }
+        user.CharacterId = character.Id;
+
+        var tokens = _jwtGenerator.IssueTokens(user);
+        return Response<Tokens>.Success(tokens);
     }
 }

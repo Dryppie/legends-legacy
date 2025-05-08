@@ -33,6 +33,11 @@ public static class AttributeCalculator
             entity.BaseCombatAttributes[attributeModifier.AttributeType] += attributeModifier.Amount;
         }
 
+        foreach (var mastery in entity.Masteries)
+        {
+            entity.BaseCombatAttributes[mastery.AttributeType] += mastery.Level * 5;
+        }
+
         // First calculate all baseCombatAttributes based on BaseAttributes + Temporary modifiers (Equipment, Essences, etc.)
 
         // Then find the derivedAttributes based on all Primary Attributes, and add those to BaseCombatAttributes
@@ -61,8 +66,8 @@ public static class AttributeCalculator
         float endurance = baseAttributes.GetValueOrDefault(AttributeType.Endurance);
         float willpower = baseAttributes.GetValueOrDefault(AttributeType.Willpower);
         float strength = baseAttributes.GetValueOrDefault(AttributeType.Strength);
-        float dexterity = baseAttributes.GetValueOrDefault(AttributeType.Dexterity);
         float fightingSpirit = baseAttributes.GetValueOrDefault(AttributeType.FightingSpirit);
+        float dexterity = baseAttributes.GetValueOrDefault(AttributeType.Dexterity);
         float agility = baseAttributes.GetValueOrDefault(AttributeType.Agility);
         float intelligence = baseAttributes.GetValueOrDefault(AttributeType.Intelligence);
         float wisdom = baseAttributes.GetValueOrDefault(AttributeType.Wisdom);
@@ -82,8 +87,8 @@ public static class AttributeCalculator
         //  - Every 10 Constitution = +2 HP Regen
         //  - Every 10 FightingSpirit = +1 HP Regen
         // ---------------------------------------------------------------------
-        float hpRegenFromCon = (int)(constitution / 10 * 2.0f);
-        float hpRegenFromSpirit = (int)(fightingSpirit / 10 * 1.0f);
+        float hpRegenFromCon = (int)(constitution / 10 * 0.5f); // TODO: Revert back to 2.0f?
+        float hpRegenFromSpirit = (int)(fightingSpirit / 10 * 0.2f); // TODO: Revert back to 1.0f?
         float totalHPRegen = hpRegenFromCon + hpRegenFromSpirit;
 
         // ---------------------------------------------------------------------
@@ -95,11 +100,11 @@ public static class AttributeCalculator
         float totalMaxMana = maxManaFromInt + maxManaFromWis;
 
         // ---------------------------------------------------------------------
-        //  - Every 10 Constitution = +2 HP Regen
-        //  - Every 10 FightingSpirit = +1 HP Regen
+        //  - Every 10 Willpower = +2 MP Regen
+        //  - Every 10 Wisdom    = +1 MP Regen
         // ---------------------------------------------------------------------
-        float mpRegenFromWil = (int)(willpower / 10 * 2.0f);
-        float mpRegenFromWis = (int)(wisdom / 10 * 1.0f);
+        float mpRegenFromWil = (int)(willpower / 10 * 0.5f); // TODO: Revert back to 2.0f?
+        float mpRegenFromWis = (int)(wisdom / 10 * 0.2f); // TODO: Revert back to 1.0f?
         float totalMPRegen = mpRegenFromWil + mpRegenFromWis;
 
         // ---------------------------------------------------------------------
@@ -112,12 +117,12 @@ public static class AttributeCalculator
 
         // ---------------------------------------------------------------------
         //  - Every 5 Dexterity = +0.4% Crit Chance
-        //  - Every 9 Perception = +0.3% Crit Chance
+        //  - Every 3 Perception = +0.1% Crit Chance
         //  - Every 3 Luck = +0.2% Crit Chance
         // ---------------------------------------------------------------------
         float critChance =
             ((int)(dexterity / 5) * 0.4f)
-          + ((int)(perception / 9) * 0.3f)
+          + ((int)(perception / 3) * 0.1f)
           + ((int)(luck / 3) * 0.2f);
 
         // ---------------------------------------------------------------------
@@ -183,20 +188,20 @@ public static class AttributeCalculator
         // ---------------------------------------------------------------------
         // Add these derived stats into entity.CombatAttributes
         // ---------------------------------------------------------------------
-        derived.Add(AttributeType.MaxHealth, totalMaxHealth);
-        derived.Add(AttributeType.HealthRegeneration, totalHPRegen);
-        derived.Add(AttributeType.MaxMana, totalMaxMana);
-        derived.Add(AttributeType.ManaRegeneration, totalMPRegen);
-        derived.Add(AttributeType.CrowdControlResistance, totalCCResistance);
-        derived.Add(AttributeType.CritChance, critChance);
-        derived.Add(AttributeType.CritDamage, critDamage);
-        derived.Add(AttributeType.Dodge, dodgeChance);
-        derived.Add(AttributeType.BasicAttackSpeed, basicAttackSpeed);
-        derived.Add(AttributeType.PhysicalDefense, physicalDefense);
-        derived.Add(AttributeType.MagicalDefense, magicalDefense);
-        derived.Add(AttributeType.CritDamageReduction, critDamageReduction);
-        derived.Add(AttributeType.Block, block);
-        derived.Add(AttributeType.Parry, parry);
+        derived.Add(AttributeType.MaxHealth, (int)totalMaxHealth);
+        derived.Add(AttributeType.HealthRegeneration, (int)totalHPRegen);
+        derived.Add(AttributeType.MaxMana, (int)totalMaxMana);
+        derived.Add(AttributeType.ManaRegeneration, (int)totalMPRegen);
+        derived.Add(AttributeType.CrowdControlResistance, (int)totalCCResistance);
+        derived.Add(AttributeType.CritChance, (int)critChance);
+        derived.Add(AttributeType.CritDamage, (int)critDamage);
+        derived.Add(AttributeType.Dodge, (int)dodgeChance);
+        derived.Add(AttributeType.BasicAttackSpeed, (int)basicAttackSpeed);
+        derived.Add(AttributeType.PhysicalDefense, (int)physicalDefense);
+        derived.Add(AttributeType.MagicalDefense, (int)magicalDefense);
+        derived.Add(AttributeType.CritDamageReduction, (int)critDamageReduction);
+        derived.Add(AttributeType.Block, (int)block);
+        derived.Add(AttributeType.Parry, (int)parry);
 
         return derived;
     }
@@ -217,6 +222,17 @@ public static class AttributeCalculator
         foreach (var attributeModifier in entity.EquippedEssences.SelectMany(ee => ee.AttributeModifiers))
         {
             entity.BaseCombatAttributes[attributeModifier.AttributeType] += attributeModifier.Amount;
+        }
+
+
+        foreach (var attributeModifier in entity.Equipment.Select(e => e.ItemBase as EquipmentBase).SelectMany(eb => eb.AttributeModifiers))
+        {
+            entity.BaseCombatAttributes[attributeModifier.AttributeType] += attributeModifier.Amount;
+        }
+
+        foreach (var mastery in entity.Masteries)
+        {
+            entity.BaseCombatAttributes[mastery.AttributeType] += mastery.Level * 5;
         }
 
         var derivedAttributes = CalculateSecondaryAttributesFromPrimaryAttributes(entity.BaseCombatAttributes);

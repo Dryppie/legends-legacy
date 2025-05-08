@@ -4,5 +4,8 @@ public class Area
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public ICollection<AreaCreature> Creatures { get; set; } = [];
+    /// <summary>
+    /// Chance of spawning n. of creatures 
+    /// </summary>
     public List<float> SpawnProbabilities { get; set; } = [];
 }

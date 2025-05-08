@@ -55,13 +55,13 @@ public class CharacterActionRepository : ICharacterActionRepository
         return true;
     }
 
-    public async Task DeleteCharacterActionAsync(Guid characterId, CancellationToken cancellationToken)
+    public async Task<bool> DeleteCharacterActionAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var characterAction = await _context.CharacterActions
             .Include(ca => ca.ActionDetails)
             .FirstOrDefaultAsync(ca => ca.CharacterId.Equals(characterId), cancellationToken);
 
-        NotFoundException.ThrowIfNull(characterAction, nameof(characterAction), characterId);
+        if (characterAction == null) return false;
 
         if (characterAction.ActionDetails != null)
             _context.ActionDetails.Remove(characterAction.ActionDetails);  // Explicitly remove the related entity
@@ -70,6 +70,7 @@ public class CharacterActionRepository : ICharacterActionRepository
         characterAction.ActionDetails = null;
         _context.CharacterActions.Update(characterAction!);
         await _context.SaveChangesAsync(cancellationToken);
+        return true;
     }
 
     public async Task<CharacterAction?> GetCharacterActionAsync(Guid characterId, CancellationToken cancellationToken)

@@ -8,6 +8,7 @@ using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Entities;
 using Domain.Models.Essences;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Masteries;
 
 namespace Domain.Models.Combat;
 [NotMapped]
@@ -33,6 +34,7 @@ public class CombatEntity
     public Dictionary<AttributeType, float> CombatAttributes { get; } = [];
     public List<AttributeModifierBase> TemporaryModifiers { get; set; } = [];
     public Dictionary<StatusEffectType, int> Statuses { get; } = [];
+    public List<Mastery> Masteries { get; set; } = [];
     public int Level { get; set; }
     public bool IsSummoned = false;
 
@@ -46,7 +48,9 @@ public class CombatEntity
         BaseAttributes = [.. entity.BaseAttributes];
         BaseCombatAttributes = new Dictionary<AttributeType, float>(entity.BaseCombatAttributes);
         CombatAttributes = new Dictionary<AttributeType, float>(entity.CombatAttributes);
+        Equipment = entity.EquipmentSlots.Where(es => es.EquipmentInstance != null).Select(es => es.EquipmentInstance!).ToList();
         EquippedEssences = [.. entity.EssenceSlots.ActiveSlotsWithOccupiedEssences().Select(es => es.OccupiedEssence!)];
+        Masteries = [.. entity.Masteries];
         Level = entity.Level;
     }
 

@@ -168,7 +168,9 @@ public class CombatInteractionManager : ICombatInteractionManager
         };
 
         _effectManager.TriggerEffects(attackTypeTrigger, target, context.Actor);
-        _effectManager.TriggerEffects(TriggerEvent.OnAttacked, target, context.Actor);
+
+        if (!(context.Actor.Id.Equals(target.Id) || context.Effect.Definition.AttackType.Equals(AttackType.None))) // Target can only be attacked, if the actor is different from the target
+            _effectManager.TriggerEffects(TriggerEvent.OnAttacked, target, context.Actor);
 
         if (damage > 0) _effectManager.TriggerEffects(TriggerEvent.OnHealthChanged, target, context.Actor);
 

@@ -1,11 +1,10 @@
-import { NgIf } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { InfoBoxComponent } from '../../info-box/info-box.component';
 
 @Component({
   selector: 'app-equipment-slot',
   standalone: true,
-  imports: [NgIf, InfoBoxComponent],
+  imports: [InfoBoxComponent],
   templateUrl: './equipment-slot.component.html',
   styleUrl: './equipment-slot.component.css',
 })

@@ -6,4 +6,5 @@
   window.env.environment = "${environment}";
   window.env.apiBaseUrl = "${apiBaseUrl}";
   window.env.isLocal = "${isLocal}";
+  window.env.googleClientId = "${googleClientId}";
 })(this);

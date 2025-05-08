@@ -1,0 +1,33 @@
+<div class="flex w-full flex-col justify-center rounded-xl p-4 text-white">
+  <h2 class="mb-4 text-primary">Arena Rankings</h2>
+  <div *ngIf="rankings?.length; else noRankings">
+    <!-- Rankings Header -->
+    <div class="grid grid-cols-7 gap-2 p-2">
+      <div>Rank</div>
+      <div class="col-start-2 col-end-7">Name</div>
+      <div class="justify-self-end">Rating</div>
+    </div>
+
+    <!-- Top 50 Rankings -->
+    <div
+      *ngFor="let player of rankings"
+      class="grid grid-cols-7 items-center gap-2 border-t border-light_gray p-2"
+      [ngClass]="{
+        'font-bold text-primary': player.characterId === myRanking?.characterId,
+      }"
+    >
+      <div>{{ player.rank }}</div>
+      <div class="col-start-2 col-end-7 break-words">
+        {{ player.name
+        }}<span *ngIf="player.characterId === myRanking?.characterId">
+          (You)</span
+        >
+      </div>
+      <div class="justify-self-end">{{ player.rating }}</div>
+    </div>
+  </div>
+
+  <ng-template #noRankings>
+    <p>No rankings available.</p>
+  </ng-template>
+</div>

@@ -3,6 +3,7 @@ export const environment = {
   environment: env.environment as 'dev' | 'test' | 'prod',
   apiBaseUrl: env.apiBaseUrl,
   production: false,
+  googleClientId: env.googleClientId,
   isLocal: env.isLocal === 'true',
   // apiUrl: 'https://localhost:7060/api/v1/',
   login: {

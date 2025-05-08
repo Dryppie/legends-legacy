@@ -1,4 +1,5 @@
 ﻿using Domain.Models.CharacterActions.CharacterActionDetails;
+using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Combat;
 using Domain.Models.Entities.Characters;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -22,7 +23,7 @@ public class CharacterAction
     public bool IsDeleted { get; set; }
     //public bool IsCapped => DateTimeOffset.UtcNow >= UpdatedAt.AddHours(OFFLINE_DURATION);
     [NotMapped]
-    public CombatResult? CombatResult { get; set; }
+    public CombatSession? CombatSession { get; set; }
 
     public CharacterAction(Guid characterId, ActionDetails actionDetails)
     {

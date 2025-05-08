@@ -2,16 +2,21 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Items;
+using Domain.Models.Users;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Services.LL._Simulator;
 using Services.LL.Attributes;
 using Services.LL.Authorization;
 using Services.LL.CharacterActions;
+using Services.LL.Colosseum;
+using Services.LL.Combat;
 using Services.LL.Entities;
 using Services.LL.Entities.Characters;
 using Services.LL.Entities.Creatures;
 using Services.LL.Essences;
 using Services.LL.Gatherings;
+using Services.LL.Guilds;
 using Services.LL.Interfaces;
 using Services.LL.Inventories;
 using Services.LL.Items;
@@ -38,7 +43,11 @@ public static class DependencyInjection
         services.AddScoped<IActionDetailsService, ActionDetailsService>();
         services.AddScoped<ICreatureService, CreatureService>();
         
+        services.AddScoped<IColosseumService, ColosseumService>();
+        services.AddScoped<IRatingService, RatingService>();
+
         services.AddScoped<ICombatService, CombatService>();
+        services.AddScoped<ICombatSetupService, CombatSetupService>();
 
         services.AddScoped<IEntityService, EntityService>();
         services.AddScoped<IEquipmentSlotService, EquipmentSlotService>();
@@ -50,6 +59,8 @@ public static class DependencyInjection
         services.AddScoped<IGatheringNodeService, GatheringNodeService>();
 
         services.AddScoped<IGatheringService, GatheringService>();
+
+        services.AddScoped<IGuildService, GuildService>();
         
         services.AddScoped<ILevelingService, LevelingService>();
 
@@ -57,19 +68,13 @@ public static class DependencyInjection
         services.AddScoped<ILootTableService, LootTableService>();
         services.AddScoped<IInventoryService, InventoryService>();
 
-        //services.AddScoped<ICombatManager, CombatManager>();
-        //services.AddScoped<ICombatService, CombatService>();
-
         services.AddScoped<ISpawningService, SpawningService>();
-
-        //services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
 
         services.AddScoped<IJwtGenerator, JwtGenerator>();
         services.AddScoped<IUserService, UserService>();
-
-        //services.AddSingleton(typeof(IJobQueue<>), typeof(ConcurrentJobQueue<>));
-        //services.AddHostedService<CombatJobBackgroundService>();
-
+        services.AddSingleton<IPasswordHasher<AppUser>, PasswordHasher<AppUser>>();
+        services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
+        services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 
         services.AddScoped<ISimulatorService, SimulatorService>();
 

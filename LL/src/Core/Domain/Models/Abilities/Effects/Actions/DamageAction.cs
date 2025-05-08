@@ -3,6 +3,7 @@ using Domain.Interfaces.Combat;
 using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
+using Domain.Models.Damages;
 
 namespace Domain.Models.Abilities.Effects.Actions;
 public class DamageAction : IEffectAction
@@ -26,7 +27,9 @@ public class DamageAction : IEffectAction
         var isFlatAmount = context.Effect.Definition.IsFlatAmount;
         var attackOutcome = AttackOutcome.Hit;
         var damageAmount = Magnitude;
-
+        var eventType = context.Effect.Definition.AttackType == AttackType.DamageOverTime
+            ? EventType.DamageOverTime
+            : EventType.Damage;
         if (!isFlatAmount) // If it isn't a flat amount, perform the necessary calculations for attack outcome and damage
         {
             attackOutcome = combatContext.InteractionManager.CalculateAttackOutcomeForDamage(context.Actor, context.Target, context.Effect.Definition.EffectModifications);
@@ -49,7 +52,7 @@ public class DamageAction : IEffectAction
 
         context.AttackOutcome = attackOutcome;
         context.Magnitude = damageResult.HealthDamage; // Only set HealthDamage, as that's what we'll use to deduct from Health. TotalDamage is only for the Log
-        context.EventType = EventType.Damage;
+        context.EventType = eventType;
         context.Details = context.Details
             .Replace("{Actor}", context.Actor.Name)
             .Replace("{Target}", context.Target.Name);

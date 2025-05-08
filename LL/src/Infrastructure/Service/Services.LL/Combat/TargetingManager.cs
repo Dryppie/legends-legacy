@@ -33,7 +33,15 @@ public static class TargetingManager
                 break;
 
             case Targeting.TwoAllies:
-                targets = enemyTeam.Where(e => e.IsAlive).ToList();
+                if (allies.Where(e => e.IsAlive).Count() >= 2)
+                {
+                    targets = allies.Where(e => e.IsAlive).Take(2).ToList();
+                }
+                else
+                {
+                    var allyTargets = SelectTarget(allies);
+                    if (allyTargets != null) targets.Add(allyTargets);
+                }
                 break;
 
             case Targeting.Self:
@@ -57,6 +65,10 @@ public static class TargetingManager
                 var allEnemies = enemyTeam.Where(e => e.IsAlive);
                 var allAllies = allies.Where(a => a.IsAlive && !a.Id.Equals(actor.Id)).ToList();
                 targets.AddRange([.. allEnemies, .. allAllies]);
+                break;
+            case Targeting.YourTeam:
+                var yourTeam = allies.Where(a => a.IsAlive).ToList();
+                targets.AddRange(yourTeam);
                 break;
             default:
                 throw new NotSupportedException($"Targeting type '{targeting}' is not supported.");

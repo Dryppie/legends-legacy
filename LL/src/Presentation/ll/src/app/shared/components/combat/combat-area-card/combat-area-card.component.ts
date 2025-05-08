@@ -6,13 +6,13 @@ import {
   StartCombatActionRequest,
 } from '../../../../shared/models/Dtos/characterActionDto';
 import { CharacterActionsService } from '../../../../core/services/api/character-actions/character-actions.service';
-import { NgIf } from '@angular/common';
+import { CommonModule, NgIf } from '@angular/common';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-combat-area-card',
   standalone: true,
-  imports: [MiniButtonComponent, NgIf],
+  imports: [MiniButtonComponent, NgIf, CommonModule],
   templateUrl: './combat-area-card.component.html',
   styleUrl: './combat-area-card.component.css',
 })
@@ -25,6 +25,7 @@ export class CombatAreaCardComponent {
     );
   }
   @Input() area!: Area;
+  @Input() isLastInRow: boolean = false;
   currentAction: CharacterActionDto | null = null;
   private subscription: Subscription = new Subscription();
 

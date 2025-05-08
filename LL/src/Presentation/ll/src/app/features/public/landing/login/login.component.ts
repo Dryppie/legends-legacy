@@ -16,6 +16,7 @@ import { emailValidator } from '../../../../shared/validators/email-validator';
 import { passwordValidator } from '../../../../shared/validators/password-validator';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { environment } from '../../../../../environments/environment';
+import { GoogleAuthService } from '../../../../core/services/api/auth/google-auth.service';
 
 @Component({
   selector: 'app-login',
@@ -37,6 +38,7 @@ export class LoginComponent {
   document: any;
   constructor(
     private authService: AuthService,
+    private googleService: GoogleAuthService,
     private router: Router,
   ) {}
   loginError: boolean = false;
@@ -53,6 +55,10 @@ export class LoginComponent {
       Validators.minLength(8),
     ]),
   });
+
+  onGoogleClick() {
+    this.googleService.prompt();
+  }
 
   login() {
     const email = this.loginForm.value.email;

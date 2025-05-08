@@ -2,13 +2,12 @@
 using Application.Interfaces.Services.LL;
 using Application.UseCases.Users.Events;
 using Common.Authorization.Security;
-using Domain.Models.Users;
+using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Users.Commands.GuestLogin;
-public record GuestLoginCommand() : IRequest<Tokens>;
-
-public class GuestLoginCommandHandler : IRequestHandler<GuestLoginCommand, Tokens>
+public record GuestLoginCommand() : IRequest<Response<Tokens>>;
+public class GuestLoginCommandHandler : IRequestHandler<GuestLoginCommand, Response<Tokens>>
 {
     private readonly IUserService _userService;
     private readonly IJwtGenerator _jwtGenerator;
@@ -23,19 +22,30 @@ public class GuestLoginCommandHandler : IRequestHandler<GuestLoginCommand, Token
         _characterService = characterService;
     }
 
-    public async Task<Tokens> Handle(GuestLoginCommand request, CancellationToken cancellationToken)
+    public async Task<Response<Tokens>> Handle(GuestLoginCommand request, CancellationToken cancellationToken)
     {
-        // Create a new guest user
-        var user = await _userService.RegisterGuest();
+        try
+        {
+            // Create a new guest user
+            var user = await _userService.RegisterGuestAsync(cancellationToken);
+            if (user == null) return Response<Tokens>.Fail("Failed to register guest");
 
-        await _publisher.Publish(new UserCreatedEvent(user.Id, user.Name), cancellationToken);
+            await _publisher.Publish(new UserCreatedEvent(user.Id, user.Username!), cancellationToken);
 
-        var character = await _characterService.GetMyCharacterAsync(Guid.Parse(user.Id), cancellationToken);
-        user.CharacterId = character.Id.ToString();
+            var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
+            if (character == null) return Response<Tokens>.Fail("Character creation failed during guest registration");
 
-        // Generate tokens
-        var tokens = _jwtGenerator.GenerateTokens(user);
+            user.CharacterId = character.Id;
 
-        return tokens;
+            // Generate tokens
+            var tokens = _jwtGenerator.IssueTokens(user);
+
+            return Response<Tokens>.Success(tokens);
+        }
+        catch (Exception)
+        {
+            return Response<Tokens>.Fail("Token Error");
+        }
+
     }
 }

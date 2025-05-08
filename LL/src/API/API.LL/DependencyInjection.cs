@@ -1,4 +1,5 @@
 ﻿using API.LL.Common;
+using API.LL.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 
@@ -9,6 +10,13 @@ namespace API.LL;
 /// </summary>
 public static class DependencyInjection
 {
+    public static IServiceCollection SetupApi(this IServiceCollection services)
+    {
+        services.AddControllers(o => o.Filters.Add<ResponseResultFilter>());
+
+        return services;
+    }
+
     /// <summary>
     /// util method for setting up swagger support with api versioning support
     /// </summary>

@@ -1,12 +1,13 @@
 ﻿using Application.Interfaces.Services.LL;
 using Application.UseCases.Characters.Dtos;
 using AutoMapper;
+using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Characters.Queries.GetLeaderboard;
-public record GetLeaderboardQuery() : IRequest<List<CharacterLeaderboardDto>>;
+public record GetLeaderboardQuery() : IRequest<Response<List<CharacterLeaderboardDto>>>;
 
-public class GetLeaderboardQueryHandler : IRequestHandler<GetLeaderboardQuery, List<CharacterLeaderboardDto>>
+public class GetLeaderboardQueryHandler : IRequestHandler<GetLeaderboardQuery, Response<List<CharacterLeaderboardDto>>>
 {
     private readonly ICharacterService _characterService;
     private readonly IMapper _mapper;
@@ -17,11 +18,11 @@ public class GetLeaderboardQueryHandler : IRequestHandler<GetLeaderboardQuery, L
         _mapper = mapper;
     }
 
-    public async Task<List<CharacterLeaderboardDto>> Handle(GetLeaderboardQuery request, CancellationToken cancellationToken)
+    public async Task<Response<List<CharacterLeaderboardDto>>> Handle(GetLeaderboardQuery request, CancellationToken cancellationToken)
     {
         var characters = await _characterService.GetLeaderboardCharactersAsync(cancellationToken);
 
-        return _mapper.Map<List<CharacterLeaderboardDto>>(characters);
+        return Response<List<CharacterLeaderboardDto>>.Success(_mapper.Map<List<CharacterLeaderboardDto>>(characters));
     }
 }
 

@@ -17,7 +17,7 @@ namespace Persistence.LL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("ProductVersion", "8.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -121,6 +121,59 @@ namespace Persistence.LL.Migrations
                     b.UseTphMappingStrategy();
                 });
 
+            modelBuilder.Entity("Domain.Models.Colosseum.ArenaTicketStatus", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("CurrentTickets")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("LastTicketUpdate")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("CharacterId");
+
+                    b.ToTable("ArenaTicketStatus");
+                });
+
+            modelBuilder.Entity("Domain.Models.Colosseum.ColosseumMatchResult", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CharacterAId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CharacterAName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("CharacterBId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CharacterBName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("PlayedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("WinnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("WinnerName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterBId");
+
+                    b.ToTable("ColosseumMatches");
+                });
+
             modelBuilder.Entity("Domain.Models.Entities.Entity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -220,6 +273,83 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("LootTableId");
 
                     b.ToTable("GatheringNodes");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.Guild", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MaxMembers")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Tag")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId")
+                        .IsUnique();
+
+                    b.ToTable("Guilds");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.GuildInvite", b =>
+                {
+                    b.Property<Guid>("GuildId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsInvite")
+                        .HasColumnType("bit");
+
+                    b.HasKey("GuildId", "CharacterId");
+
+                    b.HasIndex("CharacterId");
+
+                    b.ToTable("GuildInvites");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.GuildMember", b =>
+                {
+                    b.Property<Guid>("GuildId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("JoinedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.HasKey("GuildId", "CharacterId");
+
+                    b.HasIndex("CharacterId");
+
+                    b.ToTable("GuildMembers");
                 });
 
             modelBuilder.Entity("Domain.Models.Inventories.Inventory", b =>
@@ -350,6 +480,28 @@ namespace Persistence.LL.Migrations
                     b.UseTphMappingStrategy();
                 });
 
+            modelBuilder.Entity("Domain.Models.Masteries.Mastery", b =>
+                {
+                    b.Property<Guid>("EntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("MasteryType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AttributeType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CurrentXP")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("int");
+
+                    b.HasKey("EntityId", "MasteryType");
+
+                    b.ToTable("Mastery");
+                });
+
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
                 {
                     b.Property<string>("Id")
@@ -410,22 +562,15 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.Users.AppUser", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("AccessFailedCount")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset?>("BannedUntil")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
@@ -433,67 +578,86 @@ namespace Persistence.LL.Migrations
                     b.Property<bool>("IsGuest")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("LockoutEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("LockoutEnd")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("NormalizedEmail")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("NormalizedUserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
-
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PhoneNumber")
+                    b.Property<DateTime>("UpdatedUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Username")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PhoneNumberConfirmed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SecurityStamp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("TwoFactorEnabled")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("UserName")
-                        .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("NormalizedEmail")
-                        .HasDatabaseName("EmailIndex");
-
-                    b.HasIndex("NormalizedUserName")
-                        .IsUnique()
-                        .HasDatabaseName("UserNameIndex")
-                        .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.ToTable("AspNetUsers", (string)null);
+                    b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Domain.Models.Users.IPAddresses.IPAddress", b =>
+            modelBuilder.Entity("Domain.Models.Users.ExternalLogin", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("bigint");
 
-                    b.Property<string>("Address")
-                        .IsRequired()
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AccessToken")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("AppUserId")
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ExpiresUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Provider")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProviderUserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<DateTimeOffset>("TimeOfAccess")
-                        .HasColumnType("datetimeoffset");
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("Provider", "ProviderUserId")
+                        .IsUnique();
+
+                    b.ToTable("ExternalLogins");
+                });
+
+            modelBuilder.Entity("Domain.Models.Users.RefreshToken", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<Guid?>("AppUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiresUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ReplacedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RevokedUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -502,43 +666,9 @@ namespace Persistence.LL.Migrations
 
                     b.HasIndex("AppUserId");
 
-                    b.ToTable("IPAddress");
-                });
+                    b.HasIndex("TokenHash");
 
-            modelBuilder.Entity("Domain.Models.Users.Transactions.Transaction", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("AppUserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<float>("Cost")
-                        .HasColumnType("real");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ItemPurchased")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("PaymentMethod")
-                        .HasColumnType("int");
-
-                    b.Property<DateTimeOffset>("TimeOfPurchase")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<int>("TransactionStatus")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
-
-                    b.ToTable("Transaction");
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -591,6 +721,71 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetRoleClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -714,15 +909,17 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Entities.Entity");
 
+                    b.Property<int>("ArenaRating")
+                        .HasColumnType("int");
+
                     b.Property<float>("Experience")
                         .HasColumnType("real");
 
                     b.Property<int>("Gold")
                         .HasColumnType("int");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasIndex("UserId");
 
@@ -754,6 +951,9 @@ namespace Persistence.LL.Migrations
             modelBuilder.Entity("Domain.Models.Items.Equipments.EquipmentBase", b =>
                 {
                     b.HasBaseType("Domain.Models.Items.ItemBase");
+
+                    b.Property<int>("CombatMastery")
+                        .HasColumnType("int");
 
                     b.Property<int>("EquipmentType")
                         .HasColumnType("int");
@@ -850,6 +1050,26 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Domain.Models.Colosseum.ArenaTicketStatus", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", "Character")
+                        .WithOne("ArenaTicketStatus")
+                        .HasForeignKey("Domain.Models.Colosseum.ArenaTicketStatus", "CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+                });
+
+            modelBuilder.Entity("Domain.Models.Colosseum.ColosseumMatchResult", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", null)
+                        .WithMany("ColosseumMatches")
+                        .HasForeignKey("CharacterBId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Domain.Models.Essences.EssenceSlots.EssenceSlot", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Entity", null)
@@ -875,6 +1095,55 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
 
                     b.Navigation("LootTable");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.Guild", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", "Owner")
+                        .WithOne("Guild")
+                        .HasForeignKey("Domain.Models.Guilds.Guild", "OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.GuildInvite", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", "Character")
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Guilds.Guild", "Guild")
+                        .WithMany("Invites")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+
+                    b.Navigation("Guild");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.GuildMember", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", "Character")
+                        .WithMany()
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Guilds.Guild", "Guild")
+                        .WithMany("Members")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+
+                    b.Navigation("Guild");
                 });
 
             modelBuilder.Entity("Domain.Models.Inventories.Inventory", b =>
@@ -941,6 +1210,17 @@ namespace Persistence.LL.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
+            modelBuilder.Entity("Domain.Models.Masteries.Mastery", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Entity", "Entity")
+                        .WithMany("Masteries")
+                        .HasForeignKey("EntityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Entity");
+                });
+
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
                 {
                     b.HasOne("Domain.Models.Regions.Region", null)
@@ -963,17 +1243,21 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Domain.Models.Users.IPAddresses.IPAddress", b =>
+            modelBuilder.Entity("Domain.Models.Users.ExternalLogin", b =>
                 {
-                    b.HasOne("Domain.Models.Users.AppUser", null)
-                        .WithMany("IPAddresses")
-                        .HasForeignKey("AppUserId");
+                    b.HasOne("Domain.Models.Users.AppUser", "User")
+                        .WithMany("ExternalLogins")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Domain.Models.Users.Transactions.Transaction", b =>
+            modelBuilder.Entity("Domain.Models.Users.RefreshToken", b =>
                 {
                     b.HasOne("Domain.Models.Users.AppUser", null)
-                        .WithMany("Transactions")
+                        .WithMany("RefreshTokens")
                         .HasForeignKey("AppUserId");
                 });
 
@@ -988,7 +1272,7 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("Domain.Models.Users.AppUser", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -997,7 +1281,7 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("Domain.Models.Users.AppUser", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1012,7 +1296,7 @@ namespace Persistence.LL.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Models.Users.AppUser", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1021,7 +1305,7 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("Domain.Models.Users.AppUser", null)
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1106,6 +1390,8 @@ namespace Persistence.LL.Migrations
                     b.Navigation("EquipmentSlots");
 
                     b.Navigation("EssenceSlots");
+
+                    b.Navigation("Masteries");
                 });
 
             modelBuilder.Entity("Domain.Models.Essences.Essence", b =>
@@ -1113,6 +1399,13 @@ namespace Persistence.LL.Migrations
                     b.Navigation("EssenceItems");
 
                     b.Navigation("EssenceSlots");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.Guild", b =>
+                {
+                    b.Navigation("Invites");
+
+                    b.Navigation("Members");
                 });
 
             modelBuilder.Entity("Domain.Models.Inventories.Inventory", b =>
@@ -1139,14 +1432,21 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.Users.AppUser", b =>
                 {
-                    b.Navigation("IPAddresses");
+                    b.Navigation("ExternalLogins");
 
-                    b.Navigation("Transactions");
+                    b.Navigation("RefreshTokens");
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Characters.Character", b =>
                 {
+                    b.Navigation("ArenaTicketStatus")
+                        .IsRequired();
+
                     b.Navigation("CharacterAction");
+
+                    b.Navigation("ColosseumMatches");
+
+                    b.Navigation("Guild");
 
                     b.Navigation("Inventory")
                         .IsRequired();

@@ -10,8 +10,8 @@
       <img src="core/Logo.svg" alt="Logo" class="h-28 w-28 object-contain" />
     </div>
     <div class="flex flex-col items-center justify-center space-y-3 pb-12">
-      <h2 class="primary-gradient">Join the adventure and</h2>
-      <h2 class="primary-gradient">create your legend!</h2>
+      <h2 class="primary-gradient">{{headerText1}}</h2>
+      <h2 class="primary-gradient">{{headerText2}}</h2>
       <img
         src="core/Divider.svg"
         alt="Logo"
@@ -20,7 +20,7 @@
     </div>
     <form
       [formGroup]="registerForm"
-      (ngSubmit)="register()"
+      (ngSubmit)="submitForm()"
       class="mt-2 flex flex-col justify-center"
     >
       <label
@@ -36,7 +36,7 @@
           data-1p-ignore
           (input)="resetLoginError()"
           aria-label="Username"
-          type="username"
+          type="text"
           required
           class="relative ml-auto h-full w-full appearance-none bg-gray pr-3 text-right text-white focus:z-10 focus:outline-none sm:text-sm sm:leading-5"
           formControlName="username"
@@ -115,10 +115,11 @@
         <app-button
           type="submit"
           [disabled]="!registerForm.valid"
-          text="SIGN UP"
+          [text]="convertAccount ? 'REGISTER NOW' : 'SIGN UP'"
         ></app-button>
       </div>
       <button
+        *ngIf="!disableLoginLink"
         routerLink="/login"
         class="my-8 w-full text-center text-primary underline focus:outline-none"
       >

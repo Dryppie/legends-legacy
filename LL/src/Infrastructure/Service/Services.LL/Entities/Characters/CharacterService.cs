@@ -17,34 +17,37 @@ public class CharacterService : ICharacterService
     }
 
     /// <inheritdoc/>
-    public async Task<Character> CreateCharacterAsync(string UserId, string Username, CancellationToken cancellationToken)
+    public async Task<Character> CreateCharacterAsync(Guid userId, string username, CancellationToken cancellationToken)
     {
-        var character = await _characterRepository.CreateCharacterAsync(UserId, Username, cancellationToken);
+        var character = await _characterRepository.CreateCharacterAsync(userId, username, cancellationToken);
 
         return character;
     }
     /// <inheritdoc/>
-    public async Task<Character> GetMyCharacterAsync(Guid CurrentUserId, CancellationToken cancellationToken)
+    public async Task<Character?> GetMyCharacterAsync(Guid currentUserId, CancellationToken cancellationToken)
     {
-        var character = await _characterRepository.GetCharacterByUserIdAsync(CurrentUserId, cancellationToken);
-        character.ExperienceUntilNextLevel = EntityLevelConstants.XP_REQUIRED(character.Level);
+        var character = await _characterRepository.GetCharacterByUserIdAsync(currentUserId, cancellationToken);
+        if (character != null) character.ExperienceUntilNextLevel = EntityLevelConstants.XP_REQUIRED(character.Level);
+
         return character;
     }
 
     /// <inheritdoc/>
-    public async Task<Character> GetCharacterByCharacterIdAsync(Guid CharacterId, CancellationToken cancellationToken)
+    public async Task<Character?> GetCharacterByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        return await _characterRepository.GetCharacterByCharacterIdAsync(CharacterId, cancellationToken);
+        return await _characterRepository.GetCharacterByCharacterIdAsync(characterId, cancellationToken);
     }
 
     /// <inheritdoc/>
-    public async Task<Character> GetMyCharacterOverviewAsync(Guid CurrentUserId, CancellationToken cancellationToken)
+    public async Task<Character?> GetMyCharacterOverviewAsync(Guid currentUserId, CancellationToken cancellationToken)
     {
-        var character = await _characterRepository.GetCharacterOverviewByCharacterIdAsync(CurrentUserId, cancellationToken);
+        var character = await _characterRepository.GetCharacterOverviewByCharacterIdAsync(currentUserId, cancellationToken);
+        if (character == null) return null;
+
         AttributeCalculator.CalculateBaseAttributes(character);
-        foreach (var essence in character.EssenceSlots.Where(es => es.OccupiedEssence != null).Select(es => es.OccupiedEssence))
+        foreach (var essence in character.EssenceSlots.Where(es => es.OccupiedEssence != null).Select(es => es.OccupiedEssence!))
         {
-            essence!.Active.Description = _essenceDescriptionService.BuildAbilityDescription(essence.Active, character.BaseCombatAttributes);
+            essence.Active.Description = _essenceDescriptionService.BuildAbilityDescription(essence.Active, character.BaseCombatAttributes);
             essence.Passive.Description = _essenceDescriptionService.BuildAbilityDescription(essence.Passive, character.BaseCombatAttributes);
         }
         return character;
@@ -53,5 +56,15 @@ public class CharacterService : ICharacterService
     public async Task<List<CharacterLeaderboardItem>> GetLeaderboardCharactersAsync(CancellationToken cancellationToken)
     {
         return await _characterRepository.GetLeaderboardCharactersAsync(cancellationToken);
+    }
+
+    public async Task<Character?> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        return await _characterRepository.GetBaseCharacterByIdAsync(characterId, cancellationToken);
+    }
+
+    public async Task UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken)
+    {
+        await _characterRepository.UpdateCharacterNameAsync(userId, username, cancellationToken);
     }
 }

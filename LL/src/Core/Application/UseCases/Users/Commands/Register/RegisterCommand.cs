@@ -1,22 +1,18 @@
-﻿using Application.Authorization.Interfaces;
-using Application.Common.Responses;
-using Application.Interfaces.Services.LL;
+﻿using Application.Interfaces.Services.LL;
 using Application.UseCases.Users.Events;
+using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Users.Commands.Register;
 public record RegisterCommand(string Username, string Email, string Password) : IRequest<Response<Unit>>;
-
 public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Response<Unit>>
 {
     private readonly IUserService _userService;
-    private readonly IJwtGenerator _jwtGenerator;
     private readonly IMediator _publisher;
 
-    public RegisterCommandHandler(IUserService userService, IJwtGenerator jwtGenerator, IMediator publisher)
+    public RegisterCommandHandler(IUserService userService, IMediator publisher)
     {
         _userService = userService;
-        _jwtGenerator = jwtGenerator;
         _publisher = publisher;
     }
 
@@ -25,10 +21,11 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Response<
         try
         {
             // Register the user
-            var user = await _userService.Register(request.Username, request.Email, request.Password);
+            var user = await _userService.RegisterAsync(request.Username, request.Email, request.Password, cancellationToken);
+            if (user == null) return Response<Unit>.Fail("Email is already in use.");
 
             // Create a character for the registered user
-            await _publisher.Publish(new UserCreatedEvent(user.Id, user.Name), cancellationToken);
+            await _publisher.Publish(new UserCreatedEvent(user.Id, user.Username ?? ""), cancellationToken);
 
             return Response<Unit>.Success(Unit.Value);
         }

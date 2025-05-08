@@ -26,7 +26,7 @@
           <app-sidebar-item
             (click)="toggleSidebar()"
             [item]="item"
-            [routerLink]="['/game/', item.route, item.id]"
+            [routerLink]="item.route"
             (click)="navigateTo(item.id)"
             class="text-light_gray"
             [isActive]="activeItem === item.id"

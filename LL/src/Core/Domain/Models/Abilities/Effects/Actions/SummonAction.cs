@@ -67,7 +67,8 @@ public class SummonAction : IEffectAction
             Health = summonedCreature.GetAttributeValue(AttributeType.Health),
             MaxMana = summonedCreature.GetAttributeValue(AttributeType.MaxMana),
             Mana = summonedCreature.GetAttributeValue(AttributeType.Mana),
-            Barrier = summonedCreature.GetAttributeValue(AttributeType.Barrier)
+            Barrier = summonedCreature.GetAttributeValue(AttributeType.Barrier),
+            ImagePath = summonedCreature.ImagePath
         };
 
         context.Target = summonedCreature;

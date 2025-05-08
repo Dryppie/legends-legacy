@@ -3,7 +3,7 @@ using Application.UseCases.Inventories.Events;
 using Common.Extensions;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
-using Domain.Models.Combat;
+using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Inventories;
 using MediatR;
 using Services.LL.Interfaces;
@@ -14,14 +14,12 @@ public class CharacterActionService : ICharacterActionService
     private readonly ICharacterActionRepository _characterActionRepository;
     private readonly IGatheringService _gatheringService;
     private readonly ICombatService _combatService;
-    private readonly ILootService _lootService;
     private readonly IPublisher _publisher;
-    public CharacterActionService(ICharacterActionRepository characterActionRepository, IGatheringService gatheringService, ICombatService combatService, ILootService lootService, IPublisher publisher)
+    public CharacterActionService(ICharacterActionRepository characterActionRepository, IGatheringService gatheringService, ICombatService combatService, IPublisher publisher)
     {
         _characterActionRepository = characterActionRepository;
         _gatheringService = gatheringService;
         _combatService = combatService;
-        _lootService = lootService;
         _publisher = publisher;
     }
 
@@ -30,9 +28,9 @@ public class CharacterActionService : ICharacterActionService
         return await _characterActionRepository.StartCharacterActionAsync(characterAction, cancellationToken);
     }
 
-    public async Task DeleteCharacterActionAsync(Guid characterId, CancellationToken cancellationToken)
+    public async Task<bool> DeleteCharacterActionAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        await _characterActionRepository.DeleteCharacterActionAsync(characterId, cancellationToken);
+        return await _characterActionRepository.DeleteCharacterActionAsync(characterId, cancellationToken);
     }
 
     public async Task<CharacterAction?> GetCharacterActionAsync(Guid characterId, CancellationToken cancellationToken)
@@ -43,6 +41,16 @@ public class CharacterActionService : ICharacterActionService
         var characterAction = await _characterActionRepository.GetCharacterActionAsync(characterId, cancellationToken);
 
         if (characterAction == null) return null;
+
+        // This might be triggered by a concurrency error, where the action is deleted while being performed
+        // So in case ActionDetails is deleted, and IsDeleted is false, this error has occurred.
+        // Handle it by return the characterAction with IsDelete = true;
+        if (characterAction.ActionDetails == null && !characterAction.IsDeleted) 
+        {
+            characterAction.IsDeleted = true;
+            return characterAction;
+        }
+
         if (characterAction.ActionDetails == null) return characterAction; // Simply just record the character action.It might contain useful information,
                                                                            // such as if the UpdatedAt is in the future (Combat was canceled, and immediately refreshed)
 
@@ -58,7 +66,7 @@ public class CharacterActionService : ICharacterActionService
                 break;
 
             case CharacterActionType.Combat:
-                characterAction.CombatResult = await HandleCombatActionAsync(characterAction, now, cancellationToken);
+                characterAction.CombatSession = await HandleCombatActionAsync(characterAction, now, cancellationToken);
                 break;
 
             //case CharacterActionType.Profession:
@@ -67,14 +75,13 @@ public class CharacterActionService : ICharacterActionService
 
             // Add other action types as needed
             default:
-                throw new InvalidOperationException("Unknown action type.");
+                return null;
         }
 
         // If the action is capped, simply set the updatedAt to the original time, as their actiontime is reset to now
         if (isCapped)
         {
             characterAction.UpdatedAt = originalNow;
-            characterAction.CombatResult = null;
         }
 
         await _characterActionRepository.UpdateCharacterActionAsync(characterAction, cancellationToken);
@@ -102,19 +109,9 @@ public class CharacterActionService : ICharacterActionService
         }
     }
 
-    private async Task<CombatResult> HandleCombatActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
+    private async Task<CombatSession> HandleCombatActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        var totalLoot = new List<InventoryItem>();
-        
-        var lastCombatResult = await _combatService.PerformIdleCombatAsync(characterAction, now, cancellationToken);
-
-        //// Process the accumulated loot
-        //if (totalLoot.Count > 0)
-        //{
-        //    await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
-        //}
-
-        return lastCombatResult;
+        return await _combatService.PerformIdleCombatAsync(characterAction, now, cancellationToken);
     }
 
     private Task HandleProfessionActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)

@@ -29,10 +29,6 @@ export class CharacterService {
     return this.authService.currentCharacter$;
   }
 
-  fetchCharacterData() {
-    this.authService.getLoggedInCharacter();
-  }
-
   getLeaderboard() {
     return this.apiService.get('Character/Leaderboard');
   }

@@ -1,5 +1,5 @@
 ﻿using Domain.Models.CharacterActions;
-using Domain.Models.Combat;
+using Domain.Models.CharacterActions.Sessions;
 
 namespace Application.Interfaces.Services.LL;
 public interface ICombatService
@@ -11,5 +11,5 @@ public interface ICombatService
     /// <param name="now"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Task<CombatResult> PerformIdleCombatAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken);
+    public Task<CombatSession> PerformIdleCombatAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken);
 }

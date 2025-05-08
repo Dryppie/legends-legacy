@@ -1,0 +1,152 @@
+﻿using Application.Interfaces.Services.LL;
+using Domain.Models.Colosseum;
+using Domain.Models.Combat;
+using Domain.Models.Entities.Characters;
+using Services.LL.Combat;
+using Services.LL.Interfaces;
+
+namespace Services.LL.Colosseum;
+public class ColosseumService : IColosseumService
+{
+    private readonly IEntityService _entityService;
+    private readonly ICharacterService _characterService;
+    private readonly ICombatSetupService _combatSetupService;
+    private readonly IColosseumRepository _colosseumRepository;
+
+    public ColosseumService(IEntityService entityService, ICharacterService characterService, ICombatSetupService combatSetupService, IColosseumRepository colosseumRepository)
+    {
+        _entityService = entityService;
+        _characterService = characterService;
+        _combatSetupService = combatSetupService;
+        _colosseumRepository = colosseumRepository;
+    }
+
+    public async Task<CombatResult?> StartArenaBattle(Guid characterId, Guid enemyId, CancellationToken cancellationToken)
+    {
+        var now = DateTimeOffset.UtcNow;
+
+        var arenaTicketStatus = await _colosseumRepository.GetArenaTicketStatusAsync(characterId, cancellationToken);
+
+        if (arenaTicketStatus.CurrentTickets < 1) throw new Exception();
+        arenaTicketStatus.CurrentTickets--;
+        await _colosseumRepository.UpdateArenaTicketStatusAsync(arenaTicketStatus, cancellationToken);
+
+        var playerTeam = await _entityService.GetEntitiesByIdsForCombatAsync([characterId], cancellationToken);
+        if (playerTeam.Count == 0) return null;
+        var enemyTeam = await _entityService.GetEntitiesByIdsForCombatAsync([enemyId], cancellationToken);
+        if (enemyTeam.Count == 0) return null;
+
+        var combatPlayerEntities = _combatSetupService.CreateCombatEntities(playerTeam);
+        var combatEnemyEntities = _combatSetupService.CreateCombatEntities(enemyTeam);
+        await _combatSetupService.PrepareEntitiesForCombat([.. combatPlayerEntities, .. combatEnemyEntities]);
+
+        var combatSimulation = new CombatSimulation(combatPlayerEntities, combatEnemyEntities);
+        var combatResult = combatSimulation.RunSimulation();
+        if (combatResult == null) return null;
+
+        combatResult.StartedAt = now;
+
+        combatResult.PlayerTeam = _combatSetupService.CreateSimpleCombatEntities(combatPlayerEntities);
+        combatResult.EnemyTeam = _combatSetupService.CreateSimpleCombatEntities(combatEnemyEntities);
+
+        return combatResult;
+    }
+
+    /// <summary>
+    /// Get the opponents you are eligible to fight
+    /// </summary>
+    /// <param name="characterId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public async Task<List<Character>> GetArenaOpponents(Guid characterId, CancellationToken cancellationToken)
+    {
+        return await _colosseumRepository.GetArenaOpponents(characterId, cancellationToken);
+    }
+
+    public async Task SaveArenaMatchResult(Guid characterId, Guid enemyId, BattleOutcome outcome, CancellationToken cancellationToken)
+    {
+        var characterA = await _characterService.GetBaseCharacterByIdAsync(characterId, cancellationToken);
+        if (characterA == null) return; // TODO: Log errors
+        var characterB = await _characterService.GetBaseCharacterByIdAsync(enemyId, cancellationToken);
+        if (characterB == null) return; // TODO: Log errors
+
+        var arenaMatchResult = new ColosseumMatchResult()
+        {
+            CharacterAId = characterId,
+            CharacterAName = characterA.Name,
+            CharacterBId = enemyId,
+            CharacterBName = characterB.Name,
+            WinnerId = outcome == BattleOutcome.Victory ? characterId : outcome == BattleOutcome.Defeat ? enemyId : null,
+            WinnerName = outcome == BattleOutcome.Victory ? characterA.Name : outcome == BattleOutcome.Defeat ? characterB.Name : "",
+            PlayedAt = DateTimeOffset.UtcNow,
+        };
+
+        await _colosseumRepository.SaveArenaMatchResult(arenaMatchResult, cancellationToken);
+    }
+
+    public async Task<List<ColosseumMatchResult>> GetColosseumMatchResults(Guid characterId, CancellationToken cancellationToken)
+    {
+        return await _colosseumRepository.GetColosseumMatchResults(characterId, cancellationToken);
+    }
+
+    public async Task<List<ColosseumArenaRank>> GetRankings(Guid characterId, CancellationToken cancellationToken)
+    {
+        var characters = await _colosseumRepository.GetRankings(characterId, cancellationToken);
+
+        // Assign the real rank to each character
+        var rankedCharacters = characters
+            .Select((character, index) => new { Character = character, Rank = index + 1 })
+            .ToList();
+
+        // Take the top 50
+        var top50 = rankedCharacters.Take(50).ToList();
+
+        // Check if requester is in the top 50
+        var inTop50 = top50.Any(r => r.Character.Id == characterId);
+
+        if (!inTop50)
+        {
+            // Find the requester's actual ranking
+            var requesterRank = rankedCharacters.FirstOrDefault(r => r.Character.Id == characterId);
+            if (requesterRank != null)
+            {
+                top50.Add(requesterRank); // Add requester to the bottom of the list, with their true rank
+            }
+        }
+
+        // Create the result list
+        var rankings = top50
+            .Select(ranking => new ColosseumArenaRank()
+            {
+                CharacterId = ranking.Character.Id,
+                Character = ranking.Character,
+                Rating = ranking.Character.ArenaRating,
+                Rank = ranking.Rank,
+            })
+            .ToList();
+
+        return rankings;
+    }
+
+
+    public async Task<ArenaTicketStatus> GetArenaTicketStatusAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        var now = DateTimeOffset.UtcNow;
+        var arenaTicketStatus = await _colosseumRepository.GetArenaTicketStatusAsync(characterId, cancellationToken);
+        
+        var restoreInterval = TimeSpan.FromHours(3);
+        var timePassed = now - arenaTicketStatus.LastTicketUpdate;
+        var ticketsToRestore = (int)(timePassed.TotalHours / restoreInterval.TotalHours);
+
+        if (ticketsToRestore > 0)
+        {
+            arenaTicketStatus.CurrentTickets = Math.Min(arenaTicketStatus.CurrentTickets + ticketsToRestore, arenaTicketStatus.MaxTickets);
+            // Update LastTicketUpdate based on restored tickets. Even if capped, a new ticket might still restore in..  17 minutes
+            arenaTicketStatus.LastTicketUpdate = arenaTicketStatus.LastTicketUpdate.AddHours(ticketsToRestore * restoreInterval.TotalHours);
+
+            await _colosseumRepository.UpdateArenaTicketStatusAsync(arenaTicketStatus, cancellationToken);
+        }
+
+        return arenaTicketStatus;
+    }
+}

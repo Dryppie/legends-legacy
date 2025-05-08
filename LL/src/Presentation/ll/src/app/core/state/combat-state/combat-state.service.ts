@@ -4,87 +4,126 @@ import {
   CombatResultDto,
   SimpleCombatEntityDto,
 } from '../../../shared/models/Dtos/combatResultDto';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map, Observable } from 'rxjs';
 import { CombatEvent } from '../../../shared/models/Dtos/combatEventDto';
 import { EventBusService } from '../../services/client-side/event-bus/event-bus.service';
+import { BattleType, CombatState } from './combatState';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CombatStateService {
+  private defaultState: CombatState = {
+    playerCharacters: [],
+    enemyCharacters: [],
+    combatEvents: [],
+    combatResult: null,
+    combatOutcome: null,
+    nextCombat: null,
+    isCombatActive: false,
+  };
+
+  private lastEventsLength: { [battleType: string]: number } = {};
+
+  private stateMap = new Map<BattleType, BehaviorSubject<CombatState>>();
+
   constructor(private eventBusService: EventBusService) {
     this.eventBusService.logout$.subscribe(() => {
       this.handleLogout();
     });
   }
 
-  private playerCharactersSubject = new BehaviorSubject<
-    SimpleCombatEntityDto[]
-  >([]);
-  private enemyCharactersSubject = new BehaviorSubject<SimpleCombatEntityDto[]>(
-    [],
-  );
-  private combatEventsSubject = new BehaviorSubject<CombatEvent[]>([]);
-  private combatResultSubject = new BehaviorSubject<CombatResultDto | null>(
-    null,
-  );
-  private combatOutcomeSubject = new BehaviorSubject<BattleOutcome | null>(
-    null,
-  );
-  private nextCombatSubject = new BehaviorSubject<Date | null>(null);
-  private isCombatActiveSubject = new BehaviorSubject<boolean>(false);
-
-  public playerCharacters$ = this.playerCharactersSubject.asObservable();
-  public enemyCharacters$ = this.enemyCharactersSubject.asObservable();
-
-  public combatEvents$ = this.combatEventsSubject.asObservable();
-  public combatResult$ = this.combatResultSubject.asObservable();
-  public combatOutcome$ = this.combatOutcomeSubject.asObservable();
-
-  public nextCombat$ = this.nextCombatSubject.asObservable();
-  public isCombatActive$ = this.isCombatActiveSubject.asObservable();
-
-  setPlayerCharacters(characters: SimpleCombatEntityDto[]) {
-    this.playerCharactersSubject.next(characters);
+  private ensureSubject(type: BattleType): BehaviorSubject<CombatState> {
+    if (!this.stateMap.has(type)) {
+      this.stateMap.set(
+        type,
+        new BehaviorSubject<CombatState>({ ...this.defaultState }),
+      );
+    }
+    return this.stateMap.get(type)!;
   }
 
-  setEnemyCharacters(characters: SimpleCombatEntityDto[]) {
-    this.enemyCharactersSubject.next(characters);
+  // Observables for a given BattleType
+  public state$(type: BattleType): Observable<CombatState> {
+    return this.ensureSubject(type).asObservable();
   }
 
-  addCombatEvent(event: CombatEvent) {
-    const currentEvents = this.combatEventsSubject.value;
-    // Push the new event into a clone of the array
-    this.combatEventsSubject.next([...currentEvents, event]);
+  public getState(type: BattleType): CombatState {
+    return this.ensureSubject(type).value;
   }
 
-  setCombatActive(isActive: boolean) {
-    this.isCombatActiveSubject.next(isActive);
+  // private nextCombatSubject = new BehaviorSubject<Date | null>(null);
+  // private isCombatActiveSubject = new BehaviorSubject<boolean>(false);
+
+  // public nextCombat$ = this.nextCombatSubject.asObservable();
+  // public isCombatActive$ = this.isCombatActiveSubject.asObservable();
+
+  setPlayerCharacters(type: BattleType, characters: SimpleCombatEntityDto[]) {
+    this.patchState(type, { playerCharacters: characters });
+  }
+  setEnemyCharacters(type: BattleType, characters: SimpleCombatEntityDto[]) {
+    this.patchState(type, { enemyCharacters: characters });
+  }
+  addCombatEvent(type: BattleType, event: CombatEvent) {
+    const state = this.getState(type);
+    this.patchState(type, { combatEvents: [...state.combatEvents, event] });
+  }
+  setCombatActive(type: BattleType, isActive: boolean) {
+    this.patchState(type, { isCombatActive: isActive });
+  }
+  setCombatResult(type: BattleType, result: CombatResultDto | null) {
+    this.patchState(type, { combatResult: result });
+  }
+  setCombatOutcome(type: BattleType, outcome: BattleOutcome | null) {
+    this.patchState(type, { combatOutcome: outcome });
+  }
+  setNextCombatIn(type: BattleType, nextCombatIn: Date) {
+    this.patchState(type, { nextCombat: nextCombatIn });
+  }
+  getPlayerCharacters$(type: BattleType): Observable<SimpleCombatEntityDto[]> {
+    return this.state$(type).pipe(map((state) => state.playerCharacters));
+  }
+  getEnemyCharacters$(type: BattleType): Observable<SimpleCombatEntityDto[]> {
+    return this.state$(type).pipe(map((state) => state.enemyCharacters));
+  }
+  getLastEventsLength(type: BattleType): number {
+    return this.lastEventsLength[type];
+  }
+  setLastEventsLength(type: BattleType, length: number): number {
+    return (this.lastEventsLength[type] = length);
+  }
+  getCombatEvents$(type: BattleType): Observable<CombatEvent[]> {
+    return this.state$(type).pipe(map((state) => state.combatEvents));
+  }
+  getNextCombat$(type: BattleType): Observable<Date | null> {
+    return this.state$(type).pipe(map((state) => state.nextCombat));
+  }
+  getCombatResult$(type: BattleType): Observable<CombatResultDto | null> {
+    return this.state$(type).pipe(
+      map((state) => state.combatResult),
+      distinctUntilChanged(),
+    );
+  }
+  getCombatOutcome$(type: BattleType): Observable<BattleOutcome | null> {
+    return this.state$(type).pipe(map((state) => state.combatOutcome));
+  }
+  getIsCombatActive$(type: BattleType): Observable<boolean> {
+    return this.state$(type).pipe(map((state) => state.isCombatActive));
   }
 
-  setCombatResult(result: CombatResultDto | null) {
-    this.combatResultSubject.next(result);
+  private patchState(type: BattleType, patch: Partial<CombatState>) {
+    const current = this.getState(type);
+    this.ensureSubject(type).next({ ...current, ...patch });
   }
 
-  setCombatOutcome(outcome: BattleOutcome | null) {
-    this.combatOutcomeSubject.next(outcome);
+  // Reset state for a specific BattleType
+  resetCombatState(type: BattleType) {
+    this.lastEventsLength[type] = 0;
+    this.ensureSubject(type).next({ ...this.defaultState });
   }
 
-  setNextCombatIn(nextCombatIn: Date) {
-    this.nextCombatSubject.next(nextCombatIn);
-  }
-
-  resetCombatState() {
-    this.playerCharactersSubject.next([]);
-    this.enemyCharactersSubject.next([]);
-    this.combatEventsSubject.next([]);
-    this.isCombatActiveSubject.next(false);
-    this.combatResultSubject.next(null);
-    this.combatOutcomeSubject.next(null);
-    this.nextCombatSubject.next(null);
-  }
-
+  // Reset all types on logout
   handleLogout() {
-    this.resetCombatState();
+    this.stateMap.forEach((subject) => subject.next({ ...this.defaultState }));
   }
 }

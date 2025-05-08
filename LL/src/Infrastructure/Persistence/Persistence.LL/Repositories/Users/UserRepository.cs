@@ -1,5 +1,6 @@
 ﻿using Application.Common.Interfaces;
 using Domain.Models.Users;
+using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Users;
 public class UserRepository : IUserRepository
@@ -11,24 +12,31 @@ public class UserRepository : IUserRepository
         _context = unitOfWork;
     }
 
-    // inheritdocs />
-    public bool DoesEmailExist(string email)
+    public async Task<AppUser?> FindByEmailAsync(string email, CancellationToken cancellationToken) =>
+        await _context.Users.SingleOrDefaultAsync(u => u.Email == email, cancellationToken);
+
+    public async Task<AppUser?> FindByIdAsync(Guid id, CancellationToken cancellationToken) =>
+        await _context.Users.FindAsync([id], cancellationToken);
+
+    public async Task AddAsync(AppUser user, CancellationToken cancellationToken)
     {
-        return _context.Users.Any(x => x.Email == email);
-    }
-    
-    // inheritdocs />
-    public bool DoesUsernameExist(string username)
-    {
-        // It's not possible to use string.Equals(x, StringComparison.) with EF Core, as it can not turn it into SQL
-#pragma warning disable CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
-        return _context.Users.Any(x => x.UserName != null && x.UserName.ToLower() == username.ToLower());
-#pragma warning restore CA1862 // Use the 'StringComparison' method overloads to perform case-insensitive string comparisons
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    // inheritdocs />
-    public bool DoesGuestExist(string userId)
+    public async Task<UserInfo?> GetUserInfo(Guid userId, CancellationToken cancellationToken)
     {
-        return _context.Users.Any(x => x.Id == userId);
+        var user = await _context.Users.Include(u => u.ExternalLogins).FirstOrDefaultAsync(x => x.Id.Equals(userId), cancellationToken);
+        //TODO: Implement exception
+        if (user == null) return null;
+
+        return new UserInfo
+        {
+            Email = user.Email ?? string.Empty,
+            IsRegisteredUser = !user.IsGuest,
+            IsGmailBound = user.ExternalLogins.Count > 0,
+        };
     }
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken) => await _context.SaveChangesAsync(cancellationToken);
 }
