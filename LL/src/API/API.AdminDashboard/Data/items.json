@@ -1,18 +1,866 @@
 [
   {
-    "Id": "iron_ingot",
-    "Name": "Iron Ingot",
+    "Id": "stone",
+    "Name": "Stone",
     "IconPath": "",
     "Description": "",
     "ItemType": 2,
     "Rarity": 0
   },
   {
+    "Id": "flint",
+    "Name": "Flint",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "tiny_geode",
+    "Name": "Tiny Geode",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "jagged_obsidian",
+    "Name": "Jagged Obsidian",
+    "IconPath": "",
+    "Description": "Useful for Weapon Smithing",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "crystalline_powder",
+    "Name": "Crystalline Powder",
+    "IconPath": "",
+    "Description": "Jewelry Crafting",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "copper_ore",
+    "Name": "Copper Ore",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "malachite_shard",
+    "Name": "Malachite Shard",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "verdant_ore",
+    "Name": "Verdant Ore",
+    "IconPath": "",
+    "Description": "Armor Forger",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "living_amber",
+    "Name": "Living Amber",
+    "IconPath": "",
+    "Description": "Jewel Crafter",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "tin_ore",
+    "Name": "Tin Ore",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "river_pearl",
+    "Name": "River Pearl",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "galvanic_dust",
+    "Name": "Galvanic Dust",
+    "IconPath": "",
+    "Description": "Jewelry Crafting",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "frosted_metal_shard",
+    "Name": "Frosted Metal Shard",
+    "IconPath": "",
+    "Description": "Armor Forger",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
     "Id": "iron_ore",
     "Name": "Iron Ore",
     "IconPath": "",
-    "Description": "Test",
+    "Description": "",
     "ItemType": 2,
     "Rarity": 0
+  },
+  {
+    "Id": "hematite_lump",
+    "Name": "Hematite Lump",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "fossil_fragment",
+    "Name": "Fossil Fragment",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "rusted_scale",
+    "Name": "Rusted Scale",
+    "IconPath": "",
+    "Description": "Armor Forger",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "ironwood_core",
+    "Name": "Ironwood Core",
+    "IconPath": "",
+    "Description": "Weapon Smith",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "silver_ore",
+    "Name": "Silver Ore",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "moonstone_chip",
+    "Name": "Moonstone Chip",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "ice_crystal",
+    "Name": "Ice Crystal",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "starlight_dust",
+    "Name": "Starlight Dust",
+    "IconPath": "",
+    "Description": "Jewel Crafter",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "mist_infused_gem",
+    "Name": "Mist-Infused Gem",
+    "IconPath": "",
+    "Description": "Jewelry Crafting",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "gold_ore",
+    "Name": "Gold Ore",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "raw_sunstone",
+    "Name": "Raw Sunstone",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "topaz_shard",
+    "Name": "Topaz Shard",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "ember_gem",
+    "Name": "Ember Gem",
+    "IconPath": "",
+    "Description": "Jewel Crafter",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "pyrite_shard",
+    "Name": "Pyrite Shard",
+    "IconPath": "",
+    "Description": "Armor Forger",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "mithril_ore",
+    "Name": "Mithril Ore",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "mystic_quartz",
+    "Name": "Mystic Quartz",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "mana_dust",
+    "Name": "Mana Dust",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "aetherium_fragment",
+    "Name": "Aetherium Fragment",
+    "IconPath": "",
+    "Description": "Jewel Crafter",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "arcane_ore",
+    "Name": "Arcane Ore",
+    "IconPath": "",
+    "Description": "Weapon Smith",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "adamantite_ore",
+    "Name": "Adamantite Ore",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "fire_opal",
+    "Name": "Fire Opal",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "lava_core",
+    "Name": "Lava Core",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "searing_ash",
+    "Name": "Searing Ash",
+    "IconPath": "",
+    "Description": "Weapon Smith",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "infernal_ember",
+    "Name": "Infernal Ember",
+    "IconPath": "",
+    "Description": "Jewel Crafter",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "obsidian_ore",
+    "Name": "Obsidian Ore",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "obsidian_shard",
+    "Name": "Obsidian Shard",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "ember_crystal",
+    "Name": "Ember Crystal",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "darkstone_gem",
+    "Name": "Darkstone Gem",
+    "IconPath": "",
+    "Description": "Jewel Crafter",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "void_essence",
+    "Name": "Void Essence",
+    "IconPath": "",
+    "Description": "Armor Forger",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "arcanite_ore",
+    "Name": "Arcanite Ore",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "arcane_crystal",
+    "Name": "Arcane Crystal",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "rune_fragment",
+    "Name": "Rune Fragment",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "prismatic_shard",
+    "Name": "Prismatic Shard",
+    "IconPath": "",
+    "Description": "Jewel Crafter",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "cursed_dust",
+    "Name": "Cursed Dust",
+    "IconPath": "",
+    "Description": "Armor Forger",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "dragonstone",
+    "Name": "Dragonstone",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "dragon_scale",
+    "Name": "Dragon Scale",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "heartfire_gem",
+    "Name": "Heartfire Gem",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "ember_scale",
+    "Name": "Ember Scale",
+    "IconPath": "",
+    "Description": "Weapon Smith",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "essence_of_flame",
+    "Name": "Essence of Flame",
+    "IconPath": "",
+    "Description": "Jewel Crafter",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "willow_log",
+    "Name": "Willow Log",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "sticky_sap",
+    "Name": "Sticky Sap",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "feather_lined_nest",
+    "Name": "Feather-lined Nest",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "silk_vine",
+    "Name": "Silk Vine",
+    "IconPath": "",
+    "Description": "Armor Forger",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "shimmering_leaf",
+    "Name": "Shimmering Leaf",
+    "IconPath": "",
+    "Description": "Jewel Crafter",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "maple_log",
+    "Name": "Maple Log",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "amber_syrup",
+    "Name": "Amber Syrup",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "sweet_bark_chips",
+    "Name": "Sweet Bark Chips",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "honeycomb",
+    "Name": "Honeycomb",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "glowing_amber",
+    "Name": "Glowing Amber",
+    "IconPath": "",
+    "Description": "Jewel Crafter",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "ash_log",
+    "Name": "Ash Log",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "charcoal_chunk",
+    "Name": "Charcoal Chunk",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "fire_beetle_carapace",
+    "Name": "Fire Beetle Carapace",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "scorched_resin",
+    "Name": "Scorched Resin",
+    "IconPath": "",
+    "Description": "Weapon Smith",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "inferno_bark",
+    "Name": "Inferno Bark",
+    "IconPath": "",
+    "Description": "Armor Forger",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "birch_log",
+    "Name": "Birch Log",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "frozen_sap",
+    "Name": "Frozen Sap",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "moon_moss",
+    "Name": "Moon-Moss",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "silver_moth",
+    "Name": "Silver Moth",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "lunar_essence",
+    "Name": "Lunar Essence",
+    "IconPath": "",
+    "Description": "Jewel Crafter",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "spirit_spruce_log",
+    "Name": "Spirit Spruce Log",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "spirit_bark",
+    "Name": "Spirit Bark",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "spirit_dust",
+    "Name": "Spirit Dust",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "spirit_orb",
+    "Name": "Spirit Orb",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "echoing_essence",
+    "Name": "Echoing Essence",
+    "IconPath": "",
+    "Description": "Armor Forger",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "cedar_log",
+    "Name": "Cedar Log",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "resin_glob",
+    "Name": "Resin Glob",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "sun_bloom_seed",
+    "Name": "Sun-Bloom Seed",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "radiant_pollen",
+    "Name": "Radiant Pollen",
+    "IconPath": "",
+    "Description": "Jewel Crafter",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "solar_shard",
+    "Name": "Solar Shard",
+    "IconPath": "",
+    "Description": "Weapon Smith",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "pine_log",
+    "Name": "Pine Log",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "pine_cone",
+    "Name": "Pine Cone",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "ice_dust_crystal",
+    "Name": "Ice-Dust Crystal",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "snow_owl_feather",
+    "Name": "Snow Owl Feather",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "frostbound_heart",
+    "Name": "Frostbound Heart",
+    "IconPath": "",
+    "Description": "Jewel Crafter",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "oak_log",
+    "Name": "Oak Log",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "blood_acorn",
+    "Name": "Blood Acorn",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "leechvine",
+    "Name": "Leechvine",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "crimson_spore",
+    "Name": "Crimson Spore",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "hemal_bark",
+    "Name": "Hemal Bark",
+    "IconPath": "",
+    "Description": "Armor Forger",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "dark_log",
+    "Name": "Dark Log",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "wisp",
+    "Name": "Wisp",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "spectral_leaf",
+    "Name": "Spectral Leaf",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "spirit_core",
+    "Name": "Spirit Core",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "gloom_essence",
+    "Name": "Gloom Essence",
+    "IconPath": "",
+    "Description": "Jewel Crafter",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "elm_log",
+    "Name": "Elm Log",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "charged_bark",
+    "Name": "Charged Bark",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 1
+  },
+  {
+    "Id": "sparkstone_fragment",
+    "Name": "Sparkstone Fragment",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "thunderheart_core",
+    "Name": "Thunderheart Core",
+    "IconPath": "",
+    "Description": "Weapon Smith",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "electrum_sap",
+    "Name": "Electrum Sap",
+    "IconPath": "",
+    "Description": "Jewel Crafter",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "yew_log",
+    "Name": "Yew Log",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 0
+  },
+  {
+    "Id": "druidic_rune",
+    "Name": "Druidic Rune",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 2
+  },
+  {
+    "Id": "spirit_feather",
+    "Name": "Spirit Feather",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "seed_of_ages",
+    "Name": "Seed of Ages",
+    "IconPath": "",
+    "Description": "",
+    "ItemType": 2,
+    "Rarity": 3
+  },
+  {
+    "Id": "eternal_leaf",
+    "Name": "Eternal Leaf",
+    "IconPath": "",
+    "Description": "Armor Forger",
+    "ItemType": 2,
+    "Rarity": 3
   }
 ]
