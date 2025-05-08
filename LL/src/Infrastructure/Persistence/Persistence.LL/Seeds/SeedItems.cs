@@ -36,7 +36,7 @@ public static class SeedItems
         };
         var axe = new EquipmentBase
         {
-            Id = Guid.Parse(AXE_GUID),
+            Id = AXE_GUID,
             IconPath = "iron_axe.png",
             Name = "Iron Axe",
             Description = "Worn down through years of use.",
@@ -51,7 +51,7 @@ public static class SeedItems
         };
         var dagger = new EquipmentBase
         {
-            Id = Guid.Parse(DAGGER_GUID),
+            Id = DAGGER_GUID,
             IconPath = "iron_dagger.png",
             Name = "Iron Dagger",
             Description = "Worn down through years of use.",
@@ -66,7 +66,7 @@ public static class SeedItems
         };
         var hammer = new EquipmentBase
         {
-            Id = Guid.Parse(HAMMER_GUID),
+            Id = HAMMER_GUID,
             IconPath = "iron_hammer.png",
             Name = "Iron Hammer",
             Description = "Worn down through years of use.",
@@ -81,7 +81,7 @@ public static class SeedItems
         };
         var sword = new EquipmentBase
         {
-            Id = Guid.Parse(SWORD_GUID),
+            Id = SWORD_GUID,
             IconPath = "iron_sword.png",
             Name = "Iron Sword",
             Description = "Worn down through years of use.",
@@ -96,7 +96,7 @@ public static class SeedItems
         };
         var bow = new EquipmentBase
         {
-            Id = Guid.Parse(BOW_GUID),
+            Id = BOW_GUID,
             IconPath = "bow.png",
             Name = "Bow",
             Description = "Worn down through years of use.",
@@ -111,7 +111,7 @@ public static class SeedItems
         };
         var shield = new EquipmentBase
         {
-            Id = Guid.Parse(SHIELD_GUID),
+            Id = SHIELD_GUID,
             IconPath = "shield.png",
             Name = "Shield",
             Description = "Worn down through years of use.",
@@ -126,7 +126,7 @@ public static class SeedItems
         };
         var staff = new EquipmentBase
         {
-            Id = Guid.Parse(STAFF_GUID),
+            Id = STAFF_GUID,
             IconPath = "staff.png",
             Name = "Staff",
             Description = "Worn down through years of use.",
@@ -138,7 +138,7 @@ public static class SeedItems
 
         var potion = new ItemBase
         {
-            Id = Guid.NewGuid(),
+            Id = "Guid.NewGuid()",
             IconPath = "reward-item.png",
             Name = "Potion"
         };

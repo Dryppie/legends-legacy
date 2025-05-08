@@ -123,37 +123,37 @@ public class InventoryRepository : IInventoryRepository
         var swordEquipmentInstance = new EquipmentInstance
         {
             Id = Guid.NewGuid(),
-            ItemBaseId = Guid.Parse(SeedItems.SWORD_GUID),
+            ItemBaseId = SeedItems.SWORD_GUID,
         };
         var bowEquipmentInstance = new EquipmentInstance
         {
             Id = Guid.NewGuid(),
-            ItemBaseId = Guid.Parse(SeedItems.BOW_GUID),
+            ItemBaseId = SeedItems.BOW_GUID,
         };
         var axeEquipmentInstance = new EquipmentInstance
         {
             Id = Guid.NewGuid(),
-            ItemBaseId = Guid.Parse(SeedItems.AXE_GUID),
+            ItemBaseId = SeedItems.AXE_GUID,
         };
         var daggerEquipmentInstance = new EquipmentInstance
         {
             Id = Guid.NewGuid(),
-            ItemBaseId = Guid.Parse(SeedItems.DAGGER_GUID),
+            ItemBaseId = SeedItems.DAGGER_GUID,
         };
         var hammerEquipmentInstance = new EquipmentInstance
         {
             Id = Guid.NewGuid(),
-            ItemBaseId = Guid.Parse(SeedItems.HAMMER_GUID),
+            ItemBaseId = SeedItems.HAMMER_GUID,
         };
         var shieldEquipmentInstance = new EquipmentInstance
         {
             Id = Guid.NewGuid(),
-            ItemBaseId = Guid.Parse(SeedItems.SHIELD_GUID),
+            ItemBaseId = SeedItems.SHIELD_GUID,
         };
         var staffEquipmentInstance = new EquipmentInstance
         {
             Id = Guid.NewGuid(),
-            ItemBaseId = Guid.Parse(SeedItems.STAFF_GUID),
+            ItemBaseId = SeedItems.STAFF_GUID,
         };
 
         var inventoryItemSword = new InventoryItem()
