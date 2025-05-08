@@ -3242,6 +3242,11 @@
         "EntityId": "00000000-0000-0000-0000-000000000013",
         "AttributeType": 45,
         "Value": 0
+      },
+      {
+        "EntityId": "00000000-0000-0000-0000-000000000013",
+        "AttributeType": 23,
+        "Value": 0
       }
     ],
     "EssenceSlots": [],
