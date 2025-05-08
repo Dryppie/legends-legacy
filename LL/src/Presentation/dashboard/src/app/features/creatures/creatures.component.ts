@@ -43,6 +43,10 @@ export class CreaturesComponent implements OnInit {
   ngOnInit(): void {
     this.creatureService.getCreatures().subscribe((creatures) => {
       this.creatures = creatures;
+      if (this.creatures.length > 0) {
+        this.selectedCreature = this.creatures[0]; // Set the first creature as default
+        this.updateForm(this.selectedCreature);
+      }
     });
   }
 

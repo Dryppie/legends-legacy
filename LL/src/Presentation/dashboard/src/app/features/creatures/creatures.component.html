@@ -1,15 +1,18 @@
 <div class="flex h-full items-center p-6 text-white">
-  <div class="flex h-full flex-col">
-    <div *ngFor="let creature of creatures">
-      <div
-        class="border border-light_gray p-2"
-        (click)="selectCreature(creature)"
-      >
-        {{ creature.name }}
+  <div class="flex h-full flex-col overflow-hidden">
+    <h2 class="p-2 text-primary">Creatures</h2>
+    <div class="overflow-y-auto">
+      <div *ngFor="let creature of creatures">
+        <div
+          class="border-t border-light_gray p-2 hover:cursor-pointer hover:bg-zinc-300/10"
+          (click)="selectCreature(creature)"
+        >
+          {{ creature.name }}
+        </div>
       </div>
     </div>
   </div>
-  <div>
+  <div class="h-full">
     <!-- Creature Form -->
     <form
       *ngIf="selectedCreature"
