@@ -14,7 +14,7 @@ public class ItemService : IItemService
         //_itemRepository = itemRepository;
         _itemReader = new();
     }
-    public async Task<List<ItemBase>> GetItemBasesAsync(CancellationToken cancellationToken)
+    public async Task<List<ItemBaseDto>> GetItemBasesAsync(CancellationToken cancellationToken)
     {
         return _itemReader.GetItemsFromJson();
     }

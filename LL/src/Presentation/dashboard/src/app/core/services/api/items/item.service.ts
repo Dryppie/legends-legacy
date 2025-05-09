@@ -13,7 +13,7 @@ export class ItemService {
     return this.apiService.get('item');
   }
 
-  public updateItem(Item: ItemBase): Observable<ItemBase> {
-    return this.apiService.post('item/updateItemBase', Item);
+  public updateItem(item: ItemBase): Observable<ItemBase> {
+    return this.apiService.post('item/updateItemBase', item);
   }
 }

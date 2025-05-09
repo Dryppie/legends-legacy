@@ -192,7 +192,6 @@ public static class SeedCreatures
         var goblinEssenceItem = new EssenceItemBase
         {
             Id = "goblinId",
-            IconPath = "essence-item.svg",
             Name = goblinEssence.Name,
             Essence = goblinEssence,
             ItemType = ItemType.Essence,
@@ -201,7 +200,6 @@ public static class SeedCreatures
         var goblinWarriorEssenceItem = new EssenceItemBase
         {
             Id = "goblinWarriorId",
-            IconPath = "essence-item.svg",
             Name = goblinWarriorEssence.Name,
             Essence = goblinWarriorEssence,
             ItemType = ItemType.Essence,
@@ -210,7 +208,6 @@ public static class SeedCreatures
         var goblinArcherEssenceItem = new EssenceItemBase
         {
             Id = "goblinArcherId",
-            IconPath = "essence-item.svg",
             Name = goblinArcherEssence.Name,
             Essence = goblinArcherEssence,
             ItemType = ItemType.Essence,
@@ -219,7 +216,6 @@ public static class SeedCreatures
         var largeRatEssenceItem = new EssenceItemBase
         {
             Id = "largeRatId",
-            IconPath = "essence-item.svg",
             Name = largeRatEssence.Name,
             Essence = largeRatEssence,
             ItemType = ItemType.Essence,
@@ -228,7 +224,6 @@ public static class SeedCreatures
         var flameImpEssenceItem = new EssenceItemBase
         {
             Id = "flameImpId",
-            IconPath = "essence-item.svg",
             Name = flameImpEssence.Name,
             Essence = flameImpEssence,
             ItemType = ItemType.Essence,
@@ -237,7 +232,6 @@ public static class SeedCreatures
         var frostImpEssenceItem = new EssenceItemBase
         {
             Id = "frostImpId",
-            IconPath = "essence-item.svg",
             Name = frostImpEssence.Name,
             Essence = frostImpEssence,
             ItemType = ItemType.Essence,
@@ -246,7 +240,6 @@ public static class SeedCreatures
         var shadowImpEssenceItem = new EssenceItemBase
         {
             Id = "shadowImpId",
-            IconPath = "essence-item.svg",
             Name = shadowImpEssence.Name,
             Essence = shadowImpEssence,
             ItemType = ItemType.Essence,
@@ -255,7 +248,6 @@ public static class SeedCreatures
         var vampireBatEssenceItem = new EssenceItemBase
         {
             Id = "vampireBatId",
-            IconPath = "essence-item.svg",
             Name = vampireBatEssence.Name,
             Essence = vampireBatEssence,
             ItemType = ItemType.Essence,
@@ -264,7 +256,6 @@ public static class SeedCreatures
         var blueSlimeEssenceItem = new EssenceItemBase
         {
             Id = "blueSlimeId",
-            IconPath = "essence-item.svg",
             Name = blueSlimeEssence.Name,
             Essence = blueSlimeEssence,
             ItemType = ItemType.Essence,
@@ -273,7 +264,6 @@ public static class SeedCreatures
         var brownSlimeEssenceItem = new EssenceItemBase
         {
             Id = "brownSlimeId",
-            IconPath = "essence-item.svg",
             Name = brownSlimeEssence.Name,
             Essence = brownSlimeEssence,
             ItemType = ItemType.Essence,
@@ -282,7 +272,6 @@ public static class SeedCreatures
         var greenSlimeEssenceItem = new EssenceItemBase
         {
             Id = "greenSlimeId",
-            IconPath = "essence-item.svg",
             Name = greenSlimeEssence.Name,
             Essence = greenSlimeEssence,
             ItemType = ItemType.Essence,
@@ -291,7 +280,6 @@ public static class SeedCreatures
         var rainbowSlimeEssenceItem = new EssenceItemBase
         {
             Id = "rainbowSlimeId",
-            IconPath = "essence-item.svg",
             Name = rainbowSlimeEssence.Name,
             Essence = rainbowSlimeEssence,
             ItemType = ItemType.Essence,
@@ -300,7 +288,6 @@ public static class SeedCreatures
         var redSlimeEssenceItem = new EssenceItemBase
         {
             Id = "redSlimeId",
-            IconPath = "essence-item.svg",
             Name = redSlimeEssence.Name,
             Essence = redSlimeEssence,
             ItemType = ItemType.Essence,
@@ -309,7 +296,6 @@ public static class SeedCreatures
         var transparentSlimeEssenceItem = new EssenceItemBase
         {
             Id = "transparentSlimeId",
-            IconPath = "essence-item.svg",
             Name = transparentSlimeEssence.Name,
             Essence = transparentSlimeEssence,
             ItemType = ItemType.Essence,
@@ -318,7 +304,6 @@ public static class SeedCreatures
         var enchantedFairyEssenceItem = new EssenceItemBase
         {
             Id = "enchantedFairyId",
-            IconPath = "essence-item.svg",
             Name = enchantedFairyEssence.Name,
             Essence = enchantedFairyEssence,
             ItemType = ItemType.Essence,
@@ -327,7 +312,6 @@ public static class SeedCreatures
         var gladePantherEssenceItem = new EssenceItemBase
         {
             Id = "gladePantherId",
-            IconPath = "essence-item.svg",
             Name = gladePantherEssence.Name,
             Essence = gladePantherEssence,
             ItemType = ItemType.Essence,
@@ -336,7 +320,6 @@ public static class SeedCreatures
         var illusionFoxEssenceItem = new EssenceItemBase
         {
             Id = "illusionFoxId",
-            IconPath = "essence-item.svg",
             Name = illusionFoxEssence.Name,
             Essence = illusionFoxEssence,
             ItemType = ItemType.Essence,
@@ -345,7 +328,6 @@ public static class SeedCreatures
         var nightshadeBlossomEssenceItem = new EssenceItemBase
         {
             Id = "nightshadeBlossomId",
-            IconPath = "essence-item.svg",
             Name = nightshadeBlossomEssence.Name,
             Essence = nightshadeBlossomEssence,
             ItemType = ItemType.Essence,
@@ -354,7 +336,6 @@ public static class SeedCreatures
         var pixieEssenceItem = new EssenceItemBase
         {
             Id = "pixieId",
-            IconPath = "essence-item.svg",
             Name = pixieEssence.Name,
             Essence = pixieEssence,
             ItemType = ItemType.Essence,
@@ -363,7 +344,6 @@ public static class SeedCreatures
         var hobgoblinEssenceItem = new EssenceItemBase
         {
             Id = "hobgoblinId",
-            IconPath = "essence-item.svg",
             Name = hobgoblinEssence.Name,
             Essence = hobgoblinEssence,
             ItemType = ItemType.Essence,

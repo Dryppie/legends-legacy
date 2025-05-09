@@ -8,4 +8,6 @@ export interface AttributeDto {
 export interface AttributeModifier {
   attributeType: AttributeType;
   amount: number;
+  modifierType: string;
+  id: string;
 }

@@ -16,7 +16,6 @@ public class GetItemBasesQueryHandler : IRequestHandler<GetItemBasesQuery, List<
     }
     public async Task<List<ItemBaseDto>> Handle(GetItemBasesQuery request, CancellationToken cancellationToken)
     {
-        var itemBases = await _itemService.GetItemBasesAsync(cancellationToken);
-        return _mapper.Map<List<ItemBaseDto>>(itemBases);
+        return await _itemService.GetItemBasesAsync(cancellationToken);
     }
 }

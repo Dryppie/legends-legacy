@@ -17,6 +17,8 @@ export interface ItemBase {
   rarity: Rarity;
   itemType: ItemType;
   description: string;
+  equipmentType: EquipmentType;
+  attributeModifiers: AttributeModifier[];
 }
 
 export interface Equipment extends ItemBase {

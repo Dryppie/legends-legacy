@@ -366,12 +366,11 @@ public static class LLDbContextExtensions
         // Create Items
         var axeAttributes = new List<ItemAttributeModifier>()
         {
-            new(AttributeType.Strength, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = Guid.Parse("00000000-3000-0000-0000-000000000003") },
+            new(AttributeType.Strength, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = "00000000-3000-0000-0000-000000000003" },
         };
         var axe = new EquipmentBase
         {
             Id = "00000000-3000-0000-0000-000000000003",
-            IconPath = "iron_axe.png",
             Name = "Iron Axe",
             Description = "Worn down through years of use.",
             Rarity = Rarity.Common,
@@ -380,12 +379,11 @@ public static class LLDbContextExtensions
         };
         var daggerAttributes = new List<ItemAttributeModifier>()
         {
-            new(AttributeType.Dexterity, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = Guid.Parse("00000000-4000-0000-0000-000000000004") },
+            new(AttributeType.Dexterity, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = "00000000-4000-0000-0000-000000000004" },
         };
         var dagger = new EquipmentBase
         {
             Id = "00000000-4000-0000-0000-000000000004",
-            IconPath = "iron_dagger.png",
             Name = "Iron Dagger",
             Description = "Worn down through years of use.",
             Rarity = Rarity.Common,
@@ -394,12 +392,11 @@ public static class LLDbContextExtensions
         };
         var hammerAttributes = new List<ItemAttributeModifier>()
         {
-            new(AttributeType.Endurance, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = Guid.Parse("00000000-5000-0000-0000-000000000005") },
+            new(AttributeType.Endurance, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = "00000000-5000-0000-0000-000000000005" },
         };
         var hammer = new EquipmentBase
         {
             Id = "00000000-5000-0000-0000-000000000005",
-            IconPath = "iron_hammer.png",
             Name = "Iron Hammer",
             Description = "Worn down through years of use.",
             Rarity = Rarity.Common,
@@ -408,12 +405,11 @@ public static class LLDbContextExtensions
         };
         var swordAttributes = new List<ItemAttributeModifier>()
         {
-            new(AttributeType.FightingSpirit, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = Guid.Parse("00000000-1000-0000-0000-000000000001") } ,
+            new(AttributeType.FightingSpirit, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = "00000000-1000-0000-0000-000000000001" } ,
         };
         var sword = new EquipmentBase
         {
             Id = "00000000-1000-0000-0000-000000000001",
-            IconPath = "iron_sword.png",
             Name = "Iron Sword",
             Description = "Worn down through years of use.",
             Rarity = Rarity.Common,
@@ -422,12 +418,11 @@ public static class LLDbContextExtensions
         };
         var bowAttributes = new List<ItemAttributeModifier>()
         {
-            new(AttributeType.Agility, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = Guid.Parse("00000000-2000-0000-0000-000000000002") } ,
+            new(AttributeType.Agility, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = "00000000-2000-0000-0000-000000000002" } ,
         };
         var bow = new EquipmentBase
         {
             Id = "00000000-2000-0000-0000-000000000002",
-            IconPath = "bow.png",
             Name = "Bow",
             Description = "Worn down through years of use.",
             Rarity = Rarity.Common,
@@ -436,12 +431,11 @@ public static class LLDbContextExtensions
         };
         var shieldAttributes = new List<ItemAttributeModifier>()
         {
-            new(AttributeType.Constitution, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = Guid.Parse("00000000-6000-0000-0000-000000000006") } ,
+            new(AttributeType.Constitution, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = "00000000-6000-0000-0000-000000000006" } ,
         };
         var shield = new EquipmentBase
         {
             Id = "00000000-6000-0000-0000-000000000006",
-            IconPath = "shield.png",
             Name = "Shield",
             Description = "Worn down through years of use.",
             Rarity = Rarity.Common,
@@ -450,12 +444,11 @@ public static class LLDbContextExtensions
         };
         var staffAttributes = new List<ItemAttributeModifier>()
         {
-            new(AttributeType.Intelligence, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = Guid.Parse("00000000-7000-0000-0000-000000000007") } ,
+            new(AttributeType.Intelligence, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = "00000000-7000-0000-0000-000000000007" } ,
         };
         var staff = new EquipmentBase
         {
             Id = "00000000-7000-0000-0000-000000000007",
-            IconPath = "staff.png",
             Name = "Staff",
             Description = "Worn down through years of use.",
             Rarity = Rarity.Common,
@@ -466,7 +459,6 @@ public static class LLDbContextExtensions
         var potion = new ItemBase
         {
             Id = "Guid.NewGuid()",
-            IconPath = "reward-item.png",
             Name = "Potion"
         };
 
@@ -524,21 +516,16 @@ public static class LLDbContextExtensions
     {
         // Create Items for Tree Drops
         var treeLog = new ItemBase { Id = "Guid.NewGuid()151345",
-            IconPath = "reward-item.png",
             Name = "Tree Log" };
         var nest = new ItemBase { Id = "Guid.NewGuid()312514",
-            IconPath = "reward-item.png",
             Name = "Nest" };
         
         var oakLog = new ItemBase { Id = "Guid.NewGuid()2223",
-            IconPath = "reward-item.png",
             Name = "Oak Log" };
         
         var birchLog = new ItemBase { Id = "Guid.NewGuid()321",
-            IconPath = "reward-item.png",
             Name = "Birch Log" };
         var rareHerb = new ItemBase { Id = "Guid.NewGuid()123",
-            IconPath = "reward-item.png",   
             Name = "Rare Herb" };
 
         // Add items to context

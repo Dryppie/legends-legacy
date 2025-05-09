@@ -21,9 +21,6 @@ config
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddEnvironmentVariables();
 
-builder.Services.AddIdentityApiEndpoints<AppUser>()
-    .AddEntityFrameworkStores<LLDbContext>();
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",

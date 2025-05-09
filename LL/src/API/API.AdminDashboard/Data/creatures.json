@@ -247,6 +247,7 @@
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
+    "Masteries": [],
     "IsSummoned": false,
     "ImagePath": ""
   },
@@ -498,6 +499,7 @@
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
+    "Masteries": [],
     "IsSummoned": false,
     "ImagePath": ""
   },
@@ -749,6 +751,7 @@
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
+    "Masteries": [],
     "IsSummoned": false,
     "ImagePath": ""
   },
@@ -1000,6 +1003,7 @@
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
+    "Masteries": [],
     "IsSummoned": false,
     "ImagePath": ""
   },
@@ -1251,6 +1255,7 @@
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
+    "Masteries": [],
     "IsSummoned": false,
     "ImagePath": ""
   },
@@ -1502,6 +1507,7 @@
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
+    "Masteries": [],
     "IsSummoned": false,
     "ImagePath": ""
   },
@@ -1753,6 +1759,7 @@
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
+    "Masteries": [],
     "IsSummoned": false,
     "ImagePath": ""
   },
@@ -2004,6 +2011,7 @@
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
+    "Masteries": [],
     "IsSummoned": false,
     "ImagePath": ""
   },
@@ -2255,6 +2263,7 @@
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
+    "Masteries": [],
     "IsSummoned": false,
     "ImagePath": ""
   },
@@ -2506,6 +2515,7 @@
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
+    "Masteries": [],
     "IsSummoned": false,
     "ImagePath": ""
   },
@@ -2757,6 +2767,7 @@
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
+    "Masteries": [],
     "IsSummoned": false,
     "ImagePath": ""
   },
@@ -3008,6 +3019,7 @@
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
+    "Masteries": [],
     "IsSummoned": false,
     "ImagePath": ""
   },
@@ -3259,6 +3271,7 @@
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
+    "Masteries": [],
     "IsSummoned": false,
     "ImagePath": ""
   },
@@ -3510,6 +3523,7 @@
     "TemporaryModifiers": [],
     "Statuses": [],
     "Level": 1,
+    "Masteries": [],
     "IsSummoned": false,
     "ImagePath": ""
   }

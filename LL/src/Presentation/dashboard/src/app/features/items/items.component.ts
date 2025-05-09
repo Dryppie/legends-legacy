@@ -13,7 +13,7 @@ import { Equipment, EssenceItem, ItemBase } from '../../shared/models/item';
 import { ItemType } from '../../shared/models/enums/itemType';
 import { Rarity } from '../../shared/models/enums/rarity';
 import { EquipmentType } from '../../shared/models/Dtos/equipmentSlot';
-import { ItemService } from '../../core/services/api/items/creature.service';
+import { ItemService } from '../../core/services/api/items/item.service';
 
 @Component({
   selector: 'app-items',
@@ -116,8 +116,8 @@ export class ItemsComponent implements OnInit {
       eq.attributeModifiers.forEach((m) =>
         this.attributeModifiers.push(
           this.fb.group({
-            attribute: [m.attributeType, Validators.required],
-            value: [m.amount, Validators.required],
+            attributeType: [m.attributeType, Validators.required],
+            amount: [m.amount, Validators.required],
           }),
         ),
       );
@@ -131,8 +131,8 @@ export class ItemsComponent implements OnInit {
   addModifier(): void {
     this.attributeModifiers.push(
       this.fb.group({
-        attribute: ['', Validators.required],
-        value: [0, Validators.required],
+        attributeType: ['', Validators.required],
+        amount: [0, Validators.required],
       }),
     );
   }
@@ -155,20 +155,23 @@ export class ItemsComponent implements OnInit {
     }
 
     const formValue = this.itemForm.getRawValue();
-
     if (this.isCreating) {
       // generate temporary id if backend handles else
       formValue.id = this.generateId(formValue.name);
-      this.itemService.updateItem(formValue).subscribe((created) => {
-        this.items.push(created);
-        this.selectItem(created);
-      });
+      this.itemService
+        .updateItem(formValue as ItemBase)
+        .subscribe((created) => {
+          this.items.push(created);
+          this.selectItem(created);
+        });
     } else {
-      this.itemService.updateItem(formValue).subscribe((updated) => {
-        const idx = this.items.findIndex((i) => i.id === updated.id);
-        if (idx !== -1) this.items[idx] = updated;
-        this.selectItem(updated);
-      });
+      this.itemService
+        .updateItem(formValue as ItemBase)
+        .subscribe((updated) => {
+          const idx = this.items.findIndex((i) => i.id === updated.id);
+          if (idx !== -1) this.items[idx] = updated;
+          this.selectItem(updated);
+        });
     }
   }
 

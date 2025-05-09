@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250505055647_BaseMigration")]
+    [Migration("20250509034539_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -66,11 +66,12 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("AttributeType")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("EquipmentBaseId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("EquipmentBaseId")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<Guid>("ItemBaseId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("ItemBaseId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("ModifierType")
                         .HasColumnType("int");
@@ -403,9 +404,8 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.Items.ItemBase", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -440,8 +440,9 @@ namespace Persistence.LL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ItemBaseId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("ItemBaseId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("ItemType")
                         .HasColumnType("int");
@@ -1001,8 +1002,9 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.LootTables.LootTableEntry");
 
-                    b.Property<Guid>("ItemId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("ItemId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasIndex("ItemId");
 

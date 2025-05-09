@@ -7,9 +7,9 @@ public class ItemAttributeModifier(
     float amount,
     ModifierType modifierType = ModifierType.Flat) : AttributeModifierBase(attributeType, amount, modifierType)
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
     [JsonIgnore]
-    public Guid ItemBaseId { get; set; }
+    public string ItemBaseId { get; set; } = string.Empty;
     [JsonIgnore]
-    public ItemBase ItemBase { get; set; } = null!;
+    public ItemBase? ItemBase { get; set; }
 }

@@ -1,20 +1,19 @@
 ﻿using System.Text.Json;
 using Application.UseCases._AdminDashboard.Items.Dtos;
-using Domain.Models.Items;
 
 namespace Services.AdminDashboard.JsonReaders;
 public class ItemBaseJsonReader
 {
-    public List<ItemBase> AllItems { get; set; } = [];
+    public List<ItemBaseDto> AllItems { get; set; } = [];
     private string _filePath { get; set; }
     public ItemBaseJsonReader()
     {
         _filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "items.json");
         string json = File.ReadAllText(_filePath);
-        AllItems = JsonSerializer.Deserialize<List<ItemBase>>(json) ?? [];
+        AllItems = JsonSerializer.Deserialize<List<ItemBaseDto>>(json) ?? [];
         OverWriteJSON();
     }
-    public List<ItemBase> GetItemsFromJson()
+    public List<ItemBaseDto> GetItemsFromJson()
     {
         return AllItems;
     }
@@ -22,26 +21,20 @@ public class ItemBaseJsonReader
     {
         var index = AllItems.FindIndex(c => c.Id == itemToUpdate.Id);
         if (index == -1)
-            AllItems.Add(new ItemBase()
-            {
-                Id = itemToUpdate.Id,
-                Name = itemToUpdate.Name,
-                Description = itemToUpdate.Description,
-                ItemType = itemToUpdate.ItemType,
-                Rarity = itemToUpdate.Rarity
-            });
+            AllItems.Add(itemToUpdate);
         else
-            itemToUpdate.UpdateProperties(AllItems[index]);
+            AllItems[index] = itemToUpdate;
 
         OverWriteJSON();
     }
+
     private void OverWriteJSON()
     {
         var options = new JsonSerializerOptions { WriteIndented = true };
         File.WriteAllText(_filePath, JsonSerializer.Serialize(AllItems, options));
     }
 
-    public void AddItemBase(ItemBase itemToAdd)
+    public void AddItemBase(ItemBaseDto itemToAdd)
     {
         AllItems.Add(itemToAdd);
         OverWriteJSON();

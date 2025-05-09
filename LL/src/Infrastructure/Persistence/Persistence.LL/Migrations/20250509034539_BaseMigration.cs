@@ -217,7 +217,7 @@ namespace Persistence.LL.Migrations
                 name: "ItemBases",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IconPath = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -311,8 +311,8 @@ namespace Persistence.LL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ItemBaseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    EquipmentBaseId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ItemBaseId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    EquipmentBaseId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     AttributeType = table.Column<int>(type: "int", nullable: false),
                     Amount = table.Column<float>(type: "real", nullable: false),
                     ModifierType = table.Column<int>(type: "int", nullable: false)
@@ -338,7 +338,7 @@ namespace Persistence.LL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ItemBaseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ItemBaseId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ItemType = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -360,7 +360,7 @@ namespace Persistence.LL.Migrations
                     Weight = table.Column<float>(type: "real", nullable: false),
                     LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     LootTableType = table.Column<int>(type: "int", nullable: false),
-                    ItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    ItemId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {

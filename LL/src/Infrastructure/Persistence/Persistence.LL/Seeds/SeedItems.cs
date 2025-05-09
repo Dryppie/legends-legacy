@@ -32,12 +32,11 @@ public static class SeedItems
         // Create Items
         var axeAttributes = new List<ItemAttributeModifier>()
         {
-            new(AttributeType.Strength, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = Guid.Parse(AXE_GUID) },
+            new(AttributeType.Strength, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = AXE_GUID },
         };
         var axe = new EquipmentBase
         {
             Id = AXE_GUID,
-            IconPath = "iron_axe.png",
             Name = "Iron Axe",
             Description = "Worn down through years of use.",
             Rarity = Rarity.Common,
@@ -47,12 +46,11 @@ public static class SeedItems
         };
         var daggerAttributes = new List<ItemAttributeModifier>()
         {
-            new(AttributeType.Dexterity, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = Guid.Parse(DAGGER_GUID) },
+            new(AttributeType.Dexterity, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = DAGGER_GUID },
         };
         var dagger = new EquipmentBase
         {
             Id = DAGGER_GUID,
-            IconPath = "iron_dagger.png",
             Name = "Iron Dagger",
             Description = "Worn down through years of use.",
             Rarity = Rarity.Common,
@@ -62,12 +60,11 @@ public static class SeedItems
         };
         var hammerAttributes = new List<ItemAttributeModifier>()
         {
-            new(AttributeType.Endurance, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = Guid.Parse(HAMMER_GUID) },
+            new(AttributeType.Endurance, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = HAMMER_GUID },
         };
         var hammer = new EquipmentBase
         {
             Id = HAMMER_GUID,
-            IconPath = "iron_hammer.png",
             Name = "Iron Hammer",
             Description = "Worn down through years of use.",
             Rarity = Rarity.Common,
@@ -77,12 +74,11 @@ public static class SeedItems
         };
         var swordAttributes = new List<ItemAttributeModifier>()
         {
-            new(AttributeType.FightingSpirit, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = Guid.Parse(SWORD_GUID) } ,
+            new(AttributeType.FightingSpirit, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = SWORD_GUID } ,
         };
         var sword = new EquipmentBase
         {
             Id = SWORD_GUID,
-            IconPath = "iron_sword.png",
             Name = "Iron Sword",
             Description = "Worn down through years of use.",
             Rarity = Rarity.Common,
@@ -92,12 +88,11 @@ public static class SeedItems
         };
         var bowAttributes = new List<ItemAttributeModifier>()
         {
-            new(AttributeType.Agility, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = Guid.Parse(BOW_GUID) } ,
+            new(AttributeType.Agility, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = BOW_GUID } ,
         };
         var bow = new EquipmentBase
         {
             Id = BOW_GUID,
-            IconPath = "bow.png",
             Name = "Bow",
             Description = "Worn down through years of use.",
             Rarity = Rarity.Common,
@@ -107,12 +102,11 @@ public static class SeedItems
         };
         var shieldAttributes = new List<ItemAttributeModifier>()
         {
-            new(AttributeType.Constitution, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = Guid.Parse(SHIELD_GUID) } ,
+            new(AttributeType.Constitution, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = SHIELD_GUID } ,
         };
         var shield = new EquipmentBase
         {
             Id = SHIELD_GUID,
-            IconPath = "shield.png",
             Name = "Shield",
             Description = "Worn down through years of use.",
             Rarity = Rarity.Common,
@@ -122,12 +116,11 @@ public static class SeedItems
         };
         var staffAttributes = new List<ItemAttributeModifier>()
         {
-            new(AttributeType.Intelligence, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = Guid.Parse(STAFF_GUID) } ,
+            new(AttributeType.Intelligence, 5, ModifierType.Flat) { Id = Guid.NewGuid(), ItemBaseId = STAFF_GUID } ,
         };
         var staff = new EquipmentBase
         {
             Id = STAFF_GUID,
-            IconPath = "staff.png",
             Name = "Staff",
             Description = "Worn down through years of use.",
             Rarity = Rarity.Common,
@@ -139,7 +132,6 @@ public static class SeedItems
         var potion = new ItemBase
         {
             Id = "Guid.NewGuid()",
-            IconPath = "reward-item.png",
             Name = "Potion"
         };
 
