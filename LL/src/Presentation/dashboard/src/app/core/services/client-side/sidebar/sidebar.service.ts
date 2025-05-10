@@ -37,6 +37,12 @@ export class SidebarService {
             icon: 'character/inventory',
             title: 'Items',
           },
+          {
+            id: 'gathering',
+            route: 'gathering',
+            icon: 'character/essences',
+            title: 'Gathering Nodes',
+          },
         ],
       },
     ];

@@ -1,5 +1,4 @@
 ﻿using Application.UseCases._AdminDashboard.Items.Dtos;
-using Domain.Models.Items;
 
 namespace Application.Interfaces.Services.AdminDashboard;
 public interface IItemService
