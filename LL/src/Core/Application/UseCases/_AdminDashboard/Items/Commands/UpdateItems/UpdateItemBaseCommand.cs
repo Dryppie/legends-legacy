@@ -3,8 +3,8 @@ using Application.UseCases._AdminDashboard.Items.Dtos;
 using MediatR;
 
 namespace Application.UseCases._AdminDashboard.Items.Commands.UpdateItems;
-public record UpdateItemBaseCommand(ItemBaseDto ItemBaseToUpdate) : IRequest<ItemBaseDto>;
-public class UpdateItemBaseCommandHandler : IRequestHandler<UpdateItemBaseCommand, ItemBaseDto>
+public record UpdateRecipeCommand(ItemBaseDto ItemBaseToUpdate) : IRequest<ItemBaseDto>;
+public class UpdateItemBaseCommandHandler : IRequestHandler<UpdateRecipeCommand, ItemBaseDto>
 {
     private readonly IItemService _itemService;
 
@@ -13,7 +13,7 @@ public class UpdateItemBaseCommandHandler : IRequestHandler<UpdateItemBaseComman
         _itemService = itemService;
     }
 
-    public async Task<ItemBaseDto> Handle(UpdateItemBaseCommand request, CancellationToken cancellationToken)
+    public async Task<ItemBaseDto> Handle(UpdateRecipeCommand request, CancellationToken cancellationToken)
     {
         await _itemService.UpdateItemBaseAsync(request.ItemBaseToUpdate, cancellationToken);
         return request.ItemBaseToUpdate;

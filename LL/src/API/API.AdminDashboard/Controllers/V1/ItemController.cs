@@ -9,12 +9,12 @@ public class ItemController : BaseController
     [HttpGet]
     public async Task<ActionResult<List<ItemBaseDto>>> Get()
     {
-        return await Mediator.Send(new GetItemBasesQuery());
+        return await Mediator.Send(new GetRecipeQuery());
     }
 
     [HttpPost("UpdateItemBase")]
     public async Task<ActionResult<ItemBaseDto>> UpdateItemBase([FromBody] ItemBaseDto itemBase)
     {
-        return await Mediator.Send(new UpdateItemBaseCommand(itemBase));
+        return await Mediator.Send(new UpdateRecipeCommand(itemBase));
     }
 }

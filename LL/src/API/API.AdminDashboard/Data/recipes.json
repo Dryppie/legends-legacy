@@ -1,0 +1,42 @@
+[
+  {
+    "Id": "35ab5f73-3295-4e0f-a1af-6b453319157e",
+    "Name": "Copper Chainmail",
+    "ItemId": "00000000-0000-0000-0000-000000000000",
+    "Item": {
+      "Id": "copper_chainmail",
+      "Name": "Copper Chainmail",
+      "Description": "",
+      "ItemType": 0,
+      "Rarity": 0
+    },
+    "Quantity": 1,
+    "CraftType": 0,
+    "LevelRequirement": 1,
+    "Materials": [
+      {
+        "Quantity": 4,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "copper_ore",
+          "Name": "Copper Ore",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "malachite_shard",
+          "Name": "Malachite Shard",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      }
+    ],
+    "ItemType": 0
+  }
+]

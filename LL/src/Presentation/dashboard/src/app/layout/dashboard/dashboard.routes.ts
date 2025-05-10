@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { DashboardComponent } from './dashboard.component';
 import { CreaturesComponent } from '../../features/creatures/creatures.component';
 import { ItemsComponent } from '../../features/items/items.component';
+import { RecipesComponent } from '../../features/recipes/recipes.component';
 
 export const DASHBOARD_ROUTES: Routes = [
   {
@@ -20,6 +21,10 @@ export const DASHBOARD_ROUTES: Routes = [
       {
         path: 'items',
         component: ItemsComponent,
+      },
+      {
+        path: 'recipes',
+        component: RecipesComponent,
       },
     ],
   },

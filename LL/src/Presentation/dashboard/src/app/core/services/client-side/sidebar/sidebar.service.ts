@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, filter, Observable, of } from 'rxjs';
-import { SidebarItem, Tab } from '../../../../shared/models/sidebar-item';
+import { BehaviorSubject } from 'rxjs';
+import { Tab } from '../../../../shared/models/sidebar-item';
 import { Router } from '@angular/router';
 
 @Injectable({
@@ -38,10 +38,10 @@ export class SidebarService {
             title: 'Items',
           },
           {
-            id: 'gathering',
-            route: 'gathering',
+            id: 'recipes',
+            route: 'recipes',
             icon: 'character/essences',
-            title: 'Gathering Nodes',
+            title: 'Recipes',
           },
         ],
       },

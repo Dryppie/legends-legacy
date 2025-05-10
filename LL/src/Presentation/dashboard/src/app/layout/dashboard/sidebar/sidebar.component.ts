@@ -11,8 +11,6 @@ import { Router, RouterLink } from '@angular/router';
 import { SidebarItem, Tab } from '../../../shared/models/sidebar-item';
 import { SidebarService } from '../../../core/services/client-side/sidebar/sidebar.service';
 import { TabComponent } from '../../../shared/components/tab/tab.component';
-import { GameService } from '../../../core/services/client-side/game/game.service';
-import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-sidebar',
