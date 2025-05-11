@@ -14,6 +14,7 @@ export class ItemService {
   }
 
   public updateItem(item: ItemBase): Observable<ItemBase> {
+    console.log(item);
     return this.apiService.post('item/updateItemBase', item);
   }
 }

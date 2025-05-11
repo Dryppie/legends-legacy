@@ -2,7 +2,7 @@
 public enum EquipmentType
 {
     Head,
-    Cloak,
+    Relic,
     Chest,
     Necklace,
     Legs,

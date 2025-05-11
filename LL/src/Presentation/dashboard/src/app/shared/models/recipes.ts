@@ -18,7 +18,7 @@ export interface Material {
 }
 
 export enum CraftType {
-  ArmorForging,
-  JewelryCrafting,
-  WeaponSmithing,
+  ArmorForging = 'ArmorForging',
+  JewelryCrafting = 'JewelryCrafting',
+  WeaponSmithing = 'WeaponSmithing',
 }

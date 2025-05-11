@@ -91,17 +91,19 @@ export class RecipesComponent implements OnInit {
     this.itemService.getItems().subscribe((data) => {
       this.items = data;
       this.loadRecipes();
-      this.craftableItems = data.filter(
-        (i) =>
-          i.itemType != ItemType.Material && i.itemType != ItemType.Essence,
-      );
     });
   }
 
   private loadRecipes(): void {
     this.recipeService.getRecipes().subscribe((data) => {
-      console.log(data);
       this.recipes = data;
+      const outputItemIds = this.recipes.map((recipe) => recipe.item.id);
+      this.craftableItems = this.items.filter(
+        (i) =>
+          i.itemType != ItemType.Material &&
+          i.itemType != ItemType.Essence &&
+          !outputItemIds.includes(i.id),
+      );
       this.buildForm();
     });
   }
@@ -112,18 +114,26 @@ export class RecipesComponent implements OnInit {
     this.recipeForm.reset({
       id: '',
       name: '',
-      item: null,
+      item: this.craftableItems[0],
       quantity: 1,
       craftType: null,
       levelRequirement: 1,
-      itemType: null,
+      itemType: this.craftableItems[0].itemType,
     });
     this.clearMaterials();
   }
 
+  get craftableOutputItems() {
+    let items: ItemBase[] = [];
+    if (this.selectedRecipe != null) {
+      items = [this.selectedRecipe.item];
+    }
+    items = [...items, ...this.craftableItems];
+    return items;
+  }
+
   selectRecipe(recipe: Recipe): void {
     this.selectedRecipe = recipe;
-    console.log(this.selectedRecipe);
     this.recipeForm.patchValue({
       ...recipe,
       /* itemType is disabled – patch it separately */
@@ -160,6 +170,9 @@ export class RecipesComponent implements OnInit {
       this.recipeService.updateRecipe(raw).subscribe((created) => {
         this.recipes.push(created);
         this.selectRecipe(created);
+        this.craftableItems = this.craftableItems.filter(
+          (c) => c.id != created.item.id,
+        );
       });
     } else {
       this.recipeService.updateRecipe(raw).subscribe((updated) => {

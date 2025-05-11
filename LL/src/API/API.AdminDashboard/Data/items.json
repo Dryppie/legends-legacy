@@ -965,26 +965,334 @@
   {
     "Id": "eternal_leaf",
     "Name": "Eternal Leaf",
-    "Description": "Armor Forger",
+    "Description": "",
     "ItemType": 2,
     "Rarity": 3,
     "EquipmentType": 0,
     "AttributeModifiers": []
   },
   {
-    "Id": "copper_chainmail",
-    "Name": "Copper Chainmail",
-    "Description": "",
+    "Id": "stone_dagger",
+    "Name": "Stone Dagger",
+    "Description": "A crude dagger crafted from stone and flint.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 6,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "crude_hatchet",
+    "Name": "Crude Hatchet",
+    "Description": "A basic hatchet crafted from stone and willow log.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 6,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "jagged_obsidian_blade",
+    "Name": "Jagged Obsidian Blade",
+    "Description": "A sharp blade crafted from jagged obsidian.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 6,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "primitive_club",
+    "Name": "Primitive Club",
+    "Description": "A heavy club made from willow log.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 6,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "obsidian_shard_wand",
+    "Name": "Obsidian Shard Wand",
+    "Description": "A wand crafted from obsidian shard.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 6,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "stone_spear",
+    "Name": "Stone Spear",
+    "Description": "A primitive spear made from stone and sticky sap.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 6,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "willow_branch_staff",
+    "Name": "Willow Branch Staff",
+    "Description": "A basic staff crafted from a willow branch.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 6,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "flint_edged_axe",
+    "Name": "Flint-Edged Axe",
+    "Description": "An axe with a sharp flint edge.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 6,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "tiny_geode_orb",
+    "Name": "Tiny Geode Orb",
+    "Description": "A mystical orb made from tiny geode.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 7,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "obsidian_mirror_shield",
+    "Name": "Obsidian Mirror Shield",
+    "Description": "A reflective shield crafted from obsidian shard.",
+    "ItemType": 0,
+    "Rarity": 1,
+    "EquipmentType": 7,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "crystalline_powder_focus",
+    "Name": "Crystalline Powder Focus",
+    "Description": "A focus infused with crystalline powder.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 7,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "primitive_totem",
+    "Name": "Primitive Totem",
+    "Description": "A basic totem crafted from willow log and sticky sap.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 7,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "stone_helm",
+    "Name": "Stone Helm",
+    "Description": "A crude helm made of stone.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 0,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "willow_leaf_hood",
+    "Name": "Willow Leaf Hood",
+    "Description": "A hood crafted from willow leaves and silk vine.",
+    "ItemType": 0,
+    "Rarity": 1,
+    "EquipmentType": 0,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "rugged_obsidian_mask",
+    "Name": "Rugged Obsidian Mask",
+    "Description": "A mask crafted from jagged obsidian.",
+    "ItemType": 0,
+    "Rarity": 1,
+    "EquipmentType": 0,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "wooden_chestpiece",
+    "Name": "Wooden Chestpiece",
+    "Description": "A basic chestpiece crafted from willow log.",
     "ItemType": 0,
     "Rarity": 0,
     "EquipmentType": 2,
-    "AttributeModifiers": [
-      {
-        "Id": "a00800ce-a827-4784-9c2b-39286e86fcd8",
-        "AttributeType": 1,
-        "Amount": 2,
-        "ModifierType": 0
-      }
-    ]
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "obsidian_scale_chestplate",
+    "Name": "Obsidian Scale Chestplate",
+    "Description": "A chestplate reinforced with obsidian scales.",
+    "ItemType": 0,
+    "Rarity": 1,
+    "EquipmentType": 2,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "willow_bark_leggings",
+    "Name": "Willow Bark Leggings",
+    "Description": "Leggings made from willow bark and sticky sap.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 4,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "geode_studded_boots",
+    "Name": "Geode-Studded Boots",
+    "Description": "Boots reinforced with tiny geode shards.",
+    "ItemType": 0,
+    "Rarity": 1,
+    "EquipmentType": 4,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "stone_greaves",
+    "Name": "Stone Greaves",
+    "Description": "Solid greaves made of stone.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 4,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "leaf_cloak",
+    "Name": "Leaf Cloak",
+    "Description": "A cloak made from shimmering leaves.",
+    "ItemType": 0,
+    "Rarity": 1,
+    "EquipmentType": 2,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "spirit_mantle",
+    "Name": "Spirit Mantle",
+    "Description": "A mystical mantle woven from spirit bark.",
+    "ItemType": 0,
+    "Rarity": 2,
+    "EquipmentType": 2,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "silken_shoes",
+    "Name": "Silken Shoes",
+    "Description": "Light wraps crafted from fine silk vine.",
+    "ItemType": 0,
+    "Rarity": 1,
+    "EquipmentType": 4,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "obsidian_carapace_helmet",
+    "Name": "Obsidian Carapace Helmet",
+    "Description": "Heavy helmet crafted from obsidian shard.",
+    "ItemType": 0,
+    "Rarity": 1,
+    "EquipmentType": 0,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "stone_amulet",
+    "Name": "Stone Amulet",
+    "Description": "An amulet crafted from stone.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 3,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "obsidian_ring",
+    "Name": "Obsidian Ring",
+    "Description": "A ring forged from jagged obsidian.",
+    "ItemType": 0,
+    "Rarity": 1,
+    "EquipmentType": 5,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "willow_band",
+    "Name": "Willow Band",
+    "Description": "A ring crafted from willow.",
+    "ItemType": 0,
+    "Rarity": 1,
+    "EquipmentType": 5,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "tiny_geode_pendant",
+    "Name": "Tiny Geode Pendant",
+    "Description": "A pendant made from a tiny geode.",
+    "ItemType": 0,
+    "Rarity": 1,
+    "EquipmentType": 3,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "crystalline_charm",
+    "Name": "Crystalline Charm",
+    "Description": "A mystical charm infused with crystalline powder.",
+    "ItemType": 0,
+    "Rarity": 1,
+    "EquipmentType": 1,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "spirit_spruce_pendant",
+    "Name": "Spirit Spruce Pendant",
+    "Description": "A pendant crafted from Spirit Spruce Log.",
+    "ItemType": 0,
+    "Rarity": 1,
+    "EquipmentType": 3,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "leaf_trinket",
+    "Name": "Leaf Trinket",
+    "Description": "A trinket made from a shimmering leaf.",
+    "ItemType": 0,
+    "Rarity": 1,
+    "EquipmentType": 1,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "silken_locket",
+    "Name": "Silken Locket",
+    "Description": "A delicate locket woven from silk vine.",
+    "ItemType": 0,
+    "Rarity": 1,
+    "EquipmentType": 3,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "spirit_orb_ring",
+    "Name": "Spirit Orb Ring",
+    "Description": "A mystical ring infused with a spirit orb.",
+    "ItemType": 0,
+    "Rarity": 2,
+    "EquipmentType": 5,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "echoing_charm",
+    "Name": "Echoing Charm",
+    "Description": "A charm that resonates with the Echoing Core.",
+    "ItemType": 0,
+    "Rarity": 2,
+    "EquipmentType": 1,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "obsidian_mirror_amulet",
+    "Name": "Obsidian Mirror Amulet",
+    "Description": "An amulet with a reflective obsidian shard.",
+    "ItemType": 0,
+    "Rarity": 2,
+    "EquipmentType": 3,
+    "AttributeModifiers": []
+  },
+  {
+    "Id": "shimmering_leaf_sigil",
+    "Name": "Shimmering Leaf Sigil",
+    "Description": "A radiant sigil made from a shimmering leaf.",
+    "ItemType": 0,
+    "Rarity": 2,
+    "EquipmentType": 1,
+    "AttributeModifiers": []
   }
 ]

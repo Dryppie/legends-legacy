@@ -9,7 +9,7 @@ export interface EquipmentSlot {
 
 export enum EquipmentType {
   Head = 'Head',
-  Cloak = 'Cloak',
+  Relic = 'Relic',
   Chest = 'Chest',
   Necklace = 'Necklace',
   Legs = 'Legs',
