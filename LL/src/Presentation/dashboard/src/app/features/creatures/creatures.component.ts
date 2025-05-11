@@ -84,10 +84,7 @@ export class CreaturesComponent implements OnInit {
         this.creatureForm.value.experienceReward;
       this.selectedCreature.baseAttributes = updatedAttributes;
 
-      this.creatureService.updateCreature(this.createNewCreature()).subscribe({
-        next: (res) => console.log('Creature updated successfully:', res),
-        error: (err) => console.error('Error updating creature:', err),
-      });
+      this.creatureService.updateCreature(this.createNewCreature()).subscribe();
     }
   }
 

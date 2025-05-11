@@ -978,16 +978,30 @@
     "ItemType": 0,
     "Rarity": 0,
     "EquipmentType": 6,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "dc72f857-88cb-43c7-b985-3d9f7dcbd3da",
+        "AttributeType": 5,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
   },
   {
-    "Id": "crude_hatchet",
-    "Name": "Crude Hatchet",
-    "Description": "A basic hatchet crafted from stone and willow log.",
+    "Id": "crude_warhammer",
+    "Name": "Crude Warhammer",
+    "Description": "A basic warhammer crafted from stone and willow log.",
     "ItemType": 0,
     "Rarity": 0,
     "EquipmentType": 6,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "43d587f4-f27a-43fd-8756-5269816bad36",
+        "AttributeType": 1,
+        "Amount": 4,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "jagged_obsidian_blade",
@@ -996,7 +1010,14 @@
     "ItemType": 0,
     "Rarity": 0,
     "EquipmentType": 6,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "f677e92d-505c-48cc-bc18-789cb15b846c",
+        "AttributeType": 4,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "primitive_club",
@@ -1005,7 +1026,14 @@
     "ItemType": 0,
     "Rarity": 0,
     "EquipmentType": 6,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "458b8f68-c206-4e6d-a0c6-cb6bf1815369",
+        "AttributeType": 2,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "obsidian_shard_wand",
@@ -1014,16 +1042,30 @@
     "ItemType": 0,
     "Rarity": 0,
     "EquipmentType": 6,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "dd9dd43a-216c-4806-a146-83d465eb36d4",
+        "AttributeType": 8,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
   },
   {
-    "Id": "stone_spear",
-    "Name": "Stone Spear",
-    "Description": "A primitive spear made from stone and sticky sap.",
+    "Id": "willow_bow",
+    "Name": "Willow Bow",
+    "Description": "A primitive bow made from willow.",
     "ItemType": 0,
     "Rarity": 0,
     "EquipmentType": 6,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "3e837953-1e2c-4cee-8372-225e41cc58b4",
+        "AttributeType": 6,
+        "Amount": 4,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "willow_branch_staff",
@@ -1032,7 +1074,14 @@
     "ItemType": 0,
     "Rarity": 0,
     "EquipmentType": 6,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "e9214059-5c3c-4603-9a2e-536086f89ab4",
+        "AttributeType": 7,
+        "Amount": 4,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "flint_edged_axe",
@@ -1041,7 +1090,14 @@
     "ItemType": 0,
     "Rarity": 0,
     "EquipmentType": 6,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "0b342b11-7b6b-40b9-99ed-93128990672b",
+        "AttributeType": 3,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "tiny_geode_orb",
@@ -1059,7 +1115,20 @@
     "ItemType": 0,
     "Rarity": 1,
     "EquipmentType": 7,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "eb715d6d-2fe2-4a0f-9303-da2d65354210",
+        "AttributeType": 2,
+        "Amount": 1,
+        "ModifierType": 0
+      },
+      {
+        "Id": "c2d25f61-5303-4542-a4de-969cb714cf9d",
+        "AttributeType": 32,
+        "Amount": 50,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "crystalline_powder_focus",
@@ -1068,7 +1137,14 @@
     "ItemType": 0,
     "Rarity": 0,
     "EquipmentType": 7,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "257cef07-71f7-4b65-b3c5-0241cd7b6c6f",
+        "AttributeType": 7,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "primitive_totem",
@@ -1077,7 +1153,20 @@
     "ItemType": 0,
     "Rarity": 0,
     "EquipmentType": 7,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "b383feb9-be69-495e-911e-1ca20b97a99d",
+        "AttributeType": 11,
+        "Amount": 3,
+        "ModifierType": 0
+      },
+      {
+        "Id": "831f0d1e-3910-4c60-9a07-38950894fed6",
+        "AttributeType": 15,
+        "Amount": 15,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "stone_helm",
@@ -1086,7 +1175,14 @@
     "ItemType": 0,
     "Rarity": 0,
     "EquipmentType": 0,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "982e8056-ff94-446a-be9d-77d9aa68016b",
+        "AttributeType": 1,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "willow_leaf_hood",
@@ -1095,7 +1191,14 @@
     "ItemType": 0,
     "Rarity": 1,
     "EquipmentType": 0,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "c1ad7bdc-0ac3-4023-9dce-cc433e1a0e4a",
+        "AttributeType": 2,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "rugged_obsidian_mask",
@@ -1104,7 +1207,14 @@
     "ItemType": 0,
     "Rarity": 1,
     "EquipmentType": 0,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "06f80f45-afc8-4555-8ef9-3b3ba12f4a08",
+        "AttributeType": 4,
+        "Amount": 3,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "wooden_chestpiece",
@@ -1113,7 +1223,14 @@
     "ItemType": 0,
     "Rarity": 0,
     "EquipmentType": 2,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "b414d449-dbb8-4bb5-9027-5ccc0e646557",
+        "AttributeType": 14,
+        "Amount": 1,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "obsidian_scale_chestplate",
@@ -1122,7 +1239,14 @@
     "ItemType": 0,
     "Rarity": 1,
     "EquipmentType": 2,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "4aa036bf-7f14-452a-abfe-db2521a256a2",
+        "AttributeType": 12,
+        "Amount": 50,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "willow_bark_leggings",
@@ -1131,7 +1255,14 @@
     "ItemType": 0,
     "Rarity": 0,
     "EquipmentType": 4,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "ff1d65ce-2fe1-4d87-aa36-77216218bf72",
+        "AttributeType": 2,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "geode_studded_boots",
@@ -1140,7 +1271,20 @@
     "ItemType": 0,
     "Rarity": 1,
     "EquipmentType": 4,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "1ba4f85a-84ae-4284-b798-c995681117d3",
+        "AttributeType": 21,
+        "Amount": 9,
+        "ModifierType": 0
+      },
+      {
+        "Id": "5998047f-abe8-485b-8efd-fd238d0f5ba3",
+        "AttributeType": 3,
+        "Amount": 1,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "stone_greaves",
@@ -1149,7 +1293,14 @@
     "ItemType": 0,
     "Rarity": 0,
     "EquipmentType": 4,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "2dabd1a8-23a3-469d-ade4-0bf81e93275e",
+        "AttributeType": 0,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "leaf_cloak",
@@ -1158,7 +1309,14 @@
     "ItemType": 0,
     "Rarity": 1,
     "EquipmentType": 2,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "3d1452d5-2bab-4537-97ec-306384f9bd66",
+        "AttributeType": 6,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "spirit_mantle",
@@ -1167,7 +1325,20 @@
     "ItemType": 0,
     "Rarity": 2,
     "EquipmentType": 2,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "8554d799-60d4-40bb-87ec-dde68801ce2f",
+        "AttributeType": 2,
+        "Amount": 1,
+        "ModifierType": 0
+      },
+      {
+        "Id": "18ed4f59-ac0d-49c4-b649-3af8bf1ad0fd",
+        "AttributeType": 22,
+        "Amount": 10,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "silken_shoes",
@@ -1176,7 +1347,14 @@
     "ItemType": 0,
     "Rarity": 1,
     "EquipmentType": 4,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "3d51397b-4db8-4797-8f7f-489090adf724",
+        "AttributeType": 5,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "obsidian_carapace_helmet",
@@ -1185,7 +1363,14 @@
     "ItemType": 0,
     "Rarity": 1,
     "EquipmentType": 0,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "c7fc4787-cbf6-4360-b240-93f392f68be2",
+        "AttributeType": 0,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "stone_amulet",
@@ -1194,7 +1379,14 @@
     "ItemType": 0,
     "Rarity": 0,
     "EquipmentType": 3,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "efe162a6-99c3-43cb-8a52-a38fcae06606",
+        "AttributeType": 1,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "obsidian_ring",
@@ -1203,7 +1395,14 @@
     "ItemType": 0,
     "Rarity": 1,
     "EquipmentType": 5,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "f82b8a3c-80dd-4e15-87bd-7438fb326d80",
+        "AttributeType": 0,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "willow_band",
@@ -1212,7 +1411,14 @@
     "ItemType": 0,
     "Rarity": 1,
     "EquipmentType": 5,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "872c66a0-1ff1-47a2-a7ba-0754bf48a12d",
+        "AttributeType": 4,
+        "Amount": 3,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "tiny_geode_pendant",
@@ -1221,7 +1427,14 @@
     "ItemType": 0,
     "Rarity": 1,
     "EquipmentType": 3,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "669e6b3a-080d-4dc9-86d3-a103ec7a1d9e",
+        "AttributeType": 14,
+        "Amount": 1,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "crystalline_charm",
@@ -1230,7 +1443,14 @@
     "ItemType": 0,
     "Rarity": 1,
     "EquipmentType": 1,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "74af4e85-4919-46fb-a79e-2dfd41264271",
+        "AttributeType": 10,
+        "Amount": 3,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "spirit_spruce_pendant",
@@ -1239,7 +1459,14 @@
     "ItemType": 0,
     "Rarity": 1,
     "EquipmentType": 3,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "dd70e117-2ea0-43b2-9e95-beaabcae3c79",
+        "AttributeType": 17,
+        "Amount": 1,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "leaf_trinket",
@@ -1248,7 +1475,14 @@
     "ItemType": 0,
     "Rarity": 1,
     "EquipmentType": 1,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "e4d9a439-6984-4a6b-9a0f-9c42cefdc6db",
+        "AttributeType": 9,
+        "Amount": 3,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "silken_locket",
@@ -1257,7 +1491,14 @@
     "ItemType": 0,
     "Rarity": 1,
     "EquipmentType": 3,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "e56d7967-fb5e-48e4-aa23-b42da0eb268b",
+        "AttributeType": 6,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "spirit_orb_ring",
@@ -1266,7 +1507,14 @@
     "ItemType": 0,
     "Rarity": 2,
     "EquipmentType": 5,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "bf5428e8-4abe-491e-806f-73566c6a758a",
+        "AttributeType": 7,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "echoing_charm",
@@ -1275,7 +1523,14 @@
     "ItemType": 0,
     "Rarity": 2,
     "EquipmentType": 1,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "e0efd5df-0e60-463f-8a65-8f90b56153ed",
+        "AttributeType": 8,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "obsidian_mirror_amulet",
@@ -1284,7 +1539,14 @@
     "ItemType": 0,
     "Rarity": 2,
     "EquipmentType": 3,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "4358303a-6dd8-4a09-9530-a26169fff021",
+        "AttributeType": 1,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
   },
   {
     "Id": "shimmering_leaf_sigil",
@@ -1293,6 +1555,13 @@
     "ItemType": 0,
     "Rarity": 2,
     "EquipmentType": 1,
-    "AttributeModifiers": []
+    "AttributeModifiers": [
+      {
+        "Id": "f9d5309c-cc7c-4435-8da3-d0ebc8b9c731",
+        "AttributeType": 15,
+        "Amount": 25,
+        "ModifierType": 0
+      }
+    ]
   }
 ]

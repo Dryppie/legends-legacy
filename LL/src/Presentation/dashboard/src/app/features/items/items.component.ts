@@ -1,4 +1,4 @@
-import { NgFor, NgIf } from '@angular/common';
+import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import {
   FormArray,
@@ -14,11 +14,12 @@ import { ItemType } from '../../shared/models/enums/itemType';
 import { Rarity } from '../../shared/models/enums/rarity';
 import { EquipmentType } from '../../shared/models/Dtos/equipmentSlot';
 import { ItemService } from '../../core/services/api/items/item.service';
+import { AttributeType } from '../../shared/models/enums/attributeType';
 
 @Component({
   selector: 'app-items',
   standalone: true,
-  imports: [FormsModule, NgIf, ReactiveFormsModule, SplitCamelCasePipe, NgFor],
+  imports: [FormsModule, ReactiveFormsModule, SplitCamelCasePipe, CommonModule],
   templateUrl: './items.component.html',
   styleUrl: './items.component.css',
 })
@@ -28,6 +29,7 @@ export class ItemsComponent implements OnInit {
   itemForm!: FormGroup;
 
   rarities = Object.values(Rarity);
+  attributes = Object.values(AttributeType);
   itemTypes = Object.values(ItemType);
   equipmentTypes = Object.values(EquipmentType);
   // essences = Object.values(Essence);
@@ -110,17 +112,15 @@ export class ItemsComponent implements OnInit {
       // patch equipmentType
       this.itemForm.get('equipmentType')!.setValue(eq.equipmentType);
       // clear and repopulate attribute modifiers
-      while (this.attributeModifiers.length) {
-        this.attributeModifiers.removeAt(0);
-      }
-      eq.attributeModifiers.forEach((m) =>
+      this.attributeModifiers.clear();
+      eq.attributeModifiers.forEach((m) => {
         this.attributeModifiers.push(
           this.fb.group({
             attributeType: [m.attributeType, Validators.required],
             amount: [m.amount, Validators.required],
           }),
-        ),
-      );
+        );
+      });
     } else if (item.itemType === 'Essence') {
       const es = item as EssenceItem;
       this.itemForm.get('essence')!.setValue(es.essence);

@@ -16,6 +16,11 @@
         <div
           class="border-t border-light_gray p-2 hover:cursor-pointer hover:bg-zinc-300/10"
           (click)="selectRecipe(recipe)"
+          [ngClass]="{
+            'bg-primary/30 text-white': selectedRecipe === recipe,
+            'bg-transparent text-inherit hover:bg-zinc-300/10':
+              selectedRecipe !== recipe,
+          }"
         >
           {{ recipe.name }}
           <span class="text-gray-400 ml-2 text-xs"

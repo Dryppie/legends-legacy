@@ -5,11 +5,6 @@ using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.LootTables;
 using Domain.Models.Masteries;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Persistence.LL.Seeds;
 public static class SeedItems

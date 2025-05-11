@@ -12,12 +12,12 @@ import { ItemBase } from '../../shared/models/item';
 import { ItemService } from '../../core/services/api/items/item.service';
 import { RecipesService } from '../../core/services/api/recipes/recipes.service';
 import { ItemType } from '../../shared/models/enums/itemType';
-import { NgFor, NgIf } from '@angular/common';
+import { CommonModule, NgFor, NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-recipes',
   standalone: true,
-  imports: [NgFor, NgIf, FormsModule, ReactiveFormsModule],
+  imports: [NgFor, NgIf, FormsModule, ReactiveFormsModule, CommonModule],
   templateUrl: './recipes.component.html',
   styleUrl: './recipes.component.css',
 })

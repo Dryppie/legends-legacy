@@ -16,16 +16,28 @@
         <div
           class="border-t border-light_gray p-2 hover:cursor-pointer hover:bg-zinc-300/10"
           (click)="selectItem(item)"
+          [ngClass]="{
+            'bg-primary/30 text-white': selectedItem === item,
+            'bg-transparent text-inherit hover:bg-zinc-300/10':
+              selectedItem !== item,
+          }"
         >
           {{ item.name }}
-          <span class="text-gray-400 ml-2 text-xs">({{ item.itemType }})</span>
+          <span
+            *ngIf="item.itemType !== 'Equipment'"
+            class="text-gray-400 ml-2 text-xs"
+            >({{ item.itemType }})</span
+          >
+          <span *ngIf="item.itemType === 'Equipment'">{{
+            item.equipmentType
+          }}</span>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Item Form -->
-  <div class="ml-6 h-full w-[32rem]" *ngIf="itemForm">
+  <div class="ml-6 h-full w-[44rem]" *ngIf="itemForm">
     <form [formGroup]="itemForm" class="rounded-lg p-6" (ngSubmit)="saveItem()">
       <h2 class="mb-2 text-2xl font-semibold">
         {{ isCreating ? "Create Item" : "Edit: " + itemForm.value.name }}
@@ -106,20 +118,21 @@
         <div class="mt-4">
           <div
             formArrayName="attributeModifiers"
-            *ngFor="
-              let mod of attributeModifiers.controls;
-              let i = index;
-              trackBy: trackByIndex
-            "
+            *ngFor="let mod of attributeModifiers.controls; let i = index"
             class="mb-2 grid grid-cols-3 gap-2"
           >
             <div [formGroupName]="i" class="contents">
-              <input
-                type="text"
+              <select
                 class="rounded border border-light_gray bg-zinc-300/10 p-2"
-                placeholder="Attribute"
                 formControlName="attributeType"
-              />
+              >
+                <option
+                  *ngFor="let a of attributes"
+                  [ngValue]="a"
+                  [innerText]="a | splitCamelCase"
+                  class="bg-black text-primary"
+                ></option>
+              </select>
               <input
                 type="number"
                 class="rounded border border-light_gray bg-zinc-300/10 p-2"

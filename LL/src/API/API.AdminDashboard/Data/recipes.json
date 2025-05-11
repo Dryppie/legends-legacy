@@ -18,11 +18,11 @@
   },
   {
     "Id": "64500be9-a1e8-4088-a092-7bf25c933695",
-    "Name": "Crude Hatchet",
+    "Name": "Crude Warhammer",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "crude_hatchet",
-      "Name": "Crude Hatchet",
+      "Id": "crude_warhammer",
+      "Name": "Crude Warhammer",
       "Description": "A basic hatchet crafted from stone and willow log.",
       "ItemType": 0,
       "Rarity": 0
@@ -86,12 +86,12 @@
   },
   {
     "Id": "18e639c7-1cbf-4d68-b595-37011246374c",
-    "Name": "Stone Spear",
+    "Name": "Willow Bow",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "stone_spear",
-      "Name": "Stone Spear",
-      "Description": "A primitive spear made from stone and sticky sap.",
+      "Id": "willow_bow",
+      "Name": "Willow Bow",
+      "Description": "A primitive bow made from willow.",
       "ItemType": 0,
       "Rarity": 0
     },
