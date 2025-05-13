@@ -13,6 +13,7 @@ import { ItemService } from '../../core/services/api/items/item.service';
 import { RecipesService } from '../../core/services/api/recipes/recipes.service';
 import { ItemType } from '../../shared/models/enums/itemType';
 import { CommonModule, NgFor, NgIf } from '@angular/common';
+import { EquipmentType } from '../../shared/models/Dtos/equipmentSlot';
 
 @Component({
   selector: 'app-recipes',
@@ -116,7 +117,7 @@ export class RecipesComponent implements OnInit {
       name: '',
       item: this.craftableItems[0],
       quantity: 1,
-      craftType: null,
+      craftType: this.craftTypeBasedOnEquipmentType(this.craftableItems[0]),
       levelRequirement: 1,
       itemType: this.craftableItems[0].itemType,
     });
@@ -152,6 +153,20 @@ export class RecipesComponent implements OnInit {
     );
   }
 
+  craftTypeBasedOnEquipmentType(item: ItemBase) {
+    if (item.itemType !== ItemType.Equipment) return;
+    const eqType = item.equipmentType;
+    if (
+      eqType === EquipmentType.Chest ||
+      eqType === EquipmentType.Head ||
+      eqType === EquipmentType.Legs
+    )
+      return CraftType.ArmorForging;
+    if (eqType === EquipmentType.OffHand || eqType === EquipmentType.MainHand)
+      return CraftType.WeaponSmithing;
+    return CraftType.JewelryCrafting;
+  }
+
   saveRecipe(): void {
     if (this.recipeForm.invalid) {
       this.recipeForm.markAllAsTouched();
@@ -173,6 +188,7 @@ export class RecipesComponent implements OnInit {
         this.craftableItems = this.craftableItems.filter(
           (c) => c.id != created.item.id,
         );
+        this.newRecipe();
       });
     } else {
       this.recipeService.updateRecipe(raw).subscribe((updated) => {

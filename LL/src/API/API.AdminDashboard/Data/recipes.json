@@ -1,614 +1,2204 @@
 [
   {
     "Id": "35ab5f73-3295-4e0f-a1af-6b453319157e",
-    "Name": "Stone Dagger",
+    "Name": "Jagged Obsidian Helm",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "stone_dagger",
-      "Name": "Stone Dagger",
-      "Description": "A crude dagger crafted from stone and flint.",
-      "ItemType": 0,
-      "Rarity": 0
-    },
-    "Quantity": 1,
-    "CraftType": 2,
-    "LevelRequirement": 1,
-    "Materials": [],
-    "ItemType": 0
-  },
-  {
-    "Id": "64500be9-a1e8-4088-a092-7bf25c933695",
-    "Name": "Crude Warhammer",
-    "ItemId": "00000000-0000-0000-0000-000000000000",
-    "Item": {
-      "Id": "crude_warhammer",
-      "Name": "Crude Warhammer",
-      "Description": "A basic hatchet crafted from stone and willow log.",
-      "ItemType": 0,
-      "Rarity": 0
-    },
-    "Quantity": 1,
-    "CraftType": 2,
-    "LevelRequirement": 1,
-    "Materials": [],
-    "ItemType": 0
-  },
-  {
-    "Id": "b9ac663e-4947-414d-a093-fdb780f456ec",
-    "Name": "Jagged Obsidian Blade",
-    "ItemId": "00000000-0000-0000-0000-000000000000",
-    "Item": {
-      "Id": "jagged_obsidian_blade",
-      "Name": "Jagged Obsidian Blade",
-      "Description": "A sharp blade crafted from jagged obsidian.",
-      "ItemType": 0,
-      "Rarity": 0
-    },
-    "Quantity": 1,
-    "CraftType": 2,
-    "LevelRequirement": 1,
-    "Materials": [],
-    "ItemType": 0
-  },
-  {
-    "Id": "643019d3-dc02-4ffd-be6b-3ff0ed50cbd4",
-    "Name": "Primitive Club",
-    "ItemId": "00000000-0000-0000-0000-000000000000",
-    "Item": {
-      "Id": "primitive_club",
-      "Name": "Primitive Club",
-      "Description": "A heavy club made from willow log.",
-      "ItemType": 0,
-      "Rarity": 0
-    },
-    "Quantity": 1,
-    "CraftType": 2,
-    "LevelRequirement": 1,
-    "Materials": [],
-    "ItemType": 0
-  },
-  {
-    "Id": "f67581a3-21b4-48ab-9050-0f91bb28f04b",
-    "Name": "Obsidian Shard Wand",
-    "ItemId": "00000000-0000-0000-0000-000000000000",
-    "Item": {
-      "Id": "obsidian_shard_wand",
-      "Name": "Obsidian Shard Wand",
-      "Description": "A wand crafted from obsidian shard.",
-      "ItemType": 0,
-      "Rarity": 0
-    },
-    "Quantity": 1,
-    "CraftType": 2,
-    "LevelRequirement": 1,
-    "Materials": [],
-    "ItemType": 0
-  },
-  {
-    "Id": "18e639c7-1cbf-4d68-b595-37011246374c",
-    "Name": "Willow Bow",
-    "ItemId": "00000000-0000-0000-0000-000000000000",
-    "Item": {
-      "Id": "willow_bow",
-      "Name": "Willow Bow",
-      "Description": "A primitive bow made from willow.",
-      "ItemType": 0,
-      "Rarity": 0
-    },
-    "Quantity": 1,
-    "CraftType": 2,
-    "LevelRequirement": 1,
-    "Materials": [],
-    "ItemType": 0
-  },
-  {
-    "Id": "762d0e5c-4944-4981-82d5-0ade6c112107",
-    "Name": "Willow Branch Staff",
-    "ItemId": "00000000-0000-0000-0000-000000000000",
-    "Item": {
-      "Id": "willow_branch_staff",
-      "Name": "Willow Branch Staff",
-      "Description": "A basic staff crafted from a willow branch.",
-      "ItemType": 0,
-      "Rarity": 0
-    },
-    "Quantity": 1,
-    "CraftType": 2,
-    "LevelRequirement": 1,
-    "Materials": [],
-    "ItemType": 0
-  },
-  {
-    "Id": "b962b3a3-f6d3-43fd-8cc6-e432cd72a939",
-    "Name": "Flint-Edged Axe",
-    "ItemId": "00000000-0000-0000-0000-000000000000",
-    "Item": {
-      "Id": "flint_edged_axe",
-      "Name": "Flint-Edged Axe",
-      "Description": "An axe with a sharp flint edge.",
-      "ItemType": 0,
-      "Rarity": 0
-    },
-    "Quantity": 1,
-    "CraftType": 2,
-    "LevelRequirement": 1,
-    "Materials": [],
-    "ItemType": 0
-  },
-  {
-    "Id": "92cdf93b-4475-454c-a118-32ca6759a634",
-    "Name": "Tiny Geode Orb",
-    "ItemId": "00000000-0000-0000-0000-000000000000",
-    "Item": {
-      "Id": "tiny_geode_orb",
-      "Name": "Tiny Geode Orb",
-      "Description": "A mystical orb made from tiny geode.",
-      "ItemType": 0,
-      "Rarity": 0
-    },
-    "Quantity": 1,
-    "CraftType": 2,
-    "LevelRequirement": 1,
-    "Materials": [],
-    "ItemType": 0
-  },
-  {
-    "Id": "ee023d21-2aab-4f82-ad64-eb99957c8f79",
-    "Name": "Obsidian Mirror Shield",
-    "ItemId": "00000000-0000-0000-0000-000000000000",
-    "Item": {
-      "Id": "obsidian_mirror_shield",
-      "Name": "Obsidian Mirror Shield",
-      "Description": "A reflective shield crafted from obsidian shard.",
-      "ItemType": 0,
-      "Rarity": 1
-    },
-    "Quantity": 1,
-    "CraftType": 2,
-    "LevelRequirement": 1,
-    "Materials": [],
-    "ItemType": 0
-  },
-  {
-    "Id": "6d2da577-89e3-4c73-8cb2-626aa2075cd7",
-    "Name": "Crystalline Powder Focus",
-    "ItemId": "00000000-0000-0000-0000-000000000000",
-    "Item": {
-      "Id": "crystalline_powder_focus",
-      "Name": "Crystalline Powder Focus",
-      "Description": "A focus infused with crystalline powder.",
-      "ItemType": 0,
-      "Rarity": 0
-    },
-    "Quantity": 1,
-    "CraftType": 2,
-    "LevelRequirement": 1,
-    "Materials": [],
-    "ItemType": 0
-  },
-  {
-    "Id": "3e91aed3-8b78-4715-bf2b-11aa04e79b4f",
-    "Name": "Primitive Totem",
-    "ItemId": "00000000-0000-0000-0000-000000000000",
-    "Item": {
-      "Id": "primitive_totem",
-      "Name": "Primitive Totem",
-      "Description": "A basic totem crafted from willow log and sticky sap.",
-      "ItemType": 0,
-      "Rarity": 0
-    },
-    "Quantity": 1,
-    "CraftType": 2,
-    "LevelRequirement": 1,
-    "Materials": [],
-    "ItemType": 0
-  },
-  {
-    "Id": "2dbae45f-6495-4f54-ace3-b4395b95f4c9",
-    "Name": "Stone Helm",
-    "ItemId": "00000000-0000-0000-0000-000000000000",
-    "Item": {
-      "Id": "stone_helm",
-      "Name": "Stone Helm",
-      "Description": "A crude helm made of stone.",
+      "Id": "jagged_obsidian_helm",
+      "Name": "Jagged Obsidian Helm",
+      "Description": "A heavy helmet forged from jagged obsidian and stone.",
       "ItemType": 0,
       "Rarity": 0
     },
     "Quantity": 1,
     "CraftType": 0,
     "LevelRequirement": 1,
-    "Materials": [],
+    "Materials": [
+      {
+        "Quantity": 8,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "stone",
+          "Name": "Stone",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 4,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "flint",
+          "Name": "Flint",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 3,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "jagged_obsidian",
+          "Name": "Jagged Obsidian",
+          "Description": "Useful for Weapon Smithing",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
     "ItemType": 0
   },
   {
-    "Id": "1d9e35c6-903e-47d1-ace9-c1e5c787d436",
-    "Name": "Willow Leaf Hood",
+    "Id": "e7d8803e-d641-4b0a-beb1-93cff9dc378e",
+    "Name": "Jagged Obsidian Cuirass",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "willow_leaf_hood",
-      "Name": "Willow Leaf Hood",
-      "Description": "A hood crafted from willow leaves and silk vine.",
-      "ItemType": 0,
-      "Rarity": 1
-    },
-    "Quantity": 1,
-    "CraftType": 0,
-    "LevelRequirement": 1,
-    "Materials": [],
-    "ItemType": 0
-  },
-  {
-    "Id": "f3e2a679-120c-456f-8a71-865e8755fa07",
-    "Name": "Rugged Obsidian Mask",
-    "ItemId": "00000000-0000-0000-0000-000000000000",
-    "Item": {
-      "Id": "rugged_obsidian_mask",
-      "Name": "Rugged Obsidian Mask",
-      "Description": "A mask crafted from jagged obsidian.",
-      "ItemType": 0,
-      "Rarity": 1
-    },
-    "Quantity": 1,
-    "CraftType": 0,
-    "LevelRequirement": 1,
-    "Materials": [],
-    "ItemType": 0
-  },
-  {
-    "Id": "2c36c692-3636-4549-bc25-afda92862d10",
-    "Name": "Wooden Chestpiece",
-    "ItemId": "00000000-0000-0000-0000-000000000000",
-    "Item": {
-      "Id": "wooden_chestpiece",
-      "Name": "Wooden Chestpiece",
-      "Description": "A basic chestpiece crafted from willow log.",
-      "ItemType": 0,
-      "Rarity": 0
-    },
-    "Quantity": 1,
-    "CraftType": 0,
-    "LevelRequirement": 1,
-    "Materials": [],
-    "ItemType": 0
-  },
-  {
-    "Id": "a40181b6-4ec9-4658-b888-f62a61d6c8f0",
-    "Name": "Obsidian Scale Chestplate",
-    "ItemId": "00000000-0000-0000-0000-000000000000",
-    "Item": {
-      "Id": "obsidian_scale_chestplate",
-      "Name": "Obsidian Scale Chestplate",
-      "Description": "A chestplate reinforced with obsidian scales.",
-      "ItemType": 0,
-      "Rarity": 1
-    },
-    "Quantity": 1,
-    "CraftType": 0,
-    "LevelRequirement": 1,
-    "Materials": [],
-    "ItemType": 0
-  },
-  {
-    "Id": "532dbf36-dac6-483b-890f-757dccfac641",
-    "Name": "Willow Bark Leggings",
-    "ItemId": "00000000-0000-0000-0000-000000000000",
-    "Item": {
-      "Id": "willow_bark_leggings",
-      "Name": "Willow Bark Leggings",
-      "Description": "Leggings made from willow bark and sticky sap.",
+      "Id": "jagged_obsidian_cuirass",
+      "Name": "Jagged Obsidian Cuirass",
+      "Description": "A sturdy cuirass crafted from jagged obsidian.",
       "ItemType": 0,
       "Rarity": 0
     },
     "Quantity": 1,
     "CraftType": 0,
     "LevelRequirement": 1,
-    "Materials": [],
+    "Materials": [
+      {
+        "Quantity": 14,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "stone",
+          "Name": "Stone",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 7,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "flint",
+          "Name": "Flint",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 5,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "jagged_obsidian",
+          "Name": "Jagged Obsidian",
+          "Description": "Useful for Weapon Smithing",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
     "ItemType": 0
   },
   {
-    "Id": "8c21b5fd-4080-45f2-8058-86e1400391ca",
-    "Name": "Geode-Studded Boots",
+    "Id": "fa80e383-3731-4bf2-b319-f6e466372abf",
+    "Name": "Jagged Obsidian Greaves",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "geode_studded_boots",
-      "Name": "Geode-Studded Boots",
-      "Description": "Boots reinforced with tiny geode shards.",
+      "Id": "jagged_obsidian_greaves",
+      "Name": "Jagged Obsidian Greaves",
+      "Description": "Reinforced greaves made of jagged obsidian and stone.",
       "ItemType": 0,
-      "Rarity": 1
+      "Rarity": 0
     },
     "Quantity": 1,
     "CraftType": 0,
     "LevelRequirement": 1,
-    "Materials": [],
+    "Materials": [
+      {
+        "Quantity": 10,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "stone",
+          "Name": "Stone",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 5,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "flint",
+          "Name": "Flint",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 3,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "jagged_obsidian",
+          "Name": "Jagged Obsidian",
+          "Description": "Useful for Weapon Smithing",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
     "ItemType": 0
   },
   {
-    "Id": "35382b62-36fc-4c6c-812c-ca358a35f930",
-    "Name": "Stone Greaves",
+    "Id": "a7ee20d7-1085-4a36-b7e9-7578d719bfa3",
+    "Name": "Willow Hood",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "stone_greaves",
-      "Name": "Stone Greaves",
-      "Description": "Solid greaves made of stone.",
+      "Id": "willow_hood",
+      "Name": "Willow Hood",
+      "Description": "A lightweight hood made from willow.",
       "ItemType": 0,
       "Rarity": 0
     },
     "Quantity": 1,
     "CraftType": 0,
     "LevelRequirement": 1,
-    "Materials": [],
+    "Materials": [
+      {
+        "Quantity": 6,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "willow_log",
+          "Name": "Willow Log",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "feather_lined_nest",
+          "Name": "Feather-lined Nest",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "flint",
+          "Name": "Flint",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
     "ItemType": 0
   },
   {
-    "Id": "3d7f5a41-1107-411b-9fc3-e32bae1cfeda",
-    "Name": "Leaf Cloak",
+    "Id": "d52ccebf-0c2e-4203-8938-69cbaab9392d",
+    "Name": "Willow Brigandine",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "leaf_cloak",
-      "Name": "Leaf Cloak",
-      "Description": "A cloak made from shimmering leaves.",
+      "Id": "willow_brigandine",
+      "Name": "Willow Brigandine",
+      "Description": "A balanced brigandine crafted from willow.",
       "ItemType": 0,
-      "Rarity": 1
+      "Rarity": 0
     },
     "Quantity": 1,
     "CraftType": 0,
     "LevelRequirement": 1,
-    "Materials": [],
+    "Materials": [
+      {
+        "Quantity": 12,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "willow_log",
+          "Name": "Willow Log",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 4,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "feather_lined_nest",
+          "Name": "Feather-lined Nest",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 3,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "flint",
+          "Name": "Flint",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
     "ItemType": 0
   },
   {
-    "Id": "bf8811b2-1308-4724-9faf-bebda6815632",
-    "Name": "Spirit Mantle",
+    "Id": "bd388959-eee7-4e3f-a496-9e647221fec9",
+    "Name": "Willow Tassets",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "spirit_mantle",
-      "Name": "Spirit Mantle",
-      "Description": "A mystical mantle woven from spirit bark.",
+      "Id": "willow_tassets",
+      "Name": "Willow Tassets",
+      "Description": "Light armor piece.",
       "ItemType": 0,
-      "Rarity": 2
+      "Rarity": 0
     },
     "Quantity": 1,
     "CraftType": 0,
     "LevelRequirement": 1,
-    "Materials": [],
+    "Materials": [
+      {
+        "Quantity": 8,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "willow_log",
+          "Name": "Willow Log",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 3,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "feather_lined_nest",
+          "Name": "Feather-lined Nest",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "flint",
+          "Name": "Flint",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
     "ItemType": 0
   },
   {
-    "Id": "14316d2c-8297-46ee-8719-a1ceba710956",
-    "Name": "Silken Shoes",
+    "Id": "3ee3611d-35b0-4821-ab3e-8c61b20b76ec",
+    "Name": "Silk Capuche",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "silken_shoes",
-      "Name": "Silken Shoes",
-      "Description": "Light wraps crafted from fine silk vine.",
+      "Id": "silk_capuche",
+      "Name": "Silk Capuche",
+      "Description": "A light silk hood.",
       "ItemType": 0,
-      "Rarity": 1
+      "Rarity": 0
     },
     "Quantity": 1,
     "CraftType": 0,
     "LevelRequirement": 1,
-    "Materials": [],
+    "Materials": [
+      {
+        "Quantity": 5,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "silk_vine",
+          "Name": "Silk Vine",
+          "Description": "Armor Forger",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "shimmering_leaf",
+          "Name": "Shimmering Leaf",
+          "Description": "Jewel Crafter",
+          "ItemType": 2,
+          "Rarity": 2
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "tiny_geode",
+          "Name": "Tiny Geode",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
     "ItemType": 0
   },
   {
-    "Id": "e2d82834-4424-4fda-b5dc-5af527335243",
-    "Name": "Obsidian Carapace Helmet",
+    "Id": "94216f95-ad2a-49bd-9f85-8f606b6f0b9a",
+    "Name": "Silk Vest",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "obsidian_carapace_helmet",
-      "Name": "Obsidian Carapace Helmet",
-      "Description": "Heavy helmet crafted from obsidian shard.",
+      "Id": "silk_vest",
+      "Name": "Silk Vest",
+      "Description": "An evasive vest made of silk.",
       "ItemType": 0,
-      "Rarity": 1
+      "Rarity": 0
     },
     "Quantity": 1,
     "CraftType": 0,
     "LevelRequirement": 1,
-    "Materials": [],
+    "Materials": [
+      {
+        "Quantity": 10,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "silk_vine",
+          "Name": "Silk Vine",
+          "Description": "Armor Forger",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 4,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "shimmering_leaf",
+          "Name": "Shimmering Leaf",
+          "Description": "Jewel Crafter",
+          "ItemType": 2,
+          "Rarity": 2
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "tiny_geode",
+          "Name": "Tiny Geode",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
     "ItemType": 0
   },
   {
-    "Id": "55785a3b-e319-4517-97fc-6c5d23df6fcd",
-    "Name": "Stone Amulet",
+    "Id": "db0d6109-78d2-4d4c-8f20-a1805ef36814",
+    "Name": "Silk Trousers",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "stone_amulet",
-      "Name": "Stone Amulet",
-      "Description": "An amulet crafted from stone.",
+      "Id": "silk_trousers",
+      "Name": "Silk Trousers",
+      "Description": "Lightweight trousers.",
+      "ItemType": 0,
+      "Rarity": 0
+    },
+    "Quantity": 1,
+    "CraftType": 0,
+    "LevelRequirement": 1,
+    "Materials": [
+      {
+        "Quantity": 7,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "silk_vine",
+          "Name": "Silk Vine",
+          "Description": "Armor Forger",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 3,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "shimmering_leaf",
+          "Name": "Shimmering Leaf",
+          "Description": "Jewel Crafter",
+          "ItemType": 2,
+          "Rarity": 2
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "tiny_geode",
+          "Name": "Tiny Geode",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
+    "ItemType": 0
+  },
+  {
+    "Id": "29c2e282-40cf-4262-bd6c-4e6c71d06c0a",
+    "Name": "Powder Hood",
+    "ItemId": "00000000-0000-0000-0000-000000000000",
+    "Item": {
+      "Id": "powder_hood",
+      "Name": "Powder Hood",
+      "Description": "A hood crafted from crystalline powder.",
+      "ItemType": 0,
+      "Rarity": 0
+    },
+    "Quantity": 1,
+    "CraftType": 0,
+    "LevelRequirement": 1,
+    "Materials": [
+      {
+        "Quantity": 4,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "crystalline_powder",
+          "Name": "Crystalline Powder",
+          "Description": "Jewelry Crafting",
+          "ItemType": 2,
+          "Rarity": 2
+        }
+      },
+      {
+        "Quantity": 3,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "silk_vine",
+          "Name": "Silk Vine",
+          "Description": "Armor Forger",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "shimmering_leaf",
+          "Name": "Shimmering Leaf",
+          "Description": "Jewel Crafter",
+          "ItemType": 2,
+          "Rarity": 2
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
+    "ItemType": 0
+  },
+  {
+    "Id": "36d77ec2-9b4a-4998-8660-89b01aaa8363",
+    "Name": "Powder Robe",
+    "ItemId": "00000000-0000-0000-0000-000000000000",
+    "Item": {
+      "Id": "powder_robe",
+      "Name": "Powder Robe",
+      "Description": "A robe woven with crystalline powder.",
+      "ItemType": 0,
+      "Rarity": 0
+    },
+    "Quantity": 1,
+    "CraftType": 0,
+    "LevelRequirement": 1,
+    "Materials": [
+      {
+        "Quantity": 9,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "crystalline_powder",
+          "Name": "Crystalline Powder",
+          "Description": "Jewelry Crafting",
+          "ItemType": 2,
+          "Rarity": 2
+        }
+      },
+      {
+        "Quantity": 6,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "silk_vine",
+          "Name": "Silk Vine",
+          "Description": "Armor Forger",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "shimmering_leaf",
+          "Name": "Shimmering Leaf",
+          "Description": "Jewel Crafter",
+          "ItemType": 2,
+          "Rarity": 2
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
+    "ItemType": 0
+  },
+  {
+    "Id": "8ae0644e-7cd4-40c0-9873-39be926f2a44",
+    "Name": "Powder Pants",
+    "ItemId": "00000000-0000-0000-0000-000000000000",
+    "Item": {
+      "Id": "powder_pants",
+      "Name": "Powder Pants",
+      "Description": "Crystalline trousers.",
+      "ItemType": 0,
+      "Rarity": 0
+    },
+    "Quantity": 1,
+    "CraftType": 0,
+    "LevelRequirement": 1,
+    "Materials": [
+      {
+        "Quantity": 6,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "crystalline_powder",
+          "Name": "Crystalline Powder",
+          "Description": "Jewelry Crafting",
+          "ItemType": 2,
+          "Rarity": 2
+        }
+      },
+      {
+        "Quantity": 4,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "silk_vine",
+          "Name": "Silk Vine",
+          "Description": "Armor Forger",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "shimmering_leaf",
+          "Name": "Shimmering Leaf",
+          "Description": "Jewel Crafter",
+          "ItemType": 2,
+          "Rarity": 2
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
+    "ItemType": 0
+  },
+  {
+    "Id": "93c7853d-d73c-475e-abbb-64aef79dea1d",
+    "Name": "Geode-Heart Amulet",
+    "ItemId": "00000000-0000-0000-0000-000000000000",
+    "Item": {
+      "Id": "geode_heart_amulet",
+      "Name": "Geode-Heart Amulet",
+      "Description": "An amulet infused with earth\u0027s essence, offering earth resistance and critical damage.",
       "ItemType": 0,
       "Rarity": 0
     },
     "Quantity": 1,
     "CraftType": 1,
     "LevelRequirement": 1,
-    "Materials": [],
+    "Materials": [
+      {
+        "Quantity": 3,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "tiny_geode",
+          "Name": "Tiny Geode",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "silk_vine",
+          "Name": "Silk Vine",
+          "Description": "Armor Forger",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
     "ItemType": 0
   },
   {
-    "Id": "169f3086-2e44-4823-ab3c-f598f6b137a5",
-    "Name": "Obsidian Ring",
+    "Id": "6fcf468e-3e81-44fe-af44-94bea6ed2509",
+    "Name": "Leafglow Amulet",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "obsidian_ring",
-      "Name": "Obsidian Ring",
-      "Description": "A ring forged from jagged obsidian.",
+      "Id": "leafglow_amulet",
+      "Name": "Leafglow Amulet",
+      "Description": "A glowing amulet that grants mana regeneration and a soft green light.",
       "ItemType": 0,
-      "Rarity": 1
+      "Rarity": 0
     },
     "Quantity": 1,
     "CraftType": 1,
     "LevelRequirement": 1,
-    "Materials": [],
+    "Materials": [
+      {
+        "Quantity": 4,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "shimmering_leaf",
+          "Name": "Shimmering Leaf",
+          "Description": "Jewel Crafter",
+          "ItemType": 2,
+          "Rarity": 2
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "willow_log",
+          "Name": "Willow Log",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
     "ItemType": 0
   },
   {
-    "Id": "70bb1c26-fe9b-462f-b36d-48c24cabaa2e",
-    "Name": "Willow Band",
+    "Id": "f3e6cb7a-cc56-4f02-bfd7-a7bfc1e04f77",
+    "Name": "Obsidian Shard Amulet",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "willow_band",
-      "Name": "Willow Band",
-      "Description": "A ring crafted from willow.",
+      "Id": "obsidian_shard_amulet",
+      "Name": "Obsidian Shard Amulet",
+      "Description": "A reflective amulet offering physical resistance and slight damage reflection.",
       "ItemType": 0,
-      "Rarity": 1
+      "Rarity": 0
     },
     "Quantity": 1,
     "CraftType": 1,
     "LevelRequirement": 1,
-    "Materials": [],
+    "Materials": [
+      {
+        "Quantity": 3,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "jagged_obsidian",
+          "Name": "Jagged Obsidian",
+          "Description": "Useful for Weapon Smithing",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "flint",
+          "Name": "Flint",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "feather_lined_nest",
+          "Name": "Feather-lined Nest",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      }
+    ],
     "ItemType": 0
   },
   {
-    "Id": "a6107381-21be-4dfd-8938-bdd3eff26815",
-    "Name": "Tiny Geode Pendant",
+    "Id": "0ba06ecc-ecbc-4ff7-8a26-e85eef576b8e",
+    "Name": "Flint-Spark Ring",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "tiny_geode_pendant",
-      "Name": "Tiny Geode Pendant",
-      "Description": "A pendant made from a tiny geode.",
+      "Id": "flint_spark_ring",
+      "Name": "Flint-Spark Ring",
+      "Description": "A ring that enhances critical strikes and adds fire damage to attacks.",
       "ItemType": 0,
-      "Rarity": 1
+      "Rarity": 0
     },
     "Quantity": 1,
     "CraftType": 1,
     "LevelRequirement": 1,
-    "Materials": [],
+    "Materials": [
+      {
+        "Quantity": 5,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "flint",
+          "Name": "Flint",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "crystalline_powder",
+          "Name": "Crystalline Powder",
+          "Description": "Jewelry Crafting",
+          "ItemType": 2,
+          "Rarity": 2
+        }
+      }
+    ],
     "ItemType": 0
   },
   {
-    "Id": "781e3adf-0555-4ea8-b22c-94f6de1c0d31",
-    "Name": "Crystalline Charm",
+    "Id": "071450ab-1c64-4f7e-8b70-e9a7596cc14a",
+    "Name": "Nestling Band",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "crystalline_charm",
-      "Name": "Crystalline Charm",
-      "Description": "A mystical charm infused with crystalline powder.",
+      "Id": "nestling_band",
+      "Name": "Nestling Band",
+      "Description": "A ring that enhances ranged accuracy and reduces fall damage.",
       "ItemType": 0,
-      "Rarity": 1
+      "Rarity": 0
     },
     "Quantity": 1,
     "CraftType": 1,
     "LevelRequirement": 1,
-    "Materials": [],
+    "Materials": [
+      {
+        "Quantity": 3,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "feather_lined_nest",
+          "Name": "Feather-lined Nest",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "silk_vine",
+          "Name": "Silk Vine",
+          "Description": "Armor Forger",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      }
+    ],
     "ItemType": 0
   },
   {
-    "Id": "32aa1df1-c906-4051-8f7f-73fb92abeb64",
-    "Name": "Spirit Spruce Pendant",
+    "Id": "eaede364-9783-4807-b7ef-cdf3f8e8696c",
+    "Name": "Stoneguard Ring",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "spirit_spruce_pendant",
-      "Name": "Spirit Spruce Pendant",
-      "Description": "A pendant crafted from Spirit Spruce Log.",
+      "Id": "stoneguard_ring",
+      "Name": "Stoneguard Ring",
+      "Description": "A protective ring granting max HP and health regeneration out of combat.",
       "ItemType": 0,
-      "Rarity": 1
+      "Rarity": 0
     },
     "Quantity": 1,
     "CraftType": 1,
     "LevelRequirement": 1,
-    "Materials": [],
+    "Materials": [
+      {
+        "Quantity": 6,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "stone",
+          "Name": "Stone",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "jagged_obsidian",
+          "Name": "Jagged Obsidian",
+          "Description": "Useful for Weapon Smithing",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      }
+    ],
     "ItemType": 0
   },
   {
-    "Id": "e120fb2e-4496-45c2-bb87-3c50b640c203",
-    "Name": "Leaf Trinket",
+    "Id": "4c34d8b2-70ec-449f-89f9-04da9ce387b7",
+    "Name": "Powdered Lens",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "leaf_trinket",
-      "Name": "Leaf Trinket",
-      "Description": "A trinket made from a shimmering leaf.",
+      "Id": "powdered_lens",
+      "Name": "Powdered Lens",
+      "Description": "A lens that reveals hidden secrets for a short duration.",
       "ItemType": 0,
-      "Rarity": 1
+      "Rarity": 0
     },
     "Quantity": 1,
     "CraftType": 1,
     "LevelRequirement": 1,
-    "Materials": [],
+    "Materials": [
+      {
+        "Quantity": 4,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "crystalline_powder",
+          "Name": "Crystalline Powder",
+          "Description": "Jewelry Crafting",
+          "ItemType": 2,
+          "Rarity": 2
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "tiny_geode",
+          "Name": "Tiny Geode",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "willow_log",
+          "Name": "Willow Log",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
     "ItemType": 0
   },
   {
-    "Id": "8885186a-93e6-413e-9cad-50731897a9cd",
-    "Name": "Silken Locket",
+    "Id": "1827f908-703e-45ce-bc31-b16f0a6a05e1",
+    "Name": "Sapling Totem",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "silken_locket",
-      "Name": "Silken Locket",
-      "Description": "A delicate locket woven from silk vine.",
+      "Id": "sapling_totem",
+      "Name": "Sapling Totem",
+      "Description": "A totem that grants health regeneration while stationary.",
       "ItemType": 0,
-      "Rarity": 1
+      "Rarity": 0
     },
     "Quantity": 1,
     "CraftType": 1,
     "LevelRequirement": 1,
-    "Materials": [],
+    "Materials": [
+      {
+        "Quantity": 3,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "willow_log",
+          "Name": "Willow Log",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 3,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "shimmering_leaf",
+          "Name": "Shimmering Leaf",
+          "Description": "Jewel Crafter",
+          "ItemType": 2,
+          "Rarity": 2
+        }
+      }
+    ],
     "ItemType": 0
   },
   {
-    "Id": "18f7695f-dfdc-4446-8cd6-97c1bc6a2d84",
-    "Name": "Spirit Orb Ring",
+    "Id": "f9f1a19a-805e-4380-b963-9b877ef122e4",
+    "Name": "Jagged Obsidian Idol",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "spirit_orb_ring",
-      "Name": "Spirit Orb Ring",
-      "Description": "A mystical ring infused with a spirit orb.",
+      "Id": "jagged_obsidian_idol",
+      "Name": "Jagged Obsidian Idol",
+      "Description": "An idol that boosts damage and provides a chance for armor on kill.",
       "ItemType": 0,
-      "Rarity": 2
+      "Rarity": 0
     },
     "Quantity": 1,
     "CraftType": 1,
     "LevelRequirement": 1,
-    "Materials": [],
+    "Materials": [
+      {
+        "Quantity": 4,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "jagged_obsidian",
+          "Name": "Jagged Obsidian",
+          "Description": "Useful for Weapon Smithing",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "stone",
+          "Name": "Stone",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "feather_lined_nest",
+          "Name": "Feather-lined Nest",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      }
+    ],
     "ItemType": 0
   },
   {
-    "Id": "adc42fd2-9417-4fff-b8d3-55d995faa302",
-    "Name": "Echoing Charm",
+    "Id": "0e86afb6-ccdb-488a-999b-1b5f5d960462",
+    "Name": "Stone-Edge Shortsword",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "echoing_charm",
-      "Name": "Echoing Charm",
-      "Description": "A charm that resonates with the Echoing Core.",
+      "Id": "stone_edge_shortsword",
+      "Name": "Stone-Edge Shortsword",
+      "Description": "A sharp shortsword forged from stone and jagged obsidian.",
       "ItemType": 0,
-      "Rarity": 2
+      "Rarity": 0
     },
     "Quantity": 1,
-    "CraftType": 1,
+    "CraftType": 2,
     "LevelRequirement": 1,
-    "Materials": [],
+    "Materials": [
+      {
+        "Quantity": 6,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "stone",
+          "Name": "Stone",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 3,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "flint",
+          "Name": "Flint",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "jagged_obsidian",
+          "Name": "Jagged Obsidian",
+          "Description": "Useful for Weapon Smithing",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
     "ItemType": 0
   },
   {
-    "Id": "725a0025-2243-43c3-946b-6645c2b3aed0",
-    "Name": "Obsidian Mirror Amulet",
+    "Id": "e1a02d8d-2b93-4e79-82ae-d53e265db518",
+    "Name": "Jagged Obsidian Hatchet",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "obsidian_mirror_amulet",
-      "Name": "Obsidian Mirror Amulet",
-      "Description": "An amulet with a reflective obsidian shard.",
+      "Id": "jagged_obsidian_hatchet",
+      "Name": "Jagged Obsidian Hatchet",
+      "Description": "A durable hatchet crafted from jagged obsidian and stone.",
       "ItemType": 0,
-      "Rarity": 2
+      "Rarity": 0
     },
     "Quantity": 1,
-    "CraftType": 1,
+    "CraftType": 2,
     "LevelRequirement": 1,
-    "Materials": [],
+    "Materials": [
+      {
+        "Quantity": 5,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "stone",
+          "Name": "Stone",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 4,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "jagged_obsidian",
+          "Name": "Jagged Obsidian",
+          "Description": "Useful for Weapon Smithing",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "willow_log",
+          "Name": "Willow Log",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "feather_lined_nest",
+          "Name": "Feather-lined Nest",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      }
+    ],
     "ItemType": 0
   },
   {
-    "Id": "6d5569c5-35e0-4381-9760-cdcbba3dce3a",
-    "Name": "Shimmering Leaf Sigil",
+    "Id": "49c0b296-f981-4ba9-950e-bbb87380a669",
+    "Name": "Flint Morning Star",
     "ItemId": "00000000-0000-0000-0000-000000000000",
     "Item": {
-      "Id": "shimmering_leaf_sigil",
-      "Name": "Shimmering Leaf Sigil",
-      "Description": "A radiant sigil made from a shimmering leaf.",
+      "Id": "flint_morning_star",
+      "Name": "Flint Morning Star",
+      "Description": "A spiked mace made of flint and stone, dealing crushing damage.",
       "ItemType": 0,
-      "Rarity": 2
+      "Rarity": 0
     },
     "Quantity": 1,
-    "CraftType": 1,
+    "CraftType": 2,
     "LevelRequirement": 1,
-    "Materials": [],
+    "Materials": [
+      {
+        "Quantity": 7,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "flint",
+          "Name": "Flint",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 3,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "stone",
+          "Name": "Stone",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "tiny_geode",
+          "Name": "Tiny Geode",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
+    "ItemType": 0
+  },
+  {
+    "Id": "d7c9f417-6f0f-4158-bd53-26bd9a76e035",
+    "Name": "Silkshadow Stiletto",
+    "ItemId": "00000000-0000-0000-0000-000000000000",
+    "Item": {
+      "Id": "silkshadow_stiletto",
+      "Name": "Silkshadow Stiletto",
+      "Description": "A swift dagger made of silk vine and sharp flint.",
+      "ItemType": 0,
+      "Rarity": 0
+    },
+    "Quantity": 1,
+    "CraftType": 2,
+    "LevelRequirement": 1,
+    "Materials": [
+      {
+        "Quantity": 4,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "silk_vine",
+          "Name": "Silk Vine",
+          "Description": "Armor Forger",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 3,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "flint",
+          "Name": "Flint",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "tiny_geode",
+          "Name": "Tiny Geode",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "shimmering_leaf",
+          "Name": "Shimmering Leaf",
+          "Description": "Jewel Crafter",
+          "ItemType": 2,
+          "Rarity": 2
+        }
+      }
+    ],
+    "ItemType": 0
+  },
+  {
+    "Id": "4d5df6ee-b9dc-4bf4-89c2-3fc56125fbcb",
+    "Name": "Willow Cleaver",
+    "ItemId": "00000000-0000-0000-0000-000000000000",
+    "Item": {
+      "Id": "willow_cleaver",
+      "Name": "Willow Cleaver",
+      "Description": "A large cleaver made from sturdy willow wood and jagged obsidian.",
+      "ItemType": 0,
+      "Rarity": 0
+    },
+    "Quantity": 1,
+    "CraftType": 2,
+    "LevelRequirement": 1,
+    "Materials": [
+      {
+        "Quantity": 10,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "willow_log",
+          "Name": "Willow Log",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 6,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "flint",
+          "Name": "Flint",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 4,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "jagged_obsidian",
+          "Name": "Jagged Obsidian",
+          "Description": "Useful for Weapon Smithing",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
+    "ItemType": 0
+  },
+  {
+    "Id": "271bf75d-353d-4bc9-946d-884c04e86fa8",
+    "Name": "Stone-Reaver Greataxe",
+    "ItemId": "00000000-0000-0000-0000-000000000000",
+    "Item": {
+      "Id": "stone_reaver_greataxe",
+      "Name": "Stone-Reaver Greataxe",
+      "Description": "A heavy greataxe crafted from solid stone and jagged obsidian.",
+      "ItemType": 0,
+      "Rarity": 0
+    },
+    "Quantity": 1,
+    "CraftType": 2,
+    "LevelRequirement": 1,
+    "Materials": [
+      {
+        "Quantity": 12,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "stone",
+          "Name": "Stone",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 5,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "jagged_obsidian",
+          "Name": "Jagged Obsidian",
+          "Description": "Useful for Weapon Smithing",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 3,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "flint",
+          "Name": "Flint",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "feather_lined_nest",
+          "Name": "Feather-lined Nest",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      }
+    ],
+    "ItemType": 0
+  },
+  {
+    "Id": "19e32feb-4d6b-4b21-a594-d037dd45e9d2",
+    "Name": "Powder-Core Maul",
+    "ItemId": "00000000-0000-0000-0000-000000000000",
+    "Item": {
+      "Id": "powder_core_maul",
+      "Name": "Powder-Core Maul",
+      "Description": "A massive maul with a crystalline powder core, delivering crushing blows.",
+      "ItemType": 0,
+      "Rarity": 0
+    },
+    "Quantity": 1,
+    "CraftType": 2,
+    "LevelRequirement": 1,
+    "Materials": [
+      {
+        "Quantity": 9,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "stone",
+          "Name": "Stone",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 5,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "crystalline_powder",
+          "Name": "Crystalline Powder",
+          "Description": "Jewelry Crafting",
+          "ItemType": 2,
+          "Rarity": 2
+        }
+      },
+      {
+        "Quantity": 4,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "flint",
+          "Name": "Flint",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
+    "ItemType": 0
+  },
+  {
+    "Id": "87a9a432-3582-4516-84f4-329a9930123b",
+    "Name": "Nest-Tip Pike",
+    "ItemId": "00000000-0000-0000-0000-000000000000",
+    "Item": {
+      "Id": "nest_tip_pike",
+      "Name": "Nest-Tip Pike",
+      "Description": "A long pike tipped with feathers and flint for precision thrusts.",
+      "ItemType": 0,
+      "Rarity": 0
+    },
+    "Quantity": 1,
+    "CraftType": 2,
+    "LevelRequirement": 1,
+    "Materials": [
+      {
+        "Quantity": 8,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "willow_log",
+          "Name": "Willow Log",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 4,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "feather_lined_nest",
+          "Name": "Feather-lined Nest",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 3,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "flint",
+          "Name": "Flint",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "tiny_geode",
+          "Name": "Tiny Geode",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      }
+    ],
+    "ItemType": 0
+  },
+  {
+    "Id": "8d31de43-d1bf-4f12-b6e0-7f606573b117",
+    "Name": "Stonebark Heater",
+    "ItemId": "00000000-0000-0000-0000-000000000000",
+    "Item": {
+      "Id": "stonebark_heater",
+      "Name": "Stonebark Heater",
+      "Description": "A sturdy shield combining stone and willow for reliable protection.",
+      "ItemType": 0,
+      "Rarity": 0
+    },
+    "Quantity": 1,
+    "CraftType": 2,
+    "LevelRequirement": 1,
+    "Materials": [
+      {
+        "Quantity": 6,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "stone",
+          "Name": "Stone",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 4,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "flint",
+          "Name": "Flint",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "jagged_obsidian",
+          "Name": "Jagged Obsidian",
+          "Description": "Useful for Weapon Smithing",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      }
+    ],
+    "ItemType": 0
+  },
+  {
+    "Id": "2ea004e5-e9a7-4f23-92df-2c9a65f10f31",
+    "Name": "Silk Protector",
+    "ItemId": "00000000-0000-0000-0000-000000000000",
+    "Item": {
+      "Id": "silk_protector",
+      "Name": "Silk Protector",
+      "Description": "A shield woven with silk, allowing for magical protection.",
+      "ItemType": 0,
+      "Rarity": 0
+    },
+    "Quantity": 1,
+    "CraftType": 2,
+    "LevelRequirement": 1,
+    "Materials": [
+      {
+        "Quantity": 8,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "silk_vine",
+          "Name": "Silk Vine",
+          "Description": "Armor Forger",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "tiny_geode",
+          "Name": "Tiny Geode",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "shimmering_leaf",
+          "Name": "Shimmering Leaf",
+          "Description": "Jewel Crafter",
+          "ItemType": 2,
+          "Rarity": 2
+        }
+      }
+    ],
+    "ItemType": 0
+  },
+  {
+    "Id": "4354fddd-1af6-40a1-b8b2-2ca3436d39a9",
+    "Name": "Shimmering Willow Staff",
+    "ItemId": "00000000-0000-0000-0000-000000000000",
+    "Item": {
+      "Id": "shimmering_willow_staff",
+      "Name": "Shimmering Willow Staff",
+      "Description": "A magical staff made of willow wood and shimmering leaves.",
+      "ItemType": 0,
+      "Rarity": 0
+    },
+    "Quantity": 1,
+    "CraftType": 2,
+    "LevelRequirement": 1,
+    "Materials": [
+      {
+        "Quantity": 7,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "willow_log",
+          "Name": "Willow Log",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 3,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "shimmering_leaf",
+          "Name": "Shimmering Leaf",
+          "Description": "Jewel Crafter",
+          "ItemType": 2,
+          "Rarity": 2
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "crystalline_powder",
+          "Name": "Crystalline Powder",
+          "Description": "Jewelry Crafting",
+          "ItemType": 2,
+          "Rarity": 2
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
+    "ItemType": 0
+  },
+  {
+    "Id": "2c3ad41f-b2bf-4a93-aa9c-07a4781c77fc",
+    "Name": "Geode-Bound Grimoire",
+    "ItemId": "00000000-0000-0000-0000-000000000000",
+    "Item": {
+      "Id": "geode_bound_grimoire",
+      "Name": "Geode-Bound Grimoire",
+      "Description": "A magical tome embedded with geodes.",
+      "ItemType": 0,
+      "Rarity": 0
+    },
+    "Quantity": 1,
+    "CraftType": 2,
+    "LevelRequirement": 1,
+    "Materials": [
+      {
+        "Quantity": 5,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "tiny_geode",
+          "Name": "Tiny Geode",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 4,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "silk_vine",
+          "Name": "Silk Vine",
+          "Description": "Armor Forger",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "shimmering_leaf",
+          "Name": "Shimmering Leaf",
+          "Description": "Jewel Crafter",
+          "ItemType": 2,
+          "Rarity": 2
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
+    "ItemType": 0
+  },
+  {
+    "Id": "ea5b8f8e-ddef-4766-987f-12ce7c56f6a6",
+    "Name": "Jagged Obsidian Wand",
+    "ItemId": "00000000-0000-0000-0000-000000000000",
+    "Item": {
+      "Id": "jagged_obsidian_wand",
+      "Name": "Jagged Obsidian Wand",
+      "Description": "A magical wand forged from jagged obsidian.",
+      "ItemType": 0,
+      "Rarity": 0
+    },
+    "Quantity": 1,
+    "CraftType": 2,
+    "LevelRequirement": 1,
+    "Materials": [
+      {
+        "Quantity": 4,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "jagged_obsidian",
+          "Name": "Jagged Obsidian",
+          "Description": "Useful for Weapon Smithing",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 3,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "crystalline_powder",
+          "Name": "Crystalline Powder",
+          "Description": "Jewelry Crafting",
+          "ItemType": 2,
+          "Rarity": 2
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "willow_log",
+          "Name": "Willow Log",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
+    "ItemType": 0
+  },
+  {
+    "Id": "9b6425ca-20c2-456c-b0f8-2880f9cdb228",
+    "Name": "Powdered Crystal Orb",
+    "ItemId": "00000000-0000-0000-0000-000000000000",
+    "Item": {
+      "Id": "powdered_crystal_orb",
+      "Name": "Powdered Crystal Orb",
+      "Description": "An orb made from crystalline powder.",
+      "ItemType": 0,
+      "Rarity": 0
+    },
+    "Quantity": 1,
+    "CraftType": 2,
+    "LevelRequirement": 1,
+    "Materials": [
+      {
+        "Quantity": 6,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "crystalline_powder",
+          "Name": "Crystalline Powder",
+          "Description": "Jewelry Crafting",
+          "ItemType": 2,
+          "Rarity": 2
+        }
+      },
+      {
+        "Quantity": 3,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "tiny_geode",
+          "Name": "Tiny Geode",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "silk_vine",
+          "Name": "Silk Vine",
+          "Description": "Armor Forger",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      }
+    ],
+    "ItemType": 0
+  },
+  {
+    "Id": "a75ecbf3-0bd7-42eb-8378-0723391ca7ee",
+    "Name": "Silk-Strung Longbow",
+    "ItemId": "00000000-0000-0000-0000-000000000000",
+    "Item": {
+      "Id": "silk_strung_longbow",
+      "Name": "Silk-Strung Longbow",
+      "Description": "A longbow strung with resilient silk.",
+      "ItemType": 0,
+      "Rarity": 0
+    },
+    "Quantity": 1,
+    "CraftType": 2,
+    "LevelRequirement": 1,
+    "Materials": [
+      {
+        "Quantity": 9,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "willow_log",
+          "Name": "Willow Log",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 4,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "silk_vine",
+          "Name": "Silk Vine",
+          "Description": "Armor Forger",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "feather_lined_nest",
+          "Name": "Feather-lined Nest",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
+    "ItemType": 0
+  },
+  {
+    "Id": "f1bd183c-1d71-4441-a9a7-55b6eabe632c",
+    "Name": "Flintlock Crossbow",
+    "ItemId": "00000000-0000-0000-0000-000000000000",
+    "Item": {
+      "Id": "flintlock_crossbow",
+      "Name": "Flintlock Crossbow",
+      "Description": "A crossbow crafted using both willow and flint.",
+      "ItemType": 0,
+      "Rarity": 0
+    },
+    "Quantity": 1,
+    "CraftType": 2,
+    "LevelRequirement": 1,
+    "Materials": [
+      {
+        "Quantity": 10,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "stone",
+          "Name": "Stone",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 5,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "flint",
+          "Name": "Flint",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 3,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "willow_log",
+          "Name": "Willow Log",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
+    "ItemType": 0
+  },
+  {
+    "Id": "0375e5f4-aec9-4a08-940c-98105e66e0b7",
+    "Name": "Jagged Obsidian Knuckles",
+    "ItemId": "00000000-0000-0000-0000-000000000000",
+    "Item": {
+      "Id": "jagged_obsidian_knuckles",
+      "Name": "Jagged Obsidian Knuckles",
+      "Description": "A pair of hard knuckles made from jagged obsidian.",
+      "ItemType": 0,
+      "Rarity": 0
+    },
+    "Quantity": 1,
+    "CraftType": 2,
+    "LevelRequirement": 1,
+    "Materials": [
+      {
+        "Quantity": 6,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "jagged_obsidian",
+          "Name": "Jagged Obsidian",
+          "Description": "Useful for Weapon Smithing",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 4,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "flint",
+          "Name": "Flint",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      },
+      {
+        "Quantity": 2,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "silk_vine",
+          "Name": "Silk Vine",
+          "Description": "Armor Forger",
+          "ItemType": 2,
+          "Rarity": 1
+        }
+      },
+      {
+        "Quantity": 1,
+        "ItemId": "00000000-0000-0000-0000-000000000000",
+        "Item": {
+          "Id": "sticky_sap",
+          "Name": "Sticky Sap",
+          "Description": "",
+          "ItemType": 2,
+          "Rarity": 0
+        }
+      }
+    ],
     "ItemType": 0
   }
 ]

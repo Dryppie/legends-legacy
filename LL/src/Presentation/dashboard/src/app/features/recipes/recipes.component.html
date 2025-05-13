@@ -2,7 +2,7 @@
   <!-- Recipe List ---------------------------------------------------- -->
   <div class="flex h-full flex-col overflow-hidden">
     <div class="flex items-center justify-between pr-4">
-      <h2 class="p-2 text-primary">Recipes</h2>
+      <h2 class="p-2 text-primary">Recipes - {{ recipes.length }}</h2>
       <button
         class="rounded bg-emerald-600 px-3 py-1 text-sm font-semibold hover:bg-emerald-700"
         (click)="newRecipe()"
@@ -119,11 +119,7 @@
 
         <div
           formArrayName="materials"
-          *ngFor="
-            let mat of materials.controls;
-            let i = index;
-            trackBy: trackByIndex
-          "
+          *ngFor="let mat of materials.controls; let i = index"
           class="mb-2 grid grid-cols-4 gap-2"
         >
           <div [formGroupName]="i" class="contents">

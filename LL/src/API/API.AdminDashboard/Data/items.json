@@ -972,47 +972,107 @@
     "AttributeModifiers": []
   },
   {
-    "Id": "stone_dagger",
-    "Name": "Stone Dagger",
-    "Description": "A crude dagger crafted from stone and flint.",
+    "Id": "jagged_obsidian_helm",
+    "Name": "Jagged Obsidian Helm",
+    "Description": "A heavy helmet forged from jagged obsidian and stone.",
     "ItemType": 0,
     "Rarity": 0,
-    "EquipmentType": 6,
+    "EquipmentType": 0,
     "AttributeModifiers": [
       {
-        "Id": "dc72f857-88cb-43c7-b985-3d9f7dcbd3da",
-        "AttributeType": 5,
+        "Id": "3459045f-bb38-48a9-81b1-07552ff5894c",
+        "AttributeType": 2,
+        "Amount": 1,
+        "ModifierType": 0
+      },
+      {
+        "Id": "c742b5de-e223-4112-89e5-e47562edadcd",
+        "AttributeType": 28,
+        "Amount": 1,
+        "ModifierType": 0
+      }
+    ]
+  },
+  {
+    "Id": "jagged_obsidian_cuirass",
+    "Name": "Jagged Obsidian Cuirass",
+    "Description": "A sturdy cuirass crafted from jagged obsidian.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 2,
+    "AttributeModifiers": [
+      {
+        "Id": "0696fc44-d48e-4a54-9f81-a3866f780c1f",
+        "AttributeType": 0,
         "Amount": 2,
         "ModifierType": 0
       }
     ]
   },
   {
-    "Id": "crude_warhammer",
-    "Name": "Crude Warhammer",
-    "Description": "A basic warhammer crafted from stone and willow log.",
+    "Id": "jagged_obsidian_greaves",
+    "Name": "Jagged Obsidian Greaves",
+    "Description": "Reinforced greaves made of jagged obsidian and stone.",
     "ItemType": 0,
     "Rarity": 0,
-    "EquipmentType": 6,
+    "EquipmentType": 4,
     "AttributeModifiers": [
       {
-        "Id": "43d587f4-f27a-43fd-8756-5269816bad36",
+        "Id": "e9595040-9c93-43cd-99c1-f3cf66d839b5",
         "AttributeType": 1,
-        "Amount": 4,
+        "Amount": 2,
         "ModifierType": 0
       }
     ]
   },
   {
-    "Id": "jagged_obsidian_blade",
-    "Name": "Jagged Obsidian Blade",
-    "Description": "A sharp blade crafted from jagged obsidian.",
+    "Id": "willow_hood",
+    "Name": "Willow Hood",
+    "Description": "A lightweight hood made from willow.",
     "ItemType": 0,
     "Rarity": 0,
-    "EquipmentType": 6,
+    "EquipmentType": 0,
     "AttributeModifiers": [
       {
-        "Id": "f677e92d-505c-48cc-bc18-789cb15b846c",
+        "Id": "81a161cb-4f50-40a3-bf65-0e073bedaca6",
+        "AttributeType": 9,
+        "Amount": 3,
+        "ModifierType": 0
+      },
+      {
+        "Id": "106d937e-da42-47fe-9d6f-0525d25daf5a",
+        "AttributeType": 13,
+        "Amount": 5,
+        "ModifierType": 0
+      }
+    ]
+  },
+  {
+    "Id": "willow_brigandine",
+    "Name": "Willow Brigandine",
+    "Description": "A balanced brigandine crafted from willow.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 2,
+    "AttributeModifiers": [
+      {
+        "Id": "dcbf23e2-8d10-47f4-b7d0-d27130a957f6",
+        "AttributeType": 3,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
+  },
+  {
+    "Id": "willow_tassets",
+    "Name": "Willow Tassets",
+    "Description": "Light armor piece.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 4,
+    "AttributeModifiers": [
+      {
+        "Id": "85b2ebf3-8684-45b2-b342-80b899bc2a4f",
         "AttributeType": 4,
         "Amount": 2,
         "ModifierType": 0
@@ -1020,31 +1080,107 @@
     ]
   },
   {
-    "Id": "primitive_club",
-    "Name": "Primitive Club",
-    "Description": "A heavy club made from willow log.",
+    "Id": "silk_capuche",
+    "Name": "Silk Capuche",
+    "Description": "A light silk hood.",
     "ItemType": 0,
     "Rarity": 0,
-    "EquipmentType": 6,
+    "EquipmentType": 0,
     "AttributeModifiers": [
       {
-        "Id": "458b8f68-c206-4e6d-a0c6-cb6bf1815369",
-        "AttributeType": 2,
+        "Id": "0be456f7-f48e-4130-96c0-24808182c794",
+        "AttributeType": 11,
+        "Amount": 3,
+        "ModifierType": 0
+      },
+      {
+        "Id": "3636411b-8de1-4f9d-a92b-77046d6b0d3d",
+        "AttributeType": 25,
+        "Amount": 1,
+        "ModifierType": 0
+      }
+    ]
+  },
+  {
+    "Id": "silk_vest",
+    "Name": "Silk Vest",
+    "Description": "An evasive vest made of silk.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 2,
+    "AttributeModifiers": [
+      {
+        "Id": "436e642f-f43d-42a2-ace5-bcd47388b26e",
+        "AttributeType": 5,
         "Amount": 2,
         "ModifierType": 0
       }
     ]
   },
   {
-    "Id": "obsidian_shard_wand",
-    "Name": "Obsidian Shard Wand",
-    "Description": "A wand crafted from obsidian shard.",
+    "Id": "silk_trousers",
+    "Name": "Silk Trousers",
+    "Description": "Lightweight trousers.",
     "ItemType": 0,
     "Rarity": 0,
-    "EquipmentType": 6,
+    "EquipmentType": 4,
     "AttributeModifiers": [
       {
-        "Id": "dd9dd43a-216c-4806-a146-83d465eb36d4",
+        "Id": "13c287d8-5ed0-4db7-9884-ef1fa3b727db",
+        "AttributeType": 6,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
+  },
+  {
+    "Id": "powder_hood",
+    "Name": "Powder Hood",
+    "Description": "A hood crafted from crystalline powder.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 0,
+    "AttributeModifiers": [
+      {
+        "Id": "2583d815-9289-499a-b5e0-2a22607ab8f1",
+        "AttributeType": 10,
+        "Amount": 3,
+        "ModifierType": 0
+      },
+      {
+        "Id": "7cfc60ba-e706-4233-bb0c-196a092ccb4b",
+        "AttributeType": 16,
+        "Amount": 5,
+        "ModifierType": 0
+      }
+    ]
+  },
+  {
+    "Id": "powder_robe",
+    "Name": "Powder Robe",
+    "Description": "A robe woven with crystalline powder.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 2,
+    "AttributeModifiers": [
+      {
+        "Id": "4ede2581-6333-429a-afc9-ee7d454c9e9e",
+        "AttributeType": 7,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
+  },
+  {
+    "Id": "powder_pants",
+    "Name": "Powder Pants",
+    "Description": "Crystalline trousers.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 4,
+    "AttributeModifiers": [
+      {
+        "Id": "4a790e93-4d23-4248-9227-6473140cdf4f",
         "AttributeType": 8,
         "Amount": 2,
         "ModifierType": 0
@@ -1052,266 +1188,31 @@
     ]
   },
   {
-    "Id": "willow_bow",
-    "Name": "Willow Bow",
-    "Description": "A primitive bow made from willow.",
+    "Id": "geode_heart_amulet",
+    "Name": "Geode-Heart Amulet",
+    "Description": "An amulet infused with earth\u0027s essence, offering earth resistance and critical damage.",
     "ItemType": 0,
     "Rarity": 0,
-    "EquipmentType": 6,
+    "EquipmentType": 3,
     "AttributeModifiers": [
       {
-        "Id": "3e837953-1e2c-4cee-8372-225e41cc58b4",
-        "AttributeType": 6,
-        "Amount": 4,
-        "ModifierType": 0
-      }
-    ]
-  },
-  {
-    "Id": "willow_branch_staff",
-    "Name": "Willow Branch Staff",
-    "Description": "A basic staff crafted from a willow branch.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 6,
-    "AttributeModifiers": [
-      {
-        "Id": "e9214059-5c3c-4603-9a2e-536086f89ab4",
-        "AttributeType": 7,
-        "Amount": 4,
-        "ModifierType": 0
-      }
-    ]
-  },
-  {
-    "Id": "flint_edged_axe",
-    "Name": "Flint-Edged Axe",
-    "Description": "An axe with a sharp flint edge.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 6,
-    "AttributeModifiers": [
-      {
-        "Id": "0b342b11-7b6b-40b9-99ed-93128990672b",
-        "AttributeType": 3,
-        "Amount": 2,
-        "ModifierType": 0
-      }
-    ]
-  },
-  {
-    "Id": "tiny_geode_orb",
-    "Name": "Tiny Geode Orb",
-    "Description": "A mystical orb made from tiny geode.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 7,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "obsidian_mirror_shield",
-    "Name": "Obsidian Mirror Shield",
-    "Description": "A reflective shield crafted from obsidian shard.",
-    "ItemType": 0,
-    "Rarity": 1,
-    "EquipmentType": 7,
-    "AttributeModifiers": [
-      {
-        "Id": "eb715d6d-2fe2-4a0f-9303-da2d65354210",
-        "AttributeType": 2,
-        "Amount": 1,
-        "ModifierType": 0
-      },
-      {
-        "Id": "c2d25f61-5303-4542-a4de-969cb714cf9d",
-        "AttributeType": 32,
-        "Amount": 50,
-        "ModifierType": 0
-      }
-    ]
-  },
-  {
-    "Id": "crystalline_powder_focus",
-    "Name": "Crystalline Powder Focus",
-    "Description": "A focus infused with crystalline powder.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 7,
-    "AttributeModifiers": [
-      {
-        "Id": "257cef07-71f7-4b65-b3c5-0241cd7b6c6f",
-        "AttributeType": 7,
-        "Amount": 2,
-        "ModifierType": 0
-      }
-    ]
-  },
-  {
-    "Id": "primitive_totem",
-    "Name": "Primitive Totem",
-    "Description": "A basic totem crafted from willow log and sticky sap.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 7,
-    "AttributeModifiers": [
-      {
-        "Id": "b383feb9-be69-495e-911e-1ca20b97a99d",
-        "AttributeType": 11,
-        "Amount": 3,
-        "ModifierType": 0
-      },
-      {
-        "Id": "831f0d1e-3910-4c60-9a07-38950894fed6",
+        "Id": "8d69f7ff-d48a-4f4e-9f45-7a6de9c9ac60",
         "AttributeType": 15,
-        "Amount": 15,
+        "Amount": 20,
         "ModifierType": 0
       }
     ]
   },
   {
-    "Id": "stone_helm",
-    "Name": "Stone Helm",
-    "Description": "A crude helm made of stone.",
+    "Id": "leafglow_amulet",
+    "Name": "Leafglow Amulet",
+    "Description": "A glowing amulet that grants mana regeneration and a soft green light.",
     "ItemType": 0,
     "Rarity": 0,
-    "EquipmentType": 0,
+    "EquipmentType": 3,
     "AttributeModifiers": [
       {
-        "Id": "982e8056-ff94-446a-be9d-77d9aa68016b",
-        "AttributeType": 1,
-        "Amount": 2,
-        "ModifierType": 0
-      }
-    ]
-  },
-  {
-    "Id": "willow_leaf_hood",
-    "Name": "Willow Leaf Hood",
-    "Description": "A hood crafted from willow leaves and silk vine.",
-    "ItemType": 0,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": [
-      {
-        "Id": "c1ad7bdc-0ac3-4023-9dce-cc433e1a0e4a",
-        "AttributeType": 2,
-        "Amount": 2,
-        "ModifierType": 0
-      }
-    ]
-  },
-  {
-    "Id": "rugged_obsidian_mask",
-    "Name": "Rugged Obsidian Mask",
-    "Description": "A mask crafted from jagged obsidian.",
-    "ItemType": 0,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": [
-      {
-        "Id": "06f80f45-afc8-4555-8ef9-3b3ba12f4a08",
-        "AttributeType": 4,
-        "Amount": 3,
-        "ModifierType": 0
-      }
-    ]
-  },
-  {
-    "Id": "wooden_chestpiece",
-    "Name": "Wooden Chestpiece",
-    "Description": "A basic chestpiece crafted from willow log.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 2,
-    "AttributeModifiers": [
-      {
-        "Id": "b414d449-dbb8-4bb5-9027-5ccc0e646557",
-        "AttributeType": 14,
-        "Amount": 1,
-        "ModifierType": 0
-      }
-    ]
-  },
-  {
-    "Id": "obsidian_scale_chestplate",
-    "Name": "Obsidian Scale Chestplate",
-    "Description": "A chestplate reinforced with obsidian scales.",
-    "ItemType": 0,
-    "Rarity": 1,
-    "EquipmentType": 2,
-    "AttributeModifiers": [
-      {
-        "Id": "4aa036bf-7f14-452a-abfe-db2521a256a2",
-        "AttributeType": 12,
-        "Amount": 50,
-        "ModifierType": 0
-      }
-    ]
-  },
-  {
-    "Id": "willow_bark_leggings",
-    "Name": "Willow Bark Leggings",
-    "Description": "Leggings made from willow bark and sticky sap.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 4,
-    "AttributeModifiers": [
-      {
-        "Id": "ff1d65ce-2fe1-4d87-aa36-77216218bf72",
-        "AttributeType": 2,
-        "Amount": 2,
-        "ModifierType": 0
-      }
-    ]
-  },
-  {
-    "Id": "geode_studded_boots",
-    "Name": "Geode-Studded Boots",
-    "Description": "Boots reinforced with tiny geode shards.",
-    "ItemType": 0,
-    "Rarity": 1,
-    "EquipmentType": 4,
-    "AttributeModifiers": [
-      {
-        "Id": "1ba4f85a-84ae-4284-b798-c995681117d3",
-        "AttributeType": 21,
-        "Amount": 9,
-        "ModifierType": 0
-      },
-      {
-        "Id": "5998047f-abe8-485b-8efd-fd238d0f5ba3",
-        "AttributeType": 3,
-        "Amount": 1,
-        "ModifierType": 0
-      }
-    ]
-  },
-  {
-    "Id": "stone_greaves",
-    "Name": "Stone Greaves",
-    "Description": "Solid greaves made of stone.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 4,
-    "AttributeModifiers": [
-      {
-        "Id": "2dabd1a8-23a3-469d-ade4-0bf81e93275e",
-        "AttributeType": 0,
-        "Amount": 2,
-        "ModifierType": 0
-      }
-    ]
-  },
-  {
-    "Id": "leaf_cloak",
-    "Name": "Leaf Cloak",
-    "Description": "A cloak made from shimmering leaves.",
-    "ItemType": 0,
-    "Rarity": 1,
-    "EquipmentType": 2,
-    "AttributeModifiers": [
-      {
-        "Id": "3d1452d5-2bab-4537-97ec-306384f9bd66",
+        "Id": "73d627f8-3130-4376-8d0e-f36cc7556769",
         "AttributeType": 6,
         "Amount": 2,
         "ModifierType": 0
@@ -1319,133 +1220,79 @@
     ]
   },
   {
-    "Id": "spirit_mantle",
-    "Name": "Spirit Mantle",
-    "Description": "A mystical mantle woven from spirit bark.",
-    "ItemType": 0,
-    "Rarity": 2,
-    "EquipmentType": 2,
-    "AttributeModifiers": [
-      {
-        "Id": "8554d799-60d4-40bb-87ec-dde68801ce2f",
-        "AttributeType": 2,
-        "Amount": 1,
-        "ModifierType": 0
-      },
-      {
-        "Id": "18ed4f59-ac0d-49c4-b649-3af8bf1ad0fd",
-        "AttributeType": 22,
-        "Amount": 10,
-        "ModifierType": 0
-      }
-    ]
-  },
-  {
-    "Id": "silken_shoes",
-    "Name": "Silken Shoes",
-    "Description": "Light wraps crafted from fine silk vine.",
-    "ItemType": 0,
-    "Rarity": 1,
-    "EquipmentType": 4,
-    "AttributeModifiers": [
-      {
-        "Id": "3d51397b-4db8-4797-8f7f-489090adf724",
-        "AttributeType": 5,
-        "Amount": 2,
-        "ModifierType": 0
-      }
-    ]
-  },
-  {
-    "Id": "obsidian_carapace_helmet",
-    "Name": "Obsidian Carapace Helmet",
-    "Description": "Heavy helmet crafted from obsidian shard.",
-    "ItemType": 0,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": [
-      {
-        "Id": "c7fc4787-cbf6-4360-b240-93f392f68be2",
-        "AttributeType": 0,
-        "Amount": 2,
-        "ModifierType": 0
-      }
-    ]
-  },
-  {
-    "Id": "stone_amulet",
-    "Name": "Stone Amulet",
-    "Description": "An amulet crafted from stone.",
+    "Id": "obsidian_shard_amulet",
+    "Name": "Obsidian Shard Amulet",
+    "Description": "A reflective amulet offering physical resistance and slight damage reflection.",
     "ItemType": 0,
     "Rarity": 0,
     "EquipmentType": 3,
     "AttributeModifiers": [
       {
-        "Id": "efe162a6-99c3-43cb-8a52-a38fcae06606",
-        "AttributeType": 1,
+        "Id": "ef1299dc-a4b4-42b7-a38a-31dd6802e470",
+        "AttributeType": 12,
+        "Amount": 60,
+        "ModifierType": 0
+      }
+    ]
+  },
+  {
+    "Id": "flint_spark_ring",
+    "Name": "Flint-Spark Ring",
+    "Description": "A ring that enhances critical strikes and adds fire damage to attacks.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 5,
+    "AttributeModifiers": [
+      {
+        "Id": "8f13a3df-d0ff-4e4d-96b7-3498b40b06af",
+        "AttributeType": 26,
+        "Amount": 8,
+        "ModifierType": 0
+      }
+    ]
+  },
+  {
+    "Id": "nestling_band",
+    "Name": "Nestling Band",
+    "Description": "A ring that enhances ranged accuracy and reduces fall damage.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 5,
+    "AttributeModifiers": [
+      {
+        "Id": "c9093b63-bf43-41f7-824c-d5b31382d5a0",
+        "AttributeType": 8,
         "Amount": 2,
         "ModifierType": 0
       }
     ]
   },
   {
-    "Id": "obsidian_ring",
-    "Name": "Obsidian Ring",
-    "Description": "A ring forged from jagged obsidian.",
+    "Id": "stoneguard_ring",
+    "Name": "Stoneguard Ring",
+    "Description": "A protective ring granting max HP and health regeneration out of combat.",
     "ItemType": 0,
-    "Rarity": 1,
+    "Rarity": 0,
     "EquipmentType": 5,
     "AttributeModifiers": [
       {
-        "Id": "f82b8a3c-80dd-4e15-87bd-7438fb326d80",
-        "AttributeType": 0,
-        "Amount": 2,
+        "Id": "5adebb8c-b005-497b-ae98-b7f205aeb403",
+        "AttributeType": 21,
+        "Amount": 25,
         "ModifierType": 0
       }
     ]
   },
   {
-    "Id": "willow_band",
-    "Name": "Willow Band",
-    "Description": "A ring crafted from willow.",
+    "Id": "powdered_lens",
+    "Name": "Powdered Lens",
+    "Description": "A lens that reveals hidden secrets for a short duration.",
     "ItemType": 0,
-    "Rarity": 1,
-    "EquipmentType": 5,
-    "AttributeModifiers": [
-      {
-        "Id": "872c66a0-1ff1-47a2-a7ba-0754bf48a12d",
-        "AttributeType": 4,
-        "Amount": 3,
-        "ModifierType": 0
-      }
-    ]
-  },
-  {
-    "Id": "tiny_geode_pendant",
-    "Name": "Tiny Geode Pendant",
-    "Description": "A pendant made from a tiny geode.",
-    "ItemType": 0,
-    "Rarity": 1,
-    "EquipmentType": 3,
-    "AttributeModifiers": [
-      {
-        "Id": "669e6b3a-080d-4dc9-86d3-a103ec7a1d9e",
-        "AttributeType": 14,
-        "Amount": 1,
-        "ModifierType": 0
-      }
-    ]
-  },
-  {
-    "Id": "crystalline_charm",
-    "Name": "Crystalline Charm",
-    "Description": "A mystical charm infused with crystalline powder.",
-    "ItemType": 0,
-    "Rarity": 1,
+    "Rarity": 0,
     "EquipmentType": 1,
     "AttributeModifiers": [
       {
-        "Id": "74af4e85-4919-46fb-a79e-2dfd41264271",
+        "Id": "0fadba9d-fed6-4afa-95f1-42ea5ca8b6cc",
         "AttributeType": 10,
         "Amount": 3,
         "ModifierType": 0
@@ -1453,15 +1300,15 @@
     ]
   },
   {
-    "Id": "spirit_spruce_pendant",
-    "Name": "Spirit Spruce Pendant",
-    "Description": "A pendant crafted from Spirit Spruce Log.",
+    "Id": "sapling_totem",
+    "Name": "Sapling Totem",
+    "Description": "A totem that grants health regeneration while stationary.",
     "ItemType": 0,
-    "Rarity": 1,
-    "EquipmentType": 3,
+    "Rarity": 0,
+    "EquipmentType": 1,
     "AttributeModifiers": [
       {
-        "Id": "dd70e117-2ea0-43b2-9e95-beaabcae3c79",
+        "Id": "ba801852-8770-4e5e-aafc-21ca8dab8542",
         "AttributeType": 17,
         "Amount": 1,
         "ModifierType": 0
@@ -1469,47 +1316,243 @@
     ]
   },
   {
-    "Id": "leaf_trinket",
-    "Name": "Leaf Trinket",
-    "Description": "A trinket made from a shimmering leaf.",
+    "Id": "jagged_obsidian_idol",
+    "Name": "Jagged Obsidian Idol",
+    "Description": "An idol made from jagged obsidian.",
     "ItemType": 0,
-    "Rarity": 1,
+    "Rarity": 0,
     "EquipmentType": 1,
     "AttributeModifiers": [
       {
-        "Id": "e4d9a439-6984-4a6b-9a0f-9c42cefdc6db",
-        "AttributeType": 9,
+        "Id": "650b4316-2ba7-471f-9258-03fd2f6ce7b4",
+        "AttributeType": 28,
         "Amount": 3,
         "ModifierType": 0
       }
     ]
   },
   {
-    "Id": "silken_locket",
-    "Name": "Silken Locket",
-    "Description": "A delicate locket woven from silk vine.",
+    "Id": "stone_edge_shortsword",
+    "Name": "Stone-Edge Shortsword",
+    "Description": "A sharp shortsword forged from stone and jagged obsidian.",
     "ItemType": 0,
-    "Rarity": 1,
-    "EquipmentType": 3,
+    "Rarity": 0,
+    "EquipmentType": 6,
     "AttributeModifiers": [
       {
-        "Id": "e56d7967-fb5e-48e4-aa23-b42da0eb268b",
-        "AttributeType": 6,
+        "Id": "661f4b29-d31f-488a-b763-6df96045e22a",
+        "AttributeType": 4,
+        "Amount": 1,
+        "ModifierType": 0
+      },
+      {
+        "Id": "022e8a2d-c76c-4284-bec0-36e542d22cff",
+        "AttributeType": 3,
+        "Amount": 1,
+        "ModifierType": 0
+      }
+    ]
+  },
+  {
+    "Id": "jagged_obsidian_hatchet",
+    "Name": "Jagged Obsidian Hatchet",
+    "Description": "A durable hatchet crafted from jagged obsidian and stone.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 6,
+    "AttributeModifiers": [
+      {
+        "Id": "7527e5f8-b861-4bcf-9634-7d91e3c0637a",
+        "AttributeType": 3,
         "Amount": 2,
         "ModifierType": 0
       }
     ]
   },
   {
-    "Id": "spirit_orb_ring",
-    "Name": "Spirit Orb Ring",
-    "Description": "A mystical ring infused with a spirit orb.",
+    "Id": "flint_morning_star",
+    "Name": "Flint Morning Star",
+    "Description": "A spiked mace made of flint and stone, dealing crushing damage.",
     "ItemType": 0,
-    "Rarity": 2,
-    "EquipmentType": 5,
+    "Rarity": 0,
+    "EquipmentType": 6,
     "AttributeModifiers": [
       {
-        "Id": "bf5428e8-4abe-491e-806f-73566c6a758a",
+        "Id": "bbc014e5-4a17-4770-b7bb-282e545245cd",
+        "AttributeType": 1,
+        "Amount": 3,
+        "ModifierType": 0
+      }
+    ]
+  },
+  {
+    "Id": "silkshadow_stiletto",
+    "Name": "Silkshadow Stiletto",
+    "Description": "A swift dagger made of silk vine and sharp flint.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 6,
+    "AttributeModifiers": [
+      {
+        "Id": "a1a501f5-7791-4991-8aab-944102012c14",
+        "AttributeType": 5,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
+  },
+  {
+    "Id": "willow_cleaver",
+    "Name": "Willow Cleaver",
+    "Description": "A large cleaver made from sturdy willow wood and obsidian.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 6,
+    "AttributeModifiers": [
+      {
+        "Id": "f3187da5-0f40-4efe-9678-4ba61f404507",
+        "AttributeType": 4,
+        "Amount": 3,
+        "ModifierType": 0
+      },
+      {
+        "Id": "81f01556-5c49-4ecb-9841-fb9ca03f783f",
+        "AttributeType": 3,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
+  },
+  {
+    "Id": "stone_reaver_greataxe",
+    "Name": "Stone-Reaver Greataxe",
+    "Description": "A heavy greataxe crafted from solid stone and jagged obsidian.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 6,
+    "AttributeModifiers": [
+      {
+        "Id": "103daa3a-d5df-42e9-9623-2c3d13dad3a0",
+        "AttributeType": 3,
+        "Amount": 4,
+        "ModifierType": 0
+      }
+    ]
+  },
+  {
+    "Id": "powder_core_maul",
+    "Name": "Powder-Core Maul",
+    "Description": "A massive maul with a crystalline powder core, delivering crushing blows.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 6,
+    "AttributeModifiers": [
+      {
+        "Id": "9f518948-6f9b-43d7-b206-5dac5bd0a4d1",
+        "AttributeType": 1,
+        "Amount": 3,
+        "ModifierType": 0
+      },
+      {
+        "Id": "17281c8c-0ac4-4e58-b4f2-06e8c5d74d13",
+        "AttributeType": 2,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
+  },
+  {
+    "Id": "nest_tip_pike",
+    "Name": "Nest-Tip Pike",
+    "Description": "A long pike tipped with feathers and flint for precision thrusts.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 6,
+    "AttributeModifiers": [
+      {
+        "Id": "f472a147-2254-4df1-909b-a60c02737d0e",
+        "AttributeType": 4,
+        "Amount": 2,
+        "ModifierType": 0
+      },
+      {
+        "Id": "dfc90461-e2c1-4bc7-aa4e-93b1b949f104",
+        "AttributeType": 5,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
+  },
+  {
+    "Id": "stonebark_heater",
+    "Name": "Stonebark Heater",
+    "Description": "A sturdy shield combining stone and willow for reliable protection.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 7,
+    "AttributeModifiers": [
+      {
+        "Id": "56d3e277-2538-4cbc-a068-ea5457688497",
+        "AttributeType": 21,
+        "Amount": 20,
+        "ModifierType": 0
+      },
+      {
+        "Id": "fa36f7c2-5279-404b-95e0-9445a378fac3",
+        "AttributeType": 32,
+        "Amount": 50,
+        "ModifierType": 0
+      }
+    ]
+  },
+  {
+    "Id": "silk_protector",
+    "Name": "Silk Protector",
+    "Description": "A shield woven with silk, allowing for magical protection.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 7,
+    "AttributeModifiers": [
+      {
+        "Id": "117b6e8b-c643-4e56-ad49-921f8ab59e18",
+        "AttributeType": 22,
+        "Amount": 20,
+        "ModifierType": 0
+      },
+      {
+        "Id": "aa8d130e-ed0b-4d83-b59d-b93752473da9",
+        "AttributeType": 32,
+        "Amount": 50,
+        "ModifierType": 0
+      }
+    ]
+  },
+  {
+    "Id": "shimmering_willow_staff",
+    "Name": "Shimmering Willow Staff",
+    "Description": "A magical staff made of willow wood and shimmering leaves.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 6,
+    "AttributeModifiers": [
+      {
+        "Id": "c499f044-fac4-4390-b1bc-25cfa7150f87",
+        "AttributeType": 7,
+        "Amount": 4,
+        "ModifierType": 0
+      }
+    ]
+  },
+  {
+    "Id": "geode_bound_grimoire",
+    "Name": "Geode-Bound Grimoire",
+    "Description": "A magical tome embedded with geodes.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 7,
+    "AttributeModifiers": [
+      {
+        "Id": "07ed2161-2777-4cb1-9f72-5ff55aedef66",
         "AttributeType": 7,
         "Amount": 2,
         "ModifierType": 0
@@ -1517,15 +1560,15 @@
     ]
   },
   {
-    "Id": "echoing_charm",
-    "Name": "Echoing Charm",
-    "Description": "A charm that resonates with the Echoing Core.",
+    "Id": "jagged_obsidian_wand",
+    "Name": "Jagged Obsidian Wand",
+    "Description": "A magical wand forged from jagged obsidian.",
     "ItemType": 0,
-    "Rarity": 2,
-    "EquipmentType": 1,
+    "Rarity": 0,
+    "EquipmentType": 6,
     "AttributeModifiers": [
       {
-        "Id": "e0efd5df-0e60-463f-8a65-8f90b56153ed",
+        "Id": "d2354e29-9496-4666-930e-ced3a50a4ce4",
         "AttributeType": 8,
         "Amount": 2,
         "ModifierType": 0
@@ -1533,33 +1576,77 @@
     ]
   },
   {
-    "Id": "obsidian_mirror_amulet",
-    "Name": "Obsidian Mirror Amulet",
-    "Description": "An amulet with a reflective obsidian shard.",
+    "Id": "powdered_crystal_orb",
+    "Name": "Powdered Crystal Orb",
+    "Description": "An orb made from crystalline powder.",
     "ItemType": 0,
-    "Rarity": 2,
-    "EquipmentType": 3,
+    "Rarity": 0,
+    "EquipmentType": 7,
     "AttributeModifiers": [
       {
-        "Id": "4358303a-6dd8-4a09-9530-a26169fff021",
-        "AttributeType": 1,
+        "Id": "7ace81ec-11c8-4864-90af-11da75c08b8a",
+        "AttributeType": 8,
         "Amount": 2,
         "ModifierType": 0
       }
     ]
   },
   {
-    "Id": "shimmering_leaf_sigil",
-    "Name": "Shimmering Leaf Sigil",
-    "Description": "A radiant sigil made from a shimmering leaf.",
+    "Id": "silk_strung_longbow",
+    "Name": "Silk-Strung Longbow",
+    "Description": "A longbow strung with resilient silk.",
     "ItemType": 0,
-    "Rarity": 2,
-    "EquipmentType": 1,
+    "Rarity": 0,
+    "EquipmentType": 6,
     "AttributeModifiers": [
       {
-        "Id": "f9d5309c-cc7c-4435-8da3-d0ebc8b9c731",
-        "AttributeType": 15,
-        "Amount": 25,
+        "Id": "71087684-332b-43a8-9e03-2de2f08e3524",
+        "AttributeType": 6,
+        "Amount": 4,
+        "ModifierType": 0
+      }
+    ]
+  },
+  {
+    "Id": "flintlock_crossbow",
+    "Name": "Flintlock Crossbow",
+    "Description": "A crossbow crafted using both willow and flint.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 6,
+    "AttributeModifiers": [
+      {
+        "Id": "4c65fa15-4b39-4f1c-b413-3846a4ff8d00",
+        "AttributeType": 6,
+        "Amount": 2,
+        "ModifierType": 0
+      },
+      {
+        "Id": "c888c2c0-cb21-487e-84c1-5d7364b4ab0e",
+        "AttributeType": 2,
+        "Amount": 2,
+        "ModifierType": 0
+      }
+    ]
+  },
+  {
+    "Id": "jagged_obsidian_knuckles",
+    "Name": "Jagged Obsidian Knuckles",
+    "Description": "A pair of hard knuckles made from jagged obsidian.",
+    "ItemType": 0,
+    "Rarity": 0,
+    "EquipmentType": 6,
+    "AttributeModifiers": [
+      {
+        "Id": "da9831b4-954f-4747-b459-80716bf0907d",
+        "AttributeType": 4,
+        "Amount": 2,
+        "ModifierType": 0
+      },
+      {
+        "Id": "caf0c8d2-27d5-4319-96b0-86161228eb63",
+        "AttributeType": 12,
+        "Amount": 50,
         "ModifierType": 0
       }
     ]
