@@ -97,6 +97,13 @@ export class RecipesComponent implements OnInit {
 
   private loadRecipes(): void {
     this.recipeService.getRecipes().subscribe((data) => {
+      data.map((r) => {
+        r.item = this.items.find((i) => i.id === r.itemId)!;
+        r.materials.map((m) => {
+          m.item = this.items.find((i) => i.id === m.itemId)!;
+        });
+      });
+
       this.recipes = data;
       const outputItemIds = this.recipes.map((recipe) => recipe.item.id);
       this.craftableItems = this.items.filter(

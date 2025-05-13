@@ -4,6 +4,7 @@ import { ItemBase } from './item';
 export interface Recipe {
   id: string;
   name: string;
+  itemId: string;
   item: ItemBase;
   quantity: number;
   craftType: CraftType;
@@ -14,6 +15,7 @@ export interface Recipe {
 
 export interface Material {
   quantity: number;
+  itemId: string;
   item: ItemBase;
 }
 
