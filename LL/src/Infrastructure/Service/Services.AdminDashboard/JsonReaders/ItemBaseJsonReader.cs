@@ -5,11 +5,14 @@ namespace Services.AdminDashboard.JsonReaders;
 public class ItemBaseJsonReader
 {
     public List<ItemBaseDto> AllItems { get; set; } = [];
-    private string _filePath { get; set; }
+    private readonly string _filePath;
     public ItemBaseJsonReader()
     {
-        _filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "items.json");
+        var currentDirectory = Directory.GetCurrentDirectory();
+        var apiDirectory = Directory.GetParent(currentDirectory)!.FullName;
+        _filePath = Path.Combine(apiDirectory, "API.LL", "Data", "items.json");
         string json = File.ReadAllText(_filePath);
+
         AllItems = JsonSerializer.Deserialize<List<ItemBaseDto>>(json) ?? [];
         OverWriteJSON();
     }

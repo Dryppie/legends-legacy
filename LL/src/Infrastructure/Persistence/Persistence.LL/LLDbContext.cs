@@ -18,6 +18,7 @@ using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.LootTables;
+using Domain.Models.Professions.Crafting;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Users;
@@ -176,6 +177,8 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
     //public DbSet<Town> Towns => Set<Town>();
 
     //public DbSet<TownBuilding> TownBuildings => Set<TownBuilding>();
+
+    public DbSet<Recipe> Recipes => Set<Recipe>();
 
     public DbSet<Region> Regions => Set<Region>();
 

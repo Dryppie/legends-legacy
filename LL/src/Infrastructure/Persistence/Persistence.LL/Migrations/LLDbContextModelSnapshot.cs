@@ -262,6 +262,9 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("GatheringType")
                         .HasColumnType("int");
 
+                    b.Property<int>("LevelRequirement")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("LootTableId")
                         .HasColumnType("uniqueidentifier");
 
@@ -408,10 +411,6 @@ namespace Persistence.LL.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("IconPath")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("ItemType")
                         .HasColumnType("int");
 
@@ -501,6 +500,57 @@ namespace Persistence.LL.Migrations
                     b.HasKey("EntityId", "MasteryType");
 
                     b.ToTable("Mastery");
+                });
+
+            modelBuilder.Entity("Domain.Models.Professions.Crafting.Material", b =>
+                {
+                    b.Property<Guid>("RecipeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ItemId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("RecipeId", "ItemId");
+
+                    b.HasIndex("ItemId");
+
+                    b.ToTable("Material");
+                });
+
+            modelBuilder.Entity("Domain.Models.Professions.Crafting.Recipe", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("CraftType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ItemId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("ItemType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LevelRequirement")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemId");
+
+                    b.ToTable("Recipes");
                 });
 
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
@@ -1223,6 +1273,36 @@ namespace Persistence.LL.Migrations
                     b.Navigation("Entity");
                 });
 
+            modelBuilder.Entity("Domain.Models.Professions.Crafting.Material", b =>
+                {
+                    b.HasOne("Domain.Models.Items.ItemBase", "Item")
+                        .WithMany("Materials")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Professions.Crafting.Recipe", "Recipe")
+                        .WithMany("Materials")
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+
+                    b.Navigation("Recipe");
+                });
+
+            modelBuilder.Entity("Domain.Models.Professions.Crafting.Recipe", b =>
+                {
+                    b.HasOne("Domain.Models.Items.ItemBase", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+                });
+
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
                 {
                     b.HasOne("Domain.Models.Regions.Region", null)
@@ -1420,6 +1500,13 @@ namespace Persistence.LL.Migrations
                     b.Navigation("ItemInstances");
 
                     b.Navigation("LootTablesItems");
+
+                    b.Navigation("Materials");
+                });
+
+            modelBuilder.Entity("Domain.Models.Professions.Crafting.Recipe", b =>
+                {
+                    b.Navigation("Materials");
                 });
 
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>

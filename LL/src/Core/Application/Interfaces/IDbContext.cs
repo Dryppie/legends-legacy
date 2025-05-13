@@ -15,6 +15,7 @@ using Domain.Models.Items;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.LootTables;
+using Domain.Models.Professions.Crafting;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Users;
@@ -68,6 +69,7 @@ public interface IDbContext
     //DbSet<Title> Titles { get; }
     //DbSet<Town> Towns { get; }
     //DbSet<TownBuilding> TownBuildings { get; }
+    DbSet<Recipe> Recipes { get; }
     DbSet<Region> Regions { get; }
     DbSet<AppUser> Users { get; }
     DbSet<ExternalLogin> ExternalLogins { get; }

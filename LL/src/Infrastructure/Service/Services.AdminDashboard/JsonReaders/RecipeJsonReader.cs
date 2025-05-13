@@ -1,18 +1,26 @@
 ﻿using System.Text.Json;
-using Application.UseCases._AdminDashboard.Items.Dtos;
-using Domain.Models.Items;
 using Domain.Models.Professions.Crafting;
 
 namespace Services.AdminDashboard.JsonReaders;
 public class RecipeJsonReader
 {
     public List<Recipe> AllRecipes { get; set; } = [];
-    private string _filePath { get; set; }
+    private readonly string _filePath;
     public RecipeJsonReader()
     {
-        _filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "recipes.json");
+        var currentDirectory = Directory.GetCurrentDirectory();
+        var apiDirectory = Directory.GetParent(currentDirectory)!.FullName;
+        _filePath = Path.Combine(apiDirectory, "API.LL", "Data", "recipes.json");
         string json = File.ReadAllText(_filePath);
+
         AllRecipes = JsonSerializer.Deserialize<List<Recipe>>(json) ?? [];
+        foreach (var recipe in AllRecipes)
+        {
+            foreach (var material in recipe.Materials)
+            {
+                material.ItemId = material.Item.Id;
+            }
+        }
         OverWriteJSON();
     }
     public List<Recipe> GetRecipesFromJson()
