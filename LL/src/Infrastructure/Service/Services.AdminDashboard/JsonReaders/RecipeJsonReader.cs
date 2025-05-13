@@ -1,62 +1,67 @@
 ﻿using System.Text.Json;
 using Domain.Models.Professions.Crafting;
+using Services.AdminDashboard.Recipes.Dtos;
 
 namespace Services.AdminDashboard.JsonReaders;
 public class RecipeJsonReader
 {
-    public List<Recipe> AllRecipes { get; set; } = [];
     private readonly string _filePath;
+    private readonly JsonSerializerOptions _opts =
+        new() { WriteIndented = true };
+
+    private List<RecipeDto> _cache = [];
+
     public RecipeJsonReader()
     {
         var currentDirectory = Directory.GetCurrentDirectory();
         var apiDirectory = Directory.GetParent(currentDirectory)!.FullName;
+
         _filePath = Path.Combine(apiDirectory, "API.LL", "Data", "recipes.json");
-        string json = File.ReadAllText(_filePath);
 
-        AllRecipes = JsonSerializer.Deserialize<List<Recipe>>(json) ?? [];
-        foreach (var recipe in AllRecipes)
+        LoadFile();
+    }
+
+    public List<Recipe> GetRecipes() =>
+        [.. _cache.Select(dto => dto.ToEntity())];
+
+    public void AddRecipe(Recipe recipe)
+    {
+        _cache.Add(recipe.ToDto());
+        SaveFile();
+    }
+
+    public void UpdateRecipe(Recipe recipe)
+    {
+        var dto = recipe.ToDto();
+        var idx = _cache.FindIndex(r => r.Id == dto.Id);
+
+        if (idx == -1) _cache.Add(dto);
+        else _cache[idx] = dto;
+
+        SaveFile();
+    }
+
+    public void RemoveRecipe(Guid id)
+    {
+        _cache.RemoveAll(r => r.Id == id);
+        SaveFile();
+    }
+
+    private void LoadFile()
+    {
+        if (!File.Exists(_filePath))
         {
-            foreach (var material in recipe.Materials)
-            {
-                material.ItemId = material.Item.Id;
-            }
+            _cache = [];
+            return;
         }
-        OverWriteJSON();
-    }
-    public List<Recipe> GetRecipesFromJson()
-    {
-        return AllRecipes;
-    }
-    public void UpdateRecipe(Recipe recipeToUpdate)
-    {
-        var index = AllRecipes.FindIndex(c => c.Id == recipeToUpdate.Id);
-        if (index == -1)
-            AllRecipes.Add(recipeToUpdate);
-        else
-            AllRecipes[index] = recipeToUpdate;
 
-        OverWriteJSON();
+        var json = File.ReadAllText(_filePath);
+        _cache = JsonSerializer.Deserialize<List<RecipeDto>>(json, _opts) ?? [];
+
+        SaveFile();
     }
 
-    private void OverWriteJSON()
-    {
-        var options = new JsonSerializerOptions { WriteIndented = true };
-        File.WriteAllText(_filePath, JsonSerializer.Serialize(AllRecipes, options));
-    }
-
-    public void AddItemBase(Recipe recipeToAdd)
-    {
-        AllRecipes.Add(recipeToAdd);
-        OverWriteJSON();
-    }
-
-    public void RemoveItemBaseById(string id)
-    {
-        var index = AllRecipes.FindIndex(c => c.Id.ToString() == id);
-        if (index != -1)
-        {
-            AllRecipes.RemoveAt(index);
-        }
-        OverWriteJSON();
-    }
+    private void SaveFile() =>
+        File.WriteAllText(_filePath,
+            JsonSerializer.Serialize(_cache, _opts));
 }

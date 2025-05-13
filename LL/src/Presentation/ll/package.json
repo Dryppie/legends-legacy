@@ -2,6 +2,7 @@
   "name": "ll",
   "version": "0.0.0",
   "scripts": {
+    "prebuild": "ts-node ./scripts/generate-static-content.ts",
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",

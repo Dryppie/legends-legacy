@@ -14,7 +14,7 @@ public class RecipeService : IRecipeService
 
     public async Task<List<Recipe>> GetRecipesAsync(CancellationToken cancellationToken)
     {
-        return _reader.GetRecipesFromJson();
+        return _reader.GetRecipes();
     }
 
     public async Task UpdateRecipeAsync(Recipe recipeToUpdate, CancellationToken cancellationToken)
