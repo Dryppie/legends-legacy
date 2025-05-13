@@ -39,7 +39,7 @@ export class GoogleAuthService {
   private handleIdToken(idToken: string) {
     this.auth.isAuthenticated$.pipe(take(1)).subscribe((isLoggedIn) => {
       if (isLoggedIn) {
-        this.auth.bindGoogle(idToken).subscribe(); // bind to existing user
+        this.auth.bindGoogle(idToken); // bind to existing user
       } else {
         this.auth.googleLogin(idToken); // fresh sign‑in / sign‑up
       }

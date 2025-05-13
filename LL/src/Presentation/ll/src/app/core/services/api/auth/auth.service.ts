@@ -65,7 +65,6 @@ export class AuthService {
           this.afterSuccessfulAuth();
         }),
         catchError((e) => {
-          console.log(e);
           this.toast.showToast('Login failed', e.message, false);
           return throwError(() => e);
         }),
@@ -84,11 +83,10 @@ export class AuthService {
         Password: password,
       })
       .pipe(
-        tap((r) => {
+        tap(() => {
           this.toast.showToast('Registration success', '', true);
           this.afterSuccessfulAuth();
         }),
-        map(() => undefined),
         catchError((e) => {
           this.toast.showToast('Registration failed', e.errorMessage, false);
           return throwError(() => e);
@@ -100,13 +98,9 @@ export class AuthService {
     this.api
       .post('auth/loginAsGuest')
       .pipe(
-        tap((r) => {
-          if (r.isSuccess) {
-            this.toast.showToast('Guest session started', '', true);
-            this.afterSuccessfulAuth();
-          } else {
-            this.toast.showToast('Guest login failed', r.errorMessage, false);
-          }
+        tap(() => {
+          this.toast.showToast('Guest session started', '', true);
+          this.afterSuccessfulAuth();
         }),
         catchError((e) => {
           this.toast.showToast('Guest login error', e.message, false);
@@ -120,17 +114,9 @@ export class AuthService {
     this.api
       .post('auth/google', idToken)
       .pipe(
-        tap((r) => {
-          if (r.isSuccess) {
-            this.toast.showToast('Google sign-in success', '', true);
-            this.afterSuccessfulAuth();
-          } else {
-            this.toast.showToast(
-              'Google sign-in failed',
-              r.errorMessage,
-              false,
-            );
-          }
+        tap(() => {
+          this.toast.showToast('Google sign-in success', '', true);
+          this.afterSuccessfulAuth();
         }),
         catchError((e) => {
           this.toast.showToast('Google sign-in error', e.message, false);
@@ -141,17 +127,19 @@ export class AuthService {
   }
 
   // bind Google to existing account (new)
-  bindGoogle(idToken: string): Observable<void> {
-    return this.api.post('auth/bind-google', idToken).pipe(
-      tap((r) => {
-        this.toast.showToast(
-          r.isSuccess ? 'Google linked' : 'Link failed',
-          r.isSuccess ? '' : r.errorMessage,
-          r.isSuccess,
-        );
-      }),
-      map(() => undefined),
-    );
+  bindGoogle(idToken: string): void {
+    this.api
+      .post('auth/bind-google', idToken)
+      .pipe(
+        tap(() => {
+          this.toast.showToast('Google binding success', '', true);
+        }),
+        catchError((e) => {
+          this.toast.showToast('Google binding error', e.message, false);
+          return throwError(() => e);
+        }),
+      )
+      .subscribe();
   }
 
   convertGuestToUser(
@@ -166,16 +154,15 @@ export class AuthService {
         Password: password,
       })
       .pipe(
-        tap((r) => {
-          if (r.isValid) {
-            this.toast.showToast('Account converted', '', true);
-            // cookies already updated server‑side; just restart auth flow
-            this.afterSuccessfulAuth();
-          } else {
-            this.toast.showToast('Conversion failed', r.message, false);
-          }
+        tap(() => {
+          this.toast.showToast('Account converted', '', true);
+          // cookies already updated server‑side; just restart auth flow
+          this.afterSuccessfulAuth();
         }),
-        map(() => undefined),
+        catchError((e) => {
+          this.toast.showToast('Guest to real account error', e.message, false);
+          return throwError(() => e);
+        }),
       );
   }
 
@@ -196,12 +183,14 @@ export class AuthService {
 
   checkAuth(): Observable<CharacterDto | null> {
     return this.fetchCharacter().pipe(
-      catchError(() =>
-        this.tryRefresh().pipe(
+      catchError(() => {
+        console.log('check auth error)');
+        return this.tryRefresh().pipe(
           switchMap((ok) => (ok ? this.fetchCharacter() : of(null))),
-        ),
-      ),
+        );
+      }),
       tap((ch) => {
+        console.log('tapped into check auth');
         if (ch) this.markAuthenticated();
       }),
     );
@@ -209,15 +198,15 @@ export class AuthService {
 
   private fetchCharacter(): Observable<CharacterDto> {
     return this.api.get('character').pipe(
-      tap((r) => this.currentCharacterSubject.next(r.data)),
-      map((r) => r.data as CharacterDto),
+      tap((character) => this.currentCharacterSubject.next(character)),
+      map((character) => character as CharacterDto),
     );
   }
 
   /** Returns `true` when refresh succeeded. */
   private tryRefresh(): Observable<boolean> {
     return this.api.post('auth/createNewTokens').pipe(
-      map((r) => !!r.isSuccess), // tokens set in HttpOnly cookie
+      map(() => true), // tokens set in HttpOnly cookie
       catchError(() => of(false)),
     );
   }
