@@ -4,14 +4,13 @@ FROM node:22-alpine AS angular
 WORKDIR /ng-app
 COPY package*.json .
 COPY src/environments/environment.ts ./
-COPY Data ./Date
 
 ARG BUILD_VERSION
 RUN sed -i "s/buildversion/${BUILD_VERSION}/g" environment.ts
-RUN tree
+
 RUN npm ci
 COPY . .
-RUN cp environment.ts src/environments/environment.ts && npm run build
+RUN cp environment.ts src/environments/environment.ts && tree && npm run build
 
 ### STAGE 2: Run ###
 FROM nginx:alpine
