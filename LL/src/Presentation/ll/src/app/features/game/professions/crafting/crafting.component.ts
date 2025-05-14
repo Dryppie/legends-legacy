@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ProfessionHeaderComponent } from '../../../../shared/components/professions/profession-header/profession-header.component';
-import { NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import {
   CraftingProfession,
   Recipe,
@@ -14,12 +14,12 @@ import { CharacterActionsService } from '../../../../core/services/api/character
 @Component({
   selector: 'app-crafting',
   standalone: true,
-  imports: [ProfessionHeaderComponent, NgFor, NgIf],
+  imports: [ProfessionHeaderComponent, NgFor, NgIf, NgClass],
   templateUrl: './crafting.component.html',
   styleUrl: './crafting.component.css',
 })
 export class CraftingComponent implements OnInit {
-  filteredRecipes: any;
+  filteredRecipes: Recipe[] = [];
   selectedRecipe: Recipe | null = null;
   craftingQueue: Recipe[] = [];
 

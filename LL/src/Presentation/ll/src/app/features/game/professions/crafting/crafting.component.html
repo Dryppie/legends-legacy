@@ -10,13 +10,16 @@
       <h2 class="flex-1 text-primary">Recipes</h2>
       <ng-container *ngFor="let recipe of filteredRecipes">
         <div
-          class="cursor-pointer rounded-lg border border-primary/20 p-3 hover:border-primary/60 hover:bg-zinc-300/30"
+          class="cursor-pointer rounded-lg border p-3 hover:border-primary/60 hover:bg-zinc-300/30"
           (click)="selectRecipe(recipe)"
-          [class.border-primary]="selectedRecipe?.id === recipe.id"
+          [ngClass]="{
+            'border-primary bg-zinc-300/10': selectedRecipe?.id === recipe.id,
+            'border-primary/20': selectedRecipe?.id !== recipe.id,
+          }"
         >
           <div class="font-semibold text-white">{{ recipe.name }}</div>
           <div class="text-gray-400 text-sm">
-            Lv {{ recipe.levelRequired }} • {{ recipe.materialTier }}
+            Lv {{ recipe.levelRequirement }}
           </div>
         </div>
       </ng-container>
@@ -26,8 +29,11 @@
     <div class="flex-1 space-y-6">
       <!-- ITEM DESCRIPTION -->
       <div class="rounded-lg border border-light_gray bg-texture p-4">
-        <div class="text-lg font-semibold text-primary">Item Description</div>
+        <h2 class="text-primary">Item Description</h2>
         <ng-container *ngIf="selectedRecipe; else noRecipe">
+          <h3 class="mt-2 text-white">
+            {{ selectedRecipe.item.name }}
+          </h3>
           <div class="mt-2 text-white">
             {{ selectedRecipe.item.description }}
           </div>

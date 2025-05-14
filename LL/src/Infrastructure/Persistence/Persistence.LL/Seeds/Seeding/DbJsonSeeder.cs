@@ -20,11 +20,10 @@ public static class DbJsonSeeder
         var recipePath = Path.Combine(AppContext.BaseDirectory, "Data", "recipes.json");
         var recipeJson = await File.ReadAllTextAsync(recipePath);
 
-        var recipes = JsonSerializer.Deserialize<List<RecipeDto>>(recipeJson)!;
+        // Deserialize as Dto to filter out unnecessary data,
+        // otherwise EF Core will act up with duplicate ids of same item
+        var recipes = JsonSerializer.Deserialize<List<RecipeDto>>(recipeJson)!; 
         ctx.Recipes.AddRange(recipes.Select(dto => dto.ToEntity()));
         await ctx.SaveChangesAsync(CancellationToken.None);
-
-        //logger.LogInformation("Seeded {ItemCount} items + {RecipeCount} recipes",
-        //                      items.Count, recipes.Count);
     }
 }
