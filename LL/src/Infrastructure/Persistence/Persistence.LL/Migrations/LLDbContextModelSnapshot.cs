@@ -1278,18 +1278,16 @@ namespace Persistence.LL.Migrations
                     b.HasOne("Domain.Models.Items.ItemBase", "Item")
                         .WithMany("Materials")
                         .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Models.Professions.Crafting.Recipe", "Recipe")
-                        .WithMany("Materials")
-                        .HasForeignKey("RecipeId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Item");
+                    b.HasOne("Domain.Models.Professions.Crafting.Recipe", null)
+                        .WithMany("Materials")
+                        .HasForeignKey("RecipeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Recipe");
+                    b.Navigation("Item");
                 });
 
             modelBuilder.Entity("Domain.Models.Professions.Crafting.Recipe", b =>

@@ -8,9 +8,9 @@ public class MaterialConfiguration : IEntityTypeConfiguration<Material>
     public void Configure(EntityTypeBuilder<Material> builder)
     {
         builder.HasKey(m => new { m.RecipeId, m.ItemId });
-        //builder.HasOne(m => m.Recipe)
-        //    .WithMany(r => r.Materials)
-        //    .HasForeignKey(m => m.RecipeId)
-        //    .OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne(m => m.Item)
+            .WithMany(r => r.Materials)
+            .HasForeignKey(m => m.ItemId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
