@@ -69,23 +69,23 @@ export class EquipmentOverviewComponent implements OnInit {
       },
       {
         id: '',
-        iconPath: 'empty_cloak',
-        equipmentType: EquipmentType.Relic,
-      },
-      {
-        id: '',
         iconPath: 'empty_armor',
         equipmentType: EquipmentType.Chest,
       },
       {
         id: '',
-        iconPath: 'empty_necklace',
-        equipmentType: EquipmentType.Necklace,
+        iconPath: 'empty_legs',
+        equipmentType: EquipmentType.Legs,
       },
       {
         id: '',
-        iconPath: 'empty_legs',
-        equipmentType: EquipmentType.Legs,
+        iconPath: 'empty_cloak',
+        equipmentType: EquipmentType.Relic,
+      },
+      {
+        id: '',
+        iconPath: 'empty_necklace',
+        equipmentType: EquipmentType.Necklace,
       },
       {
         id: '',

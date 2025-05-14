@@ -3,12 +3,10 @@ import path from 'path';
 
 function findRecipesJson(): string {
   const guesses = [
-    // dev: backend cloned *next to* frontend
-    path.resolve(__dirname, '../backend/API.LL/Data/recipes.json'),
     // dev: monorepo (old path you had)
     path.resolve(__dirname, '../../../API/API.LL/Data/recipes.json'),
     // CI: file copied into build context under /ng-app/backend/…
-    path.resolve(__dirname, '../backend/API.LL/Data/recipes.json'),
+    path.resolve(__dirname, '../Data/recipes.json'),
   ];
 
   for (const p of guesses) if (existsSync(p)) return p;
