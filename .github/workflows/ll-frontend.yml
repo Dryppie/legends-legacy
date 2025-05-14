@@ -90,7 +90,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p LL/src/Presentation/ll/Data
-          cp -r LL/src/API/API.LL/Data/ LL/src/Presentation/ll/Data/
+          cp -r LL/src/API/API.LL/Data/ LL/src/Presentation/ll/
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
