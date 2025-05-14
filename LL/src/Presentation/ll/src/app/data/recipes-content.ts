@@ -1,4 +1,9 @@
-[
+/* AUTO-GENERATED — DO NOT EDIT */
+import { Recipe, CraftType } from '../shared/models/profession';
+import { ItemType } from '../shared/models/enums/itemType';
+import { Rarity } from '../shared/models/enums/rarity';
+
+export const RECIPES_CONTENT = [
   {
     "id": "35ab5f73-3295-4e0f-a1af-6b453319157e",
     "name": "Jagged Obsidian Helm",
@@ -7,11 +12,11 @@
       "id": "jagged_obsidian_helm",
       "name": "Jagged Obsidian Helm",
       "description": "A heavy helmet forged from jagged obsidian and stone.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "ArmorForging",
+    "craftType": CraftType.ArmorForging,
     "levelRequirement": 1,
     "materials": [
       {
@@ -22,8 +27,8 @@
           "id": "stone",
           "name": "Stone",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -34,8 +39,8 @@
           "id": "flint",
           "name": "Flint",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -46,8 +51,8 @@
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
           "description": "Useful for Weapon Smithing",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -58,12 +63,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "e7d8803e-d641-4b0a-beb1-93cff9dc378e",
@@ -73,11 +78,11 @@
       "id": "jagged_obsidian_cuirass",
       "name": "Jagged Obsidian Cuirass",
       "description": "A sturdy cuirass crafted from jagged obsidian.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "ArmorForging",
+    "craftType": CraftType.ArmorForging,
     "levelRequirement": 1,
     "materials": [
       {
@@ -88,8 +93,8 @@
           "id": "stone",
           "name": "Stone",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -100,8 +105,8 @@
           "id": "flint",
           "name": "Flint",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -112,8 +117,8 @@
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
           "description": "Useful for Weapon Smithing",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -124,12 +129,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "fa80e383-3731-4bf2-b319-f6e466372abf",
@@ -139,11 +144,11 @@
       "id": "jagged_obsidian_greaves",
       "name": "Jagged Obsidian Greaves",
       "description": "Reinforced greaves made of jagged obsidian and stone.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "ArmorForging",
+    "craftType": CraftType.ArmorForging,
     "levelRequirement": 1,
     "materials": [
       {
@@ -154,8 +159,8 @@
           "id": "stone",
           "name": "Stone",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -166,8 +171,8 @@
           "id": "flint",
           "name": "Flint",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -178,8 +183,8 @@
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
           "description": "Useful for Weapon Smithing",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -190,12 +195,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "a7ee20d7-1085-4a36-b7e9-7578d719bfa3",
@@ -205,11 +210,11 @@
       "id": "willow_hood",
       "name": "Willow Hood",
       "description": "A lightweight hood made from willow.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "ArmorForging",
+    "craftType": CraftType.ArmorForging,
     "levelRequirement": 1,
     "materials": [
       {
@@ -220,8 +225,8 @@
           "id": "willow_log",
           "name": "Willow Log",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -232,8 +237,8 @@
           "id": "feather_lined_nest",
           "name": "Feather-lined Nest",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -244,8 +249,8 @@
           "id": "flint",
           "name": "Flint",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -256,12 +261,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "d52ccebf-0c2e-4203-8938-69cbaab9392d",
@@ -271,11 +276,11 @@
       "id": "willow_brigandine",
       "name": "Willow Brigandine",
       "description": "A balanced brigandine crafted from willow.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "ArmorForging",
+    "craftType": CraftType.ArmorForging,
     "levelRequirement": 1,
     "materials": [
       {
@@ -286,8 +291,8 @@
           "id": "willow_log",
           "name": "Willow Log",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -298,8 +303,8 @@
           "id": "feather_lined_nest",
           "name": "Feather-lined Nest",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -310,8 +315,8 @@
           "id": "flint",
           "name": "Flint",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -322,12 +327,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "bd388959-eee7-4e3f-a496-9e647221fec9",
@@ -337,11 +342,11 @@
       "id": "willow_tassets",
       "name": "Willow Tassets",
       "description": "Light armor piece.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "ArmorForging",
+    "craftType": CraftType.ArmorForging,
     "levelRequirement": 1,
     "materials": [
       {
@@ -352,8 +357,8 @@
           "id": "willow_log",
           "name": "Willow Log",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -364,8 +369,8 @@
           "id": "feather_lined_nest",
           "name": "Feather-lined Nest",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -376,8 +381,8 @@
           "id": "flint",
           "name": "Flint",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -388,12 +393,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "3ee3611d-35b0-4821-ab3e-8c61b20b76ec",
@@ -403,11 +408,11 @@
       "id": "silk_capuche",
       "name": "Silk Capuche",
       "description": "A light silk hood.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "ArmorForging",
+    "craftType": CraftType.ArmorForging,
     "levelRequirement": 1,
     "materials": [
       {
@@ -418,8 +423,8 @@
           "id": "silk_vine",
           "name": "Silk Vine",
           "description": "Armor Forger",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -430,8 +435,8 @@
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
           "description": "Jewel Crafter",
-          "itemType": "Material",
-          "rarity": "Unique"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Unique
         }
       },
       {
@@ -442,8 +447,8 @@
           "id": "tiny_geode",
           "name": "Tiny Geode",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -454,12 +459,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "94216f95-ad2a-49bd-9f85-8f606b6f0b9a",
@@ -469,11 +474,11 @@
       "id": "silk_vest",
       "name": "Silk Vest",
       "description": "An evasive vest made of silk.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "ArmorForging",
+    "craftType": CraftType.ArmorForging,
     "levelRequirement": 1,
     "materials": [
       {
@@ -484,8 +489,8 @@
           "id": "silk_vine",
           "name": "Silk Vine",
           "description": "Armor Forger",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -496,8 +501,8 @@
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
           "description": "Jewel Crafter",
-          "itemType": "Material",
-          "rarity": "Unique"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Unique
         }
       },
       {
@@ -508,8 +513,8 @@
           "id": "tiny_geode",
           "name": "Tiny Geode",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -520,12 +525,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "db0d6109-78d2-4d4c-8f20-a1805ef36814",
@@ -535,11 +540,11 @@
       "id": "silk_trousers",
       "name": "Silk Trousers",
       "description": "Lightweight trousers.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "ArmorForging",
+    "craftType": CraftType.ArmorForging,
     "levelRequirement": 1,
     "materials": [
       {
@@ -550,8 +555,8 @@
           "id": "silk_vine",
           "name": "Silk Vine",
           "description": "Armor Forger",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -562,8 +567,8 @@
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
           "description": "Jewel Crafter",
-          "itemType": "Material",
-          "rarity": "Unique"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Unique
         }
       },
       {
@@ -574,8 +579,8 @@
           "id": "tiny_geode",
           "name": "Tiny Geode",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -586,12 +591,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "29c2e282-40cf-4262-bd6c-4e6c71d06c0a",
@@ -601,11 +606,11 @@
       "id": "powder_hood",
       "name": "Powder Hood",
       "description": "A hood crafted from crystalline powder.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "ArmorForging",
+    "craftType": CraftType.ArmorForging,
     "levelRequirement": 1,
     "materials": [
       {
@@ -616,8 +621,8 @@
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
           "description": "Jewelry Crafting",
-          "itemType": "Material",
-          "rarity": "Unique"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Unique
         }
       },
       {
@@ -628,8 +633,8 @@
           "id": "silk_vine",
           "name": "Silk Vine",
           "description": "Armor Forger",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -640,8 +645,8 @@
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
           "description": "Jewel Crafter",
-          "itemType": "Material",
-          "rarity": "Unique"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Unique
         }
       },
       {
@@ -652,12 +657,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "36d77ec2-9b4a-4998-8660-89b01aaa8363",
@@ -667,11 +672,11 @@
       "id": "powder_robe",
       "name": "Powder Robe",
       "description": "A robe woven with crystalline powder.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "ArmorForging",
+    "craftType": CraftType.ArmorForging,
     "levelRequirement": 1,
     "materials": [
       {
@@ -682,8 +687,8 @@
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
           "description": "Jewelry Crafting",
-          "itemType": "Material",
-          "rarity": "Unique"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Unique
         }
       },
       {
@@ -694,8 +699,8 @@
           "id": "silk_vine",
           "name": "Silk Vine",
           "description": "Armor Forger",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -706,8 +711,8 @@
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
           "description": "Jewel Crafter",
-          "itemType": "Material",
-          "rarity": "Unique"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Unique
         }
       },
       {
@@ -718,12 +723,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "8ae0644e-7cd4-40c0-9873-39be926f2a44",
@@ -733,11 +738,11 @@
       "id": "powder_pants",
       "name": "Powder Pants",
       "description": "Crystalline trousers.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "ArmorForging",
+    "craftType": CraftType.ArmorForging,
     "levelRequirement": 1,
     "materials": [
       {
@@ -748,8 +753,8 @@
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
           "description": "Jewelry Crafting",
-          "itemType": "Material",
-          "rarity": "Unique"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Unique
         }
       },
       {
@@ -760,8 +765,8 @@
           "id": "silk_vine",
           "name": "Silk Vine",
           "description": "Armor Forger",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -772,8 +777,8 @@
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
           "description": "Jewel Crafter",
-          "itemType": "Material",
-          "rarity": "Unique"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Unique
         }
       },
       {
@@ -784,12 +789,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "93c7853d-d73c-475e-abbb-64aef79dea1d",
@@ -798,12 +803,12 @@
     "item": {
       "id": "geode_heart_amulet",
       "name": "Geode-Heart Amulet",
-      "description": "An amulet infused with earth\u0027s essence, offering earth resistance and critical damage.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "description": "An amulet infused with earth's essence, offering earth resistance and critical damage.",
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "JewelryCrafting",
+    "craftType": CraftType.JewelryCrafting,
     "levelRequirement": 1,
     "materials": [
       {
@@ -814,8 +819,8 @@
           "id": "tiny_geode",
           "name": "Tiny Geode",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -826,8 +831,8 @@
           "id": "silk_vine",
           "name": "Silk Vine",
           "description": "Armor Forger",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -838,12 +843,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "6fcf468e-3e81-44fe-af44-94bea6ed2509",
@@ -853,11 +858,11 @@
       "id": "leafglow_amulet",
       "name": "Leafglow Amulet",
       "description": "A glowing amulet that grants mana regeneration and a soft green light.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "JewelryCrafting",
+    "craftType": CraftType.JewelryCrafting,
     "levelRequirement": 1,
     "materials": [
       {
@@ -868,8 +873,8 @@
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
           "description": "Jewel Crafter",
-          "itemType": "Material",
-          "rarity": "Unique"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Unique
         }
       },
       {
@@ -880,8 +885,8 @@
           "id": "willow_log",
           "name": "Willow Log",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -892,12 +897,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "f3e6cb7a-cc56-4f02-bfd7-a7bfc1e04f77",
@@ -907,11 +912,11 @@
       "id": "obsidian_shard_amulet",
       "name": "Obsidian Shard Amulet",
       "description": "A reflective amulet offering physical resistance and slight damage reflection.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "JewelryCrafting",
+    "craftType": CraftType.JewelryCrafting,
     "levelRequirement": 1,
     "materials": [
       {
@@ -922,8 +927,8 @@
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
           "description": "Useful for Weapon Smithing",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -934,8 +939,8 @@
           "id": "flint",
           "name": "Flint",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -946,12 +951,12 @@
           "id": "feather_lined_nest",
           "name": "Feather-lined Nest",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "0ba06ecc-ecbc-4ff7-8a26-e85eef576b8e",
@@ -961,11 +966,11 @@
       "id": "flint_spark_ring",
       "name": "Flint-Spark Ring",
       "description": "A ring that enhances critical strikes and adds fire damage to attacks.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "JewelryCrafting",
+    "craftType": CraftType.JewelryCrafting,
     "levelRequirement": 1,
     "materials": [
       {
@@ -976,8 +981,8 @@
           "id": "flint",
           "name": "Flint",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -988,12 +993,12 @@
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
           "description": "Jewelry Crafting",
-          "itemType": "Material",
-          "rarity": "Unique"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Unique
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "071450ab-1c64-4f7e-8b70-e9a7596cc14a",
@@ -1003,11 +1008,11 @@
       "id": "nestling_band",
       "name": "Nestling Band",
       "description": "A ring that enhances ranged accuracy and reduces fall damage.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "JewelryCrafting",
+    "craftType": CraftType.JewelryCrafting,
     "levelRequirement": 1,
     "materials": [
       {
@@ -1018,8 +1023,8 @@
           "id": "feather_lined_nest",
           "name": "Feather-lined Nest",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -1030,12 +1035,12 @@
           "id": "silk_vine",
           "name": "Silk Vine",
           "description": "Armor Forger",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "eaede364-9783-4807-b7ef-cdf3f8e8696c",
@@ -1045,11 +1050,11 @@
       "id": "stoneguard_ring",
       "name": "Stoneguard Ring",
       "description": "A protective ring granting max HP and health regeneration out of combat.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "JewelryCrafting",
+    "craftType": CraftType.JewelryCrafting,
     "levelRequirement": 1,
     "materials": [
       {
@@ -1060,8 +1065,8 @@
           "id": "stone",
           "name": "Stone",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1072,12 +1077,12 @@
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
           "description": "Useful for Weapon Smithing",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "4c34d8b2-70ec-449f-89f9-04da9ce387b7",
@@ -1087,11 +1092,11 @@
       "id": "powdered_lens",
       "name": "Powdered Lens",
       "description": "A lens that reveals hidden secrets for a short duration.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "JewelryCrafting",
+    "craftType": CraftType.JewelryCrafting,
     "levelRequirement": 1,
     "materials": [
       {
@@ -1102,8 +1107,8 @@
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
           "description": "Jewelry Crafting",
-          "itemType": "Material",
-          "rarity": "Unique"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Unique
         }
       },
       {
@@ -1114,8 +1119,8 @@
           "id": "tiny_geode",
           "name": "Tiny Geode",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -1126,12 +1131,12 @@
           "id": "willow_log",
           "name": "Willow Log",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "1827f908-703e-45ce-bc31-b16f0a6a05e1",
@@ -1141,11 +1146,11 @@
       "id": "sapling_totem",
       "name": "Sapling Totem",
       "description": "A totem that grants health regeneration while stationary.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "JewelryCrafting",
+    "craftType": CraftType.JewelryCrafting,
     "levelRequirement": 1,
     "materials": [
       {
@@ -1156,8 +1161,8 @@
           "id": "willow_log",
           "name": "Willow Log",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1168,8 +1173,8 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1180,12 +1185,12 @@
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
           "description": "Jewel Crafter",
-          "itemType": "Material",
-          "rarity": "Unique"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Unique
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "f9f1a19a-805e-4380-b963-9b877ef122e4",
@@ -1195,11 +1200,11 @@
       "id": "jagged_obsidian_idol",
       "name": "Jagged Obsidian Idol",
       "description": "An idol made from jagged obsidian.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "JewelryCrafting",
+    "craftType": CraftType.JewelryCrafting,
     "levelRequirement": 1,
     "materials": [
       {
@@ -1210,8 +1215,8 @@
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
           "description": "Useful for Weapon Smithing",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -1222,8 +1227,8 @@
           "id": "stone",
           "name": "Stone",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1234,12 +1239,12 @@
           "id": "feather_lined_nest",
           "name": "Feather-lined Nest",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "0e86afb6-ccdb-488a-999b-1b5f5d960462",
@@ -1249,11 +1254,11 @@
       "id": "stone_edge_shortsword",
       "name": "Stone-Edge Shortsword",
       "description": "A sharp shortsword forged from stone and jagged obsidian.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "WeaponSmithing",
+    "craftType": CraftType.WeaponSmithing,
     "levelRequirement": 1,
     "materials": [
       {
@@ -1264,8 +1269,8 @@
           "id": "stone",
           "name": "Stone",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1276,8 +1281,8 @@
           "id": "flint",
           "name": "Flint",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1288,8 +1293,8 @@
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
           "description": "Useful for Weapon Smithing",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -1300,12 +1305,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "e1a02d8d-2b93-4e79-82ae-d53e265db518",
@@ -1315,11 +1320,11 @@
       "id": "jagged_obsidian_hatchet",
       "name": "Jagged Obsidian Hatchet",
       "description": "A durable hatchet crafted from jagged obsidian and stone.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "WeaponSmithing",
+    "craftType": CraftType.WeaponSmithing,
     "levelRequirement": 1,
     "materials": [
       {
@@ -1330,8 +1335,8 @@
           "id": "stone",
           "name": "Stone",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1342,8 +1347,8 @@
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
           "description": "Useful for Weapon Smithing",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -1354,8 +1359,8 @@
           "id": "willow_log",
           "name": "Willow Log",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1366,12 +1371,12 @@
           "id": "feather_lined_nest",
           "name": "Feather-lined Nest",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "49c0b296-f981-4ba9-950e-bbb87380a669",
@@ -1381,11 +1386,11 @@
       "id": "flint_morning_star",
       "name": "Flint Morning Star",
       "description": "A spiked mace made of flint and stone, dealing crushing damage.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "WeaponSmithing",
+    "craftType": CraftType.WeaponSmithing,
     "levelRequirement": 1,
     "materials": [
       {
@@ -1396,8 +1401,8 @@
           "id": "flint",
           "name": "Flint",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1408,8 +1413,8 @@
           "id": "stone",
           "name": "Stone",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1420,8 +1425,8 @@
           "id": "tiny_geode",
           "name": "Tiny Geode",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -1432,12 +1437,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "d7c9f417-6f0f-4158-bd53-26bd9a76e035",
@@ -1447,11 +1452,11 @@
       "id": "silkshadow_stiletto",
       "name": "Silkshadow Stiletto",
       "description": "A swift dagger made of silk vine and sharp flint.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "WeaponSmithing",
+    "craftType": CraftType.WeaponSmithing,
     "levelRequirement": 1,
     "materials": [
       {
@@ -1462,8 +1467,8 @@
           "id": "silk_vine",
           "name": "Silk Vine",
           "description": "Armor Forger",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -1474,8 +1479,8 @@
           "id": "flint",
           "name": "Flint",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1486,8 +1491,8 @@
           "id": "tiny_geode",
           "name": "Tiny Geode",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -1498,12 +1503,12 @@
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
           "description": "Jewel Crafter",
-          "itemType": "Material",
-          "rarity": "Unique"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Unique
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "4d5df6ee-b9dc-4bf4-89c2-3fc56125fbcb",
@@ -1513,11 +1518,11 @@
       "id": "willow_cleaver",
       "name": "Willow Cleaver",
       "description": "A large cleaver made from sturdy willow wood and obsidian.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "WeaponSmithing",
+    "craftType": CraftType.WeaponSmithing,
     "levelRequirement": 1,
     "materials": [
       {
@@ -1528,8 +1533,8 @@
           "id": "willow_log",
           "name": "Willow Log",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1540,8 +1545,8 @@
           "id": "flint",
           "name": "Flint",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1552,8 +1557,8 @@
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
           "description": "Useful for Weapon Smithing",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -1564,12 +1569,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "271bf75d-353d-4bc9-946d-884c04e86fa8",
@@ -1579,11 +1584,11 @@
       "id": "stone_reaver_greataxe",
       "name": "Stone-Reaver Greataxe",
       "description": "A heavy greataxe crafted from solid stone and jagged obsidian.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "WeaponSmithing",
+    "craftType": CraftType.WeaponSmithing,
     "levelRequirement": 1,
     "materials": [
       {
@@ -1594,8 +1599,8 @@
           "id": "stone",
           "name": "Stone",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1606,8 +1611,8 @@
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
           "description": "Useful for Weapon Smithing",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -1618,8 +1623,8 @@
           "id": "flint",
           "name": "Flint",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1630,12 +1635,12 @@
           "id": "feather_lined_nest",
           "name": "Feather-lined Nest",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "19e32feb-4d6b-4b21-a594-d037dd45e9d2",
@@ -1645,11 +1650,11 @@
       "id": "powder_core_maul",
       "name": "Powder-Core Maul",
       "description": "A massive maul with a crystalline powder core, delivering crushing blows.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "WeaponSmithing",
+    "craftType": CraftType.WeaponSmithing,
     "levelRequirement": 1,
     "materials": [
       {
@@ -1660,8 +1665,8 @@
           "id": "stone",
           "name": "Stone",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1672,8 +1677,8 @@
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
           "description": "Jewelry Crafting",
-          "itemType": "Material",
-          "rarity": "Unique"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Unique
         }
       },
       {
@@ -1684,8 +1689,8 @@
           "id": "flint",
           "name": "Flint",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1696,12 +1701,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "87a9a432-3582-4516-84f4-329a9930123b",
@@ -1711,11 +1716,11 @@
       "id": "nest_tip_pike",
       "name": "Nest-Tip Pike",
       "description": "A long pike tipped with feathers and flint for precision thrusts.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "WeaponSmithing",
+    "craftType": CraftType.WeaponSmithing,
     "levelRequirement": 1,
     "materials": [
       {
@@ -1726,8 +1731,8 @@
           "id": "willow_log",
           "name": "Willow Log",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1738,8 +1743,8 @@
           "id": "feather_lined_nest",
           "name": "Feather-lined Nest",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -1750,8 +1755,8 @@
           "id": "flint",
           "name": "Flint",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1762,12 +1767,12 @@
           "id": "tiny_geode",
           "name": "Tiny Geode",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "8d31de43-d1bf-4f12-b6e0-7f606573b117",
@@ -1777,11 +1782,11 @@
       "id": "stonebark_heater",
       "name": "Stonebark Heater",
       "description": "A sturdy shield combining stone and willow for reliable protection.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "WeaponSmithing",
+    "craftType": CraftType.WeaponSmithing,
     "levelRequirement": 1,
     "materials": [
       {
@@ -1792,8 +1797,8 @@
           "id": "stone",
           "name": "Stone",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1804,8 +1809,8 @@
           "id": "flint",
           "name": "Flint",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1816,8 +1821,8 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1828,12 +1833,12 @@
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
           "description": "Useful for Weapon Smithing",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "2ea004e5-e9a7-4f23-92df-2c9a65f10f31",
@@ -1843,11 +1848,11 @@
       "id": "silk_protector",
       "name": "Silk Protector",
       "description": "A shield woven with silk, allowing for magical protection.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "WeaponSmithing",
+    "craftType": CraftType.WeaponSmithing,
     "levelRequirement": 1,
     "materials": [
       {
@@ -1858,8 +1863,8 @@
           "id": "silk_vine",
           "name": "Silk Vine",
           "description": "Armor Forger",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -1870,8 +1875,8 @@
           "id": "tiny_geode",
           "name": "Tiny Geode",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -1882,12 +1887,12 @@
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
           "description": "Jewel Crafter",
-          "itemType": "Material",
-          "rarity": "Unique"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Unique
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "4354fddd-1af6-40a1-b8b2-2ca3436d39a9",
@@ -1897,11 +1902,11 @@
       "id": "shimmering_willow_staff",
       "name": "Shimmering Willow Staff",
       "description": "A magical staff made of willow wood and shimmering leaves.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "WeaponSmithing",
+    "craftType": CraftType.WeaponSmithing,
     "levelRequirement": 1,
     "materials": [
       {
@@ -1912,8 +1917,8 @@
           "id": "willow_log",
           "name": "Willow Log",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -1924,8 +1929,8 @@
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
           "description": "Jewel Crafter",
-          "itemType": "Material",
-          "rarity": "Unique"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Unique
         }
       },
       {
@@ -1936,8 +1941,8 @@
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
           "description": "Jewelry Crafting",
-          "itemType": "Material",
-          "rarity": "Unique"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Unique
         }
       },
       {
@@ -1948,12 +1953,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "2c3ad41f-b2bf-4a93-aa9c-07a4781c77fc",
@@ -1963,11 +1968,11 @@
       "id": "geode_bound_grimoire",
       "name": "Geode-Bound Grimoire",
       "description": "A magical tome embedded with geodes.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "WeaponSmithing",
+    "craftType": CraftType.WeaponSmithing,
     "levelRequirement": 1,
     "materials": [
       {
@@ -1978,8 +1983,8 @@
           "id": "tiny_geode",
           "name": "Tiny Geode",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -1990,8 +1995,8 @@
           "id": "silk_vine",
           "name": "Silk Vine",
           "description": "Armor Forger",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -2002,8 +2007,8 @@
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
           "description": "Jewel Crafter",
-          "itemType": "Material",
-          "rarity": "Unique"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Unique
         }
       },
       {
@@ -2014,12 +2019,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "ea5b8f8e-ddef-4766-987f-12ce7c56f6a6",
@@ -2029,11 +2034,11 @@
       "id": "jagged_obsidian_wand",
       "name": "Jagged Obsidian Wand",
       "description": "A magical wand forged from jagged obsidian.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "WeaponSmithing",
+    "craftType": CraftType.WeaponSmithing,
     "levelRequirement": 1,
     "materials": [
       {
@@ -2044,8 +2049,8 @@
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
           "description": "Useful for Weapon Smithing",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -2056,8 +2061,8 @@
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
           "description": "Jewelry Crafting",
-          "itemType": "Material",
-          "rarity": "Unique"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Unique
         }
       },
       {
@@ -2068,8 +2073,8 @@
           "id": "willow_log",
           "name": "Willow Log",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -2080,12 +2085,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "9b6425ca-20c2-456c-b0f8-2880f9cdb228",
@@ -2095,11 +2100,11 @@
       "id": "powdered_crystal_orb",
       "name": "Powdered Crystal Orb",
       "description": "An orb made from crystalline powder.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "WeaponSmithing",
+    "craftType": CraftType.WeaponSmithing,
     "levelRequirement": 1,
     "materials": [
       {
@@ -2110,8 +2115,8 @@
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
           "description": "Jewelry Crafting",
-          "itemType": "Material",
-          "rarity": "Unique"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Unique
         }
       },
       {
@@ -2122,8 +2127,8 @@
           "id": "tiny_geode",
           "name": "Tiny Geode",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -2134,12 +2139,12 @@
           "id": "silk_vine",
           "name": "Silk Vine",
           "description": "Armor Forger",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "a75ecbf3-0bd7-42eb-8378-0723391ca7ee",
@@ -2149,11 +2154,11 @@
       "id": "silk_strung_longbow",
       "name": "Silk-Strung Longbow",
       "description": "A longbow strung with resilient silk.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "WeaponSmithing",
+    "craftType": CraftType.WeaponSmithing,
     "levelRequirement": 1,
     "materials": [
       {
@@ -2164,8 +2169,8 @@
           "id": "willow_log",
           "name": "Willow Log",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -2176,8 +2181,8 @@
           "id": "silk_vine",
           "name": "Silk Vine",
           "description": "Armor Forger",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -2188,8 +2193,8 @@
           "id": "feather_lined_nest",
           "name": "Feather-lined Nest",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -2200,12 +2205,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "f1bd183c-1d71-4441-a9a7-55b6eabe632c",
@@ -2215,11 +2220,11 @@
       "id": "flintlock_crossbow",
       "name": "Flintlock Crossbow",
       "description": "A crossbow crafted using both willow and flint.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "WeaponSmithing",
+    "craftType": CraftType.WeaponSmithing,
     "levelRequirement": 1,
     "materials": [
       {
@@ -2230,8 +2235,8 @@
           "id": "stone",
           "name": "Stone",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -2242,8 +2247,8 @@
           "id": "flint",
           "name": "Flint",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -2254,8 +2259,8 @@
           "id": "willow_log",
           "name": "Willow Log",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -2266,12 +2271,12 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   },
   {
     "id": "0375e5f4-aec9-4a08-940c-98105e66e0b7",
@@ -2281,11 +2286,11 @@
       "id": "jagged_obsidian_knuckles",
       "name": "Jagged Obsidian Knuckles",
       "description": "A pair of hard knuckles made from jagged obsidian.",
-      "itemType": "Equipment",
-      "rarity": "Common"
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
     },
     "quantity": 1,
-    "craftType": "WeaponSmithing",
+    "craftType": CraftType.WeaponSmithing,
     "levelRequirement": 1,
     "materials": [
       {
@@ -2296,8 +2301,8 @@
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
           "description": "Useful for Weapon Smithing",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -2308,8 +2313,8 @@
           "id": "flint",
           "name": "Flint",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
@@ -2320,8 +2325,8 @@
           "id": "silk_vine",
           "name": "Silk Vine",
           "description": "Armor Forger",
-          "itemType": "Material",
-          "rarity": "Rare"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -2332,11 +2337,11 @@
           "id": "sticky_sap",
           "name": "Sticky Sap",
           "description": "",
-          "itemType": "Material",
-          "rarity": "Common"
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       }
     ],
-    "itemType": "Equipment"
+    "itemType": ItemType.Equipment
   }
-]
+] satisfies Recipe[];

@@ -1,3530 +1,3530 @@
 [
   {
-    "LootTableId": "769ad506-f62f-4b47-bc5a-874809168df3",
-    "LootTable": null,
-    "ExperienceReward": 2,
-    "Id": "00000000-0000-0000-0000-000000000001",
-    "Name": "Goblin",
-    "BaseAttributes": [
+    "lootTableId": "769ad506-f62f-4b47-bc5a-874809168df3",
+    "lootTable": null,
+    "experienceReward": 2,
+    "id": "00000000-0000-0000-0000-000000000001",
+    "name": "Goblin",
+    "baseAttributes": [
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 0,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "Constitution",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 1,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "Endurance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 2,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "Willpower",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 3,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "Strength",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 4,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "FightingSpirit",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 5,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "Dexterity",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 6,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "Agility",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 7,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "Intelligence",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 8,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "Wisdom",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 9,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "Instinct",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 10,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "Perception",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 11,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "Luck",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 12,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "MaxHealth",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 13,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "Health",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 14,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "HealthRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 15,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "MaxMana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 16,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "Mana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 17,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "ManaRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 18,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "BasicAttackSpeed",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 19,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "RecoveryRate",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 20,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "Power",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 21,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "PhysicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 22,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "MagicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 24,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "DamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 25,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "CritChance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 26,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "CritDamage",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 27,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "CritDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 28,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "Threat",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 29,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "CrowdControlResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 30,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "Accuracy",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 31,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "Dodge",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 32,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "Block",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 33,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "Parry",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 34,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "Barrier",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 35,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "MultiStrike",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 36,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "MultiCast",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 37,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "CooldownReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 38,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "ArmorPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 39,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "ManaPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 40,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "LifeSteal",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 41,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "FireResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 42,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "WaterResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 43,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "EarthResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 44,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "AirResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 45,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "PoisonResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000001",
-        "AttributeType": 23,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000001",
+        "attributeType": "FlatDamageReduction",
+        "value": 0
       }
     ],
-    "EssenceSlots": [],
-    "EquipmentSlots": [],
-    "AbilityIds": [],
-    "Abilities": [],
-    "IsAlive": false,
-    "BaseCombatAttributes": {},
-    "CombatAttributes": {},
-    "TemporaryModifiers": [],
-    "Statuses": [],
-    "Level": 1,
-    "Masteries": [],
-    "IsSummoned": false,
-    "ImagePath": ""
+    "essenceSlots": [],
+    "equipmentSlots": [],
+    "abilityIds": [],
+    "abilities": [],
+    "isAlive": false,
+    "baseCombatAttributes": {},
+    "combatAttributes": {},
+    "temporaryModifiers": [],
+    "statuses": [],
+    "level": 1,
+    "masteries": [],
+    "isSummoned": false,
+    "imagePath": ""
   },
   {
-    "LootTableId": "b598bbf1-ecd0-4f27-8f78-95c675f36131",
-    "LootTable": null,
-    "ExperienceReward": 3,
-    "Id": "00000000-0000-0000-0000-000000000002",
-    "Name": "Goblin Warrior",
-    "BaseAttributes": [
+    "lootTableId": "b598bbf1-ecd0-4f27-8f78-95c675f36131",
+    "lootTable": null,
+    "experienceReward": 3,
+    "id": "00000000-0000-0000-0000-000000000002",
+    "name": "Goblin Warrior",
+    "baseAttributes": [
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 0,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "Constitution",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 1,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "Endurance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 2,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "Willpower",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 3,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "Strength",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 4,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "FightingSpirit",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 5,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "Dexterity",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 6,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "Agility",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 7,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "Intelligence",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 8,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "Wisdom",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 9,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "Instinct",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 10,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "Perception",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 11,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "Luck",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 12,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "MaxHealth",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 13,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "Health",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 14,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "HealthRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 15,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "MaxMana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 16,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "Mana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 17,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "ManaRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 18,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "BasicAttackSpeed",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 19,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "RecoveryRate",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 20,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "Power",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 21,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "PhysicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 22,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "MagicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 23,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "FlatDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 24,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "DamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 25,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "CritChance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 26,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "CritDamage",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 27,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "CritDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 28,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "Threat",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 29,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "CrowdControlResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 30,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "Accuracy",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 31,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "Dodge",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 32,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "Block",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 33,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "Parry",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 34,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "Barrier",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 35,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "MultiStrike",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 36,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "MultiCast",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 37,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "CooldownReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 38,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "ArmorPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 39,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "ManaPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 40,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "LifeSteal",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 41,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "FireResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 42,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "WaterResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 43,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "EarthResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 44,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "AirResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000002",
-        "AttributeType": 45,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000002",
+        "attributeType": "PoisonResistance",
+        "value": 0
       }
     ],
-    "EssenceSlots": [],
-    "EquipmentSlots": [],
-    "AbilityIds": [],
-    "Abilities": [],
-    "IsAlive": false,
-    "BaseCombatAttributes": {},
-    "CombatAttributes": {},
-    "TemporaryModifiers": [],
-    "Statuses": [],
-    "Level": 1,
-    "Masteries": [],
-    "IsSummoned": false,
-    "ImagePath": ""
+    "essenceSlots": [],
+    "equipmentSlots": [],
+    "abilityIds": [],
+    "abilities": [],
+    "isAlive": false,
+    "baseCombatAttributes": {},
+    "combatAttributes": {},
+    "temporaryModifiers": [],
+    "statuses": [],
+    "level": 1,
+    "masteries": [],
+    "isSummoned": false,
+    "imagePath": ""
   },
   {
-    "LootTableId": "d7841d15-2a8d-42c7-9691-6749b8319a5f",
-    "LootTable": null,
-    "ExperienceReward": 3,
-    "Id": "00000000-0000-0000-0000-000000000003",
-    "Name": "Goblin Archer",
-    "BaseAttributes": [
+    "lootTableId": "d7841d15-2a8d-42c7-9691-6749b8319a5f",
+    "lootTable": null,
+    "experienceReward": 3,
+    "id": "00000000-0000-0000-0000-000000000003",
+    "name": "Goblin Archer",
+    "baseAttributes": [
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 0,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "Constitution",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 1,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "Endurance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 2,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "Willpower",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 3,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "Strength",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 4,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "FightingSpirit",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 5,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "Dexterity",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 6,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "Agility",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 7,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "Intelligence",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 8,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "Wisdom",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 9,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "Instinct",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 10,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "Perception",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 11,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "Luck",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 12,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "MaxHealth",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 13,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "Health",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 14,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "HealthRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 15,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "MaxMana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 16,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "Mana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 17,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "ManaRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 18,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "BasicAttackSpeed",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 19,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "RecoveryRate",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 20,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "Power",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 21,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "PhysicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 22,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "MagicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 23,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "FlatDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 24,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "DamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 25,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "CritChance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 26,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "CritDamage",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 27,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "CritDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 28,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "Threat",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 29,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "CrowdControlResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 30,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "Accuracy",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 31,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "Dodge",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 32,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "Block",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 33,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "Parry",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 34,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "Barrier",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 35,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "MultiStrike",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 36,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "MultiCast",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 37,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "CooldownReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 38,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "ArmorPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 39,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "ManaPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 40,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "LifeSteal",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 41,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "FireResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 42,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "WaterResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 43,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "EarthResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 44,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "AirResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000003",
-        "AttributeType": 45,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000003",
+        "attributeType": "PoisonResistance",
+        "value": 0
       }
     ],
-    "EssenceSlots": [],
-    "EquipmentSlots": [],
-    "AbilityIds": [],
-    "Abilities": [],
-    "IsAlive": false,
-    "BaseCombatAttributes": {},
-    "CombatAttributes": {},
-    "TemporaryModifiers": [],
-    "Statuses": [],
-    "Level": 1,
-    "Masteries": [],
-    "IsSummoned": false,
-    "ImagePath": ""
+    "essenceSlots": [],
+    "equipmentSlots": [],
+    "abilityIds": [],
+    "abilities": [],
+    "isAlive": false,
+    "baseCombatAttributes": {},
+    "combatAttributes": {},
+    "temporaryModifiers": [],
+    "statuses": [],
+    "level": 1,
+    "masteries": [],
+    "isSummoned": false,
+    "imagePath": ""
   },
   {
-    "LootTableId": "0503b809-8966-49ab-83a7-42e3831e9732",
-    "LootTable": null,
-    "ExperienceReward": 2,
-    "Id": "00000000-0000-0000-0000-000000000004",
-    "Name": "Large Rat",
-    "BaseAttributes": [
+    "lootTableId": "0503b809-8966-49ab-83a7-42e3831e9732",
+    "lootTable": null,
+    "experienceReward": 2,
+    "id": "00000000-0000-0000-0000-000000000004",
+    "name": "Large Rat",
+    "baseAttributes": [
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 0,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "Constitution",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 1,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "Endurance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 2,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "Willpower",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 3,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "Strength",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 4,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "FightingSpirit",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 5,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "Dexterity",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 6,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "Agility",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 7,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "Intelligence",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 8,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "Wisdom",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 9,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "Instinct",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 10,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "Perception",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 11,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "Luck",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 12,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "MaxHealth",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 13,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "Health",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 14,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "HealthRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 15,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "MaxMana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 16,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "Mana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 17,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "ManaRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 18,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "BasicAttackSpeed",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 19,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "RecoveryRate",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 20,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "Power",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 21,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "PhysicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 22,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "MagicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 23,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "FlatDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 24,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "DamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 25,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "CritChance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 26,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "CritDamage",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 27,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "CritDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 28,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "Threat",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 29,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "CrowdControlResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 30,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "Accuracy",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 31,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "Dodge",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 32,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "Block",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 33,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "Parry",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 34,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "Barrier",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 35,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "MultiStrike",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 36,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "MultiCast",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 37,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "CooldownReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 38,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "ArmorPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 39,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "ManaPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 40,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "LifeSteal",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 41,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "FireResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 42,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "WaterResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 43,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "EarthResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 44,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "AirResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000004",
-        "AttributeType": 45,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000004",
+        "attributeType": "PoisonResistance",
+        "value": 0
       }
     ],
-    "EssenceSlots": [],
-    "EquipmentSlots": [],
-    "AbilityIds": [],
-    "Abilities": [],
-    "IsAlive": false,
-    "BaseCombatAttributes": {},
-    "CombatAttributes": {},
-    "TemporaryModifiers": [],
-    "Statuses": [],
-    "Level": 1,
-    "Masteries": [],
-    "IsSummoned": false,
-    "ImagePath": ""
+    "essenceSlots": [],
+    "equipmentSlots": [],
+    "abilityIds": [],
+    "abilities": [],
+    "isAlive": false,
+    "baseCombatAttributes": {},
+    "combatAttributes": {},
+    "temporaryModifiers": [],
+    "statuses": [],
+    "level": 1,
+    "masteries": [],
+    "isSummoned": false,
+    "imagePath": ""
   },
   {
-    "LootTableId": "a4c45d2e-b6a3-40ab-8dc2-a57912938cc8",
-    "LootTable": null,
-    "ExperienceReward": 2,
-    "Id": "00000000-0000-0000-0000-000000000005",
-    "Name": "Flame Imp",
-    "BaseAttributes": [
+    "lootTableId": "a4c45d2e-b6a3-40ab-8dc2-a57912938cc8",
+    "lootTable": null,
+    "experienceReward": 2,
+    "id": "00000000-0000-0000-0000-000000000005",
+    "name": "Flame Imp",
+    "baseAttributes": [
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 0,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "Constitution",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 1,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "Endurance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 2,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "Willpower",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 3,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "Strength",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 4,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "FightingSpirit",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 5,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "Dexterity",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 6,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "Agility",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 7,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "Intelligence",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 8,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "Wisdom",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 9,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "Instinct",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 10,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "Perception",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 11,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "Luck",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 12,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "MaxHealth",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 13,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "Health",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 14,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "HealthRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 15,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "MaxMana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 16,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "Mana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 17,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "ManaRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 18,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "BasicAttackSpeed",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 19,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "RecoveryRate",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 20,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "Power",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 21,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "PhysicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 22,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "MagicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 23,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "FlatDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 24,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "DamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 25,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "CritChance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 26,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "CritDamage",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 27,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "CritDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 28,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "Threat",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 29,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "CrowdControlResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 30,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "Accuracy",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 31,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "Dodge",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 32,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "Block",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 33,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "Parry",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 34,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "Barrier",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 35,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "MultiStrike",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 36,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "MultiCast",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 37,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "CooldownReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 38,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "ArmorPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 39,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "ManaPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 40,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "LifeSteal",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 41,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "FireResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 42,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "WaterResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 43,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "EarthResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 44,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "AirResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000005",
-        "AttributeType": 45,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000005",
+        "attributeType": "PoisonResistance",
+        "value": 0
       }
     ],
-    "EssenceSlots": [],
-    "EquipmentSlots": [],
-    "AbilityIds": [],
-    "Abilities": [],
-    "IsAlive": false,
-    "BaseCombatAttributes": {},
-    "CombatAttributes": {},
-    "TemporaryModifiers": [],
-    "Statuses": [],
-    "Level": 1,
-    "Masteries": [],
-    "IsSummoned": false,
-    "ImagePath": ""
+    "essenceSlots": [],
+    "equipmentSlots": [],
+    "abilityIds": [],
+    "abilities": [],
+    "isAlive": false,
+    "baseCombatAttributes": {},
+    "combatAttributes": {},
+    "temporaryModifiers": [],
+    "statuses": [],
+    "level": 1,
+    "masteries": [],
+    "isSummoned": false,
+    "imagePath": ""
   },
   {
-    "LootTableId": "ff9915e3-614b-4dae-832f-3897c41d6f66",
-    "LootTable": null,
-    "ExperienceReward": 2,
-    "Id": "00000000-0000-0000-0000-000000000006",
-    "Name": "Frost Imp",
-    "BaseAttributes": [
+    "lootTableId": "ff9915e3-614b-4dae-832f-3897c41d6f66",
+    "lootTable": null,
+    "experienceReward": 2,
+    "id": "00000000-0000-0000-0000-000000000006",
+    "name": "Frost Imp",
+    "baseAttributes": [
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 0,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "Constitution",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 1,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "Endurance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 2,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "Willpower",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 3,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "Strength",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 4,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "FightingSpirit",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 5,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "Dexterity",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 6,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "Agility",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 7,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "Intelligence",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 8,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "Wisdom",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 9,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "Instinct",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 10,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "Perception",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 11,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "Luck",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 12,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "MaxHealth",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 13,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "Health",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 14,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "HealthRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 15,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "MaxMana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 16,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "Mana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 17,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "ManaRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 18,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "BasicAttackSpeed",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 19,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "RecoveryRate",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 20,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "Power",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 21,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "PhysicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 22,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "MagicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 23,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "FlatDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 24,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "DamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 25,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "CritChance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 26,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "CritDamage",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 27,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "CritDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 28,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "Threat",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 29,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "CrowdControlResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 30,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "Accuracy",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 31,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "Dodge",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 32,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "Block",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 33,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "Parry",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 34,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "Barrier",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 35,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "MultiStrike",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 36,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "MultiCast",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 37,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "CooldownReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 38,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "ArmorPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 39,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "ManaPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 40,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "LifeSteal",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 41,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "FireResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 42,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "WaterResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 43,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "EarthResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 44,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "AirResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000006",
-        "AttributeType": 45,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000006",
+        "attributeType": "PoisonResistance",
+        "value": 0
       }
     ],
-    "EssenceSlots": [],
-    "EquipmentSlots": [],
-    "AbilityIds": [],
-    "Abilities": [],
-    "IsAlive": false,
-    "BaseCombatAttributes": {},
-    "CombatAttributes": {},
-    "TemporaryModifiers": [],
-    "Statuses": [],
-    "Level": 1,
-    "Masteries": [],
-    "IsSummoned": false,
-    "ImagePath": ""
+    "essenceSlots": [],
+    "equipmentSlots": [],
+    "abilityIds": [],
+    "abilities": [],
+    "isAlive": false,
+    "baseCombatAttributes": {},
+    "combatAttributes": {},
+    "temporaryModifiers": [],
+    "statuses": [],
+    "level": 1,
+    "masteries": [],
+    "isSummoned": false,
+    "imagePath": ""
   },
   {
-    "LootTableId": "0985c465-fe98-4420-a931-9544ad209229",
-    "LootTable": null,
-    "ExperienceReward": 2,
-    "Id": "00000000-0000-0000-0000-000000000007",
-    "Name": "Shadow Imp",
-    "BaseAttributes": [
+    "lootTableId": "0985c465-fe98-4420-a931-9544ad209229",
+    "lootTable": null,
+    "experienceReward": 2,
+    "id": "00000000-0000-0000-0000-000000000007",
+    "name": "Shadow Imp",
+    "baseAttributes": [
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 0,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "Constitution",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 1,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "Endurance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 2,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "Willpower",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 3,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "Strength",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 4,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "FightingSpirit",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 5,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "Dexterity",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 6,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "Agility",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 7,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "Intelligence",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 8,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "Wisdom",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 9,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "Instinct",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 10,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "Perception",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 11,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "Luck",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 12,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "MaxHealth",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 13,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "Health",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 14,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "HealthRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 15,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "MaxMana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 16,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "Mana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 17,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "ManaRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 18,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "BasicAttackSpeed",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 19,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "RecoveryRate",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 20,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "Power",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 21,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "PhysicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 22,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "MagicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 23,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "FlatDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 24,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "DamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 25,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "CritChance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 26,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "CritDamage",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 27,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "CritDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 28,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "Threat",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 29,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "CrowdControlResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 30,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "Accuracy",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 31,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "Dodge",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 32,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "Block",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 33,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "Parry",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 34,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "Barrier",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 35,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "MultiStrike",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 36,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "MultiCast",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 37,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "CooldownReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 38,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "ArmorPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 39,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "ManaPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 40,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "LifeSteal",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 41,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "FireResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 42,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "WaterResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 43,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "EarthResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 44,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "AirResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000007",
-        "AttributeType": 45,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000007",
+        "attributeType": "PoisonResistance",
+        "value": 0
       }
     ],
-    "EssenceSlots": [],
-    "EquipmentSlots": [],
-    "AbilityIds": [],
-    "Abilities": [],
-    "IsAlive": false,
-    "BaseCombatAttributes": {},
-    "CombatAttributes": {},
-    "TemporaryModifiers": [],
-    "Statuses": [],
-    "Level": 1,
-    "Masteries": [],
-    "IsSummoned": false,
-    "ImagePath": ""
+    "essenceSlots": [],
+    "equipmentSlots": [],
+    "abilityIds": [],
+    "abilities": [],
+    "isAlive": false,
+    "baseCombatAttributes": {},
+    "combatAttributes": {},
+    "temporaryModifiers": [],
+    "statuses": [],
+    "level": 1,
+    "masteries": [],
+    "isSummoned": false,
+    "imagePath": ""
   },
   {
-    "LootTableId": "a590e9dd-05c6-4d2b-acf1-1e2a8da5693e",
-    "LootTable": null,
-    "ExperienceReward": 4,
-    "Id": "00000000-0000-0000-0000-000000000008",
-    "Name": "Vampire Bat",
-    "BaseAttributes": [
+    "lootTableId": "a590e9dd-05c6-4d2b-acf1-1e2a8da5693e",
+    "lootTable": null,
+    "experienceReward": 4,
+    "id": "00000000-0000-0000-0000-000000000008",
+    "name": "Vampire Bat",
+    "baseAttributes": [
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 0,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "Constitution",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 1,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "Endurance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 2,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "Willpower",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 3,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "Strength",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 4,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "FightingSpirit",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 5,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "Dexterity",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 6,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "Agility",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 7,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "Intelligence",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 8,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "Wisdom",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 9,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "Instinct",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 10,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "Perception",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 11,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "Luck",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 12,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "MaxHealth",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 13,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "Health",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 14,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "HealthRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 15,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "MaxMana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 16,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "Mana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 17,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "ManaRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 18,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "BasicAttackSpeed",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 19,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "RecoveryRate",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 20,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "Power",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 21,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "PhysicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 22,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "MagicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 23,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "FlatDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 24,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "DamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 25,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "CritChance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 26,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "CritDamage",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 27,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "CritDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 28,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "Threat",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 29,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "CrowdControlResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 30,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "Accuracy",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 31,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "Dodge",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 32,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "Block",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 33,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "Parry",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 34,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "Barrier",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 35,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "MultiStrike",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 36,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "MultiCast",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 37,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "CooldownReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 38,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "ArmorPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 39,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "ManaPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 40,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "LifeSteal",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 41,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "FireResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 42,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "WaterResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 43,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "EarthResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 44,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "AirResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000008",
-        "AttributeType": 45,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000008",
+        "attributeType": "PoisonResistance",
+        "value": 0
       }
     ],
-    "EssenceSlots": [],
-    "EquipmentSlots": [],
-    "AbilityIds": [],
-    "Abilities": [],
-    "IsAlive": false,
-    "BaseCombatAttributes": {},
-    "CombatAttributes": {},
-    "TemporaryModifiers": [],
-    "Statuses": [],
-    "Level": 1,
-    "Masteries": [],
-    "IsSummoned": false,
-    "ImagePath": ""
+    "essenceSlots": [],
+    "equipmentSlots": [],
+    "abilityIds": [],
+    "abilities": [],
+    "isAlive": false,
+    "baseCombatAttributes": {},
+    "combatAttributes": {},
+    "temporaryModifiers": [],
+    "statuses": [],
+    "level": 1,
+    "masteries": [],
+    "isSummoned": false,
+    "imagePath": ""
   },
   {
-    "LootTableId": "4f292452-425e-4c8f-b999-23d9dbebfb64",
-    "LootTable": null,
-    "ExperienceReward": 3,
-    "Id": "00000000-0000-0000-0000-000000000009",
-    "Name": "Blue Slime",
-    "BaseAttributes": [
+    "lootTableId": "4f292452-425e-4c8f-b999-23d9dbebfb64",
+    "lootTable": null,
+    "experienceReward": 3,
+    "id": "00000000-0000-0000-0000-000000000009",
+    "name": "Blue Slime",
+    "baseAttributes": [
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 0,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "Constitution",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 1,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "Endurance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 2,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "Willpower",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 3,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "Strength",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 4,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "FightingSpirit",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 5,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "Dexterity",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 6,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "Agility",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 7,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "Intelligence",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 8,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "Wisdom",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 9,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "Instinct",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 10,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "Perception",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 11,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "Luck",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 12,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "MaxHealth",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 13,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "Health",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 14,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "HealthRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 15,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "MaxMana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 16,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "Mana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 17,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "ManaRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 18,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "BasicAttackSpeed",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 19,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "RecoveryRate",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 20,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "Power",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 21,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "PhysicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 22,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "MagicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 23,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "FlatDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 24,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "DamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 25,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "CritChance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 26,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "CritDamage",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 27,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "CritDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 28,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "Threat",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 29,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "CrowdControlResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 30,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "Accuracy",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 31,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "Dodge",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 32,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "Block",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 33,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "Parry",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 34,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "Barrier",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 35,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "MultiStrike",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 36,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "MultiCast",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 37,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "CooldownReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 38,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "ArmorPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 39,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "ManaPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 40,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "LifeSteal",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 41,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "FireResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 42,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "WaterResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 43,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "EarthResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 44,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "AirResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000009",
-        "AttributeType": 45,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000009",
+        "attributeType": "PoisonResistance",
+        "value": 0
       }
     ],
-    "EssenceSlots": [],
-    "EquipmentSlots": [],
-    "AbilityIds": [],
-    "Abilities": [],
-    "IsAlive": false,
-    "BaseCombatAttributes": {},
-    "CombatAttributes": {},
-    "TemporaryModifiers": [],
-    "Statuses": [],
-    "Level": 1,
-    "Masteries": [],
-    "IsSummoned": false,
-    "ImagePath": ""
+    "essenceSlots": [],
+    "equipmentSlots": [],
+    "abilityIds": [],
+    "abilities": [],
+    "isAlive": false,
+    "baseCombatAttributes": {},
+    "combatAttributes": {},
+    "temporaryModifiers": [],
+    "statuses": [],
+    "level": 1,
+    "masteries": [],
+    "isSummoned": false,
+    "imagePath": ""
   },
   {
-    "LootTableId": "0cfdad66-d46b-49f9-b2a4-b01984dc9873",
-    "LootTable": null,
-    "ExperienceReward": 4,
-    "Id": "00000000-0000-0000-0000-000000000010",
-    "Name": "Brown Slime",
-    "BaseAttributes": [
+    "lootTableId": "0cfdad66-d46b-49f9-b2a4-b01984dc9873",
+    "lootTable": null,
+    "experienceReward": 4,
+    "id": "00000000-0000-0000-0000-000000000010",
+    "name": "Brown Slime",
+    "baseAttributes": [
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 0,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "Constitution",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 1,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "Endurance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 2,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "Willpower",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 3,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "Strength",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 4,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "FightingSpirit",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 5,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "Dexterity",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 6,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "Agility",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 7,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "Intelligence",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 8,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "Wisdom",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 9,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "Instinct",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 10,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "Perception",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 11,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "Luck",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 12,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "MaxHealth",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 13,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "Health",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 14,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "HealthRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 15,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "MaxMana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 16,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "Mana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 17,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "ManaRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 18,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "BasicAttackSpeed",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 19,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "RecoveryRate",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 20,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "Power",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 21,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "PhysicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 22,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "MagicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 23,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "FlatDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 24,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "DamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 25,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "CritChance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 26,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "CritDamage",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 27,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "CritDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 28,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "Threat",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 29,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "CrowdControlResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 30,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "Accuracy",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 31,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "Dodge",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 32,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "Block",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 33,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "Parry",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 34,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "Barrier",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 35,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "MultiStrike",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 36,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "MultiCast",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 37,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "CooldownReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 38,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "ArmorPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 39,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "ManaPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 40,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "LifeSteal",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 41,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "FireResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 42,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "WaterResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 43,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "EarthResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 44,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "AirResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000010",
-        "AttributeType": 45,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000010",
+        "attributeType": "PoisonResistance",
+        "value": 0
       }
     ],
-    "EssenceSlots": [],
-    "EquipmentSlots": [],
-    "AbilityIds": [],
-    "Abilities": [],
-    "IsAlive": false,
-    "BaseCombatAttributes": {},
-    "CombatAttributes": {},
-    "TemporaryModifiers": [],
-    "Statuses": [],
-    "Level": 1,
-    "Masteries": [],
-    "IsSummoned": false,
-    "ImagePath": ""
+    "essenceSlots": [],
+    "equipmentSlots": [],
+    "abilityIds": [],
+    "abilities": [],
+    "isAlive": false,
+    "baseCombatAttributes": {},
+    "combatAttributes": {},
+    "temporaryModifiers": [],
+    "statuses": [],
+    "level": 1,
+    "masteries": [],
+    "isSummoned": false,
+    "imagePath": ""
   },
   {
-    "LootTableId": "882e26f2-cc3e-4273-958c-0eede8fb5b59",
-    "LootTable": null,
-    "ExperienceReward": 3,
-    "Id": "00000000-0000-0000-0000-000000000011",
-    "Name": "Green Slime",
-    "BaseAttributes": [
+    "lootTableId": "882e26f2-cc3e-4273-958c-0eede8fb5b59",
+    "lootTable": null,
+    "experienceReward": 3,
+    "id": "00000000-0000-0000-0000-000000000011",
+    "name": "Green Slime",
+    "baseAttributes": [
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 0,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "Constitution",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 1,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "Endurance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 2,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "Willpower",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 3,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "Strength",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 4,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "FightingSpirit",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 5,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "Dexterity",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 6,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "Agility",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 7,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "Intelligence",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 8,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "Wisdom",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 9,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "Instinct",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 10,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "Perception",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 11,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "Luck",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 12,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "MaxHealth",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 13,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "Health",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 14,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "HealthRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 15,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "MaxMana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 16,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "Mana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 17,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "ManaRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 18,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "BasicAttackSpeed",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 19,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "RecoveryRate",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 20,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "Power",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 21,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "PhysicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 22,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "MagicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 23,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "FlatDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 24,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "DamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 25,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "CritChance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 26,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "CritDamage",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 27,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "CritDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 28,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "Threat",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 29,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "CrowdControlResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 30,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "Accuracy",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 31,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "Dodge",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 32,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "Block",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 33,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "Parry",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 34,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "Barrier",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 35,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "MultiStrike",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 36,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "MultiCast",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 37,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "CooldownReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 38,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "ArmorPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 39,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "ManaPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 40,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "LifeSteal",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 41,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "FireResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 42,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "WaterResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 43,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "EarthResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 44,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "AirResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000011",
-        "AttributeType": 45,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000011",
+        "attributeType": "PoisonResistance",
+        "value": 0
       }
     ],
-    "EssenceSlots": [],
-    "EquipmentSlots": [],
-    "AbilityIds": [],
-    "Abilities": [],
-    "IsAlive": false,
-    "BaseCombatAttributes": {},
-    "CombatAttributes": {},
-    "TemporaryModifiers": [],
-    "Statuses": [],
-    "Level": 1,
-    "Masteries": [],
-    "IsSummoned": false,
-    "ImagePath": ""
+    "essenceSlots": [],
+    "equipmentSlots": [],
+    "abilityIds": [],
+    "abilities": [],
+    "isAlive": false,
+    "baseCombatAttributes": {},
+    "combatAttributes": {},
+    "temporaryModifiers": [],
+    "statuses": [],
+    "level": 1,
+    "masteries": [],
+    "isSummoned": false,
+    "imagePath": ""
   },
   {
-    "LootTableId": "d8b981f0-b589-4e3b-a972-9cd51e900bff",
-    "LootTable": null,
-    "ExperienceReward": 4,
-    "Id": "00000000-0000-0000-0000-000000000012",
-    "Name": "Rainbow Slime",
-    "BaseAttributes": [
+    "lootTableId": "d8b981f0-b589-4e3b-a972-9cd51e900bff",
+    "lootTable": null,
+    "experienceReward": 4,
+    "id": "00000000-0000-0000-0000-000000000012",
+    "name": "Rainbow Slime",
+    "baseAttributes": [
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 0,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "Constitution",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 1,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "Endurance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 2,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "Willpower",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 3,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "Strength",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 4,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "FightingSpirit",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 5,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "Dexterity",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 6,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "Agility",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 7,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "Intelligence",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 8,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "Wisdom",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 9,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "Instinct",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 10,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "Perception",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 11,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "Luck",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 12,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "MaxHealth",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 13,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "Health",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 14,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "HealthRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 15,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "MaxMana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 16,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "Mana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 17,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "ManaRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 18,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "BasicAttackSpeed",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 19,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "RecoveryRate",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 20,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "Power",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 21,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "PhysicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 22,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "MagicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 23,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "FlatDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 24,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "DamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 25,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "CritChance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 26,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "CritDamage",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 27,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "CritDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 28,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "Threat",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 29,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "CrowdControlResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 30,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "Accuracy",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 31,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "Dodge",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 32,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "Block",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 33,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "Parry",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 34,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "Barrier",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 35,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "MultiStrike",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 36,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "MultiCast",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 37,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "CooldownReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 38,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "ArmorPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 39,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "ManaPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 40,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "LifeSteal",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 41,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "FireResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 42,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "WaterResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 43,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "EarthResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 44,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "AirResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000012",
-        "AttributeType": 45,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000012",
+        "attributeType": "PoisonResistance",
+        "value": 0
       }
     ],
-    "EssenceSlots": [],
-    "EquipmentSlots": [],
-    "AbilityIds": [],
-    "Abilities": [],
-    "IsAlive": false,
-    "BaseCombatAttributes": {},
-    "CombatAttributes": {},
-    "TemporaryModifiers": [],
-    "Statuses": [],
-    "Level": 1,
-    "Masteries": [],
-    "IsSummoned": false,
-    "ImagePath": ""
+    "essenceSlots": [],
+    "equipmentSlots": [],
+    "abilityIds": [],
+    "abilities": [],
+    "isAlive": false,
+    "baseCombatAttributes": {},
+    "combatAttributes": {},
+    "temporaryModifiers": [],
+    "statuses": [],
+    "level": 1,
+    "masteries": [],
+    "isSummoned": false,
+    "imagePath": ""
   },
   {
-    "LootTableId": "42c55f54-5e29-4323-80ce-01762c27ad98",
-    "LootTable": null,
-    "ExperienceReward": 3,
-    "Id": "00000000-0000-0000-0000-000000000013",
-    "Name": "Red Slime",
-    "BaseAttributes": [
+    "lootTableId": "42c55f54-5e29-4323-80ce-01762c27ad98",
+    "lootTable": null,
+    "experienceReward": 3,
+    "id": "00000000-0000-0000-0000-000000000013",
+    "name": "Red Slime",
+    "baseAttributes": [
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 0,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "Constitution",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 1,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "Endurance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 2,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "Willpower",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 3,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "Strength",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 4,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "FightingSpirit",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 5,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "Dexterity",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 6,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "Agility",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 7,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "Intelligence",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 8,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "Wisdom",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 9,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "Instinct",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 10,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "Perception",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 11,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "Luck",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 12,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "MaxHealth",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 13,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "Health",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 14,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "HealthRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 15,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "MaxMana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 16,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "Mana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 17,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "ManaRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 18,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "BasicAttackSpeed",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 19,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "RecoveryRate",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 20,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "Power",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 21,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "PhysicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 22,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "MagicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 24,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "DamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 25,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "CritChance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 26,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "CritDamage",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 27,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "CritDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 28,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "Threat",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 29,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "CrowdControlResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 30,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "Accuracy",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 31,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "Dodge",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 32,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "Block",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 33,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "Parry",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 34,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "Barrier",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 35,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "MultiStrike",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 36,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "MultiCast",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 37,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "CooldownReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 38,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "ArmorPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 39,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "ManaPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 40,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "LifeSteal",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 41,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "FireResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 42,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "WaterResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 43,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "EarthResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 44,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "AirResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 45,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "PoisonResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000013",
-        "AttributeType": 23,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000013",
+        "attributeType": "FlatDamageReduction",
+        "value": 0
       }
     ],
-    "EssenceSlots": [],
-    "EquipmentSlots": [],
-    "AbilityIds": [],
-    "Abilities": [],
-    "IsAlive": false,
-    "BaseCombatAttributes": {},
-    "CombatAttributes": {},
-    "TemporaryModifiers": [],
-    "Statuses": [],
-    "Level": 1,
-    "Masteries": [],
-    "IsSummoned": false,
-    "ImagePath": ""
+    "essenceSlots": [],
+    "equipmentSlots": [],
+    "abilityIds": [],
+    "abilities": [],
+    "isAlive": false,
+    "baseCombatAttributes": {},
+    "combatAttributes": {},
+    "temporaryModifiers": [],
+    "statuses": [],
+    "level": 1,
+    "masteries": [],
+    "isSummoned": false,
+    "imagePath": ""
   },
   {
-    "LootTableId": "bd5fb1df-380f-4a09-865c-5f0fee704e2e",
-    "LootTable": null,
-    "ExperienceReward": 4,
-    "Id": "00000000-0000-0000-0000-000000000014",
-    "Name": "Transparent Slime",
-    "BaseAttributes": [
+    "lootTableId": "bd5fb1df-380f-4a09-865c-5f0fee704e2e",
+    "lootTable": null,
+    "experienceReward": 4,
+    "id": "00000000-0000-0000-0000-000000000014",
+    "name": "Transparent Slime",
+    "baseAttributes": [
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 0,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "Constitution",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 1,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "Endurance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 2,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "Willpower",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 3,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "Strength",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 4,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "FightingSpirit",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 5,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "Dexterity",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 6,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "Agility",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 7,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "Intelligence",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 8,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "Wisdom",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 9,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "Instinct",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 10,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "Perception",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 11,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "Luck",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 12,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "MaxHealth",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 13,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "Health",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 14,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "HealthRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 15,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "MaxMana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 16,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "Mana",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 17,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "ManaRegeneration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 18,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "BasicAttackSpeed",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 19,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "RecoveryRate",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 20,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "Power",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 21,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "PhysicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 22,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "MagicalDefense",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 23,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "FlatDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 24,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "DamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 25,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "CritChance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 26,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "CritDamage",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 27,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "CritDamageReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 28,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "Threat",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 29,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "CrowdControlResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 30,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "Accuracy",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 31,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "Dodge",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 32,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "Block",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 33,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "Parry",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 34,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "Barrier",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 35,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "MultiStrike",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 36,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "MultiCast",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 37,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "CooldownReduction",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 38,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "ArmorPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 39,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "ManaPenetration",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 40,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "LifeSteal",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 41,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "FireResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 42,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "WaterResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 43,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "EarthResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 44,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "AirResistance",
+        "value": 0
       },
       {
-        "EntityId": "00000000-0000-0000-0000-000000000014",
-        "AttributeType": 45,
-        "Value": 0
+        "entityId": "00000000-0000-0000-0000-000000000014",
+        "attributeType": "PoisonResistance",
+        "value": 0
       }
     ],
-    "EssenceSlots": [],
-    "EquipmentSlots": [],
-    "AbilityIds": [],
-    "Abilities": [],
-    "IsAlive": false,
-    "BaseCombatAttributes": {},
-    "CombatAttributes": {},
-    "TemporaryModifiers": [],
-    "Statuses": [],
-    "Level": 1,
-    "Masteries": [],
-    "IsSummoned": false,
-    "ImagePath": ""
+    "essenceSlots": [],
+    "equipmentSlots": [],
+    "abilityIds": [],
+    "abilities": [],
+    "isAlive": false,
+    "baseCombatAttributes": {},
+    "combatAttributes": {},
+    "temporaryModifiers": [],
+    "statuses": [],
+    "level": 1,
+    "masteries": [],
+    "isSummoned": false,
+    "imagePath": ""
   }
 ]

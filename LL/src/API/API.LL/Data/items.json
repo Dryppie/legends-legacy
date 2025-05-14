@@ -1,1653 +1,1653 @@
 [
   {
-    "Id": "stone",
-    "Name": "Stone",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "flint",
-    "Name": "Flint",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "tiny_geode",
-    "Name": "Tiny Geode",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "jagged_obsidian",
-    "Name": "Jagged Obsidian",
-    "Description": "Useful for Weapon Smithing",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "crystalline_powder",
-    "Name": "Crystalline Powder",
-    "Description": "Jewelry Crafting",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "copper_ore",
-    "Name": "Copper Ore",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "malachite_shard",
-    "Name": "Malachite Shard",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "verdant_ore",
-    "Name": "Verdant Ore",
-    "Description": "Armor Forger",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "living_amber",
-    "Name": "Living Amber",
-    "Description": "Jewel Crafter",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "tin_ore",
-    "Name": "Tin Ore",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "river_pearl",
-    "Name": "River Pearl",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "galvanic_dust",
-    "Name": "Galvanic Dust",
-    "Description": "Jewelry Crafting",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "frosted_metal_shard",
-    "Name": "Frosted Metal Shard",
-    "Description": "Armor Forger",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "iron_ore",
-    "Name": "Iron Ore",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "hematite_lump",
-    "Name": "Hematite Lump",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "fossil_fragment",
-    "Name": "Fossil Fragment",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "rusted_scale",
-    "Name": "Rusted Scale",
-    "Description": "Armor Forger",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "ironwood_core",
-    "Name": "Ironwood Core",
-    "Description": "Weapon Smith",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "silver_ore",
-    "Name": "Silver Ore",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "moonstone_chip",
-    "Name": "Moonstone Chip",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "ice_crystal",
-    "Name": "Ice Crystal",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "starlight_dust",
-    "Name": "Starlight Dust",
-    "Description": "Jewel Crafter",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "mist_infused_gem",
-    "Name": "Mist-Infused Gem",
-    "Description": "Jewelry Crafting",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "gold_ore",
-    "Name": "Gold Ore",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "raw_sunstone",
-    "Name": "Raw Sunstone",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "topaz_shard",
-    "Name": "Topaz Shard",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "ember_gem",
-    "Name": "Ember Gem",
-    "Description": "Jewel Crafter",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "pyrite_shard",
-    "Name": "Pyrite Shard",
-    "Description": "Armor Forger",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "mithril_ore",
-    "Name": "Mithril Ore",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "mystic_quartz",
-    "Name": "Mystic Quartz",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "mana_dust",
-    "Name": "Mana Dust",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "aetherium_fragment",
-    "Name": "Aetherium Fragment",
-    "Description": "Jewel Crafter",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "arcane_ore",
-    "Name": "Arcane Ore",
-    "Description": "Weapon Smith",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "adamantite_ore",
-    "Name": "Adamantite Ore",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "fire_opal",
-    "Name": "Fire Opal",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "lava_core",
-    "Name": "Lava Core",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "searing_ash",
-    "Name": "Searing Ash",
-    "Description": "Weapon Smith",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "infernal_ember",
-    "Name": "Infernal Ember",
-    "Description": "Jewel Crafter",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "obsidian_ore",
-    "Name": "Obsidian Ore",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "obsidian_shard",
-    "Name": "Obsidian Shard",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "ember_crystal",
-    "Name": "Ember Crystal",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "darkstone_gem",
-    "Name": "Darkstone Gem",
-    "Description": "Jewel Crafter",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "void_essence",
-    "Name": "Void Essence",
-    "Description": "Armor Forger",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "arcanite_ore",
-    "Name": "Arcanite Ore",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "arcane_crystal",
-    "Name": "Arcane Crystal",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "rune_fragment",
-    "Name": "Rune Fragment",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "prismatic_shard",
-    "Name": "Prismatic Shard",
-    "Description": "Jewel Crafter",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "cursed_dust",
-    "Name": "Cursed Dust",
-    "Description": "Armor Forger",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "dragonstone",
-    "Name": "Dragonstone",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "dragon_scale",
-    "Name": "Dragon Scale",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "heartfire_gem",
-    "Name": "Heartfire Gem",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "ember_scale",
-    "Name": "Ember Scale",
-    "Description": "Weapon Smith",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "essence_of_flame",
-    "Name": "Essence of Flame",
-    "Description": "Jewel Crafter",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "willow_log",
-    "Name": "Willow Log",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "sticky_sap",
-    "Name": "Sticky Sap",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "feather_lined_nest",
-    "Name": "Feather-lined Nest",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "silk_vine",
-    "Name": "Silk Vine",
-    "Description": "Armor Forger",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "shimmering_leaf",
-    "Name": "Shimmering Leaf",
-    "Description": "Jewel Crafter",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "maple_log",
-    "Name": "Maple Log",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "amber_syrup",
-    "Name": "Amber Syrup",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "sweet_bark_chips",
-    "Name": "Sweet Bark Chips",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "honeycomb",
-    "Name": "Honeycomb",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "glowing_amber",
-    "Name": "Glowing Amber",
-    "Description": "Jewel Crafter",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "ash_log",
-    "Name": "Ash Log",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "charcoal_chunk",
-    "Name": "Charcoal Chunk",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "fire_beetle_carapace",
-    "Name": "Fire Beetle Carapace",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "scorched_resin",
-    "Name": "Scorched Resin",
-    "Description": "Weapon Smith",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "inferno_bark",
-    "Name": "Inferno Bark",
-    "Description": "Armor Forger",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "birch_log",
-    "Name": "Birch Log",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "frozen_sap",
-    "Name": "Frozen Sap",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "moon_moss",
-    "Name": "Moon-Moss",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "silver_moth",
-    "Name": "Silver Moth",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "lunar_essence",
-    "Name": "Lunar Essence",
-    "Description": "Jewel Crafter",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "spirit_spruce_log",
-    "Name": "Spirit Spruce Log",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "spirit_bark",
-    "Name": "Spirit Bark",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "spirit_dust",
-    "Name": "Spirit Dust",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "spirit_orb",
-    "Name": "Spirit Orb",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "echoing_essence",
-    "Name": "Echoing Essence",
-    "Description": "Armor Forger",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "cedar_log",
-    "Name": "Cedar Log",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "resin_glob",
-    "Name": "Resin Glob",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "sun_bloom_seed",
-    "Name": "Sun-Bloom Seed",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "radiant_pollen",
-    "Name": "Radiant Pollen",
-    "Description": "Jewel Crafter",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "solar_shard",
-    "Name": "Solar Shard",
-    "Description": "Weapon Smith",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "pine_log",
-    "Name": "Pine Log",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "pine_cone",
-    "Name": "Pine Cone",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "ice_dust_crystal",
-    "Name": "Ice-Dust Crystal",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "snow_owl_feather",
-    "Name": "Snow Owl Feather",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "frostbound_heart",
-    "Name": "Frostbound Heart",
-    "Description": "Jewel Crafter",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "oak_log",
-    "Name": "Oak Log",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "blood_acorn",
-    "Name": "Blood Acorn",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "leechvine",
-    "Name": "Leechvine",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "crimson_spore",
-    "Name": "Crimson Spore",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "hemal_bark",
-    "Name": "Hemal Bark",
-    "Description": "Armor Forger",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "dark_log",
-    "Name": "Dark Log",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "wisp",
-    "Name": "Wisp",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "spectral_leaf",
-    "Name": "Spectral Leaf",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "spirit_core",
-    "Name": "Spirit Core",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "gloom_essence",
-    "Name": "Gloom Essence",
-    "Description": "Jewel Crafter",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "elm_log",
-    "Name": "Elm Log",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "charged_bark",
-    "Name": "Charged Bark",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 1,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "sparkstone_fragment",
-    "Name": "Sparkstone Fragment",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "thunderheart_core",
-    "Name": "Thunderheart Core",
-    "Description": "Weapon Smith",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "electrum_sap",
-    "Name": "Electrum Sap",
-    "Description": "Jewel Crafter",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "yew_log",
-    "Name": "Yew Log",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "druidic_rune",
-    "Name": "Druidic Rune",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 2,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "spirit_feather",
-    "Name": "Spirit Feather",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "seed_of_ages",
-    "Name": "Seed of Ages",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "eternal_leaf",
-    "Name": "Eternal Leaf",
-    "Description": "",
-    "ItemType": 2,
-    "Rarity": 3,
-    "EquipmentType": 0,
-    "AttributeModifiers": []
-  },
-  {
-    "Id": "jagged_obsidian_helm",
-    "Name": "Jagged Obsidian Helm",
-    "Description": "A heavy helmet forged from jagged obsidian and stone.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": [
+    "id": "stone",
+    "name": "Stone",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "flint",
+    "name": "Flint",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "tiny_geode",
+    "name": "Tiny Geode",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "jagged_obsidian",
+    "name": "Jagged Obsidian",
+    "description": "Useful for Weapon Smithing",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "crystalline_powder",
+    "name": "Crystalline Powder",
+    "description": "Jewelry Crafting",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "copper_ore",
+    "name": "Copper Ore",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "malachite_shard",
+    "name": "Malachite Shard",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "verdant_ore",
+    "name": "Verdant Ore",
+    "description": "Armor Forger",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "living_amber",
+    "name": "Living Amber",
+    "description": "Jewel Crafter",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "tin_ore",
+    "name": "Tin Ore",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "river_pearl",
+    "name": "River Pearl",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "galvanic_dust",
+    "name": "Galvanic Dust",
+    "description": "Jewelry Crafting",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "frosted_metal_shard",
+    "name": "Frosted Metal Shard",
+    "description": "Armor Forger",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "iron_ore",
+    "name": "Iron Ore",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "hematite_lump",
+    "name": "Hematite Lump",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "fossil_fragment",
+    "name": "Fossil Fragment",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "rusted_scale",
+    "name": "Rusted Scale",
+    "description": "Armor Forger",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "ironwood_core",
+    "name": "Ironwood Core",
+    "description": "Weapon Smith",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "silver_ore",
+    "name": "Silver Ore",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "moonstone_chip",
+    "name": "Moonstone Chip",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "ice_crystal",
+    "name": "Ice Crystal",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "starlight_dust",
+    "name": "Starlight Dust",
+    "description": "Jewel Crafter",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "mist_infused_gem",
+    "name": "Mist-Infused Gem",
+    "description": "Jewelry Crafting",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "gold_ore",
+    "name": "Gold Ore",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "raw_sunstone",
+    "name": "Raw Sunstone",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "topaz_shard",
+    "name": "Topaz Shard",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "ember_gem",
+    "name": "Ember Gem",
+    "description": "Jewel Crafter",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "pyrite_shard",
+    "name": "Pyrite Shard",
+    "description": "Armor Forger",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "mithril_ore",
+    "name": "Mithril Ore",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "mystic_quartz",
+    "name": "Mystic Quartz",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "mana_dust",
+    "name": "Mana Dust",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "aetherium_fragment",
+    "name": "Aetherium Fragment",
+    "description": "Jewel Crafter",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "arcane_ore",
+    "name": "Arcane Ore",
+    "description": "Weapon Smith",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "adamantite_ore",
+    "name": "Adamantite Ore",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "fire_opal",
+    "name": "Fire Opal",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "lava_core",
+    "name": "Lava Core",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "searing_ash",
+    "name": "Searing Ash",
+    "description": "Weapon Smith",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "infernal_ember",
+    "name": "Infernal Ember",
+    "description": "Jewel Crafter",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "obsidian_ore",
+    "name": "Obsidian Ore",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "obsidian_shard",
+    "name": "Obsidian Shard",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "ember_crystal",
+    "name": "Ember Crystal",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "darkstone_gem",
+    "name": "Darkstone Gem",
+    "description": "Jewel Crafter",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "void_essence",
+    "name": "Void Essence",
+    "description": "Armor Forger",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "arcanite_ore",
+    "name": "Arcanite Ore",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "arcane_crystal",
+    "name": "Arcane Crystal",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "rune_fragment",
+    "name": "Rune Fragment",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "prismatic_shard",
+    "name": "Prismatic Shard",
+    "description": "Jewel Crafter",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "cursed_dust",
+    "name": "Cursed Dust",
+    "description": "Armor Forger",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "dragonstone",
+    "name": "Dragonstone",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "dragon_scale",
+    "name": "Dragon Scale",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "heartfire_gem",
+    "name": "Heartfire Gem",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "ember_scale",
+    "name": "Ember Scale",
+    "description": "Weapon Smith",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "essence_of_flame",
+    "name": "Essence of Flame",
+    "description": "Jewel Crafter",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "willow_log",
+    "name": "Willow Log",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "sticky_sap",
+    "name": "Sticky Sap",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "feather_lined_nest",
+    "name": "Feather-lined Nest",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "silk_vine",
+    "name": "Silk Vine",
+    "description": "Armor Forger",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "shimmering_leaf",
+    "name": "Shimmering Leaf",
+    "description": "Jewel Crafter",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "maple_log",
+    "name": "Maple Log",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "amber_syrup",
+    "name": "Amber Syrup",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "sweet_bark_chips",
+    "name": "Sweet Bark Chips",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "honeycomb",
+    "name": "Honeycomb",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "glowing_amber",
+    "name": "Glowing Amber",
+    "description": "Jewel Crafter",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "ash_log",
+    "name": "Ash Log",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "charcoal_chunk",
+    "name": "Charcoal Chunk",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "fire_beetle_carapace",
+    "name": "Fire Beetle Carapace",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "scorched_resin",
+    "name": "Scorched Resin",
+    "description": "Weapon Smith",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "inferno_bark",
+    "name": "Inferno Bark",
+    "description": "Armor Forger",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "birch_log",
+    "name": "Birch Log",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "frozen_sap",
+    "name": "Frozen Sap",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "moon_moss",
+    "name": "Moon-Moss",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "silver_moth",
+    "name": "Silver Moth",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "lunar_essence",
+    "name": "Lunar Essence",
+    "description": "Jewel Crafter",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "spirit_spruce_log",
+    "name": "Spirit Spruce Log",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "spirit_bark",
+    "name": "Spirit Bark",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "spirit_dust",
+    "name": "Spirit Dust",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "spirit_orb",
+    "name": "Spirit Orb",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "echoing_essence",
+    "name": "Echoing Essence",
+    "description": "Armor Forger",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "cedar_log",
+    "name": "Cedar Log",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "resin_glob",
+    "name": "Resin Glob",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "sun_bloom_seed",
+    "name": "Sun-Bloom Seed",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "radiant_pollen",
+    "name": "Radiant Pollen",
+    "description": "Jewel Crafter",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "solar_shard",
+    "name": "Solar Shard",
+    "description": "Weapon Smith",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "pine_log",
+    "name": "Pine Log",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "pine_cone",
+    "name": "Pine Cone",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "ice_dust_crystal",
+    "name": "Ice-Dust Crystal",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "snow_owl_feather",
+    "name": "Snow Owl Feather",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "frostbound_heart",
+    "name": "Frostbound Heart",
+    "description": "Jewel Crafter",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "oak_log",
+    "name": "Oak Log",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "blood_acorn",
+    "name": "Blood Acorn",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "leechvine",
+    "name": "Leechvine",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "crimson_spore",
+    "name": "Crimson Spore",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "hemal_bark",
+    "name": "Hemal Bark",
+    "description": "Armor Forger",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "dark_log",
+    "name": "Dark Log",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "wisp",
+    "name": "Wisp",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "spectral_leaf",
+    "name": "Spectral Leaf",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "spirit_core",
+    "name": "Spirit Core",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "gloom_essence",
+    "name": "Gloom Essence",
+    "description": "Jewel Crafter",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "elm_log",
+    "name": "Elm Log",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "charged_bark",
+    "name": "Charged Bark",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "sparkstone_fragment",
+    "name": "Sparkstone Fragment",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "thunderheart_core",
+    "name": "Thunderheart Core",
+    "description": "Weapon Smith",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "electrum_sap",
+    "name": "Electrum Sap",
+    "description": "Jewel Crafter",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "yew_log",
+    "name": "Yew Log",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "druidic_rune",
+    "name": "Druidic Rune",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Unique",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "spirit_feather",
+    "name": "Spirit Feather",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "seed_of_ages",
+    "name": "Seed of Ages",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "eternal_leaf",
+    "name": "Eternal Leaf",
+    "description": "",
+    "itemType": "Material",
+    "rarity": "Legendary",
+    "equipmentType": "Head",
+    "attributeModifiers": []
+  },
+  {
+    "id": "jagged_obsidian_helm",
+    "name": "Jagged Obsidian Helm",
+    "description": "A heavy helmet forged from jagged obsidian and stone.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [
       {
-        "Id": "3459045f-bb38-48a9-81b1-07552ff5894c",
-        "AttributeType": 2,
-        "Amount": 1,
-        "ModifierType": 0
+        "id": "3459045f-bb38-48a9-81b1-07552ff5894c",
+        "attributeType": "Willpower",
+        "amount": 1,
+        "modifierType": "Flat"
       },
       {
-        "Id": "c742b5de-e223-4112-89e5-e47562edadcd",
-        "AttributeType": 28,
-        "Amount": 1,
-        "ModifierType": 0
+        "id": "c742b5de-e223-4112-89e5-e47562edadcd",
+        "attributeType": "Threat",
+        "amount": 1,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "jagged_obsidian_cuirass",
-    "Name": "Jagged Obsidian Cuirass",
-    "Description": "A sturdy cuirass crafted from jagged obsidian.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 2,
-    "AttributeModifiers": [
+    "id": "jagged_obsidian_cuirass",
+    "name": "Jagged Obsidian Cuirass",
+    "description": "A sturdy cuirass crafted from jagged obsidian.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Chest",
+    "attributeModifiers": [
       {
-        "Id": "0696fc44-d48e-4a54-9f81-a3866f780c1f",
-        "AttributeType": 0,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "0696fc44-d48e-4a54-9f81-a3866f780c1f",
+        "attributeType": "Constitution",
+        "amount": 2,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "jagged_obsidian_greaves",
-    "Name": "Jagged Obsidian Greaves",
-    "Description": "Reinforced greaves made of jagged obsidian and stone.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 4,
-    "AttributeModifiers": [
+    "id": "jagged_obsidian_greaves",
+    "name": "Jagged Obsidian Greaves",
+    "description": "Reinforced greaves made of jagged obsidian and stone.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Legs",
+    "attributeModifiers": [
       {
-        "Id": "e9595040-9c93-43cd-99c1-f3cf66d839b5",
-        "AttributeType": 1,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "e9595040-9c93-43cd-99c1-f3cf66d839b5",
+        "attributeType": "Endurance",
+        "amount": 2,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "willow_hood",
-    "Name": "Willow Hood",
-    "Description": "A lightweight hood made from willow.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": [
+    "id": "willow_hood",
+    "name": "Willow Hood",
+    "description": "A lightweight hood made from willow.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [
       {
-        "Id": "81a161cb-4f50-40a3-bf65-0e073bedaca6",
-        "AttributeType": 9,
-        "Amount": 3,
-        "ModifierType": 0
+        "id": "81a161cb-4f50-40a3-bf65-0e073bedaca6",
+        "attributeType": "Instinct",
+        "amount": 3,
+        "modifierType": "Flat"
       },
       {
-        "Id": "106d937e-da42-47fe-9d6f-0525d25daf5a",
-        "AttributeType": 13,
-        "Amount": 5,
-        "ModifierType": 0
+        "id": "106d937e-da42-47fe-9d6f-0525d25daf5a",
+        "attributeType": "Health",
+        "amount": 5,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "willow_brigandine",
-    "Name": "Willow Brigandine",
-    "Description": "A balanced brigandine crafted from willow.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 2,
-    "AttributeModifiers": [
+    "id": "willow_brigandine",
+    "name": "Willow Brigandine",
+    "description": "A balanced brigandine crafted from willow.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Chest",
+    "attributeModifiers": [
       {
-        "Id": "dcbf23e2-8d10-47f4-b7d0-d27130a957f6",
-        "AttributeType": 3,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "dcbf23e2-8d10-47f4-b7d0-d27130a957f6",
+        "attributeType": "Strength",
+        "amount": 2,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "willow_tassets",
-    "Name": "Willow Tassets",
-    "Description": "Light armor piece.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 4,
-    "AttributeModifiers": [
+    "id": "willow_tassets",
+    "name": "Willow Tassets",
+    "description": "Light armor piece.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Legs",
+    "attributeModifiers": [
       {
-        "Id": "85b2ebf3-8684-45b2-b342-80b899bc2a4f",
-        "AttributeType": 4,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "85b2ebf3-8684-45b2-b342-80b899bc2a4f",
+        "attributeType": "FightingSpirit",
+        "amount": 2,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "silk_capuche",
-    "Name": "Silk Capuche",
-    "Description": "A light silk hood.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": [
+    "id": "silk_capuche",
+    "name": "Silk Capuche",
+    "description": "A light silk hood.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [
       {
-        "Id": "0be456f7-f48e-4130-96c0-24808182c794",
-        "AttributeType": 11,
-        "Amount": 3,
-        "ModifierType": 0
+        "id": "0be456f7-f48e-4130-96c0-24808182c794",
+        "attributeType": "Luck",
+        "amount": 3,
+        "modifierType": "Flat"
       },
       {
-        "Id": "3636411b-8de1-4f9d-a92b-77046d6b0d3d",
-        "AttributeType": 25,
-        "Amount": 1,
-        "ModifierType": 0
+        "id": "3636411b-8de1-4f9d-a92b-77046d6b0d3d",
+        "attributeType": "CritChance",
+        "amount": 1,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "silk_vest",
-    "Name": "Silk Vest",
-    "Description": "An evasive vest made of silk.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 2,
-    "AttributeModifiers": [
+    "id": "silk_vest",
+    "name": "Silk Vest",
+    "description": "An evasive vest made of silk.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Chest",
+    "attributeModifiers": [
       {
-        "Id": "436e642f-f43d-42a2-ace5-bcd47388b26e",
-        "AttributeType": 5,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "436e642f-f43d-42a2-ace5-bcd47388b26e",
+        "attributeType": "Dexterity",
+        "amount": 2,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "silk_trousers",
-    "Name": "Silk Trousers",
-    "Description": "Lightweight trousers.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 4,
-    "AttributeModifiers": [
+    "id": "silk_trousers",
+    "name": "Silk Trousers",
+    "description": "Lightweight trousers.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Legs",
+    "attributeModifiers": [
       {
-        "Id": "13c287d8-5ed0-4db7-9884-ef1fa3b727db",
-        "AttributeType": 6,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "13c287d8-5ed0-4db7-9884-ef1fa3b727db",
+        "attributeType": "Agility",
+        "amount": 2,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "powder_hood",
-    "Name": "Powder Hood",
-    "Description": "A hood crafted from crystalline powder.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 0,
-    "AttributeModifiers": [
+    "id": "powder_hood",
+    "name": "Powder Hood",
+    "description": "A hood crafted from crystalline powder.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [
       {
-        "Id": "2583d815-9289-499a-b5e0-2a22607ab8f1",
-        "AttributeType": 10,
-        "Amount": 3,
-        "ModifierType": 0
+        "id": "2583d815-9289-499a-b5e0-2a22607ab8f1",
+        "attributeType": "Perception",
+        "amount": 3,
+        "modifierType": "Flat"
       },
       {
-        "Id": "7cfc60ba-e706-4233-bb0c-196a092ccb4b",
-        "AttributeType": 16,
-        "Amount": 5,
-        "ModifierType": 0
+        "id": "7cfc60ba-e706-4233-bb0c-196a092ccb4b",
+        "attributeType": "Mana",
+        "amount": 5,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "powder_robe",
-    "Name": "Powder Robe",
-    "Description": "A robe woven with crystalline powder.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 2,
-    "AttributeModifiers": [
+    "id": "powder_robe",
+    "name": "Powder Robe",
+    "description": "A robe woven with crystalline powder.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Chest",
+    "attributeModifiers": [
       {
-        "Id": "4ede2581-6333-429a-afc9-ee7d454c9e9e",
-        "AttributeType": 7,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "4ede2581-6333-429a-afc9-ee7d454c9e9e",
+        "attributeType": "Intelligence",
+        "amount": 2,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "powder_pants",
-    "Name": "Powder Pants",
-    "Description": "Crystalline trousers.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 4,
-    "AttributeModifiers": [
+    "id": "powder_pants",
+    "name": "Powder Pants",
+    "description": "Crystalline trousers.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Legs",
+    "attributeModifiers": [
       {
-        "Id": "4a790e93-4d23-4248-9227-6473140cdf4f",
-        "AttributeType": 8,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "4a790e93-4d23-4248-9227-6473140cdf4f",
+        "attributeType": "Wisdom",
+        "amount": 2,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "geode_heart_amulet",
-    "Name": "Geode-Heart Amulet",
-    "Description": "An amulet infused with earth\u0027s essence, offering earth resistance and critical damage.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 3,
-    "AttributeModifiers": [
+    "id": "geode_heart_amulet",
+    "name": "Geode-Heart Amulet",
+    "description": "An amulet infused with earth\u0027s essence, offering earth resistance and critical damage.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Necklace",
+    "attributeModifiers": [
       {
-        "Id": "8d69f7ff-d48a-4f4e-9f45-7a6de9c9ac60",
-        "AttributeType": 15,
-        "Amount": 20,
-        "ModifierType": 0
+        "id": "8d69f7ff-d48a-4f4e-9f45-7a6de9c9ac60",
+        "attributeType": "MaxMana",
+        "amount": 20,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "leafglow_amulet",
-    "Name": "Leafglow Amulet",
-    "Description": "A glowing amulet that grants mana regeneration and a soft green light.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 3,
-    "AttributeModifiers": [
+    "id": "leafglow_amulet",
+    "name": "Leafglow Amulet",
+    "description": "A glowing amulet that grants mana regeneration and a soft green light.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Necklace",
+    "attributeModifiers": [
       {
-        "Id": "73d627f8-3130-4376-8d0e-f36cc7556769",
-        "AttributeType": 6,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "73d627f8-3130-4376-8d0e-f36cc7556769",
+        "attributeType": "Agility",
+        "amount": 2,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "obsidian_shard_amulet",
-    "Name": "Obsidian Shard Amulet",
-    "Description": "A reflective amulet offering physical resistance and slight damage reflection.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 3,
-    "AttributeModifiers": [
+    "id": "obsidian_shard_amulet",
+    "name": "Obsidian Shard Amulet",
+    "description": "A reflective amulet offering physical resistance and slight damage reflection.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Necklace",
+    "attributeModifiers": [
       {
-        "Id": "ef1299dc-a4b4-42b7-a38a-31dd6802e470",
-        "AttributeType": 12,
-        "Amount": 60,
-        "ModifierType": 0
+        "id": "ef1299dc-a4b4-42b7-a38a-31dd6802e470",
+        "attributeType": "MaxHealth",
+        "amount": 60,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "flint_spark_ring",
-    "Name": "Flint-Spark Ring",
-    "Description": "A ring that enhances critical strikes and adds fire damage to attacks.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 5,
-    "AttributeModifiers": [
+    "id": "flint_spark_ring",
+    "name": "Flint-Spark Ring",
+    "description": "A ring that enhances critical strikes and adds fire damage to attacks.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Ring",
+    "attributeModifiers": [
       {
-        "Id": "8f13a3df-d0ff-4e4d-96b7-3498b40b06af",
-        "AttributeType": 26,
-        "Amount": 8,
-        "ModifierType": 0
+        "id": "8f13a3df-d0ff-4e4d-96b7-3498b40b06af",
+        "attributeType": "CritDamage",
+        "amount": 8,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "nestling_band",
-    "Name": "Nestling Band",
-    "Description": "A ring that enhances ranged accuracy and reduces fall damage.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 5,
-    "AttributeModifiers": [
+    "id": "nestling_band",
+    "name": "Nestling Band",
+    "description": "A ring that enhances ranged accuracy and reduces fall damage.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Ring",
+    "attributeModifiers": [
       {
-        "Id": "c9093b63-bf43-41f7-824c-d5b31382d5a0",
-        "AttributeType": 8,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "c9093b63-bf43-41f7-824c-d5b31382d5a0",
+        "attributeType": "Wisdom",
+        "amount": 2,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "stoneguard_ring",
-    "Name": "Stoneguard Ring",
-    "Description": "A protective ring granting max HP and health regeneration out of combat.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 5,
-    "AttributeModifiers": [
+    "id": "stoneguard_ring",
+    "name": "Stoneguard Ring",
+    "description": "A protective ring granting max HP and health regeneration out of combat.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Ring",
+    "attributeModifiers": [
       {
-        "Id": "5adebb8c-b005-497b-ae98-b7f205aeb403",
-        "AttributeType": 21,
-        "Amount": 25,
-        "ModifierType": 0
+        "id": "5adebb8c-b005-497b-ae98-b7f205aeb403",
+        "attributeType": "PhysicalDefense",
+        "amount": 25,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "powdered_lens",
-    "Name": "Powdered Lens",
-    "Description": "A lens that reveals hidden secrets for a short duration.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 1,
-    "AttributeModifiers": [
+    "id": "powdered_lens",
+    "name": "Powdered Lens",
+    "description": "A lens that reveals hidden secrets for a short duration.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Relic",
+    "attributeModifiers": [
       {
-        "Id": "0fadba9d-fed6-4afa-95f1-42ea5ca8b6cc",
-        "AttributeType": 10,
-        "Amount": 3,
-        "ModifierType": 0
+        "id": "0fadba9d-fed6-4afa-95f1-42ea5ca8b6cc",
+        "attributeType": "Perception",
+        "amount": 3,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "sapling_totem",
-    "Name": "Sapling Totem",
-    "Description": "A totem that grants health regeneration while stationary.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 1,
-    "AttributeModifiers": [
+    "id": "sapling_totem",
+    "name": "Sapling Totem",
+    "description": "A totem that grants health regeneration while stationary.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Relic",
+    "attributeModifiers": [
       {
-        "Id": "ba801852-8770-4e5e-aafc-21ca8dab8542",
-        "AttributeType": 17,
-        "Amount": 1,
-        "ModifierType": 0
+        "id": "ba801852-8770-4e5e-aafc-21ca8dab8542",
+        "attributeType": "ManaRegeneration",
+        "amount": 1,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "jagged_obsidian_idol",
-    "Name": "Jagged Obsidian Idol",
-    "Description": "An idol made from jagged obsidian.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 1,
-    "AttributeModifiers": [
+    "id": "jagged_obsidian_idol",
+    "name": "Jagged Obsidian Idol",
+    "description": "An idol made from jagged obsidian.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Relic",
+    "attributeModifiers": [
       {
-        "Id": "650b4316-2ba7-471f-9258-03fd2f6ce7b4",
-        "AttributeType": 28,
-        "Amount": 3,
-        "ModifierType": 0
+        "id": "650b4316-2ba7-471f-9258-03fd2f6ce7b4",
+        "attributeType": "Threat",
+        "amount": 3,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "stone_edge_shortsword",
-    "Name": "Stone-Edge Shortsword",
-    "Description": "A sharp shortsword forged from stone and jagged obsidian.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 6,
-    "AttributeModifiers": [
+    "id": "stone_edge_shortsword",
+    "name": "Stone-Edge Shortsword",
+    "description": "A sharp shortsword forged from stone and jagged obsidian.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "MainHand",
+    "attributeModifiers": [
       {
-        "Id": "661f4b29-d31f-488a-b763-6df96045e22a",
-        "AttributeType": 4,
-        "Amount": 1,
-        "ModifierType": 0
+        "id": "661f4b29-d31f-488a-b763-6df96045e22a",
+        "attributeType": "FightingSpirit",
+        "amount": 1,
+        "modifierType": "Flat"
       },
       {
-        "Id": "022e8a2d-c76c-4284-bec0-36e542d22cff",
-        "AttributeType": 3,
-        "Amount": 1,
-        "ModifierType": 0
+        "id": "022e8a2d-c76c-4284-bec0-36e542d22cff",
+        "attributeType": "Strength",
+        "amount": 1,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "jagged_obsidian_hatchet",
-    "Name": "Jagged Obsidian Hatchet",
-    "Description": "A durable hatchet crafted from jagged obsidian and stone.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 6,
-    "AttributeModifiers": [
+    "id": "jagged_obsidian_hatchet",
+    "name": "Jagged Obsidian Hatchet",
+    "description": "A durable hatchet crafted from jagged obsidian and stone.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "MainHand",
+    "attributeModifiers": [
       {
-        "Id": "7527e5f8-b861-4bcf-9634-7d91e3c0637a",
-        "AttributeType": 3,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "7527e5f8-b861-4bcf-9634-7d91e3c0637a",
+        "attributeType": "Strength",
+        "amount": 2,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "flint_morning_star",
-    "Name": "Flint Morning Star",
-    "Description": "A spiked mace made of flint and stone, dealing crushing damage.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 6,
-    "AttributeModifiers": [
+    "id": "flint_morning_star",
+    "name": "Flint Morning Star",
+    "description": "A spiked mace made of flint and stone, dealing crushing damage.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "MainHand",
+    "attributeModifiers": [
       {
-        "Id": "bbc014e5-4a17-4770-b7bb-282e545245cd",
-        "AttributeType": 1,
-        "Amount": 3,
-        "ModifierType": 0
+        "id": "bbc014e5-4a17-4770-b7bb-282e545245cd",
+        "attributeType": "Endurance",
+        "amount": 3,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "silkshadow_stiletto",
-    "Name": "Silkshadow Stiletto",
-    "Description": "A swift dagger made of silk vine and sharp flint.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 6,
-    "AttributeModifiers": [
+    "id": "silkshadow_stiletto",
+    "name": "Silkshadow Stiletto",
+    "description": "A swift dagger made of silk vine and sharp flint.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "MainHand",
+    "attributeModifiers": [
       {
-        "Id": "a1a501f5-7791-4991-8aab-944102012c14",
-        "AttributeType": 5,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "a1a501f5-7791-4991-8aab-944102012c14",
+        "attributeType": "Dexterity",
+        "amount": 2,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "willow_cleaver",
-    "Name": "Willow Cleaver",
-    "Description": "A large cleaver made from sturdy willow wood and obsidian.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 6,
-    "AttributeModifiers": [
+    "id": "willow_cleaver",
+    "name": "Willow Cleaver",
+    "description": "A large cleaver made from sturdy willow wood and obsidian.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "MainHand",
+    "attributeModifiers": [
       {
-        "Id": "f3187da5-0f40-4efe-9678-4ba61f404507",
-        "AttributeType": 4,
-        "Amount": 3,
-        "ModifierType": 0
+        "id": "f3187da5-0f40-4efe-9678-4ba61f404507",
+        "attributeType": "FightingSpirit",
+        "amount": 3,
+        "modifierType": "Flat"
       },
       {
-        "Id": "81f01556-5c49-4ecb-9841-fb9ca03f783f",
-        "AttributeType": 3,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "81f01556-5c49-4ecb-9841-fb9ca03f783f",
+        "attributeType": "Strength",
+        "amount": 2,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "stone_reaver_greataxe",
-    "Name": "Stone-Reaver Greataxe",
-    "Description": "A heavy greataxe crafted from solid stone and jagged obsidian.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 6,
-    "AttributeModifiers": [
+    "id": "stone_reaver_greataxe",
+    "name": "Stone-Reaver Greataxe",
+    "description": "A heavy greataxe crafted from solid stone and jagged obsidian.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "MainHand",
+    "attributeModifiers": [
       {
-        "Id": "103daa3a-d5df-42e9-9623-2c3d13dad3a0",
-        "AttributeType": 3,
-        "Amount": 4,
-        "ModifierType": 0
+        "id": "103daa3a-d5df-42e9-9623-2c3d13dad3a0",
+        "attributeType": "Strength",
+        "amount": 4,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "powder_core_maul",
-    "Name": "Powder-Core Maul",
-    "Description": "A massive maul with a crystalline powder core, delivering crushing blows.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 6,
-    "AttributeModifiers": [
+    "id": "powder_core_maul",
+    "name": "Powder-Core Maul",
+    "description": "A massive maul with a crystalline powder core, delivering crushing blows.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "MainHand",
+    "attributeModifiers": [
       {
-        "Id": "9f518948-6f9b-43d7-b206-5dac5bd0a4d1",
-        "AttributeType": 1,
-        "Amount": 3,
-        "ModifierType": 0
+        "id": "9f518948-6f9b-43d7-b206-5dac5bd0a4d1",
+        "attributeType": "Endurance",
+        "amount": 3,
+        "modifierType": "Flat"
       },
       {
-        "Id": "17281c8c-0ac4-4e58-b4f2-06e8c5d74d13",
-        "AttributeType": 2,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "17281c8c-0ac4-4e58-b4f2-06e8c5d74d13",
+        "attributeType": "Willpower",
+        "amount": 2,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "nest_tip_pike",
-    "Name": "Nest-Tip Pike",
-    "Description": "A long pike tipped with feathers and flint for precision thrusts.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 6,
-    "AttributeModifiers": [
+    "id": "nest_tip_pike",
+    "name": "Nest-Tip Pike",
+    "description": "A long pike tipped with feathers and flint for precision thrusts.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "MainHand",
+    "attributeModifiers": [
       {
-        "Id": "f472a147-2254-4df1-909b-a60c02737d0e",
-        "AttributeType": 4,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "f472a147-2254-4df1-909b-a60c02737d0e",
+        "attributeType": "FightingSpirit",
+        "amount": 2,
+        "modifierType": "Flat"
       },
       {
-        "Id": "dfc90461-e2c1-4bc7-aa4e-93b1b949f104",
-        "AttributeType": 5,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "dfc90461-e2c1-4bc7-aa4e-93b1b949f104",
+        "attributeType": "Dexterity",
+        "amount": 2,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "stonebark_heater",
-    "Name": "Stonebark Heater",
-    "Description": "A sturdy shield combining stone and willow for reliable protection.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 7,
-    "AttributeModifiers": [
+    "id": "stonebark_heater",
+    "name": "Stonebark Heater",
+    "description": "A sturdy shield combining stone and willow for reliable protection.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "OffHand",
+    "attributeModifiers": [
       {
-        "Id": "56d3e277-2538-4cbc-a068-ea5457688497",
-        "AttributeType": 21,
-        "Amount": 20,
-        "ModifierType": 0
+        "id": "56d3e277-2538-4cbc-a068-ea5457688497",
+        "attributeType": "PhysicalDefense",
+        "amount": 20,
+        "modifierType": "Flat"
       },
       {
-        "Id": "fa36f7c2-5279-404b-95e0-9445a378fac3",
-        "AttributeType": 32,
-        "Amount": 50,
-        "ModifierType": 0
+        "id": "fa36f7c2-5279-404b-95e0-9445a378fac3",
+        "attributeType": "Block",
+        "amount": 50,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "silk_protector",
-    "Name": "Silk Protector",
-    "Description": "A shield woven with silk, allowing for magical protection.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 7,
-    "AttributeModifiers": [
+    "id": "silk_protector",
+    "name": "Silk Protector",
+    "description": "A shield woven with silk, allowing for magical protection.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "OffHand",
+    "attributeModifiers": [
       {
-        "Id": "117b6e8b-c643-4e56-ad49-921f8ab59e18",
-        "AttributeType": 22,
-        "Amount": 20,
-        "ModifierType": 0
+        "id": "117b6e8b-c643-4e56-ad49-921f8ab59e18",
+        "attributeType": "MagicalDefense",
+        "amount": 20,
+        "modifierType": "Flat"
       },
       {
-        "Id": "aa8d130e-ed0b-4d83-b59d-b93752473da9",
-        "AttributeType": 32,
-        "Amount": 50,
-        "ModifierType": 0
+        "id": "aa8d130e-ed0b-4d83-b59d-b93752473da9",
+        "attributeType": "Block",
+        "amount": 50,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "shimmering_willow_staff",
-    "Name": "Shimmering Willow Staff",
-    "Description": "A magical staff made of willow wood and shimmering leaves.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 6,
-    "AttributeModifiers": [
+    "id": "shimmering_willow_staff",
+    "name": "Shimmering Willow Staff",
+    "description": "A magical staff made of willow wood and shimmering leaves.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "MainHand",
+    "attributeModifiers": [
       {
-        "Id": "c499f044-fac4-4390-b1bc-25cfa7150f87",
-        "AttributeType": 7,
-        "Amount": 4,
-        "ModifierType": 0
+        "id": "c499f044-fac4-4390-b1bc-25cfa7150f87",
+        "attributeType": "Intelligence",
+        "amount": 4,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "geode_bound_grimoire",
-    "Name": "Geode-Bound Grimoire",
-    "Description": "A magical tome embedded with geodes.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 7,
-    "AttributeModifiers": [
+    "id": "geode_bound_grimoire",
+    "name": "Geode-Bound Grimoire",
+    "description": "A magical tome embedded with geodes.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "OffHand",
+    "attributeModifiers": [
       {
-        "Id": "07ed2161-2777-4cb1-9f72-5ff55aedef66",
-        "AttributeType": 7,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "07ed2161-2777-4cb1-9f72-5ff55aedef66",
+        "attributeType": "Intelligence",
+        "amount": 2,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "jagged_obsidian_wand",
-    "Name": "Jagged Obsidian Wand",
-    "Description": "A magical wand forged from jagged obsidian.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 6,
-    "AttributeModifiers": [
+    "id": "jagged_obsidian_wand",
+    "name": "Jagged Obsidian Wand",
+    "description": "A magical wand forged from jagged obsidian.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "MainHand",
+    "attributeModifiers": [
       {
-        "Id": "d2354e29-9496-4666-930e-ced3a50a4ce4",
-        "AttributeType": 8,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "d2354e29-9496-4666-930e-ced3a50a4ce4",
+        "attributeType": "Wisdom",
+        "amount": 2,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "powdered_crystal_orb",
-    "Name": "Powdered Crystal Orb",
-    "Description": "An orb made from crystalline powder.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 7,
-    "AttributeModifiers": [
+    "id": "powdered_crystal_orb",
+    "name": "Powdered Crystal Orb",
+    "description": "An orb made from crystalline powder.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "OffHand",
+    "attributeModifiers": [
       {
-        "Id": "7ace81ec-11c8-4864-90af-11da75c08b8a",
-        "AttributeType": 8,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "7ace81ec-11c8-4864-90af-11da75c08b8a",
+        "attributeType": "Wisdom",
+        "amount": 2,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "silk_strung_longbow",
-    "Name": "Silk-Strung Longbow",
-    "Description": "A longbow strung with resilient silk.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 6,
-    "AttributeModifiers": [
+    "id": "silk_strung_longbow",
+    "name": "Silk-Strung Longbow",
+    "description": "A longbow strung with resilient silk.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "MainHand",
+    "attributeModifiers": [
       {
-        "Id": "71087684-332b-43a8-9e03-2de2f08e3524",
-        "AttributeType": 6,
-        "Amount": 4,
-        "ModifierType": 0
+        "id": "71087684-332b-43a8-9e03-2de2f08e3524",
+        "attributeType": "Agility",
+        "amount": 4,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "flintlock_crossbow",
-    "Name": "Flintlock Crossbow",
-    "Description": "A crossbow crafted using both willow and flint.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 6,
-    "AttributeModifiers": [
+    "id": "flintlock_crossbow",
+    "name": "Flintlock Crossbow",
+    "description": "A crossbow crafted using both willow and flint.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "MainHand",
+    "attributeModifiers": [
       {
-        "Id": "4c65fa15-4b39-4f1c-b413-3846a4ff8d00",
-        "AttributeType": 6,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "4c65fa15-4b39-4f1c-b413-3846a4ff8d00",
+        "attributeType": "Agility",
+        "amount": 2,
+        "modifierType": "Flat"
       },
       {
-        "Id": "c888c2c0-cb21-487e-84c1-5d7364b4ab0e",
-        "AttributeType": 2,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "c888c2c0-cb21-487e-84c1-5d7364b4ab0e",
+        "attributeType": "Willpower",
+        "amount": 2,
+        "modifierType": "Flat"
       }
     ]
   },
   {
-    "Id": "jagged_obsidian_knuckles",
-    "Name": "Jagged Obsidian Knuckles",
-    "Description": "A pair of hard knuckles made from jagged obsidian.",
-    "ItemType": 0,
-    "Rarity": 0,
-    "EquipmentType": 6,
-    "AttributeModifiers": [
+    "id": "jagged_obsidian_knuckles",
+    "name": "Jagged Obsidian Knuckles",
+    "description": "A pair of hard knuckles made from jagged obsidian.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "MainHand",
+    "attributeModifiers": [
       {
-        "Id": "da9831b4-954f-4747-b459-80716bf0907d",
-        "AttributeType": 4,
-        "Amount": 2,
-        "ModifierType": 0
+        "id": "da9831b4-954f-4747-b459-80716bf0907d",
+        "attributeType": "FightingSpirit",
+        "amount": 2,
+        "modifierType": "Flat"
       },
       {
-        "Id": "caf0c8d2-27d5-4319-96b0-86161228eb63",
-        "AttributeType": 12,
-        "Amount": 50,
-        "ModifierType": 0
+        "id": "caf0c8d2-27d5-4319-96b0-86161228eb63",
+        "attributeType": "MaxHealth",
+        "amount": 50,
+        "modifierType": "Flat"
       }
     ]
   }

@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using Application.UseCases._AdminDashboard.Creatures.Dtos;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Creatures;
@@ -16,7 +17,12 @@ public class CreatureJsonReader
         _filePath = Path.Combine(apiDirectory, "API.LL", "Data", "creatures.json");
         string json = File.ReadAllText(_filePath);
 
-        AllCreatures = JsonSerializer.Deserialize<List<Creature>>(json)!;
+        AllCreatures = JsonSerializer.Deserialize<List<Creature>>(json, new JsonSerializerOptions()
+        {
+            WriteIndented = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters = { new JsonStringEnumConverter() }
+        })!;
         ValidateAndFixCreatureAttributes(AllCreatures);
 
         OverWriteJSON();
@@ -40,7 +46,9 @@ public class CreatureJsonReader
 
     private void OverWriteJSON()
     {
-        var options = new JsonSerializerOptions { WriteIndented = true };
+        var options = new JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters = { new JsonStringEnumConverter() }
+        };
         File.WriteAllText(_filePath, JsonSerializer.Serialize(AllCreatures, options));
     }
 

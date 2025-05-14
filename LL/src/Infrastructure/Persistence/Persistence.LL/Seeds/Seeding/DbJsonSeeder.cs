@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
 using Application.Common.Interfaces;
 using Domain.Models.Items;
-using Domain.Models.Professions.Crafting;
 using Microsoft.EntityFrameworkCore;
+using Persistence.LL.Seeds.Seeding.Dtos.Recipes;
 
 namespace Persistence.LL.Seeds.Seeding;
 public static class DbJsonSeeder
@@ -20,8 +20,8 @@ public static class DbJsonSeeder
         var recipePath = Path.Combine(AppContext.BaseDirectory, "Data", "recipes.json");
         var recipeJson = await File.ReadAllTextAsync(recipePath);
 
-        var recipes = JsonSerializer.Deserialize<List<Recipe>>(recipeJson)!;
-        ctx.Recipes.AddRange(recipes);
+        var recipes = JsonSerializer.Deserialize<List<RecipeDto>>(recipeJson)!;
+        ctx.Recipes.AddRange(recipes.Select(dto => dto.ToEntity()));
         await ctx.SaveChangesAsync(CancellationToken.None);
 
         //logger.LogInformation("Seeded {ItemCount} items + {RecipeCount} recipes",

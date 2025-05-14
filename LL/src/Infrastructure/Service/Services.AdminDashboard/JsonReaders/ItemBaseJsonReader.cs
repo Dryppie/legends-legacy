@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using Application.UseCases._AdminDashboard.Items.Dtos;
 
 namespace Services.AdminDashboard.JsonReaders;
@@ -13,7 +14,12 @@ public class ItemBaseJsonReader
         _filePath = Path.Combine(apiDirectory, "API.LL", "Data", "items.json");
         string json = File.ReadAllText(_filePath);
 
-        AllItems = JsonSerializer.Deserialize<List<ItemBaseDto>>(json) ?? [];
+        AllItems = JsonSerializer.Deserialize<List<ItemBaseDto>>(json, new JsonSerializerOptions()
+        {
+            WriteIndented = true,
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters = { new JsonStringEnumConverter() }
+        }) ?? [];
         OverWriteJSON();
     }
     public List<ItemBaseDto> GetItemsFromJson()
@@ -33,7 +39,9 @@ public class ItemBaseJsonReader
 
     private void OverWriteJSON()
     {
-        var options = new JsonSerializerOptions { WriteIndented = true };
+        var options = new JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            Converters = { new JsonStringEnumConverter() }
+        };
         File.WriteAllText(_filePath, JsonSerializer.Serialize(AllItems, options));
     }
 

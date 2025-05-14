@@ -8,8 +8,7 @@ import {
   Profession,
   Recipe,
 } from '../../../../shared/models/profession';
-import { ItemType } from '../../../../shared/models/enums/itemType';
-import { Rarity } from '../../../../shared/models/enums/rarity';
+import { RECIPES_CONTENT } from '../../../../data/recipes-content';
 
 @Injectable({
   providedIn: 'root',
@@ -58,7 +57,7 @@ export class ProfessionsService {
   }
 
   getWeaponsmithingRecipes(): Recipe[] {
-    return [];
+    return RECIPES_CONTENT;
   }
 
   getWoodcuttingNodes(): GatheringNode[] {

@@ -19,8 +19,6 @@ export interface ItemBase {
   rarity: Rarity;
   itemType: ItemType;
   description: string;
-  // ability: Ability;
-  iconPath: string;
 }
 
 export interface Equipment extends ItemBase {

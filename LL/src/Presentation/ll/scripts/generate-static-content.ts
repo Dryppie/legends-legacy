@@ -2,13 +2,24 @@ import { readFileSync, writeFileSync } from 'fs';
 import path from 'path';
 
 const source = path.resolve(__dirname, '../../../API/API.LL/Data/recipes.json');
-const target = path.resolve(__dirname, '../src/app/data/game-content.ts');
+const target = path.resolve(__dirname, '../src/app/data/recipes-content.ts');
 
 const json = readFileSync(source, 'utf-8').trim();
+
+const tsLiteral = JSON.stringify(JSON.parse(json), null, 2)
+  // itemType → ItemType.Foo
+  .replace(/"itemType":\s*"([^"]+)"/g, (_, v) => `"itemType": ItemType.${v}`)
+  // craftType → CraftType.Bar
+  .replace(/"craftType":\s*"([^"]+)"/g, (_, v) => `"craftType": CraftType.${v}`)
+  .replace(/"rarity":\s*"([^"]+)"/g, (_, v) => `"rarity": Rarity.${v}`);
 writeFileSync(
   target,
   `/* AUTO-GENERATED — DO NOT EDIT */
-export const GAME_CONTENT = ${json} as const;
+import { Recipe, CraftType } from '../shared/models/profession';
+import { ItemType } from '../shared/models/enums/itemType';
+import { Rarity } from '../shared/models/enums/rarity';
+
+export const RECIPES_CONTENT = ${tsLiteral} satisfies Recipe[];
 `,
 );
-console.log('Static game-content.ts regenerated');
+console.log('Static recipes-content.ts regenerated');

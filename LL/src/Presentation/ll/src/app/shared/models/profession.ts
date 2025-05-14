@@ -12,12 +12,13 @@ export interface GatheringProfession extends Profession {
 }
 
 export interface CraftingProfession extends Profession {
-  recipes: Recipe[];
+  readonly recipes: Recipe[];
 }
 
 export interface Recipe {
   id: string;
   name: string;
+  itemId: string;
   item: ItemBase;
   quantity: number;
   craftType: CraftType;
@@ -27,12 +28,14 @@ export interface Recipe {
 }
 
 export interface Material {
+  recipeId: string;
   quantity: number;
+  itemId: string;
   item: ItemBase;
 }
 
 export enum CraftType {
-  ArmorForging,
-  JewelryCrafting,
-  WeaponSmithing,
+  ArmorForging = 'ArmorForging',
+  JewelryCrafting = 'JewelryCrafting',
+  WeaponSmithing = 'WeaponSmithing',
 }

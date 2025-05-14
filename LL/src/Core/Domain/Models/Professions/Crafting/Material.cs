@@ -4,7 +4,6 @@ namespace Domain.Models.Professions.Crafting;
 public class Material
 {
     public Guid RecipeId { get; set; }
-    public Recipe Recipe { get; set; } = null!;
     public int Quantity { get; set; }
     public string ItemId { get; set; } = string.Empty;
     public ItemBase Item { get; set; } = null!;
