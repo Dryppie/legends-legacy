@@ -86,6 +86,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Checkout backend repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/ll-backend
+          path: backend
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Copy recipes.json into build context
+        shell: bash
+        run: |
+          mkdir -p LL/src/Presentation/ll/API/API.LL/Data
+          cp backend/API.LL/Data/ LL/src/Presentation/ll/API/API.LL/Data/
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
