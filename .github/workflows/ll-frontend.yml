@@ -86,13 +86,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Checkout backend repository
-        uses: actions/checkout@v4
-        with:
-          repository: ${{ github.repository_owner }}/ll-backend
-          path: backend
-          token: ${{ secrets.PAT_TOKEN }}
-
       - name: Copy recipes.json into build context
         shell: bash
         run: |
