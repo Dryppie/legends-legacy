@@ -10,7 +10,7 @@ RUN sed -i "s/buildversion/${BUILD_VERSION}/g" environment.ts
 
 RUN npm ci
 COPY . .
-RUN cp environment.ts src/environments/environment.ts && tree && npm run build
+RUN cp environment.ts src/environments/environment.ts && npm run build
 
 ### STAGE 2: Run ###
 FROM nginx:alpine
