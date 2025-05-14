@@ -461,11 +461,17 @@ namespace Persistence.LL.Migrations
                 {
                     RecipeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ItemId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false)
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    ItemBaseId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Material", x => new { x.RecipeId, x.ItemId });
+                    table.ForeignKey(
+                        name: "FK_Material_ItemBases_ItemBaseId",
+                        column: x => x.ItemBaseId,
+                        principalTable: "ItemBases",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Material_ItemBases_ItemId",
                         column: x => x.ItemId,
@@ -972,6 +978,11 @@ namespace Persistence.LL.Migrations
                 name: "IX_LootTableEntry_LootTableId",
                 table: "LootTableEntry",
                 column: "LootTableId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Material_ItemBaseId",
+                table: "Material",
+                column: "ItemBaseId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Material_ItemId",

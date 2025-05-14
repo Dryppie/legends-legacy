@@ -425,7 +425,7 @@ namespace Persistence.LL.Migrations
 
                     b.ToTable("ItemBases");
 
-                    b.HasDiscriminator<int>("ItemType").HasValue(4);
+                    b.HasDiscriminator<int>("ItemType").HasValue(2);
 
                     b.UseTphMappingStrategy();
                 });
@@ -449,7 +449,7 @@ namespace Persistence.LL.Migrations
 
                     b.ToTable("ItemInstances");
 
-                    b.HasDiscriminator<int>("ItemType").HasValue(4);
+                    b.HasDiscriminator<int>("ItemType").HasValue(2);
 
                     b.UseTphMappingStrategy();
                 });
@@ -510,10 +510,15 @@ namespace Persistence.LL.Migrations
                     b.Property<string>("ItemId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("ItemBaseId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
                     b.HasKey("RecipeId", "ItemId");
+
+                    b.HasIndex("ItemBaseId");
 
                     b.HasIndex("ItemId");
 
@@ -1275,8 +1280,12 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.Professions.Crafting.Material", b =>
                 {
-                    b.HasOne("Domain.Models.Items.ItemBase", "Item")
+                    b.HasOne("Domain.Models.Items.ItemBase", null)
                         .WithMany("Materials")
+                        .HasForeignKey("ItemBaseId");
+
+                    b.HasOne("Domain.Models.Items.ItemBase", "Item")
+                        .WithMany()
                         .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();

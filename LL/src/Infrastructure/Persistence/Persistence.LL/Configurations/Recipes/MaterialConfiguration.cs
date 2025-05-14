@@ -9,7 +9,7 @@ public class MaterialConfiguration : IEntityTypeConfiguration<Material>
     {
         builder.HasKey(m => new { m.RecipeId, m.ItemId });
         builder.HasOne(m => m.Item)
-            .WithMany(r => r.Materials)
+            .WithMany()
             .HasForeignKey(m => m.ItemId)
             .OnDelete(DeleteBehavior.Restrict);
     }

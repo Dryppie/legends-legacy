@@ -114,47 +114,47 @@ export class ProfessionsService {
   getMiningNodes(): GatheringNode[] {
     let gatheringNodes: GatheringNode[] = [
       {
-        id: 'woodcutting_tree',
+        id: 'mining_slate_shard',
         name: 'Slate Shard',
       },
       {
-        id: 'woodcutting_oak',
+        id: 'mining_copperbloom_vein',
         name: 'Copperbloom Vein',
       },
       {
-        id: 'woodcutting_',
+        id: 'mining_tinspine_vein',
         name: 'Tinspine Vein',
       },
       {
-        id: 'woodcutting_',
+        id: 'mining_ironheart_seam',
         name: 'Ironheart Seam',
       },
       {
-        id: 'woodcutting_',
+        id: 'mining_silverlight_vein',
         name: 'Silverlight Vein',
       },
       {
-        id: 'woodcutting_',
+        id: 'mining_goldflare_vein',
         name: 'Goldflare Vein',
       },
       {
-        id: 'woodcutting_',
+        id: 'mining_mithril_thread',
         name: 'Mithril Thread',
       },
       // {
-      //   id: 'woodcutting_',
+      //   id: 'mining_adamant_ridge',
       //   name: 'Adamant Ridge',
       // },
       // {
-      //   id: 'woodcutting_',
+      //   id: 'mining_obsidian_mirror',
       //   name: 'Obsidian Mirror',
       // },
       // {
-      //   id: 'woodcutting_',
+      //   id: 'mining_arcanite_cluster',
       //   name: 'Arcanite Cluster',
       // },
       // {
-      //   id: 'woodcutting_',
+      //   id: 'mining_dragonstone_core',
       //   name: 'Dragonstone Core',
       // },
     ];

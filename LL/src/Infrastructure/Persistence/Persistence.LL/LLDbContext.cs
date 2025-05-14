@@ -68,13 +68,13 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
 
         modelBuilder.Entity<ItemBase>()
             .HasDiscriminator<ItemType>("ItemType")
-            .HasValue<ItemBase>(ItemType.Misc)
+            .HasValue<ItemBase>(ItemType.Material)
             .HasValue<EquipmentBase>(ItemType.Equipment)
             .HasValue<EssenceItemBase>(ItemType.Essence);
 
         modelBuilder.Entity<ItemInstance>()
             .HasDiscriminator<ItemType>("ItemType")
-            .HasValue<ItemInstance>(ItemType.Misc)
+            .HasValue<ItemInstance>(ItemType.Material)
             .HasValue<EquipmentInstance>(ItemType.Equipment)
             .HasValue<EssenceItemInstance>(ItemType.Essence);
 

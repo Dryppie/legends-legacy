@@ -247,6 +247,7 @@ public static class LLDbContextExtensions
 
     public static async Task SeedItemsAndLootTables(LLDbContext context)
     {
+        await SeedMiningLootTables(context);
         await SeedWoodcuttingLootTables(context);
     }
 
@@ -511,95 +512,116 @@ public static class LLDbContextExtensions
         //await context.LootTables.AddAsync(lootTable);
     }
 
+    public static async Task SeedMiningLootTables(LLDbContext context)
+    {
+        /* ────────────────────────────────
+         *  Existing ItemBase IDs
+         * ────────────────────────────────*/
+        const string STONE_ID = "stone";
+        const string FLINT_ID = "flint";
+        const string TINY_GEODE_ID = "tiny_geode";
+        const string JAGGED_OBSIDIAN_ID = "jagged_obsidian";
+        const string CRYSTALLINE_POWDER_ID = "crystalline_powder";
+
+        /* ────────────────────────────────
+         *  Helper builders
+         * ────────────────────────────────*/
+        LootTable MakeItemTable(string itemId, int entryWeight, int tableWeight) =>
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Weight = tableWeight,
+                Entries =
+                [
+                    new LootTableItem
+                {
+                    Id     = Guid.NewGuid(),
+                    ItemId = itemId,
+                    Weight = entryWeight
+                }
+                ]
+            };
+
+        LootTable BuildLootTable(params LootTable[] subtables) =>
+            new() { Id = Guid.NewGuid(), Entries = subtables };
+
+        /* ────────────────────────────────
+         *  Mining tiers & weights
+         * ────────────────────────────────*/
+        var miningCommon = MakeItemTable(STONE_ID, 20, 80); // 16 %
+        var miningUncommon = MakeItemTable(FLINT_ID, 30, 30); // 9 %
+        var miningRare = MakeItemTable(TINY_GEODE_ID, 1, 15); // 0.15 %
+        var miningEpic = MakeItemTable(JAGGED_OBSIDIAN_ID, 30, 3); // 0.9 %
+        var miningLegendary = MakeItemTable(CRYSTALLINE_POWDER_ID, 1, 1); // 0.03 %
+
+        var miningRoot = BuildLootTable(
+            miningCommon, miningUncommon, miningRare, miningEpic, miningLegendary);
+
+        /* ────────────────────────────────
+         *  Persist
+         * ────────────────────────────────*/
+        await context.LootTables.AddRangeAsync(
+            miningRoot, miningCommon, miningUncommon,
+            miningRare, miningEpic, miningLegendary);
+
+        var miningNode = new GatheringNode
+        {
+            Id = "mining_slate_shard",
+            Name = "Slate Shard",
+            GatheringType = GatheringType.Mining,
+            LootTableId = miningRoot.Id
+        };
+
+        await context.GatheringNodes.AddAsync(miningNode);
+    }
+
     public static async Task SeedWoodcuttingLootTables(LLDbContext context)
     {
-        // Create Items for Tree Drops
-        var treeLog = new ItemBase { Id = "Guid.NewGuid()151345",
-            Name = "Tree Log" };
-        var nest = new ItemBase { Id = "Guid.NewGuid()312514",
-            Name = "Nest" };
-        
-        var oakLog = new ItemBase { Id = "Guid.NewGuid()2223",
-            Name = "Oak Log" };
-        
-        var birchLog = new ItemBase { Id = "Guid.NewGuid()321",
-            Name = "Birch Log" };
-        var rareHerb = new ItemBase { Id = "Guid.NewGuid()123",
-            Name = "Rare Herb" };
+        const string WILLOW_LOG_ID = "willow_log";
+        const string STICKY_SAP_ID = "sticky_sap";
+        const string FEATHER_NEST_ID = "feather_lined_nest";
+        const string SILK_VINE_ID = "silk_vine";
+        const string SHIMMER_LEAF_ID = "shimmering_leaf";
+
+        LootTable MakeItemTable(string itemId, int entryWeight, int tableWeight) =>
+            new()
+            {
+                Id = Guid.NewGuid(),
+                Weight = tableWeight,
+                Entries =
+                [
+                    new LootTableItem
+                    {
+                        Id     = Guid.NewGuid(),
+                        ItemId = itemId,
+                        Weight = entryWeight
+                    }
+                ]
+            };
+
+        LootTable BuildLootTable(params LootTable[] subtables) =>
+            new() { Id = Guid.NewGuid(), Entries = subtables };
+
+        var willowCommon = MakeItemTable(WILLOW_LOG_ID, 20, 80); // 16 %
+        var willowUncommon = MakeItemTable(STICKY_SAP_ID, 30, 30); // 9 %
+        var willowRare = MakeItemTable(FEATHER_NEST_ID, 1, 15); // 0.15 %
+        var willowEpic = MakeItemTable(SILK_VINE_ID, 30, 3);  // 0.9 %
+        var willowLegendary = MakeItemTable(SHIMMER_LEAF_ID, 1, 1);  // 0.03 %
+        var willowRoot = BuildLootTable(
+            willowCommon, willowUncommon, willowRare, willowEpic, willowLegendary);
 
         // Add items to context
-        await context.ItemBases.AddRangeAsync(treeLog, nest, oakLog, birchLog, rareHerb);
-
-        // Create LootTableRarities for Tree
-        var treeLootTableLegendary = new LootTable
+        await context.LootTables.AddRangeAsync(willowRoot, willowCommon, willowUncommon,
+            willowRare, willowEpic, willowLegendary);
+        
+        var willowGatheringNode = new GatheringNode
         {
-            Id = Guid.NewGuid(),
-            Entries = [new LootTableItem { Id = Guid.NewGuid(), ItemId = nest.Id, Weight = 1 }],
-            Weight = 1 // 0.01% chance to drop nest. 144%~ chance in 24 hours.
-        };
-        var treeLootTableCommon = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [new LootTableItem { Id = Guid.NewGuid(), ItemId = treeLog.Id, Weight = 20 }],
-            Weight = 80 // 16%
-        };
-        var treeLootTable = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [treeLootTableCommon, treeLootTableLegendary]
+            Id = "woodcutting_young_willow",
+            Name = "Young Willow",
+            GatheringType = GatheringType.Woodcutting,
+            LootTableId = willowRoot.Id
         };
 
-        // Create LootTableItems for Oak Tree
-        var oakLootTableLegendary = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [new LootTableItem { Id = Guid.NewGuid(), ItemId = nest.Id, Weight = 1 }],
-            Weight = 2 // 0.02% chance to drop nest. 144%~ chance in 12 hours.
-        };
-        var oakLootTableCommon = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [new LootTableItem { Id = Guid.NewGuid(), ItemId = oakLog.Id, Weight = 20 }],
-            Weight = 80 // 16%
-        };
-        var oakLootTable = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [oakLootTableCommon, oakLootTableLegendary]
-        };
-
-        // Create LootTableItems for Birch Tree
-        var birchLootTableLegendary = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [new LootTableItem { Id = Guid.NewGuid(), ItemId = nest.Id, Weight = 1 }],
-            Weight = 3 // 0.04% chance to drop nest. 144%~ chance in 9 hours.
-        };
-        var birchLootTableRare = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [new LootTableItem { Id = Guid.NewGuid(), ItemId = rareHerb.Id, Weight = 30 }],
-            Weight = 15 // 4.5%
-        };
-        var birchLootTableCommon = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [new LootTableItem { Id = Guid.NewGuid(), ItemId = birchLog.Id, Weight = 20 }],
-            Weight = 80 // 16%
-        };
-        var birchLootTable = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [birchLootTableCommon, birchLootTableRare, birchLootTableLegendary]
-        };
-
-        // Add LootTables to context
-        await context.LootTables.AddRangeAsync(treeLootTable, treeLootTableCommon, treeLootTableLegendary, oakLootTable, oakLootTableCommon, oakLootTableLegendary, birchLootTable, birchLootTableCommon, birchLootTableRare, birchLootTableLegendary);
-
-        var treeGatheringNode = new GatheringNode { Id = "woodcutting_tree", Name = "Tree", GatheringType = GatheringType.Woodcutting, LootTableId = treeLootTable.Id };
-        var oakGatheringNode = new GatheringNode { Id = "woodcutting_oak", Name = "Oak Tree", GatheringType = GatheringType.Woodcutting, LootTableId = oakLootTable.Id };
-        var birchGatheringNode = new GatheringNode { Id = "woodcutting_birch", Name = "Birch Tree", GatheringType = GatheringType.Woodcutting, LootTableId = birchLootTable.Id };
-
-        await context.GatheringNodes.AddRangeAsync(treeGatheringNode, oakGatheringNode, birchGatheringNode);
+        await context.GatheringNodes.AddRangeAsync(willowGatheringNode);
     }
 }
