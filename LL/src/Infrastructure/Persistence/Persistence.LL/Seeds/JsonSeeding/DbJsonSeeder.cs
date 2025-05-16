@@ -3,9 +3,9 @@ using System.Text.Json.Serialization;
 using Application.Common.Interfaces;
 using Domain.Models.Items;
 using Microsoft.EntityFrameworkCore;
-using Persistence.LL.Seeds.Seeding.Dtos.Recipes;
+using Persistence.LL.Seeds.JsonSeeding.Dtos.Recipes;
 
-namespace Persistence.LL.Seeds.Seeding;
+namespace Persistence.LL.Seeds.JsonSeeding;
 public static class DbJsonSeeder
 {
 

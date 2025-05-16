@@ -14,6 +14,7 @@ using Domain.Models.LootTables;
 using Domain.Models.Masteries;
 using Domain.Models.Users;
 using Microsoft.AspNetCore.Identity;
+using Persistence.LL.Seeds.JsonSeeding;
 using Persistence.LL.Seeds.Seeding;
 
 namespace Persistence.LL.Seeds;

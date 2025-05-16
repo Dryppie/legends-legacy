@@ -30,7 +30,7 @@ export class ProfessionsService {
   }
 
   getMiningProfession() {
-    let miningProfession: GatheringProfession = {
+    const miningProfession: GatheringProfession = {
       name: 'Mining',
       gatheringNodes: this.getMiningNodes(),
       iconPath: 'mining',
@@ -39,7 +39,7 @@ export class ProfessionsService {
   }
 
   getWoodcuttingProfession() {
-    let woodcuttingProfession: GatheringProfession = {
+    const woodcuttingProfession: GatheringProfession = {
       name: 'Woodcutting',
       gatheringNodes: this.getWoodcuttingNodes(),
       iconPath: 'woodcutting',
@@ -61,7 +61,7 @@ export class ProfessionsService {
   }
 
   getWoodcuttingNodes(): GatheringNode[] {
-    let gatheringNodes: GatheringNode[] = [
+    const gatheringNodes: GatheringNode[] = [
       {
         id: 'woodcutting_young_willow',
         name: 'Young Willow',
@@ -112,7 +112,7 @@ export class ProfessionsService {
   }
 
   getMiningNodes(): GatheringNode[] {
-    let gatheringNodes: GatheringNode[] = [
+    const gatheringNodes: GatheringNode[] = [
       {
         id: 'mining_slate_shard',
         name: 'Slate Shard',

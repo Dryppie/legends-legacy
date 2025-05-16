@@ -1,7 +1,7 @@
 ﻿using Domain.Models.Items;
 using Domain.Models.Professions.Crafting;
 
-namespace Persistence.LL.Seeds.Seeding.Dtos.Recipes;
+namespace Persistence.LL.Seeds.JsonSeeding.Dtos.Recipes;
 public record RecipeDto
 {
     public Guid Id { get; init; }

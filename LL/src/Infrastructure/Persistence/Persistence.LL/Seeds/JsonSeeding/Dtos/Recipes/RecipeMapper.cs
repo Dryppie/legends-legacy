@@ -1,6 +1,6 @@
 ﻿using Domain.Models.Professions.Crafting;
 
-namespace Persistence.LL.Seeds.Seeding.Dtos.Recipes;
+namespace Persistence.LL.Seeds.JsonSeeding.Dtos.Recipes;
 public static class RecipeMapper
 {
     public static RecipeDto ToDto(this Recipe r) => new()

@@ -1,12 +1,4 @@
-﻿using Domain.Models.Attributes;
-using Domain.Models.Attributes.Modifiers;
-using Domain.Models.Items;
-using Domain.Models.Items.Equipments;
-using Domain.Models.Items.Equipments.Slots;
-using Domain.Models.LootTables;
-using Domain.Models.Masteries;
-
-namespace Persistence.LL.Seeds;
+﻿namespace Persistence.LL.Seeds.Seeding;
 public static class SeedItems
 {
     //public const string AXE_GUID = "00000000-0000-0000-0001-000000000001";

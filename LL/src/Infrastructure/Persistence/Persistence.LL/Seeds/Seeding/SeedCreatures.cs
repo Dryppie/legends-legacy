@@ -9,7 +9,7 @@ using Domain.Models.LootTables;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 
-namespace Persistence.LL.Seeds;
+namespace Persistence.LL.Seeds.Seeding;
 public static class SeedCreatures
 {
     public static async Task SeedCreaturesData(this LLDbContext context)

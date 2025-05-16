@@ -1,4 +1,4 @@
-﻿namespace Persistence.LL.Seeds.Seeding.Dtos.Recipes;
+﻿namespace Persistence.LL.Seeds.JsonSeeding.Dtos.Recipes;
 public record MaterialDto
 {
     public string ItemId { get; init; } = null!;
