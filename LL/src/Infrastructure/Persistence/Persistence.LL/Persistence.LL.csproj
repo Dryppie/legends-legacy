@@ -26,4 +26,8 @@
     <ProjectReference Include="..\..\..\Core\Application\Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Repositories\Professions\Craftings\" />
+  </ItemGroup>
+
 </Project>

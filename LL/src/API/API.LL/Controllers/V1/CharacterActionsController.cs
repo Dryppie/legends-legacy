@@ -4,7 +4,8 @@ using Application.UseCases.CharacterActions.Commands.StartGatheringAction;
 using Application.UseCases.CharacterActions.Dtos.Responses;
 using Application.UseCases.CharacterActions.Queries.GetCharacterAction;
 using Common.Primitives;
-using Domain.Models.GatheringNodes;
+using Domain.Models.Professions;
+using Domain.Models.Professions.Gathering.GatheringNodes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,7 +13,7 @@ namespace API.LL.Controllers.V1;
 [Authorize]
 public class CharacterActionsController : BaseController
 {
-    public record StartGatheringActionRequest(string GatheringNodeId, GatheringType GatheringType);
+    public record StartGatheringActionRequest(string GatheringNodeId, ProfessionType ProfessionType);
     public record StartCombatActionRequest(string AreaId);
 
     [HttpGet]
@@ -27,7 +28,7 @@ public class CharacterActionsController : BaseController
     // POST api/<CharacterActionsController>
     [HttpPost("StartGathering")]
     public async Task<ActionResult<Response<bool>>> StartGathering([FromBody] StartGatheringActionRequest request) =>
-        await Mediator.Send(new StartGatheringActionCommand(CurrentCharacterGuid, request.GatheringNodeId, request.GatheringType));
+        await Mediator.Send(new StartGatheringActionCommand(CurrentCharacterGuid, request.GatheringNodeId, request.ProfessionType));
 
     [HttpDelete]
     public async Task<ActionResult<Response<bool>>> Delete() => 

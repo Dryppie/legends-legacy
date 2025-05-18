@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Models.CharacterActions;
+﻿using Domain.Models.CharacterActions;
 using Domain.Models.Colosseum;
 using Domain.Models.Guilds;
 using Domain.Models.Inventories;
+using Domain.Models.Professions;
 using Domain.Models.Users;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Models.Entities.Characters;
 public class Character : Entity
@@ -23,6 +24,7 @@ public class Character : Entity
     public ICollection<ColosseumMatchResult> ColosseumMatches { get; set; } = [];
     public ArenaTicketStatus ArenaTicketStatus { get; set; } = null!;
     public Guild? Guild { get; set; }
+    public ICollection<Profession> Professions { get; set; } = [];
     //public GuildMember? GuildMember { get; set; }
     //public ICollection<GuildInvite> GuildInvites { get; set; } = [];
     //public List<Effect> ActiveEffects { get; set; } = [];

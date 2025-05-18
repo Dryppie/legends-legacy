@@ -1,13 +1,12 @@
 ﻿using Application.Common.Interfaces;
 using Common.Exceptions;
-using Domain.Models.GatheringNodes;
+using Domain.Models.Professions.Gathering.GatheringNodes;
 using Microsoft.EntityFrameworkCore;
 
-namespace Persistence.LL.Repositories.GatheringNodes;
+namespace Persistence.LL.Repositories.Professions.Gatherings;
 public class GatheringNodeRepository : IGatheringNodeRepository
 {
     private readonly IDbContext _context;
-    
     public GatheringNodeRepository(IDbContext context)
     {
         _context = context;

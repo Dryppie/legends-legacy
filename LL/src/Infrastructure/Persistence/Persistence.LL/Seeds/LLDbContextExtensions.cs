@@ -5,12 +5,9 @@ using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
-using Domain.Models.GatheringNodes;
 using Domain.Models.Inventories;
-using Domain.Models.Items;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
-using Domain.Models.LootTables;
 using Domain.Models.Masteries;
 using Domain.Models.Users;
 using Microsoft.AspNetCore.Identity;
@@ -29,7 +26,7 @@ public static class LLDbContextExtensions
             await DbJsonSeeder.RunAsync(context);
             await SeedCreatures.SeedCreaturesData(context);
             await SeedItems.SeedItemsData(context);
-            await SeedItemsAndLootTables(context);
+            await SeedProfessions.SeedProfessionsData(context);
             await SeedAdminData(context, hasher);
 
             await SeedInventoryItems(context);
@@ -244,12 +241,6 @@ public static class LLDbContextExtensions
             .ToList();
 
         return equipmentSlots;
-    }
-
-    public static async Task SeedItemsAndLootTables(LLDbContext context)
-    {
-        await SeedMiningLootTables(context);
-        await SeedWoodcuttingLootTables(context);
     }
 
     public static async Task SeedInventoryItems(LLDbContext context)
@@ -511,118 +502,5 @@ public static class LLDbContextExtensions
         //};
 
         //await context.LootTables.AddAsync(lootTable);
-    }
-
-    public static async Task SeedMiningLootTables(LLDbContext context)
-    {
-        /* ────────────────────────────────
-         *  Existing ItemBase IDs
-         * ────────────────────────────────*/
-        const string STONE_ID = "stone";
-        const string FLINT_ID = "flint";
-        const string TINY_GEODE_ID = "tiny_geode";
-        const string JAGGED_OBSIDIAN_ID = "jagged_obsidian";
-        const string CRYSTALLINE_POWDER_ID = "crystalline_powder";
-
-        /* ────────────────────────────────
-         *  Helper builders
-         * ────────────────────────────────*/
-        LootTable MakeItemTable(string itemId, int entryWeight, int tableWeight) =>
-            new()
-            {
-                Id = Guid.NewGuid(),
-                Weight = tableWeight,
-                Entries =
-                [
-                    new LootTableItem
-                {
-                    Id     = Guid.NewGuid(),
-                    ItemId = itemId,
-                    Weight = entryWeight
-                }
-                ]
-            };
-
-        LootTable BuildLootTable(params LootTable[] subtables) =>
-            new() { Id = Guid.NewGuid(), Entries = subtables };
-
-        /* ────────────────────────────────
-         *  Mining tiers & weights
-         * ────────────────────────────────*/
-        var miningCommon = MakeItemTable(STONE_ID, 20, 80); // 16 %
-        var miningUncommon = MakeItemTable(FLINT_ID, 30, 30); // 9 %
-        var miningRare = MakeItemTable(TINY_GEODE_ID, 1, 15); // 0.15 %
-        var miningEpic = MakeItemTable(JAGGED_OBSIDIAN_ID, 30, 3); // 0.9 %
-        var miningLegendary = MakeItemTable(CRYSTALLINE_POWDER_ID, 1, 1); // 0.03 %
-
-        var miningRoot = BuildLootTable(
-            miningCommon, miningUncommon, miningRare, miningEpic, miningLegendary);
-
-        /* ────────────────────────────────
-         *  Persist
-         * ────────────────────────────────*/
-        await context.LootTables.AddRangeAsync(
-            miningRoot, miningCommon, miningUncommon,
-            miningRare, miningEpic, miningLegendary);
-
-        var miningNode = new GatheringNode
-        {
-            Id = "mining_slate_shard",
-            Name = "Slate Shard",
-            GatheringType = GatheringType.Mining,
-            LootTableId = miningRoot.Id
-        };
-
-        await context.GatheringNodes.AddAsync(miningNode);
-    }
-
-    public static async Task SeedWoodcuttingLootTables(LLDbContext context)
-    {
-        const string WILLOW_LOG_ID = "willow_log";
-        const string STICKY_SAP_ID = "sticky_sap";
-        const string FEATHER_NEST_ID = "feather_lined_nest";
-        const string SILK_VINE_ID = "silk_vine";
-        const string SHIMMER_LEAF_ID = "shimmering_leaf";
-
-        LootTable MakeItemTable(string itemId, int entryWeight, int tableWeight) =>
-            new()
-            {
-                Id = Guid.NewGuid(),
-                Weight = tableWeight,
-                Entries =
-                [
-                    new LootTableItem
-                    {
-                        Id     = Guid.NewGuid(),
-                        ItemId = itemId,
-                        Weight = entryWeight
-                    }
-                ]
-            };
-
-        LootTable BuildLootTable(params LootTable[] subtables) =>
-            new() { Id = Guid.NewGuid(), Entries = subtables };
-
-        var willowCommon = MakeItemTable(WILLOW_LOG_ID, 20, 80); // 16 %
-        var willowUncommon = MakeItemTable(STICKY_SAP_ID, 30, 30); // 9 %
-        var willowRare = MakeItemTable(FEATHER_NEST_ID, 1, 15); // 0.15 %
-        var willowEpic = MakeItemTable(SILK_VINE_ID, 30, 3);  // 0.9 %
-        var willowLegendary = MakeItemTable(SHIMMER_LEAF_ID, 1, 1);  // 0.03 %
-        var willowRoot = BuildLootTable(
-            willowCommon, willowUncommon, willowRare, willowEpic, willowLegendary);
-
-        // Add items to context
-        await context.LootTables.AddRangeAsync(willowRoot, willowCommon, willowUncommon,
-            willowRare, willowEpic, willowLegendary);
-        
-        var willowGatheringNode = new GatheringNode
-        {
-            Id = "woodcutting_young_willow",
-            Name = "Young Willow",
-            GatheringType = GatheringType.Woodcutting,
-            LootTableId = willowRoot.Id
-        };
-
-        await context.GatheringNodes.AddRangeAsync(willowGatheringNode);
     }
 }

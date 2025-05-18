@@ -8,14 +8,15 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
-using Domain.Models.GatheringNodes;
 using Domain.Models.Guilds;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.LootTables;
+using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
+using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Users;
@@ -62,7 +63,7 @@ public interface IDbContext
     DbSet<LootTableItem> LootTableItems { get; }
     //DbSet<Party> Parties { get; }
     //DbSet<PartyMember> PartyMembers { get; }
-    //DbSet<Profession> Professions { get; }
+    DbSet<Profession> Professions { get; }
     //DbSet<Quest> Quests { get; }
     //DbSet<QuestStage> QuestStages { get; }
     //DbSet<Stat> Stats { get; }

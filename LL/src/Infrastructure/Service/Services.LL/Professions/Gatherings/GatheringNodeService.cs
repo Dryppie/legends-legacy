@@ -1,7 +1,7 @@
 ﻿using Application.Interfaces.Services.LL;
-using Domain.Models.GatheringNodes;
+using Domain.Models.Professions.Gathering.GatheringNodes;
 
-namespace Services.LL.Gatherings;
+namespace Services.LL.Professions.Gatherings;
 public class GatheringNodeService : IGatheringNodeService
 {
     private readonly IGatheringNodeRepository _gatheringNodeRepository;

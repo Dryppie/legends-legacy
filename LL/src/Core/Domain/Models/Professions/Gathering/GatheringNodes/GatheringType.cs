@@ -1,4 +1,4 @@
-﻿namespace Domain.Models.GatheringNodes;
+﻿namespace Domain.Models.Professions.Gathering.GatheringNodes;
 public enum GatheringType
 {
     Fishing,

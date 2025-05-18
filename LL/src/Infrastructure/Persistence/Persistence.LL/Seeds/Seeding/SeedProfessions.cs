@@ -1,24 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Domain.Models.GatheringNodes;
-using Domain.Models.LootTables;
+﻿using Domain.Models.LootTables;
+using Domain.Models.Professions;
+using Domain.Models.Professions.Gathering.GatheringNodes;
 
 namespace Persistence.LL.Seeds.Seeding;
 public static class SeedProfessions
 {
     public static async Task SeedProfessionsData(this LLDbContext context)
     {
+        // Tier‑1
         await SeedMiningLootTables(context);
         await SeedWoodcuttingLootTables(context);
+
+        // Tier‑2
+        await SeedMiningTier2LootTables(context);
+        await SeedWoodcuttingTier2LootTables(context);
+
+        // Tier-3
+        await SeedMiningTier3LootTables(context);
+        await SeedWoodcuttingTier3LootTables(context);
     }
 
-    public static async Task SeedMiningLootTables(LLDbContext context)
+    #region Tier-1
+    private static async Task SeedMiningLootTables(LLDbContext context)
     {
         /* ────────────────────────────────
-         *  Existing ItemBase IDs
+         *  Item IDs (Tier‑1 Mining)
          * ────────────────────────────────*/
         const string STONE_ID = "stone";
         const string FLINT_ID = "flint";
@@ -73,14 +79,15 @@ public static class SeedProfessions
         {
             Id = "mining_slate_shard",
             Name = "Slate Shard",
-            GatheringType = GatheringType.Mining,
+            LevelRequirement = 1,
+            ProfessionType = ProfessionType.Mining,
             LootTableId = miningRoot.Id
         };
 
         await context.GatheringNodes.AddAsync(miningNode);
     }
 
-    public static async Task SeedWoodcuttingLootTables(LLDbContext context)
+    private static async Task SeedWoodcuttingLootTables(LLDbContext context)
     {
         /* ────────────────────────────────
          *  Existing ItemBase IDs
@@ -137,13 +144,217 @@ public static class SeedProfessions
         {
             Id = "woodcutting_young_willow",
             Name = "Young Willow",
-            GatheringType = GatheringType.Woodcutting,
+            LevelRequirement = 1,
+            ProfessionType = ProfessionType.Woodcutting,
             LootTableId = willowRoot.Id
         };
 
         await context.GatheringNodes.AddRangeAsync(willowGatheringNode);
     }
+    #endregion
 
+    #region Tier‑2
+    private static async Task SeedMiningTier2LootTables(LLDbContext context)
+    {
+        /* ────────────────────────────────
+         *  Item IDs (Tier‑2 Mining ‑ Copperbloom Vein)
+         * ────────────────────────────────*/
+        const string COPPER_ORE_ID = "copper_ore";
+        const string VEINSTONE_CHIP_ID = "veinstone_chip";
+        const string MALACHITE_SHARD_ID = "malachite_shard";
+        const string VERDANT_ORE_ID = "verdant_ore";
+        const string LIVING_AMBER_ID = "living_amber";
+
+        var copperCommon = MakeItemTable(
+        [
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = COPPER_ORE_ID,     Weight = 20 },
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = VEINSTONE_CHIP_ID, Weight = 20 }
+        ], 80);
+
+        var copperUncommon = MakeItemTable(
+        [
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = MALACHITE_SHARD_ID, Weight = 30 },
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = VERDANT_ORE_ID,     Weight = 30 }
+        ], 30);
+
+        var copperRare = MakeItemTable(
+        [
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = LIVING_AMBER_ID, Weight = 1 }
+        ], 15);
+
+        var copperRoot = BuildLootTable(copperCommon, copperUncommon, copperRare);
+
+        await context.LootTables.AddRangeAsync(copperRoot, copperCommon, copperUncommon, copperRare);
+
+        await context.GatheringNodes.AddAsync(new GatheringNode
+        {
+            Id = "mining_copperbloom_vein",
+            Name = "Copperbloom Vein",
+            LevelRequirement = 25,
+            ProfessionType = ProfessionType.Mining,
+            LootTableId = copperRoot.Id
+        });
+    }
+
+    private static async Task SeedWoodcuttingTier2LootTables(LLDbContext context)
+    {
+        /* ────────────────────────────────
+         *  Item IDs (Tier‑2 Woodcutting ‑ Amberleaf Maple)
+         * ────────────────────────────────*/
+        const string MAPLE_LOG_ID = "maple_log";
+        const string AMBER_SYRUP_ID = "amber_syrup";
+        const string SWEET_BARK_CHIPS_ID = "sweet_bark_chips";
+        const string HONEYCOMB_ID = "honeycomb";
+        const string GLOWING_AMBER_ID = "glowing_amber";
+
+        var mapleCommon = MakeItemTable(
+        [
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = MAPLE_LOG_ID,  Weight = 20 },
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = AMBER_SYRUP_ID, Weight = 20 }
+        ], 80);
+
+        var mapleUncommon = MakeItemTable(
+        [
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = SWEET_BARK_CHIPS_ID, Weight = 30 }
+        ], 30);
+
+        var mapleRare = MakeItemTable(
+        [
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = HONEYCOMB_ID, Weight = 1 }
+        ], 15);
+
+        var mapleEpic = MakeItemTable(
+        [
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = GLOWING_AMBER_ID, Weight = 30 }
+        ], 3);
+
+        var mapleRoot = BuildLootTable(mapleCommon, mapleUncommon, mapleRare, mapleEpic);
+
+        await context.LootTables.AddRangeAsync(mapleRoot, mapleCommon, mapleUncommon, mapleRare, mapleEpic);
+
+        await context.GatheringNodes.AddAsync(new GatheringNode
+        {
+            Id = "woodcutting_amberleaf_maple",
+            Name = "Amberleaf Maple",
+            LevelRequirement = 25,
+            ProfessionType = ProfessionType.Woodcutting,
+            LootTableId = mapleRoot.Id
+        });
+    }
+    #endregion
+
+    #region Tier-3
+    private static async Task SeedMiningTier3LootTables(LLDbContext context)
+    {
+        /* Tier-3 Mining – Tinspine Vein */
+        const string TIN_ORE_ID = "tin_ore";
+        const string RIVER_PEARL_ID = "river_pearl";
+        const string DULL_QUARTZ_ID = "dull_quartz";
+        const string GALVANIC_DUST_ID = "galvanic_dust";
+        const string FROSTED_METAL_SHARD_ID = "frosted_metal_shard";
+
+        var tinCommon = MakeItemTable(
+        [
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = TIN_ORE_ID, Weight = 20 }
+        ], 80);
+
+        var tinUncommon = MakeItemTable(
+        [
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = RIVER_PEARL_ID, Weight = 30 },
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = DULL_QUARTZ_ID, Weight = 30 }
+        ], 30);
+
+        var tinRare = MakeItemTable(
+        [
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = GALVANIC_DUST_ID,       Weight = 1 },
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = FROSTED_METAL_SHARD_ID, Weight = 1 }
+        ], 15);
+
+        var tinRoot = BuildLootTable(tinCommon, tinUncommon, tinRare);
+
+        await context.LootTables.AddRangeAsync(tinRoot, tinCommon, tinUncommon, tinRare);
+
+        await context.GatheringNodes.AddAsync(new GatheringNode
+        {
+            Id = "mining_tinspine_vein",
+            Name = "Tinspine Vein",
+            LevelRequirement = 50,
+            ProfessionType = ProfessionType.Mining,
+            LootTableId = tinRoot.Id
+        });
+    }
+
+    private static async Task SeedWoodcuttingTier3LootTables(LLDbContext context)
+    {
+        /* Tier-3 Woodcutting – Ember Ash */
+        const string ASH_LOG_ID = "ash_log";
+        const string CHARCOAL_CHUNK_ID = "charcoal_chunk";
+        const string FIRE_BEETLE_CARAPACE_ID = "fire_beetle_carapace";
+        const string SCORCHED_RESIN_ID = "scorched_resin";
+        const string INFERNO_BARK_ID = "inferno_bark";
+
+        var ashCommon = MakeItemTable(
+        [
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = ASH_LOG_ID,        Weight = 20 },
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = CHARCOAL_CHUNK_ID, Weight = 20 }
+        ], 80);
+
+        var ashUncommon = MakeItemTable(
+        [
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = FIRE_BEETLE_CARAPACE_ID, Weight = 30 }
+        ], 30);
+
+        var ashRare = MakeItemTable(
+        [
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = SCORCHED_RESIN_ID, Weight = 1 }
+        ], 15);
+
+        var ashEpic = MakeItemTable(
+        [
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = INFERNO_BARK_ID, Weight = 30 }
+        ], 3);
+
+        var ashRoot = BuildLootTable(ashCommon, ashUncommon, ashRare, ashEpic);
+
+        await context.LootTables.AddRangeAsync(ashRoot, ashCommon, ashUncommon, ashRare, ashEpic);
+
+        await context.GatheringNodes.AddAsync(new GatheringNode
+        {
+            Id = "woodcutting_ember_ash",
+            Name = "Ember Ash",
+            LevelRequirement = 50,
+            ProfessionType = ProfessionType.Woodcutting,
+            LootTableId = ashRoot.Id
+        });
+    }
+    #endregion
+
+    #region Tier-4
+    #endregion
+
+    #region Tier-5
+    #endregion
+
+    #region Tier-6
+    #endregion
+
+    #region Tier-7
+    #endregion
+
+    #region Tier-8
+    #endregion
+
+    #region Tier-9
+    #endregion
+
+    #region Tier-10
+    #endregion
+
+    #region Tier-11
+    #endregion
+
+
+    #region LootTable Creation Helpers
     private static LootTable BuildLootTable(params LootTable[] subtables) =>
             new() { Id = Guid.NewGuid(), Entries = subtables };
 
@@ -160,4 +371,5 @@ public static class SeedProfessions
             Weight = tableWeight,
             Entries = [.. items]
         };
+    #endregion
 }

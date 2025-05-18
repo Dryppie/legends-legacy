@@ -1,4 +1,4 @@
-﻿using Domain.Models.GatheringNodes;
+﻿using Domain.Models.Professions.Gathering.GatheringNodes;
 
 namespace Application.Interfaces.Services.LL;
 public interface IGatheringNodeService
