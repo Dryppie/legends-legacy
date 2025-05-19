@@ -9,6 +9,7 @@ import { ProfessionHeaderComponent } from '../../../../shared/components/profess
 import { NgFor } from '@angular/common';
 import { ProfessionCardComponent } from '../../../../shared/components/professions/profession-card/profession-card.component';
 import { GatheringProfession } from '../../../../shared/models/profession';
+import { CharacterProfession } from '../../../../shared/models/Dtos/characterProfession';
 
 @Component({
   selector: 'app-gathering',
@@ -24,6 +25,8 @@ export class GatheringComponent {
   combatStarted = false;
   private subscription: Subscription = new Subscription();
   currentAction: CharacterActionDto | null = null;
+  characterProfessions: CharacterProfession[] = [];
+  characterProfession: CharacterProfession | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -37,6 +40,10 @@ export class GatheringComponent {
         this.currentAction = action;
       }),
     );
+    this.professionService.professions$.subscribe((characterProfessions) => {
+      this.characterProfessions = characterProfessions;
+      this.getCharacterProfession();
+    });
     this.route.paramMap.subscribe((params) => {
       this.professionId = params.get('id') ?? '';
       this.getProfessionDetails(this.professionId);
@@ -45,6 +52,13 @@ export class GatheringComponent {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  getCharacterProfession() {
+    this.characterProfession =
+      this.characterProfessions.find(
+        (p) => p.professionType.toLocaleLowerCase() === this.professionId, // or p.id, p.type, etc.
+      ) ?? null;
   }
 
   getProfessionDetails(id: string) {

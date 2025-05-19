@@ -184,13 +184,11 @@ export class AuthService {
   checkAuth(): Observable<CharacterDto | null> {
     return this.fetchCharacter().pipe(
       catchError(() => {
-        console.log('check auth error)');
         return this.tryRefresh().pipe(
           switchMap((ok) => (ok ? this.fetchCharacter() : of(null))),
         );
       }),
       tap((ch) => {
-        console.log('tapped into check auth');
         if (ch) this.markAuthenticated();
       }),
     );

@@ -2,6 +2,7 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Items;
+using Application.Interfaces.Services.LL.Professions;
 using Domain.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,6 +23,7 @@ using Services.LL.Items;
 using Services.LL.Levels;
 using Services.LL.Loots;
 using Services.LL.LootTables;
+using Services.LL.Professions;
 using Services.LL.Professions.Gatherings;
 using Services.LL.Regions;
 using Services.LL.Regions.Areas;
@@ -67,6 +69,8 @@ public static class DependencyInjection
         services.AddScoped<ILootService, LootServices>();
         services.AddScoped<ILootTableService, LootTableService>();
         services.AddScoped<IInventoryService, InventoryService>();
+
+        services.AddScoped<IProfessionService, ProfessionService>();
 
         services.AddScoped<ISpawningService, SpawningService>();
 

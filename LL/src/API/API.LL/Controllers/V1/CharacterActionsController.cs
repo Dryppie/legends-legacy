@@ -5,7 +5,6 @@ using Application.UseCases.CharacterActions.Dtos.Responses;
 using Application.UseCases.CharacterActions.Queries.GetCharacterAction;
 using Common.Primitives;
 using Domain.Models.Professions;
-using Domain.Models.Professions.Gathering.GatheringNodes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

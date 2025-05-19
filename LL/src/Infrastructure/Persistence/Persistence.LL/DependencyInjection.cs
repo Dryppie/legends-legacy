@@ -1,5 +1,4 @@
-﻿using Application.Authorization.Interfaces;
-using Application.Common.Interfaces;
+﻿using Application.Common.Interfaces;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.Colosseum;
@@ -12,6 +11,7 @@ using Domain.Models.Guilds;
 using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
 using Domain.Models.LootTables;
+using Domain.Models.Professions;
 using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
@@ -30,6 +30,7 @@ using Persistence.LL.Repositories.Essences;
 using Persistence.LL.Repositories.Guilds;
 using Persistence.LL.Repositories.Inventories;
 using Persistence.LL.Repositories.LootTables;
+using Persistence.LL.Repositories.Professions;
 using Persistence.LL.Repositories.Professions.Gatherings;
 using Persistence.LL.Repositories.Regions;
 using Persistence.LL.Repositories.Regions.Areas;
@@ -76,6 +77,8 @@ public static class DependencyInjection
         services.AddScoped<ILootTableRepository, LootTableRepository>();
         services.AddScoped<IInventoryRepository, InventoryRepository>();
         services.AddScoped<IRegionRepository, RegionRepository>();
+
+        services.AddScoped<IProfessionRepository, ProfessionRepository>();
 
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();

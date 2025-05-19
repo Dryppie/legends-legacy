@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Services.LL;
+﻿using Application.Interfaces.Services.LL.Professions;
 using Domain.Models.Professions.Gathering.GatheringNodes;
 
 namespace Services.LL.Professions.Gatherings;

@@ -441,7 +441,7 @@ namespace Persistence.LL.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LevelRequirement = table.Column<int>(type: "int", nullable: false),
-                    GatheringType = table.Column<int>(type: "int", nullable: false),
+                    ProfessionType = table.Column<int>(type: "int", nullable: false),
                     LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -705,6 +705,26 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Professions",
+                columns: table => new
+                {
+                    CharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ProfessionType = table.Column<int>(type: "int", nullable: false),
+                    Level = table.Column<int>(type: "int", nullable: false),
+                    Experience = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Professions", x => new { x.CharacterId, x.ProfessionType });
+                    table.ForeignKey(
+                        name: "FK_Professions_Entities_CharacterId",
+                        column: x => x.CharacterId,
+                        principalTable: "Entities",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ActionDetails",
                 columns: table => new
                 {
@@ -714,7 +734,7 @@ namespace Persistence.LL.Migrations
                     CharacterTeam = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AreaId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    GatheringType = table.Column<int>(type: "int", nullable: true),
+                    ProfessionType = table.Column<int>(type: "int", nullable: true),
                     LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
@@ -1070,6 +1090,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "Material");
+
+            migrationBuilder.DropTable(
+                name: "Professions");
 
             migrationBuilder.DropTable(
                 name: "RefreshTokens");

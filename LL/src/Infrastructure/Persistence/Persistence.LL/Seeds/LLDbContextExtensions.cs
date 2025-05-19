@@ -11,6 +11,7 @@ using Domain.Models.Items.EssenceItems;
 using Domain.Models.Masteries;
 using Domain.Models.Users;
 using Microsoft.AspNetCore.Identity;
+using Persistence.LL.Seeds.Helpers;
 using Persistence.LL.Seeds.JsonSeeding;
 using Persistence.LL.Seeds.Seeding;
 
@@ -55,7 +56,8 @@ public static class LLDbContextExtensions
             UserId = user.Id,
             Name = "admin",
             ImagePath = "player",
-            Level = 1
+            Level = 1,
+            Professions = ProfessionsSeederHelper.CreateProfessions(Guid.Parse(CHARACTER_GUID)),
         };
 
         var inventory = new Inventory()

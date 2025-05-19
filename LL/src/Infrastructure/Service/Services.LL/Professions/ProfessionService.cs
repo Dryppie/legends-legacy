@@ -1,5 +1,5 @@
-﻿using Domain.Models.Professions;
-using Services.LL.Interfaces;
+﻿using Application.Interfaces.Services.LL.Professions;
+using Domain.Models.Professions;
 
 namespace Services.LL.Professions;
 public class ProfessionService : IProfessionService
@@ -13,5 +13,10 @@ public class ProfessionService : IProfessionService
     public async Task<bool> CanPerformProfession(Guid characterId, ProfessionType professionType, int requiredLevel, CancellationToken cancellationToken)
     {
         return await _professionRepository.CanPerformProfession(characterId, professionType, requiredLevel, cancellationToken);
+    }
+
+    public async Task<List<Profession>> GetProfessionsAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        return await _professionRepository.GetProfessionsAsync(characterId, cancellationToken);
     }
 }

@@ -1,5 +1,8 @@
 <div
   class="relative flex h-64 w-full overflow-visible rounded-md bg-cover sm:size-64"
+  [class.opacity-50]="isLocked"
+  [class.pointer-events-none]="isLocked"
+  [class.grayscale]="isLocked"
   style="
     background-image: url(&quot;cards/tree.png&quot;);
     box-shadow: 0 6px 6px -3px rgba(0, 0, 0, 0.4);
@@ -24,9 +27,11 @@
     <div class="relative flex w-full items-end justify-between p-3 text-white">
       <div class="flex flex-col gap-1 pb-4">
         <div class="flex items-center justify-between">
-          <h3>{{ gatheringNodeName }}</h3>
+          <h3>{{ gatheringNode.name }}</h3>
         </div>
-        <small class="text-secondary">Req. LV: 1</small>
+        <small class="text-secondary"
+          >Req. LV: {{ gatheringNode.levelRequirement }}</small
+        >
         <div class="mt-2 flex items-center gap-2">
           <!-- <svg
             xmlns="http://www.w3.org/2000/svg"

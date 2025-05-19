@@ -3,12 +3,13 @@ import { MiniButtonComponent } from '../../mini-button/mini-button.component';
 import { CharacterActionsService } from '../../../../core/services/api/character-actions/character-actions.service';
 import {
   CharacterActionDto,
-  GatheringActionDetails,
   StartGatheringActionRequest,
 } from '../../../models/Dtos/characterActionDto';
 import { Subscription } from 'rxjs';
 import { NgIf } from '@angular/common';
 import { GatheringType } from '../../../models/enums/gatheringType';
+import { GatheringNode } from '../../../models/Dtos/gatheringNode';
+import { CharacterProfession } from '../../../models/Dtos/characterProfession';
 
 @Component({
   selector: 'app-profession-card',
@@ -18,10 +19,11 @@ import { GatheringType } from '../../../models/enums/gatheringType';
   styleUrl: './profession-card.component.css',
 })
 export class ProfessionCardComponent {
-  @Input() gatheringNodeId!: string;
-  @Input() gatheringNodeName!: string;
+  @Input() gatheringNode!: GatheringNode;
+  @Input() characterProfession!: CharacterProfession | null;
   currentAction: CharacterActionDto | null = null;
   private subscription: Subscription = new Subscription();
+  isLocked = true;
 
   constructor(private characterActionsService: CharacterActionsService) {}
 
@@ -31,6 +33,7 @@ export class ProfessionCardComponent {
         this.currentAction = action;
       }),
     );
+    this.setIsLocked();
   }
 
   // TODO: Rework this. Html is calling this continuously
@@ -47,13 +50,13 @@ export class ProfessionCardComponent {
 
   specificCard(): boolean {
     return (
-      this.currentAction?.gatheringActionDetails?.name == this.gatheringNodeId
+      this.currentAction?.gatheringActionDetails?.name == this.gatheringNode.id
     );
   }
 
   startGatheringAction() {
     const startGatheringActionRequest: StartGatheringActionRequest = {
-      gatheringNodeId: this.gatheringNodeId,
+      gatheringNodeId: this.gatheringNode.id,
       gatheringType: GatheringType.Woodcutting,
     };
     this.characterActionsService.startGatheringAction(
@@ -63,5 +66,10 @@ export class ProfessionCardComponent {
 
   cancelCharacterAction() {
     this.characterActionsService.stopCharacterAction();
+  }
+  setIsLocked() {
+    this.isLocked =
+      !this.characterProfession ||
+      this.characterProfession.level < this.gatheringNode.levelRequirement;
   }
 }
