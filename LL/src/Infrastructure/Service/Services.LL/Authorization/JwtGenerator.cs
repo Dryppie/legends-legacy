@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Text;
 using Application.Authorization.Interfaces;
+using Application.Interfaces.Services.LL;
 using Common.Authorization.Security;
 using Common.Options;
 using Domain.Models.Users;
@@ -14,6 +15,7 @@ public class JwtGenerator : IJwtGenerator
     private readonly IRefreshTokenRepository _repo;
     private readonly IUserRepository _userRepo;
     private readonly ITokenHasher _hasher;
+    private readonly ICharacterService _characterService;
 
     private readonly JwtSecurityTokenHandler _handler = new();
     private readonly SymmetricSecurityKey _signingKey;
@@ -23,11 +25,12 @@ public class JwtGenerator : IJwtGenerator
     private readonly TimeSpan _refreshLifespan;
     private readonly string _validIssuer;
     public readonly string _validAudience;
-    public JwtGenerator(IRefreshTokenRepository repo, IUserRepository userRepo, ITokenHasher hasher, IOptions<JwtOptions> jwtOpt)
+    public JwtGenerator(IRefreshTokenRepository repo, IUserRepository userRepo, ITokenHasher hasher, ICharacterService characterService, IOptions<JwtOptions> jwtOpt)
     {
         _repo = repo;
         _userRepo = userRepo;
         _hasher = hasher;
+        _characterService = characterService;
 
         var opt = jwtOpt.Value;
 
@@ -101,9 +104,13 @@ public class JwtGenerator : IJwtGenerator
 
         var userId = record.UserId; // needed for new token
 
-        // you likely have an IUserRepository already:
         var user = await _userRepo.FindByIdAsync(userId, cancellationToken);
         if (user == null) return null;
+
+        var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
+        if (character == null) return null;
+
+        user.CharacterId = character.Id;
 
         var newTokens = IssueTokens(user);
         // store the hash of the *new* refresh token inside the old one (`ReplacedBy`) – optional
