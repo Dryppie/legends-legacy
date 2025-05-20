@@ -33,13 +33,11 @@ export class ProfessionsService {
     startWith(void 0),
     // hit the API whenever refresh$ emits
     switchMap(() =>
-      this.api.get('profession').pipe(
-        tap(() => console.log('[Professions] fetched')),
-        catchError((err) => {
-          console.error('[Professions] fetch failed', err);
-          return throwError(() => err);
-        }),
-      ),
+      this.api
+        .get('profession')
+        .pipe
+        // tap(() => console.log('[Professions] fetched')),
+        (),
     ),
     // keep the latest value for all current & future subscribers
     shareReplay({ bufferSize: 1, refCount: true }),

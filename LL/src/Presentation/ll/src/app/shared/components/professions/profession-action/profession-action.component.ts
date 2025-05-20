@@ -35,7 +35,7 @@ export class ProfessionActionComponent implements OnInit, OnDestroy {
           CharacterActionType.Gathering;
 
         if (this.isGatheringAction)
-          this.performingAction = `Cutting: ${action?.gatheringActionDetails!.name}`;
+          this.performingAction = `Gathering - ${action?.gatheringActionDetails!.name}`;
       }),
     );
   }

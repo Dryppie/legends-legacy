@@ -10,6 +10,7 @@ using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Masteries;
 using Microsoft.EntityFrameworkCore;
+using Persistence.LL.Seeds.Helpers;
 
 namespace Persistence.LL.Repositories.Entities.Characters;
 public class CharacterRepository : ICharacterRepository
@@ -26,6 +27,7 @@ public class CharacterRepository : ICharacterRepository
     {
         var character = new Character()
         {
+            Id = Guid.NewGuid(),
             UserId = userId,
             Name = username,
             ImagePath = "player",
@@ -62,7 +64,7 @@ public class CharacterRepository : ICharacterRepository
         };
 
         character.EssenceSlots = essenceSlots;
-
+        character.Professions = ProfessionsSeederHelper.CreateProfessions(character.Id);
         await _context.Essences.AddRangeAsync(essences);
         await _context.EssenceSlots.AddRangeAsync(essenceSlots);
         character.Masteries = SeedMasteries(character);

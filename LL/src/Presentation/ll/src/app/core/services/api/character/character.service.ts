@@ -29,13 +29,10 @@ export class CharacterService {
     startWith(void 0),
     // hit the API whenever refresh$ emits
     switchMap(() =>
-      this.getCharacterOverview().pipe(
-        tap(() => console.log('[Character overview] fetched')),
-        catchError((err) => {
-          console.error('[Character overview] fetch failed', err);
-          return throwError(() => err);
-        }),
-      ),
+      this.getCharacterOverview()
+        .pipe
+        // tap(() => console.log('[Character overview] fetched')),
+        (),
     ),
     // keep the latest value for all current & future subscribers
     shareReplay(1),

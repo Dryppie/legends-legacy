@@ -55,7 +55,6 @@ export class GatheringComponent {
   }
 
   getCharacterProfession() {
-    console.log(this.characterProfessions);
     this.characterProfession = this.characterProfessions.find(
       (p) => p.professionType.toLowerCase() === this.professionId, // or p.id, p.type, etc.
     )!;

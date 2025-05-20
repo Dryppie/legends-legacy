@@ -38,4 +38,3 @@ import { Rarity } from '../shared/models/enums/rarity';
 export const RECIPES_CONTENT = ${tsLiteral} satisfies Recipe[];
 `,
 );
-console.log('Static recipes-content.ts regenerated');
