@@ -27,6 +27,19 @@ export interface Recipe {
   itemType: ItemType;
 }
 
+export interface CraftingQueueItem {
+  id: string;
+  recipe: Recipe;
+  startedAt: Date;
+  status: CraftingQueueStatus;
+}
+
+export enum CraftingQueueStatus {
+  Queued = 'Queued',
+  InProgress = 'InProgress',
+  Completed = 'Completed',
+}
+
 export interface Material {
   recipeId: string;
   quantity: number;

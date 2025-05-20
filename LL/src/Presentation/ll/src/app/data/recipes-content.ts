@@ -5,6 +5,36 @@ import { Rarity } from '../shared/models/enums/rarity';
 
 export const RECIPES_CONTENT = [
   {
+    "id": "35ab5f73-3295-4e0f-a1af-6b453399999e",
+    "name": "Test Helmet",
+    "itemId": "test_helmet",
+    "item": {
+      "id": "test_helmet",
+      "name": "Test Helmet",
+      "description": "A helmet for testing.",
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common
+    },
+    "quantity": 1,
+    "craftType": CraftType.ArmorForging,
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "stone",
+        "item": {
+          "id": "stone",
+          "name": "Stone",
+          "description": "",
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
     "id": "35ab5f73-3295-4e0f-a1af-6b453319157e",
     "name": "Jagged Obsidian Helm",
     "itemId": "jagged_obsidian_helm",

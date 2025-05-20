@@ -24,7 +24,7 @@ export class ProfessionCardComponent implements OnInit {
   currentAction: CharacterActionDto | null = null;
   private subscription: Subscription = new Subscription();
   isLocked = true;
-
+  canStartAction: boolean = false;
   constructor(private characterActionsService: CharacterActionsService) {}
 
   ngOnInit(): void {
@@ -34,15 +34,14 @@ export class ProfessionCardComponent implements OnInit {
       }),
     );
     this.setIsLocked();
+    this.setCanStartAction();
   }
 
-  // TODO: Rework this. Html is calling this continuously
-  canStartAction(): boolean {
-    return (
+  setCanStartAction() {
+    this.canStartAction =
       this.currentAction == null ||
       (new Date(this.currentAction.updatedAt).getTime() <= Date.now() &&
-        this.currentAction.isDeleted)
-    );
+        this.currentAction.isDeleted);
   }
   ngOnDestroy(): void {
     this.subscription.unsubscribe();

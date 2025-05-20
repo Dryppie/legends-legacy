@@ -3,12 +3,15 @@ import { ProfessionHeaderComponent } from '../../../../shared/components/profess
 import { AsyncPipe, NgClass, NgFor, NgIf } from '@angular/common';
 import {
   CraftingProfession,
+  CraftingQueueItem,
+  CraftingQueueStatus,
   Recipe,
 } from '../../../../shared/models/profession';
 import {
   BehaviorSubject,
   combineLatest,
   map,
+  of,
   shareReplay,
   Subject,
   switchMap,
@@ -19,6 +22,7 @@ import { ProfessionsService } from '../../../../core/services/api/professions/pr
 import { CharacterActionsService } from '../../../../core/services/api/character-actions/character-actions.service';
 import { CharacterManagerService } from '../../../../core/services/client-side/character-manager/character-manager.service';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
+import { InventoryService } from '../../../../core/services/api/inventory/inventory.service';
 
 function hasQuantity(
   inv: InventoryItem[],
@@ -62,7 +66,7 @@ export class CraftingComponent implements OnInit {
   readonly inventory$;
 
   // Stub until you wire real actions/queue in the service
-  readonly craftingQueue$ = new BehaviorSubject<Recipe[]>([]);
+  readonly craftingQueue$ = new BehaviorSubject<CraftingQueueItem[]>([]);
   readonly canCraftSelected$;
 
   // ────────────────────────────────────── ctor/di ─────────────────────────────
@@ -71,6 +75,7 @@ export class CraftingComponent implements OnInit {
     private readonly professionService: ProfessionsService,
     private readonly characterActionService: CharacterActionsService,
     private readonly characterManager: CharacterManagerService,
+    private readonly inventoryService: InventoryService,
   ) {
     this.profession$ = this.route.paramMap.pipe(
       map((p) => p.get('id') ?? ''),
@@ -87,7 +92,15 @@ export class CraftingComponent implements OnInit {
 
     this.currentAction$ = this.characterActionService.currentAction$;
 
-    this.inventory$ = this.characterManager.inventory$;
+    this.inventory$ = this.characterManager.inventory$.pipe(
+      switchMap(
+        (invDto) =>
+          invDto // already cached?
+            ? of(invDto) // → just pass it through
+            : this.inventoryService.getInventory(), // → make a network call
+      ),
+      shareReplay(1), // every subscriber sees the same value
+    );
     this.canCraftSelected$ = combineLatest([
       this.selectedRecipe$,
       this.inventory$,
@@ -127,8 +140,15 @@ export class CraftingComponent implements OnInit {
       return; // safety net – shouldn’t happen if button was disabled
     }
 
+    const queueItem: CraftingQueueItem = {
+      id: crypto.randomUUID(),
+      recipe,
+      startedAt: new Date(),
+      status: CraftingQueueStatus.Queued,
+    };
+
     /* optimistic queue */
-    this.craftingQueue$.next([...this.craftingQueue$.value, recipe]);
+    this.craftingQueue$.next([...this.craftingQueue$.value, queueItem]);
 
     /* optimistic client-side material removal */
     const updatedItems = consumeMaterials(items, recipe);
@@ -137,10 +157,10 @@ export class CraftingComponent implements OnInit {
     /* TODO: call backend to actually start the craft */
   }
 
-  cancelCraft(recipe: Recipe): void {
+  cancelCraft(queueItem: CraftingQueueItem): void {
     // TODO: cancel via service
     this.craftingQueue$.next(
-      this.craftingQueue$.value.filter((r) => r.id !== recipe.id),
+      this.craftingQueue$.value.filter((r) => r.id !== queueItem.id),
     );
   }
 

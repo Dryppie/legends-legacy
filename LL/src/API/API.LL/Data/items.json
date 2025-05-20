@@ -990,6 +990,28 @@
         "attributeModifiers": []
     },
     {
+        "id": "test_helmet",
+        "name": "Test Helmet",
+        "description": "A helmet for testing.",
+        "itemType": "Equipment",
+        "rarity": "Common",
+        "equipmentType": "Head",
+        "attributeModifiers": [
+            {
+                "id": "1234565f-bb38-48a9-81b1-07552ff5894c",
+                "attributeType": "Willpower",
+                "amount": 1,
+                "modifierType": "Flat"
+            },
+            {
+                "id": "123712de-e223-4112-89e5-e47562edadcd",
+                "attributeType": "Endurance",
+                "amount": 1,
+                "modifierType": "Flat"
+            }
+        ]
+    },
+    {
         "id": "jagged_obsidian_helm",
         "name": "Jagged Obsidian Helm",
         "description": "A heavy helmet forged from jagged obsidian and stone.",
