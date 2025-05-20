@@ -6,7 +6,7 @@ import { Subscription } from 'rxjs';
 import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
 import { GatheringNode } from '../../../../shared/models/Dtos/gatheringNode';
 import { ProfessionHeaderComponent } from '../../../../shared/components/professions/profession-header/profession-header.component';
-import { NgFor } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { ProfessionCardComponent } from '../../../../shared/components/professions/profession-card/profession-card.component';
 import { GatheringProfession } from '../../../../shared/models/profession';
 import { CharacterProfession } from '../../../../shared/models/Dtos/characterProfession';
@@ -14,7 +14,7 @@ import { CharacterProfession } from '../../../../shared/models/Dtos/characterPro
 @Component({
   selector: 'app-gathering',
   standalone: true,
-  imports: [ProfessionHeaderComponent, ProfessionCardComponent, NgFor],
+  imports: [ProfessionHeaderComponent, ProfessionCardComponent, NgFor, NgIf],
   templateUrl: './gathering.component.html',
   styleUrl: './gathering.component.css',
 })
@@ -26,7 +26,7 @@ export class GatheringComponent {
   private subscription: Subscription = new Subscription();
   currentAction: CharacterActionDto | null = null;
   characterProfessions: CharacterProfession[] = [];
-  characterProfession: CharacterProfession | null = null;
+  characterProfession!: CharacterProfession;
 
   constructor(
     private route: ActivatedRoute,
@@ -40,13 +40,13 @@ export class GatheringComponent {
         this.currentAction = action;
       }),
     );
-    this.professionService.professions$.subscribe((characterProfessions) => {
-      this.characterProfessions = characterProfessions;
-      this.getCharacterProfession();
-    });
     this.route.paramMap.subscribe((params) => {
       this.professionId = params.get('id') ?? '';
       this.getProfessionDetails(this.professionId);
+      this.professionService.professions$.subscribe((characterProfessions) => {
+        this.characterProfessions = characterProfessions;
+        this.getCharacterProfession();
+      });
     });
   }
 
@@ -55,10 +55,10 @@ export class GatheringComponent {
   }
 
   getCharacterProfession() {
-    this.characterProfession =
-      this.characterProfessions.find(
-        (p) => p.professionType.toLocaleLowerCase() === this.professionId, // or p.id, p.type, etc.
-      ) ?? null;
+    console.log(this.characterProfessions);
+    this.characterProfession = this.characterProfessions.find(
+      (p) => p.professionType.toLowerCase() === this.professionId, // or p.id, p.type, etc.
+    )!;
   }
 
   getProfessionDetails(id: string) {

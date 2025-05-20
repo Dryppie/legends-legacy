@@ -7,11 +7,13 @@
   <div
     class="grid h-full w-full gap-4 overflow-y-auto pr-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
   >
-    <div *ngFor="let gatheringNode of gatheringNodes" class="">
-      <app-profession-card
-        [gatheringNode]="gatheringNode"
-        [characterProfession]="characterProfession"
-      ></app-profession-card>
-    </div>
+    <ng-container *ngIf="characterProfession">
+      <div *ngFor="let gatheringNode of gatheringNodes" class="">
+        <app-profession-card
+          [gatheringNode]="gatheringNode"
+          [characterProfession]="characterProfession"
+        ></app-profession-card>
+      </div>
+    </ng-container>
   </div>
 </div>

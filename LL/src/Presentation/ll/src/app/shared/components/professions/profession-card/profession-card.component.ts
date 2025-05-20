@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { MiniButtonComponent } from '../../mini-button/mini-button.component';
 import { CharacterActionsService } from '../../../../core/services/api/character-actions/character-actions.service';
 import {
@@ -18,9 +18,9 @@ import { CharacterProfession } from '../../../models/Dtos/characterProfession';
   templateUrl: './profession-card.component.html',
   styleUrl: './profession-card.component.css',
 })
-export class ProfessionCardComponent {
+export class ProfessionCardComponent implements OnInit {
   @Input() gatheringNode!: GatheringNode;
-  @Input() characterProfession!: CharacterProfession | null;
+  @Input() characterProfession!: CharacterProfession;
   currentAction: CharacterActionDto | null = null;
   private subscription: Subscription = new Subscription();
   isLocked = true;

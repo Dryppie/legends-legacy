@@ -26,13 +26,10 @@ export class CharacterOverviewComponent {
   itemDescription = '';
   itemImage = '';
 
-  character$!: Observable<CharacterOverviewDto | null>;
+  readonly character$!: Observable<CharacterOverviewDto>;
 
-  constructor(private characterService: CharacterService) {}
-
-  ngOnInit() {
+  constructor(private characterService: CharacterService) {
+    // `characterService` is already injected → safe to use here
     this.character$ = this.characterService.characterOverview$;
-
-    this.characterService.getCharacterOverview();
   }
 }
