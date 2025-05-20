@@ -1,77 +1,150 @@
 import { Component, OnInit } from '@angular/core';
 import { ProfessionHeaderComponent } from '../../../../shared/components/professions/profession-header/profession-header.component';
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe, NgClass, NgFor, NgIf } from '@angular/common';
 import {
   CraftingProfession,
   Recipe,
 } from '../../../../shared/models/profession';
-import { Subscription } from 'rxjs';
-import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
+import {
+  BehaviorSubject,
+  combineLatest,
+  map,
+  shareReplay,
+  Subject,
+  switchMap,
+  take,
+} from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { ProfessionsService } from '../../../../core/services/api/professions/professions.service';
 import { CharacterActionsService } from '../../../../core/services/api/character-actions/character-actions.service';
+import { CharacterManagerService } from '../../../../core/services/client-side/character-manager/character-manager.service';
+import { InventoryItem } from '../../../../shared/models/inventoryItem';
+
+function hasQuantity(
+  inv: InventoryItem[],
+  itemBaseId: string,
+  required: number,
+): boolean {
+  const found = inv.find((ii) => ii.itemInstance.itemBase.id === itemBaseId);
+  return found ? found.quantity >= required : false;
+}
+
+function consumeMaterials(
+  items: InventoryItem[],
+  recipe: Recipe,
+): InventoryItem[] {
+  return items.map((ii) => {
+    const mat = recipe.materials.find(
+      (m) => m.item.id === ii.itemInstance.itemBase.id,
+    );
+    return mat ? { ...ii, quantity: ii.quantity - mat.quantity } : ii;
+  });
+}
 
 @Component({
   selector: 'app-crafting',
   standalone: true,
-  imports: [ProfessionHeaderComponent, NgFor, NgIf, NgClass],
+  imports: [ProfessionHeaderComponent, NgFor, NgIf, AsyncPipe],
   templateUrl: './crafting.component.html',
   styleUrl: './crafting.component.css',
 })
 export class CraftingComponent implements OnInit {
-  filteredRecipes: Recipe[] = [];
-  selectedRecipe: Recipe | null = null;
-  craftingQueue: Recipe[] = [];
+  private readonly destroy$ = new Subject<void>();
 
-  professionId!: string;
-  profession!: CraftingProfession;
+  readonly profession$;
+  readonly recipes$;
 
-  combatStarted = false;
-  private subscription: Subscription = new Subscription();
-  currentAction: CharacterActionDto | null = null;
+  private readonly selectedRecipeId$ = new BehaviorSubject<string | null>(null);
+  readonly selectedRecipe$;
 
+  readonly currentAction$;
+
+  readonly inventory$;
+
+  // Stub until you wire real actions/queue in the service
+  readonly craftingQueue$ = new BehaviorSubject<Recipe[]>([]);
+  readonly canCraftSelected$;
+
+  // ────────────────────────────────────── ctor/di ─────────────────────────────
   constructor(
-    private route: ActivatedRoute,
-    private professionService: ProfessionsService,
-    private characterActionService: CharacterActionsService,
-  ) {}
-
-  ngOnInit(): void {
-    this.subscription.add(
-      this.characterActionService.currentAction$.subscribe((action) => {
-        this.currentAction = action;
-      }),
+    private readonly route: ActivatedRoute,
+    private readonly professionService: ProfessionsService,
+    private readonly characterActionService: CharacterActionsService,
+    private readonly characterManager: CharacterManagerService,
+  ) {
+    this.profession$ = this.route.paramMap.pipe(
+      map((p) => p.get('id') ?? ''),
+      switchMap(async (id) => this.professionService.getProfessionById(id)),
+      shareReplay(1),
     );
-    this.route.paramMap.subscribe((params) => {
-      this.professionId = params.get('id') ?? '';
-      this.getProfessionDetails(this.professionId);
-    });
+    this.recipes$ = this.profession$.pipe(
+      map((p) => (p as CraftingProfession).recipes),
+    );
+    this.selectedRecipe$ = combineLatest([
+      this.recipes$,
+      this.selectedRecipeId$,
+    ]).pipe(map(([recipes, id]) => recipes.find((r) => r.id === id) ?? null));
+
+    this.currentAction$ = this.characterActionService.currentAction$;
+
+    this.inventory$ = this.characterManager.inventory$;
+    this.canCraftSelected$ = combineLatest([
+      this.selectedRecipe$,
+      this.inventory$,
+    ]).pipe(
+      map(([recipe, inv]) =>
+        recipe
+          ? recipe.materials.every((mat) =>
+              hasQuantity(inv?.inventoryItems!, mat.item.id, mat.quantity),
+            )
+          : false,
+      ),
+    );
+  }
+
+  // ───────────────────────── component lifecycle / housekeeping ───────────────
+  ngOnInit(): void {
+    // No imperative subscriptions needed – everything is async-piped in the view.
   }
 
   ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  getProfessionDetails(id: string) {
-    this.profession = this.professionService.getProfessionById(
-      id,
-    ) as CraftingProfession;
-    this.filteredRecipes = this.profession.recipes;
+  selectRecipe(recipe: Recipe): void {
+    this.selectedRecipeId$.next(recipe.id);
   }
 
-  selectRecipe(recipe: Recipe) {
-    this.selectedRecipe = recipe;
+  craft(recipe: Recipe): void {
+    // take the latest inventory once, synchronously
+    const inventory = this.characterManager.getInventory();
+    if (!inventory) return;
+    const items = inventory.inventoryItems;
+    if (
+      !recipe.materials.every((m) => hasQuantity(items, m.item.id, m.quantity))
+    ) {
+      return; // safety net – shouldn’t happen if button was disabled
+    }
+
+    /* optimistic queue */
+    this.craftingQueue$.next([...this.craftingQueue$.value, recipe]);
+
+    /* optimistic client-side material removal */
+    const updatedItems = consumeMaterials(items, recipe);
+    this.characterManager.setInventory({ inventoryItems: updatedItems });
+
+    /* TODO: call backend to actually start the craft */
   }
 
-  canCraft(recipe: Recipe): boolean {
-    return true;
+  cancelCraft(recipe: Recipe): void {
+    // TODO: cancel via service
+    this.craftingQueue$.next(
+      this.craftingQueue$.value.filter((r) => r.id !== recipe.id),
+    );
   }
 
-  craft(recipe: Recipe) {
-    throw new Error('Method not implemented.');
-  }
-
-  cancelCraft(recipe: Recipe) {
-    throw new Error('Method not implemented.');
+  trackByRecipe(_: number, recipe: Recipe): string {
+    return recipe.id;
   }
 }

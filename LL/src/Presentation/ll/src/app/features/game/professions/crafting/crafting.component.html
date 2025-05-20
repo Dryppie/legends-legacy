@@ -1,5 +1,6 @@
 <div class="flex h-full w-full flex-col gap-4 text-white">
   <app-profession-header
+    *ngIf="profession$ | async as profession"
     class="pr-4 sm:pr-6"
     title="{{ profession.name }}"
     icon="professions/{{ profession.iconPath }}"
@@ -8,14 +9,15 @@
     <!-- RECIPES LIST -->
     <div class="flex h-full w-1/2 flex-col space-y-2 overflow-y-auto">
       <h2 class="flex-1 text-primary">Recipes</h2>
-      <ng-container *ngFor="let recipe of filteredRecipes">
+      <ng-container *ngIf="recipes$ | async as recipes">
         <div
+          *ngFor="let recipe of recipes"
           class="cursor-pointer rounded-lg border p-3 hover:border-primary/60 hover:bg-zinc-300/30"
           (click)="selectRecipe(recipe)"
-          [ngClass]="{
-            'border-primary bg-zinc-300/10': selectedRecipe?.id === recipe.id,
-            'border-primary/20': selectedRecipe?.id !== recipe.id,
-          }"
+          [class.border-primary]="(selectedRecipe$ | async)?.id === recipe.id"
+          [class.border-primary-20]="
+            (selectedRecipe$ | async)?.id !== recipe.id
+          "
         >
           <div class="font-semibold text-white">{{ recipe.name }}</div>
           <div class="text-gray-400 text-sm">
@@ -30,7 +32,9 @@
       <!-- ITEM DESCRIPTION -->
       <div class="rounded-lg border border-light_gray bg-texture p-4">
         <h2 class="text-primary">Item Description</h2>
-        <ng-container *ngIf="selectedRecipe; else noRecipe">
+        <ng-container
+          *ngIf="selectedRecipe$ | async as selectedRecipe; else noRecipe"
+        >
           <h3 class="mt-2 text-white">
             {{ selectedRecipe.item.name }}
           </h3>
@@ -48,19 +52,24 @@
           </div>
 
           <div class="mt-4 flex items-center gap-2">
-            <button
-              class="rounded border border-light_gray px-3 py-1 text-white hover:bg-zinc-300/10"
-              (click)="craft(selectedRecipe)"
-              [disabled]="!canCraft(selectedRecipe)"
+            <ng-container
+              *ngIf="canCraftSelected$ | async as canCraft; else nothing"
             >
-              Craft
-            </button>
-            <span
-              *ngIf="!canCraft(selectedRecipe)"
-              class="text-sm text-rose-500"
-            >
-              Not enough materials
-            </span>
+              <button
+                class="rounded border border-light_gray px-3 py-1 text-white hover:bg-zinc-300/10"
+                (click)="craft(selectedRecipe)"
+              >
+                Craft
+              </button>
+            </ng-container>
+            <ng-template #nothing>
+              <span
+                *ngIf="!(canCraftSelected$ | async)"
+                class="text-sm text-rose-500"
+              >
+                Not enough materials
+              </span>
+            </ng-template>
           </div>
         </ng-container>
         <ng-template #noRecipe>
@@ -75,21 +84,23 @@
         class="border-gold/20 rounded-lg border border-light_gray bg-texture p-4"
       >
         <div class="text-gold text-lg font-semibold">Crafting Queue</div>
-        <ng-container *ngIf="craftingQueue.length > 0; else emptyQueue">
-          <div
-            *ngFor="let item of craftingQueue"
-            class="mt-2 flex items-center justify-between rounded bg-black/30 p-2"
-          >
-            <div class="text-white">
-              <!-- {{ item.name }} — {{ item.timeRemaining }}s -->
-            </div>
-            <button
-              class="text-sm text-red-400 hover:underline"
-              (click)="cancelCraft(item)"
+        <ng-container *ngIf="craftingQueue$ | async as queue">
+          <ng-container *ngIf="queue.length > 0; else emptyQueue">
+            <div
+              *ngFor="let item of queue"
+              class="mt-2 flex items-center justify-between rounded bg-black/30 p-2"
             >
-              Cancel
-            </button>
-          </div>
+              <div class="text-white">
+                <!-- {{ item.name }} — {{ item.timeRemaining }}s -->
+              </div>
+              <button
+                class="text-sm text-red-400 hover:underline"
+                (click)="cancelCraft(item)"
+              >
+                Cancel
+              </button>
+            </div>
+          </ng-container>
         </ng-container>
         <ng-template #emptyQueue>
           <div class="mt-2 italic">Nothing is currently being crafted.</div>
