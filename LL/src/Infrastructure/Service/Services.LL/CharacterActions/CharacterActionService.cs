@@ -144,4 +144,14 @@ public class CharacterActionService : ICharacterActionService
         //await _InventoryService.AddLootAsync(loot, cancellationToken);
         await _publisher.Publish(new LootGeneratedEvent(characterId, loot), cancellationToken);
     }
+
+    public async Task<CharacterAction?> GetCraftingActionAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        return await _characterActionRepository.GetCraftingActionAsync(characterId, cancellationToken);
+    }
+
+    public async Task<bool> UpdateCraftingCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
+    {
+        return await _characterActionRepository.UpdateCraftingCharacterActionAsync(characterAction, cancellationToken);
+    }
 }

@@ -23,6 +23,10 @@ import { CharacterActionsService } from '../../../../core/services/api/character
 import { CharacterManagerService } from '../../../../core/services/client-side/character-manager/character-manager.service';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { InventoryService } from '../../../../core/services/api/inventory/inventory.service';
+import {
+  CraftingMode,
+  StartCraftingActionRequest,
+} from '../../../../shared/models/Dtos/characterActionDto';
 
 function hasQuantity(
   inv: InventoryItem[],
@@ -154,7 +158,12 @@ export class CraftingComponent implements OnInit {
     const updatedItems = consumeMaterials(items, recipe);
     this.characterManager.setInventory({ inventoryItems: updatedItems });
 
-    /* TODO: call backend to actually start the craft */
+    const craftingAction: StartCraftingActionRequest = {
+      queueId: queueItem.id,
+      targetId: recipe.id,
+      mode: CraftingMode.Craft,
+    };
+    this.characterActionService.startCraftingAction(craftingAction);
   }
 
   cancelCraft(queueItem: CraftingQueueItem): void {

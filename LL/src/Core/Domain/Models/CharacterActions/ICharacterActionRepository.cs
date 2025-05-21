@@ -1,5 +1,4 @@
-﻿
-namespace Domain.Models.CharacterActions;
+﻿namespace Domain.Models.CharacterActions;
 public interface ICharacterActionRepository
 {
     /// <summary>
@@ -29,4 +28,13 @@ public interface ICharacterActionRepository
     /// <param name="characterId"></param>
     /// <returns></returns>
     public Task<bool> DeleteCharacterActionAsync(Guid characterId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Get a character's crafting action
+    /// </summary>
+    /// <param name="characterId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<CharacterAction?> GetCraftingActionAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<bool> UpdateCraftingCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken);
 }

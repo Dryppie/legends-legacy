@@ -22,6 +22,17 @@ export interface StartGatheringActionRequest {
   gatheringType: GatheringType;
 }
 
+export interface StartCraftingActionRequest {
+  queueId: string;
+  targetId: string;
+  mode: CraftingMode;
+}
+
+export enum CraftingMode {
+  Craft = 'Craft',
+  Perfect = 'Perfect',
+}
+
 export interface CombatActionDetails {
   characterTeam: string[]; // or appropriate type
   area: Area;

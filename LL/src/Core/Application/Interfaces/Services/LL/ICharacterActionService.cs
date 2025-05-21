@@ -23,4 +23,6 @@ public interface ICharacterActionService
     /// <param name="characterId"></param>
     /// <returns></returns>
     public Task<bool> DeleteCharacterActionAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<CharacterAction?> GetCraftingActionAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<bool> UpdateCraftingCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken);
 }

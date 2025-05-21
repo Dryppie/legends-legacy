@@ -4,5 +4,5 @@ public enum CharacterActionType
     Idle,
     Combat,
     Gathering,
-    Profession
+    Crafting
 }

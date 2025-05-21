@@ -15,6 +15,7 @@ import { ApiService } from '../../api/api.service';
 import {
   CharacterActionDto,
   StartCombatActionRequest,
+  StartCraftingActionRequest,
   StartGatheringActionRequest,
 } from '../../../../shared/models/Dtos/characterActionDto';
 import { environment } from '../../../../../environments/environment';
@@ -99,6 +100,23 @@ export class CharacterActionsService {
 
     this.apiService
       .post('CharacterActions/StartGathering', gatheringAction)
+      .pipe(
+        catchError((error) => {
+          this.clearCAT();
+          console.error('Failed to start character action:', error);
+          return of(null);
+        }),
+      )
+      .subscribe((success) => {
+        if (success) this.getCharacterAction();
+      });
+  }
+
+  startCraftingAction(craftingAction: StartCraftingActionRequest): void {
+    this.setCAT(CharacterActionType.Crafting);
+
+    this.apiService
+      .post('CharacterActions/StartCrafting', craftingAction)
       .pipe(
         catchError((error) => {
           this.clearCAT();

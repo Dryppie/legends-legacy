@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250520181100_BaseMigration")]
+    [Migration("20250521050850_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -478,6 +478,38 @@ namespace Persistence.LL.Migrations
                     b.HasKey("EntityId", "MasteryType");
 
                     b.ToTable("Mastery");
+                });
+
+            modelBuilder.Entity("Domain.Models.Professions.Crafting.CraftingQueueItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CraftingActionDetailsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ItemInstanceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Mode")
+                        .HasColumnType("int");
+
+                    b.Property<byte>("QueueIndex")
+                        .HasColumnType("tinyint");
+
+                    b.Property<Guid?>("RecipeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CraftingActionDetailsId");
+
+                    b.HasIndex("ItemInstanceId");
+
+                    b.HasIndex("RecipeId");
+
+                    b.ToTable("CraftingQueueItem");
                 });
 
             modelBuilder.Entity("Domain.Models.Professions.Crafting.Material", b =>
@@ -964,6 +996,13 @@ namespace Persistence.LL.Migrations
                     b.HasDiscriminator().HasValue(1);
                 });
 
+            modelBuilder.Entity("Domain.Models.CharacterActions.CharacterActionDetails.CraftingActionDetails", b =>
+                {
+                    b.HasBaseType("Domain.Models.CharacterActions.CharacterActionDetails.ActionDetails");
+
+                    b.HasDiscriminator().HasValue(3);
+                });
+
             modelBuilder.Entity("Domain.Models.CharacterActions.CharacterActionDetails.GatheringActionDetails", b =>
                 {
                     b.HasBaseType("Domain.Models.CharacterActions.CharacterActionDetails.ActionDetails");
@@ -1289,6 +1328,25 @@ namespace Persistence.LL.Migrations
                     b.Navigation("Entity");
                 });
 
+            modelBuilder.Entity("Domain.Models.Professions.Crafting.CraftingQueueItem", b =>
+                {
+                    b.HasOne("Domain.Models.CharacterActions.CharacterActionDetails.CraftingActionDetails", null)
+                        .WithMany("CraftingQueueItems")
+                        .HasForeignKey("CraftingActionDetailsId");
+
+                    b.HasOne("Domain.Models.Items.ItemInstance", "ItemInstance")
+                        .WithMany()
+                        .HasForeignKey("ItemInstanceId");
+
+                    b.HasOne("Domain.Models.Professions.Crafting.Recipe", "Recipe")
+                        .WithMany()
+                        .HasForeignKey("RecipeId");
+
+                    b.Navigation("ItemInstance");
+
+                    b.Navigation("Recipe");
+                });
+
             modelBuilder.Entity("Domain.Models.Professions.Crafting.Material", b =>
                 {
                     b.HasOne("Domain.Models.Items.ItemBase", null)
@@ -1564,6 +1622,11 @@ namespace Persistence.LL.Migrations
                     b.Navigation("ExternalLogins");
 
                     b.Navigation("RefreshTokens");
+                });
+
+            modelBuilder.Entity("Domain.Models.CharacterActions.CharacterActionDetails.CraftingActionDetails", b =>
+                {
+                    b.Navigation("CraftingQueueItems");
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Characters.Character", b =>

@@ -1,5 +1,4 @@
 ﻿using Application.Common.Interfaces;
-using Common.Exceptions;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Microsoft.EntityFrameworkCore;
@@ -87,5 +86,26 @@ public class CharacterActionRepository : ICharacterActionRepository
     {
         _context.CharacterActions.Update(characterAction);
         await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<CharacterAction?> GetCraftingActionAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        var craftingAction = await _context.CharacterActions
+            .Include(ca => ca.ActionDetails)
+                .ThenInclude(ad => (ad as CraftingActionDetails).CraftingQueueItems)
+                    .ThenInclude(ci => ci.Recipe)
+            .Include(ca => ca.ActionDetails)
+                .ThenInclude(ad => (ad as CraftingActionDetails).CraftingQueueItems)
+                    .ThenInclude(ci => ci.ItemInstance)
+            .FirstOrDefaultAsync(ca => ca.CharacterId.Equals(characterId), cancellationToken);
+
+        return craftingAction;
+    }
+
+    // This differs from the StartCharacterActionAsync method in that it doesn't update UpdatedAt
+    public async Task<bool> UpdateCraftingCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
+    {
+        await _context.SaveChangesAsync(cancellationToken);
+        return true;
     }
 }

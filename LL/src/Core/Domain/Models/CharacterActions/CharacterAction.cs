@@ -1,8 +1,7 @@
-﻿using Domain.Models.CharacterActions.CharacterActionDetails;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
-using Domain.Models.Combat;
 using Domain.Models.Entities.Characters;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Models.CharacterActions;
 public class CharacterAction
@@ -12,9 +11,9 @@ public class CharacterAction
     public Character Character { get; set; } = null!;
     public CharacterActionType CharacterActionType => ActionDetails switch
     {
-        GatheringActionDetails => CharacterActionType.Gathering,
         CombatActionDetails => CharacterActionType.Combat,
-        //GatheringActionDetails => CharacterActionType.Gathering,
+        CraftingActionDetails => CharacterActionType.Crafting,
+        GatheringActionDetails => CharacterActionType.Gathering,
         _ => CharacterActionType.Idle
     };
 

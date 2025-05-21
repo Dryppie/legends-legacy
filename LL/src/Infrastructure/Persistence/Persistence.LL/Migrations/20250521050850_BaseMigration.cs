@@ -837,6 +837,37 @@ namespace Persistence.LL.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "CraftingQueueItem",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    QueueIndex = table.Column<byte>(type: "tinyint", nullable: false),
+                    Mode = table.Column<int>(type: "int", nullable: false),
+                    RecipeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ItemInstanceId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CraftingActionDetailsId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CraftingQueueItem", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CraftingQueueItem_ActionDetails_CraftingActionDetailsId",
+                        column: x => x.CraftingActionDetailsId,
+                        principalTable: "ActionDetails",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_CraftingQueueItem_ItemInstances_ItemInstanceId",
+                        column: x => x.ItemInstanceId,
+                        principalTable: "ItemInstances",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_CraftingQueueItem_Recipes_RecipeId",
+                        column: x => x.RecipeId,
+                        principalTable: "Recipes",
+                        principalColumn: "Id");
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_ActionDetails_AreaId",
                 table: "ActionDetails",
@@ -906,6 +937,21 @@ namespace Persistence.LL.Migrations
                 name: "IX_ColosseumMatches_CharacterBId",
                 table: "ColosseumMatches",
                 column: "CharacterBId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CraftingQueueItem_CraftingActionDetailsId",
+                table: "CraftingQueueItem",
+                column: "CraftingActionDetailsId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CraftingQueueItem_ItemInstanceId",
+                table: "CraftingQueueItem",
+                column: "ItemInstanceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CraftingQueueItem_RecipeId",
+                table: "CraftingQueueItem",
+                column: "RecipeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Entities_LootTableId",
@@ -1032,9 +1078,6 @@ namespace Persistence.LL.Migrations
                 name: "AbilityIds");
 
             migrationBuilder.DropTable(
-                name: "ActionDetails");
-
-            migrationBuilder.DropTable(
                 name: "AreaCreature");
 
             migrationBuilder.DropTable(
@@ -1057,6 +1100,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "ColosseumMatches");
+
+            migrationBuilder.DropTable(
+                name: "CraftingQueueItem");
 
             migrationBuilder.DropTable(
                 name: "EntityAttributes");
@@ -1098,16 +1144,13 @@ namespace Persistence.LL.Migrations
                 name: "RefreshTokens");
 
             migrationBuilder.DropTable(
-                name: "CharacterActions");
-
-            migrationBuilder.DropTable(
-                name: "Areas");
-
-            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "ActionDetails");
 
             migrationBuilder.DropTable(
                 name: "Guilds");
@@ -1120,6 +1163,12 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "Recipes");
+
+            migrationBuilder.DropTable(
+                name: "Areas");
+
+            migrationBuilder.DropTable(
+                name: "CharacterActions");
 
             migrationBuilder.DropTable(
                 name: "Regions");

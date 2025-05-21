@@ -82,17 +82,13 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
         modelBuilder.Entity<ActionDetails>()
             .HasDiscriminator<CharacterActionType>("ActionType")
             .HasValue<CombatActionDetails>(CharacterActionType.Combat)
-            .HasValue<GatheringActionDetails>(CharacterActionType.Gathering);
+            .HasValue<GatheringActionDetails>(CharacterActionType.Gathering)
+            .HasValue<CraftingActionDetails>(CharacterActionType.Crafting);
 
         modelBuilder.Entity<LootTableEntry>()
             .HasDiscriminator<int>("LootTableType")
             .HasValue<LootTable>(1)
             .HasValue<LootTableItem>(2);
-        //modelBuilder.Entity<LootTableEntry>()
-        //    .HasDiscriminator<string>("LootTableType")
-        //    .HasValue<LootTableEntry>("LootTableEntry")
-        //    .HasValue<LootTable>("LootTable")
-        //    .HasValue<LootTableItem>("LootTableItem");
     }
 
     private static void SetupSqlite(ModelBuilder builder)
