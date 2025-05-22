@@ -4,8 +4,8 @@ using Common.Helpers.Essences;
 using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.EssenceItems;
+using Domain.Models.Professions.Crafting;
 using Microsoft.EntityFrameworkCore;
-using Persistence.LL.Seeds;
 
 namespace Persistence.LL.Repositories.Inventories;
 public class InventoryRepository : IInventoryRepository
@@ -43,66 +43,68 @@ public class InventoryRepository : IInventoryRepository
         return inventory;
     }
 
-    public async Task AddItemsToInventory(Guid characterId, List<InventoryItem> loot, CancellationToken cancellationToken)
+    public async Task AddItemsToInventory(Guid characterId, List<InventoryItem> items, CancellationToken cancellationToken)
     {
-        // Aggregate the loot list to combine quantities of the same ItemBase
-        var aggregatedLoot = loot
+        // Separate stackable and non-stackable items
+        var stackableLoot = items
+            .Where(item => item.ItemInstance.ItemBase.Stackable)
             .GroupBy(item => item.ItemInstance.ItemBaseId)
             .Select(g =>
             {
-                // "first" to preserve the existing ItemInstance reference 
-                // (and any other properties it may have)
                 var first = g.First();
-
                 return new InventoryItem
                 {
                     InventoryId = characterId,
                     ItemInstanceId = first.ItemInstanceId,
-                    // preserve the reference to the actual ItemInstance:
                     ItemInstance = first.ItemInstance,
-                    // sum up the total quantity
                     Quantity = g.Sum(x => x.Quantity)
                 };
             }).ToList();
 
-        // Get all relevant InventoryItems in one database call
-        var itemBaseIds = aggregatedLoot.Select(l => l.ItemInstance.ItemBaseId).Distinct().ToList();
-        //var itemInstances = await _context.ItemInstances
-        //    .Where(ii => itemInstanceIds.Contains(ii.Id))
-        //    .Include(ii => ii.ItemBase) // <-- only if you need the ItemBase eagerly
-        //    .ToListAsync(cancellationToken);
+        var nonStackableLoot = items
+            .Where(item => !item.ItemInstance.ItemBase.Stackable)
+            .Select(item => new InventoryItem
+            {
+                InventoryId = characterId,
+                ItemInstanceId = item.ItemInstanceId,
+                ItemInstance = item.ItemInstance,
+                Quantity = 1
+            }).ToList();
 
-        //var existingInventoryItems = await _context.InventoryItems
-        //    .Where(inv => inv.InventoryId == characterId && itemInstanceIds.Contains(inv.ItemInstanceId))
-        //    .Include(inv => inv.ItemInstance) // So we have the existing linked ItemInstance
-        //    .ToListAsync(cancellationToken);
-
-        var existingInventoryItems = await _context.InventoryItems
-            .Include(ii => ii.ItemInstance)
-            .Where(ii => ii.InventoryId == characterId && itemBaseIds.Contains(ii.ItemInstance.ItemBaseId))
-            .ToListAsync(cancellationToken);
-
-        foreach (var item in aggregatedLoot)
+        // Process stackable items
+        if (stackableLoot.Count > 0)
         {
-            // Check if the item already exists in the retrieved list of existing items
-            var existingItem = existingInventoryItems
-                .FirstOrDefault(i => i.ItemInstance.ItemBaseId == item.ItemInstance.ItemBaseId);
+            var itemBaseIds = stackableLoot.Select(l => l.ItemInstance.ItemBaseId).Distinct().ToList();
+            var existingInventoryItems = await _context.InventoryItems
+                .Include(ii => ii.ItemInstance)
+                .ThenInclude(ii => ii.ItemBase)
+                .Where(ii => ii.InventoryId == characterId && itemBaseIds.Contains(ii.ItemInstance.ItemBaseId))
+                .ToListAsync(cancellationToken);
 
-            if (existingItem != null)
+            foreach (var item in stackableLoot)
             {
-                // If item exists, increase the quantity
-                existingItem.Quantity += item.Quantity;
-            }
-            else
-            {
+                var existingItem = existingInventoryItems
+                    .FirstOrDefault(i => i.ItemInstance.ItemBaseId == item.ItemInstance.ItemBaseId);
 
-                // If item doesn't exist, add it to the database
-                await _context.ItemInstances.AddAsync(item.ItemInstance, cancellationToken);
-                await _context.InventoryItems.AddAsync(item, cancellationToken);
+                if (existingItem != null)
+                {
+                    existingItem.Quantity += item.Quantity;
+                }
+                else
+                {
+                    await _context.ItemInstances.AddAsync(item.ItemInstance, cancellationToken);
+                    await _context.InventoryItems.AddAsync(item, cancellationToken);
+                }
             }
         }
 
-        // Save the changes to the database
+        // Add non-stackable items as separate entries
+        foreach (var item in nonStackableLoot)
+        {
+            await _context.ItemInstances.AddAsync(item.ItemInstance, cancellationToken);
+            await _context.InventoryItems.AddAsync(item, cancellationToken);
+        }
+
         await _context.SaveChangesAsync(cancellationToken);
     }
 
@@ -200,5 +202,59 @@ public class InventoryRepository : IInventoryRepository
         //};
         //await _context.ItemInstances.AddRangeAsync(swordEquipmentInstance, bowEquipmentInstance, axeEquipmentInstance, daggerEquipmentInstance, hammerEquipmentInstance, shieldEquipmentInstance, staffEquipmentInstance);
         //await _context.InventoryItems.AddRangeAsync(inventoryItemSword, inventoryItemBow, inventoryItemAxe, inventoryItemDagger, inventoryItemHammer, inventoryItemShield, inventoryItemStaff);
+    }
+
+    public async Task<bool> TryRemoveItemsAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken)
+    {
+        var requiredByItemId = materials
+            .GroupBy(m => m.ItemId)
+            .ToDictionary(g => g.Key, g => g.Sum(m => m.Quantity));
+
+        var inventory = await _context.InventoryItems
+            .Where(i => i.InventoryId == characterId)
+            .Include(i => i.ItemInstance)
+                .ThenInclude(ii => ii.ItemBase)
+            .ToListAsync(cancellationToken);
+
+        // Check if all required items exist in sufficient quantity
+        foreach (var kvp in requiredByItemId)
+        {
+            var totalOwned = inventory
+                .Where(i => i.ItemInstance.ItemBase.Id == kvp.Key)
+                .Sum(i => i.Quantity);
+
+            if (totalOwned < kvp.Value)
+                return false; // Not enough of this item
+        }
+
+        // Proceed to deduct
+        foreach (var kvp in requiredByItemId)
+        {
+            var remainingToRemove = kvp.Value;
+
+            var matchingItems = inventory
+                .Where(i => i.ItemInstance.ItemBase.Id == kvp.Key)
+                .OrderByDescending(i => i.Quantity) // Prefer removing large stacks
+                .ToList();
+
+            foreach (var invItem in matchingItems)
+            {
+                if (remainingToRemove <= 0) break;
+
+                if (invItem.Quantity <= remainingToRemove)
+                {
+                    remainingToRemove -= invItem.Quantity;
+                    _context.InventoryItems.Remove(invItem);
+                }
+                else
+                {
+                    invItem.Quantity -= remainingToRemove;
+                    remainingToRemove = 0;
+                }
+            }
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+        return true;
     }
 }

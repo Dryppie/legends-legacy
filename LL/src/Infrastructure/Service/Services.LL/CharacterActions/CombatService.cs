@@ -40,7 +40,6 @@ public class CombatService : ICombatService
     public async Task<CombatSession> PerformIdleCombatAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
         var totalLoot = new List<InventoryItem>();
-        var totalExp = 0;
 
         var sessionStartedAt = characterAction.UpdatedAt;
 

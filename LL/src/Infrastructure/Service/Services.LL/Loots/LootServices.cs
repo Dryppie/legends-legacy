@@ -73,9 +73,9 @@ public class LootServices : ILootService
     {
         var itemInstance = item.ItemType switch
         {
-            ItemType.Equipment => new EquipmentInstance() { Id = Guid.NewGuid(), ItemBaseId = item.Id },
-            ItemType.Essence => new EssenceItemInstance() { Id = Guid.NewGuid(), ItemBaseId = item.Id },
-            _ => new ItemInstance() { Id = Guid.NewGuid(), ItemBaseId = item.Id },
+            ItemType.Equipment => new EquipmentInstance() { Id = Guid.NewGuid(), ItemBaseId = item.Id, ItemBase = item },
+            ItemType.Essence => new EssenceItemInstance() { Id = Guid.NewGuid(), ItemBaseId = item.Id, ItemBase = item },
+            _ => new ItemInstance() { Id = Guid.NewGuid(), ItemBaseId = item.Id, ItemBase = item },
         };
         return new InventoryItem()
         {

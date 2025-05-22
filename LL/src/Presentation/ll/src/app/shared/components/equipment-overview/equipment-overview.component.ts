@@ -37,7 +37,7 @@ export class EquipmentOverviewComponent implements OnInit {
   }
 
   private loadEquipment(): void {
-    this.equipmentService.getEquipment();
+    this.equipmentService.getEquipment().subscribe();
   }
 
   handleSlotClick(equipmentSlot: EquipmentSlot) {
@@ -64,7 +64,7 @@ export class EquipmentOverviewComponent implements OnInit {
     return [
       {
         id: '',
-        iconPath: 'empty_helmet',
+        iconPath: 'empty_head',
         equipmentType: EquipmentType.Head,
       },
       {

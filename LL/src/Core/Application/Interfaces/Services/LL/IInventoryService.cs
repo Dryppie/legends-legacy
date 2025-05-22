@@ -1,9 +1,9 @@
 ﻿using Domain.Models.Inventories;
+using Domain.Models.Professions.Crafting;
 
 namespace Application.Interfaces.Services.LL;
 public interface IInventoryService
 {
-
     /// <summary>
     /// Get a character's Inventory by Id
     /// </summary>
@@ -24,4 +24,5 @@ public interface IInventoryService
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task CreateInventoryAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<bool> TryRemoveItemsAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken);
 }

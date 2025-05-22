@@ -136,7 +136,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbCont
     // Player Actions
     public DbSet<CharacterAction> CharacterActions => Set<CharacterAction>();
     public DbSet<ActionDetails> ActionDetails => Set<ActionDetails>();
-
+    public DbSet<CraftingQueueItem> CraftingQueueItems => Set<CraftingQueueItem>(); 
     public DbSet<GatheringNode> GatheringNodes => Set<GatheringNode>();
 
     //public DbSet<Equipment> Equipments => Set<Equipment>();

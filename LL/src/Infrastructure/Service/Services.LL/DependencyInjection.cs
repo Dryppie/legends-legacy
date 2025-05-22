@@ -24,6 +24,7 @@ using Services.LL.Levels;
 using Services.LL.Loots;
 using Services.LL.LootTables;
 using Services.LL.Professions;
+using Services.LL.Professions.Craftings;
 using Services.LL.Professions.Gatherings;
 using Services.LL.Regions;
 using Services.LL.Regions.Areas;
@@ -51,6 +52,8 @@ public static class DependencyInjection
         services.AddScoped<ICombatService, CombatService>();
         services.AddScoped<ICombatSetupService, CombatSetupService>();
 
+        services.AddScoped<ICraftingService, CraftingService>();
+
         services.AddScoped<IEntityService, EntityService>();
         services.AddScoped<IEquipmentSlotService, EquipmentSlotService>();
 
@@ -71,6 +74,7 @@ public static class DependencyInjection
         services.AddScoped<IInventoryService, InventoryService>();
 
         services.AddScoped<IProfessionService, ProfessionService>();
+        services.AddScoped<IRecipeService, RecipeService>();
 
         services.AddScoped<ISpawningService, SpawningService>();
 

@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces.Services.LL;
 using Domain.Models.Inventories;
 using Domain.Models.Items.EssenceItems;
+using Domain.Models.Professions.Crafting;
 using Services.LL.Interfaces;
 
 namespace Services.LL.Inventories;
@@ -43,4 +44,8 @@ public class InventoryService : IInventoryService
         await _inventoryRepository.CreateInventoryAsync(characterId, cancellationToken);
     }
 
+    public async Task<bool> TryRemoveItemsAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken)
+    {
+        return await _inventoryRepository.TryRemoveItemsAsync(characterId, materials, cancellationToken);
+    }
 }

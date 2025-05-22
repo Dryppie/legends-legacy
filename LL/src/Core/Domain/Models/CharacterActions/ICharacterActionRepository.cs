@@ -1,4 +1,6 @@
-﻿namespace Domain.Models.CharacterActions;
+﻿using Domain.Models.Professions.Crafting;
+
+namespace Domain.Models.CharacterActions;
 public interface ICharacterActionRepository
 {
     /// <summary>
@@ -36,5 +38,5 @@ public interface ICharacterActionRepository
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task<CharacterAction?> GetCraftingActionAsync(Guid characterId, CancellationToken cancellationToken);
-    Task<bool> UpdateCraftingCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken);
+    Task<bool> UpdateCraftingActionAsync(Guid characterId, CraftingQueueItem characterAction, CancellationToken cancellationToken);
 }

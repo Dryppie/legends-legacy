@@ -1,6 +1,7 @@
 ﻿using Application.Common.Interfaces;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
+using Domain.Models.Professions.Crafting;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.CharacterActions;
@@ -93,18 +94,60 @@ public class CharacterActionRepository : ICharacterActionRepository
         var craftingAction = await _context.CharacterActions
             .Include(ca => ca.ActionDetails)
                 .ThenInclude(ad => (ad as CraftingActionDetails).CraftingQueueItems)
-                    .ThenInclude(ci => ci.Recipe)
-            .Include(ca => ca.ActionDetails)
-                .ThenInclude(ad => (ad as CraftingActionDetails).CraftingQueueItems)
-                    .ThenInclude(ci => ci.ItemInstance)
+                    .ThenInclude(ci => ci.EquipmentInstance)
             .FirstOrDefaultAsync(ca => ca.CharacterId.Equals(characterId), cancellationToken);
 
         return craftingAction;
     }
 
     // This differs from the StartCharacterActionAsync method in that it doesn't update UpdatedAt
-    public async Task<bool> UpdateCraftingCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
+    public async Task<bool> UpdateCraftingActionAsync(Guid characterId, CraftingQueueItem craftingQueueItem, CancellationToken cancellationToken)
     {
+        var existingAction = await _context.CharacterActions
+            .Include(a => a.ActionDetails)  // Ensure ActionDetails is loaded
+            .FirstOrDefaultAsync(a => a.CharacterId == characterId, cancellationToken);
+        if (existingAction == null)
+        {
+
+            var action = new CharacterAction
+            {
+                CharacterId = characterId,
+                UpdatedAt = DateTimeOffset.UtcNow,
+                ActionDetails = new CraftingActionDetails
+                {
+                    CraftingQueueItems = [craftingQueueItem]
+                }
+            };
+            action.IsDeleted = false; // Ensure it's not marked as deleted on creation
+            await _context.CharacterActions.AddAsync(action, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+        // If combat or any other action ends in the future, it is not possible to start a new action until that time has passed
+        if (existingAction.UpdatedAt > DateTimeOffset.UtcNow)
+        {
+            return false;
+        }
+
+        existingAction.IsDeleted = false;
+
+        var craftingDetails = existingAction.ActionDetails as CraftingActionDetails;
+        if (craftingDetails == null)
+        {
+            // If existing action had no details, add new details
+            existingAction.ActionDetails = new CraftingActionDetails
+            {
+                CraftingQueueItems = [craftingQueueItem]
+            };
+            _context.ActionDetails.Add(existingAction.ActionDetails);
+        }
+        else
+        {
+            craftingQueueItem.CraftingActionDetailsId = craftingDetails.Id;
+            _context.CraftingQueueItems.Add(craftingQueueItem);
+        }
+
         await _context.SaveChangesAsync(cancellationToken);
         return true;
     }

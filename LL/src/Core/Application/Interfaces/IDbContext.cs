@@ -47,7 +47,7 @@ public interface IDbContext
     // Player Actions
     DbSet<CharacterAction> CharacterActions { get; }
     DbSet<ActionDetails> ActionDetails { get; }
-
+    DbSet<CraftingQueueItem> CraftingQueueItems { get; }
     DbSet<GatheringNode> GatheringNodes { get; }
 
     //DbSet<Equipment> Equipments { get; }

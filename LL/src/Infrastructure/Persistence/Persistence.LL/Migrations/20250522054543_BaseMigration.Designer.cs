@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250521050850_BaseMigration")]
+    [Migration("20250522054543_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -399,6 +399,9 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("Rarity")
                         .HasColumnType("int");
 
+                    b.Property<bool>("Stackable")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
                     b.ToTable("ItemBases");
@@ -486,30 +489,22 @@ namespace Persistence.LL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("CraftingActionDetailsId")
+                    b.Property<Guid>("CraftingActionDetailsId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ItemInstanceId")
+                    b.Property<Guid?>("EquipmentInstanceId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Mode")
-                        .HasColumnType("int");
 
                     b.Property<byte>("QueueIndex")
                         .HasColumnType("tinyint");
-
-                    b.Property<Guid?>("RecipeId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CraftingActionDetailsId");
 
-                    b.HasIndex("ItemInstanceId");
+                    b.HasIndex("EquipmentInstanceId");
 
-                    b.HasIndex("RecipeId");
-
-                    b.ToTable("CraftingQueueItem");
+                    b.ToTable("CraftingQueueItems");
                 });
 
             modelBuilder.Entity("Domain.Models.Professions.Crafting.Material", b =>
@@ -1332,19 +1327,15 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasOne("Domain.Models.CharacterActions.CharacterActionDetails.CraftingActionDetails", null)
                         .WithMany("CraftingQueueItems")
-                        .HasForeignKey("CraftingActionDetailsId");
+                        .HasForeignKey("CraftingActionDetailsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasOne("Domain.Models.Items.ItemInstance", "ItemInstance")
+                    b.HasOne("Domain.Models.Items.Equipments.EquipmentInstance", "EquipmentInstance")
                         .WithMany()
-                        .HasForeignKey("ItemInstanceId");
+                        .HasForeignKey("EquipmentInstanceId");
 
-                    b.HasOne("Domain.Models.Professions.Crafting.Recipe", "Recipe")
-                        .WithMany()
-                        .HasForeignKey("RecipeId");
-
-                    b.Navigation("ItemInstance");
-
-                    b.Navigation("Recipe");
+                    b.Navigation("EquipmentInstance");
                 });
 
             modelBuilder.Entity("Domain.Models.Professions.Crafting.Material", b =>

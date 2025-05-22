@@ -1,4 +1,5 @@
 ﻿using Domain.Models.CharacterActions;
+using Domain.Models.Professions.Crafting;
 
 namespace Application.Interfaces.Services.LL;
 public interface ICharacterActionService
@@ -24,5 +25,5 @@ public interface ICharacterActionService
     /// <returns></returns>
     public Task<bool> DeleteCharacterActionAsync(Guid characterId, CancellationToken cancellationToken);
     Task<CharacterAction?> GetCraftingActionAsync(Guid characterId, CancellationToken cancellationToken);
-    Task<bool> UpdateCraftingCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken);
+    Task<bool> UpdateCraftingCharacterActionAsync(Guid characterId, CraftingQueueItem characterAction, CancellationToken cancellationToken);
 }

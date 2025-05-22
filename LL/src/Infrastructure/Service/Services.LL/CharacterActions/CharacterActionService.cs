@@ -1,10 +1,12 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Professions;
 using Application.UseCases.Inventories.Events;
 using Common.Extensions;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Inventories;
+using Domain.Models.Professions.Crafting;
 using MediatR;
 using Services.LL.Interfaces;
 
@@ -12,15 +14,17 @@ namespace Services.LL.CharacterActions;
 public class CharacterActionService : ICharacterActionService
 {
     private readonly ICharacterActionRepository _characterActionRepository;
-    private readonly IGatheringService _gatheringService;
     private readonly ICombatService _combatService;
+    private readonly ICraftingService _craftingService;
+    private readonly IGatheringService _gatheringService;
     private readonly IPublisher _publisher;
-    public CharacterActionService(ICharacterActionRepository characterActionRepository, IGatheringService gatheringService, ICombatService combatService, IPublisher publisher)
+    public CharacterActionService(ICharacterActionRepository car, IGatheringService gs, ICombatService comS, ICraftingService cs, IPublisher p)
     {
-        _characterActionRepository = characterActionRepository;
-        _gatheringService = gatheringService;
-        _combatService = combatService;
-        _publisher = publisher;
+        _characterActionRepository = car;
+        _gatheringService = gs;
+        _combatService = comS;
+        _craftingService = cs;
+        _publisher = p;
     }
 
     public async Task<bool> StartCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
@@ -69,9 +73,9 @@ public class CharacterActionService : ICharacterActionService
                 characterAction.CombatSession = await HandleCombatActionAsync(characterAction, now, cancellationToken);
                 break;
 
-            //case CharacterActionType.Profession:
-            //    await HandleProfessionActionAsync(characterAction, now, cancellationToken);
-            //    break;
+            case CharacterActionType.Crafting:
+                await HandleProfessionActionAsync(characterAction, now, cancellationToken);
+                break;
 
             // Add other action types as needed
             default:
@@ -114,9 +118,17 @@ public class CharacterActionService : ICharacterActionService
         return await _combatService.PerformIdleCombatAsync(characterAction, now, cancellationToken);
     }
 
-    private Task HandleProfessionActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
+    private async Task HandleProfessionActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        int actionsToPerform = characterAction.UpdatedAt.NumberOfXSecondsIntervals(now, 6);
+
+        if (actionsToPerform == 0) return;
+
+        // TODO: This should only be done within the idle crafter, as it depends on how many items are in queue
+        characterAction.UpdatedAt += TimeSpan.FromSeconds(6 * actionsToPerform);
+        var actionDetails = characterAction.ActionDetails as GatheringActionDetails;
+
+        await _craftingService.PerformIdleCrafting(characterAction, actionsToPerform, cancellationToken);
     }
 
     /// <summary>
@@ -150,8 +162,8 @@ public class CharacterActionService : ICharacterActionService
         return await _characterActionRepository.GetCraftingActionAsync(characterId, cancellationToken);
     }
 
-    public async Task<bool> UpdateCraftingCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
+    public async Task<bool> UpdateCraftingCharacterActionAsync(Guid characterId, CraftingQueueItem characterAction, CancellationToken cancellationToken)
     {
-        return await _characterActionRepository.UpdateCraftingCharacterActionAsync(characterAction, cancellationToken);
+        return await _characterActionRepository.UpdateCraftingActionAsync(characterId, characterAction, cancellationToken);
     }
 }

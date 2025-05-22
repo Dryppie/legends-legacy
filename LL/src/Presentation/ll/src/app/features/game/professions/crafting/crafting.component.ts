@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ProfessionHeaderComponent } from '../../../../shared/components/professions/profession-header/profession-header.component';
-import { AsyncPipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe, NgFor, NgIf } from '@angular/common';
 import {
   CraftingProfession,
   CraftingQueueItem,
@@ -15,7 +15,6 @@ import {
   shareReplay,
   Subject,
   switchMap,
-  take,
 } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { ProfessionsService } from '../../../../core/services/api/professions/professions.service';
@@ -23,10 +22,7 @@ import { CharacterActionsService } from '../../../../core/services/api/character
 import { CharacterManagerService } from '../../../../core/services/client-side/character-manager/character-manager.service';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { InventoryService } from '../../../../core/services/api/inventory/inventory.service';
-import {
-  CraftingMode,
-  StartCraftingActionRequest,
-} from '../../../../shared/models/Dtos/characterActionDto';
+import { CraftingService } from '../../../../core/services/api/crafting/crafting.service';
 
 function hasQuantity(
   inv: InventoryItem[],
@@ -80,6 +76,7 @@ export class CraftingComponent implements OnInit {
     private readonly characterActionService: CharacterActionsService,
     private readonly characterManager: CharacterManagerService,
     private readonly inventoryService: InventoryService,
+    private readonly craftingService: CraftingService,
   ) {
     this.profession$ = this.route.paramMap.pipe(
       map((p) => p.get('id') ?? ''),
@@ -158,12 +155,7 @@ export class CraftingComponent implements OnInit {
     const updatedItems = consumeMaterials(items, recipe);
     this.characterManager.setInventory({ inventoryItems: updatedItems });
 
-    const craftingAction: StartCraftingActionRequest = {
-      queueId: queueItem.id,
-      targetId: recipe.id,
-      mode: CraftingMode.Craft,
-    };
-    this.characterActionService.startCraftingAction(craftingAction);
+    this.craftingService.craftItem(recipe.id);
   }
 
   cancelCraft(queueItem: CraftingQueueItem): void {

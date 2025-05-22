@@ -98,7 +98,7 @@ public class RecipeJsonReader
 
     private EquipmentBase EquipmentBase(ItemBaseDto itemDto)
     {
-        return new EquipmentBase
+        return new EquipmentBase()
         {
             Id = itemDto.Id,
             Name = itemDto.Name,

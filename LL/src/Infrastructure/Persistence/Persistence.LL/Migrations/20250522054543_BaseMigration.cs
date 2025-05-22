@@ -220,6 +220,7 @@ namespace Persistence.LL.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Stackable = table.Column<bool>(type: "bit", nullable: false),
                     ItemType = table.Column<int>(type: "int", nullable: false),
                     Rarity = table.Column<int>(type: "int", nullable: false),
                     EquipmentType = table.Column<int>(type: "int", nullable: true),
@@ -838,33 +839,27 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CraftingQueueItem",
+                name: "CraftingQueueItems",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     QueueIndex = table.Column<byte>(type: "tinyint", nullable: false),
-                    Mode = table.Column<int>(type: "int", nullable: false),
-                    RecipeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ItemInstanceId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CraftingActionDetailsId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    EquipmentInstanceId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CraftingActionDetailsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CraftingQueueItem", x => x.Id);
+                    table.PrimaryKey("PK_CraftingQueueItems", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CraftingQueueItem_ActionDetails_CraftingActionDetailsId",
+                        name: "FK_CraftingQueueItems_ActionDetails_CraftingActionDetailsId",
                         column: x => x.CraftingActionDetailsId,
                         principalTable: "ActionDetails",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CraftingQueueItem_ItemInstances_ItemInstanceId",
-                        column: x => x.ItemInstanceId,
+                        name: "FK_CraftingQueueItems_ItemInstances_EquipmentInstanceId",
+                        column: x => x.EquipmentInstanceId,
                         principalTable: "ItemInstances",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_CraftingQueueItem_Recipes_RecipeId",
-                        column: x => x.RecipeId,
-                        principalTable: "Recipes",
                         principalColumn: "Id");
                 });
 
@@ -939,19 +934,14 @@ namespace Persistence.LL.Migrations
                 column: "CharacterBId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CraftingQueueItem_CraftingActionDetailsId",
-                table: "CraftingQueueItem",
+                name: "IX_CraftingQueueItems_CraftingActionDetailsId",
+                table: "CraftingQueueItems",
                 column: "CraftingActionDetailsId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CraftingQueueItem_ItemInstanceId",
-                table: "CraftingQueueItem",
-                column: "ItemInstanceId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CraftingQueueItem_RecipeId",
-                table: "CraftingQueueItem",
-                column: "RecipeId");
+                name: "IX_CraftingQueueItems_EquipmentInstanceId",
+                table: "CraftingQueueItems",
+                column: "EquipmentInstanceId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Entities_LootTableId",
@@ -1102,7 +1092,7 @@ namespace Persistence.LL.Migrations
                 name: "ColosseumMatches");
 
             migrationBuilder.DropTable(
-                name: "CraftingQueueItem");
+                name: "CraftingQueueItems");
 
             migrationBuilder.DropTable(
                 name: "EntityAttributes");

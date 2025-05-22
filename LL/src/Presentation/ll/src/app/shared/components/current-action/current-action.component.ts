@@ -65,7 +65,7 @@ export class CurrentActionComponent implements OnInit, OnDestroy {
         this.performingAction = 'Gathering Resources';
         break;
       case CharacterActionType.Crafting:
-        this.performingAction = 'Crafting Items';
+        this.performingAction = 'Perfecting Items';
         break;
       case CharacterActionType.Idle:
         this.performingAction = 'Idle';

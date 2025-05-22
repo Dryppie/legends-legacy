@@ -15,7 +15,7 @@ namespace API.LL.Controllers.V1;
 public class CharacterActionsController : BaseController
 {
     public record StartCombatActionRequest(string AreaId);
-    public record StartCraftingActionRequest(string QueueId, string TargetId, CraftingMode Mode);
+    public record StartCraftingActionRequest(string QueueId, string ItemInstanceId);
     public record StartGatheringActionRequest(string GatheringNodeId, ProfessionType ProfessionType);
 
     [HttpGet]
@@ -32,7 +32,7 @@ public class CharacterActionsController : BaseController
 
     [HttpPost("StartCrafting")]
     public async Task<ActionResult<Response<bool>>> StartCrafting([FromBody] StartCraftingActionRequest request) =>
-        await Mediator.Send(new StartCraftingActionCommand(CurrentCharacterGuid, request.QueueId, request.TargetId, request.Mode));
+        await Mediator.Send(new StartCraftingActionCommand(CurrentCharacterGuid, request.QueueId, request.ItemInstanceId));
 
     [HttpDelete]
     public async Task<ActionResult<Response<bool>>> Delete() => 

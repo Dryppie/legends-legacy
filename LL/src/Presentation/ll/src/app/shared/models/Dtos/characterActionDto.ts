@@ -24,13 +24,7 @@ export interface StartGatheringActionRequest {
 
 export interface StartCraftingActionRequest {
   queueId: string;
-  targetId: string;
-  mode: CraftingMode;
-}
-
-export enum CraftingMode {
-  Craft = 'Craft',
-  Perfect = 'Perfect',
+  itemInstanceId: string;
 }
 
 export interface CombatActionDetails {
