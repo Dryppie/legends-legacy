@@ -69,7 +69,7 @@ export class EquipmentOverviewComponent implements OnInit {
       },
       {
         id: '',
-        iconPath: 'empty_armor',
+        iconPath: 'empty_chest',
         equipmentType: EquipmentType.Chest,
       },
       {
