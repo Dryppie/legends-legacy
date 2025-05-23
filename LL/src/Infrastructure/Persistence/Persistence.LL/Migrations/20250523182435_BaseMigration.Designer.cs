@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250522190932_BaseMigration")]
+    [Migration("20250523182435_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -1089,6 +1089,9 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Items.ItemInstance");
 
+                    b.Property<int?>("Potential")
+                        .HasColumnType("int");
+
                     b.HasDiscriminator().HasValue(0);
                 });
 
@@ -1361,7 +1364,7 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.Professions.Crafting.Recipe", b =>
                 {
-                    b.HasOne("Domain.Models.Items.ItemBase", "Item")
+                    b.HasOne("Domain.Models.Items.Equipments.EquipmentBase", "Item")
                         .WithMany()
                         .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)

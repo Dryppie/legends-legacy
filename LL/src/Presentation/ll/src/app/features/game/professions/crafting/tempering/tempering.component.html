@@ -12,13 +12,13 @@
         class="cursor-pointer rounded-lg border p-3 hover:border-primary/60 hover:bg-zinc-300/30"
         (click)="selectItem(item)"
         [class.border-primary]="
-          (selectedItem$ | async)?.itemInstance?.id === item.itemInstance.id
+          (selectedEquipmentInstance$ | async)?.id === item.itemInstance.id
         "
         [ngClass]="{
           'bg-primary/10':
-            (selectedItem$ | async)?.itemInstance?.id === item.itemInstance.id,
+            (selectedEquipmentInstance$ | async)?.id === item.itemInstance.id,
           'border-primary/20':
-            (selectedItem$ | async)?.itemInstance?.id !== item.itemInstance.id,
+            (selectedEquipmentInstance$ | async)?.id !== item.itemInstance.id,
         }"
       >
         <div class="font-semibold text-white">
@@ -36,47 +36,63 @@
     <!-- ITEM DESCRIPTION -->
     <div class="rounded-lg border border-light_gray bg-texture p-4">
       <h2 class="text-primary">Item Description</h2>
-      <ng-container *ngIf="selectedItem$ | async as selectedItem; else noItem">
-        <h3 class="mt-2 text-white">
-          {{ selectedItem.itemInstance.itemBase.name }}
-        </h3>
-        <div class="mt-2 text-white">
-          {{ selectedItem.itemInstance.itemBase.description }}
+      <ng-container
+        *ngIf="selectedEquipmentInstance$ | async as equipment; else noItem"
+      >
+        <div class="flex flex-col gap-2">
+          <!-- Equipment Name and Rarity -->
+          <h2 class="">
+            {{ equipment.itemBase.name }}
+          </h2>
+          <!-- Type -->
+          <span class="text-zinc-300">
+            {{ equipment.itemBase.equipmentType }} -
+            {{ equipment.itemBase.rarity }}
+          </span>
+          <!-- Description -->
+          <div
+            *ngIf="equipment.itemBase.description"
+            class="text-gray-400 text-sm italic"
+          >
+            {{ equipment.itemBase.description }}
+          </div>
+          <!-- Attributes -->
+          <div *ngIf="equipment.itemBase.attributeModifiers.length > 0">
+            <div class="mb-1">Attributes:</div>
+            <ul class="ml-5 list-disc text-sm">
+              <li *ngFor="let attr of equipment.itemBase.attributeModifiers">
+                {{ attr.amount > 0 ? "+" : "" }}{{ attr.amount }}
+                {{ attr.attributeType | attributeTypeFormat }}
+              </li>
+            </ul>
+          </div>
         </div>
-
-        <!-- <div class="text-gray-400 mt-4 text-sm">
-          Requires:
-          <ul class="ml-4 list-disc">
-            <li *ngFor="let mat of selectedItem.materials">
-              {{ mat.item.name }} x{{ mat.quantity }}
-            </li>
-          </ul>
-        </div> -->
-
-        <div class="mt-4 flex items-center gap-2">
-          <!-- <ng-container
+        <div class="pt-2">
+          <span *ngIf="equipment.potential as potential">
+            Potential: {{ potential }}
+          </span>
+        </div>
+        <!-- <div class="mt-4 flex items-center gap-2">
+          <ng-container
             *ngIf="canCraftSelected$ | async as canCraft; else nothing"
           >
             <button
               class="rounded border border-light_gray px-3 py-1 text-white hover:bg-zinc-300/10"
-              (click)="craft(selectedItem)"
+              (click)="craft(selectedRecipe)"
             >
               Craft
             </button>
           </ng-container>
           <ng-template #nothing>
-            <span
-              *ngIf="!(canCraftSelected$ | async)"
-              class="text-sm text-rose-500"
-            >
+            <span *ngIf="!(canCraftSelected$ | async)" class="text-rose-500">
               Not enough materials
             </span>
-          </ng-template> -->
-        </div>
+          </ng-template>
+        </div> -->
       </ng-container>
       <ng-template #noItem>
         <div class="text-gray-500 mt-2 italic">
-          Select a recipe to view details.
+          Select an item to view details.
         </div>
       </ng-template>
     </div>

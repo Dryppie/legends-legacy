@@ -27,6 +27,18 @@ const tsLiteral = JSON.stringify(JSON.parse(json), null, 2)
   .replace(/"itemType":\s*"([^"]+)"/g, (_, v) => `"itemType": ItemType.${v}`)
   // craftType → CraftType.Bar
   .replace(/"craftType":\s*"([^"]+)"/g, (_, v) => `"craftType": CraftType.${v}`)
+  .replace(
+    /"modifierType":\s*"([^"]+)"/g,
+    (_, v) => `"modifierType": ModifierType.${v}`,
+  )
+  .replace(
+    /"attributeType":\s*"([^"]+)"/g,
+    (_, v) => `"attributeType": AttributeType.${v}`,
+  )
+  .replace(
+    /"equipmentType":\s*"([^"]+)"/g,
+    (_, v) => `"equipmentType": EquipmentType.${v}`,
+  )
   .replace(/"rarity":\s*"([^"]+)"/g, (_, v) => `"rarity": Rarity.${v}`);
 writeFileSync(
   target,
@@ -34,6 +46,9 @@ writeFileSync(
 import { Recipe, CraftType } from '../shared/models/profession';
 import { ItemType } from '../shared/models/enums/itemType';
 import { Rarity } from '../shared/models/enums/rarity';
+import { EquipmentType } from '../shared/models/Dtos/equipmentSlot';
+import { AttributeType } from '../shared/models/enums/attributeType';
+import { ModifierType } from '../shared/models/Dtos/attributesDto';
 
 export const RECIPES_CONTENT = ${tsLiteral} satisfies Recipe[];
 `,

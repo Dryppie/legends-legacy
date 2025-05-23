@@ -8,4 +8,11 @@ export interface AttributeDto {
 export interface AttributeModifier {
   attributeType: AttributeType;
   amount: number;
+  modifierType: string;
+}
+
+export enum ModifierType {
+  Flat = 'Flat',
+  Additive = 'Additive',
+  Multiplicative = 'Multiplicative',
 }

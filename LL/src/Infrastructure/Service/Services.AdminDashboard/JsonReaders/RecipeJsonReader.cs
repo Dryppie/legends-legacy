@@ -4,6 +4,8 @@ using Application.UseCases._AdminDashboard.Items.Dtos;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting;
+using Services.AdminDashboard.Items;
+using Services.AdminDashboard.Recipes;
 
 namespace Services.AdminDashboard.JsonReaders;
 public class RecipeJsonReader
@@ -12,7 +14,7 @@ public class RecipeJsonReader
     private readonly JsonSerializerOptions _opts =
         new() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase, Converters = { new JsonStringEnumConverter() } };
 
-    private List<Recipe> _cache = [];
+    private List<RecipeToJsonDto> _cache = [];
 
     public RecipeJsonReader()
     {
@@ -25,11 +27,11 @@ public class RecipeJsonReader
     }
 
     public List<Recipe> GetRecipes() =>
-        [.. _cache];
+        [.. _cache.Select(r => r.ToEntity())];
 
     public void AddRecipe(Recipe recipe)
     {
-        _cache.Add(recipe);
+        _cache.Add(recipe.ToDto());
         SaveFile();
     }
 
@@ -37,8 +39,8 @@ public class RecipeJsonReader
     {
         var idx = _cache.FindIndex(r => r.Id == recipe.Id);
 
-        if (idx == -1) _cache.Add(recipe);
-        else _cache[idx] = recipe;
+        if (idx == -1) _cache.Add(recipe.ToDto());
+        else _cache[idx] = recipe.ToDto();
 
         SaveFile();
     }
@@ -58,7 +60,7 @@ public class RecipeJsonReader
         }
 
         var json = File.ReadAllText(_filePath);
-        _cache = JsonSerializer.Deserialize<List<Recipe>>(json, _opts) ?? [];
+        _cache = JsonSerializer.Deserialize<List<RecipeToJsonDto>>(json, _opts) ?? [];
 
         var itemReader = new ItemBaseJsonReader();
         var itemDtos = itemReader.GetItemsFromJson();
@@ -83,7 +85,7 @@ public class RecipeJsonReader
 
         foreach (var recipe in _cache)
         {
-            recipe.Item = items.FirstOrDefault(i => i.Id == recipe.ItemId)!;
+            recipe.Item = (items.FirstOrDefault(i => i.Id == recipe.ItemId) as EquipmentBase)!.ToDto();
             recipe.Materials = recipe.Materials
                 .Select(m => new Material
                 {

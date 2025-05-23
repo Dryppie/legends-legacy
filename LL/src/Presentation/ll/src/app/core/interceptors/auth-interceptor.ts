@@ -30,9 +30,12 @@ export class AuthInterceptor implements HttpInterceptor {
   ): Observable<HttpEvent<any>> {
     return next.handle(req).pipe(
       catchError((err: HttpErrorResponse) => {
-        console.log(err);
         /* not an auth problem – just bubble it up */
-        if (err.status !== 401 || req.url.endsWith('createNewTokens')) {
+        if (
+          err.status !== 401 ||
+          req.url.endsWith('createNewTokens') ||
+          req.url.endsWith('/character')
+        ) {
           return throwError(() => err);
         }
 

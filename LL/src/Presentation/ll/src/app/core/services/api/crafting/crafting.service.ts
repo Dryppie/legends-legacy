@@ -1,22 +1,23 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from '../api.service';
-import { catchError, map, Observable, throwError } from 'rxjs';
+import { catchError, map, throwError } from 'rxjs';
+import { ToastService } from '../../client-side/toast/toast.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CraftingService {
-  constructor(private api: ApiService) {}
+  constructor(
+    private api: ApiService,
+    private toast: ToastService,
+  ) {}
 
   public craftItem(recipeId: string) {
     return this.api
       .post('Crafting/CraftItem', recipeId)
       .pipe(
         map((item) => {
-          // this.toastService.showToast(
-          //   'Action completed successfully!',
-          //   'success',
-          // );
+          this.toast.showToast(`Crafted item!`, 'success', true, 'tr');
           return item;
         }),
 

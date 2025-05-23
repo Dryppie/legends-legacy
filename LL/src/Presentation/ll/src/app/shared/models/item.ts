@@ -11,6 +11,7 @@ export interface ItemInstance {
 
 export interface EquipmentInstance extends ItemInstance {
   itemBase: Equipment;
+  potential?: number;
 }
 
 export interface ItemBase {
@@ -19,6 +20,7 @@ export interface ItemBase {
   rarity: Rarity;
   itemType: ItemType;
   description: string;
+  stackable: boolean;
 }
 
 export interface Equipment extends ItemBase {

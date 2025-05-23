@@ -4,28 +4,25 @@
     "name": "Test Helmet",
     "itemId": "test_helmet",
     "item": {
-      "equipmentType": "Head",
-      "attributeModifiers": [
-        {
-          "id": "1234565f-bb38-48a9-81b1-07552ff5894c",
-          "attributeType": "Willpower",
-          "amount": 1,
-          "modifierType": "Flat"
-        },
-        {
-          "id": "123712de-e223-4112-89e5-e47562edadcd",
-          "attributeType": "Endurance",
-          "amount": 1,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "test_helmet",
       "name": "Test Helmet",
       "description": "A helmet for testing.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Head",
+      "attributeModifiers": [
+        {
+          "attributeType": "Willpower",
+          "amount": 1,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "Endurance",
+          "amount": 1,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -52,28 +49,25 @@
     "name": "Jagged Obsidian Helm",
     "itemId": "jagged_obsidian_helm",
     "item": {
-      "equipmentType": "Head",
-      "attributeModifiers": [
-        {
-          "id": "3459045f-bb38-48a9-81b1-07552ff5894c",
-          "attributeType": "Willpower",
-          "amount": 1,
-          "modifierType": "Flat"
-        },
-        {
-          "id": "c742b5de-e223-4112-89e5-e47562edadcd",
-          "attributeType": "Threat",
-          "amount": 1,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "jagged_obsidian_helm",
       "name": "Jagged Obsidian Helm",
       "description": "A heavy helmet forged from jagged obsidian and stone.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Head",
+      "attributeModifiers": [
+        {
+          "attributeType": "Willpower",
+          "amount": 1,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "Threat",
+          "amount": 1,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -139,22 +133,20 @@
     "name": "Jagged Obsidian Cuirass",
     "itemId": "jagged_obsidian_cuirass",
     "item": {
-      "equipmentType": "Chest",
-      "attributeModifiers": [
-        {
-          "id": "0696fc44-d48e-4a54-9f81-a3866f780c1f",
-          "attributeType": "Constitution",
-          "amount": 2,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "jagged_obsidian_cuirass",
       "name": "Jagged Obsidian Cuirass",
       "description": "A sturdy cuirass crafted from jagged obsidian.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Chest",
+      "attributeModifiers": [
+        {
+          "attributeType": "Constitution",
+          "amount": 2,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -220,22 +212,20 @@
     "name": "Jagged Obsidian Greaves",
     "itemId": "jagged_obsidian_greaves",
     "item": {
-      "equipmentType": "Legs",
-      "attributeModifiers": [
-        {
-          "id": "e9595040-9c93-43cd-99c1-f3cf66d839b5",
-          "attributeType": "Endurance",
-          "amount": 2,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "jagged_obsidian_greaves",
       "name": "Jagged Obsidian Greaves",
       "description": "Reinforced greaves made of jagged obsidian and stone.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Legs",
+      "attributeModifiers": [
+        {
+          "attributeType": "Endurance",
+          "amount": 2,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -301,28 +291,25 @@
     "name": "Willow Hood",
     "itemId": "willow_hood",
     "item": {
-      "equipmentType": "Head",
-      "attributeModifiers": [
-        {
-          "id": "81a161cb-4f50-40a3-bf65-0e073bedaca6",
-          "attributeType": "Instinct",
-          "amount": 3,
-          "modifierType": "Flat"
-        },
-        {
-          "id": "106d937e-da42-47fe-9d6f-0525d25daf5a",
-          "attributeType": "Health",
-          "amount": 5,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "willow_hood",
       "name": "Willow Hood",
       "description": "A lightweight hood made from willow.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Head",
+      "attributeModifiers": [
+        {
+          "attributeType": "Instinct",
+          "amount": 3,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "Health",
+          "amount": 5,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -388,22 +375,20 @@
     "name": "Willow Brigandine",
     "itemId": "willow_brigandine",
     "item": {
-      "equipmentType": "Chest",
-      "attributeModifiers": [
-        {
-          "id": "dcbf23e2-8d10-47f4-b7d0-d27130a957f6",
-          "attributeType": "Strength",
-          "amount": 2,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "willow_brigandine",
       "name": "Willow Brigandine",
       "description": "A balanced brigandine crafted from willow.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Chest",
+      "attributeModifiers": [
+        {
+          "attributeType": "Strength",
+          "amount": 2,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -469,22 +454,20 @@
     "name": "Willow Tassets",
     "itemId": "willow_tassets",
     "item": {
-      "equipmentType": "Legs",
-      "attributeModifiers": [
-        {
-          "id": "85b2ebf3-8684-45b2-b342-80b899bc2a4f",
-          "attributeType": "FightingSpirit",
-          "amount": 2,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "willow_tassets",
       "name": "Willow Tassets",
       "description": "Light armor piece.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Legs",
+      "attributeModifiers": [
+        {
+          "attributeType": "FightingSpirit",
+          "amount": 2,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -550,28 +533,25 @@
     "name": "Silk Capuche",
     "itemId": "silk_capuche",
     "item": {
-      "equipmentType": "Head",
-      "attributeModifiers": [
-        {
-          "id": "0be456f7-f48e-4130-96c0-24808182c794",
-          "attributeType": "Luck",
-          "amount": 3,
-          "modifierType": "Flat"
-        },
-        {
-          "id": "3636411b-8de1-4f9d-a92b-77046d6b0d3d",
-          "attributeType": "CritChance",
-          "amount": 1,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "silk_capuche",
       "name": "Silk Capuche",
       "description": "A light silk hood.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Head",
+      "attributeModifiers": [
+        {
+          "attributeType": "Luck",
+          "amount": 3,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "CritChance",
+          "amount": 1,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -637,22 +617,20 @@
     "name": "Silk Vest",
     "itemId": "silk_vest",
     "item": {
-      "equipmentType": "Chest",
-      "attributeModifiers": [
-        {
-          "id": "436e642f-f43d-42a2-ace5-bcd47388b26e",
-          "attributeType": "Dexterity",
-          "amount": 2,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "silk_vest",
       "name": "Silk Vest",
       "description": "An evasive vest made of silk.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Chest",
+      "attributeModifiers": [
+        {
+          "attributeType": "Dexterity",
+          "amount": 2,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -718,22 +696,20 @@
     "name": "Silk Trousers",
     "itemId": "silk_trousers",
     "item": {
-      "equipmentType": "Legs",
-      "attributeModifiers": [
-        {
-          "id": "13c287d8-5ed0-4db7-9884-ef1fa3b727db",
-          "attributeType": "Agility",
-          "amount": 2,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "silk_trousers",
       "name": "Silk Trousers",
       "description": "Lightweight trousers.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Legs",
+      "attributeModifiers": [
+        {
+          "attributeType": "Agility",
+          "amount": 2,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -799,28 +775,25 @@
     "name": "Powder Hood",
     "itemId": "powder_hood",
     "item": {
-      "equipmentType": "Head",
-      "attributeModifiers": [
-        {
-          "id": "2583d815-9289-499a-b5e0-2a22607ab8f1",
-          "attributeType": "Perception",
-          "amount": 3,
-          "modifierType": "Flat"
-        },
-        {
-          "id": "7cfc60ba-e706-4233-bb0c-196a092ccb4b",
-          "attributeType": "Mana",
-          "amount": 5,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "powder_hood",
       "name": "Powder Hood",
       "description": "A hood crafted from crystalline powder.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Head",
+      "attributeModifiers": [
+        {
+          "attributeType": "Perception",
+          "amount": 3,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "Mana",
+          "amount": 5,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -886,22 +859,20 @@
     "name": "Powder Robe",
     "itemId": "powder_robe",
     "item": {
-      "equipmentType": "Chest",
-      "attributeModifiers": [
-        {
-          "id": "4ede2581-6333-429a-afc9-ee7d454c9e9e",
-          "attributeType": "Intelligence",
-          "amount": 2,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "powder_robe",
       "name": "Powder Robe",
       "description": "A robe woven with crystalline powder.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Chest",
+      "attributeModifiers": [
+        {
+          "attributeType": "Intelligence",
+          "amount": 2,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -967,22 +938,20 @@
     "name": "Powder Pants",
     "itemId": "powder_pants",
     "item": {
-      "equipmentType": "Legs",
-      "attributeModifiers": [
-        {
-          "id": "4a790e93-4d23-4248-9227-6473140cdf4f",
-          "attributeType": "Wisdom",
-          "amount": 2,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "powder_pants",
       "name": "Powder Pants",
       "description": "Crystalline trousers.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Legs",
+      "attributeModifiers": [
+        {
+          "attributeType": "Wisdom",
+          "amount": 2,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -1048,22 +1017,20 @@
     "name": "Geode-Heart Amulet",
     "itemId": "geode_heart_amulet",
     "item": {
-      "equipmentType": "Necklace",
-      "attributeModifiers": [
-        {
-          "id": "8d69f7ff-d48a-4f4e-9f45-7a6de9c9ac60",
-          "attributeType": "MaxMana",
-          "amount": 20,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "geode_heart_amulet",
       "name": "Geode-Heart Amulet",
       "description": "An amulet infused with earth\u0027s essence, offering earth resistance and critical damage.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Necklace",
+      "attributeModifiers": [
+        {
+          "attributeType": "MaxMana",
+          "amount": 20,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "JewelryCrafting",
@@ -1116,22 +1083,20 @@
     "name": "Leafglow Amulet",
     "itemId": "leafglow_amulet",
     "item": {
-      "equipmentType": "Necklace",
-      "attributeModifiers": [
-        {
-          "id": "73d627f8-3130-4376-8d0e-f36cc7556769",
-          "attributeType": "Agility",
-          "amount": 2,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "leafglow_amulet",
       "name": "Leafglow Amulet",
       "description": "A glowing amulet that grants mana regeneration and a soft green light.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Necklace",
+      "attributeModifiers": [
+        {
+          "attributeType": "Agility",
+          "amount": 2,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "JewelryCrafting",
@@ -1184,22 +1149,20 @@
     "name": "Obsidian Shard Amulet",
     "itemId": "obsidian_shard_amulet",
     "item": {
-      "equipmentType": "Necklace",
-      "attributeModifiers": [
-        {
-          "id": "ef1299dc-a4b4-42b7-a38a-31dd6802e470",
-          "attributeType": "MaxHealth",
-          "amount": 60,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "obsidian_shard_amulet",
       "name": "Obsidian Shard Amulet",
       "description": "A reflective amulet offering physical resistance and slight damage reflection.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Necklace",
+      "attributeModifiers": [
+        {
+          "attributeType": "MaxHealth",
+          "amount": 60,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "JewelryCrafting",
@@ -1252,22 +1215,20 @@
     "name": "Flint-Spark Ring",
     "itemId": "flint_spark_ring",
     "item": {
-      "equipmentType": "Ring",
-      "attributeModifiers": [
-        {
-          "id": "8f13a3df-d0ff-4e4d-96b7-3498b40b06af",
-          "attributeType": "CritDamage",
-          "amount": 8,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "flint_spark_ring",
       "name": "Flint-Spark Ring",
       "description": "A ring that enhances critical strikes and adds fire damage to attacks.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Ring",
+      "attributeModifiers": [
+        {
+          "attributeType": "CritDamage",
+          "amount": 8,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "JewelryCrafting",
@@ -1307,22 +1268,20 @@
     "name": "Nestling Band",
     "itemId": "nestling_band",
     "item": {
-      "equipmentType": "Ring",
-      "attributeModifiers": [
-        {
-          "id": "c9093b63-bf43-41f7-824c-d5b31382d5a0",
-          "attributeType": "Wisdom",
-          "amount": 2,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "nestling_band",
       "name": "Nestling Band",
       "description": "A ring that enhances ranged accuracy and reduces fall damage.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Ring",
+      "attributeModifiers": [
+        {
+          "attributeType": "Wisdom",
+          "amount": 2,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "JewelryCrafting",
@@ -1362,22 +1321,20 @@
     "name": "Stoneguard Ring",
     "itemId": "stoneguard_ring",
     "item": {
-      "equipmentType": "Ring",
-      "attributeModifiers": [
-        {
-          "id": "5adebb8c-b005-497b-ae98-b7f205aeb403",
-          "attributeType": "PhysicalDefense",
-          "amount": 25,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "stoneguard_ring",
       "name": "Stoneguard Ring",
       "description": "A protective ring granting max HP and health regeneration out of combat.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Ring",
+      "attributeModifiers": [
+        {
+          "attributeType": "PhysicalDefense",
+          "amount": 25,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "JewelryCrafting",
@@ -1417,22 +1374,20 @@
     "name": "Powdered Lens",
     "itemId": "powdered_lens",
     "item": {
-      "equipmentType": "Relic",
-      "attributeModifiers": [
-        {
-          "id": "0fadba9d-fed6-4afa-95f1-42ea5ca8b6cc",
-          "attributeType": "Perception",
-          "amount": 3,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "powdered_lens",
       "name": "Powdered Lens",
       "description": "A lens that reveals hidden secrets for a short duration.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Relic",
+      "attributeModifiers": [
+        {
+          "attributeType": "Perception",
+          "amount": 3,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "JewelryCrafting",
@@ -1485,22 +1440,20 @@
     "name": "Sapling Totem",
     "itemId": "sapling_totem",
     "item": {
-      "equipmentType": "Relic",
-      "attributeModifiers": [
-        {
-          "id": "ba801852-8770-4e5e-aafc-21ca8dab8542",
-          "attributeType": "ManaRegeneration",
-          "amount": 1,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "sapling_totem",
       "name": "Sapling Totem",
       "description": "A totem that grants health regeneration while stationary.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Relic",
+      "attributeModifiers": [
+        {
+          "attributeType": "ManaRegeneration",
+          "amount": 1,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "JewelryCrafting",
@@ -1553,22 +1506,20 @@
     "name": "Jagged Obsidian Idol",
     "itemId": "jagged_obsidian_idol",
     "item": {
-      "equipmentType": "Relic",
-      "attributeModifiers": [
-        {
-          "id": "650b4316-2ba7-471f-9258-03fd2f6ce7b4",
-          "attributeType": "Threat",
-          "amount": 3,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "jagged_obsidian_idol",
       "name": "Jagged Obsidian Idol",
       "description": "An idol made from jagged obsidian.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "Relic",
+      "attributeModifiers": [
+        {
+          "attributeType": "Threat",
+          "amount": 3,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "JewelryCrafting",
@@ -1621,28 +1572,25 @@
     "name": "Stone-Edge Shortsword",
     "itemId": "stone_edge_shortsword",
     "item": {
-      "equipmentType": "MainHand",
-      "attributeModifiers": [
-        {
-          "id": "661f4b29-d31f-488a-b763-6df96045e22a",
-          "attributeType": "FightingSpirit",
-          "amount": 1,
-          "modifierType": "Flat"
-        },
-        {
-          "id": "022e8a2d-c76c-4284-bec0-36e542d22cff",
-          "attributeType": "Strength",
-          "amount": 1,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "stone_edge_shortsword",
       "name": "Stone-Edge Shortsword",
       "description": "A sharp shortsword forged from stone and jagged obsidian.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "MainHand",
+      "attributeModifiers": [
+        {
+          "attributeType": "FightingSpirit",
+          "amount": 1,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "Strength",
+          "amount": 1,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -1708,22 +1656,20 @@
     "name": "Jagged Obsidian Hatchet",
     "itemId": "jagged_obsidian_hatchet",
     "item": {
-      "equipmentType": "MainHand",
-      "attributeModifiers": [
-        {
-          "id": "7527e5f8-b861-4bcf-9634-7d91e3c0637a",
-          "attributeType": "Strength",
-          "amount": 2,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "jagged_obsidian_hatchet",
       "name": "Jagged Obsidian Hatchet",
       "description": "A durable hatchet crafted from jagged obsidian and stone.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "MainHand",
+      "attributeModifiers": [
+        {
+          "attributeType": "Strength",
+          "amount": 2,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -1789,22 +1735,20 @@
     "name": "Flint Morning Star",
     "itemId": "flint_morning_star",
     "item": {
-      "equipmentType": "MainHand",
-      "attributeModifiers": [
-        {
-          "id": "bbc014e5-4a17-4770-b7bb-282e545245cd",
-          "attributeType": "Endurance",
-          "amount": 3,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "flint_morning_star",
       "name": "Flint Morning Star",
       "description": "A spiked mace made of flint and stone, dealing crushing damage.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "MainHand",
+      "attributeModifiers": [
+        {
+          "attributeType": "Endurance",
+          "amount": 3,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -1870,22 +1814,20 @@
     "name": "Silkshadow Stiletto",
     "itemId": "silkshadow_stiletto",
     "item": {
-      "equipmentType": "MainHand",
-      "attributeModifiers": [
-        {
-          "id": "a1a501f5-7791-4991-8aab-944102012c14",
-          "attributeType": "Dexterity",
-          "amount": 2,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "silkshadow_stiletto",
       "name": "Silkshadow Stiletto",
       "description": "A swift dagger made of silk vine and sharp flint.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "MainHand",
+      "attributeModifiers": [
+        {
+          "attributeType": "Dexterity",
+          "amount": 2,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -1951,28 +1893,25 @@
     "name": "Willow Cleaver",
     "itemId": "willow_cleaver",
     "item": {
-      "equipmentType": "MainHand",
-      "attributeModifiers": [
-        {
-          "id": "f3187da5-0f40-4efe-9678-4ba61f404507",
-          "attributeType": "FightingSpirit",
-          "amount": 3,
-          "modifierType": "Flat"
-        },
-        {
-          "id": "81f01556-5c49-4ecb-9841-fb9ca03f783f",
-          "attributeType": "Strength",
-          "amount": 2,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "willow_cleaver",
       "name": "Willow Cleaver",
       "description": "A large cleaver made from sturdy willow wood and obsidian.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "MainHand",
+      "attributeModifiers": [
+        {
+          "attributeType": "FightingSpirit",
+          "amount": 3,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "Strength",
+          "amount": 2,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2038,22 +1977,20 @@
     "name": "Stone-Reaver Greataxe",
     "itemId": "stone_reaver_greataxe",
     "item": {
-      "equipmentType": "MainHand",
-      "attributeModifiers": [
-        {
-          "id": "103daa3a-d5df-42e9-9623-2c3d13dad3a0",
-          "attributeType": "Strength",
-          "amount": 4,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "stone_reaver_greataxe",
       "name": "Stone-Reaver Greataxe",
       "description": "A heavy greataxe crafted from solid stone and jagged obsidian.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "MainHand",
+      "attributeModifiers": [
+        {
+          "attributeType": "Strength",
+          "amount": 4,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2119,28 +2056,25 @@
     "name": "Powder-Core Maul",
     "itemId": "powder_core_maul",
     "item": {
-      "equipmentType": "MainHand",
-      "attributeModifiers": [
-        {
-          "id": "9f518948-6f9b-43d7-b206-5dac5bd0a4d1",
-          "attributeType": "Endurance",
-          "amount": 3,
-          "modifierType": "Flat"
-        },
-        {
-          "id": "17281c8c-0ac4-4e58-b4f2-06e8c5d74d13",
-          "attributeType": "Willpower",
-          "amount": 2,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "powder_core_maul",
       "name": "Powder-Core Maul",
       "description": "A massive maul with a crystalline powder core, delivering crushing blows.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "MainHand",
+      "attributeModifiers": [
+        {
+          "attributeType": "Endurance",
+          "amount": 3,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "Willpower",
+          "amount": 2,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2206,28 +2140,25 @@
     "name": "Nest-Tip Pike",
     "itemId": "nest_tip_pike",
     "item": {
-      "equipmentType": "MainHand",
-      "attributeModifiers": [
-        {
-          "id": "f472a147-2254-4df1-909b-a60c02737d0e",
-          "attributeType": "FightingSpirit",
-          "amount": 2,
-          "modifierType": "Flat"
-        },
-        {
-          "id": "dfc90461-e2c1-4bc7-aa4e-93b1b949f104",
-          "attributeType": "Dexterity",
-          "amount": 2,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "nest_tip_pike",
       "name": "Nest-Tip Pike",
       "description": "A long pike tipped with feathers and flint for precision thrusts.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "MainHand",
+      "attributeModifiers": [
+        {
+          "attributeType": "FightingSpirit",
+          "amount": 2,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "Dexterity",
+          "amount": 2,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2293,28 +2224,25 @@
     "name": "Stonebark Heater",
     "itemId": "stonebark_heater",
     "item": {
-      "equipmentType": "OffHand",
-      "attributeModifiers": [
-        {
-          "id": "56d3e277-2538-4cbc-a068-ea5457688497",
-          "attributeType": "PhysicalDefense",
-          "amount": 20,
-          "modifierType": "Flat"
-        },
-        {
-          "id": "fa36f7c2-5279-404b-95e0-9445a378fac3",
-          "attributeType": "Block",
-          "amount": 50,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "stonebark_heater",
       "name": "Stonebark Heater",
       "description": "A sturdy shield combining stone and willow for reliable protection.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "OffHand",
+      "attributeModifiers": [
+        {
+          "attributeType": "PhysicalDefense",
+          "amount": 20,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "Block",
+          "amount": 50,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2380,28 +2308,25 @@
     "name": "Silk Protector",
     "itemId": "silk_protector",
     "item": {
-      "equipmentType": "OffHand",
-      "attributeModifiers": [
-        {
-          "id": "117b6e8b-c643-4e56-ad49-921f8ab59e18",
-          "attributeType": "MagicalDefense",
-          "amount": 20,
-          "modifierType": "Flat"
-        },
-        {
-          "id": "aa8d130e-ed0b-4d83-b59d-b93752473da9",
-          "attributeType": "Block",
-          "amount": 50,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "silk_protector",
       "name": "Silk Protector",
       "description": "A shield woven with silk, allowing for magical protection.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "OffHand",
+      "attributeModifiers": [
+        {
+          "attributeType": "MagicalDefense",
+          "amount": 20,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "Block",
+          "amount": 50,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2454,22 +2379,20 @@
     "name": "Shimmering Willow Staff",
     "itemId": "shimmering_willow_staff",
     "item": {
-      "equipmentType": "MainHand",
-      "attributeModifiers": [
-        {
-          "id": "c499f044-fac4-4390-b1bc-25cfa7150f87",
-          "attributeType": "Intelligence",
-          "amount": 4,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "shimmering_willow_staff",
       "name": "Shimmering Willow Staff",
       "description": "A magical staff made of willow wood and shimmering leaves.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "MainHand",
+      "attributeModifiers": [
+        {
+          "attributeType": "Intelligence",
+          "amount": 4,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2535,22 +2458,20 @@
     "name": "Geode-Bound Grimoire",
     "itemId": "geode_bound_grimoire",
     "item": {
-      "equipmentType": "OffHand",
-      "attributeModifiers": [
-        {
-          "id": "07ed2161-2777-4cb1-9f72-5ff55aedef66",
-          "attributeType": "Intelligence",
-          "amount": 2,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "geode_bound_grimoire",
       "name": "Geode-Bound Grimoire",
       "description": "A magical tome embedded with geodes.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "OffHand",
+      "attributeModifiers": [
+        {
+          "attributeType": "Intelligence",
+          "amount": 2,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2616,22 +2537,20 @@
     "name": "Jagged Obsidian Wand",
     "itemId": "jagged_obsidian_wand",
     "item": {
-      "equipmentType": "MainHand",
-      "attributeModifiers": [
-        {
-          "id": "d2354e29-9496-4666-930e-ced3a50a4ce4",
-          "attributeType": "Wisdom",
-          "amount": 2,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "jagged_obsidian_wand",
       "name": "Jagged Obsidian Wand",
       "description": "A magical wand forged from jagged obsidian.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "MainHand",
+      "attributeModifiers": [
+        {
+          "attributeType": "Wisdom",
+          "amount": 2,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2697,22 +2616,20 @@
     "name": "Powdered Crystal Orb",
     "itemId": "powdered_crystal_orb",
     "item": {
-      "equipmentType": "OffHand",
-      "attributeModifiers": [
-        {
-          "id": "7ace81ec-11c8-4864-90af-11da75c08b8a",
-          "attributeType": "Wisdom",
-          "amount": 2,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "powdered_crystal_orb",
       "name": "Powdered Crystal Orb",
       "description": "An orb made from crystalline powder.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "OffHand",
+      "attributeModifiers": [
+        {
+          "attributeType": "Wisdom",
+          "amount": 2,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2765,22 +2682,20 @@
     "name": "Silk-Strung Longbow",
     "itemId": "silk_strung_longbow",
     "item": {
-      "equipmentType": "MainHand",
-      "attributeModifiers": [
-        {
-          "id": "71087684-332b-43a8-9e03-2de2f08e3524",
-          "attributeType": "Agility",
-          "amount": 4,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "silk_strung_longbow",
       "name": "Silk-Strung Longbow",
       "description": "A longbow strung with resilient silk.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "MainHand",
+      "attributeModifiers": [
+        {
+          "attributeType": "Agility",
+          "amount": 4,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2846,28 +2761,25 @@
     "name": "Flintlock Crossbow",
     "itemId": "flintlock_crossbow",
     "item": {
-      "equipmentType": "MainHand",
-      "attributeModifiers": [
-        {
-          "id": "4c65fa15-4b39-4f1c-b413-3846a4ff8d00",
-          "attributeType": "Agility",
-          "amount": 2,
-          "modifierType": "Flat"
-        },
-        {
-          "id": "c888c2c0-cb21-487e-84c1-5d7364b4ab0e",
-          "attributeType": "Willpower",
-          "amount": 2,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "flintlock_crossbow",
       "name": "Flintlock Crossbow",
       "description": "A crossbow crafted using both willow and flint.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "MainHand",
+      "attributeModifiers": [
+        {
+          "attributeType": "Agility",
+          "amount": 2,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "Willpower",
+          "amount": 2,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2933,28 +2845,25 @@
     "name": "Jagged Obsidian Knuckles",
     "itemId": "jagged_obsidian_knuckles",
     "item": {
-      "equipmentType": "MainHand",
-      "attributeModifiers": [
-        {
-          "id": "da9831b4-954f-4747-b459-80716bf0907d",
-          "attributeType": "FightingSpirit",
-          "amount": 2,
-          "modifierType": "Flat"
-        },
-        {
-          "id": "caf0c8d2-27d5-4319-96b0-86161228eb63",
-          "attributeType": "MaxHealth",
-          "amount": 50,
-          "modifierType": "Flat"
-        }
-      ],
-      "combatMastery": "Axe",
       "id": "jagged_obsidian_knuckles",
       "name": "Jagged Obsidian Knuckles",
       "description": "A pair of hard knuckles made from jagged obsidian.",
       "stackable": false,
       "itemType": "Equipment",
-      "rarity": "Common"
+      "rarity": "Common",
+      "equipmentType": "MainHand",
+      "attributeModifiers": [
+        {
+          "attributeType": "FightingSpirit",
+          "amount": 2,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "MaxHealth",
+          "amount": 50,
+          "modifierType": "Flat"
+        }
+      ]
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",

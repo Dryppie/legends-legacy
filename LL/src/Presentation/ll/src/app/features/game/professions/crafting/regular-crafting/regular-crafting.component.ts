@@ -12,6 +12,7 @@ import {
 import { CharacterManagerService } from '../../../../../core/services/client-side/character-manager/character-manager.service';
 import { CraftingService } from '../../../../../core/services/api/crafting/crafting.service';
 import { InventoryDto } from '../../../../../shared/models/Dtos/inventoryDto';
+import { AttributeTypeFormatPipe } from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 
 function hasQuantity(
   inv: InventoryItem[],
@@ -37,7 +38,7 @@ function consumeMaterials(
 @Component({
   selector: 'app-regular-crafting',
   standalone: true,
-  imports: [NgIf, NgFor, NgClass, AsyncPipe],
+  imports: [NgIf, NgFor, NgClass, AsyncPipe, AttributeTypeFormatPipe],
   templateUrl: './regular-crafting.component.html',
   styleUrl: './regular-crafting.component.css',
 })

@@ -339,7 +339,8 @@ namespace Persistence.LL.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ItemBaseId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ItemType = table.Column<int>(type: "int", nullable: false)
+                    ItemType = table.Column<int>(type: "int", nullable: false),
+                    Potential = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {

@@ -4,7 +4,6 @@ import {
   CraftingQueueItem,
   CraftingQueueStatus,
   CraftType,
-  Profession,
 } from '../../../../../shared/models/profession';
 import {
   BehaviorSubject,
@@ -12,21 +11,16 @@ import {
   map,
   Observable,
   ReplaySubject,
-  tap,
 } from 'rxjs';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
-import {
-  Equipment,
-  EquipmentInstance,
-} from '../../../../../shared/models/item';
+import { EquipmentInstance } from '../../../../../shared/models/item';
 import { InventoryDto } from '../../../../../shared/models/Dtos/inventoryDto';
-import { ItemType } from '../../../../../shared/models/enums/itemType';
-import { EquipmentType } from '../../../../../shared/models/Dtos/equipmentSlot';
+import { AttributeTypeFormatPipe } from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 
 @Component({
   selector: 'app-tempering',
   standalone: true,
-  imports: [NgFor, NgIf, NgClass, AsyncPipe],
+  imports: [NgFor, NgIf, NgClass, AsyncPipe, AttributeTypeFormatPipe],
   templateUrl: './tempering.component.html',
   styleUrl: './tempering.component.css',
 })
@@ -36,9 +30,20 @@ export class TemperingComponent implements OnInit {
 
   readonly craftingQueue$ = new BehaviorSubject<CraftingQueueItem[]>([]);
   private readonly selectedItemId$ = new BehaviorSubject<string | null>(null);
-  readonly selectedItem$ = new ReplaySubject<InventoryItem | null>(1);
+  readonly selectedEquipmentInstance$ =
+    new ReplaySubject<EquipmentInstance | null>(1);
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    combineLatest([this.inventory$, this.selectedItemId$])
+      .pipe(
+        map(
+          ([inventory, id]) =>
+            (inventory.inventoryItems.find((i) => i.itemInstance.id === id)
+              ?.itemInstance as EquipmentInstance) ?? null,
+        ),
+      )
+      .subscribe(this.selectedEquipmentInstance$);
+  }
   selectItem(item: InventoryItem): void {
     this.selectedItemId$.next(item.itemInstance.id);
   }

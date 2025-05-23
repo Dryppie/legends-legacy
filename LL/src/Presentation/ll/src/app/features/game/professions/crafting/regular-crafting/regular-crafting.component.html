@@ -33,16 +33,38 @@
       <ng-container
         *ngIf="selectedRecipe$ | async as selectedRecipe; else noRecipe"
       >
-        <h3 class="mt-2 text-white">
-          {{ selectedRecipe.item.name }}
-        </h3>
-        <div class="mt-2 text-white">
-          {{ selectedRecipe.item.description }}
+        <div class="flex flex-col gap-2">
+          <!-- Equipment Name and Rarity -->
+          <h2 class="">
+            {{ selectedRecipe.item.name }}
+          </h2>
+          <!-- Type -->
+          <span class="text-zinc-300">
+            {{ selectedRecipe.item.equipmentType }} -
+            {{ selectedRecipe.item.rarity }}
+          </span>
+          <!-- Description -->
+          <div
+            *ngIf="selectedRecipe.item.description"
+            class="text-gray-400 text-sm italic"
+          >
+            {{ selectedRecipe.item.description }}
+          </div>
+          <!-- Attributes -->
+          <div *ngIf="selectedRecipe.item.attributeModifiers.length > 0">
+            <div class="mb-1">Attributes:</div>
+            <ul class="ml-5 list-disc text-sm">
+              <li *ngFor="let attr of selectedRecipe.item.attributeModifiers">
+                {{ attr.amount > 0 ? "+" : "" }}{{ attr.amount }}
+                {{ attr.attributeType | attributeTypeFormat }}
+              </li>
+            </ul>
+          </div>
         </div>
 
-        <div class="text-gray-400 mt-4 text-sm">
+        <div class="text-gray-400 mt-2 text-sm">
           Requires:
-          <ul class="ml-4 list-disc">
+          <ul class="ml-5 list-disc">
             <li *ngFor="let mat of selectedRecipe.materials">
               {{ mat.item.name }} x{{ mat.quantity }}
             </li>
@@ -61,10 +83,7 @@
             </button>
           </ng-container>
           <ng-template #nothing>
-            <span
-              *ngIf="!(canCraftSelected$ | async)"
-              class="text-sm text-rose-500"
-            >
+            <span *ngIf="!(canCraftSelected$ | async)" class="text-rose-500">
               Not enough materials
             </span>
           </ng-template>

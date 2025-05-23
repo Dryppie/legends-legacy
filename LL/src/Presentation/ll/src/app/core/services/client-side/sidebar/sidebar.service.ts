@@ -182,12 +182,6 @@ function getProfessionSidebar(): Tab[] {
           title: 'Woodcutting',
         },
         {
-          id: 'weaponsmithing',
-          route: ['/game', 'professions', 'crafting', 'weaponsmithing'],
-          icon: 'professions/mining',
-          title: 'Weaponsmithing',
-        },
-        {
           id: 'armorforging',
           route: ['/game', 'professions', 'crafting', 'armorforging'],
           icon: 'professions/mining',
@@ -198,6 +192,12 @@ function getProfessionSidebar(): Tab[] {
           route: ['/game', 'professions', 'crafting', 'jewelcrafting'],
           icon: 'professions/mining',
           title: 'Jewelcrafting',
+        },
+        {
+          id: 'weaponsmithing',
+          route: ['/game', 'professions', 'crafting', 'weaponsmithing'],
+          icon: 'professions/mining',
+          title: 'Weaponsmithing',
         },
       ],
     },

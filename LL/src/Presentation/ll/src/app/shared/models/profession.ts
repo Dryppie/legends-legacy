@@ -1,7 +1,7 @@
 import { ProfessionType } from './Dtos/characterProfession';
 import { GatheringNode } from './Dtos/gatheringNode';
 import { ItemType } from './enums/itemType';
-import { EquipmentInstance, ItemBase } from './item';
+import { Equipment, EquipmentInstance, ItemBase } from './item';
 
 export interface Profession {
   name: string;
@@ -21,7 +21,7 @@ export interface Recipe {
   id: string;
   name: string;
   itemId: string;
-  item: ItemBase;
+  item: Equipment;
   quantity: number;
   craftType: CraftType;
   levelRequirement: number;

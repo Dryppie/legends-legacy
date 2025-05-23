@@ -13,12 +13,14 @@
   ></app-tab>
   <ng-container [ngSwitch]="activeTab">
     <app-regular-crafting
+      class="h-full overflow-hidden"
       *ngSwitchCase="'Crafting'"
       [recipes$]="recipes$"
       [inventory$]="inventory$"
     >
     </app-regular-crafting>
     <app-tempering
+      class="h-full overflow-hidden"
       *ngSwitchCase="'Tempering'"
       [inventory$]="inventoryEquipment$"
       [craftType]="craftType"

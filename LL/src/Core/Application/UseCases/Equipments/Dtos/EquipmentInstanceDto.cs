@@ -6,7 +6,7 @@ using Domain.Models.Items.Equipments;
 namespace Application.UseCases.Equipments.Dtos;
 public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
 {
-
+    public int? Potential { get; set; } = null;
     public void Mapping(Profile profile)
     {
         profile.CreateMap<EquipmentInstance, EquipmentInstanceDto>();

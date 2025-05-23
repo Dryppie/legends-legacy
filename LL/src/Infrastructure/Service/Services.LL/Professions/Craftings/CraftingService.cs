@@ -49,7 +49,8 @@ public class CraftingService : ICraftingService
         {
             Id = Guid.NewGuid(),
             ItemBaseId = recipe.ItemId,
-            ItemBase = recipe.Item
+            ItemBase = recipe.Item,
+            Potential = 100
         };
         var inventoryItem = new InventoryItem()
         {
