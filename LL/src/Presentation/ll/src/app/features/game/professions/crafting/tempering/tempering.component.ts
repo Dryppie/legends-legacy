@@ -34,59 +34,11 @@ export class TemperingComponent implements OnInit {
   @Input() inventory$!: Observable<InventoryDto>;
   @Input() craftType!: CraftType;
 
-  allowedTypesByCraft: Record<CraftType, EquipmentType[]> = {
-    [CraftType.JewelryCrafting]: [EquipmentType.Ring, EquipmentType.Necklace],
-    [CraftType.ArmorForging]: [
-      EquipmentType.Head,
-      EquipmentType.Chest,
-      EquipmentType.Legs,
-      EquipmentType.Relic,
-    ],
-    [CraftType.WeaponSmithing]: [EquipmentType.MainHand, EquipmentType.OffHand],
-  };
-
-  filteredInventory$!: Observable<InventoryItem[]>;
-
   readonly craftingQueue$ = new BehaviorSubject<CraftingQueueItem[]>([]);
   private readonly selectedItemId$ = new BehaviorSubject<string | null>(null);
   readonly selectedItem$ = new ReplaySubject<InventoryItem | null>(1);
 
-  ngOnInit(): void {
-    this.filteredInventory$ = this.inventory$.pipe(
-      map((inventory) => {
-        const allowedTypes = this.allowedTypesByCraft[this.craftType];
-        return inventory.inventoryItems.filter(
-          (i) =>
-            i.itemInstance.itemBase.itemType === ItemType.Equipment &&
-            allowedTypes.includes(
-              (i.itemInstance.itemBase as Equipment)
-                .equipmentType as EquipmentType,
-            ),
-        );
-      }),
-    );
-
-    combineLatest([this.filteredInventory$, this.selectedItemId$])
-      .pipe(
-        map(
-          ([inventory, id]) =>
-            inventory.find((i) => i.itemInstance.id === id) ?? null,
-        ),
-      )
-      .subscribe(this.selectedItem$);
-
-    // combineLatest([this.selectedRecipe$, this.inventory$])
-    //   .pipe(
-    //     map(([recipe, inv]) =>
-    //       recipe
-    //         ? recipe.materials.every((mat) =>
-    //             hasQuantity(inv?.inventoryItems!, mat.item.id, mat.quantity),
-    //           )
-    //         : false,
-    //     ),
-    //   )
-    //   .subscribe(this.canCraftSelected$);
-  }
+  ngOnInit(): void {}
   selectItem(item: InventoryItem): void {
     this.selectedItemId$.next(item.itemInstance.id);
   }

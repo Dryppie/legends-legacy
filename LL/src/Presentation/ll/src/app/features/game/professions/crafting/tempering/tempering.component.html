@@ -6,9 +6,9 @@
     class="order-2 flex h-full flex-col space-y-2 sm:order-1 sm:w-1/2 sm:overflow-y-auto"
   >
     <h2 class="flex text-primary">Items to temper</h2>
-    <ng-container *ngIf="filteredInventory$ | async as inventory">
+    <ng-container *ngIf="inventory$ | async as inventory">
       <div
-        *ngFor="let item of inventory"
+        *ngFor="let item of inventory.inventoryItems"
         class="cursor-pointer rounded-lg border p-3 hover:border-primary/60 hover:bg-zinc-300/30"
         (click)="selectItem(item)"
         [class.border-primary]="

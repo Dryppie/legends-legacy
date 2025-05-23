@@ -103,7 +103,6 @@ public class AuthController : BaseController
     [AllowAnonymous]
     [ProducesResponseType(typeof(Response<Tokens>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<Response<Tokens>>> CreateNewTokens()
     {
         var refreshToken = Request.Cookies[RefreshTokenCookie];

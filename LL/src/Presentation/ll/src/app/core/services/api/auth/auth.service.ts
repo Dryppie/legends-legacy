@@ -202,7 +202,7 @@ export class AuthService {
   }
 
   /** Returns `true` when refresh succeeded. */
-  private tryRefresh(): Observable<boolean> {
+  public tryRefresh(): Observable<boolean> {
     return this.api.post('auth/createNewTokens').pipe(
       map(() => true), // tokens set in HttpOnly cookie
       catchError(() => of(false)),

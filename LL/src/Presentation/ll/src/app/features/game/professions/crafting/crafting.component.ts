@@ -5,7 +5,7 @@ import {
   CraftingProfession,
   CraftType,
 } from '../../../../shared/models/profession';
-import { map, of, shareReplay, switchMap, tap } from 'rxjs';
+import { combineLatest, map, of, shareReplay, switchMap, tap } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { ProfessionsService } from '../../../../core/services/api/professions/professions.service';
 import { CharacterManagerService } from '../../../../core/services/client-side/character-manager/character-manager.service';
@@ -14,6 +14,9 @@ import { Tab } from '../../../../shared/models/sidebar-item';
 import { TabComponent } from '../../../../shared/components/tab/tab.component';
 import { RegularCraftingComponent } from './regular-crafting/regular-crafting.component';
 import { TemperingComponent } from './tempering/tempering.component';
+import { EquipmentType } from '../../../../shared/models/Dtos/equipmentSlot';
+import { ItemType } from '../../../../shared/models/enums/itemType';
+import { Equipment } from '../../../../shared/models/item';
 
 @Component({
   selector: 'app-crafting',
@@ -35,10 +38,20 @@ export class CraftingComponent implements OnInit {
   readonly profession$;
   readonly recipes$;
   readonly inventory$;
+  readonly inventoryEquipment$;
 
   craftType: CraftType = CraftType.ArmorForging;
   // Stub until you wire real actions/queue in the service
-
+  allowedTypesByCraft: Record<CraftType, EquipmentType[]> = {
+    [CraftType.JewelryCrafting]: [EquipmentType.Ring, EquipmentType.Necklace],
+    [CraftType.ArmorForging]: [
+      EquipmentType.Head,
+      EquipmentType.Chest,
+      EquipmentType.Legs,
+      EquipmentType.Relic,
+    ],
+    [CraftType.WeaponSmithing]: [EquipmentType.MainHand, EquipmentType.OffHand],
+  };
   // ────────────────────────────────────── ctor/di ─────────────────────────────
   constructor(
     private readonly route: ActivatedRoute,
@@ -62,15 +75,35 @@ export class CraftingComponent implements OnInit {
         ),
       ),
     );
-
-    this.inventory$ = this.characterManager.inventory$.pipe(
-      switchMap(
-        (invDto) =>
-          invDto // already cached?
-            ? of(invDto) // → just pass it through
-            : this.inventoryService.getInventory(), // → make a network call
+    const rawInventory$ = this.characterManager.inventory$.pipe(
+      switchMap((invDto) =>
+        invDto ? of(invDto) : this.inventoryService.getInventory(),
       ),
-      shareReplay(1), // every subscriber sees the same value
+      shareReplay(1),
+    );
+
+    this.inventory$ = rawInventory$;
+
+    this.inventoryEquipment$ = combineLatest([
+      rawInventory$,
+      this.profession$,
+    ]).pipe(
+      map(([inventory, profession]) => {
+        const craftType = profession.professionType as unknown as CraftType;
+        const allowedTypes = this.allowedTypesByCraft[craftType];
+        return {
+          ...inventory,
+          inventoryItems: inventory.inventoryItems.filter(
+            (i) =>
+              i.itemInstance.itemBase.itemType === ItemType.Equipment &&
+              allowedTypes.includes(
+                (i.itemInstance.itemBase as Equipment)
+                  .equipmentType as EquipmentType,
+              ),
+          ),
+        };
+      }),
+      shareReplay(1),
     );
   }
 

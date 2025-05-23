@@ -8,6 +8,7 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import {
+  HTTP_INTERCEPTORS,
   provideHttpClient,
   withInterceptorsFromDi,
 } from '@angular/common/http';
@@ -20,6 +21,7 @@ import { BattleType } from './core/state/combat-state/combatState';
 import { CombatLogService } from './core/services/client-side/combat/combat-log/combat-log.service';
 import { LevelingService } from './core/services/client-side/leveling/leveling.service';
 import { ColosseumPlaybackStrategy } from './core/services/client-side/combat/combat-playback/colosseum-playback-strategy';
+import { AuthInterceptor } from './core/interceptors/auth-interceptor';
 
 export function initializeApp(authService: AuthService) {
   return () =>
@@ -42,7 +44,7 @@ export const appConfig: ApplicationConfig = {
       }),
       deps: [CombatLogService, LevelingService],
     },
-
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideAnimations(),
     provideHttpClient(withInterceptorsFromDi()),
