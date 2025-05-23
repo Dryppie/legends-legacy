@@ -1,10 +1,12 @@
+import { ProfessionType } from './Dtos/characterProfession';
 import { GatheringNode } from './Dtos/gatheringNode';
 import { ItemType } from './enums/itemType';
-import { ItemBase } from './item';
+import { EquipmentInstance, ItemBase } from './item';
 
 export interface Profession {
   name: string;
   iconPath: string;
+  professionType: ProfessionType;
 }
 
 export interface GatheringProfession extends Profession {
@@ -29,7 +31,7 @@ export interface Recipe {
 
 export interface CraftingQueueItem {
   id: string;
-  recipe: Recipe;
+  equipment: EquipmentInstance;
   startedAt: Date;
   status: CraftingQueueStatus;
 }

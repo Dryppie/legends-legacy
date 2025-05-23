@@ -14,12 +14,16 @@ import { GatheringNode } from '../../../../shared/models/Dtos/gatheringNode';
 import { ApiService } from '../../api/api.service';
 import {
   CraftingProfession,
+  CraftType,
   GatheringProfession,
   Profession,
   Recipe,
 } from '../../../../shared/models/profession';
 import { RECIPES_CONTENT } from '../../../../data/recipes-content';
-import { CharacterProfession } from '../../../../shared/models/Dtos/characterProfession';
+import {
+  CharacterProfession,
+  ProfessionType,
+} from '../../../../shared/models/Dtos/characterProfession';
 
 @Injectable({
   providedIn: 'root',
@@ -62,10 +66,20 @@ export class ProfessionsService {
     if (id.includes('woodcutting')) {
       return this.getWoodcuttingProfession();
     }
+    if (id.includes('armorforging')) {
+      return this.getArmorforgingProfession();
+    }
+    if (id.includes('jewelcrafting')) {
+      return this.getJewelcraftingProfession();
+    }
     if (id.includes('weaponsmithing')) {
       return this.getWeaponsmithingProfession();
     }
-    return { name: '', iconPath: '' };
+    return {
+      name: '',
+      iconPath: '',
+      professionType: ProfessionType.ArmorForging,
+    };
   }
 
   getMiningProfession() {
@@ -73,6 +87,7 @@ export class ProfessionsService {
       name: 'Mining',
       gatheringNodes: this.getMiningNodes(),
       iconPath: 'mining',
+      professionType: ProfessionType.Mining,
     };
     return miningProfession;
   }
@@ -82,8 +97,29 @@ export class ProfessionsService {
       name: 'Woodcutting',
       gatheringNodes: this.getWoodcuttingNodes(),
       iconPath: 'woodcutting',
+      professionType: ProfessionType.Woodcutting,
     };
     return woodcuttingProfession;
+  }
+
+  getArmorforgingProfession() {
+    let miningProfession: CraftingProfession = {
+      name: 'Armorforging',
+      recipes: this.getWeaponsmithingRecipes(),
+      iconPath: 'mining',
+      professionType: ProfessionType.ArmorForging,
+    };
+    return miningProfession;
+  }
+
+  getJewelcraftingProfession() {
+    let miningProfession: CraftingProfession = {
+      name: 'Jewelcrafting',
+      recipes: this.getWeaponsmithingRecipes(),
+      iconPath: 'mining',
+      professionType: ProfessionType.JewelryCrafting,
+    };
+    return miningProfession;
   }
 
   getWeaponsmithingProfession() {
@@ -91,6 +127,7 @@ export class ProfessionsService {
       name: 'Weaponsmithing',
       recipes: this.getWeaponsmithingRecipes(),
       iconPath: 'mining',
+      professionType: ProfessionType.WeaponSmithing,
     };
     return miningProfession;
   }

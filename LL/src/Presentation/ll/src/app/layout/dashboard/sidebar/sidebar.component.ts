@@ -94,7 +94,9 @@ export class SidebarComponent implements OnInit {
       NamedStorageKeys.CharacterActionType,
     );
     if (actionType === 'Combat') this.gameService.showCombat();
-    else if (actionType === 'Gathering')
+    else if (actionType === 'Gathering') {
       this.router.navigate(['game/professions']);
+      this.sidebarService.updateContent('game/professions');
+    }
   }
 }

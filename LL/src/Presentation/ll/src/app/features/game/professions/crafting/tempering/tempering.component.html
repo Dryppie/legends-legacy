@@ -1,0 +1,112 @@
+<div
+  class="flex h-full w-full flex-col gap-4 overflow-y-auto px-4 sm:flex-row sm:overflow-hidden sm:px-6"
+>
+  <!-- RECIPES LIST -->
+  <div
+    class="order-2 flex h-full flex-col space-y-2 sm:order-1 sm:w-1/2 sm:overflow-y-auto"
+  >
+    <h2 class="flex text-primary">Items to temper</h2>
+    <ng-container *ngIf="filteredInventory$ | async as inventory">
+      <div
+        *ngFor="let item of inventory"
+        class="cursor-pointer rounded-lg border p-3 hover:border-primary/60 hover:bg-zinc-300/30"
+        (click)="selectItem(item)"
+        [class.border-primary]="
+          (selectedItem$ | async)?.itemInstance?.id === item.itemInstance.id
+        "
+        [ngClass]="{
+          'bg-primary/10':
+            (selectedItem$ | async)?.itemInstance?.id === item.itemInstance.id,
+          'border-primary/20':
+            (selectedItem$ | async)?.itemInstance?.id !== item.itemInstance.id,
+        }"
+      >
+        <div class="font-semibold text-white">
+          {{ item.itemInstance.itemBase.name }}
+        </div>
+        <div class="text-gray-400 text-sm">
+          <!-- Lv {{ item.levelRequirement }} -->
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- ITEM DESCRIPTION + CRAFTING QUEUE -->
+  <div class="order-1 flex-1 space-y-6 sm:order-2">
+    <!-- ITEM DESCRIPTION -->
+    <div class="rounded-lg border border-light_gray bg-texture p-4">
+      <h2 class="text-primary">Item Description</h2>
+      <ng-container *ngIf="selectedItem$ | async as selectedItem; else noItem">
+        <h3 class="mt-2 text-white">
+          {{ selectedItem.itemInstance.itemBase.name }}
+        </h3>
+        <div class="mt-2 text-white">
+          {{ selectedItem.itemInstance.itemBase.description }}
+        </div>
+
+        <!-- <div class="text-gray-400 mt-4 text-sm">
+          Requires:
+          <ul class="ml-4 list-disc">
+            <li *ngFor="let mat of selectedItem.materials">
+              {{ mat.item.name }} x{{ mat.quantity }}
+            </li>
+          </ul>
+        </div> -->
+
+        <div class="mt-4 flex items-center gap-2">
+          <!-- <ng-container
+            *ngIf="canCraftSelected$ | async as canCraft; else nothing"
+          >
+            <button
+              class="rounded border border-light_gray px-3 py-1 text-white hover:bg-zinc-300/10"
+              (click)="craft(selectedItem)"
+            >
+              Craft
+            </button>
+          </ng-container>
+          <ng-template #nothing>
+            <span
+              *ngIf="!(canCraftSelected$ | async)"
+              class="text-sm text-rose-500"
+            >
+              Not enough materials
+            </span>
+          </ng-template> -->
+        </div>
+      </ng-container>
+      <ng-template #noItem>
+        <div class="text-gray-500 mt-2 italic">
+          Select a recipe to view details.
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- CRAFTING QUEUE -->
+    <div
+      class="border-gold/20 rounded-lg border border-light_gray bg-texture p-4"
+    >
+      <div class="text-gold text-lg font-semibold">Crafting Queue</div>
+      <ng-container *ngIf="craftingQueue$ | async as queue">
+        <ng-container *ngIf="queue.length > 0; else emptyQueue">
+          <div
+            *ngFor="let item of queue"
+            class="mt-2 flex items-center justify-between rounded bg-black/30 p-2"
+          >
+            <div class="text-white">
+              <!-- {{ item.name }} — {{ item.timeRemaining }}s -->
+            </div>
+            <button
+              class="text-sm text-red-400 hover:underline"
+              (click)="cancelCraft(item)"
+            >
+              Cancel
+            </button>
+          </div>
+        </ng-container>
+      </ng-container>
+      <ng-template #emptyQueue>
+        <div class="mt-2 italic">Nothing is currently being crafted.</div>
+      </ng-template>
+    </div>
+  </div>
+</div>

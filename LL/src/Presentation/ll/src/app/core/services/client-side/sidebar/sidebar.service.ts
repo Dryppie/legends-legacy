@@ -30,6 +30,8 @@ export class SidebarService {
       tabs = getProfessionSidebar();
     } else if (url.includes('world')) {
       tabs = getWorldSidebar();
+    } else if (url.includes('settings')) {
+      tabs = getSettingsSidebar();
     }
 
     return of(tabs);
@@ -185,18 +187,18 @@ function getProfessionSidebar(): Tab[] {
           icon: 'professions/mining',
           title: 'Weaponsmithing',
         },
-        // {
-        //   id: 'armorforging',
-        //   route: ['/game', 'professions', 'crafting', 'armorforging'],
-        //   icon: 'professions/mining',
-        //   title: 'Armorforging',
-        // },
-        // {
-        //   id: 'jewelcrafting',
-        //   route: ['/game', 'professions', 'crafting', 'jewelcrafting'],
-        //   icon: 'professions/mining',
-        //   title: 'Jewelcrafting',
-        // },
+        {
+          id: 'armorforging',
+          route: ['/game', 'professions', 'crafting', 'armorforging'],
+          icon: 'professions/mining',
+          title: 'Armorforging',
+        },
+        {
+          id: 'jewelcrafting',
+          route: ['/game', 'professions', 'crafting', 'jewelcrafting'],
+          icon: 'professions/mining',
+          title: 'Jewelcrafting',
+        },
       ],
     },
   ];
@@ -229,6 +231,23 @@ function getWorldSidebar(): Tab[] {
         //     { icon: 'path/to/coin-icon.png', amount: 1 },
         //   ],
         // },
+      ],
+    },
+  ];
+}
+
+function getSettingsSidebar(): Tab[] {
+  return [
+    {
+      label: 'Settings',
+      items: [
+        {
+          id: 'settings',
+          route: ['/game', 'settings'],
+          icon: 'world/Quest',
+          title: 'Account',
+          description: 'Settings',
+        },
       ],
     },
   ];
