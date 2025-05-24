@@ -23,15 +23,15 @@ public class CraftingService : ICraftingService
         _recipeService = rs;
     }
 
-    public async Task<bool> CraftItemFromRecipeAsync(Guid characterId, Guid recipeId, CancellationToken cancellationToken)
+    public async Task<InventoryItem?> CraftItemFromRecipeAsync(Guid characterId, Guid recipeId, CancellationToken cancellationToken)
     {
         // Load the recipe
         var recipe = await _recipeService.GetRecipeByIdAsync(recipeId, cancellationToken);
-        if (recipe == null) return false;
+        if (recipe == null) return null;
 
         // Check inventory for required materials
         var removedMaterials = await _inventoryService.TryRemoveItemsAsync(characterId, [.. recipe.Materials], cancellationToken);
-        if (!removedMaterials)return false;
+        if (!removedMaterials)return null;
 
         var professionType = recipe.CraftType switch
         {
@@ -43,7 +43,7 @@ public class CraftingService : ICraftingService
 
         // Check profession level
         var hasRequiredLevel = await _professionService.CanPerformProfession(characterId, professionType, recipe.LevelRequirement, cancellationToken);
-        if (!hasRequiredLevel) return false;
+        if (!hasRequiredLevel) return null;
 
         var equipmentInstance = new EquipmentInstance()
         {
@@ -63,10 +63,10 @@ public class CraftingService : ICraftingService
         await _inventoryService.AddItemsToInventory(characterId, [inventoryItem], cancellationToken);
 
         // Craft the item
-        var crafted = await _craftingRepository.CraftItemFromRecipeAsync(characterId, recipeId, cancellationToken);
-        if (!crafted) return false;
+        //var crafted = await _craftingRepository.CraftItemFromRecipeAsync(characterId, recipeId, cancellationToken);
+        //if (!crafted) return null;
 
-        return true;
+        return inventoryItem;
     }
 
     public async Task PerformIdleCrafting(CharacterAction characterAction, int actionsToPerform, CancellationToken cancellationToken)

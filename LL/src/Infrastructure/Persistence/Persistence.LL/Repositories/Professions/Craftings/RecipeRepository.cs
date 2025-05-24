@@ -15,6 +15,7 @@ public class RecipeRepository : IRecipeRepository
         return await _dbContext.Recipes
             .Include(r => r.Materials)
             .Include(r => r.Item)
+                .ThenInclude(i => i.AttributeModifiers)
             .FirstOrDefaultAsync(r => r.Id == recipeId, cancellationToken);
     }
 }

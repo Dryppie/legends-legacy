@@ -72,23 +72,21 @@
             Potential: {{ potential }}
           </span>
         </div>
-        <!-- <div class="mt-4 flex items-center gap-2">
+        <div class="mt-4 flex items-center gap-2">
           <ng-container
-            *ngIf="canCraftSelected$ | async as canCraft; else nothing"
+            *ngIf="equipment.potential && equipment.potential > 0; else nothing"
           >
             <button
               class="rounded border border-light_gray px-3 py-1 text-white hover:bg-zinc-300/10"
-              (click)="craft(selectedRecipe)"
+              (click)="temper(equipment)"
             >
-              Craft
+              Temper
             </button>
           </ng-container>
           <ng-template #nothing>
-            <span *ngIf="!(canCraftSelected$ | async)" class="text-rose-500">
-              Not enough materials
-            </span>
+            <span class="text-rose-500"> Not enough materials </span>
           </ng-template>
-        </div> -->
+        </div>
       </ng-container>
       <ng-template #noItem>
         <div class="text-gray-500 mt-2 italic">

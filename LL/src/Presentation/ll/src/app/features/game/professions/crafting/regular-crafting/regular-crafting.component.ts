@@ -89,9 +89,11 @@ export class RegularCraftingComponent implements OnInit {
 
     /* optimistic client-side material removal */
     const updatedItems = consumeMaterials(items, recipe);
-    this.characterManager.setInventory({ inventoryItems: updatedItems });
-
-    this.craftingService.craftItem(recipe.id);
+    this.craftingService.craftItem(recipe.id).subscribe((item) => {
+      updatedItems.push(item);
+      console.log(item);
+      this.characterManager.setInventory({ inventoryItems: updatedItems });
+    });
   }
 
   trackByRecipe(_: number, recipe: Recipe): string {
