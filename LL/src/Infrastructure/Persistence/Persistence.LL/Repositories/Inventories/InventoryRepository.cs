@@ -2,6 +2,7 @@
 using Common.Exceptions;
 using Common.Helpers.Essences;
 using Domain.Models.Inventories;
+using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.Professions.Crafting;
@@ -253,6 +254,20 @@ public class InventoryRepository : IInventoryRepository
         }
 
         await _context.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
+    public async Task<bool> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken)
+    {
+        var itemToAdd = new InventoryItem
+        {
+            InventoryId = characterId,
+            ItemInstanceId = itemInstance.Id,
+            ItemInstance = itemInstance,
+            Quantity = 1
+        };
+
+        await _context.InventoryItems.AddAsync(itemToAdd, cancellationToken);
         return true;
     }
 }

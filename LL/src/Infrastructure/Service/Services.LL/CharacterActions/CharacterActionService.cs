@@ -126,7 +126,6 @@ public class CharacterActionService : ICharacterActionService
 
         // TODO: This should only be done within the idle crafter, as it depends on how many items are in queue
         characterAction.UpdatedAt += TimeSpan.FromSeconds(6 * actionsToPerform);
-        var actionDetails = characterAction.ActionDetails as GatheringActionDetails;
 
         await _craftingService.PerformIdleCrafting(characterAction, actionsToPerform, cancellationToken);
     }

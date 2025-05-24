@@ -73,25 +73,34 @@ public class CraftingService : ICraftingService
     {
         var actionDetails = (characterAction.ActionDetails as CraftingActionDetails)!;
         var produced = new List<InventoryItem>();
+        while (actionsToPerform > 0 && actionDetails.CraftingQueueItems.Count > 0)
+        {
+            var current = actionDetails.CraftingQueueItems.First();
+            var spend = Math.Min(actionsToPerform, current.EquipmentInstance.Potential ?? 0);
 
-        //while (actionsToPerform > 0 && actionDetails.CraftingQueueItems.Count > 0)
-        //{
-        //    var current = actionDetails.CraftingQueueItems.First();
-        //    var spend = Math.Min(actionsToPerform, current.RemainingTicks);
+            current.EquipmentInstance.Potential -= spend;
+            actionsToPerform -= spend;
 
-        //    current.RemainingTicks -= spend;
-        //    actionsToPerform -= spend;
-
-        //    if (current.Potential is > 0)
-        //        current.Potential = Math.Max(0, current.Potential.Value - spend);
-
-        //    if (current.RemainingTicks == 0)
-        //    {
-        //        produced.Add(await _craftService.FinishAsync(current, cancellationToken));
-        //        details.Queue.RemoveAt(0); // next item slides up
-        //    }
-        //}
-
-
+            if (current.EquipmentInstance.Potential == 0)
+            {
+                //produced.Add(await _craftService.FinishAsync(current, cancellationToken));
+                actionDetails.CraftingQueueItems.Remove(current); // next item slides up
+                var inventoryItem = new InventoryItem()
+                {
+                    InventoryId = characterAction.CharacterId,
+                    ItemInstanceId = current.EquipmentInstance.Id,
+                    ItemInstance = current.EquipmentInstance,
+                    Quantity = 1,
+                };
+                //await _inventoryService.AddItemsToInventory(characterAction.CharacterId, [inventoryItem], cancellationToken);
+                await _inventoryService.AddItemInstanceBackToInventory(characterAction.CharacterId, current.EquipmentInstance, cancellationToken);
+            }
+        }
+        if (actionDetails.CraftingQueueItems.Count == 0)
+        {
+            characterAction.IsDeleted = true;
+            characterAction.ActionDetails = null;
+            return;
+        }
     }
 }

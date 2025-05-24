@@ -1,6 +1,7 @@
 ﻿using Application.Common.Interfaces;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
+using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting;
 using Microsoft.EntityFrameworkCore;
 
@@ -79,6 +80,11 @@ public class CharacterActionRepository : ICharacterActionRepository
             .Include(ca => ca.ActionDetails)
                 .ThenInclude(ad => (ad as CombatActionDetails).Area)
                     .ThenInclude(a => a.Creatures)
+            .Include(ca => ca.ActionDetails)
+                .ThenInclude(ad => (ad as CraftingActionDetails).CraftingQueueItems)
+                    .ThenInclude(ci => ci.EquipmentInstance)
+                        .ThenInclude(ei => ei.ItemBase)
+                            .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
             .FirstOrDefaultAsync(ca => ca.CharacterId.Equals(characterId), cancellationToken);
         return characterAction;
     }
@@ -103,16 +109,31 @@ public class CharacterActionRepository : ICharacterActionRepository
     // This differs from the StartCharacterActionAsync method in that it doesn't update UpdatedAt
     public async Task<bool> UpdateCraftingActionAsync(Guid characterId, CraftingQueueItem craftingQueueItem, CancellationToken cancellationToken)
     {
+        var now = DateTimeOffset.UtcNow;
+
         var existingAction = await _context.CharacterActions
             .Include(a => a.ActionDetails)  // Ensure ActionDetails is loaded
+                .ThenInclude(ad => (ad as CraftingActionDetails).CraftingQueueItems)
+                    .ThenInclude(ci => ci.EquipmentInstance)
             .FirstOrDefaultAsync(a => a.CharacterId == characterId, cancellationToken);
+
+        var inventoryItem = await _context.InventoryItems
+            .Include(ii => ii.ItemInstance)
+            .FirstOrDefaultAsync(ii => ii.ItemInstanceId == craftingQueueItem.EquipmentInstanceId && ii.InventoryId == characterId, cancellationToken);
+
+        if (inventoryItem == null)
+            return false; // Item doesn't belong to the character or doesn't exist
+
+        // Remove it from inventory
+        _context.InventoryItems.Remove(inventoryItem);
+
         if (existingAction == null)
         {
 
             var action = new CharacterAction
             {
                 CharacterId = characterId,
-                UpdatedAt = DateTimeOffset.UtcNow,
+                UpdatedAt = now,
                 ActionDetails = new CraftingActionDetails
                 {
                     CraftingQueueItems = [craftingQueueItem]
@@ -125,17 +146,15 @@ public class CharacterActionRepository : ICharacterActionRepository
         }
 
         // If combat or any other action ends in the future, it is not possible to start a new action until that time has passed
-        if (existingAction.UpdatedAt > DateTimeOffset.UtcNow)
-        {
+        if (existingAction.UpdatedAt > now)
             return false;
-        }
 
         existingAction.IsDeleted = false;
 
-        var craftingDetails = existingAction.ActionDetails as CraftingActionDetails;
-        if (craftingDetails == null)
+        if (existingAction.ActionDetails is not CraftingActionDetails craftingDetails)
         {
             // If existing action had no details, add new details
+            existingAction.UpdatedAt = now;
             existingAction.ActionDetails = new CraftingActionDetails
             {
                 CraftingQueueItems = [craftingQueueItem]
@@ -144,6 +163,8 @@ public class CharacterActionRepository : ICharacterActionRepository
         }
         else
         {
+            if (craftingDetails.CraftingQueueItems.Count == 0) existingAction.UpdatedAt = now;
+
             craftingQueueItem.CraftingActionDetailsId = craftingDetails.Id;
             _context.CraftingQueueItems.Add(craftingQueueItem);
         }

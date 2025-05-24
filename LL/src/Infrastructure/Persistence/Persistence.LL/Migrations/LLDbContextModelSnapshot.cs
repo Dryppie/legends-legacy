@@ -489,7 +489,7 @@ namespace Persistence.LL.Migrations
                     b.Property<Guid>("CraftingActionDetailsId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("EquipmentInstanceId")
+                    b.Property<Guid>("EquipmentInstanceId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<byte>("QueueIndex")
@@ -1333,7 +1333,9 @@ namespace Persistence.LL.Migrations
 
                     b.HasOne("Domain.Models.Items.Equipments.EquipmentInstance", "EquipmentInstance")
                         .WithMany()
-                        .HasForeignKey("EquipmentInstanceId");
+                        .HasForeignKey("EquipmentInstanceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("EquipmentInstance");
                 });

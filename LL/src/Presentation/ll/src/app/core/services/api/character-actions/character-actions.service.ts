@@ -25,6 +25,7 @@ import { GameService } from '../../client-side/game/game.service';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { CombatService } from '../../client-side/combat/combat.service';
 import { SessionSummaryService } from '../../client-side/session-summary/session-summary.service';
+import { CraftingService } from '../crafting/crafting.service';
 
 @Injectable({
   providedIn: 'root',
@@ -51,6 +52,7 @@ export class CharacterActionsService {
     private gameService: GameService,
     private eventBusService: EventBusService,
     private sessionSummaryService: SessionSummaryService,
+    private craftingService: CraftingService,
   ) {
     this.eventBusService.logout$.subscribe(() => {
       this.handleLogout();
@@ -238,12 +240,17 @@ export class CharacterActionsService {
       )
       .subscribe((action: CharacterActionDto | null) => {
         if (!action || action.isDeleted) this.stopPolling();
-        this.loadingCombatActionSubject.next(false);
         this.setCurrentAction(action);
 
         if (action?.characterActionType === CharacterActionType.Combat) {
+          this.loadingCombatActionSubject.next(false);
           this.combatService.startCombatSimulation(action);
           this.sessionSummaryService.loadSince(action.combatSession);
+        }
+        if (action?.characterActionType === CharacterActionType.Crafting) {
+          this.craftingService.setQueue(
+            action.craftingActionDetails?.craftingQueueItems ?? [],
+          );
         }
 
         this.setDisplayCurrentAction(action);
@@ -255,6 +262,7 @@ export class CharacterActionsService {
       this.pollingSubscription.unsubscribe();
       this.pollingSubscription = null;
     }
+    this.craftingService.setQueue([]);
   }
 
   setDisplayCurrentAction(action: CharacterActionDto | null) {

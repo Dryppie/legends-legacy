@@ -845,7 +845,7 @@ namespace Persistence.LL.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     QueueIndex = table.Column<byte>(type: "tinyint", nullable: false),
-                    EquipmentInstanceId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    EquipmentInstanceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CraftingActionDetailsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -861,7 +861,8 @@ namespace Persistence.LL.Migrations
                         name: "FK_CraftingQueueItems_ItemInstances_EquipmentInstanceId",
                         column: x => x.EquipmentInstanceId,
                         principalTable: "ItemInstances",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(

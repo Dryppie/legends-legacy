@@ -1,9 +1,9 @@
 <div
-  class="flex h-full w-full flex-col gap-4 overflow-y-auto px-4 sm:flex-row sm:overflow-hidden sm:px-6"
+  class="flex h-full w-full flex-col justify-evenly gap-4 overflow-y-auto px-4 sm:flex-row sm:overflow-hidden sm:px-6"
 >
   <!-- RECIPES LIST -->
   <div
-    class="order-2 flex h-full flex-col space-y-2 sm:order-1 sm:w-1/2 sm:overflow-y-auto"
+    class="order-2 flex h-full w-full flex-col space-y-2 sm:order-1 sm:overflow-y-auto"
   >
     <h2 class="flex text-primary">Recipes</h2>
     <ng-container *ngIf="recipes$ | async as recipes">
@@ -26,7 +26,7 @@
   </div>
 
   <!-- ITEM DESCRIPTION + CRAFTING QUEUE -->
-  <div class="order-1 flex-1 space-y-6 sm:order-2">
+  <div class="order-1 flex w-full flex-col space-y-6 sm:order-2">
     <!-- ITEM DESCRIPTION -->
     <div class="rounded-lg border border-light_gray bg-texture p-4">
       <h2 class="text-primary">Item Description</h2>

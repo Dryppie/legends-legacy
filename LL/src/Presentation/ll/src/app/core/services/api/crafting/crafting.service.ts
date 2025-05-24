@@ -1,13 +1,19 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from '../api.service';
-import { catchError, map, Observable, throwError } from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, throwError } from 'rxjs';
 import { ToastService } from '../../client-side/toast/toast.service';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
+import { CraftingQueueItem } from '../../../../shared/models/profession';
+import { StartCraftingActionRequest } from '../../../../shared/models/Dtos/characterActionDto';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CraftingService {
+  private readonly queueSubject = new BehaviorSubject<CraftingQueueItem[]>([]);
+  /** Observable that callers (components, other services) can subscribe to */
+  readonly craftingQueue$ = this.queueSubject.asObservable();
+
   constructor(
     private api: ApiService,
     private toast: ToastService,
@@ -35,5 +41,20 @@ export class CraftingService {
         return throwError(() => new Error('Failed to craft item'));
       }),
     );
+  }
+
+  enqueueTempering(item: CraftingQueueItem): void {
+    this.queueSubject.next([...this.queueSubject.value, item]);
+  }
+  dequeueTempering(id: string): void {
+    this.queueSubject.next(this.queueSubject.value.filter((q) => q.id !== id));
+  }
+  setQueue(nextQueue: CraftingQueueItem[]): void {
+    // Use a defensive copy so callers can keep mutating their own array safely
+    this.queueSubject.next([...nextQueue]);
+  }
+
+  get currentQueue(): Observable<CraftingQueueItem[]> {
+    return this.queueSubject;
   }
 }

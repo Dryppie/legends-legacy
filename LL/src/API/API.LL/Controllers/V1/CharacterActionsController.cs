@@ -26,13 +26,13 @@ public class CharacterActionsController : BaseController
     public async Task<ActionResult<Response<bool>>> StartCombat([FromBody] StartCombatActionRequest request) =>
         await Mediator.Send(new StartCombatActionCommand(CurrentCharacterGuid, request.AreaId));
 
-    [HttpPost("StartGathering")]
-    public async Task<ActionResult<Response<bool>>> StartGathering([FromBody] StartGatheringActionRequest request) =>
-        await Mediator.Send(new StartGatheringActionCommand(CurrentCharacterGuid, request.GatheringNodeId, request.ProfessionType));
-
     [HttpPost("StartCrafting")]
     public async Task<ActionResult<Response<bool>>> StartCrafting([FromBody] StartCraftingActionRequest request) =>
         await Mediator.Send(new StartCraftingActionCommand(CurrentCharacterGuid, request.QueueId, request.ItemInstanceId));
+
+    [HttpPost("StartGathering")]
+    public async Task<ActionResult<Response<bool>>> StartGathering([FromBody] StartGatheringActionRequest request) =>
+        await Mediator.Send(new StartGatheringActionCommand(CurrentCharacterGuid, request.GatheringNodeId, request.ProfessionType));
 
     [HttpDelete]
     public async Task<ActionResult<Response<bool>>> Delete() => 

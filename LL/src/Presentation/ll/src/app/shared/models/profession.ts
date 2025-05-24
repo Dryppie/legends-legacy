@@ -31,15 +31,7 @@ export interface Recipe {
 
 export interface CraftingQueueItem {
   id: string;
-  equipment: EquipmentInstance;
-  startedAt: Date;
-  status: CraftingQueueStatus;
-}
-
-export enum CraftingQueueStatus {
-  Queued = 'Queued',
-  InProgress = 'InProgress',
-  Completed = 'Completed',
+  equipmentInstance: EquipmentInstance;
 }
 
 export interface Material {

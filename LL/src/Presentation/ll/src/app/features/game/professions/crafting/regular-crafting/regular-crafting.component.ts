@@ -91,7 +91,6 @@ export class RegularCraftingComponent implements OnInit {
     const updatedItems = consumeMaterials(items, recipe);
     this.craftingService.craftItem(recipe.id).subscribe((item) => {
       updatedItems.push(item);
-      console.log(item);
       this.characterManager.setInventory({ inventoryItems: updatedItems });
     });
   }

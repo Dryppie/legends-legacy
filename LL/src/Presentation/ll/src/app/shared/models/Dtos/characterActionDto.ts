@@ -1,5 +1,6 @@
 import { CharacterActionType } from '../enums/characterActionType';
 import { GatheringType } from '../enums/gatheringType';
+import { CraftingQueueItem } from '../profession';
 import { CombatSessionDto } from './combatResultDto';
 import { Area } from './regionDto';
 
@@ -11,6 +12,7 @@ export interface CharacterActionDto {
   combatSession?: CombatSessionDto;
   combatActionDetails?: CombatActionDetails;
   gatheringActionDetails?: GatheringActionDetails;
+  craftingActionDetails?: CraftingActionDetails;
 }
 
 export interface StartCombatActionRequest {
@@ -35,4 +37,8 @@ export interface CombatActionDetails {
 export interface GatheringActionDetails {
   name: string;
   gatheringType: GatheringType;
+}
+
+export interface CraftingActionDetails {
+  craftingQueueItems: CraftingQueueItem[];
 }

@@ -9,5 +9,5 @@ public class InventoryItem
     public Guid InventoryId { get; set; }
     public Guid ItemInstanceId { get; set; }
     public ItemInstance ItemInstance { get; set; } = null!;
-    public int Quantity { get; set; }
+    public int Quantity { get; set; } = 1;
 }

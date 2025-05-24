@@ -1,4 +1,5 @@
-﻿using Domain.Models.Professions.Crafting;
+﻿using Domain.Models.Items;
+using Domain.Models.Professions.Crafting;
 
 namespace Domain.Models.Inventories;
 public interface IInventoryRepository
@@ -25,4 +26,5 @@ public interface IInventoryRepository
     /// <returns></returns>
     Task CreateInventoryAsync(Guid characterId, CancellationToken cancellationToken);
     Task<bool> TryRemoveItemsAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken);
+    Task<bool> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken);
 }

@@ -21,6 +21,7 @@ import { CharacterProfession } from '../../../models/Dtos/characterProfession';
 export class ProfessionCardComponent implements OnInit {
   @Input() gatheringNode!: GatheringNode;
   @Input() characterProfession!: CharacterProfession;
+  @Input() iconPath: string = '';
   currentAction: CharacterActionDto | null = null;
   private subscription: Subscription = new Subscription();
   isLocked = true;
