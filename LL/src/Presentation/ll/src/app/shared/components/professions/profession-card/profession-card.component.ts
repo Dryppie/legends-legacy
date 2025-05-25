@@ -32,10 +32,10 @@ export class ProfessionCardComponent implements OnInit {
     this.subscription.add(
       this.characterActionsService.currentAction$.subscribe((action) => {
         this.currentAction = action;
+        this.setCanStartAction();
       }),
     );
     this.setIsLocked();
-    this.setCanStartAction();
   }
 
   setCanStartAction() {

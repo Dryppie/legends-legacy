@@ -104,19 +104,24 @@ export class TemperingComponent implements OnInit {
       equipmentInstance: equipment,
     };
     /* optimistic queue */
-    this.craftingService.enqueueTempering(queueItem);
 
     /* optimistic client-side material removal */
     const updatedItems = items.filter(
       (i) => i.itemInstance.id !== equipment.id,
     );
-    this.characterManager.setInventory({ inventoryItems: updatedItems });
-    this.selectedItemId$.next(null);
     const startCraftingActionRequest: StartCraftingActionRequest = {
       queueId: queueItem.id,
       itemInstanceId: equipment.id,
     };
-    this.characterActionService.startCraftingAction(startCraftingActionRequest);
+    this.characterActionService
+      .startCraftingAction(startCraftingActionRequest)
+      .subscribe((success) => {
+        if (success) {
+          this.selectedItemId$.next(null);
+          this.craftingService.enqueueTempering(queueItem);
+          this.characterManager.setInventory({ inventoryItems: updatedItems });
+        }
+      });
   }
 
   cancelCraft(queueItem: CraftingQueueItem): void {

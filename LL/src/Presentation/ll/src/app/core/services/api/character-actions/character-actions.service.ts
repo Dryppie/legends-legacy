@@ -2,13 +2,16 @@ import { Injectable } from '@angular/core';
 import {
   BehaviorSubject,
   EMPTY,
+  Observable,
   Subscription,
   catchError,
   expand,
+  map,
   mergeMap,
   of,
   retry,
   take,
+  tap,
   timer,
 } from 'rxjs';
 import { ApiService } from '../../api/api.service';
@@ -114,21 +117,26 @@ export class CharacterActionsService {
       });
   }
 
-  startCraftingAction(craftingAction: StartCraftingActionRequest): void {
+  startCraftingAction(
+    craftingAction: StartCraftingActionRequest,
+  ): Observable<boolean> {
     this.setCAT(CharacterActionType.Crafting);
 
-    this.apiService
+    return this.apiService
       .post('CharacterActions/StartCrafting', craftingAction)
       .pipe(
+        tap((success) => {
+          if (success) {
+            this.getCharacterAction();
+          }
+        }),
+        map((success) => success),
         catchError((error) => {
           this.clearCAT();
-          console.error('Failed to start character action:', error);
-          return of(null);
+          console.log('Failed to start tempering');
+          return of(false);
         }),
-      )
-      .subscribe((success) => {
-        if (success) this.getCharacterAction();
-      });
+      );
   }
 
   stopCharacterAction(): void {
@@ -191,7 +199,6 @@ export class CharacterActionsService {
             return EMPTY;
           }
 
-          this.setCurrentAction(action);
           // if CombatAction
           if (action.characterActionType === CharacterActionType.Combat) {
             // Calculate the next interval based on updatedAt - now

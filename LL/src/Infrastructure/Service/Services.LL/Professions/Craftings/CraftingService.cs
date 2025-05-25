@@ -6,6 +6,7 @@ using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
+using Services.LL.Interfaces;
 
 namespace Services.LL.Professions.Craftings;
 public class CraftingService : ICraftingService
@@ -14,13 +15,15 @@ public class CraftingService : ICraftingService
     private readonly IInventoryService _inventoryService;
     private readonly IProfessionService _professionService;
     private readonly IRecipeService _recipeService;
+    private readonly ITemperingService _temperingService;
 
-    public CraftingService(ICraftingRepository cr, IInventoryService invS, IProfessionService ps, IRecipeService rs)
+    public CraftingService(ICraftingRepository cr, IInventoryService invS, IProfessionService ps, IRecipeService rs, ITemperingService ts)
     {
         _craftingRepository = cr;
         _inventoryService = invS;
         _professionService = ps;
         _recipeService = rs;
+        _temperingService = ts;
     }
 
     public async Task<InventoryItem?> CraftItemFromRecipeAsync(Guid characterId, Guid recipeId, CancellationToken cancellationToken)
@@ -50,7 +53,8 @@ public class CraftingService : ICraftingService
             Id = Guid.NewGuid(),
             ItemBaseId = recipe.ItemId,
             ItemBase = recipe.Item,
-            Potential = 100
+            Potential = 1000,
+
         };
         var inventoryItem = new InventoryItem()
         {
@@ -61,10 +65,6 @@ public class CraftingService : ICraftingService
         };
 
         await _inventoryService.AddItemsToInventory(characterId, [inventoryItem], cancellationToken);
-
-        // Craft the item
-        //var crafted = await _craftingRepository.CraftItemFromRecipeAsync(characterId, recipeId, cancellationToken);
-        //if (!crafted) return null;
 
         return inventoryItem;
     }
@@ -80,6 +80,11 @@ public class CraftingService : ICraftingService
 
             current.EquipmentInstance.Potential -= spend;
             actionsToPerform -= spend;
+            var rng = Random.Shared;
+            for (int i = 0; i < spend; i++)
+            {
+                _temperingService.HandleTempering(current, rng);
+            }
 
             if (current.EquipmentInstance.Potential == 0)
             {
@@ -92,7 +97,7 @@ public class CraftingService : ICraftingService
                     ItemInstance = current.EquipmentInstance,
                     Quantity = 1,
                 };
-                //await _inventoryService.AddItemsToInventory(characterAction.CharacterId, [inventoryItem], cancellationToken);
+
                 await _inventoryService.AddItemInstanceBackToInventory(characterAction.CharacterId, current.EquipmentInstance, cancellationToken);
             }
         }

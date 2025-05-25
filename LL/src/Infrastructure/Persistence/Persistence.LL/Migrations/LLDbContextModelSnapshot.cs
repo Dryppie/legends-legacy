@@ -1086,6 +1086,15 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Items.ItemInstance");
 
+                    b.Property<bool>("IsLevelingItem")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsMasterpiece")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ItemXp")
+                        .HasColumnType("int");
+
                     b.Property<int?>("Potential")
                         .HasColumnType("int");
 

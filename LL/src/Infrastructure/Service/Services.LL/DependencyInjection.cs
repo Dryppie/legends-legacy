@@ -53,6 +53,7 @@ public static class DependencyInjection
         services.AddScoped<ICombatSetupService, CombatSetupService>();
 
         services.AddScoped<ICraftingService, CraftingService>();
+        services.AddScoped<ITemperingService, TemperingService>();
 
         services.AddScoped<IEntityService, EntityService>();
         services.AddScoped<IEquipmentSlotService, EquipmentSlotService>();

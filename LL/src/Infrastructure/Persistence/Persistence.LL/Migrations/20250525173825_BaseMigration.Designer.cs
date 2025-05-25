@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250524142455_BaseMigration")]
+    [Migration("20250525173825_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -1088,6 +1088,15 @@ namespace Persistence.LL.Migrations
             modelBuilder.Entity("Domain.Models.Items.Equipments.EquipmentInstance", b =>
                 {
                     b.HasBaseType("Domain.Models.Items.ItemInstance");
+
+                    b.Property<bool>("IsLevelingItem")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsMasterpiece")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ItemXp")
+                        .HasColumnType("int");
 
                     b.Property<int?>("Potential")
                         .HasColumnType("int");
