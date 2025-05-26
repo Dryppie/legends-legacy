@@ -8,7 +8,6 @@ using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Entities;
 using Domain.Models.Essences;
 using Domain.Models.Items.Equipments;
-using Domain.Models.Masteries;
 
 namespace Domain.Models.Combat;
 [NotMapped]
@@ -34,7 +33,6 @@ public class CombatEntity
     public Dictionary<AttributeType, float> CombatAttributes { get; } = [];
     public List<AttributeModifierBase> TemporaryModifiers { get; set; } = [];
     public Dictionary<StatusEffectType, int> Statuses { get; } = [];
-    public List<Mastery> Masteries { get; set; } = [];
     public int Level { get; set; }
     public bool IsSummoned = false;
 
@@ -50,7 +48,6 @@ public class CombatEntity
         CombatAttributes = new Dictionary<AttributeType, float>(entity.CombatAttributes);
         Equipment = entity.EquipmentSlots.Where(es => es.EquipmentInstance != null).Select(es => es.EquipmentInstance!).ToList();
         EquippedEssences = [.. entity.EssenceSlots.ActiveSlotsWithOccupiedEssences().Select(es => es.OccupiedEssence!)];
-        Masteries = [.. entity.Masteries];
         Level = entity.Level;
     }
 
@@ -142,7 +139,12 @@ public class CombatEntity
         return CombatAttributes.TryGetValue(attributeType, out var attributeValue) ? (int)attributeValue : 0;
     }
 
-    public CombatEntity(CombatEntity entity)
+    public CombatEntity Copy()
+    {
+        return new CombatEntity(this);
+    }
+
+    private CombatEntity(CombatEntity entity)
     {
         OriginalId = entity.OriginalId;
         Id = entity.Id.ToString();
@@ -160,10 +162,5 @@ public class CombatEntity
         Statuses = new Dictionary<StatusEffectType, int>(entity.Statuses);
         Level = entity.Level;
         IsSummoned = entity.IsSummoned;
-    }
-
-    public CombatEntity Copy()
-    {
-        return new CombatEntity(this);
     }
 }

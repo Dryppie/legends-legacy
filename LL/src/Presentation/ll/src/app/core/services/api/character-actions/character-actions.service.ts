@@ -133,7 +133,6 @@ export class CharacterActionsService {
         map((success) => success),
         catchError((error) => {
           this.clearCAT();
-          console.log('Failed to start tempering');
           return of(false);
         }),
       );

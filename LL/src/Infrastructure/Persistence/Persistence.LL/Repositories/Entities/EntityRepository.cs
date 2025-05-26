@@ -7,6 +7,7 @@ using Domain.Models.Entities.Creatures;
 using Domain.Models.Items.Equipments;
 using Domain.Models.LootTables;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Persistence.LL.Repositories.Entities;
 public class EntityRepository : IEntityRepository
@@ -20,7 +21,7 @@ public class EntityRepository : IEntityRepository
 
     public async Task UpdateEntities(List<Entity> entities, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(entities);
+        if (entities.IsNullOrEmpty()) return;
 
         _context.Entities.UpdateRange(entities);
         await _context.SaveChangesAsync(cancellationToken);
@@ -31,7 +32,6 @@ public class EntityRepository : IEntityRepository
         // Query only distinct IDs
         var entities = await _context.Entities
             .Include(e => e.BaseAttributes)
-            .Include(e => e.Masteries)
             .Include(e => e.EquipmentSlots)
                 .ThenInclude(es => (es.EquipmentInstance.ItemBase as EquipmentBase).AttributeModifiers)
             .Include(e => e.EssenceSlots)

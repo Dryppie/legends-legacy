@@ -12,6 +12,8 @@
 
   <ItemGroup>
     <Folder Include="Models\Abilities\Usages\" />
+    <Folder Include="Models\Items\Equipments\EquipmentBehaviors\" />
+    <Folder Include="Models\Masteries\" />
     <Folder Include="Models\Regions\Dungeons\" />
     <Folder Include="Models\Regions\Raids\" />
     <Folder Include="Models\Regions\Rifts\" />

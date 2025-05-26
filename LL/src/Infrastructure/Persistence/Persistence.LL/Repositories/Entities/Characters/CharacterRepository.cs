@@ -1,14 +1,12 @@
 ﻿using Application.Common.Interfaces;
 using Common.Exceptions;
 using Common.Helpers.Essences;
-using Domain.Models.Attributes;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
-using Domain.Models.Masteries;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL.Seeds.Helpers;
 
@@ -67,7 +65,6 @@ public class CharacterRepository : ICharacterRepository
         character.Professions = ProfessionsSeederHelper.CreateProfessions(character.Id);
         await _context.Essences.AddRangeAsync(essences);
         await _context.EssenceSlots.AddRangeAsync(essenceSlots);
-        character.Masteries = SeedMasteries(character);
         SeedEquipmentSlots(character);
         await _context.Characters.AddAsync(character);
 
@@ -104,7 +101,6 @@ public class CharacterRepository : ICharacterRepository
     public async Task<Character?> GetCharacterOverviewByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var character = await _context.Characters
-            .Include(c => c.Masteries)
             .Include(c => c.EssenceSlots)
                 .ThenInclude(es => es.OccupiedEssence)
             .Include(c => c.BaseAttributes)
@@ -159,71 +155,7 @@ public class CharacterRepository : ICharacterRepository
         entity.EquipmentSlots = equipmentSlots;
     }
 
-    private static List<Mastery> SeedMasteries(Entity entity)
-    {
-        var masteries = new List<Mastery>()
-        {
-            new Mastery()
-            {
-                EntityId = entity.Id,
-                Level = 0,
-                CurrentXP = 0,
-                MasteryType = CombatMastery.Axe,
-                AttributeType = AttributeType.Strength,
-            },
-            new Mastery()
-            {
-                EntityId = entity.Id,
-                Level = 0,
-                CurrentXP = 0,
-                MasteryType = CombatMastery.Bow,
-                AttributeType = AttributeType.Agility,
-            },
-            new Mastery()
-            {
-                EntityId = entity.Id,
-                Level = 0,
-                CurrentXP = 0,
-                MasteryType = CombatMastery.Dagger,
-                AttributeType = AttributeType.Dexterity,
-            },
-            new Mastery()
-            {
-                EntityId = entity.Id,
-                Level = 0,
-                CurrentXP = 0,
-                MasteryType = CombatMastery.Hammer,
-                AttributeType = AttributeType.Endurance,
-            },
-            new Mastery()
-            {
-                EntityId = entity.Id,
-                Level = 0,
-                CurrentXP = 0,
-                MasteryType = CombatMastery.Shield,
-                AttributeType = AttributeType.Constitution,
-            },
-            new Mastery()
-            {
-                EntityId = entity.Id,
-                Level = 0,
-                CurrentXP = 0,
-                MasteryType = CombatMastery.Staff,
-                AttributeType = AttributeType.Intelligence,
-            },
-            new Mastery()
-            {
-                EntityId = entity.Id,
-                Level = 0,
-                CurrentXP = 0,
-                MasteryType = CombatMastery.Sword,
-                AttributeType = AttributeType.FightingSpirit,
-            },
-        };
-
-        return masteries;
-    }
-
+    
     public async Task<Character> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var character = await _context.Characters

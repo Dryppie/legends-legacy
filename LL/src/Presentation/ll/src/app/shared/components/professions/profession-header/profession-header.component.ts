@@ -12,8 +12,7 @@ import { ProfessionActionComponent } from '../profession-action/profession-actio
 export class ProfessionHeaderComponent {
   @Input() title: string = '';
   @Input() icon: string = '';
-  @Input() level: string = '';
-  @Input() experience: string = '';
-
-  active = true;
+  @Input() level: number = 1;
+  @Input() experience: number = 0;
+  @Input() experienceUntilNextLevel: number = 0;
 }

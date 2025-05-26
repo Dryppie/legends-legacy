@@ -36,13 +36,7 @@ export class ProfessionsService {
     // make the first request immediately
     startWith(void 0),
     // hit the API whenever refresh$ emits
-    switchMap(() =>
-      this.api
-        .get('profession')
-        .pipe
-        // tap(() => console.log('[Professions] fetched')),
-        (),
-    ),
+    switchMap(() => this.api.get('profession').pipe()),
     // keep the latest value for all current & future subscribers
     shareReplay({ bufferSize: 1, refCount: true }),
   );

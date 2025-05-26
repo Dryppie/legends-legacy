@@ -59,10 +59,10 @@
             {{ equipment.itemBase.description }}
           </div>
           <!-- Attributes -->
-          <div *ngIf="equipment.itemBase.attributeModifiers.length > 0">
+          <div *ngIf="equipment.attributeModifiers.length > 0">
             <div class="mb-1">Attributes:</div>
             <ul class="ml-5 list-disc text-sm">
-              <li *ngFor="let attr of equipment.itemBase.attributeModifiers">
+              <li *ngFor="let attr of equipment.attributeModifiers">
                 {{ attr.amount > 0 ? "+" : "" }}{{ attr.amount }}
                 {{ attr.attributeType | attributeTypeFormat }}
               </li>

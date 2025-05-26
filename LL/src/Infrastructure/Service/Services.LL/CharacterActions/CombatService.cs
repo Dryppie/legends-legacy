@@ -1,8 +1,5 @@
 ﻿using Application.Interfaces.Services.LL;
 using Application.UseCases.Inventories.Events;
-using Common.Helpers.Essences;
-using Domain.Components.Attributes;
-using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
@@ -11,7 +8,6 @@ using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
-using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using MediatR;
 using Services.LL.Combat;
@@ -172,18 +168,7 @@ public class CombatService : ICombatService
         {
             character.Experience += totalExp / characters.Count();
             var wepAndShield = character.EquipmentSlots.Where(eq => (eq.EquipmentType == EquipmentType.MainHand || eq.EquipmentType == EquipmentType.OffHand) && eq.EquipmentInstance != null).ToList();
-            foreach (var mastery in character.Masteries)
-            {
-                if (wepAndShield != null && wepAndShield.Select(we => (we.EquipmentInstance.ItemBase as EquipmentBase).CombatMastery).ToList().Contains(mastery.MasteryType))
-                {
-                    mastery.CurrentXP++;
-                    if (mastery.CurrentXP >= mastery.XPThresholdForNextLevel)
-                    {
-                        mastery.CurrentXP -= mastery.XPThresholdForNextLevel;
-                        mastery.Level++;
-                    }
-                }
-            }
+
             await _levelingService.UpdateCharacterLevel(character);
         }
         await _entityService.UpdateEntities(playerCharacters, cancellationToken);

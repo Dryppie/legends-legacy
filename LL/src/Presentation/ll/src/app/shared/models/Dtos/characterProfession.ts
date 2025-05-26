@@ -2,6 +2,7 @@ export interface CharacterProfession {
   professionType: ProfessionType;
   level: number;
   experience: number;
+  experienceUntilNextLevel: number;
 }
 
 export enum ProfessionType {

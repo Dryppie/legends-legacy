@@ -313,23 +313,16 @@ export class CombatComponent implements OnInit, OnDestroy {
 
   private handleBuffEvent(event: CombatEvent, buffExpired: boolean = false) {
     this.updateCharacter(event.combatEntity);
-    // if (buffExpired) console.log(`Buff Expired: ${event.details}`);
-    // else console.log(`Buff: ${event.details}`);
   }
 
   private handleDebuffEvent(event: CombatEvent, buffExpired: boolean = false) {
     this.updateCharacter(event.combatEntity);
-    // if (buffExpired) console.log(`Buff Expired: ${event.details}`);
-    // else console.log(`Buff: ${event.details}`);
   }
 
   handleStatusEffectEvent(
     event: CombatEvent,
     statusEffectExpired: boolean = false,
-  ) {
-    // if (buffExpired) console.log(`Buff Expired: ${event.details}`);
-    // else console.log(`Buff: ${event.details}`);
-  }
+  ) {}
 
   handleRegeneration(event: CombatEvent) {
     this.updateCharacter(event.combatEntity);

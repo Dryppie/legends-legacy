@@ -23,7 +23,6 @@ using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Users;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Design;
@@ -31,7 +30,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
 
 namespace Persistence.LL;
-public class LLDbContext(DbContextOptions<LLDbContext> options) : IdentityDbContext(options), IDbContext
+public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(options), IDbContext
 {
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

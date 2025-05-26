@@ -1,4 +1,7 @@
-﻿using Application.Interfaces.Services.LL.Professions;
+﻿using System.Threading.Tasks;
+using Application.Interfaces.Services.LL.Professions;
+using Domain.Helpers.Constants;
+using Domain.Models.Entities.Characters;
 using Domain.Models.Professions;
 
 namespace Services.LL.Professions;
@@ -17,6 +20,16 @@ public class ProfessionService : IProfessionService
 
     public async Task<List<Profession>> GetProfessionsAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        return await _professionRepository.GetProfessionsAsync(characterId, cancellationToken);
+        var professions = await _professionRepository.GetProfessionsAsync(characterId, cancellationToken);
+        foreach (var profession in professions)
+        {
+            profession.ExperienceUntilNextLevel = EntityLevelConstants.XP_REQUIRED(profession.Level);
+        }
+        return professions;
+    }
+
+    public async Task UpdateProfessionLevelAsync(List<Profession> professions, CancellationToken cancellationToken)
+    {
+        await _professionRepository.UpdateProfessionLevelsAsync(professions, cancellationToken);
     }
 }

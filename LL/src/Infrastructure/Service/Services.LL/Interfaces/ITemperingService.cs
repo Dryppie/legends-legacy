@@ -3,5 +3,5 @@
 namespace Services.LL.Interfaces;
 public interface ITemperingService
 {
-    void HandleTempering(CraftingQueueItem current, Random rng);
+    TemperingResult HandleTempering(CraftingQueueItem current, Random rng);
 }

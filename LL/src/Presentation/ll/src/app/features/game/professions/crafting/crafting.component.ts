@@ -39,6 +39,7 @@ export class CraftingComponent implements OnInit {
   readonly recipes$;
   readonly inventory$;
   readonly inventoryEquipment$;
+  readonly characterProfession$;
 
   craftType: CraftType = CraftType.ArmorForging;
   // Stub until you wire real actions/queue in the service
@@ -83,7 +84,16 @@ export class CraftingComponent implements OnInit {
     );
 
     this.inventory$ = rawInventory$;
-
+    this.characterProfession$ = combineLatest([
+      this.profession$,
+      this.professionService.professions$,
+    ]).pipe(
+      map(([profession, characterProfessions]) => {
+        return characterProfessions.find(
+          (cp) => cp.professionType === profession.professionType,
+        );
+      }),
+    );
     this.inventoryEquipment$ = combineLatest([
       rawInventory$,
       this.profession$,

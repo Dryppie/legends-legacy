@@ -28,14 +28,12 @@ public static class AttributeCalculator
             entity.BaseCombatAttributes[attributeModifier.AttributeType] += attributeModifier.Amount;
         }
 
-        foreach (var attributeModifier in entity.EquipmentSlots.Where(es => es.EquipmentInstance != null).Select(es => es.EquipmentInstance.ItemBase as EquipmentBase).SelectMany(eb => eb.AttributeModifiers))
+        foreach (var equipment in entity.EquipmentSlots.Where(es => es.EquipmentInstance != null).Select(es => es.EquipmentInstance!))
         {
-            entity.BaseCombatAttributes[attributeModifier.AttributeType] += attributeModifier.Amount;
-        }
-
-        foreach (var mastery in entity.Masteries)
-        {
-            entity.BaseCombatAttributes[mastery.AttributeType] += mastery.Level * 5;
+            foreach (var attributeModifier in equipment.AttributeModifiers)
+            {
+                entity.BaseCombatAttributes[attributeModifier.AttributeType] += attributeModifier.Amount;
+            }
         }
 
         // First calculate all baseCombatAttributes based on BaseAttributes + Temporary modifiers (Equipment, Essences, etc.)
@@ -224,15 +222,12 @@ public static class AttributeCalculator
             entity.BaseCombatAttributes[attributeModifier.AttributeType] += attributeModifier.Amount;
         }
 
-
-        foreach (var attributeModifier in entity.Equipment.Select(e => e.ItemBase as EquipmentBase).SelectMany(eb => eb.AttributeModifiers))
+        foreach (var equipment in entity.Equipment)
         {
-            entity.BaseCombatAttributes[attributeModifier.AttributeType] += attributeModifier.Amount;
-        }
-
-        foreach (var mastery in entity.Masteries)
-        {
-            entity.BaseCombatAttributes[mastery.AttributeType] += mastery.Level * 5;
+            foreach (var attributeModifier in equipment.AttributeModifiers)
+            {
+                entity.BaseCombatAttributes[attributeModifier.AttributeType] += attributeModifier.Amount;
+            }
         }
 
         var derivedAttributes = CalculateSecondaryAttributesFromPrimaryAttributes(entity.BaseCombatAttributes);
@@ -398,15 +393,5 @@ public static class AttributeCalculator
             default:
                 break;
         }
-    }
-
-    /// <summary>
-    /// Helper to safely retrieve an attribute from a dictionary, returning 0 if not found.
-    /// </summary>
-    private static float SafeGet(Dictionary<AttributeType, float> dict, AttributeType type)
-    {
-        if (dict.TryGetValue(type, out float value))
-            return value;
-        return 0;
     }
 }

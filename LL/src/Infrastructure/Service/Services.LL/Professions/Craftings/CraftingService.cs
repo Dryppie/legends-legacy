@@ -7,6 +7,7 @@ using Domain.Models.Items.Equipments;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
 using Services.LL.Interfaces;
+using Services.LL.Levels;
 
 namespace Services.LL.Professions.Craftings;
 public class CraftingService : ICraftingService
@@ -16,14 +17,16 @@ public class CraftingService : ICraftingService
     private readonly IProfessionService _professionService;
     private readonly IRecipeService _recipeService;
     private readonly ITemperingService _temperingService;
+    private readonly ILevelingService _levelingService;
 
-    public CraftingService(ICraftingRepository cr, IInventoryService invS, IProfessionService ps, IRecipeService rs, ITemperingService ts)
+    public CraftingService(ICraftingRepository cr, IInventoryService invS, IProfessionService ps, IRecipeService rs, ITemperingService ts, ILevelingService ls)
     {
         _craftingRepository = cr;
         _inventoryService = invS;
         _professionService = ps;
         _recipeService = rs;
         _temperingService = ts;
+        _levelingService = ls;
     }
 
     public async Task<InventoryItem?> CraftItemFromRecipeAsync(Guid characterId, Guid recipeId, CancellationToken cancellationToken)
@@ -31,10 +34,6 @@ public class CraftingService : ICraftingService
         // Load the recipe
         var recipe = await _recipeService.GetRecipeByIdAsync(recipeId, cancellationToken);
         if (recipe == null) return null;
-
-        // Check inventory for required materials
-        var removedMaterials = await _inventoryService.TryRemoveItemsAsync(characterId, [.. recipe.Materials], cancellationToken);
-        if (!removedMaterials)return null;
 
         var professionType = recipe.CraftType switch
         {
@@ -48,12 +47,16 @@ public class CraftingService : ICraftingService
         var professionLevel = await _professionService.GetProfessionLevelAsync(characterId, professionType, cancellationToken);
         if (professionLevel < recipe.LevelRequirement) return null;
 
+        // Check inventory for required materials
+        var removedMaterials = await _inventoryService.TryRemoveItemsAsync(characterId, [.. recipe.Materials], cancellationToken);
+        if (!removedMaterials) return null;
+
         var equipmentInstance = new EquipmentInstance()
         {
             Id = Guid.NewGuid(),
             ItemBaseId = recipe.ItemId,
             ItemBase = recipe.Item,
-            Potential = 1000 + (10 * professionLevel),
+            Potential = 500 + (10 * professionLevel),
 
         };
         var inventoryItem = new InventoryItem()
@@ -73,7 +76,7 @@ public class CraftingService : ICraftingService
     {
         var actionDetails = (characterAction.ActionDetails as CraftingActionDetails)!;
         var produced = new List<InventoryItem>();
-        
+        var temperingSession = new TemperingSession();
         while (actionsToPerform > 0 && actionDetails.CraftingQueueItems.Count > 0)
         {
             var current = actionDetails.CraftingQueueItems.First();
@@ -84,7 +87,8 @@ public class CraftingService : ICraftingService
             var rng = Random.Shared;
             for (int i = 0; i < spend; i++)
             {
-                _temperingService.HandleTempering(current, rng);
+                var newResult = _temperingService.HandleTempering(current, rng);
+                AllocateExpBasedOnCraftingProfession(temperingSession, newResult, current.CraftType);
             }
 
             if (current.EquipmentInstance.Potential == 0)
@@ -93,12 +97,57 @@ public class CraftingService : ICraftingService
                 await _inventoryService.AddItemInstanceBackToInventory(characterAction.CharacterId, current.EquipmentInstance, cancellationToken);
             }
         }
+        // If all items in the queue are processed, mark the action as deleted (finished / completed)
         if (actionDetails.CraftingQueueItems.Count == 0)
         {
             characterAction.IsDeleted = true;
             characterAction.ActionDetails = null;
-            return;
         }
+        await UpdateCharacterProfessionsAsync(characterAction.CharacterId, temperingSession, cancellationToken).ConfigureAwait(false);
+    }
+
+    private static void AllocateExpBasedOnCraftingProfession(TemperingSession temperingSession, TemperingResult newResult, CraftType craftType)
+    {
+        switch (craftType)
+        {   
+            case CraftType.ArmorForging:
+                temperingSession.ArmorForgingExperience += newResult.ExperienceGained;
+                break;
+            case CraftType.JewelryCrafting:
+                temperingSession.JewelryCraftingExperience += newResult.ExperienceGained;
+                break;
+            case CraftType.WeaponSmithing:
+                temperingSession.WeaponSmithingExperience += newResult.ExperienceGained;
+                break;
+            default:
+                break;
+        }
+    }
+
+    private async Task UpdateCharacterProfessionsAsync(Guid characterId, TemperingSession temperingSession, CancellationToken cancellationToken)
+    {
+        if (temperingSession.TotalExperience == 0) return;
+        var professions = await _professionService.GetProfessionsAsync(characterId, cancellationToken);
+        foreach (var profession in professions)
+        {
+            switch (profession.ProfessionType)
+            {
+                case ProfessionType.ArmorForging:
+                    profession.Experience += temperingSession.ArmorForgingExperience;
+                    break;
+                case ProfessionType.JewelryCrafting:
+                    profession.Experience += temperingSession.JewelryCraftingExperience;
+                    break;
+                case ProfessionType.WeaponSmithing:
+                    profession.Experience += temperingSession.WeaponSmithingExperience;
+                    break;
+                default:
+                    continue; // Skip if the profession type is not recognized
+            }
+            await _levelingService.UpdateProfessionLevel(profession);
+        }
+
+        await _professionService.UpdateProfessionLevelAsync(professions, cancellationToken);
     }
 
     public async Task<bool> RemoveCraftingQueueItemAsync(Guid characterId, Guid queueItemId, CancellationToken cancellationToken)

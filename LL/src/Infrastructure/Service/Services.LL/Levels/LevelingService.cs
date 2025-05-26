@@ -1,6 +1,7 @@
 ﻿using Application.UseCases.Characters.Events;
 using Domain.Helpers.Constants;
 using Domain.Models.Entities.Characters;
+using Domain.Models.Professions;
 using MediatR;
 using Services.LL.Interfaces;
 
@@ -28,6 +29,23 @@ public class LevelingService : ILevelingService
 
             //TODO: Add Publish Event to notify listeners that listen to level ups
             await _publisher.Publish(new CharacterLevelUpEvent(character.Id, character.Level));
+        }
+    }
+
+    public async Task UpdateProfessionLevel(Profession profession)
+    {
+        var xpRequired = EntityLevelConstants.XP_REQUIRED(profession.Level);
+
+        while (profession.Experience >= xpRequired)
+        {
+            profession.Level++;
+            profession.Experience -= xpRequired;
+
+            // After leveling up and adjusting current experience, calculate whether there's enough experience left for more level ups
+            xpRequired = EntityLevelConstants.XP_REQUIRED(profession.Level);
+
+            //TODO: Add Publish Event to notify listeners that listen to level ups
+            //await _publisher.Publish(new CharacterLevelUpEvent(character.Id, profession.Level));
         }
     }
 }

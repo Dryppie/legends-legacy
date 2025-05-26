@@ -28,12 +28,7 @@ export class CharacterService {
     // make the first request immediately
     startWith(void 0),
     // hit the API whenever refresh$ emits
-    switchMap(() =>
-      this.getCharacterOverview()
-        .pipe
-        // tap(() => console.log('[Character overview] fetched')),
-        (),
-    ),
+    switchMap(() => this.getCharacterOverview().pipe()),
     // keep the latest value for all current & future subscribers
     shareReplay(1),
   );

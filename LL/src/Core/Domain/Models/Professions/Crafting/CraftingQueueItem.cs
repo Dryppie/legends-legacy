@@ -7,5 +7,6 @@ public class CraftingQueueItem
     public DateTimeOffset AddedAt { get; set; } = DateTimeOffset.UtcNow;
     public Guid EquipmentInstanceId { get; set; }
     public EquipmentInstance EquipmentInstance { get; set; } = null!;
+    public CraftType CraftType { get; set; }
     public Guid CraftingActionDetailsId { get; set; }
 }

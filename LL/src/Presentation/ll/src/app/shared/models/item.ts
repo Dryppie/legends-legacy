@@ -12,6 +12,7 @@ export interface ItemInstance {
 export interface EquipmentInstance extends ItemInstance {
   itemBase: Equipment;
   potential?: number;
+  attributeModifiers: AttributeModifier[];
 }
 
 export interface ItemBase {

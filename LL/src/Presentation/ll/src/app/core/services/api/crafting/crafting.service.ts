@@ -4,7 +4,6 @@ import { BehaviorSubject, catchError, map, Observable, throwError } from 'rxjs';
 import { ToastService } from '../../client-side/toast/toast.service';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { CraftingQueueItem } from '../../../../shared/models/profession';
-import { StartCraftingActionRequest } from '../../../../shared/models/Dtos/characterActionDto';
 
 @Injectable({
   providedIn: 'root',

@@ -15,7 +15,7 @@
     <h3 class="text-lg font-semibold">Currently Equipped</h3>
     <div class="p-2">
       <div class="text-lg font-bold">
-        {{ currentEquippedEquipment.name }}
+        {{ currentEquippedEquipment.itemBase.name }}
       </div>
       <div
         *ngFor="let attribute of currentEquippedEquipment.attributeModifiers"
@@ -57,7 +57,7 @@
             {{ equipment.itemBase.name }}
           </div>
           <div
-            *ngFor="let attribute of equipment.itemBase.attributeModifiers"
+            *ngFor="let attribute of equipment.attributeModifiers"
             class="flex gap-1"
           >
             <span class="text-white">

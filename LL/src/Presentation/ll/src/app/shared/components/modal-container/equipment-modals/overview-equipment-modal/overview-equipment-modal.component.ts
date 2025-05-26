@@ -18,7 +18,7 @@ export class OverviewEquipmentModalComponent implements OnInit {
   equipmentInstances!: EquipmentInstance[] | null;
   selectedEquipmentInstance!: EquipmentInstance;
   selectedEquipment!: Equipment;
-  currentEquippedEquipment?: Equipment;
+  currentEquippedEquipment?: EquipmentInstance;
   @Output() close = new EventEmitter<void>();
 
   constructor(
@@ -35,7 +35,7 @@ export class OverviewEquipmentModalComponent implements OnInit {
     const equippedItems = this.characterManager.getEquipment();
     this.currentEquippedEquipment = equippedItems.find(
       (ei) => ei.equipmentType === this.equipmentType,
-    )?.equipmentInstance?.itemBase;
+    )?.equipmentInstance;
   }
 
   selectEquipment(equipment: EquipmentInstance) {

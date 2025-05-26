@@ -24,4 +24,10 @@ public class ProfessionRepository : IProfessionRepository
             .Where(p => p.CharacterId == characterId)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task UpdateProfessionLevelsAsync(List<Profession> professions, CancellationToken cancellationToken)
+    {
+        _context.Professions.UpdateRange(professions);
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 }

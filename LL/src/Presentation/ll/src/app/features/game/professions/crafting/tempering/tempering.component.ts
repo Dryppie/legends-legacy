@@ -137,7 +137,7 @@ export class TemperingComponent implements OnInit {
     });
 
     this.craftingService.removeItemFromQueue(queueItem).subscribe((success) => {
-      /* might be necessary if removing items from queue is deemed troublesome*/
+      /* TODO: might be necessary, but only if removing items from queue is deemed troublesome in the backend, causing client-side miss-match */
     });
     this.characterManager.setInventory(inventory);
     this.craftingService.dequeueTempering(queueItem.id);

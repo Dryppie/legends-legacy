@@ -2,6 +2,7 @@
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Professions.Crafting;
 using Microsoft.EntityFrameworkCore;
 
@@ -119,11 +120,18 @@ public class CharacterActionRepository : ICharacterActionRepository
 
         var inventoryItem = await _context.InventoryItems
             .Include(ii => ii.ItemInstance)
+                .ThenInclude(inventoryItem => inventoryItem.ItemBase)
             .FirstOrDefaultAsync(ii => ii.ItemInstanceId == craftingQueueItem.EquipmentInstanceId && ii.InventoryId == characterId, cancellationToken);
 
         if (inventoryItem == null)
             return false; // Item doesn't belong to the character or doesn't exist
-
+        craftingQueueItem.CraftType = (inventoryItem.ItemInstance.ItemBase as EquipmentBase)!.EquipmentType switch
+        {
+            EquipmentType.MainHand or EquipmentType.OffHand => CraftType.WeaponSmithing,
+            EquipmentType.Head or EquipmentType.Chest or EquipmentType.Legs => CraftType.ArmorForging,
+            EquipmentType.Necklace or EquipmentType.Relic or EquipmentType.Ring => CraftType.JewelryCrafting,
+            _ => throw new NotImplementedException($"Craft type for {inventoryItem.ItemInstance.ItemBase.Id} is not implemented")
+        };
         // Remove it from inventory
         _context.InventoryItems.Remove(inventoryItem);
 
