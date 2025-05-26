@@ -11,10 +11,11 @@ public class ProfessionRepository : IProfessionRepository
         _context = context;
     }
 
-    public async Task<bool> CanPerformProfession(Guid characterId, ProfessionType professionType, int requiredLevel, CancellationToken cancellationToken)
+    public async Task<int> GetProfessionLevelAsync(Guid characterId, ProfessionType professionType, CancellationToken cancellationToken)
     {
         var profession = await _context.Professions.FindAsync([characterId, professionType], cancellationToken);
-        return profession != null && profession.Level >= requiredLevel;
+
+        return profession?.Level ?? 0;
     }
 
     public async Task<List<Profession>> GetProfessionsAsync(Guid characterId, CancellationToken cancellationToken)

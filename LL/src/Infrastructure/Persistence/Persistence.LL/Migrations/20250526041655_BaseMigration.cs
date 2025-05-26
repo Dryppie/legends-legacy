@@ -847,7 +847,7 @@ namespace Persistence.LL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    QueueIndex = table.Column<byte>(type: "tinyint", nullable: false),
+                    AddedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     EquipmentInstanceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CraftingActionDetailsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },

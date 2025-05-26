@@ -131,13 +131,17 @@ export class TemperingComponent implements OnInit {
     if (!inventory) return;
 
     inventory.inventoryItems.push({
-      id: crypto.randomUUID(),
+      id: inventory.inventoryItems[0].id,
       quantity: 1,
       itemInstance: queueItem.equipmentInstance,
     });
-    this.characterManager.setInventory(inventory);
 
-    /* update queue inside the service */
+    this.craftingService.removeItemFromQueue(queueItem).subscribe((success) => {
+      /* might be necessary if removing items from queue is deemed troublesome*/
+    });
+    this.characterManager.setInventory(inventory);
     this.craftingService.dequeueTempering(queueItem.id);
+    if (this.craftingService.currentQueue.length === 0)
+      this.characterActionService.clearCurrentAction();
   }
 }

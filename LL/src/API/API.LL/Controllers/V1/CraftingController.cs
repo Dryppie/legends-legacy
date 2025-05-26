@@ -1,5 +1,6 @@
 ﻿using Application.UseCases.Inventories.Dtos;
 using Application.UseCases.Professions.Commands.CraftItem;
+using Application.UseCases.Professions.Commands.RemoveCraftingQueueItem;
 using Common.Primitives;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,4 +10,8 @@ public class CraftingController : BaseController
     [HttpPost("CraftItem")]
     public async Task<ActionResult<Response<InventoryItemDto>>> CraftItem([FromBody] string recipeId) =>
         await Mediator.Send(new CraftItemCommand(CurrentCharacterGuid, recipeId));
+
+    [HttpPost("RemoveCraftingQueueItem")]
+    public async Task<ActionResult<Response<bool>>> RemoveCraftingQueueItem([FromBody] string queueItemId) =>
+        await Mediator.Send(new RemoveCraftingQueueItemCommand(CurrentCharacterGuid, queueItemId));
 }

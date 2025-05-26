@@ -1,5 +1,8 @@
-﻿namespace Domain.Models.Professions.Crafting;
+﻿using Domain.Models.Items.Equipments;
+
+namespace Domain.Models.Professions.Crafting;
 public interface ICraftingRepository
 {
-    Task<bool> CraftItemFromRecipeAsync(Guid characterId, Guid recipeId, CancellationToken cancellationToken);
+    Task<EquipmentInstance?> RemoveCraftingQueueItemAndReturnItemAsync(Guid characterId, Guid queueItemId, CancellationToken cancellationToken);
+    Task SaveChangesAsync(CancellationToken cancellationToken);
 }

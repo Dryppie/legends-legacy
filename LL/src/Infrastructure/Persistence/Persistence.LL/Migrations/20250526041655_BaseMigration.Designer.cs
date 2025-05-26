@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250525173825_BaseMigration")]
+    [Migration("20250526041655_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -489,14 +489,14 @@ namespace Persistence.LL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTimeOffset>("AddedAt")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<Guid>("CraftingActionDetailsId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("EquipmentInstanceId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte>("QueueIndex")
-                        .HasColumnType("tinyint");
 
                     b.HasKey("Id");
 

@@ -38,7 +38,7 @@ public class ActionDetailsService : IActionDetailsService
     {
         var gatheringNode = await _gatheringNodeService.GetGatheringNodeById(gatheringNodeId, cancellationToken);
 
-        if (!await _professionService.CanPerformProfession(characterId, professionType, gatheringNode.LevelRequirement, cancellationToken)) return null;
+        if (!(await _professionService.GetProfessionLevelAsync(characterId, professionType, cancellationToken) < gatheringNode.LevelRequirement)) return null;
         
         var gatheringDetails = new GatheringActionDetails
         {

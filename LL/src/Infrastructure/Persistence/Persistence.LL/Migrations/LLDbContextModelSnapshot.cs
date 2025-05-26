@@ -486,14 +486,14 @@ namespace Persistence.LL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTimeOffset>("AddedAt")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<Guid>("CraftingActionDetailsId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("EquipmentInstanceId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<byte>("QueueIndex")
-                        .HasColumnType("tinyint");
 
                     b.HasKey("Id");
 

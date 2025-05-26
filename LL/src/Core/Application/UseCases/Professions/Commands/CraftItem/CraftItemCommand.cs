@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Application.Interfaces.Services.LL.Professions;
+﻿using Application.Interfaces.Services.LL.Professions;
 using Application.UseCases.Inventories.Dtos;
 using AutoMapper;
 using Common.Primitives;

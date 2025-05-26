@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Application.Common.Interfaces;
-using Domain.Models.Entities.Characters;
-using Domain.Models.Inventories;
+﻿using Application.Common.Interfaces;
+using Domain.Models.CharacterActions.CharacterActionDetails;
+using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,25 +13,30 @@ public class CraftingRepository : ICraftingRepository
         _dbContext = dbContext;
     }
 
-    public async Task<bool> CraftItemFromRecipeAsync(Guid characterId, Guid recipeId, CancellationToken cancellationToken)
+    public async Task<EquipmentInstance?> RemoveCraftingQueueItemAndReturnItemAsync(Guid characterId, Guid queueItemId, CancellationToken cancellationToken)
     {
-        var recipe = await _dbContext.Recipes
-            .Include(r => r.Materials)
-            .Include(r => r.Item)
-            .FirstOrDefaultAsync(r => r.Id == recipeId, cancellationToken);
-        if (recipe == null) return false;
+        var characterAction = await _dbContext.CharacterActions
+            .Include(ca => ca.ActionDetails)
+                .ThenInclude(ad => (ad as CraftingActionDetails).CraftingQueueItems)
+                    .ThenInclude(cq => cq.EquipmentInstance)
+            .FirstOrDefaultAsync(ca => ca.CharacterId == characterId && ca.ActionDetails is CraftingActionDetails, cancellationToken);
+        if (characterAction == null || characterAction.ActionDetails == null) return null;
 
-        
-        //var test = new InventoryItem
-        //{
-        //    InventoryId = characterId,
-        //    Id = Guid.NewGuid(),
-        //    ItemId = recipe.ResultItemId,
-        //    Quantity = 1,
-        //    CharacterId = characterId
-        //});
+        var queueItem = (characterAction.ActionDetails as CraftingActionDetails).CraftingQueueItems
+            .FirstOrDefault(cq => cq.Id == queueItemId);
+        if (queueItem == null) return null;
 
+        (characterAction.ActionDetails as CraftingActionDetails).CraftingQueueItems.Remove(queueItem);
+        if ((characterAction.ActionDetails as CraftingActionDetails).CraftingQueueItems.Count == 0)
+        {
+            characterAction.IsDeleted = true;
+            characterAction.ActionDetails = null;
+        }
+        return queueItem?.EquipmentInstance;
+    }
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken)
+    {
         await _dbContext.SaveChangesAsync(cancellationToken);
-        return true;
     }
 }

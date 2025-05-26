@@ -43,6 +43,24 @@ export class CraftingService {
     );
   }
 
+  removeItemFromQueue(queueItem: CraftingQueueItem): Observable<boolean> {
+    return this.api.post('Crafting/RemoveCraftingQueueItem', queueItem.id).pipe(
+      map((success) => {
+        return success;
+      }),
+
+      catchError(() => {
+        // this.toastService.showToast(
+        //   'Login Failed',
+        //   'Wrong email or password',
+        //   'error',
+        //   't',
+        // );
+        return throwError(() => new Error('Failed to craft item'));
+      }),
+    );
+  }
+
   enqueueTempering(item: CraftingQueueItem): void {
     this.queueSubject.next([...this.queueSubject.value, item]);
   }
@@ -54,7 +72,7 @@ export class CraftingService {
     this.queueSubject.next([...nextQueue]);
   }
 
-  get currentQueue(): Observable<CraftingQueueItem[]> {
-    return this.queueSubject;
+  get currentQueue(): CraftingQueueItem[] {
+    return this.queueSubject.value;
   }
 }

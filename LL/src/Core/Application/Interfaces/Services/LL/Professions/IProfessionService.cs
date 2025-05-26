@@ -3,6 +3,6 @@
 namespace Application.Interfaces.Services.LL.Professions;
 public interface IProfessionService
 {
-    Task<bool> CanPerformProfession(Guid characterId, ProfessionType professionType, int requiredLevel, CancellationToken cancellationToken);
+    Task<int> GetProfessionLevelAsync(Guid characterId, ProfessionType professionType, CancellationToken cancellationToken);
     Task<List<Profession>> GetProfessionsAsync(Guid characterId, CancellationToken cancellationToken);
 }

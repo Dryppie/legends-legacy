@@ -45,15 +45,15 @@ public class CraftingService : ICraftingService
         };
 
         // Check profession level
-        var hasRequiredLevel = await _professionService.CanPerformProfession(characterId, professionType, recipe.LevelRequirement, cancellationToken);
-        if (!hasRequiredLevel) return null;
+        var professionLevel = await _professionService.GetProfessionLevelAsync(characterId, professionType, cancellationToken);
+        if (professionLevel < recipe.LevelRequirement) return null;
 
         var equipmentInstance = new EquipmentInstance()
         {
             Id = Guid.NewGuid(),
             ItemBaseId = recipe.ItemId,
             ItemBase = recipe.Item,
-            Potential = 1000,
+            Potential = 1000 + (10 * professionLevel),
 
         };
         var inventoryItem = new InventoryItem()
@@ -73,6 +73,7 @@ public class CraftingService : ICraftingService
     {
         var actionDetails = (characterAction.ActionDetails as CraftingActionDetails)!;
         var produced = new List<InventoryItem>();
+        
         while (actionsToPerform > 0 && actionDetails.CraftingQueueItems.Count > 0)
         {
             var current = actionDetails.CraftingQueueItems.First();
@@ -88,16 +89,7 @@ public class CraftingService : ICraftingService
 
             if (current.EquipmentInstance.Potential == 0)
             {
-                //produced.Add(await _craftService.FinishAsync(current, cancellationToken));
                 actionDetails.CraftingQueueItems.Remove(current); // next item slides up
-                var inventoryItem = new InventoryItem()
-                {
-                    InventoryId = characterAction.CharacterId,
-                    ItemInstanceId = current.EquipmentInstance.Id,
-                    ItemInstance = current.EquipmentInstance,
-                    Quantity = 1,
-                };
-
                 await _inventoryService.AddItemInstanceBackToInventory(characterAction.CharacterId, current.EquipmentInstance, cancellationToken);
             }
         }
@@ -107,5 +99,18 @@ public class CraftingService : ICraftingService
             characterAction.ActionDetails = null;
             return;
         }
+    }
+
+    public async Task<bool> RemoveCraftingQueueItemAsync(Guid characterId, Guid queueItemId, CancellationToken cancellationToken)
+    {
+        var equipmentInstance = await _craftingRepository.RemoveCraftingQueueItemAndReturnItemAsync(characterId, queueItemId, cancellationToken);
+        if (equipmentInstance == null) return false;
+
+        var itemAdded = await _inventoryService.AddItemInstanceBackToInventory(characterId, equipmentInstance, cancellationToken);
+        if (itemAdded)
+        {
+            await _craftingRepository.SaveChangesAsync(cancellationToken);
+        }
+        return itemAdded;
     }
 }

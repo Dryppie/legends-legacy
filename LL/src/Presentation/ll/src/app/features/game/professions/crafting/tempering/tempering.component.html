@@ -150,44 +150,48 @@
           </div>
 
           <!-- ── REST OF THE QUEUE ─────────────────────────────────── -->
-          <div class="mt-6">
-            <div class="text-gold text-lg font-semibold">Waiting in queue</div>
-
-            <!-- everything *after* the first element -->
-            <div
-              *ngFor="let queueItem of craftingQueue | slice: 1"
-              class="mt-2 flex cursor-pointer justify-between rounded-lg border p-3 hover:border-primary/60 hover:bg-zinc-300/30"
-              (click)="selectItem(queueItem.equipmentInstance)"
-              [class.border-primary]="
-                (selectedEquipmentInstance$ | async)?.id ===
-                queueItem.equipmentInstance.id
-              "
-              [ngClass]="{
-                'bg-primary/10':
-                  (selectedEquipmentInstance$ | async)?.id ===
-                  queueItem.equipmentInstance.id,
-                'border-primary/20':
-                  (selectedEquipmentInstance$ | async)?.id !==
-                  queueItem.equipmentInstance.id,
-              }"
-            >
-              <div class="flex flex-col">
-                <div class="font-semibold text-white">
-                  {{ queueItem.equipmentInstance.itemBase.name }}
-                </div>
-                <div class="text-gray-400 text-sm">
-                  {{ queueItem.equipmentInstance.potential }} Potential
-                </div>
+          <ng-container *ngIf="craftingQueue | slice: 1 as waitingQueue">
+            <div *ngIf="waitingQueue.length" class="mt-6">
+              <div class="text-gold text-lg font-semibold">
+                Waiting in queue
               </div>
 
-              <button
-                class="text-sm text-red-400 hover:underline"
-                (click)="cancelCraft(queueItem)"
+              <!-- everything *after* the first element -->
+              <div
+                *ngFor="let queueItem of waitingQueue"
+                class="mt-2 flex cursor-pointer justify-between rounded-lg border p-3 hover:border-primary/60 hover:bg-zinc-300/30"
+                (click)="selectItem(queueItem.equipmentInstance)"
+                [class.border-primary]="
+                  (selectedEquipmentInstance$ | async)?.id ===
+                  queueItem.equipmentInstance.id
+                "
+                [ngClass]="{
+                  'bg-primary/10':
+                    (selectedEquipmentInstance$ | async)?.id ===
+                    queueItem.equipmentInstance.id,
+                  'border-primary/20':
+                    (selectedEquipmentInstance$ | async)?.id !==
+                    queueItem.equipmentInstance.id,
+                }"
               >
-                Cancel
-              </button>
+                <div class="flex flex-col">
+                  <div class="font-semibold text-white">
+                    {{ queueItem.equipmentInstance.itemBase.name }}
+                  </div>
+                  <div class="text-gray-400 text-sm">
+                    {{ queueItem.equipmentInstance.potential }} Potential
+                  </div>
+                </div>
+
+                <button
+                  class="text-sm text-red-400 hover:underline"
+                  (click)="cancelCraft(queueItem)"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
-          </div>
+          </ng-container>
         </ng-container>
       </ng-container>
 

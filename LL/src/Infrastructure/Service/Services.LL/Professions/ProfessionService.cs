@@ -10,9 +10,9 @@ public class ProfessionService : IProfessionService
     {
         _professionRepository = professionRepository;
     }
-    public async Task<bool> CanPerformProfession(Guid characterId, ProfessionType professionType, int requiredLevel, CancellationToken cancellationToken)
+    public async Task<int> GetProfessionLevelAsync(Guid characterId, ProfessionType professionType, CancellationToken cancellationToken)
     {
-        return await _professionRepository.CanPerformProfession(characterId, professionType, requiredLevel, cancellationToken);
+        return await _professionRepository.GetProfessionLevelAsync(characterId, professionType, cancellationToken);
     }
 
     public async Task<List<Profession>> GetProfessionsAsync(Guid characterId, CancellationToken cancellationToken)

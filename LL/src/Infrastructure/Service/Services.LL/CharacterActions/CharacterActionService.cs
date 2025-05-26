@@ -120,6 +120,7 @@ public class CharacterActionService : ICharacterActionService
 
     private async Task HandleProfessionActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
+        (characterAction.ActionDetails as CraftingActionDetails).CraftingQueueItems = [.. (characterAction.ActionDetails as CraftingActionDetails).CraftingQueueItems.OrderBy(queueItem => queueItem.AddedAt)];
         int actionsToPerform = characterAction.UpdatedAt.NumberOfXSecondsIntervals(now, 6);
 
         if (actionsToPerform == 0) return;
