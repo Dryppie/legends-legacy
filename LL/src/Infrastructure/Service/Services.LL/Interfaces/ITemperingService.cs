@@ -1,7 +1,8 @@
-﻿using Domain.Models.Professions.Crafting;
+﻿using Domain.Models.CharacterActions.Sessions;
+using Domain.Models.Professions.Crafting;
 
 namespace Services.LL.Interfaces;
 public interface ITemperingService
 {
-    TemperingResult HandleTempering(CraftingQueueItem current, Random rng);
+    void HandleTempering(CraftingQueueItem current, TemperingSummary temperingSummary, Random rng);
 }

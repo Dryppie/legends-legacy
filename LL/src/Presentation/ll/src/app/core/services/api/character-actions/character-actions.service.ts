@@ -29,6 +29,8 @@ import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { CombatService } from '../../client-side/combat/combat.service';
 import { SessionSummaryService } from '../../client-side/session-summary/session-summary.service';
 import { CraftingService } from '../crafting/crafting.service';
+import { LevelingService } from '../../client-side/leveling/leveling.service';
+import { ProfessionType } from '../../../../shared/models/Dtos/characterProfession';
 
 @Injectable({
   providedIn: 'root',
@@ -56,6 +58,7 @@ export class CharacterActionsService {
     private eventBusService: EventBusService,
     private sessionSummaryService: SessionSummaryService,
     private craftingService: CraftingService,
+    private levelingService: LevelingService,
   ) {
     this.eventBusService.logout$.subscribe(() => {
       this.handleLogout();
@@ -248,19 +251,57 @@ export class CharacterActionsService {
         if (!action || action.isDeleted) this.stopPolling();
         this.setCurrentAction(action);
 
-        if (action?.characterActionType === CharacterActionType.Combat) {
-          this.loadingCombatActionSubject.next(false);
-          this.combatService.startCombatSimulation(action);
-          this.sessionSummaryService.loadSince(action.combatSession);
-        }
-        if (action?.characterActionType === CharacterActionType.Crafting) {
-          this.craftingService.setQueue(
-            action.craftingActionDetails?.craftingQueueItems ?? [],
-          );
-        }
+        this.handleCombatAction(action);
+        this.handleCraftingAction(action);
+        this.handleGatheringAction(action);
 
         this.setDisplayCurrentAction(action);
       });
+  }
+
+  private handleCraftingAction(action: CharacterActionDto | null) {
+    if (
+      action?.characterActionType === CharacterActionType.Crafting &&
+      action.temperingSession
+    ) {
+      this.craftingService.setQueue(
+        action.craftingActionDetails?.craftingQueueItems ?? [],
+      );
+      this.sessionSummaryService.loadCraftingSince(action.temperingSession);
+      const summary = action.temperingSession.temperingSummary;
+      if (summary.armorForgingExperience > 0)
+        this.levelingService.gainProfessionExperience(
+          ProfessionType.ArmorForging,
+          1,
+        );
+      if (summary.jewelryCraftingExperience > 0)
+        this.levelingService.gainProfessionExperience(
+          ProfessionType.JewelryCrafting,
+          1,
+        );
+      if (summary.weaponSmithingExperience > 0)
+        this.levelingService.gainProfessionExperience(
+          ProfessionType.WeaponSmithing,
+          1,
+        );
+      if (action.craftingActionDetails?.craftingQueueItems.length === 0) {
+        console.log('test');
+        this.clearCurrentAction();
+      }
+    }
+  }
+
+  private handleCombatAction(action: CharacterActionDto | null) {
+    if (action?.characterActionType === CharacterActionType.Combat) {
+      this.loadingCombatActionSubject.next(false);
+      this.combatService.startCombatSimulation(action);
+      this.sessionSummaryService.loadCombatSince(action.combatSession);
+    }
+  }
+
+  private handleGatheringAction(action: CharacterActionDto | null) {
+    if (action?.characterActionType === CharacterActionType.Gathering) {
+    }
   }
 
   stopPolling(): void {

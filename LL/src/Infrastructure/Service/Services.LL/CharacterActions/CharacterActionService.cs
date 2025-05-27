@@ -74,7 +74,7 @@ public class CharacterActionService : ICharacterActionService
                 break;
 
             case CharacterActionType.Crafting:
-                await HandleProfessionActionAsync(characterAction, now, cancellationToken);
+                characterAction.TemperingSession = await HandleProfessionActionAsync(characterAction, now, cancellationToken);
                 break;
 
             // Add other action types as needed
@@ -118,17 +118,14 @@ public class CharacterActionService : ICharacterActionService
         return await _combatService.PerformIdleCombatAsync(characterAction, now, cancellationToken);
     }
 
-    private async Task HandleProfessionActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
+    private async Task<TemperingSession?> HandleProfessionActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
         (characterAction.ActionDetails as CraftingActionDetails).CraftingQueueItems = [.. (characterAction.ActionDetails as CraftingActionDetails).CraftingQueueItems.OrderBy(queueItem => queueItem.AddedAt)];
         int actionsToPerform = characterAction.UpdatedAt.NumberOfXSecondsIntervals(now, 6);
 
-        if (actionsToPerform == 0) return;
+        if (actionsToPerform == 0) return null;
 
-        // TODO: This should only be done within the idle crafter, as it depends on how many items are in queue
-        characterAction.UpdatedAt += TimeSpan.FromSeconds(6 * actionsToPerform);
-
-        await _craftingService.PerformIdleCrafting(characterAction, actionsToPerform, cancellationToken);
+        return await _craftingService.PerformIdleCrafting(characterAction, actionsToPerform, cancellationToken);
     }
 
     /// <summary>

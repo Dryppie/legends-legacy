@@ -43,10 +43,12 @@ export class GatheringComponent {
     this.route.paramMap.subscribe((params) => {
       this.professionId = params.get('id') ?? '';
       this.getProfessionDetails(this.professionId);
-      this.professionService.professions$.subscribe((characterProfessions) => {
-        this.characterProfessions = characterProfessions;
-        this.getCharacterProfession();
-      });
+      this.professionService.characterProfessions$.subscribe(
+        (characterProfessions) => {
+          this.characterProfessions = characterProfessions;
+          this.getCharacterProfession();
+        },
+      );
     });
   }
 

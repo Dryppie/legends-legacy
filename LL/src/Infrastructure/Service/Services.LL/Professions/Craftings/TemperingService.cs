@@ -1,4 +1,5 @@
-﻿using Domain.Models.Items;
+﻿using Domain.Models.CharacterActions.Sessions;
+using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting;
 using Services.LL.Interfaces;
@@ -6,15 +7,15 @@ using Services.LL.Interfaces;
 namespace Services.LL.Professions.Craftings;
 public class TemperingService : ITemperingService
 {
-    public TemperingResult HandleTempering(CraftingQueueItem current, Random rng)
+    public void HandleTempering(CraftingQueueItem current, TemperingSummary temperingSummary, Random rng)
     {
-        var temperingResult = new TemperingResult();
-        var outcome = RollOutcome(current.EquipmentInstance.ItemBase.Rarity, rng);
+        var experience = 0;
+        var outcome = RollOutcome(current.EquipmentInstance.Rarity, rng);
 
         switch (outcome)
         {
             case TemperingOutcome.Critical:
-                HandleCriticalOutcome(current.EquipmentInstance, rng);
+                HandleCriticalOutcome(current.EquipmentInstance, temperingSummary, rng);
                 break;
 
             case TemperingOutcome.Positive:
@@ -32,13 +33,13 @@ public class TemperingService : ITemperingService
                 break;
         }
 
-        temperingResult.ExperienceGained = outcome switch
+        experience = outcome switch
         {
             TemperingOutcome.Critical => 100,
             _ => 1,
         };
-
-        return temperingResult;
+        
+        AllocateExpBasedOnCraftingProfession(temperingSummary, experience, current.CraftType);
     }
 
     private static void HandlePositiveOutcome(CraftingQueueItem current)
@@ -75,18 +76,20 @@ public class TemperingService : ITemperingService
         };
     }
 
-    private static void HandleCriticalOutcome(EquipmentInstance eq, Random rng)
+    private static void HandleCriticalOutcome(EquipmentInstance eq, TemperingSummary temperingSummary, Random rng)
     {
         // 90 % → Masterpiece, 10 % → Leveling Item
         if (rng.NextDouble() < 0.9)
         {
             eq.IsMasterpiece = true;
             eq.IsLevelingItem = false;
+            temperingSummary.Masterpieces++;
         }
         else
         {
             eq.IsLevelingItem = true;
             eq.IsMasterpiece = false;
+            temperingSummary.LevelingItems++;
         }
     }
 
@@ -94,10 +97,10 @@ public class TemperingService : ITemperingService
     {
         const int XpPerTier = 10;
 
-        while (eq.ItemXp >= XpPerTier && eq.ItemBase.Rarity < Rarity.Legacy)
+        while (eq.ItemXp >= XpPerTier && eq.Rarity < Rarity.Legacy)
         {
             eq.ItemXp -= XpPerTier;
-            eq.ItemBase.Rarity = eq.ItemBase.Rarity + 1;        // next tier
+            eq.Rarity = eq.Rarity + 1;        // next tier
             ApplyTierPackage(eq);              // stats / sockets / visuals / etc.
         }
     }
@@ -134,5 +137,23 @@ public class TemperingService : ITemperingService
 
         if (roll < pNegative) return TemperingOutcome.Negative;
         return TemperingOutcome.Neutral;
+    }
+
+    private static void AllocateExpBasedOnCraftingProfession(TemperingSummary temperingSummary, int experience, CraftType craftType)
+    {
+        switch (craftType)
+        {
+            case CraftType.ArmorForging:
+                temperingSummary.ArmorForgingExperience += experience;
+                break;
+            case CraftType.JewelryCrafting:
+                temperingSummary.JewelryCraftingExperience += experience;
+                break;
+            case CraftType.WeaponSmithing:
+                temperingSummary.WeaponSmithingExperience += experience;
+                break;
+            default:
+                break;
+        }
     }
 }

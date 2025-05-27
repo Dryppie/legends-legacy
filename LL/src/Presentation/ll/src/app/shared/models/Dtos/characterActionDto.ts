@@ -3,16 +3,18 @@ import { GatheringType } from '../enums/gatheringType';
 import { CraftingQueueItem } from '../profession';
 import { CombatSessionDto } from './combatResultDto';
 import { Area } from './regionDto';
+import { TemperingSessionDto } from './temperingSessionDto';
 
 export interface CharacterActionDto {
   characterActionType: CharacterActionType;
   lootTableId: string;
   updatedAt: Date;
   isDeleted: boolean;
+  temperingSession?: TemperingSessionDto;
   combatSession?: CombatSessionDto;
+  craftingActionDetails?: CraftingActionDetails;
   combatActionDetails?: CombatActionDetails;
   gatheringActionDetails?: GatheringActionDetails;
-  craftingActionDetails?: CraftingActionDetails;
 }
 
 export interface StartCombatActionRequest {

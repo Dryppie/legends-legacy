@@ -1,20 +1,30 @@
 import { Injectable, signal } from '@angular/core';
 import { CombatSessionDto } from '../../../../shared/models/Dtos/combatResultDto';
+import { TemperingSessionDto } from '../../../../shared/models/Dtos/temperingSessionDto';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SessionSummaryService {
-  readonly session = signal<CombatSessionDto | null | undefined>(null);
+  readonly combatSession = signal<CombatSessionDto | null | undefined>(null);
+  readonly temperingSession = signal<TemperingSessionDto | null | undefined>(
+    null,
+  );
 
-  // When fetching character action data, show a display info for how much has happened while offline
-  loadSince(session: CombatSessionDto | undefined) {
+  loadCombatSince(session: CombatSessionDto | undefined) {
     if (!session?.combatSummary) return;
     if (session.combatSummary.totalBattles <= 1) return;
-    this.session.set(session);
+    this.combatSession.set(session);
+  }
+
+  loadCraftingSince(session: TemperingSessionDto) {
+    if (!session?.temperingSummary) return;
+    if (session.temperingSummary.totalActions <= 1) return;
+    this.temperingSession.set(session);
   }
 
   dismiss() {
-    this.session.set(undefined);
+    this.combatSession.set(undefined);
+    this.temperingSession.set(undefined);
   }
 }

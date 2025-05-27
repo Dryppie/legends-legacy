@@ -86,7 +86,7 @@ export class CraftingComponent implements OnInit {
     this.inventory$ = rawInventory$;
     this.characterProfession$ = combineLatest([
       this.profession$,
-      this.professionService.professions$,
+      this.professionService.characterProfessions$,
     ]).pipe(
       map(([profession, characterProfessions]) => {
         return characterProfessions.find(

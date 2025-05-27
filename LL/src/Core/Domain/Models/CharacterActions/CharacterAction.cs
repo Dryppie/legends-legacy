@@ -23,6 +23,8 @@ public class CharacterAction
     //public bool IsCapped => DateTimeOffset.UtcNow >= UpdatedAt.AddHours(OFFLINE_DURATION);
     [NotMapped]
     public CombatSession? CombatSession { get; set; }
+    [NotMapped]
+    public TemperingSession? TemperingSession { get; set; }
 
     public CharacterAction(Guid characterId, ActionDetails actionDetails)
     {

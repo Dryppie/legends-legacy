@@ -2,12 +2,12 @@
 using Application.Interfaces.Services.LL.Professions;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
+using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
 using Services.LL.Interfaces;
-using Services.LL.Levels;
 
 namespace Services.LL.Professions.Craftings;
 public class CraftingService : ICraftingService
@@ -72,27 +72,34 @@ public class CraftingService : ICraftingService
         return inventoryItem;
     }
 
-    public async Task PerformIdleCrafting(CharacterAction characterAction, int actionsToPerform, CancellationToken cancellationToken)
+    public async Task<TemperingSession> PerformIdleCrafting(CharacterAction characterAction, int actionsToPerform, CancellationToken cancellationToken)
     {
         var actionDetails = (characterAction.ActionDetails as CraftingActionDetails)!;
         var produced = new List<InventoryItem>();
-        var temperingSession = new TemperingSession();
+        var sessionStartedAt = characterAction.UpdatedAt;
+        var now = DateTimeOffset.UtcNow;
+
+        var temperingSummary = new TemperingSummary();
+
         while (actionsToPerform > 0 && actionDetails.CraftingQueueItems.Count > 0)
         {
             var current = actionDetails.CraftingQueueItems.First();
             var spend = Math.Min(actionsToPerform, current.EquipmentInstance.Potential ?? 0);
+            characterAction.UpdatedAt += TimeSpan.FromSeconds(6 * spend);
 
             current.EquipmentInstance.Potential -= spend;
             actionsToPerform -= spend;
+            temperingSummary.TotalActions += spend;
             var rng = Random.Shared;
+
             for (int i = 0; i < spend; i++)
             {
-                var newResult = _temperingService.HandleTempering(current, rng);
-                AllocateExpBasedOnCraftingProfession(temperingSession, newResult, current.CraftType);
+                _temperingService.HandleTempering(current, temperingSummary, rng);
             }
 
             if (current.EquipmentInstance.Potential == 0)
             {
+                temperingSummary.TotalItemsCrafted++;
                 actionDetails.CraftingQueueItems.Remove(current); // next item slides up
                 await _inventoryService.AddItemInstanceBackToInventory(characterAction.CharacterId, current.EquipmentInstance, cancellationToken);
             }
@@ -101,45 +108,37 @@ public class CraftingService : ICraftingService
         if (actionDetails.CraftingQueueItems.Count == 0)
         {
             characterAction.IsDeleted = true;
-            characterAction.ActionDetails = null;
+            //characterAction.ActionDetails = null;
         }
-        await UpdateCharacterProfessionsAsync(characterAction.CharacterId, temperingSession, cancellationToken).ConfigureAwait(false);
+        await UpdateCharacterProfessionsAsync(characterAction.CharacterId, temperingSummary, cancellationToken);
+
+
+        var temperingSession = new TemperingSession()
+        {
+            From = sessionStartedAt,
+            To = now,
+            TemperingSummary = temperingSummary
+        };
+
+        return temperingSession;
     }
 
-    private static void AllocateExpBasedOnCraftingProfession(TemperingSession temperingSession, TemperingResult newResult, CraftType craftType)
+    private async Task UpdateCharacterProfessionsAsync(Guid characterId, TemperingSummary temperingSummary, CancellationToken cancellationToken)
     {
-        switch (craftType)
-        {   
-            case CraftType.ArmorForging:
-                temperingSession.ArmorForgingExperience += newResult.ExperienceGained;
-                break;
-            case CraftType.JewelryCrafting:
-                temperingSession.JewelryCraftingExperience += newResult.ExperienceGained;
-                break;
-            case CraftType.WeaponSmithing:
-                temperingSession.WeaponSmithingExperience += newResult.ExperienceGained;
-                break;
-            default:
-                break;
-        }
-    }
-
-    private async Task UpdateCharacterProfessionsAsync(Guid characterId, TemperingSession temperingSession, CancellationToken cancellationToken)
-    {
-        if (temperingSession.TotalExperience == 0) return;
+        if (temperingSummary.TotalExperience == 0) return;
         var professions = await _professionService.GetProfessionsAsync(characterId, cancellationToken);
         foreach (var profession in professions)
         {
             switch (profession.ProfessionType)
             {
                 case ProfessionType.ArmorForging:
-                    profession.Experience += temperingSession.ArmorForgingExperience;
+                    profession.Experience += temperingSummary.ArmorForgingExperience;
                     break;
                 case ProfessionType.JewelryCrafting:
-                    profession.Experience += temperingSession.JewelryCraftingExperience;
+                    profession.Experience += temperingSummary.JewelryCraftingExperience;
                     break;
                 case ProfessionType.WeaponSmithing:
-                    profession.Experience += temperingSession.WeaponSmithingExperience;
+                    profession.Experience += temperingSummary.WeaponSmithingExperience;
                     break;
                 default:
                     continue; // Skip if the profession type is not recognized

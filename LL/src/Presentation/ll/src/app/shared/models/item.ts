@@ -10,6 +10,7 @@ export interface ItemInstance {
 }
 
 export interface EquipmentInstance extends ItemInstance {
+  rarity: Rarity;
   itemBase: Equipment;
   potential?: number;
   attributeModifiers: AttributeModifier[];

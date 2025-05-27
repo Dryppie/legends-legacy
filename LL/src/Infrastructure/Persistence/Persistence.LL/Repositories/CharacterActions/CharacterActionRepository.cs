@@ -39,7 +39,7 @@ public class CharacterActionRepository : ICharacterActionRepository
         existingAction.UpdatedAt = characterAction.UpdatedAt;
         existingAction.IsDeleted = false;
 
-        if (existingAction.ActionDetails == null)
+        if (existingAction.ActionDetails == null || existingAction.ActionDetails is CraftingActionDetails)
         {
             // If existing action had no details, add new details
             existingAction.ActionDetails = characterAction.ActionDetails!;

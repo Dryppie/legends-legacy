@@ -13,6 +13,7 @@ public class CharacterActionDto : IMapFrom<CharacterAction>
     public DateTimeOffset UpdatedAt { get; set; }
     public bool IsDeleted { get; set; }
     public CombatSessionDto? CombatSession { get; set; }
+    public TemperingSessionDto? TemperingSession { get; set; }
     public CombatActionDetails? CombatActionDetails { get; set; }
     public GatheringActionDetails? GatheringActionDetails { get; set; }
     public CraftingActionDetailsDto? CraftingActionDetails { get; set; }

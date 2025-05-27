@@ -1,7 +1,5 @@
-﻿using System.Threading.Tasks;
-using Application.Interfaces.Services.LL.Professions;
+﻿using Application.Interfaces.Services.LL.Professions;
 using Domain.Helpers.Constants;
-using Domain.Models.Entities.Characters;
 using Domain.Models.Professions;
 
 namespace Services.LL.Professions;

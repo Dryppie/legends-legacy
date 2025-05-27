@@ -194,6 +194,7 @@ namespace Persistence.LL.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ItemBaseId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ItemType = table.Column<int>(type: "int", nullable: false),
+                    Rarity = table.Column<int>(type: "int", nullable: true),
                     Potential = table.Column<int>(type: "int", nullable: true),
                     ItemXp = table.Column<int>(type: "int", nullable: true),
                     IsMasterpiece = table.Column<bool>(type: "bit", nullable: true),

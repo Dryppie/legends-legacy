@@ -878,6 +878,9 @@ namespace Persistence.LL.Migrations
                     b.Property<int?>("Potential")
                         .HasColumnType("int");
 
+                    b.Property<int>("Rarity")
+                        .HasColumnType("int");
+
                     b.HasDiscriminator().HasValue(0);
                 });
 
