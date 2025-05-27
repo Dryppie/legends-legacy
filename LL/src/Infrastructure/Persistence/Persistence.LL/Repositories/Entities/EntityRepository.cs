@@ -21,7 +21,7 @@ public class EntityRepository : IEntityRepository
 
     public async Task UpdateEntities(List<Entity> entities, CancellationToken cancellationToken)
     {
-        if (entities.IsNullOrEmpty()) return;
+        if (entities.Count == 0) return;
 
         _context.Entities.UpdateRange(entities);
         await _context.SaveChangesAsync(cancellationToken);
