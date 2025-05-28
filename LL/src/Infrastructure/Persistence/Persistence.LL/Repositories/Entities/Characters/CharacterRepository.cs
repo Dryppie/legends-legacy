@@ -175,4 +175,16 @@ public class CharacterRepository : ICharacterRepository
 
         await _context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<Character?> GetCharacterWithSoulstoneUpgradesAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        return await _context.Characters
+            .Include(c => c.CharacterSoulstoneUpgrades)
+            .FirstOrDefaultAsync(c => c.Id.Equals(characterId), cancellationToken);
+    }
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        await _context.SaveChangesAsync(cancellationToken);
+    }
 }

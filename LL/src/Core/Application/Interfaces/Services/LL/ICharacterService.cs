@@ -41,4 +41,6 @@ public interface ICharacterService
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task<Character?> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<Character?> GetCharacterWithSoulstoneUpgradesAsync(Guid characterId, CancellationToken cancellationToken);
+    Task SaveChangesAsync(CancellationToken cancellationToken);
 }

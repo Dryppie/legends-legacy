@@ -49,10 +49,6 @@ function getCharacterSidebar(): Tab[] {
           icon: 'character/achievements',
           title: 'Character Overview',
           description: 'Attributes and essences',
-          rewards: [
-            { icon: 'path/to/fire-icon.png', amount: 2 },
-            { icon: 'path/to/coin-icon.png', amount: 1 },
-          ],
         },
         {
           id: 'inventory',
@@ -60,10 +56,13 @@ function getCharacterSidebar(): Tab[] {
           icon: 'character/inventory',
           title: 'Inventory',
           description: 'Items, gear, misc',
-          rewards: [
-            { icon: 'path/to/fire-icon.png', amount: 2 },
-            { icon: 'path/to/coin-icon.png', amount: 1 },
-          ],
+        },
+        {
+          id: 'soulstone-archive',
+          route: ['/game', 'character', 'soulstone-archive'],
+          icon: 'character/essences',
+          title: 'Soulstone Archive',
+          description: 'Soulstone upgrades',
         },
         // {
         //   id: 'essences',

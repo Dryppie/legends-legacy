@@ -28,6 +28,7 @@ using Services.LL.Professions.Craftings;
 using Services.LL.Professions.Gatherings;
 using Services.LL.Regions;
 using Services.LL.Regions.Areas;
+using Services.LL.Soulstones;
 using Services.LL.Spawnings;
 using Services.LL.Users;
 
@@ -77,6 +78,8 @@ public static class DependencyInjection
         services.AddScoped<IProfessionService, ProfessionService>();
         services.AddScoped<IRecipeService, RecipeService>();
 
+        services.AddScoped<ISoulstoneUpgradeService, SoulstoneUpgradeService>();
+
         services.AddScoped<ISpawningService, SpawningService>();
 
         services.AddScoped<IJwtGenerator, JwtGenerator>();
@@ -86,6 +89,8 @@ public static class DependencyInjection
         services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 
         services.AddScoped<ISimulatorService, SimulatorService>();
+
+        services.AddSingleton<SoulstoneUpgradeDefinitionProvider>();
 
         return services;
     }

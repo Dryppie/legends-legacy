@@ -1,0 +1,48 @@
+[
+  {
+    "id": "combat.essence",
+    "name": "Essence Drop-Rate",
+    "maxLevel": 100,
+    "cost": {
+      "base": 1,
+      "increment": 1
+    },
+    "effects": [
+      {
+        "stat": "EssenceDropRate",
+        "perLevel": 0.01
+      }
+    ]
+  },
+  {
+    "id": "misc.soulstone.drop",
+    "name": "+% Soulstone Drop-Rate",
+    "maxLevel": 100,
+    "cost": {
+      "base": 1,
+      "increment": 1,
+      "incrementCap": 50
+    },
+    "effects": [
+      {
+        "stat": "SoulstoneDropRate",
+        "perLevel": 0.01
+      }
+    ]
+  },
+  {
+    "id": "misc.daily.tasks",
+    "name": "+Daily Tasks",
+    "maxLevel": 3,
+    "cost": {
+      "base": 50,
+      "increment": 50
+    },
+    "effects": [
+      {
+        "stat": "DailyTaskSlots",
+        "perLevel": 1
+      }
+    ]
+  }
+]

@@ -4,6 +4,7 @@ using Domain.Models.Guilds;
 using Domain.Models.Inventories;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
+using Domain.Models.Soulstones;
 using Domain.Models.Users;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -21,6 +22,7 @@ public class Character : Entity
     public float ExperienceUntilNextLevel { get; set; }
     public long Cinders { get; set; } = 0;
     public long Soulstones { get; set; } = 0;
+    public ICollection<CharacterSoulstoneUpgrade> CharacterSoulstoneUpgrades { get; set; } = [];
     public Inventory Inventory { get; set; } = null!;
     public int ArenaRating { get; set; } = 1000;
     public ICollection<ColosseumMatchResult> ColosseumMatches { get; set; } = [];

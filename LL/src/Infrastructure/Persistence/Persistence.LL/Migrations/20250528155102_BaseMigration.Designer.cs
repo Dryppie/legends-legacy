@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250528054910_BaseMigration")]
+    [Migration("20250528155102_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -646,6 +646,22 @@ namespace Persistence.LL.Migrations
                     b.ToTable("Regions");
                 });
 
+            modelBuilder.Entity("Domain.Models.Soulstones.CharacterSoulstoneUpgrade", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SoulstoneUpgradeDefinitionId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("int");
+
+                    b.HasKey("CharacterId", "SoulstoneUpgradeDefinitionId");
+
+                    b.ToTable("CharacterSoulstoneUpgrade");
+                });
+
             modelBuilder.Entity("Domain.Models.Users.AppUser", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1201,6 +1217,17 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Domain.Models.Soulstones.CharacterSoulstoneUpgrade", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Characters.Character", "Character")
+                        .WithMany("CharacterSoulstoneUpgrades")
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+                });
+
             modelBuilder.Entity("Domain.Models.Users.ExternalLogin", b =>
                 {
                     b.HasOne("Domain.Models.Users.AppUser", "User")
@@ -1360,6 +1387,8 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
 
                     b.Navigation("CharacterAction");
+
+                    b.Navigation("CharacterSoulstoneUpgrades");
 
                     b.Navigation("ColosseumMatches");
 

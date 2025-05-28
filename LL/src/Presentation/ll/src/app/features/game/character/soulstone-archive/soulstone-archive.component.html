@@ -1,0 +1,11 @@
+<div class="flex h-full flex-col gap-4 overflow-hidden pb-4 text-white sm:pb-0">
+  <app-default-header
+    *ngIf="character$ | async as character"
+    class="flex-none"
+    title="Soulstone Archive"
+    icon="character/essences"
+  ></app-default-header>
+  <div
+    class="flex flex-col gap-4 overflow-y-auto pr-4 sm:pr-6 lg:flex-row"
+  ></div>
+</div>

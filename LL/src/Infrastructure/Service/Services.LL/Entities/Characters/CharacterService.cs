@@ -67,4 +67,14 @@ public class CharacterService : ICharacterService
     {
         await _characterRepository.UpdateCharacterNameAsync(userId, username, cancellationToken);
     }
+
+    public async Task<Character?> GetCharacterWithSoulstoneUpgradesAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        return await _characterRepository.GetCharacterWithSoulstoneUpgradesAsync(characterId, cancellationToken);
+    }
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken)
+    {
+        await _characterRepository.SaveChangesAsync(cancellationToken);
+    }
 }

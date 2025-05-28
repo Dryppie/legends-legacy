@@ -15,5 +15,4 @@ public class EssenceDto : IMapFrom<Essence>
     {
         profile.CreateMap<Essence, EssenceDto>();
     }
-
 }
