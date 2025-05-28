@@ -1,7 +1,6 @@
 ﻿using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Professions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
-using Domain.Models.Professions;
 using Services.LL.Interfaces;
 
 namespace Services.LL.CharacterActions;
@@ -34,16 +33,16 @@ public class ActionDetailsService : IActionDetailsService
         return combatDetails;
     }
 
-    public async Task<GatheringActionDetails?> CreateGatheringActionDetailsAsync(string gatheringNodeId, ProfessionType professionType, Guid characterId, CancellationToken cancellationToken)
+    public async Task<GatheringActionDetails?> CreateGatheringActionDetailsAsync(string gatheringNodeId, Guid characterId, CancellationToken cancellationToken)
     {
         var gatheringNode = await _gatheringNodeService.GetGatheringNodeById(gatheringNodeId, cancellationToken);
 
-        if (await _professionService.GetProfessionLevelAsync(characterId, professionType, cancellationToken) < gatheringNode.LevelRequirement) return null;
+        if (await _professionService.GetProfessionLevelAsync(characterId, gatheringNode.ProfessionType, cancellationToken) < gatheringNode.LevelRequirement) return null;
         
         var gatheringDetails = new GatheringActionDetails
         {
             Name = gatheringNode.Name,
-            ProfessionType = professionType,
+            ProfessionType = gatheringNode.ProfessionType,
             LootTableId = gatheringNode.LootTableId
         };
 

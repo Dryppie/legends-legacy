@@ -6,6 +6,7 @@
     icon="professions/{{ profession.iconPath }}"
     [level]="characterProfession.level"
     [experience]="characterProfession.experience"
+    [experienceUntilNextLevel]="characterProfession.experienceUntilNextLevel"
   ></app-profession-header>
   <div
     class="grid h-full w-full gap-4 overflow-y-auto pr-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
@@ -16,6 +17,7 @@
           [gatheringNode]="gatheringNode"
           [characterProfession]="characterProfession"
           [iconPath]="profession.iconPath"
+          [professionType]="profession.professionType"
         ></app-profession-card>
       </div>
     </ng-container>

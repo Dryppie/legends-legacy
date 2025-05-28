@@ -4,6 +4,7 @@ import { CityComponent } from './city.component';
 import { TavernComponent } from './tavern/tavern.component';
 import { ColosseumComponent } from './colosseum/colosseum.component';
 import { GuildComponent } from './guild/guild.component';
+import { MarketPlaceComponent } from './market-place/market-place.component';
 
 export const CITY_ROUTES: Routes = [
   {
@@ -30,6 +31,10 @@ export const CITY_ROUTES: Routes = [
       {
         path: 'guild',
         component: GuildComponent,
+      },
+      {
+        path: 'market-place',
+        component: MarketPlaceComponent,
       },
     ],
   },

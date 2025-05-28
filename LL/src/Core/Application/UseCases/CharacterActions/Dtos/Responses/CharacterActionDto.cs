@@ -1,6 +1,7 @@
 ﻿using Application.Common.Mappings;
 using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 using Application.UseCases.CharacterActions.Dtos.Responses.CraftingDtos;
+using Application.UseCases.CharacterActions.Dtos.Responses.GatheringDtos;
 using AutoMapper;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
@@ -14,6 +15,7 @@ public class CharacterActionDto : IMapFrom<CharacterAction>
     public bool IsDeleted { get; set; }
     public CombatSessionDto? CombatSession { get; set; }
     public TemperingSessionDto? TemperingSession { get; set; }
+    public GatheringSessionDto? GatheringSession { get; set; }
     public CombatActionDetails? CombatActionDetails { get; set; }
     public GatheringActionDetails? GatheringActionDetails { get; set; }
     public CraftingActionDetailsDto? CraftingActionDetails { get; set; }

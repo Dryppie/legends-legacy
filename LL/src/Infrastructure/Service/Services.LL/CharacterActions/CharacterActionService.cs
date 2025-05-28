@@ -1,13 +1,10 @@
 ﻿using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Professions;
-using Application.UseCases.Inventories.Events;
 using Common.Extensions;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
-using Domain.Models.Inventories;
 using Domain.Models.Professions.Crafting;
-using MediatR;
 using Services.LL.Interfaces;
 
 namespace Services.LL.CharacterActions;
@@ -17,14 +14,12 @@ public class CharacterActionService : ICharacterActionService
     private readonly ICombatService _combatService;
     private readonly ICraftingService _craftingService;
     private readonly IGatheringService _gatheringService;
-    private readonly IPublisher _publisher;
-    public CharacterActionService(ICharacterActionRepository car, IGatheringService gs, ICombatService comS, ICraftingService cs, IPublisher p)
+    public CharacterActionService(ICharacterActionRepository car, IGatheringService gs, ICombatService comS, ICraftingService cs)
     {
         _characterActionRepository = car;
         _gatheringService = gs;
         _combatService = comS;
         _craftingService = cs;
-        _publisher = p;
     }
 
     public async Task<bool> StartCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
@@ -66,7 +61,7 @@ public class CharacterActionService : ICharacterActionService
         switch (characterAction.CharacterActionType)
         {
             case CharacterActionType.Gathering:
-                await HandleGatheringActionAsync(characterAction, now, cancellationToken);
+                characterAction.GatheringSession = await HandleGatheringActionAsync(characterAction, now, cancellationToken);
                 break;
 
             case CharacterActionType.Combat:
@@ -93,24 +88,13 @@ public class CharacterActionService : ICharacterActionService
         return characterAction;
     }
 
-    private async Task HandleGatheringActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
+    private async Task<GatheringSession?> HandleGatheringActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
         int actionsToPerform = characterAction.UpdatedAt.NumberOfXSecondsIntervals(now, 6);
 
-        if (actionsToPerform == 0) return;
+        if (actionsToPerform == 0) return null;
 
-        // Update the UpdatedAt timestamp
-        characterAction.UpdatedAt += TimeSpan.FromSeconds(6 * actionsToPerform);
-        var actionDetails = characterAction.ActionDetails as GatheringActionDetails;
-
-        // Perform the gathering actions
-        var loot = await _gatheringService.PerformGatheringAsync(actionDetails!.LootTableId, actionsToPerform, cancellationToken);
-
-        // Process the loot
-        if (loot.Count > 0)
-        {
-            await ProcessLootAsync(characterAction.CharacterId, loot, cancellationToken);
-        }
+        return await _gatheringService.PerformGatheringAsync(characterAction, actionsToPerform, cancellationToken);
     }
 
     private async Task<CombatSession> HandleCombatActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
@@ -120,43 +104,13 @@ public class CharacterActionService : ICharacterActionService
 
     private async Task<TemperingSession?> HandleProfessionActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {
-        (characterAction.ActionDetails as CraftingActionDetails).CraftingQueueItems = [.. (characterAction.ActionDetails as CraftingActionDetails).CraftingQueueItems.OrderBy(queueItem => queueItem.AddedAt)];
+        // Must be sorted here, or it'll return unsorted list if Actions To Perform is 0
+        (characterAction.ActionDetails as CraftingActionDetails)!.CraftingQueueItems = [.. (characterAction.ActionDetails as CraftingActionDetails)!.CraftingQueueItems.OrderBy(queueItem => queueItem.AddedAt)];
         int actionsToPerform = characterAction.UpdatedAt.NumberOfXSecondsIntervals(now, 6);
 
         if (actionsToPerform == 0) return null;
 
         return await _craftingService.PerformIdleCrafting(characterAction, actionsToPerform, cancellationToken);
-    }
-
-    /// <summary>
-    /// Set the UpdatedAt to match however many actions has been performed timed 6,
-    /// such that if 3 seconds are left before a new action, those are not overwritten as if it had been set to UtcNow.
-    /// Then update .UpdatedAt before doing all other calculations
-    /// </summary>
-    /// <param name="characterAction"></param>
-    /// <param name="characterActionsToPerform"></param>
-    /// <param name="cancellationToken"></param>
-    /// <returns></returns>
-    private async Task UpdateCharacterActionAsync(CharacterAction characterAction, int characterActionsToPerform, CancellationToken cancellationToken)
-    {
-        characterAction.UpdatedAt += TimeSpan.FromSeconds(6 * characterActionsToPerform);
-        await _characterActionRepository.UpdateCharacterActionAsync(characterAction, cancellationToken);
-    }
-
-    // TODO: After adding the loot to the character's inventory in the database,
-    // make use of a socket to send it to the UI
-    // https://chatgpt.com/c/316198c8-d8a1-40d3-8b91-369e81ddfabc
-    private async Task ProcessLootAsync(Guid characterId, List<InventoryItem> loot, CancellationToken cancellationToken)
-    {
-        // Implement how to update the character or game state with the loot
-        // For example, updating the character inventory
-        //await _InventoryService.AddLootAsync(loot, cancellationToken);
-        await _publisher.Publish(new LootGeneratedEvent(characterId, loot), cancellationToken);
-    }
-
-    public async Task<CharacterAction?> GetCraftingActionAsync(Guid characterId, CancellationToken cancellationToken)
-    {
-        return await _characterActionRepository.GetCraftingActionAsync(characterId, cancellationToken);
     }
 
     public async Task<bool> UpdateCraftingCharacterActionAsync(Guid characterId, CraftingQueueItem characterAction, CancellationToken cancellationToken)

@@ -5,8 +5,6 @@ using Application.UseCases.CharacterActions.Commands.StartGatheringAction;
 using Application.UseCases.CharacterActions.Dtos.Responses;
 using Application.UseCases.CharacterActions.Queries.GetCharacterAction;
 using Common.Primitives;
-using Domain.Models.Professions;
-using Domain.Models.Professions.Crafting;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,7 +14,6 @@ public class CharacterActionsController : BaseController
 {
     public record StartCombatActionRequest(string AreaId);
     public record StartCraftingActionRequest(string QueueId, string ItemInstanceId);
-    public record StartGatheringActionRequest(string GatheringNodeId, ProfessionType ProfessionType);
 
     [HttpGet]
     public async Task<ActionResult<Response<CharacterActionDto?>>> Get() =>
@@ -31,8 +28,8 @@ public class CharacterActionsController : BaseController
         await Mediator.Send(new StartCraftingActionCommand(CurrentCharacterGuid, request.QueueId, request.ItemInstanceId));
 
     [HttpPost("StartGathering")]
-    public async Task<ActionResult<Response<bool>>> StartGathering([FromBody] StartGatheringActionRequest request) =>
-        await Mediator.Send(new StartGatheringActionCommand(CurrentCharacterGuid, request.GatheringNodeId, request.ProfessionType));
+    public async Task<ActionResult<Response<bool>>> StartGathering([FromBody] string gatheringNodeId) =>
+        await Mediator.Send(new StartGatheringActionCommand(CurrentCharacterGuid, gatheringNodeId));
 
     [HttpDelete]
     public async Task<ActionResult<Response<bool>>> Delete() => 

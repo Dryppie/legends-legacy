@@ -7,8 +7,8 @@ export interface CharacterDto {
   level: number;
   experience: number;
   experienceUntilNextLevel: number;
-  gold: number;
-  rawAttributes?: Array<AttributeDto>;
+  cinders: number;
+  soulstones: number;
   attributes?: Array<AttributeDto>;
   arenaRating: number;
 }

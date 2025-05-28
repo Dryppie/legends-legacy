@@ -1,4 +1,5 @@
-﻿using Domain.Models.Inventories;
+﻿using Domain.Models.CharacterActions;
+using Domain.Models.CharacterActions.Sessions;
 
 namespace Services.LL.Interfaces;
 public interface IGatheringService
@@ -6,9 +7,9 @@ public interface IGatheringService
     /// <summary>
     /// Perform gathering
     /// </summary>
-    /// <param name="lootTableId"></param>
+    /// <param name="characterAction"></param>
     /// <param name="actionsToPerform"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Task<List<InventoryItem>> PerformGatheringAsync(Guid lootTableId, int actionsToPerform, CancellationToken cancellationToken);
+    public Task<GatheringSession> PerformGatheringAsync(CharacterAction characterAction, int actionsToPerform, CancellationToken cancellationToken);
 }

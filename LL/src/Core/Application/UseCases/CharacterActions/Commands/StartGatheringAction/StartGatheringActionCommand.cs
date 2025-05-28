@@ -1,11 +1,10 @@
 ﻿using Application.Interfaces.Services.LL;
 using Common.Primitives;
 using Domain.Models.CharacterActions;
-using Domain.Models.Professions;
 using MediatR;
 
 namespace Application.UseCases.CharacterActions.Commands.StartGatheringAction;
-public record StartGatheringActionCommand(Guid CharacterId, string GatheringNodeId, ProfessionType ProfessionType) : IRequest<Response<bool>>;
+public record StartGatheringActionCommand(Guid CharacterId, string GatheringNodeId) : IRequest<Response<bool>>;
 public class StartGatheringActionCommandHandler : IRequestHandler<StartGatheringActionCommand, Response<bool>>
 {
     private readonly ICharacterActionService _characterActionService;
@@ -18,7 +17,7 @@ public class StartGatheringActionCommandHandler : IRequestHandler<StartGathering
     public async Task<Response<bool>> Handle(StartGatheringActionCommand request, CancellationToken cancellationToken)
     {
         var gatheringActionDetails = await _actionDetailsService
-            .CreateGatheringActionDetailsAsync(request.GatheringNodeId, request.ProfessionType, request.CharacterId, cancellationToken);
+            .CreateGatheringActionDetailsAsync(request.GatheringNodeId, request.CharacterId, cancellationToken);
 
         if (gatheringActionDetails == null) return Response<bool>.Fail("Unable to start gathering");
 

@@ -804,11 +804,14 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("ArenaRating")
                         .HasColumnType("int");
 
+                    b.Property<long>("Cinders")
+                        .HasColumnType("bigint");
+
                     b.Property<float>("Experience")
                         .HasColumnType("real");
 
-                    b.Property<int>("Gold")
-                        .HasColumnType("int");
+                    b.Property<long>("Soulstones")
+                        .HasColumnType("bigint");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");

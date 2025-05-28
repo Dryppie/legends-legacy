@@ -19,7 +19,6 @@ import {
   CharacterActionDto,
   StartCombatActionRequest,
   StartCraftingActionRequest,
-  StartGatheringActionRequest,
 } from '../../../../shared/models/Dtos/characterActionDto';
 import { environment } from '../../../../../environments/environment';
 import { NamedStorageKeys } from '../../../common/enums/named-storage-keys';
@@ -103,11 +102,11 @@ export class CharacterActionsService {
       });
   }
 
-  startGatheringAction(gatheringAction: StartGatheringActionRequest): void {
+  startGatheringAction(gatheringNodeId: string): void {
     this.setCAT(CharacterActionType.Gathering);
 
     this.apiService
-      .post('CharacterActions/StartGathering', gatheringAction)
+      .post('CharacterActions/StartGathering', gatheringNodeId)
       .pipe(
         catchError((error) => {
           this.clearCAT();
@@ -272,20 +271,19 @@ export class CharacterActionsService {
       if (summary.armorForgingExperience > 0)
         this.levelingService.gainProfessionExperience(
           ProfessionType.ArmorForging,
-          1,
+          summary.armorForgingExperience,
         );
       if (summary.jewelryCraftingExperience > 0)
         this.levelingService.gainProfessionExperience(
           ProfessionType.JewelryCrafting,
-          1,
+          summary.jewelryCraftingExperience,
         );
       if (summary.weaponSmithingExperience > 0)
         this.levelingService.gainProfessionExperience(
           ProfessionType.WeaponSmithing,
-          1,
+          summary.weaponSmithingExperience,
         );
       if (action.craftingActionDetails?.craftingQueueItems.length === 0) {
-        console.log('test');
         this.clearCurrentAction();
       }
     }
@@ -300,7 +298,16 @@ export class CharacterActionsService {
   }
 
   private handleGatheringAction(action: CharacterActionDto | null) {
-    if (action?.characterActionType === CharacterActionType.Gathering) {
+    if (
+      action?.characterActionType === CharacterActionType.Gathering &&
+      action?.gatheringSession
+    ) {
+      const summary = action.gatheringSession.gatheringSummary;
+      this.sessionSummaryService.loadGatheringSince(action.gatheringSession);
+      this.levelingService.gainProfessionExperience(
+        summary.professionType,
+        summary.totalExperience,
+      );
     }
   }
 

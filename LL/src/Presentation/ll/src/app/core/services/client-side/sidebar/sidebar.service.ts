@@ -137,6 +137,13 @@ function getCitySidebar(): Tab[] {
           title: 'Guild',
           description: 'Guild headquarters',
         },
+        {
+          id: 'market-place',
+          route: ['/game', 'city', 'market-place'],
+          icon: 'city/temple',
+          title: 'Market Place',
+          description: 'List and buy items',
+        },
       ],
     },
   ];

@@ -43,6 +43,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.authService.currentCharacter$.subscribe((character) => {
         this.currentCharacter = character;
+        console.log(this.currentCharacter);
       }),
     );
   }

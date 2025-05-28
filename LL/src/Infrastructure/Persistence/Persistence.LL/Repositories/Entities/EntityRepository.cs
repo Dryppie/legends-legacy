@@ -7,7 +7,6 @@ using Domain.Models.Entities.Creatures;
 using Domain.Models.Items.Equipments;
 using Domain.Models.LootTables;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Persistence.LL.Repositories.Entities;
 public class EntityRepository : IEntityRepository

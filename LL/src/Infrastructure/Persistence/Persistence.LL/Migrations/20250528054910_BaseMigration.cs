@@ -272,7 +272,8 @@ namespace Persistence.LL.Migrations
                     EntityType = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Experience = table.Column<float>(type: "real", nullable: true),
-                    Gold = table.Column<int>(type: "int", nullable: true),
+                    Cinders = table.Column<long>(type: "bigint", nullable: true),
+                    Soulstones = table.Column<long>(type: "bigint", nullable: true),
                     ArenaRating = table.Column<int>(type: "int", nullable: true),
                     LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     ExperienceReward = table.Column<int>(type: "int", nullable: true)

@@ -19,41 +19,12 @@ public class Character : Entity
     public float Experience { get; set; } = 0;
     [NotMapped]
     public float ExperienceUntilNextLevel { get; set; }
-    public int Gold { get; set; } = 0;
+    public long Cinders { get; set; } = 0;
+    public long Soulstones { get; set; } = 0;
     public Inventory Inventory { get; set; } = null!;
     public int ArenaRating { get; set; } = 1000;
     public ICollection<ColosseumMatchResult> ColosseumMatches { get; set; } = [];
     public ArenaTicketStatus ArenaTicketStatus { get; set; } = null!;
     public Guild? Guild { get; set; }
     public ICollection<Profession> Professions { get; set; } = [];
-    //public GuildMember? GuildMember { get; set; }
-    //public ICollection<GuildInvite> GuildInvites { get; set; } = [];
-    //public List<Effect> ActiveEffects { get; set; } = [];
-
-    //public void AddEffect(Effect effect)
-    //{
-    //    ActiveEffects.Add(effect);
-    //    CalculateAttributes();
-    //}
-
-    //public void RemoveEffect(Effect effect)
-    //{
-    //    ActiveEffects.Remove(effect);
-    //    CalculateAttributes();
-    //}
-
-    //public void UpdateEffects()
-    //{
-    //    foreach (var effect in ActiveEffects.ToList()) // ToList() to avoid errors when modifying the list during iteration
-    //    {
-    //        effect.Update();
-
-    //        if(!effect.Duration.IsActive())
-    //        {
-    //            RemoveEffect(effect);
-    //        }
-    //    }
-    //}
-
-    //public ICollection<Item> Items { get; set; } = [];
 }

@@ -25,6 +25,8 @@ public class CharacterAction
     public CombatSession? CombatSession { get; set; }
     [NotMapped]
     public TemperingSession? TemperingSession { get; set; }
+    [NotMapped]
+    public GatheringSession? GatheringSession { get; set; }
 
     public CharacterAction(Guid characterId, ActionDetails actionDetails)
     {

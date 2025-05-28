@@ -1,15 +1,14 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { MiniButtonComponent } from '../../mini-button/mini-button.component';
 import { CharacterActionsService } from '../../../../core/services/api/character-actions/character-actions.service';
-import {
-  CharacterActionDto,
-  StartGatheringActionRequest,
-} from '../../../models/Dtos/characterActionDto';
+import { CharacterActionDto } from '../../../models/Dtos/characterActionDto';
 import { Subscription } from 'rxjs';
 import { NgIf } from '@angular/common';
-import { GatheringType } from '../../../models/enums/gatheringType';
 import { GatheringNode } from '../../../models/Dtos/gatheringNode';
-import { CharacterProfession } from '../../../models/Dtos/characterProfession';
+import {
+  CharacterProfession,
+  ProfessionType,
+} from '../../../models/Dtos/characterProfession';
 
 @Component({
   selector: 'app-profession-card',
@@ -22,6 +21,8 @@ export class ProfessionCardComponent implements OnInit {
   @Input() gatheringNode!: GatheringNode;
   @Input() characterProfession!: CharacterProfession;
   @Input() iconPath: string = '';
+  @Input() professionType!: ProfessionType;
+
   currentAction: CharacterActionDto | null = null;
   private subscription: Subscription = new Subscription();
   isLocked = true;
@@ -55,13 +56,7 @@ export class ProfessionCardComponent implements OnInit {
   }
 
   startGatheringAction() {
-    const startGatheringActionRequest: StartGatheringActionRequest = {
-      gatheringNodeId: this.gatheringNode.id,
-      gatheringType: GatheringType.Woodcutting,
-    };
-    this.characterActionsService.startGatheringAction(
-      startGatheringActionRequest,
-    );
+    this.characterActionsService.startGatheringAction(this.gatheringNode.id);
   }
 
   cancelCharacterAction() {

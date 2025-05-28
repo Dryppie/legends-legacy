@@ -17,12 +17,12 @@ public class EquipmentInstance : ItemInstance
     public float Boost => Rarity switch
     {
         Rarity.Common => 1.0f,
-        Rarity.Uncommon => 1.10f,
-        Rarity.Rare => 1.20f,
-        Rarity.Epic => 1.35f,
-        Rarity.Unique => 1.50f,
-        Rarity.Legendary => 1.70f,
-        Rarity.Legacy => 2.0f,
+        Rarity.Uncommon => 1.25f,
+        Rarity.Rare => 1.75f,
+        Rarity.Epic => 2.5f,
+        Rarity.Unique => 3.50f,
+        Rarity.Legendary => 4.75f,
+        Rarity.Legacy => 6.0f,
         _ => 1.0f
     };
 }
