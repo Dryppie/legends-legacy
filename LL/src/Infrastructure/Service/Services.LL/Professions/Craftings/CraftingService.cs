@@ -18,8 +18,10 @@ public class CraftingService : ICraftingService
     private readonly IRecipeService _recipeService;
     private readonly ITemperingService _temperingService;
     private readonly ILevelingService _levelingService;
+    private readonly ISoulstoneUpgradeService _soulstoneUpgradeService;
+    private readonly ILootService _lootService;
 
-    public CraftingService(ICraftingRepository cr, IInventoryService invS, IProfessionService ps, IRecipeService rs, ITemperingService ts, ILevelingService ls)
+    public CraftingService(ICraftingRepository cr, IInventoryService invS, IProfessionService ps, IRecipeService rs, ITemperingService ts, ILevelingService ls, ISoulstoneUpgradeService sus, ILootService lootS)
     {
         _craftingRepository = cr;
         _inventoryService = invS;
@@ -27,6 +29,8 @@ public class CraftingService : ICraftingService
         _recipeService = rs;
         _temperingService = ts;
         _levelingService = ls;
+        _soulstoneUpgradeService = sus;
+        _lootService = lootS;
     }
 
     public async Task<InventoryItem?> CraftItemFromRecipeAsync(Guid characterId, Guid recipeId, CancellationToken cancellationToken)
@@ -74,6 +78,8 @@ public class CraftingService : ICraftingService
 
     public async Task<TemperingSession> PerformIdleCrafting(CharacterAction characterAction, int actionsToPerform, CancellationToken cancellationToken)
     {
+        //var upgrades = _soulstoneUpgradeService.GetForCharacterAsync(characterAction.CharacterId, cancellationToken);
+
         var actionDetails = (characterAction.ActionDetails as CraftingActionDetails)!;
         var produced = new List<InventoryItem>();
         var sessionStartedAt = characterAction.UpdatedAt;
@@ -112,7 +118,10 @@ public class CraftingService : ICraftingService
         }
         await UpdateCharacterProfessionsAsync(characterAction.CharacterId, temperingSummary, cancellationToken);
 
-
+        var durationInSeconds = 6 * temperingSummary.TotalActions;
+        var soulstonesEarned = _lootService.GenerateSoulstoneLoot(durationInSeconds, 0, 0);
+        // TODO: Publish event to handle earning soulstones
+        // TODO: Perhaps publish event with nothing but a durationInSeconds, and a CharacterGuid. The event can then handle checking whether SS drops
         var temperingSession = new TemperingSession()
         {
             From = sessionStartedAt,

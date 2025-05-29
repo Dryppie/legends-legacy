@@ -71,7 +71,7 @@ public static class DependencyInjection
         
         services.AddScoped<ILevelingService, LevelingService>();
 
-        services.AddScoped<ILootService, LootServices>();
+        services.AddScoped<ILootService, LootService>();
         services.AddScoped<ILootTableService, LootTableService>();
         services.AddScoped<IInventoryService, InventoryService>();
 

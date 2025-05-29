@@ -6,17 +6,26 @@ namespace Application.Interfaces.Services.LL;
 public interface ILootService
 {
     /// <summary>
+    /// Generate soulstone loot
+    /// </summary>
+    /// <param name="seconds"></param>
+    /// <param name="dropRate"></param>
+    /// <param name="doubleChance"></param>
+    /// <returns></returns>
+    int GenerateSoulstoneLoot(int seconds, float dropRate, float doubleChance);
+
+    /// <summary>
     /// Generate Gathering Loot based on a lootTable
     /// </summary>
     /// <param name="lootTable"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public List<InventoryItem> GenerateGatheringLootAsync(LootTable lootTable, CancellationToken cancellationToken);
+    List<InventoryItem> GenerateGatheringLootAsync(LootTable lootTable, CancellationToken cancellationToken);
 
     /// <summary>
     /// Generate Idle-Combat Loot based on defeated enemies
     /// </summary>
     /// <param name="enemyCharacters"></param>
     /// <returns></returns>
-    public List<InventoryItem> GenerateIdleCombatLootAsync(List<Entity> enemyCharacters);
+    List<InventoryItem> GenerateIdleCombatLootAsync(List<Entity> enemyCharacters);
 }

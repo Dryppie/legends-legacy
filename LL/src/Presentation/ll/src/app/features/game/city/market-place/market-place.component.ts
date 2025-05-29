@@ -17,7 +17,7 @@ export class MarketPlaceComponent implements OnInit {
 
   tabs: Tab[] = [
     {
-      label: 'Arena',
+      label: 'Buy',
       items: [],
     },
     // {
@@ -29,11 +29,7 @@ export class MarketPlaceComponent implements OnInit {
     //   items: [],
     // },
     {
-      label: 'Rankings & Glory',
-      items: [],
-    },
-    {
-      label: 'Record of Battles',
+      label: 'Your Orders',
       items: [],
     },
   ];

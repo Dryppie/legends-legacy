@@ -74,6 +74,11 @@ public class GatheringService : IGatheringService
             GatheringSummary = gatheringSummary,
         };
 
+        var durationInSeconds = 6 * actionsToPerform;
+        var soulstonesEarned = _lootService.GenerateSoulstoneLoot(durationInSeconds, 0, 0);
+        // TODO: Publish event to handle earning soulstones
+        // TODO: Perhaps publish event with nothing but a durationInSeconds, and a CharacterGuid. The event can then handle checking whether SS drops
+
         await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
         await UpdateCharacterProfessionsAsync(characterAction.CharacterId, gatheringSummary, cancellationToken);
 

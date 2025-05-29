@@ -43,7 +43,6 @@ public class SoulstoneUpgradeService : ISoulstoneUpgradeService
         if (current >= def.MaxLevel) return false;
 
         var cost = def.Cost.CostOfLevel(current + 1);
-        character.Soulstones += 10;
         if (!TrySpendSoulstones(character, cost)) return false;
 
         if (entry is null)

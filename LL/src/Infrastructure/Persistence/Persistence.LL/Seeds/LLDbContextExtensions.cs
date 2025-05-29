@@ -55,6 +55,8 @@ public static class LLDbContextExtensions
             Name = "admin",
             ImagePath = "player",
             Level = 1,
+            Cinders = 5719,
+            Soulstones = 5000,
             Professions = ProfessionsSeederHelper.CreateProfessions(Guid.Parse(CHARACTER_GUID)),
         };
 

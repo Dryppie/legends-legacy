@@ -1,21 +1,90 @@
 [
   {
-    "id": "combat.essence",
-    "name": "Essence Drop-Rate",
+    "id": "combat.essence.drop.rate",
+    "name": "+% Essence Drop Rate",
     "maxLevel": 100,
     "cost": {
       "base": 1,
       "increment": 1
     },
-    "effects": [
-      {
-        "stat": "EssenceDropRate",
-        "perLevel": 0.01
-      }
-    ]
+    "effect": {
+      "stat": "CombatEssenceDropRate",
+      "perLevel": 0.5
+    },
+    "type": "Combat"
   },
   {
-    "id": "misc.soulstone.drop",
+    "id": "combat.double.exp.chance",
+    "name": "+% Double Exp Chance",
+    "maxLevel": 100,
+    "cost": {
+      "base": 1,
+      "increment": 1
+    },
+    "effect": {
+      "stat": "CombatDoubleExpChance",
+      "perLevel": 0.2
+    },
+    "type": "Combat"
+  },
+  {
+    "id": "crafting.double.item.exp.chance",
+    "name": "+% Double Item Exp Chance",
+    "maxLevel": 100,
+    "cost": {
+      "base": 1,
+      "increment": 1
+    },
+    "effect": {
+      "stat": "CraftingDoubleItemExpChance",
+      "perLevel": 0.1
+    },
+    "type": "Crafting"
+  },
+  {
+    "id": "crafting.negative.outcome",
+    "name": "-% Negative Outcome Chance",
+    "maxLevel": 100,
+    "cost": {
+      "base": 1,
+      "increment": 1
+    },
+    "effect": {
+      "stat": "CraftingNegativeOutcome",
+      "perLevel": -0.1
+    },
+    "type": "Crafting"
+  },
+  {
+    "id": "gathering.double.drop.chance",
+    "name": "+% Gathering Double Drop Chance",
+    "maxLevel": 100,
+    "cost": {
+      "base": 1,
+      "increment": 1
+    },
+    "effect": {
+      "stat": "GatheringDoubleDropChance",
+      "perLevel": 0.1
+    },
+    "type": "Gathering"
+  },
+  {
+    "id": "gathering.double.exp.chance",
+    "name": "+% Gathering Double Exp Chance",
+    "maxLevel": 100,
+    "cost": {
+      "base": 1,
+      "increment": 1
+    },
+    "effect": {
+      "stat": "GatheringDoubleExpChance",
+      "perLevel": 0.1
+    },
+    "type": "Gathering"
+  },
+  {
+    "id": "misc.soulstone.drop.rate",
     "name": "+% Soulstone Drop-Rate",
     "maxLevel": 100,
     "cost": {
@@ -23,26 +92,39 @@
       "increment": 1,
       "incrementCap": 50
     },
-    "effects": [
-      {
-        "stat": "SoulstoneDropRate",
-        "perLevel": 0.01
-      }
-    ]
+    "effect": {
+      "stat": "SoulstoneDropRate",
+      "perLevel": 0.1
+    },
+    "type": "Misc"
   },
   {
-    "id": "misc.daily.tasks",
-    "name": "+Daily Tasks",
-    "maxLevel": 3,
+    "id": "misc.soulstone.double.drop.chance",
+    "name": "+% Soulstone Double Drop Chance",
+    "maxLevel": 100,
     "cost": {
-      "base": 50,
-      "increment": 50
+      "base": 1,
+      "increment": 1,
+      "incrementCap": 50
     },
-    "effects": [
-      {
-        "stat": "DailyTaskSlots",
-        "perLevel": 1
-      }
-    ]
+    "effect": {
+      "stat": "SoulstoneDoubleDropChance",
+      "perLevel": 0.1
+    },
+    "type": "Misc"
   }
+  //{
+  //  "id": "misc.daily.tasks",
+  //  "name": "+Daily Tasks",
+  //  "maxLevel": 3,
+  //  "cost": {
+  //    "base": 50,
+  //    "increment": 50
+  //  },
+  //  "effect": {
+  //    "stat": "DailyTaskSlots",
+  //    "perLevel": 1
+  //  },
+  //  "type": "Misc"
+  //}
 ]

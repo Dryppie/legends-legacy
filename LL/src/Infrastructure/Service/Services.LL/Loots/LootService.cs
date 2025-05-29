@@ -8,9 +8,29 @@ using Domain.Models.Items.EssenceItems;
 using Domain.Models.LootTables;
 
 namespace Services.LL.Loots;
-public class LootServices : ILootService
+public class LootService : ILootService
 {
     private static readonly Random RandomGenerator = new();
+
+    public int GenerateSoulstoneLoot(int seconds, float dropRate, float doubleChance)
+    {
+        double baseChance = 0.0000463; // every 6 hour
+        // 1/43200 - 0.0000232 // every 12 hour
+
+        var rng = Random.Shared;
+        int earned = 0;
+        foreach (var _ in Enumerable.Range(0, seconds))
+        {
+
+            if (rng.NextDouble() <= baseChance * (1 + (dropRate / 100)))
+            {
+                earned++;
+            }
+        }
+
+        if (earned > 0 && rng.NextDouble() <= doubleChance) earned *= 2;
+        return earned;
+    }
 
     public List<InventoryItem> GenerateGatheringLootAsync(LootTable lootTable, CancellationToken cancellationToken)
     {

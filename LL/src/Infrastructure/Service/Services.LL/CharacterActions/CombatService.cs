@@ -23,14 +23,14 @@ public class CombatService : ICombatService
     private readonly ISpawningService _spawningService;
     private readonly IPublisher _publisher;
 
-    public CombatService(IEntityService entityService, ICombatSetupService combatPreparationService, ILevelingService levelingService, ILootService lootService, ISpawningService spawningService, IPublisher publisher)
+    public CombatService(IEntityService es, ICombatSetupService cps, ILevelingService lvlS, ILootService ls, ISpawningService ss, IPublisher p)
     {
-        _entityService = entityService;
-        _combatSetupService = combatPreparationService;
-        _levelingService = levelingService;
-        _lootService = lootService;
-        _spawningService = spawningService;
-        _publisher = publisher;
+        _entityService = es;
+        _combatSetupService = cps;
+        _levelingService = lvlS;
+        _lootService = ls;
+        _spawningService = ss;
+        _publisher = p;
     }
 
     public async Task<CombatSession> PerformIdleCombatAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
@@ -107,6 +107,7 @@ public class CombatService : ICombatService
             // https://chatgpt.com/c/671943b1-0958-800d-9234-32c45632490e
         }
 
+
         // Create CombatEntities to keep track of simple data over each entity, such as id, health, mana
         lastCombatResult.PlayerTeam = _combatSetupService.CreateSimpleCombatEntities(combatPlayerEntities);
         lastCombatResult.EnemyTeam = _combatSetupService.CreateSimpleCombatEntities(selectedCombatEnemyEntities);
@@ -119,7 +120,10 @@ public class CombatService : ICombatService
             CombatSummary = combatSummary,
         };
 
-        await UpdateCharacterStatsAsync(playerCharacters, combatSession.CombatSummary.TotalExperience, cancellationToken);
+        var durationInSeconds = (int)Math.Abs((sessionStartedAt - characterAction.UpdatedAt).TotalSeconds);
+        var soulstonesEarned = _lootService.GenerateSoulstoneLoot(durationInSeconds, 0, 0);
+
+        await UpdateCharacterStatsAsync(playerCharacters, combatSession.CombatSummary.TotalExperience, soulstonesEarned, cancellationToken);
         await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
 
         return combatSession;
@@ -159,13 +163,14 @@ public class CombatService : ICombatService
         await _publisher.Publish(new LootGeneratedEvent(characterId, loot), cancellationToken);
     }
 
-    private async Task UpdateCharacterStatsAsync(List<Entity> playerCharacters, int totalExp, CancellationToken cancellationToken)
+    private async Task UpdateCharacterStatsAsync(List<Entity> playerCharacters, int totalExp, int soulstonesEarned, CancellationToken cancellationToken)
     {
         if (totalExp == 0) return;
 
         var characters = playerCharacters.OfType<Character>();
         foreach (var character in characters)
         {
+            character.Soulstones += soulstonesEarned;
             character.Experience += totalExp / characters.Count();
             var wepAndShield = character.EquipmentSlots.Where(eq => (eq.EquipmentType == EquipmentType.MainHand || eq.EquipmentType == EquipmentType.OffHand) && eq.EquipmentInstance != null).ToList();
 

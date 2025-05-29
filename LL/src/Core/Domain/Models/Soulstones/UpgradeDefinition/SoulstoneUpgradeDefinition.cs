@@ -5,5 +5,6 @@ public record SoulstoneUpgradeDefinition
     string Name,
     int MaxLevel,
     CostCurve Cost,
-    IReadOnlyList<UpgradeEffect> Effects
+    UpgradeEffect Effect,
+    SoulstoneUpgradeType Type
 );
