@@ -3,6 +3,7 @@ using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL.Professions;
+using Application.UseCases.Soulstones.Providers;
 using Domain.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;

@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces.Services.LL;
 using Application.UseCases.Inventories.Events;
+using Application.UseCases.Soulstones.Events;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
@@ -121,12 +122,16 @@ public class CombatService : ICombatService
         };
 
         var durationInSeconds = (int)Math.Abs((sessionStartedAt - characterAction.UpdatedAt).TotalSeconds);
-        var soulstonesEarned = _lootService.GenerateSoulstoneLoot(durationInSeconds, 0, 0);
-
-        await UpdateCharacterStatsAsync(playerCharacters, combatSession.CombatSummary.TotalExperience, soulstonesEarned, cancellationToken);
+        await ProcessSoulstoneDrops(characterAction.CharacterId, durationInSeconds);
+        await UpdateCharacterStatsAsync(playerCharacters, combatSession.CombatSummary.TotalExperience, cancellationToken);
         await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
 
         return combatSession;
+    }
+
+    private async Task ProcessSoulstoneDrops(Guid characterId, int durationInSeconds)
+    {
+        await _publisher.Publish(new SoulstoneDropEvent(characterId, durationInSeconds));
     }
 
     private static void AddToCombatSummary(CombatSummary combatSummary, CombatResult lastCombatResult)
@@ -163,14 +168,13 @@ public class CombatService : ICombatService
         await _publisher.Publish(new LootGeneratedEvent(characterId, loot), cancellationToken);
     }
 
-    private async Task UpdateCharacterStatsAsync(List<Entity> playerCharacters, int totalExp, int soulstonesEarned, CancellationToken cancellationToken)
+    private async Task UpdateCharacterStatsAsync(List<Entity> playerCharacters, int totalExp, CancellationToken cancellationToken)
     {
         if (totalExp == 0) return;
 
         var characters = playerCharacters.OfType<Character>();
         foreach (var character in characters)
         {
-            character.Soulstones += soulstonesEarned;
             character.Experience += totalExp / characters.Count();
             var wepAndShield = character.EquipmentSlots.Where(eq => (eq.EquipmentType == EquipmentType.MainHand || eq.EquipmentType == EquipmentType.OffHand) && eq.EquipmentInstance != null).ToList();
 

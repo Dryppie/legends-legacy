@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Services.LL.Soulstones;
+namespace Application.UseCases.Soulstones.Providers;
 public class SoulstoneUpgradeDefinitionProvider
 {
     private readonly string _filePath;

@@ -12,24 +12,38 @@ public class LootService : ILootService
 {
     private static readonly Random RandomGenerator = new();
 
-    public int GenerateSoulstoneLoot(int seconds, float dropRate, float doubleChance)
+    public int GenerateSoulstoneLoot(int seconds, double dropRate, double doubleChance)
     {
-        double baseChance = 0.0000463; // every 6 hour
-        // 1/43200 - 0.0000232 // every 12 hour
+        double baseChance = 0.000278; // every 1 hour
+                                      // 1/21600 - 0.0000463 // every 6 hour
+                                      // 1/43200 - 0.0000232 // every 12 hour
+        double effectiveRate = baseChance * (1 + (dropRate / 100.0));
+        double expectedDrops = seconds * effectiveRate;
+
+        int earned = SamplePoisson(expectedDrops);
+        if (earned < 1) return 0;
 
         var rng = Random.Shared;
-        int earned = 0;
-        foreach (var _ in Enumerable.Range(0, seconds))
-        {
+        if (earned > 0 && rng.NextDouble() <= doubleChance)
+            earned *= 2;
 
-            if (rng.NextDouble() <= baseChance * (1 + (dropRate / 100)))
-            {
-                earned++;
-            }
+        return earned;
+    }
+
+    private static int SamplePoisson(double lambda)
+    {
+        var rng = Random.Shared;
+        int k = 0;
+        double p = 1.0;
+        double L = Math.Exp(-lambda);
+
+        while (p > L)
+        {
+            k++;
+            p *= rng.NextDouble();
         }
 
-        if (earned > 0 && rng.NextDouble() <= doubleChance) earned *= 2;
-        return earned;
+        return k - 1;
     }
 
     public List<InventoryItem> GenerateGatheringLootAsync(LootTable lootTable, CancellationToken cancellationToken)
@@ -51,7 +65,6 @@ public class LootService : ILootService
     public List<InventoryItem> GetRandomLoot(LootTable lootTable, int numberOfRolls = 1)
     {
         var generatedLoot = new List<InventoryItem>();
-        var random = new Random();
 
         for (int i = 0; i < numberOfRolls; i++)
         {

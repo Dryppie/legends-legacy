@@ -1,12 +1,11 @@
 ﻿using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Professions;
 using Application.UseCases.Inventories.Events;
+using Application.UseCases.Soulstones.Events;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Inventories;
-using Domain.Models.Items;
-using Domain.Models.Professions;
 using MediatR;
 using Services.LL.Interfaces;
 
@@ -74,15 +73,17 @@ public class GatheringService : IGatheringService
             GatheringSummary = gatheringSummary,
         };
 
-        var durationInSeconds = 6 * actionsToPerform;
-        var soulstonesEarned = _lootService.GenerateSoulstoneLoot(durationInSeconds, 0, 0);
-        // TODO: Publish event to handle earning soulstones
-        // TODO: Perhaps publish event with nothing but a durationInSeconds, and a CharacterGuid. The event can then handle checking whether SS drops
-
+        await ProcessSoulstoneDrops(characterAction.CharacterId, actionsToPerform);
         await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
         await UpdateCharacterProfessionsAsync(characterAction.CharacterId, gatheringSummary, cancellationToken);
 
         return gatheringSession;
+    }
+
+    private async Task ProcessSoulstoneDrops(Guid characterId, int actionsToPerform)
+    {
+        var durationInSeconds = 6 * actionsToPerform;
+        await _publisher.Publish(new SoulstoneDropEvent(characterId, durationInSeconds));
     }
 
     private async Task UpdateCharacterProfessionsAsync(Guid characterId, GatheringSummary gatheringSummary, CancellationToken cancellationToken)

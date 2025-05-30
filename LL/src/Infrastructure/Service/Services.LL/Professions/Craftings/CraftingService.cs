@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Professions;
+using Application.UseCases.Soulstones.Events;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
@@ -7,6 +8,7 @@ using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
+using MediatR;
 using Services.LL.Interfaces;
 
 namespace Services.LL.Professions.Craftings;
@@ -19,9 +21,9 @@ public class CraftingService : ICraftingService
     private readonly ITemperingService _temperingService;
     private readonly ILevelingService _levelingService;
     private readonly ISoulstoneUpgradeService _soulstoneUpgradeService;
-    private readonly ILootService _lootService;
+    private readonly IPublisher _publisher;
 
-    public CraftingService(ICraftingRepository cr, IInventoryService invS, IProfessionService ps, IRecipeService rs, ITemperingService ts, ILevelingService ls, ISoulstoneUpgradeService sus, ILootService lootS)
+    public CraftingService(ICraftingRepository cr, IInventoryService invS, IProfessionService ps, IRecipeService rs, ITemperingService ts, ILevelingService ls, ISoulstoneUpgradeService sus, IPublisher p)
     {
         _craftingRepository = cr;
         _inventoryService = invS;
@@ -30,7 +32,7 @@ public class CraftingService : ICraftingService
         _temperingService = ts;
         _levelingService = ls;
         _soulstoneUpgradeService = sus;
-        _lootService = lootS;
+        _publisher = p;
     }
 
     public async Task<InventoryItem?> CraftItemFromRecipeAsync(Guid characterId, Guid recipeId, CancellationToken cancellationToken)
@@ -116,10 +118,10 @@ public class CraftingService : ICraftingService
             characterAction.IsDeleted = true;
             //characterAction.ActionDetails = null;
         }
+
+        await ProcessSoulstoneDrops(characterAction.CharacterId, temperingSummary.TotalActions);
         await UpdateCharacterProfessionsAsync(characterAction.CharacterId, temperingSummary, cancellationToken);
 
-        var durationInSeconds = 6 * temperingSummary.TotalActions;
-        var soulstonesEarned = _lootService.GenerateSoulstoneLoot(durationInSeconds, 0, 0);
         // TODO: Publish event to handle earning soulstones
         // TODO: Perhaps publish event with nothing but a durationInSeconds, and a CharacterGuid. The event can then handle checking whether SS drops
         var temperingSession = new TemperingSession()
@@ -130,6 +132,12 @@ public class CraftingService : ICraftingService
         };
 
         return temperingSession;
+    }
+
+    private async Task ProcessSoulstoneDrops(Guid characterId, int actionsPerformed)
+    {
+        var durationInSeconds = 6 * actionsPerformed;
+        await _publisher.Publish(new SoulstoneDropEvent(characterId, durationInSeconds));
     }
 
     private async Task UpdateCharacterProfessionsAsync(Guid characterId, TemperingSummary temperingSummary, CancellationToken cancellationToken)

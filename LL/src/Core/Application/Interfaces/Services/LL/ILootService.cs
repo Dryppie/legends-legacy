@@ -12,7 +12,7 @@ public interface ILootService
     /// <param name="dropRate"></param>
     /// <param name="doubleChance"></param>
     /// <returns></returns>
-    int GenerateSoulstoneLoot(int seconds, float dropRate, float doubleChance);
+    int GenerateSoulstoneLoot(int seconds, double dropRate, double doubleChance);
 
     /// <summary>
     /// Generate Gathering Loot based on a lootTable

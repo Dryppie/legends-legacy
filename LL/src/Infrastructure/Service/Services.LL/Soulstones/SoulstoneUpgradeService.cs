@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.UseCases.Soulstones.Providers;
 using Domain.Extensions.Soulstones;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Soulstones;
