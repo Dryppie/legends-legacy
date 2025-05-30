@@ -48,28 +48,38 @@ public class LootService : ILootService
 
     public List<InventoryItem> GenerateGatheringLootAsync(LootTable lootTable, CancellationToken cancellationToken)
     {
-        return GetRandomLoot(lootTable);
+        var ctx = new LootContext
+        {
+            Source = LootSource.Gathering
+            //  ⟹ leave multipliers empty (1×) unless you have special rules
+        };
+        return GetRandomLoot(lootTable, ctx);
     }
 
-    public List<InventoryItem> GenerateIdleCombatLootAsync(List<Entity> entities)
+    public List<InventoryItem> GenerateIdleCombatLootAsync(List<Entity> entities, Dictionary<ItemType, double> multipliers)
     {
-        var totalLoot = new List<InventoryItem>();
-        foreach (var entity in entities.OfType<Creature>())
+        var ctx = new LootContext
         {
-            totalLoot.AddRange(GetRandomLoot(entity.LootTable));
-        }
-        return totalLoot;
+            Source = LootSource.Combat,
+            TypeMultipliers = multipliers
+        };
+
+        var total = new List<InventoryItem>();
+        foreach (var creature in entities.OfType<Creature>())
+            total.AddRange(GetRandomLoot(creature.LootTable, ctx));
+
+        return total;
     }
 
     // TODO: Redo Loot Generation
-    public List<InventoryItem> GetRandomLoot(LootTable lootTable, int numberOfRolls = 1)
+    public List<InventoryItem> GetRandomLoot(LootTable lootTable, LootContext ctx, int numberOfRolls = 1)
     {
         var generatedLoot = new List<InventoryItem>();
 
         for (int i = 0; i < numberOfRolls; i++)
         {
 
-            var selectedEntry = GetRandomEntryBasedOnWeight([.. lootTable.Entries]);
+            var selectedEntry = GetRandomEntryBasedOnWeight([.. lootTable.Entries], ctx);
 
             if (selectedEntry is LootTableItem lootTableItem)
             {
@@ -77,26 +87,42 @@ public class LootService : ILootService
             }
             else if (selectedEntry is LootTable table)
             {
-                generatedLoot.AddRange(GetRandomLoot(table, 1));
+                generatedLoot.AddRange(GetRandomLoot(table, ctx, 1));
             }
         }
 
         return generatedLoot;
     }
 
-    private LootTableEntry? GetRandomEntryBasedOnWeight(List<LootTableEntry> entries)
+    private LootTableEntry? GetRandomEntryBasedOnWeight(List<LootTableEntry> entries, LootContext ctx)
     {
-        double totalWeight = entries.Sum(e => e.Weight);
-        double randomValue = RandomGenerator.NextSingle() * 100;
-        double cumulativeWeight = 0.0;
-
-        foreach (var entry in entries)
-        {
-            cumulativeWeight += entry.Weight;
-            if (randomValue <= cumulativeWeight)
+        var weighted = entries
+            .Select(e =>
             {
+                double mult = 0.0;
+
+                if (e is LootTableItem li && ctx.TypeMultipliers.TryGetValue(li.Item.ItemType, out var m))
+                    mult = m;
+
+                return (Entry: e, Weight: e.Weight * (1 + (mult / 100)));
+            })
+            .Where(w => w.Weight > 0)
+            .ToList();
+
+        if (weighted.Count == 0) return null;
+
+        double effectiveTotal = weighted.Sum(w => w.Weight);
+        double roll = RandomGenerator.NextDouble() * 100;
+
+        if (roll > effectiveTotal)
+            return null;
+
+        double accum = 0;
+        foreach (var (entry, weight) in weighted)
+        {
+            accum += weight;
+            if (roll <= accum)
                 return entry;
-            }
         }
 
         return null;

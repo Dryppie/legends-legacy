@@ -411,7 +411,7 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CharacterSoulstoneUpgrade",
+                name: "CharacterSoulstoneUpgrades",
                 columns: table => new
                 {
                     CharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -420,9 +420,9 @@ namespace Persistence.LL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CharacterSoulstoneUpgrade", x => new { x.CharacterId, x.SoulstoneUpgradeDefinitionId });
+                    table.PrimaryKey("PK_CharacterSoulstoneUpgrades", x => new { x.CharacterId, x.SoulstoneUpgradeDefinitionId });
                     table.ForeignKey(
-                        name: "FK_CharacterSoulstoneUpgrade_Entities_CharacterId",
+                        name: "FK_CharacterSoulstoneUpgrades_Entities_CharacterId",
                         column: x => x.CharacterId,
                         principalTable: "Entities",
                         principalColumn: "Id",
@@ -895,7 +895,7 @@ namespace Persistence.LL.Migrations
                 name: "ArenaTicketStatus");
 
             migrationBuilder.DropTable(
-                name: "CharacterSoulstoneUpgrade");
+                name: "CharacterSoulstoneUpgrades");
 
             migrationBuilder.DropTable(
                 name: "ColosseumMatches");

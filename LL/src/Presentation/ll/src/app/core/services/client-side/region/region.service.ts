@@ -14,12 +14,8 @@ export class RegionService {
     if (id.includes('shenic')) {
       region = this.getShenicRegion();
     }
-    // else if (id.includes('city')) {
+    // else if (id.includes('varnel')) {
     //   region = getCitySidebar();
-    // } else if (id.includes('professions')) {
-    //   region = getProfessionSidebar();
-    // } else if (id.includes('world')) {
-    //   region = getWorldSidebar();
     // }
 
     return of(region);
@@ -33,13 +29,15 @@ export class RegionService {
           id: 'region_01_area_01',
           name: 'Lumo Ruins',
           creatures: ['Goblin', 'Goblin Archer', 'Goblin Warrior', 'Large Rat'],
-          description: 'The Lumo Ruins are crumbling remnants of a forgotten kingdom, overrun by goblins and vermin. Whispers of ancient magic still echo through the cracked stone corridors.'
+          description:
+            'The Lumo Ruins are crumbling remnants of a forgotten kingdom, overrun by goblins and vermin. Whispers of ancient magic still echo through the cracked stone corridors.',
         },
         {
           id: 'region_01_area_02',
           name: 'Blood Grove',
           creatures: ['Flame Imp', 'Frost Imp', 'Shadow Imp', 'Vampire Bat'],
-          description: 'The Blood Grove is a cursed forest where the trees bleed sap as red as blood. Twisted imps dance between the roots, feeding off the energy of the living.'
+          description:
+            'The Blood Grove is a cursed forest where the trees bleed sap as red as blood. Twisted imps dance between the roots, feeding off the energy of the living.',
         },
         {
           id: 'region_01_area_03',
@@ -52,7 +50,8 @@ export class RegionService {
             'Red Slime',
             'Transparent Slime',
           ],
-          description: 'Crystal Creek shimmers with enchanted waters and glowing minerals. Slimes of every color thrive here, feeding on the creek’s arcane residue.'
+          description:
+            'Crystal Creek shimmers with enchanted waters and glowing minerals. Slimes of every color thrive here, feeding on the creek’s arcane residue.',
         },
         {
           id: 'region_01_area_04',
@@ -64,13 +63,15 @@ export class RegionService {
             'Nightshade Blossom',
             'Pixie',
           ],
-          description: 'Bathed in eternal dusk, the Twilight Clearing is a mystical glade where reality bends. It’s a favorite haunt of mischievous fae and creatures born from illusion and light.'
+          description:
+            'Bathed in eternal dusk, the Twilight Clearing is a mystical glade where reality bends. It’s a favorite haunt of mischievous fae and creatures born from illusion and light.',
         },
         {
           id: 'region_01_area_05',
           name: 'Goblin Mines',
           creatures: ['Hobgoblin'],
-          description: 'Deep beneath the hills, the Goblin Mines echo with the clang of stolen tools. Hobgoblins rule here, digging for ancient relics they barely understand.'
+          description:
+            'Deep beneath the hills, the Goblin Mines echo with the clang of stolen tools. Hobgoblins rule here, digging for ancient relics they barely understand.',
         },
       ],
       dungeons: [],

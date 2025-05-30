@@ -1,7 +1,8 @@
 [
+  // Combat
   {
     "id": "combat.essence.drop.rate",
-    "name": "+% Essence Drop Rate",
+    "name": "Essence Drop Rate",
     "maxLevel": 100,
     "cost": {
       "base": 1,
@@ -15,7 +16,7 @@
   },
   {
     "id": "combat.double.exp.chance",
-    "name": "+% Double Exp Chance",
+    "name": "Double Exp Chance",
     "maxLevel": 100,
     "cost": {
       "base": 1,
@@ -27,9 +28,11 @@
     },
     "type": "Combat"
   },
+
+  // Crafting
   {
     "id": "crafting.double.item.exp.chance",
-    "name": "+% Double Item Exp Chance",
+    "name": "Double Item Exp Chance",
     "maxLevel": 100,
     "cost": {
       "base": 1,
@@ -43,7 +46,7 @@
   },
   {
     "id": "crafting.negative.outcome",
-    "name": "-% Negative Outcome Chance",
+    "name": "Negative Outcome Chance",
     "maxLevel": 100,
     "cost": {
       "base": 1,
@@ -55,9 +58,11 @@
     },
     "type": "Crafting"
   },
+
+  // Gathering
   {
     "id": "gathering.double.drop.chance",
-    "name": "+% Gathering Double Drop Chance",
+    "name": "Gathering Double Drop Chance",
     "maxLevel": 100,
     "cost": {
       "base": 1,
@@ -71,7 +76,7 @@
   },
   {
     "id": "gathering.double.exp.chance",
-    "name": "+% Gathering Double Exp Chance",
+    "name": "Gathering Double Exp Chance",
     "maxLevel": 100,
     "cost": {
       "base": 1,
@@ -83,9 +88,11 @@
     },
     "type": "Gathering"
   },
+
+  // Misc
   {
     "id": "misc.soulstone.drop.rate",
-    "name": "+% Soulstone Drop-Rate",
+    "name": "Soulstone Drop Rate",
     "maxLevel": 100,
     "cost": {
       "base": 1,
@@ -100,7 +107,7 @@
   },
   {
     "id": "misc.soulstone.double.drop.chance",
-    "name": "+% Soulstone Double Drop Chance",
+    "name": "Soulstone Double Drop Chance",
     "maxLevel": 100,
     "cost": {
       "base": 1,

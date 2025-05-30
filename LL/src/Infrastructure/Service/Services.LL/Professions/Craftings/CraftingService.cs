@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Professions;
 using Application.UseCases.Soulstones.Events;
+using Domain.Helpers.Constants;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
@@ -21,17 +22,19 @@ public class CraftingService : ICraftingService
     private readonly ITemperingService _temperingService;
     private readonly ILevelingService _levelingService;
     private readonly ISoulstoneUpgradeService _soulstoneUpgradeService;
+    private readonly ILootService _lootService;
     private readonly IPublisher _publisher;
 
-    public CraftingService(ICraftingRepository cr, IInventoryService invS, IProfessionService ps, IRecipeService rs, ITemperingService ts, ILevelingService ls, ISoulstoneUpgradeService sus, IPublisher p)
+    public CraftingService(ICraftingRepository cr, IInventoryService invS, IProfessionService ps, IRecipeService rs, ITemperingService ts, ILevelingService lvlS, ISoulstoneUpgradeService sus, ILootService ls, IPublisher p)
     {
         _craftingRepository = cr;
         _inventoryService = invS;
         _professionService = ps;
         _recipeService = rs;
         _temperingService = ts;
-        _levelingService = ls;
+        _levelingService = lvlS;
         _soulstoneUpgradeService = sus;
+        _lootService = ls;
         _publisher = p;
     }
 
@@ -80,7 +83,23 @@ public class CraftingService : ICraftingService
 
     public async Task<TemperingSession> PerformIdleCrafting(CharacterAction characterAction, int actionsToPerform, CancellationToken cancellationToken)
     {
-        //var upgrades = _soulstoneUpgradeService.GetForCharacterAsync(characterAction.CharacterId, cancellationToken);
+        string[] wantedBonuses = [SoulstoneUpgradeContants.SoulstoneDropRate,
+                                  SoulstoneUpgradeContants.SoulstoneDoubleDropChance,
+                                  SoulstoneUpgradeContants.CraftingDoubleItemExpChance,
+                                  SoulstoneUpgradeContants.CraftingNegativeOutcome];
+
+        var soulstoneBonuses = await _soulstoneUpgradeService.GetSoulstoneBonusesByCharacterIdAsync(characterAction.CharacterId, wantedBonuses, cancellationToken);
+
+        soulstoneBonuses.TryGetValue(SoulstoneUpgradeContants.SoulstoneDropRate, out var soulstoneDropRate);
+        soulstoneBonuses.TryGetValue(SoulstoneUpgradeContants.SoulstoneDoubleDropChance, out var soulstoneDoubleDropChance);
+        soulstoneBonuses.TryGetValue(SoulstoneUpgradeContants.CraftingDoubleItemExpChance, out var craftingDoubleItemExpChance);
+        soulstoneBonuses.TryGetValue(SoulstoneUpgradeContants.CraftingNegativeOutcome, out var craftingNegativeOutcome);
+        
+        var temperingBonuses = new Dictionary<TemperingOutcome, double>()
+        {
+            { TemperingOutcome.Negative, craftingNegativeOutcome },
+            { TemperingOutcome.Positive, craftingDoubleItemExpChance }
+        };
 
         var actionDetails = (characterAction.ActionDetails as CraftingActionDetails)!;
         var produced = new List<InventoryItem>();
@@ -88,6 +107,7 @@ public class CraftingService : ICraftingService
         var now = DateTimeOffset.UtcNow;
 
         var temperingSummary = new TemperingSummary();
+        var rng = Random.Shared;
 
         while (actionsToPerform > 0 && actionDetails.CraftingQueueItems.Count > 0)
         {
@@ -98,11 +118,10 @@ public class CraftingService : ICraftingService
             current.EquipmentInstance.Potential -= spend;
             actionsToPerform -= spend;
             temperingSummary.TotalActions += spend;
-            var rng = Random.Shared;
 
             for (int i = 0; i < spend; i++)
             {
-                _temperingService.HandleTempering(current, temperingSummary, rng);
+                _temperingService.HandleTempering(current, temperingSummary, rng, temperingBonuses);
             }
 
             if (current.EquipmentInstance.Potential == 0)
@@ -119,7 +138,7 @@ public class CraftingService : ICraftingService
             //characterAction.ActionDetails = null;
         }
 
-        await ProcessSoulstoneDrops(characterAction.CharacterId, temperingSummary.TotalActions);
+        await ProcessSoulstoneDrops(characterAction.CharacterId, temperingSummary.TotalActions, soulstoneDropRate, soulstoneDoubleDropChance, cancellationToken);
         await UpdateCharacterProfessionsAsync(characterAction.CharacterId, temperingSummary, cancellationToken);
 
         // TODO: Publish event to handle earning soulstones
@@ -134,10 +153,13 @@ public class CraftingService : ICraftingService
         return temperingSession;
     }
 
-    private async Task ProcessSoulstoneDrops(Guid characterId, int actionsPerformed)
+    private async Task ProcessSoulstoneDrops(Guid characterId, int actionsPerformed, double dropRate, double doubleDropChance, CancellationToken cancellationToken)
     {
         var durationInSeconds = 6 * actionsPerformed;
-        await _publisher.Publish(new SoulstoneDropEvent(characterId, durationInSeconds));
+        var soulstonesEarned = _lootService.GenerateSoulstoneLoot(durationInSeconds, dropRate, doubleDropChance);
+        if (soulstonesEarned < 1) return;
+
+        await _publisher.Publish(new SoulstoneDropEvent(characterId, soulstonesEarned), cancellationToken);
     }
 
     private async Task UpdateCharacterProfessionsAsync(Guid characterId, TemperingSummary temperingSummary, CancellationToken cancellationToken)

@@ -19,6 +19,7 @@ using Domain.Models.Professions.Crafting;
 using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
+using Domain.Models.Soulstones;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -34,6 +35,7 @@ public interface IDbContext
     DbSet<ArenaTicketStatus> ArenaTicketStatus { get; }
     DbSet<ColosseumMatchResult> ColosseumMatches { get; }
     DbSet<Character> Characters { get; }
+    DbSet<CharacterSoulstoneUpgrade> CharacterSoulstoneUpgrades { get; }
     DbSet<Creature> Creatures { get; }
     //DbSet<Echo> Echoes { get; }
     DbSet<Entity> Entities { get; }

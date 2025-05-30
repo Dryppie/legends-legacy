@@ -22,6 +22,7 @@ using Domain.Models.Professions.Crafting;
 using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
+using Domain.Models.Soulstones;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -117,6 +118,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<ArenaTicketStatus> ArenaTicketStatus => Set<ArenaTicketStatus>();
     public DbSet<ColosseumMatchResult> ColosseumMatches => Set<ColosseumMatchResult>();
     public DbSet<Character> Characters => Set<Character>();
+    public DbSet<CharacterSoulstoneUpgrade> CharacterSoulstoneUpgrades => Set<CharacterSoulstoneUpgrade>();
     public DbSet<Creature> Creatures => Set<Creature>();
 
     //public DbSet<Echo> Echoes => Set<Echo>();

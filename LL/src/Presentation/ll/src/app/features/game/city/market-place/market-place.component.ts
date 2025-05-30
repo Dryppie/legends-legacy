@@ -20,16 +20,8 @@ export class MarketPlaceComponent implements OnInit {
       label: 'Buy',
       items: [],
     },
-    // {
-    //   label: 'Tournament Grounds',
-    //   items: [],
-    // },
-    // {
-    //   label: `Champion's Market`,
-    //   items: [],
-    // },
     {
-      label: 'Your Orders',
+      label: 'Sell',
       items: [],
     },
   ];

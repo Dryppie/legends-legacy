@@ -2,6 +2,7 @@
 using Application.Interfaces.Services.LL.Professions;
 using Application.UseCases.Inventories.Events;
 using Application.UseCases.Soulstones.Events;
+using Domain.Helpers.Constants;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
@@ -17,18 +18,33 @@ public class GatheringService : IGatheringService
     private readonly IPublisher _publisher;
     private readonly IProfessionService _professionService;
     private readonly ILevelingService _levelingService;
+    private readonly ISoulstoneUpgradeService _soulstoneUpgradeService;
 
-    public GatheringService(ILootService ls, ILootTableService lts, IPublisher p, IProfessionService ps, ILevelingService lvlS)
+    public GatheringService(ILootService ls, ILootTableService lts, IPublisher p, IProfessionService ps, ILevelingService lvlS, ISoulstoneUpgradeService sus)
     {
         _lootService = ls;
         _lootTableService = lts;
         _publisher = p;
         _professionService = ps;
         _levelingService = lvlS;
+        _soulstoneUpgradeService = sus;
     }
 
     public async Task<GatheringSession> PerformGatheringAsync(CharacterAction characterAction, int actionsToPerform, CancellationToken cancellationToken)
     {
+        string[] wantedBonuses = [SoulstoneUpgradeContants.SoulstoneDropRate,
+                                  SoulstoneUpgradeContants.SoulstoneDoubleDropChance,
+                                  SoulstoneUpgradeContants.GatheringDoubleDropChance,
+                                  SoulstoneUpgradeContants.GatheringDoubleExpChance];
+
+        var soulstoneBonuses = await _soulstoneUpgradeService.GetSoulstoneBonusesByCharacterIdAsync(characterAction.CharacterId, wantedBonuses, cancellationToken);
+
+        soulstoneBonuses.TryGetValue(SoulstoneUpgradeContants.SoulstoneDropRate, out var soulstoneDropRate);
+        soulstoneBonuses.TryGetValue(SoulstoneUpgradeContants.SoulstoneDoubleDropChance, out var soulstoneDoubleDropChance);
+        soulstoneBonuses.TryGetValue(SoulstoneUpgradeContants.GatheringDoubleDropChance, out var gatheringDoubleDropChance);
+        soulstoneBonuses.TryGetValue(SoulstoneUpgradeContants.GatheringDoubleExpChance, out var gatheringDoubleExpChance);
+
+        var rng = Random.Shared;
         var startedAt = characterAction.UpdatedAt;
         var now = DateTimeOffset.UtcNow;
 
@@ -52,11 +68,19 @@ public class GatheringService : IGatheringService
             var loot = _lootService.GenerateGatheringLootAsync(lootTable, cancellationToken);
             if (loot.Count > 0)
             {
+                if (rng.NextDouble() < (gatheringDoubleDropChance / 100))
+                    foreach (var drop in loot)
+                        drop.Quantity *= 2; // Double loot based on rng roll
+
                 totalLoot.AddRange(loot);
             }
+
             gatheringSummary.TotalExperience++;
+            if (rng.NextDouble() < (gatheringDoubleExpChance / 100))
+                gatheringSummary.TotalExperience++;
         }
 
+        // This is made purely to display the loot in the frontend
         gatheringSummary.Loot = totalLoot
             .GroupBy(ii => ii.ItemInstance.ItemBaseId)
             .Select(g => new InventoryItem
@@ -73,17 +97,20 @@ public class GatheringService : IGatheringService
             GatheringSummary = gatheringSummary,
         };
 
-        await ProcessSoulstoneDrops(characterAction.CharacterId, actionsToPerform);
+        await ProcessSoulstoneDrops(characterAction.CharacterId, actionsToPerform, soulstoneDropRate, soulstoneDoubleDropChance, cancellationToken);
         await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
         await UpdateCharacterProfessionsAsync(characterAction.CharacterId, gatheringSummary, cancellationToken);
 
         return gatheringSession;
     }
 
-    private async Task ProcessSoulstoneDrops(Guid characterId, int actionsToPerform)
+    private async Task ProcessSoulstoneDrops(Guid characterId, int actionsToPerform, double dropRate, double doubleDropChance, CancellationToken cancellationToken)
     {
         var durationInSeconds = 6 * actionsToPerform;
-        await _publisher.Publish(new SoulstoneDropEvent(characterId, durationInSeconds));
+        var soulstonesEarned = _lootService.GenerateSoulstoneLoot(durationInSeconds, dropRate, doubleDropChance);
+        if (soulstonesEarned < 1) return;
+
+        await _publisher.Publish(new SoulstoneDropEvent(characterId, soulstonesEarned), cancellationToken);
     }
 
     private async Task UpdateCharacterProfessionsAsync(Guid characterId, GatheringSummary gatheringSummary, CancellationToken cancellationToken)

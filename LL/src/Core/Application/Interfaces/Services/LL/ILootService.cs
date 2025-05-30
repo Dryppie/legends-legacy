@@ -1,5 +1,6 @@
 ﻿using Domain.Models.Entities;
 using Domain.Models.Inventories;
+using Domain.Models.Items;
 using Domain.Models.LootTables;
 
 namespace Application.Interfaces.Services.LL;
@@ -27,5 +28,5 @@ public interface ILootService
     /// </summary>
     /// <param name="enemyCharacters"></param>
     /// <returns></returns>
-    List<InventoryItem> GenerateIdleCombatLootAsync(List<Entity> enemyCharacters);
+    List<InventoryItem> GenerateIdleCombatLootAsync(List<Entity> enemyCharacters, Dictionary<ItemType, double> multipliers);
 }

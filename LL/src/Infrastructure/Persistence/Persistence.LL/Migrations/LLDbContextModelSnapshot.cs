@@ -656,7 +656,7 @@ namespace Persistence.LL.Migrations
 
                     b.HasKey("CharacterId", "SoulstoneUpgradeDefinitionId");
 
-                    b.ToTable("CharacterSoulstoneUpgrade");
+                    b.ToTable("CharacterSoulstoneUpgrades");
                 });
 
             modelBuilder.Entity("Domain.Models.Users.AppUser", b =>

@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250529165832_BaseMigration")]
+    [Migration("20250530171125_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -659,7 +659,7 @@ namespace Persistence.LL.Migrations
 
                     b.HasKey("CharacterId", "SoulstoneUpgradeDefinitionId");
 
-                    b.ToTable("CharacterSoulstoneUpgrade");
+                    b.ToTable("CharacterSoulstoneUpgrades");
                 });
 
             modelBuilder.Entity("Domain.Models.Users.AppUser", b =>

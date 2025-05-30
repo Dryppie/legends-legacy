@@ -16,6 +16,7 @@ using Domain.Models.Professions.Crafting;
 using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
+using Domain.Models.Soulstones;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -36,6 +37,7 @@ using Persistence.LL.Repositories.Professions.Craftings;
 using Persistence.LL.Repositories.Professions.Gatherings;
 using Persistence.LL.Repositories.Regions;
 using Persistence.LL.Repositories.Regions.Areas;
+using Persistence.LL.Repositories.Soulstones;
 using Persistence.LL.Repositories.Users;
 
 namespace Persistence.LL;
@@ -83,6 +85,8 @@ public static class DependencyInjection
         services.AddScoped<IProfessionRepository, ProfessionRepository>();
         services.AddScoped<ICraftingRepository, CraftingRepository>();
         services.AddScoped<IRecipeRepository, RecipeRepository>();
+
+        services.AddScoped<ISoulstoneUpgradeRepository, SoulstoneUpgradeRepository>();
 
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();

@@ -7,10 +7,11 @@ using Services.LL.Interfaces;
 namespace Services.LL.Professions.Craftings;
 public class TemperingService : ITemperingService
 {
-    public void HandleTempering(CraftingQueueItem current, TemperingSummary temperingSummary, Random rng)
+    public void HandleTempering(CraftingQueueItem current, TemperingSummary temperingSummary, Random rng, Dictionary<TemperingOutcome, double> temperingBonuses)
     {
-        var experience = 0;
-        var outcome = RollOutcome(current.EquipmentInstance.Rarity, rng);
+        temperingBonuses.TryGetValue(TemperingOutcome.Positive, out var doubleItemExpChance);
+        temperingBonuses.TryGetValue(TemperingOutcome.Negative, out var craftingNegativeOutcome);
+        var outcome = RollOutcome(current.EquipmentInstance.Rarity, rng, craftingNegativeOutcome);
 
         switch (outcome)
         {
@@ -19,32 +20,35 @@ public class TemperingService : ITemperingService
                 break;
 
             case TemperingOutcome.Positive:
-                HandlePositiveOutcome(current);
+                HandlePositiveOutcome(current, rng, doubleItemExpChance);
                 break;
 
             case TemperingOutcome.Negative:
                 HandleNegativeOutcome(current, rng);
-
                 break;
 
             case TemperingOutcome.Neutral:
             default:
-                // literally nothing happens
+                // nothing happens
                 break;
         }
 
-        experience = outcome switch
+        var experience = outcome switch
         {
             TemperingOutcome.Critical => 100,
             _ => 1,
         };
-        
+
         AllocateExpBasedOnCraftingProfession(temperingSummary, experience, current.CraftType);
     }
 
-    private static void HandlePositiveOutcome(CraftingQueueItem current)
+    private static void HandlePositiveOutcome(CraftingQueueItem current, Random rng, double doubleItemExpChance)
     {
-        current.EquipmentInstance.ItemXp++;
+        var experience = 1;
+        if (rng.NextDouble() < (doubleItemExpChance / 100)) experience *= 2;
+
+        current.EquipmentInstance.ItemXp += experience;
+
         TryUpgradeRarity(current.EquipmentInstance);
     }
 
@@ -105,7 +109,6 @@ public class TemperingService : ITemperingService
         }
     }
 
-    /// <summary>Everything in §2 of your design doc (stats, visuals, sockets, …)</summary>
     private static void ApplyTierPackage(EquipmentInstance eq)
     {
         // Implement the details in one place so it can be reused from everywhere.
@@ -113,7 +116,7 @@ public class TemperingService : ITemperingService
 
 
 
-    private static TemperingOutcome RollOutcome(Rarity rarity, Random rng)
+    private static TemperingOutcome RollOutcome(Rarity rarity, Random rng, double craftingNegativeOutcome)
     {
         /* ---------------- probability tables ----------------
            • Critical  : 0.0005 % doubled per rarity step
@@ -122,10 +125,10 @@ public class TemperingService : ITemperingService
            • Neutral   : remainder
         ----------------------------------------------------- */
 
-        int rarityIndex = (int)rarity;                 // Common = 0 … Legacy = 6
+        int rarityIndex = (int)rarity; // Common = 0 … Legacy = 6
 
         double pCritical = 0.00005 * rarityIndex;  // 0.005 % → 0.035 %
-        double pNegative = 0.05 + 0.05 * rarityIndex;        // 5 %   → 35 %
+        double pNegative = (0.05 + 0.05 * rarityIndex) + (craftingNegativeOutcome / 100); // (5 + -10 = -5) // 5% → 35%
         double pPositive = PositiveChance(rarity);
 
         double roll = rng.NextDouble();
