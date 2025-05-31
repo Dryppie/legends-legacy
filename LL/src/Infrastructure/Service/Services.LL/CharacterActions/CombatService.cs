@@ -1,4 +1,6 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.CharacterActions;
+using Application.Interfaces.Services.LL.Entities;
 using Application.UseCases.Inventories.Events;
 using Application.UseCases.Soulstones.Events;
 using Domain.Helpers.Constants;
@@ -14,6 +16,7 @@ using Domain.Models.Items;
 using Domain.Models.Items.Equipments.Slots;
 using MediatR;
 using Services.LL.Combat;
+using Services.LL.Extensions;
 using Services.LL.Interfaces;
 
 namespace Services.LL.CharacterActions;
@@ -59,11 +62,6 @@ public class CombatService : ICombatService
 
         var soulstoneBonuses = await _soulstoneUpgradeService.GetSoulstoneBonusesByCharacterIdAsync(characterAction.CharacterId, wantedBonuses, cancellationToken);
 
-        soulstoneBonuses.TryGetValue(SoulstoneUpgradeContants.SoulstoneDropRate, out var soulstoneDropRate);
-        soulstoneBonuses.TryGetValue(SoulstoneUpgradeContants.SoulstoneDoubleDropChance, out var soulstoneDoubleDropChance);
-        soulstoneBonuses.TryGetValue(SoulstoneUpgradeContants.CombatEssenceDropRate, out var combatEssenceDropRate);
-        soulstoneBonuses.TryGetValue(SoulstoneUpgradeContants.CombatDoubleExpChance, out var combatDoubleExpChance);
-
         // Initialize combatants
         var playerCharacters = await GetEntitiesAsync([.. combatAction.CharacterTeam], cancellationToken);
         var allEnemyCharacters = await GetEntitiesAsync([.. combatAction.Area.Creatures.Select(c => c.CreatureId)], cancellationToken);
@@ -103,6 +101,7 @@ public class CombatService : ICombatService
                 var selectedEnemyEntities = new List<Entity>();
                 selectedEnemyIds.ForEach(id => selectedEnemyEntities.Add(allEnemyCharacters.First(ee => ee.Id.Equals(id))));
 
+                var combatEssenceDropRate = soulstoneBonuses.Get(SoulstoneUpgradeContants.CombatEssenceDropRate);
                 var lootThisBattle = _lootService.GenerateIdleCombatLootAsync(selectedEnemyEntities, new Dictionary<ItemType, double>() { { ItemType.Essence, combatEssenceDropRate } });
                 lastCombatResult.Loot = lootThisBattle;
 
@@ -110,7 +109,7 @@ public class CombatService : ICombatService
                 totalLoot.AddRange(lootThisBattle);
 
                 lastCombatResult.ExperienceGained = selectedEnemyEntities.OfType<Creature>().Sum(e => e.ExperienceReward);
-                if (rng.NextDouble() < (combatDoubleExpChance / 100))
+                if (rng.NextDouble() < (soulstoneBonuses.Get(SoulstoneUpgradeContants.CombatDoubleExpChance) / 100))
                     lastCombatResult.ExperienceGained *= 2;
             }
             AddToCombatSummary(combatSummary, lastCombatResult);
@@ -130,6 +129,8 @@ public class CombatService : ICombatService
         };
 
         var durationInSeconds = (int)Math.Abs((characterAction.UpdatedAt - sessionStartedAt).TotalSeconds);
+        var soulstoneDropRate = soulstoneBonuses.Get(SoulstoneUpgradeContants.SoulstoneDropRate);
+        var soulstoneDoubleDropChance = soulstoneBonuses.Get(SoulstoneUpgradeContants.SoulstoneDoubleDropChance);
         await ProcessSoulstoneDrops(characterAction.CharacterId, durationInSeconds, soulstoneDropRate, soulstoneDoubleDropChance, cancellationToken);
 
         await UpdateCharacterStatsAsync(playerCharacters, combatSession.CombatSummary.TotalExperience, cancellationToken);

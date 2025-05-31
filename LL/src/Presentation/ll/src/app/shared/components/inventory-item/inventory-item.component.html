@@ -3,15 +3,15 @@
   (click)="openModal()"
 >
   <img
-    *ngIf="isEquipment"
-    src="icons/equipment-slots/empty_{{ equipmentIcon }}.svg"
-    alt="empty_equipment"
+    *ngIf="equipmentIconPath"
+    [src]="equipmentIconPath"
+    [alt]="equipmentIcon + ' slot'"
     class="center w-4 object-contain"
   />
   <img
     *ngIf="isEssence"
     src="icons/items/essence-item.svg"
-    alt="empty_equipment"
+    alt="essence item"
     class="center w-4 object-contain"
   />
 

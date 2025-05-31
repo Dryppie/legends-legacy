@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Services.LL;
+﻿using Application.Interfaces.Services.LL.Entities;
 using Domain.Models.Entities;
 
 namespace Services.LL.Entities;

@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Services.LL;
+﻿using Application.Interfaces.Services.LL.Colosseum;
 using Domain.Models.Colosseum;
 using Domain.Models.Combat;
 

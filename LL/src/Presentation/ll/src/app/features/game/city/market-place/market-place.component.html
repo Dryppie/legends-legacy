@@ -6,17 +6,23 @@
       class="w-full"
     ></app-banner>
   </div>
-
   <app-tab
     [tabs]="tabLabels"
     [activeTab]="activeTab"
     (tabSelected)="setActiveTab($event)"
     class="w-full flex-none"
   ></app-tab>
-  <div class="flex h-full w-full flex-col justify-between">
-    <div class="italic text-white"></div>
-    <div
-      class="flex flex-col items-center justify-center gap-4 sm:flex-row"
-    ></div>
+
+  <div class="flex h-full w-full flex-col justify-between overflow-hidden">
+    <ng-container [ngSwitch]="activeTab">
+      <app-market-place-buy
+        class="h-full"
+        *ngSwitchCase="'Buy'"
+      ></app-market-place-buy>
+      <app-market-place-sell
+        class="h-full"
+        *ngSwitchCase="'Sell'"
+      ></app-market-place-sell>
+    </ng-container>
   </div>
 </div>

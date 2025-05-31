@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Services.LL;
+﻿using Application.Interfaces.Services.LL.CharacterActions;
 using Common.Primitives;
 using MediatR;
 

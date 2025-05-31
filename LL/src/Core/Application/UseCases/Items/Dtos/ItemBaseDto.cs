@@ -15,6 +15,7 @@ public class ItemBaseDto : IMapFrom<ItemBase>
     public string Name { get; set; } = string.Empty;
     public string IconPath { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    public bool Stackable { get; set; } = true;
     public ItemType ItemType { get; set; }
     public Rarity Rarity { get; set; }
     public void Mapping(Profile profile)

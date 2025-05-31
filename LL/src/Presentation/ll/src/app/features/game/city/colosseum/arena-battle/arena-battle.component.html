@@ -21,12 +21,12 @@
     <div>Name</div>
     <div>Level</div>
     <div>Arena Rating</div>
-    <div
-      class="justify-self-end rounded-md border border-light_gray px-5 py-2 text-rose-500 hover:cursor-pointer hover:bg-zinc-600/30"
-      (click)="onRefresh()"
-    >
-      Refresh
-    </div>
+    <app-regular-button
+      class="justify-self-end"
+      text="Refresh"
+      variant="danger"
+      (pressed)="onRefresh()"
+    ></app-regular-button>
   </div>
   <div
     class="grid grid-cols-4 items-center border-t border-light_gray p-2"
@@ -35,16 +35,13 @@
     <div class="break-words pr-2">{{ o.name }}</div>
     <div>{{ o.level }}</div>
     <div>{{ o.arenaRating }}</div>
-    <div
-      class="justify-self-end rounded-md border border-light_gray p-2 text-primary hover:cursor-pointer hover:bg-zinc-600/30"
-      (click)="onChallenge(o.id)"
-      [ngClass]="{
-        'pointer-events-none cursor-not-allowed opacity-40 hover:bg-transparent':
-          arenaTicketStatus == undefined ||
-          arenaTicketStatus.currentTickets < 1,
-      }"
-    >
-      Challenge
-    </div>
+    <app-regular-button
+      class="justify-self-end"
+      text="Challenge"
+      (pressed)="onChallenge(o.id)"
+      [disabled]="
+        arenaTicketStatus == undefined || arenaTicketStatus.currentTickets < 1
+      "
+    ></app-regular-button>
   </div>
 </div>

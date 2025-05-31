@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Services.LL;
+﻿using Application.Interfaces.Services.LL.Entities;
 using Application.UseCases.Characters.Dtos;
 using AutoMapper;
 using Common.Primitives;

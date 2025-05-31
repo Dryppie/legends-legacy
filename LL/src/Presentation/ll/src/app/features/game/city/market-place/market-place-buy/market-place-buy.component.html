@@ -1,0 +1,81 @@
+<div>
+  <!-- <form
+    class="flex flex-wrap items-center gap-2 rounded-lg bg-black/40 px-3 py-2 text-sm backdrop-blur-sm"
+    (ngSubmit)="applyFilters()"
+  > -->
+  <!-- 🔍 Search -->
+  <!-- <input
+      type="search"
+      [(ngModel)]="filters.search"
+      name="search"
+      placeholder="Search relics…"
+      class="flex-1 rounded border border-neutral-700 bg-transparent px-2 py-1 focus:outline-none focus:ring-amber-400 md:w-48 md:flex-none"
+    /> -->
+
+  <!-- ▼ Category -->
+  <!-- <select
+      [(ngModel)]="filters.category"
+      name="category"
+      class="rounded border border-neutral-700 bg-transparent px-2 py-1"
+    >
+      <option value="">All categories</option>
+      <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+    </select> -->
+
+  <!-- ▼ Rarity -->
+  <!-- <select
+      [(ngModel)]="filters.rarity"
+      name="rarity"
+      class="rounded border border-neutral-700 bg-transparent px-2 py-1"
+    >
+      <option value="">Any rarity</option>
+      <option *ngFor="let r of rarities" [value]="r">{{ r }}</option>
+    </select> -->
+
+  <!-- ▼ Price sort -->
+  <!-- <select
+      [(ngModel)]="filters.priceSort"
+      name="priceSort"
+      class="rounded border border-neutral-700 bg-transparent px-2 py-1"
+    >
+      <option value="asc">Price ↑</option>
+      <option value="desc">Price ↓</option>
+    </select> -->
+
+  <!-- Reset -->
+  <!-- <button
+      type="button"
+      class="ml-auto text-amber-400 hover:underline"
+      (click)="resetFilters()"
+    >
+      Reset
+    </button> -->
+  <!-- </form> -->
+
+  <!-- ITEMS GRID -->
+  <div
+    class="grid grid-cols-1 gap-4 overflow-y-auto py-4 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-4"
+  >
+    <!-- <ng-container *ngFor="let item of filteredItems">
+      <app-item-card
+        [item]="item"
+        (purchase)="openConfirm(item)"
+      ></app-item-card>
+    </ng-container> -->
+
+    <!-- Empty-state -->
+    <!-- <p
+      *ngIf="filteredItems.length === 0"
+      class="col-span-full text-center italic text-neutral-400"
+    >
+      No items match your filters.
+    </p> -->
+  </div>
+
+  <!-- PURCHASE MODAL -->
+  <!-- <app-purchase-modal
+    *ngIf="selected"
+    [item]="selected"
+    (closed)="selected = null"
+  ></app-purchase-modal> -->
+</div>

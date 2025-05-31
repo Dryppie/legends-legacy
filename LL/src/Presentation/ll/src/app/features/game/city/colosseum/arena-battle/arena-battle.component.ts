@@ -1,13 +1,14 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CharacterDto } from '../../../../../shared/models/Dtos/characterDto';
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { ArenaTicketStatus } from '../../../../../shared/models/Dtos/colosseum/arenaTicketStatus';
 import { ColosseumService } from '../../../../../core/services/api/colosseum/colosseum.service';
+import { RegularButtonComponent } from '../../../../../shared/components/buttons/regular-button/regular-button.component';
 
 @Component({
   selector: 'app-arena-battle',
   standalone: true,
-  imports: [NgFor, NgIf, NgClass],
+  imports: [NgFor, NgIf, RegularButtonComponent],
   templateUrl: './arena-battle.component.html',
   styleUrl: './arena-battle.component.css',
 })

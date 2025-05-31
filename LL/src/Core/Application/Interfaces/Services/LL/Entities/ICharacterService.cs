@@ -1,6 +1,6 @@
 ﻿using Domain.Models.Entities.Characters;
 
-namespace Application.Interfaces.Services.LL;
+namespace Application.Interfaces.Services.LL.Entities;
 public interface ICharacterService
 {
     /// <summary>

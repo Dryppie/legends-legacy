@@ -140,7 +140,7 @@ function getCitySidebar(): Tab[] {
           id: 'market-place',
           route: ['/game', 'city', 'market-place'],
           icon: 'city/temple',
-          title: 'Market Place',
+          title: 'Cinder Bazaar',
           description: 'List and buy items',
         },
       ],

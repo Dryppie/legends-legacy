@@ -25,6 +25,7 @@ public interface IInventoryService
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task CreateInventoryAsync(Guid characterId, CancellationToken cancellationToken);
-    Task<bool> TryRemoveItemsAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken);
+    Task<bool> TryRemoveMaterialsForCraftingAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken);
+    Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken);
     Task<bool> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken);
 }

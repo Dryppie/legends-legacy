@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.Services.LL;
+﻿using Application.Interfaces.Services.LL.CharacterActions;
+using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Professions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Services.LL.Interfaces;

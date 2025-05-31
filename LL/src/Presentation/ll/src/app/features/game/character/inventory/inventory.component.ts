@@ -2,13 +2,11 @@ import { NgFor } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { TabComponent } from '../../../../shared/components/tab/tab.component';
 import { Tab } from '../../../../shared/models/sidebar-item';
-import { InventoryService } from '../../../../core/services/api/inventory/inventory.service';
-import { InventoryDto } from '../../../../shared/models/Dtos/inventoryDto';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
-import { CharacterManagerService } from '../../../../core/services/client-side/character-manager/character-manager.service';
 import { EquipmentOverviewComponent } from '../../../../shared/components/equipment-overview/equipment-overview.component';
 import { InventoryItemComponent } from '../../../../shared/components/inventory-item/inventory-item.component';
+import { InventoryStateService } from '../../../../core/services/api/inventory/inventory-state.service';
 
 @Component({
   selector: 'app-inventory',
@@ -43,41 +41,12 @@ export class InventoryComponent implements OnInit {
     },
   ];
   activeTab: string = '';
-  items: InventoryItem[] = [];
-  emptySlots = Array(180).fill(null);
 
-  constructor(
-    private inventoryService: InventoryService,
-    private characterManager: CharacterManagerService,
-  ) {}
+  constructor(public state: InventoryStateService) {}
 
   ngOnInit(): void {
-    this.characterManager.inventory$.subscribe({
-      next: (inventory) => {
-        if (!inventory) return;
-        this.items = inventory.inventoryItems;
-        this.emptySlots = Array(180 - this.items.length).fill(null);
-      },
-      error: (err) => {
-        console.error('Error getting inventory from CharacterManager:', err);
-      },
-    });
-    this.getInventory();
+    this.state.load();
     this.setActiveTab(this.tabs[0]?.label || '');
-  }
-
-  getInventory(): void {
-    this.inventoryService.getInventory().subscribe({
-      next: (inventory: InventoryDto) => {
-        // Update the component's items
-        this.items = inventory.inventoryItems;
-        // Adjust the number of empty slots based on the items
-        this.emptySlots = Array(180 - this.items.length).fill(null);
-      },
-      error: (error) => {
-        console.error('Error fetching inventory:', error);
-      },
-    });
   }
 
   setActiveTab(tabLabel: string) {
@@ -87,30 +56,19 @@ export class InventoryComponent implements OnInit {
   get filteredItems(): InventoryItem[] {
     switch (this.activeTab) {
       case 'All':
-        return this.items;
+        return this.state.items();
 
       case 'Equipment':
-        return this.items.filter(
-          (inventoryItem) =>
-            inventoryItem.itemInstance.itemBase.itemType === 'Equipment',
-        );
+        return this.state.equipment();
 
       case 'Resources':
-        return this.items.filter(
-          (inventoryItem) =>
-            inventoryItem.itemInstance.itemBase.itemType === 'Material',
-        );
+        return this.state.materials();
 
       case 'Essences':
-        return this.items.filter(
-          (inventoryItem) =>
-            inventoryItem.itemInstance.itemBase.itemType === 'Essence',
-        );
+        return this.state.essences();
 
       default:
-        // Fallback if no matching case; you can decide what makes sense
-        // E.g., return an empty array, or return all items
-        return this.items;
+        return this.state.items();
     }
   }
 

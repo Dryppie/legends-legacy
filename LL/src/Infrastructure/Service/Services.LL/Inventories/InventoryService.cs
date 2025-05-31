@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Entities;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.EssenceItems;
@@ -45,9 +46,22 @@ public class InventoryService : IInventoryService
         await _inventoryRepository.CreateInventoryAsync(characterId, cancellationToken);
     }
 
-    public async Task<bool> TryRemoveItemsAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken)
+    public async Task<bool> TryRemoveMaterialsForCraftingAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken)
     {
-        return await _inventoryRepository.TryRemoveItemsAsync(characterId, materials, cancellationToken);
+        var requiredByItemId = materials
+            .GroupBy(m => m.ItemId)
+            .ToDictionary(g => g.Key, g => g.Sum(m => m.Quantity));
+
+        return await _inventoryRepository.TryRemoveItemsAsync(characterId, requiredByItemId, cancellationToken);
+    }
+
+    public async Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken)
+    {
+        var requiredByItemId = materials
+            .GroupBy(m => m.ItemId)
+            .ToDictionary(g => g.Key, g => g.Sum(m => m.Quantity));
+
+        return await _inventoryRepository.TryRemoveItemsAsync(characterId, requiredByItemId, cancellationToken);
     }
 
     public async Task<bool> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken)

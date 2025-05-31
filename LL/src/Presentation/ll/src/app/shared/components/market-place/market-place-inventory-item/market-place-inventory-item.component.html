@@ -1,0 +1,21 @@
+<div
+  class="flex w-full items-center gap-1 p-2 hover:cursor-pointer hover:bg-neutral-600/50"
+>
+  <img
+    *ngIf="equipmentIconPath"
+    [src]="equipmentIconPath"
+    [alt]="equipmentIcon + ' slot'"
+    class="center w-4 object-contain"
+  />
+  <img
+    *ngIf="isEssence"
+    src="icons/items/essence-item.svg"
+    alt="essence item"
+    class="center w-4 object-contain"
+  />
+
+  <app-item [item]="inventoryItem.itemInstance"></app-item>
+  <div *ngIf="inventoryItem.quantity > 1" class="rounded-full pl-1 text-white">
+    x{{ inventoryItem.quantity }}
+  </div>
+</div>

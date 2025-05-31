@@ -1,6 +1,6 @@
 ﻿using Domain.Models.Combat;
 
-namespace Application.Interfaces.Services.LL;
+namespace Application.Interfaces.Services.LL.Colosseum;
 public interface IRatingService
 {
     /// <summary>

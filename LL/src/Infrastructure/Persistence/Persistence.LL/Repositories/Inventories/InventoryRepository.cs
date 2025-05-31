@@ -5,7 +5,6 @@ using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.EssenceItems;
-using Domain.Models.Professions.Crafting;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Inventories;
@@ -118,12 +117,8 @@ public class InventoryRepository : IInventoryRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<bool> TryRemoveItemsAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken)
+    public async Task<bool> TryRemoveItemsAsync(Guid characterId, Dictionary<string, int> requiredByItemId, CancellationToken cancellationToken)
     {
-        var requiredByItemId = materials
-            .GroupBy(m => m.ItemId)
-            .ToDictionary(g => g.Key, g => g.Sum(m => m.Quantity));
-
         var inventory = await _context.InventoryItems
             .Where(i => i.InventoryId == characterId)
             .Include(i => i.ItemInstance)

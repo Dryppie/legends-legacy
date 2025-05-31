@@ -259,33 +259,32 @@ export class CharacterActionsService {
   }
 
   private handleCraftingAction(action: CharacterActionDto | null) {
-    if (
-      action?.characterActionType === CharacterActionType.Crafting &&
-      action.temperingSession
-    ) {
-      this.craftingService.setQueue(
-        action.craftingActionDetails?.craftingQueueItems ?? [],
+    if (action?.characterActionType !== CharacterActionType.Crafting) return;
+    // Set and display current crafting queue
+    this.craftingService.setQueue(
+      action.craftingActionDetails?.craftingQueueItems ?? [],
+    );
+    if (!action.temperingSession) return;
+
+    this.sessionSummaryService.loadCraftingSince(action.temperingSession);
+    const summary = action.temperingSession.temperingSummary;
+    if (summary.armorForgingExperience > 0)
+      this.levelingService.gainProfessionExperience(
+        ProfessionType.ArmorForging,
+        summary.armorForgingExperience,
       );
-      this.sessionSummaryService.loadCraftingSince(action.temperingSession);
-      const summary = action.temperingSession.temperingSummary;
-      if (summary.armorForgingExperience > 0)
-        this.levelingService.gainProfessionExperience(
-          ProfessionType.ArmorForging,
-          summary.armorForgingExperience,
-        );
-      if (summary.jewelryCraftingExperience > 0)
-        this.levelingService.gainProfessionExperience(
-          ProfessionType.JewelryCrafting,
-          summary.jewelryCraftingExperience,
-        );
-      if (summary.weaponSmithingExperience > 0)
-        this.levelingService.gainProfessionExperience(
-          ProfessionType.WeaponSmithing,
-          summary.weaponSmithingExperience,
-        );
-      if (action.craftingActionDetails?.craftingQueueItems.length === 0) {
-        this.clearCurrentAction();
-      }
+    if (summary.jewelryCraftingExperience > 0)
+      this.levelingService.gainProfessionExperience(
+        ProfessionType.JewelryCrafting,
+        summary.jewelryCraftingExperience,
+      );
+    if (summary.weaponSmithingExperience > 0)
+      this.levelingService.gainProfessionExperience(
+        ProfessionType.WeaponSmithing,
+        summary.weaponSmithingExperience,
+      );
+    if (action.craftingActionDetails?.craftingQueueItems.length === 0) {
+      this.clearCurrentAction();
     }
   }
 

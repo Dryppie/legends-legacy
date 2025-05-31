@@ -1,0 +1,118 @@
+<div class="flex h-full flex-col gap-6 py-2 text-white lg:flex-row">
+  <!-- LEFT ▸ INVENTORY -->
+  <div class="flex h-full w-full flex-col">
+    <app-tab
+      [tabs]="tabLabels"
+      [activeTab]="activeTab"
+      (tabSelected)="setActiveTab($event)"
+      class="flex-none"
+    ></app-tab>
+
+    <div class="mb-2 flex h-full flex-col overflow-y-scroll">
+      <app-market-place-inventory-item
+        *ngFor="let item of filteredItems; trackBy: trackByItem"
+        [inventoryItem]="item"
+        (click)="selectItem(item)"
+        [ngClass]="{ 'bg-primary/30': item.itemInstance.id === selectedItemId }"
+      ></app-market-place-inventory-item>
+    </div>
+
+    <p
+      *ngIf="!filteredItems.length"
+      class="mt-8 text-center italic text-neutral-400"
+    >
+      You have no items you can sell right now.
+    </p>
+  </div>
+
+  <!-- RIGHT ▸ LISTING PANEL -->
+  <div
+    class="flex h-fit w-full flex-shrink-0 flex-col gap-4 rounded-lg bg-black/40 p-4 backdrop-blur-sm lg:w-96"
+  >
+    <h2 class="text-lg font-semibold">Create a Listing</h2>
+
+    <!-- Selected item preview -->
+    <ng-container *ngIf="pendingItem() as p; else placeholder">
+      <div class="flex flex-col gap-3">
+        <!-- Name -->
+        <div class="">
+          {{ p.itemInstance.itemBase.name }}
+        </div>
+
+        <!-- Adaptive description -->
+        <p class="whitespace-pre-line text-sm text-neutral-300">
+          {{ itemDescription() }}
+        </p>
+
+        <!-- Quantity selector (only for stackables) -->
+        <div
+          *ngIf="p.itemInstance.itemBase.stackable"
+          class="flex items-center gap-1"
+        >
+          <span class="text-sm text-neutral-300">Quantity:</span>
+          <input
+            type="number"
+            min="1"
+            [max]="maxQuantity()"
+            class="no-spinner w-20 rounded border border-neutral-600 bg-transparent px-2 py-1 text-right"
+            [formControl]="qtyCtrl"
+          />
+        </div>
+
+        <!-- Price -->
+        <div class="flex items-center gap-1">
+          <span class="text-sm text-neutral-300">Price:</span>
+          <input
+            type="number"
+            min="1"
+            class="no-spinner w-32 rounded border border-neutral-600 bg-transparent px-2 py-1 text-right"
+            [formControl]="priceCtrl"
+          />
+          <span class="text-xs text-neutral-400">Cinders</span>
+        </div>
+
+        <!-- Submit -->
+        <app-regular-button
+          class="w-full justify-self-end"
+          text="List item"
+          fullWidth
+          [disabled]="priceCtrl.invalid || qtyCtrl.invalid"
+          (pressed)="listItem()"
+        ></app-regular-button>
+      </div>
+    </ng-container>
+
+    <ng-template #placeholder>
+      <p class="text-center italic text-neutral-400">
+        Select an item from your inventory.
+      </p>
+    </ng-template>
+
+    <!-- Divider -->
+    <hr class="border-neutral-700" />
+
+    <!-- Active listings -->
+    <h3 class="font-semibold">Your Listings</h3>
+    <div class="flex max-h-60 flex-col gap-3 overflow-y-auto">
+      <!-- <ng-container *ngFor="let l of myListings(); trackBy: trackByListing">
+        <div
+          class="flex items-center justify-between rounded bg-neutral-800/70 p-2"
+        >
+          <div class="flex items-center gap-2">
+            <img [src]="l.item.icon" [alt]="l.item.name" class="w-8 h-8" />
+            <span class="text-sm">{{ l.item.name }}</span>
+          </div>
+          <div class="flex items-center gap-1 text-sm">
+            <span>{{ l.price }}</span>
+            <svg class="h-4 w-4 fill-amber-500"></svg>
+          </div>
+        </div>
+      </ng-container> -->
+
+      <!-- <p *ngIf="!myListings().length"
+         class="text-center text-neutral-400 italic">
+        No active listings.
+      </p> -->
+    </div>
+  </div>
+</div>

@@ -29,6 +29,36 @@
     "type": "Combat"
   },
 
+  // Gathering
+  {
+    "id": "gathering.double.drop.chance",
+    "name": "Double Drop Chance",
+    "maxLevel": 100,
+    "cost": {
+      "base": 1,
+      "increment": 1
+    },
+    "effect": {
+      "stat": "GatheringDoubleDropChance",
+      "perLevel": 0.1
+    },
+    "type": "Gathering"
+  },
+  {
+    "id": "gathering.double.exp.chance",
+    "name": "Double Exp Chance",
+    "maxLevel": 100,
+    "cost": {
+      "base": 1,
+      "increment": 1
+    },
+    "effect": {
+      "stat": "GatheringDoubleExpChance",
+      "perLevel": 0.1
+    },
+    "type": "Gathering"
+  },
+
   // Crafting
   {
     "id": "crafting.double.item.exp.chance",
@@ -57,36 +87,6 @@
       "perLevel": -0.1
     },
     "type": "Crafting"
-  },
-
-  // Gathering
-  {
-    "id": "gathering.double.drop.chance",
-    "name": "Gathering Double Drop Chance",
-    "maxLevel": 100,
-    "cost": {
-      "base": 1,
-      "increment": 1
-    },
-    "effect": {
-      "stat": "GatheringDoubleDropChance",
-      "perLevel": 0.1
-    },
-    "type": "Gathering"
-  },
-  {
-    "id": "gathering.double.exp.chance",
-    "name": "Gathering Double Exp Chance",
-    "maxLevel": 100,
-    "cost": {
-      "base": 1,
-      "increment": 1
-    },
-    "effect": {
-      "stat": "GatheringDoubleExpChance",
-      "perLevel": 0.1
-    },
-    "type": "Gathering"
   },
 
   // Misc

@@ -1,5 +1,5 @@
 ﻿using Application.Authorization.Interfaces;
-using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Entities;
 using Common.Authorization.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Any;

@@ -11,6 +11,7 @@ using Domain.Models.Guilds;
 using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
 using Domain.Models.LootTables;
+using Domain.Models.MarketPlaces;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Professions.Gathering.GatheringNodes;
@@ -32,6 +33,7 @@ using Persistence.LL.Repositories.Essences;
 using Persistence.LL.Repositories.Guilds;
 using Persistence.LL.Repositories.Inventories;
 using Persistence.LL.Repositories.LootTables;
+using Persistence.LL.Repositories.MarketPlaces;
 using Persistence.LL.Repositories.Professions;
 using Persistence.LL.Repositories.Professions.Craftings;
 using Persistence.LL.Repositories.Professions.Gatherings;
@@ -80,6 +82,9 @@ public static class DependencyInjection
 
         services.AddScoped<ILootTableRepository, LootTableRepository>();
         services.AddScoped<IInventoryRepository, InventoryRepository>();
+
+        services.AddScoped<IMarketPlaceRepository, MarketPlaceRepository>();
+
         services.AddScoped<IRegionRepository, RegionRepository>();
 
         services.AddScoped<IProfessionRepository, ProfessionRepository>();

@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Services.LL;
+﻿using Application.Interfaces.Services.LL.Entities;
 using Domain.Components.Attributes;
 using Domain.Helpers.Constants;
 using Domain.Models.Entities.Characters;

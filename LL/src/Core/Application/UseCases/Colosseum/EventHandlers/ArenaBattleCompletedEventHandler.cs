@@ -1,5 +1,5 @@
 ﻿using Application.Interfaces.Services;
-using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Colosseum;
 using Application.UseCases.Colosseum.Events;
 using MediatR;
 

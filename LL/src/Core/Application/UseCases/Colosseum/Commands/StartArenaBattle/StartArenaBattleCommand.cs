@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Services.LL;
+﻿using Application.Interfaces.Services.LL.Colosseum;
 using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 using Application.UseCases.Colosseum.Events;
 using AutoMapper;

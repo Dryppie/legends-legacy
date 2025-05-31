@@ -23,6 +23,8 @@
     <Folder Include="UseCases\CharacterActions\Dtos\Requests\" />
     <Folder Include="UseCases\Characters\Commands\" />
     <Folder Include="UseCases\Inventories\Commands\" />
+    <Folder Include="UseCases\MarketPlaces\Events\" />
+    <Folder Include="UseCases\MarketPlaces\EventHandlers\" />
     <Folder Include="UseCases\Regions\Dtos\" />
     <Folder Include="UseCases\Regions\Commands\" />
     <Folder Include="UseCases\Soulstones\Dtos\" />

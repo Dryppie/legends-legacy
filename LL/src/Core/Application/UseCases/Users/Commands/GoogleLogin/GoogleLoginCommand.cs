@@ -1,5 +1,5 @@
 ﻿using Application.Authorization.Interfaces;
-using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Entities;
 using Application.UseCases.Users.Events;
 using Common.Authorization.Security;
 using Common.Primitives;

@@ -1,5 +1,8 @@
 ﻿using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.CharacterActions;
+using Application.Interfaces.Services.LL.Colosseum;
+using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL.Professions;
@@ -24,6 +27,7 @@ using Services.LL.Items;
 using Services.LL.Levels;
 using Services.LL.Loots;
 using Services.LL.LootTables;
+using Services.LL.MarketPlaces;
 using Services.LL.Professions;
 using Services.LL.Professions.Craftings;
 using Services.LL.Professions.Gatherings;
@@ -75,6 +79,8 @@ public static class DependencyInjection
         services.AddScoped<ILootService, LootService>();
         services.AddScoped<ILootTableService, LootTableService>();
         services.AddScoped<IInventoryService, InventoryService>();
+
+        services.AddScoped<IMarketPlaceService, MarketPlaceService>();
 
         services.AddScoped<IProfessionService, ProfessionService>();
         services.AddScoped<IRecipeService, RecipeService>();

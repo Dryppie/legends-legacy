@@ -1,7 +1,7 @@
 ﻿using Domain.Models.CharacterActions;
 using Domain.Models.Professions.Crafting;
 
-namespace Application.Interfaces.Services.LL;
+namespace Application.Interfaces.Services.LL.CharacterActions;
 public interface ICharacterActionService
 {
     /// <summary>

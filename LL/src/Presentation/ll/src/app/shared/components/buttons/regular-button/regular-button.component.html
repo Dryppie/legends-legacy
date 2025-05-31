@@ -1,0 +1,14 @@
+<button
+  type="button"
+  class="rounded-md border p-2 transition-colors duration-150 focus:outline-none focus-visible:ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:cursor-not-allowed"
+  [ngClass]="buttonClasses"
+  [disabled]="disabled"
+  [attr.aria-disabled]="disabled"
+  (click)="onClick($event)"
+>
+  <!-- Use provided text or fallback to projected content so consumers can slot icons etc. -->
+  <div *ngIf="text; else projected">{{ text }}</div>
+  <ng-template #projected>
+    <ng-content></ng-content>
+  </ng-template>
+</button>

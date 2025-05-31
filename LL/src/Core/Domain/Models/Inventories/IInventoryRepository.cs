@@ -25,6 +25,13 @@ public interface IInventoryRepository
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task CreateInventoryAsync(Guid characterId, CancellationToken cancellationToken);
-    Task<bool> TryRemoveItemsAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken);
+    /// <summary>
+    /// Try to remove quantity through item ids
+    /// </summary>
+    /// <param name="characterId"></param>
+    /// <param name=""></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    Task<bool> TryRemoveItemsAsync(Guid characterId, Dictionary<string, int> requiredByItemId, CancellationToken cancellationToken);
     Task<bool> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken);
 }

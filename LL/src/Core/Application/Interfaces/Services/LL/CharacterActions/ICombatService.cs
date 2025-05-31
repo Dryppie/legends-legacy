@@ -1,7 +1,7 @@
 ﻿using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.Sessions;
 
-namespace Application.Interfaces.Services.LL;
+namespace Application.Interfaces.Services.LL.CharacterActions;
 public interface ICombatService
 {
     /// <summary>

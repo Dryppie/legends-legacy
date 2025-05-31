@@ -17,6 +17,7 @@ using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.LootTables;
+using Domain.Models.MarketPlaces;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
 using Domain.Models.Professions.Gathering.GatheringNodes;
@@ -157,6 +158,8 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<ItemInstance> ItemInstances => Set<ItemInstance>();
     public DbSet<LootTable> LootTables => Set<LootTable>();
     public DbSet<LootTableItem> LootTableItems => Set<LootTableItem>();
+
+    public DbSet<MarketPlaceListing> MarketPlaceListings => Set<MarketPlaceListing>();
 
     //public DbSet<Party> Parties => Set<Party>();
 

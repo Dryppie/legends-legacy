@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.Services.LL;
+﻿using Application.Interfaces.Services.LL.Colosseum;
+using Application.Interfaces.Services.LL.Entities;
 using Domain.Models.Colosseum;
 using Domain.Models.Combat;
 using Domain.Models.Entities.Characters;

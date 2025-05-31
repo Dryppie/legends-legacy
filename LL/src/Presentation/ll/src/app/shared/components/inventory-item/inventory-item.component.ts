@@ -13,48 +13,45 @@ import { Equipment, EquipmentInstance, EssenceItem } from '../../models/item';
   templateUrl: './inventory-item.component.html',
   styleUrl: './inventory-item.component.css',
 })
-export class InventoryItemComponent implements OnInit {
+export class InventoryItemComponent {
   @Input() inventoryItem!: InventoryItem;
-  equipmentIcon = '';
-  isEquipment = false;
-  isEssence = false;
 
-  constructor(private modalService: ModalService) {}
+  constructor(private modal: ModalService) {}
 
-  ngOnInit(): void {
-    this.setIsEquipment();
-    this.setIsEssence();
-    if (this.isEquipment) {
-      this.equipmentIcon = (
-        this.inventoryItem.itemInstance.itemBase as Equipment
-      ).equipmentType.toLocaleLowerCase();
-    }
-  }
-
-  openModal() {
-    if (this.isEquipment) this.openEquipItemModal();
-    else if (this.isEssence) this.openEssenceModal();
-  }
-
-  setIsEquipment() {
-    this.isEquipment =
-      this.inventoryItem.itemInstance.itemBase.itemType === ItemType.Equipment;
-  }
-
-  openEquipItemModal() {
-    this.modalService.toggleInventoryEquipItemModal(
-      this.inventoryItem.itemInstance as EquipmentInstance,
+  get isEquipment(): boolean {
+    return (
+      this.inventoryItem.itemInstance.itemBase.itemType === ItemType.Equipment
     );
   }
 
-  setIsEssence() {
-    this.isEssence =
-      this.inventoryItem.itemInstance.itemBase.itemType === ItemType.Essence;
+  get isEssence(): boolean {
+    return (
+      this.inventoryItem.itemInstance.itemBase.itemType === ItemType.Essence
+    );
   }
 
-  openEssenceModal() {
-    this.modalService.toggleEssenceModal(
-      (this.inventoryItem.itemInstance.itemBase as EssenceItem).essence,
-    ); // Pass the essence from the Item to display all necessary info
+  get equipmentIcon(): string | null {
+    if (!this.isEquipment) return null;
+    return (
+      this.inventoryItem.itemInstance.itemBase as Equipment
+    ).equipmentType.toLowerCase();
+  }
+
+  get equipmentIconPath(): string | null {
+    return this.equipmentIcon
+      ? `icons/equipment-slots/empty_${this.equipmentIcon}.svg`
+      : null;
+  }
+
+  openModal(): void {
+    if (this.isEquipment) {
+      this.modal.toggleInventoryEquipItemModal(
+        this.inventoryItem.itemInstance as EquipmentInstance,
+      );
+    } else if (this.isEssence) {
+      const essence = (this.inventoryItem.itemInstance.itemBase as EssenceItem)
+        .essence;
+      this.modal.toggleEssenceModal(essence);
+    }
   }
 }
