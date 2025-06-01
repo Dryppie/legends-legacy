@@ -262,6 +262,28 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "MarketPlaceListings",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SellerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ItemInstanceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    UnitPrice = table.Column<long>(type: "bigint", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MarketPlaceListings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MarketPlaceListings_ItemInstances_ItemInstanceId",
+                        column: x => x.ItemInstanceId,
+                        principalTable: "ItemInstances",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Entities",
                 columns: table => new
                 {
@@ -857,6 +879,11 @@ namespace Persistence.LL.Migrations
                 column: "LootTableId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_MarketPlaceListings_ItemInstanceId",
+                table: "MarketPlaceListings",
+                column: "ItemInstanceId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Material_ItemBaseId",
                 table: "Material",
                 column: "ItemBaseId");
@@ -929,6 +956,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "ItemAttributeModifier");
+
+            migrationBuilder.DropTable(
+                name: "MarketPlaceListings");
 
             migrationBuilder.DropTable(
                 name: "Material");

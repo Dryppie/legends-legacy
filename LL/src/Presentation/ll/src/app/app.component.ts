@@ -5,9 +5,7 @@ import { ToastService } from './core/services/client-side/toast/toast.service';
 import { CharacterActionsService } from './core/services/api/character-actions/character-actions.service';
 import { ModalContainerComponent } from './shared/components/modal-container/modal-container.component';
 import { AuthService } from './core/services/api/auth/auth.service';
-import { forkJoin, switchMap, take } from 'rxjs';
-import { InventoryService } from './core/services/api/inventory/inventory.service';
-import { EquipmentService } from './core/services/api/equipment/equipment.service';
+import { switchMap, take } from 'rxjs';
 import { SessionSummaryPopupComponent } from './shared/components/session-summary-popup/session-summary-popup.component';
 import { GoogleAuthService } from './core/services/api/auth/google-auth.service';
 

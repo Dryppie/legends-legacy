@@ -19,7 +19,7 @@
       (tabSelected)="setActiveTab($event)"
       class="w-full flex-none"
     ></app-tab>
-    <div class="flex h-full w-full flex-col overflow-y-scroll">
+    <div class="flex h-full w-full flex-col overflow-y-auto">
       <ng-container [ngSwitch]="activeTab">
         <app-arena-battle
           *ngSwitchCase="'Arena'"

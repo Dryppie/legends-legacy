@@ -123,10 +123,6 @@ export class MarketPlaceSellComponent implements OnInit {
   selectItem(item: InventoryItem) {
     this.pendingItem.set(item);
     this.selectedItemId = item.itemInstance.id;
-    const max = this.maxQuantity();
-    if (this.qtyCtrl.value ?? 0 > max) {
-      this.qtyCtrl.setValue(max, { emitEvent: false });
-    }
   }
 
   listItem() {

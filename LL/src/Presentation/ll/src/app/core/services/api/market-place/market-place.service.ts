@@ -3,6 +3,7 @@ import { catchError, map, Observable, throwError } from 'rxjs';
 import { MarketPlaceListing } from '../../../../shared/models/Dtos/market-place/market-place-listing';
 import { ApiService } from '../api.service';
 import { CreateMarketPlaceListingRequest } from '../../../../shared/models/requestDtos/market-place/create-market-place-listing-request';
+import { BuyoutMarketPlaceListingRequest } from '../../../../shared/models/requestDtos/market-place/buyout-market.place-listing-request';
 
 @Injectable({
   providedIn: 'root',
@@ -35,7 +36,15 @@ export class MarketPlaceService {
   createListing(listing: CreateMarketPlaceListingRequest): Observable<boolean> {
     return this.api.post('marketplace/createListing', listing).pipe(
       catchError(() => {
-        return throwError(() => new Error('Failed to get inventory'));
+        return throwError(() => new Error('Failed to create listing'));
+      }),
+    );
+  }
+
+  buyoutListing(listing: BuyoutMarketPlaceListingRequest): Observable<boolean> {
+    return this.api.post('marketplace/buyoutListing', listing).pipe(
+      catchError(() => {
+        return throwError(() => new Error('Failed to buy listing'));
       }),
     );
   }

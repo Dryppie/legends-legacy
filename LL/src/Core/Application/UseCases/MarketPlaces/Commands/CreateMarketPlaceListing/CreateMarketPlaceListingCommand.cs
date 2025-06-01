@@ -17,6 +17,7 @@ public class CreateMarketPlaceListingCommandHandler : IRequestHandler<CreateMark
 
     public async Task<Response<bool>> Handle(CreateMarketPlaceListingCommand request, CancellationToken cancellationToken)
     {
+        if (request.Listing.Quantity <= 0 || request.Listing.UnitPrice <= 0) return Response<bool>.Fail("Failed to create marketplace listing.");
         var marketPlaceListing = new MarketPlaceListing()
         {
             SellerId = request.CharacterId,

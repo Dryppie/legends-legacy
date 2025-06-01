@@ -1,4 +1,5 @@
 ﻿using Domain.Models.Items;
+using Domain.Models.MarketPlaces;
 using Domain.Models.Professions.Crafting;
 
 namespace Domain.Models.Inventories;
@@ -32,6 +33,8 @@ public interface IInventoryRepository
     /// <param name=""></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<bool> TryRemoveItemsAsync(Guid characterId, Dictionary<string, int> requiredByItemId, CancellationToken cancellationToken);
+    Task<bool> TryRemoveCraftingMaterialsAsync(Guid characterId, Dictionary<string, int> requiredByItemId, CancellationToken cancellationToken);
+    Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, MarketPlaceListing listing, CancellationToken cancellationToken);
     Task<bool> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken);
+    Task AddItemToInventoryFromMarketPlace(Guid characterId, InventoryItem item, CancellationToken cancellationToken);
 }

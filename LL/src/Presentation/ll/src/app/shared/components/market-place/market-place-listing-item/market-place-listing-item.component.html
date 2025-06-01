@@ -1,0 +1,17 @@
+<div
+  class="grid w-full grid-cols-4 gap-2 p-2 hover:cursor-pointer hover:bg-neutral-600/50"
+>
+  <app-item
+    class="col-start-1 col-end-3"
+    [item]="listing.itemInstance"
+  ></app-item>
+  <div>
+    <div class="rounded-full pl-1 text-white">x{{ listing.quantity }}</div>
+  </div>
+
+  <!-- Price (aligned right) -->
+  <div class="ml-auto flex items-center gap-1">
+    <!-- <img src="icons/ui/gold.svg" alt="gold" class="h-4 w-4 object-contain" /> -->
+    <div>{{ listing.unitPrice | numberFormat }}</div>
+  </div>
+</div>

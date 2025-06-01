@@ -3,6 +3,7 @@ using Application.Interfaces.Services.LL.Entities;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.EssenceItems;
+using Domain.Models.MarketPlaces;
 using Domain.Models.Professions.Crafting;
 using Services.LL.Interfaces;
 
@@ -46,26 +47,27 @@ public class InventoryService : IInventoryService
         await _inventoryRepository.CreateInventoryAsync(characterId, cancellationToken);
     }
 
-    public async Task<bool> TryRemoveMaterialsForCraftingAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken)
+    public async Task<bool> TryRemoveCraftingMaterialsAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken)
     {
         var requiredByItemId = materials
             .GroupBy(m => m.ItemId)
             .ToDictionary(g => g.Key, g => g.Sum(m => m.Quantity));
 
-        return await _inventoryRepository.TryRemoveItemsAsync(characterId, requiredByItemId, cancellationToken);
+        return await _inventoryRepository.TryRemoveCraftingMaterialsAsync(characterId, requiredByItemId, cancellationToken);
     }
 
-    public async Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken)
+    public async Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, MarketPlaceListing marketplaceListing, CancellationToken cancellationToken)
     {
-        var requiredByItemId = materials
-            .GroupBy(m => m.ItemId)
-            .ToDictionary(g => g.Key, g => g.Sum(m => m.Quantity));
-
-        return await _inventoryRepository.TryRemoveItemsAsync(characterId, requiredByItemId, cancellationToken);
+        return await _inventoryRepository.TryRemoveItemsForMarketPlaceListingAsync(characterId, marketplaceListing, cancellationToken);
     }
 
     public async Task<bool> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken)
     {
         return await _inventoryRepository.AddItemInstanceBackToInventory(characterId, itemInstance, cancellationToken);
+    }
+
+    public async Task AddItemToInventoryFromMarketPlace(Guid characterId, InventoryItem inventoryItem, CancellationToken cancellationToken)
+    {
+        await _inventoryRepository.AddItemToInventoryFromMarketPlace(characterId, inventoryItem, cancellationToken);
     }
 }

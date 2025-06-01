@@ -12,7 +12,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250530171125_BaseMigration")]
+    [Migration("20250601122705_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -459,6 +459,34 @@ namespace Persistence.LL.Migrations
                     b.HasDiscriminator<int>("LootTableType");
 
                     b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("Domain.Models.MarketPlaces.MarketPlaceListing", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("ItemInstanceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("SellerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<long>("UnitPrice")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemInstanceId");
+
+                    b.ToTable("MarketPlaceListings");
                 });
 
             modelBuilder.Entity("Domain.Models.Professions.Crafting.CraftingQueueItem", b =>
@@ -1124,6 +1152,17 @@ namespace Persistence.LL.Migrations
                         .WithMany("Entries")
                         .HasForeignKey("LootTableId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Domain.Models.MarketPlaces.MarketPlaceListing", b =>
+                {
+                    b.HasOne("Domain.Models.Items.ItemInstance", "ItemInstance")
+                        .WithMany()
+                        .HasForeignKey("ItemInstanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ItemInstance");
                 });
 
             modelBuilder.Entity("Domain.Models.Professions.Crafting.CraftingQueueItem", b =>

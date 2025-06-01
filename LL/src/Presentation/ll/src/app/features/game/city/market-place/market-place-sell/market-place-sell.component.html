@@ -8,12 +8,13 @@
       class="flex-none"
     ></app-tab>
 
-    <div class="mb-2 flex h-full flex-col overflow-y-scroll">
+    <div class="mb-2 flex h-full flex-col overflow-y-auto">
       <app-market-place-inventory-item
         *ngFor="let item of filteredItems; trackBy: trackByItem"
         [inventoryItem]="item"
         (click)="selectItem(item)"
         [ngClass]="{ 'bg-primary/30': item.itemInstance.id === selectedItemId }"
+        class="transition"
       ></app-market-place-inventory-item>
     </div>
 

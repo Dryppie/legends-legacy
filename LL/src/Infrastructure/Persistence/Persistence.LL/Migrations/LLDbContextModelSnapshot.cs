@@ -458,6 +458,34 @@ namespace Persistence.LL.Migrations
                     b.UseTphMappingStrategy();
                 });
 
+            modelBuilder.Entity("Domain.Models.MarketPlaces.MarketPlaceListing", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("ItemInstanceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("SellerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<long>("UnitPrice")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemInstanceId");
+
+                    b.ToTable("MarketPlaceListings");
+                });
+
             modelBuilder.Entity("Domain.Models.Professions.Crafting.CraftingQueueItem", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1121,6 +1149,17 @@ namespace Persistence.LL.Migrations
                         .WithMany("Entries")
                         .HasForeignKey("LootTableId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Domain.Models.MarketPlaces.MarketPlaceListing", b =>
+                {
+                    b.HasOne("Domain.Models.Items.ItemInstance", "ItemInstance")
+                        .WithMany()
+                        .HasForeignKey("ItemInstanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ItemInstance");
                 });
 
             modelBuilder.Entity("Domain.Models.Professions.Crafting.CraftingQueueItem", b =>

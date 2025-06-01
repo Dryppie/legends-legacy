@@ -22,7 +22,7 @@ import { MarketPlaceSellComponent } from './market-place-sell/market-place-sell.
 })
 export class MarketPlaceComponent implements OnInit {
   ngOnInit(): void {
-    this.setActiveTab(this.tabs[1]?.label || '');
+    this.setActiveTab(this.tabs[0]?.label || '');
   }
 
   tabs: Tab[] = [

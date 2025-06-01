@@ -5,4 +5,7 @@ public interface IMarketPlaceRepository
     Task<bool> CreateMarketPlaceListingAsync(Guid characterId, MarketPlaceListing marketPlaceListing, CancellationToken cancellationToken);
     Task<bool> BuyoutMarketPlaceListingAsync(Guid characterId, Guid listingId, int quantity, CancellationToken cancellationToken);
     Task<bool> CancelMarketPlaceListingAsync(Guid characterId, Guid listingId, CancellationToken cancellationToken);
+    Task<MarketPlaceListing?> GetListingForBuyoutAsync(Guid listingId, CancellationToken cancellationToken);
+    void RemoveListingAsync(MarketPlaceListing listing);
+    Task SaveChangesAsync(CancellationToken cancellationToken);
 }

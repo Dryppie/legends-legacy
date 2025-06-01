@@ -1,81 +1,123 @@
-<div>
-  <!-- <form
-    class="flex flex-wrap items-center gap-2 rounded-lg bg-black/40 px-3 py-2 text-sm backdrop-blur-sm"
-    (ngSubmit)="applyFilters()"
-  > -->
-  <!-- 🔍 Search -->
-  <!-- <input
-      type="search"
-      [(ngModel)]="filters.search"
-      name="search"
-      placeholder="Search relics…"
-      class="flex-1 rounded border border-neutral-700 bg-transparent px-2 py-1 focus:outline-none focus:ring-amber-400 md:w-48 md:flex-none"
-    /> -->
-
-  <!-- ▼ Category -->
-  <!-- <select
-      [(ngModel)]="filters.category"
-      name="category"
-      class="rounded border border-neutral-700 bg-transparent px-2 py-1"
+<div
+  class="flex h-full flex-col gap-6 overflow-y-auto py-2 text-white xl:flex-row"
+>
+  <div class="order-2 flex w-full flex-col xl:order-1">
+    <div
+      class="grid grid-cols-[1fr_1fr_1fr_auto_auto] items-center gap-2 rounded-t-lg bg-black/40 px-2 py-2 text-sm backdrop-blur-sm"
     >
-      <option value="">All categories</option>
-      <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
-    </select> -->
+      <input
+        type="search"
+        [formControl]="searchCtrl"
+        placeholder="Search items…"
+        class="rounded border border-zinc-300/30 bg-transparent px-2 py-[4px] focus:outline-none focus:ring-amber-400"
+      />
 
-  <!-- ▼ Rarity -->
-  <!-- <select
-      [(ngModel)]="filters.rarity"
-      name="rarity"
-      class="rounded border border-neutral-700 bg-transparent px-2 py-1"
-    >
-      <option value="">Any rarity</option>
-      <option *ngFor="let r of rarities" [value]="r">{{ r }}</option>
-    </select> -->
+      <select
+        [ngModel]="itemType()"
+        (ngModelChange)="itemType.set($event)"
+        class="rounded border border-zinc-300/30 bg-transparent px-2 py-1"
+      >
+        <option class="bg-black" value="">All categories</option>
+        <option class="bg-black" *ngFor="let c of itemTypes" [value]="c">
+          {{ c }}
+        </option>
+      </select>
 
-  <!-- ▼ Price sort -->
-  <!-- <select
-      [(ngModel)]="filters.priceSort"
-      name="priceSort"
-      class="rounded border border-neutral-700 bg-transparent px-2 py-1"
-    >
-      <option value="asc">Price ↑</option>
-      <option value="desc">Price ↓</option>
-    </select> -->
+      <select
+        [ngModel]="rarity()"
+        (ngModelChange)="rarity.set($event)"
+        class="rounded border border-zinc-300/30 bg-transparent px-2 py-1"
+      >
+        <option class="bg-black" value="">Any rarity</option>
+        <option class="bg-black" *ngFor="let r of rarities" [value]="r">
+          {{ r }}
+        </option>
+      </select>
 
-  <!-- Reset -->
-  <!-- <button
-      type="button"
-      class="ml-auto text-amber-400 hover:underline"
-      (click)="resetFilters()"
-    >
-      Reset
-    </button> -->
-  <!-- </form> -->
-
-  <!-- ITEMS GRID -->
-  <div
-    class="grid grid-cols-1 gap-4 overflow-y-auto py-4 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-4"
-  >
-    <!-- <ng-container *ngFor="let item of filteredItems">
-      <app-item-card
-        [item]="item"
-        (purchase)="openConfirm(item)"
-      ></app-item-card>
-    </ng-container> -->
-
-    <!-- Empty-state -->
-    <!-- <p
-      *ngIf="filteredItems.length === 0"
-      class="col-span-full text-center italic text-neutral-400"
-    >
-      No items match your filters.
-    </p> -->
+      <button
+        type="button"
+        (click)="togglePriceSort()"
+        class="flex items-center justify-between gap-1 text-nowrap rounded border border-zinc-300/30 px-2 py-1 hover:bg-zinc-300/30"
+      >
+        Unit price
+        <ng-container [ngSwitch]="priceSort()">
+          <span *ngSwitchCase="'asc'">↑</span>
+          <span *ngSwitchCase="'desc'">↓</span>
+          <span *ngSwitchDefault class="opacity-50">↕</span>
+        </ng-container>
+      </button>
+      <button
+        type="button"
+        class="ml-auto text-rose-500 hover:underline"
+        (click)="resetFilters()"
+      >
+        Reset
+      </button>
+    </div>
+    <div class="grid grid-cols-4 rounded-b-md bg-black/40">
+      <div class="col-start-1 col-end-3 p-2">Name</div>
+      <div class="p-2">Quantity</div>
+      <div class="justify-self-end p-2">Cinders per unit</div>
+    </div>
+    <div class="flex flex-col overflow-y-auto">
+      <div
+        *ngFor="let l of filteredListings(); trackBy: trackByListing"
+        (click)="selectListing(l)"
+        [ngClass]="{
+          'bg-primary/30': l.id === selectedListingId,
+        }"
+        class="cursor-pointer transition"
+      >
+        <app-market-place-listing-item
+          [listing]="l"
+        ></app-market-place-listing-item>
+      </div>
+      <ng-container *ngIf="!filteredListings().length">
+        <p class="mt-8 text-center italic text-neutral-400">
+          No listings match your filters.
+        </p>
+      </ng-container>
+    </div>
   </div>
 
-  <!-- PURCHASE MODAL -->
-  <!-- <app-purchase-modal
-    *ngIf="selected"
-    [item]="selected"
-    (closed)="selected = null"
-  ></app-purchase-modal> -->
+  <div
+    class="order-1 flex h-fit w-full flex-shrink-0 flex-col gap-4 rounded-lg bg-black/40 p-4 backdrop-blur-sm xl:order-2 xl:w-96"
+  >
+    <ng-container *ngIf="selectedListing() as sel; else placeholder">
+      <h2 class="text-lg font-semibold">
+        {{ sel.itemInstance.itemBase.name }}
+      </h2>
+
+      <p class="text-sm text-neutral-300">
+        Unit price: {{ sel.unitPrice | numberFormat }} Cinders
+      </p>
+      <p class="text-sm text-neutral-300">Quantity: {{ sel.quantity }}</p>
+      <!-- Quantity selector appears only when > 1 items are in the listing -->
+      <div *ngIf="sel.quantity > 1" class="flex items-center gap-2">
+        <label for="buyQty" class="whitespace-nowrap text-sm text-neutral-300"
+          >Buy quantity:</label
+        >
+        <input
+          id="buyQty"
+          type="number"
+          min="1"
+          [max]="maxQuantity()"
+          [formControl]="qtyCtrl"
+          class="no-spinner w-24 rounded border border-neutral-700 bg-transparent px-2 py-1 text-right focus:outline-none focus:ring-amber-400"
+        />
+      </div>
+      <app-regular-button
+        class="w-full"
+        text="Buy item"
+        fullWidth
+        (pressed)="buyoutListing()"
+      ></app-regular-button>
+    </ng-container>
+
+    <ng-template #placeholder>
+      <p class="text-center italic text-neutral-400">
+        Select a listing to purchase.
+      </p>
+    </ng-template>
+  </div>
 </div>

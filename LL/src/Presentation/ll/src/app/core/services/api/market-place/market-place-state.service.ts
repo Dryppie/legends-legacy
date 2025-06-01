@@ -7,6 +7,7 @@ import { MarketPlaceListing } from '../../../../shared/models/Dtos/market-place/
 import { CreateMarketPlaceListingRequest } from '../../../../shared/models/requestDtos/market-place/create-market-place-listing-request';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { Observable } from 'rxjs';
+import { BuyoutMarketPlaceListingRequest } from '../../../../shared/models/requestDtos/market-place/buyout-market.place-listing-request';
 
 @Injectable({ providedIn: 'root' })
 export class MarketplaceStateService {
@@ -58,6 +59,17 @@ export class MarketplaceStateService {
         },
         error: (err) => this._error.set(err.message ?? 'Unknown error'),
       });
+  }
+
+  buyoutListing(listingId: string, quantity: number): Observable<boolean> {
+    const listing: BuyoutMarketPlaceListingRequest = {
+      marketPlaceListingId: listingId,
+      quantity,
+    };
+
+    return this.marketplaceService
+      .buyoutListing(listing)
+      .pipe((success) => success);
   }
 
   addListing(

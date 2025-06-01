@@ -57,7 +57,7 @@ public class CraftingService : ICraftingService
         if (professionLevel < recipe.LevelRequirement) return null;
 
         // Check inventory for required materials
-        var removedMaterials = await _inventoryService.TryRemoveMaterialsForCraftingAsync(characterId, [.. recipe.Materials], cancellationToken);
+        var removedMaterials = await _inventoryService.TryRemoveCraftingMaterialsAsync(characterId, [.. recipe.Materials], cancellationToken);
         if (!removedMaterials) return null;
 
         var equipmentInstance = new EquipmentInstance()

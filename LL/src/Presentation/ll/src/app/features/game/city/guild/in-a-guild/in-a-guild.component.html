@@ -5,7 +5,7 @@
     (tabSelected)="setActiveTab($event)"
     class="w-full flex-none pb-2"
   ></app-tab>
-  <div class="flex h-full w-full flex-col overflow-y-scroll">
+  <div class="flex h-full w-full flex-col overflow-y-auto">
     <ng-container [ngSwitch]="activeTab">
       <app-guild-info
         *ngSwitchCase="'Info'"

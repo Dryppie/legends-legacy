@@ -1,4 +1,5 @@
-﻿using Application.UseCases.MarketPlaces.Commands.CreateMarketPlaceListing;
+﻿using Application.UseCases.MarketPlaces.Commands.BuyoutMarketPlaceListing;
+using Application.UseCases.MarketPlaces.Commands.CreateMarketPlaceListing;
 using Application.UseCases.MarketPlaces.Dtos.Requests;
 using Application.UseCases.MarketPlaces.Dtos.Responses;
 using Application.UseCases.MarketPlaces.Queries.GetMarketPlaceListings;
@@ -13,6 +14,10 @@ public class MarketPlaceController : BaseController
         await Mediator.Send(new GetMarketPlaceListingsQuery());
 
     [HttpPost("CreateListing")]
-    public async Task<ActionResult<Response<bool>>> CreateListing([FromBody] CreateMarketPlaceListingRequest marketPlaceRequest) =>
-        await Mediator.Send(new CreateMarketPlaceListingCommand(CurrentCharacterGuid, marketPlaceRequest));
+    public async Task<ActionResult<Response<bool>>> CreateListing([FromBody] CreateMarketPlaceListingRequest createMarketPlaceRequest) =>
+        await Mediator.Send(new CreateMarketPlaceListingCommand(CurrentCharacterGuid, createMarketPlaceRequest));
+
+    [HttpPost("BuyoutListing")]
+    public async Task<ActionResult<Response<bool>>> BuyoutListing([FromBody] BuyoutMarketPlaceListingRequest buyoutMarketPlaceRequest) =>
+        await Mediator.Send(new BuyoutMarketPlaceListingCommand(CurrentCharacterGuid, buyoutMarketPlaceRequest));
 }

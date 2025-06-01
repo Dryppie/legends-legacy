@@ -5,6 +5,7 @@ using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.EssenceItems;
+using Domain.Models.MarketPlaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Inventories;
@@ -106,6 +107,42 @@ public class InventoryRepository : IInventoryRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task AddItemToInventoryFromMarketPlace(Guid characterId, InventoryItem item, CancellationToken cancellationToken)
+    {
+        if (!item.ItemInstance.ItemBase.Stackable)
+        {
+            item.Quantity = 1;
+            await _context.InventoryItems.AddAsync(item, cancellationToken);
+            return;
+        }
+
+        var existing = await _context.InventoryItems
+            .Include(ii => ii.ItemInstance)
+                .ThenInclude(ii => ii.ItemBase)
+            .FirstOrDefaultAsync(ii => ii.InventoryId == characterId && ii.ItemInstance.ItemBaseId == item.ItemInstance.ItemBaseId, cancellationToken);
+
+
+        if (existing != null)
+        {
+            existing.Quantity += item.Quantity;
+        }
+        else
+        {
+            var itemToAdd = new InventoryItem
+            {
+                InventoryId = characterId,
+                ItemInstanceId = item.ItemInstanceId,
+                ItemInstance = item.ItemInstance,
+                Quantity = item.Quantity,
+            };
+
+            if (_context.GetEntry(itemToAdd.ItemInstance).State == EntityState.Detached)
+                await _context.ItemInstances.AddAsync(itemToAdd.ItemInstance, cancellationToken);
+
+            await _context.InventoryItems.AddAsync(itemToAdd, cancellationToken);
+        }
+    }
+
     public async Task CreateInventoryAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var inventory = new Inventory()
@@ -117,10 +154,10 @@ public class InventoryRepository : IInventoryRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<bool> TryRemoveItemsAsync(Guid characterId, Dictionary<string, int> requiredByItemId, CancellationToken cancellationToken)
+    public async Task<bool> TryRemoveCraftingMaterialsAsync(Guid characterId, Dictionary<string, int> requiredByItemId, CancellationToken cancellationToken)
     {
-        var inventory = await _context.InventoryItems
-            .Where(i => i.InventoryId == characterId)
+        var candidateRows = await _context.InventoryItems
+            .Where(i => i.InventoryId == characterId && requiredByItemId.Keys.Contains(i.ItemInstance.ItemBaseId))
             .Include(i => i.ItemInstance)
                 .ThenInclude(ii => ii.ItemBase)
             .ToListAsync(cancellationToken);
@@ -128,7 +165,7 @@ public class InventoryRepository : IInventoryRepository
         // Check if all required items exist in sufficient quantity
         foreach (var kvp in requiredByItemId)
         {
-            var totalOwned = inventory
+            var totalOwned = candidateRows
                 .Where(i => i.ItemInstance.ItemBase.Id == kvp.Key)
                 .Sum(i => i.Quantity);
 
@@ -141,12 +178,7 @@ public class InventoryRepository : IInventoryRepository
         {
             var remainingToRemove = kvp.Value;
 
-            var matchingItems = inventory
-                .Where(i => i.ItemInstance.ItemBase.Id == kvp.Key)
-                .OrderByDescending(i => i.Quantity) // Prefer removing large stacks
-                .ToList();
-
-            foreach (var invItem in matchingItems)
+            foreach (var invItem in candidateRows.Where(i => i.ItemInstance.ItemBase.Id == kvp.Key).OrderByDescending(i => i.Quantity))
             {
                 if (remainingToRemove <= 0) break;
 
@@ -163,6 +195,41 @@ public class InventoryRepository : IInventoryRepository
             }
         }
 
+        return true;
+    }
+
+    public async Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, MarketPlaceListing listing, CancellationToken cancellationToken)
+    {
+        var invItem = await _context.InventoryItems
+            .Where(i => i.InventoryId == characterId &&
+                i.ItemInstanceId == listing.ItemInstanceId)
+            .Include(i => i.ItemInstance)
+                .ThenInclude(ii => ii.ItemBase)
+            .SingleOrDefaultAsync(cancellationToken);
+
+        if (invItem == null || invItem.ItemInstance == null || invItem.ItemInstance.ItemBase == null)
+            return false;
+
+        bool isStackable = invItem.ItemInstance.ItemBase.Stackable;
+
+        if (!isStackable)
+        {
+            _context.InventoryItems.Remove(invItem);
+            return true;
+        }
+
+        var qty = listing.Quantity;
+        if (invItem.Quantity < qty) return false;
+
+        if (invItem.Quantity == qty)
+        {
+            _context.InventoryItems.Remove(invItem);
+        }
+        else
+        {
+            invItem.Quantity -= qty;
+        }
+        
         return true;
     }
 
