@@ -4,12 +4,16 @@ import { MarketPlaceListing } from '../../../../shared/models/Dtos/market-place/
 import { ApiService } from '../api.service';
 import { CreateMarketPlaceListingRequest } from '../../../../shared/models/requestDtos/market-place/create-market-place-listing-request';
 import { BuyoutMarketPlaceListingRequest } from '../../../../shared/models/requestDtos/market-place/buyout-market.place-listing-request';
+import { ToastService } from '../../client-side/toast/toast.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MarketPlaceService {
-  constructor(private readonly api: ApiService) {}
+  constructor(
+    private readonly api: ApiService,
+    private toast: ToastService,
+  ) {}
 
   getListings(): Observable<MarketPlaceListing[]> {
     return this.api.get('marketplace').pipe(
@@ -22,18 +26,14 @@ export class MarketPlaceService {
       }),
 
       catchError(() => {
-        // this.toastService.showToast(
-        //   'Login Failed',
-        //   'Wrong email or password',
-        //   'error',
-        //   't',
-        // );
         return throwError(() => new Error('Failed to get inventory'));
       }),
     );
   }
 
-  createListing(listing: CreateMarketPlaceListingRequest): Observable<boolean> {
+  createListing(
+    listing: CreateMarketPlaceListingRequest,
+  ): Observable<MarketPlaceListing> {
     return this.api.post('marketplace/createListing', listing).pipe(
       catchError(() => {
         return throwError(() => new Error('Failed to create listing'));
@@ -45,6 +45,20 @@ export class MarketPlaceService {
     return this.api.post('marketplace/buyoutListing', listing).pipe(
       catchError(() => {
         return throwError(() => new Error('Failed to buy listing'));
+      }),
+    );
+  }
+
+  cancelListing(listingId: string): Observable<boolean> {
+    return this.api.post('marketplace/cancelListing', listingId).pipe(
+      catchError(() => {
+        this.toast.showToast(
+          'Order cancellation failed',
+          'Order might have been purchased.',
+          false,
+          't',
+        );
+        return throwError(() => new Error('Failed to cancel listing'));
       }),
     );
   }

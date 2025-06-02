@@ -29,14 +29,14 @@ public class MarketPlaceRepository : IMarketPlaceRepository
         throw new NotImplementedException();
     }
 
-    public async Task<bool> CreateMarketPlaceListingAsync(Guid characterId, MarketPlaceListing marketPlaceListing, CancellationToken cancellationToken)
+    public async Task<MarketPlaceListing?> CreateMarketPlaceListingAsync(Guid characterId, MarketPlaceListing marketPlaceListing, CancellationToken cancellationToken)
     {
         var listingCount = await _dbContext.MarketPlaceListings
             .Where(mpl => mpl.SellerId.Equals(characterId))
             .CountAsync(cancellationToken);
 
         if (listingCount >= 10)
-            return false;
+            return null;
 
         // Set seller ID to ensure it's linked to the correct character
         marketPlaceListing.SellerId = characterId;
@@ -45,10 +45,10 @@ public class MarketPlaceRepository : IMarketPlaceRepository
         await _dbContext.MarketPlaceListings.AddAsync(marketPlaceListing, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        return true;
+        return marketPlaceListing;
     }
 
-    public async Task<MarketPlaceListing?> GetListingForBuyoutAsync(Guid listingId, CancellationToken cancellationToken)
+    public async Task<MarketPlaceListing?> GetListingAsync(Guid listingId, CancellationToken cancellationToken)
     {
         return await _dbContext.MarketPlaceListings
             .Include(mpl => mpl.ItemInstance)

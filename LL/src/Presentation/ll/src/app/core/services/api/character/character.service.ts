@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { computed, Injectable, Signal } from '@angular/core';
 import { ApiService } from '../api.service';
 import {
   BehaviorSubject,
@@ -16,6 +16,7 @@ import {
   CharacterOverviewDto,
 } from '../../../../shared/models/Dtos/characterDto';
 import { AuthService } from '../auth/auth.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root',
@@ -23,6 +24,11 @@ import { AuthService } from '../auth/auth.service';
 export class CharacterService {
   private readonly refresh$ = new Subject<void>();
 
+  readonly currentCharacter: Signal<CharacterDto | null>;
+  // readonly currentCharacterId: Signal<string | null>;
+  readonly currentCharacterId = computed(
+    () => this.currentCharacter()?.id ?? null,
+  );
   /** cached, shared stream of professions */
   private readonly characterOverviewObservable$ = this.refresh$.pipe(
     // make the first request immediately
@@ -46,7 +52,15 @@ export class CharacterService {
   constructor(
     private api: ApiService,
     private authService: AuthService,
-  ) {}
+  ) {
+    this.currentCharacter = toSignal(this.authService.currentCharacter$, {
+      initialValue: null,
+    });
+
+    // this.currentCharacterId = computed(
+    //   () => this.currentCharacter()?.id ?? null,
+    // );
+  }
 
   updateCharacter(updatedCharacter: CharacterDto): void {
     this.authService.updateCharacter(updatedCharacter);

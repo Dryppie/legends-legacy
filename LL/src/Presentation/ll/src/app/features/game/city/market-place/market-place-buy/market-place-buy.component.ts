@@ -184,7 +184,10 @@ export class MarketPlaceBuyComponent implements OnInit {
     // 👇 Replace with your real service / API call
     this.marketplaceState.buyoutListing(sel.id, qty).subscribe({
       next: () => {
-        // Optionally give the user feedback / toast here
+        this.marketplaceState.decrementListing(sel.id, qty);
+        sel.quantity -= qty;
+        if (sel.quantity > 0) this.selectListing(sel);
+        else this.selectedListing.set(null);
       },
       error: (err) => {
         // Handle error (e.g., show toast)
@@ -215,7 +218,7 @@ export class MarketPlaceBuyComponent implements OnInit {
     this.searchCtrl.reset();
     this.itemType.set('');
     this.rarity.set('');
-    this.priceSort.set('asc');
+    this.priceSort.set('');
   }
 
   selectListing(listing: MarketPlaceListing) {

@@ -22,7 +22,7 @@ public class MarketPlaceService : IMarketPlaceService
         return await _marketPlaceRepository.GetMarketPlaceListingsAsync(cancellationToken);
     }
 
-    public async Task<bool> CreateMarketPlaceListingAsync(Guid characterId, MarketPlaceListing marketPlaceListing, CancellationToken cancellationToken)
+    public async Task<MarketPlaceListing?> CreateMarketPlaceListingAsync(Guid characterId, MarketPlaceListing marketPlaceListing, CancellationToken cancellationToken)
     {
         await _inventoryService.TryRemoveItemsForMarketPlaceListingAsync(characterId, marketPlaceListing, cancellationToken);
 
@@ -31,12 +31,13 @@ public class MarketPlaceService : IMarketPlaceService
 
     public async Task<bool> BuyoutMarketPlaceListingAsync(Guid characterId, Guid listingId, int quantity, CancellationToken cancellationToken)
     {
-        var listing = await _marketPlaceRepository.GetListingForBuyoutAsync(listingId, cancellationToken);
-        if (listing == null || listing.Quantity < quantity) return false;
+        var listing = await _marketPlaceRepository.GetListingAsync(listingId, cancellationToken);
+        // If listing is null,   insufficient quantity,    or buyer is trying to purchase their own listing
+        if (listing == null || listing.Quantity < quantity || listing.SellerId.Equals(characterId)) return false;
 
         var buyer = await _characterService.GetCharacterByCharacterIdAsync(characterId, cancellationToken);
         if (buyer == null) return false;
-        var seller = await _characterService.GetCharacterByCharacterIdAsync(characterId, cancellationToken);
+        var seller = await _characterService.GetCharacterByCharacterIdAsync(listing.SellerId, cancellationToken);
         if (seller == null) return false;
 
         var totalPrice = listing.UnitPrice * quantity;
@@ -63,8 +64,23 @@ public class MarketPlaceService : IMarketPlaceService
         return true;
     }
 
-    public Task<bool> CancelMarketPlaceListingAsync(Guid characterId, Guid listingId, CancellationToken cancellationToken)
+    public async Task<bool> CancelMarketPlaceListingAsync(Guid characterId, Guid listingId, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var listing = await _marketPlaceRepository.GetListingAsync(listingId, cancellationToken);
+        if (listing == null) return false;
+
+        var inventoryItem = new InventoryItem()
+        {
+            InventoryId = characterId,
+            Quantity = listing.Quantity,
+            ItemInstanceId = listing.ItemInstanceId,
+            ItemInstance = listing.ItemInstance,
+        };
+
+        await _inventoryService.AddItemToInventoryFromMarketPlace(characterId, inventoryItem, cancellationToken);
+        _marketPlaceRepository.RemoveListingAsync(listing);
+
+        await _marketPlaceRepository.SaveChangesAsync(cancellationToken);
+        return true;
     }
 }

@@ -17,6 +17,8 @@ import {
   EssenceItem,
 } from '../../../../../shared/models/item';
 import { MarketplaceStateService } from '../../../../../core/services/api/market-place/market-place-state.service';
+import { MarketPlaceListing } from '../../../../../shared/models/Dtos/market-place/market-place-listing';
+import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
 
 @Component({
   selector: 'app-market-place-sell',
@@ -28,11 +30,14 @@ import { MarketplaceStateService } from '../../../../../core/services/api/market
     TabComponent,
     MarketPlaceInventoryItemComponent,
     RegularButtonComponent,
+    NumberFormatPipe,
   ],
   templateUrl: './market-place-sell.component.html',
   styleUrl: './market-place-sell.component.css',
 })
 export class MarketPlaceSellComponent implements OnInit {
+  readonly myListings = signal<MarketPlaceListing[]>([]);
+
   readonly pendingItem = signal<InventoryItem | null>(null);
   selectedItemId: string = '';
 
@@ -62,6 +67,13 @@ export class MarketPlaceSellComponent implements OnInit {
       this.qtyCtrl.setValue(1, { emitEvent: false });
       this.qtyCtrl.updateValueAndValidity({ emitEvent: false });
     });
+
+    effect(
+      () => {
+        this.myListings.set(this.marketplaceState.myListings());
+      },
+      { allowSignalWrites: true }, // ✅ Add this option
+    );
 
     this.setActiveTab(this.tabs[0]?.label || '');
   }
@@ -134,20 +146,33 @@ export class MarketPlaceSellComponent implements OnInit {
     const item = this.pendingItem()!;
 
     this.marketplaceState
-      .addListing(item, qty, unitPrice)
-      .subscribe((success) => {
+      .createListing(item, qty, unitPrice)
+      .subscribe((listing) => {
         // remove or decrement from inventory
         if (item.itemInstance.itemBase.stackable && item.quantity > qty) {
           this.inventoryState.decrementItem(item.itemInstance.id, qty);
         } else {
           this.inventoryState.removeItem(item.itemInstance.id);
         }
+        this.marketplaceState.addToListings(listing);
 
-        // clean up UI
         this.pendingItem.set(null);
         this.priceCtrl.reset();
         this.qtyCtrl.reset();
       });
+  }
+
+  cancelListing(listing: MarketPlaceListing) {
+    this.marketplaceState.cancelListing(listing.id).subscribe((success) => {
+      const inventoryItem: InventoryItem = {
+        id: crypto.randomUUID(),
+        itemInstance: listing.itemInstance,
+        quantity: listing.quantity,
+      };
+      this.inventoryState.add(inventoryItem);
+      if (this.selectedItemId === inventoryItem.itemInstance.id)
+        this.selectedItemId = '';
+    });
   }
 
   tabs: Tab[] = [
@@ -200,4 +225,5 @@ export class MarketPlaceSellComponent implements OnInit {
 
   trackByItem = (_: number, item: InventoryItem) => item.id;
   // trackByListing = (_: number, l: Listing) => l.id;
+  trackByListing = (_: number, l: MarketPlaceListing) => l.id;
 }

@@ -1,4 +1,4 @@
-import { signal, computed, Injectable } from '@angular/core';
+import { signal, computed, Injectable, Signal } from '@angular/core';
 import { finalize } from 'rxjs/operators';
 
 import { MarketPlaceService } from './market-place.service';
@@ -8,6 +8,7 @@ import { CreateMarketPlaceListingRequest } from '../../../../shared/models/reque
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { Observable } from 'rxjs';
 import { BuyoutMarketPlaceListingRequest } from '../../../../shared/models/requestDtos/market-place/buyout-market.place-listing-request';
+import { CharacterService } from '../character/character.service';
 
 @Injectable({ providedIn: 'root' })
 export class MarketplaceStateService {
@@ -15,12 +16,29 @@ export class MarketplaceStateService {
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
 
-  readonly listings = computed(() => this._listings());
+  private readonly myCharacterId!: Signal<string | null>;
+
+  readonly listings = computed(() => {
+    const myId = this.myCharacterId(); // ← read the value
+    return this._listings().filter((l) => l.sellerId !== myId);
+  });
+  readonly myListings = computed(() =>
+    this._listings().filter(
+      (l) => l.sellerId === this.myCharacterId(), // adjust property name
+    ),
+  );
   readonly loading = computed(() => this._loading());
   readonly isEmpty = computed(() => this._listings().length === 0);
   readonly error = computed(() => this._error());
 
-  constructor(private marketplaceService: MarketPlaceService) {}
+  constructor(
+    private marketplaceService: MarketPlaceService,
+    private characterService: CharacterService,
+  ) {
+    this.myCharacterId = computed(
+      () => this.characterService.currentCharacterId(), // unwrap inside
+    );
+  }
 
   byType = (type: ItemType) =>
     computed(
@@ -72,11 +90,18 @@ export class MarketplaceStateService {
       .pipe((success) => success);
   }
 
-  addListing(
+  cancelListing(listingId: string): Observable<boolean> {
+    return this.marketplaceService.cancelListing(listingId).pipe((success) => {
+      this.removeListing(listingId);
+      return success;
+    });
+  }
+
+  createListing(
     item: InventoryItem,
     quantity: number,
     unitPrice: number,
-  ): Observable<boolean> {
+  ): Observable<MarketPlaceListing> {
     const listing: CreateMarketPlaceListingRequest = {
       itemInstanceId: item.itemInstance.id,
       quantity,
@@ -86,7 +111,11 @@ export class MarketplaceStateService {
     // Uncomment once backend endpoint is ready
     return this.marketplaceService
       .createListing(listing)
-      .pipe((success) => success);
+      .pipe((createdListing) => createdListing);
+  }
+
+  addToListings(listing: MarketPlaceListing) {
+    this._listings.set([...this._listings(), listing]);
   }
 
   // Remove an existing listing.

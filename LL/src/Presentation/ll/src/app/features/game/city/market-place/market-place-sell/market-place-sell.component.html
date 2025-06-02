@@ -95,25 +95,34 @@
     <!-- Active listings -->
     <h3 class="font-semibold">Your Listings</h3>
     <div class="flex max-h-60 flex-col gap-3 overflow-y-auto">
-      <!-- <ng-container *ngFor="let l of myListings(); trackBy: trackByListing">
+      <ng-container *ngFor="let l of myListings(); trackBy: trackByListing">
         <div
           class="flex items-center justify-between rounded bg-neutral-800/70 p-2"
         >
           <div class="flex items-center gap-2">
-            <img [src]="l.item.icon" [alt]="l.item.name" class="w-8 h-8" />
-            <span class="text-sm">{{ l.item.name }}</span>
+            <span class="text-sm">{{ l.itemInstance.itemBase.name }}</span>
           </div>
           <div class="flex items-center gap-1 text-sm">
-            <span>{{ l.price }}</span>
-            <svg class="h-4 w-4 fill-amber-500"></svg>
+            <span>x{{ l.quantity | numberFormat }}</span>
+          </div>
+          <div class="flex items-center gap-1 text-sm">
+            <span>{{ l.unitPrice | numberFormat }}</span>
+          </div>
+          <div>
+            <app-regular-button
+              (pressed)="cancelListing(l)"
+              text="Cancel"
+            ></app-regular-button>
           </div>
         </div>
-      </ng-container> -->
+      </ng-container>
 
-      <!-- <p *ngIf="!myListings().length"
-         class="text-center text-neutral-400 italic">
+      <p
+        *ngIf="!myListings().length"
+        class="text-center italic text-neutral-400"
+      >
         No active listings.
-      </p> -->
+      </p>
     </div>
   </div>
 </div>
