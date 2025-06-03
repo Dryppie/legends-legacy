@@ -49,7 +49,7 @@ public static class DependencyInjection
     {
         var timeout = configuration.GetSection("Database").GetValue<int>("TimeoutInSeconds");
         services.AddDbContextFactory<LLDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("LegendsLegacyDB"), sqlServerOptions => sqlServerOptions.CommandTimeout(timeout))
+            options.UseNpgsql(configuration.GetConnectionString("LegendsLegacyDB"), npgsqlOptions => npgsqlOptions.CommandTimeout(timeout))
         );
 
         services.AddScoped<IDbContext>(provider => provider.GetRequiredService<LLDbContext>() ?? throw new SystemException("LLDbContext could not be resolved"));

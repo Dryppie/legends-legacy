@@ -206,7 +206,7 @@ public class LLDbContextFactory : IDesignTimeDbContextFactory<LLDbContext>
         DbContextOptionsBuilder<LLDbContext> optionsBuilder = new();
 
         var timeout = configuration.GetSection("Database").GetValue<int>("TimeoutInSeconds");
-        optionsBuilder.UseSqlServer(connectionString, sqlServerOptions => sqlServerOptions.CommandTimeout(timeout));
+        optionsBuilder.UseNpgsql(connectionString, sqlServerOptions => sqlServerOptions.CommandTimeout(timeout));
 
         return new(optionsBuilder.Options);
     }

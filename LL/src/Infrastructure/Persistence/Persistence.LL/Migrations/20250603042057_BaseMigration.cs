@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -15,8 +17,8 @@ namespace Persistence.LL.Migrations
                 name: "AbilityIds",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    EntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    EntityId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -27,10 +29,10 @@ namespace Persistence.LL.Migrations
                 name: "Essences",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PassiveAbilityId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ActiveAbilityId = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    PassiveAbilityId = table.Column<string>(type: "text", nullable: false),
+                    ActiveAbilityId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -41,9 +43,9 @@ namespace Persistence.LL.Migrations
                 name: "Regions",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -54,14 +56,14 @@ namespace Persistence.LL.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Username = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsGuest = table.Column<bool>(type: "bit", nullable: false),
-                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedUtc = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Username = table.Column<string>(type: "text", nullable: true),
+                    Email = table.Column<string>(type: "text", nullable: true),
+                    PasswordHash = table.Column<string>(type: "text", nullable: true),
+                    IsGuest = table.Column<bool>(type: "boolean", nullable: false),
+                    EmailConfirmed = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    UpdatedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -72,14 +74,14 @@ namespace Persistence.LL.Migrations
                 name: "ItemBases",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Stackable = table.Column<bool>(type: "bit", nullable: false),
-                    ItemType = table.Column<int>(type: "int", nullable: false),
-                    Rarity = table.Column<int>(type: "int", nullable: false),
-                    EquipmentType = table.Column<int>(type: "int", nullable: true),
-                    EssenceId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    Stackable = table.Column<bool>(type: "boolean", nullable: false),
+                    ItemType = table.Column<int>(type: "integer", nullable: false),
+                    Rarity = table.Column<int>(type: "integer", nullable: false),
+                    EquipmentType = table.Column<int>(type: "integer", nullable: true),
+                    EssenceId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -96,10 +98,10 @@ namespace Persistence.LL.Migrations
                 name: "Areas",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SpawnProbabilities = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    RegionId = table.Column<int>(type: "int", nullable: true)
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    SpawnProbabilities = table.Column<List<float>>(type: "real[]", nullable: false),
+                    RegionId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -116,14 +118,14 @@ namespace Persistence.LL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Provider = table.Column<int>(type: "int", nullable: false),
-                    ProviderUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    AccessToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ExpiresUtc = table.Column<DateTime>(type: "datetime2", nullable: true)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Provider = table.Column<int>(type: "integer", nullable: false),
+                    ProviderUserId = table.Column<string>(type: "text", nullable: false),
+                    AccessToken = table.Column<string>(type: "text", nullable: true),
+                    RefreshToken = table.Column<string>(type: "text", nullable: true),
+                    CreatedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ExpiresUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -141,14 +143,14 @@ namespace Persistence.LL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TokenHash = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ExpiresUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedUtc = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    RevokedUtc = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    ReplacedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AppUserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TokenHash = table.Column<string>(type: "text", nullable: false),
+                    ExpiresUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    RevokedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ReplacedBy = table.Column<string>(type: "text", nullable: true),
+                    AppUserId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -164,12 +166,12 @@ namespace Persistence.LL.Migrations
                 name: "ItemAttributeModifier",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ItemBaseId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    EquipmentBaseId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    AttributeType = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ItemBaseId = table.Column<string>(type: "text", nullable: false),
+                    EquipmentBaseId = table.Column<string>(type: "text", nullable: true),
+                    AttributeType = table.Column<int>(type: "integer", nullable: false),
                     Amount = table.Column<float>(type: "real", nullable: false),
-                    ModifierType = table.Column<int>(type: "int", nullable: false)
+                    ModifierType = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -191,14 +193,14 @@ namespace Persistence.LL.Migrations
                 name: "ItemInstances",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ItemBaseId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ItemType = table.Column<int>(type: "int", nullable: false),
-                    Rarity = table.Column<int>(type: "int", nullable: true),
-                    Potential = table.Column<int>(type: "int", nullable: true),
-                    ItemXp = table.Column<int>(type: "int", nullable: true),
-                    IsMasterpiece = table.Column<bool>(type: "bit", nullable: true),
-                    IsLevelingItem = table.Column<bool>(type: "bit", nullable: true)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ItemBaseId = table.Column<string>(type: "text", nullable: false),
+                    ItemType = table.Column<int>(type: "integer", nullable: false),
+                    Rarity = table.Column<int>(type: "integer", nullable: true),
+                    Potential = table.Column<int>(type: "integer", nullable: true),
+                    ItemXp = table.Column<int>(type: "integer", nullable: true),
+                    IsMasterpiece = table.Column<bool>(type: "boolean", nullable: true),
+                    IsLevelingItem = table.Column<bool>(type: "boolean", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -215,11 +217,11 @@ namespace Persistence.LL.Migrations
                 name: "LootTableEntry",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Weight = table.Column<float>(type: "real", nullable: false),
-                    LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    LootTableType = table.Column<int>(type: "int", nullable: false),
-                    ItemId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    LootTableId = table.Column<Guid>(type: "uuid", nullable: true),
+                    LootTableType = table.Column<int>(type: "integer", nullable: false),
+                    ItemId = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -242,13 +244,13 @@ namespace Persistence.LL.Migrations
                 name: "Recipes",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ItemId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false),
-                    CraftType = table.Column<int>(type: "int", nullable: false),
-                    LevelRequirement = table.Column<int>(type: "int", nullable: false),
-                    ItemType = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    ItemId = table.Column<string>(type: "text", nullable: false),
+                    Quantity = table.Column<int>(type: "integer", nullable: false),
+                    CraftType = table.Column<int>(type: "integer", nullable: false),
+                    LevelRequirement = table.Column<int>(type: "integer", nullable: false),
+                    ItemType = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -265,12 +267,12 @@ namespace Persistence.LL.Migrations
                 name: "MarketPlaceListings",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SellerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ItemInstanceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    SellerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ItemInstanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Quantity = table.Column<int>(type: "integer", nullable: false),
                     UnitPrice = table.Column<long>(type: "bigint", nullable: false),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -287,18 +289,18 @@ namespace Persistence.LL.Migrations
                 name: "Entities",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Level = table.Column<int>(type: "int", nullable: false),
-                    ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    EntityType = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Level = table.Column<int>(type: "integer", nullable: false),
+                    ImagePath = table.Column<string>(type: "text", nullable: false),
+                    EntityType = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: true),
                     Experience = table.Column<float>(type: "real", nullable: true),
                     Cinders = table.Column<long>(type: "bigint", nullable: true),
                     Soulstones = table.Column<long>(type: "bigint", nullable: true),
-                    ArenaRating = table.Column<int>(type: "int", nullable: true),
-                    LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ExperienceReward = table.Column<int>(type: "int", nullable: true)
+                    ArenaRating = table.Column<int>(type: "integer", nullable: true),
+                    LootTableId = table.Column<Guid>(type: "uuid", nullable: true),
+                    ExperienceReward = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -321,11 +323,11 @@ namespace Persistence.LL.Migrations
                 name: "GatheringNodes",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LevelRequirement = table.Column<int>(type: "int", nullable: false),
-                    ProfessionType = table.Column<int>(type: "int", nullable: false),
-                    LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    LevelRequirement = table.Column<int>(type: "integer", nullable: false),
+                    ProfessionType = table.Column<int>(type: "integer", nullable: false),
+                    LootTableId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -342,10 +344,10 @@ namespace Persistence.LL.Migrations
                 name: "Material",
                 columns: table => new
                 {
-                    RecipeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ItemId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false),
-                    ItemBaseId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    RecipeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ItemId = table.Column<string>(type: "text", nullable: false),
+                    Quantity = table.Column<int>(type: "integer", nullable: false),
+                    ItemBaseId = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -373,8 +375,8 @@ namespace Persistence.LL.Migrations
                 name: "AreaCreature",
                 columns: table => new
                 {
-                    AreaId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    CreatureId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AreaId = table.Column<string>(type: "text", nullable: false),
+                    CreatureId = table.Column<Guid>(type: "uuid", nullable: false),
                     WeightedSpawnRate = table.Column<float>(type: "real", nullable: false)
                 },
                 constraints: table =>
@@ -398,9 +400,9 @@ namespace Persistence.LL.Migrations
                 name: "ArenaTicketStatus",
                 columns: table => new
                 {
-                    CharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CurrentTickets = table.Column<int>(type: "int", nullable: false),
-                    LastTicketUpdate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CurrentTickets = table.Column<int>(type: "integer", nullable: false),
+                    LastTicketUpdate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -417,9 +419,9 @@ namespace Persistence.LL.Migrations
                 name: "CharacterActions",
                 columns: table => new
                 {
-                    CharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UpdatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -436,9 +438,9 @@ namespace Persistence.LL.Migrations
                 name: "CharacterSoulstoneUpgrades",
                 columns: table => new
                 {
-                    CharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SoulstoneUpgradeDefinitionId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Level = table.Column<int>(type: "int", nullable: false)
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SoulstoneUpgradeDefinitionId = table.Column<string>(type: "text", nullable: false),
+                    Level = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -455,14 +457,14 @@ namespace Persistence.LL.Migrations
                 name: "ColosseumMatches",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CharacterAId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CharacterAName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CharacterBId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CharacterBName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    WinnerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    WinnerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PlayedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CharacterAId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CharacterAName = table.Column<string>(type: "text", nullable: false),
+                    CharacterBId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CharacterBName = table.Column<string>(type: "text", nullable: false),
+                    WinnerId = table.Column<Guid>(type: "uuid", nullable: true),
+                    WinnerName = table.Column<string>(type: "text", nullable: false),
+                    PlayedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -479,8 +481,8 @@ namespace Persistence.LL.Migrations
                 name: "EntityAttributes",
                 columns: table => new
                 {
-                    EntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AttributeType = table.Column<int>(type: "int", nullable: false),
+                    EntityId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AttributeType = table.Column<int>(type: "integer", nullable: false),
                     Value = table.Column<float>(type: "real", nullable: false)
                 },
                 constraints: table =>
@@ -498,9 +500,9 @@ namespace Persistence.LL.Migrations
                 name: "EquipmentSlots",
                 columns: table => new
                 {
-                    EntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    EquipmentType = table.Column<int>(type: "int", nullable: false),
-                    EquipmentInstanceId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    EntityId = table.Column<Guid>(type: "uuid", nullable: false),
+                    EquipmentType = table.Column<int>(type: "integer", nullable: false),
+                    EquipmentInstanceId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -522,11 +524,11 @@ namespace Persistence.LL.Migrations
                 name: "EssenceSlots",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SlotType = table.Column<int>(type: "int", nullable: false),
-                    SlotState = table.Column<int>(type: "int", nullable: false),
-                    EntityId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    EssenceId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    SlotType = table.Column<int>(type: "integer", nullable: false),
+                    SlotState = table.Column<int>(type: "integer", nullable: false),
+                    EntityId = table.Column<Guid>(type: "uuid", nullable: false),
+                    EssenceId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -549,13 +551,13 @@ namespace Persistence.LL.Migrations
                 name: "Guilds",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Tag = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    MaxMembers = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    OwnerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    Tag = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    MaxMembers = table.Column<int>(type: "integer", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    OwnerId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -572,7 +574,7 @@ namespace Persistence.LL.Migrations
                 name: "Inventories",
                 columns: table => new
                 {
-                    CharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -589,9 +591,9 @@ namespace Persistence.LL.Migrations
                 name: "Professions",
                 columns: table => new
                 {
-                    CharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ProfessionType = table.Column<int>(type: "int", nullable: false),
-                    Level = table.Column<int>(type: "int", nullable: false),
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ProfessionType = table.Column<int>(type: "integer", nullable: false),
+                    Level = table.Column<int>(type: "integer", nullable: false),
                     Experience = table.Column<float>(type: "real", nullable: false)
                 },
                 constraints: table =>
@@ -609,14 +611,14 @@ namespace Persistence.LL.Migrations
                 name: "ActionDetails",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CharacterActionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ActionType = table.Column<int>(type: "int", nullable: false),
-                    CharacterTeam = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AreaId = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ProfessionType = table.Column<int>(type: "int", nullable: true),
-                    LootTableId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CharacterActionId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ActionType = table.Column<int>(type: "integer", nullable: false),
+                    CharacterTeam = table.Column<List<Guid>>(type: "uuid[]", nullable: true),
+                    AreaId = table.Column<string>(type: "text", nullable: true),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    ProfessionType = table.Column<int>(type: "integer", nullable: true),
+                    LootTableId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -645,10 +647,10 @@ namespace Persistence.LL.Migrations
                 name: "GuildInvites",
                 columns: table => new
                 {
-                    GuildId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IsInvite = table.Column<bool>(type: "bit", nullable: false)
+                    GuildId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    IsInvite = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -671,10 +673,10 @@ namespace Persistence.LL.Migrations
                 name: "GuildMembers",
                 columns: table => new
                 {
-                    GuildId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CharacterId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Role = table.Column<int>(type: "int", nullable: false),
-                    JoinedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
+                    GuildId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Role = table.Column<int>(type: "integer", nullable: false),
+                    JoinedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -697,9 +699,9 @@ namespace Persistence.LL.Migrations
                 name: "InventoryItems",
                 columns: table => new
                 {
-                    InventoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ItemInstanceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false)
+                    InventoryId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ItemInstanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Quantity = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -722,11 +724,11 @@ namespace Persistence.LL.Migrations
                 name: "CraftingQueueItems",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AddedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    EquipmentInstanceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CraftType = table.Column<int>(type: "int", nullable: false),
-                    CraftingActionDetailsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    AddedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    EquipmentInstanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CraftType = table.Column<int>(type: "integer", nullable: false),
+                    CraftingActionDetailsId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {

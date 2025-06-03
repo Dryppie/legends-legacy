@@ -49,10 +49,10 @@ builder.Services.AddApiVersioning(options =>
 });
 
 // Authorization policy FallbackPolicy is applied globally. Overridden by [] Attributes on specific endpoints
-builder.Services.AddAuthorization(); // For Identity
+//builder.Services.AddAuthorization(); // For Identity
 
 // TODO: Apply policies during release
-builder.Services.AddAuthorizationBuilder().SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+//builder.Services.AddAuthorizationBuilder().SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 
 //builder.Services.AddIdentityApiEndpoints<AppUser>()
 //    .AddEntityFrameworkStores<LLDbContext>();
@@ -66,37 +66,16 @@ builder.Services.AddCors(options =>
                           .AllowAnyHeader());
 });
 
-// TODO: Create an extension method for this
-builder.Services.Configure<IdentityOptions>(options =>
-{
-    // Password settings.
-    options.Password.RequireDigit = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequiredLength = 6;
-    options.Password.RequiredUniqueChars = 0;
+//builder.Services.ConfigureApplicationCookie(options =>
+//{
+//    // Cookie settings
+//    options.Cookie.HttpOnly = true;
+//    options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
 
-    // Lockout settings.
-    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-    options.Lockout.MaxFailedAccessAttempts = 5;
-    options.Lockout.AllowedForNewUsers = true;
-
-    // User settings.
-
-    options.User.RequireUniqueEmail = true;
-});
-
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    // Cookie settings
-    options.Cookie.HttpOnly = true;
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
-
-    options.LoginPath = "/Identity/Account/Login";
-    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-    options.SlidingExpiration = true;
-});
+//    options.LoginPath = "/Identity/Account/Login";
+//    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+//    options.SlidingExpiration = true;
+//});
 
 // Dependency Injections
 builder.Services.AddPersistence(config);
