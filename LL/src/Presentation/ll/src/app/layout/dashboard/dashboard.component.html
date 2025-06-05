@@ -28,11 +28,9 @@
           class="relative h-full w-full max-w-[1280px] flex-auto overflow-hidden sm:pr-4"
         >
           <div
-            class="border-gradient absolute inset-0 flex w-full items-center pt-[1px] sm:rounded-md sm:py-[1px] sm:pr-4 sm:opacity-90 2xl:rounded-b-none 2xl:pb-[0px]"
+            class="border-gradient absolute inset-0 flex w-full items-center rounded-b-none pt-[1px] sm:rounded-t-md sm:pr-4 sm:opacity-95"
           >
-            <div
-              class="h-full w-full bg-texture sm:rounded-md 2xl:rounded-b-none"
-            ></div>
+            <div class="h-full w-full bg-texture sm:rounded-t-md"></div>
           </div>
           <main
             class="relative flex h-full w-full flex-auto flex-col gap-2 overflow-hidden pt-4 sm:rounded-md sm:pt-6 2xl:rounded-b-none"
@@ -51,24 +49,39 @@
             </div>
           </main>
         </div>
-        <div
-          class="flex h-12 flex-none justify-end rounded-md rounded-b-none text-white 2xl:hidden"
-        >
-          <div
-            class="border-gradient relative flex h-full items-center rounded-md pt-[1px]"
-          >
-            <div
-              class="flex h-full w-80 items-center justify-between rounded-tl-md bg-texture px-3"
-            >
-              <div class="text-primary">CHAT</div>
-              <img src="icons/ActivePlus.svg" />
-            </div>
-          </div>
-        </div>
       </div>
-      <div class="hidden h-full w-80 flex-col 2xl:flex">
-        <div class="hidden h-full w-80 flex-col 2xl:flex"></div>
+      <div
+        *ngIf="isChatOpenDesktop && isScreenLarge"
+        class="hidden h-full flex-col xl:flex"
+      >
+        <app-chat class="h-full"></app-chat>
       </div>
+    </div>
+  </div>
+</div>
+
+<div
+  class="fixed bottom-4 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-zinc-300/30 xl:hidden"
+>
+  <div
+    (click)="toggleChat()"
+    class="border-gradient relative flex h-full cursor-pointer items-center rounded-md p-[1px]"
+  >
+    <div
+      class="flex h-full w-28 items-center justify-between rounded-tl-md bg-texture px-4"
+    >
+      <div class="text-primary">CHAT</div>
+      <img src="icons/ActivePlus.svg" />
+    </div>
+  </div>
+  <div
+    *ngIf="isFloatingChatOpen && !isScreenLarge"
+    class="fixed inset-0 z-50 flex justify-end xl:hidden"
+  >
+    <div class="absolute inset-0 bg-black/60" (click)="toggleChat()"></div>
+
+    <div class="animate-slide-in relative h-full max-w-full">
+      <app-chat (close)="toggleChat()"></app-chat>
     </div>
   </div>
 </div>

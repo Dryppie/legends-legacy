@@ -91,9 +91,8 @@ public class SwaggerAutoAuthFilter : IOperationFilter
             var user = await context.Users.FirstOrDefaultAsync(u => u.Email!.Equals(email), cancellationToken);
 
             var character = await characterService.GetMyCharacterAsync(user!.Id, cancellationToken);
-            user.CharacterId = character!.Id;
 
-            var token = jwtTokenService.IssueTokens(user);
+            var token = jwtTokenService.IssueTokens(user, character!);
             return token;
         }
     }

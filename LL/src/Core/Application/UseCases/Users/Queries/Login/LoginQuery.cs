@@ -28,9 +28,7 @@ public class LoginQueryHandler : IRequestHandler<LoginQuery, Response<Tokens>>
         var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
         if (character == null) return Response<Tokens>.Fail("No character exists with this account.");
 
-        user.CharacterId = character.Id;
-
-        var tokens = _jwtGenerator.IssueTokens(user);
+        var tokens = _jwtGenerator.IssueTokens(user, character);
         return Response<Tokens>.Success(tokens);
     }
 }

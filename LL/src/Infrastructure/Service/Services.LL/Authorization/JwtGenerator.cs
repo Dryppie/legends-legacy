@@ -1,13 +1,14 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Application.Authorization.Interfaces;
+﻿using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL.Entities;
 using Common.Authorization.Security;
 using Common.Options;
+using Domain.Models.Entities.Characters;
 using Domain.Models.Users;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace Services.LL.Authorization;
 public class JwtGenerator : IJwtGenerator
@@ -53,7 +54,7 @@ public class JwtGenerator : IJwtGenerator
         };
     }
 
-    public Tokens IssueTokens(AppUser user)
+    public Tokens IssueTokens(AppUser user, Character character)
     {
         var now = DateTime.UtcNow;
 
@@ -64,6 +65,8 @@ public class JwtGenerator : IJwtGenerator
             new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
             new("guest",                       user.IsGuest.ToString()),
             new(ClaimTypes.UserData,           user.Id.ToString()),
+            new("CharacterId", character.Id.ToString()),
+            new(ClaimTypes.Name, character.Name)
         };
 
         if (!string.IsNullOrWhiteSpace(user.CharacterId.ToString()))
@@ -110,9 +113,7 @@ public class JwtGenerator : IJwtGenerator
         var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
         if (character == null) return null;
 
-        user.CharacterId = character.Id;
-
-        var newTokens = IssueTokens(user);
+        var newTokens = IssueTokens(user, character);
         // store the hash of the *new* refresh token inside the old one (`ReplacedBy`) – optional
         record.ReplacedBy = _hasher.Hash(newTokens.RefreshToken);
         await _repo.SaveChangesAsync(cancellationToken);

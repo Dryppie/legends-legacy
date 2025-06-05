@@ -7,6 +7,7 @@ import { AsyncPipe, NgClass, NgIf } from '@angular/common';
 import { Observable } from 'rxjs';
 import { GameService } from '../../core/services/client-side/game/game.service';
 import { CombatComponent } from '../../shared/components/combat/combat.component';
+import { ChatComponent } from './chat/chat.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -20,6 +21,7 @@ import { CombatComponent } from '../../shared/components/combat/combat.component
     AsyncPipe,
     NgClass,
     CombatComponent,
+    ChatComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css',
@@ -27,6 +29,9 @@ import { CombatComponent } from '../../shared/components/combat/combat.component
 export class DashboardComponent implements OnInit {
   isSidebarOpen = true;
   isScreenSmall = false;
+  isScreenLarge = false;
+  isChatOpenDesktop = true; // open by default on ≥ lg
+  isFloatingChatOpen = false;
   combatVisible$!: Observable<boolean>;
 
   constructor(private gameService: GameService) {}
@@ -43,10 +48,17 @@ export class DashboardComponent implements OnInit {
 
   checkScreenSize() {
     this.isScreenSmall = window.innerWidth < 640;
+    this.isScreenLarge = window.innerWidth >= 1280;
   }
 
   toggleNav() {
     this.isSidebarOpen = !this.isSidebarOpen;
+  }
+
+  toggleChat(): void {
+    this.isScreenLarge
+      ? (this.isChatOpenDesktop = !this.isChatOpenDesktop)
+      : (this.isFloatingChatOpen = !this.isFloatingChatOpen);
   }
 
   openSidebar() {

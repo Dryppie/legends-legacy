@@ -79,7 +79,7 @@
           fullWidth
           [disabled]="priceCtrl.invalid || qtyCtrl.invalid"
           (pressed)="listItem()"
-        ></app-regular-button>
+        />
       </div>
     </ng-container>
 
@@ -109,10 +109,7 @@
             <span>{{ l.unitPrice | numberFormat }}</span>
           </div>
           <div>
-            <app-regular-button
-              (pressed)="cancelListing(l)"
-              text="Cancel"
-            ></app-regular-button>
+            <app-regular-button (pressed)="cancelListing(l)" text="Cancel" />
           </div>
         </div>
       </ng-container>

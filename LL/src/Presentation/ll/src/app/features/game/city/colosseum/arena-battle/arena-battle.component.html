@@ -26,7 +26,7 @@
       text="Refresh"
       variant="danger"
       (pressed)="onRefresh()"
-    ></app-regular-button>
+    />
   </div>
   <div
     class="grid grid-cols-4 items-center border-t border-light_gray p-2"
@@ -42,6 +42,6 @@
       [disabled]="
         arenaTicketStatus == undefined || arenaTicketStatus.currentTickets < 1
       "
-    ></app-regular-button>
+    />
   </div>
 </div>

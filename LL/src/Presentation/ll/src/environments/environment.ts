@@ -2,6 +2,7 @@ const env = (window as any).env;
 export const environment = {
   environment: env.environment as 'dev' | 'test' | 'prod',
   apiBaseUrl: env.apiBaseUrl,
+  chatApiRoot: env.chatApiRoot,
   production: false,
   googleClientId: env.googleClientId,
   isLocal: env.isLocal === 'true',

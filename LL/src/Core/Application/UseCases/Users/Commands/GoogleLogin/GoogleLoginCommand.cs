@@ -36,9 +36,7 @@ public class GoogleLoginCommandHandler : IRequestHandler<GoogleLoginCommand, Res
         var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
         if (character == null) return Response<Tokens>.Fail("Could not find character.");
 
-        user.CharacterId = character.Id;
-
-        var tokens = _jwt.IssueTokens(user);
+        var tokens = _jwt.IssueTokens(user, character);
         return Response<Tokens>.Success(tokens);
     }
 }

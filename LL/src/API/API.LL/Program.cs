@@ -1,5 +1,3 @@
-using System.Text;
-using System.Text.Json.Serialization;
 using API.LL;
 using Application;
 using Asp.Versioning;
@@ -15,6 +13,9 @@ using Persistence.LL;
 using Persistence.LL.Seeds;
 using Services.AdminDashboard;
 using Services.LL;
+using System.Security.Claims;
+using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -99,6 +100,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuer = false, // Needs to be true
             ValidateAudience = false, // Needs to be true
             ValidateLifetime = true,
+            NameClaimType = ClaimTypes.Name
         };
 
         options.Events = new JwtBearerEvents

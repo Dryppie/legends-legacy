@@ -32,11 +32,10 @@ public class ConvertGuestToUserCommandHandler : IRequestHandler<ConvertGuestToUs
         var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
         if (character == null) return Response<Tokens>.Fail("No character is bound to this account.");
 
-        user.CharacterId = character.Id;
         await _publisher.Publish(new ConvertedGuestToUserEvent(user.Id, user.Username!), cancellationToken);
 
 
-        var tokens = _jwtGenerator.IssueTokens(user);
+        var tokens = _jwtGenerator.IssueTokens(user, character);
 
         return Response<Tokens>.Success(tokens);
     }

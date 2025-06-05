@@ -1,0 +1,52 @@
+<div
+  class="flex h-full w-96 flex-col justify-between bg-texture xl:rounded-tl-md"
+>
+  <div class="relative flex h-full flex-col overflow-hidden">
+    <div class="text-gold flex justify-between border-b border-primary p-2">
+      <span (click)="send()" class="text-white">Global</span>
+      <button
+        class="hover:text-gold/70 text-xs uppercase xl:hidden"
+        aria-label="Close chat"
+        (click)="close.emit()"
+      >
+        ✕
+      </button>
+    </div>
+
+    <section class="flex flex-col overflow-y-auto text-white" appStickyScroll>
+      <ng-container *ngIf="chat.messages$ | async as messages">
+        <div
+          *ngFor="let m of messages"
+          class="p-1 odd:bg-zinc-300/5 even:bg-transparent"
+        >
+          <span class="animate-fade-in-up">
+            <span class="font-bold">{{ m.senderName }}:</span> {{ m.body }}
+          </span>
+        </div>
+      </ng-container>
+    </section>
+    <div
+      *ngIf="draft.length > 160"
+      class="absolute bottom-0 place-self-end bg-transparent pr-4 text-sm text-rose-700"
+    >
+      <div>{{ draft.length }}/200 characters</div>
+    </div>
+  </div>
+  <div class="flex bg-black/40 p-1">
+    <input
+      type="text"
+      placeholder="write here.."
+      class="w-full rounded-md bg-transparent p-3 text-primary placeholder:text-zinc-300"
+      [(ngModel)]="draft"
+      (ngModelChange)="onDraftChange()"
+      (keydown.enter)="send()"
+      maxlength="200"
+    />
+    <app-regular-button
+      class="p-1"
+      (click)="send()"
+      text="Send"
+      [disabled]="!draft"
+    />
+  </div>
+</div>
