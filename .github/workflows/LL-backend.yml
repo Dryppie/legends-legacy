@@ -14,7 +14,7 @@ env:
   buildConfiguration: Release
 
   major: 0
-  minor: 0
+  minor: 1
   patch: ${{ github.run_number }}
 
 jobs:
