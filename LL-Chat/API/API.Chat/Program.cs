@@ -129,6 +129,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
+app.UsePathBase("/chat");
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
