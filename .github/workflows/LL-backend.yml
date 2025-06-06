@@ -82,7 +82,7 @@ jobs:
 
   build:
     needs: setup
-    uses: ./.github/workflows/LL-backend-build.yml
+    uses: ./.github/workflows/backend-build.yml
     with:
       projects_filter: "LL/LegendsLegacy.sln"
       project_name: "LL"

@@ -81,10 +81,10 @@ jobs:
 
   build:
     needs: setup
-    uses: ./.github/workflows/LL-chat-build.yml
+    uses: ./.github/workflows/backend-build.yml
     with:
-      projects_filter: "LL/LegendsLegacy.sln"
-      project_name: "LL"
+      projects_filter: "LL-Chat/LL-Chat.sln"
+      project_name: "LL-Chat"
       version: ${{ needs.setup.outputs.version }}
 
   docker:
