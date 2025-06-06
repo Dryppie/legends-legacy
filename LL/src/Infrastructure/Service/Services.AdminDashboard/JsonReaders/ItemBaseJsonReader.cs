@@ -11,7 +11,7 @@ public class ItemBaseJsonReader
     {
         var currentDirectory = Directory.GetCurrentDirectory();
         var apiDirectory = Directory.GetParent(currentDirectory)!.FullName;
-        _filePath = Path.Combine(apiDirectory, "API.LL", "Data", "items.json");
+        _filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "items.json");
         string json = File.ReadAllText(_filePath);
 
         AllItems = JsonSerializer.Deserialize<List<ItemBaseDto>>(json, new JsonSerializerOptions()

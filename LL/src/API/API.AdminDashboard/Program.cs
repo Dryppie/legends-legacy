@@ -8,8 +8,6 @@ using Services.LL;
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
-var test = Directory.GetCurrentDirectory();
-
 var currentDirectory = Directory.GetCurrentDirectory(); // API.AdminDashboard
 var apiDirectory = Directory.GetParent(currentDirectory)!.FullName; // API folder
 
