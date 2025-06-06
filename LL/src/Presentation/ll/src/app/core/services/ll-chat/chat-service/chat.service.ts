@@ -25,7 +25,7 @@ export class ChatService {
   // expose an observable stream of all messages
   private readonly messageList = signal<ChatMessageDto[]>([]);
   public messages$ = toObservable(this.messageList);
-  private readonly apiBase = 'https://localhost:7095'; // e.g. https://api.legends-legacy.com
+  private readonly apiBase = environment.chatApiRoot; // e.g. https://api.legends-legacy.com
 
   constructor(
     private zone: NgZone,
