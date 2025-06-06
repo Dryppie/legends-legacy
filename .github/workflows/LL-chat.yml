@@ -115,7 +115,7 @@ jobs:
         with:
           version: ${{ needs.setup.outputs.version }}
           tag: ${{ needs.setup.outputs.tag }}
-          workingDirectory: "LL/deploy/ll-chat"
+          workingDirectory: "LL-Chat/deploy/ll-chat"
           token: ${{ secrets.GITHUB_TOKEN }}
           imageName: "ll-chat"
 
