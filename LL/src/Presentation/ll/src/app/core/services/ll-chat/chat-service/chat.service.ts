@@ -82,7 +82,7 @@ export class ChatService {
 
   private async buildHubConnection(channel: string): Promise<void> {
     this.hub = new signalR.HubConnectionBuilder()
-      .withUrl(`${this.apiBase}/hub?channel=${encodeURIComponent(channel)}`, {
+      .withUrl(`/hub?channel=${encodeURIComponent(channel)}`, {
         withCredentials: true, // send AccessToken cookie
         // DEV ONLY – include bearer if you keep tokens outside cookies
         accessTokenFactory: () => localStorage.getItem('DevAuth') ?? '',
