@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: { { include "ll-chat.fullname" . } }
-  labels: { { - include "ll-chat.labels" . | nindent 4 } }
+  name: {{ include "ll-chat.fullname" . }}
+  labels: {{- include "ll-chat.labels" . | nindent 4 }}
 spec:
-  type: { { .Values.service.type } }
+  type: {{ .Values.service.type }}
   ports:
-    - port: { { .Values.service.port } }
+    - port: {{ .Values.service.port }}
       targetPort: http
       protocol: TCP
       name: http
-  selector: { { - include "ll-chat.selectorLabels" . | nindent 4 } }
+  selector: {{- include "ll-chat.selectorLabels" . | nindent 4 }}
