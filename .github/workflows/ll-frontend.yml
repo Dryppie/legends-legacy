@@ -92,12 +92,6 @@ jobs:
           mkdir -p LL/src/Presentation/ll/Data
           cp -r LL/src/API/API.LL/Data/ LL/src/Presentation/ll/
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Docker Login
         if: ${{ success() && github.event_name != 'pull_request' }}
         shell: bash
@@ -114,13 +108,12 @@ jobs:
       - name: Build Docker image using pwsh
         shell: pwsh
         run: |
-          docker buildx build `
+          docker build `
             --push `
             --file "LL/src/Presentation/ll/Dockerfile" `
             --build-arg name=ll `
             --build-arg BUILD_VERSION=${{ needs.setup.outputs.version }} `
             --tag ghcr.io/${{ env.OWNER_LC }}/ll-frontend:${{ needs.setup.outputs.TAG }} `
-            --platform linux/amd64,linux/arm64 `
             LL/src/Presentation/ll
 
       - name: Helm Package and Push
