@@ -2,7 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "ll-chat.fullname" . }}
-  labels: {{- include "ll-chat.labels" . | nindent 4 }}
+  labels:
+    {{- include "ll-chat.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -10,4 +11,5 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
-  selector: {{- include "ll-chat.selectorLabels" . | nindent 4 }}
+  selector:
+    {{- include "ll-chat.selectorLabels" . | nindent 4 }}
