@@ -152,7 +152,7 @@ public class CombatService : ICombatService
         combatSummary.TotalBattles++;
 
         if (lastCombatResult.Outcome.Equals(BattleOutcome.Victory)) combatSummary.Wins++;
-        else if (lastCombatResult.Outcome.Equals(BattleOutcome.Defeat)) combatSummary.Losses--;
+        else if (lastCombatResult.Outcome.Equals(BattleOutcome.Defeat)) combatSummary.Losses++;
         else combatSummary.Draws++;
 
         combatSummary.TotalExperience += lastCombatResult.ExperienceGained;
