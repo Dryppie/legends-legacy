@@ -100,7 +100,7 @@ jobs:
         with:
           tag: ${{ needs.setup.outputs.tag }}
           version: ${{ needs.setup.outputs.version }}
-          buildScript: "build/build-ll.ps1"
+          buildScript: "build/build-ll-chat.ps1"
           token: ${{ secrets.GITHUB_TOKEN }}
 
   helm:
