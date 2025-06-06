@@ -18,14 +18,10 @@ namespace API.LL.Controllers;
 public abstract class BaseController : ControllerBase
 {
     private ISender _mediator = null!;
-
-    /// <summary>
-    /// Mediator injection
-    /// </summary>
     protected ISender Mediator => _mediator ??= HttpContext.RequestServices.GetService<ISender>() ?? throw new SystemException(nameof(_mediator));
 
-    protected Guid CurrentUserId => Guid.Parse(User.FindFirstValue(ClaimTypes.UserData)!);
-    protected Guid CurrentCharacterGuid => Guid.Parse(User.FindFirstValue("CharacterId")!);
+    protected Guid CurrentUserId => GetGuidClaim(ClaimTypes.UserData, "User ID");
+    protected Guid CurrentCharacterGuid => GetGuidClaim("CharacterId", "Character ID");
 
     protected bool IsLocal()
     {
@@ -34,5 +30,16 @@ public abstract class BaseController : ControllerBase
 #else
         return false;
 #endif
+    }
+
+    private Guid GetGuidClaim(string claimType, string name)
+    {
+        var value = User.FindFirstValue(claimType);
+        if (string.IsNullOrWhiteSpace(value))
+            throw new UnauthorizedAccessException($"{name} claim is missing.");
+        if (!Guid.TryParse(value, out var guid))
+            throw new UnauthorizedAccessException($"{name} claim is invalid.");
+
+        return guid;
     }
 }

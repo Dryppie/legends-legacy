@@ -1,5 +1,4 @@
-﻿using Common.Helpers.JsonFiles;
-using Domain.Models.Soulstones.UpgradeDefinition;
+﻿using Domain.Models.Soulstones.UpgradeDefinition;
 using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -14,9 +13,9 @@ public class SoulstoneUpgradeDefinitionProvider
     private volatile IReadOnlyDictionary<string, SoulstoneUpgradeDefinition> _cache
         = new Dictionary<string, SoulstoneUpgradeDefinition>();
 
-    public SoulstoneUpgradeDefinitionProvider(JsonFileResolver resolver)
+    public SoulstoneUpgradeDefinitionProvider()
     {
-        _filePath = resolver.Resolve("soulstone-upgrades.json");
+        _filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "soulstone-upgrades.json");
 
         Load();
 

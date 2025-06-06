@@ -18,9 +18,6 @@ public class RecipeJsonReader
 
     public RecipeJsonReader()
     {
-        var currentDirectory = Directory.GetCurrentDirectory();
-        var apiDirectory = Directory.GetParent(currentDirectory)!.FullName;
-
         _filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "recipes.json");
 
         LoadFile();

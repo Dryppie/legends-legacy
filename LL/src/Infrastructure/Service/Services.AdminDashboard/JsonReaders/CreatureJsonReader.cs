@@ -12,8 +12,6 @@ public class CreatureJsonReader
 
     public CreatureJsonReader()
     {
-        var currentDirectory = Directory.GetCurrentDirectory();
-        var apiDirectory = Directory.GetParent(currentDirectory)!.FullName;
         _filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "creatures.json");
         string json = File.ReadAllText(_filePath);
 

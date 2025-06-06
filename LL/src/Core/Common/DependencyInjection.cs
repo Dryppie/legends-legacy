@@ -10,11 +10,9 @@ public static class DependencyInjection
     {
         
         services.AddSingleton<IDateTimeProviderService, DateTimeProviderService>();
-        services.AddSingleton<JsonFileResolver>();
 
         services.AddOptions<JwtOptions>().BindConfiguration("Jwt").ValidateDataAnnotations();
         services.AddOptions<GoogleOAuthOptions>().BindConfiguration("Google").ValidateDataAnnotations();
-        services.AddOptions<DataFilePathOptions>().BindConfiguration("DataFilePath").ValidateDataAnnotations();
 
 
         return services;

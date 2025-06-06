@@ -9,8 +9,6 @@ public class ItemBaseJsonReader
     private readonly string _filePath;
     public ItemBaseJsonReader()
     {
-        var currentDirectory = Directory.GetCurrentDirectory();
-        var apiDirectory = Directory.GetParent(currentDirectory)!.FullName;
         _filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "items.json");
         string json = File.ReadAllText(_filePath);
 
