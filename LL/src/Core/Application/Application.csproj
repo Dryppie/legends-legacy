@@ -28,7 +28,6 @@
     <Folder Include="UseCases\Regions\Dtos\" />
     <Folder Include="UseCases\Regions\Commands\" />
     <Folder Include="UseCases\Soulstones\Dtos\" />
-    <Folder Include="UseCases\Users\Commands\Delete\" />
   </ItemGroup>
 
 </Project>

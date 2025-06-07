@@ -7,12 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Gatherings\**" />
-    <EmbeddedResource Remove="Gatherings\**" />
-    <None Remove="Gatherings\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="DeepCloner" Version="0.10.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.2.0" />
