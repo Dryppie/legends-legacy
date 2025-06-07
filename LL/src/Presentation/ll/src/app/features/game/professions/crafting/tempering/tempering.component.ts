@@ -1,18 +1,16 @@
-import { AsyncPipe, NgClass, NgFor, NgIf, SlicePipe } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { NgClass, NgFor, NgIf, SlicePipe } from '@angular/common';
+import {
+  Component,
+  computed,
+  Input,
+  OnInit,
+  signal,
+  Signal,
+} from '@angular/core';
 import {
   CraftingQueueItem,
   CraftType,
 } from '../../../../../shared/models/profession';
-import {
-  BehaviorSubject,
-  combineLatest,
-  map,
-  Observable,
-  ReplaySubject,
-  tap,
-} from 'rxjs';
-import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import {
   EquipmentInstance,
   ItemInstance,
@@ -23,48 +21,62 @@ import { CharacterManagerService } from '../../../../../core/services/client-sid
 import { CharacterActionsService } from '../../../../../core/services/api/character-actions/character-actions.service';
 import { StartCraftingActionRequest } from '../../../../../shared/models/Dtos/characterActionDto';
 import { CraftingService } from '../../../../../core/services/api/crafting/crafting.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-tempering',
   standalone: true,
-  imports: [
-    NgFor,
-    NgIf,
-    NgClass,
-    AsyncPipe,
-    AttributeTypeFormatPipe,
-    SlicePipe,
-  ],
+  imports: [NgFor, NgIf, NgClass, AttributeTypeFormatPipe, SlicePipe],
   templateUrl: './tempering.component.html',
   styleUrl: './tempering.component.css',
 })
 export class TemperingComponent implements OnInit {
-  @Input() inventory$!: Observable<InventoryDto>;
-  @Input() craftType!: CraftType;
-  canTemper = false;
-  isQueueSelected = false;
-  readonly craftingQueue$ = new Observable<CraftingQueueItem[]>();
-  private readonly selectedItemId$ = new BehaviorSubject<string | null>(null);
-  readonly selectedEquipmentInstance$ =
-    new ReplaySubject<EquipmentInstance | null>(1);
+  @Input({ required: true }) inventory!: Signal<InventoryDto | null>;
+  @Input({ required: true }) craftType!: CraftType;
+
+  readonly craftingQueue;
+
+  private readonly selectedItemId = signal<string | null>(null);
+
+  readonly selectedEquipmentInstance = computed<EquipmentInstance | null>(
+    () => {
+      const id = this.selectedItemId();
+      const inv = this.inventory();
+      const queue = this.craftingQueue();
+
+      const invItem = inv?.inventoryItems.find((i) => i.itemInstance.id === id)
+        ?.itemInstance as EquipmentInstance | undefined;
+
+      return (
+        invItem ??
+        queue.find((q) => q.equipmentInstance.id === id)?.equipmentInstance ??
+        null
+      );
+    },
+  );
+
+  readonly canTemper = computed<boolean>(() => {
+    const eq = this.selectedEquipmentInstance();
+    return !!eq && (eq.potential ?? 0) > 0;
+  });
+
+  readonly isQueueSelected = computed<boolean>(() => {
+    const id = this.selectedItemId();
+    const inv = this.inventory();
+    return !!id && !inv?.inventoryItems.some((i) => i.itemInstance.id === id);
+  });
 
   constructor(
     private readonly characterManager: CharacterManagerService,
     private readonly characterActionService: CharacterActionsService,
     private readonly craftingService: CraftingService,
   ) {
-    this.craftingQueue$ = craftingService.craftingQueue$;
+    this.craftingQueue = toSignal(this.craftingService.craftingQueue$, {
+      initialValue: [] as CraftingQueueItem[],
+    });
   }
 
-  ngOnInit(): void {
-    combineLatest([this.inventory$, this.selectedItemId$, this.craftingQueue$])
-      .pipe(
-        map(([inventory, id, queue]) =>
-          this.handleEquipmentInstanceAndTempering(inventory, id, queue),
-        ),
-      )
-      .subscribe(this.selectedEquipmentInstance$);
-  }
+  ngOnInit(): void {}
 
   handleEquipmentInstanceAndTempering(
     inventory: InventoryDto,
@@ -78,15 +90,12 @@ export class TemperingComponent implements OnInit {
       inventoryItem ??
       queue.find((q) => q.equipmentInstance.id === id)?.equipmentInstance ??
       null;
-    if (equipment?.potential && equipment.potential > 0) this.canTemper = true;
-    else this.canTemper = false;
-    this.isQueueSelected = equipment && !inventoryItem;
 
     return equipment;
   }
 
-  selectItem(equipment: ItemInstance): void {
-    this.selectedItemId$.next(equipment.id);
+  selectItem(e: ItemInstance): void {
+    this.selectedItemId.set(e.id);
   }
 
   temper(equipment: EquipmentInstance): void {
@@ -117,7 +126,7 @@ export class TemperingComponent implements OnInit {
       .startCraftingAction(startCraftingActionRequest)
       .subscribe((success) => {
         if (success) {
-          this.selectedItemId$.next(null);
+          this.selectedItemId.set(null);
           this.craftingService.enqueueTempering(queueItem);
           this.characterManager.setInventory({ inventoryItems: updatedItems });
         }

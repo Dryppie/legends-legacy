@@ -22,6 +22,5 @@ export function getContributions(
   const effects = ATTRIBUTE_EFFECTS[stat];
   if (!effects) return []; // secondary stats land here
   return effects
-    .map((e) => ({ to: e.gives, value: apply(points, e) }))
-    .filter((c) => c.value !== 0);
+    .map((e) => ({ to: e.gives, value: apply(points, e) }));
 }

@@ -1,7 +1,7 @@
 <div class="flex h-full w-full flex-col gap-4 text-white">
-  <ng-container *ngIf="characterProfession$ | async as characterProfession">
+  <ng-container *ngIf="characterProfession() as characterProfession">
     <app-profession-header
-      *ngIf="profession$ | async as profession"
+      *ngIf="profession() as profession"
       class="pr-4 sm:pr-6"
       title="{{ profession.name }}"
       icon="professions/{{ profession.iconPath }}"
@@ -18,18 +18,17 @@
   ></app-tab>
   <ng-container [ngSwitch]="activeTab">
     <app-regular-crafting
-      class="h-full overflow-hidden"
       *ngSwitchCase="'Crafting'"
-      [recipes$]="recipes$"
-      [inventory$]="inventory$"
-    >
-    </app-regular-crafting>
-    <app-tempering
       class="h-full overflow-hidden"
+      [recipes]="recipes"
+      [inventory]="inventory"
+    ></app-regular-crafting>
+
+    <app-tempering
       *ngSwitchCase="'Tempering'"
-      [inventory$]="inventoryEquipment$"
-      [craftType]="craftType"
-    >
-    </app-tempering>
+      class="h-full overflow-hidden"
+      [inventory]="inventoryEquipment"
+      [craftType]="craftType()"
+    ></app-tempering>
   </ng-container>
 </div>

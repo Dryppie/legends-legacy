@@ -7,7 +7,8 @@ import {
 } from '../../../../shared/models/Dtos/equipmentSlot';
 import { EquipmentInstance } from '../../../../shared/models/item';
 import { CharacterManagerService } from '../../client-side/character-manager/character-manager.service';
-import { InventoryService } from '../inventory/inventory.service';
+import { InventoryStateService } from '../inventory/inventory-state.service';
+import { InventoryItem } from '../../../../shared/models/inventoryItem';
 
 @Injectable({
   providedIn: 'root',
@@ -16,7 +17,7 @@ export class EquipmentService {
   constructor(
     private apiService: ApiService,
     private characterManager: CharacterManagerService,
-    private inventoryService: InventoryService,
+    private inventoryState: InventoryStateService,
   ) {}
 
   public getEquipment(): Observable<EquipmentSlot[]> {
@@ -29,8 +30,7 @@ export class EquipmentService {
     return this.apiService.post('equipment/equip', equipment.id).subscribe({
       next: () => {
         this.characterManager.updateEquipment(equipment);
-        // this.characterManager.removeItemFromInventory(equipment.id, 1);
-        this.inventoryService.getInventory().subscribe();
+        this.inventoryState.removeItem(equipment.id);
         // this.toastService.showToast(
         //   'Essence equipped successfully!',
         //   'success',
@@ -46,9 +46,19 @@ export class EquipmentService {
   unequipEquipment(equipmentType: EquipmentType) {
     return this.apiService.post('equipment/unequip', equipmentType).subscribe({
       next: () => {
+        const equipment = this.characterManager
+          .getEquipment()
+          .find((e) => e.equipmentType === equipmentType);
+        if (!equipment || !equipment.equipmentInstance) return;
+
+        const inventoryItem: InventoryItem = {
+          id: '',
+          itemInstance: equipment.equipmentInstance,
+          quantity: 1,
+        };
+
+        this.inventoryState.add(inventoryItem);
         this.characterManager.unequipEquipment(equipmentType);
-        // this.characterManager.removeItemFromInventory(equipment.id, 1);
-        this.inventoryService.getInventory().subscribe();
         // this.toastService.showToast(
         //   'Essence equipped successfully!',
         //   'success',

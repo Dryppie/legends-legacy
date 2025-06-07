@@ -6,15 +6,15 @@
     class="order-2 flex h-full w-full flex-col space-y-2 sm:order-1 sm:overflow-y-auto"
   >
     <h2 class="flex text-primary">Recipes</h2>
-    <ng-container *ngIf="recipes$ | async as recipes">
+    <ng-container *ngIf="recipes() as recipes">
       <div
         *ngFor="let recipe of recipes"
         class="cursor-pointer rounded-lg border p-3 hover:border-primary/60 hover:bg-zinc-300/30"
         (click)="selectRecipe(recipe)"
-        [class.border-primary]="(selectedRecipe$ | async)?.id === recipe.id"
+        [class.border-primary]="selectedRecipe()?.id === recipe.id"
         [ngClass]="{
-          'bg-primary/10': (selectedRecipe$ | async)?.id === recipe.id,
-          'border-primary/20': (selectedRecipe$ | async)?.id !== recipe.id,
+          'bg-primary/10': selectedRecipe()?.id === recipe.id,
+          'border-primary/20': selectedRecipe()?.id !== recipe.id,
         }"
       >
         <div class="font-semibold text-white">{{ recipe.name }}</div>
@@ -30,9 +30,7 @@
     <!-- ITEM DESCRIPTION -->
     <div class="rounded-lg border border-light_gray bg-texture p-4">
       <h2 class="text-primary">Item Description</h2>
-      <ng-container
-        *ngIf="selectedRecipe$ | async as selectedRecipe; else noRecipe"
-      >
+      <ng-container *ngIf="selectedRecipe() as selectedRecipe; else noRecipe">
         <div class="flex flex-col gap-2">
           <!-- Equipment Name and Rarity -->
           <h2 class="">
@@ -72,9 +70,7 @@
         </div>
 
         <div class="mt-4 flex items-center gap-2">
-          <ng-container
-            *ngIf="canCraftSelected$ | async as canCraft; else nothing"
-          >
+          <ng-container *ngIf="canCraftSelected() as canCraft; else nothing">
             <button
               class="rounded border border-light_gray px-3 py-1 text-white hover:bg-zinc-300/10"
               (click)="craft(selectedRecipe)"
@@ -83,7 +79,7 @@
             </button>
           </ng-container>
           <ng-template #nothing>
-            <span *ngIf="!(canCraftSelected$ | async)" class="text-rose-500">
+            <span *ngIf="!canCraftSelected()" class="text-rose-500">
               Not enough materials
             </span>
           </ng-template>

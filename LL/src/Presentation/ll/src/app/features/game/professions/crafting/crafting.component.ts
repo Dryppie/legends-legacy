@@ -1,11 +1,18 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { ProfessionHeaderComponent } from '../../../../shared/components/professions/profession-header/profession-header.component';
 import { AsyncPipe, NgIf, NgSwitch, NgSwitchCase } from '@angular/common';
 import {
   CraftingProfession,
   CraftType,
 } from '../../../../shared/models/profession';
-import { combineLatest, map, of, shareReplay, switchMap, tap } from 'rxjs';
+import { map, of, switchMap } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { ProfessionsService } from '../../../../core/services/api/professions/professions.service';
 import { CharacterManagerService } from '../../../../core/services/client-side/character-manager/character-manager.service';
@@ -17,6 +24,7 @@ import { TemperingComponent } from './tempering/tempering.component';
 import { EquipmentType } from '../../../../shared/models/Dtos/equipmentSlot';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { Equipment } from '../../../../shared/models/item';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-crafting',
@@ -24,7 +32,6 @@ import { Equipment } from '../../../../shared/models/item';
   imports: [
     ProfessionHeaderComponent,
     NgIf,
-    AsyncPipe,
     TabComponent,
     NgSwitch,
     NgSwitchCase,
@@ -35,13 +42,18 @@ import { Equipment } from '../../../../shared/models/item';
   styleUrl: './crafting.component.css',
 })
 export class CraftingComponent implements OnInit {
-  readonly profession$;
-  readonly recipes$;
-  readonly inventory$;
-  readonly inventoryEquipment$;
-  readonly characterProfession$;
+  private readonly route = inject(ActivatedRoute);
+  private readonly professionService = inject(ProfessionsService);
+  private readonly characterManager = inject(CharacterManagerService);
+  private readonly inventoryService = inject(InventoryService);
 
-  craftType: CraftType = CraftType.ArmorForging;
+  readonly professionId = toSignal(
+    this.route.paramMap.pipe(map((p) => p.get('id') ?? '')),
+    { initialValue: '' },
+  );
+
+  readonly profession = signal<CraftingProfession | null>(null);
+
   // Stub until you wire real actions/queue in the service
   allowedTypesByCraft: Record<CraftType, EquipmentType[]> = {
     [CraftType.JewelryCrafting]: [EquipmentType.Ring, EquipmentType.Necklace],
@@ -54,68 +66,71 @@ export class CraftingComponent implements OnInit {
     [CraftType.WeaponSmithing]: [EquipmentType.MainHand, EquipmentType.OffHand],
   };
   // ────────────────────────────────────── ctor/di ─────────────────────────────
-  constructor(
-    private readonly route: ActivatedRoute,
-    private readonly professionService: ProfessionsService,
-    private readonly characterManager: CharacterManagerService,
-    private readonly inventoryService: InventoryService,
-  ) {
-    this.profession$ = this.route.paramMap.pipe(
-      map((p) => p.get('id') ?? ''),
-      switchMap(async (id) => this.professionService.getProfessionById(id)),
-      tap((profession) => {
-        this.craftType = profession.professionType as unknown as CraftType;
-      }),
-      shareReplay(1),
+  constructor() {
+    effect(
+      () => {
+        const id = this.professionId();
+        if (id) {
+          this.profession.set(
+            this.professionService.getProfessionById(id) as CraftingProfession,
+          );
+        }
+      },
+      { allowSignalWrites: true },
     );
+  }
 
-    this.recipes$ = this.profession$.pipe(
-      map((p) =>
-        (p as CraftingProfession).recipes.filter(
-          (r) => r.craftType === this.craftType,
-        ),
-      ),
-    );
-    const rawInventory$ = this.characterManager.inventory$.pipe(
+  private readonly _rawInventory = toSignal(
+    this.characterManager.inventory$.pipe(
       switchMap((invDto) =>
         invDto ? of(invDto) : this.inventoryService.getInventory(),
       ),
-      shareReplay(1),
-    );
+    ),
+    { initialValue: null },
+  );
 
-    this.inventory$ = rawInventory$;
-    this.characterProfession$ = combineLatest([
-      this.profession$,
-      this.professionService.characterProfessions$,
-    ]).pipe(
-      map(([profession, characterProfessions]) => {
-        return characterProfessions.find(
-          (cp) => cp.professionType === profession.professionType,
+  readonly craftType = computed<CraftType>(() => {
+    return (
+      (this.profession()?.professionType as unknown as CraftType) ??
+      CraftType.ArmorForging
+    );
+  });
+
+  readonly recipes = computed(() => {
+    const prof = this.profession() as CraftingProfession | null;
+    if (!prof) return [];
+    return prof.recipes.filter((r) => r.craftType === this.craftType());
+  });
+
+  readonly inventory = computed(() => this._rawInventory());
+
+  readonly characterProfession = computed(() => {
+    const prof = this.profession();
+    if (!prof) return undefined;
+    return this.professionService
+      .characterProfessions()
+      .find((cp) => cp.professionType === prof.professionType);
+  });
+
+  readonly inventoryEquipment = computed(() => {
+    const inventory = this._rawInventory();
+    const prof = this.profession();
+    if (!inventory || !prof) return null;
+
+    const allowed = this.allowedTypesByCraft[this.craftType()];
+    return {
+      ...inventory,
+      inventoryItems: inventory.inventoryItems.filter((i) => {
+        return (
+          i.itemInstance.itemBase.itemType === ItemType.Equipment &&
+          allowed.includes(
+            (i.itemInstance.itemBase as Equipment)
+              .equipmentType as EquipmentType,
+          )
         );
       }),
-    );
-    this.inventoryEquipment$ = combineLatest([
-      rawInventory$,
-      this.profession$,
-    ]).pipe(
-      map(([inventory, profession]) => {
-        const craftType = profession.professionType as unknown as CraftType;
-        const allowedTypes = this.allowedTypesByCraft[craftType];
-        return {
-          ...inventory,
-          inventoryItems: inventory.inventoryItems.filter(
-            (i) =>
-              i.itemInstance.itemBase.itemType === ItemType.Equipment &&
-              allowedTypes.includes(
-                (i.itemInstance.itemBase as Equipment)
-                  .equipmentType as EquipmentType,
-              ),
-          ),
-        };
-      }),
-      shareReplay(1),
-    );
-  }
+    } as typeof inventory;
+  });
 
   ngOnInit(): void {
     this.setActiveTab(this.tabs[0]?.label || '');

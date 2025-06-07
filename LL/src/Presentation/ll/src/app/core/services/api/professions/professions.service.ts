@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Signal, signal } from '@angular/core';
 import {
   BehaviorSubject,
   catchError,
@@ -30,75 +30,55 @@ import {
   providedIn: 'root',
 })
 export class ProfessionsService {
-  private readonly refresh$ = new Subject<void>();
-  private readonly localProfessions: CharacterProfession[] = [];
-  private readonly professionsSubject$ = new BehaviorSubject<
-    CharacterProfession[]
-  >([]);
+  private readonly _professions = signal<CharacterProfession[]>([]);
 
   /** cached, shared stream of professions */
-  private readonly characterProfessionsObservable$ = this.refresh$.pipe(
-    startWith(void 0),
-    switchMap(() =>
-      this.api.get('profession').pipe(
-        tap((professions) => {
-          // Update local cache
-          this.localProfessions.length = 0;
-          this.localProfessions.push(...professions);
-          this.professionsSubject$.next([...this.localProfessions]);
-        }),
-      ),
-    ),
-    shareReplay({ bufferSize: 1, refCount: true }),
-  );
-
-  constructor(private readonly api: ApiService) {
-    this.characterProfessionsObservable$.subscribe();
+  get characterProfessions(): Signal<CharacterProfession[]> {
+    return this._professions.asReadonly();
   }
+
+  constructor(private readonly api: ApiService) {}
 
   /** Public readonly stream.  Subscribe or use it with the async-pipe. */
-  get characterProfessions$(): Observable<CharacterProfession[]> {
-    return this.professionsSubject$.asObservable();
-  }
-
-  /** Call this after *any* change (create / update / delete) to bust the cache */
   refresh(): void {
-    this.refresh$.next();
+    this.api.get('profession').subscribe((professions) => {
+      // always emit a new array reference so signal change detection fires
+      this._professions.set([...professions]);
+    });
   }
 
   addExperience(professionType: ProfessionType, experience: number): void {
-    const profession = this.localProfessions.find(
-      (p) => p.professionType === professionType,
-    );
+    // Work on a copy so we never mutate the current signal value in place
+    const updated = [...this._professions()];
+    const profession = updated.find((p) => p.professionType === professionType);
     if (!profession) return;
 
     profession.experience += experience;
     let leveledUp = false;
+
     while (profession.experience >= profession.experienceUntilNextLevel) {
       profession.experience -= profession.experienceUntilNextLevel;
       profession.level++;
-      leveledUp = true;
-
-      // Optional: Recalculate experienceUntilNextLevel if it scales
       // profession.experienceUntilNextLevel = calculateNextLevelThreshold(profession.level);
+      leveledUp = true;
     }
-    this.professionsSubject$.next([...this.localProfessions]); // emit new state
+
+    this._professions.set(updated);
 
     if (leveledUp) {
-      this.refresh(); // Pull updated data from the backend
+      // ensure consistency with the backend after a level‑up
+      this.refresh();
     }
   }
 
   getProfession(
     professionType: ProfessionType,
   ): CharacterProfession | undefined {
-    return this.localProfessions.find(
-      (p) => p.professionType === professionType,
-    );
+    return this._professions().find((p) => p.professionType === professionType);
   }
 
   emitUpdate(): void {
-    this.professionsSubject$.next([...this.localProfessions]);
+    this._professions.set([...this._professions()]);
   }
 
   getProfessionById(id: string): Profession {

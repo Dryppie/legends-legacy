@@ -1,14 +1,7 @@
 import { AsyncPipe, NgClass, NgFor, NgIf } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, computed, Input, signal, Signal } from '@angular/core';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { Recipe } from '../../../../../shared/models/profession';
-import {
-  BehaviorSubject,
-  combineLatest,
-  map,
-  Observable,
-  ReplaySubject,
-} from 'rxjs';
 import { CharacterManagerService } from '../../../../../core/services/client-side/character-manager/character-manager.service';
 import { CraftingService } from '../../../../../core/services/api/crafting/crafting.service';
 import { InventoryDto } from '../../../../../shared/models/Dtos/inventoryDto';
@@ -38,57 +31,50 @@ function consumeMaterials(
 @Component({
   selector: 'app-regular-crafting',
   standalone: true,
-  imports: [NgIf, NgFor, NgClass, AsyncPipe, AttributeTypeFormatPipe],
+  imports: [NgIf, NgFor, NgClass, AttributeTypeFormatPipe],
   templateUrl: './regular-crafting.component.html',
   styleUrl: './regular-crafting.component.css',
 })
-export class RegularCraftingComponent implements OnInit {
-  @Input() recipes$!: Observable<Recipe[]>;
-  @Input() inventory$!: Observable<InventoryDto>;
+export class RegularCraftingComponent {
+  @Input({ required: true }) recipes!: Signal<Recipe[]>;
+  @Input({ required: true }) inventory!: Signal<InventoryDto | null>;
 
-  private readonly selectedRecipeId$ = new BehaviorSubject<string | null>(null);
-  readonly selectedRecipe$ = new ReplaySubject<Recipe | null>(1);
-  readonly canCraftSelected$ = new ReplaySubject<boolean>(1);
+  private readonly selectedRecipeId = signal<string | null>(null);
+  readonly selectedRecipe = computed<Recipe | null>(() => {
+    const id = this.selectedRecipeId();
+    return id ? (this.recipes().find((r) => r.id === id) ?? null) : null;
+  });
+  readonly canCraftSelected = computed<boolean>(() => {
+    const recipe = this.selectedRecipe();
+    const inv = this.inventory();
+    if (!recipe || !inv) return false;
+    return recipe.materials.every((mat) =>
+      hasQuantity(inv.inventoryItems, mat.item.id, mat.quantity),
+    );
+  });
 
   constructor(
     private readonly characterManager: CharacterManagerService,
     private readonly craftingService: CraftingService,
   ) {}
-  ngOnInit(): void {
-    combineLatest([this.recipes$, this.selectedRecipeId$])
-      .pipe(map(([recipes, id]) => recipes.find((r) => r.id === id) ?? null))
-      .subscribe(this.selectedRecipe$);
-
-    combineLatest([this.selectedRecipe$, this.inventory$])
-      .pipe(
-        map(([recipe, inv]) =>
-          recipe
-            ? recipe.materials.every((mat) =>
-                hasQuantity(inv?.inventoryItems!, mat.item.id, mat.quantity),
-              )
-            : false,
-        ),
-      )
-      .subscribe(this.canCraftSelected$);
-  }
 
   selectRecipe(recipe: Recipe): void {
-    this.selectedRecipeId$.next(recipe.id);
+    this.selectedRecipeId.set(recipe.id);
   }
 
   craft(recipe: Recipe): void {
-    // take the latest inventory once, synchronously
     const inventory = this.characterManager.getInventory();
     if (!inventory) return;
-    const items = inventory.inventoryItems;
+
     if (
-      !recipe.materials.every((m) => hasQuantity(items, m.item.id, m.quantity))
+      !recipe.materials.every((m) =>
+        hasQuantity(inventory.inventoryItems, m.item.id, m.quantity),
+      )
     ) {
-      return; // safety net – shouldn’t happen if button was disabled
+      return;
     }
 
-    /* optimistic client-side material removal */
-    const updatedItems = consumeMaterials(items, recipe);
+    const updatedItems = consumeMaterials(inventory.inventoryItems, recipe);
     this.craftingService.craftItem(recipe.id).subscribe((item) => {
       updatedItems.push(item);
       this.characterManager.setInventory({ inventoryItems: updatedItems });

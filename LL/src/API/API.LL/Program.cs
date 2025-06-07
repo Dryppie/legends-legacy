@@ -161,10 +161,19 @@ using (var scope = app.Services.CreateScope())
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+if (config.GetValue("FeatureManagement:DisableAllRequests", false))
+{
+    app.Use((Func<HttpContext, Func<Task>, Task>)(async (context, next) =>
     {
-        app.UseSwagger();
-        app.UseSwaggerUI();
-    }
+        context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+        await context.Response.WriteAsync("The backend is currently unavailable.");
+    }));
+}
 
 app.UseCors("AllowSpecificOrigin");
 

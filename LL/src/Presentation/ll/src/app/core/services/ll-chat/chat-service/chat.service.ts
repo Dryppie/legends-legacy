@@ -1,5 +1,5 @@
 import { Injectable, NgZone, signal } from '@angular/core';
-import { Subject, Observable, firstValueFrom, ReplaySubject } from 'rxjs';
+import { firstValueFrom, ReplaySubject } from 'rxjs';
 import * as signalR from '@microsoft/signalr';
 import { HubConnection } from '@microsoft/signalr';
 import { environment } from '../../../../../environments/environment';

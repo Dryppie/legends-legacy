@@ -1,6 +1,9 @@
-<div class="flex h-full w-full flex-col gap-4">
+<div
+  *ngIf="profession() as profession"
+  class="flex h-full w-full flex-col gap-4"
+>
   <app-profession-header
-    *ngIf="characterProfession"
+    *ngIf="characterProfession() as characterProfession"
     class="pr-4 sm:pr-6"
     title="{{ profession.name }}"
     icon="professions/{{ profession.iconPath }}"
@@ -11,15 +14,17 @@
   <div
     class="grid h-full w-full gap-4 overflow-y-auto pr-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
   >
-    <ng-container *ngIf="characterProfession">
-      <div *ngFor="let gatheringNode of gatheringNodes" class="">
-        <app-profession-card
-          [gatheringNode]="gatheringNode"
-          [characterProfession]="characterProfession"
-          [iconPath]="profession.iconPath"
-          [professionType]="profession.professionType"
-        ></app-profession-card>
-      </div>
+    <ng-container *ngIf="characterProfession() as characterProfession">
+      <ng-container *ngIf="gatheringNodes() as gatheringNodes">
+        <div *ngFor="let gatheringNode of gatheringNodes" class="">
+          <app-profession-card
+            [gatheringNode]="gatheringNode"
+            [characterProfession]="characterProfession"
+            [iconPath]="profession.iconPath"
+            [professionType]="profession.professionType"
+          ></app-profession-card>
+        </div>
+      </ng-container>
     </ng-container>
   </div>
 </div>

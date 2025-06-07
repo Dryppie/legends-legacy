@@ -61,7 +61,7 @@ function getCharacterSidebar(): Tab[] {
           id: 'soulstone-archive',
           route: ['/game', 'character', 'soulstone-archive'],
           icon: 'character/essences',
-          title: 'Soulstone Archive',
+          title: 'Soulstone Archives',
           description: 'Soulstone upgrades',
         },
         // {

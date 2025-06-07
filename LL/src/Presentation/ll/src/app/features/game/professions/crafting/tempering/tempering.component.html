@@ -6,19 +6,19 @@
     class="order-2 flex h-full w-full flex-col space-y-2 sm:order-1 sm:overflow-y-auto"
   >
     <h2 class="flex text-primary">Items to temper</h2>
-    <ng-container *ngIf="inventory$ | async as inventory">
+    <ng-container *ngIf="inventory() as inventory">
       <div
         *ngFor="let item of inventory.inventoryItems"
         class="cursor-pointer rounded-lg border p-3 hover:border-primary/60 hover:bg-zinc-300/30"
         (click)="selectItem(item.itemInstance)"
         [class.border-primary]="
-          (selectedEquipmentInstance$ | async)?.id === item.itemInstance.id
+          selectedEquipmentInstance()?.id === item.itemInstance.id
         "
         [ngClass]="{
           'bg-primary/10':
-            (selectedEquipmentInstance$ | async)?.id === item.itemInstance.id,
+            selectedEquipmentInstance()?.id === item.itemInstance.id,
           'border-primary/20':
-            (selectedEquipmentInstance$ | async)?.id !== item.itemInstance.id,
+            selectedEquipmentInstance()?.id !== item.itemInstance.id,
         }"
       >
         <div class="font-semibold text-white">
@@ -39,7 +39,7 @@
     <div class="rounded-lg border border-light_gray bg-texture p-4">
       <h2 class="text-primary">Item Description</h2>
       <ng-container
-        *ngIf="selectedEquipmentInstance$ | async as equipment; else noItem"
+        *ngIf="selectedEquipmentInstance() as equipment; else noItem"
       >
         <div class="flex flex-col gap-2">
           <!-- Equipment Name and Rarity -->
@@ -75,11 +75,11 @@
           </span>
         </div>
         <div class="flex items-center gap-2">
-          <ng-container *ngIf="isQueueSelected; else itemSelected">
+          <ng-container *ngIf="isQueueSelected(); else itemSelected">
             <span class="py-1 italic text-zinc-300"> In queue </span>
           </ng-container>
           <ng-template #itemSelected>
-            <ng-container *ngIf="canTemper; else nothing">
+            <ng-container *ngIf="canTemper(); else nothing">
               <button
                 class="rounded border border-light_gray px-3 py-1 text-white hover:bg-zinc-300/10"
                 (click)="temper(equipment)"
@@ -106,7 +106,7 @@
     >
       <div class="text-gold text-lg font-semibold">Tempering Queue</div>
 
-      <ng-container *ngIf="craftingQueue$ | async as craftingQueue">
+      <ng-container *ngIf="craftingQueue() as craftingQueue">
         <ng-container *ngIf="craftingQueue.length > 0; else emptyQueue">
           <!-- ── CURRENTLY WORKING ON ──────────────────────────────── -->
           <div class="mt-3">
@@ -119,15 +119,15 @@
               class="mt-2 flex cursor-pointer justify-between rounded-lg border p-3 hover:border-primary/60 hover:bg-zinc-300/30"
               (click)="selectItem(craftingQueue[0].equipmentInstance)"
               [class.border-primary]="
-                (selectedEquipmentInstance$ | async)?.id ===
+                selectedEquipmentInstance()?.id ===
                 craftingQueue[0].equipmentInstance.id
               "
               [ngClass]="{
                 'bg-primary/10':
-                  (selectedEquipmentInstance$ | async)?.id ===
+                  selectedEquipmentInstance()?.id ===
                   craftingQueue[0].equipmentInstance.id,
                 'border-primary/20':
-                  (selectedEquipmentInstance$ | async)?.id !==
+                  selectedEquipmentInstance()?.id !==
                   craftingQueue[0].equipmentInstance.id,
               }"
             >
@@ -162,15 +162,15 @@
                 class="mt-2 flex cursor-pointer justify-between rounded-lg border p-3 hover:border-primary/60 hover:bg-zinc-300/30"
                 (click)="selectItem(queueItem.equipmentInstance)"
                 [class.border-primary]="
-                  (selectedEquipmentInstance$ | async)?.id ===
+                  selectedEquipmentInstance()?.id ===
                   queueItem.equipmentInstance.id
                 "
                 [ngClass]="{
                   'bg-primary/10':
-                    (selectedEquipmentInstance$ | async)?.id ===
+                    selectedEquipmentInstance()?.id ===
                     queueItem.equipmentInstance.id,
                   'border-primary/20':
-                    (selectedEquipmentInstance$ | async)?.id !==
+                    selectedEquipmentInstance()?.id !==
                     queueItem.equipmentInstance.id,
                 }"
               >
