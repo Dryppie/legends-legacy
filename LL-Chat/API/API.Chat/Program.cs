@@ -129,6 +129,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ChatDbContext>();
+
+    // Migrate and Seed
+    await context.Database.MigrateAsync();
+}
+
 app.UsePathBase("/chat");
 
 // Configure the HTTP request pipeline.
