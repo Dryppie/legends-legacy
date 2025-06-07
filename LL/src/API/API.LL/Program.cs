@@ -166,6 +166,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("AllowSpecificOrigin");
+
 if (config.GetValue("FeatureManagement:DisableAllRequests", false))
 {
     app.Use((Func<HttpContext, Func<Task>, Task>)(async (context, next) =>
@@ -174,8 +176,6 @@ if (config.GetValue("FeatureManagement:DisableAllRequests", false))
         await context.Response.WriteAsync("The backend is currently unavailable.");
     }));
 }
-
-app.UseCors("AllowSpecificOrigin");
 
 app.UseAuthentication();
 app.UseAuthorization();
