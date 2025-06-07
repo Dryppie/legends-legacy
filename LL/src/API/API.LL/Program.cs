@@ -172,6 +172,13 @@ if (config.GetValue("FeatureManagement:DisableAllRequests", false))
 {
     app.Use((Func<HttpContext, Func<Task>, Task>)(async (context, next) =>
     {
+        var path = context.Request.Path.Value?.ToLowerInvariant();
+        if (path != null && (path.Contains("/healthz/ready") || path.Contains("/healthz/live")))
+        {
+            await next(); // allow health checks through
+            return;
+        }
+
         context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
         await context.Response.WriteAsync("The backend is currently unavailable.");
     }));
