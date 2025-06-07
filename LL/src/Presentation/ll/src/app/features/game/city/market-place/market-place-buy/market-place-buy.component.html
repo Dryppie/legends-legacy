@@ -64,7 +64,7 @@
         *ngFor="let l of filteredListings(); trackBy: trackByListing"
         (click)="selectListing(l)"
         [ngClass]="{
-          'bg-primary/30': l.id === selectedListingId,
+          'bg-zinc-300/30': l.id === selectedListingId,
         }"
         class="cursor-pointer transition"
       >

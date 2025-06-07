@@ -78,7 +78,7 @@ export class EquipmentOverviewComponent implements OnInit {
       },
       {
         id: '',
-        iconPath: 'empty_cloak',
+        iconPath: 'empty_relic',
         equipmentType: EquipmentType.Relic,
       },
       {

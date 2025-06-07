@@ -15,7 +15,9 @@
         *ngFor="let item of filteredItems; trackBy: trackByItem"
         [inventoryItem]="item"
         (click)="selectItem(item)"
-        [ngClass]="{ 'bg-primary/30': item.itemInstance.id === selectedItemId }"
+        [ngClass]="{
+          'bg-zinc-300/30': item.itemInstance.id === selectedItemId,
+        }"
         class="transition"
       ></app-market-place-inventory-item>
     </div>
