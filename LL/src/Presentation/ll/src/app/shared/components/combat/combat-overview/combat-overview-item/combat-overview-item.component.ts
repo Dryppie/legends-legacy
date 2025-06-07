@@ -7,7 +7,6 @@ import { TicksToSecondsPipe } from '../../../../pipes/ticks-to-seconds/ticks-to-
   standalone: true,
   imports: [TicksToSecondsPipe],
   templateUrl: './combat-overview-item.component.html',
-  styleUrl: './combat-overview-item.component.css',
 })
 export class CombatOverviewItemComponent {
   @Input() combatEvent!: CombatEvent;

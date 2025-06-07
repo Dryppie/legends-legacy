@@ -45,7 +45,6 @@ import {
     NgSwitchDefault,
   ],
   templateUrl: './market-place-buy.component.html',
-  styleUrl: './market-place-buy.component.css',
 })
 export class MarketPlaceBuyComponent implements OnInit {
   readonly allListings = signal<MarketPlaceListing[]>([]);

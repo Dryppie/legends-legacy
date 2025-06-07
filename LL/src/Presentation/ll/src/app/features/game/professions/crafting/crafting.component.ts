@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { ProfessionHeaderComponent } from '../../../../shared/components/professions/profession-header/profession-header.component';
-import { AsyncPipe, NgIf, NgSwitch, NgSwitchCase } from '@angular/common';
+import { NgIf, NgSwitch, NgSwitchCase } from '@angular/common';
 import {
   CraftingProfession,
   CraftType,
@@ -39,7 +39,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
     TemperingComponent,
   ],
   templateUrl: './crafting.component.html',
-  styleUrl: './crafting.component.css',
 })
 export class CraftingComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);

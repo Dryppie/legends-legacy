@@ -5,7 +5,6 @@ import { Component, ElementRef, Input, ViewChild } from '@angular/core';
   standalone: true,
   imports: [],
   templateUrl: './health-bar.component.html',
-  styleUrl: './health-bar.component.css',
 })
 export class HealthBarComponent {
   @ViewChild('healthBar', { static: true })

@@ -15,7 +15,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
   standalone: true,
   imports: [ProfessionHeaderComponent, ProfessionCardComponent, NgFor, NgIf],
   templateUrl: './gathering.component.html',
-  styleUrl: './gathering.component.css',
 })
 export class GatheringComponent {
   private readonly route = inject(ActivatedRoute);

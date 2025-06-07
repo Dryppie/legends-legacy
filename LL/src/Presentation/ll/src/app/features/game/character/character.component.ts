@@ -9,7 +9,6 @@ import { RouterOutlet } from '@angular/router';
   standalone: true,
   imports: [RouterOutlet],
   templateUrl: './character.component.html',
-  styleUrl: './character.component.css',
   providers: [],
 })
 export class CharacterComponent {}

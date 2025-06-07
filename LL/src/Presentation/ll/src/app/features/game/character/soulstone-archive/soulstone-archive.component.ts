@@ -3,16 +3,7 @@ import { CharacterService } from '../../../../core/services/api/character/charac
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { AsyncPipe, NgIf } from '@angular/common';
 import { SoulstoneUpgradeService } from '../../../../core/services/api/soulstone-upgrade/soulstone-upgrade.service';
-import {
-  filter,
-  map,
-  Observable,
-  of,
-  shareReplay,
-  switchMap,
-  take,
-  tap,
-} from 'rxjs';
+import { map, Observable, shareReplay } from 'rxjs';
 import { SoulstoneUpgradeView } from '../../../../shared/models/soulstones/soulstone-upgrade-view';
 import { SoulstoneUpgradeType } from '../../../../shared/models/soulstones/soulstone-upgrade-type';
 import { SoulstoneUpgradeCardComponent } from './soulstone-upgrade-card/soulstone-upgrade-card.component';
@@ -27,7 +18,6 @@ import { SoulstoneUpgradeCardComponent } from './soulstone-upgrade-card/soulston
     SoulstoneUpgradeCardComponent,
   ],
   templateUrl: './soulstone-archive.component.html',
-  styleUrl: './soulstone-archive.component.css',
 })
 export class SoulstoneArchiveComponent implements OnInit {
   readonly character$;

@@ -9,7 +9,6 @@ import { ColosseumRank } from '../../../../../shared/models/Dtos/colosseum/colos
   standalone: true,
   imports: [NgIf, NgFor, NgClass],
   templateUrl: './rankings-glory.component.html',
-  styleUrl: './rankings-glory.component.css',
 })
 export class RankingsGloryComponent implements OnInit {
   @Input() rankings: ColosseumRank[] = [];

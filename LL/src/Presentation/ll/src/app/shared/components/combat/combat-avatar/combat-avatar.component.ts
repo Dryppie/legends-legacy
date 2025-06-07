@@ -8,7 +8,6 @@ import { ManaBarComponent } from '../mana-bar/mana-bar.component';
   standalone: true,
   imports: [NgStyle, HealthBarComponent, ManaBarComponent, CommonModule],
   templateUrl: './combat-avatar.component.html',
-  styleUrl: './combat-avatar.component.css',
 })
 export class CombatAvatarComponent {
   @Input() imagePath!: string;

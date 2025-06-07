@@ -11,7 +11,6 @@ import { CharacterManagerService } from '../../../../../core/services/client-sid
   standalone: true,
   imports: [AttributeTypeFormatPipe, NgIf, NgFor, NgClass],
   templateUrl: './overview-equipment-modal.component.html',
-  styleUrl: './overview-equipment-modal.component.css',
 })
 export class OverviewEquipmentModalComponent implements OnInit {
   @Input() equipmentType!: EquipmentType;

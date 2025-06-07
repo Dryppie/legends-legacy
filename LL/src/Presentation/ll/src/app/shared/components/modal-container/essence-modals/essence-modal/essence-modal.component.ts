@@ -10,7 +10,6 @@ import { AbilityTooltipContainerDirective } from '../../../../directives/ability
   standalone: true,
   imports: [TicksToSecondsPipe, NgFor, AbilityTooltipContainerDirective],
   templateUrl: './essence-modal.component.html',
-  styleUrl: './essence-modal.component.css',
 })
 export class EssenceModalComponent implements OnInit {
   @Input() essence!: Essence;

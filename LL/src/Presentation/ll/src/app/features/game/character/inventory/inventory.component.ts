@@ -19,7 +19,6 @@ import { InventoryStateService } from '../../../../core/services/api/inventory/i
     EquipmentOverviewComponent,
   ],
   templateUrl: './inventory.component.html',
-  styleUrl: './inventory.component.css',
 })
 export class InventoryComponent implements OnInit {
   tabs: Tab[] = [

@@ -10,7 +10,6 @@ import { CombatAreaCardComponent } from '../../../../shared/components/combat/co
   standalone: true,
   imports: [NgIf, NgFor, CombatAreaCardComponent],
   templateUrl: './region.component.html',
-  styleUrl: './region.component.css',
 })
 export class RegionComponent implements OnInit {
   regionId!: string;

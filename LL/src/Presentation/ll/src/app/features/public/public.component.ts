@@ -6,6 +6,5 @@ import { RouterOutlet } from '@angular/router';
   standalone: true,
   imports: [RouterOutlet],
   templateUrl: './public.component.html',
-  styleUrl: './public.component.css',
 })
 export class PublicComponent {}

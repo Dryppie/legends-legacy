@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { EquipmentInstance, ItemInstance } from '../../models/item';
-import { NgClass, NgIf } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { Rarity } from '../../models/enums/rarity';
 
 @Component({
@@ -8,7 +8,6 @@ import { Rarity } from '../../models/enums/rarity';
   standalone: true,
   imports: [NgClass],
   templateUrl: './item.component.html',
-  styleUrl: './item.component.css',
 })
 export class ItemComponent {
   @Input() item!: ItemInstance;

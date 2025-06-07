@@ -19,7 +19,6 @@ import { GoogleAuthService } from './core/services/api/auth/google-auth.service'
     SessionSummaryPopupComponent,
   ],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css',
 })
 export class AppComponent {
   title = 'll';

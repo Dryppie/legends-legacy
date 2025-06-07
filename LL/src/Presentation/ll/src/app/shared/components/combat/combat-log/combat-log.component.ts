@@ -10,7 +10,6 @@ import { BattleOutcome } from '../../../models/Dtos/combatResultDto';
   standalone: true,
   imports: [CommonModule, CombatStatsCardComponent],
   templateUrl: './combat-log.component.html',
-  styleUrl: './combat-log.component.css',
 })
 export class CombatLogComponent {
   logs = signal<CombatRecord[]>([]);

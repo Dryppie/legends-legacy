@@ -18,7 +18,6 @@ import { AsyncPipe, NgIf } from '@angular/common';
     NgIf,
   ],
   templateUrl: './character-overview.component.html',
-  styleUrl: './character-overview.component.css',
 })
 export class CharacterOverviewComponent {
   showItemInfo = false;

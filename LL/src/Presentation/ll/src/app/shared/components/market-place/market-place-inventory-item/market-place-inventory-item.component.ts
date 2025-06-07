@@ -10,7 +10,6 @@ import { ItemComponent } from '../../item/item.component';
   standalone: true,
   imports: [ItemComponent, NgIf],
   templateUrl: './market-place-inventory-item.component.html',
-  styleUrl: './market-place-inventory-item.component.css',
 })
 export class MarketPlaceInventoryItemComponent {
   @Input() inventoryItem!: InventoryItem;

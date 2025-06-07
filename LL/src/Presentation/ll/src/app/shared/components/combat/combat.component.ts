@@ -29,7 +29,6 @@ import { BattleType } from '../../../core/state/combat-state/combatState';
     CombatLogComponent,
   ],
   templateUrl: './combat.component.html',
-  styleUrl: './combat.component.css',
 })
 export class CombatComponent implements OnInit, OnDestroy {
   combatEvents: CombatEvent[] = [];

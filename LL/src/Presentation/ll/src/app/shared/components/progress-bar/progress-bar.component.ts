@@ -2,7 +2,6 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  Input,
   OnDestroy,
   OnInit,
   Output,
@@ -19,7 +18,6 @@ import { CharacterActionType } from '../../models/enums/characterActionType';
   standalone: true,
   imports: [],
   templateUrl: './progress-bar.component.html',
-  styleUrl: './progress-bar.component.css',
 })
 export class ProgressBarComponent implements OnInit, OnDestroy {
   @ViewChild('progressBar', { static: true })

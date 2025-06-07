@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Tab } from '../../models/sidebar-item';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 
 @Component({
@@ -7,7 +6,6 @@ import { NgClass, NgFor, NgIf } from '@angular/common';
   standalone: true,
   imports: [NgIf, NgFor, NgClass],
   templateUrl: './tab.component.html',
-  styleUrl: './tab.component.css',
 })
 export class TabComponent {
   @Input() tabs: string[] = [];

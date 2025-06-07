@@ -5,8 +5,5 @@ import { Component } from '@angular/core';
   standalone: true,
   imports: [],
   templateUrl: './world.component.html',
-  styleUrl: './world.component.css'
 })
-export class WorldComponent {
-
-}
+export class WorldComponent {}

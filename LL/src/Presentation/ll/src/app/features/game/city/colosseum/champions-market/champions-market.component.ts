@@ -5,8 +5,5 @@ import { Component } from '@angular/core';
   standalone: true,
   imports: [],
   templateUrl: './champions-market.component.html',
-  styleUrl: './champions-market.component.css'
 })
-export class ChampionsMarketComponent {
-
-}
+export class ChampionsMarketComponent {}

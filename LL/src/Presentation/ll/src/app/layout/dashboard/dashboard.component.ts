@@ -24,7 +24,6 @@ import { ChatComponent } from './chat/chat.component';
     ChatComponent,
   ],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css',
 })
 export class DashboardComponent implements OnInit {
   isSidebarOpen = true;

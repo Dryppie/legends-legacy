@@ -7,7 +7,6 @@ import { SidebarService } from '../../../../core/services/client-side/sidebar/si
   standalone: true,
   imports: [RouterLink, RouterLinkActive],
   templateUrl: './navbutton.component.html',
-  styleUrl: './navbutton.component.css',
 })
 export class NavbuttonComponent {
   @Input() link: string = '';

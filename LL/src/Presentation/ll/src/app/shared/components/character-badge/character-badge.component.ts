@@ -5,7 +5,6 @@ import { Component, Input } from '@angular/core';
   standalone: true,
   imports: [],
   templateUrl: './character-badge.component.html',
-  styleUrl: './character-badge.component.css',
 })
 export class CharacterBadgeComponent {
   @Input() level?: number = 1;

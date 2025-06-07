@@ -9,7 +9,6 @@ import { Subscription } from 'rxjs';
   standalone: true,
   imports: [NgIf, NgFor, NgClass, DatePipe],
   templateUrl: './record-of-battle.component.html',
-  styleUrl: './record-of-battle.component.css',
 })
 export class RecordOfBattleComponent {
   @Input() previousMatches: ColosseumMatchResult[] = [];

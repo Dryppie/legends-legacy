@@ -7,7 +7,6 @@ import { SessionSummaryService } from '../../../core/services/client-side/sessio
   standalone: true,
   imports: [NgIf, NgFor],
   templateUrl: './session-summary-popup.component.html',
-  styleUrl: './session-summary-popup.component.css',
 })
 export class SessionSummaryPopupComponent {
   constructor(public svc: SessionSummaryService) {}

@@ -15,7 +15,6 @@ import { AttributeDisplayComponent } from '../../attribute-display/attribute-dis
     AttributeDisplayComponent,
   ],
   templateUrl: './character-attributes.component.html',
-  styleUrl: './character-attributes.component.css',
 })
 export class CharacterAttributesComponent {
   @Input() attributes: AttributeDto[] = [];

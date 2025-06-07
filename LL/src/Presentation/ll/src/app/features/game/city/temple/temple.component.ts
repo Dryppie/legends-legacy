@@ -10,7 +10,6 @@ import { ModalService } from '../../../../core/services/client-side/modal/modal.
   standalone: true,
   imports: [ButtonComponent, BannerComponent],
   templateUrl: './temple.component.html',
-  styleUrl: './temple.component.css',
 })
 export class TempleComponent implements AfterViewInit {
   public equippedEssences: Essence[] = [];

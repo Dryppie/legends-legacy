@@ -7,10 +7,8 @@ import { NgFor } from '@angular/common';
   standalone: true,
   imports: [NgFor],
   templateUrl: './combat-filters-modal.component.html',
-  styleUrl: './combat-filters-modal.component.css',
 })
 export class CombatFiltersModalComponent implements OnInit {
-  
   deselectAll(): void {
     this.selectedEventTypes = [];
   }

@@ -28,7 +28,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
   standalone: true,
   imports: [NgFor, NgIf, NgClass, AttributeTypeFormatPipe, SlicePipe],
   templateUrl: './tempering.component.html',
-  styleUrl: './tempering.component.css',
 })
 export class TemperingComponent implements OnInit {
   @Input({ required: true }) inventory!: Signal<InventoryDto | null>;

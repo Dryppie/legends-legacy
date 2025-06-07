@@ -18,7 +18,6 @@ import { MarketPlaceSellComponent } from './market-place-sell/market-place-sell.
     MarketPlaceSellComponent,
   ],
   templateUrl: './market-place.component.html',
-  styleUrl: './market-place.component.css',
 })
 export class MarketPlaceComponent implements OnInit {
   ngOnInit(): void {

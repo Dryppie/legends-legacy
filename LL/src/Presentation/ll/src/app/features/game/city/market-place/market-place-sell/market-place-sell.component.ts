@@ -33,7 +33,6 @@ import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/numb
     NumberFormatPipe,
   ],
   templateUrl: './market-place-sell.component.html',
-  styleUrl: './market-place-sell.component.css',
 })
 export class MarketPlaceSellComponent implements OnInit {
   readonly myListings = signal<MarketPlaceListing[]>([]);

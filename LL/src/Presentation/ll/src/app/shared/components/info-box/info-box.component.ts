@@ -6,7 +6,6 @@ import { Component, Input } from '@angular/core';
   standalone: true,
   imports: [NgIf],
   templateUrl: './info-box.component.html',
-  styleUrl: './info-box.component.css',
 })
 export class InfoBoxComponent {
   @Input() title: string = ''; // Title for the info box

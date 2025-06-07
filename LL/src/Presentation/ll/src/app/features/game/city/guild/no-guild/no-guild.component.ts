@@ -11,7 +11,6 @@ import { Observable, Subscription } from 'rxjs';
   standalone: true,
   imports: [NgIf, NgFor, FormsModule, AsyncPipe],
   templateUrl: './no-guild.component.html',
-  styleUrl: './no-guild.component.css',
 })
 export class NoGuildComponent implements OnInit {
   guilds$!: Observable<GuildSimple[]>;

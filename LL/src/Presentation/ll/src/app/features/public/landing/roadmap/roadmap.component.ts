@@ -11,7 +11,6 @@ interface RoadmapItem {
   standalone: true,
   imports: [],
   templateUrl: './roadmap.component.html',
-  styleUrl: './roadmap.component.css',
 })
 export class RoadmapComponent {
   roadmapItems: RoadmapItem[] = [

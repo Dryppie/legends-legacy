@@ -8,7 +8,6 @@ import { EssencesService } from '../../../../../core/services/api/essences/essen
   standalone: true,
   imports: [NgIf, NgFor, CommonModule],
   templateUrl: './remove-essence-modal.component.html',
-  styleUrl: './remove-essence-modal.component.css',
 })
 export class RemoveEssenceModalComponent {
   @Input() essences!: Essence[];

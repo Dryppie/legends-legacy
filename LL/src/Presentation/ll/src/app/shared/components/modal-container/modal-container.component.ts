@@ -25,7 +25,6 @@ import { EquipmentType } from '../../models/Dtos/equipmentSlot';
     OverviewEquipmentModalComponent,
   ],
   templateUrl: './modal-container.component.html',
-  styleUrl: './modal-container.component.css',
 })
 export class ModalContainerComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];

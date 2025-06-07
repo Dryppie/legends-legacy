@@ -9,7 +9,6 @@ import { AttributeTypeFormatPipe } from '../../../../pipes/attributes/attribute-
   standalone: true,
   imports: [NgFor, AttributeTypeFormatPipe],
   templateUrl: './inventory-equipment-modal.component.html',
-  styleUrl: './inventory-equipment-modal.component.css',
 })
 export class InventoryEquipmentModalComponent implements OnInit {
   @Input() equipmentInstance!: EquipmentInstance;

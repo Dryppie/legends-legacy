@@ -4,11 +4,6 @@ import { UserInfoDto } from '../../../shared/models/Dtos/userInfoDto';
 import { AuthService } from '../../../core/services/api/auth/auth.service';
 import { CharacterDto } from '../../../shared/models/Dtos/characterDto';
 import { SignupComponent } from '../../public/landing/signup/signup.component';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { environment } from '../../../../environments/environment';
-import { emailValidator } from '../../../shared/validators/email-validator';
-import { passwordValidator } from '../../../shared/validators/password-validator';
-import { passwordMatchValidator } from '../../../shared/validators/password-match-validator';
 import { GoogleAuthService } from '../../../core/services/api/auth/google-auth.service';
 
 @Component({
@@ -16,7 +11,6 @@ import { GoogleAuthService } from '../../../core/services/api/auth/google-auth.s
   standalone: true,
   imports: [CommonModule, SignupComponent],
   templateUrl: './settings.component.html',
-  styleUrl: './settings.component.css',
 })
 export class SettingsComponent {
   userInfo: UserInfoDto | null = null; // Initialize it to null first

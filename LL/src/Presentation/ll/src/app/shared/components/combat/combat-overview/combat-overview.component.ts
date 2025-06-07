@@ -15,7 +15,6 @@ import { ModalService } from '../../../../core/services/client-side/modal/modal.
     CommonModule,
   ],
   templateUrl: './combat-overview.component.html',
-  styleUrl: './combat-overview.component.css',
 })
 export class CombatOverviewComponent {
   @Input() combatEvents: CombatEvent[] = [];

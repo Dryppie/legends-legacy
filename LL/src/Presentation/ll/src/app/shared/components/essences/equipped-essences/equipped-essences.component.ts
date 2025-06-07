@@ -9,7 +9,6 @@ import { EssenceSlot, SlotState } from '../../../models/essenceSlot';
   standalone: true,
   imports: [NgFor],
   templateUrl: './equipped-essences.component.html',
-  styleUrl: './equipped-essences.component.css',
 })
 export class EquippedEssencesComponent implements OnInit {
   @Input() essenceSlots: EssenceSlot[] = [];

@@ -10,7 +10,6 @@ import { NgFor, NgIf } from '@angular/common';
   standalone: true,
   imports: [AttributeTypeFormatPipe, MatTooltipModule, NgIf, NgFor],
   templateUrl: './attribute-display.component.html',
-  styleUrl: './attribute-display.component.css',
 })
 export class AttributeDisplayComponent implements OnInit {
   @Input() attribute!: AttributeDto;

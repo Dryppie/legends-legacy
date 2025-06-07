@@ -6,6 +6,5 @@ import { RouterLink } from '@angular/router';
   standalone: true,
   imports: [RouterLink],
   templateUrl: './landing-hero.component.html',
-  styleUrl: './landing-hero.component.css',
 })
 export class LandingHeroComponent {}

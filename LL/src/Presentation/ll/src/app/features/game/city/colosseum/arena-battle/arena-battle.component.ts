@@ -10,7 +10,6 @@ import { RegularButtonComponent } from '../../../../../shared/components/buttons
   standalone: true,
   imports: [NgFor, NgIf, RegularButtonComponent],
   templateUrl: './arena-battle.component.html',
-  styleUrl: './arena-battle.component.css',
 })
 export class ArenaBattleComponent implements OnInit {
   @Input() opponents!: CharacterDto[];

@@ -7,7 +7,6 @@ import { ProfessionActionComponent } from '../profession-action/profession-actio
   standalone: true,
   imports: [ProfessionIconComponent, ProfessionActionComponent],
   templateUrl: './profession-header.component.html',
-  styleUrl: './profession-header.component.css',
 })
 export class ProfessionHeaderComponent {
   @Input() title: string = '';

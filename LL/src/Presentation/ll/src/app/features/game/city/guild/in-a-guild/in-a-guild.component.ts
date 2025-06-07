@@ -12,7 +12,6 @@ import { InviteToGuild } from '../../../../../shared/models/requestDtos/guilds/i
   standalone: true,
   imports: [TabComponent, NgSwitch, NgSwitchCase, GuildInfoComponent],
   templateUrl: './in-a-guild.component.html',
-  styleUrl: './in-a-guild.component.css',
 })
 export class InAGuildComponent implements OnInit {
   @Input() guild!: Guild;

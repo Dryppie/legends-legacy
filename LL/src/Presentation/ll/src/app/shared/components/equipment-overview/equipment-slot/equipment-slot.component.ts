@@ -6,7 +6,6 @@ import { InfoBoxComponent } from '../../info-box/info-box.component';
   standalone: true,
   imports: [InfoBoxComponent],
   templateUrl: './equipment-slot.component.html',
-  styleUrl: './equipment-slot.component.css',
 })
 export class EquipmentSlotComponent {
   @Input() icon: string = '';

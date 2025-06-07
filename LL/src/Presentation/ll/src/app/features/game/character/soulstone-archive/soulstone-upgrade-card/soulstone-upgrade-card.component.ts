@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { SoulstoneUpgradeView } from '../../../../../shared/models/soulstones/soulstone-upgrade-view';
 import { CommonModule } from '@angular/common';
 import { CharacterService } from '../../../../../core/services/api/character/character.service';
@@ -11,7 +11,6 @@ import { CharacterDto } from '../../../../../shared/models/Dtos/characterDto';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './soulstone-upgrade-card.component.html',
-  styleUrl: './soulstone-upgrade-card.component.css',
 })
 export class SoulstoneUpgradeCardComponent {
   @Input() character!: CharacterDto;

@@ -10,7 +10,6 @@ import { ProgressBarComponent } from '../progress-bar/progress-bar.component';
   standalone: true,
   imports: [ProgressBarComponent],
   templateUrl: './current-action.component.html',
-  styleUrl: './current-action.component.css',
 })
 export class CurrentActionComponent implements OnInit, OnDestroy {
   currentAction: CharacterActionDto | null = null;

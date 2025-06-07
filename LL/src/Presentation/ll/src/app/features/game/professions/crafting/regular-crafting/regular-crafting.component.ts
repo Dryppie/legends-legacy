@@ -1,4 +1,4 @@
-import { AsyncPipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, computed, Input, signal, Signal } from '@angular/core';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { Recipe } from '../../../../../shared/models/profession';
@@ -33,7 +33,6 @@ function consumeMaterials(
   standalone: true,
   imports: [NgIf, NgFor, NgClass, AttributeTypeFormatPipe],
   templateUrl: './regular-crafting.component.html',
-  styleUrl: './regular-crafting.component.css',
 })
 export class RegularCraftingComponent {
   @Input({ required: true }) recipes!: Signal<Recipe[]>;

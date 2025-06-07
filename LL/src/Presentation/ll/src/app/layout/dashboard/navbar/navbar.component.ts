@@ -18,7 +18,6 @@ import { CharacterDto } from '../../../shared/models/Dtos/characterDto';
   standalone: true,
   imports: [CharacterBadgeComponent, NavbuttonComponent, NgIf, NgFor],
   templateUrl: './navbar.component.html',
-  styleUrls: ['./navbar.component.css'], // Corrected to `styleUrls`
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   @Output() itemTapped = new EventEmitter<void>();

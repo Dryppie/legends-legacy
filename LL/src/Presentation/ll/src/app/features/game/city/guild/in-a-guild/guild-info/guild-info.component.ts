@@ -13,7 +13,6 @@ import { GuildService } from '../../../../../../core/services/api/guild/guild.se
   standalone: true,
   imports: [NgFor, NgIf, NgClass, FormsModule],
   templateUrl: './guild-info.component.html',
-  styleUrl: './guild-info.component.css',
 })
 export class GuildInfoComponent implements OnInit {
   @Input() guild!: Guild;

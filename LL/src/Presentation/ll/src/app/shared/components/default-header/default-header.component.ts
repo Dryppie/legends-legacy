@@ -6,7 +6,6 @@ import { ProfessionIconComponent } from '../professions/profession-icon/professi
   standalone: true,
   imports: [ProfessionIconComponent],
   templateUrl: './default-header.component.html',
-  styleUrl: './default-header.component.css',
 })
 export class DefaultHeaderComponent {
   @Input() title: string = '';

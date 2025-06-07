@@ -7,7 +7,6 @@ import { ProfessionIconComponent } from '../../../../shared/components/professio
   standalone: true,
   imports: [ProfessionIconComponent],
   templateUrl: './sidebar-item.component.html',
-  styleUrl: './sidebar-item.component.css',
 })
 export class SidebarItemComponent {
   @Input() item!: SidebarItem;

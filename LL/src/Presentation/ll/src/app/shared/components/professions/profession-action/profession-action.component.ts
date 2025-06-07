@@ -11,7 +11,6 @@ import { CharacterActionType } from '../../../models/enums/characterActionType';
   standalone: true,
   imports: [ProgressBarComponent, NgIf],
   templateUrl: './profession-action.component.html',
-  styleUrl: './profession-action.component.css',
 })
 export class ProfessionActionComponent implements OnInit, OnDestroy {
   currentAction: CharacterActionDto | null = null;

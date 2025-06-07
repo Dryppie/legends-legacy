@@ -6,7 +6,6 @@ import { Component, Input } from '@angular/core';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './mini-button.component.html',
-  styleUrl: './mini-button.component.css',
 })
 export class MiniButtonComponent {
   @Input() disabled = false;

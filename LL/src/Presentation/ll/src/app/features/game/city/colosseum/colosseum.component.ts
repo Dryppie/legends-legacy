@@ -4,13 +4,7 @@ import { TabComponent } from '../../../../shared/components/tab/tab.component';
 import { Tab } from '../../../../shared/models/sidebar-item';
 import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { ColosseumService } from '../../../../core/services/api/colosseum/colosseum.service';
-import {
-  AsyncPipe,
-  NgFor,
-  NgIf,
-  NgSwitch,
-  NgSwitchCase,
-} from '@angular/common';
+import { AsyncPipe, NgIf, NgSwitch, NgSwitchCase } from '@angular/common';
 import { CombatComponent } from '../../../../shared/components/combat/combat.component';
 import { BattleType } from '../../../../core/state/combat-state/combatState';
 import { CombatStateService } from '../../../../core/state/combat-state/combat-state.service';
@@ -41,7 +35,6 @@ import { ArenaTicketStatus } from '../../../../shared/models/Dtos/colosseum/aren
     TournamentGroundsComponent,
   ],
   templateUrl: './colosseum.component.html',
-  styleUrl: './colosseum.component.css',
 })
 export class ColosseumComponent implements OnInit {
   allOpponents: CharacterDto[] = [];

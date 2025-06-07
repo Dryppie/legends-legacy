@@ -32,7 +32,6 @@ import { environment } from '../../../../../environments/environment';
     ButtonComponent,
   ],
   templateUrl: './signup.component.html',
-  styleUrl: './signup.component.css',
 })
 export class SignupComponent {
   @Input() convertAccount: boolean = false;

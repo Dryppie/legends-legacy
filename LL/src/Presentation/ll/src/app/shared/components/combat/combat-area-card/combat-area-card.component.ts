@@ -14,7 +14,6 @@ import { Subscription } from 'rxjs';
   standalone: true,
   imports: [MiniButtonComponent, NgIf, CommonModule],
   templateUrl: './combat-area-card.component.html',
-  styleUrl: './combat-area-card.component.css',
 })
 export class CombatAreaCardComponent {
   canStartAction(): boolean {

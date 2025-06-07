@@ -9,7 +9,6 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [NgIf, NgFor, FormsModule, CommonModule],
   templateUrl: './absorb-essence-modal.component.html',
-  styleUrl: './absorb-essence-modal.component.css',
 })
 export class AbsorbEssenceModalComponent implements OnInit {
   @Input() essences!: Essence[];

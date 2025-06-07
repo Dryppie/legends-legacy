@@ -21,7 +21,6 @@ import { StickyScrollDirective } from '../../../shared/directives/sticky-scroll/
     StickyScrollDirective,
   ],
   templateUrl: './chat.component.html',
-  styleUrl: './chat.component.css',
 })
 export class ChatComponent {
   @Output() close = new EventEmitter<void>();

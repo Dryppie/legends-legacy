@@ -32,7 +32,6 @@ import { GoogleAuthService } from '../../../../core/services/api/auth/google-aut
     NgClass,
   ],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css',
 })
 export class LoginComponent {
   document: any;

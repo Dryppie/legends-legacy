@@ -9,7 +9,6 @@ import { BannerComponent } from '../../../../shared/components/banner/banner.com
   standalone: true,
   imports: [BannerComponent, NgFor],
   templateUrl: './tavern.component.html',
-  styleUrl: './tavern.component.css',
 })
 export class TavernComponent {
   constructor(private characterService: CharacterService) {

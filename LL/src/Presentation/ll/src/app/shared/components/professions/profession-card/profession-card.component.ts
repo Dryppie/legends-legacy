@@ -15,7 +15,6 @@ import {
   standalone: true,
   imports: [MiniButtonComponent, NgIf],
   templateUrl: './profession-card.component.html',
-  styleUrl: './profession-card.component.css',
 })
 export class ProfessionCardComponent implements OnInit {
   @Input() gatheringNode!: GatheringNode;

@@ -30,7 +30,6 @@ import { Observable } from 'rxjs';
     AsyncPipe,
   ],
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.css',
 })
 export class SidebarComponent implements OnInit {
   @Output() itemTapped = new EventEmitter<void>();

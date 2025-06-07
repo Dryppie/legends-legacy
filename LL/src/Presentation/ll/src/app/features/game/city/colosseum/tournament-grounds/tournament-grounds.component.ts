@@ -5,8 +5,5 @@ import { Component } from '@angular/core';
   standalone: true,
   imports: [],
   templateUrl: './tournament-grounds.component.html',
-  styleUrl: './tournament-grounds.component.css'
 })
-export class TournamentGroundsComponent {
-
-}
+export class TournamentGroundsComponent {}

@@ -5,7 +5,6 @@ import { Component, ElementRef, Input, ViewChild } from '@angular/core';
   standalone: true,
   imports: [],
   templateUrl: './mana-bar.component.html',
-  styleUrl: './mana-bar.component.css',
 })
 export class ManaBarComponent {
   @ViewChild('manaBar', { static: true })

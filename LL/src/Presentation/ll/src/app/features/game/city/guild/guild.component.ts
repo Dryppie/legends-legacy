@@ -11,7 +11,6 @@ import { AsyncPipe, NgIf } from '@angular/common';
   standalone: true,
   imports: [NoGuildComponent, InAGuildComponent, AsyncPipe, NgIf],
   templateUrl: './guild.component.html',
-  styleUrl: './guild.component.css',
 })
 export class GuildComponent implements OnInit {
   guild$!: Observable<Guild | null>;

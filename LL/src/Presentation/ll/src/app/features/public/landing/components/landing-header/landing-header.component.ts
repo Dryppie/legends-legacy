@@ -6,6 +6,5 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   standalone: true,
   imports: [RouterLink, RouterLinkActive],
   templateUrl: './landing-header.component.html',
-  styleUrl: './landing-header.component.css',
 })
 export class LandingHeaderComponent {}

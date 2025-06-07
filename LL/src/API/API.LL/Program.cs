@@ -168,9 +168,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowSpecificOrigin");
 
-if (config.GetValue("FeatureManagement:DisableAllRequests", false))
+if (config.GetValue("FeatureManagement:DisableAllRequests", "false") == "true")
 {
-    app.Use((Func<HttpContext, Func<Task>, Task>)(async (context, next) =>
+    app.Use(async (context, next) =>
     {
         var path = context.Request.Path.Value?.ToLowerInvariant();
         if (path != null && (path.Contains("/healthz/ready") || path.Contains("/healthz/live")))
@@ -181,13 +181,13 @@ if (config.GetValue("FeatureManagement:DisableAllRequests", false))
 
         context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
         await context.Response.WriteAsync("The backend is currently unavailable.");
-    }));
+    });
 }
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-if (config.GetValue("FeatureManagement:AllowAnonymous", false))
+if (config.GetValue("FeatureManagement:AllowAnonymous", "false") == "true")
 {
     app.MapControllers().AllowAnonymous();
 }

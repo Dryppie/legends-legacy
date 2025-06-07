@@ -17,7 +17,6 @@ interface Toast {
   standalone: true,
   imports: [NgClass, NgFor, NgStyle, NgIf],
   templateUrl: './toast.component.html',
-  styleUrl: './toast.component.css',
 })
 export class ToastComponent {
   toasts: Toast[] = [];

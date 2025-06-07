@@ -7,7 +7,6 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   standalone: true,
   imports: [NgClass, NgIf],
   templateUrl: './regular-button.component.html',
-  styleUrl: './regular-button.component.css',
 })
 export class RegularButtonComponent {
   /** Button label. If omitted, projected content (icon, custom markup) is rendered. */

@@ -11,7 +11,6 @@ import { ItemComponent } from '../item/item.component';
   standalone: true,
   imports: [NgFor, NgIf, ItemComponent],
   templateUrl: './equipment-overview.component.html',
-  styleUrl: './equipment-overview.component.css',
 })
 export class EquipmentOverviewComponent implements OnInit {
   constructor(
