@@ -25,6 +25,7 @@ import { EquipmentType } from '../../../../shared/models/Dtos/equipmentSlot';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { Equipment } from '../../../../shared/models/item';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { InventoryStateService } from '../../../../core/services/api/inventory/inventory-state.service';
 
 @Component({
   selector: 'app-crafting',
@@ -43,7 +44,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 export class CraftingComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly professionService = inject(ProfessionsService);
-  private readonly characterManager = inject(CharacterManagerService);
+  private readonly inventoryState = inject(InventoryStateService);
   private readonly inventoryService = inject(InventoryService);
 
   readonly professionId = toSignal(
@@ -79,15 +80,6 @@ export class CraftingComponent implements OnInit {
     );
   }
 
-  private readonly _rawInventory = toSignal(
-    this.characterManager.inventory$.pipe(
-      switchMap((invDto) =>
-        invDto ? of(invDto) : this.inventoryService.getInventory(),
-      ),
-    ),
-    { initialValue: null },
-  );
-
   readonly craftType = computed<CraftType>(() => {
     return (
       (this.profession()?.professionType as unknown as CraftType) ??
@@ -101,7 +93,7 @@ export class CraftingComponent implements OnInit {
     return prof.recipes.filter((r) => r.craftType === this.craftType());
   });
 
-  readonly inventory = computed(() => this._rawInventory());
+  readonly inventory = computed(() => this.inventoryState.items());
 
   readonly characterProfession = computed(() => {
     const prof = this.profession();
@@ -112,23 +104,20 @@ export class CraftingComponent implements OnInit {
   });
 
   readonly inventoryEquipment = computed(() => {
-    const inventory = this._rawInventory();
+    const inventory = this.inventoryState.items();
     const prof = this.profession();
-    if (!inventory || !prof) return null;
+    if (!inventory || !prof) return [];
 
     const allowed = this.allowedTypesByCraft[this.craftType()];
-    return {
-      ...inventory,
-      inventoryItems: inventory.inventoryItems.filter((i) => {
-        return (
-          i.itemInstance.itemBase.itemType === ItemType.Equipment &&
-          allowed.includes(
-            (i.itemInstance.itemBase as Equipment)
-              .equipmentType as EquipmentType,
-          )
-        );
-      }),
-    } as typeof inventory;
+
+    return this.inventoryState.items().filter((i) => {
+      return (
+        i.itemInstance.itemBase.itemType === ItemType.Equipment &&
+        allowed.includes(
+          (i.itemInstance.itemBase as Equipment).equipmentType as EquipmentType,
+        )
+      );
+    }) as typeof inventory;
   });
 
   ngOnInit(): void {

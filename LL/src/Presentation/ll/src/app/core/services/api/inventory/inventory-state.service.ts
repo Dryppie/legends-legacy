@@ -17,7 +17,9 @@ export class InventoryStateService {
   readonly isEmpty = computed(() => this._items().length === 0);
   readonly error = computed(() => this._error());
 
-  constructor(private inventoryService: InventoryService) {}
+  constructor(private inventoryService: InventoryService) {
+    this.load();
+  }
 
   /* Generic selector: reuse everywhere */
   byType = (type: ItemType) =>

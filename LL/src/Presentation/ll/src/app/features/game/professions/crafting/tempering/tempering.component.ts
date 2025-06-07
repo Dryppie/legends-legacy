@@ -17,11 +17,12 @@ import {
 } from '../../../../../shared/models/item';
 import { InventoryDto } from '../../../../../shared/models/Dtos/inventoryDto';
 import { AttributeTypeFormatPipe } from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
-import { CharacterManagerService } from '../../../../../core/services/client-side/character-manager/character-manager.service';
 import { CharacterActionsService } from '../../../../../core/services/api/character-actions/character-actions.service';
 import { StartCraftingActionRequest } from '../../../../../shared/models/Dtos/characterActionDto';
 import { CraftingService } from '../../../../../core/services/api/crafting/crafting.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
+import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 
 @Component({
   selector: 'app-tempering',
@@ -30,7 +31,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   templateUrl: './tempering.component.html',
 })
 export class TemperingComponent implements OnInit {
-  @Input({ required: true }) inventory!: Signal<InventoryDto | null>;
+  @Input({ required: true }) inventory!: Signal<InventoryItem[]>;
   @Input({ required: true }) craftType!: CraftType;
 
   readonly craftingQueue;
@@ -40,11 +41,13 @@ export class TemperingComponent implements OnInit {
   readonly selectedEquipmentInstance = computed<EquipmentInstance | null>(
     () => {
       const id = this.selectedItemId();
-      const inv = this.inventory();
       const queue = this.craftingQueue();
 
-      const invItem = inv?.inventoryItems.find((i) => i.itemInstance.id === id)
-        ?.itemInstance as EquipmentInstance | undefined;
+      const invItem = this.inventoryState
+        .items()
+        .find((i) => i.itemInstance.id === id)?.itemInstance as
+        | EquipmentInstance
+        | undefined;
 
       return (
         invItem ??
@@ -61,12 +64,13 @@ export class TemperingComponent implements OnInit {
 
   readonly isQueueSelected = computed<boolean>(() => {
     const id = this.selectedItemId();
-    const inv = this.inventory();
-    return !!id && !inv?.inventoryItems.some((i) => i.itemInstance.id === id);
+    return (
+      !!id && !this.inventoryState.items().some((i) => i.itemInstance.id === id)
+    );
   });
 
   constructor(
-    private readonly characterManager: CharacterManagerService,
+    private readonly inventoryState: InventoryStateService,
     private readonly characterActionService: CharacterActionsService,
     private readonly craftingService: CraftingService,
   ) {
@@ -100,9 +104,9 @@ export class TemperingComponent implements OnInit {
   temper(equipment: EquipmentInstance): void {
     if (!equipment) return;
     // take the latest inventory once, synchronously
-    const inventory = this.characterManager.getInventory();
-    if (!inventory) return;
-    const items = inventory.inventoryItems;
+    const items = this.inventoryState.items();
+    if (!items) return;
+
     if (!equipment.potential || equipment.potential <= 0) {
       return;
     }
@@ -111,12 +115,7 @@ export class TemperingComponent implements OnInit {
       id: crypto.randomUUID(),
       equipmentInstance: equipment,
     };
-    /* optimistic queue */
 
-    /* optimistic client-side material removal */
-    const updatedItems = items.filter(
-      (i) => i.itemInstance.id !== equipment.id,
-    );
     const startCraftingActionRequest: StartCraftingActionRequest = {
       queueId: queueItem.id,
       itemInstanceId: equipment.id,
@@ -127,7 +126,7 @@ export class TemperingComponent implements OnInit {
         if (success) {
           this.selectedItemId.set(null);
           this.craftingService.enqueueTempering(queueItem);
-          this.characterManager.setInventory({ inventoryItems: updatedItems });
+          this.inventoryState.removeItem(equipment.id);
         }
       });
   }
@@ -135,21 +134,20 @@ export class TemperingComponent implements OnInit {
   cancelCraft(queueItem: CraftingQueueItem): void {
     if (!queueItem) return;
 
-    const inventory = this.characterManager.getInventory();
-    if (!inventory) return;
-
-    inventory.inventoryItems.push({
-      id: inventory.inventoryItems[0].id,
-      quantity: 1,
-      itemInstance: queueItem.equipmentInstance,
-    });
-
+    const items = this.inventoryState.items();
+    if (!items) return;
     this.craftingService.removeItemFromQueue(queueItem).subscribe((success) => {
       /* TODO: might be necessary, but only if removing items from queue is deemed troublesome in the backend, causing client-side miss-match */
     });
-    this.characterManager.setInventory(inventory);
+    this.inventoryState.add({
+      id: items[0].id,
+      quantity: 1,
+      itemInstance: queueItem.equipmentInstance,
+    });
     this.craftingService.dequeueTempering(queueItem.id);
     if (this.craftingService.currentQueue.length === 0)
       this.characterActionService.clearCurrentAction();
+
+    this.selectedItemId.set(null);
   }
 }

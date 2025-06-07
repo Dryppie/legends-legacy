@@ -7,11 +7,12 @@ import { GuildRole } from '../../../../../../shared/models/Dtos/guild/guildRole'
 import { FormsModule } from '@angular/forms';
 import { GuildMember } from '../../../../../../shared/models/Dtos/guild/guildMember';
 import { GuildService } from '../../../../../../core/services/api/guild/guild.service';
+import { RegularButtonComponent } from '../../../../../../shared/components/buttons/regular-button/regular-button.component';
 
 @Component({
   selector: 'app-guild-info',
   standalone: true,
-  imports: [NgFor, NgIf, NgClass, FormsModule],
+  imports: [NgFor, NgIf, NgClass, FormsModule, RegularButtonComponent],
   templateUrl: './guild-info.component.html',
 })
 export class GuildInfoComponent implements OnInit {

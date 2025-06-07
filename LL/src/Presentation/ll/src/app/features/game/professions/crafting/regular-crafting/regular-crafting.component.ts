@@ -36,7 +36,7 @@ function consumeMaterials(
 })
 export class RegularCraftingComponent {
   @Input({ required: true }) recipes!: Signal<Recipe[]>;
-  @Input({ required: true }) inventory!: Signal<InventoryDto | null>;
+  @Input({ required: true }) inventory!: Signal<InventoryItem[]>;
 
   private readonly selectedRecipeId = signal<string | null>(null);
   readonly selectedRecipe = computed<Recipe | null>(() => {
@@ -48,7 +48,7 @@ export class RegularCraftingComponent {
     const inv = this.inventory();
     if (!recipe || !inv) return false;
     return recipe.materials.every((mat) =>
-      hasQuantity(inv.inventoryItems, mat.item.id, mat.quantity),
+      hasQuantity(inv, mat.item.id, mat.quantity),
     );
   });
 

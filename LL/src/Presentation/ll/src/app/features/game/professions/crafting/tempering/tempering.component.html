@@ -8,7 +8,7 @@
     <h2 class="flex text-primary">Items to temper</h2>
     <ng-container *ngIf="inventory() as inventory">
       <div
-        *ngFor="let item of inventory.inventoryItems"
+        *ngFor="let item of inventory"
         class="cursor-pointer rounded-lg border p-3 hover:border-primary/60 hover:bg-zinc-300/30"
         (click)="selectItem(item.itemInstance)"
         [class.border-primary]="
@@ -142,7 +142,9 @@
 
               <button
                 class="text-sm text-red-400 hover:underline"
-                (click)="cancelCraft(craftingQueue[0])"
+                (click)="
+                  cancelCraft(craftingQueue[0]); $event.stopPropagation()
+                "
               >
                 Cancel
               </button>
@@ -185,7 +187,7 @@
 
                 <button
                   class="text-sm text-red-400 hover:underline"
-                  (click)="cancelCraft(queueItem)"
+                  (click)="cancelCraft(queueItem); $event.stopPropagation()"
                 >
                   Cancel
                 </button>
