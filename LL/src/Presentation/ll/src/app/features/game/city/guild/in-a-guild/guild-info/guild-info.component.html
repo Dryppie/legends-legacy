@@ -33,32 +33,34 @@
       </div>
     </div>
   </div>
-  <div>
+  <div class="flex h-full flex-col overflow-hidden">
     <div class="grid grid-cols-4 gap-2 p-2">
       <div>Name</div>
       <div>Level</div>
       <div>Role</div>
     </div>
-    <div
-      class="grid grid-cols-4 items-center border-t border-light_gray p-2 text-white"
-      *ngFor="let member of guildMembers"
-      [ngClass]="{
-        'bg-zinc-300/10 text-primary': member.characterId === id,
-      }"
-    >
-      <div class="break-words pr-2">
-        {{ member.name }}
-      </div>
-      <div>{{ member.level }}</div>
-      <div>{{ member.role }}</div>
+    <div class="overflow-y-auto">
       <div
-        *ngIf="member.characterId === id"
-        class="col-start-4 justify-self-end rounded border border-light_gray p-2 hover:cursor-pointer hover:bg-zinc-600/30"
-        (click)="
-          openConfirmModal(member.role === leaderRole ? 'disband' : 'leave')
-        "
+        class="grid grid-cols-4 items-center border-t border-light_gray p-2 text-white"
+        *ngFor="let member of guildMembers"
+        [ngClass]="{
+          'bg-zinc-300/10 text-primary': member.characterId === id,
+        }"
       >
-        {{ member.role === leaderRole ? "Disband" : "Leave" }}
+        <div class="break-words pr-2">
+          {{ member.name }}
+        </div>
+        <div>{{ member.level }}</div>
+        <div>{{ member.role }}</div>
+        <div
+          *ngIf="member.characterId === id"
+          class="col-start-4 justify-self-end rounded border border-light_gray p-2 hover:cursor-pointer hover:bg-zinc-600/30"
+          (click)="
+            openConfirmModal(member.role === leaderRole ? 'disband' : 'leave')
+          "
+        >
+          {{ member.role === leaderRole ? "Disband" : "Leave" }}
+        </div>
       </div>
     </div>
   </div>

@@ -91,8 +91,8 @@ export class ProfessionsService {
     if (id.includes('armorforging')) {
       return this.getArmorforgingProfession();
     }
-    if (id.includes('jewelcrafting')) {
-      return this.getJewelcraftingProfession();
+    if (id.includes('jewelrycrafting')) {
+      return this.getJewelrycraftingProfession();
     }
     if (id.includes('weaponsmithing')) {
       return this.getWeaponsmithingProfession();
@@ -134,9 +134,9 @@ export class ProfessionsService {
     return miningProfession;
   }
 
-  getJewelcraftingProfession() {
+  getJewelrycraftingProfession() {
     let miningProfession: CraftingProfession = {
-      name: 'Jewelcrafting',
+      name: 'Jewelrycrafting',
       recipes: this.getWeaponsmithingRecipes(),
       iconPath: 'mining',
       professionType: ProfessionType.JewelryCrafting,

@@ -10,12 +10,12 @@
         (click)="navigateToAction()"
       ></app-current-action>
     </div>
-    <app-tab
+    <app-filter-tabs
       [tabs]="tabLabels"
       [activeTab]="activeTab"
       (tabSelected)="setActiveTab($event)"
     >
-    </app-tab>
+    </app-filter-tabs>
     <!-- Tab Content -->
     <div *ngFor="let tab of tabs" class="overflow-auto">
       <div *ngIf="activeTab === tab.label" class="tab-content">

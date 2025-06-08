@@ -1,21 +1,17 @@
 <div class="flex h-full w-full flex-col gap-2">
-  <app-tab
-    [tabs]="tabLabels"
-    [activeTab]="activeTab"
-    (tabSelected)="setActiveTab($event)"
-    class="w-full flex-none pb-2"
-  ></app-tab>
   <div class="flex h-full w-full flex-col overflow-y-auto">
-    <ng-container [ngSwitch]="activeTab">
-      <app-guild-info
-        *ngSwitchCase="'Info'"
-        [guild]="guild"
-        (inviteEvent)="inviteCharacterByName($event)"
-        (leaveEvent)="leaveGuild()"
-        (disbandEvent)="disbandGuild()"
-        (rejectEvent)="rejectApplication($event)"
-        (approveEvent)="approveApplication($event)"
-      ></app-guild-info>
-    </ng-container>
+    <app-tabs class="flex h-full flex-col overflow-hidden">
+      <app-tab label="Info">
+        <app-guild-info
+          class="overflow-hidden"
+          [guild]="guild"
+          (inviteEvent)="inviteCharacterByName($event)"
+          (leaveEvent)="leaveGuild()"
+          (disbandEvent)="disbandGuild()"
+          (rejectEvent)="rejectApplication($event)"
+          (approveEvent)="approveApplication($event)"
+        ></app-guild-info>
+      </app-tab>
+    </app-tabs>
   </div>
 </div>

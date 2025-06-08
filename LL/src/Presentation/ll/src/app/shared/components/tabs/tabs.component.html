@@ -1,0 +1,17 @@
+<div *ngIf="panes.length > 1" class="flex justify-around">
+  <span
+    *ngFor="let pane of panes; let i = index"
+    class="flex-1 border-b border-light_gray py-2 text-center font-semibold text-light_gray hover:border-primary focus:outline-none"
+    [ngClass]="{ 'border-primary text-primary': activeIndex() === i }"
+    (click)="select(i)"
+  >
+    {{ pane.label }}
+  </span>
+</div>
+
+<!-- Active pane outlet -->
+<ng-container *ngFor="let pane of panes; let i = index">
+  <ng-container *ngIf="activeIndex() === i">
+    <ng-container *ngTemplateOutlet="pane.templateRef"></ng-container>
+  </ng-container>
+</ng-container>

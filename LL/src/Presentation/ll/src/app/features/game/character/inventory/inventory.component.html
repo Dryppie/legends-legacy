@@ -23,12 +23,12 @@
     <div
       class="flex h-full min-h-96 w-full flex-col rounded-md bg-black/40 pt-2"
     >
-      <app-tab
+      <app-filter-tabs
         [tabs]="tabLabels"
         [activeTab]="activeTab"
         (tabSelected)="setActiveTab($event)"
         class="flex-none"
-      ></app-tab>
+      ></app-filter-tabs>
 
       <div
         class="mb-2 flex h-full flex-col justify-items-center overflow-y-auto"

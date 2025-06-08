@@ -1,4 +1,11 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ProfessionsService } from '../../../../core/services/api/professions/professions.service';
 import { CharacterActionsService } from '../../../../core/services/api/character-actions/character-actions.service';
@@ -16,7 +23,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
   imports: [ProfessionHeaderComponent, ProfessionCardComponent, NgFor, NgIf],
   templateUrl: './gathering.component.html',
 })
-export class GatheringComponent {
+export class GatheringComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly professionService = inject(ProfessionsService);
   private readonly characterActionService = inject(CharacterActionsService);

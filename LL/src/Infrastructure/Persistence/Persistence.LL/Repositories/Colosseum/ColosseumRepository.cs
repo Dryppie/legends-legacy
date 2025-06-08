@@ -40,6 +40,8 @@ public class ColosseumRepository : IColosseumRepository
     {
         var colosseumMatchResults = await _context.ColosseumMatches
             .Where(cm => cm.CharacterAId == characterId || cm.CharacterBId == characterId)
+            .OrderByDescending(cm => cm.PlayedAt)
+            .Take(20)
             .ToListAsync(cancellationToken);
 
         return colosseumMatchResults;

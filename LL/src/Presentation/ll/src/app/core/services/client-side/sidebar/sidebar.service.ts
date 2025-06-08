@@ -194,10 +194,10 @@ function getProfessionSidebar(): Tab[] {
           title: 'Armorforging',
         },
         {
-          id: 'jewelcrafting',
-          route: ['/game', 'professions', 'crafting', 'jewelcrafting'],
+          id: 'jewelrycrafting',
+          route: ['/game', 'professions', 'crafting', 'jewelrycrafting'],
           icon: 'professions/mining',
-          title: 'Jewelcrafting',
+          title: 'Jewelrycrafting',
         },
         {
           id: 'weaponsmithing',

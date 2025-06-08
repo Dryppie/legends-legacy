@@ -1,13 +1,13 @@
+import { NgIf, NgFor, NgClass } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { NgClass, NgFor, NgIf } from '@angular/common';
 
 @Component({
-  selector: 'app-tab',
+  selector: 'app-filter-tabs',
   standalone: true,
   imports: [NgIf, NgFor, NgClass],
-  templateUrl: './tab.component.html',
+  templateUrl: './filter-tabs.component.html',
 })
-export class TabComponent {
+export class FilterTabsComponent {
   @Input() tabs: string[] = [];
   @Input() activeTab: string = '';
   @Output() tabSelected = new EventEmitter<string>();

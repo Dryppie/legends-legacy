@@ -1,10 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { BannerComponent } from '../../../../shared/components/banner/banner.component';
-import { TabComponent } from '../../../../shared/components/tab/tab.component';
-import { Tab } from '../../../../shared/models/sidebar-item';
+import { TabComponent } from '../../../../shared/components/tabs/tab/tab.component';
 import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { ColosseumService } from '../../../../core/services/api/colosseum/colosseum.service';
-import { AsyncPipe, NgIf, NgSwitch, NgSwitchCase } from '@angular/common';
+import { AsyncPipe, NgIf } from '@angular/common';
 import { CombatComponent } from '../../../../shared/components/combat/combat.component';
 import { BattleType } from '../../../../core/state/combat-state/combatState';
 import { CombatStateService } from '../../../../core/state/combat-state/combat-state.service';
@@ -16,6 +15,7 @@ import { TournamentGroundsComponent } from './tournament-grounds/tournament-grou
 import { ColosseumMatchResult } from '../../../../shared/models/Dtos/colosseum/colosseumMatchResult';
 import { ColosseumRank } from '../../../../shared/models/Dtos/colosseum/colosseumRank';
 import { ArenaTicketStatus } from '../../../../shared/models/Dtos/colosseum/arenaTicketStatus';
+import { TabsComponent } from '../../../../shared/components/tabs/tabs.component';
 
 @Component({
   selector: 'app-colosseum',
@@ -26,13 +26,12 @@ import { ArenaTicketStatus } from '../../../../shared/models/Dtos/colosseum/aren
     CombatComponent,
     NgIf,
     AsyncPipe,
-    NgSwitch,
-    NgSwitchCase,
     ArenaBattleComponent,
     ChampionsMarketComponent,
     RankingsGloryComponent,
     RecordOfBattleComponent,
     TournamentGroundsComponent,
+    TabsComponent,
   ],
   templateUrl: './colosseum.component.html',
 })
@@ -53,7 +52,6 @@ export class ColosseumComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.setActiveTab(this.tabs[0]?.label || '');
     this.colosseumService.getArenaOpponents().subscribe({
       next: (data) => {
         this.allOpponents = data;
@@ -97,37 +95,5 @@ export class ColosseumComponent implements OnInit {
   challenge(id: string) {
     this.colosseumService.startArenaBattle(id);
     this.displayCombat = true;
-  }
-
-  tabs: Tab[] = [
-    {
-      label: 'Arena',
-      items: [],
-    },
-    // {
-    //   label: 'Tournament Grounds',
-    //   items: [],
-    // },
-    // {
-    //   label: `Champion's Market`,
-    //   items: [],
-    // },
-    {
-      label: 'Rankings & Glory',
-      items: [],
-    },
-    {
-      label: 'Record of Battles',
-      items: [],
-    },
-  ];
-  activeTab: string = '';
-
-  setActiveTab(tabLabel: string) {
-    this.activeTab = tabLabel;
-  }
-
-  get tabLabels(): string[] {
-    return this.tabs.map((tab) => tab.label);
   }
 }

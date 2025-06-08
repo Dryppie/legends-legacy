@@ -1,7 +1,12 @@
-<div class="panel h-full w-full rounded-xl p-4 text-white">
-  <h2 class="mb-4 text-primary">Previous Battles</h2>
+<div
+  class="flex h-full w-full flex-col overflow-hidden rounded-xl p-4 text-white"
+>
+  <h2 class="text-primary">Previous Battles</h2>
 
-  <div *ngIf="previousMatches?.length; else noMatches">
+  <div
+    class="flex h-full flex-col overflow-hidden"
+    *ngIf="previousMatches?.length; else noMatches"
+  >
     <div
       class="grid grid-cols-4 items-center gap-2 border-b border-light_gray p-2"
     >
@@ -10,41 +15,43 @@
       <div>Winner</div>
       <div>Played At</div>
     </div>
-    <div
-      class="grid grid-cols-4 items-center gap-2 border-b border-light_gray p-2"
-      *ngFor="let match of previousMatches"
-    >
+    <div class="h-full overflow-y-auto">
       <div
-        class="break-words"
-        [ngClass]="{
-          'font-bold text-primary': match.characterAId === id,
-        }"
+        class="grid grid-cols-4 items-center gap-2 overflow-y-auto border-b border-light_gray p-2"
+        *ngFor="let match of previousMatches"
       >
-        {{ match.characterAName }}
-      </div>
-      <div
-        class="break-words"
-        [ngClass]="{
-          'font-bold text-primary': match.characterBId === id,
-        }"
-      >
-        {{ match.characterBName }}
-      </div>
-      <ng-container *ngIf="match.winnerName; else draw">
         <div
           class="break-words"
           [ngClass]="{
-            'font-bold text-primary': match.winnerId === id,
+            'font-bold text-primary': match.characterAId === id,
           }"
         >
-          {{ match.winnerName
-          }}<span *ngIf="match.winnerId === id"> (You)</span>
+          {{ match.characterAName }}
         </div>
-      </ng-container>
+        <div
+          class="break-words"
+          [ngClass]="{
+            'font-bold text-primary': match.characterBId === id,
+          }"
+        >
+          {{ match.characterBName }}
+        </div>
+        <ng-container *ngIf="match.winnerName; else draw">
+          <div
+            class="break-words"
+            [ngClass]="{
+              'font-bold text-primary': match.winnerId === id,
+            }"
+          >
+            {{ match.winnerName
+            }}<span *ngIf="match.winnerId === id"> (You)</span>
+          </div>
+        </ng-container>
 
-      <ng-template #draw>Draw</ng-template>
-      <div>
-        {{ match.playedAt | date: "mediumDate" }}
+        <ng-template #draw>Draw</ng-template>
+        <div>
+          {{ match.playedAt | date: "mediumDate" }}
+        </div>
       </div>
     </div>
   </div>

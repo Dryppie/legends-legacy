@@ -1,10 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { BannerComponent } from '../../../../shared/components/banner/banner.component';
-import { TabComponent } from '../../../../shared/components/tab/tab.component';
-import { Tab } from '../../../../shared/models/sidebar-item';
-import { NgSwitch, NgSwitchCase } from '@angular/common';
+import { TabComponent } from '../../../../shared/components/tabs/tab/tab.component';
 import { MarketPlaceBuyComponent } from './market-place-buy/market-place-buy.component';
 import { MarketPlaceSellComponent } from './market-place-sell/market-place-sell.component';
+import { TabsComponent } from '../../../../shared/components/tabs/tabs.component';
 
 @Component({
   selector: 'app-market-place',
@@ -12,35 +11,11 @@ import { MarketPlaceSellComponent } from './market-place-sell/market-place-sell.
   imports: [
     BannerComponent,
     TabComponent,
-    NgSwitch,
-    NgSwitchCase,
     MarketPlaceBuyComponent,
     MarketPlaceSellComponent,
+    TabsComponent,
+    TabComponent,
   ],
   templateUrl: './market-place.component.html',
 })
-export class MarketPlaceComponent implements OnInit {
-  ngOnInit(): void {
-    this.setActiveTab(this.tabs[0]?.label || '');
-  }
-
-  tabs: Tab[] = [
-    {
-      label: 'Buy',
-      items: [],
-    },
-    {
-      label: 'Sell',
-      items: [],
-    },
-  ];
-  activeTab: string = '';
-
-  setActiveTab(tabLabel: string) {
-    this.activeTab = tabLabel;
-  }
-
-  get tabLabels(): string[] {
-    return this.tabs.map((tab) => tab.label);
-  }
-}
+export class MarketPlaceComponent {}

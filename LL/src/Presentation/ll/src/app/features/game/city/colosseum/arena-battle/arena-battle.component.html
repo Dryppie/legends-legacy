@@ -1,47 +1,55 @@
-<div class="panel h-full w-full rounded-xl p-4 text-white">
-  <div class="pb-2 italic text-white">
-    <p>Ah, a challenger approaches! Looking to test your might in the arena?</p>
-    <p>Glory awaits, champion.</p>
-  </div>
-  <div class="flex items-center justify-between">
-    <h2 class="text-primary">Arena Battles</h2>
-    <div
-      *ngIf="arenaTicketStatus"
-      class="flex flex-col items-end text-lg font-medium"
-    >
-      <span class="bg-gold rounded-full px-2 py-1 text-emerald-400">
-        {{ arenaTicketStatus.currentTickets }} /
-        {{ arenaTicketStatus.maxTickets }} tickets
-      </span>
-      <span class="">{{ newTicketsIn }} </span>
+<div
+  class="flex h-full w-full flex-col overflow-hidden rounded-xl p-4 text-white"
+>
+  <div class="flex-1">
+    <div class="pb-2 italic text-white">
+      <p>
+        Ah, a challenger approaches! Looking to test your might in the arena?
+      </p>
+      <p>Glory awaits, champion.</p>
+    </div>
+    <div class="flex items-center justify-between">
+      <h2 class="text-primary">Arena Battles</h2>
+      <div
+        *ngIf="arenaTicketStatus"
+        class="flex flex-col items-end text-lg font-medium"
+      >
+        <span class="bg-gold rounded-full px-2 py-1 text-emerald-400">
+          {{ arenaTicketStatus.currentTickets }} /
+          {{ arenaTicketStatus.maxTickets }} tickets
+        </span>
+        <span class="">{{ newTicketsIn }} </span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-4 items-center p-2">
+      <div>Name</div>
+      <div>Level</div>
+      <div>Arena Rating</div>
+      <app-regular-button
+        class="justify-self-end"
+        text="Refresh"
+        variant="danger"
+        (pressed)="onRefresh()"
+      />
     </div>
   </div>
-
-  <div class="grid grid-cols-4 items-center p-2">
-    <div>Name</div>
-    <div>Level</div>
-    <div>Arena Rating</div>
-    <app-regular-button
-      class="justify-self-end"
-      text="Refresh"
-      variant="danger"
-      (pressed)="onRefresh()"
-    />
-  </div>
-  <div
-    class="grid grid-cols-4 items-center border-t border-light_gray p-2"
-    *ngFor="let o of opponents"
-  >
-    <div class="break-words pr-2">{{ o.name }}</div>
-    <div>{{ o.level }}</div>
-    <div>{{ o.arenaRating }}</div>
-    <app-regular-button
-      class="justify-self-end"
-      text="Challenge"
-      (pressed)="onChallenge(o.id)"
-      [disabled]="
-        arenaTicketStatus == undefined || arenaTicketStatus.currentTickets < 1
-      "
-    />
+  <div class="overflow-y-auto">
+    <div
+      class="grid grid-cols-4 items-center border-t border-light_gray p-2"
+      *ngFor="let o of opponents"
+    >
+      <div class="break-words pr-2">{{ o.name }}</div>
+      <div>{{ o.level }}</div>
+      <div>{{ o.arenaRating }}</div>
+      <app-regular-button
+        class="justify-self-end"
+        text="Challenge"
+        (pressed)="onChallenge(o.id)"
+        [disabled]="
+          arenaTicketStatus == undefined || arenaTicketStatus.currentTickets < 1
+        "
+      />
+    </div>
   </div>
 </div>

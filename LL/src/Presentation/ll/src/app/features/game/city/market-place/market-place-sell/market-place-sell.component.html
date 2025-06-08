@@ -3,12 +3,12 @@
 >
   <!-- LEFT ▸ INVENTORY -->
   <div class="flex h-full w-full flex-col">
-    <app-tab
+    <app-filter-tabs
       [tabs]="tabLabels"
       [activeTab]="activeTab"
       (tabSelected)="setActiveTab($event)"
       class="flex-none"
-    ></app-tab>
+    ></app-filter-tabs>
 
     <div class="mb-2 flex h-full flex-col overflow-y-auto">
       <app-market-place-inventory-item
@@ -32,98 +32,101 @@
 
   <!-- RIGHT ▸ LISTING PANEL -->
   <div
-    class="flex h-fit w-full flex-shrink-0 flex-col gap-4 rounded-lg bg-black/40 p-4 backdrop-blur-sm lg:w-96"
+    class="flex h-full w-full flex-shrink-0 flex-col gap-4 rounded-lg bg-black/40 p-4 backdrop-blur-sm lg:w-96"
   >
-    <h2 class="text-lg font-semibold">Create a Listing</h2>
+    <div class="">
+      <h2 class="text-lg font-semibold">Create a Listing</h2>
 
-    <!-- Selected item preview -->
-    <ng-container *ngIf="pendingItem() as p; else placeholder">
-      <div class="flex flex-col gap-3">
-        <!-- Name -->
-        <div class="">
-          {{ p.itemInstance.itemBase.name }}
-        </div>
+      <!-- Selected item preview -->
+      <ng-container *ngIf="pendingItem() as p; else placeholder">
+        <div class="flex flex-col gap-3">
+          <!-- Name -->
+          <div class="">
+            {{ p.itemInstance.itemBase.name }}
+          </div>
 
-        <!-- Adaptive description -->
-        <p class="whitespace-pre-line text-sm text-neutral-300">
-          {{ itemDescription() }}
-        </p>
+          <!-- Adaptive description -->
+          <p class="whitespace-pre-line text-sm text-neutral-300">
+            {{ itemDescription() }}
+          </p>
 
-        <!-- Quantity selector (only for stackables) -->
-        <div
-          *ngIf="p.itemInstance.itemBase.stackable"
-          class="flex items-center gap-1"
-        >
-          <span class="text-sm text-neutral-300">Quantity:</span>
-          <input
-            type="number"
-            min="1"
-            [max]="maxQuantity()"
-            class="no-spinner w-20 rounded border border-neutral-600 bg-transparent px-2 py-1 text-right"
-            [formControl]="qtyCtrl"
+          <!-- Quantity selector (only for stackables) -->
+          <div
+            *ngIf="p.itemInstance.itemBase.stackable"
+            class="flex items-center gap-1"
+          >
+            <span class="text-sm text-neutral-300">Quantity:</span>
+            <input
+              type="number"
+              min="1"
+              [max]="maxQuantity()"
+              class="no-spinner w-20 rounded border border-neutral-600 bg-transparent px-2 py-1 text-right"
+              [formControl]="qtyCtrl"
+            />
+          </div>
+
+          <!-- Price -->
+          <div class="flex items-center gap-1">
+            <span class="text-sm text-neutral-300">Price:</span>
+            <input
+              type="number"
+              min="1"
+              class="no-spinner w-32 rounded border border-neutral-600 bg-transparent px-2 py-1 text-right"
+              [formControl]="priceCtrl"
+            />
+            <span class="text-xs text-neutral-400">Cinders</span>
+          </div>
+
+          <!-- Submit -->
+          <app-regular-button
+            class="w-full justify-self-end"
+            text="List item"
+            fullWidth
+            [disabled]="priceCtrl.invalid || qtyCtrl.invalid"
+            (pressed)="listItem()"
           />
-        </div>
-
-        <!-- Price -->
-        <div class="flex items-center gap-1">
-          <span class="text-sm text-neutral-300">Price:</span>
-          <input
-            type="number"
-            min="1"
-            class="no-spinner w-32 rounded border border-neutral-600 bg-transparent px-2 py-1 text-right"
-            [formControl]="priceCtrl"
-          />
-          <span class="text-xs text-neutral-400">Cinders</span>
-        </div>
-
-        <!-- Submit -->
-        <app-regular-button
-          class="w-full justify-self-end"
-          text="List item"
-          fullWidth
-          [disabled]="priceCtrl.invalid || qtyCtrl.invalid"
-          (pressed)="listItem()"
-        />
-      </div>
-    </ng-container>
-
-    <ng-template #placeholder>
-      <p class="text-center italic text-neutral-400">
-        Select an item from your inventory.
-      </p>
-    </ng-template>
-
-    <!-- Divider -->
-    <hr class="border-neutral-700" />
-
-    <!-- Active listings -->
-    <h3 class="font-semibold">Your Listings</h3>
-    <div class="flex max-h-60 flex-col gap-3 overflow-y-auto">
-      <ng-container *ngFor="let l of myListings(); trackBy: trackByListing">
-        <div
-          class="flex items-center justify-between rounded bg-neutral-800/70 p-2"
-        >
-          <div class="flex items-center gap-2">
-            <span class="text-sm">{{ l.itemInstance.itemBase.name }}</span>
-          </div>
-          <div class="flex items-center gap-1 text-sm">
-            <span>x{{ l.quantity | numberFormat }}</span>
-          </div>
-          <div class="flex items-center gap-1 text-sm">
-            <span>{{ l.unitPrice | numberFormat }}</span>
-          </div>
-          <div>
-            <app-regular-button (pressed)="cancelListing(l)" text="Cancel" />
-          </div>
         </div>
       </ng-container>
 
-      <p
-        *ngIf="!myListings().length"
-        class="text-center italic text-neutral-400"
-      >
-        No active listings.
-      </p>
+      <ng-template #placeholder>
+        <p class="text-center italic text-neutral-400">
+          Select an item from your inventory.
+        </p>
+      </ng-template>
+    </div>
+
+    <!-- Divider -->
+    <div class="flex flex-col gap-4 overflow-hidden">
+      <hr class="border-neutral-700" />
+      <!-- Active listings -->
+      <h3 class="font-semibold">Your Listings</h3>
+      <div class="flex flex-col gap-3 overflow-y-auto">
+        <ng-container *ngFor="let l of myListings(); trackBy: trackByListing">
+          <div
+            class="flex items-center justify-between rounded bg-neutral-800/70 p-2"
+          >
+            <div class="flex items-center gap-2">
+              <span class="text-sm">{{ l.itemInstance.itemBase.name }}</span>
+            </div>
+            <div class="flex items-center gap-1 text-sm">
+              <span>x{{ l.quantity | numberFormat }}</span>
+            </div>
+            <div class="flex items-center gap-1 text-sm">
+              <span>{{ l.unitPrice | numberFormat }}</span>
+            </div>
+            <div>
+              <app-regular-button (pressed)="cancelListing(l)" text="Cancel" />
+            </div>
+          </div>
+        </ng-container>
+
+        <p
+          *ngIf="!myListings().length"
+          class="text-center italic text-neutral-400"
+        >
+          No active listings.
+        </p>
+      </div>
     </div>
   </div>
 </div>

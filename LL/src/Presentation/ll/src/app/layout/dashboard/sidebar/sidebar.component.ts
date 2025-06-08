@@ -10,12 +10,13 @@ import { SidebarItemComponent } from './sidebar-item/sidebar-item.component';
 import { Router, RouterLink } from '@angular/router';
 import { SidebarItem, Tab } from '../../../shared/models/sidebar-item';
 import { SidebarService } from '../../../core/services/client-side/sidebar/sidebar.service';
-import { TabComponent } from '../../../shared/components/tab/tab.component';
+import { TabComponent } from '../../../shared/components/tabs/tab/tab.component';
 import { GameService } from '../../../core/services/client-side/game/game.service';
 import { CharacterActionsService } from '../../../core/services/api/character-actions/character-actions.service';
 import { CurrentActionComponent } from '../../../shared/components/current-action/current-action.component';
 import { NamedStorageKeys } from '../../../core/common/enums/named-storage-keys';
 import { Observable } from 'rxjs';
+import { FilterTabsComponent } from '../../../shared/components/tabs/filter-tabs/filter-tabs.component';
 
 @Component({
   selector: 'app-sidebar',
@@ -25,9 +26,9 @@ import { Observable } from 'rxjs';
     NgIf,
     SidebarItemComponent,
     RouterLink,
-    TabComponent,
     CurrentActionComponent,
     AsyncPipe,
+    FilterTabsComponent,
   ],
   templateUrl: './sidebar.component.html',
 })

@@ -7,18 +7,16 @@ import {
   signal,
 } from '@angular/core';
 import { ProfessionHeaderComponent } from '../../../../shared/components/professions/profession-header/profession-header.component';
-import { NgIf, NgSwitch, NgSwitchCase } from '@angular/common';
+import { NgIf } from '@angular/common';
 import {
   CraftingProfession,
   CraftType,
 } from '../../../../shared/models/profession';
-import { map, of, switchMap } from 'rxjs';
+import { map } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { ProfessionsService } from '../../../../core/services/api/professions/professions.service';
-import { CharacterManagerService } from '../../../../core/services/client-side/character-manager/character-manager.service';
-import { InventoryService } from '../../../../core/services/api/inventory/inventory.service';
 import { Tab } from '../../../../shared/models/sidebar-item';
-import { TabComponent } from '../../../../shared/components/tab/tab.component';
+import { TabComponent } from '../../../../shared/components/tabs/tab/tab.component';
 import { RegularCraftingComponent } from './regular-crafting/regular-crafting.component';
 import { TemperingComponent } from './tempering/tempering.component';
 import { EquipmentType } from '../../../../shared/models/Dtos/equipmentSlot';
@@ -26,6 +24,7 @@ import { ItemType } from '../../../../shared/models/enums/itemType';
 import { Equipment } from '../../../../shared/models/item';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { InventoryStateService } from '../../../../core/services/api/inventory/inventory-state.service';
+import { TabsComponent } from '../../../../shared/components/tabs/tabs.component';
 
 @Component({
   selector: 'app-crafting',
@@ -34,10 +33,9 @@ import { InventoryStateService } from '../../../../core/services/api/inventory/i
     ProfessionHeaderComponent,
     NgIf,
     TabComponent,
-    NgSwitch,
-    NgSwitchCase,
     RegularCraftingComponent,
     TemperingComponent,
+    TabsComponent,
   ],
   templateUrl: './crafting.component.html',
 })
@@ -45,7 +43,6 @@ export class CraftingComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly professionService = inject(ProfessionsService);
   private readonly inventoryState = inject(InventoryStateService);
-  private readonly inventoryService = inject(InventoryService);
 
   readonly professionId = toSignal(
     this.route.paramMap.pipe(map((p) => p.get('id') ?? '')),
@@ -71,9 +68,7 @@ export class CraftingComponent implements OnInit {
       () => {
         const id = this.professionId();
         if (id) {
-          this.profession.set(
-            this.professionService.getProfessionById(id) as CraftingProfession,
-          );
+          this.getProfessionDetails(id);
         }
       },
       { allowSignalWrites: true },
@@ -95,13 +90,12 @@ export class CraftingComponent implements OnInit {
 
   readonly inventory = computed(() => this.inventoryState.items());
 
-  readonly characterProfession = computed(() => {
-    const prof = this.profession();
-    if (!prof) return undefined;
-    return this.professionService
-      .characterProfessions()
-      .find((cp) => cp.professionType === prof.professionType);
-  });
+  readonly characterProfessions = this.professionService.characterProfessions;
+  readonly characterProfession = computed(() =>
+    this.characterProfessions().find(
+      (p) => p.professionType.toLocaleLowerCase() === this.professionId(),
+    ),
+  );
 
   readonly inventoryEquipment = computed(() => {
     const inventory = this.inventoryState.items();
@@ -121,28 +115,13 @@ export class CraftingComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.setActiveTab(this.tabs[0]?.label || '');
+    this.professionService.refresh();
   }
 
-  ngOnDestroy(): void {}
-
-  tabs: Tab[] = [
-    {
-      label: 'Crafting',
-      items: [],
-    },
-    {
-      label: 'Tempering',
-      items: [],
-    },
-  ];
-  activeTab: string = '';
-
-  setActiveTab(tabLabel: string) {
-    this.activeTab = tabLabel;
-  }
-
-  get tabLabels(): string[] {
-    return this.tabs.map((tab) => tab.label);
+  getProfessionDetails(id: string) {
+    const prof = this.professionService.getProfessionById(
+      id,
+    ) as CraftingProfession;
+    this.profession.set(prof);
   }
 }

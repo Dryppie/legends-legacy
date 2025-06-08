@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, effect, OnInit, signal } from '@angular/core';
 import { Tab } from '../../../../../shared/models/sidebar-item';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
-import { TabComponent } from '../../../../../shared/components/tab/tab.component';
 import { MarketPlaceInventoryItemComponent } from '../../../../../shared/components/market-place/market-place-inventory-item/market-place-inventory-item.component';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import {
@@ -19,6 +18,7 @@ import {
 import { MarketplaceStateService } from '../../../../../core/services/api/market-place/market-place-state.service';
 import { MarketPlaceListing } from '../../../../../shared/models/Dtos/market-place/market-place-listing';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
+import { FilterTabsComponent } from '../../../../../shared/components/tabs/filter-tabs/filter-tabs.component';
 
 @Component({
   selector: 'app-market-place-sell',
@@ -27,10 +27,10 @@ import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/numb
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    TabComponent,
     MarketPlaceInventoryItemComponent,
     RegularButtonComponent,
     NumberFormatPipe,
+    FilterTabsComponent,
   ],
   templateUrl: './market-place-sell.component.html',
 })

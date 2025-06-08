@@ -1,4 +1,4 @@
-<div class="flex h-full w-full flex-col gap-4 text-white">
+<div class="flex h-full w-full flex-col text-white sm:gap-4">
   <ng-container *ngIf="characterProfession() as characterProfession">
     <app-profession-header
       *ngIf="profession() as profession"
@@ -10,25 +10,20 @@
       [experienceUntilNextLevel]="characterProfession.experienceUntilNextLevel"
     ></app-profession-header>
   </ng-container>
-  <app-tab
-    [tabs]="tabLabels"
-    [activeTab]="activeTab"
-    (tabSelected)="setActiveTab($event)"
-    class="w-full flex-none"
-  ></app-tab>
-  <ng-container [ngSwitch]="activeTab">
-    <app-regular-crafting
-      *ngSwitchCase="'Crafting'"
-      class="h-full overflow-hidden"
-      [recipes]="recipes"
-      [inventory]="inventory"
-    ></app-regular-crafting>
-
-    <app-tempering
-      *ngSwitchCase="'Tempering'"
-      class="h-full overflow-hidden"
-      [inventory]="inventoryEquipment"
-      [craftType]="craftType()"
-    ></app-tempering>
-  </ng-container>
+  <app-tabs class="flex h-full flex-col overflow-hidden">
+    <app-tab label="Crafting">
+      <app-regular-crafting
+        class="overflow-hidden"
+        [recipes]="recipes"
+        [inventory]="inventory"
+      ></app-regular-crafting>
+    </app-tab>
+    <app-tab label="Tempering">
+      <app-tempering
+        class="overflow-hidden"
+        [inventory]="inventoryEquipment"
+        [craftType]="craftType()"
+      ></app-tempering>
+    </app-tab>
+  </app-tabs>
 </div>

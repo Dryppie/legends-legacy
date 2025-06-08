@@ -13,40 +13,39 @@
     <div class="flex w-full flex-col sm:gap-6">
       <app-banner image="colosseum" class="w-full"></app-banner>
     </div>
-    <app-tab
-      [tabs]="tabLabels"
-      [activeTab]="activeTab"
-      (tabSelected)="setActiveTab($event)"
-      class="w-full flex-none"
-    ></app-tab>
-    <div class="flex h-full w-full flex-col overflow-y-auto">
-      <ng-container [ngSwitch]="activeTab">
+
+    <app-tabs class="flex w-full flex-col overflow-hidden">
+      <app-tab label="Arena">
         <app-arena-battle
-          *ngSwitchCase="'Arena'"
+          class="overflow-hidden"
           [opponents]="opponents"
           (refreshOpponents)="onRefreshOpponents()"
           (challenge)="challenge($event)"
         >
         </app-arena-battle>
+      </app-tab>
 
-        <app-tournament-grounds *ngSwitchCase="'Tournament Grounds'">
+      <!-- <app-tab label="Tournament Grounds">
+        <app-tournament-grounds class="overflow-hidden">
         </app-tournament-grounds>
+      </app-tab>
 
-        <app-champions-market *ngSwitchCase="'Champion\'s Market'">
-        </app-champions-market>
+      <app-tab label="Champion's Market">
+        <app-champions-market class="overflow-hidden"> </app-champions-market>
+      </app-tab> -->
 
-        <app-rankings-glory
-          *ngSwitchCase="'Rankings & Glory'"
-          [rankings]="rankings"
-        >
+      <app-tab label="Rankings">
+        <app-rankings-glory class="overflow-hidden" [rankings]="rankings">
         </app-rankings-glory>
+      </app-tab>
 
+      <app-tab label="Record of Battles">
         <app-record-of-battle
-          *ngSwitchCase="'Record of Battles'"
+          class="overflow-hidden"
           [previousMatches]="previousMatches"
         >
         </app-record-of-battle>
-      </ng-container>
-    </div>
+      </app-tab>
+    </app-tabs>
   </div>
 </ng-template>
