@@ -25,7 +25,7 @@ export class EquippedEssencesComponent implements OnInit {
     this.setActiveAndReservedSlotsAmount();
   }
 
-  openEssenceModal(essence?: Essence) {
+  openEssenceModal(essence?: Essence | null) {
     this.modalService.toggleEssenceModal(essence); // Pass the essence from the Item to display all necessary info
   }
 

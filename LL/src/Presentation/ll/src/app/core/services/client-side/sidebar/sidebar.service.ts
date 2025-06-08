@@ -58,6 +58,13 @@ function getCharacterSidebar(): Tab[] {
           description: 'Items, gear, misc',
         },
         {
+          id: 'essences',
+          route: ['/game', 'character', 'essences'],
+          icon: 'character/essences',
+          title: 'Essences',
+          description: 'Absorb and remove essences',
+        },
+        {
           id: 'soulstone-archive',
           route: ['/game', 'character', 'soulstone-archive'],
           icon: 'character/essences',
@@ -108,13 +115,6 @@ function getCitySidebar(): Tab[] {
     {
       label: 'City',
       items: [
-        {
-          id: 'temple',
-          route: ['/game', 'city', 'temple'],
-          icon: 'city/temple',
-          title: 'Temple',
-          description: 'Temple',
-        },
         {
           id: 'tavern',
           route: ['/game', 'city', 'tavern'],

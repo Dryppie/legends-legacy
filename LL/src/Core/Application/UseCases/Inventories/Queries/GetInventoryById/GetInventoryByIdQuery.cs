@@ -5,7 +5,7 @@ using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Inventories.Queries.GetInventoryById;
-public record GetInventoryByIdQuery(Guid characterId) : IRequest<Response<InventoryDto>>;
+public record GetInventoryByIdQuery(Guid CharacterId) : IRequest<Response<InventoryDto>>;
 
 public class GetInventoryByIdQueryHandler : IRequestHandler<GetInventoryByIdQuery, Response<InventoryDto>>
 {
@@ -18,7 +18,7 @@ public class GetInventoryByIdQueryHandler : IRequestHandler<GetInventoryByIdQuer
     }
     public async Task<Response<InventoryDto>> Handle(GetInventoryByIdQuery request, CancellationToken cancellationToken)
     {
-        var inventory = await _inventoryService.GetInventoryByIdAsync(request.characterId, cancellationToken);
+        var inventory = await _inventoryService.GetInventoryByIdAsync(request.CharacterId, cancellationToken);
         if (inventory == null) return Response<InventoryDto>.Fail("Failed to get inventory.");
 
         var inventoryDto =  _mapper.Map<InventoryDto>(inventory);

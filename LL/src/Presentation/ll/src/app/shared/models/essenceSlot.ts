@@ -1,9 +1,10 @@
 import { Essence } from './essence';
 
 export interface EssenceSlot {
+  id: string;
   slotType: SlotType;
   slotState: SlotState;
-  occupiedEssence?: Essence;
+  occupiedEssence?: Essence | null;
 }
 
 export enum SlotType {

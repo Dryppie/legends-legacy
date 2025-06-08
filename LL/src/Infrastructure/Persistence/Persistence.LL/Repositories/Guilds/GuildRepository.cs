@@ -14,7 +14,7 @@ public class GuildRepository : IGuildRepository
 
     public async Task<bool> CreateAsync(Guid ownerCharacterId, string name, CancellationToken cancellationToken)
     {
-        if (await _context.Guilds.AnyAsync(g => g.Name == name, cancellationToken)) return false;
+        if (await _context.Guilds.AnyAsync(g => g.Name.Equals(name, StringComparison.OrdinalIgnoreCase), cancellationToken)) return false;
 
         var newGuild = new Guild
         {

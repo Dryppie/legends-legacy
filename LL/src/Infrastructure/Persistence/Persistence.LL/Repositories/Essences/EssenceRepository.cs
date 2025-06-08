@@ -88,28 +88,11 @@ public class EssenceRepository : IEssenceRepository
         return true; // Return true if it was successfully removed
     }
 
-    public async Task<EquippedEssencesAndInventoryEssences> GetEquippedEssencesAndInventoryEssences(Guid characterId, CancellationToken cancellationToken)
+    public async Task<List<EssenceSlot>> GetEquippedEssences(Guid characterId, CancellationToken cancellationToken)
     {
-        var character = await _context.Characters
-            .Include(c => c.EssenceSlots)
-                .ThenInclude(es => es.OccupiedEssence)
-            .Include(c => c.Inventory)
-                .ThenInclude(inv => inv.InventoryItems)
-                    .ThenInclude(ii => ii.ItemInstance)
-                        .ThenInclude(ii => ii.ItemBase)
-                            .ThenInclude(i => (i as EssenceItemBase).Essence)
-            .FirstOrDefaultAsync(c => c.Id == characterId, cancellationToken);
-
-        NotFoundException.ThrowIfNull(character, nameof(character), characterId);
-
-        var equippedEssencesAndInventoryEssences = new EquippedEssencesAndInventoryEssences
-        {
-            EquippedEssences = [.. character.EssenceSlots.Where(es => es.OccupiedEssence != null).Select(es => es.OccupiedEssence)],
-            InventoryEssences = [.. character.Inventory.InventoryItems
-                .Where(ii => ii.ItemInstance is EssenceItemInstance eii && eii.ItemBase is EssenceItemBase)
-                    .Select(ii => ((ii.ItemInstance as EssenceItemInstance)!.ItemBase as EssenceItemBase)!.Essence)]
-        };
-
-        return equippedEssencesAndInventoryEssences;
+        return await _context.EssenceSlots
+            .Include(es => es.OccupiedEssence)
+            .Where(c => c.EntityId == characterId)
+            .ToListAsync(cancellationToken);
     }
 }

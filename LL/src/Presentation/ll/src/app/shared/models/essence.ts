@@ -1,10 +1,10 @@
 import { AttributeModifier } from './Dtos/attributesDto';
-import { AttributeType } from './enums/attributeType';
 import { EffectType } from './enums/effectType';
 import { ResourceType } from './enums/resourceType';
 import { Targeting } from './enums/targeting';
 
 export interface Essence {
+  id: string;
   name: string;
   active: Ability;
   passive: Ability;

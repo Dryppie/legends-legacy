@@ -1,0 +1,21 @@
+<div class="flex h-full flex-col gap-4 overflow-hidden text-white">
+  <app-default-header
+    [text]="numberOfAbsorbedEssence()"
+    title="Essences"
+    icon="character/essences"
+  ></app-default-header>
+  <app-tabs class="flex h-full w-full flex-col overflow-hidden">
+    <app-tab label="Inventory essences">
+      <app-essences-absorb
+        [inventoryEssences]="inventoryEssences"
+        class="overflow-hidden"
+      ></app-essences-absorb>
+    </app-tab>
+    <app-tab label="Absorbed essences">
+      <app-essences-equipped
+        [essenceSlots]="essenceSlots"
+        class="overflow-hidden"
+      ></app-essences-equipped>
+    </app-tab>
+  </app-tabs>
+</div>

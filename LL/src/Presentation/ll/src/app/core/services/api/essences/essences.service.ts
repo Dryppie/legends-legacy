@@ -4,71 +4,52 @@ import { Essence } from '../../../../shared/models/essence';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, switchMap, tap } from 'rxjs/operators';
 import { ToastService } from '../../client-side/toast/toast.service';
+import { EssenceSlot } from '../../../../shared/models/essenceSlot';
 
 @Injectable({
   providedIn: 'root',
 })
 export class EssencesService {
-  private equippedAndInventoryEssencesSubject = new BehaviorSubject<{
-    equippedEssences: Essence[];
-    inventoryEssences: Essence[];
-  }>({
-    equippedEssences: [],
-    inventoryEssences: [],
-  });
+  private equippedEssencesSubject = new BehaviorSubject<Essence[]>([]);
 
-  equippedAndInventoryEssencesSubject$ =
-    this.equippedAndInventoryEssencesSubject.asObservable();
+  equippedEssencesSubject$ = this.equippedEssencesSubject.asObservable();
 
   constructor(
     private apiService: ApiService,
     public toastService: ToastService,
   ) {}
 
-  public getEquippedEssencesAndInventoryEssences(): Observable<EquippedAndInventoryEssences> {
-    return this.apiService
-      .get('essence/GetEquippedEssencesAndInventoryEssences')
-      .pipe(
-        tap({
-          next: (essences) => {
-            this.equippedAndInventoryEssencesSubject.next({
-              equippedEssences: essences.equippedEssences,
-              inventoryEssences: essences.inventoryEssences,
-            });
-          },
-        }),
-        catchError((error) => {
-          return throwError(() => error);
-        }),
-      );
+  public getEquippedEssences(): Observable<EssenceSlot[]> {
+    return this.apiService.get('essence/GetEquippedEssences').pipe(
+      tap({
+        next: (essences) => {
+          this.equippedEssencesSubject.next(essences);
+        },
+      }),
+      catchError((error) => {
+        return throwError(() => error);
+      }),
+    );
   }
 
-  public equipEssence(essenceId: string): void {
-    this.apiService
-      .post('essence/EquipEssence', essenceId)
-      .pipe(switchMap(() => this.getEquippedEssencesAndInventoryEssences()))
-      .subscribe({
-        next: () => {
-          this.getEquippedEssencesAndInventoryEssences();
-          this.toastService.showToast(
-            'Essence equipped successfully!',
-            'success',
-            true,
-          );
-        },
-        error: (error) => {
-          console.error('Failed to equip essence: ', error);
-        },
-      });
+  public equipEssence(essenceId: string): Observable<boolean> {
+    return this.apiService.post('essence/EquipEssence', essenceId).pipe(
+      tap(() => {
+        this.toastService.showToast(
+          'Essence equipped successfully!',
+          'success',
+          true,
+        );
+      }),
+    );
   }
 
   public deleteEquippedEssence(essenceId: string): void {
     this.apiService
       .post('essence/DeleteEquippedEssence', essenceId)
-      .pipe(switchMap(() => this.getEquippedEssencesAndInventoryEssences()))
+      .pipe()
       .subscribe({
         next: () => {
-          this.getEquippedEssencesAndInventoryEssences();
           this.toastService.showToast(
             'Essence removed successfully!',
             'success',
@@ -80,10 +61,4 @@ export class EssencesService {
         },
       });
   }
-}
-
-interface EquippedAndInventoryEssences {
-  // Define the properties of the interface here
-  equippedEssences: Essence[];
-  inventoryEssences: Essence[];
 }
