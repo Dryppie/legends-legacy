@@ -1,6 +1,8 @@
 ﻿using Application.Common.Interfaces;
+using Domain.Extensions.Guilds;
 using Domain.Models.Guilds;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace Persistence.LL.Repositories.Guilds;
 public class GuildRepository : IGuildRepository
@@ -83,7 +85,7 @@ public class GuildRepository : IGuildRepository
             .Include(g => g.Invites)
             .FirstOrDefaultAsync(g => g.Id == guildId, cancellationToken);
 
-        if (guild == null) return false;
+        if (guild == null || guild.IsGuildFull()) return false;
 
         if (guild.Members.Count >= guild.MaxMembers) return false;
 
@@ -107,7 +109,7 @@ public class GuildRepository : IGuildRepository
         var invitedCharacter = await _context.Characters
             .FirstOrDefaultAsync(c => c.Name.Equals(invitedCharacterName), cancellationToken);
 
-        if (guild == null || invitedCharacter == null) return false;
+        if (guild == null || invitedCharacter == null || guild.IsGuildFull()) return false;
 
         if (guild.Members.Count >= guild.MaxMembers) return false;
 
@@ -123,6 +125,9 @@ public class GuildRepository : IGuildRepository
 
     public async Task<bool> AcceptInviteAsync(Guid characterId, Guid guildId, CancellationToken cancellationToken)
     {
+        var guild = await _context.Guilds.FindAsync([guildId], cancellationToken);
+        if (guild == null || guild.IsGuildFull()) return false;
+
         var invite = await _context.GuildInvites
             .FirstOrDefaultAsync(i => i.GuildId == guildId && i.CharacterId == characterId, cancellationToken);
 
@@ -162,7 +167,7 @@ public class GuildRepository : IGuildRepository
 
         if (guild == null) return false;
 
-        if (guild.Members.Count >= guild.MaxMembers) return false;
+        if (guild.IsGuildFull()) return false;
 
         guild.Invites.Add(new GuildInvite
         {
@@ -176,6 +181,9 @@ public class GuildRepository : IGuildRepository
 
     public async Task<bool> ApproveApplicationAsync(Guid guildId, Guid applicationCharacterId, CancellationToken cancellationToken)
     {
+        var guild = await _context.Guilds.FindAsync([guildId], cancellationToken);
+        if (guild == null || guild.IsGuildFull()) return false;
+
         var invite = await _context.GuildInvites
             .FirstOrDefaultAsync(i => i.GuildId == guildId && i.CharacterId == applicationCharacterId, cancellationToken);
 
