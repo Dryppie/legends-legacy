@@ -1377,7 +1377,7 @@
     "description": "A sharp shortsword forged from stone and jagged obsidian.",
     "itemType": "Equipment",
     "rarity": "Common",
-    "equipmentType": "MainHand",
+    "equipmentType": "OneHanded",
     "attributeModifiers": [
       {
         "id": "661f4b29-d31f-488a-b763-6df96045e22a",
@@ -1399,7 +1399,7 @@
     "description": "A durable hatchet crafted from jagged obsidian and stone.",
     "itemType": "Equipment",
     "rarity": "Common",
-    "equipmentType": "MainHand",
+    "equipmentType": "OneHanded",
     "attributeModifiers": [
       {
         "id": "7527e5f8-b861-4bcf-9634-7d91e3c0637a",
@@ -1415,7 +1415,7 @@
     "description": "A spiked mace made of flint and stone, dealing crushing damage.",
     "itemType": "Equipment",
     "rarity": "Common",
-    "equipmentType": "MainHand",
+    "equipmentType": "OneHanded",
     "attributeModifiers": [
       {
         "id": "bbc014e5-4a17-4770-b7bb-282e545245cd",
@@ -1431,7 +1431,7 @@
     "description": "A swift dagger made of silk vine and sharp flint.",
     "itemType": "Equipment",
     "rarity": "Common",
-    "equipmentType": "MainHand",
+    "equipmentType": "OneHanded",
     "attributeModifiers": [
       {
         "id": "a1a501f5-7791-4991-8aab-944102012c14",
@@ -1447,7 +1447,7 @@
     "description": "A large cleaver made from sturdy willow wood and obsidian.",
     "itemType": "Equipment",
     "rarity": "Common",
-    "equipmentType": "MainHand",
+    "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
         "id": "f3187da5-0f40-4efe-9678-4ba61f404507",
@@ -1469,7 +1469,7 @@
     "description": "A heavy greataxe crafted from solid stone and jagged obsidian.",
     "itemType": "Equipment",
     "rarity": "Common",
-    "equipmentType": "MainHand",
+    "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
         "id": "103daa3a-d5df-42e9-9623-2c3d13dad3a0",
@@ -1485,7 +1485,7 @@
     "description": "A massive maul with a crystalline powder core, delivering crushing blows.",
     "itemType": "Equipment",
     "rarity": "Common",
-    "equipmentType": "MainHand",
+    "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
         "id": "9f518948-6f9b-43d7-b206-5dac5bd0a4d1",
@@ -1507,7 +1507,7 @@
     "description": "A long pike tipped with feathers and flint for precision thrusts.",
     "itemType": "Equipment",
     "rarity": "Common",
-    "equipmentType": "MainHand",
+    "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
         "id": "f472a147-2254-4df1-909b-a60c02737d0e",
@@ -1573,7 +1573,7 @@
     "description": "A magical staff made of willow wood and shimmering leaves.",
     "itemType": "Equipment",
     "rarity": "Common",
-    "equipmentType": "MainHand",
+    "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
         "id": "c499f044-fac4-4390-b1bc-25cfa7150f87",
@@ -1605,7 +1605,7 @@
     "description": "A magical wand forged from jagged obsidian.",
     "itemType": "Equipment",
     "rarity": "Common",
-    "equipmentType": "MainHand",
+    "equipmentType": "OneHanded",
     "attributeModifiers": [
       {
         "id": "d2354e29-9496-4666-930e-ced3a50a4ce4",
@@ -1637,7 +1637,7 @@
     "description": "A longbow strung with resilient silk.",
     "itemType": "Equipment",
     "rarity": "Common",
-    "equipmentType": "MainHand",
+    "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
         "id": "71087684-332b-43a8-9e03-2de2f08e3524",
@@ -1653,7 +1653,7 @@
     "description": "A crossbow crafted using both willow and flint.",
     "itemType": "Equipment",
     "rarity": "Common",
-    "equipmentType": "MainHand",
+    "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
         "id": "4c65fa15-4b39-4f1c-b413-3846a4ff8d00",
@@ -1675,7 +1675,7 @@
     "description": "A pair of hard knuckles made from jagged obsidian.",
     "itemType": "Equipment",
     "rarity": "Common",
-    "equipmentType": "MainHand",
+    "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
         "id": "da9831b4-954f-4747-b459-80716bf0907d",
