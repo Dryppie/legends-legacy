@@ -123,9 +123,9 @@ public class GatheringService : IGatheringService
         if (profession == null) return;
         profession.Experience += gatheringSummary.TotalExperience;
 
-        await _levelingService.UpdateProfessionLevel(profession);
+        await _levelingService.UpdateProfessionLevel(profession, cancellationToken);
 
-        await _professionService.UpdateProfessionLevelAsync(professions, cancellationToken);
+        await _professionService.UpdateProfessionLevelAsync([profession], cancellationToken);
     }
 
     private async Task ProcessLootAsync(Guid characterId, List<InventoryItem> loot, CancellationToken cancellationToken)

@@ -24,6 +24,7 @@ using Services.LL.Guilds;
 using Services.LL.Interfaces;
 using Services.LL.Inventories;
 using Services.LL.Items;
+using Services.LL.Leaderboards;
 using Services.LL.Levels;
 using Services.LL.Loots;
 using Services.LL.LootTables;
@@ -75,6 +76,7 @@ public static class DependencyInjection
         services.AddScoped<IGuildService, GuildService>();
         
         services.AddScoped<ILevelingService, LevelingService>();
+        services.AddScoped<ILeaderboardService, LeaderboardService>();
 
         services.AddScoped<ILootService, LootService>();
         services.AddScoped<ILootTableService, LootTableService>();

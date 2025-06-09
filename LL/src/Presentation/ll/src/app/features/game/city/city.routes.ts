@@ -12,24 +12,24 @@ export const CITY_ROUTES: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'temple',
+        redirectTo: 'guild',
         pathMatch: 'full',
-      },
-      {
-        path: 'tavern',
-        component: TavernComponent,
-      },
-      {
-        path: 'colosseum',
-        component: ColosseumComponent,
       },
       {
         path: 'guild',
         component: GuildComponent,
       },
       {
+        path: 'colosseum',
+        component: ColosseumComponent,
+      },
+      {
         path: 'market-place',
         component: MarketPlaceComponent,
+      },
+      {
+        path: 'tavern',
+        component: TavernComponent,
       },
     ],
   },

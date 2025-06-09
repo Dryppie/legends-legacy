@@ -1,31 +1,87 @@
 import { Component } from '@angular/core';
-import { CharacterService } from '../../../../core/services/api/character/character.service';
-import { CharacterLeaderboardDto } from '../../../../shared/models/Dtos/characterLeaderboardDto';
 import { NgFor } from '@angular/common';
 import { BannerComponent } from '../../../../shared/components/banner/banner.component';
+import { LeaderboardStateService } from '../../../../core/services/api/leaderboard/leaderboard-state.service';
+import { FilterTabsComponent } from '../../../../shared/components/tabs/filter-tabs/filter-tabs.component';
+import { LeaderboardEntryDto } from '../../../../shared/models/Dtos/leaderboard/leaderboardEntryDto';
+import { Tab } from '../../../../shared/models/sidebar-item';
 
 @Component({
   selector: 'app-tavern',
   standalone: true,
-  imports: [BannerComponent, NgFor],
+  imports: [BannerComponent, NgFor, FilterTabsComponent],
   templateUrl: './tavern.component.html',
 })
 export class TavernComponent {
-  constructor(private characterService: CharacterService) {
-    this.getLeaderboard();
+  constructor(public state: LeaderboardStateService) {}
+
+  tabs: Tab[] = [
+    {
+      label: 'Combat',
+      items: [],
+    },
+    {
+      label: 'Mining',
+      items: [],
+    },
+    {
+      label: 'Woodcutting',
+      items: [],
+    },
+    {
+      label: 'Armorforging',
+      items: [],
+    },
+    {
+      label: 'Jewelrycrafting',
+      items: [],
+    },
+    {
+      label: 'Weaponsmithing',
+      items: [],
+    },
+  ];
+  activeTab: string = '';
+
+  ngOnInit(): void {
+    this.state.load();
+    this.setActiveTab(this.tabs[0]?.label || '');
   }
 
-  leaderboard: CharacterLeaderboardDto[] = [];
+  setActiveTab(tabLabel: string) {
+    this.activeTab = tabLabel;
+  }
 
-  getLeaderboard(): void {
-    this.characterService.getLeaderboard().subscribe({
-      next: (data) => {
-        // Store the fetched data in the component property
-        this.leaderboard = data;
-      },
-      error: (err) => {
-        console.error('Failed to fetch leaderboard:', err);
-      },
-    });
+  get filteredLeaderboard(): LeaderboardEntryDto[] {
+    switch (this.activeTab) {
+      case 'Combat':
+        return this.state.topCombat();
+
+      case 'Mining':
+        return this.state.byProfession('Mining')();
+
+      case 'Woodcutting':
+        return this.state.byProfession('Woodcutting')();
+
+      case 'Armorforging':
+        return this.state.byProfession('ArmorForging')();
+
+      case 'Jewelrycrafting':
+        return this.state.byProfession('JewelryCrafting')();
+
+      case 'Weaponsmithing':
+        return this.state.byProfession('WeaponSmithing')();
+
+      default:
+        return this.state.topCombat();
+    }
+  }
+
+  get tabLabels(): string[] {
+    return this.tabs.map((tab) => tab.label);
+  }
+
+  get loading() {
+    return this.state.loading();
   }
 }

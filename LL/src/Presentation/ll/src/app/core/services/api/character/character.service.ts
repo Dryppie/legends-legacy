@@ -2,14 +2,11 @@ import { computed, Injectable, Signal } from '@angular/core';
 import { ApiService } from '../api.service';
 import {
   BehaviorSubject,
-  catchError,
   Observable,
   shareReplay,
   startWith,
   Subject,
   switchMap,
-  tap,
-  throwError,
 } from 'rxjs';
 import {
   CharacterDto,
@@ -68,10 +65,6 @@ export class CharacterService {
 
   getCurrentCharacter(): Observable<CharacterDto | null> {
     return this.authService.currentCharacter$;
-  }
-
-  getLeaderboard() {
-    return this.api.get('Character/Leaderboard');
   }
 
   public getCharacterOverview(): Observable<CharacterOverviewDto> {

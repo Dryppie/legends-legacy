@@ -8,11 +8,9 @@ public record StartCraftingActionCommand(Guid CharacterId, string QueueId, strin
 public class StartCraftingActionCommandHandler : IRequestHandler<StartCraftingActionCommand, Response<bool>>
 {
     private readonly ICharacterActionService _characterActionService;
-    private readonly IActionDetailsService _actionDetailsService;
-    public StartCraftingActionCommandHandler(ICharacterActionService characterActionService, IActionDetailsService actionDetailsService)
+    public StartCraftingActionCommandHandler(ICharacterActionService characterActionService)
     {
         _characterActionService = characterActionService;
-        _actionDetailsService = actionDetailsService;
     }
     public async Task<Response<bool>> Handle(StartCraftingActionCommand request, CancellationToken cancellationToken)
     {

@@ -116,11 +116,11 @@ function getCitySidebar(): Tab[] {
       label: 'City',
       items: [
         {
-          id: 'tavern',
-          route: ['/game', 'city', 'tavern'],
+          id: 'guild',
+          route: ['/game', 'city', 'guild'],
           icon: 'city/temple',
-          title: 'Tavern',
-          description: 'Leaderboard',
+          title: 'Guild',
+          description: 'Guild headquarters',
         },
         {
           id: 'colosseum',
@@ -130,18 +130,18 @@ function getCitySidebar(): Tab[] {
           description: 'Tournaments and Battles',
         },
         {
-          id: 'guild',
-          route: ['/game', 'city', 'guild'],
-          icon: 'city/temple',
-          title: 'Guild',
-          description: 'Guild headquarters',
-        },
-        {
           id: 'market-place',
           route: ['/game', 'city', 'market-place'],
           icon: 'city/temple',
           title: 'Cinder Bazaar',
           description: 'List and buy items',
+        },
+        {
+          id: 'tavern',
+          route: ['/game', 'city', 'tavern'],
+          icon: 'city/temple',
+          title: 'Tavern',
+          description: 'Leaderboard',
         },
       ],
     },

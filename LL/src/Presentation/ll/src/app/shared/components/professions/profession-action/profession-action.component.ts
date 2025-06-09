@@ -16,7 +16,6 @@ export class ProfessionActionComponent implements OnInit, OnDestroy {
   currentAction: CharacterActionDto | null = null;
   private subscription: Subscription = new Subscription();
   remainingTime: string = '00:00'; // Add a property to track the remaining time
-  isGatheringAction = false;
   performingAction = '';
 
   constructor(private characterActionsService: CharacterActionsService) {}
@@ -25,16 +24,22 @@ export class ProfessionActionComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.characterActionsService.currentAction$.subscribe((action) => {
         if (action?.isDeleted) {
-          this.isGatheringAction = false;
+          this.performingAction = '';
           return;
         }
         this.currentAction = action;
-        this.isGatheringAction =
-          this.currentAction?.characterActionType ===
-          CharacterActionType.Gathering;
 
-        if (this.isGatheringAction)
+        if (
+          this.currentAction?.characterActionType ===
+          CharacterActionType.Gathering
+        )
           this.performingAction = `Gathering - ${action?.gatheringActionDetails!.name}`;
+
+        if (
+          this.currentAction?.characterActionType ===
+          CharacterActionType.Crafting
+        )
+          this.performingAction = `Tempering - ${action?.craftingActionDetails!.craftingQueueItems[0].equipmentInstance.itemBase.name}`;
       }),
     );
   }
@@ -49,7 +54,7 @@ export class ProfessionActionComponent implements OnInit, OnDestroy {
   }
 
   stopAction(): void {
-    this.isGatheringAction == false;
     this.characterActionsService.stopCharacterAction();
+    this.performingAction = '';
   }
 }

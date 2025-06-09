@@ -15,7 +15,7 @@ public class LevelingService : ILevelingService
         _publisher = publisher;
     }
 
-    public async Task UpdateCharacterLevel(Character character)
+    public async Task UpdateCharacterLevel(Character character, CancellationToken cancellationToken)
     {
         var xpRequired = EntityLevelConstants.XP_REQUIRED(character.Level);
 
@@ -28,11 +28,11 @@ public class LevelingService : ILevelingService
             xpRequired = EntityLevelConstants.XP_REQUIRED(character.Level);
 
             //TODO: Add Publish Event to notify listeners that listen to level ups
-            await _publisher.Publish(new CharacterLevelUpEvent(character.Id, character.Level));
+            await _publisher.Publish(new CharacterLevelUpEvent(character.Id, character.Level), cancellationToken);
         }
     }
 
-    public async Task UpdateProfessionLevel(Profession profession)
+    public async Task UpdateProfessionLevel(Profession profession, CancellationToken cancellationToken)
     {
         var xpRequired = EntityLevelConstants.XP_REQUIRED(profession.Level);
 

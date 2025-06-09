@@ -1,7 +1,6 @@
 ﻿using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Characters.Queries.GetCharacter;
 using Application.UseCases.Characters.Queries.GetCharacterOverview;
-using Application.UseCases.Characters.Queries.GetLeaderboard;
 using Common.Primitives;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,8 +17,4 @@ public class CharacterController : BaseController
     [HttpGet("Overview")]
     public async Task<ActionResult<Response<CharacterOverviewDto>>> Overview() =>
         await Mediator.Send(new GetCharacterOverviewQuery(CurrentCharacterGuid));
-
-    [HttpGet("Leaderboard")]
-    public async Task<ActionResult<Response<List<CharacterLeaderboardDto>>>> Leaderboard() =>
-        await Mediator.Send(new GetLeaderboardQuery());
 }

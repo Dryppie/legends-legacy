@@ -43,20 +43,27 @@
           </span>
         </div>
         <div class="flex items-center gap-2">
-          <ng-container *ngIf="isQueueSelected(); else itemSelected">
-            <span class="py-1 italic text-zinc-300"> In queue </span>
+          <ng-container *ngIf="isPerformingOtherAction(); else canPerform">
+            <span class="py-1 italic text-zinc-300">
+              Can not temper with an ongoing action
+            </span>
           </ng-container>
-          <ng-template #itemSelected>
-            <ng-container *ngIf="canTemper(); else nothing">
-              <button
-                class="rounded border border-light_gray px-3 py-1 text-white hover:bg-zinc-300/10"
-                (click)="temper(equipment)"
-              >
-                Temper
-              </button>
+          <ng-template #canPerform>
+            <ng-container *ngIf="isQueueSelected(); else itemSelected">
+              <span class="py-1 italic text-zinc-300"> In queue </span>
             </ng-container>
-            <ng-template #nothing>
-              <span class="py-1 text-rose-500"> No potential left </span>
+            <ng-template #itemSelected>
+              <ng-container *ngIf="canTemper(); else nothing">
+                <button
+                  class="rounded border border-light_gray px-3 py-1 text-white hover:bg-zinc-300/10"
+                  (click)="temper(equipment)"
+                >
+                  Temper
+                </button>
+              </ng-container>
+              <ng-template #nothing>
+                <span class="py-1 text-rose-500"> No potential left </span>
+              </ng-template>
             </ng-template>
           </ng-template>
         </div>
@@ -75,8 +82,11 @@
       <ng-container *ngIf="craftingQueue() as craftingQueue">
         <ng-container *ngIf="craftingQueue.length > 0; else emptyQueue">
           <!-- ── CURRENTLY WORKING ON ──────────────────────────────── -->
-          <div class="text-gold text-lg font-semibold">
-            Currently working on
+          <div class="text-gold flex justify-between text-lg font-semibold">
+            <div>Working on</div>
+            <span class="place-self-end">
+              {{ getEstimatedTime([craftingQueue[0]]) }}~
+            </span>
           </div>
 
           <!-- the first item (index 0) -->
@@ -116,8 +126,11 @@
           <!-- ── REST OF THE QUEUE ─────────────────────────────────── -->
           <ng-container *ngIf="craftingQueue | slice: 1 as waitingQueue">
             <div *ngIf="waitingQueue.length" class="mt-4">
-              <div class="text-gold text-lg font-semibold">
-                Waiting in queue
+              <div class="text-gold flex justify-between text-lg font-semibold">
+                <div>Queued</div>
+                <span class="place-self-end">
+                  {{ getEstimatedTime(waitingQueue) }}~
+                </span>
               </div>
 
               <!-- everything *after* the first element -->
@@ -165,7 +178,7 @@
     </div>
   </div>
   <!-- TEMPERING LIST -->
-  <ng-container *ngIf="inventory().length">
+  <ng-container *ngIf="inventory().length; else noItemsToTemper">
     <div
       class="flex max-h-full min-h-24 w-full flex-col space-y-2 overflow-y-auto md:order-1"
     >
@@ -195,4 +208,9 @@
       </ng-container>
     </div>
   </ng-container>
+  <ng-template #noItemsToTemper>
+    <p class="mt-4 text-center italic text-neutral-400">
+      You have no available items to temper.
+    </p>
+  </ng-template>
 </div>

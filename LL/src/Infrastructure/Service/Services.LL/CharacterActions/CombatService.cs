@@ -191,7 +191,7 @@ public class CombatService : ICombatService
             character.Experience += totalExp / characters.Count();
             var wepAndShield = character.EquipmentSlots.Where(eq => (eq.EquipmentType == EquipmentType.MainHand || eq.EquipmentType == EquipmentType.OffHand) && eq.EquipmentInstance != null).ToList();
 
-            await _levelingService.UpdateCharacterLevel(character);
+            await _levelingService.UpdateCharacterLevel(character, cancellationToken);
         }
         await _entityService.UpdateEntities(playerCharacters, cancellationToken);
     }

@@ -29,7 +29,7 @@ public interface ICharacterActionRepository
     /// </summary>
     /// <param name="characterId"></param>
     /// <returns></returns>
-    public Task<bool> DeleteCharacterActionAsync(Guid characterId, CancellationToken cancellationToken);
+    public Task<bool> DeleteCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken);
 
     /// <summary>
     /// Get a character's crafting action
@@ -39,4 +39,5 @@ public interface ICharacterActionRepository
     /// <returns></returns>
     Task<CharacterAction?> GetCraftingActionAsync(Guid characterId, CancellationToken cancellationToken);
     Task<bool> UpdateCraftingActionAsync(Guid characterId, CraftingQueueItem characterAction, CancellationToken cancellationToken);
+    Task<CharacterAction?> GetCharacterActionForDeletionAsync(Guid characterId, CancellationToken cancellationToken);
 }

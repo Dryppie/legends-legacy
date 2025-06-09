@@ -1,5 +1,6 @@
 ﻿using Application.Common.Interfaces;
 using Common.Exceptions;
+using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
 using Microsoft.EntityFrameworkCore;
@@ -115,6 +116,17 @@ public class EssenceSlotRepository : IEssenceSlotRepository
 
     public async Task CreateEssenceSlotOnLevelUp(Guid characterId, SlotState slotState, CancellationToken cancellationToken)
     {
+        // TODO: During test phase of 15th June to 29th of June, check whether this is an issue. If it is, this needs to be implemented
+        //var character = await _context.Characters
+        //    .Include(c => c.EssenceSlots)
+        //    .FirstOrDefaultAsync(c => c.Id == characterId, cancellationToken);
+
+        //if (character == null) return;
+        
+        //int expectedSlots = character.Level / 5;
+        //if (character.EssenceSlots.Where(es => es.SlotState == slotState).Count() >= expectedSlots)
+        //    return;
+
         var newEssenceSlot = new EssenceSlot()
         {
             EntityId = characterId,

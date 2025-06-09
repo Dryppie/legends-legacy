@@ -6,7 +6,7 @@ using MediatR;
 namespace Application.UseCases.Characters.EventHandlers;
 public class CharacterLevelUpEventHandler : INotificationHandler<CharacterLevelUpEvent>
 {
-    private readonly List<LevelTrigger> _triggers;
+    //private readonly List<LevelTrigger> _triggers;
     private readonly IEssenceSlotService _essenceSlotService;
 
     public CharacterLevelUpEventHandler(IEssenceSlotService essenceSlotService)

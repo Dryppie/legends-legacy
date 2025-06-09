@@ -22,6 +22,12 @@ public class CharacterActionService : ICharacterActionService
         _craftingService = cs;
     }
 
+    /// <summary>
+    /// For starting a Combat or Gathering action
+    /// </summary>
+    /// <param name="characterAction"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public async Task<bool> StartCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
     {
         return await _characterActionRepository.StartCharacterActionAsync(characterAction, cancellationToken);
@@ -29,7 +35,15 @@ public class CharacterActionService : ICharacterActionService
 
     public async Task<bool> DeleteCharacterActionAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        return await _characterActionRepository.DeleteCharacterActionAsync(characterId, cancellationToken);
+        var characterAction = await _characterActionRepository.GetCharacterActionForDeletionAsync(characterId, cancellationToken);
+        if (characterAction == null) return false;
+        // If we're deleting CraftingAction, then simply remove everything from the queue and return them to the character's inventory.
+        if (characterAction.ActionDetails is CraftingActionDetails craftingActionDetails)
+        {
+            var removed = await _craftingService.RemoveCraftingQueueItemsAsync(characterId, [.. craftingActionDetails.CraftingQueueItems.Select(cqi => cqi.Id)], cancellationToken);
+            if (removed) return true; // Return here is fine, since previous call deletes the action once there are 0 crafting items in the queue
+        }
+        return await _characterActionRepository.DeleteCharacterActionAsync(characterAction, cancellationToken);
     }
 
     public async Task<CharacterAction?> GetCharacterActionAsync(Guid characterId, CancellationToken cancellationToken)
@@ -113,6 +127,13 @@ public class CharacterActionService : ICharacterActionService
         return await _craftingService.PerformIdleCrafting(characterAction, actionsToPerform, cancellationToken);
     }
 
+    /// <summary>
+    /// For starting a Crafting action, and adding more crafting items to the queue
+    /// </summary>
+    /// <param name="characterId"></param>
+    /// <param name="characterAction"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public async Task<bool> UpdateCraftingCharacterActionAsync(Guid characterId, CraftingQueueItem characterAction, CancellationToken cancellationToken)
     {
         return await _characterActionRepository.UpdateCraftingActionAsync(characterId, characterAction, cancellationToken);

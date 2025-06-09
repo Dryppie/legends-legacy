@@ -2,6 +2,7 @@ import { NgClass, NgFor, NgIf, SlicePipe } from '@angular/common';
 import {
   Component,
   computed,
+  effect,
   Input,
   OnInit,
   signal,
@@ -18,11 +19,16 @@ import {
 import { InventoryDto } from '../../../../../shared/models/Dtos/inventoryDto';
 import { AttributeTypeFormatPipe } from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { CharacterActionsService } from '../../../../../core/services/api/character-actions/character-actions.service';
-import { StartCraftingActionRequest } from '../../../../../shared/models/Dtos/characterActionDto';
+import {
+  CharacterActionDto,
+  StartCraftingActionRequest,
+} from '../../../../../shared/models/Dtos/characterActionDto';
 import { CraftingService } from '../../../../../core/services/api/crafting/crafting.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
+import { map, Subscription } from 'rxjs';
+import { CharacterActionType } from '../../../../../shared/models/enums/characterActionType';
 
 @Component({
   selector: 'app-tempering',
@@ -35,6 +41,7 @@ export class TemperingComponent implements OnInit {
   @Input({ required: true }) craftType!: CraftType;
 
   readonly craftingQueue;
+  readonly isPerformingOtherAction = signal(false);
 
   private readonly selectedItemId = signal<string | null>(null);
 
@@ -56,6 +63,7 @@ export class TemperingComponent implements OnInit {
       );
     },
   );
+  readonly currentAction = signal<CharacterActionDto | null>(null); // declared safely first
 
   readonly canTemper = computed<boolean>(() => {
     const eq = this.selectedEquipmentInstance();
@@ -68,6 +76,8 @@ export class TemperingComponent implements OnInit {
       !!id && !this.inventoryState.items().some((i) => i.itemInstance.id === id)
     );
   });
+  private subscriptions = new Subscription();
+  private checkTimeout: any = null;
 
   constructor(
     private readonly inventoryState: InventoryStateService,
@@ -79,7 +89,61 @@ export class TemperingComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    const currentActionSub =
+      this.characterActionService.currentAction$.subscribe((action) => {
+        if (!action) {
+          this.clearCheckTimeout();
+          this.isPerformingOtherAction.set(false);
+          return;
+        }
+
+        if (
+          action.characterActionType === CharacterActionType.Crafting &&
+          action.isDeleted
+        ) {
+          this.cancelEntireQueue(
+            action.craftingActionDetails?.craftingQueueItems ?? [],
+          );
+        }
+
+        if (action.characterActionType === CharacterActionType.Crafting) {
+          this.clearCheckTimeout();
+          this.isPerformingOtherAction.set(false);
+          return;
+        }
+
+        const updatedAt = new Date(action.updatedAt ?? 0).getTime();
+        const now = Date.now();
+        const isBusy = !action.isDeleted || updatedAt > now;
+
+        if (action.isDeleted && updatedAt > now) {
+          this.clearCheckTimeout(); // Clear any existing timer first
+          this.checkTimeout = setTimeout(() => {
+            // Trigger re-check by setting again (or use change detector / refresh logic)
+            this.isPerformingOtherAction.set(false); // or trigger a re-evaluation
+          }, updatedAt - now);
+        } else {
+          this.clearCheckTimeout();
+        }
+
+        this.isPerformingOtherAction.set(isBusy);
+      });
+
+    this.subscriptions.add(currentActionSub);
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+    this.clearCheckTimeout();
+  }
+
+  private clearCheckTimeout(): void {
+    if (this.checkTimeout) {
+      clearTimeout(this.checkTimeout);
+      this.checkTimeout = null;
+    }
+  }
 
   handleEquipmentInstanceAndTempering(
     inventory: InventoryDto,
@@ -149,5 +213,41 @@ export class TemperingComponent implements OnInit {
       this.characterActionService.clearCurrentAction();
 
     this.selectedItemId.set(null);
+  }
+
+  cancelEntireQueue(queue: CraftingQueueItem[]) {
+    if (!queue.length) return;
+
+    const items = this.inventoryState.items();
+    if (!items) return;
+
+    queue.forEach((queueItem) => {
+      this.inventoryState.add({
+        id: items[0].id,
+        quantity: 1,
+        itemInstance: queueItem.equipmentInstance,
+      });
+      this.craftingService.dequeueTempering(queueItem.id);
+    });
+
+    this.selectedItemId.set(null);
+  }
+
+  getEstimatedTime(queue: CraftingQueueItem[]): string {
+    const totalSeconds = queue.reduce((sum, q) => {
+      const potential = q.equipmentInstance?.potential ?? 0;
+      return sum + potential * 6;
+    }, 0);
+
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    const parts = [];
+    if (hours > 0) parts.push(`${hours}h`);
+    if (minutes > 0) parts.push(`${minutes}m`);
+    if (seconds > 0 || parts.length === 0) parts.push(`${seconds}s`);
+
+    return parts.join(' ');
   }
 }

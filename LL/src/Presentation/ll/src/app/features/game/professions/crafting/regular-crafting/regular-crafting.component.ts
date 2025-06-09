@@ -2,10 +2,9 @@ import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, computed, Input, signal, Signal } from '@angular/core';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { Recipe } from '../../../../../shared/models/profession';
-import { CharacterManagerService } from '../../../../../core/services/client-side/character-manager/character-manager.service';
 import { CraftingService } from '../../../../../core/services/api/crafting/crafting.service';
-import { InventoryDto } from '../../../../../shared/models/Dtos/inventoryDto';
 import { AttributeTypeFormatPipe } from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
+import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 
 function hasQuantity(
   inv: InventoryItem[],
@@ -53,7 +52,7 @@ export class RegularCraftingComponent {
   });
 
   constructor(
-    private readonly characterManager: CharacterManagerService,
+    private readonly inventoryState: InventoryStateService,
     private readonly craftingService: CraftingService,
   ) {}
 
@@ -62,21 +61,25 @@ export class RegularCraftingComponent {
   }
 
   craft(recipe: Recipe): void {
-    const inventory = this.characterManager.getInventory();
-    if (!inventory) return;
+    const items = this.inventoryState.items();
+    if (!items) return;
 
     if (
-      !recipe.materials.every((m) =>
-        hasQuantity(inventory.inventoryItems, m.item.id, m.quantity),
-      )
+      !recipe.materials.every((m) => hasQuantity(items, m.item.id, m.quantity))
     ) {
       return;
     }
 
-    const updatedItems = consumeMaterials(inventory.inventoryItems, recipe);
-    this.craftingService.craftItem(recipe.id).subscribe((item) => {
-      updatedItems.push(item);
-      this.characterManager.setInventory({ inventoryItems: updatedItems });
+    const updatedItems = consumeMaterials(items, recipe);
+    const backup = [...this.inventoryState.items()];
+
+    this.craftingService.craftItem(recipe.id).subscribe({
+      next: (item) => {
+        this.inventoryState.setInventory([...updatedItems, item]);
+      },
+      error: () => {
+        this.inventoryState.setInventory(backup);
+      },
     });
   }
 

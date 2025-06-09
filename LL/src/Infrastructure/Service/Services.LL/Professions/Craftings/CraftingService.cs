@@ -54,6 +54,7 @@ public class CraftingService : ICraftingService
 
         // Check profession level
         var professionLevel = await _professionService.GetProfessionLevelAsync(characterId, professionType, cancellationToken);
+        // Is the profession level sufficient for this recipe?
         if (professionLevel < recipe.LevelRequirement) return null;
 
         // Check inventory for required materials
@@ -166,38 +167,50 @@ public class CraftingService : ICraftingService
     {
         if (temperingSummary.TotalExperience == 0) return;
         var professions = await _professionService.GetProfessionsAsync(characterId, cancellationToken);
+        var professionsToUpdate = new List<Profession>();
         foreach (var profession in professions)
         {
             switch (profession.ProfessionType)
             {
                 case ProfessionType.ArmorForging:
                     profession.Experience += temperingSummary.ArmorForgingExperience;
+                    professionsToUpdate.Add(profession);
                     break;
                 case ProfessionType.JewelryCrafting:
                     profession.Experience += temperingSummary.JewelryCraftingExperience;
+                    professionsToUpdate.Add(profession);
                     break;
                 case ProfessionType.WeaponSmithing:
                     profession.Experience += temperingSummary.WeaponSmithingExperience;
+                    professionsToUpdate.Add(profession);
                     break;
                 default:
                     continue; // Skip if the profession type is not recognized
             }
-            await _levelingService.UpdateProfessionLevel(profession);
+            await _levelingService.UpdateProfessionLevel(profession, cancellationToken);
         }
 
-        await _professionService.UpdateProfessionLevelAsync(professions, cancellationToken);
+
+        await _professionService.UpdateProfessionLevelAsync(professionsToUpdate, cancellationToken);
     }
 
-    public async Task<bool> RemoveCraftingQueueItemAsync(Guid characterId, Guid queueItemId, CancellationToken cancellationToken)
+    public async Task<bool> RemoveCraftingQueueItemsAsync(Guid characterId, List<Guid> queueItemIds, CancellationToken cancellationToken)
+{
+    var anyItemAdded = false;
+
+    foreach (var queueItemId in queueItemIds)
     {
         var equipmentInstance = await _craftingRepository.RemoveCraftingQueueItemAndReturnItemAsync(characterId, queueItemId, cancellationToken);
-        if (equipmentInstance == null) return false;
+        if (equipmentInstance == null) continue;
 
         var itemAdded = await _inventoryService.AddItemInstanceBackToInventory(characterId, equipmentInstance, cancellationToken);
-        if (itemAdded)
-        {
-            await _craftingRepository.SaveChangesAsync(cancellationToken);
-        }
-        return itemAdded;
+        if (itemAdded) anyItemAdded = true;
     }
+
+    if (anyItemAdded)
+        await _craftingRepository.SaveChangesAsync(cancellationToken);
+
+    return anyItemAdded;
+}
+
 }

@@ -57,6 +57,10 @@ export class InventoryStateService {
       });
   }
 
+  setInventory(items: InventoryItem[]): void {
+    this._items.set(items);
+  }
+
   add(item: InventoryItem): void {
     const backup = this._items(); // snapshot for rollback
     this._items.set([...backup, item]);

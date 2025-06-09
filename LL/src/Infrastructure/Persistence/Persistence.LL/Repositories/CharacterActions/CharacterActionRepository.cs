@@ -57,20 +57,14 @@ public class CharacterActionRepository : ICharacterActionRepository
         return true;
     }
 
-    public async Task<bool> DeleteCharacterActionAsync(Guid characterId, CancellationToken cancellationToken)
+    public async Task<bool> DeleteCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
     {
-        var characterAction = await _context.CharacterActions
-            .Include(ca => ca.ActionDetails)
-            .FirstOrDefaultAsync(ca => ca.CharacterId.Equals(characterId), cancellationToken);
-
-        if (characterAction == null) return false;
-
         if (characterAction.ActionDetails != null)
             _context.ActionDetails.Remove(characterAction.ActionDetails);  // Explicitly remove the related entity
 
         characterAction.IsDeleted = true;
         characterAction.ActionDetails = null;
-        _context.CharacterActions.Update(characterAction!);
+        _context.CharacterActions.Update(characterAction);
         await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
@@ -142,12 +136,12 @@ public class CharacterActionRepository : ICharacterActionRepository
             {
                 CharacterId = characterId,
                 UpdatedAt = now,
+                IsDeleted = false, // Ensure it's not marked as deleted on creation
                 ActionDetails = new CraftingActionDetails
                 {
                     CraftingQueueItems = [craftingQueueItem]
-                }
+                },
             };
-            action.IsDeleted = false; // Ensure it's not marked as deleted on creation
             await _context.CharacterActions.AddAsync(action, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
             return true;
@@ -179,5 +173,13 @@ public class CharacterActionRepository : ICharacterActionRepository
 
         await _context.SaveChangesAsync(cancellationToken);
         return true;
+    }
+
+    public async Task<CharacterAction?> GetCharacterActionForDeletionAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        return await _context.CharacterActions
+            .Include(ca => ca.ActionDetails)
+                .ThenInclude(ad => (ad as CraftingActionDetails).CraftingQueueItems)
+            .FirstOrDefaultAsync(ca => ca.CharacterId.Equals(characterId), cancellationToken);
     }
 }

@@ -30,7 +30,6 @@ public interface ICharacterRepository
     /// <param name="UserId"></param>
     /// <returns></returns>
     Task<Character?> GetCharacterOverviewByCharacterIdAsync(Guid currentUserId, CancellationToken cancellationToken);
-    Task<List<CharacterLeaderboardItem>> GetLeaderboardCharactersAsync(CancellationToken cancellationToken);
     Task<Character> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken);
     Task UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken);
     Task<Character?> GetCharacterWithSoulstoneUpgradesAsync(Guid characterId, CancellationToken cancellationToken);

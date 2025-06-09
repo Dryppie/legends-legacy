@@ -120,24 +120,6 @@ public class CharacterRepository : ICharacterRepository
         return character;
     }
 
-    public async Task<List<CharacterLeaderboardItem>> GetLeaderboardCharactersAsync(CancellationToken cancellationToken)
-    {
-        var leaderboard = await _context.Characters
-            .OrderByDescending(c => c.Level)
-            .ThenByDescending(c => c.Experience)
-            .Take(10)
-            .Select(c => new CharacterLeaderboardItem
-            {
-                Id = c.Id,
-                Name = c.Name,
-                Level = c.Level,
-                Experience = (int)c.Experience
-            })
-            .ToListAsync(cancellationToken);
-
-        return leaderboard;
-    }
-
     private static void SeedEquipmentSlots(Entity entity)
     {
 

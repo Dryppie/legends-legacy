@@ -1,8 +1,12 @@
-<div *ngIf="tabs.length > 1" class="flex justify-around">
+<div *ngIf="tabs.length > 1" class="flex flex-wrap justify-around">
   <span
     *ngFor="let tab of tabs"
-    class="flex-1 border-b border-light_gray py-2 text-center font-semibold text-light_gray hover:border-primary focus:outline-none"
-    [ngClass]="{ 'border-primary text-primary': activeTab === tab }"
+    class="border-b border-light_gray py-2 text-center font-semibold text-light_gray hover:border-primary focus:outline-none"
+    [ngClass]="{
+      'border-primary text-primary': activeTab === tab,
+      'w-1/3': tabs.length >= 6,
+      'flex-1': tabs.length < 6,
+    }"
     (click)="setActiveTab(tab)"
   >
     {{ tab }}

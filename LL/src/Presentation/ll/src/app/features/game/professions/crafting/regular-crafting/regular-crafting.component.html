@@ -71,9 +71,9 @@
   <!-- RECIPES LIST -->
   <div class="flex h-full w-full flex-col space-y-2 overflow-y-auto md:order-1">
     <h2 class="flex text-primary">Recipes</h2>
-    <ng-container *ngIf="recipes() as recipes">
+    <ng-container *ngIf="recipes().length; else noRecipes">
       <div
-        *ngFor="let recipe of recipes"
+        *ngFor="let recipe of recipes()"
         class="cursor-pointer rounded-lg border p-3 hover:border-primary/60 hover:bg-zinc-300/30"
         (click)="selectRecipe(recipe)"
         [class.border-primary]="selectedRecipe()?.id === recipe.id"
@@ -88,5 +88,10 @@
         </div>
       </div>
     </ng-container>
+    <ng-template #noRecipes>
+      <p class="mt-4 text-center italic text-neutral-400">
+        No recipes match this filter.
+      </p>
+    </ng-template>
   </div>
 </div>

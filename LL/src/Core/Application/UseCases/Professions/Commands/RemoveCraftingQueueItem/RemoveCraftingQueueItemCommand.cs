@@ -15,7 +15,7 @@ public class RemoveCraftingQueueItemCommandHandler : IRequestHandler<RemoveCraft
     {
         if (!Guid.TryParse(request.QueueItemId, out var queueItemId)) return Response<bool>.Fail("Failed to remove item in crafting queue");
 
-        return await _craftingService.RemoveCraftingQueueItemAsync(request.CharacterId, queueItemId, cancellationToken)
+        return await _craftingService.RemoveCraftingQueueItemsAsync(request.CharacterId, [queueItemId], cancellationToken)
             ? Response<bool>.Success(true)
             : Response<bool>.Fail("Failed to remove item in crafting queue");
     }
