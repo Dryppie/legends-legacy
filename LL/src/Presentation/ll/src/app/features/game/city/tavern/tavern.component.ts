@@ -5,11 +5,17 @@ import { LeaderboardStateService } from '../../../../core/services/api/leaderboa
 import { FilterTabsComponent } from '../../../../shared/components/tabs/filter-tabs/filter-tabs.component';
 import { LeaderboardEntryDto } from '../../../../shared/models/Dtos/leaderboard/leaderboardEntryDto';
 import { Tab } from '../../../../shared/models/sidebar-item';
+import { RegularButtonComponent } from '../../../../shared/components/buttons/regular-button/regular-button.component';
 
 @Component({
   selector: 'app-tavern',
   standalone: true,
-  imports: [BannerComponent, NgFor, FilterTabsComponent],
+  imports: [
+    BannerComponent,
+    NgFor,
+    FilterTabsComponent,
+    RegularButtonComponent,
+  ],
   templateUrl: './tavern.component.html',
 })
 export class TavernComponent {
@@ -50,6 +56,10 @@ export class TavernComponent {
 
   setActiveTab(tabLabel: string) {
     this.activeTab = tabLabel;
+  }
+
+  refresh(): void {
+    this.state.refresh();
   }
 
   get filteredLeaderboard(): LeaderboardEntryDto[] {

@@ -23,6 +23,12 @@ export class LeaderboardStateService {
 
   load(): void {
     if (this._leaderboard()) return; // already cached
+    this.refresh();
+  }
+
+  refresh(): void {
+    if (this._loading()) return;
+
     this._loading.set(true);
 
     this.leaderboardService

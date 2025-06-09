@@ -1,5 +1,5 @@
-<div class="flex h-full flex-col items-center space-y-6 pr-4 sm:pr-6">
-  <div class="flex w-full flex-col sm:gap-6">
+<div class="flex h-full flex-col space-y-2 pr-4 sm:pr-6">
+  <div class="flex w-full flex-col">
     <app-banner image="tavern" bgPosition="bg-left" class="w-full"></app-banner>
   </div>
   <app-filter-tabs
@@ -8,7 +8,14 @@
     (tabSelected)="setActiveTab($event)"
     class="w-full"
   ></app-filter-tabs>
-  <div class="flex h-full w-full flex-col gap-4 overflow-hidden">
+  <app-regular-button
+    (click)="refresh()"
+    [disabled]="state.loading()"
+    class="place-self-end"
+    text="Refresh"
+  >
+  </app-regular-button>
+  <div class="flex h-full w-full flex-col overflow-hidden">
     <div class="flex-none text-white"></div>
     <div class="flex flex-col gap-2 overflow-y-auto">
       <!-- Repeat for each leaderboard item -->
