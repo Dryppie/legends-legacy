@@ -13,7 +13,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250603042057_BaseMigration")]
+    [Migration("20250609174328_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -368,13 +368,13 @@ namespace Persistence.LL.Migrations
                     b.Property<Guid>("EntityId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("EquipmentType")
+                    b.Property<int>("EquipmentSlotType")
                         .HasColumnType("integer");
 
                     b.Property<Guid?>("EquipmentInstanceId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("EntityId", "EquipmentType");
+                    b.HasKey("EntityId", "EquipmentSlotType");
 
                     b.HasIndex("EquipmentInstanceId");
 

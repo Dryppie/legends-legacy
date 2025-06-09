@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Domain.Models.Attributes.Modifiers;
-using Domain.Models.Items;
-using Domain.Models.Items.Equipments.Slots;
+﻿using Domain.Models.Items;
+using Domain.Models.Items.Equipments;
 
 namespace Services.AdminDashboard.Items;
 public class EquipmentToJsonDto

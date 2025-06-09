@@ -1,6 +1,6 @@
 ﻿using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items;
-using Domain.Models.Items.Equipments.Slots;
+using Domain.Models.Items.Equipments;
 
 namespace Application.UseCases._AdminDashboard.Items.Dtos;
 public class ItemBaseDto

@@ -123,14 +123,14 @@ public class CharacterRepository : ICharacterRepository
     private static void SeedEquipmentSlots(Entity entity)
     {
 
-        var slotTypes = Enum.GetValues(typeof(EquipmentType)).Cast<EquipmentType>();
+        var slotTypes = Enum.GetValues(typeof(EquipmentSlotType)).Cast<EquipmentSlotType>();
 
         // Create an equipment slot for each enum value
         var equipmentSlots = slotTypes
             .Select(type => new EquipmentSlot
             {
                 EntityId = entity.Id,
-                EquipmentType = type
+                EquipmentSlotType = type
             })
             .ToList();
 

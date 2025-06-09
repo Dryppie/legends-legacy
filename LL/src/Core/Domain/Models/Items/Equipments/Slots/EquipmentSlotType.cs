@@ -1,5 +1,5 @@
 ﻿namespace Domain.Models.Items.Equipments.Slots;
-public enum EquipmentType
+public enum EquipmentSlotType
 {
     Head,
     Relic,

@@ -2,7 +2,6 @@
 using AutoMapper;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items.Equipments;
-using Domain.Models.Items.Equipments.Slots;
 
 namespace Application.UseCases.Items.Dtos;
 public class EquipmentBaseDto : ItemBaseDto, IMapFrom<EquipmentBase>

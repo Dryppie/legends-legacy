@@ -1,6 +1,8 @@
-﻿using System.Text.Json;
+﻿using Application.UseCases._AdminDashboard.Items.Dtos;
+using Domain.Models.Items.Equipments;
+using Services.AdminDashboard.Converters;
+using System.Text.Json;
 using System.Text.Json.Serialization;
-using Application.UseCases._AdminDashboard.Items.Dtos;
 
 namespace Services.AdminDashboard.JsonReaders;
 public class ItemBaseJsonReader
@@ -9,14 +11,16 @@ public class ItemBaseJsonReader
     private readonly string _filePath;
     public ItemBaseJsonReader()
     {
-        _filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "items.json");
+        var currentDirectory = Directory.GetCurrentDirectory();
+        var apiDirectory = Directory.GetParent(currentDirectory)!.FullName;
+        _filePath = Path.Combine(apiDirectory, "API.LL", "Data", "items.json");
         string json = File.ReadAllText(_filePath);
 
         AllItems = JsonSerializer.Deserialize<List<ItemBaseDto>>(json, new JsonSerializerOptions()
         {
             WriteIndented = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            Converters = { new JsonStringEnumConverter() }
+            Converters = { new FallbackEnumConverter<EquipmentType>(EquipmentType.Head), new JsonStringEnumConverter()  }
         }) ?? [];
         OverWriteJSON();
     }

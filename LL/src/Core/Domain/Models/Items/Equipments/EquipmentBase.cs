@@ -1,5 +1,4 @@
 ﻿using Domain.Models.Attributes.Modifiers;
-using Domain.Models.Items.Equipments.Slots;
 
 namespace Domain.Models.Items.Equipments;
 public class EquipmentBase : ItemBase

@@ -7,6 +7,6 @@ public class EquipmentSlotConfiguration : IEntityTypeConfiguration<EquipmentSlot
 {
     public void Configure(EntityTypeBuilder<EquipmentSlot> builder)
     {
-        builder.HasKey(es => new { es.EntityId, es.EquipmentType });
+        builder.HasKey(es => new { es.EntityId, es.EquipmentSlotType });
     }
 }

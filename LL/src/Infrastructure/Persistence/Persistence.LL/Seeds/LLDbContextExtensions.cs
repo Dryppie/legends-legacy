@@ -5,6 +5,7 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Inventories;
+using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.Users;
@@ -152,14 +153,14 @@ public static class LLDbContextExtensions
     private static List<EquipmentSlot> SeedEquipmentSlots(Entity entity)
     {
 
-        var slotTypes = Enum.GetValues(typeof(EquipmentType)).Cast<EquipmentType>();
+        var slotTypes = Enum.GetValues(typeof(EquipmentSlotType)).Cast<EquipmentSlotType>();
 
         // Create an equipment slot for each enum value
         var equipmentSlots = slotTypes
             .Select(type => new EquipmentSlot
             {
                 EntityId = entity.Id,
-                EquipmentType = type
+                EquipmentSlotType = type
             })
             .ToList();
 

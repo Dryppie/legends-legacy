@@ -13,7 +13,7 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
-using Domain.Models.Items.Equipments.Slots;
+using Domain.Models.Items.Equipments;
 using MediatR;
 using Services.LL.Combat;
 using Services.LL.Extensions;
@@ -189,7 +189,6 @@ public class CombatService : ICombatService
         foreach (var character in characters)
         {
             character.Experience += totalExp / characters.Count();
-            var wepAndShield = character.EquipmentSlots.Where(eq => (eq.EquipmentType == EquipmentType.MainHand || eq.EquipmentType == EquipmentType.OffHand) && eq.EquipmentInstance != null).ToList();
 
             await _levelingService.UpdateCharacterLevel(character, cancellationToken);
         }

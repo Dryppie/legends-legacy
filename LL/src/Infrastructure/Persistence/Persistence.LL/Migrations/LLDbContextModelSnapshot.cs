@@ -365,13 +365,13 @@ namespace Persistence.LL.Migrations
                     b.Property<Guid>("EntityId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("EquipmentType")
+                    b.Property<int>("EquipmentSlotType")
                         .HasColumnType("integer");
 
                     b.Property<Guid?>("EquipmentInstanceId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("EntityId", "EquipmentType");
+                    b.HasKey("EntityId", "EquipmentSlotType");
 
                     b.HasIndex("EquipmentInstanceId");
 

@@ -19,12 +19,72 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
     {
         var equipmentList = await _context.EquipmentSlots
             .Include(es => es.EquipmentInstance)
-                .ThenInclude(ei => ei.ItemBase)
-                    .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
+                .ThenInclude(ei => ei.EquipmentBase)
+                    .ThenInclude(eb => eb.AttributeModifiers)
             .Where(es => es.EntityId.Equals(entityId))
             .ToListAsync(cancellationToken);
 
         return equipmentList;
+    }
+
+    public async Task<bool> UnequipEquipmentAsync(Guid entityId, EquipmentSlotType slotType, CancellationToken cancellationToken)
+    {
+        var character = await _context.Characters
+            .Include(c => c.EquipmentSlots)
+                .ThenInclude(es => es.EquipmentInstance)
+                    .ThenInclude(ei => ei.EquipmentBase)
+            .Include(c => c.Inventory)
+                .ThenInclude(i => i.InventoryItems)
+                    .ThenInclude(ii => ii.ItemInstance)
+                        .ThenInclude(ii => ii.ItemBase)
+            .SingleOrDefaultAsync(c => c.Id == entityId, cancellationToken);
+
+        if (character == null || character.Inventory == null)
+            return false;
+
+        var targetSlot = character.EquipmentSlots
+            .FirstOrDefault(es => es.EquipmentSlotType == slotType && es.EquipmentInstance != null);
+
+        if (targetSlot == null)
+            return false;
+
+        var equipmentInstance = targetSlot.EquipmentInstance!;
+        var equipmentBase = equipmentInstance.EquipmentBase;
+
+        // Special handling for Two-Handed weapons occupying both hands
+        if (equipmentBase.EquipmentType == EquipmentType.TwoHandedWeapon &&
+            (slotType == EquipmentSlotType.MainHand || slotType == EquipmentSlotType.OffHand))
+        {
+            var mainHand = GetSlot(character, EquipmentSlotType.MainHand);
+            var offHand = GetSlot(character, EquipmentSlotType.OffHand);
+            if (mainHand == null || offHand == null)
+                return false;
+
+            if (mainHand.EquipmentInstanceId == equipmentInstance.Id)
+            {
+                mainHand.EquipmentInstance = null;
+                mainHand.EquipmentInstanceId = null;
+            }
+
+            if (offHand.EquipmentInstanceId == equipmentInstance.Id)
+            {
+                offHand.EquipmentInstance = null;
+                offHand.EquipmentInstanceId = null;
+            }
+
+            AddOrIncrementItemInInventory(character.Inventory, equipmentInstance.Id);
+        }
+        else
+        {
+            // Regular unequip
+            targetSlot.EquipmentInstance = null;
+            targetSlot.EquipmentInstanceId = null;
+
+            AddOrIncrementItemInInventory(character.Inventory, equipmentInstance.Id);
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+        return true;
     }
 
     public async Task<bool> EquipEquipmentAsync(Guid entityId, Guid equipmentId, CancellationToken cancellationToken)
@@ -33,7 +93,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         var character = await _context.Characters
             .Include(c => c.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)
-                    .ThenInclude(ei => ei.ItemBase)
+                    .ThenInclude(ei => ei.EquipmentBase)
             .Include(c => c.Inventory)
                 .ThenInclude(i => i.InventoryItems)
                     .ThenInclude(ii => ii.ItemInstance)
@@ -66,114 +126,131 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         return await EquipEquipmentAsync(character, inventory, equipmentInstance, inventoryItem, cancellationToken);
     }
 
-    public async Task<bool> UnequipEquipmentAsync(Guid entityId, EquipmentType equipmentType, CancellationToken cancellationToken)
-    {
-        var character = await _context.Characters
-            .Include(c => c.EquipmentSlots)
-                .ThenInclude(es => es.EquipmentInstance)
-                    .ThenInclude(ei => ei.ItemBase)
-            .Include(c => c.Inventory)
-                .ThenInclude(i => i.InventoryItems)
-                    .ThenInclude(ii => ii.ItemInstance)
-                        .ThenInclude(ii => ii.ItemBase)
-            .SingleOrDefaultAsync(c => c.Id == entityId, cancellationToken);
-
-        if (character == null)
-        {
-            return false;
-        }
-        var inventory = character.Inventory;
-        if (inventory == null)
-        {
-            return false;
-        }
-        var equipmentSlot = character.EquipmentSlots
-            .FirstOrDefault(es => es.EquipmentType == equipmentType && es.EquipmentInstance != null);
-        if (equipmentSlot == null)
-        {
-            return false;
-        }
-        AddOrIncrementItemInInventory(character.Inventory, equipmentSlot.EquipmentInstance!.Id);
-        equipmentSlot.EquipmentInstance = null;
-        equipmentSlot.EquipmentInstanceId = null;
-        await _context.SaveChangesAsync(cancellationToken);
-        return true;
-    }
-
     private async Task<bool> EquipEquipmentAsync(Character character, Inventory inventory, EquipmentInstance equipmentInstance, InventoryItem inventoryItem, CancellationToken cancellationToken)
     {
-        var equipmentBase = equipmentInstance.ItemBase as EquipmentBase;
-        var desiredSlotType = equipmentBase.EquipmentType;
+        var equipmentBase = equipmentInstance.EquipmentBase;
 
-        if (!CanEquip(equipmentBase, desiredSlotType))
+        // Equip logic based on EquipmentType
+        switch (equipmentBase.EquipmentType)
         {
-            return false;
+            case EquipmentType.TwoHandedWeapon:
+                {
+                    var mainHand = GetSlot(character, EquipmentSlotType.MainHand);
+                    var offHand = GetSlot(character, EquipmentSlotType.OffHand);
+
+                    if (mainHand is null || offHand is null)
+                        return false;
+
+                    // Unequip both hands if occupied
+                    UnequipSlotAsync(mainHand, inventory);
+                    UnequipSlotAsync(offHand, inventory);
+
+                    mainHand.EquipmentInstanceId = equipmentInstance.Id;
+                    offHand.EquipmentInstanceId = equipmentInstance.Id;
+                    mainHand.EquipmentInstance = equipmentInstance;
+                    offHand.EquipmentInstance = equipmentInstance;
+                    break;
+                }
+
+            case EquipmentType.OneHandedWeapon:
+                {
+                    var mainHand = GetSlot(character, EquipmentSlotType.MainHand);
+                    var offHand = GetSlot(character, EquipmentSlotType.OffHand);
+
+                    if (mainHand is null || offHand is null)
+                        return false;
+
+                    // Prioritize empty hand; fall back to replacing OffHand if needed
+                    if (mainHand.EquipmentInstanceId is null)
+                    {
+                        UnequipSlotAsync(mainHand, inventory);
+                        mainHand.EquipmentInstanceId = equipmentInstance.Id;
+                        mainHand.EquipmentInstance = equipmentInstance;
+                    }
+                    else if (offHand.EquipmentInstanceId is null)
+                    {
+                        UnequipSlotAsync(offHand, inventory);
+                        offHand.EquipmentInstanceId = equipmentInstance.Id;
+                        offHand.EquipmentInstance = equipmentInstance;
+                    }
+                    else
+                    {
+                        // Fall back to replacing mainhand if both are occupied
+                        mainHand.EquipmentInstanceId = equipmentInstance.Id;
+                        mainHand.EquipmentInstance = equipmentInstance;
+                    }
+
+                    break;
+                }
+
+            case EquipmentType.OffHand:
+                {
+                    var offHand = GetSlot(character, EquipmentSlotType.OffHand);
+                    var mainHand = GetSlot(character, EquipmentSlotType.MainHand);
+
+                    if (offHand is null || mainHand is null)
+                        return false;
+
+                    // Block if main-hand is a two-hander
+                    var mainHandItem = mainHand.EquipmentInstance;
+                    if (mainHandItem != null && mainHandItem.EquipmentBase.EquipmentType == EquipmentType.TwoHandedWeapon)
+                    {
+                        UnequipSlotAsync(mainHand, inventory);
+                    }
+
+                    UnequipSlotAsync(offHand, inventory);
+                    offHand.EquipmentInstanceId = equipmentInstance.Id;
+                    break;
+                }
+
+            default:
+                {
+                    // Armor, relic, etc.
+                    var slotType = equipmentBase.EquipmentType switch
+                    {
+                        EquipmentType.Head => EquipmentSlotType.Head,
+                        EquipmentType.Chest => EquipmentSlotType.Chest,
+                        EquipmentType.Legs => EquipmentSlotType.Legs,
+                        EquipmentType.Relic => EquipmentSlotType.Relic,
+                        EquipmentType.Necklace => EquipmentSlotType.Necklace,
+                        EquipmentType.Ring => EquipmentSlotType.Ring,
+                        _ => throw new ArgumentOutOfRangeException(nameof(equipmentBase.EquipmentType), "Unsupported equipment type for armor or relic.")
+                    };
+                    var slot = GetSlot(character, slotType);
+
+                    if (slot == null)
+                        return false;
+
+                    UnequipSlotAsync(slot, inventory);
+                    slot.EquipmentInstanceId = equipmentInstance.Id;
+                    break;
+                }
         }
-        var targetSlot = character.EquipmentSlots
-            .FirstOrDefault(es => es.EquipmentType == desiredSlotType);
 
-        if (targetSlot == null)
-        {
-            return false;
-        }
-
-        if (targetSlot.EquipmentInstanceId != null)
-        {
-            // The item currently equipped in that slot
-            var currentlyEquipped = targetSlot.EquipmentInstance;
-            if (currentlyEquipped != null)
-            {
-                // We put that equipment item back into the inventory
-                AddOrIncrementItemInInventory(inventory, currentlyEquipped.Id);
-            }
-        }
-        // If the new equipment is two-handed,
-        // you might optionally also do the “ghost off‐hand” logic:
-        //if (equipment.EquipmentBehavior == EquipmentBehavior.TwoHandedWeapon)
-        //{
-        //    var offHandSlot = character.CharacterEquipmentSlots
-        //        .FirstOrDefault(ces => ces.SlotType == EquipmentType.OffHand);
-
-        //    if (offHandSlot != null && offHandSlot.ItemId != null)
-        //    {
-        //        // The offhand is currently equipped with something.
-        //        // We need to remove it or block equipping if not allowed
-        //        // For example, remove it from offhand and put it back into inventory.
-        //        var offHandEquipped = offHandSlot.Item as Equipment;
-        //        if (offHandEquipped != null)
-        //        {
-        //            AddOrIncrementItemInInventory(inventory, offHandEquipped.Id);
-        //        }
-        //        offHandSlot.ItemId = null;
-        //    }
-        //}
-        targetSlot.EquipmentInstanceId = equipmentInstance.Id;
-
+        // Adjust inventory
         inventoryItem.Quantity -= 1;
         if (inventoryItem.Quantity < 1)
-        {
             _context.InventoryItems.Remove(inventoryItem);
-        }
 
         await _context.SaveChangesAsync(cancellationToken);
-
         return true;
     }
 
-    private bool CanEquip(EquipmentBase equipment, EquipmentType desiredSlotType)
+    private static EquipmentSlot? GetSlot(Character character, EquipmentSlotType slotType) =>
+        character.EquipmentSlots.FirstOrDefault(s => s.EquipmentSlotType == slotType);
+
+    private void UnequipSlotAsync(EquipmentSlot slot, Inventory inventory)
     {
-        //return equipment.EquipmentBehavior switch
-        //{
-        //    EquipmentBehavior.OneHandedWeapon =>
-        //        desiredSlot == EquipmentType.MainHand || desiredSlot == EquipmentType.OffHand,
-        //    EquipmentBehavior.TwoHandedWeapon =>
-        //        desiredSlot == EquipmentType.MainHand,
-        //    EquipmentBehavior.Shield =>
-        //        desiredSlot == EquipmentType.OffHand,
-        //    // For other types, you can match equipment.EquipmentType to desiredSlot, etc.
-        //    _ => equipment.EquipmentType == desiredSlot
-        //};
-        return true;
+        if (slot.EquipmentInstanceId is null)
+            return;
+
+        var equipped = slot.EquipmentInstance;
+        if (equipped is not null)
+        {
+            AddOrIncrementItemInInventory(inventory, equipped.Id);
+        }
+
+        slot.EquipmentInstanceId = null;
     }
 
     private void AddOrIncrementItemInInventory(Inventory inventory, Guid itemId)

@@ -17,7 +17,7 @@ public class EquipmentSlotService : IEquipmentSlotService
     public async Task<bool> EquipEquipmentAsync(Guid entityId, Guid equipmentId, CancellationToken cancellationToken) =>
         await _equipmentSlotRepository.EquipEquipmentAsync(entityId, equipmentId, cancellationToken);
 
-    public async Task<bool> UnequipEquipmentAsync(Guid entityId, EquipmentType equipmentType, CancellationToken cancellationToken) =>
-        await _equipmentSlotRepository.UnequipEquipmentAsync(entityId, equipmentType, cancellationToken);
+    public async Task<bool> UnequipEquipmentAsync(Guid entityId, EquipmentSlotType slotType, CancellationToken cancellationToken) =>
+        await _equipmentSlotRepository.UnequipEquipmentAsync(entityId, slotType, cancellationToken);
 
 }

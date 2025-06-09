@@ -501,12 +501,12 @@ namespace Persistence.LL.Migrations
                 columns: table => new
                 {
                     EntityId = table.Column<Guid>(type: "uuid", nullable: false),
-                    EquipmentType = table.Column<int>(type: "integer", nullable: false),
+                    EquipmentSlotType = table.Column<int>(type: "integer", nullable: false),
                     EquipmentInstanceId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EquipmentSlots", x => new { x.EntityId, x.EquipmentType });
+                    table.PrimaryKey("PK_EquipmentSlots", x => new { x.EntityId, x.EquipmentSlotType });
                     table.ForeignKey(
                         name: "FK_EquipmentSlots_Entities_EntityId",
                         column: x => x.EntityId,

@@ -1,5 +1,6 @@
 ﻿using Application.Common.Mappings;
 using AutoMapper;
+using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 
 namespace Application.UseCases.Equipments.Dtos;

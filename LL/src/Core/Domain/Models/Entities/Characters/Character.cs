@@ -3,7 +3,6 @@ using Domain.Models.Colosseum;
 using Domain.Models.Guilds;
 using Domain.Models.Inventories;
 using Domain.Models.Professions;
-using Domain.Models.Professions.Crafting;
 using Domain.Models.Soulstones;
 using Domain.Models.Users;
 using System.ComponentModel.DataAnnotations.Schema;

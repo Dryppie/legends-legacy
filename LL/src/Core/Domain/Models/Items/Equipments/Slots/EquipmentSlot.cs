@@ -7,5 +7,5 @@ public class EquipmentSlot
     public Entity Entity { get; set; } = null!;
     public Guid? EquipmentInstanceId { get; set; }
     public EquipmentInstance? EquipmentInstance { get; set; }
-    public EquipmentType EquipmentType { get; set; }
+    public EquipmentSlotType EquipmentSlotType { get; set; }
 }

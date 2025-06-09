@@ -3,6 +3,7 @@ using Application.UseCases.Equipments.Commands.UnequipEquipment;
 using Application.UseCases.Equipments.Dtos;
 using Application.UseCases.Equipments.Queries.GetMyEquipment;
 using Common.Primitives;
+using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,6 +19,6 @@ public class EquipmentController : BaseController
         await Mediator.Send(new EquipEquipmentCommand(CurrentCharacterGuid, equipmentItemId));
 
     [HttpPost("Unequip")]
-    public async Task<ActionResult<Response<bool>>> Unequip([FromBody] EquipmentType equipmentType) =>
-        await Mediator.Send(new UnequipEquipmentCommand(CurrentCharacterGuid, equipmentType));
+    public async Task<ActionResult<Response<bool>>> Unequip([FromBody] EquipmentSlotType slotType) =>
+        await Mediator.Send(new UnequipEquipmentCommand(CurrentCharacterGuid, slotType));
 }

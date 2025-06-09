@@ -2,7 +2,6 @@
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Items.Equipments;
-using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Professions.Crafting;
 using Microsoft.EntityFrameworkCore;
 
@@ -121,7 +120,7 @@ public class CharacterActionRepository : ICharacterActionRepository
             return false; // Item doesn't belong to the character or doesn't exist
         craftingQueueItem.CraftType = (inventoryItem.ItemInstance.ItemBase as EquipmentBase)!.EquipmentType switch
         {
-            EquipmentType.MainHand or EquipmentType.OffHand => CraftType.WeaponSmithing,
+            EquipmentType.TwoHandedWeapon or EquipmentType.OneHandedWeapon or EquipmentType.OffHand => CraftType.WeaponSmithing,
             EquipmentType.Head or EquipmentType.Chest or EquipmentType.Legs => CraftType.ArmorForging,
             EquipmentType.Necklace or EquipmentType.Relic or EquipmentType.Ring => CraftType.JewelryCrafting,
             _ => throw new NotImplementedException($"Craft type for {inventoryItem.ItemInstance.ItemBase.Id} is not implemented")
