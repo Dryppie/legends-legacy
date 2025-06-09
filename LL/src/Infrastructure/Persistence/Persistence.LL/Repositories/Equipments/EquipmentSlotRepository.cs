@@ -52,7 +52,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         var equipmentBase = equipmentInstance.EquipmentBase;
 
         // Special handling for Two-Handed weapons occupying both hands
-        if (equipmentBase.EquipmentType == EquipmentType.TwoHandedWeapon &&
+        if (equipmentBase.EquipmentType == EquipmentType.TwoHanded &&
             (slotType == EquipmentSlotType.MainHand || slotType == EquipmentSlotType.OffHand))
         {
             var mainHand = GetSlot(character, EquipmentSlotType.MainHand);
@@ -133,7 +133,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         // Equip logic based on EquipmentType
         switch (equipmentBase.EquipmentType)
         {
-            case EquipmentType.TwoHandedWeapon:
+            case EquipmentType.TwoHanded:
                 {
                     var mainHand = GetSlot(character, EquipmentSlotType.MainHand);
                     var offHand = GetSlot(character, EquipmentSlotType.OffHand);
@@ -152,7 +152,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                     break;
                 }
 
-            case EquipmentType.OneHandedWeapon:
+            case EquipmentType.OneHanded:
                 {
                     var mainHand = GetSlot(character, EquipmentSlotType.MainHand);
                     var offHand = GetSlot(character, EquipmentSlotType.OffHand);
@@ -193,7 +193,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
 
                     // Block if main-hand is a two-hander
                     var mainHandItem = mainHand.EquipmentInstance;
-                    if (mainHandItem != null && mainHandItem.EquipmentBase.EquipmentType == EquipmentType.TwoHandedWeapon)
+                    if (mainHandItem != null && mainHandItem.EquipmentBase.EquipmentType == EquipmentType.TwoHanded)
                     {
                         UnequipSlotAsync(mainHand, inventory);
                     }

@@ -7,7 +7,7 @@ public enum EquipmentType
     Necklace,
     Legs,
     Ring,
-    OneHandedWeapon,
-    TwoHandedWeapon,
+    OneHanded,
+    TwoHanded,
     OffHand
 }
