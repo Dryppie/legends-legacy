@@ -22,7 +22,9 @@ public sealed class UserService : IUserService
         var user = AppUser.Register(username, email,
                      _hasher.HashPassword(null!, password));
 
-        await _userRepository.AddAsync(user, cancellationToken);
+        var added = await _userRepository.AddAsync(user, cancellationToken);
+        if (!added) return null;
+
         return user;
     }
 

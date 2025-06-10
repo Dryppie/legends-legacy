@@ -42,7 +42,7 @@
             <ng-container *ngIf="canEquipSelected() as canEquip; else nothing">
               <app-regular-button
                 [disabled]="!canEquipSelected()"
-                (click)="remove()"
+                (pressed)="remove()"
               >
                 Remove essence
               </app-regular-button>

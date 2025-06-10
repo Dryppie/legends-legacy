@@ -9,7 +9,7 @@
     class="w-full"
   ></app-filter-tabs>
   <app-regular-button
-    (click)="refresh()"
+    (pressed)="refresh()"
     [disabled]="state.loading()"
     class="place-self-end"
     text="Refresh"

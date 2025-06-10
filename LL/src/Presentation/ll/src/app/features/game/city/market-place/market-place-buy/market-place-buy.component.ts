@@ -19,7 +19,10 @@ import { MarketplaceStateService } from '../../../../../core/services/api/market
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
 import { MarketPlaceListingItemComponent } from '../../../../../shared/components/market-place/market-place-listing-item/market-place-listing-item.component';
 import { ItemType } from '../../../../../shared/models/enums/itemType';
-import { EquipmentInstance } from '../../../../../shared/models/item';
+import {
+  EquipmentInstance,
+  EssenceItem,
+} from '../../../../../shared/models/item';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   debounceTime,
@@ -27,6 +30,7 @@ import {
   map,
   startWith,
 } from 'rxjs/operators';
+import { EquipmentTypePipe } from '../../../../../shared/pipes/equipment/equipment-type-format/equipment-type.pipe';
 
 @Component({
   selector: 'app-market-place-buy',
@@ -174,6 +178,36 @@ export class MarketPlaceBuyComponent implements OnInit {
       }
     });
   }
+
+  readonly itemDescription = computed(() => {
+    const listing = this.selectedListing();
+    if (!listing) return '';
+
+    const base = listing.itemInstance.itemBase;
+    const instance = listing.itemInstance;
+
+    switch (base.itemType) {
+      case 'Equipment': {
+        const eq = instance as EquipmentInstance;
+        const mods = eq.attributeModifiers
+          .map((m) => `• ${m.attributeType}: +${m.amount}`)
+          .join('\n');
+        return `Rarity: ${eq.rarity}\nType: ${new EquipmentTypePipe().transform(eq.itemBase.equipmentType)}\n${mods}`;
+      }
+
+      case 'Essence': {
+        const es = base as EssenceItem;
+        const mods = es.essence.attributeModifiers
+          .map((m) => `• ${m.attributeType}: +${m.amount}`)
+          .join('\n');
+        return `Active:  ${es.essence.active.name}\nPassive: ${es.essence.passive.name}\n${mods}`;
+      }
+
+      default:
+        /* Materials or other stackables */
+        return `${base.rarity}\n${base.description}`;
+    }
+  });
 
   buyoutListing(): void {
     const sel = this.selectedListing();

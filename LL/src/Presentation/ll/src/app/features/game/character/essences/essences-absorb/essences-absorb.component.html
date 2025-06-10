@@ -41,7 +41,7 @@
           <ng-container *ngIf="canEquipSelected() as canEquip; else nothing">
             <app-regular-button
               [disabled]="!canEquipSelected()"
-              (click)="absorb()"
+              (pressed)="absorb()"
             >
               Absorb essence
             </app-regular-button>

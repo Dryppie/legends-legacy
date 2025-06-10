@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import {
   BehaviorSubject,
   Observable,
+  Subscription,
   catchError,
   map,
   of,
@@ -10,6 +11,7 @@ import {
   take,
   tap,
   throwError,
+  timer,
 } from 'rxjs';
 
 import { ApiService } from '../api.service';
@@ -23,6 +25,8 @@ import { UserInfoDto } from '../../../../shared/models/Dtos/userInfoDto';
   providedIn: 'root',
 })
 export class AuthService {
+  private refreshSub?: Subscription;
+
   private currentCharacterSubject = new BehaviorSubject<CharacterDto | null>(
     null,
   );
@@ -60,9 +64,9 @@ export class AuthService {
     return this.api
       .post('auth/login', { Email: email, Password: password })
       .pipe(
-        tap(() => {
+        tap(({ accessExpiresAt }) => {
           this.toast.showToast('Login successful', '', true);
-          this.afterSuccessfulAuth();
+          this.afterSuccessfulAuth(accessExpiresAt);
         }),
         catchError((e) => {
           this.toast.showToast('Login failed', e.message, false);
@@ -83,9 +87,9 @@ export class AuthService {
         Password: password,
       })
       .pipe(
-        tap(() => {
+        tap(({ accessExpiresAt }) => {
           this.toast.showToast('Registration success', '', true);
-          this.afterSuccessfulAuth();
+          this.afterSuccessfulAuth(accessExpiresAt);
         }),
         catchError((e) => {
           this.toast.showToast('Registration failed', e.errorMessage, false);
@@ -98,9 +102,9 @@ export class AuthService {
     this.api
       .post('auth/loginAsGuest')
       .pipe(
-        tap(() => {
+        tap(({ accessExpiresAt }) => {
           this.toast.showToast('Guest session started', '', true);
-          this.afterSuccessfulAuth();
+          this.afterSuccessfulAuth(accessExpiresAt);
         }),
         catchError((e) => {
           this.toast.showToast('Guest login error', e.message, false);
@@ -114,9 +118,9 @@ export class AuthService {
     this.api
       .post('auth/google', idToken)
       .pipe(
-        tap(() => {
+        tap(({ accessExpiresAt }) => {
           this.toast.showToast('Google sign-in success', '', true);
-          this.afterSuccessfulAuth();
+          this.afterSuccessfulAuth(accessExpiresAt);
         }),
         catchError((e) => {
           this.toast.showToast('Google sign-in error', e.message, false);
@@ -154,10 +158,10 @@ export class AuthService {
         Password: password,
       })
       .pipe(
-        tap(() => {
+        tap(({ accessExpiresAt }) => {
           this.toast.showToast('Account converted', '', true);
           // cookies already updated server‑side; just restart auth flow
-          this.afterSuccessfulAuth();
+          this.afterSuccessfulAuth(accessExpiresAt);
         }),
         catchError((e) => {
           this.toast.showToast('Guest to real account error', e.message, false);
@@ -176,7 +180,8 @@ export class AuthService {
       });
   }
 
-  private finishLogout() {
+  private finishLogout(): void {
+    this.refreshSub?.unsubscribe(); // stop future refresh attempts
     this.markUnauthenticated();
     this.router.navigateByUrl('/');
   }
@@ -209,13 +214,31 @@ export class AuthService {
     );
   }
 
-  private afterSuccessfulAuth() {
+  private afterSuccessfulAuth(accessExpiresAt: number) {
     this.markAuthenticated();
+    this.armRefreshScheduler(accessExpiresAt);
+
     // preload character, then redirect
     this.fetchCharacter().subscribe({
       next: () => this.router.navigateByUrl('/game'),
       error: () => this.router.navigateByUrl('/game'),
     });
+  }
+
+  private armRefreshScheduler(accessExpiresAt: number): void {
+    // Cancel any previous timer
+    this.refreshSub?.unsubscribe();
+
+    const nowSec = Date.now() / 1000;
+    const ttlSec = accessExpiresAt - nowSec;
+    // Refresh when 70 % of lifetime has elapsed (i.e. 30 % remains)
+    const delayMs = Math.max(ttlSec * 0.7 * 1000, 1000);
+
+    this.refreshSub = timer(delayMs)
+      .pipe(switchMap(() => this.tryRefresh()))
+      .subscribe((ok) => {
+        if (!ok) this.logout(); // refresh token invalid / expired
+      });
   }
 
   getUserInfo(): Observable<UserInfoDto> {

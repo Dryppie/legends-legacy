@@ -68,7 +68,13 @@ public class CombatService : ICombatService
 
         var combatPlayerEntities = _combatSetupService.CreateCombatEntities(playerCharacters);
         var allCombatEnemyEntities = _combatSetupService.CreateCombatEntities(allEnemyCharacters);
-
+        var creatureKills = new Dictionary<Guid, int>();
+        var baseCinderValues = new Dictionary<Guid, int>();
+        foreach (var creature in allEnemyCharacters.OfType<Creature>())
+        {
+            creatureKills.Add(creature.Id, 0);
+            baseCinderValues.Add(creature.Id, creature.ExperienceReward * 10);
+        }
         // Prepare entities for combat
         await _combatSetupService.PrepareEntitiesForCombat([.. combatPlayerEntities, .. allCombatEnemyEntities]);
 
@@ -105,6 +111,11 @@ public class CombatService : ICombatService
                 var lootThisBattle = _lootService.GenerateIdleCombatLootAsync(selectedEnemyEntities, new Dictionary<ItemType, double>() { { ItemType.Essence, combatEssenceDropRate } });
                 lastCombatResult.Loot = lootThisBattle;
 
+                foreach (var id in selectedEnemyIds)
+                {
+                    creatureKills[id] = creatureKills.TryGetValue(id, out var kills) ? kills + 1 : 1;
+                }
+
                 // Accumulate total loot
                 totalLoot.AddRange(lootThisBattle);
 
@@ -133,6 +144,8 @@ public class CombatService : ICombatService
         var soulstoneDoubleDropChance = soulstoneBonuses.Get(SoulstoneUpgradeContants.SoulstoneDoubleDropChance);
         await ProcessSoulstoneDrops(characterAction.CharacterId, durationInSeconds, soulstoneDropRate, soulstoneDoubleDropChance, cancellationToken);
 
+        playerCharacters.OfType<Character>().First().Cinders += ProcessCinderDrop(creatureKills, baseCinderValues);
+
         await UpdateCharacterStatsAsync(playerCharacters, combatSession.CombatSummary.TotalExperience, cancellationToken);
         await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
 
@@ -145,6 +158,10 @@ public class CombatService : ICombatService
         if (soulstonesEarned < 1) return;
 
         await _publisher.Publish(new SoulstoneDropEvent(characterId, soulstonesEarned), cancellationToken);
+    }
+    private int ProcessCinderDrop(Dictionary<Guid, int> creatureKills, Dictionary<Guid, int> baseCinderValues)
+    {
+        return _lootService.GenerateCinderLoot(creatureKills, baseCinderValues);
     }
 
     private static void AddToCombatSummary(CombatSummary combatSummary, CombatResult lastCombatResult)

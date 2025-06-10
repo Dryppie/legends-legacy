@@ -13,15 +13,16 @@
         >{{ guild.members.length }} / {{ guild.maxMembers }} members</span
       >
       <div *ngIf="character.role !== memberRole" class="flex flex-col gap-2">
-        <div
-          class="place-self-end rounded border border-light_gray p-2 hover:cursor-pointer hover:bg-zinc-600/30"
-          (click)="openModal()"
+        <app-regular-button
+          [disabled]="isGuildFull()"
+          class="place-self-end"
+          (pressed)="openModal()"
         >
           Invite
-        </div>
-        <div
-          class="place-self-end rounded border border-light_gray p-2 hover:cursor-pointer hover:bg-zinc-600/30"
-          (click)="openApplicationsModal()"
+        </app-regular-button>
+        <app-regular-button
+          class="place-self-end"
+          (pressed)="openApplicationsModal()"
         >
           <div class="flex gap-1">
             <div>Applications</div>
@@ -29,19 +30,19 @@
               ({{ guild.invites.length }})
             </div>
           </div>
-        </div>
+        </app-regular-button>
       </div>
     </div>
   </div>
   <div class="flex h-full flex-col overflow-hidden">
-    <div class="grid grid-cols-4 gap-2 p-2">
+    <div class="grid grid-cols-4 gap-2 border-b border-light_gray p-2">
       <div>Name</div>
       <div>Level</div>
       <div>Role</div>
     </div>
     <div class="overflow-y-auto">
       <div
-        class="grid grid-cols-4 items-center border-t border-light_gray p-2 text-white"
+        class="grid grid-cols-4 items-center border-b border-light_gray p-2 text-white"
         *ngFor="let member of guildMembers"
         [ngClass]="{
           'bg-zinc-300/10 text-primary': member.characterId === id,
@@ -52,15 +53,16 @@
         </div>
         <div>{{ member.level }}</div>
         <div>{{ member.role }}</div>
-        <div
+        <app-regular-button
           *ngIf="member.characterId === id"
-          class="col-start-4 justify-self-end rounded border border-light_gray p-2 hover:cursor-pointer hover:bg-zinc-600/30"
-          (click)="
+          variant="danger"
+          class="col-start-4 justify-self-end"
+          (pressed)="
             openConfirmModal(member.role === leaderRole ? 'disband' : 'leave')
           "
         >
           {{ member.role === leaderRole ? "Disband" : "Leave" }}
-        </div>
+        </app-regular-button>
       </div>
     </div>
   </div>
@@ -83,8 +85,10 @@
       class="mb-4 w-full rounded border border-light_gray bg-texture p-2 text-white"
     />
     <div class="flex justify-end gap-2">
-      <app-regular-button (click)="closeModal()"> Cancel </app-regular-button>
-      <app-regular-button (click)="invite()"> Send Invite </app-regular-button>
+      <app-regular-button (pressed)="closeModal()"> Cancel </app-regular-button>
+      <app-regular-button (pressed)="invite()">
+        Send Invite
+      </app-regular-button>
     </div>
   </div>
 </div>
@@ -95,33 +99,38 @@
   (click)="closeApplicationsModal()"
 >
   <div
-    class="w-96 rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
+    class="flex max-h-full w-96 flex-col rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
     (click)="$event.stopPropagation()"
   >
-    <ng-container *ngIf="guild.invites.length > 0; else noApplications">
-      <h3 class="mb-4 text-primary">Applications</h3>
-      <div
-        class="flex items-center justify-between gap-2 border-t border-light_gray p-2 hover:bg-zinc-300/10"
-        *ngFor="let application of guild.invites"
-      >
-        <div class="truncate">{{ application.characterName }}</div>
-        <div class="flex gap-2">
-          <app-regular-button
-            (click)="rejectApplication(application.characterId)"
-          >
-            Reject
-          </app-regular-button>
-          <app-regular-button
-            (click)="approveApplication(application.characterId)"
-          >
-            Approve
-          </app-regular-button>
+    <h3 class="mb-4 text-primary">Applications</h3>
+    <div class="flex h-full flex-col overflow-y-auto">
+      <ng-container *ngIf="guild.invites.length > 0; else noApplications">
+        <div
+          class="flex items-center justify-between gap-2 border-t border-light_gray p-2 hover:bg-zinc-300/10"
+          *ngFor="let application of guild.invites"
+        >
+          <div class="truncate">{{ application.characterName }}</div>
+          <div class="flex gap-2">
+            <app-regular-button
+              variant="danger"
+              (pressed)="rejectApplication(application.characterId)"
+            >
+              Reject
+            </app-regular-button>
+            <app-regular-button
+              variant="secondary"
+              (pressed)="approveApplication(application.characterId)"
+              [disabled]="isGuildFull()"
+            >
+              Approve
+            </app-regular-button>
+          </div>
         </div>
-      </div>
-    </ng-container>
-    <ng-template #noApplications>
-      <h3 class="p-2 text-center text-primary">No applications</h3>
-    </ng-template>
+      </ng-container>
+      <ng-template #noApplications>
+        <p class="text-center italic text-neutral-400">No applications.</p>
+      </ng-template>
+    </div>
   </div>
 </div>
 
@@ -144,10 +153,10 @@
       }}? This action cannot be undone.
     </p>
     <div class="flex justify-end gap-2">
-      <app-regular-button (click)="closeConfirmModal()">
+      <app-regular-button (pressed)="closeConfirmModal()">
         Cancel
       </app-regular-button>
-      <app-regular-button variant="danger" (click)="confirmDecision()">
+      <app-regular-button variant="danger" (pressed)="confirmDecision()">
         {{ confirmAction === "disband" ? "Disband" : "Leave" }}
       </app-regular-button>
     </div>

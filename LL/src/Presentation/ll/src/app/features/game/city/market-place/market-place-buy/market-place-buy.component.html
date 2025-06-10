@@ -88,6 +88,11 @@
         {{ sel.itemInstance.itemBase.name }}
       </h2>
 
+      <!-- Adaptive description -->
+      <p class="whitespace-pre-line text-sm text-neutral-300">
+        {{ itemDescription() }}
+      </p>
+
       <p class="text-sm text-neutral-300">
         Unit price: {{ sel.unitPrice | numberFormat }} Cinders
       </p>

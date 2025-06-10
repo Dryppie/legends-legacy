@@ -125,4 +125,8 @@ export class GuildInfoComponent implements OnInit {
 
     this.closeConfirmModal();
   }
+
+  isGuildFull(): boolean {
+    return this.guildMembers.length >= this.guild.maxMembers;
+  }
 }

@@ -17,69 +17,78 @@
       Create Guild
     </div>
   </div>
-  <div *ngIf="guildInvites.length > 0" class="flex flex-col py-4 text-white">
-    <h3 class="p-2">Invites</h3>
-    <div
-      *ngFor="let invite of guildInvites"
-      class="flex items-center justify-between border-t border-light_gray p-2 hover:bg-zinc-300/10"
-    >
-      <div>
-        {{ invite.guildName }}
-      </div>
-      <div class="flex gap-2">
-        <div
-          (click)="rejectInvite(invite.guildId)"
-          class="rounded-md border border-light_gray p-2 text-primary hover:cursor-pointer hover:bg-zinc-300/10"
-        >
-          Reject
-        </div>
-        <div
-          (click)="acceptInvite(invite.guildId)"
-          class="rounded-md border border-light_gray p-2 text-primary hover:cursor-pointer hover:bg-zinc-300/10"
-        >
-          Accept
-        </div>
-      </div>
-    </div>
-  </div>
-  <div *ngIf="guilds.length > 0" class="flex flex-col text-white">
-    <h3 class="p-2 text-primary">Guilds</h3>
-    <div class="flex flex-col">
-      <div class="grid grid-cols-4 items-center gap-2 p-2">
-        <div>Name</div>
-        <div>Owner</div>
-        <div>Members</div>
-      </div>
+  <ng-container *ngIf="guildInvites.length > 0">
+    <div class="flex flex-col py-4 text-white">
+      <h3 class="p-2">Invites</h3>
       <div
-        class="grid grid-cols-4 items-center justify-between gap-2 border-t border-light_gray p-2 hover:bg-zinc-300/10"
-        *ngFor="let guild of guilds"
+        *ngFor="let invite of guildInvites"
+        class="flex items-center justify-between border-t border-light_gray p-2 hover:bg-zinc-300/10"
       >
-        <div class="break-words">
-          {{ guild.name }}
+        <div>
+          {{ invite.guildName }}
         </div>
-        <div class="break-words">
-          {{ guild.ownerName }}
-        </div>
-        <div>{{ guild.memberCount }}/{{ guild.maxMembers }}</div>
-
-        <div
-          class="justify-self-end rounded-md border border-light_gray p-2 text-white hover:cursor-pointer hover:bg-zinc-300/10"
-          (click)="!isGuildAppliedTo(guild.id) && applyToGuild(guild.id)"
-        >
-          <ng-container
-            *ngIf="!isGuildAppliedTo(guild.id); else appliedTemplate"
+        <div class="flex gap-2">
+          <div
+            (click)="rejectInvite(invite.guildId)"
+            class="rounded-md border border-light_gray p-2 text-primary hover:cursor-pointer hover:bg-zinc-300/10"
           >
-            Apply
-          </ng-container>
-          <ng-template #appliedTemplate> Applied </ng-template>
-        </div>
-
-        <div *ngIf="guilds.length === 0" class="text-white">
-          <p>No guilds available yet. Be the first to create one!</p>
+            Reject
+          </div>
+          <div
+            (click)="acceptInvite(invite.guildId)"
+            class="rounded-md border border-light_gray p-2 text-primary hover:cursor-pointer hover:bg-zinc-300/10"
+          >
+            Accept
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </ng-container>
+  <ng-container *ngIf="guilds.length > 0; else noGuilds">
+    <div class="flex flex-col text-white">
+      <h3 class="p-2 text-primary">Guilds</h3>
+      <div class="flex flex-col">
+        <div class="grid grid-cols-4 items-center gap-2 p-2">
+          <div>Name</div>
+          <div>Owner</div>
+          <div>Members</div>
+        </div>
+        <div
+          class="grid grid-cols-4 items-center justify-between gap-2 border-t border-light_gray p-2 hover:bg-zinc-300/10"
+          *ngFor="let guild of guilds"
+        >
+          <div class="break-words">
+            {{ guild.name }}
+          </div>
+          <div class="break-words">
+            {{ guild.ownerName }}
+          </div>
+          <div>{{ guild.memberCount }}/{{ guild.maxMembers }}</div>
+
+          <div
+            class="justify-self-end rounded-md border border-light_gray p-2 text-white hover:cursor-pointer hover:bg-zinc-300/10"
+            (click)="!isGuildAppliedTo(guild.id) && applyToGuild(guild.id)"
+          >
+            <ng-container
+              *ngIf="!isGuildAppliedTo(guild.id); else appliedTemplate"
+            >
+              Apply
+            </ng-container>
+            <ng-template #appliedTemplate> Applied </ng-template>
+          </div>
+
+          <div *ngIf="guilds.length === 0" class="text-white">
+            <p>No guilds available yet. Be the first to create one!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+  <ng-template #noGuilds>
+    <p class="mt-4 text-center italic text-neutral-400">
+      No guilds exist at the moment. Be the first and create one now!
+    </p>
+  </ng-template>
   <div
     *ngIf="showModal"
     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"

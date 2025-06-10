@@ -18,10 +18,13 @@ public class UserRepository : IUserRepository
     public async Task<AppUser?> FindByIdAsync(Guid id, CancellationToken cancellationToken) =>
         await _context.Users.FindAsync([id], cancellationToken);
 
-    public async Task AddAsync(AppUser user, CancellationToken cancellationToken)
+    public async Task<bool> AddAsync(AppUser user, CancellationToken cancellationToken)
     {
+        if (await _context.Users.AnyAsync(u => u.Username.ToLower() == user.Username.ToLower(), cancellationToken)) return false;
+
         _context.Users.Add(user);
         await _context.SaveChangesAsync(cancellationToken);
+        return true;
     }
 
     public async Task<UserInfo?> GetUserInfo(Guid userId, CancellationToken cancellationToken)

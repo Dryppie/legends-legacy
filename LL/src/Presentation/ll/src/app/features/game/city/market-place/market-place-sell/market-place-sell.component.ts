@@ -19,6 +19,7 @@ import { MarketplaceStateService } from '../../../../../core/services/api/market
 import { MarketPlaceListing } from '../../../../../shared/models/Dtos/market-place/market-place-listing';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
 import { FilterTabsComponent } from '../../../../../shared/components/tabs/filter-tabs/filter-tabs.component';
+import { EquipmentTypePipe } from '../../../../../shared/pipes/equipment/equipment-type-format/equipment-type.pipe';
 
 @Component({
   selector: 'app-market-place-sell',
@@ -108,7 +109,7 @@ export class MarketPlaceSellComponent implements OnInit {
         const mods = eq.attributeModifiers
           .map((m) => `• ${m.attributeType}: +${m.amount}`)
           .join('\n');
-        return `Rarity: ${eq.rarity}\nType: ${eq.itemBase.equipmentType}\n${mods}`;
+        return `Rarity: ${eq.rarity}\nType: ${new EquipmentTypePipe().transform(eq.itemBase.equipmentType)}\n${mods}`;
       }
 
       case 'Essence': {

@@ -22,10 +22,10 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Response<
         {
             // Register the user
             var user = await _userService.RegisterAsync(request.Username, request.Email, request.Password, cancellationToken);
-            if (user == null) return Response<Unit>.Fail("Email is already in use.");
+            if (user == null) return Response<Unit>.Fail("Email or username is already in use.");
 
             // Create a character for the registered user
-            await _publisher.Publish(new UserCreatedEvent(user.Id, user.Username ?? ""), cancellationToken);
+            await _publisher.Publish(new UserCreatedEvent(user.Id, user.Username), cancellationToken);
 
             return Response<Unit>.Success(Unit.Value);
         }

@@ -4,7 +4,7 @@ namespace Domain.Models.Users;
 public sealed class AppUser
 {
     public Guid Id { get; private set; } = Guid.NewGuid();
-    public string? Username { get; set; }
+    public string Username { get; set; } = string.Empty;
     public string? Email { get; set; }
     public string? PasswordHash { get; set; }
     [NotMapped]

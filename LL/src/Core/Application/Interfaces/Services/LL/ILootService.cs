@@ -29,4 +29,5 @@ public interface ILootService
     /// <param name="enemyCharacters"></param>
     /// <returns></returns>
     List<InventoryItem> GenerateIdleCombatLootAsync(List<Entity> enemyCharacters, Dictionary<ItemType, double> multipliers);
+    int GenerateCinderLoot(Dictionary<Guid, int> creatureKills, Dictionary<Guid, int> baseCinderValues, double dropChance = 0.2);
 }

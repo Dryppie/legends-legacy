@@ -31,7 +31,7 @@ public class GuestLoginCommandHandler : IRequestHandler<GuestLoginCommand, Respo
             var user = await _userService.RegisterGuestAsync(cancellationToken);
             if (user == null) return Response<Tokens>.Fail("Failed to register guest");
 
-            await _publisher.Publish(new UserCreatedEvent(user.Id, user.Username!), cancellationToken);
+            await _publisher.Publish(new UserCreatedEvent(user.Id, user.Username), cancellationToken);
 
             var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
             if (character == null) return Response<Tokens>.Fail("Character creation failed during guest registration");

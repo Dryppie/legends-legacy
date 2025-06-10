@@ -16,7 +16,8 @@ public class GuildRepository : IGuildRepository
 
     public async Task<bool> CreateAsync(Guid ownerCharacterId, string name, CancellationToken cancellationToken)
     {
-        if (await _context.Guilds.AnyAsync(g => g.Name.Equals(name, StringComparison.OrdinalIgnoreCase), cancellationToken)) return false;
+        if (await _context.Guilds.AnyAsync(g => g.Name.ToLower() == name.ToLower(), cancellationToken)) return false;
+        if (await _context.GuildMembers.AnyAsync(gm => gm.CharacterId == ownerCharacterId, cancellationToken)) return false;
 
         var newGuild = new Guild
         {
@@ -106,10 +107,12 @@ public class GuildRepository : IGuildRepository
             .Include(g => g.Invites)
             .FirstOrDefaultAsync(g => g.Id == guildId, cancellationToken);
 
-        var invitedCharacter = await _context.Characters
-            .FirstOrDefaultAsync(c => c.Name.Equals(invitedCharacterName), cancellationToken);
+        if (guild == null || guild.IsGuildFull()) return false;
 
-        if (guild == null || invitedCharacter == null || guild.IsGuildFull()) return false;
+        var invitedCharacter = await _context.Characters
+            .FirstOrDefaultAsync(c => c.Name.ToLower() == invitedCharacterName.ToLower(), cancellationToken);
+
+        if (invitedCharacter == null) return false;
 
         if (guild.Members.Count >= guild.MaxMembers) return false;
 
@@ -125,7 +128,9 @@ public class GuildRepository : IGuildRepository
 
     public async Task<bool> AcceptInviteAsync(Guid characterId, Guid guildId, CancellationToken cancellationToken)
     {
-        var guild = await _context.Guilds.FindAsync([guildId], cancellationToken);
+        var guild = await _context.Guilds
+            .Include(g => g.Members)
+            .FirstOrDefaultAsync(g => g.Id == guildId, cancellationToken);
         if (guild == null || guild.IsGuildFull()) return false;
 
         var invite = await _context.GuildInvites
@@ -135,6 +140,11 @@ public class GuildRepository : IGuildRepository
 
         // Player can not accept an invitation to a guild that they applied for
         if (!invite.IsInvite) return false;
+
+        var isInGuild = await _context.GuildMembers
+            .AnyAsync(gm => gm.CharacterId == characterId, cancellationToken);
+
+        if (isInGuild) return false;
 
         _context.GuildMembers.Add(new GuildMember
         {
@@ -167,7 +177,7 @@ public class GuildRepository : IGuildRepository
 
         if (guild == null) return false;
 
-        if (guild.IsGuildFull()) return false;
+        //if (guild.IsGuildFull()) return false;
 
         guild.Invites.Add(new GuildInvite
         {
@@ -181,13 +191,20 @@ public class GuildRepository : IGuildRepository
 
     public async Task<bool> ApproveApplicationAsync(Guid guildId, Guid applicationCharacterId, CancellationToken cancellationToken)
     {
-        var guild = await _context.Guilds.FindAsync([guildId], cancellationToken);
+        var guild = await _context.Guilds
+            .Include(g => g.Members)
+            .FirstOrDefaultAsync(g => g.Id == guildId, cancellationToken);
         if (guild == null || guild.IsGuildFull()) return false;
 
         var invite = await _context.GuildInvites
             .FirstOrDefaultAsync(i => i.GuildId == guildId && i.CharacterId == applicationCharacterId, cancellationToken);
 
         if (invite == null) return false;
+
+        var isInGuild = await _context.GuildMembers
+            .AnyAsync(gm => gm.CharacterId == applicationCharacterId, cancellationToken);
+
+        if (isInGuild) return false;
 
         _context.GuildMembers.Add(new GuildMember
         {

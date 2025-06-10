@@ -56,7 +56,7 @@ public class JwtGenerator : IJwtGenerator
 
     public Tokens IssueTokens(AppUser user, Character character)
     {
-        var now = DateTime.UtcNow;
+        var now = DateTimeOffset.UtcNow;
 
         var claims = new List<Claim>
         {
@@ -71,13 +71,13 @@ public class JwtGenerator : IJwtGenerator
 
         if (!string.IsNullOrWhiteSpace(user.CharacterId.ToString()))
             claims.Add(new Claim("CharacterId", user.CharacterId.ToString()!));
-
+        var expiresAt = now.Add(_accessLifespan);
         var jwt = new JwtSecurityToken(
             issuer: _validIssuer,
             audience: _validAudience,
             claims: claims,
-            notBefore: now,
-            expires: now.Add(_accessLifespan),
+            notBefore: now.UtcDateTime,
+            expires: expiresAt.UtcDateTime,
             signingCredentials: new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256)
         );
 
@@ -87,12 +87,12 @@ public class JwtGenerator : IJwtGenerator
         {
             UserId = user.Id,
             TokenHash = _hasher.Hash(refresh),
-            ExpiresUtc = now.Add(_refreshLifespan)
+            ExpiresUtc = now.Add(_refreshLifespan).UtcDateTime
         };
 
         _repo.AddAsync(refreshEntity, CancellationToken.None).GetAwaiter().GetResult();
 
-        return new Tokens(access, refresh);
+        return new Tokens(access, refresh, expiresAt.ToUnixTimeSeconds());
     }
 
     public async Task<Tokens?> RefreshAsync(string refreshToken, CancellationToken cancellationToken)

@@ -31,7 +31,7 @@ public class GoogleLoginCommandHandler : IRequestHandler<GoogleLoginCommand, Res
         var (user, isNew) = googleLoginResult;
         // if brand‑new, create a character
         if (isNew)
-            await _publisher.Publish(new UserCreatedEvent(user.Id, user.Username!), cancellationToken);
+            await _publisher.Publish(new UserCreatedEvent(user.Id, user.Username), cancellationToken);
 
         var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
         if (character == null) return Response<Tokens>.Fail("Could not find character.");
