@@ -1,19 +1,21 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Equipment, EquipmentInstance } from '../../../../models/item';
-import { EquipmentService } from '../../../../../core/services/api/equipment/equipment.service';
 import { AttributeTypeFormatPipe } from '../../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { EquipmentType } from '../../../../models/Dtos/equipmentSlot';
-import { CharacterManagerService } from '../../../../../core/services/client-side/character-manager/character-manager.service';
+import { EquipmentSlotType } from '../../../../models/Dtos/equipment-slots/equipmentSlot';
+import { getAllowedEquipmentTypesForSlot } from '../../../../utils/equipment/equipment.utils';
+import { EquipmentStateService } from '../../../../../core/services/api/equipment/equipment-state.service';
+import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
+import { EquipmentTypePipe } from '../../../../pipes/equipment/equipment-type-format/equipment-type.pipe';
 
 @Component({
   selector: 'app-overview-equipment-modal',
   standalone: true,
-  imports: [AttributeTypeFormatPipe, NgIf, NgFor, NgClass],
+  imports: [AttributeTypeFormatPipe, EquipmentTypePipe, NgIf, NgFor, NgClass],
   templateUrl: './overview-equipment-modal.component.html',
 })
 export class OverviewEquipmentModalComponent implements OnInit {
-  @Input() equipmentType!: EquipmentType;
+  @Input() equipmentSlotType!: EquipmentSlotType;
   equipmentInstances!: EquipmentInstance[] | null;
   selectedEquipmentInstance!: EquipmentInstance;
   selectedEquipment!: Equipment;
@@ -21,19 +23,25 @@ export class OverviewEquipmentModalComponent implements OnInit {
   @Output() close = new EventEmitter<void>();
 
   constructor(
-    private equipmentService: EquipmentService,
-    private characterManager: CharacterManagerService,
+    private inventoryState: InventoryStateService,
+    private equipmentState: EquipmentStateService,
   ) {}
   ngOnInit(): void {
-    const inventory = this.characterManager.getInventory();
-    this.equipmentInstances = inventory?.inventoryItems
-      .map((ii) => ii.itemInstance as EquipmentInstance)
-      .filter(
-        (ii) => (ii.itemBase as Equipment).equipmentType === this.equipmentType,
-      )!;
-    const equippedItems = this.characterManager.getEquipment();
-    this.currentEquippedEquipment = equippedItems.find(
-      (ei) => ei.equipmentType === this.equipmentType,
+    const items = this.inventoryState.items();
+    const allItems =
+      items.map((ii) => ii.itemInstance as EquipmentInstance) ?? [];
+
+    const allowedTypes = getAllowedEquipmentTypesForSlot(
+      this.equipmentSlotType,
+    );
+
+    this.equipmentInstances = allItems.filter((ii) =>
+      allowedTypes.includes((ii.itemBase as Equipment).equipmentType),
+    );
+
+    const equipmentSlots = this.equipmentState.equipmentSlots();
+    this.currentEquippedEquipment = equipmentSlots.find(
+      (ei) => ei.equipmentSlotType === this.equipmentSlotType,
     )?.equipmentInstance;
   }
 
@@ -42,12 +50,13 @@ export class OverviewEquipmentModalComponent implements OnInit {
   }
 
   onEquip(): void {
-    this.equipmentService.equipEquipment(this.selectedEquipmentInstance);
+    this.equipmentState.equip(this.selectedEquipmentInstance);
+
     this.onClose();
   }
 
   onUnequip() {
-    this.equipmentService.unequipEquipment(this.equipmentType);
+    this.equipmentState.unequip(this.equipmentSlotType);
     this.onClose();
   }
 

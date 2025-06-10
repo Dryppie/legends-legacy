@@ -46,7 +46,7 @@ writeFileSync(
 import { Recipe, CraftType } from '../shared/models/profession';
 import { ItemType } from '../shared/models/enums/itemType';
 import { Rarity } from '../shared/models/enums/rarity';
-import { EquipmentType } from '../shared/models/Dtos/equipmentSlot';
+import { EquipmentType } from '../shared/models/enums/equipmentType';
 import { AttributeType } from '../shared/models/enums/attributeType';
 import { ModifierType } from '../shared/models/Dtos/attributesDto';
 

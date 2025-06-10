@@ -4,6 +4,7 @@
     "id": "combat.essence.drop.rate",
     "name": "Essence Drop Rate",
     "maxLevel": 100,
+    "description": "If this increases drop rate by 100%, then an essence with a 1% drop rate is increased to a 2% drop rate.",
     "cost": {
       "base": 1,
       "increment": 1
@@ -18,6 +19,7 @@
     "id": "combat.double.exp.chance",
     "name": "Double Exp Chance",
     "maxLevel": 100,
+    "description": "Increases the chance of receiving double the experience from a fight.",
     "cost": {
       "base": 1,
       "increment": 1
@@ -34,6 +36,7 @@
     "id": "gathering.double.drop.chance",
     "name": "Double Drop Chance",
     "maxLevel": 100,
+    "description": "Increases the chance of receiving double the loot from a gathering action.",
     "cost": {
       "base": 1,
       "increment": 1
@@ -48,6 +51,7 @@
     "id": "gathering.double.exp.chance",
     "name": "Double Exp Chance",
     "maxLevel": 100,
+    "description": "Increases the chance of receiving double the experience from a gathering action.",
     "cost": {
       "base": 1,
       "increment": 1
@@ -64,6 +68,7 @@
     "id": "crafting.double.item.exp.chance",
     "name": "Double Item Exp Chance",
     "maxLevel": 100,
+    "description": "Increases the chance of receiving double the experience on an item when performing tempering.",
     "cost": {
       "base": 1,
       "increment": 1
@@ -78,6 +83,7 @@
     "id": "crafting.negative.outcome",
     "name": "Negative Outcome Chance",
     "maxLevel": 100,
+    "description": "Decreases the chance of performing a negative outcome when tempering by a flat amount.",
     "cost": {
       "base": 1,
       "increment": 1
@@ -94,6 +100,7 @@
     "id": "misc.soulstone.drop.rate",
     "name": "Soulstone Drop Rate",
     "maxLevel": 100,
+    "description": "Increases the drop rate of Soulstones.",
     "cost": {
       "base": 1,
       "increment": 1,
@@ -109,6 +116,7 @@
     "id": "misc.soulstone.double.drop.chance",
     "name": "Soulstone Double Drop Chance",
     "maxLevel": 100,
+    "description": "Increases the chance of receiving double the Soulstones.",
     "cost": {
       "base": 1,
       "increment": 1,
@@ -124,6 +132,7 @@
   //  "id": "misc.daily.tasks",
   //  "name": "+Daily Tasks",
   //  "maxLevel": 3,
+  //  "description": "Increases the amount of daily tasks received upon daily reset.",
   //  "cost": {
   //    "base": 50,
   //    "increment": 50

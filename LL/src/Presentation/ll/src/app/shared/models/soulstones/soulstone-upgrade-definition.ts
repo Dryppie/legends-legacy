@@ -6,6 +6,7 @@ export interface SoulstoneUpgradeDefinition {
   id: string;
   name: string;
   maxLevel: number;
+  description: string;
   cost: CostCurve;
   effect: UpgradeEffect;
   type: SoulstoneUpgradeType;

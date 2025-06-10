@@ -2,7 +2,7 @@
 import { Recipe, CraftType } from '../shared/models/profession';
 import { ItemType } from '../shared/models/enums/itemType';
 import { Rarity } from '../shared/models/enums/rarity';
-import { EquipmentType } from '../shared/models/Dtos/equipmentSlot';
+import { EquipmentType } from '../shared/models/enums/equipmentType';
 import { AttributeType } from '../shared/models/enums/attributeType';
 import { ModifierType } from '../shared/models/Dtos/attributesDto';
 
@@ -1586,7 +1586,7 @@ export const RECIPES_CONTENT = [
       "stackable": false,
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
-      "equipmentType": EquipmentType.MainHand,
+      "equipmentType": EquipmentType.OneHanded,
       "attributeModifiers": [
         {
           "attributeType": AttributeType.FightingSpirit,
@@ -1670,7 +1670,7 @@ export const RECIPES_CONTENT = [
       "stackable": false,
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
-      "equipmentType": EquipmentType.MainHand,
+      "equipmentType": EquipmentType.OneHanded,
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Strength,
@@ -1749,7 +1749,7 @@ export const RECIPES_CONTENT = [
       "stackable": false,
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
-      "equipmentType": EquipmentType.MainHand,
+      "equipmentType": EquipmentType.OneHanded,
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Endurance,
@@ -1828,7 +1828,7 @@ export const RECIPES_CONTENT = [
       "stackable": false,
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
-      "equipmentType": EquipmentType.MainHand,
+      "equipmentType": EquipmentType.OneHanded,
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Dexterity,
@@ -1907,7 +1907,7 @@ export const RECIPES_CONTENT = [
       "stackable": false,
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
-      "equipmentType": EquipmentType.MainHand,
+      "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
           "attributeType": AttributeType.FightingSpirit,
@@ -1991,7 +1991,7 @@ export const RECIPES_CONTENT = [
       "stackable": false,
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
-      "equipmentType": EquipmentType.MainHand,
+      "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Strength,
@@ -2070,7 +2070,7 @@ export const RECIPES_CONTENT = [
       "stackable": false,
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
-      "equipmentType": EquipmentType.MainHand,
+      "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Endurance,
@@ -2154,7 +2154,7 @@ export const RECIPES_CONTENT = [
       "stackable": false,
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
-      "equipmentType": EquipmentType.MainHand,
+      "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
           "attributeType": AttributeType.FightingSpirit,
@@ -2393,7 +2393,7 @@ export const RECIPES_CONTENT = [
       "stackable": false,
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
-      "equipmentType": EquipmentType.MainHand,
+      "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Intelligence,
@@ -2551,7 +2551,7 @@ export const RECIPES_CONTENT = [
       "stackable": false,
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
-      "equipmentType": EquipmentType.MainHand,
+      "equipmentType": EquipmentType.OneHanded,
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Wisdom,
@@ -2696,7 +2696,7 @@ export const RECIPES_CONTENT = [
       "stackable": false,
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
-      "equipmentType": EquipmentType.MainHand,
+      "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Agility,
@@ -2775,7 +2775,7 @@ export const RECIPES_CONTENT = [
       "stackable": false,
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
-      "equipmentType": EquipmentType.MainHand,
+      "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Agility,
@@ -2859,7 +2859,7 @@ export const RECIPES_CONTENT = [
       "stackable": false,
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
-      "equipmentType": EquipmentType.MainHand,
+      "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
           "attributeType": AttributeType.FightingSpirit,

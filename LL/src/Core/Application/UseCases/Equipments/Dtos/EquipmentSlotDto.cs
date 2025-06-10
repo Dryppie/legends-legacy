@@ -9,7 +9,7 @@ public class EquipmentSlotDto : IMapFrom<EquipmentSlot>
     public Guid EntityId { get; set; }
     public Guid? EquipmentInstanceId { get; set; }
     public EquipmentInstanceDto? EquipmentInstance { get; set; }
-    public EquipmentType EquipmentType { get; set; }
+    public EquipmentSlotType EquipmentSlotType { get; set; }
 
     public void Mapping(Profile profile)
     {

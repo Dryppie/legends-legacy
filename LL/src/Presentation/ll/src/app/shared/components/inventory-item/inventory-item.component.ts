@@ -5,6 +5,7 @@ import { NgIf } from '@angular/common';
 import { ModalService } from '../../../core/services/client-side/modal/modal.service';
 import { ItemType } from '../../models/enums/itemType';
 import { Equipment, EquipmentInstance, EssenceItem } from '../../models/item';
+import { EquipmentType } from '../../models/enums/equipmentType';
 
 @Component({
   selector: 'app-inventory-item',
@@ -31,9 +32,15 @@ export class InventoryItemComponent {
 
   get equipmentIcon(): string | null {
     if (!this.isEquipment) return null;
-    return (
+    const equipmentType = (
       this.inventoryItem.itemInstance.itemBase as Equipment
-    ).equipmentType.toLowerCase();
+    ).equipmentType;
+    if (
+      equipmentType === EquipmentType.TwoHanded ||
+      equipmentType === EquipmentType.OneHanded
+    )
+      return 'mainhand';
+    else return equipmentType.toLowerCase();
   }
 
   get equipmentIconPath(): string | null {

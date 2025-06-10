@@ -1,4 +1,4 @@
-<div class="max-w-xl rounded-lg border-primary bg-texture p-6 text-white">
+<div class="max-w-full rounded-lg border-primary bg-texture p-6 text-white">
   <!-- Modal Header -->
   <div class="flex w-full items-center justify-center pb-2">
     <h2 class="text-primary">
@@ -9,7 +9,7 @@
 
   <div class="flex flex-row justify-between gap-2">
     <!-- Modal Body -->
-    <div class="space-y-4">
+    <div class="space-y-2">
       <!-- <div class="flex flex-col gap-1">
         <h3 class="font-semibold text-primary">Active Ability</h3>
         <div class="flex gap-1">
@@ -37,6 +37,10 @@
           </div>
         </div>
       </div> -->
+
+      <div class="italic text-zinc-300">
+        {{ equipmentInstance.itemBase.equipmentType | equipmentType }}
+      </div>
       <div>
         <h3 class="pb-1 font-semibold text-primary">Attributes</h3>
         <div

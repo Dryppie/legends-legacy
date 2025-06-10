@@ -19,8 +19,8 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
     {
         var equipmentList = await _context.EquipmentSlots
             .Include(es => es.EquipmentInstance)
-                .ThenInclude(ei => ei.EquipmentBase)
-                    .ThenInclude(eb => eb.AttributeModifiers)
+                .ThenInclude(ei => ei.ItemBase)
+                    .ThenInclude(eb => (eb as EquipmentBase).AttributeModifiers)
             .Where(es => es.EntityId.Equals(entityId))
             .ToListAsync(cancellationToken);
 
@@ -32,7 +32,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         var character = await _context.Characters
             .Include(c => c.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)
-                    .ThenInclude(ei => ei.EquipmentBase)
+                    .ThenInclude(ei => ei.ItemBase)
             .Include(c => c.Inventory)
                 .ThenInclude(i => i.InventoryItems)
                     .ThenInclude(ii => ii.ItemInstance)
@@ -52,8 +52,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         var equipmentBase = equipmentInstance.EquipmentBase;
 
         // Special handling for Two-Handed weapons occupying both hands
-        if (equipmentBase.EquipmentType == EquipmentType.TwoHanded &&
-            (slotType == EquipmentSlotType.MainHand || slotType == EquipmentSlotType.OffHand))
+        if (equipmentBase.EquipmentType == EquipmentType.TwoHanded)
         {
             var mainHand = GetSlot(character, EquipmentSlotType.MainHand);
             var offHand = GetSlot(character, EquipmentSlotType.OffHand);
@@ -72,7 +71,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                 offHand.EquipmentInstanceId = null;
             }
 
-            AddOrIncrementItemInInventory(character.Inventory, equipmentInstance.Id);
+            AddItemToInventory(character.Inventory, equipmentInstance.Id);
         }
         else
         {
@@ -80,7 +79,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
             targetSlot.EquipmentInstance = null;
             targetSlot.EquipmentInstanceId = null;
 
-            AddOrIncrementItemInInventory(character.Inventory, equipmentInstance.Id);
+            AddItemToInventory(character.Inventory, equipmentInstance.Id);
         }
 
         await _context.SaveChangesAsync(cancellationToken);
@@ -93,7 +92,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         var character = await _context.Characters
             .Include(c => c.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)
-                    .ThenInclude(ei => ei.EquipmentBase)
+                    .ThenInclude(ei => ei.ItemBase)
             .Include(c => c.Inventory)
                 .ThenInclude(i => i.InventoryItems)
                     .ThenInclude(ii => ii.ItemInstance)
@@ -141,9 +140,11 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                     if (mainHand is null || offHand is null)
                         return false;
 
-                    // Unequip both hands if occupied
+                    // Unequip both hands if occupied, unless it's a two-handed. Because that'll just return two items to the inventory
+                    if (mainHand.EquipmentInstance?.EquipmentBase.EquipmentType != EquipmentType.TwoHanded)
+                        UnequipSlotAsync(offHand, inventory);
+
                     UnequipSlotAsync(mainHand, inventory);
-                    UnequipSlotAsync(offHand, inventory);
 
                     mainHand.EquipmentInstanceId = equipmentInstance.Id;
                     offHand.EquipmentInstanceId = equipmentInstance.Id;
@@ -161,21 +162,25 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                         return false;
 
                     // Prioritize empty hand; fall back to replacing OffHand if needed
-                    if (mainHand.EquipmentInstanceId is null)
+                    if (mainHand.EquipmentInstance is null)
                     {
-                        UnequipSlotAsync(mainHand, inventory);
                         mainHand.EquipmentInstanceId = equipmentInstance.Id;
                         mainHand.EquipmentInstance = equipmentInstance;
                     }
-                    else if (offHand.EquipmentInstanceId is null)
+                    else if (offHand.EquipmentInstance is null)
                     {
-                        UnequipSlotAsync(offHand, inventory);
                         offHand.EquipmentInstanceId = equipmentInstance.Id;
                         offHand.EquipmentInstance = equipmentInstance;
                     }
                     else
                     {
+                        if (mainHand.EquipmentInstance.EquipmentBase.EquipmentType == EquipmentType.TwoHanded)
+                        {
+                            offHand.EquipmentInstanceId = null;
+                            offHand.EquipmentInstance = null;
+                        }
                         // Fall back to replacing mainhand if both are occupied
+                        UnequipSlotAsync(mainHand, inventory);
                         mainHand.EquipmentInstanceId = equipmentInstance.Id;
                         mainHand.EquipmentInstance = equipmentInstance;
                     }
@@ -195,11 +200,13 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                     var mainHandItem = mainHand.EquipmentInstance;
                     if (mainHandItem != null && mainHandItem.EquipmentBase.EquipmentType == EquipmentType.TwoHanded)
                     {
-                        UnequipSlotAsync(mainHand, inventory);
+                        mainHand.EquipmentInstanceId = null;
+                        mainHand.EquipmentInstance = null;
                     }
 
                     UnequipSlotAsync(offHand, inventory);
                     offHand.EquipmentInstanceId = equipmentInstance.Id;
+                    offHand.EquipmentInstance = equipmentInstance;
                     break;
                 }
 
@@ -227,10 +234,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                 }
         }
 
-        // Adjust inventory
-        inventoryItem.Quantity -= 1;
-        if (inventoryItem.Quantity < 1)
-            _context.InventoryItems.Remove(inventoryItem);
+        _context.InventoryItems.Remove(inventoryItem);
 
         await _context.SaveChangesAsync(cancellationToken);
         return true;
@@ -239,7 +243,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
     private static EquipmentSlot? GetSlot(Character character, EquipmentSlotType slotType) =>
         character.EquipmentSlots.FirstOrDefault(s => s.EquipmentSlotType == slotType);
 
-    private void UnequipSlotAsync(EquipmentSlot slot, Inventory inventory)
+    private static void UnequipSlotAsync(EquipmentSlot slot, Inventory inventory)
     {
         if (slot.EquipmentInstanceId is null)
             return;
@@ -247,29 +251,19 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         var equipped = slot.EquipmentInstance;
         if (equipped is not null)
         {
-            AddOrIncrementItemInInventory(inventory, equipped.Id);
+            AddItemToInventory(inventory, equipped.Id);
         }
 
         slot.EquipmentInstanceId = null;
     }
 
-    private void AddOrIncrementItemInInventory(Inventory inventory, Guid itemId)
+    private static void AddItemToInventory(Inventory inventory, Guid itemId)
     {
-        var invItem = inventory.InventoryItems
-            .FirstOrDefault(ii => ii.ItemInstanceId == itemId);
-
-        if (invItem != null)
+        inventory.InventoryItems.Add(new InventoryItem
         {
-            invItem.Quantity += 1;
-        }
-        else
-        {
-            inventory.InventoryItems.Add(new InventoryItem
-            {
-                InventoryId = inventory.CharacterId,
-                ItemInstanceId = itemId,
-                Quantity = 1
-            });
-        }
+            InventoryId = inventory.CharacterId,
+            ItemInstanceId = itemId,
+            Quantity = 1
+        });
     }
 }

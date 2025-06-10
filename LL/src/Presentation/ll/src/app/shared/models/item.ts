@@ -1,5 +1,5 @@
 import { AttributeModifier } from './Dtos/attributesDto';
-import { EquipmentType } from './Dtos/equipmentSlot';
+import { EquipmentType } from './enums/equipmentType';
 import { ItemType } from './enums/itemType';
 import { Rarity } from './enums/rarity';
 import { Essence } from './essence';

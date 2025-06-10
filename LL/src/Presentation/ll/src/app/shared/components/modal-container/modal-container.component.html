@@ -1,9 +1,12 @@
 <div
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
+  class="fixed inset-0 z-50 flex max-h-full flex-col items-center justify-center overflow-hidden bg-black/70"
   *ngIf="isModalOpen"
   (click)="onOverlayClick($event)"
 >
-  <div class="w-full sm:w-2/3 lg:w-2/5" (click)="$event.stopPropagation()">
+  <div
+    class="max-h-full w-full overflow-hidden sm:w-2/3 lg:w-2/5"
+    (click)="$event.stopPropagation()"
+  >
     <app-essence-modal
       *ngIf="essence"
       [essence]="essence"
@@ -34,7 +37,7 @@
     </app-inventory-equipment-modal>
     <app-overview-equipment-modal
       *ngIf="overviewEquipment"
-      [equipmentType]="overviewEquipment"
+      [equipmentSlotType]="overviewEquipment"
       (close)="onOverviewEquipmentModalClose()"
       >>
     </app-overview-equipment-modal>

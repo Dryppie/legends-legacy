@@ -4,6 +4,7 @@ import { NgIf } from '@angular/common';
 import { Equipment } from '../../../models/item';
 import { ItemType } from '../../../models/enums/itemType';
 import { ItemComponent } from '../../item/item.component';
+import { EquipmentType } from '../../../models/enums/equipmentType';
 
 @Component({
   selector: 'app-market-place-inventory-item',
@@ -28,9 +29,15 @@ export class MarketPlaceInventoryItemComponent {
 
   get equipmentIcon(): string | null {
     if (!this.isEquipment) return null;
-    return (
+    const equipmentType = (
       this.inventoryItem.itemInstance.itemBase as Equipment
-    ).equipmentType.toLowerCase();
+    ).equipmentType;
+    if (
+      equipmentType === EquipmentType.TwoHanded ||
+      equipmentType === EquipmentType.OneHanded
+    )
+      return 'mainhand';
+    else return equipmentType.toLowerCase();
   }
 
   get equipmentIconPath(): string | null {

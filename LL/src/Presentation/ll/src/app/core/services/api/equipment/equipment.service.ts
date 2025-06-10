@@ -3,8 +3,8 @@ import { ApiService } from '../api.service';
 import { Observable, tap } from 'rxjs';
 import {
   EquipmentSlot,
-  EquipmentType,
-} from '../../../../shared/models/Dtos/equipmentSlot';
+  EquipmentSlotType,
+} from '../../../../shared/models/Dtos/equipment-slots/equipmentSlot';
 import { EquipmentInstance } from '../../../../shared/models/item';
 import { CharacterManagerService } from '../../client-side/character-manager/character-manager.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
@@ -29,8 +29,8 @@ export class EquipmentService {
   public equipEquipment(equipment: EquipmentInstance) {
     return this.apiService.post('equipment/equip', equipment.id).subscribe({
       next: () => {
-        this.characterManager.updateEquipment(equipment);
-        this.inventoryState.removeItem(equipment.id);
+        // this.characterManager.updateEquipment(equipment);
+        // this.inventoryState.removeItem(equipment.id);
         // this.toastService.showToast(
         //   'Essence equipped successfully!',
         //   'success',
@@ -43,22 +43,9 @@ export class EquipmentService {
     });
   }
 
-  unequipEquipment(equipmentType: EquipmentType) {
-    return this.apiService.post('equipment/unequip', equipmentType).subscribe({
+  unequipEquipment(slotType: EquipmentSlotType) {
+    return this.apiService.post('equipment/unequip', slotType).subscribe({
       next: () => {
-        const equipment = this.characterManager
-          .getEquipment()
-          .find((e) => e.equipmentType === equipmentType);
-        if (!equipment || !equipment.equipmentInstance) return;
-
-        const inventoryItem: InventoryItem = {
-          id: '',
-          itemInstance: equipment.equipmentInstance,
-          quantity: 1,
-        };
-
-        this.inventoryState.add(inventoryItem);
-        this.characterManager.unequipEquipment(equipmentType);
         // this.toastService.showToast(
         //   'Essence equipped successfully!',
         //   'success',

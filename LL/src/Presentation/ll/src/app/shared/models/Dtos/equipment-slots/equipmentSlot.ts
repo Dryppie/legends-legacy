@@ -1,13 +1,13 @@
-import { EquipmentInstance } from '../item';
+import { EquipmentInstance } from '../../item';
 
 export interface EquipmentSlot {
   id: string;
   iconPath: string;
   equipmentInstance?: EquipmentInstance;
-  equipmentType: EquipmentType;
+  equipmentSlotType: EquipmentSlotType;
 }
 
-export enum EquipmentType {
+export enum EquipmentSlotType {
   Head = 'Head',
   Relic = 'Relic',
   Chest = 'Chest',

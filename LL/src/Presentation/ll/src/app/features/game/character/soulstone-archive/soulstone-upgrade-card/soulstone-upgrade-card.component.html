@@ -5,7 +5,19 @@
       class="flex h-32 w-80 flex-col justify-between gap-2 rounded-md border border-zinc-300/30 p-4"
       *ngFor="let view of upgrades"
     >
-      <div>{{ view.definition.name }}</div>
+      <div class="flex justify-between">
+        <div>{{ view.definition.name }}</div>
+        <div class="group relative flex sm:inline-block">
+          <button class="cursor-pointer border-none bg-transparent p-0">
+            <img src="icons/Info.svg" class="size-6" />
+          </button>
+          <div
+            class="absolute right-full top-0 hidden rounded border border-light_gray bg-texture p-2 text-sm text-white shadow group-hover:block sm:w-56"
+          >
+            {{ view.definition.description }}
+          </div>
+        </div>
+      </div>
       <div class="flex justify-between">
         <div class="flex flex-col justify-end gap-2">
           <span

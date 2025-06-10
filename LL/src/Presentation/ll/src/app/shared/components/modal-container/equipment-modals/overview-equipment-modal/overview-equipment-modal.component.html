@@ -1,5 +1,5 @@
 <div
-  class="max-w-xl rounded-lg border border-primary bg-texture p-6 text-primary"
+  class="flex max-h-full max-w-full flex-col overflow-hidden rounded-lg border border-primary bg-texture p-6 text-primary"
 >
   <!-- Modal Header -->
   <div class="mb-4 flex items-start justify-between">
@@ -14,8 +14,13 @@
   <div *ngIf="currentEquippedEquipment" class="mb-4">
     <h3 class="text-lg font-semibold">Currently Equipped</h3>
     <div class="p-2">
-      <div class="text-lg font-bold">
-        {{ currentEquippedEquipment.itemBase.name }}
+      <div class="flex justify-between text-lg font-bold">
+        <div>
+          {{ currentEquippedEquipment.itemBase.name }}
+        </div>
+        <span class="italic text-zinc-300">
+          {{ currentEquippedEquipment.itemBase.equipmentType | equipmentType }}
+        </span>
       </div>
       <div
         *ngFor="let attribute of currentEquippedEquipment.attributeModifiers"
@@ -32,14 +37,13 @@
   </div>
   <div class="border-t border-light_gray pb-2"></div>
   <!-- List of Equipment -->
-  <div class="space-y-4">
+  <div class="flex flex-col space-y-4 overflow-y-auto">
     <!-- Iterate over all equipment instances -->
+    <h3 class="text-lg font-semibold">Available items</h3>
     <div
       *ngIf="equipmentInstances && equipmentInstances.length; else noEquipment"
-      class="flex flex-col gap-2"
+      class="flex h-full flex-col overflow-y-auto"
     >
-      <h3 class="text-lg font-semibold">Available items</h3>
-
       <div
         class="flex items-center gap-2"
         *ngFor="let equipment of equipmentInstances"
@@ -53,8 +57,13 @@
             'border-primary': equipment === selectedEquipmentInstance,
           }"
         >
-          <div class="text-lg font-bold">
-            {{ equipment.itemBase.name }}
+          <div class="flex justify-between text-lg font-bold">
+            <div>
+              {{ equipment.itemBase.name }}
+            </div>
+            <span class="italic text-zinc-300">
+              {{ equipment.itemBase.equipmentType | equipmentType }}
+            </span>
           </div>
           <div
             *ngFor="let attribute of equipment.attributeModifiers"

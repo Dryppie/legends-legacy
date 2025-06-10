@@ -15,16 +15,15 @@ import {
 import { map } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { ProfessionsService } from '../../../../core/services/api/professions/professions.service';
-import { Tab } from '../../../../shared/models/sidebar-item';
 import { TabComponent } from '../../../../shared/components/tabs/tab/tab.component';
 import { RegularCraftingComponent } from './regular-crafting/regular-crafting.component';
 import { TemperingComponent } from './tempering/tempering.component';
-import { EquipmentType } from '../../../../shared/models/Dtos/equipmentSlot';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { Equipment } from '../../../../shared/models/item';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { InventoryStateService } from '../../../../core/services/api/inventory/inventory-state.service';
 import { TabsComponent } from '../../../../shared/components/tabs/tabs.component';
+import { EquipmentType } from '../../../../shared/models/enums/equipmentType';
 
 @Component({
   selector: 'app-crafting',
@@ -60,7 +59,11 @@ export class CraftingComponent implements OnInit {
       EquipmentType.Legs,
       EquipmentType.Relic,
     ],
-    [CraftType.WeaponSmithing]: [EquipmentType.MainHand, EquipmentType.OffHand],
+    [CraftType.WeaponSmithing]: [
+      EquipmentType.TwoHanded,
+      EquipmentType.OneHanded,
+      EquipmentType.OffHand,
+    ],
   };
   // ────────────────────────────────────── ctor/di ─────────────────────────────
   constructor() {

@@ -3,12 +3,14 @@ import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { InventoryDto } from '../../../../shared/models/Dtos/inventoryDto';
 import {
   EquipmentSlot,
-  EquipmentType,
-} from '../../../../shared/models/Dtos/equipmentSlot';
+  EquipmentSlotType,
+} from '../../../../shared/models/Dtos/equipment-slots/equipmentSlot';
 import { BehaviorSubject } from 'rxjs';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { Equipment, EquipmentInstance } from '../../../../shared/models/item';
 import { EventBusService } from '../event-bus/event-bus.service';
+import { getAllowedEquipmentTypesForSlot } from '../../../../shared/utils/equipment/equipment.utils';
+import { EquipmentType } from '../../../../shared/models/enums/equipmentType';
 
 @Injectable({
   providedIn: 'root',
@@ -88,17 +90,117 @@ export class CharacterManagerService {
   }
 
   updateEquipment(equipmentInstance: EquipmentInstance) {
-    const current = this.equipmentSubject.value.map((es) => {
-      const equipmentBase = equipmentInstance.itemBase as Equipment;
-      if (es.equipmentType === equipmentBase.equipmentType)
-        es.equipmentInstance = equipmentInstance;
-      return es;
-    });
-    this.equipmentSubject.next(current);
+    const equipmentBase = equipmentInstance.itemBase as Equipment;
+    const equipmentType = equipmentBase.equipmentType;
+
+    const updated = this.equipmentSubject.value.map((slot) => ({ ...slot }));
+
+    const getSlot = (type: EquipmentSlotType) =>
+      updated.find((s) => s.equipmentSlotType === type);
+
+    const unequip = (slot?: EquipmentSlot) => {
+      if (slot) slot.equipmentInstance = undefined;
+    };
+
+    switch (equipmentType) {
+      case EquipmentType.TwoHanded: {
+        const main = getSlot(EquipmentSlotType.MainHand);
+        const off = getSlot(EquipmentSlotType.OffHand);
+        if (!main || !off) return;
+
+        // Unequip both unless mainHand already holds a two-hander
+        if (
+          !main.equipmentInstance ||
+          (main.equipmentInstance.itemBase as Equipment).equipmentType !==
+            EquipmentType.TwoHanded
+        ) {
+          unequip(off);
+        }
+        unequip(main);
+
+        main.equipmentInstance = equipmentInstance;
+        off.equipmentInstance = equipmentInstance;
+        break;
+      }
+
+      case EquipmentType.OneHanded: {
+        const main = getSlot(EquipmentSlotType.MainHand);
+        const off = getSlot(EquipmentSlotType.OffHand);
+        if (!main || !off) return;
+
+        if (!main.equipmentInstance) {
+          main.equipmentInstance = equipmentInstance;
+        } else if (!off.equipmentInstance) {
+          off.equipmentInstance = equipmentInstance;
+        } else {
+          const mainType = (main.equipmentInstance.itemBase as Equipment)
+            .equipmentType;
+          if (mainType === EquipmentType.TwoHanded) {
+            unequip(off); // clear off-hand to break ghost state
+          }
+
+          unequip(main);
+          main.equipmentInstance = equipmentInstance;
+        }
+        break;
+      }
+
+      case EquipmentType.OffHand: {
+        const main = getSlot(EquipmentSlotType.MainHand);
+        const off = getSlot(EquipmentSlotType.OffHand);
+        if (!main || !off) return;
+
+        const mainType = main.equipmentInstance
+          ? (main.equipmentInstance.itemBase as Equipment).equipmentType
+          : null;
+
+        if (mainType === EquipmentType.TwoHanded) {
+          unequip(main);
+        }
+
+        unequip(off);
+        off.equipmentInstance = equipmentInstance;
+        break;
+      }
+
+      default: {
+        const slotType = this.getSlotTypeFromEquipmentType(equipmentType);
+        const slot = getSlot(slotType);
+        if (!slot) return;
+
+        unequip(slot);
+        slot.equipmentInstance = equipmentInstance;
+        break;
+      }
+    }
+
+    this.equipmentSubject.next(updated);
   }
-  unequipEquipment(equipmentType: EquipmentType) {
+
+  private getSlotTypeFromEquipmentType(
+    equipmentType: EquipmentType,
+  ): EquipmentSlotType {
+    switch (equipmentType) {
+      case EquipmentType.Head:
+        return EquipmentSlotType.Head;
+      case EquipmentType.Chest:
+        return EquipmentSlotType.Chest;
+      case EquipmentType.Legs:
+        return EquipmentSlotType.Legs;
+      case EquipmentType.Relic:
+        return EquipmentSlotType.Relic;
+      case EquipmentType.Necklace:
+        return EquipmentSlotType.Necklace;
+      case EquipmentType.Ring:
+        return EquipmentSlotType.Ring;
+      default:
+        throw new Error(`Unsupported equipment type: ${equipmentType}`);
+    }
+  }
+
+  unequipEquipment(slotType: EquipmentSlotType) {
     const updated = this.equipmentSubject.value.map((es) => {
-      if (es.equipmentType === equipmentType) es.equipmentInstance = undefined;
+      if (es.equipmentSlotType === slotType) es.equipmentInstance = undefined;
       return es;
     });
     this.equipmentSubject.next(updated);

@@ -1,18 +1,19 @@
-﻿using System.Text.Json;
-using System.Text.Json.Serialization;
-using Application.UseCases._AdminDashboard.Items.Dtos;
+﻿using Application.UseCases._AdminDashboard.Items.Dtos;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting;
+using Services.AdminDashboard.Converters;
 using Services.AdminDashboard.Items;
 using Services.AdminDashboard.Recipes;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Services.AdminDashboard.JsonReaders;
 public class RecipeJsonReader
 {
     private readonly string _filePath;
     private readonly JsonSerializerOptions _opts =
-        new() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase, Converters = { new JsonStringEnumConverter() } };
+        new() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase, Converters = { new FallbackEnumConverter<EquipmentType>(EquipmentType.Head), new JsonStringEnumConverter() } };
 
     private List<RecipeToJsonDto> _cache = [];
 

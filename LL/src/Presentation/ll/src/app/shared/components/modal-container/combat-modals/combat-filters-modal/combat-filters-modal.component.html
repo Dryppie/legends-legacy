@@ -1,12 +1,22 @@
-<div class="max-w-xl rounded-lg border-primary bg-texture p-6 text-white">
+<div class="max-w-full rounded-lg border-primary bg-texture p-6 text-white">
   <!-- Modal Header -->
   <h3>Select which events you want displayed in the combat log:</h3>
   <div class="flex w-full items-center justify-center pb-2"></div>
   <div class="border-t border-light_gray pb-3"></div>
   <div class="flex flex-col justify-between gap-4">
     <div class="flex w-full gap-2">
-      <button class="rounded bg-light px-3 py-1 text-white text-sm" (click)="selectAll()">Select All</button>
-      <button class="rounded bg-light px-3 py-1 text-white text-sm" (click)="deselectAll()">Deselect All</button>
+      <button
+        class="rounded bg-light px-3 py-1 text-sm text-white"
+        (click)="selectAll()"
+      >
+        Select All
+      </button>
+      <button
+        class="rounded bg-light px-3 py-1 text-sm text-white"
+        (click)="deselectAll()"
+      >
+        Deselect All
+      </button>
     </div>
     <!-- Modal Body -->
     <div class="flex flex-col gap-4">

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { Essence } from '../../../../shared/models/essence';
 import { EquipmentInstance } from '../../../../shared/models/item';
-import { EquipmentType } from '../../../../shared/models/Dtos/equipmentSlot';
+import { EquipmentSlotType } from '../../../../shared/models/Dtos/equipment-slots/equipmentSlot';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +15,7 @@ export class ModalService {
   private inventoryEquipmentModalState =
     new BehaviorSubject<EquipmentInstance | null>(null);
   private overviewEquipmentModalState =
-    new BehaviorSubject<EquipmentType | null>(null);
+    new BehaviorSubject<EquipmentSlotType | null>(null);
 
   private editCombatFiltersModalState = new BehaviorSubject<boolean>(false);
 
@@ -52,7 +52,7 @@ export class ModalService {
     this.inventoryEquipmentModalState.next(equipment);
   }
 
-  toggleOverviewEquipItemModal(equipment: EquipmentType | null = null) {
+  toggleOverviewEquipItemModal(equipment: EquipmentSlotType | null = null) {
     this.overviewEquipmentModalState.next(equipment);
   }
 }

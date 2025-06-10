@@ -10,7 +10,7 @@ import { CombatFiltersModalComponent } from './combat-modals/combat-filters-moda
 import { EquipmentInstance } from '../../models/item';
 import { InventoryEquipmentModalComponent } from './equipment-modals/equipment-modal/inventory-equipment-modal.component';
 import { OverviewEquipmentModalComponent } from './equipment-modals/overview-equipment-modal/overview-equipment-modal.component';
-import { EquipmentType } from '../../models/Dtos/equipmentSlot';
+import { EquipmentSlotType } from '../../models/Dtos/equipment-slots/equipmentSlot';
 
 @Component({
   selector: 'app-modal-container',
@@ -30,7 +30,7 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
 
   inventoryEquipment: EquipmentInstance | null = null;
-  overviewEquipment: EquipmentType | null = null;
+  overviewEquipment: EquipmentSlotType | null = null;
   essence: Essence | null = null;
   absorbEssence: Essence[] | null = null;
   removeEssence: Essence[] | null = null;
@@ -46,7 +46,7 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
     );
     this.subscriptions.push(
       this.modalService.overviewEquipmentModalState$.subscribe(
-        (data: EquipmentType | null) => (this.overviewEquipment = data),
+        (data: EquipmentSlotType | null) => (this.overviewEquipment = data),
       ),
     );
     this.subscriptions.push(
