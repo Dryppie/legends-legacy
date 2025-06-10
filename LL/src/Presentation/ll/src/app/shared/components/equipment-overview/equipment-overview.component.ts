@@ -1,4 +1,4 @@
-import { NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, computed, OnInit } from '@angular/core';
 import {
   EquipmentSlot,
@@ -7,14 +7,22 @@ import {
 import { ModalService } from '../../../core/services/client-side/modal/modal.service';
 import { ItemComponent } from '../item/item.component';
 import { EquipmentStateService } from '../../../core/services/api/equipment/equipment-state.service';
+import { EquipmentInstance } from '../../models/item';
+import { EquipmentType } from '../../models/enums/equipmentType';
 
 @Component({
   selector: 'app-equipment-overview',
   standalone: true,
-  imports: [NgFor, NgIf, ItemComponent],
+  imports: [NgFor, NgIf, NgClass, ItemComponent],
   templateUrl: './equipment-overview.component.html',
 })
 export class EquipmentOverviewComponent implements OnInit {
+  isGhost(slot: EquipmentSlot): boolean {
+    return (
+      slot.equipmentSlotType === EquipmentSlotType.OffHand &&
+      slot.equipmentInstance?.itemBase.equipmentType === EquipmentType.TwoHanded
+    );
+  }
   constructor(
     private modalService: ModalService,
     private readonly equipmentState: EquipmentStateService,

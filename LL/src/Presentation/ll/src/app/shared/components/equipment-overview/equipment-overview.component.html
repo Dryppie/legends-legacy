@@ -12,6 +12,7 @@
       />
     </div>
     <app-item
+      [ngClass]="isGhost(slot) ? 'opacity-40 grayscale' : ''"
       *ngIf="slot.equipmentInstance"
       [item]="slot.equipmentInstance"
     ></app-item>
