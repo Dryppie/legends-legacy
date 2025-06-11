@@ -7,7 +7,6 @@ import {
 import { ModalService } from '../../../core/services/client-side/modal/modal.service';
 import { ItemComponent } from '../item/item.component';
 import { EquipmentStateService } from '../../../core/services/api/equipment/equipment-state.service';
-import { EquipmentInstance } from '../../models/item';
 import { EquipmentType } from '../../models/enums/equipmentType';
 
 @Component({
