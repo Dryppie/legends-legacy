@@ -7,6 +7,7 @@ using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL.Professions;
 using Application.UseCases.Soulstones.Providers;
+using Domain.Interfaces.Combat;
 using Domain.Models.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,6 +17,8 @@ using Services.LL.Authorization;
 using Services.LL.CharacterActions;
 using Services.LL.Colosseum;
 using Services.LL.Combat;
+using Services.LL.Combat.CombatEngine;
+using Services.LL.Combat.Statuses;
 using Services.LL.Entities;
 using Services.LL.Entities.Characters;
 using Services.LL.Entities.Creatures;
@@ -58,6 +61,11 @@ public static class DependencyInjection
 
         services.AddScoped<ICombatService, CombatService>();
         services.AddScoped<ICombatSetupService, CombatSetupService>();
+        services.AddScoped<ICombatContext, CombatContext>();
+        services.AddScoped<ICombatEventBus, CombatEventBus>();
+        //services.AddScoped<ICombatEffectManager, CombatEffectManager>();
+        //services.AddScoped<ICombatEntityManager, CombatEntityManager>();
+        //services.AddScoped<ICombatInteractionManager, CombatInteractionManager>();
 
         services.AddScoped<ICraftingService, CraftingService>();
         services.AddScoped<ITemperingService, TemperingService>();
@@ -100,6 +108,7 @@ public static class DependencyInjection
         services.AddScoped<ISimulatorService, SimulatorService>();
 
         services.AddSingleton<SoulstoneUpgradeDefinitionProvider>();
+        services.AddSingleton<IStatusDefinitionService, JsonStatusService>();
 
         return services;
     }

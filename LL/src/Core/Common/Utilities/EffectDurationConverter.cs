@@ -19,7 +19,7 @@ public class EffectDurationConverter : JsonConverter<IEffectDuration>
                     return new NoDuration();
                 case "TimedDuration":
                     var duration = root.GetProperty("Duration").GetInt32();
-                    return new TimedDuration(duration);
+                    return new TimedDuration(duration + 1); // This is to counteract the tick that happens when the effect is applied to a target
                 case "IndefiniteDuration":
                     return new IndefiniteDuration();
 

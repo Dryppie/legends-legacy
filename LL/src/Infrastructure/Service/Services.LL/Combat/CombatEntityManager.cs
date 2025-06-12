@@ -1,22 +1,46 @@
 ﻿using Domain.Interfaces.Combat;
+using Domain.Models.Abilities;
+using Domain.Models.Abilities.Triggers.TriggerFilters;
 using Domain.Models.Combat;
-using Domain.Models.Entities;
 
 namespace Services.LL.Combat;
 public class CombatEntityManager : ICombatEntityManager
 {
-    private readonly List<CombatEntity> _playerTeam;
-    private readonly List<CombatEntity> _enemyTeam;
-
-    public CombatEntityManager(List<CombatEntity> playerTeam, List<CombatEntity> enemyTeam)
-    {
-        _playerTeam = new List<CombatEntity>(playerTeam);
-        _enemyTeam = new List<CombatEntity>(enemyTeam);
-    }
+    private readonly List<CombatEntity> _playerTeam = [];
+    private readonly List<CombatEntity> _enemyTeam = [];
 
     public List<CombatEntity> PlayerTeam => _playerTeam;
     public List<CombatEntity> EnemyTeam => _enemyTeam;
     public List<CombatEntity> AllEntities => [.. _playerTeam, .. _enemyTeam];
+
+    public void InitializeCombatEntityManager(List<CombatEntity> playerTeam, List<CombatEntity> enemyTeam)
+    {
+        _playerTeam.Clear();
+        _enemyTeam.Clear();
+        _playerTeam.AddRange(playerTeam);
+        _enemyTeam.AddRange(enemyTeam);
+        SetTriggerFilters();
+    }
+
+    private void SetTriggerFilters()
+    {
+        foreach (var entity in AllEntities)
+        {
+            foreach (var ability in entity.Abilities)
+            {
+                foreach (var trigger in ability.Definition.Triggers)
+                {
+                    foreach (var filter in trigger.Filters)
+                    {
+                        if (filter is SourceIsSelfFilter selfFilter)
+                        {
+                            selfFilter.SetOwner(entity);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     public void AddEntityToOwnTeam(CombatEntity self, CombatEntity entityToAdd)
     {
@@ -58,10 +82,11 @@ public class CombatEntityManager : ICombatEntityManager
         return playersAlive && enemiesAlive;
     }
 
-    // Optional: You could add convenience methods here:
-    // For example:
-    // - Get all alive entities on a specific team
-    // - Get a random alive target from the opposing team
-    // - Reset entity states at the start of combat
-    // etc.
+    public List<CombatEntity> SelectTargets(CombatEntity actor, Targeting targeting)
+    {
+        var enemyTeam = GetOpposingTeam(actor);
+        var allyTeam = GetOwnTeam(actor);
+
+        return TargetingManager.SelectTargets(targeting, actor, enemyTeam, allyTeam);
+    }
 }

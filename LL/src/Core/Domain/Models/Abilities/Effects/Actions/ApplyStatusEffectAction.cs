@@ -16,21 +16,22 @@ public class ApplyStatusEffectAction : IEffectAction
         _amount = amount;
     }
 
-    public void Execute(EffectContext context, ICombatContext combatContext)
+    public void Execute(EffectContext effect, ICombatContext combatContext)
     {
-        context.Target.ModifyStatuses(_status, Magnitude);
 
-        context.EventType = EventType.StatusEffect;
-        context.Details = context.Details
-           .Replace("{Actor}", context.Actor.Name)
-           .Replace("{Target}", context.Target.Name)
-           .Replace("{Amount}", context.Magnitude.ToString());
+        effect.Target.ModifyStatusEffects(_status, Magnitude);
 
-        combatContext.LogEffectExecution(context);
+        effect.EventType = EventType.StatusEffect;
+        effect.Details = effect.Details
+           .Replace("{Actor}", effect.Source.Name)
+           .Replace("{Target}", effect.Target.Name)
+           .Replace("{Amount}", effect.Magnitude.ToString());
+
+        combatContext.LogEffectExecution(effect);
     }
 
-    public void OnExpireExecute(EffectContext context, ICombatContext combatContext)
+    public void OnExpireExecute(EffectContext effect, ICombatContext combatContext)
     {
-        context.Target.ModifyStatuses(_status, -Magnitude);
+        effect.Target.ModifyStatusEffects(_status, -Magnitude);
     }
 }

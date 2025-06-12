@@ -7,46 +7,58 @@
       "Description": "Stab the target in the back, dealing {damage1} damage, and apply 15 bleed damage over 10 seconds.",
       "Type": "Active",
       "Cooldown": 90,
-      "Cost": 12,
-      "Effects": [
+      "Cost": { "Mana": "12" },
+      "Triggers": [
         {
-          "Action": {
-            "Type": "Damage",
-            "Amount": 5,
-            "ScalingAttribute": "Dexterity",
-            "ScalingMultiplier": 0.15
-          },
-          "Duration": {
-            "Type": "NoDuration"
-          },
-          "Targeting": "SingleEnemy",
-          "Trigger": "None",
-          "AttackType": "Melee",
-          "DamageType": "Physical",
-          "EffectTags": [],
-          "Log": "{Target} received {Amount} damage."
-        },
-        {
-          "Action": {
-            "Type": "Damage",
-            "Amount": 3
-          },
-          "Duration": {
-            "Type": "TimedDuration",
-            "Duration": 100
-          },
-          "Interval": {
-            "Type": "Interval",
-            "Interval": 20
-          },
-          "Targeting": "SingleEnemy",
-          "Trigger": "OnTickInterval",
-          "TriggerTarget": "Self",
-          "IsFlatAmount": true,
-          "AttackType": "DamageOverTime",
-          "DamageType": "Bleed",
-          "EffectTags": [],
-          "Log": "{Target} is bleeding, and took {Amount} damage."
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "sneakAttack" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "Damage",
+                "Amount": 5,
+                "ScalingAttribute": "Dexterity",
+                "ScalingMultiplier": 0.15
+              },
+              "Duration": {
+                "Type": "NoDuration"
+              },
+              "Targeting": "SingleEnemy",
+              "Trigger": "None",
+              "AttackType": "Melee",
+              "DamageType": "Physical",
+              "EffectTags": [],
+              "Log": "{Target} received {Amount} damage."
+            },
+            {
+              "Action": {
+                "Type": "Damage",
+                "Amount": 3
+              },
+              "Duration": {
+                "Type": "TimedDuration",
+                "Duration": 100
+              },
+              "Interval": {
+                "Type": "Interval",
+                "Interval": 20
+              },
+              "Targeting": "SingleEnemy",
+              "Trigger": "OnTickInterval",
+              "TriggerTarget": "Self",
+              "IsFlatAmount": true,
+              "AttackType": "DamageOverTime",
+              "DamageType": "Bleed",
+              "EffectTags": [],
+              "Log": "{Target} is bleeding, and took {Amount} damage."
+            }
+          ]
         }
       ]
     },
@@ -56,27 +68,21 @@
       "Description": "Whenever you dodge, use the opportunity to throw dirt at the target, decreasing their accuracy by 3% for 6 seconds",
       "Type": "Passive",
       "Cooldown": 0,
-      "Cost": 0,
-      "Effects": [
+      "Triggers": [
         {
-          "Action": {
-            "Type": "ModifyAttribute",
-            "Attribute": "Accuracy",
-            "Amount": 3,
-            "ModifierType": "Additive",
-            "Stackable": true
-          },
-          "Duration": {
-            "Type": "IndefiniteDuration"
-          },
-          "Targeting": "Self",
-          "Trigger": "OnDodge",
-          "TriggerTarget": "SingleEnemy",
-          "ApplyOnSelf": false,
-          "AttackType": "None",
-          "DamageType": "None",
-          "EffectTags": [],
-          "Log": "{Actor} threw dirt in {Target}'s eyes. {Target}'s accuracy decreased by 3%."
+          "Event": "OnDodge",
+          "Filters": [
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "blindedByDirt"
+              },
+              "Targeting": "CauseOfTrigger"
+            }
+          ]
         }
       ]
     },
@@ -296,24 +302,36 @@
       "Description": "Apply a crushing force to the target, dealing {damage1} damage.",
       "Type": "Active",
       "Cooldown": 150,
-      "Cost": 10,
-      "Effects": [
+      "Cost": { "Mana": "10" },
+      "Triggers": [
         {
-          "Action": {
-            "Type": "Damage",
-            "Amount": 12,
-            "ScalingAttribute": "Strength",
-            "ScalingMultiplier": 0.2
-          },
-          "Duration": {
-            "Type": "NoDuration"
-          },
-          "Targeting": "SingleEnemy",
-          "Trigger": "None",
-          "AttackType": "Melee",
-          "DamageType": "Physical",
-          "EffectTags": [],
-          "Log": "{Target} received {Amount} damage."
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "tailWrap" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "Damage",
+                "Amount": 12,
+                "ScalingAttribute": "Strength",
+                "ScalingMultiplier": 0.2
+              },
+              "Duration": {
+                "Type": "NoDuration"
+              },
+              "Targeting": "SingleEnemy",
+              "Trigger": "None",
+              "AttackType": "Melee",
+              "DamageType": "Physical",
+              "EffectTags": [],
+              "Log": "{Target} received {Amount} damage."
+            }
+          ]
         }
       ]
     },
@@ -323,21 +341,25 @@
       "Description": "Health is increased by 50.",
       "Type": "Passive",
       "Cooldown": 0,
-      "Cost": 0,
-      "Effects": [
+      "Triggers": [
         {
-          "Action": {
-            "Type": "ModifyAttribute",
-            "Attribute": "MaxHealth",
-            "Amount": 50,
-            "ModifierType": "Flat"
-          },
-          "Duration": {
-            "Type": "IndefiniteDuration"
-          },
-          "Targeting": "Self",
-          "Trigger": "None",
-          "Log": "{Actor}'s health is increased by 50 due to being big."
+          "Event": "OnCombatStart",
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ModifyAttribute",
+                "Attribute": "MaxHealth",
+                "Amount": 50,
+                "ModifierType": "Flat"
+              },
+              "Duration": {
+                "Type": "IndefiniteDuration"
+              },
+              "Targeting": "Self",
+              "Trigger": "None",
+              "Log": "{Actor}'s health is increased by 50 due to being big."
+            }
+          ]
         }
       ]
     },

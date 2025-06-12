@@ -5,7 +5,7 @@ public class CombatResult
 {
     public List<SimpleCombatEntity> PlayerTeam { get; set; } = [];
     public List<SimpleCombatEntity> EnemyTeam { get; set; } = [];
-    public List<CombatEvent> EventLog { get; set; } = [];
+    public List<CombatLogItem> EventLog { get; set; } = [];
     public BattleOutcome Outcome { get; set; }
     public List<InventoryItem> Loot { get; set; } = [];
     public int ExperienceGained { get; set; }

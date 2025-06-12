@@ -21,7 +21,7 @@ public class AbilityDto : IMapFrom<AbilityDefinition>
     public void Mapping(Profile profile)
     {
         profile.CreateMap<AbilityDefinition, AbilityDto>()
-            .ForMember(dto => dto.EffectTypes, opt => opt.MapFrom(src => src.Effects.Select(e => e.EffectType).ToList()));
+            .ForMember(dto => dto.EffectTypes, opt => opt.MapFrom(src => src.Triggers.SelectMany(t => t.Actions.Select(e => e.EffectType).ToList())));
 
         // TODO: THIS SHOULD BE POSSIBLE TO DELETE
         //.ForMember(dto => dto.AttackType, opt => opt.MapFrom(src => src.Effects

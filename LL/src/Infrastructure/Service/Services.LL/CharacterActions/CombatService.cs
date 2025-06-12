@@ -4,6 +4,7 @@ using Application.Interfaces.Services.LL.Entities;
 using Application.UseCases.Inventories.Events;
 using Application.UseCases.Soulstones.Events;
 using Domain.Helpers.Constants;
+using Domain.Interfaces.Combat;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
@@ -29,11 +30,12 @@ public class CombatService : ICombatService
     private readonly ISpawningService _spawningService;
     private readonly IPublisher _publisher;
     private readonly ISoulstoneUpgradeService _soulstoneUpgradeService;
+    private readonly ICombatContext _combatContext;
 
     
     // Create a static SoulstoneUpgradeClass that expands on this, containing all bonuses
 
-    public CombatService(IEntityService es, ICombatSetupService cps, ILevelingService lvlS, ILootService ls, ISpawningService ss, IPublisher p, ISoulstoneUpgradeService sus)
+    public CombatService(IEntityService es, ICombatSetupService cps, ILevelingService lvlS, ILootService ls, ISpawningService ss, IPublisher p, ISoulstoneUpgradeService sus, ICombatContext cc)
     {
         _entityService = es;
         _combatSetupService = cps;
@@ -42,6 +44,7 @@ public class CombatService : ICombatService
         _spawningService = ss;
         _publisher = p;
         _soulstoneUpgradeService = sus;
+        _combatContext = cc;
     }
 
     public async Task<CombatSession> PerformIdleCombatAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
@@ -87,8 +90,7 @@ public class CombatService : ICombatService
 
             selectedCombatEnemyEntities = [.. selectedEnemyIds.Select(id => allCombatEnemyEntities.First(ee => ee.OriginalId.Equals(id)).Copy())];
             _combatSetupService.AppendPrefixToId(selectedCombatEnemyEntities);
-            var combatSimulation = new CombatSimulation(combatPlayerEntities, selectedCombatEnemyEntities);
-            lastCombatResult = combatSimulation.RunSimulation();
+            lastCombatResult = _combatContext.InstantiateAndRunCombat(combatPlayerEntities, selectedCombatEnemyEntities);
 
             // StartedAt is 1 second after the action is initialized, so as to have a 'combat starting' screen
             lastCombatResult.StartedAt = characterAction.UpdatedAt.AddSeconds(1);

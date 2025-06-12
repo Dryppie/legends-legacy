@@ -1,9 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Models.Abilities;
+﻿using Domain.Models.Abilities;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Items.Equipments.Slots;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Models.Entities;
 public abstract class Entity
@@ -19,7 +19,7 @@ public abstract class Entity
     [NotMapped]
     public List<string> AbilityIds { get; set; } = [];
     [NotMapped]
-    public List<AbilityDefinition> Abilities { get; set; } = [];
+    public List<AbilityInstance> Abilities { get; set; } = [];
     [NotMapped]
     public int NextBasicAttackIn = 300; // TODO: Turn 300 into a Constant somewhere, as it is also stored in the CombatSimulator class
                                         // Every tick, this decrements by BaseAttackSpeed.

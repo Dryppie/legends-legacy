@@ -14,68 +14,65 @@ public class NestedEffectAction : IEffectAction
         Effects = effects;
     }
 
-    public void Execute(EffectContext context, ICombatContext combatContext)
+    public void Execute(EffectContext effectContext, ICombatContext combatContext)
     {
-        var effectsToApply = new List<(CombatEntity target, Effect effectInstance)>();
+        //var effectsToApply = new List<(CombatEntity target, EffectInstance effectInstance)>();
 
-        // Apply each effect of the ability
-        foreach (var effectTemplate in Effects)
-        {
-            var effectDefinition = new EffectDefinition(
-                action: effectTemplate.Action,
-                duration: effectTemplate.Duration.Clone(),
-                condition: effectTemplate.Condition.Clone(),
-                interval: effectTemplate.Interval.Clone(),
-                usage: effectTemplate.Usage.Clone(),
-                targeting: effectTemplate.Targeting,
-                trigger: effectTemplate.Trigger,
-                triggerTarget: effectTemplate.TriggerTarget,
-                isFlatAmount: effectTemplate.IsFlatAmount,
-                chance: effectTemplate.Chance,
-                effectModifications: effectTemplate.EffectModifications,
-                effectTags: effectTemplate.EffectTags,
-                attackType: effectTemplate.AttackType,
-                damageType: effectTemplate.DamageType
-                );
-            effectDefinition.Log = effectTemplate.Log;
+        //// Apply each effect of the ability
+        //foreach (var effectTemplate in Effects)
+        //{
+        //    var effectDefinition = new EffectDefinition(
+        //        action: effectTemplate.Action,
+        //        duration: effectTemplate.Duration.Clone(),
+        //        condition: effectTemplate.Condition.Clone(),
+        //        interval: effectTemplate.Interval.Clone(),
+        //        usage: effectTemplate.Usage.Clone(),
+        //        targeting: effectTemplate.Targeting,
+        //        chance: effectTemplate.Chance,
+        //        effectModifications: effectTemplate.EffectModifications,
+        //        effectTags: effectTemplate.EffectTags,
+        //        attackType: effectTemplate.AttackType,
+        //        damageType: effectTemplate.DamageType
+        //        );
+        //    effectDefinition.Log = effectTemplate.Log;
 
-            var effectInstance = new Effect()
-            {
-                Definition = effectDefinition,
-                Caster = context.Actor!,
-                Owner = context.Target
-            };
+        //    var effectInstance = new EffectInstance()
+        //    {
+        //        Definition = effectDefinition,
+        //        Caster = context.Actor!,
+        //        Owner = context.Target
+        //    };
 
 
-            // Defer effect application until after logging
-            effectsToApply.Add((context.Target, effectInstance));
-        }
+        //    // Defer effect application until after logging
+        //    effectsToApply.Add((context.Target, effectInstance));
+        //}
 
-        var combatEntity = new SimpleCombatEntity()
-        {
-            Id = context.Target.Id,
-            MaxHealth = context.Target.GetAttributeValue(AttributeType.MaxHealth),
-            Health = context.Target.GetAttributeValue(AttributeType.Health),
-            MaxMana = context.Target.GetAttributeValue(AttributeType.MaxMana),
-            Mana = context.Target.GetAttributeValue(AttributeType.Mana),
-            Barrier = context.Target.GetAttributeValue(AttributeType.Barrier)
-        };
+        //var combatEntity = new SimpleCombatEntity()
+        //{
+        //    Id = context.Target.Id,
+        //    MaxHealth = context.Target.GetAttributeValue(AttributeType.MaxHealth),
+        //    Health = context.Target.GetAttributeValue(AttributeType.Health),
+        //    MaxMana = context.Target.GetAttributeValue(AttributeType.MaxMana),
+        //    Mana = context.Target.GetAttributeValue(AttributeType.Mana),
+        //    Barrier = context.Target.GetAttributeValue(AttributeType.Barrier)
+        //};
 
-        context.Details = context.Details
-            .Replace("{Actor}", context.Actor!.Name)
-            .Replace("{Target}", context.Target.Name);
+        //context.Details = context.Details
+        //    .Replace("{Actor}", context.Actor!.Name)
+        //    .Replace("{Target}", context.Target.Name);
 
-        combatContext.LogEffectExecution(context, combatEntity);
+        //combatContext.LogEffectExecution(context, combatEntity);
 
-        foreach (var (target, effectInstance) in effectsToApply)
-        {
-            combatContext.EffectManager.AddEffect(context.Actor, target, effectInstance);
-        }
+        //foreach (var (target, effectInstance) in effectsToApply)
+        //{
+        //    combatContext.EffectManager.AddEffect(context.Actor, target, effectInstance);
+        //}
     }
 
-    public void OnExpireExecute(EffectContext context, ICombatContext combatContext)
+    public void OnExpireExecute(EffectContext effect, ICombatContext combatContext)
     {
-        throw new NotImplementedException();
+        
     }
 
     private List<CombatEntity> SelectTargets(Targeting target, CombatEntity caster, List<CombatEntity> enemyTeam, List<CombatEntity> allies)

@@ -1,5 +1,7 @@
 ﻿using Domain.Interfaces.Abilities;
+using Domain.Interfaces.Combat;
 using Domain.Models.Attributes;
+using Domain.Models.Combat;
 
 namespace Domain.Models.Abilities.Effects.Conditions;
 public class HealthCondition : ICondition
@@ -13,9 +15,9 @@ public class HealthCondition : ICondition
         Comparison = comparison;
     }
 
-    public bool IsSatisfied(EffectContext context)
+    public bool IsSatisfied(CombatEntity source, CombatEntity target, ICombatContext combatContext)
     {
-        var targetHealthPercent = (context.Target.CombatAttributes[AttributeType.Health] / context.Target.CombatAttributes[AttributeType.MaxHealth]) * 100;
+        var targetHealthPercent = (target.CombatAttributes[AttributeType.Health] / target.CombatAttributes[AttributeType.MaxHealth]) * 100;
 
         return Comparison switch
         {
@@ -31,5 +33,5 @@ public class HealthCondition : ICondition
         return new HealthCondition(HealthPercentage, Comparison);
     }
 
-    public void PerformCondition(EffectContext context) { }
+    public void PerformCondition(CombatEntity target) { }
 }

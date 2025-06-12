@@ -1,6 +1,7 @@
 ﻿using Domain.Interfaces.Abilities;
 using Domain.Interfaces.Combat;
 using Domain.Models.Attributes;
+using Domain.Models.Combat;
 
 namespace Domain.Models.Abilities.Effects.Actions;
 public class ScalingDamageAction : IEffectAction
@@ -21,14 +22,14 @@ public class ScalingDamageAction : IEffectAction
         ScalingAttribute = scalingAttribute;
     }
 
-    public void Execute(EffectContext context, ICombatContext combatContext)
+    public void Execute(EffectContext effectContext, ICombatContext combatContext)
     {
         // apply the scalingFactor to Magnitude, in combination with the interval, based on the scalingAttribute
         // +2% damage per 5% health lost
         // This might have to be an IScalingEffect, as there could be scaling to buffs, debuffs, heals, summons, and so on
     }
 
-    public void OnExpireExecute(EffectContext context, ICombatContext combatContext)
+    public void OnExpireExecute(EffectContext effect, ICombatContext combatContext)
     {
         
     }

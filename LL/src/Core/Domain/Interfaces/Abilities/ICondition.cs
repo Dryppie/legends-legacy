@@ -1,9 +1,10 @@
-﻿using Domain.Models.Abilities.Effects;
+﻿using Domain.Interfaces.Combat;
+using Domain.Models.Combat;
 
 namespace Domain.Interfaces.Abilities;
 public interface ICondition
 {
-    bool IsSatisfied(EffectContext context);
-    void PerformCondition(EffectContext context);
+    bool IsSatisfied(CombatEntity source, CombatEntity target, ICombatContext combatContext);
+    void PerformCondition(CombatEntity target);
     ICondition Clone();
 }

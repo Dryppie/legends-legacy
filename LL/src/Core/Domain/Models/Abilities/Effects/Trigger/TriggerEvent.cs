@@ -6,6 +6,10 @@ public enum TriggerEvent
     /// </summary>
     None,
     /// <summary>
+    /// When combat starts - primarily passives
+    /// </summary>
+    OnCombatStart,
+    /// <summary>
     /// Triggered when the entity attacks. Barely ever used
     /// </summary>    
     OnAttack,
@@ -102,4 +106,7 @@ public enum TriggerEvent
     /// Triggered when an effect is expired
     /// </summary>
     OnEffectExpired,
+    OnStatusApplied,
+    OnStatusAppliedIfThis,
+    OnKill,
 }

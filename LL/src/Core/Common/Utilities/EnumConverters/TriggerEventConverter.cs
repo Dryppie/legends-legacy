@@ -11,6 +11,7 @@ public class TriggerEventConverter : JsonConverter<TriggerEvent>
         return stringValue switch
         {
             "None" => TriggerEvent.None,
+            "OnCombatStart" => TriggerEvent.OnCombatStart,
             "OnAttack" => TriggerEvent.OnAttack,
             "OnMeleeAttack" => TriggerEvent.OnMeleeAttack,
             "OnRangedAttack" => TriggerEvent.OnRangedAttack,
@@ -35,6 +36,9 @@ public class TriggerEventConverter : JsonConverter<TriggerEvent>
             "OnRevived" => TriggerEvent.OnRevived,
             "OnHealthChanged" => TriggerEvent.OnHealthChanged,
             "OnEffectExpired" => TriggerEvent.OnEffectExpired,
+            "OnStatusApplied" => TriggerEvent.OnStatusApplied,
+            "OnStatusAppliedIfThis" => TriggerEvent.OnStatusAppliedIfThis,
+            "OnKill" => TriggerEvent.OnKill,
             _ => throw new JsonException($"Unknown trigger event: {stringValue}")
         };
     }
@@ -44,6 +48,7 @@ public class TriggerEventConverter : JsonConverter<TriggerEvent>
         var stringValue = value switch
         {
             TriggerEvent.None => "None",
+            TriggerEvent.OnCombatStart => "OnCombatStart",
             TriggerEvent.OnAttack => "OnAttack",
             TriggerEvent.OnMeleeAttack => "OnMeleeAttack",
             TriggerEvent.OnRangedAttack => "OnRangedAttack",
@@ -68,6 +73,9 @@ public class TriggerEventConverter : JsonConverter<TriggerEvent>
             TriggerEvent.OnRevived => "OnRevived",
             TriggerEvent.OnHealthChanged => "OnHealthChanged",
             TriggerEvent.OnEffectExpired => "OnEffectExpired",
+            TriggerEvent.OnStatusApplied => "OnStatusApplied",
+            TriggerEvent.OnStatusAppliedIfThis => "OnStatusAppliedIfThis",
+            TriggerEvent.OnKill => "OnKill",
             _ => throw new JsonException($"Unknown trigger event: {value}")
         };
 

@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces.Services.LL.Colosseum;
 using Application.Interfaces.Services.LL.Entities;
+using Domain.Interfaces.Combat;
 using Domain.Models.Colosseum;
 using Domain.Models.Combat;
 using Domain.Models.Entities.Characters;
@@ -13,6 +14,7 @@ public class ColosseumService : IColosseumService
     private readonly ICharacterService _characterService;
     private readonly ICombatSetupService _combatSetupService;
     private readonly IColosseumRepository _colosseumRepository;
+    private readonly ICombatContext _combatContext;
 
     public ColosseumService(IEntityService entityService, ICharacterService characterService, ICombatSetupService combatSetupService, IColosseumRepository colosseumRepository)
     {
@@ -41,8 +43,8 @@ public class ColosseumService : IColosseumService
         var combatEnemyEntities = _combatSetupService.CreateCombatEntities(enemyTeam);
         await _combatSetupService.PrepareEntitiesForCombat([.. combatPlayerEntities, .. combatEnemyEntities]);
 
-        var combatSimulation = new CombatSimulation(combatPlayerEntities, combatEnemyEntities);
-        var combatResult = combatSimulation.RunSimulation();
+        var combatResult = _combatContext.InstantiateAndRunCombat(combatPlayerEntities, combatEnemyEntities);
+
         if (combatResult == null) return null;
 
         combatResult.StartedAt = now;

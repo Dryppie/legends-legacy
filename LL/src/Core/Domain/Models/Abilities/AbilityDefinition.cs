@@ -1,10 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Interfaces.Abilities;
-using Domain.Models.Abilities.Effects;
+﻿using Domain.Interfaces.Abilities;
 using Domain.Models.Abilities.Effects.Actions;
 using Domain.Models.Abilities.Effects.Conditions;
 using Domain.Models.Abilities.Effects.Usages;
 using Domain.Models.Abilities.ResourceCosts;
+using Domain.Models.Abilities.Triggers;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Models.Abilities;
 [NotMapped]
@@ -27,19 +27,10 @@ public class AbilityDefinition
     }
     public AbilityType Type { get; set; } // Active or Passive
     public int Cooldown { get; set; }
-    public int RemainingTimeUntilUse { get; set; }
-    /// <summary>
-    /// How much of a resource will be deducted upon use
-    /// </summary>
-    public int Cost { get; set; }
-    /// <summary>
-    /// What resource will be deducted from upon use
-    /// </summary>
-    public ResourceType CostType { get; set; }
+    public ResourceCost? Cost { get; set; }
+    public List<Trigger> Triggers { get; set; } = [];
     // If it's a summon ability, don't say who the ability is used on.
-    public string ActivationLog => Effects.All(e => e.Action is SummonAction) ? "{Actor} used {Ability}." :  "{Actor} used {Ability} on {Target}.";
-
-    public List<EffectDefinition> Effects { get; set; } = [];
+    public string ActivationLog => Triggers.All(e => e.Actions.All(a => a.Action is SummonAction)) ? "{Actor} used {Ability}." :  "{Actor} used {Ability} on {Target}.";
 
     public AbilityDefinition Clone()
     {
@@ -51,14 +42,10 @@ public class AbilityDefinition
             Description = Description,
             Type = Type,
             Cooldown = Cooldown,
-            RemainingTimeUntilUse = RemainingTimeUntilUse,
             Cost = Cost,
-            CostType = CostType,
+            Triggers = [.. Triggers.Select(t => t.Clone())],
             Usage = Usage.Clone(),
             Condition = Condition.Clone(),
-            Effects = Effects
-                .Select(effect => effect.Clone())
-                .ToList()
         };
 
         return copy;

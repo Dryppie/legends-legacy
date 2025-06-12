@@ -3,7 +3,6 @@ using Domain.Interfaces.Combat;
 using Domain.Models.Abilities.ResourceCosts;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
-using System.Threading;
 
 namespace Domain.Models.Abilities.Effects.Actions;
 public class ResourceRestoreAction : IEffectAction
@@ -22,29 +21,30 @@ public class ResourceRestoreAction : IEffectAction
         ScalingMultiplier = scalingMultiplier;
     }
 
-    public void Execute(EffectContext context, ICombatContext combatContext)
+    public void Execute(EffectContext effect, ICombatContext combatContext)
     {
-        // Attack outcome
-        
-        context = _resourceType switch
+        //Attack outcome
+
+
+        effect = _resourceType switch
         {
-            ResourceType.Mana => HandleMana(context, combatContext),
-            ResourceType.Health => HandleHealth(context, combatContext),
-            ResourceType.Barrier => HandleBarrier(context, combatContext),
-            _ => context
+            ResourceType.Mana => HandleMana(effect, combatContext),
+            ResourceType.Health => HandleHealth(effect, combatContext),
+            ResourceType.Barrier => HandleBarrier(effect, combatContext),
+            _ => effect
         };
 
-        context.Details = context.Details   
-            .Replace("{Actor}", context.Actor.Name)
-            .Replace("{Target}", context.Target.Name)
-            .Replace("{Amount}", context.Magnitude.ToString());
+        effect.Details = effect.Details
+            .Replace("{Actor}", effect.Source.Name)
+            .Replace("{Target}", effect.Target.Name)
+            .Replace("{Amount}", effect.Magnitude.ToString());
 
-        var simpleCombatEntity = CreateSimpleCombatEntity(context.Target);
-        combatContext.LogEffectExecution(context, simpleCombatEntity);
+        var simpleCombatEntity = CreateSimpleCombatEntity(effect.Target);
+        combatContext.LogEffectExecution(effect, simpleCombatEntity);
 
         if (_resourceType == ResourceType.Health)
         {
-            combatContext.InteractionManager.ApplyHealing(context);
+            combatContext.InteractionManager.ApplyHealing(effect);
         }
     }
 
@@ -67,13 +67,10 @@ public class ResourceRestoreAction : IEffectAction
 
     private EffectContext HandleHealth(EffectContext context, ICombatContext combatContext)
     {
-        var attackOutcome = combatContext.InteractionManager.CalculateAttackOutcomeForHealing(context.Actor, context.Target, context.Effect.Definition.EffectModifications);
+        var attackOutcome = combatContext.InteractionManager.CalculateAttackOutcomeForHealing(context.Source, context.Target, [/*context.Effect.Definition.EffectModifications*/]);
 
         // Potential healing
-        var isFlatAmount = context.Effect.Definition.IsFlatAmount;
-        var healingAmount = isFlatAmount
-                            ? Magnitude
-                            : combatContext.InteractionManager.CalculateHealingToDeal(context.Actor, context.Target, Magnitude, attackOutcome, ScalingAttribute, ScalingMultiplier);
+        var healingAmount = combatContext.InteractionManager.CalculateHealingToDeal(context.Source, context.Target, Magnitude, attackOutcome, ScalingAttribute, ScalingMultiplier);
 
         // Healing target will receive
         var healingReceived = combatContext.InteractionManager.CalculateHealingReceived(context.Target, healingAmount, attackOutcome);
@@ -119,7 +116,7 @@ public class ResourceRestoreAction : IEffectAction
         };
     }
 
-    public void OnExpireExecute(EffectContext context, ICombatContext combatContext)
+    public void OnExpireExecute(EffectContext effect, ICombatContext combatContext)
     {
         // Do nothing
     }

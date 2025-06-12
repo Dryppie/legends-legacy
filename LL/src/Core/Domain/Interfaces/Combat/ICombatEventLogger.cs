@@ -3,5 +3,5 @@
 namespace Domain.Interfaces.Combat;
 public interface ICombatEventLogger
 {
-    void LogEvent(CombatEvent combatEvent);
+    void LogEvent(CombatLogItem combatEvent);
 }

@@ -1,22 +1,22 @@
 ﻿using Domain.Helpers;
 using Domain.Helpers.Constants;
 using Domain.Interfaces.Combat;
+using Domain.Models.Abilities;
 using Domain.Models.Abilities.Effects;
 using Domain.Models.Abilities.Effects.EffectModifications;
 using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Damages;
-using Domain.Models.Items.Equipments;
 
 namespace Services.LL.Combat;
 public class CombatInteractionManager : ICombatInteractionManager
 {
-    private readonly ICombatEffectManager _effectManager;
+    private readonly ICombatContext _combatContext;
 
-    public CombatInteractionManager(ICombatEffectManager effectManager)
+    public CombatInteractionManager(ICombatContext combatContext)
     {
-        _effectManager = effectManager;
+        _combatContext = combatContext;
     }
 
     public AttackOutcome CalculateAttackOutcomeForDamage(CombatEntity actor, CombatEntity target, List<EffectModification> effectModifications)
@@ -29,9 +29,9 @@ public class CombatInteractionManager : ICombatInteractionManager
         return CombatFormulaCalculator.CalculateAttackOutcome(actor, target, effectModifications, isDamage: false);
     }
 
-    public int CalculateDamageToDeal(CombatEntity actor, CombatEntity target, float magnitude, AttackOutcome attackOutcome, AttributeType scalingAttribute, float scalingMultiplier)
+    public int CalculateDamageToDeal(CombatEntity actor, CombatEntity target, float magnitude, AttackOutcome attackOutcome, AttributeType? scalingAttribute, float scalingMultiplier)
     {
-        var finalDamage = magnitude + (actor.CombatAttributes[scalingAttribute] * scalingMultiplier);
+        var finalDamage = magnitude + (scalingAttribute.HasValue ? (actor.CombatAttributes[scalingAttribute.Value] * scalingMultiplier) : 0);
         if (attackOutcome.Equals(AttackOutcome.Crit))
             finalDamage = finalDamage * (1 + (actor.CombatAttributes[AttributeType.CritDamage] / 100));
 
@@ -150,34 +150,75 @@ public class CombatInteractionManager : ICombatInteractionManager
         return (int)finalDamage;
     }
 
-    public void ApplyDamage(EffectContext context)
+    public void ApplyDamage(CombatEntity source, CombatEntity target, int damage, AttackType attackType)
     {
-        var target = context.Target;
-        var damage = context.Magnitude;
 
         target.CombatAttributes[AttributeType.Health] -= damage;
 
         // TODO: Make sure something like "Retaliate" is only triggered based on a specific TriggerEvent. And this effect should not return that specific TriggerEvent
-        var attackTypeTrigger = TriggerEvent.None;
-        attackTypeTrigger = context.Effect.Definition.AttackType switch
+
+        var attackTypeTrigger = attackType switch
         {
-            AttackType.Melee            => TriggerEvent.OnMeleeAttacked,
-            AttackType.Ranged           => TriggerEvent.OnRangedAttacked,
-            AttackType.DamageOverTime   => TriggerEvent.OnDamaged,
-            _                           => TriggerEvent.OnDamaged
+            AttackType.Melee => TriggerEvent.OnMeleeAttack,
+            AttackType.Ranged => TriggerEvent.OnRangedAttack,
+            _ => TriggerEvent.None
         };
 
-        _effectManager.TriggerEffects(attackTypeTrigger, target, context.Actor);
+        var attackedTypeTrigger = attackType switch
+        {
+            AttackType.Melee => TriggerEvent.OnMeleeAttacked,
+            AttackType.Ranged => TriggerEvent.OnRangedAttacked,
+            AttackType.DamageOverTime => TriggerEvent.OnDamaged,
+            _ => TriggerEvent.OnDamaged
+        };
+        if (!attackTypeTrigger.Equals(TriggerEvent.None))
+        {
+            _combatContext.EventBus.Publish(new CombatEvent
+            {
+                Type = attackTypeTrigger,
+                Source = source,
+                Target = target,
+            });
+        }
 
-        if (!(context.Actor.Id.Equals(target.Id) || context.Effect.Definition.AttackType.Equals(AttackType.None))) // Target can only be attacked, if the actor is different from the target
-            _effectManager.TriggerEffects(TriggerEvent.OnAttacked, target, context.Actor);
+        _combatContext.EventBus.Publish(new CombatEvent
+        {
+            Type = attackedTypeTrigger,
+            Source = target,
+            Target = source,
+        });
 
-        if (damage > 0) _effectManager.TriggerEffects(TriggerEvent.OnHealthChanged, target, context.Actor);
+        if (!(source.Id == target.Id || attackType.Equals(AttackType.None))) // Target can only be attacked, if the actor is different from the target
+            _combatContext.EventBus.Publish(new CombatEvent
+            {
+                Type = TriggerEvent.OnAttacked,
+                Source = target,
+                Target = source,
+            });
+
+        if (damage > 0) _combatContext.EventBus.Publish(new CombatEvent
+            {
+                Type = TriggerEvent.OnHealthChanged,
+                Source = target,
+                Target = source,
+            });
 
         // If target is dead
         if (!target.IsAlive)
         {
-            _effectManager.TriggerEffects(TriggerEvent.OnDeath, target, context.Actor);
+            _combatContext.EventBus.Publish(new CombatEvent
+            {
+                Type = TriggerEvent.OnKill,
+                Source = source,
+                Target = target,
+            });
+
+            _combatContext.EventBus.Publish(new CombatEvent
+            {
+                Type = TriggerEvent.OnDeath,
+                Source = target,
+                Target = source,
+            });
         }
     }
 
@@ -198,14 +239,24 @@ public class CombatInteractionManager : ICombatInteractionManager
             context.Target.CombatAttributes[AttributeType.Health] += actualHealing;
 
             // Trigger effects for overhealing
-            _effectManager.TriggerEffects(TriggerEvent.OnOverhealed, context.Target, context.Actor, extraHealing);
+            _combatContext.EventBus.Publish(new CombatEvent
+            {
+                Type = TriggerEvent.OnOverhealed,
+                Source = context.Source,
+                Target = context.Target,
+            });
         }
         else
         {
             context.Target.CombatAttributes[AttributeType.Health] += healing;
 
             // Trigger normal healing effects
-            _effectManager.TriggerEffects(TriggerEvent.OnHealed, context.Target, context.Actor, healing);
+            _combatContext.EventBus.Publish(new CombatEvent
+            {
+                Type = TriggerEvent.OnHealed,
+                Source = context.Source,
+                Target = context.Target,
+            });
         }
     }
 }

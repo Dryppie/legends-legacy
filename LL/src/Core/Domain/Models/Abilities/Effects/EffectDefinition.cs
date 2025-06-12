@@ -13,13 +13,11 @@ public class EffectDefinition
     public ICondition Condition { get; }
     public IUsage Usage { get; }
     public Targeting Targeting { get; }
-    public TriggerEvent Trigger { get; }
-    public Targeting TriggerTarget { get; }
-    public bool IsFlatAmount { get; }
     public int Chance { get; }
     public List<EffectModification> EffectModifications { get; } = [];
     public EffectType EffectType => Action switch
     {
+        ApplyStatusAction => EffectType.NestedEffect,
         ApplyStatusEffectAction => EffectType.StatusEffect,
         DamageAction => EffectType.Damage,
         ResourceRestoreAction => EffectType.Healing,
@@ -57,9 +55,6 @@ public class EffectDefinition
         Interval = interval;
         Usage = usage;
         Targeting = targeting;
-        Trigger = trigger;
-        TriggerTarget = triggerTarget;
-        IsFlatAmount = isFlatAmount;
         Chance = chance;
         AttackType = attackType;
         DamageType = damageType;
@@ -73,9 +68,6 @@ public class EffectDefinition
                             interval: Interval.Clone(),
                             usage: Usage, // Do not close Usage, as we need the reference to the original object. Otherwise Usage never reaches 0
                             targeting: Targeting,
-                            trigger: Trigger,
-                            triggerTarget: TriggerTarget,
-                            isFlatAmount: IsFlatAmount,
                             chance: Chance,
                             effectModifications: EffectModifications,
                             effectTags: EffectTags,

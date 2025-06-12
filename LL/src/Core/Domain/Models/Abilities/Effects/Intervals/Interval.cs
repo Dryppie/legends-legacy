@@ -9,7 +9,7 @@ public class Interval : IEffectInterval
     public Interval(int interval)
     {
         this.interval = interval;
-        ticksUntilNextTrigger = interval;
+        ticksUntilNextTrigger = interval + 1; // +1 to counteract the first tick which is calculated right when this is applied
     }
 
     public bool ShouldTrigger()

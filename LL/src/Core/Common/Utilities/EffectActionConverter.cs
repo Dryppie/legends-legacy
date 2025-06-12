@@ -20,6 +20,11 @@ public class EffectActionConverter : JsonConverter<IEffectAction>
 
             switch (actionType)
             {
+                case "ApplyStatus":
+                    var statusId = root.GetProperty("StatusId").GetString() ?? "";
+
+                    return new ApplyStatusAction(statusId);
+
                 case "ApplyStatusEffect":
                     var status = Enum.Parse<StatusEffectType>(root.GetProperty("Status").GetString()!);
                     int stacks = 0;

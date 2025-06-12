@@ -17,35 +17,35 @@ public class ModifyAttributeAction : IEffectAction
         Stackable = stackable;
     }
 
-    public void Execute(EffectContext context, ICombatContext combatContext)
+    public void Execute(EffectContext effect, ICombatContext combatContext)
     {
-        var target = context.Target;
-        
-        var existingEffect = combatContext.EffectManager.FindEffectForEntity(target, context.Effect.Definition.SourceId);
-        
-        if (existingEffect != null && !Stackable) 
-        {
-            // If an effect exists, renew it, but only if it isn't stackable
-            combatContext.EffectManager.RenewEffect(existingEffect);
-            return;
-        }
+        var target = effect.Target;
+
+        //var existingEffect = combatContext.EffectManager.FindEffectForEntity(target, effect.Effect.Definition.SourceId);
+
+        //if (existingEffect != null && !Stackable)
+        //{
+        //    // If an effect exists, renew it, but only if it isn't stackable
+        //    combatContext.EffectManager.RenewEffect(existingEffect);
+        //    return;
+        //}
 
         // If an effect doesn't exist, always apply it
         target.ModifyAttribute(AttributeModifier);
 
-        context.EventType = AttributeModifier.Amount > 0 ? EventType.Buff : EventType.Debuff;
-        LogEvent(context, combatContext, target);
+        effect.EventType = AttributeModifier.Amount > 0 ? EventType.Buff : EventType.Debuff;
+        LogEvent(effect, combatContext, target);
     }
 
-    public void OnExpireExecute(EffectContext context, ICombatContext combatContext)
+    public void OnExpireExecute(EffectContext effect, ICombatContext combatContext)
     {
-        var target = context.Target;
+        var target = effect.Target;
 
-        context.Target.ModifyAttribute(AttributeModifier, remove: true);
+        effect.Target.ModifyAttribute(AttributeModifier, remove: true);
 
-        // At the moment it isn't necessary to log the expiration of an effect. It simply just have to disappear
-        // context.EventType = AttributeModifier.Amount > 0 ? EventType.BuffExpired : EventType.DebuffExpired;
-        // LogEvent(context, combatContext, target);
+        //At the moment it isn't necessary to log the expiration of an effect. It simply just have to disappear
+        effect.EventType = AttributeModifier.Amount > 0 ? EventType.BuffExpired : EventType.DebuffExpired;
+        //LogEvent(effect, combatContext, target);
     }
 
     private void LogEvent(EffectContext context, ICombatContext combatContext, CombatEntity target)
@@ -54,9 +54,9 @@ public class ModifyAttributeAction : IEffectAction
         // ie. 'HP increasd by 25%', rather than 'HP increased by 171'.
         // Magnitude will tell exactly how much it changed
         context.Magnitude = context.Magnitude;
-        context.Attribute = AttributeModifier.AttributeType;
+        //context.Attribute = AttributeModifier.AttributeType;
         context.Details = context.Details
-            .Replace("{Actor}", context.Actor.Name)
+            .Replace("{Actor}", context.Source.Name)
             .Replace("{Target}", target.Name)
             .Replace("{Amount}", AttributeModifier.Amount.ToString());
 

@@ -44,7 +44,7 @@ public class EssenceDescriptionService : IEssenceDescriptionService
         string template = ability.Description ?? string.Empty;
 
         // If no effects, just return the raw description
-        if (ability.Effects == null || ability.Effects.Count == 0)
+        if (ability.Triggers == null || ability.Triggers.Count == 0)
             return template;
 
         // We’ll track counters per effect type. 
@@ -58,7 +58,7 @@ public class EssenceDescriptionService : IEssenceDescriptionService
         var placeholders = new Dictionary<string, TooltipValue>();
 
         // Parse each effect in order
-        foreach (var effect in ability.Effects)
+        foreach (var effect in ability.Triggers.SelectMany(t => t.Actions))
         {
             var action = effect.Action;
             switch (action)

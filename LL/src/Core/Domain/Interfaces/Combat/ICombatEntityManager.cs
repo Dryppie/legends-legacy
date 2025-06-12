@@ -1,4 +1,5 @@
-﻿using Domain.Models.Combat;
+﻿using Domain.Models.Abilities;
+using Domain.Models.Combat;
 
 namespace Domain.Interfaces.Combat;
 public interface ICombatEntityManager
@@ -17,6 +18,8 @@ public interface ICombatEntityManager
     /// Returns all entities currently in combat.
     /// </summary>
     List<CombatEntity> AllEntities { get; }
+
+    void InitializeCombatEntityManager(List<CombatEntity> playerTeam, List<CombatEntity> enemyTeam);
 
     /// <summary>
     /// Adds a new entity to ones team
@@ -43,4 +46,12 @@ public interface ICombatEntityManager
     /// Check if combat should continue or if a team has been wiped out.
     /// </summary>
     bool IsCombatActive();
+
+    /// <summary>
+    /// This makes it such that only EntityManager selects targets for abilities, effects, etc.
+    /// </summary>
+    /// <param name="actor"></param>
+    /// <param name="targeting"></param>
+    /// <returns></returns>
+    List<CombatEntity> SelectTargets(CombatEntity actor, Targeting targeting);
 }

@@ -5,28 +5,26 @@ using Domain.Models.Damages;
 namespace Domain.Models.Abilities.Effects;
 public class EffectContext
 {
-    public Effect Effect { get; set; }
-    public List<CombatEntity> OwnTeam { get; set; } = [];
-    public List<CombatEntity> EnemyTeam { get; set; } = [];
-    /// <summary>
-    /// The entity initiating this context
-    /// </summary>
-    public CombatEntity Actor { get; set; }
-    /// <summary>
-    /// The entity this effect affects when Executed
-    /// </summary>
+    public CombatEntity Source { get; set; }
     public CombatEntity Target { get; set; }
     public AttackType AttackType { get; set; } = AttackType.None;
+    public string Details { get; set; } = string.Empty;
+    public EffectContext(CombatEntity source,
+                         CombatEntity target,
+                         AttackType attackType,
+                         string details)
+    {
+        Source = source;
+        Target = target;
+        AttackType = attackType;
+        Details = details;
+    }
 
-    /// <summary>
-    /// Whether the effect in context hits, crits, is dodged, and so on.
-    /// </summary>
-    public AttackOutcome AttackOutcome { get; set; }
     /// <summary>
     /// How much an effect heals, damages, and so on
     /// </summary>
     public int Magnitude { get; set; }
-    public string Details { get; set; } = string.Empty;
+    public AttackOutcome AttackOutcome { get; set; }
     /// <summary>
     /// This is being set in each EffectAction during execution
     /// </summary>
@@ -36,20 +34,4 @@ public class EffectContext
     /// </summary>
     public AttributeType Attribute { get; set; }
 
-    public EffectContext(Effect effect,
-                         List<CombatEntity> ownTeam,
-                         List<CombatEntity> enemyTeam,
-                         CombatEntity actor,
-                         CombatEntity target,
-                         int magnitude,
-                         string details)
-    {
-        Effect = effect;
-        OwnTeam = ownTeam;
-        EnemyTeam = enemyTeam;
-        Actor = actor;
-        Target = target;
-        Magnitude = magnitude;
-        Details = details;
-    }
 }

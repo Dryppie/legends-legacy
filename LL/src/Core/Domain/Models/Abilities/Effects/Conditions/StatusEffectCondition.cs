@@ -1,5 +1,7 @@
 ﻿using Domain.Interfaces.Abilities;
+using Domain.Interfaces.Combat;
 using Domain.Models.Abilities.Effects.StatusEffects;
+using Domain.Models.Combat;
 
 namespace Domain.Models.Abilities.Effects.Conditions;
 public class StatusEffectCondition : ICondition
@@ -20,9 +22,9 @@ public class StatusEffectCondition : ICondition
         return new StatusEffectCondition(_type, _stacksRequired, _comparison);
     }
 
-    public bool IsSatisfied(EffectContext context)
+    public bool IsSatisfied(CombatEntity source, CombatEntity target, ICombatContext combatContext)
     {
-        if (context.Target.Statuses.TryGetValue(_type, out int value))
+        if (target.StatusEffects.TryGetValue(_type, out int value))
         {
             var comparisonFulfilled = _comparison switch
             {
@@ -33,15 +35,15 @@ public class StatusEffectCondition : ICondition
             };
             if (comparisonFulfilled)
             {
-                PerformCondition(context);
+                PerformCondition(target);
                 return true;
             }
         }
         return false;
     }
 
-    public void PerformCondition(EffectContext context)
+    public void PerformCondition(CombatEntity target)
     {
-        context.Target.ModifyStatuses(_type, -_stacksRequired);
+        target.ModifyStatusEffects(_type, -_stacksRequired);
     }
 }

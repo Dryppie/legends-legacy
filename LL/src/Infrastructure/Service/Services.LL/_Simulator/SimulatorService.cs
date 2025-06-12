@@ -4,6 +4,7 @@ using Application.Interfaces.Services.LL.Entities;
 using Common.Helpers.Essences;
 using Domain.Components.Attributes;
 using Domain.Helpers;
+using Domain.Interfaces.Combat;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Entities;
@@ -14,12 +15,14 @@ public class SimulatorService : ISimulatorService
 {
     private readonly ICombatService _combatService;
     private readonly IEntityService _entityService;
+    private readonly ICombatContext _combatContext;
     private bool _pickRandomEssences = true;
     private string _essenceName;
 
-    public SimulatorService(ICombatService combatService)
+    public SimulatorService(ICombatService combatService, ICombatContext combatContext)
     {
         _combatService = combatService;
+        _combatContext = combatContext;
     }
 
     public async Task SimulateCombatWithOneEssence(string essenceName, int teamSize = 1)
@@ -70,8 +73,7 @@ public class SimulatorService : ISimulatorService
                 await PickSpecificAbility([.. combatEnemyEntities]);
             }
 
-            var combatSimulation = new CombatSimulation(combatPlayerEntities, combatEnemyEntities);
-            lastCombatResult = combatSimulation.RunSimulation(simulated: true);
+            lastCombatResult = _combatContext.InstantiateAndRunCombat(combatPlayerEntities, combatEnemyEntities);
 
             // Build the combination keys for the essences
             var playerCombo = GetEssenceComboKey(combatPlayerEntities);

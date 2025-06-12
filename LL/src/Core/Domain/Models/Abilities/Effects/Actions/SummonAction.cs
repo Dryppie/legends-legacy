@@ -24,7 +24,7 @@ public class SummonAction : IEffectAction
         _duration = duration;
     }
 
-    public void Execute(EffectContext context, ICombatContext combatContext)
+    public void Execute(EffectContext effect, ICombatContext combatContext)
     {
         // Create the summoned entity based on the provided type
         CombatEntity summonedCreature = SummonCreatureFactory.CreateCreature(_summonEntityType);
@@ -33,7 +33,7 @@ public class SummonAction : IEffectAction
         if (Magnitude > 0)
         {
             var selfDestructAction = new SelfDestructAction(_combatContext!);
-            var duration = new TimedDuration(Magnitude);
+            var duration = new TimedDuration(Magnitude + 1);
             var condition = new NoCondition();
             var interval = new NoInterval();
             var usage = new UnlimitedUsage();
@@ -47,17 +47,13 @@ public class SummonAction : IEffectAction
                 trigger: TriggerEvent.OnTickInterval,
                 effectTags: [EffectTag.SummonExpiration]
             );
-            var selfDestructEffect = new Effect()
-            {
-                Definition = selfDestructEffectDefinition,
-                Caster = context.Actor!,
-                Owner = summonedCreature
-            };
-            combatContext.EffectManager.AddEffect(context.Actor!, summonedCreature, selfDestructEffect);
+            var selfDestructEffect = new EffectInstance(selfDestructEffectDefinition, summonedCreature, summonedCreature);
+
+            combatContext.EffectManager.AddEffect(selfDestructEffect);
         }
 
         // Add the summoned entity to the caster's team
-        combatContext.EntityManager.AddEntityToOwnTeam(context.Actor!, summonedCreature);
+        combatContext.EntityManager.AddEntityToOwnTeam(effect.Source, summonedCreature);
 
         var simpleCombatEntity = new SimpleCombatEntity()
         {
@@ -71,16 +67,16 @@ public class SummonAction : IEffectAction
             ImagePath = summonedCreature.ImagePath
         };
 
-        context.Target = summonedCreature;
-        context.EventType = EventType.Summon;
-        context.Details = context.Details
-            .Replace("{Actor}", context.Actor!.Name)
+        effect.Target = summonedCreature;
+        effect.EventType = EventType.Summon;
+        effect.Details = effect.Details
+            .Replace("{Actor}", effect.Source.Name)
             .Replace("{Target}", summonedCreature.Name);
 
-        combatContext.LogEffectExecution(context, simpleCombatEntity);
+        combatContext.LogEffectExecution(effect, simpleCombatEntity);
     }
 
-    public void OnExpireExecute(EffectContext context, ICombatContext combatContext)
+    public void OnExpireExecute(EffectContext effect, ICombatContext combatContext)
     {
         // Do nothing
     }

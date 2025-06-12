@@ -1,0 +1,91 @@
+[
+  {
+    "Id": "blindedByDirt",
+    "Name": "Blinded by Dirt",
+    "IsStackable": true,
+    "Description": "Whenever you dodge, use the opportunity to throw dirt at the target, decreasing their accuracy by 3% for 6 seconds",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "ModifyAttribute",
+              "Attribute": "Accuracy",
+              "Amount": -3,
+              "ModifierType": "Additive",
+              "Stackable": true
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 110
+            },
+            "Targeting": "CauseOfTrigger",
+            "AttackType": "None",
+            "DamageType": "None",
+            "EffectTags": [],
+            "Log": "{Actor} threw dirt in {Target}'s eyes. {Target}'s accuracy decreased by 3%."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "poisonedArrowEffect",
+    "Name": "Poisoned Arrow",
+    "Description": "Taking poison damage over time.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "Damage",
+              "Amount": 2
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 30
+            },
+            "Interval": {
+              "Type": "Interval",
+              "Interval": 10
+            },
+            "Targeting": "Self",
+            "Trigger": "OnTickInterval",
+            "AttackType": "DamageOverTime",
+            "DamageType": "Poison",
+            "EffectTags": [ "Arrows" ],
+            "Log": "{Target} takes {Amount} poison damage."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "frostImpFreeze",
+    "Name": "Frozen",
+    "Description": "Unable to act for 4 seconds.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "ApplyStatusEffect",
+              "Status": "Frozen",
+              "Stacks": 1
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 40
+            },
+            "Targeting": "Self",
+            "Trigger": "None",
+            "Log": "{Target} is frozen"
+          }
+        ]
+      }
+    ]
+  }
+]

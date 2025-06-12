@@ -5,7 +5,10 @@ public class TimedDuration : IEffectDuration
 {
     private int initialDuration;
     private int durationRemaining;
-
+    /// <summary>
+    /// When timedDuration is loaded from the EssenceJsonReader, we add +1 to the duration so it counteracts the tick that happens while this is applied to a target
+    /// </summary>
+    /// <param name="duration"></param>
     public TimedDuration(int duration)
     {
         initialDuration = duration;

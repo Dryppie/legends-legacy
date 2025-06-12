@@ -1,13 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Components.Attributes;
+﻿using Domain.Components.Attributes;
 using Domain.Extensions;
 using Domain.Models.Abilities;
+using Domain.Models.Abilities.Effects;
 using Domain.Models.Abilities.Effects.StatusEffects;
+using Domain.Models.Abilities.Statuses;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Entities;
 using Domain.Models.Essences;
 using Domain.Models.Items.Equipments;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Models.Combat;
 [NotMapped]
@@ -19,7 +21,10 @@ public class CombatEntity
     public string Name { get; set; } = string.Empty;
     public string ImagePath { get; set; } = string.Empty;
     public ICollection<Essence> EquippedEssences { get; set; } = [];
-    public List<AbilityDefinition> Abilities { get; set; } = [];
+    public List<AbilityInstance> Abilities { get; set; } = [];
+    public List<StatusInstance> Statuses { get; set; } = [];
+
+    public Dictionary<StatusEffectType, int> StatusEffects { get; } = [];
     public int NextBasicAttackIn = 300; // TODO: Turn 300 into a Constant somewhere, as it is also stored in the CombatSimulator class
                                         // Every tick, this decrements by BaseAttackSpeed.
                                         // Start at 300. Whenever it is equal to or lower than 0, perform the attack.
@@ -32,7 +37,6 @@ public class CombatEntity
     public Dictionary<AttributeType, float> BaseCombatAttributes { get; } = [];
     public Dictionary<AttributeType, float> CombatAttributes { get; } = [];
     public List<AttributeModifierBase> TemporaryModifiers { get; set; } = [];
-    public Dictionary<StatusEffectType, int> Statuses { get; } = [];
     public int Level { get; set; }
     public bool IsSummoned = false;
 
@@ -60,7 +64,7 @@ public class CombatEntity
     {
         foreach (var ability in Abilities)
         {
-            ability.Usage.Recharge();
+            ability.Definition.Usage.Recharge();
             ability.RemainingTimeUntilUse--;
         }
     }
@@ -75,32 +79,67 @@ public class CombatEntity
         AttributeCalculator.CalculateCombatAttributeByType(this, attributeModifier.AttributeType);
     }
 
-    public void ModifyStatuses(StatusEffectType status, int amount)
+    public void ModifyStatusEffects(StatusEffectType status, int amount)
     {
         if (amount == 0)
             return;
 
         // If we already have this status in the dictionary:
-        if (Statuses.ContainsKey(status))
+        if (StatusEffects.ContainsKey(status))
         {
             // Update its stack count
-            Statuses[status] += amount;
+            StatusEffects[status] += amount;
 
             // If stacks drop to 0 or below, remove the status entirely
-            if (Statuses[status] <= 0)
-                Statuses.Remove(status);
+            if (StatusEffects[status] <= 0)
+                StatusEffects.Remove(status);
         }
         else
         {
             // We only add if we have a positive amount
             if (amount > 0)
-                Statuses[status] = amount;
+                StatusEffects[status] = amount;
         }
+    }
+
+    public void ApplyStatus(StatusInstance status)
+    {
+        if (!status.Definition.IsStackable)
+        {
+            var existing = Statuses.FirstOrDefault(s => s.Definition.Id == status.Definition.Id);
+            if (existing != null)
+            {
+                // Replace or refresh (based on design)
+                Statuses.Remove(existing);
+            }
+        }
+
+        Statuses.Add(status);
+
+        // Fire trigger on status applied
+        // This could be part of EffectManager or StatusService
+        //status.Definition.Triggers
+        //    .Where(t => t.Event == "OnStatusAppliedIfThis")
+        //    .ToList()
+        //    .ForEach(t =>
+        //    {
+        //        foreach (var effect in t.Actions)
+        //        {
+        //            var instance = new EffectInstance(effect, status.Source, status.Owner);
+        //            // Optional: You can apply this immediately or defer
+        //        }
+        //    });
+    }
+
+    public void RemoveStatus(StatusInstance status)
+    {
+        Statuses.Remove(status);
+        // Optionally fire OnStatusExpired triggers
     }
 
     public bool CanAct()
     {
-        return !Statuses.ContainsKey(StatusEffectType.Stunned) && !Statuses.ContainsKey(StatusEffectType.Frozen);
+        return !StatusEffects.ContainsKey(StatusEffectType.Stunned) && !StatusEffects.ContainsKey(StatusEffectType.Frozen);
     }
 
     public void Reset()
@@ -115,14 +154,14 @@ public class CombatEntity
 
         foreach (var ability in Abilities)
         {
-            ability.Usage.Reset();
+            //ability.Usage.Reset();
 
-            ability.RemainingTimeUntilUse = ability.Cooldown;
+            //ability.RemainingTimeUntilUse = ability.Cooldown;
 
-            foreach (var effect in ability.Effects)
-            {
-                effect.Usage.Reset();
-            }
+            //foreach (var effect in ability.Effects)
+            //{
+            //    effect.Usage.Reset();
+            //}
         }
 
         TemporaryModifiers.Clear();
@@ -150,7 +189,7 @@ public class CombatEntity
         Id = entity.Id.ToString();
         Name = entity.Name;
         ImagePath = entity.ImagePath;
-        Abilities = [.. entity.Abilities.Select(a => a.Clone())];
+        //Abilities = [.. entity.Abilities.Select(a => a.Clone())];
         NextBasicAttackIn = entity.NextBasicAttackIn;
         NextRecoveryIn = entity.NextRecoveryIn;
         Equipment = entity.Equipment.Select(e => e).ToList();
@@ -159,7 +198,7 @@ public class CombatEntity
         BaseCombatAttributes = new Dictionary<AttributeType, float>(entity.BaseCombatAttributes);
         CombatAttributes = new Dictionary<AttributeType, float>(entity.CombatAttributes);
         EquippedEssences = [.. entity.EquippedEssences];
-        Statuses = new Dictionary<StatusEffectType, int>(entity.Statuses);
+        //Statuses = new Dictionary<StatusEffectType, int>(entity.Statuses);
         Level = entity.Level;
         IsSummoned = entity.IsSummoned;
     }

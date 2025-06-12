@@ -1,0 +1,889 @@
+[
+  {
+    "Name": "Goblin's Essence",
+    "Active": {
+      "Id": "sneakAttack",
+      "Name": "Sneak Attack",
+      "Description": "Stab the target in the back, dealing {damage1} damage, and apply 15 bleed damage over 10 seconds.",
+      "Type": "Active",
+      "Cooldown": 90,
+      "Cost": { "Mana": "12" },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "sneakAttack" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "Damage",
+                "Amount": 5,
+                "ScalingAttribute": "Dexterity",
+                "ScalingMultiplier": 0.15
+              },
+              "Duration": {
+                "Type": "NoDuration"
+              },
+              "Targeting": "SingleEnemy",
+              "Trigger": "None",
+              "AttackType": "Melee",
+              "DamageType": "Physical",
+              "EffectTags": [],
+              "Log": "{Target} received {Amount} damage."
+            },
+            {
+              "Action": {
+                "Type": "Damage",
+                "Amount": 3
+              },
+              "Duration": {
+                "Type": "TimedDuration",
+                "Duration": 100
+              },
+              "Interval": {
+                "Type": "Interval",
+                "Interval": 20
+              },
+              "Targeting": "SingleEnemy",
+              "Trigger": "OnTickInterval",
+              "TriggerTarget": "Self",
+              "IsFlatAmount": true,
+              "AttackType": "DamageOverTime",
+              "DamageType": "Bleed",
+              "EffectTags": [],
+              "Log": "{Target} is bleeding, and took {Amount} damage."
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "pocketDirt",
+      "Name": "Pocket Dirt",
+      "Description": "Whenever you dodge, use the opportunity to throw dirt at the target, decreasing their accuracy by 3% for 6 seconds",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnDodge",
+          "Filters": [
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "blindedByDirt"
+              },
+              "Targeting": "CauseOfTrigger"
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Agility",
+        "Amount": 4,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Dexterity",
+        "Amount": 5,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Perception",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Instinct",
+        "Amount": 1,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Goblin Warrior's Essence",
+    "Active": {
+      "Id": "ragingCleave",
+      "Name": "Raging Cleave",
+      "Description": "Swing your weapon in a wide arc, dealing {damage1} damage to two enemies.",
+      "Type": "Active",
+      "Cooldown": 120,
+      "Cost": { "Mana": "9" },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "ragingCleave" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "Damage",
+                "Amount": 8,
+                "ScalingAttribute": "Strength",
+                "ScalingMultiplier": 0.2
+              },
+              "Duration": {
+                "Type": "NoDuration"
+              },
+              "Targeting": "TwoEnemies",
+              "Trigger": "None",
+              "AttackType": "Melee",
+              "DamageType": "Physical",
+              "EffectTags": [ "Slashing" ],
+              "Log": "{Target} received {Amount} damage."
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "recklessAssault",
+      "Name": "Reckless Assault",
+      "Description": "Increase Strength by 20, but decrease Endurance by 20",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnCombatStart",
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ModifyAttribute",
+                "Attribute": "Strength",
+                "Amount": 20,
+                "ModifierType": "Flat",
+                "Stackable": true
+              },
+              "Duration": {
+                "Type": "IndefiniteDuration"
+              },
+              "Targeting": "Self",
+              "Trigger": "None",
+              "Log": "{Actor}'s Strength is increased by 20."
+            },
+            {
+              "Action": {
+                "Type": "ModifyAttribute",
+                "Attribute": "Endurance",
+                "Amount": -20,
+                "ModifierType": "Flat",
+                "Stackable": true
+              },
+              "Duration": {
+                "Type": "IndefiniteDuration"
+              },
+              "Targeting": "Self",
+              "Trigger": "None",
+              "Log": "{Actor}'s Endurance is decreased by 20."
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "FightingSpirit",
+        "Amount": 10,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Endurance",
+        "Amount": 4,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Threat",
+        "Amount": 6,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Goblin Archer's Essence",
+    "Active": {
+      "Id": "snipersStrike",
+      "Name": "Sniper's Strike",
+      "Description": "Unleash a powerful shot dealing {damage1} damage. 50% increased critical chance.",
+      "Type": "Active",
+      "Cooldown": 150,
+      "Cost": { "Mana": "12" },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "snipersStrike" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "Damage",
+                "Amount": 15,
+                "ScalingAttribute": "Agility",
+                "ScalingMultiplier": 0.1,
+                "EffectModifiers": [
+                  {
+                    "Type": "CritChance",
+                    "Amount": 50,
+                    "ModifierType": "Flat"
+                  }
+                ]
+              },
+              "Duration": {
+                "Type": "NoDuration"
+              },
+              "Targeting": "SingleEnemy",
+              "Trigger": "None",
+              "AttackType": "Ranged",
+              "DamageType": "Physical",
+              "EffectTags": [ "Arrows" ],
+              "Log": "{Actor} landed a powerful shot on {Target}, dealing {Amount} damage."
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "poisonedArrows",
+      "Name": "Poisoned Arrows",
+      "Description": "Every ranged attack has a 20% chance to apply poison, dealing 6 damage over 3 seconds.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnRangedAttack",
+          "Filters": [
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "poisonedArrowEffect"
+              },
+              "Targeting": "CauseOfTrigger",
+              "Chance": 20
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Agility",
+        "Amount": 10,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Perception",
+        "Amount": 6,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Large Rat's Essence",
+    "Active": {
+      "Id": "tailWrap",
+      "Name": "Tail Wrap",
+      "Description": "Apply a crushing force to the target, dealing {damage1} damage.",
+      "Type": "Active",
+      "Cooldown": 150,
+      "Cost": { "Mana": "10" },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "tailWrap" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "Damage",
+                "Amount": 12,
+                "ScalingAttribute": "Strength",
+                "ScalingMultiplier": 0.2
+              },
+              "Duration": {
+                "Type": "NoDuration"
+              },
+              "Targeting": "SingleEnemy",
+              "Trigger": "None",
+              "AttackType": "Melee",
+              "DamageType": "Physical",
+              "EffectTags": [],
+              "Log": "{Target} received {Amount} damage."
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "big",
+      "Name": "Big",
+      "Description": "Health is increased by 50.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnCombatStart",
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ModifyAttribute",
+                "Attribute": "MaxHealth",
+                "Amount": 50,
+                "ModifierType": "Flat"
+              },
+              "Duration": {
+                "Type": "IndefiniteDuration"
+              },
+              "Targeting": "Self",
+              "Trigger": "None",
+              "Log": "{Actor}'s health is increased by 50 due to being big."
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Willpower",
+        "Amount": 4,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Endurance",
+        "Amount": 13,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Flame Imp's Essence",
+    "Active": {
+      "Id": "firebombToss",
+      "Name": "Firebomb Toss",
+      "Description": "Throw a flaming sphere, dealing {damage1} damage.",
+      "Type": "Active",
+      "Cooldown": 110,
+      "Cost": { "Mana": "7" },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "firebombToss" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "Damage",
+                "Amount": 11,
+                "ScalingAttribute": "Intelligence",
+                "ScalingMultiplier": 0.2
+              },
+              "Duration": {
+                "Type": "NoDuration"
+              },
+              "Targeting": "SingleEnemy",
+              "Trigger": "None",
+              "AttackType": "Ranged",
+              "DamageType": "Magical",
+              "EffectTags": [],
+              "Log": "{Target} received {Amount} damage."
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "hotAura",
+      "Name": "Hot Aura",
+      "Description": "Enemies that attack you in melee range have a 30% chance to receive 4 burn damage.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnMeleeAttacked",
+          "Filters": [
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "Damage",
+                "Amount": 4
+              },
+              "Duration": {
+                "Type": "NoDuration"
+              },
+              "Targeting": "CauseOfTrigger",
+              "Trigger": "None",
+              "IsFlatAmount": true,
+              "Chance": 100,
+              "AttackType": "Melee",
+              "DamageType": "Burn",
+              "EffectTags": [],
+              "Log": "{Target} received {Amount} burn damage."
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 9,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Willpower",
+        "Amount": 4,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Frost Imp's Essence",
+    "Active": {
+      "Id": "iceTouch",
+      "Name": "Ice Touch",
+      "Description": "If the target has 5 stacks of Cold, apply Freeze for 4 seconds. Then remove 5 stacks of Cold.",
+      "Type": "Active",
+      "Cooldown": 150,
+      "Cost": { "Mana": "4" },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "iceTouch" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "frostImpFreeze"
+              },
+              "Targeting": "SingleEnemy",
+              "Trigger": "None",
+              "Condition": {
+                "Type": "StatusEffectCondition",
+                "Status": "Cold",
+                "StacksRequired": 2,
+                "ComparisonType": "GreaterThan"
+              },
+              "Log": "{Actor} froze {Target} solid!"
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "coldAura",
+      "Name": "Cold Aura",
+      "Description": "Enemies that attack you in melee range receive a Cold status effect that does not expire.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnMeleeAttacked",
+          "Filters": [
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatusEffect",
+                "Status": "Cold",
+                "Stacks": 1
+              },
+              "Duration": {
+                "Type": "IndefiniteDuration"
+              },
+              "Targeting": "CauseOfTrigger",
+              "Trigger": "None",
+              "Log": "{Target} has received 1 stack of Cold."
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Wisdom",
+        "Amount": 8,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 6,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Shadow Imp's Essence",
+    "Active": {
+      "Id": "shadowImage",
+      "Name": "Shadow Image",
+      "Description": "Summon a shadow illusion of yourself with 1 health.",
+      "Type": "Active",
+      "Cooldown": 150,
+      "Cost": { "Mana": "5" },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "shadowImage" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "Summon",
+                "SummonId": "shadowImage",
+                "SummonDuration": 100
+              },
+              "Duration": {
+                "Type": "NoDuration"
+              },
+              "Targeting": "Self",
+              "Trigger": "None",
+              "Log": "{Actor} summoned a shadowy illusion of themselves."
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "shadowyPresence",
+      "Name": "Shadowy Presence",
+      "Description": "Increase chance of dodging by 2%.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnCombatStart",
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ModifyAttribute",
+                "Attribute": "Dodge",
+                "Amount": 2,
+                "ModifierType": "Flat"
+              },
+              "Duration": {
+                "Type": "IndefiniteDuration"
+              },
+              "Targeting": "Self",
+              "Trigger": "None",
+              "Log": "{Actor} moves with an elusive shadowy presence, increasing dodge chance by 2%."
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Luck",
+        "Amount": 6,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Threat",
+        "Amount": -1,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Vampire Bat's Essence",
+    "Active": {
+      "Id": "bloodthirstyFangs",
+      "Name": "Bloodthirsty Fangs",
+      "Description": "Deal {damage1} damage to the target, with 30% lifesteal.",
+      "Type": "Active",
+      "Cooldown": 200,
+      "Cost": { "Mana": "6" },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "bloodthirstyFangs" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "Damage",
+                "Amount": 11,
+                "ScalingAttribute": "Strength",
+                "ScalingMultiplier": 0.2,
+                "Lifesteal": 30
+              },
+              "Duration": {
+                "Type": "NoDuration"
+              },
+              "Targeting": "SingleEnemy",
+              "Trigger": "None",
+              "AttackType": "Melee",
+              "DamageType": "Physical",
+              "EffectTags": [],
+              "Log": "{Actor} bit {Target}, dealing {Amount} damage."
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "darkVitality",
+      "Name": "Dark Vitality",
+      "Description": "Whenever you heal through lifesteal, gain an extra 4 health.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnLifestealHeal",
+          "Filters": [
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ResourceRestore",
+                "ResourceType": "Health",
+                "Amount": 4
+              },
+              "Duration": {
+                "Type": "NoDuration"
+              },
+              "IsFlatAmount": true,
+              "Targeting": "Self",
+              "Trigger": "None",
+              "Log": "{Actor} gained an additional {Amount} health from lifesteal."
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Agility",
+        "Amount": 8,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Strength",
+        "Amount": 4,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Blue Slime's Essence",
+    "Active": {
+      "Id": "sweetWater",
+      "Name": "Sweet Water",
+      "Description": "Restores {heal1} Health to all allies every 2 seconds for 8 seconds.",
+      "Type": "Active",
+      "Cooldown": 240,
+      "Cost": { "Mana": "8" },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "sweetWater" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ResourceRestore",
+                "ResourceType": "Health",
+                "Amount": 2,
+                "ScalingAttribute": "Wisdom",
+                "ScalingMultiplier": 0.2
+              },
+              "Duration": {
+                "Type": "TimedDuration",
+                "Duration": 80
+              },
+              "Interval": {
+                "Type": "Interval",
+                "Interval": 20
+              },
+              "Targeting": "AllAllies",
+              "Trigger": "OnTickInterval",
+              "Log": "{Target} is soothed by {Actor}'s Sweet Water, restoring {Amount} health."
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "absorptiveShell",
+      "Name": "Absorptive Shell",
+      "Description": "Whenever you are attacked, restore 2 mana.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnAttacked",
+          "Filters": [
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ResourceRestore",
+                "ResourceType": "Mana",
+                "Amount": 2
+              },
+              "Duration": {
+                "Type": "NoDuration"
+              },
+              "Targeting": "Self",
+              "Trigger": "None",
+              "Log": "{Actor}'s Absorptive Shell restored 2 mana."
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Wisdom",
+        "Amount": 7,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Willpower",
+        "Amount": 7,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Brown Slime's Essence",
+    "Active": {
+      "Id": "mudArmor",
+      "Name": "Mud Armor",
+      "Description": "Decrease all damage taken by 2 for 6.5 seconds.",
+      "Type": "Active",
+      "Cooldown": 140,
+      "Cost": { "Mana": "6" },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "mudArmor" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ModifyAttribute",
+                "Attribute": "FlatDamageReduction",
+                "Amount": 2,
+                "ModifierType": "Flat"
+              },
+              "Duration": {
+                "Type": "TimedDuration",
+                "Duration": 65
+              },
+              "Targeting": "Self",
+              "Trigger": "None",
+              "Log": "{Actor} is covered in thick mud, reducing all damage taken by 2."
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "earthlyFortitude",
+      "Name": "Earthly Fortitude",
+      "Description": "Increase Physical Defense by 15.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnCombatStart",
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ModifyAttribute",
+                "Attribute": "PhysicalDefense",
+                "Amount": 15,
+                "ModifierType": "Flat"
+              },
+              "Duration": {
+                "Type": "IndefiniteDuration"
+              },
+              "Targeting": "Self",
+              "Trigger": "None",
+              "Log": "{Actor}'s body hardens like stone, increasing Physical Defense by 15."
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Constitution",
+        "Amount": 6,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Endurance",
+        "Amount": 8,
+        "ModifierType": "Flat"
+      }
+    ]
+  }
+]

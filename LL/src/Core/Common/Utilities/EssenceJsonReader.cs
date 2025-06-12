@@ -19,6 +19,7 @@ public static class EssenceJsonReader
             new TargetingConverter(),
             new TriggerEventConverter(),
             new JsonStringEnumConverter(),
+            new TriggerFilterConverter(),
         },
         PropertyNameCaseInsensitive = true,
     };

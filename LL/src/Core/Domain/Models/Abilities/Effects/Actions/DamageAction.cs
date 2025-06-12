@@ -22,60 +22,69 @@ public class DamageAction : IEffectAction
         _lifeStealPercentage = lifeStealPercentage;
     }
 
-    public void Execute(EffectContext context, ICombatContext combatContext)
+    public void Execute(EffectContext effect, ICombatContext combatContext)
     {
-        var isFlatAmount = context.Effect.Definition.IsFlatAmount;
-        var attackOutcome = AttackOutcome.Hit;
+        var attackOutcome = AttackOutcome.Miss;
         var damageAmount = Magnitude;
-        var eventType = context.Effect.Definition.AttackType == AttackType.DamageOverTime
+        var eventType = effect.AttackType == AttackType.DamageOverTime
             ? EventType.DamageOverTime
             : EventType.Damage;
-        if (!isFlatAmount) // If it isn't a flat amount, perform the necessary calculations for attack outcome and damage
+        if (eventType != EventType.DamageOverTime)
         {
-            attackOutcome = combatContext.InteractionManager.CalculateAttackOutcomeForDamage(context.Actor, context.Target, context.Effect.Definition.EffectModifications);
+            attackOutcome = combatContext.InteractionManager.CalculateAttackOutcomeForDamage(effect.Source, effect.Target, []);
 
             if (attackOutcome == AttackOutcome.Miss)
             {
-                context.EventType = EventType.Miss;
-                context.Details = $"{context.Actor?.Name!} missed the target.";
-                // Log
-                combatContext.LogEffectExecution(context);
+                effect.EventType = EventType.Miss;
+                effect.Details = $"{effect.Source.Name} missed the target.";
+                //// Log
+                combatContext.LogEffectExecution(effect);
+
+                combatContext.EventBus.Publish(new CombatEvent
+                {
+                    // When someone dodges, they're the source of the event, as they're the ones dodging the attack
+                    // The target is the whoever attacked. This will result in being able to trigger effects on the attacker
+                    Type = TriggerEvent.OnDodge,
+                    Source = effect.Target,
+                    Target = effect.Source,
+                    CurrentTime = combatContext.CurrentTime
+                });
                 return;
             }
-
             // Potential damage to deal before calculating opponent's defenses
-            damageAmount = combatContext.InteractionManager.CalculateDamageToDeal(context.Actor, context.Target, Magnitude, attackOutcome, ScalingAttribute!.Value, ScalingMultiplier);
+            damageAmount = combatContext.InteractionManager.CalculateDamageToDeal(effect.Source, effect.Target, Magnitude, attackOutcome, ScalingAttribute, ScalingMultiplier);
         }
 
-        // Damage opponent will receive
-        var damageResult = combatContext.InteractionManager.CalculateDamageBreakdown(context.Target, damageAmount, attackOutcome, context.Effect.Definition.DamageType);
+        //// Damage opponent will receive
+        var damageResult = combatContext.InteractionManager.CalculateDamageBreakdown(effect.Target, damageAmount, attackOutcome, DamageType.Physical);
 
-        context.AttackOutcome = attackOutcome;
-        context.Magnitude = damageResult.HealthDamage; // Only set HealthDamage, as that's what we'll use to deduct from Health. TotalDamage is only for the Log
-        context.EventType = eventType;
-        context.Details = context.Details
-            .Replace("{Actor}", context.Actor.Name)
-            .Replace("{Target}", context.Target.Name);
+        effect.AttackOutcome = attackOutcome;
+        effect.Magnitude = damageResult.HealthDamage; // Only set HealthDamage, as that's what we'll use to deduct from Health. TotalDamage is only for the Log
+        effect.EventType = eventType;
+        effect.Details = effect.Details
+            .Replace("{Actor}", effect.Source.Name)
+            .Replace("{Target}", effect.Target.Name);
 
         if (damageResult.IsCrit)
-            context.Details = context.Details.Replace("{Amount}", $"{context.Magnitude} critical");
-        else if (context.AttackOutcome == AttackOutcome.Parry)
-            context.Details = context.Details.Replace("{Amount}", $"{context.Magnitude} parried");
-        else if (context.AttackOutcome == AttackOutcome.Block)
-            context.Details = context.Details.Replace("{Amount}", $"{context.Magnitude} blocked");
+            effect.Details = effect.Details.Replace("{Amount}", $"{damageResult.TotalDamage} critical");
+        else if (attackOutcome == AttackOutcome.Parry)
+            effect.Details = effect.Details.Replace("{Amount}", $"{damageResult.TotalDamage} parried");
+        else if (attackOutcome == AttackOutcome.Block)
+            effect.Details = effect.Details.Replace("{Amount}", $"{damageResult.TotalDamage} blocked");
         else
-            context.Details = context.Details.Replace("{Amount}", context.Magnitude.ToString());
+            effect.Details = effect.Details.Replace("{Amount}", damageResult.TotalDamage.ToString());
 
-        var simpleCombatEntity = CreateSimpleCombatEntity(context.Target);
-        simpleCombatEntity.Health = Math.Max(0, simpleCombatEntity.Health - context.Magnitude);
-        combatContext.LogEffectExecution(context, simpleCombatEntity);
-        
-        combatContext.InteractionManager.ApplyDamage(context);
+        var simpleCombatEntity = CreateSimpleCombatEntity(effect.Target);
+        simpleCombatEntity.Health = Math.Max(0, simpleCombatEntity.Health - damageResult.HealthDamage);
+        //var context = new EffectContext(source, target, eventType, damageResult.HealthDamage, details);
+        combatContext.LogEffectExecution(effect, simpleCombatEntity);
 
-        ApplyLifeStealIfAny(context, combatContext, damageResult.HealthDamage);
+        combatContext.InteractionManager.ApplyDamage(effect.Source, effect.Target, damageResult.HealthDamage, effect.AttackType);
+
+        ApplyLifeStealIfAny(effect, combatContext, damageResult.HealthDamage);
     }
 
-    private void ApplyLifeStealIfAny(EffectContext context, ICombatContext combatContext, int finalDamageDealt)
+    private void ApplyLifeStealIfAny(EffectContext effect, ICombatContext combatContext, int finalDamageDealt)
     {
         // If there's no life-steal or no damage dealt, skip
         if (_lifeStealPercentage <= 0f || finalDamageDealt <= 0)
@@ -87,22 +96,27 @@ public class DamageAction : IEffectAction
         if (lifeStolen <= 0)
             return;
 
-        context.Magnitude += lifeStolen;
-        context.Actor = context.Actor;
-        context.Target = context.Actor;
-        context.EventType = EventType.Heal;
-        context.Details = $"{context.Actor.Name} restored {lifeStolen} health through lifesteal.";
+        effect.Magnitude += lifeStolen;
+        effect.Target = effect.Source; // The source is the one who gets healed
+        effect.EventType = EventType.Heal;
+        effect.Details = $"{effect.Source.Name} restored {lifeStolen} health through lifesteal.";
 
         // Apply the healing
-        combatContext.InteractionManager.ApplyHealing(context);
+        combatContext.InteractionManager.ApplyHealing(effect);
 
         // Log the healing event
-        var simpleCombatEntity = CreateSimpleCombatEntity(context.Actor);
-        simpleCombatEntity.Health += context.Magnitude;
-        combatContext.LogEffectExecution(context, simpleCombatEntity);
+        var simpleCombatEntity = CreateSimpleCombatEntity(effect.Source);
+        simpleCombatEntity.Health += effect.Magnitude;
+        simpleCombatEntity.Health = Math.Min(simpleCombatEntity.MaxHealth, simpleCombatEntity.Health + effect.Magnitude);
 
         // Trigger OnLifesteal
-        combatContext.EffectManager.TriggerEffects(TriggerEvent.OnLifestealHeal, context.Actor, context.Actor, lifeStolen);
+        combatContext.LogEffectExecution(effect, simpleCombatEntity);
+
+        combatContext.EventBus.Publish(new CombatEvent
+        {
+            Type = TriggerEvent.OnLifestealHeal,
+            Source = effect.Source,
+        });
     }
 
     private SimpleCombatEntity CreateSimpleCombatEntity(CombatEntity target)
@@ -118,7 +132,7 @@ public class DamageAction : IEffectAction
         };
     }
 
-    public void OnExpireExecute(EffectContext context, ICombatContext combatContext)
+    public void OnExpireExecute(EffectContext effect, ICombatContext combatContext)
     {
         // Do nothing
     }

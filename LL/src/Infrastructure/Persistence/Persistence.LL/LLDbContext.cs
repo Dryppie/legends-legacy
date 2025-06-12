@@ -183,7 +183,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
 
     public DbSet<Region> Regions => Set<Region>();
 
-    public new DbSet<AppUser> Users => Set<AppUser>();
+    public DbSet<AppUser> Users => Set<AppUser>();
     public DbSet<ExternalLogin> ExternalLogins => Set<ExternalLogin>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 }

@@ -47,7 +47,7 @@ public sealed class EssenceLoader
     /// </summary>
     private static List<Essence> LoadEssencesFromJson()
     {
-        string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "abilities.json");
+        string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "abilities2.json");
         string json = File.ReadAllText(filePath);
 
         // Deserialize JSON into a list of essences
@@ -70,8 +70,8 @@ public sealed class EssenceLoader
         foreach (var essence in entityEssences)
         {
             SetSourceIdForEffects(essence);
-            entity.Abilities.Add(essence.Active.Clone());
-            entity.Abilities.Add(essence.Passive.Clone());
+            entity.Abilities.Add(new (essence.Active));
+            entity.Abilities.Add(new (essence.Passive));
         }
     }
 
@@ -86,8 +86,8 @@ public sealed class EssenceLoader
         foreach (var essence in entityEssences)
         {
             SetSourceIdForEffects(essence);
-            entity.Abilities.Add(essence.Active.Clone());
-            entity.Abilities.Add(essence.Passive.Clone());
+            entity.Abilities.Add(new(essence.Active));
+            entity.Abilities.Add(new(essence.Passive));
         }
     }
 
@@ -130,8 +130,8 @@ public sealed class EssenceLoader
         {
             SetSourceIdForEffects(essence);
             entity.EquippedEssences.Add(essence);
-            entity.Abilities.Add(essence.Active.Clone());
-            entity.Abilities.Add(essence.Passive.Clone());
+            entity.Abilities.Add(new(essence.Active));
+            entity.Abilities.Add(new(essence.Passive));
         }
     }
 
@@ -145,8 +145,8 @@ public sealed class EssenceLoader
         {
             SetSourceIdForEffects(chosenEssence);
             entity.EquippedEssences.Add(chosenEssence);
-            entity.Abilities.Add(chosenEssence.Active.Clone());
-            entity.Abilities.Add(chosenEssence.Passive.Clone());
+            entity.Abilities.Add(new (chosenEssence.Active));
+            entity.Abilities.Add(new (chosenEssence.Passive));
         }
     }
 
@@ -155,14 +155,14 @@ public sealed class EssenceLoader
     /// </summary>
     private static void SetSourceIdForEffects(Essence essence)
     {
-        for (int i = 0; i < essence.Active.Effects.Count; i++)
-        {
-            essence.Active.Effects[i].SourceId = $"{essence.Active.Id}_{i}";
-        }
+        //for (int i = 0; i < essence.Active.Effects.Count; i++)
+        //{
+        //    essence.Active.Effects[i].SourceId = $"{essence.Active.Id}_{i}";
+        //}
 
-        for (int i = 0; i < essence.Passive.Effects.Count; i++)
-        {
-            essence.Passive.Effects[i].SourceId = $"{essence.Passive.Id}_{i}";
-        }
+        //for (int i = 0; i < essence.Passive.Effects.Count; i++)
+        //{
+        //    essence.Passive.Effects[i].SourceId = $"{essence.Passive.Id}_{i}";
+        //}
     }
 }

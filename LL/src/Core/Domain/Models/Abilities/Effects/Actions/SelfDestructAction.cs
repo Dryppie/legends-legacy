@@ -13,18 +13,18 @@ public class SelfDestructAction : IEffectAction
         _combatContext = combatContext;
     }
 
-    public void Execute(EffectContext context, ICombatContext combatContext)
+    public void Execute(EffectContext effect, ICombatContext combatContext)
     {
         
     }
 
-    public void OnExpireExecute(EffectContext context, ICombatContext combatContext)
+    public void OnExpireExecute(EffectContext effect, ICombatContext combatContext)
     {
-        combatContext.EntityManager.RemoveEntity(context.Target);
+        combatContext.EntityManager.RemoveEntity(effect.Target);
 
-        context.EventType = EventType.SummonExpired;
-        context.Details = $"{context.Target.Name} vanished. Summon effect expired.";
+        effect.EventType = EventType.SummonExpired;
+        effect.Details = $"{effect.Target.Name} vanished. Summon effect expired.";
 
-        combatContext.LogEffectExecution(context);
+        combatContext.LogEffectExecution(effect);
     }
 }
