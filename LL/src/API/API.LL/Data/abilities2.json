@@ -140,11 +140,7 @@
                 "ScalingAttribute": "Strength",
                 "ScalingMultiplier": 0.2
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
               "Targeting": "TwoEnemies",
-              "Trigger": "None",
               "AttackType": "Melee",
               "DamageType": "Physical",
               "EffectTags": [ "Slashing" ],
@@ -176,7 +172,6 @@
                 "Type": "IndefiniteDuration"
               },
               "Targeting": "Self",
-              "Trigger": "None",
               "Log": "{Actor}'s Strength is increased by 20."
             },
             {
@@ -191,7 +186,6 @@
                 "Type": "IndefiniteDuration"
               },
               "Targeting": "Self",
-              "Trigger": "None",
               "Log": "{Actor}'s Endurance is decreased by 20."
             }
           ]
@@ -250,11 +244,7 @@
                   }
                 ]
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
               "Targeting": "SingleEnemy",
-              "Trigger": "None",
               "AttackType": "Ranged",
               "DamageType": "Physical",
               "EffectTags": [ "Arrows" ],
@@ -329,11 +319,7 @@
                 "ScalingAttribute": "Strength",
                 "ScalingMultiplier": 0.2
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
               "Targeting": "SingleEnemy",
-              "Trigger": "None",
               "AttackType": "Melee",
               "DamageType": "Physical",
               "EffectTags": [],
@@ -364,7 +350,6 @@
                 "Type": "IndefiniteDuration"
               },
               "Targeting": "Self",
-              "Trigger": "None",
               "Log": "{Actor}'s health is increased by 50 due to being big."
             }
           ]
@@ -411,11 +396,7 @@
                 "ScalingAttribute": "Intelligence",
                 "ScalingMultiplier": 0.2
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
               "Targeting": "SingleEnemy",
-              "Trigger": "None",
               "AttackType": "Ranged",
               "DamageType": "Magical",
               "EffectTags": [],
@@ -443,11 +424,7 @@
                 "Type": "Damage",
                 "Amount": 4
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
               "Targeting": "CauseOfTrigger",
-              "Trigger": "None",
               "IsFlatAmount": true,
               "Chance": 100,
               "AttackType": "Melee",
@@ -498,7 +475,6 @@
                 "StatusId": "frostImpFreeze"
               },
               "Targeting": "SingleEnemy",
-              "Trigger": "None",
               "Condition": {
                 "Type": "StatusEffectCondition",
                 "Status": "Cold",
@@ -534,7 +510,6 @@
                 "Type": "IndefiniteDuration"
               },
               "Targeting": "CauseOfTrigger",
-              "Trigger": "None",
               "Log": "{Target} has received 1 stack of Cold."
             }
           ]
@@ -580,11 +555,7 @@
                 "SummonId": "shadowImage",
                 "SummonDuration": 100
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
               "Targeting": "Self",
-              "Trigger": "None",
               "Log": "{Actor} summoned a shadowy illusion of themselves."
             }
           ]
@@ -612,7 +583,6 @@
                 "Type": "IndefiniteDuration"
               },
               "Targeting": "Self",
-              "Trigger": "None",
               "Log": "{Actor} moves with an elusive shadowy presence, increasing dodge chance by 2%."
             }
           ]
@@ -665,11 +635,7 @@
                 "ScalingMultiplier": 0.2,
                 "Lifesteal": 30
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
               "Targeting": "SingleEnemy",
-              "Trigger": "None",
               "AttackType": "Melee",
               "DamageType": "Physical",
               "EffectTags": [],
@@ -698,12 +664,7 @@
                 "ResourceType": "Health",
                 "Amount": 4
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
-              "IsFlatAmount": true,
               "Targeting": "Self",
-              "Trigger": "None",
               "Log": "{Actor} gained an additional {Amount} health from lifesteal."
             }
           ]
@@ -760,7 +721,6 @@
                 "Interval": 20
               },
               "Targeting": "AllAllies",
-              "Trigger": "OnTickInterval",
               "Log": "{Target} is soothed by {Actor}'s Sweet Water, restoring {Amount} health."
             }
           ]
@@ -786,11 +746,7 @@
                 "ResourceType": "Mana",
                 "Amount": 2
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
               "Targeting": "Self",
-              "Trigger": "None",
               "Log": "{Actor}'s Absorptive Shell restored 2 mana."
             }
           ]
@@ -842,7 +798,6 @@
                 "Duration": 65
               },
               "Targeting": "Self",
-              "Trigger": "None",
               "Log": "{Actor} is covered in thick mud, reducing all damage taken by 2."
             }
           ]
@@ -870,7 +825,6 @@
                 "Type": "IndefiniteDuration"
               },
               "Targeting": "Self",
-              "Trigger": "None",
               "Log": "{Actor}'s body hardens like stone, increasing Physical Defense by 15."
             }
           ]
@@ -985,12 +939,8 @@
                 "Type": "ApplyStatus",
                 "StatusId": "unstableColorsBuff"
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
               "Targeting": "AllAllies",
               "Chance": 30,
-              "Trigger": "None",
               "Log": "{Actor}'s colors ripple across {Target}, empowering them!"
             }
           ]
@@ -1016,11 +966,7 @@
                 "ResourceType": "Barrier",
                 "Amount": 20
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
               "Targeting": "AllyHighestMaxHealth",
-              "Trigger": "None",
               "Log": "{Actor} creates a colorful shield around {Target}, granting 20 Barrier."
             }
           ]
@@ -1108,7 +1054,6 @@
                 "Type": "IndefiniteDuration"
               },
               "Targeting": "Self",
-              "Trigger": "None",
               "Log": "{Actor}'s body hardens against fire, increasing Fire Resistance by 5."
             }
           ]
@@ -1187,7 +1132,6 @@
                 "Type": "LimitedUsage",
                 "Uses": 1
               },
-              "Duration": { "Type": "NoDuration" },
               "Targeting": "Self",
               "Log": "{Actor}'s form becomes elusive as its health drops!"
             }
@@ -1234,7 +1178,6 @@
                 "ResourceType": "Barrier",
                 "Amount": 20
               },
-              "Duration": { "Type": "NoDuration" },
               "Targeting": "TwoAllies",
               "Log": "{Target} received {Amount} barrier."
             }
@@ -1319,7 +1262,6 @@
                   "ModifierType": "Flat"
                 }
               ],
-              "Duration": { "Type": "NoDuration" },
               "Targeting": "SingleEnemy",
               "AttackType": "Melee",
               "DamageType": "Physical",
@@ -1394,10 +1336,8 @@
                 "Type": "ApplyStatus",
                 "StatusId": "illusionFoxAccuracyDebuff"
               },
-              "Duration": { "Type": "NoDuration" },
               "Targeting": "AllEnemies",
               "Chance": 35,
-              "Trigger": "None",
               "Log": "{Target} has been distracted, reducing their accuracy."
             }
           ]
@@ -1441,6 +1381,84 @@
       },
       {
         "AttributeType": "Agility",
+        "Amount": 7,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Nightshade Blossom's Essence",
+    "Active": {
+      "Id": "necroticSpores",
+      "Name": "Necrotic Spores",
+      "Description": "Release a burst of spores that reduce the natural regeneration of all enemies by 40% for 8 seconds.",
+      "Type": "Active",
+      "Cooldown": 140,
+      "Cost": { "Mana": "12" },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "necroticSpores" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "necroticSporeDebuff"
+              },
+              "Targeting": "AllEnemies",
+              "Log": "{Target} is afflicted by necrotic spores, weakening their regeneration."
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "twilightBloom",
+      "Name": "Twilight Bloom",
+      "Description": "Produce a seed that blooms every 11 seconds, releasing a scent that heals your team.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnCombatStart",
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ResourceRestore",
+                "ResourceType": "Health",
+                "Amount": 29
+              },
+              "Duration": { "Type": "IndefiniteDuration" },
+              "Interval": {
+                "Type": "Interval",
+                "Interval": 110
+              },
+              "Targeting": "AllAllies",
+              "Log": "{Target} is soothed by the scent of the Twilight Bloom, restoring {Amount} health."
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Willpower",
+        "Amount": 11,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 7,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Wisdom",
         "Amount": 7,
         "ModifierType": "Flat"
       }

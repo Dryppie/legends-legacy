@@ -116,6 +116,36 @@
     ]
   },
   {
+    "Id": "redSlimeFireAura",
+    "Name": "Fire Aura",
+    "Description": "Deals 3 burn damage every second to all enemies for 10 seconds.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "Damage",
+              "Amount": 3
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 100
+            },
+            "Interval": {
+              "Type": "Interval",
+              "Interval": 10
+            },
+            "Targeting": "EveryoneButYou",
+            "AttackType": "DamageOverTime",
+            "DamageType": "Burn",
+            "Log": "{Target} is scorched by {Actor}'s fiery aura, taking {Amount} burn damage!"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "Id": "unstableColorsBuff",
     "Name": "Unstable Colors",
     "Description": "Increases Strength and Intelligence by 20 for 10 seconds.",
@@ -174,7 +204,6 @@
               "Duration": 30
             },
             "Targeting": "Self",
-            "Trigger": "None",
             "Log": "{Target} is stunned while engulfed!"
           },
           {
@@ -298,11 +327,50 @@
               "Type": "Damage",
               "Amount": 8,
               "AttackType": "None",
-              "DamageType": "Magical",
-              "IsFlatAmount": true
+              "DamageType": "Magical"
             },
             "Targeting": "CauseOfTrigger",
             "Log": "{Target} was hit by a Foxfire Wisp, taking {Amount} magical damage."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "necroticSporeDebuff",
+    "Name": "Necrotic Spores",
+    "Description": "Regeneration reduced by 40%.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "ModifyAttribute",
+              "Attribute": "HealthRegeneration",
+              "Amount": -40,
+              "ModifierType": "Multiplicative"
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 80
+            },
+            "Targeting": "Self",
+            "Log": "{Target}'s health regeneration is suppressed."
+          },
+          {
+            "Action": {
+              "Type": "ModifyAttribute",
+              "Attribute": "ManaRegeneration",
+              "Amount": -40,
+              "ModifierType": "Multiplicative"
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 80
+            },
+            "Targeting": "Self",
+            "Log": "{Target}'s mana regeneration is suppressed."
           }
         ]
       }

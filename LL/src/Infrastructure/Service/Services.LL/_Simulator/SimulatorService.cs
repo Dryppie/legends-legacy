@@ -195,7 +195,7 @@ public class SimulatorService : ISimulatorService
         await Task.WhenAll(attributePickerTasks);
     }
 
-    private static async Task PickSpecificAbility(IEnumerable<CombatEntity> entities, string essenceName = "Test Essence")
+    private static async Task PickSpecificAbility(IEnumerable<CombatEntity> entities, string essenceName = "Goblin's Essence")
     {
         // Pick ability for the first entity
         var tasks = new List<Task> { Task.Run(() => EssenceLoader.Instance._Simulator_PickSpecificAbility(entities.First(), essenceName)) };
