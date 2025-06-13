@@ -48,10 +48,6 @@ public class TriggerEngine : IDisposable
                     {
                         targets.Add(e.Target!);
                     }
-                    //else if (triggerTarget.Equals(Targeting.AttackedEnemy))
-                    //{
-                    //    targets.Add(causeOfTrigger!);
-                    //}
                     else
                     {
                         targets = _context.EntityManager.SelectTargets(entity, effect.Targeting);

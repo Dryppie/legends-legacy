@@ -52,7 +52,6 @@
               "Interval": 10
             },
             "Targeting": "Self",
-            "Trigger": "OnTickInterval",
             "AttackType": "DamageOverTime",
             "DamageType": "Poison",
             "EffectTags": [ "Arrows" ],
@@ -81,8 +80,313 @@
               "Duration": 40
             },
             "Targeting": "Self",
-            "Trigger": "None",
             "Log": "{Target} is frozen"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "greenSlimePoison",
+    "Name": "Acid Splash Poison",
+    "Description": "Taking 4 poison damage every 3 seconds.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "Damage",
+              "Amount": 4
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 90
+            },
+            "Interval": {
+              "Type": "Interval",
+              "Interval": 30
+            },
+            "Targeting": "Self",
+            "AttackType": "DamageOverTime",
+            "DamageType": "Poison",
+            "Log": "{Target} took {Amount} poison damage."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "corrosiveOozePoison",
+    "Name": "Corrosive Ooze",
+    "Description": "Takes 3 poison damage every 6 seconds for 12 seconds.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "Damage",
+              "Amount": 3
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 120
+            },
+            "Interval": {
+              "Type": "Interval",
+              "Interval": 60
+            },
+            "Targeting": "Self",
+            "AttackType": "DamageOverTime",
+            "DamageType": "Poison",
+            "Log": "{Target} took {Amount} poison damage from corrosive ooze."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "unstableColorsBuff",
+    "Name": "Unstable Colors",
+    "Description": "Increases Strength and Intelligence by 20 for 10 seconds.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "ModifyAttribute",
+              "Attribute": "Intelligence",
+              "Amount": 20,
+              "ModifierType": "Flat"
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 100
+            },
+            "Targeting": "Self",
+            "Log": "{Target}'s mind surges with color, gaining 20 Intelligence."
+          },
+          {
+            "Action": {
+              "Type": "ModifyAttribute",
+              "Attribute": "Strength",
+              "Amount": 20,
+              "ModifierType": "Flat"
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 100
+            },
+            "Targeting": "Self",
+            "Log": "{Target}'s body glows with power, gaining 20 Strength."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "transparentEngulfed",
+    "Name": "Engulfed",
+    "Description": "Stunned and taking damage while trapped inside a slime.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "ApplyStatusEffect",
+              "Status": "Stunned",
+              "Stacks": 1
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 30
+            },
+            "Targeting": "Self",
+            "Trigger": "None",
+            "Log": "{Target} is stunned while engulfed!"
+          },
+          {
+            "Action": {
+              "Type": "Damage",
+              "Amount": 3
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 30
+            },
+            "Interval": {
+              "Type": "Interval",
+              "Interval": 10
+            },
+            "Targeting": "Self",
+            "AttackType": "DamageOverTime",
+            "DamageType": "Physical",
+            "Log": "{Target} struggles while being engulfed, taking {Amount} damage!"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "transparentDodgeBoost",
+    "Name": "Evasive Shift",
+    "Description": "Dodge chance increased by 40% for 3 seconds.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "ModifyAttribute",
+              "Attribute": "Dodge",
+              "Amount": 40,
+              "ModifierType": "Flat"
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 30
+            },
+            "Targeting": "Self",
+            "Log": "{Target}'s form flickers and slips through attacks!"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "fairyCharmAura",
+    "Name": "Charm Aura",
+    "Description": "Attempts to charm all enemies every 18 seconds.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "ApplyStatus",
+              "StatusId": "charmedStun"
+            },
+            "Duration": {
+              "Type": "IndefiniteDuration"
+            },
+            "Interval": {
+              "Type": "Interval",
+              "Interval": 180
+            },
+            "Chance": 30,
+            "Targeting": "AllEnemies",
+            "Log": "{Actor}'s enchanting aura overwhelms {Target}'s will."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "charmedStun",
+    "Name": "Charmed",
+    "Description": "Stunned by the fairy's charm.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "ApplyStatusEffect",
+              "Status": "Stunned",
+              "Stacks": 1
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 60
+            },
+            "Targeting": "Self",
+            "Log": "{Target} was charmed, unable to act for a short while."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "illusionFoxAccuracyDebuff",
+    "Name": "Distracted",
+    "Description": "Accuracy reduced due to illusion.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "ModifyAttribute",
+              "Attribute": "Accuracy",
+              "Amount": -10,
+              "ModifierType": "Additive",
+              "Stackable": true
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 50
+            },
+            "Targeting": "Self",
+            "Log": "{Target}'s accuracy is reduced by the illusion."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "foxfireAura",
+    "Name": "Foxfire Aura",
+    "Description": "Gains a stack of Foxfire every 5 seconds. Attacker takes 8 damage per stack when hitting you.",
+    "Duration": {
+      "Type": "IndefiniteDuration"
+    },
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "ApplyStatus",
+              "StatusId": "foxfireStack"
+            },
+            "Interval": {
+              "Type": "Interval",
+              "Interval": 50
+            },
+            "Targeting": "Self",
+            "Log": "A small wisp gathers around {Actor}."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "foxfireStack",
+    "Name": "Foxfire Stack",
+    "Description": "Explodes when attacked, dealing 8 magical damage to attacker and consuming a stack.",
+    "Triggers": [
+      {
+        "Event": "OnAttacked",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "Damage",
+              "Amount": 8,
+              "AttackType": "None",
+              "DamageType": "Magical",
+              "IsFlatAmount": true
+            },
+            "Usage": {
+              "Type": "LimitedUsage",
+              "Uses": 1
+            },
+            "Duration": { "Type": "IndefiniteDuration" },
+            "Targeting": "CauseOfTrigger",
+            "Trigger": "None",
+            "Log": "{Target} was hit by a Foxfire Wisp, taking {Amount} magical damage."
           }
         ]
       }

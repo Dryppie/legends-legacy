@@ -70,25 +70,6 @@ public class CombatEffectManager : ICombatEffectManager
             _activeStatuses.Add(status);
             owner.Statuses.Add(status); // add to entity
         }
-
-        // Fire immediate "OnStatusAppliedIfThis" if needed
-        //_combatContext.EventBus.Publish(new CombatEvent
-        //{
-        //    Type = TriggerEvent.OnStatusAppliedIfThis,
-        //    Source = status.Source, // who applied it
-        //    Target = owner,         // who now carries it
-        //    StatusId = status.Definition.Id,
-        //    CurrentTime = _combatContext.CurrentTime
-        //});
-
-        //_combatContext.EventBus.Publish(new CombatEvent
-        //{
-        //    Type = TriggerEvent.OnStatusApplied,
-        //    Source = status.Source,
-        //    Target = status.Owner,
-        //    StatusId = status.Definition.Id,
-        //    CurrentTime = _combatContext.CurrentTime
-        //});
     }
 
     public void Tick()
@@ -117,7 +98,7 @@ public class CombatEffectManager : ICombatEffectManager
             if (!effect.IsActive())
             {
                 RemoveEffect(effect);
-                _combatContext.LogEffectExecution(new EffectContext(effect.Source, effect.Target, effect.Definition.AttackType, $"{effect.Definition.Log} expired {effect.Target.Name}"));
+                _combatContext.LogEffectExecution(new EffectContext(effect.Source, effect.Target, effect.Definition.AttackType, [], $"{effect.Definition.Log} expired {effect.Target.Name}"));
                 _combatContext.EventBus.Publish(new CombatEvent
                 {
                     Type = TriggerEvent.OnEffectExpired,

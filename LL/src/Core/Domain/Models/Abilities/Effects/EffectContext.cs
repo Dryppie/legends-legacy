@@ -1,4 +1,5 @@
-﻿using Domain.Models.Attributes;
+﻿using Domain.Models.Abilities.Effects.EffectModifications;
+using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Damages;
 
@@ -8,15 +9,18 @@ public class EffectContext
     public CombatEntity Source { get; set; }
     public CombatEntity Target { get; set; }
     public AttackType AttackType { get; set; } = AttackType.None;
+    public List<EffectModification> EffectModifications { get; set; } = [];
     public string Details { get; set; } = string.Empty;
     public EffectContext(CombatEntity source,
                          CombatEntity target,
                          AttackType attackType,
+                         List<EffectModification> effectModifications,
                          string details)
     {
         Source = source;
         Target = target;
         AttackType = attackType;
+        EffectModifications = effectModifications;
         Details = details;
     }
 

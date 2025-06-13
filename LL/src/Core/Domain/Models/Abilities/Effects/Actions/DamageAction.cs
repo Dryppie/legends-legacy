@@ -31,7 +31,7 @@ public class DamageAction : IEffectAction
             : EventType.Damage;
         if (eventType != EventType.DamageOverTime)
         {
-            attackOutcome = combatContext.InteractionManager.CalculateAttackOutcomeForDamage(effect.Source, effect.Target, []);
+            attackOutcome = combatContext.InteractionManager.CalculateAttackOutcomeForDamage(effect.Source, effect.Target, effect.EffectModifications);
 
             if (attackOutcome == AttackOutcome.Miss)
             {

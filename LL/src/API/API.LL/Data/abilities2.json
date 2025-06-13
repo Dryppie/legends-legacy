@@ -885,5 +885,548 @@
         "ModifierType": "Flat"
       }
     ]
+  },
+  {
+    "Name": "Green Slime's Essence",
+    "Active": {
+      "Id": "acidSplash",
+      "Name": "Acid Splash",
+      "Description": "Apply poison to all enemies, dealing 12 damage over 9 seconds.",
+      "Type": "Active",
+      "Cooldown": 170,
+      "Cost": { "Mana": "7" },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "acidSplash" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "greenSlimePoison"
+              },
+              "Targeting": "AllEnemies",
+              "Log": "{Actor} splashes corrosive acid onto all enemies."
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "corrosiveOoze",
+      "Name": "Corrosive Ooze",
+      "Description": "Whenever damaged by a melee attack, apply poison to the target, dealing 6 damage over 12 seconds.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnMeleeAttacked",
+          "Filters": [
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "corrosiveOozePoison"
+              },
+              "Targeting": "CauseOfTrigger",
+              "Log": "{Actor} was attacked and coated {Target} with corrosive ooze."
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Wisdom",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 11,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Rainbow Slime's Essence",
+    "Active": {
+      "Id": "unstableColors",
+      "Name": "Unstable Colors",
+      "Description": "30% chance to apply a buff to everyone on your team, increasing Strength and Intelligence by 20 for 10 seconds.",
+      "Type": "Active",
+      "Cooldown": 150,
+      "Cost": { "Mana": "8" },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "unstableColors" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "unstableColorsBuff"
+              },
+              "Duration": {
+                "Type": "NoDuration"
+              },
+              "Targeting": "AllAllies",
+              "Chance": 30,
+              "Trigger": "None",
+              "Log": "{Actor}'s colors ripple across {Target}, empowering them!"
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "colorfulShield",
+      "Name": "Colorful Shield",
+      "Description": "Whenever you use an ability, apply 20 Barrier to the ally with the highest Max Health.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ResourceRestore",
+                "ResourceType": "Barrier",
+                "Amount": 20
+              },
+              "Duration": {
+                "Type": "NoDuration"
+              },
+              "Targeting": "AllyHighestMaxHealth",
+              "Trigger": "None",
+              "Log": "{Actor} creates a colorful shield around {Target}, granting 20 Barrier."
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Constitution",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Strength",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Dexterity",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Luck",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Red Slime's Essence",
+    "Active": {
+      "Id": "igniteCore",
+      "Name": "Ignite Core",
+      "Description": "Ignite and apply a fire aura to yourself. Deal 3 burn damage to everyone every second. Lasts 10 seconds.",
+      "Type": "Active",
+      "Cooldown": 180,
+      "Cost": { "Mana": "8" },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "igniteCore" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "redSlimeFireAura"
+              },
+              "Targeting": "Self",
+              "Log": "{Actor}'s core ignites in blazing flames!"
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "fireBody",
+      "Name": "Fire Body",
+      "Description": "Increase Fire Resistance by 5.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnCombatStart",
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ModifyAttribute",
+                "Attribute": "FireResistance",
+                "Amount": 5,
+                "ModifierType": "Flat"
+              },
+              "Duration": {
+                "Type": "IndefiniteDuration"
+              },
+              "Targeting": "Self",
+              "Trigger": "None",
+              "Log": "{Actor}'s body hardens against fire, increasing Fire Resistance by 5."
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Instinct",
+        "Amount": 7,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 6,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Transparent Slime's Essence",
+    "Active": {
+      "Id": "transparentEngulf",
+      "Name": "Transparent Engulf",
+      "Description": "Trap a single enemy inside your body, stunning them for 3 seconds and dealing 9 damage over time.",
+      "Type": "Active",
+      "Cooldown": 250,
+      "Cost": { "Mana": "8" },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "transparentEngulf" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "transparentEngulfed"
+              },
+              "Targeting": "SingleEnemy",
+              "Log": "{Actor} engulfs {Target}, stunning and damaging them!"
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "transparentShift",
+      "Name": "Transparent Shift",
+      "Description": "When below 30% health, increase dodge chance by 40% for 3 seconds. This effect can only be used once.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnHealthChanged",
+          "Filters": [
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "transparentDodgeBoost"
+              },
+              "Condition": {
+                "Type": "HealthCondition",
+                "HealthPercentage": 30,
+                "ComparisonType": "LessThan"
+              },
+              "Usage": {
+                "Type": "LimitedUsage",
+                "Uses": 1
+              },
+              "Duration": { "Type": "NoDuration" },
+              "Targeting": "Self",
+              "Log": "{Actor}'s form becomes elusive as its health drops!"
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Endurance",
+        "Amount": 9,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Wisdom",
+        "Amount": 8,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Enchanted Fairy's Essence",
+    "Active": {
+      "Id": "faesEmbrace",
+      "Name": "Fae's Embrace",
+      "Description": "Create a protective barrier around two allies, blocking up to 20 damage.",
+      "Type": "Active",
+      "Cooldown": 220,
+      "Cost": { "Mana": "14" },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "faesEmbrace" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ResourceRestore",
+                "ResourceType": "Barrier",
+                "Amount": 20
+              },
+              "Duration": { "Type": "NoDuration" },
+              "Targeting": "TwoAllies",
+              "Log": "{Target} received {Amount} barrier."
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "enchantedCharm",
+      "Name": "Enchanted Charm",
+      "Description": "At the start of combat, gain an aura that attempts to charm enemies every 18 seconds.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnCombatStart",
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "fairyCharmAura"
+              },
+              "Targeting": "Self",
+              "Duration": { "Type": "NoDuration" },
+              "Trigger": "None",
+              "Log": "{Actor} begins to exude an enchanting aura."
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Wisdom",
+        "Amount": 8,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Willpower",
+        "Amount": 8,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Glade Panther's Essence",
+    "Active": {
+      "Id": "ambushStrike",
+      "Name": "Ambush Strike",
+      "Description": "Strike at the target, with 20% increased Crit Chance. Deal {damage1} damage.",
+      "Type": "Active",
+      "Cooldown": 200,
+      "Cost": { "Mana": "10" },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "ambushStrike" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "Damage",
+                "Amount": 15,
+                "ScalingAttribute": "Agility",
+                "ScalingMultiplier": 0.2
+              },
+              "EffectModifiers": [
+                {
+                  "Type": "CritChance",
+                  "Amount": 20,
+                  "ModifierType": "Flat"
+                }
+              ],
+              "Duration": { "Type": "NoDuration" },
+              "Targeting": "SingleEnemy",
+              "AttackType": "Melee",
+              "DamageType": "Physical",
+              "EffectTags": [],
+              "Log": "{Actor} swiped at {Target}, dealing {Amount} damage."
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "razorClaws",
+      "Name": "Razor Claws",
+      "Description": "Increase Critical Damage by 15%.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnCombatStart",
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ModifyAttribute",
+                "Attribute": "CritDamage",
+                "Amount": 15,
+                "ModifierType": "Flat",
+                "Stackable": true
+              },
+              "Duration": { "Type": "IndefiniteDuration" },
+              "Targeting": "Self",
+              "Log": "{Target} has their critical damage increased by {Amount}."
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Agility",
+        "Amount": 12,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Dexterity",
+        "Amount": 9,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Illusion Fox's Essence",
+    "Active": {
+      "Id": "distractingIllusion",
+      "Name": "Distracting Illusion",
+      "Description": "Create an illusion that has a chance to distract all enemies, reducing their accuracy by 10% for 5 seconds.",
+      "Type": "Active",
+      "Cooldown": 160,
+      "Cost": { "Mana": "20" },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "distractingIllusion" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "illusionFoxAccuracyDebuff"
+              },
+              "Duration": { "Type": "NoDuration" },
+              "Targeting": "AllEnemies",
+              "Chance": 35,
+              "Trigger": "None",
+              "Log": "{Target} has been distracted, reducing their accuracy."
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "foxfireWisp",
+      "Name": "Foxfire Wisp",
+      "Description": "Every 5 seconds, gain a Foxfire Wisp. When damaged, the attacker receives 8 magical damage and a stack is removed.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnCombatStart",
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "foxfireAura"
+              },
+              "Targeting": "Self",
+              "Log": "{Actor} is surrounded by Foxfire Wisps."
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 14,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Agility",
+        "Amount": 7,
+        "ModifierType": "Flat"
+      }
+    ]
   }
 ]
