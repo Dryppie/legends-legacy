@@ -1,6 +1,7 @@
 ﻿using Domain.Interfaces.Combat;
 using Domain.Models.Abilities;
 using Domain.Models.Abilities.Effects;
+using Domain.Models.Abilities.Triggers;
 using Domain.Models.Combat;
 
 namespace Services.LL.Combat.CombatEngine;
@@ -26,38 +27,54 @@ public class TriggerEngine : IDisposable
     {
         foreach (var entity in _context.EntityManager.AllEntities)
         {
-            var allTriggers = entity.Abilities
-                .SelectMany(a => a.Definition.Triggers)
-                .Concat(entity.Statuses.SelectMany(s => s.Definition.Triggers));
-
-            foreach (var trigger in allTriggers)
+            // 🔹 1. First: Process ability triggers (no mutable state)
+            foreach (var ability in entity.Abilities)
             {
-                if (trigger.Event != e.Type)
-                    continue;
-
-                if (trigger.Filters.Count > 0 && !trigger.Filters.All(f => f.IsMatch(e)))
-                    continue;
-
-                foreach (var effect in trigger.Actions)
+                foreach (var trigger in ability.Definition.Triggers)
                 {
-                    var targets = new List<CombatEntity>();
+                    if (!ShouldTrigger(trigger, e))
+                        continue;
 
-                    var triggerTarget = effect.Targeting;
-
-                    if (triggerTarget.Equals(Targeting.CauseOfTrigger))
-                    {
-                        targets.Add(e.Target!);
-                    }
-                    else
-                    {
-                        targets = _context.EntityManager.SelectTargets(entity, effect.Targeting);
-                    }
-                    foreach (var target in targets)
-                    {
-                        var instance = new EffectInstance(effect.Clone(), entity, target);
-                        _effectManager.AddEffect(instance);
-                    }
+                    ExecuteTriggerActions(trigger, entity, e);
                 }
+            }
+
+            foreach (var status in entity.Statuses.ToList()) // Clone for safe mutation
+            {
+                foreach (var trigger in status.Definition.Triggers)
+                {
+                    if (!ShouldTrigger(trigger, e))
+                        continue;
+                    if (!status.CanUse())
+                        continue;
+
+                    ExecuteTriggerActions(trigger, entity, e);
+                    status.ConsumeUse();
+                }
+            }
+        }
+    }
+
+    private bool ShouldTrigger(Trigger trigger, CombatEvent e)
+    {
+        if (trigger.Event != e.Type)
+            return false;
+
+        return trigger.Filters.Count == 0 || trigger.Filters.All(f => f.IsMatch(e));
+    }
+
+    private void ExecuteTriggerActions(Trigger trigger, CombatEntity source, CombatEvent e)
+    {
+        foreach (var effect in trigger.Actions)
+        {
+            var targets = effect.Targeting == Targeting.CauseOfTrigger
+                ? new List<CombatEntity> { e.Target! }
+                : _context.EntityManager.SelectTargets(source, effect.Targeting);
+
+            foreach (var target in targets)
+            {
+                var instance = new EffectInstance(effect.Clone(), source, target);
+                _effectManager.AddEffect(instance);
             }
         }
     }

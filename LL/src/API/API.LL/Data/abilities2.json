@@ -26,11 +26,7 @@
                 "ScalingAttribute": "Dexterity",
                 "ScalingMultiplier": 0.15
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
               "Targeting": "SingleEnemy",
-              "Trigger": "None",
               "AttackType": "Melee",
               "DamageType": "Physical",
               "EffectTags": [],
@@ -50,9 +46,6 @@
                 "Interval": 20
               },
               "Targeting": "SingleEnemy",
-              "Trigger": "OnTickInterval",
-              "TriggerTarget": "Self",
-              "IsFlatAmount": true,
               "AttackType": "DamageOverTime",
               "DamageType": "Bleed",
               "EffectTags": [],
@@ -77,10 +70,21 @@
           "Actions": [
             {
               "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "blindedByDirt"
+                "Type": "ModifyAttribute",
+                "Attribute": "Accuracy",
+                "Amount": -3,
+                "ModifierType": "Additive",
+                "Stackable": true
               },
-              "Targeting": "CauseOfTrigger"
+              "Duration": {
+                "Type": "TimedDuration",
+                "Duration": 110
+              },
+              "Targeting": "CauseOfTrigger",
+              "AttackType": "None",
+              "DamageType": "None",
+              "EffectTags": [],
+              "Log": "{Actor} threw dirt in {Target}'s eyes. {Target}'s accuracy decreased by 3%."
             }
           ]
         }
@@ -1251,12 +1255,18 @@
             {
               "Action": {
                 "Type": "ApplyStatus",
-                "StatusId": "fairyCharmAura"
+                "StatusId": "charmedStun"
               },
+              "Duration": {
+                "Type": "IndefiniteDuration"
+              },
+              "Interval": {
+                "Type": "Interval",
+                "Interval": 180
+              },
+              "Chance": 30,
               "Targeting": "Self",
-              "Duration": { "Type": "NoDuration" },
-              "Trigger": "None",
-              "Log": "{Actor} begins to exude an enchanting aura."
+              "Log": "{Actor}'s enchanting aura overwhelms {Target}'s will."
             }
           ]
         }
@@ -1407,10 +1417,17 @@
             {
               "Action": {
                 "Type": "ApplyStatus",
-                "StatusId": "foxfireAura"
+                "StatusId": "foxfireStack"
+              },
+              "Duration": {
+                "Type": "IndefiniteDuration"
+              },
+              "Interval": {
+                "Type": "Interval",
+                "Interval": 50
               },
               "Targeting": "Self",
-              "Log": "{Actor} is surrounded by Foxfire Wisps."
+              "Log": "A small wisp gathers around {Actor}."
             }
           ]
         }

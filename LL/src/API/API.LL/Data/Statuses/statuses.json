@@ -1,36 +1,5 @@
 [
   {
-    "Id": "blindedByDirt",
-    "Name": "Blinded by Dirt",
-    "IsStackable": true,
-    "Description": "Whenever you dodge, use the opportunity to throw dirt at the target, decreasing their accuracy by 3% for 6 seconds",
-    "Triggers": [
-      {
-        "Event": "OnStatusAppliedIfThis",
-        "Actions": [
-          {
-            "Action": {
-              "Type": "ModifyAttribute",
-              "Attribute": "Accuracy",
-              "Amount": -3,
-              "ModifierType": "Additive",
-              "Stackable": true
-            },
-            "Duration": {
-              "Type": "TimedDuration",
-              "Duration": 110
-            },
-            "Targeting": "CauseOfTrigger",
-            "AttackType": "None",
-            "DamageType": "None",
-            "EffectTags": [],
-            "Log": "{Actor} threw dirt in {Target}'s eyes. {Target}'s accuracy decreased by 3%."
-          }
-        ]
-      }
-    ]
-  },
-  {
     "Id": "poisonedArrowEffect",
     "Name": "Poisoned Arrow",
     "Description": "Taking poison damage over time.",
@@ -257,34 +226,6 @@
     ]
   },
   {
-    "Id": "fairyCharmAura",
-    "Name": "Charm Aura",
-    "Description": "Attempts to charm all enemies every 18 seconds.",
-    "Triggers": [
-      {
-        "Event": "OnStatusAppliedIfThis",
-        "Actions": [
-          {
-            "Action": {
-              "Type": "ApplyStatus",
-              "StatusId": "charmedStun"
-            },
-            "Duration": {
-              "Type": "IndefiniteDuration"
-            },
-            "Interval": {
-              "Type": "Interval",
-              "Interval": 180
-            },
-            "Chance": 30,
-            "Targeting": "AllEnemies",
-            "Log": "{Actor}'s enchanting aura overwhelms {Target}'s will."
-          }
-        ]
-      }
-    ]
-  },
-  {
     "Id": "charmedStun",
     "Name": "Charmed",
     "Description": "Stunned by the fairy's charm.",
@@ -302,7 +243,7 @@
               "Type": "TimedDuration",
               "Duration": 60
             },
-            "Targeting": "Self",
+            "Targeting": "AllEnemies",
             "Log": "{Target} was charmed, unable to act for a short while."
           }
         ]
@@ -337,36 +278,17 @@
     ]
   },
   {
-    "Id": "foxfireAura",
-    "Name": "Foxfire Aura",
-    "Description": "Gains a stack of Foxfire every 5 seconds. Attacker takes 8 damage per stack when hitting you.",
+    "Id": "foxfireStack",
+    "Name": "Foxfire Stack",
+    "IsStackable": true,
+    "Description": "Explodes when attacked, dealing 8 magical damage to attacker and consuming a stack.",
     "Duration": {
       "Type": "IndefiniteDuration"
     },
-    "Triggers": [
-      {
-        "Event": "OnStatusAppliedIfThis",
-        "Actions": [
-          {
-            "Action": {
-              "Type": "ApplyStatus",
-              "StatusId": "foxfireStack"
-            },
-            "Interval": {
-              "Type": "Interval",
-              "Interval": 50
-            },
-            "Targeting": "Self",
-            "Log": "A small wisp gathers around {Actor}."
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "Id": "foxfireStack",
-    "Name": "Foxfire Stack",
-    "Description": "Explodes when attacked, dealing 8 magical damage to attacker and consuming a stack.",
+    "Usage": {
+      "Type": "LimitedUsage",
+      "Uses": 1
+    },
     "Triggers": [
       {
         "Event": "OnAttacked",
@@ -379,13 +301,7 @@
               "DamageType": "Magical",
               "IsFlatAmount": true
             },
-            "Usage": {
-              "Type": "LimitedUsage",
-              "Uses": 1
-            },
-            "Duration": { "Type": "IndefiniteDuration" },
             "Targeting": "CauseOfTrigger",
-            "Trigger": "None",
             "Log": "{Target} was hit by a Foxfire Wisp, taking {Amount} magical damage."
           }
         ]

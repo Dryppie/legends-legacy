@@ -188,7 +188,7 @@ public class CombatInteractionManager : ICombatInteractionManager
             Target = source,
         });
 
-        if (!(source.Id == target.Id || attackType.Equals(AttackType.None))) // Target can only be attacked, if the actor is different from the target
+        if (!(source.Id == target.Id || attackType.Equals(AttackType.DamageOverTime))) // Target can only be attacked, if the actor is different from the target
             _combatContext.EventBus.Publish(new CombatEvent
             {
                 Type = TriggerEvent.OnAttacked,

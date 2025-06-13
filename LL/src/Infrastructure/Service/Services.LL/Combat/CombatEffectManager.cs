@@ -84,7 +84,7 @@ public class CombatEffectManager : ICombatEffectManager
         {
             effect.Update();
 
-            if (!effect.Target.IsAlive) // If the source of the effect isn't alive, it can't activate.
+            if (!effect.Target.IsAlive) // If the target of the effect isn't alive, no reason to activate it.
             {
                 _activeEffects.Remove(effect);
                 continue;

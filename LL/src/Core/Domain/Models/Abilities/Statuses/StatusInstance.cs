@@ -27,6 +27,14 @@ public class StatusInstance
         _duration.DecrementDuration();
         _usage.Recharge();
     }
+    public bool CanUse()
+    {
+        return _usage.CanUse();
+    }
+    public void ConsumeUse()
+    {
+        _usage.ConsumeUse();
+    }
 
     public bool IsExpired => !_duration.IsActive() || !_usage.CanUse();
 
