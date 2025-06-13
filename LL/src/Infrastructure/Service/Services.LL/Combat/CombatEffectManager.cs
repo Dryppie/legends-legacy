@@ -20,6 +20,7 @@ public class CombatEffectManager : ICombatEffectManager
 
     public void AddEffect(EffectInstance instance)
     {
+        if (!instance.Target.IsAlive) return;
         // Execute any effect without a an interval.
         // If an effect has a duration, it should be executed so the effect can be applied immediately.
         // It will then last until expired

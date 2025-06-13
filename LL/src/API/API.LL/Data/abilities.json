@@ -1162,7 +1162,7 @@
     "Passive": {
       "Id": "enchantedCharm",
       "Name": "Enchanted Charm",
-      "Description": "At the start of combat, gain an aura that attempts to charm enemies every 18 seconds.",
+      "Description": "Every 18 seconds, enemies have to resist your charms, or become stunned for 6 seconds.",
       "Type": "Passive",
       "Cooldown": 0,
       "Triggers": [
@@ -1182,8 +1182,7 @@
                 "Interval": 180
               },
               "Chance": 30,
-              "Targeting": "Self",
-              "Log": "{Actor}'s enchanting aura overwhelms {Target}'s will."
+              "Targeting": "AllEnemies"
             }
           ]
         }
@@ -1626,6 +1625,78 @@
       {
         "AttributeType": "Willpower",
         "Amount": 11,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Feral Ghoul's Essence",
+    "Active": {
+      "Id": "feralPounce",
+      "Name": "Feral Pounce",
+      "Description": "Leap to a target, dealing 26 Physical Melee damage with a 30% chance to stun.",
+      "Type": "Active",
+      "Cooldown": 160,
+      "Cost": { "Mana": "23" },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "feralPounce" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "feralPounceStun"
+              },
+              "Targeting": "SingleEnemy"
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "shreddingClaws",
+      "Name": "Shredding Claws",
+      "Description": "Every Melee attack has a 7% chance to apply 16 bleed damage over 4 seconds.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnMeleeAttack",
+          "Filters": [
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "shreddingClawsBleed"
+              },
+              "Chance": 50,
+              "AttackType": "DamageOverTime",
+              "DamageType": "Bleed",
+              "Targeting": "CauseOfTrigger",
+              "Log": "{Target} is torn open by the {Actor}’s claws and begins to bleed."
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Strength",
+        "Amount": 12,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Agility",
+        "Amount": 9,
         "ModifierType": "Flat"
       }
     ]

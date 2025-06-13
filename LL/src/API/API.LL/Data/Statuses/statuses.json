@@ -313,10 +313,10 @@
             },
             "Duration": {
               "Type": "TimedDuration",
-              "Duration": 60
+              "Duration": 50
             },
-            "Targeting": "AllEnemies",
-            "Log": "{Target} was charmed, unable to act for a short while."
+            "Targeting": "Self",
+            "Log": "{Actor}'s enchanting aura overwhelms {Target}'s will, stunning them."
           }
         ]
       }
@@ -414,6 +414,75 @@
             },
             "Targeting": "Self",
             "Log": "{Target}'s mana regeneration is suppressed."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "feralPounceStun",
+    "Name": "Feral Pounce Stun",
+    "Description": "Leap to a target, dealing 26 Physical Melee damage with a 30% chance to stun.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "Damage",
+              "Amount": 26,
+              "ScalingAttribute": "FightingSpirit",
+              "ScalingMultiplier": 0.3
+            },
+            "Targeting": "Self",
+            "AttackType": "Melee",
+            "DamageType": "Physical",
+            "EffectTags": [ "Slashing" ],
+            "Log": "{Actor} pounces on {Target}, dealing {Amount} damage."
+          },
+          {
+            "Action": {
+              "Type": "ApplyStatusEffect",
+              "Status": "Stunned",
+              "Stacks": 1
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 30
+            },
+            "Targeting": "Self",
+            "Log": "{Target} is stunned by the impact!"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "shreddingClawsBleed",
+    "Name": "Shredding Claws Bleed",
+    "Description": "Bleeding by Shredding Claws.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "Damage",
+              "Amount": 4
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 40
+            },
+            "Interval": {
+              "Type": "Interval",
+              "Interval": 10
+            },
+            "Chance": 50,
+            "AttackType": "DamageOverTime",
+            "DamageType": "Bleed",
+            "Targeting": "Self",
+            "Log": "{Target} takes {Amount} bleed damage."
           }
         ]
       }
