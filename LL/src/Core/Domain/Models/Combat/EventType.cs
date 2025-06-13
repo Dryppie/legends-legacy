@@ -23,4 +23,5 @@ public enum EventType
     StatusEffect,
     StatusEffectExpired,
     Regeneration,
+    Death,
 }

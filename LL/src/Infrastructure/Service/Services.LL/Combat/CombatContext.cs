@@ -15,7 +15,7 @@ public class CombatContext : ICombatContext
     public ICombatInteractionManager InteractionManager { get; set; }
     public IStatusDefinitionService StatusDefinitionService { get; set; }
     public ICombatEventBus EventBus { get; set; }
-    private readonly TriggerEngine _triggerEngine;
+    private TriggerEngine _triggerEngine;
 
     private readonly List<CombatLogItem> _eventLog;
     private const int MaxSimulationTime = 1000; // Max duration in milliseconds
@@ -39,7 +39,22 @@ public class CombatContext : ICombatContext
     public CombatResult InstantiateAndRunCombat(List<CombatEntity> playerEntities, List<CombatEntity> enemyEntities)
     {
         EntityManager.InitializeCombatEntityManager(playerEntities, enemyEntities);
-        return RunSimulation(false);
+        var combatResult = RunSimulation(false);
+        Reset();
+        return combatResult;
+    }
+    public void Reset()
+    {
+        CurrentTime = 0;
+        _eventLog.Clear();
+
+        EventBus = new CombatEventBus();
+        EntityManager = new CombatEntityManager();
+        EffectManager = new CombatEffectManager(this);
+        InteractionManager = new CombatInteractionManager(this);
+
+        _triggerEngine = new TriggerEngine(this, EventBus, EffectManager);
+        _triggerEngine.Initialize();
     }
 
     /// <summary>
@@ -76,7 +91,7 @@ public class CombatContext : ICombatContext
 
         return new CombatResult
         {
-            EventLog = _eventLog,
+            EventLog = [.. _eventLog],
             Outcome = outcome,
             Duration = CurrentTime // CurrentTime 10 (10 ticks) equals 1 second
         };

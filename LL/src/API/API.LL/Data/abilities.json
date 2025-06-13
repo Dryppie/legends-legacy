@@ -4,7 +4,7 @@
     "Active": {
       "Id": "sneakAttack",
       "Name": "Sneak Attack",
-      "Description": "Stab the target in the back, dealing {damage1} damage, and apply 15 bleed damage over 10 seconds.",
+      "Description": "Stab the target in the back, dealing {damage1} damage, and apply 8 bleed damage over 8 seconds.",
       "Type": "Active",
       "Cooldown": 90,
       "Cost": { "Mana": "12" },
@@ -21,42 +21,10 @@
           "Actions": [
             {
               "Action": {
-                "Type": "Damage",
-                "Amount": 5,
-                "ScalingAttribute": "Dexterity",
-                "ScalingMultiplier": 0.15
+                "Type": "ApplyStatus",
+                "StatusId": "sneakAttackBleed"
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
-              "Targeting": "SingleEnemy",
-              "Trigger": "None",
-              "AttackType": "Melee",
-              "DamageType": "Physical",
-              "EffectTags": [],
-              "Log": "{Target} received {Amount} damage."
-            },
-            {
-              "Action": {
-                "Type": "Damage",
-                "Amount": 3
-              },
-              "Duration": {
-                "Type": "TimedDuration",
-                "Duration": 100
-              },
-              "Interval": {
-                "Type": "Interval",
-                "Interval": 20
-              },
-              "Targeting": "SingleEnemy",
-              "Trigger": "OnTickInterval",
-              "TriggerTarget": "Self",
-              "IsFlatAmount": true,
-              "AttackType": "DamageOverTime",
-              "DamageType": "Bleed",
-              "EffectTags": [],
-              "Log": "{Target} is bleeding, and took {Amount} damage."
+              "Targeting": "SingleEnemy"
             }
           ]
         }
@@ -77,10 +45,21 @@
           "Actions": [
             {
               "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "blindedByDirt"
+                "Type": "ModifyAttribute",
+                "Attribute": "Accuracy",
+                "Amount": -3,
+                "ModifierType": "Additive",
+                "Stackable": true
               },
-              "Targeting": "CauseOfTrigger"
+              "Duration": {
+                "Type": "TimedDuration",
+                "Duration": 110
+              },
+              "Targeting": "CauseOfTrigger",
+              "AttackType": "None",
+              "DamageType": "None",
+              "EffectTags": [],
+              "Log": "{Actor} threw dirt in {Target}'s eyes. {Target}'s accuracy decreased by 3%."
             }
           ]
         }
@@ -136,11 +115,7 @@
                 "ScalingAttribute": "Strength",
                 "ScalingMultiplier": 0.2
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
               "Targeting": "TwoEnemies",
-              "Trigger": "None",
               "AttackType": "Melee",
               "DamageType": "Physical",
               "EffectTags": [ "Slashing" ],
@@ -172,7 +147,6 @@
                 "Type": "IndefiniteDuration"
               },
               "Targeting": "Self",
-              "Trigger": "None",
               "Log": "{Actor}'s Strength is increased by 20."
             },
             {
@@ -187,7 +161,6 @@
                 "Type": "IndefiniteDuration"
               },
               "Targeting": "Self",
-              "Trigger": "None",
               "Log": "{Actor}'s Endurance is decreased by 20."
             }
           ]
@@ -237,20 +210,16 @@
                 "Type": "Damage",
                 "Amount": 15,
                 "ScalingAttribute": "Agility",
-                "ScalingMultiplier": 0.1,
-                "EffectModifiers": [
-                  {
-                    "Type": "CritChance",
-                    "Amount": 50,
-                    "ModifierType": "Flat"
-                  }
-                ]
+                "ScalingMultiplier": 0.1
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
+              "EffectModifiers": [
+                {
+                  "Type": "CritChance",
+                  "Amount": 50,
+                  "ModifierType": "Flat"
+                }
+              ],
               "Targeting": "SingleEnemy",
-              "Trigger": "None",
               "AttackType": "Ranged",
               "DamageType": "Physical",
               "EffectTags": [ "Arrows" ],
@@ -279,7 +248,8 @@
                 "StatusId": "poisonedArrowEffect"
               },
               "Targeting": "CauseOfTrigger",
-              "Chance": 20
+              "Chance": 20,
+              "Log": "{Actor} inflicted {Target} with poison from their ranged attack."
             }
           ]
         }
@@ -325,11 +295,7 @@
                 "ScalingAttribute": "Strength",
                 "ScalingMultiplier": 0.2
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
               "Targeting": "SingleEnemy",
-              "Trigger": "None",
               "AttackType": "Melee",
               "DamageType": "Physical",
               "EffectTags": [],
@@ -360,7 +326,6 @@
                 "Type": "IndefiniteDuration"
               },
               "Targeting": "Self",
-              "Trigger": "None",
               "Log": "{Actor}'s health is increased by 50 due to being big."
             }
           ]
@@ -407,11 +372,7 @@
                 "ScalingAttribute": "Intelligence",
                 "ScalingMultiplier": 0.2
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
               "Targeting": "SingleEnemy",
-              "Trigger": "None",
               "AttackType": "Ranged",
               "DamageType": "Magical",
               "EffectTags": [],
@@ -439,17 +400,13 @@
                 "Type": "Damage",
                 "Amount": 4
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
               "Targeting": "CauseOfTrigger",
-              "Trigger": "None",
               "IsFlatAmount": true,
               "Chance": 100,
               "AttackType": "Melee",
               "DamageType": "Burn",
               "EffectTags": [],
-              "Log": "{Target} received {Amount} burn damage."
+              "Log": "{Target} received {Amount} burn damage after attacking {Actor}."
             }
           ]
         }
@@ -493,15 +450,13 @@
                 "Type": "ApplyStatus",
                 "StatusId": "frostImpFreeze"
               },
-              "Targeting": "SingleEnemy",
-              "Trigger": "None",
               "Condition": {
                 "Type": "StatusEffectCondition",
                 "Status": "Cold",
                 "StacksRequired": 2,
                 "ComparisonType": "GreaterThan"
               },
-              "Log": "{Actor} froze {Target} solid!"
+              "Targeting": "SingleEnemy"
             }
           ]
         }
@@ -530,7 +485,6 @@
                 "Type": "IndefiniteDuration"
               },
               "Targeting": "CauseOfTrigger",
-              "Trigger": "None",
               "Log": "{Target} has received 1 stack of Cold."
             }
           ]
@@ -576,11 +530,7 @@
                 "SummonId": "shadowImage",
                 "SummonDuration": 100
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
               "Targeting": "Self",
-              "Trigger": "None",
               "Log": "{Actor} summoned a shadowy illusion of themselves."
             }
           ]
@@ -608,7 +558,6 @@
                 "Type": "IndefiniteDuration"
               },
               "Targeting": "Self",
-              "Trigger": "None",
               "Log": "{Actor} moves with an elusive shadowy presence, increasing dodge chance by 2%."
             }
           ]
@@ -661,11 +610,7 @@
                 "ScalingMultiplier": 0.2,
                 "Lifesteal": 30
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
               "Targeting": "SingleEnemy",
-              "Trigger": "None",
               "AttackType": "Melee",
               "DamageType": "Physical",
               "EffectTags": [],
@@ -694,12 +639,7 @@
                 "ResourceType": "Health",
                 "Amount": 4
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
-              "IsFlatAmount": true,
               "Targeting": "Self",
-              "Trigger": "None",
               "Log": "{Actor} gained an additional {Amount} health from lifesteal."
             }
           ]
@@ -756,7 +696,6 @@
                 "Interval": 20
               },
               "Targeting": "AllAllies",
-              "Trigger": "OnTickInterval",
               "Log": "{Target} is soothed by {Actor}'s Sweet Water, restoring {Amount} health."
             }
           ]
@@ -782,11 +721,7 @@
                 "ResourceType": "Mana",
                 "Amount": 2
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
               "Targeting": "Self",
-              "Trigger": "None",
               "Log": "{Actor}'s Absorptive Shell restored 2 mana."
             }
           ]
@@ -838,7 +773,6 @@
                 "Duration": 65
               },
               "Targeting": "Self",
-              "Trigger": "None",
               "Log": "{Actor} is covered in thick mud, reducing all damage taken by 2."
             }
           ]
@@ -866,7 +800,6 @@
                 "Type": "IndefiniteDuration"
               },
               "Targeting": "Self",
-              "Trigger": "None",
               "Log": "{Actor}'s body hardens like stone, increasing Physical Defense by 15."
             }
           ]
@@ -981,12 +914,8 @@
                 "Type": "ApplyStatus",
                 "StatusId": "unstableColorsBuff"
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
               "Targeting": "AllAllies",
               "Chance": 30,
-              "Trigger": "None",
               "Log": "{Actor}'s colors ripple across {Target}, empowering them!"
             }
           ]
@@ -1012,11 +941,7 @@
                 "ResourceType": "Barrier",
                 "Amount": 20
               },
-              "Duration": {
-                "Type": "NoDuration"
-              },
               "Targeting": "AllyHighestMaxHealth",
-              "Trigger": "None",
               "Log": "{Actor} creates a colorful shield around {Target}, granting 20 Barrier."
             }
           ]
@@ -1056,7 +981,7 @@
     "Active": {
       "Id": "igniteCore",
       "Name": "Ignite Core",
-      "Description": "Ignite and apply a fire aura to yourself. Deal 3 burn damage to everyone every second. Lasts 10 seconds.",
+      "Description": "Ignite and apply a fire aura to yourself. Deal 3 burn damage to everyone but you every second. Lasts 10 seconds.",
       "Type": "Active",
       "Cooldown": 180,
       "Cost": { "Mana": "8" },
@@ -1076,7 +1001,7 @@
                 "Type": "ApplyStatus",
                 "StatusId": "redSlimeFireAura"
               },
-              "Targeting": "Self",
+              "Targeting": "EveryoneButYou",
               "Log": "{Actor}'s core ignites in blazing flames!"
             }
           ]
@@ -1104,7 +1029,6 @@
                 "Type": "IndefiniteDuration"
               },
               "Targeting": "Self",
-              "Trigger": "None",
               "Log": "{Actor}'s body hardens against fire, increasing Fire Resistance by 5."
             }
           ]
@@ -1183,9 +1107,7 @@
                 "Type": "LimitedUsage",
                 "Uses": 1
               },
-              "Duration": { "Type": "NoDuration" },
-              "Targeting": "Self",
-              "Log": "{Actor}'s form becomes elusive as its health drops!"
+              "Targeting": "Self"
             }
           ]
         }
@@ -1230,7 +1152,6 @@
                 "ResourceType": "Barrier",
                 "Amount": 20
               },
-              "Duration": { "Type": "NoDuration" },
               "Targeting": "TwoAllies",
               "Log": "{Target} received {Amount} barrier."
             }
@@ -1251,12 +1172,18 @@
             {
               "Action": {
                 "Type": "ApplyStatus",
-                "StatusId": "fairyCharmAura"
+                "StatusId": "charmedStun"
               },
+              "Duration": {
+                "Type": "IndefiniteDuration"
+              },
+              "Interval": {
+                "Type": "Interval",
+                "Interval": 180
+              },
+              "Chance": 30,
               "Targeting": "Self",
-              "Duration": { "Type": "NoDuration" },
-              "Trigger": "None",
-              "Log": "{Actor} begins to exude an enchanting aura."
+              "Log": "{Actor}'s enchanting aura overwhelms {Target}'s will."
             }
           ]
         }
@@ -1309,7 +1236,6 @@
                   "ModifierType": "Flat"
                 }
               ],
-              "Duration": { "Type": "NoDuration" },
               "Targeting": "SingleEnemy",
               "AttackType": "Melee",
               "DamageType": "Physical",
@@ -1384,10 +1310,8 @@
                 "Type": "ApplyStatus",
                 "StatusId": "illusionFoxAccuracyDebuff"
               },
-              "Duration": { "Type": "NoDuration" },
               "Targeting": "AllEnemies",
               "Chance": 35,
-              "Trigger": "None",
               "Log": "{Target} has been distracted, reducing their accuracy."
             }
           ]
@@ -1407,10 +1331,17 @@
             {
               "Action": {
                 "Type": "ApplyStatus",
-                "StatusId": "foxfireAura"
+                "StatusId": "foxfireStack"
+              },
+              "Duration": {
+                "Type": "IndefiniteDuration"
+              },
+              "Interval": {
+                "Type": "Interval",
+                "Interval": 50
               },
               "Targeting": "Self",
-              "Log": "{Actor} is surrounded by Foxfire Wisps."
+              "Log": "A small wisp gathers around {Actor}."
             }
           ]
         }
@@ -1437,79 +1368,55 @@
       "Description": "Release a burst of spores that reduce the natural regeneration of all enemies by 40% for 8 seconds.",
       "Type": "Active",
       "Cooldown": 140,
-      "Cost": 12,
-      "Effects": [
+      "Cost": { "Mana": "12" },
+      "Triggers": [
         {
-          "Action": {
-            "Type": "ModifyAttribute",
-            "Attribute": "HealthRegeneration",
-            "Amount": -40,
-            "ModifierType": "Multiplicative"
-          },
-          "Duration": {
-            "Type": "TimedDuration",
-            "Duration": 8
-          },
-          "Targeting": "AllEnemies",
-          "Trigger": "None",
-          "Log": "{Target}'s natural health regeneration has been reduced by 40%."
-        },
-        {
-          "Action": {
-            "Type": "ModifyAttribute",
-            "Attribute": "ManaRegeneration",
-            "Amount": -40,
-            "ModifierType": "Multiplicative"
-          },
-          "Duration": {
-            "Type": "TimedDuration",
-            "Duration": 8
-          },
-          "Targeting": "AllEnemies",
-          "Trigger": "None",
-          "Log": "{Target}'s natural mana regeneration has been reduced by 40%."
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "necroticSpores" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "necroticSporeDebuff"
+              },
+              "Targeting": "AllEnemies",
+              "Log": "{Target} is afflicted by necrotic spores, weakening their regeneration."
+            }
+          ]
         }
       ]
     },
     "Passive": {
       "Id": "twilightBloom",
       "Name": "Twilight Bloom",
-      "Description": "Produce a seed that blooms every 11 seconds, releasing a scent that heals your team by {heal1}.",
+      "Description": "Produce a seed that blooms every 11 seconds, releasing a scent that heals your team.",
       "Type": "Passive",
       "Cooldown": 0,
-      "Cost": 0,
-      "Effects": [
+      "Triggers": [
         {
-          "Action": {
-            "Type": "NestedEffect",
-            "Effects": [
-              {
-                "Action": {
-                  "Type": "ResourceRestore",
-                  "ResourceType": "Health",
-                  "Amount": 29
-                },
-                "Duration": {
-                  "Type": "IndefiniteDuration"
-                },
-                "Interval": {
-                  "Type": "Interval",
-                  "Interval": 110
-                },
-                "IsFlatAmount": true,
-                "Targeting": "Self",
-                "Trigger": "OnTickInterval",
-                "TriggerTarget": "YourTeam",
-                "Log": "{Target} received {Amount} healing from the blooming Twilight Seed."
-              }
-            ]
-          },
-          "Duration": {
-            "Type": "IndefiniteDuration"
-          },
-          "Targeting": "Self",
-          "Trigger": "None",
-          "Log": "{Actor} plants a Twilight Seed."
+          "Event": "OnCombatStart",
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ResourceRestore",
+                "ResourceType": "Health",
+                "Amount": 29
+              },
+              "Duration": { "Type": "IndefiniteDuration" },
+              "Interval": {
+                "Type": "Interval",
+                "Interval": 110
+              },
+              "Targeting": "AllAllies",
+              "Log": "{Target} is soothed by the scent of the Twilight Bloom, restoring {Amount} health."
+            }
+          ]
         }
       ]
     },
@@ -1539,23 +1446,31 @@
       "Description": "Deal {damage1} damage to all enemies.",
       "Type": "Active",
       "Cooldown": 80,
-      "Cost": 9,
-      "Effects": [
+      "Cost": { "Mana": "9" },
+      "Triggers": [
         {
-          "Action": {
-            "Type": "Damage",
-            "Amount": 15,
-            "ScalingAttribute": "Intelligence",
-            "ScalingMultiplier": 0.3
-          },
-          "Duration": {
-            "Type": "NoDuration"
-          },
-          "Targeting": "AllEnemies",
-          "Trigger": "None",
-          "AttackType": "Ranged",
-          "DamageType": "Magical",
-          "Log": "{Target} took {Amount} damage from {Actor}'s Pixie Burst."
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "pixieBurst" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "Damage",
+                "Amount": 15,
+                "ScalingAttribute": "Intelligence",
+                "ScalingMultiplier": 0.3
+              },
+              "Targeting": "AllEnemies",
+              "AttackType": "Ranged",
+              "DamageType": "Magical",
+              "Log": "{Target} took {Amount} damage from {Actor}'s Pixie Burst."
+            }
+          ]
         }
       ]
     },
@@ -1565,23 +1480,28 @@
       "Description": "Every time you use an ability, all allies gain +1 Crit Chance.",
       "Type": "Passive",
       "Cooldown": 0,
-      "Cost": 0,
-      "Effects": [
+      "Triggers": [
         {
-          "Action": {
-            "Type": "ModifyAttribute",
-            "Attribute": "CritChance",
-            "Amount": 1,
-            "ModifierType": "Flat",
-            "Stackable": true
-          },
-          "Duration": {
-            "Type": "IndefiniteDuration"
-          },
-          "Targeting": "Self",
-          "Trigger": "OnAbilityUsed",
-          "TriggerTarget": "AllAllies",
-          "Log": "{Target}'s crit chance increased by 1."
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ModifyAttribute",
+                "Attribute": "CritChance",
+                "Amount": 1,
+                "ModifierType": "Flat",
+                "Stackable": true
+              },
+              "Duration": {
+                "Type": "IndefiniteDuration"
+              },
+              "Targeting": "AllAllies",
+              "Log": "{Target}'s crit chance increased by 1."
+            }
+          ]
         }
       ]
     },
@@ -1606,39 +1526,49 @@
       "Description": "Increase Attack Speed by 24% and Critical Hit Chance by 25% for 10 seconds.",
       "Type": "Active",
       "Cooldown": 140,
-      "Cost": 24,
-      "CostType": "Mana",
-      "Effects": [
+      "Cost": { "Mana": "24" },
+      "Triggers": [
         {
-          "Action": {
-            "Type": "ModifyAttribute",
-            "Attribute": "BasicAttackSpeed",
-            "Amount": 24,
-            "ModifierType": "Additive",
-            "Stackable": true
-          },
-          "Duration": {
-            "Type": "TimedDuration",
-            "Duration": 100
-          },
-          "Targeting": "Self",
-          "Log": "{Actor}'s Attack Speed increased by 24%."
-        },
-        {
-          "Action": {
-            "Type": "ModifyAttribute",
-            "Attribute": "CritChance",
-            "Amount": 25,
-            "ModifierType": "Additive",
-            "Stackable": true
-          },
-          "Duration": {
-            "Type": "TimedDuration",
-            "Duration": 100
-          },
-          "Targeting": "Self",
-          "Trigger": "None",
-          "Log": "{Actor}'s Critical Chance increased by 25%."
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "frenzy" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ModifyAttribute",
+                "Attribute": "BasicAttackSpeed",
+                "Amount": 24,
+                "ModifierType": "Additive",
+                "Stackable": true
+              },
+              "Duration": {
+                "Type": "TimedDuration",
+                "Duration": 100
+              },
+              "Targeting": "Self",
+              "Log": "{Actor}'s Attack Speed increased by 24%."
+            },
+            {
+              "Action": {
+                "Type": "ModifyAttribute",
+                "Attribute": "CritChance",
+                "Amount": 25,
+                "ModifierType": "Additive",
+                "Stackable": true
+              },
+              "Duration": {
+                "Type": "TimedDuration",
+                "Duration": 100
+              },
+              "Targeting": "Self",
+              "Log": "{Actor}'s Critical Chance increased by 25%."
+            }
+          ]
         }
       ]
     },
@@ -1648,31 +1578,37 @@
       "Description": "Increase Strength by 95 the first time dropping below 80% Health.",
       "Type": "Passive",
       "Cooldown": 0,
-      "Cost": 0,
-      "Effects": [
+      "Triggers": [
         {
-          "Action": {
-            "Type": "ModifyAttribute",
-            "Attribute": "Strength",
-            "Amount": 95,
-            "ModifierType": "Flat",
-            "Stackable": true
-          },
-          "Duration": {
-            "Type": "IndefiniteDuration"
-          },
-          "Usage": {
-            "Type": "LimitedUsage",
-            "Uses": 1
-          },
-          "Condition": {
-            "Type": "HealthCondition",
-            "HealthPercentage": 80,
-            "ComparisonType": "LessThan"
-          },
-          "Targeting": "Self",
-          "Trigger": "OnHealthChanged",
-          "Log": "{Actor}'s Strength is increased by 95 due to falling below 80% health."
+          "Event": "OnHealthChanged",
+          "Filters": [
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ModifyAttribute",
+                "Attribute": "Strength",
+                "Amount": 95,
+                "ModifierType": "Flat",
+                "Stackable": true
+              },
+              "Condition": {
+                "Type": "HealthCondition",
+                "HealthPercentage": 80,
+                "ComparisonType": "LessThan"
+              },
+              "Duration": {
+                "Type": "IndefiniteDuration"
+              },
+              "Usage": {
+                "Type": "LimitedUsage",
+                "Uses": 1
+              },
+              "Targeting": "Self",
+              "Log": "{Actor}'s Strength is increased by 95 due to falling below 80% health."
+            }
+          ]
         }
       ]
     },
@@ -1690,471 +1626,6 @@
       {
         "AttributeType": "Willpower",
         "Amount": 11,
-        "ModifierType": "Flat"
-      }
-    ]
-  },
-  {
-    "Name": "Starter Essence 1",
-    "Active": {
-      "Id": "fireball_01",
-      "Name": "Fireball",
-      "Description": "Hurls a fireball that deals {damage1} damage on impact and applies a burn to the target. 3 uses.",
-      "Type": "Active",
-      "Cooldown": 120,
-      "Cost": 7,
-      "Usage": {
-        "Type": "LimitedUsage",
-        "Uses": 3
-      },
-      "CostType": "Mana",
-      "Effects": [
-        {
-          "Action": {
-            "Type": "Damage",
-            "Amount": 11,
-            "ScalingAttribute": "Intelligence",
-            "ScalingMultiplier": 0.2
-          },
-          "Duration": {
-            "Type": "TimedDuration",
-            "Duration": 0
-          },
-          "Targeting": "SingleEnemy",
-          "ApplyOnSelf": false,
-          "Trigger": "None",
-          "AttackType": "Ranged",
-          "DamageType": "Magical",
-          "EffectTags": [],
-          "Log": "{Target} received {Amount} damage."
-        },
-        {
-          "Action": {
-            "Type": "Damage",
-            "Amount": 4
-          },
-          "Duration": {
-            "Type": "TimedDuration",
-            "Duration": 40
-          },
-          "Interval": {
-            "Type": "Interval",
-            "Interval": 10
-          },
-          "Targeting": "SingleEnemy",
-          "Trigger": "OnTickInterval",
-          "ApplyOnSelf": false,
-          "IsFlatAmount": true,
-          "AttackType": "DamageOverTime",
-          "DamageType": "Burn",
-          "EffectTags": [],
-          "Log": "{Target} is burning, and took {Amount} fire damage."
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "heal_01",
-      "Name": "Heal",
-      "Description": "Restores {heal1} to the target every 4 second for 20 seconds.",
-      "Type": "Active",
-      "Cooldown": 140,
-      "Cost": 6,
-      "Effects": [
-        {
-          "Action": {
-            "Type": "ResourceRestore",
-            "ResourceType": "Health",
-            "Amount": 12,
-            "ScalingAttribute": "Wisdom",
-            "ScalingMultiplier": 0.3
-          },
-          "Duration": {
-            "Type": "TimedDuration",
-            "Duration": 120
-          },
-          "Interval": {
-            "Type": "Interval",
-            "Interval": 30
-          },
-          "Targeting": "Self",
-          "Trigger": "OnTickInterval",
-          "AttackType": "None",
-          "DamageType": "None",
-          "EffectTags": [],
-          "Log": "{Target} was healed for {Amount}."
-        }
-      ]
-    },
-    "AttributeModifiers": [
-      {
-        "AttributeType": "Constitution",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Strength",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Dexterity",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Intelligence",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      }
-    ]
-  },
-  {
-    "Name": "Starter Essence 2",
-    "Active": {
-      "Id": "empower_01",
-      "Name": "Empower",
-      "Description": "Strengthen your attack power.",
-      "Type": "Active",
-      "Cooldown": 150,
-      "Cost": 10,
-      "CostType": "Mana",
-      "Effects": [
-        {
-          "Action": {
-            "Type": "ModifyAttribute",
-            "Attribute": "Strength",
-            "Amount": 10,
-            "ModifierType": "Flat",
-            "Stackable": true
-          },
-          "Duration": {
-            "Type": "TimedDuration",
-            "Duration": 50
-          },
-          "Usage": {
-            "Type": "LimitedUsage",
-            "Uses": 1
-          },
-          "Targeting": "Self",
-          "Trigger": "None",
-          "AttackType": "None",
-          "DamageType": "None",
-          "EffectTags": [],
-          "Log": "{Actor}'s strength increased by 10'."
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "lastStance",
-      "Name": "Last Stance",
-      "Description": "Defense is increased by 30% when your health drops below 20% for the first time.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Cost": 0,
-      "Effects": [
-        {
-          "Action": {
-            "Type": "ResourceRestore",
-            "ResourceType": "Health",
-            "Amount": 30
-          },
-          "Duration": {
-            "Type": "IndefiniteDuration"
-          },
-          "Usage": {
-            "Type": "LimitedUsage",
-            "Uses": 1
-          },
-          "Condition": {
-            "Type": "HealthCondition",
-            "HealthPercentage": 20,
-            "ComparisonType": "LessThan"
-          },
-          "Targeting": "Self",
-          "Trigger": "OnHealthChanged",
-          "AttackType": "None",
-          "DamageType": "None",
-          "EffectTags": [],
-          "Log": "{Actor}'s defense is increased by 30% due to falling below 20% health."
-        }
-      ]
-    },
-    "AttributeModifiers": [
-      {
-        "AttributeType": "Constitution",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Strength",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Dexterity",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Intelligence",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      }
-    ]
-  },
-  {
-    "Name": "Starter Essence 3",
-    "Active": {
-      "Id": "forbiddenRitual",
-      "Name": "Forbidden Ritual",
-      "Description": "Summon a low level demon, Blood Imp.",
-      "Type": "Active",
-      "Cooldown": 20,
-      "Cost": 30,
-      "CostType": "Health",
-      "ActivationLog": "{Actor} used {Ability}.",
-      "Effects": [
-        {
-          "Action": {
-            "Type": "Summon",
-            "SummonId": "monster",
-            "SummonDuration": 150
-          },
-          "Duration": {
-            "Type": "NoDuration"
-          },
-          "Targeting": "Self",
-          "Trigger": "None",
-          "AttackType": "None",
-          "DamageType": "None",
-          "EffectTags": [],
-          "Log": "{Target} has been summoned by {Actor}."
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "retaliate_01",
-      "Name": "Retaliate",
-      "Description": "Deals 2 damage back to the attacker when hit.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Cost": 0,
-      "Effects": [
-        {
-          "Action": {
-            "Type": "Damage",
-            "Amount": 2
-          },
-          "Duration": {
-            "Type": "IndefiniteDuration"
-          },
-          "Targeting": "Self",
-          "Trigger": "OnMeleeAttacked",
-          "TriggerTarget": "CauseOfTrigger",
-          "IsFlatAmount": true,
-          "AttackType": "None",
-          "DamageType": "Physical",
-          "EffectTags": [],
-          "Log": "{Actor} retaliated against {Target} and dealt {Amount} damage."
-        }
-      ]
-    },
-    "AttributeModifiers": [
-      {
-        "AttributeType": "Constitution",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Strength",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Dexterity",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Intelligence",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      }
-    ]
-  },
-  {
-    "Name": "Starter Essence 4",
-    "Active": {
-      "Id": "stun_01",
-      "Name": "Stun",
-      "Description": "Stun the enemy.",
-      "Type": "Active",
-      "Cooldown": 300,
-      "Cost": 10,
-      "Effects": [
-        {
-          "Action": {
-            "Type": "ApplyStatusEffect",
-            "Status": "Stunned",
-            "Stacks": 1
-          },
-          "Duration": {
-            "Type": "TimedDuration",
-            "Duration": 200
-          },
-          "Targeting": "SingleEnemy",
-          "Trigger": "None",
-          "AttackType": "None",
-          "DamageType": "None",
-          "EffectTags": [],
-          "Log": "{Actor} stunned {Target}."
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "poison_retaliate",
-      "Name": "Poisonous Retaliation",
-      "Description": "Apply poison to the attacker when hit, dealing 10 damage over 10 seconds.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Cost": 0,
-      "Effects": [
-        {
-          "Action": {
-            "Type": "NestedEffect",
-            "Effects": [
-              {
-                "Action": {
-                  "Type": "Damage",
-                  "Amount": 1
-                },
-                "Duration": {
-                  "Type": "TimedDuration",
-                  "Duration": 100
-                },
-                "Interval": {
-                  "Type": "Interval",
-                  "Interval": 10
-                },
-                "Targeting": "Self",
-                "Trigger": "OnTickInterval",
-                "IsFlatAmount": true,
-                "AttackType": "DamageOverTime",
-                "DamageType": "Poison",
-                "EffectTags": [],
-                "Log": "{Target} took {Amount} poison damage."
-              }
-            ]
-          },
-          "Duration": {
-            "Type": "IndefiniteDuration"
-          },
-          "Targeting": "Self",
-          "Trigger": "OnMeleeAttacked",
-          "TriggerTarget": "CauseOfTrigger",
-          "Log": "{Actor} retaliated against {Target} and applied a poison to them."
-        }
-      ]
-    },
-    "AttributeModifiers": [
-      {
-        "AttributeType": "Constitution",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Strength",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Dexterity",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Intelligence",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      }
-    ]
-  },
-  {
-    "Name": "Test Essence",
-    "Active": {
-      "Id": "test_01",
-      "Name": "Test Active",
-      "Description": "Test the enemy.",
-      "Type": "Active",
-      "Cooldown": 3000,
-      "Cost": 0,
-      "Effects": [
-        {
-          "Action": {
-            "Type": "Damage",
-            "Amount": 1,
-            "ScalingAttribute": "Dexterity",
-            "ScalingMultiplier": 0.15
-          },
-          "Duration": {
-            "Type": "TimedDuration",
-            "Duration": 0
-          },
-          "Targeting": "SingleEnemy",
-          "Trigger": "None",
-          "AttackType": "Melee",
-          "DamageType": "Physical",
-          "EffectTags": [],
-          "Log": "{Actor} hit {Target} with a test effect."
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "test_02",
-      "Name": "Test Passive",
-      "Description": "Test yourself",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Cost": 0,
-      "Effects": [
-        {
-          "Action": {
-            "Type": "ApplyStatusEffect",
-            "Status": "Asleep",
-            "Stacks": 1
-          },
-          "Duration": {
-            "Type": "TimedDuration",
-            "Duration": 2000
-          },
-          "Targeting": "SingleEnemy",
-          "Trigger": "None",
-          "AttackType": "None",
-          "DamageType": "None",
-          "EffectTags": [],
-          "Log": "{Actor} tests {Target}."
-        }
-      ]
-    },
-    "AttributeModifiers": [
-      {
-        "AttributeType": "Constitution",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Strength",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Dexterity",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Intelligence",
-        "Amount": 3,
         "ModifierType": "Flat"
       }
     ]

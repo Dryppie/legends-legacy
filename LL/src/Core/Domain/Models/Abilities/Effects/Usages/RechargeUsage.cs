@@ -27,7 +27,8 @@ public class RechargeUsage : IUsage
             _ticksUntilNextRecharge = 0;
         }
     }
+    // Clone with remaining uses to keep track during a single fight
     public IUsage Clone() => new RechargeUsage(_remainingUses, _rechargeInterval);
-
+    // Reset makes sure to reset everything after a fight is over
     public void Reset() => _remainingUses = _initialUses;
 }

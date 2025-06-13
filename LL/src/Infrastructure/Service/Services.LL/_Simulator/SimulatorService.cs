@@ -163,12 +163,6 @@ public class SimulatorService : ISimulatorService
         return EntityBaseAttributeHelper.CreateSimulatedAttributes(tier);
     }
 
-    //private async Task<List<Entity>> GetMonsters(int id)
-    //{
-    //    var ids = _entityService.GetEntityIdsByLocationId(id);
-    //    return await _entityService.GetEntitiesByIdsForCombatAsync(ids);
-    //}
-
     private static void ResetEntitiesForCombat(List<CombatEntity> allEntities)
     {
         foreach (var entity in allEntities)

@@ -188,7 +188,8 @@ public class CombatInteractionManager : ICombatInteractionManager
             Target = source,
         });
 
-        if (!(source.Id == target.Id || attackType.Equals(AttackType.DamageOverTime))) // Target can only be attacked, if the actor is different from the target
+        // Target can only be attacked, if the actor is different from the target, and it is either Melee or Ranged
+        if (source.Id != target.Id && (attackType.Equals(AttackType.Melee) || attackedTypeTrigger.Equals(AttackType.Ranged)))
             _combatContext.EventBus.Publish(new CombatEvent
             {
                 Type = TriggerEvent.OnAttacked,
@@ -219,6 +220,8 @@ public class CombatInteractionManager : ICombatInteractionManager
                 Source = target,
                 Target = source,
             });
+
+            _combatContext.LogEffectExecution(new EffectContext(source, target, attackType, [], $"{target.Name} was killed by {source.Name}") { EventType = EventType.Death });
         }
     }
 

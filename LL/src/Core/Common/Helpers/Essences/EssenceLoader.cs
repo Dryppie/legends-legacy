@@ -47,7 +47,7 @@ public sealed class EssenceLoader
     /// </summary>
     private static List<Essence> LoadEssencesFromJson()
     {
-        string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "abilities2.json");
+        string filePath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "abilities.json");
         string json = File.ReadAllText(filePath);
 
         // Deserialize JSON into a list of essences

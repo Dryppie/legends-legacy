@@ -115,26 +115,11 @@ public class CombatEntity
         }
 
         Statuses.Add(status);
-
-        // Fire trigger on status applied
-        // This could be part of EffectManager or StatusService
-        //status.Definition.Triggers
-        //    .Where(t => t.Event == "OnStatusAppliedIfThis")
-        //    .ToList()
-        //    .ForEach(t =>
-        //    {
-        //        foreach (var effect in t.Actions)
-        //        {
-        //            var instance = new EffectInstance(effect, status.Source, status.Owner);
-        //            // Optional: You can apply this immediately or defer
-        //        }
-        //    });
     }
 
     public void RemoveStatus(StatusInstance status)
     {
         Statuses.Remove(status);
-        // Optionally fire OnStatusExpired triggers
     }
 
     public bool CanAct()
@@ -154,18 +139,19 @@ public class CombatEntity
 
         foreach (var ability in Abilities)
         {
-            //ability.Usage.Reset();
+            ability.Definition.Usage.Reset();
 
-            //ability.RemainingTimeUntilUse = ability.Cooldown;
+            ability.RemainingTimeUntilUse = ability.Definition.Cooldown;
 
-            //foreach (var effect in ability.Effects)
-            //{
-            //    effect.Usage.Reset();
-            //}
+            foreach (var effect in ability.Definition.Triggers.SelectMany(t => t.Actions))
+            {
+                effect.Usage.Reset();
+            }
         }
 
         TemporaryModifiers.Clear();
         Statuses.Clear();
+        StatusEffects.Clear();
     }
 
     /// <summary>
@@ -189,7 +175,7 @@ public class CombatEntity
         Id = entity.Id.ToString();
         Name = entity.Name;
         ImagePath = entity.ImagePath;
-        //Abilities = [.. entity.Abilities.Select(a => a.Clone())];
+        Abilities = [.. entity.Abilities.Select(a => new AbilityInstance(a.Definition))];
         NextBasicAttackIn = entity.NextBasicAttackIn;
         NextRecoveryIn = entity.NextRecoveryIn;
         Equipment = entity.Equipment.Select(e => e).ToList();
@@ -198,7 +184,8 @@ public class CombatEntity
         BaseCombatAttributes = new Dictionary<AttributeType, float>(entity.BaseCombatAttributes);
         CombatAttributes = new Dictionary<AttributeType, float>(entity.CombatAttributes);
         EquippedEssences = [.. entity.EquippedEssences];
-        //Statuses = new Dictionary<StatusEffectType, int>(entity.Statuses);
+        StatusEffects = new Dictionary<StatusEffectType, int>(entity.StatusEffects);
+        Statuses = [];
         Level = entity.Level;
         IsSummoned = entity.IsSummoned;
     }

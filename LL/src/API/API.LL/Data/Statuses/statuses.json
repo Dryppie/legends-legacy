@@ -1,5 +1,48 @@
 [
   {
+    "Id": "sneakAttackBleed",
+    "Name": "Sneak Attack Bleed",
+    "Description": "Takes initial physical damage and bleeds over 10 seconds.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "Damage",
+              "Amount": 5,
+              "ScalingAttribute": "Dexterity",
+              "ScalingMultiplier": 0.15
+            },
+            "Duration": { "Type": "NoDuration" },
+            "Targeting": "Self",
+            "AttackType": "Melee",
+            "DamageType": "Physical",
+            "Log": "{Target} received {Amount} damage."
+          },
+          {
+            "Action": {
+              "Type": "Damage",
+              "Amount": 4
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 80
+            },
+            "Interval": {
+              "Type": "Interval",
+              "Interval": 40
+            },
+            "Targeting": "Self",
+            "AttackType": "DamageOverTime",
+            "DamageType": "Bleed",
+            "Log": "{Target} is bleeding, and took {Amount} damage."
+          }
+        ]
+      }
+    ]
+  },
+  {
     "Id": "poisonedArrowEffect",
     "Name": "Poisoned Arrow",
     "Description": "Taking poison damage over time.",
@@ -204,7 +247,7 @@
               "Duration": 30
             },
             "Targeting": "Self",
-            "Log": "{Target} is stunned while engulfed!"
+            "Log": "{Target} is stunned!"
           },
           {
             "Action": {
@@ -222,7 +265,7 @@
             "Targeting": "Self",
             "AttackType": "DamageOverTime",
             "DamageType": "Physical",
-            "Log": "{Target} struggles while being engulfed, taking {Amount} damage!"
+            "Log": "{Target} is stunned while engulfed, taking {Amount} damage!"
           }
         ]
       }
@@ -248,7 +291,7 @@
               "Duration": 30
             },
             "Targeting": "Self",
-            "Log": "{Target}'s form flickers and slips through attacks!"
+            "Log": "{Actor}'s form becomes elusive after dropping below 30% health!"
           }
         ]
       }

@@ -15,6 +15,4 @@ public class AbilityInstance
     {
         RemainingTimeUntilUse = Definition.Cooldown;
     }
-
-    public IEnumerable<Trigger> GetTriggers() => Definition.Triggers;
 }

@@ -4,7 +4,7 @@
     "Active": {
       "Id": "sneakAttack",
       "Name": "Sneak Attack",
-      "Description": "Stab the target in the back, dealing {damage1} damage, and apply 15 bleed damage over 10 seconds.",
+      "Description": "Stab the target in the back, dealing {damage1} damage, and apply 8 bleed damage over 8 seconds.",
       "Type": "Active",
       "Cooldown": 90,
       "Cost": { "Mana": "12" },
@@ -21,35 +21,10 @@
           "Actions": [
             {
               "Action": {
-                "Type": "Damage",
-                "Amount": 5,
-                "ScalingAttribute": "Dexterity",
-                "ScalingMultiplier": 0.15
+                "Type": "ApplyStatus",
+                "StatusId": "sneakAttackBleed"
               },
-              "Targeting": "SingleEnemy",
-              "AttackType": "Melee",
-              "DamageType": "Physical",
-              "EffectTags": [],
-              "Log": "{Target} received {Amount} damage."
-            },
-            {
-              "Action": {
-                "Type": "Damage",
-                "Amount": 3
-              },
-              "Duration": {
-                "Type": "TimedDuration",
-                "Duration": 100
-              },
-              "Interval": {
-                "Type": "Interval",
-                "Interval": 20
-              },
-              "Targeting": "SingleEnemy",
-              "AttackType": "DamageOverTime",
-              "DamageType": "Bleed",
-              "EffectTags": [],
-              "Log": "{Target} is bleeding, and took {Amount} damage."
+              "Targeting": "SingleEnemy"
             }
           ]
         }
@@ -235,15 +210,15 @@
                 "Type": "Damage",
                 "Amount": 15,
                 "ScalingAttribute": "Agility",
-                "ScalingMultiplier": 0.1,
-                "EffectModifiers": [
-                  {
-                    "Type": "CritChance",
-                    "Amount": 50,
-                    "ModifierType": "Flat"
-                  }
-                ]
+                "ScalingMultiplier": 0.1
               },
+              "EffectModifiers": [
+                {
+                  "Type": "CritChance",
+                  "Amount": 50,
+                  "ModifierType": "Flat"
+                }
+              ],
               "Targeting": "SingleEnemy",
               "AttackType": "Ranged",
               "DamageType": "Physical",
@@ -273,7 +248,8 @@
                 "StatusId": "poisonedArrowEffect"
               },
               "Targeting": "CauseOfTrigger",
-              "Chance": 20
+              "Chance": 20,
+              "Log": "{Actor} inflicted {Target} with poison from their ranged attack."
             }
           ]
         }
@@ -430,7 +406,7 @@
               "AttackType": "Melee",
               "DamageType": "Burn",
               "EffectTags": [],
-              "Log": "{Target} received {Amount} burn damage."
+              "Log": "{Target} received {Amount} burn damage after attacking {Actor}."
             }
           ]
         }
@@ -474,14 +450,13 @@
                 "Type": "ApplyStatus",
                 "StatusId": "frostImpFreeze"
               },
-              "Targeting": "SingleEnemy",
               "Condition": {
                 "Type": "StatusEffectCondition",
                 "Status": "Cold",
                 "StacksRequired": 2,
                 "ComparisonType": "GreaterThan"
               },
-              "Log": "{Actor} froze {Target} solid!"
+              "Targeting": "SingleEnemy"
             }
           ]
         }
@@ -1006,7 +981,7 @@
     "Active": {
       "Id": "igniteCore",
       "Name": "Ignite Core",
-      "Description": "Ignite and apply a fire aura to yourself. Deal 3 burn damage to everyone every second. Lasts 10 seconds.",
+      "Description": "Ignite and apply a fire aura to yourself. Deal 3 burn damage to everyone but you every second. Lasts 10 seconds.",
       "Type": "Active",
       "Cooldown": 180,
       "Cost": { "Mana": "8" },
@@ -1026,7 +1001,7 @@
                 "Type": "ApplyStatus",
                 "StatusId": "redSlimeFireAura"
               },
-              "Targeting": "Self",
+              "Targeting": "EveryoneButYou",
               "Log": "{Actor}'s core ignites in blazing flames!"
             }
           ]
@@ -1132,8 +1107,7 @@
                 "Type": "LimitedUsage",
                 "Uses": 1
               },
-              "Targeting": "Self",
-              "Log": "{Actor}'s form becomes elusive as its health drops!"
+              "Targeting": "Self"
             }
           ]
         }
@@ -1460,6 +1434,198 @@
       {
         "AttributeType": "Wisdom",
         "Amount": 7,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Pixie's Essence",
+    "Active": {
+      "Id": "pixieBurst",
+      "Name": "Pixie Burst",
+      "Description": "Deal {damage1} damage to all enemies.",
+      "Type": "Active",
+      "Cooldown": 80,
+      "Cost": { "Mana": "9" },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "pixieBurst" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "Damage",
+                "Amount": 15,
+                "ScalingAttribute": "Intelligence",
+                "ScalingMultiplier": 0.3
+              },
+              "Targeting": "AllEnemies",
+              "AttackType": "Ranged",
+              "DamageType": "Magical",
+              "Log": "{Target} took {Amount} damage from {Actor}'s Pixie Burst."
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "resonantChime",
+      "Name": "Resonant Chime",
+      "Description": "Every time you use an ability, all allies gain +1 Crit Chance.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ModifyAttribute",
+                "Attribute": "CritChance",
+                "Amount": 1,
+                "ModifierType": "Flat",
+                "Stackable": true
+              },
+              "Duration": {
+                "Type": "IndefiniteDuration"
+              },
+              "Targeting": "AllAllies",
+              "Log": "{Target}'s crit chance increased by 1."
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 11,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Luck",
+        "Amount": 12,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Hobgoblin's Essence",
+    "Active": {
+      "Id": "frenzy",
+      "Name": "Frenzy",
+      "Description": "Increase Attack Speed by 24% and Critical Hit Chance by 25% for 10 seconds.",
+      "Type": "Active",
+      "Cooldown": 140,
+      "Cost": { "Mana": "24" },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "frenzy" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ModifyAttribute",
+                "Attribute": "BasicAttackSpeed",
+                "Amount": 24,
+                "ModifierType": "Additive",
+                "Stackable": true
+              },
+              "Duration": {
+                "Type": "TimedDuration",
+                "Duration": 100
+              },
+              "Targeting": "Self",
+              "Log": "{Actor}'s Attack Speed increased by 24%."
+            },
+            {
+              "Action": {
+                "Type": "ModifyAttribute",
+                "Attribute": "CritChance",
+                "Amount": 25,
+                "ModifierType": "Additive",
+                "Stackable": true
+              },
+              "Duration": {
+                "Type": "TimedDuration",
+                "Duration": 100
+              },
+              "Targeting": "Self",
+              "Log": "{Actor}'s Critical Chance increased by 25%."
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "savageOnslaught",
+      "Name": "Savage Onslaught",
+      "Description": "Increase Strength by 95 the first time dropping below 80% Health.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnHealthChanged",
+          "Filters": [
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ModifyAttribute",
+                "Attribute": "Strength",
+                "Amount": 95,
+                "ModifierType": "Flat",
+                "Stackable": true
+              },
+              "Condition": {
+                "Type": "HealthCondition",
+                "HealthPercentage": 80,
+                "ComparisonType": "LessThan"
+              },
+              "Duration": {
+                "Type": "IndefiniteDuration"
+              },
+              "Usage": {
+                "Type": "LimitedUsage",
+                "Uses": 1
+              },
+              "Targeting": "Self",
+              "Log": "{Actor}'s Strength is increased by 95 due to falling below 80% health."
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Constitution",
+        "Amount": 13,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "FightingSpirit",
+        "Amount": 7,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Willpower",
+        "Amount": 11,
         "ModifierType": "Flat"
       }
     ]
