@@ -22,7 +22,6 @@ public class EffectDefinition
         DamageAction => EffectType.Damage,
         ResourceRestoreAction => EffectType.Healing,
         ModifyAttributeAction => EffectType.ModifyAttribute,
-        NestedEffectAction => EffectType.NestedEffect,
         SummonAction => EffectType.Summon,
         _ => throw new NotSupportedException($"Unsupported action type {Action?.GetType().Name}")
     };

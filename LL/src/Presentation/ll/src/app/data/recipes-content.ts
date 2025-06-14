@@ -30,7 +30,10 @@ export const RECIPES_CONTENT = [
           "amount": 1,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -75,7 +78,10 @@ export const RECIPES_CONTENT = [
           "amount": 1,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -154,7 +160,10 @@ export const RECIPES_CONTENT = [
           "amount": 2,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -233,7 +242,10 @@ export const RECIPES_CONTENT = [
           "amount": 2,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -317,7 +329,10 @@ export const RECIPES_CONTENT = [
           "amount": 5,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -396,7 +411,10 @@ export const RECIPES_CONTENT = [
           "amount": 2,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -475,7 +493,10 @@ export const RECIPES_CONTENT = [
           "amount": 2,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -559,7 +580,10 @@ export const RECIPES_CONTENT = [
           "amount": 1,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -638,7 +662,10 @@ export const RECIPES_CONTENT = [
           "amount": 2,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -717,7 +744,10 @@ export const RECIPES_CONTENT = [
           "amount": 2,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -801,7 +831,10 @@ export const RECIPES_CONTENT = [
           "amount": 5,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -880,7 +913,10 @@ export const RECIPES_CONTENT = [
           "amount": 2,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -959,7 +995,10 @@ export const RECIPES_CONTENT = [
           "amount": 2,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -1038,7 +1077,10 @@ export const RECIPES_CONTENT = [
           "amount": 20,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.JewelryCrafting,
@@ -1104,7 +1146,10 @@ export const RECIPES_CONTENT = [
           "amount": 2,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.JewelryCrafting,
@@ -1170,7 +1215,10 @@ export const RECIPES_CONTENT = [
           "amount": 60,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.JewelryCrafting,
@@ -1236,7 +1284,10 @@ export const RECIPES_CONTENT = [
           "amount": 8,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.JewelryCrafting,
@@ -1289,7 +1340,10 @@ export const RECIPES_CONTENT = [
           "amount": 2,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.JewelryCrafting,
@@ -1342,7 +1396,10 @@ export const RECIPES_CONTENT = [
           "amount": 25,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.JewelryCrafting,
@@ -1395,7 +1452,10 @@ export const RECIPES_CONTENT = [
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.JewelryCrafting,
@@ -1461,7 +1521,10 @@ export const RECIPES_CONTENT = [
           "amount": 1,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.JewelryCrafting,
@@ -1527,7 +1590,10 @@ export const RECIPES_CONTENT = [
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.JewelryCrafting,
@@ -1598,7 +1664,10 @@ export const RECIPES_CONTENT = [
           "amount": 1,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -1677,7 +1746,10 @@ export const RECIPES_CONTENT = [
           "amount": 2,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -1756,7 +1828,10 @@ export const RECIPES_CONTENT = [
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -1835,7 +1910,10 @@ export const RECIPES_CONTENT = [
           "amount": 2,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -1919,7 +1997,10 @@ export const RECIPES_CONTENT = [
           "amount": 2,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -1998,7 +2079,10 @@ export const RECIPES_CONTENT = [
           "amount": 4,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2082,7 +2166,10 @@ export const RECIPES_CONTENT = [
           "amount": 2,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2166,7 +2253,10 @@ export const RECIPES_CONTENT = [
           "amount": 2,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2250,7 +2340,10 @@ export const RECIPES_CONTENT = [
           "amount": 50,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2334,7 +2427,10 @@ export const RECIPES_CONTENT = [
           "amount": 50,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2400,7 +2496,10 @@ export const RECIPES_CONTENT = [
           "amount": 4,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2479,7 +2578,10 @@ export const RECIPES_CONTENT = [
           "amount": 2,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2558,7 +2660,10 @@ export const RECIPES_CONTENT = [
           "amount": 2,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2637,7 +2742,10 @@ export const RECIPES_CONTENT = [
           "amount": 2,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2703,7 +2811,10 @@ export const RECIPES_CONTENT = [
           "amount": 4,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2787,7 +2898,10 @@ export const RECIPES_CONTENT = [
           "amount": 2,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2871,7 +2985,10 @@ export const RECIPES_CONTENT = [
           "amount": 50,
           "modifierType": ModifierType.Flat
         }
-      ]
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,

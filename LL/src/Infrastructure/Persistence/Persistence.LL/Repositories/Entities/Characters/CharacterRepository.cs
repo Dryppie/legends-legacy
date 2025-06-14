@@ -32,41 +32,20 @@ public class CharacterRepository : ICharacterRepository
             Level = 1
         };
 
-        // TODO: This is only temporary, so guests have abilities
-        
-
-        var essences = new List<Essence>()
-            {
-                new Essence()
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Goblin's Essence",
-                    ActiveAbilityId = "sneakAttack",
-                    PassiveAbilityId = "pocketDirt"
-                },
-            };
-
         var essenceSlots = new List<EssenceSlot>()
         {
             new EssenceSlot()
             {
                 SlotState = SlotState.Active,
                 SlotType = SlotType.Standard,
-                OccupiedEssence = essences.First()
-            },
-            new EssenceSlot()
-            {
-                SlotState = SlotState.Active,
-                SlotType = SlotType.Standard,
             },
         };
-
+        character.Soulstones = 500;
         character.EssenceSlots = essenceSlots;
         character.Professions = ProfessionsSeederHelper.CreateProfessions(character.Id);
-        await _context.Essences.AddRangeAsync(essences);
-        await _context.EssenceSlots.AddRangeAsync(essenceSlots);
+        await _context.EssenceSlots.AddRangeAsync(essenceSlots, cancellationToken);
         SeedEquipmentSlots(character);
-        await _context.Characters.AddAsync(character);
+        await _context.Characters.AddAsync(character, cancellationToken);
 
         await _context.SaveChangesAsync(cancellationToken);
         return character;

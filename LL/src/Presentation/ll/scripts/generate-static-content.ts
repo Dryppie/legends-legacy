@@ -36,6 +36,10 @@ const tsLiteral = JSON.stringify(JSON.parse(json), null, 2)
     (_, v) => `"attributeType": AttributeType.${v}`,
   )
   .replace(
+    /"scalingAttribute":\s*"([^"]+)"/g,
+    (_, v) => `"scalingAttribute": AttributeType.${v}`,
+  )
+  .replace(
     /"equipmentType":\s*"([^"]+)"/g,
     (_, v) => `"equipmentType": EquipmentType.${v}`,
   )

@@ -37,11 +37,6 @@ public class JsonStatusService : IStatusDefinitionService, IDisposable
     public bool TryGetById(string id, out StatusDefinition def)
         => _cache.TryGetValue(id, out def);
 
-    public StatusDefinition GetById(string id)
-        => _cache.TryGetValue(id, out var def)
-           ? def
-           : throw new KeyNotFoundException($"Status '{id}' not found in repository.");
-
     public IReadOnlyCollection<StatusDefinition> GetAll() => [.. _cache.Values];
 
     /* ---------- private helpers ---------- */

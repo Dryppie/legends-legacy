@@ -2134,8 +2134,8 @@
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 0,
+    "magnitude": 5,
     "scalingAttribute": "FightingSpirit",
-    "scalingAmount": 0
+    "scalingAmount": 0.1
   }
 ]

@@ -67,7 +67,7 @@
   </div>
   <!-- INVENTORY ESSENCES LIST -->
   <div class="flex h-full w-full flex-col space-y-2 overflow-y-auto md:order-1">
-    <ng-container *ngIf="activeSlots().length">
+    <ng-container *ngIf="activeSlots().length; else noEssences">
       <h2 class="flex text-primary">Active absorbed essences</h2>
       <div
         *ngFor="let slot of activeSlots()"
@@ -87,7 +87,12 @@
         </div> -->
       </div>
     </ng-container>
-    <ng-container *ngIf="reservedSlots().length; else noEssences">
+    <ng-template #noEssences>
+      <p class="mt-4 text-center italic text-neutral-400">
+        You have no essence slots yet.
+      </p>
+    </ng-template>
+    <ng-container *ngIf="reservedSlots().length">
       <h2 class="flex text-primary">Essences in your inventory</h2>
       <div
         *ngFor="let slot of reservedSlots()"
@@ -107,10 +112,5 @@
         </div> -->
       </div>
     </ng-container>
-    <ng-template #noEssences>
-      <p class="mt-4 text-center italic text-neutral-400">
-        You have no essence slots yet.
-      </p>
-    </ng-template>
   </div>
 </div>

@@ -1,4 +1,5 @@
 import { AttributeModifier } from './Dtos/attributesDto';
+import { AttributeType } from './enums/attributeType';
 import { EquipmentType } from './enums/equipmentType';
 import { ItemType } from './enums/itemType';
 import { Rarity } from './enums/rarity';
@@ -28,6 +29,9 @@ export interface ItemBase {
 export interface Equipment extends ItemBase {
   equipmentType: EquipmentType;
   attributeModifiers: AttributeModifier[];
+  magnitude: number;
+  scalingAttribute: AttributeType;
+  scalingAmount: number;
 }
 
 export interface EssenceItem extends ItemBase {

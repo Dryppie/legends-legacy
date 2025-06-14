@@ -74,16 +74,16 @@ public static class LLDbContextExtensions
             new Essence()
             {
                 Id = Guid.NewGuid(),
-                Name = "Starter Essence 1",
-                ActiveAbilityId = "fireball_01",
-                PassiveAbilityId = "retaliate_01"
+                Name = "Goblin's Essence",
+                ActiveAbilityId = "sneakAttack",
+                PassiveAbilityId = "pocketDirt"
             },
             new Essence()
             {
                 Id = Guid.NewGuid(),
-                Name = "Starter Essence 2",
-                ActiveAbilityId = "heal_01",
-                PassiveAbilityId = "pocketDirt"
+                Name = "Goblin Warrior's Essence",
+                ActiveAbilityId = "ragingCleave",
+                PassiveAbilityId = "recklessAssault"
             }
         };
 

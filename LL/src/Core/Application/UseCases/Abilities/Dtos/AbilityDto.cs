@@ -2,6 +2,7 @@
 using AutoMapper;
 using Domain.Models.Abilities;
 using Domain.Models.Abilities.Effects;
+using Domain.Models.Abilities.ResourceCosts;
 using Domain.Models.Damages;
 
 namespace Application.UseCases.Abilities.Dtos;
@@ -16,7 +17,7 @@ public class AbilityDto : IMapFrom<AbilityDefinition>
     public AbilityType Type { get; set; } // Active or Passive
     public int Cooldown { get; set; }
     public int RemainingTimeUntilUse { get; set; }
-    public int Cost { get; set; } // e.g., mana cost
+    public ResourceCost? Cost { get; set; } // e.g., mana cost
     public List<EffectType> EffectTypes { get; } = [];
     public void Mapping(Profile profile)
     {

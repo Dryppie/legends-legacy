@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Domain.Interfaces.Combat;
 using Domain.Models.Abilities;
 using Domain.Models.Abilities.Effects;
 using Domain.Models.Abilities.Effects.Actions;
@@ -20,16 +21,24 @@ public record TooltipValue(
 public class EssenceDescriptionService : IEssenceDescriptionService
 {
     private const float MAGNITUDE_RANGE = 0.2f;
+    private readonly IStatusDefinitionService _statusService;
 
-    public string BuildAbilityDescription(AbilityDefinition ability, Dictionary<AttributeType, float> attributes)
+    public EssenceDescriptionService(IStatusDefinitionService statusService)
     {
-        var dictAttributes = attributes.Select(kvp => new EntityAttribute
-        {
-            AttributeType = kvp.Key,
-            Value = kvp.Value
-        }).ToList();
-        return BuildAbilityDescription(ability, dictAttributes);
+        _statusService = statusService;
     }
+
+    public string BuildAbilityDescription(
+        AbilityDefinition ability,
+        IReadOnlyDictionary<AttributeType, float> attributes)
+        => BuildAbilityDescription(
+               ability,
+               attributes.Select(kvp => new EntityAttribute
+               {
+                   AttributeType = kvp.Key,
+                   Value = kvp.Value
+               }).ToList(),
+               new HashSet<string>());
 
     /// <summary>
     /// Generates a final description string from the ability's description template and effects.
@@ -38,7 +47,10 @@ public class EssenceDescriptionService : IEssenceDescriptionService
     /// <param name="ability">The ability definition containing a Description and Effects.</param>
     /// <param name="attributes">A dictionary of relevant stats (e.g., Strength, Dex) for scaling calculations.</param>
     /// <returns>The final string with placeholders replaced by computed values.</returns>
-    private static string BuildAbilityDescription(AbilityDefinition ability, List<EntityAttribute> attributes)
+    private string BuildAbilityDescription(
+        AbilityDefinition ability,
+        List<EntityAttribute> attributes,
+        HashSet<string> visitedStatuses)
     {
         // Fallback if there's no description
         string template = ability.Description ?? string.Empty;
@@ -59,46 +71,63 @@ public class EssenceDescriptionService : IEssenceDescriptionService
 
         // Parse each effect in order
         foreach (var effect in ability.Triggers.SelectMany(t => t.Actions))
-        {
-            var action = effect.Action;
-            switch (action)
-            {
-                case DamageAction dmg:
-                    damageIndex++;
-                    string dmgKey = $"{{damage{damageIndex}}}";
-                    placeholders[dmgKey] = BuildTooltipValue(
-                        dmg.Magnitude,
-                        dmg.ScalingAttribute,
-                        dmg.ScalingMultiplier,
-                        attributes,
-                        TooltipKind.Damage);
-                    break;
-
-                case ResourceRestoreAction heal:
-                    healIndex++;
-                    string healKey = $"{{heal{healIndex}}}";
-                    placeholders[healKey] = BuildTooltipValue(
-                        heal.Magnitude,
-                        heal.ScalingAttribute,
-                        heal.ScalingMultiplier,
-                        attributes,
-                        TooltipKind.Heal);
-                    break;
-
-                case NestedEffectAction nest when nest.Effects != null:
-                    foreach (var nested in nest.Effects)
-                        HandleNestedEffect(nested, placeholders, attributes,
-                                           ref damageIndex, ref healIndex, ref modifyIndex);
-                    break;
-
-                default:
-                    // If your template doesn't need them, skip.
-                    break;
-            }
-        }
+            HandleEffect(effect, placeholders, attributes,
+                         ref damageIndex, ref healIndex, ref modifyIndex,
+                         visitedStatuses);
 
         // Finally, replace all placeholders in the template
         return ReplacePlaceholders(template, placeholders);
+    }
+
+    private void HandleEffect(
+        EffectDefinition effect,
+        Dictionary<string, TooltipValue> placeholders,
+        List<EntityAttribute> attributes,
+        ref int damageIndex, ref int healIndex, ref int modifyIndex,
+        HashSet<string> visitedStatuses)
+    {
+        switch (effect.Action)
+        {
+            case DamageAction dmg:
+                damageIndex++;
+                placeholders[$"{{damage{damageIndex}}}"] =
+                    BuildTooltipValue(dmg.Magnitude, dmg.ScalingAttribute,
+                                      dmg.ScalingMultiplier, attributes, TooltipKind.Damage);
+                break;
+
+            case ResourceRestoreAction heal:
+                healIndex++;
+                placeholders[$"{{heal{healIndex}}}"] =
+                    BuildTooltipValue(heal.Magnitude, heal.ScalingAttribute,
+                                      heal.ScalingMultiplier, attributes, TooltipKind.Heal);
+                break;
+
+            case ApplyStatusAction apply:
+                ExpandStatus(apply.StatusId, placeholders, attributes,
+                             ref damageIndex, ref healIndex, ref modifyIndex,
+                             visitedStatuses);
+                break;
+        }
+    }
+
+    private void ExpandStatus(
+    string statusId,
+    Dictionary<string, TooltipValue> placeholders,
+    List<EntityAttribute> attributes,
+    ref int damageIndex, ref int healIndex, ref int modifyIndex,
+    HashSet<string> visitedStatuses)
+    {
+        // Avoid infinite recursion
+        if (!visitedStatuses.Add(statusId))
+            return;
+
+        if (!_statusService.TryGetById(statusId, out var status))
+            return;                 // Unknown status – silently ignore or log
+
+        foreach (var nestedEffect in status.Triggers.SelectMany(t => t.Actions))
+            HandleEffect(nestedEffect, placeholders, attributes,
+                         ref damageIndex, ref healIndex, ref modifyIndex,
+                         visitedStatuses);
     }
 
     /// <summary>
@@ -128,10 +157,14 @@ public class EssenceDescriptionService : IEssenceDescriptionService
                     BuildTooltipValue(heal.Magnitude, heal.ScalingAttribute, heal.ScalingMultiplier, stats, TooltipKind.Heal);
                 break;
 
-            case NestedEffectAction deeper when deeper.Effects != null:
-                foreach (var n in deeper.Effects)
-                    HandleNestedEffect(n, placeholders, stats,
-                                       ref damageIndex, ref healIndex, ref modifyIndex);
+            //case ApplyStatusAction deeper when deeper.Effects != null:
+            //    foreach (var n in deeper.Effects)
+            //        HandleNestedEffect(n, placeholders, stats,
+            //                           ref damageIndex, ref healIndex, ref modifyIndex);
+            //    break;
+
+            default:
+                // If your template doesn't need them, skip.
                 break;
         }
     }
