@@ -57,7 +57,7 @@ namespace Persistence.LL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Username = table.Column<string>(type: "text", nullable: true),
+                    Username = table.Column<string>(type: "text", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: true),
                     PasswordHash = table.Column<string>(type: "text", nullable: true),
                     IsGuest = table.Column<bool>(type: "boolean", nullable: false),
@@ -81,6 +81,9 @@ namespace Persistence.LL.Migrations
                     ItemType = table.Column<int>(type: "integer", nullable: false),
                     Rarity = table.Column<int>(type: "integer", nullable: false),
                     EquipmentType = table.Column<int>(type: "integer", nullable: true),
+                    Magnitude = table.Column<int>(type: "integer", nullable: true),
+                    ScalingAttribute = table.Column<int>(type: "integer", nullable: true),
+                    ScalingAmount = table.Column<float>(type: "real", nullable: true),
                     EssenceId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>

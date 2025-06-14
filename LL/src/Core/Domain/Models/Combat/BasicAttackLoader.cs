@@ -41,7 +41,8 @@ public static class BasicAttackLoader
             Targeting.SingleEnemy,
             AttackType.Melee,
             DamageType.Physical)
-        { Log = "{Actor} hit {Target} with a basic attack, dealing {Amount} damage." };
+        { Log = "{Test} - {Actor} hit {Target} with a basic attack, dealing {Amount} damage." };
+        basicAttackAction.Log.Replace("{Test}", scalingAttribute.ToString());
 
         var abilityTrigger = new Trigger()
         {

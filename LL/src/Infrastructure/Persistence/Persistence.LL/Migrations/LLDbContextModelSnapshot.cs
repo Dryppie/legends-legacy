@@ -713,6 +713,7 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Username")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -893,6 +894,15 @@ namespace Persistence.LL.Migrations
                     b.HasBaseType("Domain.Models.Items.ItemBase");
 
                     b.Property<int>("EquipmentType")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Magnitude")
+                        .HasColumnType("integer");
+
+                    b.Property<float>("ScalingAmount")
+                        .HasColumnType("real");
+
+                    b.Property<int>("ScalingAttribute")
                         .HasColumnType("integer");
 
                     b.HasDiscriminator().HasValue(0);

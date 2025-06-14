@@ -13,6 +13,9 @@ public static class EquipmentMapper
         Stackable = r.Stackable,
         EquipmentType = r.EquipmentType,
         AttributeModifiers = r.AttributeModifiers.Select(a => a.ToDto()).ToList(),
+        Magnitude = r.Magnitude,
+        ScalingAttribute = r.ScalingAttribute,
+        ScalingAmount = r.ScalingAmount
     };
 
     public static EquipmentBase ToEntity(this EquipmentToJsonDto dto) => new()
@@ -25,5 +28,8 @@ public static class EquipmentMapper
         Stackable = dto.Stackable,
         EquipmentType = dto.EquipmentType,
         AttributeModifiers = dto.AttributeModifiers.Select(a => a.ToEntity()).ToList(),
+        Magnitude = dto.Magnitude,
+        ScalingAttribute = dto.ScalingAttribute,
+        ScalingAmount = dto.ScalingAmount,
     };
 }

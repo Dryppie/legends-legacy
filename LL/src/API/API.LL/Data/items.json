@@ -6,7 +6,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "flint",
@@ -15,7 +18,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "tiny_geode",
@@ -24,7 +30,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "jagged_obsidian",
@@ -33,7 +42,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "crystalline_powder",
@@ -42,7 +54,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "copper_ore",
@@ -51,7 +66,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "veinstone_chip",
@@ -60,7 +78,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "malachite_shard",
@@ -69,7 +90,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "verdant_ore",
@@ -78,7 +102,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "living_amber",
@@ -87,7 +114,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "tin_ore",
@@ -96,7 +126,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "river_pearl",
@@ -105,7 +138,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "dull_quartz",
@@ -114,7 +150,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "galvanic_dust",
@@ -123,7 +162,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "frosted_metal_shard",
@@ -132,7 +174,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "iron_ore",
@@ -141,7 +186,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "hematite_lump",
@@ -150,7 +198,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "fossil_fragment",
@@ -159,7 +210,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "rusted_scale",
@@ -168,7 +222,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "ironwood_core",
@@ -177,7 +234,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "silver_ore",
@@ -186,7 +246,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "moonstone_chip",
@@ -195,7 +258,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "ice_crystal",
@@ -204,7 +270,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "starlight_dust",
@@ -213,7 +282,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "mist_infused_gem",
@@ -222,7 +294,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "gold_ore",
@@ -231,7 +306,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "raw_sunstone",
@@ -240,7 +318,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "topaz_shard",
@@ -249,7 +330,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "ember_gem",
@@ -258,7 +342,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "pyrite_shard",
@@ -267,7 +354,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "mithril_ore",
@@ -276,7 +366,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "mystic_quartz",
@@ -285,7 +378,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "mana_dust",
@@ -294,7 +390,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "aetherium_fragment",
@@ -303,7 +402,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "arcane_ore",
@@ -312,7 +414,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "adamantite_ore",
@@ -321,7 +426,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "fire_opal",
@@ -330,7 +438,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "lava_core",
@@ -339,7 +450,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "searing_ash",
@@ -348,7 +462,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "infernal_ember",
@@ -357,7 +474,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "obsidian_ore",
@@ -366,7 +486,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "obsidian_shard",
@@ -375,7 +498,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "ember_crystal",
@@ -384,7 +510,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "darkstone_gem",
@@ -393,7 +522,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "void_essence",
@@ -402,7 +534,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "arcanite_ore",
@@ -411,7 +546,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "arcane_crystal",
@@ -420,7 +558,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "rune_fragment",
@@ -429,7 +570,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "prismatic_shard",
@@ -438,7 +582,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "cursed_dust",
@@ -447,7 +594,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "dragonstone",
@@ -456,7 +606,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "dragon_scale",
@@ -465,7 +618,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "heartfire_gem",
@@ -474,7 +630,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "ember_scale",
@@ -483,7 +642,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "essence_of_flame",
@@ -492,7 +654,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "willow_log",
@@ -501,7 +666,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "sticky_sap",
@@ -510,7 +678,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "feather_lined_nest",
@@ -519,7 +690,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "silk_vine",
@@ -528,7 +702,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "shimmering_leaf",
@@ -537,7 +714,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "maple_log",
@@ -546,7 +726,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "amber_syrup",
@@ -555,7 +738,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "sweet_bark_chips",
@@ -564,7 +750,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "honeycomb",
@@ -573,7 +762,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "glowing_amber",
@@ -582,7 +774,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "ash_log",
@@ -591,7 +786,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "charcoal_chunk",
@@ -600,7 +798,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "fire_beetle_carapace",
@@ -609,7 +810,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "scorched_resin",
@@ -618,7 +822,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "inferno_bark",
@@ -627,7 +834,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "birch_log",
@@ -636,7 +846,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "frozen_sap",
@@ -645,7 +858,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "moon_moss",
@@ -654,7 +870,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "silver_moth",
@@ -663,7 +882,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "lunar_essence",
@@ -672,7 +894,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "spirit_spruce_log",
@@ -681,7 +906,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "spirit_bark",
@@ -690,7 +918,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "spirit_dust",
@@ -699,7 +930,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "spirit_orb",
@@ -708,7 +942,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "echoing_essence",
@@ -717,7 +954,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "cedar_log",
@@ -726,7 +966,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "resin_glob",
@@ -735,7 +978,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "sun_bloom_seed",
@@ -744,7 +990,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "radiant_pollen",
@@ -753,7 +1002,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "solar_shard",
@@ -762,7 +1014,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "pine_log",
@@ -771,7 +1026,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "pine_cone",
@@ -780,7 +1038,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "ice_dust_crystal",
@@ -789,7 +1050,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "snow_owl_feather",
@@ -798,7 +1062,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "frostbound_heart",
@@ -807,7 +1074,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "oak_log",
@@ -816,7 +1086,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "blood_acorn",
@@ -825,7 +1098,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "leechvine",
@@ -834,7 +1110,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "crimson_spore",
@@ -843,7 +1122,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "hemal_bark",
@@ -852,7 +1134,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "dark_log",
@@ -861,7 +1146,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "wisp",
@@ -870,7 +1158,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "spectral_leaf",
@@ -879,7 +1170,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "spirit_core",
@@ -888,7 +1182,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "gloom_essence",
@@ -897,7 +1194,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "elm_log",
@@ -906,7 +1206,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "charged_bark",
@@ -915,7 +1218,10 @@
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "sparkstone_fragment",
@@ -924,7 +1230,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "thunderheart_core",
@@ -933,7 +1242,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "electrum_sap",
@@ -942,7 +1254,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "yew_log",
@@ -951,7 +1266,10 @@
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "druidic_rune",
@@ -960,7 +1278,10 @@
     "itemType": "Material",
     "rarity": "Unique",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "spirit_feather",
@@ -969,7 +1290,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "seed_of_ages",
@@ -978,7 +1302,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "eternal_leaf",
@@ -987,7 +1314,10 @@
     "itemType": "Material",
     "rarity": "Legendary",
     "equipmentType": "Head",
-    "attributeModifiers": []
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "test_helmet",
@@ -1009,7 +1339,10 @@
         "amount": 1,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "jagged_obsidian_helm",
@@ -1031,7 +1364,10 @@
         "amount": 1,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "jagged_obsidian_cuirass",
@@ -1047,7 +1383,10 @@
         "amount": 2,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "jagged_obsidian_greaves",
@@ -1063,7 +1402,10 @@
         "amount": 2,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "willow_hood",
@@ -1085,7 +1427,10 @@
         "amount": 5,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "willow_brigandine",
@@ -1101,7 +1446,10 @@
         "amount": 2,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "willow_tassets",
@@ -1117,7 +1465,10 @@
         "amount": 2,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "silk_capuche",
@@ -1139,7 +1490,10 @@
         "amount": 1,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "silk_vest",
@@ -1155,7 +1509,10 @@
         "amount": 2,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "silk_trousers",
@@ -1171,7 +1528,10 @@
         "amount": 2,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "powder_hood",
@@ -1193,7 +1553,10 @@
         "amount": 5,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "powder_robe",
@@ -1209,7 +1572,10 @@
         "amount": 2,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "powder_pants",
@@ -1225,7 +1591,10 @@
         "amount": 2,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "geode_heart_amulet",
@@ -1241,7 +1610,10 @@
         "amount": 20,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "leafglow_amulet",
@@ -1257,7 +1629,10 @@
         "amount": 2,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "obsidian_shard_amulet",
@@ -1273,7 +1648,10 @@
         "amount": 60,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "flint_spark_ring",
@@ -1289,7 +1667,10 @@
         "amount": 8,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "nestling_band",
@@ -1305,7 +1686,10 @@
         "amount": 2,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "stoneguard_ring",
@@ -1321,7 +1705,10 @@
         "amount": 25,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "powdered_lens",
@@ -1337,7 +1724,10 @@
         "amount": 3,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "sapling_totem",
@@ -1353,7 +1743,10 @@
         "amount": 1,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "jagged_obsidian_idol",
@@ -1369,7 +1762,10 @@
         "amount": 3,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "stone_edge_shortsword",
@@ -1391,7 +1787,10 @@
         "amount": 1,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 5,
+    "scalingAttribute": "FightingSpirit",
+    "scalingAmount": 0.1
   },
   {
     "id": "jagged_obsidian_hatchet",
@@ -1407,7 +1806,10 @@
         "amount": 2,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 5,
+    "scalingAttribute": "Strength",
+    "scalingAmount": 0.1
   },
   {
     "id": "flint_morning_star",
@@ -1423,7 +1825,10 @@
         "amount": 3,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 5,
+    "scalingAttribute": "Endurance",
+    "scalingAmount": 0.1
   },
   {
     "id": "silkshadow_stiletto",
@@ -1439,7 +1844,10 @@
         "amount": 2,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 5,
+    "scalingAttribute": "Dexterity",
+    "scalingAmount": 0.1
   },
   {
     "id": "willow_cleaver",
@@ -1461,7 +1869,10 @@
         "amount": 2,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 5,
+    "scalingAttribute": "FightingSpirit",
+    "scalingAmount": 0.1
   },
   {
     "id": "stone_reaver_greataxe",
@@ -1477,7 +1888,10 @@
         "amount": 4,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 5,
+    "scalingAttribute": "Strength",
+    "scalingAmount": 0.1
   },
   {
     "id": "powder_core_maul",
@@ -1499,7 +1913,10 @@
         "amount": 2,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 5,
+    "scalingAttribute": "Endurance",
+    "scalingAmount": 0.1
   },
   {
     "id": "nest_tip_pike",
@@ -1521,7 +1938,10 @@
         "amount": 2,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 5,
+    "scalingAttribute": "Dexterity",
+    "scalingAmount": 0.1
   },
   {
     "id": "stonebark_heater",
@@ -1543,7 +1963,10 @@
         "amount": 50,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "silk_protector",
@@ -1565,7 +1988,10 @@
         "amount": 50,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "shimmering_willow_staff",
@@ -1581,7 +2007,10 @@
         "amount": 4,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 5,
+    "scalingAttribute": "Intelligence",
+    "scalingAmount": 0.1
   },
   {
     "id": "geode_bound_grimoire",
@@ -1597,7 +2026,10 @@
         "amount": 2,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "jagged_obsidian_wand",
@@ -1613,7 +2045,10 @@
         "amount": 2,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 5,
+    "scalingAttribute": "Wisdom",
+    "scalingAmount": 0.1
   },
   {
     "id": "powdered_crystal_orb",
@@ -1629,7 +2064,10 @@
         "amount": 2,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "silk_strung_longbow",
@@ -1645,7 +2083,10 @@
         "amount": 4,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 5,
+    "scalingAttribute": "Agility",
+    "scalingAmount": 0.1
   },
   {
     "id": "flintlock_crossbow",
@@ -1667,7 +2108,10 @@
         "amount": 2,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 5,
+    "scalingAttribute": "Agility",
+    "scalingAmount": 0.1
   },
   {
     "id": "jagged_obsidian_knuckles",
@@ -1689,6 +2133,9 @@
         "amount": 50,
         "modifierType": "Flat"
       }
-    ]
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "FightingSpirit",
+    "scalingAmount": 0
   }
 ]

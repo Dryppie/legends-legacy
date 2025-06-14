@@ -1,4 +1,5 @@
-﻿using Domain.Models.Attributes.Modifiers;
+﻿using Domain.Models.Attributes;
+using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 
@@ -12,4 +13,7 @@ public class ItemBaseDto
     public Rarity Rarity { get; set; }
     public EquipmentType EquipmentType { get; set; }
     public List<ItemAttributeModifier> AttributeModifiers { get; set; } = [];
+    public int Magnitude { get; set; } = 0;
+    public AttributeType ScalingAttribute { get; set; } = AttributeType.Luck;
+    public float ScalingAmount { get; set; } = 0.0f;
 }
