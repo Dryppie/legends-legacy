@@ -157,7 +157,7 @@ export class RecipesComponent implements OnInit {
       this.materials.push(
         this.fb.group({
           item: [m.item, Validators.required],
-          itemId: [m.itemId],
+          itemId: [m.itemId, Validators.required],
           quantity: [m.quantity, [Validators.required, Validators.min(1)]],
         }),
       ),
@@ -190,6 +190,11 @@ export class RecipesComponent implements OnInit {
       name: this.recipeForm.get('item')!.value.name,
       itemType: this.recipeForm.get('itemType')!.value,
     };
+    raw.materials = raw.materials.map((m: any) => ({
+      item: m.item,
+      itemId: m.item.id,
+      quantity: m.quantity,
+    }));
 
     if (this.isCreating) {
       raw.id = crypto.randomUUID();

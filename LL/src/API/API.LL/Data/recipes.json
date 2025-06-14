@@ -72,15 +72,15 @@
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "sticky_sap",
+        "quantity": 1,
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": "Material",
-          "rarity": "Common"
+          "rarity": "Rare"
         }
       }
     ],
@@ -115,7 +115,7 @@
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 14,
+        "quantity": 28,
         "itemId": "stone",
         "item": {
           "id": "stone",
@@ -128,7 +128,7 @@
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 7,
+        "quantity": 14,
         "itemId": "flint",
         "item": {
           "id": "flint",
@@ -141,7 +141,7 @@
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 5,
+        "quantity": 7,
         "itemId": "jagged_obsidian",
         "item": {
           "id": "jagged_obsidian",
@@ -155,14 +155,14 @@
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 2,
-        "itemId": "sticky_sap",
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": "Material",
-          "rarity": "Common"
+          "rarity": "Rare"
         }
       }
     ],
@@ -197,7 +197,7 @@
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 10,
+        "quantity": 20,
         "itemId": "stone",
         "item": {
           "id": "stone",
@@ -210,7 +210,7 @@
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 5,
+        "quantity": 10,
         "itemId": "flint",
         "item": {
           "id": "flint",
@@ -237,14 +237,14 @@
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 1,
-        "itemId": "sticky_sap",
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": "Material",
-          "rarity": "Common"
+          "rarity": "Rare"
         }
       }
     ],
@@ -284,7 +284,20 @@
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 6,
+        "quantity": 13,
+        "itemId": "stone",
+        "item": {
+          "id": "stone",
+          "name": "Stone",
+          "description": "",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 18,
         "itemId": "willow_log",
         "item": {
           "id": "willow_log",
@@ -297,11 +310,11 @@
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "feather_lined_nest",
+        "quantity": 5,
+        "itemId": "tiny_geode",
         "item": {
-          "id": "feather_lined_nest",
-          "name": "Feather-lined Nest",
+          "id": "tiny_geode",
+          "name": "Tiny Geode",
           "description": "",
           "stackable": true,
           "itemType": "Material",
@@ -310,28 +323,15 @@
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "flint",
-        "item": {
-          "id": "flint",
-          "name": "Flint",
-          "description": "",
-          "stackable": true,
-          "itemType": "Material",
-          "rarity": "Common"
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 1,
-        "itemId": "sticky_sap",
+        "itemId": "shimmering_leaf",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "shimmering_leaf",
+          "name": "Shimmering Leaf",
           "description": "",
           "stackable": true,
           "itemType": "Material",
-          "rarity": "Common"
+          "rarity": "Rare"
         }
       }
     ],
@@ -366,7 +366,20 @@
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 12,
+        "quantity": 21,
+        "itemId": "stone",
+        "item": {
+          "id": "stone",
+          "name": "Stone",
+          "description": "",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 26,
         "itemId": "willow_log",
         "item": {
           "id": "willow_log",
@@ -379,11 +392,11 @@
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
-        "itemId": "feather_lined_nest",
+        "quantity": 7,
+        "itemId": "tiny_geode",
         "item": {
-          "id": "feather_lined_nest",
-          "name": "Feather-lined Nest",
+          "id": "tiny_geode",
+          "name": "Tiny Geode",
           "description": "",
           "stackable": true,
           "itemType": "Material",
@@ -392,28 +405,15 @@
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
-        "itemId": "flint",
-        "item": {
-          "id": "flint",
-          "name": "Flint",
-          "description": "",
-          "stackable": true,
-          "itemType": "Material",
-          "rarity": "Common"
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 2,
-        "itemId": "sticky_sap",
+        "itemId": "shimmering_leaf",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "shimmering_leaf",
+          "name": "Shimmering Leaf",
           "description": "",
           "stackable": true,
           "itemType": "Material",
-          "rarity": "Common"
+          "rarity": "Rare"
         }
       }
     ],
@@ -448,7 +448,20 @@
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 8,
+        "quantity": 16,
+        "itemId": "stone",
+        "item": {
+          "id": "stone",
+          "name": "Stone",
+          "description": "",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 12,
         "itemId": "willow_log",
         "item": {
           "id": "willow_log",
@@ -461,11 +474,11 @@
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
-        "itemId": "feather_lined_nest",
+        "quantity": 4,
+        "itemId": "tiny_geode",
         "item": {
-          "id": "feather_lined_nest",
-          "name": "Feather-lined Nest",
+          "id": "tiny_geode",
+          "name": "Tiny Geode",
           "description": "",
           "stackable": true,
           "itemType": "Material",
@@ -474,28 +487,15 @@
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "flint",
-        "item": {
-          "id": "flint",
-          "name": "Flint",
-          "description": "",
-          "stackable": true,
-          "itemType": "Material",
-          "rarity": "Common"
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 1,
-        "itemId": "sticky_sap",
+        "itemId": "shimmering_leaf",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "shimmering_leaf",
+          "name": "Shimmering Leaf",
           "description": "",
           "stackable": true,
           "itemType": "Material",
-          "rarity": "Common"
+          "rarity": "Rare"
         }
       }
     ],
@@ -535,7 +535,33 @@
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 5,
+        "quantity": 12,
+        "itemId": "flint",
+        "item": {
+          "id": "flint",
+          "name": "Flint",
+          "description": "",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 16,
+        "itemId": "sticky_sap",
+        "item": {
+          "id": "sticky_sap",
+          "name": "Sticky Sap",
+          "description": "",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 4,
         "itemId": "silk_vine",
         "item": {
           "id": "silk_vine",
@@ -548,7 +574,7 @@
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
+        "quantity": 1,
         "itemId": "shimmering_leaf",
         "item": {
           "id": "shimmering_leaf",
@@ -557,32 +583,6 @@
           "stackable": true,
           "itemType": "Material",
           "rarity": "Rare"
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "tiny_geode",
-        "item": {
-          "id": "tiny_geode",
-          "name": "Tiny Geode",
-          "description": "",
-          "stackable": true,
-          "itemType": "Material",
-          "rarity": "Uncommon"
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "sticky_sap",
-        "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
-          "description": "",
-          "stackable": true,
-          "itemType": "Material",
-          "rarity": "Common"
         }
       }
     ],
@@ -617,7 +617,33 @@
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 10,
+        "quantity": 14,
+        "itemId": "flint",
+        "item": {
+          "id": "flint",
+          "name": "Flint",
+          "description": "",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 30,
+        "itemId": "sticky_sap",
+        "item": {
+          "id": "sticky_sap",
+          "name": "Sticky Sap",
+          "description": "",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 8,
         "itemId": "silk_vine",
         "item": {
           "id": "silk_vine",
@@ -630,7 +656,7 @@
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
+        "quantity": 2,
         "itemId": "shimmering_leaf",
         "item": {
           "id": "shimmering_leaf",
@@ -639,32 +665,6 @@
           "stackable": true,
           "itemType": "Material",
           "rarity": "Rare"
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "tiny_geode",
-        "item": {
-          "id": "tiny_geode",
-          "name": "Tiny Geode",
-          "description": "",
-          "stackable": true,
-          "itemType": "Material",
-          "rarity": "Uncommon"
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "sticky_sap",
-        "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
-          "description": "",
-          "stackable": true,
-          "itemType": "Material",
-          "rarity": "Common"
         }
       }
     ],
@@ -699,7 +699,33 @@
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 7,
+        "quantity": 14,
+        "itemId": "flint",
+        "item": {
+          "id": "flint",
+          "name": "Flint",
+          "description": "",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 22,
+        "itemId": "sticky_sap",
+        "item": {
+          "id": "sticky_sap",
+          "name": "Sticky Sap",
+          "description": "",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 5,
         "itemId": "silk_vine",
         "item": {
           "id": "silk_vine",
@@ -712,7 +738,7 @@
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
+        "quantity": 1,
         "itemId": "shimmering_leaf",
         "item": {
           "id": "shimmering_leaf",
@@ -721,32 +747,6 @@
           "stackable": true,
           "itemType": "Material",
           "rarity": "Rare"
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "tiny_geode",
-        "item": {
-          "id": "tiny_geode",
-          "name": "Tiny Geode",
-          "description": "",
-          "stackable": true,
-          "itemType": "Material",
-          "rarity": "Uncommon"
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "sticky_sap",
-        "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
-          "description": "",
-          "stackable": true,
-          "itemType": "Material",
-          "rarity": "Common"
         }
       }
     ],
@@ -786,24 +786,37 @@
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
-        "itemId": "crystalline_powder",
+        "quantity": 16,
+        "itemId": "willow_log",
         "item": {
-          "id": "crystalline_powder",
-          "name": "Crystalline Powder",
+          "id": "willow_log",
+          "name": "Willow Log",
           "description": "",
           "stackable": true,
           "itemType": "Material",
-          "rarity": "Rare"
+          "rarity": "Common"
         }
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
-        "itemId": "silk_vine",
+        "quantity": 16,
+        "itemId": "sticky_sap",
         "item": {
-          "id": "silk_vine",
-          "name": "Silk Vine",
+          "id": "sticky_sap",
+          "name": "Sticky Sap",
+          "description": "",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 5,
+        "itemId": "feather_lined_nest",
+        "item": {
+          "id": "feather_lined_nest",
+          "name": "Feather-lined Nest",
           "description": "",
           "stackable": true,
           "itemType": "Material",
@@ -813,27 +826,14 @@
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 1,
-        "itemId": "shimmering_leaf",
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "shimmering_leaf",
-          "name": "Shimmering Leaf",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": "Material",
           "rarity": "Rare"
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "sticky_sap",
-        "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
-          "description": "",
-          "stackable": true,
-          "itemType": "Material",
-          "rarity": "Common"
         }
       }
     ],
@@ -868,24 +868,37 @@
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 9,
-        "itemId": "crystalline_powder",
+        "quantity": 25,
+        "itemId": "willow_log",
         "item": {
-          "id": "crystalline_powder",
-          "name": "Crystalline Powder",
+          "id": "willow_log",
+          "name": "Willow Log",
           "description": "",
           "stackable": true,
           "itemType": "Material",
-          "rarity": "Rare"
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 18,
+        "itemId": "sticky_sap",
+        "item": {
+          "id": "sticky_sap",
+          "name": "Sticky Sap",
+          "description": "",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
         }
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 6,
-        "itemId": "silk_vine",
+        "itemId": "feather_lined_nest",
         "item": {
-          "id": "silk_vine",
-          "name": "Silk Vine",
+          "id": "feather_lined_nest",
+          "name": "Feather-lined Nest",
           "description": "",
           "stackable": true,
           "itemType": "Material",
@@ -895,27 +908,14 @@
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 2,
-        "itemId": "shimmering_leaf",
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "shimmering_leaf",
-          "name": "Shimmering Leaf",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": "Material",
           "rarity": "Rare"
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "sticky_sap",
-        "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
-          "description": "",
-          "stackable": true,
-          "itemType": "Material",
-          "rarity": "Common"
         }
       }
     ],
@@ -950,24 +950,37 @@
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 6,
-        "itemId": "crystalline_powder",
+        "quantity": 22,
+        "itemId": "willow_log",
         "item": {
-          "id": "crystalline_powder",
-          "name": "Crystalline Powder",
+          "id": "willow_log",
+          "name": "Willow Log",
           "description": "",
           "stackable": true,
           "itemType": "Material",
-          "rarity": "Rare"
+          "rarity": "Common"
         }
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
-        "itemId": "silk_vine",
+        "quantity": 16,
+        "itemId": "sticky_sap",
         "item": {
-          "id": "silk_vine",
-          "name": "Silk Vine",
+          "id": "sticky_sap",
+          "name": "Sticky Sap",
+          "description": "",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 6,
+        "itemId": "feather_lined_nest",
+        "item": {
+          "id": "feather_lined_nest",
+          "name": "Feather-lined Nest",
           "description": "",
           "stackable": true,
           "itemType": "Material",
@@ -977,27 +990,14 @@
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 1,
-        "itemId": "shimmering_leaf",
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "shimmering_leaf",
-          "name": "Shimmering Leaf",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": "Material",
           "rarity": "Rare"
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "sticky_sap",
-        "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
-          "description": "",
-          "stackable": true,
-          "itemType": "Material",
-          "rarity": "Common"
         }
       }
     ],
