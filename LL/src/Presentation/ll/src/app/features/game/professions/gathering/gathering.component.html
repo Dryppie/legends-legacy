@@ -11,18 +11,21 @@
     [experience]="characterProfession.experience"
     [experienceUntilNextLevel]="characterProfession.experienceUntilNextLevel"
   ></app-profession-header>
-  <div
-    class="grid h-full w-full gap-4 overflow-y-auto pr-2 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
-  >
+  <div class="flex h-full w-full flex-col overflow-y-auto">
     <ng-container *ngIf="characterProfession() as characterProfession">
       <ng-container *ngIf="gatheringNodes() as gatheringNodes">
-        <div *ngFor="let gatheringNode of gatheringNodes" class="">
-          <app-profession-card
-            [gatheringNode]="gatheringNode"
-            [characterProfession]="characterProfession"
-            [iconPath]="profession.iconPath"
-            [professionType]="profession.professionType"
-          ></app-profession-card>
+        <div class="flex w-full flex-wrap gap-4 pr-2">
+          <div
+            *ngFor="let gatheringNode of gatheringNodes"
+            class="w-full sm:w-fit"
+          >
+            <app-profession-card
+              [gatheringNode]="gatheringNode"
+              [characterProfession]="characterProfession"
+              [iconPath]="profession.iconPath"
+              [professionType]="profession.professionType"
+            ></app-profession-card>
+          </div>
         </div>
       </ng-container>
     </ng-container>

@@ -8,6 +8,8 @@ import {
 import { CharacterActionsService } from '../../../../core/services/api/character-actions/character-actions.service';
 import { CommonModule, NgIf } from '@angular/common';
 import { Subscription } from 'rxjs';
+import { CharacterService } from '../../../../core/services/api/character/character.service';
+import { CharacterDto } from '../../../models/Dtos/characterDto';
 
 @Component({
   selector: 'app-combat-area-card',
@@ -26,9 +28,14 @@ export class CombatAreaCardComponent {
   @Input() area!: Area;
   @Input() isLastInRow: boolean = false;
   currentAction: CharacterActionDto | null = null;
+  currentCharacter: CharacterDto | null = null;
+  isLocked = true;
   private subscription: Subscription = new Subscription();
 
-  constructor(private characterActionService: CharacterActionsService) {}
+  constructor(
+    private characterActionService: CharacterActionsService,
+    private readonly characterService: CharacterService,
+  ) {}
 
   ngOnInit(): void {
     this.subscription.add(
@@ -36,6 +43,12 @@ export class CombatAreaCardComponent {
         this.currentAction = action;
       }),
     );
+    this.subscription.add(
+      this.characterService.getCurrentCharacter().subscribe((character) => {
+        this.currentCharacter = character;
+      }),
+    );
+    this.setIsLocked();
   }
 
   ngOnDestroy(): void {
@@ -51,5 +64,9 @@ export class CombatAreaCardComponent {
     this.characterActionService.startCombatAction(startCharacterActionRequest);
   }
 
-  cancelCharacterAction() {}
+  setIsLocked() {
+    this.isLocked =
+      !this.currentCharacter ||
+      this.currentCharacter.level < this.area.levelRequirement;
+  }
 }

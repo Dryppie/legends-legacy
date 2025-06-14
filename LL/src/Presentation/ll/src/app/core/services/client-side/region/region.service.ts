@@ -28,6 +28,7 @@ export class RegionService {
         {
           id: 'region_01_area_01',
           name: 'Lumo Ruins',
+          levelRequirement: 1,
           creatures: ['Goblin', 'Goblin Archer', 'Goblin Warrior', 'Large Rat'],
           description:
             'The Lumo Ruins are crumbling remnants of a forgotten kingdom, overrun by goblins and vermin. Whispers of ancient magic still echo through the cracked stone corridors.',
@@ -35,6 +36,7 @@ export class RegionService {
         {
           id: 'region_01_area_02',
           name: 'Blood Grove',
+          levelRequirement: 5,
           creatures: ['Flame Imp', 'Frost Imp', 'Shadow Imp', 'Vampire Bat'],
           description:
             'The Blood Grove is a cursed forest where the trees bleed sap as red as blood. Twisted imps dance between the roots, feeding off the energy of the living.',
@@ -42,6 +44,7 @@ export class RegionService {
         {
           id: 'region_01_area_03',
           name: 'Crystal Creek',
+          levelRequirement: 10,
           creatures: [
             'Blue Slime',
             'Brown Slime',
@@ -56,6 +59,7 @@ export class RegionService {
         {
           id: 'region_01_area_04',
           name: 'Twilight Clearing',
+          levelRequirement: 15,
           creatures: [
             'Enchanted Fairy',
             'Glade Panther',
@@ -69,6 +73,7 @@ export class RegionService {
         {
           id: 'region_01_area_05',
           name: 'Goblin Mines',
+          levelRequirement: 20,
           creatures: ['Hobgoblin'],
           description:
             'Deep beneath the hills, the Goblin Mines echo with the clang of stolen tools. Hobgoblins rule here, digging for ancient relics they barely understand.',

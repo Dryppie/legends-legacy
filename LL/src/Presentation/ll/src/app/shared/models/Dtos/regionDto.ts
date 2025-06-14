@@ -8,6 +8,7 @@ export interface Region {
 export interface Area {
   id: string;
   name: string;
+  levelRequirement: number;
   creatures: string[];
   description: string;
   // creatures: Creature[];

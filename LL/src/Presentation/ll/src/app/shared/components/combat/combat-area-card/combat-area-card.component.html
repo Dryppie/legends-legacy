@@ -1,5 +1,8 @@
 <div
   class="relative flex h-64 w-full overflow-visible rounded-md bg-cover sm:size-64"
+  [class.opacity-50]="isLocked"
+  [class.pointer-events-none]="isLocked"
+  [class.grayscale]="isLocked"
   style="
     background-image: url(&quot;cards/combatArea.png&quot;);
     box-shadow: 0 6px 6px -3px rgba(0, 0, 0, 0.4);
@@ -40,15 +43,10 @@
         <div class="flex items-center justify-between">
           <h3>{{ area.name }}</h3>
         </div>
-        <small class="text-secondary">Req. LV: 1</small>
-        <div class="mt-2 flex items-center">
-          <!-- <img
-            src="core/currencies/Diamonds.svg"
-            alt="Log Icon"
-            class="mr-[6px] h-4 w-4"
-          />
-          <small class="text-primary">+ 1 oak log</small> -->
-        </div>
+        <small class="text-secondary"
+          >Req. LV: {{ area.levelRequirement }}</small
+        >
+        <div class="mt-2"></div>
       </div>
       <div class="-mb-2">
         <app-mini-button

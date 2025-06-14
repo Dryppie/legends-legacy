@@ -8,54 +8,6 @@ import { ModifierType } from '../shared/models/Dtos/attributesDto';
 
 export const RECIPES_CONTENT = [
   {
-    "id": "35ab5f73-3295-4e0f-a1af-6b453399999e",
-    "name": "Test Helmet",
-    "itemId": "test_helmet",
-    "item": {
-      "id": "test_helmet",
-      "name": "Test Helmet",
-      "description": "A helmet for testing.",
-      "stackable": false,
-      "itemType": ItemType.Equipment,
-      "rarity": Rarity.Common,
-      "equipmentType": EquipmentType.Head,
-      "attributeModifiers": [
-        {
-          "attributeType": AttributeType.Willpower,
-          "amount": 1,
-          "modifierType": ModifierType.Flat
-        },
-        {
-          "attributeType": AttributeType.Endurance,
-          "amount": 1,
-          "modifierType": ModifierType.Flat
-        }
-      ],
-      "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
-    },
-    "quantity": 1,
-    "craftType": CraftType.ArmorForging,
-    "levelRequirement": 1,
-    "materials": [
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "stone",
-        "item": {
-          "id": "stone",
-          "name": "Stone",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Common
-        }
-      }
-    ],
-    "itemType": ItemType.Equipment
-  },
-  {
     "id": "35ab5f73-3295-4e0f-a1af-6b453319157e",
     "name": "Jagged Obsidian Helm",
     "itemId": "jagged_obsidian_helm",
@@ -80,8 +32,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -89,7 +41,7 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 8,
+        "quantity": 16,
         "itemId": "stone",
         "item": {
           "id": "stone",
@@ -102,7 +54,7 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
+        "quantity": 11,
         "itemId": "flint",
         "item": {
           "id": "flint",
@@ -115,7 +67,7 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
+        "quantity": 5,
         "itemId": "jagged_obsidian",
         "item": {
           "id": "jagged_obsidian",
@@ -129,14 +81,14 @@ export const RECIPES_CONTENT = [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 1,
-        "itemId": "sticky_sap",
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -162,8 +114,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -171,7 +123,7 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 14,
+        "quantity": 28,
         "itemId": "stone",
         "item": {
           "id": "stone",
@@ -184,7 +136,7 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 7,
+        "quantity": 14,
         "itemId": "flint",
         "item": {
           "id": "flint",
@@ -197,7 +149,7 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 5,
+        "quantity": 7,
         "itemId": "jagged_obsidian",
         "item": {
           "id": "jagged_obsidian",
@@ -211,14 +163,14 @@ export const RECIPES_CONTENT = [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 2,
-        "itemId": "sticky_sap",
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -244,8 +196,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -253,7 +205,7 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 10,
+        "quantity": 20,
         "itemId": "stone",
         "item": {
           "id": "stone",
@@ -266,7 +218,7 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 5,
+        "quantity": 10,
         "itemId": "flint",
         "item": {
           "id": "flint",
@@ -293,14 +245,14 @@ export const RECIPES_CONTENT = [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 1,
-        "itemId": "sticky_sap",
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -331,8 +283,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -340,7 +292,20 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 6,
+        "quantity": 13,
+        "itemId": "stone",
+        "item": {
+          "id": "stone",
+          "name": "Stone",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 18,
         "itemId": "willow_log",
         "item": {
           "id": "willow_log",
@@ -353,11 +318,11 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "feather_lined_nest",
+        "quantity": 5,
+        "itemId": "tiny_geode",
         "item": {
-          "id": "feather_lined_nest",
-          "name": "Feather-lined Nest",
+          "id": "tiny_geode",
+          "name": "Tiny Geode",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
@@ -366,28 +331,15 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "flint",
-        "item": {
-          "id": "flint",
-          "name": "Flint",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Common
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 1,
-        "itemId": "sticky_sap",
+        "itemId": "shimmering_leaf",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "shimmering_leaf",
+          "name": "Shimmering Leaf",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -413,8 +365,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -422,7 +374,20 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 12,
+        "quantity": 21,
+        "itemId": "stone",
+        "item": {
+          "id": "stone",
+          "name": "Stone",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 26,
         "itemId": "willow_log",
         "item": {
           "id": "willow_log",
@@ -435,11 +400,11 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
-        "itemId": "feather_lined_nest",
+        "quantity": 7,
+        "itemId": "tiny_geode",
         "item": {
-          "id": "feather_lined_nest",
-          "name": "Feather-lined Nest",
+          "id": "tiny_geode",
+          "name": "Tiny Geode",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
@@ -448,28 +413,15 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
-        "itemId": "flint",
-        "item": {
-          "id": "flint",
-          "name": "Flint",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Common
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 2,
-        "itemId": "sticky_sap",
+        "itemId": "shimmering_leaf",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "shimmering_leaf",
+          "name": "Shimmering Leaf",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -495,8 +447,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -504,7 +456,20 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 8,
+        "quantity": 16,
+        "itemId": "stone",
+        "item": {
+          "id": "stone",
+          "name": "Stone",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 12,
         "itemId": "willow_log",
         "item": {
           "id": "willow_log",
@@ -517,11 +482,11 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
-        "itemId": "feather_lined_nest",
+        "quantity": 4,
+        "itemId": "tiny_geode",
         "item": {
-          "id": "feather_lined_nest",
-          "name": "Feather-lined Nest",
+          "id": "tiny_geode",
+          "name": "Tiny Geode",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
@@ -530,28 +495,15 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "flint",
-        "item": {
-          "id": "flint",
-          "name": "Flint",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Common
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 1,
-        "itemId": "sticky_sap",
+        "itemId": "shimmering_leaf",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "shimmering_leaf",
+          "name": "Shimmering Leaf",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -582,8 +534,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -591,7 +543,33 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 5,
+        "quantity": 12,
+        "itemId": "flint",
+        "item": {
+          "id": "flint",
+          "name": "Flint",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 16,
+        "itemId": "sticky_sap",
+        "item": {
+          "id": "sticky_sap",
+          "name": "Sticky Sap",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 4,
         "itemId": "silk_vine",
         "item": {
           "id": "silk_vine",
@@ -604,7 +582,7 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
+        "quantity": 1,
         "itemId": "shimmering_leaf",
         "item": {
           "id": "shimmering_leaf",
@@ -613,32 +591,6 @@ export const RECIPES_CONTENT = [
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "tiny_geode",
-        "item": {
-          "id": "tiny_geode",
-          "name": "Tiny Geode",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Uncommon
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "sticky_sap",
-        "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Common
         }
       }
     ],
@@ -664,8 +616,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -673,7 +625,33 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 10,
+        "quantity": 14,
+        "itemId": "flint",
+        "item": {
+          "id": "flint",
+          "name": "Flint",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 30,
+        "itemId": "sticky_sap",
+        "item": {
+          "id": "sticky_sap",
+          "name": "Sticky Sap",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 8,
         "itemId": "silk_vine",
         "item": {
           "id": "silk_vine",
@@ -686,7 +664,7 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
+        "quantity": 2,
         "itemId": "shimmering_leaf",
         "item": {
           "id": "shimmering_leaf",
@@ -695,32 +673,6 @@ export const RECIPES_CONTENT = [
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "tiny_geode",
-        "item": {
-          "id": "tiny_geode",
-          "name": "Tiny Geode",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Uncommon
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "sticky_sap",
-        "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Common
         }
       }
     ],
@@ -746,8 +698,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -755,7 +707,33 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 7,
+        "quantity": 14,
+        "itemId": "flint",
+        "item": {
+          "id": "flint",
+          "name": "Flint",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 22,
+        "itemId": "sticky_sap",
+        "item": {
+          "id": "sticky_sap",
+          "name": "Sticky Sap",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 5,
         "itemId": "silk_vine",
         "item": {
           "id": "silk_vine",
@@ -768,7 +746,7 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
+        "quantity": 1,
         "itemId": "shimmering_leaf",
         "item": {
           "id": "shimmering_leaf",
@@ -777,32 +755,6 @@ export const RECIPES_CONTENT = [
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "tiny_geode",
-        "item": {
-          "id": "tiny_geode",
-          "name": "Tiny Geode",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Uncommon
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "sticky_sap",
-        "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Common
         }
       }
     ],
@@ -833,8 +785,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -842,24 +794,37 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
-        "itemId": "crystalline_powder",
+        "quantity": 16,
+        "itemId": "willow_log",
         "item": {
-          "id": "crystalline_powder",
-          "name": "Crystalline Powder",
+          "id": "willow_log",
+          "name": "Willow Log",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Common
         }
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
-        "itemId": "silk_vine",
+        "quantity": 16,
+        "itemId": "sticky_sap",
         "item": {
-          "id": "silk_vine",
-          "name": "Silk Vine",
+          "id": "sticky_sap",
+          "name": "Sticky Sap",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 5,
+        "itemId": "feather_lined_nest",
+        "item": {
+          "id": "feather_lined_nest",
+          "name": "Feather-lined Nest",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
@@ -869,27 +834,14 @@ export const RECIPES_CONTENT = [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 1,
-        "itemId": "shimmering_leaf",
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "shimmering_leaf",
-          "name": "Shimmering Leaf",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "sticky_sap",
-        "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Common
         }
       }
     ],
@@ -915,8 +867,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -924,24 +876,37 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 9,
-        "itemId": "crystalline_powder",
+        "quantity": 25,
+        "itemId": "willow_log",
         "item": {
-          "id": "crystalline_powder",
-          "name": "Crystalline Powder",
+          "id": "willow_log",
+          "name": "Willow Log",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 18,
+        "itemId": "sticky_sap",
+        "item": {
+          "id": "sticky_sap",
+          "name": "Sticky Sap",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
         }
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 6,
-        "itemId": "silk_vine",
+        "itemId": "feather_lined_nest",
         "item": {
-          "id": "silk_vine",
-          "name": "Silk Vine",
+          "id": "feather_lined_nest",
+          "name": "Feather-lined Nest",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
@@ -951,27 +916,14 @@ export const RECIPES_CONTENT = [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 2,
-        "itemId": "shimmering_leaf",
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "shimmering_leaf",
-          "name": "Shimmering Leaf",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "sticky_sap",
-        "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Common
         }
       }
     ],
@@ -997,8 +949,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.ArmorForging,
@@ -1006,24 +958,37 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 6,
-        "itemId": "crystalline_powder",
+        "quantity": 22,
+        "itemId": "willow_log",
         "item": {
-          "id": "crystalline_powder",
-          "name": "Crystalline Powder",
+          "id": "willow_log",
+          "name": "Willow Log",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Common
         }
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
-        "itemId": "silk_vine",
+        "quantity": 16,
+        "itemId": "sticky_sap",
         "item": {
-          "id": "silk_vine",
-          "name": "Silk Vine",
+          "id": "sticky_sap",
+          "name": "Sticky Sap",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 6,
+        "itemId": "feather_lined_nest",
+        "item": {
+          "id": "feather_lined_nest",
+          "name": "Feather-lined Nest",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
@@ -1033,27 +998,14 @@ export const RECIPES_CONTENT = [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 1,
-        "itemId": "shimmering_leaf",
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "shimmering_leaf",
-          "name": "Shimmering Leaf",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "sticky_sap",
-        "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Common
         }
       }
     ],
@@ -1079,8 +1031,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.JewelryCrafting,
@@ -1088,20 +1040,20 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
-        "itemId": "tiny_geode",
+        "quantity": 30,
+        "itemId": "willow_log",
         "item": {
-          "id": "tiny_geode",
-          "name": "Tiny Geode",
+          "id": "willow_log",
+          "name": "Willow Log",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Uncommon
+          "rarity": Rarity.Common
         }
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
+        "quantity": 4,
         "itemId": "silk_vine",
         "item": {
           "id": "silk_vine",
@@ -1115,14 +1067,14 @@ export const RECIPES_CONTENT = [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 1,
-        "itemId": "sticky_sap",
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -1148,8 +1100,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.JewelryCrafting,
@@ -1157,20 +1109,7 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
-        "itemId": "shimmering_leaf",
-        "item": {
-          "id": "shimmering_leaf",
-          "name": "Shimmering Leaf",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
+        "quantity": 30,
         "itemId": "willow_log",
         "item": {
           "id": "willow_log",
@@ -1183,15 +1122,28 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "sticky_sap",
+        "quantity": 4,
+        "itemId": "silk_vine",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "silk_vine",
+          "name": "Silk Vine",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "crystalline_powder",
+        "item": {
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -1217,8 +1169,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.JewelryCrafting,
@@ -1226,24 +1178,11 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
-        "itemId": "jagged_obsidian",
+        "quantity": 30,
+        "itemId": "willow_log",
         "item": {
-          "id": "jagged_obsidian",
-          "name": "Jagged Obsidian",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Uncommon
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "flint",
-        "item": {
-          "id": "flint",
-          "name": "Flint",
+          "id": "willow_log",
+          "name": "Willow Log",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
@@ -1252,15 +1191,28 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "feather_lined_nest",
+        "quantity": 4,
+        "itemId": "silk_vine",
         "item": {
-          "id": "feather_lined_nest",
-          "name": "Feather-lined Nest",
+          "id": "silk_vine",
+          "name": "Silk Vine",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "crystalline_powder",
+        "item": {
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -1286,8 +1238,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.JewelryCrafting,
@@ -1295,11 +1247,11 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 5,
-        "itemId": "flint",
+        "quantity": 30,
+        "itemId": "stone",
         "item": {
-          "id": "flint",
-          "name": "Flint",
+          "id": "stone",
+          "name": "Stone",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
@@ -1308,11 +1260,24 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "crystalline_powder",
+        "quantity": 4,
+        "itemId": "jagged_obsidian",
         "item": {
-          "id": "crystalline_powder",
-          "name": "Crystalline Powder",
+          "id": "jagged_obsidian",
+          "name": "Jagged Obsidian",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "shimmering_leaf",
+        "item": {
+          "id": "shimmering_leaf",
+          "name": "Shimmering Leaf",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
@@ -1342,8 +1307,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.JewelryCrafting,
@@ -1351,11 +1316,24 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
-        "itemId": "feather_lined_nest",
+        "quantity": 30,
+        "itemId": "stone",
         "item": {
-          "id": "feather_lined_nest",
-          "name": "Feather-lined Nest",
+          "id": "stone",
+          "name": "Stone",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 4,
+        "itemId": "jagged_obsidian",
+        "item": {
+          "id": "jagged_obsidian",
+          "name": "Jagged Obsidian",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
@@ -1364,15 +1342,15 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "silk_vine",
+        "quantity": 1,
+        "itemId": "shimmering_leaf",
         "item": {
-          "id": "silk_vine",
-          "name": "Silk Vine",
+          "id": "shimmering_leaf",
+          "name": "Shimmering Leaf",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Uncommon
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -1398,8 +1376,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.JewelryCrafting,
@@ -1407,7 +1385,7 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 6,
+        "quantity": 30,
         "itemId": "stone",
         "item": {
           "id": "stone",
@@ -1420,7 +1398,7 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
+        "quantity": 4,
         "itemId": "jagged_obsidian",
         "item": {
           "id": "jagged_obsidian",
@@ -1429,6 +1407,19 @@ export const RECIPES_CONTENT = [
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "shimmering_leaf",
+        "item": {
+          "id": "shimmering_leaf",
+          "name": "Shimmering Leaf",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -1454,8 +1445,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.JewelryCrafting,
@@ -1463,7 +1454,7 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
+        "quantity": 1,
         "itemId": "crystalline_powder",
         "item": {
           "id": "crystalline_powder",
@@ -1476,28 +1467,15 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "tiny_geode",
-        "item": {
-          "id": "tiny_geode",
-          "name": "Tiny Geode",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Uncommon
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 1,
-        "itemId": "willow_log",
+        "itemId": "shimmering_leaf",
         "item": {
-          "id": "willow_log",
-          "name": "Willow Log",
+          "id": "shimmering_leaf",
+          "name": "Shimmering Leaf",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -1523,8 +1501,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.JewelryCrafting,
@@ -1532,33 +1510,20 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
-        "itemId": "willow_log",
+        "quantity": 1,
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "willow_log",
-          "name": "Willow Log",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Rare
         }
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
-        "itemId": "sticky_sap",
-        "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Common
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
+        "quantity": 1,
         "itemId": "shimmering_leaf",
         "item": {
           "id": "shimmering_leaf",
@@ -1592,8 +1557,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.JewelryCrafting,
@@ -1601,41 +1566,28 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
-        "itemId": "jagged_obsidian",
+        "quantity": 1,
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "jagged_obsidian",
-          "name": "Jagged Obsidian",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Uncommon
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "stone",
-        "item": {
-          "id": "stone",
-          "name": "Stone",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Rare
         }
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 1,
-        "itemId": "feather_lined_nest",
+        "itemId": "shimmering_leaf",
         "item": {
-          "id": "feather_lined_nest",
-          "name": "Feather-lined Nest",
+          "id": "shimmering_leaf",
+          "name": "Shimmering Leaf",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Uncommon
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -1665,8 +1617,8 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "magnitude": 5,
+      "scalingAttribute": AttributeType.FightingSpirit,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -1675,7 +1627,7 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 6,
+        "quantity": 26,
         "itemId": "stone",
         "item": {
           "id": "stone",
@@ -1688,24 +1640,11 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
-        "itemId": "flint",
+        "quantity": 6,
+        "itemId": "silk_vine",
         "item": {
-          "id": "flint",
-          "name": "Flint",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Common
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "jagged_obsidian",
-        "item": {
-          "id": "jagged_obsidian",
-          "name": "Jagged Obsidian",
+          "id": "silk_vine",
+          "name": "Silk Vine",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
@@ -1715,14 +1654,27 @@ export const RECIPES_CONTENT = [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 1,
-        "itemId": "sticky_sap",
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Rare
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 2,
+        "itemId": "shimmering_leaf",
+        "item": {
+          "id": "shimmering_leaf",
+          "name": "Shimmering Leaf",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -1747,7 +1699,7 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 0,
+      "magnitude": 5,
       "scalingAttribute": AttributeType.Strength,
       "scalingAmount": 0.1
     },
@@ -1757,11 +1709,11 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 5,
-        "itemId": "stone",
+        "quantity": 29,
+        "itemId": "willow_log",
         "item": {
-          "id": "stone",
-          "name": "Stone",
+          "id": "willow_log",
+          "name": "Willow Log",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
@@ -1770,7 +1722,7 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
+        "quantity": 7,
         "itemId": "jagged_obsidian",
         "item": {
           "id": "jagged_obsidian",
@@ -1784,27 +1736,27 @@ export const RECIPES_CONTENT = [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 2,
-        "itemId": "willow_log",
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "willow_log",
-          "name": "Willow Log",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Rare
         }
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 1,
-        "itemId": "feather_lined_nest",
+        "itemId": "shimmering_leaf",
         "item": {
-          "id": "feather_lined_nest",
-          "name": "Feather-lined Nest",
+          "id": "shimmering_leaf",
+          "name": "Shimmering Leaf",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Uncommon
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -1829,8 +1781,8 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "magnitude": 5,
+      "scalingAttribute": AttributeType.Endurance,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -1839,7 +1791,7 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 7,
+        "quantity": 25,
         "itemId": "flint",
         "item": {
           "id": "flint",
@@ -1852,11 +1804,11 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
-        "itemId": "stone",
+        "quantity": 21,
+        "itemId": "sticky_sap",
         "item": {
-          "id": "stone",
-          "name": "Stone",
+          "id": "sticky_sap",
+          "name": "Sticky Sap",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
@@ -1865,7 +1817,7 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
+        "quantity": 6,
         "itemId": "tiny_geode",
         "item": {
           "id": "tiny_geode",
@@ -1878,15 +1830,15 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "sticky_sap",
+        "quantity": 3,
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -1911,8 +1863,8 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "magnitude": 5,
+      "scalingAttribute": AttributeType.Dexterity,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -1921,20 +1873,7 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
-        "itemId": "silk_vine",
-        "item": {
-          "id": "silk_vine",
-          "name": "Silk Vine",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Uncommon
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
+        "quantity": 24,
         "itemId": "flint",
         "item": {
           "id": "flint",
@@ -1947,15 +1886,28 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "tiny_geode",
+        "quantity": 7,
+        "itemId": "silk_vine",
         "item": {
-          "id": "tiny_geode",
-          "name": "Tiny Geode",
+          "id": "silk_vine",
+          "name": "Silk Vine",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 2,
+        "itemId": "crystalline_powder",
+        "item": {
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -1998,8 +1950,8 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "magnitude": 5,
+      "scalingAttribute": AttributeType.FightingSpirit,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -2008,7 +1960,7 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 10,
+        "quantity": 63,
         "itemId": "willow_log",
         "item": {
           "id": "willow_log",
@@ -2022,23 +1974,10 @@ export const RECIPES_CONTENT = [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 6,
-        "itemId": "flint",
+        "itemId": "feather_lined_nest",
         "item": {
-          "id": "flint",
-          "name": "Flint",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Common
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
-        "itemId": "jagged_obsidian",
-        "item": {
-          "id": "jagged_obsidian",
-          "name": "Jagged Obsidian",
+          "id": "feather_lined_nest",
+          "name": "Feather-lined Nest",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
@@ -2047,15 +1986,28 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "sticky_sap",
+        "quantity": 4,
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Rare
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 2,
+        "itemId": "shimmering_leaf",
+        "item": {
+          "id": "shimmering_leaf",
+          "name": "Shimmering Leaf",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -2080,7 +2032,7 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 0,
+      "magnitude": 5,
       "scalingAttribute": AttributeType.Strength,
       "scalingAmount": 0.1
     },
@@ -2090,7 +2042,7 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 12,
+        "quantity": 75,
         "itemId": "stone",
         "item": {
           "id": "stone",
@@ -2117,27 +2069,27 @@ export const RECIPES_CONTENT = [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 3,
-        "itemId": "flint",
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "flint",
-          "name": "Flint",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Rare
         }
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "feather_lined_nest",
+        "quantity": 3,
+        "itemId": "shimmering_leaf",
         "item": {
-          "id": "feather_lined_nest",
-          "name": "Feather-lined Nest",
+          "id": "shimmering_leaf",
+          "name": "Shimmering Leaf",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Uncommon
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -2167,8 +2119,8 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "magnitude": 5,
+      "scalingAttribute": AttributeType.Endurance,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -2177,7 +2129,7 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 9,
+        "quantity": 59,
         "itemId": "stone",
         "item": {
           "id": "stone",
@@ -2190,7 +2142,20 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 5,
+        "quantity": 7,
+        "itemId": "tiny_geode",
+        "item": {
+          "id": "tiny_geode",
+          "name": "Tiny Geode",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 3,
         "itemId": "crystalline_powder",
         "item": {
           "id": "crystalline_powder",
@@ -2203,28 +2168,15 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
-        "itemId": "flint",
+        "quantity": 3,
+        "itemId": "shimmering_leaf",
         "item": {
-          "id": "flint",
-          "name": "Flint",
+          "id": "shimmering_leaf",
+          "name": "Shimmering Leaf",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "sticky_sap",
-        "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -2254,8 +2206,8 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "magnitude": 5,
+      "scalingAttribute": AttributeType.Dexterity,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -2290,28 +2242,28 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
-        "itemId": "flint",
+        "quantity": 1,
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "flint",
-          "name": "Flint",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Rare
         }
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "tiny_geode",
+        "quantity": 5,
+        "itemId": "shimmering_leaf",
         "item": {
-          "id": "tiny_geode",
-          "name": "Tiny Geode",
+          "id": "shimmering_leaf",
+          "name": "Shimmering Leaf",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Uncommon
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -2342,8 +2294,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2351,7 +2303,7 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 6,
+        "quantity": 21,
         "itemId": "stone",
         "item": {
           "id": "stone",
@@ -2364,11 +2316,11 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
-        "itemId": "flint",
+        "quantity": 18,
+        "itemId": "willow_log",
         "item": {
-          "id": "flint",
-          "name": "Flint",
+          "id": "willow_log",
+          "name": "Willow Log",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
@@ -2377,20 +2329,20 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "sticky_sap",
+        "quantity": 5,
+        "itemId": "feather_lined_nest",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "feather_lined_nest",
+          "name": "Feather-lined Nest",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Uncommon
         }
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
+        "quantity": 3,
         "itemId": "jagged_obsidian",
         "item": {
           "id": "jagged_obsidian",
@@ -2429,8 +2381,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2438,7 +2390,33 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 8,
+        "quantity": 15,
+        "itemId": "flint",
+        "item": {
+          "id": "flint",
+          "name": "Flint",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 23,
+        "itemId": "sticky_sap",
+        "item": {
+          "id": "sticky_sap",
+          "name": "Sticky Sap",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 6,
         "itemId": "silk_vine",
         "item": {
           "id": "silk_vine",
@@ -2451,20 +2429,7 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "tiny_geode",
-        "item": {
-          "id": "tiny_geode",
-          "name": "Tiny Geode",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Uncommon
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
+        "quantity": 3,
         "itemId": "shimmering_leaf",
         "item": {
           "id": "shimmering_leaf",
@@ -2497,8 +2462,8 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "magnitude": 5,
+      "scalingAttribute": AttributeType.Intelligence,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -2507,7 +2472,7 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 7,
+        "quantity": 71,
         "itemId": "willow_log",
         "item": {
           "id": "willow_log",
@@ -2520,15 +2485,15 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
-        "itemId": "shimmering_leaf",
+        "quantity": 8,
+        "itemId": "tiny_geode",
         "item": {
-          "id": "shimmering_leaf",
-          "name": "Shimmering Leaf",
+          "id": "tiny_geode",
+          "name": "Tiny Geode",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -2546,15 +2511,15 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "sticky_sap",
+        "quantity": 4,
+        "itemId": "shimmering_leaf",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "shimmering_leaf",
+          "name": "Shimmering Leaf",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -2580,8 +2545,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2589,11 +2554,24 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 5,
-        "itemId": "tiny_geode",
+        "quantity": 18,
+        "itemId": "sticky_sap",
         "item": {
-          "id": "tiny_geode",
-          "name": "Tiny Geode",
+          "id": "sticky_sap",
+          "name": "Sticky Sap",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 3,
+        "itemId": "feather_lined_nest",
+        "item": {
+          "id": "feather_lined_nest",
+          "name": "Feather-lined Nest",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
@@ -2602,7 +2580,7 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
+        "quantity": 3,
         "itemId": "silk_vine",
         "item": {
           "id": "silk_vine",
@@ -2615,7 +2593,7 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
+        "quantity": 3,
         "itemId": "shimmering_leaf",
         "item": {
           "id": "shimmering_leaf",
@@ -2624,19 +2602,6 @@ export const RECIPES_CONTENT = [
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "sticky_sap",
-        "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Common
         }
       }
     ],
@@ -2661,8 +2626,8 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "magnitude": 5,
+      "scalingAttribute": AttributeType.Wisdom,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -2671,7 +2636,33 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
+        "quantity": 18,
+        "itemId": "stone",
+        "item": {
+          "id": "stone",
+          "name": "Stone",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 19,
+        "itemId": "willow_log",
+        "item": {
+          "id": "willow_log",
+          "name": "Willow Log",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 5,
         "itemId": "jagged_obsidian",
         "item": {
           "id": "jagged_obsidian",
@@ -2685,40 +2676,14 @@ export const RECIPES_CONTENT = [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 3,
-        "itemId": "crystalline_powder",
+        "itemId": "shimmering_leaf",
         "item": {
-          "id": "crystalline_powder",
-          "name": "Crystalline Powder",
+          "id": "shimmering_leaf",
+          "name": "Shimmering Leaf",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
-        "itemId": "willow_log",
-        "item": {
-          "id": "willow_log",
-          "name": "Willow Log",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Common
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "sticky_sap",
-        "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Common
         }
       }
     ],
@@ -2744,8 +2709,8 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2753,20 +2718,20 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 6,
-        "itemId": "crystalline_powder",
+        "quantity": 24,
+        "itemId": "stone",
         "item": {
-          "id": "crystalline_powder",
-          "name": "Crystalline Powder",
+          "id": "stone",
+          "name": "Stone",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Common
         }
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
+        "quantity": 4,
         "itemId": "tiny_geode",
         "item": {
           "id": "tiny_geode",
@@ -2780,14 +2745,27 @@ export const RECIPES_CONTENT = [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 2,
-        "itemId": "silk_vine",
+        "itemId": "feather_lined_nest",
         "item": {
-          "id": "silk_vine",
-          "name": "Silk Vine",
+          "id": "feather_lined_nest",
+          "name": "Feather-lined Nest",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 3,
+        "itemId": "crystalline_powder",
+        "item": {
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -2812,8 +2790,8 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "magnitude": 5,
+      "scalingAttribute": AttributeType.Agility,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -2822,7 +2800,7 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 9,
+        "quantity": 69,
         "itemId": "willow_log",
         "item": {
           "id": "willow_log",
@@ -2835,20 +2813,7 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
-        "itemId": "silk_vine",
-        "item": {
-          "id": "silk_vine",
-          "name": "Silk Vine",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Uncommon
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
+        "quantity": 3,
         "itemId": "feather_lined_nest",
         "item": {
           "id": "feather_lined_nest",
@@ -2861,15 +2826,28 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "sticky_sap",
+        "quantity": 6,
+        "itemId": "silk_vine",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "silk_vine",
+          "name": "Silk Vine",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 6,
+        "itemId": "shimmering_leaf",
+        "item": {
+          "id": "shimmering_leaf",
+          "name": "Shimmering Leaf",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -2899,8 +2877,8 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "magnitude": 5,
+      "scalingAttribute": AttributeType.Agility,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -2909,20 +2887,7 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 10,
-        "itemId": "stone",
-        "item": {
-          "id": "stone",
-          "name": "Stone",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Common
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 5,
+        "quantity": 65,
         "itemId": "flint",
         "item": {
           "id": "flint",
@@ -2935,28 +2900,41 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
-        "itemId": "willow_log",
+        "quantity": 4,
+        "itemId": "jagged_obsidian",
         "item": {
-          "id": "willow_log",
-          "name": "Willow Log",
+          "id": "jagged_obsidian",
+          "name": "Jagged Obsidian",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 4,
+        "itemId": "crystalline_powder",
+        "item": {
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
         }
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
         "quantity": 2,
-        "itemId": "sticky_sap",
+        "itemId": "shimmering_leaf",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "shimmering_leaf",
+          "name": "Shimmering Leaf",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -2986,8 +2964,8 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "magnitude": 5,
+      "scalingAttribute": AttributeType.FightingSpirit,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -2996,20 +2974,7 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 6,
-        "itemId": "jagged_obsidian",
-        "item": {
-          "id": "jagged_obsidian",
-          "name": "Jagged Obsidian",
-          "description": "",
-          "stackable": true,
-          "itemType": ItemType.Material,
-          "rarity": Rarity.Uncommon
-        }
-      },
-      {
-        "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
+        "quantity": 58,
         "itemId": "flint",
         "item": {
           "id": "flint",
@@ -3022,7 +2987,20 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 2,
+        "quantity": 9,
+        "itemId": "jagged_obsidian",
+        "item": {
+          "id": "jagged_obsidian",
+          "name": "Jagged Obsidian",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 3,
         "itemId": "silk_vine",
         "item": {
           "id": "silk_vine",
@@ -3035,15 +3013,15 @@ export const RECIPES_CONTENT = [
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
-        "itemId": "sticky_sap",
+        "quantity": 6,
+        "itemId": "crystalline_powder",
         "item": {
-          "id": "sticky_sap",
-          "name": "Sticky Sap",
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Common
+          "rarity": Rarity.Rare
         }
       }
     ],
