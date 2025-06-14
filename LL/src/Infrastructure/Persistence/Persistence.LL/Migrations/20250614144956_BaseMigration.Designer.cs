@@ -13,7 +13,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250614085657_BaseMigration")]
+    [Migration("20250614144956_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -621,6 +621,9 @@ namespace Persistence.LL.Migrations
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text");
+
+                    b.Property<int>("LevelRequirement")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()

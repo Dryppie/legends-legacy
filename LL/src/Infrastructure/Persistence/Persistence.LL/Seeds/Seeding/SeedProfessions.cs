@@ -37,43 +37,41 @@ public static class SeedProfessions
          * ────────────────────────────────*/
         var miningCommon = MakeItemTable(
             [
-                new LootTableItem { Id = Guid.NewGuid(), ItemId = STONE_ID, Weight = 20 }
+                new LootTableItem { Id = Guid.NewGuid(), ItemId = STONE_ID, Weight = 20 },
+                new LootTableItem { Id = Guid.NewGuid(), ItemId = FLINT_ID, Weight = 20 }
             ],
-            tableWeight: 80); // 16 %
+            tableWeight: 60); // 16 %
 
         var miningUncommon = MakeItemTable(
             [
-                new LootTableItem { Id = Guid.NewGuid(), ItemId = FLINT_ID, Weight = 30 }
+                new LootTableItem { Id = Guid.NewGuid(), ItemId = TINY_GEODE_ID, Weight = 20 },
+                new LootTableItem { Id = Guid.NewGuid(), ItemId = JAGGED_OBSIDIAN_ID, Weight = 20 }
             ],
             tableWeight: 30); // 9 %
 
         var miningRare = MakeItemTable(
             [
-                new LootTableItem { Id = Guid.NewGuid(), ItemId = TINY_GEODE_ID, Weight = 1 }
+                new LootTableItem { Id = Guid.NewGuid(), ItemId = CRYSTALLINE_POWDER_ID, Weight = 10 }
             ],
             tableWeight: 15); // 0.15 %
 
-        var miningEpic = MakeItemTable(
-            [
-                new LootTableItem { Id = Guid.NewGuid(), ItemId = JAGGED_OBSIDIAN_ID, Weight = 30 }
-            ],
-            tableWeight: 3); // 0.9 %
+        //var miningEpic = MakeItemTable(
+        //    [
+        //    ],
+        //    tableWeight: 3); // 0.9 %
 
-        var miningLegendary = MakeItemTable(
-            [
-                new LootTableItem { Id = Guid.NewGuid(), ItemId = CRYSTALLINE_POWDER_ID, Weight = 1 }
-            ],
-            tableWeight: 1); // 0.03 %
+        //var miningLegendary = MakeItemTable(
+        //    [
+        //    ],
+        //    tableWeight: 1); // 0.03 %
 
-        var miningRoot = BuildLootTable(
-            miningCommon, miningUncommon, miningRare, miningEpic, miningLegendary);
+        var miningRoot = BuildLootTable(miningCommon, miningUncommon, miningRare/*, miningEpic, miningLegendary*/);
 
         /* ────────────────────────────────
          *  Persist
          * ────────────────────────────────*/
-        await context.LootTables.AddRangeAsync(
-            miningRoot, miningCommon, miningUncommon,
-            miningRare, miningEpic, miningLegendary);
+        await context.LootTables.AddRangeAsync(miningRoot, miningCommon, miningUncommon,
+                                               miningRare/*, miningEpic, miningLegendary*/);
 
         var miningNode = new GatheringNode
         {
@@ -103,42 +101,41 @@ public static class SeedProfessions
          * ────────────────────────────────*/
         var willowCommon = MakeItemTable(
             [
-            new LootTableItem { Id = Guid.NewGuid(), ItemId = WILLOW_LOG_ID, Weight = 20 }
+                new LootTableItem { Id = Guid.NewGuid(), ItemId = WILLOW_LOG_ID, Weight = 20 },
+                new LootTableItem { Id = Guid.NewGuid(), ItemId = STICKY_SAP_ID, Weight = 20 }
             ],
-            tableWeight: 80); // 16 %
+            tableWeight: 60); // 16 %
 
         var willowUncommon = MakeItemTable(
             [
-                new LootTableItem { Id = Guid.NewGuid(), ItemId = STICKY_SAP_ID, Weight = 30 }
+                new LootTableItem { Id = Guid.NewGuid(), ItemId = FEATHER_NEST_ID, Weight = 20 },
+                new LootTableItem { Id = Guid.NewGuid(), ItemId = SILK_VINE_ID, Weight = 20 }
             ],
             tableWeight: 30); // 9 %
 
         var willowRare = MakeItemTable(
             [
-                new LootTableItem { Id = Guid.NewGuid(), ItemId = FEATHER_NEST_ID, Weight = 1 }
+                new LootTableItem { Id = Guid.NewGuid(), ItemId = SHIMMER_LEAF_ID, Weight = 10 }
             ],
             tableWeight: 15); // 0.15 %
 
-        var willowEpic = MakeItemTable(
-            [
-                new LootTableItem { Id = Guid.NewGuid(), ItemId = SILK_VINE_ID, Weight = 30 }
-            ],
-            tableWeight: 3); // 0.9 %
+        //var willowEpic = MakeItemTable(
+        //    [
+        //    ],
+        //    tableWeight: 3); // 0.9 %
 
-        var willowLegendary = MakeItemTable(
-            [
-                new LootTableItem { Id = Guid.NewGuid(), ItemId = SHIMMER_LEAF_ID, Weight = 1 }
-            ],
-            tableWeight: 1); // 0.03 %
+        //var willowLegendary = MakeItemTable(
+        //    [
+        //    ],
+        //    tableWeight: 1); // 0.03 %
 
-        var willowRoot = BuildLootTable(
-            willowCommon, willowUncommon, willowRare, willowEpic, willowLegendary);
+        var willowRoot = BuildLootTable(willowCommon, willowUncommon, willowRare/*, willowEpic, willowLegendary*/);
 
         /* ────────────────────────────────
          *  Persist
          * ────────────────────────────────*/
         await context.LootTables.AddRangeAsync(willowRoot, willowCommon, willowUncommon,
-                                               willowRare, willowEpic, willowLegendary);
+                                               willowRare/*, willowEpic, willowLegendary*/);
 
         var willowGatheringNode = new GatheringNode
         {
@@ -169,17 +166,17 @@ public static class SeedProfessions
         [
             new LootTableItem { Id = Guid.NewGuid(), ItemId = COPPER_ORE_ID,     Weight = 20 },
             new LootTableItem { Id = Guid.NewGuid(), ItemId = VEINSTONE_CHIP_ID, Weight = 20 }
-        ], 80);
+        ], 60);
 
         var copperUncommon = MakeItemTable(
         [
-            new LootTableItem { Id = Guid.NewGuid(), ItemId = MALACHITE_SHARD_ID, Weight = 30 },
-            new LootTableItem { Id = Guid.NewGuid(), ItemId = VERDANT_ORE_ID,     Weight = 30 }
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = MALACHITE_SHARD_ID, Weight = 20 },
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = VERDANT_ORE_ID,     Weight = 20 }
         ], 30);
 
         var copperRare = MakeItemTable(
         [
-            new LootTableItem { Id = Guid.NewGuid(), ItemId = LIVING_AMBER_ID, Weight = 1 }
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = LIVING_AMBER_ID, Weight = 10 }
         ], 15);
 
         var copperRoot = BuildLootTable(copperCommon, copperUncommon, copperRare);
@@ -211,26 +208,22 @@ public static class SeedProfessions
         [
             new LootTableItem { Id = Guid.NewGuid(), ItemId = MAPLE_LOG_ID,  Weight = 20 },
             new LootTableItem { Id = Guid.NewGuid(), ItemId = AMBER_SYRUP_ID, Weight = 20 }
-        ], 80);
+        ], 60);
 
         var mapleUncommon = MakeItemTable(
         [
-            new LootTableItem { Id = Guid.NewGuid(), ItemId = SWEET_BARK_CHIPS_ID, Weight = 30 }
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = SWEET_BARK_CHIPS_ID, Weight = 20 },
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = HONEYCOMB_ID, Weight = 20 }
         ], 30);
 
         var mapleRare = MakeItemTable(
         [
-            new LootTableItem { Id = Guid.NewGuid(), ItemId = HONEYCOMB_ID, Weight = 1 }
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = GLOWING_AMBER_ID, Weight = 10 }
         ], 15);
 
-        var mapleEpic = MakeItemTable(
-        [
-            new LootTableItem { Id = Guid.NewGuid(), ItemId = GLOWING_AMBER_ID, Weight = 30 }
-        ], 3);
+        var mapleRoot = BuildLootTable(mapleCommon, mapleUncommon, mapleRare);
 
-        var mapleRoot = BuildLootTable(mapleCommon, mapleUncommon, mapleRare, mapleEpic);
-
-        await context.LootTables.AddRangeAsync(mapleRoot, mapleCommon, mapleUncommon, mapleRare, mapleEpic);
+        await context.LootTables.AddRangeAsync(mapleRoot, mapleCommon, mapleUncommon, mapleRare);
 
         await context.GatheringNodes.AddAsync(new GatheringNode
         {
@@ -255,19 +248,19 @@ public static class SeedProfessions
 
         var tinCommon = MakeItemTable(
         [
-            new LootTableItem { Id = Guid.NewGuid(), ItemId = TIN_ORE_ID, Weight = 20 }
-        ], 80);
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = TIN_ORE_ID, Weight = 20 },
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = RIVER_PEARL_ID, Weight = 20 }
+        ], 60);
 
         var tinUncommon = MakeItemTable(
         [
-            new LootTableItem { Id = Guid.NewGuid(), ItemId = RIVER_PEARL_ID, Weight = 30 },
-            new LootTableItem { Id = Guid.NewGuid(), ItemId = DULL_QUARTZ_ID, Weight = 30 }
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = DULL_QUARTZ_ID, Weight = 20 },
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = GALVANIC_DUST_ID, Weight = 20 }
         ], 30);
 
         var tinRare = MakeItemTable(
         [
-            new LootTableItem { Id = Guid.NewGuid(), ItemId = GALVANIC_DUST_ID,       Weight = 1 },
-            new LootTableItem { Id = Guid.NewGuid(), ItemId = FROSTED_METAL_SHARD_ID, Weight = 1 }
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = FROSTED_METAL_SHARD_ID, Weight = 10 }
         ], 15);
 
         var tinRoot = BuildLootTable(tinCommon, tinUncommon, tinRare);
@@ -295,28 +288,24 @@ public static class SeedProfessions
 
         var ashCommon = MakeItemTable(
         [
-            new LootTableItem { Id = Guid.NewGuid(), ItemId = ASH_LOG_ID,        Weight = 20 },
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = ASH_LOG_ID, Weight = 20 },
             new LootTableItem { Id = Guid.NewGuid(), ItemId = CHARCOAL_CHUNK_ID, Weight = 20 }
-        ], 80);
+        ], 60);
 
         var ashUncommon = MakeItemTable(
         [
-            new LootTableItem { Id = Guid.NewGuid(), ItemId = FIRE_BEETLE_CARAPACE_ID, Weight = 30 }
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = FIRE_BEETLE_CARAPACE_ID, Weight = 20 },
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = SCORCHED_RESIN_ID, Weight = 20 }
         ], 30);
 
         var ashRare = MakeItemTable(
         [
-            new LootTableItem { Id = Guid.NewGuid(), ItemId = SCORCHED_RESIN_ID, Weight = 1 }
+            new LootTableItem { Id = Guid.NewGuid(), ItemId = INFERNO_BARK_ID, Weight = 10 }
         ], 15);
 
-        var ashEpic = MakeItemTable(
-        [
-            new LootTableItem { Id = Guid.NewGuid(), ItemId = INFERNO_BARK_ID, Weight = 30 }
-        ], 3);
+        var ashRoot = BuildLootTable(ashCommon, ashUncommon, ashRare);
 
-        var ashRoot = BuildLootTable(ashCommon, ashUncommon, ashRare, ashEpic);
-
-        await context.LootTables.AddRangeAsync(ashRoot, ashCommon, ashUncommon, ashRare, ashEpic);
+        await context.LootTables.AddRangeAsync(ashRoot, ashCommon, ashUncommon, ashRare);
 
         await context.GatheringNodes.AddAsync(new GatheringNode
         {

@@ -178,10 +178,10 @@
     </div>
   </div>
   <!-- TEMPERING LIST -->
-  <ng-container *ngIf="inventory().length; else noItemsToTemper">
-    <div
-      class="flex max-h-full min-h-24 w-full flex-col space-y-2 overflow-y-auto md:order-1"
-    >
+  <div
+    class="flex max-h-full min-h-24 w-full flex-col space-y-2 overflow-y-auto md:order-1"
+  >
+    <ng-container *ngIf="inventory().length; else noItemsToTemper">
       <h2 class="flex text-primary">Items to temper</h2>
       <ng-container *ngIf="inventory() as inventory">
         <div
@@ -206,11 +206,11 @@
           </div>
         </div>
       </ng-container>
-    </div>
-  </ng-container>
-  <ng-template #noItemsToTemper>
-    <p class="mt-4 text-center italic text-neutral-400">
-      You have no available items to temper.
-    </p>
-  </ng-template>
+    </ng-container>
+    <ng-template #noItemsToTemper>
+      <p class="mt-4 text-center italic text-neutral-400">
+        You have no available items to temper.
+      </p>
+    </ng-template>
+  </div>
 </div>

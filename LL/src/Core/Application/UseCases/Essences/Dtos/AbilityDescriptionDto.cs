@@ -10,8 +10,7 @@ public class AbilityDescriptionDto : IMapFrom<AbilityDefinition>
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int Cooldown { get; set; }
-    public int Cost { get; set; }
-    public ResourceType CostType { get; set; }
+    public ResourceCost? Cost { get; set; }
 
     public void Mapping(Profile profile)
     {

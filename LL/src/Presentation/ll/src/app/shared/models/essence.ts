@@ -20,8 +20,12 @@ export interface Ability {
   damageTags?: DamageTag[];
   targeting: Targeting[];
   cooldown: number;
-  cost: number;
-  costType: ResourceType;
+  cost: ResourceCost;
+}
+
+export interface ResourceCost {
+  type: ResourceType;
+  amount: number;
 }
 
 export enum AttackType {

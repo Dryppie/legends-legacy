@@ -164,7 +164,7 @@ public class CombatContext : ICombatContext
         // Put ability on cooldown even if actor is out of mana/health
         ability.SetCooldown();
 
-        var costType = def.Cost!.Equals(ResourceType.Mana)
+        var costType = def.Cost!.Type.Equals(ResourceType.Mana)
             ? AttributeType.Mana
             : AttributeType.Health;
 
@@ -223,14 +223,14 @@ public class CombatContext : ICombatContext
         actor.CombatAttributes[costType] -= def.Cost.Amount;
         def.Usage.ConsumeUse();
 
-        //var simpleCombatEntity = new SimpleCombatEntity()
-        //{
-        //    Id = actor.Id,
-        //    MaxHealth = actor.GetAttributeValue(AttributeType.MaxHealth),
-        //    Health = actor.GetAttributeValue(AttributeType.Health),
-        //    MaxMana = actor.GetAttributeValue(AttributeType.MaxMana),
-        //    Mana = actor.GetAttributeValue(AttributeType.Mana)
-        //};
+        var simpleCombatEntity = new SimpleCombatEntity()
+        {
+            Id = actor.Id,
+            MaxHealth = actor.GetAttributeValue(AttributeType.MaxHealth),
+            Health = actor.GetAttributeValue(AttributeType.Health),
+            MaxMana = actor.GetAttributeValue(AttributeType.MaxMana),
+            Mana = actor.GetAttributeValue(AttributeType.Mana)
+        };
 
         // Actor has cast Ability log
         //_eventLog.Add(new CombatLogItem()
@@ -252,7 +252,8 @@ public class CombatContext : ICombatContext
             ActorId = actor.Id,
             Timestamp = CurrentTime,
             EventType = EventType.AbilityUse,
-            Details = $"{actor.Name} used {def.Name}"
+            Details = $"{actor.Name} used {def.Name}",
+            CombatEntity = simpleCombatEntity
         });
 
         // Publish the ability use event (TriggerEngine will handle all effects)
@@ -298,7 +299,7 @@ public class CombatContext : ICombatContext
     private void EndTick(CombatEntity entity)
     {
         entity.IncrementStep();
-        //TickRecoveryRate(entity);
+        TickRecoveryRate(entity);
     }
 
     private void TickRecoveryRate(CombatEntity entity)

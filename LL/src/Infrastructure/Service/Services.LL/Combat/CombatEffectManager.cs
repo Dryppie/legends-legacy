@@ -99,7 +99,7 @@ public class CombatEffectManager : ICombatEffectManager
             if (!effect.IsActive())
             {
                 RemoveEffect(effect);
-                _combatContext.LogEffectExecution(new EffectContext(effect.Source, effect.Target, effect.Definition.AttackType, [], $"{effect.Definition.Log} expired {effect.Target.Name}"));
+                //_combatContext.LogEffectExecution(new EffectContext(effect.Source, effect.Target, effect.Definition.AttackType, [], $"{effect.Definition.Log} expired {effect.Target.Name}"));
                 _combatContext.EventBus.Publish(new CombatEvent
                 {
                     Type = TriggerEvent.OnEffectExpired,

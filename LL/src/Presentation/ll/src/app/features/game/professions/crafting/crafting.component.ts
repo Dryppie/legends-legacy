@@ -52,11 +52,14 @@ export class CraftingComponent implements OnInit {
 
   // Stub until you wire real actions/queue in the service
   allowedTypesByCraft: Record<CraftType, EquipmentType[]> = {
-    [CraftType.JewelryCrafting]: [EquipmentType.Ring, EquipmentType.Necklace],
+    [CraftType.JewelryCrafting]: [
+      EquipmentType.Ring,
+      EquipmentType.Necklace,
+      EquipmentType.Legs,
+    ],
     [CraftType.ArmorForging]: [
       EquipmentType.Head,
       EquipmentType.Chest,
-      EquipmentType.Legs,
       EquipmentType.Relic,
     ],
     [CraftType.WeaponSmithing]: [

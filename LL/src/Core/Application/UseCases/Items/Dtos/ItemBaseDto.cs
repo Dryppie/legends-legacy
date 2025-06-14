@@ -22,8 +22,7 @@ public class ItemBaseDto : IMapFrom<ItemBase>
     {
         profile.CreateMap<ItemBase, ItemBaseDto>()
             .Include<EssenceItemBase, EssenceItemBaseDto>()
-            .Include<EquipmentBase, EquipmentBaseDto>()
-            /*.ForMember(dest => dest.Essence, opt => opt.MapFrom<EssenceResolver>())*/;
+            .Include<EquipmentBase, EquipmentBaseDto>();
     }
 
     //public class EssenceResolver : IValueResolver<ItemBase, ItemBaseDto, EssenceDetailsDto?>

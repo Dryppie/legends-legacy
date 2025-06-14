@@ -6,12 +6,15 @@
     <h3 class="h-16 min-h-16 content-center p-4 text-primary">
       Battle overview
     </h3>
-    <img
-      src="icons/settings/filters.svg"
-      alt="Logo"
-      class="h-10 w-10 object-contain pr-4 hover:cursor-pointer"
-      (click)="openFilters()"
-    />
+    <div class="flex items-center gap-2 text-primary">
+      Filter
+      <img
+        src="icons/settings/filters.svg"
+        alt="Logo"
+        class="h-10 w-10 object-contain pr-4 hover:cursor-pointer"
+        (click)="openFilters()"
+      />
+    </div>
   </div>
   <div class="chat-gradient mb-4 h-[1px]"></div>
   <div class="overflow-y-auto" appStickyScroll>

@@ -16,12 +16,13 @@ public class ColosseumService : IColosseumService
     private readonly IColosseumRepository _colosseumRepository;
     private readonly ICombatContext _combatContext;
 
-    public ColosseumService(IEntityService entityService, ICharacterService characterService, ICombatSetupService combatSetupService, IColosseumRepository colosseumRepository)
+    public ColosseumService(IEntityService es, ICharacterService cs, ICombatSetupService css, IColosseumRepository cr, ICombatContext cc)
     {
-        _entityService = entityService;
-        _characterService = characterService;
-        _combatSetupService = combatSetupService;
-        _colosseumRepository = colosseumRepository;
+        _entityService = es;
+        _characterService = cs;
+        _combatSetupService = css;
+        _colosseumRepository = cr;
+        _combatContext = cc;
     }
 
     public async Task<CombatResult?> StartArenaBattle(Guid characterId, Guid enemyId, CancellationToken cancellationToken)

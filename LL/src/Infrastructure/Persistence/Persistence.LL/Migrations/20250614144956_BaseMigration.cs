@@ -103,6 +103,7 @@ namespace Persistence.LL.Migrations
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
+                    LevelRequirement = table.Column<int>(type: "integer", nullable: false),
                     SpawnProbabilities = table.Column<List<float>>(type: "real[]", nullable: false),
                     RegionId = table.Column<int>(type: "integer", nullable: true)
                 },

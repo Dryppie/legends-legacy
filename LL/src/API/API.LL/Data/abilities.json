@@ -7,7 +7,8 @@
       "Description": "Stab the target in the back, dealing {damage1} damage, and apply 8 bleed damage over 8 seconds.",
       "Type": "Active",
       "Cooldown": 90,
-      "Cost": { "Mana": "12" },
+      "Cost": { "Type": "Mana", "Amount": 12
+      },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",
@@ -96,7 +97,7 @@
       "Description": "Swing your weapon in a wide arc, dealing {damage1} damage to two enemies.",
       "Type": "Active",
       "Cooldown": 120,
-      "Cost": { "Mana": "9" },
+      "Cost": { "Type": "Mana", "Amount": 9 },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",
@@ -193,7 +194,7 @@
       "Description": "Unleash a powerful shot dealing {damage1} damage. 50% increased critical chance.",
       "Type": "Active",
       "Cooldown": 150,
-      "Cost": { "Mana": "12" },
+      "Cost": { "Type": "Mana", "Amount": 12 },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",
@@ -276,7 +277,7 @@
       "Description": "Apply a crushing force to the target, dealing {damage1} damage.",
       "Type": "Active",
       "Cooldown": 150,
-      "Cost": { "Mana": "10" },
+      "Cost": { "Type": "Mana", "Amount": 10 },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",
@@ -353,7 +354,7 @@
       "Description": "Throw a flaming sphere, dealing {damage1} damage.",
       "Type": "Active",
       "Cooldown": 110,
-      "Cost": { "Mana": "7" },
+      "Cost": { "Type": "Mana", "Amount": 7 },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",
@@ -432,7 +433,7 @@
       "Description": "If the target has 5 stacks of Cold, apply Freeze for 4 seconds. Then remove 5 stacks of Cold.",
       "Type": "Active",
       "Cooldown": 150,
-      "Cost": { "Mana": "4" },
+      "Cost": { "Type": "Mana", "Amount": 4 },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",
@@ -511,7 +512,7 @@
       "Description": "Summon a shadow illusion of yourself with 1 health.",
       "Type": "Active",
       "Cooldown": 150,
-      "Cost": { "Mana": "5" },
+      "Cost": { "Type": "Mana", "Amount": 5 },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",
@@ -589,7 +590,7 @@
       "Description": "Deal {damage1} damage to the target, with 30% lifesteal.",
       "Type": "Active",
       "Cooldown": 200,
-      "Cost": { "Mana": "6" },
+      "Cost": { "Type": "Mana", "Amount": 6 },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",
@@ -666,7 +667,7 @@
       "Description": "Restores {heal1} Health to all allies every 2 seconds for 8 seconds.",
       "Type": "Active",
       "Cooldown": 240,
-      "Cost": { "Mana": "8" },
+      "Cost": { "Type": "Mana", "Amount": 8 },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",
@@ -748,7 +749,7 @@
       "Description": "Decrease all damage taken by 2 for 6.5 seconds.",
       "Type": "Active",
       "Cooldown": 140,
-      "Cost": { "Mana": "6" },
+      "Cost": { "Type": "Mana", "Amount": 6 },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",
@@ -826,7 +827,7 @@
       "Description": "Apply poison to all enemies, dealing 12 damage over 9 seconds.",
       "Type": "Active",
       "Cooldown": 170,
-      "Cost": { "Mana": "7" },
+      "Cost": { "Type": "Mana", "Amount": 7 },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",
@@ -896,7 +897,7 @@
       "Description": "30% chance to apply a buff to everyone on your team, increasing Strength and Intelligence by 20 for 10 seconds.",
       "Type": "Active",
       "Cooldown": 150,
-      "Cost": { "Mana": "8" },
+      "Cost": { "Type": "Mana", "Amount": 8 },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",
@@ -983,7 +984,7 @@
       "Description": "Ignite and apply a fire aura to yourself. Deal 3 burn damage to everyone but you every second. Lasts 10 seconds.",
       "Type": "Active",
       "Cooldown": 180,
-      "Cost": { "Mana": "8" },
+      "Cost": { "Type": "Mana", "Amount": 8 },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",
@@ -1055,7 +1056,7 @@
       "Description": "Trap a single enemy inside your body, stunning them for 3 seconds and dealing 9 damage over time.",
       "Type": "Active",
       "Cooldown": 250,
-      "Cost": { "Mana": "8" },
+      "Cost": { "Type": "Mana", "Amount": 8 },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",
@@ -1133,7 +1134,7 @@
       "Description": "Create a protective barrier around two allies, blocking up to 20 damage.",
       "Type": "Active",
       "Cooldown": 220,
-      "Cost": { "Mana": "14" },
+      "Cost": { "Type": "Mana", "Amount": 14 },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",
@@ -1208,7 +1209,7 @@
       "Description": "Strike at the target, with 20% increased Crit Chance. Deal {damage1} damage.",
       "Type": "Active",
       "Cooldown": 200,
-      "Cost": { "Mana": "10" },
+      "Cost": { "Type": "Mana", "Amount": 10 },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",
@@ -1291,7 +1292,7 @@
       "Description": "Create an illusion that has a chance to distract all enemies, reducing their accuracy by 10% for 5 seconds.",
       "Type": "Active",
       "Cooldown": 160,
-      "Cost": { "Mana": "20" },
+      "Cost": { "Type": "Mana", "Amount": 20 },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",
@@ -1366,7 +1367,7 @@
       "Description": "Release a burst of spores that reduce the natural regeneration of all enemies by 40% for 8 seconds.",
       "Type": "Active",
       "Cooldown": 140,
-      "Cost": { "Mana": "12" },
+      "Cost": { "Type": "Mana", "Amount": 12 },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",
@@ -1444,7 +1445,7 @@
       "Description": "Deal {damage1} damage to all enemies.",
       "Type": "Active",
       "Cooldown": 80,
-      "Cost": { "Mana": "9" },
+      "Cost": { "Type": "Mana", "Amount": 9 },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",
@@ -1524,7 +1525,7 @@
       "Description": "Increase Attack Speed by 24% and Critical Hit Chance by 25% for 10 seconds.",
       "Type": "Active",
       "Cooldown": 140,
-      "Cost": { "Mana": "24" },
+      "Cost": { "Type": "Mana", "Amount": 19 },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",
@@ -1636,7 +1637,7 @@
       "Description": "Leap to a target, dealing 26 Physical Melee damage with a 30% chance to stun.",
       "Type": "Active",
       "Cooldown": 160,
-      "Cost": { "Mana": "23" },
+      "Cost": { "Type": "Mana", "Amount": 23 },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",

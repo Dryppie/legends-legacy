@@ -351,26 +351,26 @@ public static class SeedCreatures
         };
 
         // Step 4 - Loot Tables
-        var goblinEssenceLootTableItem = new LootTableItem { ItemId = goblinEssenceItem.Id, Weight = 25 };
-        var goblinWarriorEssenceLootTableItem = new LootTableItem { ItemId = goblinWarriorEssenceItem.Id, Weight = 25 };
-        var goblinArcherEssenceLootTableItem = new LootTableItem { ItemId = goblinArcherEssenceItem.Id, Weight = 25 };
-        var largeRatEssenceLootTableItem = new LootTableItem { ItemId = largeRatEssenceItem.Id, Weight = 25 };
-        var flameImpEssenceLootTableItem = new LootTableItem { ItemId = flameImpEssenceItem.Id, Weight = 25 };
-        var frostImpEssenceLootTableItem = new LootTableItem { ItemId = frostImpEssenceItem.Id, Weight = 25 };
-        var shadowImpEssenceLootTableItem = new LootTableItem { ItemId = shadowImpEssenceItem.Id, Weight = 25 };
-        var vampireBatEssenceLootTableItem = new LootTableItem { ItemId = vampireBatEssenceItem.Id, Weight = 25 };
-        var blueSlimeEssenceLootTableItem = new LootTableItem { ItemId = blueSlimeEssenceItem.Id, Weight = 25 };
-        var brownSlimeEssenceLootTableItem = new LootTableItem { ItemId = brownSlimeEssenceItem.Id, Weight = 25 };
-        var greenSlimeEssenceLootTableItem = new LootTableItem { ItemId = greenSlimeEssenceItem.Id, Weight = 25 };
-        var rainbowSlimeEssenceLootTableItem = new LootTableItem { ItemId = rainbowSlimeEssenceItem.Id, Weight = 25 };
-        var redSlimeEssenceLootTableItem = new LootTableItem { ItemId = redSlimeEssenceItem.Id, Weight = 25 };
-        var transparentSlimeEssenceLootTableItem = new LootTableItem { ItemId = transparentSlimeEssenceItem.Id, Weight = 25 };
-        var enchantedFairyEssenceLootTableItem = new LootTableItem { ItemId = enchantedFairyEssenceItem.Id, Weight = 25 };
-        var gladePantherEssenceLootTableItem = new LootTableItem { ItemId = gladePantherEssenceItem.Id, Weight = 25 };
-        var illusionFoxEssenceLootTableItem = new LootTableItem { ItemId = illusionFoxEssenceItem.Id, Weight = 25 };
-        var nightshadeBlossomEssenceLootTableItem = new LootTableItem { ItemId = nightshadeBlossomEssenceItem.Id, Weight = 25 };
-        var pixieEssenceLootTableItem = new LootTableItem { ItemId = pixieEssenceItem.Id, Weight = 25 };
-        var hobgoblinEssenceLootTableItem = new LootTableItem { ItemId = hobgoblinEssenceItem.Id, Weight = 25 };
+        var goblinEssenceLootTableItem = new LootTableItem { ItemId = goblinEssenceItem.Id, Weight = 5 };
+        var goblinWarriorEssenceLootTableItem = new LootTableItem { ItemId = goblinWarriorEssenceItem.Id, Weight = 5 };
+        var goblinArcherEssenceLootTableItem = new LootTableItem { ItemId = goblinArcherEssenceItem.Id, Weight = 5 };
+        var largeRatEssenceLootTableItem = new LootTableItem { ItemId = largeRatEssenceItem.Id, Weight = 5 };
+        var flameImpEssenceLootTableItem = new LootTableItem { ItemId = flameImpEssenceItem.Id, Weight = 5 };
+        var frostImpEssenceLootTableItem = new LootTableItem { ItemId = frostImpEssenceItem.Id, Weight = 5 };
+        var shadowImpEssenceLootTableItem = new LootTableItem { ItemId = shadowImpEssenceItem.Id, Weight = 5 };
+        var vampireBatEssenceLootTableItem = new LootTableItem { ItemId = vampireBatEssenceItem.Id, Weight = 5 };
+        var blueSlimeEssenceLootTableItem = new LootTableItem { ItemId = blueSlimeEssenceItem.Id, Weight = 5 };
+        var brownSlimeEssenceLootTableItem = new LootTableItem { ItemId = brownSlimeEssenceItem.Id, Weight = 5 };
+        var greenSlimeEssenceLootTableItem = new LootTableItem { ItemId = greenSlimeEssenceItem.Id, Weight = 5 };
+        var rainbowSlimeEssenceLootTableItem = new LootTableItem { ItemId = rainbowSlimeEssenceItem.Id, Weight = 5 };
+        var redSlimeEssenceLootTableItem = new LootTableItem { ItemId = redSlimeEssenceItem.Id, Weight = 5 };
+        var transparentSlimeEssenceLootTableItem = new LootTableItem { ItemId = transparentSlimeEssenceItem.Id, Weight = 5 };
+        var enchantedFairyEssenceLootTableItem = new LootTableItem { ItemId = enchantedFairyEssenceItem.Id, Weight = 5 };
+        var gladePantherEssenceLootTableItem = new LootTableItem { ItemId = gladePantherEssenceItem.Id, Weight = 5 };
+        var illusionFoxEssenceLootTableItem = new LootTableItem { ItemId = illusionFoxEssenceItem.Id, Weight = 5 };
+        var nightshadeBlossomEssenceLootTableItem = new LootTableItem { ItemId = nightshadeBlossomEssenceItem.Id, Weight = 5 };
+        var pixieEssenceLootTableItem = new LootTableItem { ItemId = pixieEssenceItem.Id, Weight = 5 };
+        var hobgoblinEssenceLootTableItem = new LootTableItem { ItemId = hobgoblinEssenceItem.Id, Weight = 5 };
 
 
         // Create LootTableRarities for Goblin
@@ -378,7 +378,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [goblinEssenceLootTableItem],
-            Weight = 15 // 0.02%
+            Weight = 10 // 0.02%
         };
         var goblinLootTable = new LootTable
         {
@@ -390,7 +390,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [goblinWarriorEssenceLootTableItem],
-            Weight = 15 // 0.01%
+            Weight = 10 // 0.01%
         };
         var goblinWarriorLootTable = new LootTable
         {
@@ -402,7 +402,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [goblinArcherEssenceLootTableItem],
-            Weight = 15 // 0.01%
+            Weight = 10 // 0.01%
         };
         var goblinArcherLootTable = new LootTable
         {
@@ -414,7 +414,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [largeRatEssenceLootTableItem],
-            Weight = 15 // 0.02%
+            Weight = 10 // 0.02%
         };
         var largeRatLootTable = new LootTable
         {
@@ -426,7 +426,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [flameImpEssenceLootTableItem],
-            Weight = 15 // 0.02%
+            Weight = 10 // 0.02%
         };
         var flameImpLootTable = new LootTable
         {
@@ -438,7 +438,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [frostImpEssenceLootTableItem],
-            Weight = 15 // 0.02%
+            Weight = 10 // 0.02%
         };
         var frostImpLootTable = new LootTable
         {
@@ -450,7 +450,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [shadowImpEssenceLootTableItem],
-            Weight = 15 // 0.02%
+            Weight = 10 // 0.02%
         };
         var shadowImpLootTable = new LootTable
         {
@@ -462,7 +462,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [vampireBatEssenceLootTableItem],
-            Weight = 15 // 0.02%
+            Weight = 10 // 0.02%
         };
         var vampireBatLootTable = new LootTable
         {
@@ -474,7 +474,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [blueSlimeEssenceLootTableItem],
-            Weight = 15 // 0.02%
+            Weight = 10 // 0.02%
         };
         var blueSlimeLootTable = new LootTable
         {
@@ -486,7 +486,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [brownSlimeEssenceLootTableItem],
-            Weight = 15 // 0.02%
+            Weight = 10 // 0.02%
         };
         var brownSlimeLootTable = new LootTable
         {
@@ -498,7 +498,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [greenSlimeEssenceLootTableItem],
-            Weight = 15 // 0.02%
+            Weight = 10 // 0.02%
         };
         var greenSlimeLootTable = new LootTable
         {
@@ -510,7 +510,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [rainbowSlimeEssenceLootTableItem],
-            Weight = 15 // 0.02%
+            Weight = 10 // 0.02%
         };
         var rainbowSlimeLootTable = new LootTable
         {
@@ -522,7 +522,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [redSlimeEssenceLootTableItem],
-            Weight = 15 // 0.02%
+            Weight = 10 // 0.02%
         };
         var redSlimeLootTable = new LootTable
         {
@@ -534,7 +534,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [transparentSlimeEssenceLootTableItem],
-            Weight = 15 // 0.02%
+            Weight = 10 // 0.02%
         };
         var transparentSlimeLootTable = new LootTable
         {
@@ -546,7 +546,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [enchantedFairyEssenceLootTableItem],
-            Weight = 15 // 0.02%
+            Weight = 10 // 0.02%
         };
         var enchantedFairyLootTable = new LootTable
         {
@@ -558,7 +558,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [gladePantherEssenceLootTableItem],
-            Weight = 15 // 0.02%
+            Weight = 10 // 0.02%
         };
         var gladePantherLootTable = new LootTable
         {
@@ -570,7 +570,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [illusionFoxEssenceLootTableItem],
-            Weight = 15 // 0.02%
+            Weight = 10 // 0.02%
         };
         var illusionFoxLootTable = new LootTable
         {
@@ -582,7 +582,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [nightshadeBlossomEssenceLootTableItem],
-            Weight = 15 // 0.02%
+            Weight = 10 // 0.02%
         };
         var nightshadeBlossomLootTable = new LootTable
         {
@@ -594,7 +594,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [pixieEssenceLootTableItem],
-            Weight = 15 // 0.02%
+            Weight = 10 // 0.02%
         };
         var pixieLootTable = new LootTable
         {
@@ -606,7 +606,7 @@ public static class SeedCreatures
         {
             Id = Guid.NewGuid(),
             Entries = [hobgoblinEssenceLootTableItem],
-            Weight = 15 // 0.02%
+            Weight = 10 // 0.02%
         };
         var hobgoblinLootTable = new LootTable
         {
@@ -845,10 +845,10 @@ public static class SeedCreatures
         var lumoRuinsAreaId = "region_01_area_01";
         var lumoRuinsAreaCreatures = new List<AreaCreature>
         {
-            new AreaCreature() { AreaId = lumoRuinsAreaId, CreatureId = goblinId, WeightedSpawnRate = 0.45f },
-            new AreaCreature() { AreaId = lumoRuinsAreaId, CreatureId = goblinWarriorId, WeightedSpawnRate = 0.2f },
-            new AreaCreature() { AreaId = lumoRuinsAreaId, CreatureId = goblinArcherId, WeightedSpawnRate = 0.2f },
-            new AreaCreature() { AreaId = lumoRuinsAreaId, CreatureId = largeRatId, WeightedSpawnRate = 0.25f },
+            new AreaCreature() { AreaId = lumoRuinsAreaId, CreatureId = goblinId, WeightedSpawnRate = 0.55f },
+            new AreaCreature() { AreaId = lumoRuinsAreaId, CreatureId = goblinWarriorId, WeightedSpawnRate = 0.07f },
+            new AreaCreature() { AreaId = lumoRuinsAreaId, CreatureId = goblinArcherId, WeightedSpawnRate = 0.08f },
+            new AreaCreature() { AreaId = lumoRuinsAreaId, CreatureId = largeRatId, WeightedSpawnRate = 0.30f },
         };
 
         var bloodGroveAreaId = "region_01_area_02";
@@ -891,23 +891,23 @@ public static class SeedCreatures
         attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(goblinId, -0.3f));
         attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(goblinWarriorId, -0.1f));
         attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(goblinArcherId, -0.2f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(largeRatId, -0.4f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(flameImpId, 0.1f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(frostImpId, 0.1f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(shadowImpId, 0.1f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(vampireBatId, 0.5f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(blueSlimeId, 0.2f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(brownSlimeId, 0.3f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(greenSlimeId, 0.3f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(rainbowSlimeId, 0.4f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(redSlimeId, 0.3f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(transparentSlimeId, 0.4f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(enchantedFairyId, 0.7f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(gladePantherId, 1f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(illusionFoxId, 0.8f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(nightshadeBlossomId, 0.6f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(pixieId, 0.8f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(hobgoblinId, 3f));
+        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(largeRatId, -0.5f));
+        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(flameImpId, 0.3f));
+        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(frostImpId, 0.6f));
+        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(shadowImpId, 0.4f));
+        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(vampireBatId, 0.9f));
+        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(blueSlimeId, 1.5f));
+        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(brownSlimeId, 1.2f));
+        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(greenSlimeId, 1.1f));
+        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(rainbowSlimeId, 1.4f));
+        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(redSlimeId, 1.3f));
+        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(transparentSlimeId, 1.4f));
+        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(enchantedFairyId, 1.6f));
+        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(gladePantherId, 1.8f));
+        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(illusionFoxId, 1.8f));
+        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(nightshadeBlossomId, 2f));
+        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(pixieId, 1.4f));
+        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(hobgoblinId, 4f));
         await context.EntityAttributes.AddRangeAsync(attributes);
 
         if (!context.Regions.Any())
@@ -918,60 +918,59 @@ public static class SeedCreatures
                 {
                     Id = lumoRuinsAreaId, // region, [area, dungeon, raid, or rift], area
                     Name = "Lumo Ruins",
+                    LevelRequirement = 1,
                     Creatures = lumoRuinsAreaCreatures,
                     SpawnProbabilities = new List<float>
                     {
-                        0.87f,
-                        0.09f,
+                        0.969f,
                         0.03f,
-                        0.01f,
+                        0.001f,
                     }
                 },
                 new Area
                 {
                     Id = bloodGroveAreaId, // region, [area, dungeon, raid, or rift], area
                     Name = "Blood Grove",
+                    LevelRequirement = 5,
                     Creatures = bloodGroveAreaCreatures,
                     SpawnProbabilities = new List<float>
                     {
-                        0.82f,
-                        0.12f,
-                        0.04f,
-                        0.02f,
+                        0.03f,
+                        0.969f,
+                        0.001f,
                     }
                 },
                 new Area
                 {
                     Id = crystalCreekAreaId, // region, [area, dungeon, raid, or rift], area
                     Name = "Crystal Creek",
+                    LevelRequirement = 10,
                     Creatures = crystalCreekAreaCreatures,
                     SpawnProbabilities = new List<float>
                     {
-                        0.75f,
-                        0.17f,
-                        0.05f,
-                        0.02f,
-                        0.01f,
+                        0.03f,
+                        0.969f,
+                        0.001f,
                     }
                 },
                 new Area
                 {
                     Id = twilightClearingAreaId, // region, [area, dungeon, raid, or rift], area
                     Name = "Twilight Clearing",
+                    LevelRequirement = 15,
                     Creatures = twilightClearingAreaCreatures,
                     SpawnProbabilities = new List<float>
                     {
-                        0.75f,
-                        0.17f,
-                        0.05f,
-                        0.02f,
-                        0.01f,
+                        0.03f,
+                        0.969f,
+                        0.001f,
                     }
                 },
                 new Area
                 {
                     Id = goblinMinesAreaId, // region, [area, dungeon, raid, or rift], area
                     Name = "Goblin Mines",
+                    LevelRequirement = 20,
                     Creatures = goblinMinesAreaCreatures,
                     SpawnProbabilities = new List<float>
                     {

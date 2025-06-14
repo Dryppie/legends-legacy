@@ -120,10 +120,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "Useful for Weapon Smithing",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -202,10 +202,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "Useful for Weapon Smithing",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -284,10 +284,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "Useful for Weapon Smithing",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -361,7 +361,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -443,7 +443,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -525,7 +525,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -599,7 +599,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -612,7 +612,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Unique
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -625,7 +625,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -681,7 +681,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -694,7 +694,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Unique
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -707,7 +707,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -763,7 +763,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -776,7 +776,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Unique
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -789,7 +789,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -847,10 +847,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "Jewelry Crafting",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Unique
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -863,7 +863,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -876,7 +876,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Unique
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -929,10 +929,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "Jewelry Crafting",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Unique
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -945,7 +945,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -958,7 +958,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Unique
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -1011,10 +1011,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "Jewelry Crafting",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Unique
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -1027,7 +1027,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -1040,7 +1040,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Unique
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -1096,7 +1096,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -1109,7 +1109,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -1165,7 +1165,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Unique
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -1231,10 +1231,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "Useful for Weapon Smithing",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -1260,7 +1260,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       }
     ],
@@ -1313,10 +1313,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "Jewelry Crafting",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Unique
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -1359,7 +1359,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -1372,7 +1372,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       }
     ],
@@ -1425,10 +1425,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "Useful for Weapon Smithing",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       }
     ],
@@ -1468,10 +1468,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "Jewelry Crafting",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Unique
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -1484,7 +1484,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -1566,7 +1566,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Unique
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -1606,10 +1606,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "Useful for Weapon Smithing",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -1635,7 +1635,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       }
     ],
@@ -1706,10 +1706,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "Useful for Weapon Smithing",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -1775,10 +1775,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "Useful for Weapon Smithing",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -1804,7 +1804,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       }
     ],
@@ -1873,7 +1873,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -1929,7 +1929,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -1955,7 +1955,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -1968,7 +1968,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Unique
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -2039,10 +2039,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "Useful for Weapon Smithing",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -2108,10 +2108,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "Useful for Weapon Smithing",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -2137,7 +2137,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       }
     ],
@@ -2195,10 +2195,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "Jewelry Crafting",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Unique
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -2285,7 +2285,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -2311,7 +2311,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       }
     ],
@@ -2395,10 +2395,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "Useful for Weapon Smithing",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       }
     ],
@@ -2446,7 +2446,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -2459,7 +2459,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -2472,7 +2472,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Unique
+          "rarity": Rarity.Rare
         }
       }
     ],
@@ -2528,7 +2528,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Unique
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -2538,10 +2538,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "Jewelry Crafting",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Unique
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -2597,7 +2597,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -2610,7 +2610,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -2623,7 +2623,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Unique
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -2676,10 +2676,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "Useful for Weapon Smithing",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -2689,10 +2689,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "Jewelry Crafting",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Unique
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -2758,10 +2758,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "Jewelry Crafting",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Unique
+          "rarity": Rarity.Rare
         }
       },
       {
@@ -2774,7 +2774,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -2787,7 +2787,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       }
     ],
@@ -2843,7 +2843,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -2856,7 +2856,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -3001,10 +3001,10 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "Useful for Weapon Smithing",
+          "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {
@@ -3030,7 +3030,7 @@ export const RECIPES_CONTENT = [
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,
-          "rarity": Rarity.Rare
+          "rarity": Rarity.Uncommon
         }
       },
       {

@@ -253,6 +253,8 @@ export class CombatComponent implements OnInit, OnDestroy {
       case EventType.Regeneration:
         this.handleRegeneration(event);
         break;
+      case EventType.Death:
+        break;
       // Add other event types as needed
       default:
         console.warn(`Unhandled event type: ${event.eventType}`);

@@ -55,14 +55,14 @@ public static class EntityBaseAttributeHelper
             // Combat Stats
             case AttributeType.MaxHealth:
             case AttributeType.Health:
-                return 50;
+                return 100;
             case AttributeType.HealthRegeneration:
-                return 1;
+                return 2;
             case AttributeType.MaxMana:
             case AttributeType.Mana:
-                return 50;
+                return 100;
             case AttributeType.ManaRegeneration:
-                return 1;
+                return 2;
             case AttributeType.BasicAttackSpeed:
                 return 10;
             case AttributeType.RecoveryRate:
