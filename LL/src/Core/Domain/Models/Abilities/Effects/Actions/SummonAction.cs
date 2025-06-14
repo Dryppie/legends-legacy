@@ -44,7 +44,6 @@ public class SummonAction : IEffectAction
                 interval: interval,
                 usage: usage,
                 effectModifications: [],
-                trigger: TriggerEvent.OnTickInterval,
                 effectTags: [EffectTag.SummonExpiration]
             );
             var selfDestructEffect = new EffectInstance(selfDestructEffectDefinition, summonedCreature, summonedCreature);

@@ -81,14 +81,6 @@ public class EffectConverter : JsonConverter<EffectDefinition>
                             ? Enum.Parse<Targeting>(targetingProp.GetString() ?? "None")
                             : Targeting.None;
 
-        var trigger = root.TryGetProperty("Trigger", out var triggerProp)
-                            ? Enum.Parse<TriggerEvent>(triggerProp.GetString() ?? "None")
-                            : TriggerEvent.None;
-
-        var triggerTarget = root.TryGetProperty("TriggerTarget", out var triggerTargetProp)
-                            ? Enum.Parse<Targeting>(triggerTargetProp.GetString() ?? "None")
-                            : Targeting.None;
-
         var attackType = root.TryGetProperty("AttackType", out var attackTypeProp)
                             ? Enum.Parse<AttackType>(attackTypeProp.GetString() ?? "None")
                             : AttackType.None;
@@ -96,13 +88,6 @@ public class EffectConverter : JsonConverter<EffectDefinition>
         var damageType = root.TryGetProperty("DamageType", out var damageTypeProp)
                             ? Enum.Parse<DamageType>(damageTypeProp.GetString() ?? "None")
                             : DamageType.None;
-
-        bool isFlatAmount = false;
-        if (root.TryGetProperty("IsFlatAmount", out var isFlatAmountElement) &&
-            (isFlatAmountElement.ValueKind == JsonValueKind.True || isFlatAmountElement.ValueKind == JsonValueKind.False))
-        {
-            isFlatAmount = isFlatAmountElement.GetBoolean();
-        }
 
         int chance = 100;
         if (root.TryGetProperty("Chance", out var chanceElement) && chanceElement.ValueKind == JsonValueKind.Number)
@@ -153,9 +138,6 @@ public class EffectConverter : JsonConverter<EffectDefinition>
             effectTags: new List<EffectTag>(),
             effectModifications: effectModifications,
             targeting: targeting,
-            trigger: trigger,
-            triggerTarget: triggerTarget,
-            isFlatAmount: isFlatAmount,
             chance: chance,
             attackType: attackType,
             damageType: damageType

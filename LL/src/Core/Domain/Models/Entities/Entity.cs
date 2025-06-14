@@ -31,10 +31,6 @@ public abstract class Entity
     public Dictionary<AttributeType, float> BaseCombatAttributes { get; } = [];
     [NotMapped]
     public Dictionary<AttributeType, float> CombatAttributes { get; } = [];
-    [NotMapped]
-    public List<ItemAttributeModifier> TemporaryModifiers { get; set; } = [];
-    [NotMapped]
-    public HashSet<string> Statuses { get; } = [];
     public int Level { get; set; } = 1;
     [NotMapped]
     public bool IsSummoned { get; set; } = false;

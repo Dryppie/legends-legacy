@@ -9,6 +9,7 @@ using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Entities;
 using Domain.Models.Essences;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Slots;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Models.Combat;
@@ -53,6 +54,8 @@ public class CombatEntity
         Equipment = entity.EquipmentSlots.Where(es => es.EquipmentInstance != null).Select(es => es.EquipmentInstance!).ToList();
         EquippedEssences = [.. entity.EssenceSlots.ActiveSlotsWithOccupiedEssences().Select(es => es.OccupiedEssence!)];
         Level = entity.Level;
+        var mainHand = entity.EquipmentSlots.FirstOrDefault(es => es.EquipmentSlotType == EquipmentSlotType.MainHand);
+        Abilities.Add(BasicAttackLoader.LoadBasicAttack(mainHand));
     }
 
     public void IncrementStep()

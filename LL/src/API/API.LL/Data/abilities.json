@@ -401,7 +401,6 @@
                 "Amount": 4
               },
               "Targeting": "CauseOfTrigger",
-              "IsFlatAmount": true,
               "Chance": 100,
               "AttackType": "Melee",
               "DamageType": "Burn",

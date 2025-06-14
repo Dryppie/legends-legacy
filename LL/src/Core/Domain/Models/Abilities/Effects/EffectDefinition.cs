@@ -40,11 +40,8 @@ public class EffectDefinition
                   List<EffectTag> effectTags,
                   List<EffectModification> effectModifications,
                   Targeting targeting = Targeting.None,
-                  TriggerEvent trigger = TriggerEvent.None,
-                  Targeting triggerTarget = Targeting.None,
                   AttackType attackType = AttackType.None,
                   DamageType damageType = DamageType.None,
-                  bool isFlatAmount = false,
                   int chance = 100)
     {
         Action = action;

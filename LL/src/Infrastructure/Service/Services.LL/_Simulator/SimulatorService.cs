@@ -62,7 +62,7 @@ public class SimulatorService : ISimulatorService
         await PrepareEntitiesForCombat([.. combatPlayerEntities, .. combatEnemyEntities]);
 
         var lastCombatResult = new CombatResult();
-
+        var totalTime = new TimeSpan();
         while (fights > 0)
         {
             if (_pickRandomEssences)
@@ -74,7 +74,7 @@ public class SimulatorService : ISimulatorService
             }
 
             lastCombatResult = _combatContext.InstantiateAndRunCombat(combatPlayerEntities, combatEnemyEntities);
-
+            totalTime += TimeSpan.FromSeconds(lastCombatResult.Duration * 0.1);
             // Build the combination keys for the essences
             var playerCombo = GetEssenceComboKey(combatPlayerEntities);
             var enemyCombo = GetEssenceComboKey(combatEnemyEntities);
@@ -107,6 +107,7 @@ public class SimulatorService : ISimulatorService
 
         Console.WriteLine($"Draws : {numberOfDraws}");
         Console.WriteLine($"Time  : {end - start}");
+        Console.WriteLine($"Time  : {totalTime}");
     }
 
     private static List<Entity> GeneratePlayerTeam(int teamSize, int tier)

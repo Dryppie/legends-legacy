@@ -5,6 +5,7 @@ using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Abilities.ResourceCosts;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
+using Microsoft.EntityFrameworkCore;
 using Services.LL.Combat.CombatEngine;
 
 namespace Services.LL.Combat;
@@ -18,7 +19,7 @@ public class CombatContext : ICombatContext
     private TriggerEngine _triggerEngine;
 
     private readonly List<CombatLogItem> _eventLog;
-    private const int MaxSimulationTime = 1000; // Max duration in milliseconds
+    private const int MaxSimulationTime = 6000; // Max duration in milliseconds
     private const int TimeStep = 1; // Time step in milliseconds
     public int CurrentTime { get; private set; } = 0;
 
@@ -80,14 +81,14 @@ public class CombatContext : ICombatContext
 
         // Determine outcome
         var outcome = DetermineOutcome();
-        if (true)
-        {
-            foreach (var log in _eventLog)
-            {
-                Console.WriteLine($"Time: {log.Timestamp} - {log.Details}");
-            }
-            Console.WriteLine(outcome);
-        }
+        //if (true)
+        //{
+        //    foreach (var log in _eventLog)
+        //    {
+        //        Console.WriteLine($"Time: {log.Timestamp} - {log.Details}");
+        //    }
+        //    Console.WriteLine(outcome);
+        //}
 
         return new CombatResult
         {
@@ -145,7 +146,7 @@ public class CombatContext : ICombatContext
                 // Perform basic
                 //var weapon = entity.Equipment.FirstOrDefault(e => e.Type.Equals(ItemType.Weapon));
                 //var target = SelectTarget(weapon.Targeting);
-                UseBasicAttack(entity, opposingTeam);
+                UseBasicAttack(entity);
 
                 entity.NextBasicAttackIn = 300; // TODO: Turn 300 into a Constant somewhere, as it is also stored in the Entity class
             }
@@ -264,9 +265,14 @@ public class CombatContext : ICombatContext
         });
     }
 
-    private void UseBasicAttack(CombatEntity entity, List<CombatEntity> opposingTeam)
+    private void UseBasicAttack(CombatEntity entity)
     {
-        
+        EventBus.Publish(new CombatEvent
+        {
+            Type = TriggerEvent.BasicAttack,
+            Source = entity,
+            CurrentTime = CurrentTime
+        });
     }
 
     private void CleanupDefeatedEntities()

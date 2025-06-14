@@ -109,4 +109,5 @@ public enum TriggerEvent
     OnStatusApplied,
     OnStatusAppliedIfThis,
     OnKill,
+    BasicAttack,
 }
