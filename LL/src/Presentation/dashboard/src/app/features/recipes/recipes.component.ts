@@ -62,6 +62,7 @@ export class RecipesComponent implements OnInit {
       name: ['', Validators.required],
       /* the finished product */
       item: [null, Validators.required],
+      itemId: [''],
       quantity: [1, [Validators.required, Validators.min(1)]],
       craftType: [null, Validators.required],
       levelRequirement: [1, [Validators.required, Validators.min(1)]],
@@ -100,7 +101,9 @@ export class RecipesComponent implements OnInit {
       data.map((r) => {
         r.item = this.items.find((i) => i.id === r.itemId)!;
         r.materials.map((m) => {
-          m.item = this.items.find((i) => i.id === m.itemId)!;
+          const item = this.items.find((i) => i.id === m.itemId)!;
+          m.item = item;
+          m.itemId = item.id;
         });
       });
 
@@ -154,6 +157,7 @@ export class RecipesComponent implements OnInit {
       this.materials.push(
         this.fb.group({
           item: [m.item, Validators.required],
+          itemId: [m.itemId],
           quantity: [m.quantity, [Validators.required, Validators.min(1)]],
         }),
       ),
@@ -179,7 +183,7 @@ export class RecipesComponent implements OnInit {
       this.recipeForm.markAllAsTouched();
       return;
     }
-
+    console.log(this.recipeForm.getRawValue());
     const raw: Recipe = {
       ...this.recipeForm.getRawValue(),
       /* ensure disabled control value is carried over */
@@ -222,10 +226,6 @@ export class RecipesComponent implements OnInit {
 
   clearMaterials(): void {
     while (this.materials.length) this.materials.removeAt(0);
-  }
-
-  trackByIndex(i: number): number {
-    return i;
   }
 
   compareItems = (a: ItemBase | null, b: ItemBase | null): boolean =>

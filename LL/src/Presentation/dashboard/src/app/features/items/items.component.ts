@@ -142,11 +142,6 @@ export class ItemsComponent implements OnInit {
     this.attributeModifiers.removeAt(index);
   }
 
-  /** trackBy for ngFor FormArray controls */
-  trackByIndex(index: number): number {
-    return index;
-  }
-
   /** Persist changes or create new item */
   saveItem(): void {
     if (this.itemForm.invalid) {

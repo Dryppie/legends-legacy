@@ -33,7 +33,7 @@
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 8,
+        "quantity": 16,
         "itemId": "stone",
         "item": {
           "id": "stone",
@@ -46,7 +46,7 @@
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 4,
+        "quantity": 8,
         "itemId": "flint",
         "item": {
           "id": "flint",
@@ -59,7 +59,7 @@
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 3,
+        "quantity": 5,
         "itemId": "jagged_obsidian",
         "item": {
           "id": "jagged_obsidian",
@@ -72,7 +72,7 @@
       },
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 1,
+        "quantity": 2,
         "itemId": "sticky_sap",
         "item": {
           "id": "sticky_sap",
