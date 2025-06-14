@@ -24,8 +24,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -106,8 +106,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -188,8 +188,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -275,8 +275,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -357,8 +357,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -439,8 +439,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -526,8 +526,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -608,8 +608,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -690,8 +690,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -777,8 +777,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -859,8 +859,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -941,8 +941,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "ArmorForging",
@@ -1023,8 +1023,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "JewelryCrafting",
@@ -1092,8 +1092,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "JewelryCrafting",
@@ -1161,8 +1161,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "JewelryCrafting",
@@ -1230,8 +1230,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "JewelryCrafting",
@@ -1286,8 +1286,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "JewelryCrafting",
@@ -1342,8 +1342,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "JewelryCrafting",
@@ -1398,8 +1398,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "JewelryCrafting",
@@ -1467,8 +1467,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "JewelryCrafting",
@@ -1536,8 +1536,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "JewelryCrafting",
@@ -1609,8 +1609,8 @@
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "magnitude": 5,
+      "scalingAttribute": "FightingSpirit",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -1691,7 +1691,7 @@
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 0,
+      "magnitude": 5,
       "scalingAttribute": "Strength",
       "scalingAmount": 0.1
     },
@@ -1773,8 +1773,8 @@
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "magnitude": 5,
+      "scalingAttribute": "Endurance",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -1855,8 +1855,8 @@
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "magnitude": 5,
+      "scalingAttribute": "Dexterity",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -1942,8 +1942,8 @@
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "magnitude": 5,
+      "scalingAttribute": "FightingSpirit",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -2024,7 +2024,7 @@
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 0,
+      "magnitude": 5,
       "scalingAttribute": "Strength",
       "scalingAmount": 0.1
     },
@@ -2111,8 +2111,8 @@
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "magnitude": 5,
+      "scalingAttribute": "Endurance",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -2198,8 +2198,8 @@
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "magnitude": 5,
+      "scalingAttribute": "Dexterity",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -2286,8 +2286,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2373,8 +2373,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2441,8 +2441,8 @@
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "magnitude": 5,
+      "scalingAttribute": "Intelligence",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -2524,8 +2524,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2605,8 +2605,8 @@
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "magnitude": 5,
+      "scalingAttribute": "Wisdom",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -2688,8 +2688,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2756,8 +2756,8 @@
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "magnitude": 5,
+      "scalingAttribute": "Agility",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -2843,8 +2843,8 @@
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "magnitude": 5,
+      "scalingAttribute": "Agility",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -2930,8 +2930,8 @@
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "magnitude": 5,
+      "scalingAttribute": "FightingSpirit",
       "scalingAmount": 0.1
     },
     "quantity": 1,

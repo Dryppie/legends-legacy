@@ -108,7 +108,10 @@ public class RecipeJsonReader
             ItemType = itemDto.ItemType,
             Rarity = itemDto.Rarity,
             EquipmentType = itemDto.EquipmentType,
-            AttributeModifiers = itemDto.AttributeModifiers
+            AttributeModifiers = itemDto.AttributeModifiers,
+            Magnitude = itemDto.Magnitude,
+            ScalingAttribute = itemDto.ScalingAttribute,
+            ScalingAmount = itemDto.ScalingAmount
         };
     }
 
