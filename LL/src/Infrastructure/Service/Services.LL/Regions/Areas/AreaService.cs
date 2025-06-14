@@ -10,7 +10,7 @@ public class AreaService : IAreaService
         _areaRepository = areaRepository;
     }
 
-    public async Task<Area> GetAreaByIdAsync(string id)
+    public async Task<Area?> GetAreaByIdAsync(string id)
     {
         return await _areaRepository.GetAreaByIdAsync(id);
     }

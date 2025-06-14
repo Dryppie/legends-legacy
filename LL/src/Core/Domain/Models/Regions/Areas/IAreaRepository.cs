@@ -3,5 +3,5 @@
 namespace Domain.Models.Regions.Areas;
 public interface IAreaRepository
 {
-    Task<Area> GetAreaByIdAsync(string id);
+    Task<Area?> GetAreaByIdAsync(string id);
 }

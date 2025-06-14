@@ -17,6 +17,8 @@ public class StartCombatActionCommandHandler : IRequestHandler<StartCombatAction
     public async Task<Response<bool>> Handle(StartCombatActionCommand request, CancellationToken cancellationToken)
     {
         var combatActionDetails = await _actionDetailsService.CreateCombatActionDetailsAsync(request.AreaId, request.CharacterId, cancellationToken);
+        if (combatActionDetails == null)
+            return Response<bool>.Fail("Unable to start combat.");
 
         var characterAction = new CharacterAction(request.CharacterId, combatActionDetails);
 

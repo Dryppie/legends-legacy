@@ -24,8 +24,8 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
-      "scalingAmount": 0
+      "scalingAttribute": "Strength",
+      "scalingAmount": 0.1
     },
     "quantity": 1,
     "craftType": "ArmorForging",

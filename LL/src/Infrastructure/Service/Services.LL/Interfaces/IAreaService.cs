@@ -3,5 +3,5 @@
 namespace Services.LL.Interfaces;
 public interface IAreaService
 {
-    Task<Area> GetAreaByIdAsync(string id);
+    Task<Area?> GetAreaByIdAsync(string id);
 }

@@ -12,7 +12,7 @@ public class AreaRepository : IAreaRepository
         _dbContext = dbContext;
     }
 
-    public async Task<Area> GetAreaByIdAsync(string areaId)
+    public async Task<Area?> GetAreaByIdAsync(string areaId)
     {
         var area = await _dbContext.Areas
             .Include(a => a.Creatures)

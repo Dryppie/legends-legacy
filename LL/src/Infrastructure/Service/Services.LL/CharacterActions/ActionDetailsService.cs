@@ -11,9 +11,10 @@ public class ActionDetailsService : IActionDetailsService
     private readonly IProfessionService _professionService;
     private readonly IGatheringNodeService _gatheringNodeService;
     private readonly ICreatureService _creatureService;
+    private readonly ICharacterService _characterService;
     private readonly IAreaService _areaService;
     private readonly ICharacterActionService _characterActionService;
-    public ActionDetailsService(IEntityService es, IProfessionService ps, IGatheringNodeService gs, ICreatureService cs, IAreaService areaS, ICharacterActionService cas)
+    public ActionDetailsService(IEntityService es, IProfessionService ps, IGatheringNodeService gs, ICreatureService cs, IAreaService areaS, ICharacterActionService cas, ICharacterService charS)
     {
         _entityService = es;
         _professionService = ps;
@@ -21,10 +22,14 @@ public class ActionDetailsService : IActionDetailsService
         _creatureService = cs;
         _areaService = areaS;
         _characterActionService = cas;
+        _characterService = charS;
     }
-    public async Task<CombatActionDetails> CreateCombatActionDetailsAsync(string areaId, Guid characterId, CancellationToken cancellationToken)
+    public async Task<CombatActionDetails?> CreateCombatActionDetailsAsync(string areaId, Guid characterId, CancellationToken cancellationToken)
     {
         var area = await _areaService.GetAreaByIdAsync(areaId);
+        var character = await _entityService.GetEntitiesByIdsForCombatAsync([characterId], cancellationToken);
+        if (area == null || character.Count == 0 || area.LevelRequirement > character.FirstOrDefault()?.Level) return null;
+
         var combatDetails = new CombatActionDetails
         {
             CharacterTeam = [characterId], /*_entityService.FindCharacterTeamById();*/
