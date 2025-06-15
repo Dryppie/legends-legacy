@@ -130,9 +130,7 @@ public class GatheringService : IGatheringService
 
     private async Task ProcessLootAsync(Guid characterId, List<InventoryItem> loot, CancellationToken cancellationToken)
     {
-        // Implement how to update the character or game state with the loot
-        // For example, updating the character inventory
-        //await _InventoryService.AddLootAsync(loot, cancellationToken);
+        if (loot.Count == 0) return;
         await _publisher.Publish(new LootGeneratedEvent(characterId, loot), cancellationToken);
     }
 }

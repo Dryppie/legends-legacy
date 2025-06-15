@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebSockets;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Persistence.LL;
@@ -26,7 +27,6 @@ config
     .AddEnvironmentVariables();
 
 builder.Services.AddHttpContextAccessor();
-
 // Add services to the container.
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -49,15 +49,6 @@ builder.Services.AddApiVersioning(options =>
     options.SubstituteApiVersionInUrl = true;
 });
 
-// Authorization policy FallbackPolicy is applied globally. Overridden by [] Attributes on specific endpoints
-//builder.Services.AddAuthorization(); // For Identity
-
-// TODO: Apply policies during release
-//builder.Services.AddAuthorizationBuilder().SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
-
-//builder.Services.AddIdentityApiEndpoints<AppUser>()
-//    .AddEntityFrameworkStores<LLDbContext>();
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
@@ -67,18 +58,6 @@ builder.Services.AddCors(options =>
                           .AllowAnyHeader());
 });
 
-//builder.Services.ConfigureApplicationCookie(options =>
-//{
-//    // Cookie settings
-//    options.Cookie.HttpOnly = true;
-//    options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
-
-//    options.LoginPath = "/Identity/Account/Login";
-//    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-//    options.SlidingExpiration = true;
-//});
-
-// Dependency Injections
 builder.Services.AddPersistence(config);
 builder.Services.AddRepositories();
 builder.Services.AddApplication();
@@ -105,23 +84,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
         options.Events = new JwtBearerEvents
         {
-            OnMessageReceived = context =>
+            OnMessageReceived = ctx =>
             {
 #if DEBUG
                 // Check Authorization against DevAuth header from Swagger
-                var authHeader = context.Request.Headers["DevAuth"].FirstOrDefault();
+                var authHeader = ctx.Request.Headers["DevAuth"].FirstOrDefault();
                 if (authHeader != null)
                 {
-                    context.Token = context.Request.Headers["DevAuth"].FirstOrDefault();
+                    ctx.Token = ctx.Request.Headers["DevAuth"].FirstOrDefault();
                 }
 #endif
-                var token = context.Token;
-
+                var token = ctx.Token;
+                
                 // Add support for token origin to either be from a http-header or from a http-only cookie
                 // https://alimozdemir.medium.com/asp-net-core-jwt-and-refresh-token-with-httponly-cookies-b1b96c849742
-                if (context.Request.Cookies.ContainsKey("AccessToken") && context.Token is null)
+                if (ctx.Request.Cookies.ContainsKey("AccessToken") && string.IsNullOrEmpty(ctx.Token))
                 {
-                    context.Token = context.Request.Cookies["AccessToken"];
+                    ctx.Token = ctx.Request.Cookies["AccessToken"];
                 }
 
                 return Task.CompletedTask;
@@ -184,6 +163,15 @@ if (config.GetValue("FeatureManagement:DisableAllRequests", "false") == "true")
     });
 }
 
+if (!app.Environment.IsDevelopment())       // prod only
+{
+    app.UseHttpsRedirection();
+}
+
+app.UseWebSockets(new WebSocketOptions
+{
+    KeepAliveInterval = TimeSpan.FromSeconds(30),
+});
 app.UseAuthentication();
 app.UseAuthorization();
 

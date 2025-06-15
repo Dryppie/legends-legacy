@@ -3,16 +3,14 @@ using Application.UseCases.Inventories.Events;
 using MediatR;
 
 namespace Application.UseCases.Inventories.EventHandlers;
-public class LootGeneratedEventHandler : INotificationHandler<LootGeneratedEvent>
+public sealed class LootGeneratedEventHandler : INotificationHandler<LootGeneratedEvent>
 {
-    private readonly IInventoryService _inventoryService;
-    public LootGeneratedEventHandler(IInventoryService inventoryService)
+    private readonly IInventoryService _inventory;
+    public LootGeneratedEventHandler(IInventoryService inventory)
     {
-        _inventoryService = inventoryService;
+        _inventory = inventory;
     }
 
-    public async Task Handle(LootGeneratedEvent notification, CancellationToken cancellationToken)
-    {
-        await _inventoryService.AddItemsToInventory(notification.CharacterId, notification.Loot, cancellationToken);
-    }
+    public async Task Handle(LootGeneratedEvent notification, CancellationToken ct)
+        => await _inventory.AddItemsToInventory(notification.CharacterId, notification.Loot, ct);
 }

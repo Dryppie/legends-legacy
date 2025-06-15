@@ -14,9 +14,7 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
-using Domain.Models.Items.Equipments;
 using MediatR;
-using Services.LL.Combat;
 using Services.LL.Extensions;
 using Services.LL.Interfaces;
 
@@ -194,9 +192,6 @@ public class CombatService : ICombatService
     private async Task ProcessLootAsync(Guid characterId, List<InventoryItem> loot, CancellationToken cancellationToken)
     {
         if (loot.Count == 0) return;
-        // Implement how to update the character or game state with the loot
-        // For example, updating the character inventory
-        //await _InventoryService.AddLootAsync(loot, cancellationToken);
         await _publisher.Publish(new LootGeneratedEvent(characterId, loot), cancellationToken);
     }
 
