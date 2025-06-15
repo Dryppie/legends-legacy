@@ -21,6 +21,7 @@ public class LeaderboardRepository : ILeaderboardRepository
 
         var combatLeaderboard = characters
             .OrderByDescending(c => c.Level)
+            .ThenByDescending(c => c.Experience)
             .Select((c, index) => new LeaderboardEntry
             {
                 CharacterId = c.Id,
@@ -53,6 +54,7 @@ public class LeaderboardRepository : ILeaderboardRepository
                     Profession = c.Professions.First(p => p.ProfessionType == profession)
                 })
                 .OrderByDescending(x => x.Profession.Level)
+                .ThenByDescending(c => c.Profession.Experience)
                 .Select((x, index) => new LeaderboardEntry
                 {
                     CharacterId = x.Character.Id,
