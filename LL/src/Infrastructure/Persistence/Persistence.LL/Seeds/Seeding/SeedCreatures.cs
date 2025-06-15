@@ -201,83 +201,83 @@ public static class SeedCreatures
             PassiveAbilityId = "savageOnslaught",
         };
 
-        var mossLizardEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Moss Lizard's Essence",
-            ActiveAbilityId = "mossCamouflage",
-            PassiveAbilityId = "lostTail",
-        };
-        var spiderEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Spider's Essence",
-            ActiveAbilityId = "skitteringStrike",
-            PassiveAbilityId = "spiderEyes",
-        };
-        var treantSaplingEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Treant Sapling's Essence",
-            ActiveAbilityId = "sproutingSurge",
-            PassiveAbilityId = "naturingRoots",
-        };
-        var venomousSnakeEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Venomous Snake's Essence",
-            ActiveAbilityId = "venomousSpit",
-            PassiveAbilityId = "toxicHide",
-        };
-        var viperEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Viper's Essence",
-            ActiveAbilityId = "piercingFangs",
-            PassiveAbilityId = "potentToxins",
-        };
-        var feralGhoulEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Feral Ghoul's Essence",
-            ActiveAbilityId = "feralPounce",
-            PassiveAbilityId = "shreddingClaws",
-        };
-        var plagueGhoulEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Plague Ghoul's Essence",
-            ActiveAbilityId = "plagueSwipe",
-            PassiveAbilityId = "pestilentTouch",
-        };
-        var ravenousGhoulEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Ravenous Ghoul's Essence",
-            ActiveAbilityId = "drainingClaws",
-            PassiveAbilityId = "vileFeast",
-        };
-        var skeletonArcherEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Skeleton Archer's Essence",
-            ActiveAbilityId = "boneArrow",
-            PassiveAbilityId = "piercingArrow",
-        };
-        var skeletonMageEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Skeleton Mage's Essence",
-            ActiveAbilityId = "siphon",
-            PassiveAbilityId = "protectiveBoneBarrier",
-        };
-        var skeletonWarriorEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Skeleton Warrior's Essence",
-            ActiveAbilityId = "boneShield",
-            PassiveAbilityId = "spikedDefense",
-        };
+        //var mossLizardEssence = new Essence()
+        //{
+        //    Id = Guid.NewGuid(),
+        //    Name = "Moss Lizard's Essence",
+        //    ActiveAbilityId = "mossCamouflage",
+        //    PassiveAbilityId = "lostTail",
+        //};
+        //var spiderEssence = new Essence()
+        //{
+        //    Id = Guid.NewGuid(),
+        //    Name = "Spider's Essence",
+        //    ActiveAbilityId = "skitteringStrike",
+        //    PassiveAbilityId = "spiderEyes",
+        //};
+        //var treantSaplingEssence = new Essence()
+        //{
+        //    Id = Guid.NewGuid(),
+        //    Name = "Treant Sapling's Essence",
+        //    ActiveAbilityId = "sproutingSurge",
+        //    PassiveAbilityId = "naturingRoots",
+        //};
+        //var venomousSnakeEssence = new Essence()
+        //{
+        //    Id = Guid.NewGuid(),
+        //    Name = "Venomous Snake's Essence",
+        //    ActiveAbilityId = "venomousSpit",
+        //    PassiveAbilityId = "toxicHide",
+        //};
+        //var viperEssence = new Essence()
+        //{
+        //    Id = Guid.NewGuid(),
+        //    Name = "Viper's Essence",
+        //    ActiveAbilityId = "piercingFangs",
+        //    PassiveAbilityId = "potentToxins",
+        //};
+        //var feralGhoulEssence = new Essence()
+        //{
+        //    Id = Guid.NewGuid(),
+        //    Name = "Feral Ghoul's Essence",
+        //    ActiveAbilityId = "feralPounce",
+        //    PassiveAbilityId = "shreddingClaws",
+        //};
+        //var plagueGhoulEssence = new Essence()
+        //{
+        //    Id = Guid.NewGuid(),
+        //    Name = "Plague Ghoul's Essence",
+        //    ActiveAbilityId = "plagueSwipe",
+        //    PassiveAbilityId = "pestilentTouch",
+        //};
+        //var ravenousGhoulEssence = new Essence()
+        //{
+        //    Id = Guid.NewGuid(),
+        //    Name = "Ravenous Ghoul's Essence",
+        //    ActiveAbilityId = "drainingClaws",
+        //    PassiveAbilityId = "vileFeast",
+        //};
+        //var skeletonArcherEssence = new Essence()
+        //{
+        //    Id = Guid.NewGuid(),
+        //    Name = "Skeleton Archer's Essence",
+        //    ActiveAbilityId = "boneArrow",
+        //    PassiveAbilityId = "piercingArrow",
+        //};
+        //var skeletonMageEssence = new Essence()
+        //{
+        //    Id = Guid.NewGuid(),
+        //    Name = "Skeleton Mage's Essence",
+        //    ActiveAbilityId = "siphon",
+        //    PassiveAbilityId = "protectiveBoneBarrier",
+        //};
+        //var skeletonWarriorEssence = new Essence()
+        //{
+        //    Id = Guid.NewGuid(),
+        //    Name = "Skeleton Warrior's Essence",
+        //    ActiveAbilityId = "boneShield",
+        //    PassiveAbilityId = "spikedDefense",
+        //};
 
 
 
@@ -442,94 +442,94 @@ public static class SeedCreatures
             ItemType = ItemType.Essence,
             Rarity = Rarity.Unique
         };
-        var mossLizardEssenceItem = new EssenceItemBase
-        {
-            Id = "mossLizardId",
-            Name = mossLizardEssence.Name,
-            Essence = mossLizardEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
-        var spiderEssenceItem = new EssenceItemBase
-        {
-            Id = "spiderId",
-            Name = spiderEssence.Name,
-            Essence = spiderEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
-        var treantSaplingEssenceItem = new EssenceItemBase
-        {
-            Id = "treantSaplingId",
-            Name = treantSaplingEssence.Name,
-            Essence = treantSaplingEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
-        var venomousSnakeEssenceItem = new EssenceItemBase
-        {
-            Id = "venomousSnakeId",
-            Name = venomousSnakeEssence.Name,
-            Essence = venomousSnakeEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
-        var viperEssenceItem = new EssenceItemBase
-        {
-            Id = "viperId",
-            Name = viperEssence.Name,
-            Essence = viperEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
-        var feralGhoulEssenceItem = new EssenceItemBase
-        {
-            Id = "feralGhoulId",
-            Name = feralGhoulEssence.Name,
-            Essence = feralGhoulEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
-        var plagueGhoulEssenceItem = new EssenceItemBase
-        {
-            Id = "plagueGhoulId",
-            Name = plagueGhoulEssence.Name,
-            Essence = plagueGhoulEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
-        var ravenousGhoulEssenceItem = new EssenceItemBase
-        {
-            Id = "ravenousGhoulId",
-            Name = ravenousGhoulEssence.Name,
-            Essence = ravenousGhoulEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
-        var skeletonArcherEssenceItem = new EssenceItemBase
-        {
-            Id = "skeletonArcherId",
-            Name = skeletonArcherEssence.Name,
-            Essence = skeletonArcherEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
-        var skeletonMageEssenceItem = new EssenceItemBase
-        {
-            Id = "skeletonMageId",
-            Name = skeletonMageEssence.Name,
-            Essence = skeletonMageEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
-        var skeletonWarriorEssenceItem = new EssenceItemBase
-        {
-            Id = "skeletonWarriorId",
-            Name = skeletonWarriorEssence.Name,
-            Essence = skeletonWarriorEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
+        //var mossLizardEssenceItem = new EssenceItemBase
+        //{
+        //    Id = "mossLizardId",
+        //    Name = mossLizardEssence.Name,
+        //    Essence = mossLizardEssence,
+        //    ItemType = ItemType.Essence,
+        //    Rarity = Rarity.Unique
+        //};
+        //var spiderEssenceItem = new EssenceItemBase
+        //{
+        //    Id = "spiderId",
+        //    Name = spiderEssence.Name,
+        //    Essence = spiderEssence,
+        //    ItemType = ItemType.Essence,
+        //    Rarity = Rarity.Unique
+        //};
+        //var treantSaplingEssenceItem = new EssenceItemBase
+        //{
+        //    Id = "treantSaplingId",
+        //    Name = treantSaplingEssence.Name,
+        //    Essence = treantSaplingEssence,
+        //    ItemType = ItemType.Essence,
+        //    Rarity = Rarity.Unique
+        //};
+        //var venomousSnakeEssenceItem = new EssenceItemBase
+        //{
+        //    Id = "venomousSnakeId",
+        //    Name = venomousSnakeEssence.Name,
+        //    Essence = venomousSnakeEssence,
+        //    ItemType = ItemType.Essence,
+        //    Rarity = Rarity.Unique
+        //};
+        //var viperEssenceItem = new EssenceItemBase
+        //{
+        //    Id = "viperId",
+        //    Name = viperEssence.Name,
+        //    Essence = viperEssence,
+        //    ItemType = ItemType.Essence,
+        //    Rarity = Rarity.Unique
+        //};
+        //var feralGhoulEssenceItem = new EssenceItemBase
+        //{
+        //    Id = "feralGhoulId",
+        //    Name = feralGhoulEssence.Name,
+        //    Essence = feralGhoulEssence,
+        //    ItemType = ItemType.Essence,
+        //    Rarity = Rarity.Unique
+        //};
+        //var plagueGhoulEssenceItem = new EssenceItemBase
+        //{
+        //    Id = "plagueGhoulId",
+        //    Name = plagueGhoulEssence.Name,
+        //    Essence = plagueGhoulEssence,
+        //    ItemType = ItemType.Essence,
+        //    Rarity = Rarity.Unique
+        //};
+        //var ravenousGhoulEssenceItem = new EssenceItemBase
+        //{
+        //    Id = "ravenousGhoulId",
+        //    Name = ravenousGhoulEssence.Name,
+        //    Essence = ravenousGhoulEssence,
+        //    ItemType = ItemType.Essence,
+        //    Rarity = Rarity.Unique
+        //};
+        //var skeletonArcherEssenceItem = new EssenceItemBase
+        //{
+        //    Id = "skeletonArcherId",
+        //    Name = skeletonArcherEssence.Name,
+        //    Essence = skeletonArcherEssence,
+        //    ItemType = ItemType.Essence,
+        //    Rarity = Rarity.Unique
+        //};
+        //var skeletonMageEssenceItem = new EssenceItemBase
+        //{
+        //    Id = "skeletonMageId",
+        //    Name = skeletonMageEssence.Name,
+        //    Essence = skeletonMageEssence,
+        //    ItemType = ItemType.Essence,
+        //    Rarity = Rarity.Unique
+        //};
+        //var skeletonWarriorEssenceItem = new EssenceItemBase
+        //{
+        //    Id = "skeletonWarriorId",
+        //    Name = skeletonWarriorEssence.Name,
+        //    Essence = skeletonWarriorEssence,
+        //    ItemType = ItemType.Essence,
+        //    Rarity = Rarity.Unique
+        //};
 
 
         // Step 4 - Loot Tables
@@ -553,17 +553,17 @@ public static class SeedCreatures
         var nightshadeBlossomEssenceLootTableItem = new LootTableItem { ItemId = nightshadeBlossomEssenceItem.Id, Weight = 5 };
         var pixieEssenceLootTableItem = new LootTableItem { ItemId = pixieEssenceItem.Id, Weight = 5 };
         var hobgoblinEssenceLootTableItem = new LootTableItem { ItemId = hobgoblinEssenceItem.Id, Weight = 5 };
-        var mossLizardEssenceLootTableItem = new LootTableItem { ItemId = mossLizardEssenceItem.Id, Weight = 5 };
-        var spiderEssenceLootTableItem = new LootTableItem { ItemId = spiderEssenceItem.Id, Weight = 5 };
-        var treantSaplingEssenceLootTableItem = new LootTableItem { ItemId = treantSaplingEssenceItem.Id, Weight = 5 };
-        var venomousSnakeEssenceLootTableItem = new LootTableItem { ItemId = venomousSnakeEssenceItem.Id, Weight = 5 };
-        var viperEssenceLootTableItem = new LootTableItem { ItemId = viperEssenceItem.Id, Weight = 5 };
-        var feralGhoulEssenceLootTableItem = new LootTableItem { ItemId = feralGhoulEssenceItem.Id, Weight = 5 };
-        var plagueGhoulEssenceLootTableItem = new LootTableItem { ItemId = plagueGhoulEssenceItem.Id, Weight = 5 };
-        var ravenousGhoulEssenceLootTableItem = new LootTableItem { ItemId = ravenousGhoulEssenceItem.Id, Weight = 5 };
-        var skeletonArcherEssenceLootTableItem = new LootTableItem { ItemId = skeletonArcherEssenceItem.Id, Weight = 5 };
-        var skeletonMageEssenceLootTableItem = new LootTableItem { ItemId = skeletonMageEssenceItem.Id, Weight = 5 };
-        var skeletonWarriorEssenceLootTableItem = new LootTableItem { ItemId = skeletonWarriorEssenceItem.Id, Weight = 5 };
+        //var mossLizardEssenceLootTableItem = new LootTableItem { ItemId = mossLizardEssenceItem.Id, Weight = 5 };
+        //var spiderEssenceLootTableItem = new LootTableItem { ItemId = spiderEssenceItem.Id, Weight = 5 };
+        //var treantSaplingEssenceLootTableItem = new LootTableItem { ItemId = treantSaplingEssenceItem.Id, Weight = 5 };
+        //var venomousSnakeEssenceLootTableItem = new LootTableItem { ItemId = venomousSnakeEssenceItem.Id, Weight = 5 };
+        //var viperEssenceLootTableItem = new LootTableItem { ItemId = viperEssenceItem.Id, Weight = 5 };
+        //var feralGhoulEssenceLootTableItem = new LootTableItem { ItemId = feralGhoulEssenceItem.Id, Weight = 5 };
+        //var plagueGhoulEssenceLootTableItem = new LootTableItem { ItemId = plagueGhoulEssenceItem.Id, Weight = 5 };
+        //var ravenousGhoulEssenceLootTableItem = new LootTableItem { ItemId = ravenousGhoulEssenceItem.Id, Weight = 5 };
+        //var skeletonArcherEssenceLootTableItem = new LootTableItem { ItemId = skeletonArcherEssenceItem.Id, Weight = 5 };
+        //var skeletonMageEssenceLootTableItem = new LootTableItem { ItemId = skeletonMageEssenceItem.Id, Weight = 5 };
+        //var skeletonWarriorEssenceLootTableItem = new LootTableItem { ItemId = skeletonWarriorEssenceItem.Id, Weight = 5 };
 
 
 
@@ -1370,17 +1370,17 @@ public static class SeedCreatures
         attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(nightshadeBlossomId, 2f));
         attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(pixieId, 1.4f));
         attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(hobgoblinId, 4f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(mossLizardId, 2.1f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(spiderId, 1.9f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(treantSaplingId, 2f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(venomousSnakeId, 1.9f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(viperId, 1.7f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(feralGhoulId, 2.4f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(plagueGhoulId, 2.3f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(ravenousGhoulId, 2.7f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(skeletonArcherId, 2.8f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(skeletonMageId, 2.9f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(skeletonWarriorId, 2.6f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(mossLizardId, 2.1f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(spiderId, 1.9f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(treantSaplingId, 2f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(venomousSnakeId, 1.9f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(viperId, 1.7f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(feralGhoulId, 2.4f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(plagueGhoulId, 2.3f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(ravenousGhoulId, 2.7f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(skeletonArcherId, 2.8f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(skeletonMageId, 2.9f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(skeletonWarriorId, 2.6f));
 
         await context.EntityAttributes.AddRangeAsync(attributes);
 
