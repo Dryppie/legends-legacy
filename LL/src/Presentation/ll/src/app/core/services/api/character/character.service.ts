@@ -50,9 +50,7 @@ export class CharacterService {
     private api: ApiService,
     private authService: AuthService,
   ) {
-    this.currentCharacter = toSignal(this.authService.currentCharacter$, {
-      initialValue: null,
-    });
+    this.currentCharacter = this.authService.currentCharacter;
 
     // this.currentCharacterId = computed(
     //   () => this.currentCharacter()?.id ?? null,
@@ -63,8 +61,8 @@ export class CharacterService {
     this.authService.updateCharacter(updatedCharacter);
   }
 
-  getCurrentCharacter(): Observable<CharacterDto | null> {
-    return this.authService.currentCharacter$;
+  getCurrentCharacter(): Signal<CharacterDto | null> {
+    return this.authService.currentCharacter;
   }
 
   public getCharacterOverview(): Observable<CharacterOverviewDto> {

@@ -1,4 +1,4 @@
-<div class="flex h-24">
+<div class="flex h-24" *ngIf="currentCharacter() as currentCharacter">
   <app-character-badge
     class="z-10 -mr-12"
     [level]="currentCharacter?.level"

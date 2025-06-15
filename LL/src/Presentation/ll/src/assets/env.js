@@ -4,7 +4,7 @@
   window["env"] = window["env"] || {};
   // Environment variables
   window.env.environment = "dev";
-  window.env.apiBaseUrl = "https://localhost:7060";
+  window.env.apiBaseUrl = "http://localhost:7050";
   window.env.chatApiRoot = "https://localhost:7095/chat";
   window.env.isLocal = "true";
   window.env.googleClientId =

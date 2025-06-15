@@ -1,7 +1,6 @@
-import { Injectable } from '@angular/core';
+import { computed, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
-  BehaviorSubject,
   Observable,
   Subscription,
   catchError,
@@ -27,15 +26,13 @@ import { UserInfoDto } from '../../../../shared/models/Dtos/userInfoDto';
 export class AuthService {
   private refreshSub?: Subscription;
 
-  private currentCharacterSubject = new BehaviorSubject<CharacterDto | null>(
-    null,
-  );
+  /* writable signals */
+  private readonly _currentCharacter = signal<CharacterDto | null>(null);
+  private readonly _isAuthenticated = signal(false);
 
-  public currentCharacter$ = this.currentCharacterSubject.asObservable();
-
-  private isAuthenticatedSubject = new BehaviorSubject<boolean | null>(false); // Start with false
-  public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
-
+  /* public read-only selectors */
+  readonly currentCharacter = computed(() => this._currentCharacter());
+  readonly isAuthenticated = computed(() => this._isAuthenticated());
   public returnUrl = '/';
 
   constructor(
@@ -46,18 +43,18 @@ export class AuthService {
   ) {}
 
   private markAuthenticated() {
-    this.isAuthenticatedSubject.next(true);
+    this._isAuthenticated.set(true);
     this.event.emitFetchCurrentAction();
   }
 
   private markUnauthenticated() {
-    this.currentCharacterSubject.next(null);
-    this.isAuthenticatedSubject.next(false);
+    this._currentCharacter.set(null);
+    this._isAuthenticated.set(false);
     this.event.emitLogout();
   }
 
   updateCharacter(updatedCharacter: CharacterDto): void {
-    this.currentCharacterSubject.next(updatedCharacter);
+    this._currentCharacter.set(updatedCharacter);
   }
 
   login(email: string, password: string): Observable<void> {
@@ -201,7 +198,7 @@ export class AuthService {
 
   private fetchCharacter(): Observable<CharacterDto> {
     return this.api.get('character').pipe(
-      tap((character) => this.currentCharacterSubject.next(character)),
+      tap((character) => this._currentCharacter.set(character)),
       map((character) => character as CharacterDto),
     );
   }

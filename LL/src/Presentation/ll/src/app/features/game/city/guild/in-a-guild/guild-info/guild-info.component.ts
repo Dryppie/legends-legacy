@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  computed,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Guild } from '../../../../../../shared/models/Dtos/guild/guild';
 import { CharacterService } from '../../../../../../core/services/api/character/character.service';
@@ -8,6 +15,7 @@ import { FormsModule } from '@angular/forms';
 import { GuildMember } from '../../../../../../shared/models/Dtos/guild/guildMember';
 import { GuildService } from '../../../../../../core/services/api/guild/guild.service';
 import { RegularButtonComponent } from '../../../../../../shared/components/buttons/regular-button/regular-button.component';
+import { GuildStateService } from '../../../../../../core/services/api/guild/guild-state.service';
 
 @Component({
   selector: 'app-guild-info',
@@ -17,13 +25,19 @@ import { RegularButtonComponent } from '../../../../../../shared/components/butt
 })
 export class GuildInfoComponent implements OnInit {
   @Input() guild!: Guild;
-  guildMembers: GuildMember[] = [];
-  character!: GuildMember;
   @Output() inviteEvent = new EventEmitter<string>();
   @Output() leaveEvent = new EventEmitter<void>();
   @Output() disbandEvent = new EventEmitter<void>();
   @Output() rejectEvent = new EventEmitter<string>();
   @Output() approveEvent = new EventEmitter<string>();
+
+  guildMembers: GuildMember[] = [];
+  readonly character = computed(() => {
+    const myId = this.characterService.currentCharacterId(); // string | null
+    const guild = this.state.guild(); // Guild | null
+    if (!myId || !guild) return null;
+    return guild.members.find((m) => m.characterId === myId) ?? null;
+  });
 
   showModal = false;
   inviteName = '';
@@ -39,25 +53,11 @@ export class GuildInfoComponent implements OnInit {
   subscriptions: Subscription = new Subscription();
   constructor(
     private characterService: CharacterService,
-    private guildService: GuildService,
+    private state: GuildStateService,
   ) {}
 
   ngOnInit(): void {
-    this.subscriptions.add(
-      this.guildService.guild$.subscribe((guild) => {
-        if (!guild) return;
-        this.guild = guild;
-        this.sortGuildMembers();
-      }),
-    );
-    this.subscriptions.add(
-      this.characterService.getCurrentCharacter().subscribe((character) => {
-        if (character) this.id = character.id;
-        this.character = this.guildMembers.find(
-          (gm) => gm.characterId === this.id,
-        )!;
-      }),
-    );
+    this.sortGuildMembers();
   }
 
   private sortGuildMembers() {

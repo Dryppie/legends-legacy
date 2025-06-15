@@ -20,374 +20,160 @@ export class GuildService {
   constructor(private api: ApiService) {}
 
   create(name: string) {
-    this.api
-      .post('guild/createGuild', name)
-      .pipe(
-        map((guild) => {
-          // this.toastService.showToast(
-          //   'Action completed successfully!',
-          //   'success',
-          // );
-          return guild;
-        }),
+    return this.api.post('guild/createGuild', name).pipe(
+      map((guild) => {
+        return guild;
+      }),
 
-        catchError(() => {
-          // this.toastService.showToast(
-          //   'Login Failed',
-          //   'Wrong email or password',
-          //   'error',
-          //   't',
-          // );
-          return throwError(() => new Error('Failed to create guild'));
-        }),
-      )
-      .subscribe(() => {
-        this.getMyGuild();
-      });
+      catchError(() => {
+        return throwError(() => new Error('Failed to create guild'));
+      }),
+    );
   }
 
   getMyGuild() {
-    this.api
-      .get('guild/getMyGuild')
-      .pipe(
-        map((guild) => {
-          // this.toastService.showToast(
-          //   'Action completed successfully!',
-          //   'success',
-          // );
-          return guild;
-        }),
+    return this.api.get('guild/getMyGuild').pipe(
+      map((guild) => {
+        return guild;
+      }),
 
-        catchError(() => {
-          // this.toastService.showToast(
-          //   'Login Failed',
-          //   'Wrong email or password',
-          //   'error',
-          //   't',
-          // );
-          return throwError(() => new Error('Failed to get guild'));
-        }),
-      )
-      .subscribe((guild) => {
-        if (guild) {
-          this._guild$.next(guild);
-          return;
-        }
-
-        this.getAllGuilds();
-        this.getMyInvites();
-      });
+      catchError(() => {
+        return throwError(() => new Error('Failed to get guild'));
+      }),
+    );
   }
 
   getAllGuilds() {
-    this.api
-      .get('guild/getAllGuilds')
-      .pipe(
-        map((guilds) => {
-          // this.toastService.showToast(
-          //   'Action completed successfully!',
-          //   'success',
-          // );
-          return guilds;
-        }),
+    return this.api.get('guild/getAllGuilds').pipe(
+      map((guilds) => {
+        return guilds;
+      }),
 
-        catchError(() => {
-          // this.toastService.showToast(
-          //   'Login Failed',
-          //   'Wrong email or password',
-          //   'error',
-          //   't',
-          // );
-          return throwError(() => new Error('Failed to get guilds'));
-        }),
-      )
-      .subscribe((guilds) => {
-        this._allGuilds$.next(guilds);
-      });
+      catchError(() => {
+        return throwError(() => new Error('Failed to get guilds'));
+      }),
+    );
   }
 
   applyToGuild(guildId: string) {
-    this.api
-      .post('guild/applyToGuild', guildId)
-      .pipe(
-        map((opponents) => {
-          // this.toastService.showToast(
-          //   'Action completed successfully!',
-          //   'success',
-          // );
-          return opponents;
-        }),
+    return this.api.post('guild/applyToGuild', guildId).pipe(
+      map((opponents) => {
+        return opponents;
+      }),
 
-        catchError(() => {
-          // this.toastService.showToast(
-          //   'Login Failed',
-          //   'Wrong email or password',
-          //   'error',
-          //   't',
-          // );
-          return throwError(() => new Error('Failed to apply to guild'));
-        }),
-      )
-      .subscribe(() => {
-        const invite: GuildInvite = {
-          guildId: guildId,
-          guildName: '',
-          characterId: '',
-          characterName: '',
-          isInvite: false,
-        };
-        const currentInvites = this._invites$.value;
-        this._invites$.next([...currentInvites, invite]);
-      });
+      catchError(() => {
+        return throwError(() => new Error('Failed to apply to guild'));
+      }),
+    );
   }
 
   invite(inviteToGuild: InviteToGuild): Observable<void> {
     return this.api.post('guild/invite', inviteToGuild).pipe(
       map((opponents) => {
-        // this.toastService.showToast(
-        //   'Action completed successfully!',
-        //   'success',
-        // );
         return opponents;
       }),
 
       catchError(() => {
-        // this.toastService.showToast(
-        //   'Login Failed',
-        //   'Wrong email or password',
-        //   'error',
-        //   't',
-        // );
         return throwError(() => new Error('Failed to invite character'));
       }),
     );
   }
 
   inviteCharacterByName(inviteToGuild: InviteToGuild) {
-    this.api
-      .post('guild/inviteCharacterByName', inviteToGuild)
-      .pipe(
-        map((opponents) => {
-          // this.toastService.showToast(
-          //   'Action completed successfully!',
-          //   'success',
-          // );
-          return opponents;
-        }),
+    return this.api.post('guild/inviteCharacterByName', inviteToGuild).pipe(
+      map((opponents) => {
+        return opponents;
+      }),
 
-        catchError(() => {
-          // this.toastService.showToast(
-          //   'Login Failed',
-          //   'Wrong email or password',
-          //   'error',
-          //   't',
-          // );
-          return throwError(
-            () => new Error('Failed to invite character by name'),
-          );
-        }),
-      )
-      .subscribe();
+      catchError(() => {
+        return throwError(
+          () => new Error('Failed to invite character by name'),
+        );
+      }),
+    );
   }
 
   getMyInvites() {
-    this.api
-      .get('guild/getMyinvites')
-      .pipe(
-        map((opponents) => {
-          // this.toastService.showToast(
-          //   'Action completed successfully!',
-          //   'success',
-          // );
-          return opponents;
-        }),
+    return this.api.get('guild/getMyinvites').pipe(
+      map((opponents) => {
+        return opponents;
+      }),
 
-        catchError(() => {
-          // this.toastService.showToast(
-          //   'Login Failed',
-          //   'Wrong email or password',
-          //   'error',
-          //   't',
-          // );
-          return throwError(() => new Error('Failed to get guild invites'));
-        }),
-      )
-      .subscribe((invites) => {
-        this._invites$.next(invites);
-      });
+      catchError(() => {
+        return throwError(() => new Error('Failed to get guild invites'));
+      }),
+    );
   }
 
   acceptInvite(guildId: string) {
-    this.api
-      .post('guild/acceptInvite', guildId)
-      .pipe(
-        map((opponents) => {
-          // this.toastService.showToast(
-          //   'Action completed successfully!',
-          //   'success',
-          // );
-          return opponents;
-        }),
+    return this.api.post('guild/acceptInvite', guildId).pipe(
+      map((opponents) => {
+        return opponents;
+      }),
 
-        catchError(() => {
-          // this.toastService.showToast(
-          //   'Login Failed',
-          //   'Wrong email or password',
-          //   'error',
-          //   't',
-          // );
-          return throwError(() => new Error('Failed to accept guild invite'));
-        }),
-      )
-      .subscribe(() => {
-        this.getMyGuild();
-      });
+      catchError(() => {
+        return throwError(() => new Error('Failed to accept guild invite'));
+      }),
+    );
   }
 
   rejectInvite(guildId: string) {
-    this.api
-      .post('guild/rejectInvite', guildId)
-      .pipe(
-        map((guild) => {
-          // this.toastService.showToast(
-          //   'Action completed successfully!',
-          //   'success',
-          // );
-          return guild;
-        }),
+    return this.api.post('guild/rejectInvite', guildId).pipe(
+      map((guild) => {
+        return guild;
+      }),
 
-        catchError(() => {
-          // this.toastService.showToast(
-          //   'Login Failed',
-          //   'Wrong email or password',
-          //   'error',
-          //   't',
-          // );
-          return throwError(() => new Error('Failed to reject guild invite'));
-        }),
-      )
-      .subscribe(() => {
-        const filteredInvites = this._invites$.value.filter(
-          (i) => i.guildId !== guildId,
-        );
-        this._invites$.next(filteredInvites);
-      });
+      catchError(() => {
+        return throwError(() => new Error('Failed to reject guild invite'));
+      }),
+    );
   }
 
   approveApplication(characterId: string) {
-    this.api
-      .post('guild/approveApplication', characterId)
-      .pipe(
-        map((guild) => {
-          // this.toastService.showToast(
-          //   'Action completed successfully!',
-          //   'success',
-          // );
-          return guild;
-        }),
+    return this.api.post('guild/approveApplication', characterId).pipe(
+      map((guild) => {
+        return guild;
+      }),
 
-        catchError(() => {
-          // this.toastService.showToast(
-          //   'Login Failed',
-          //   'Wrong email or password',
-          //   'error',
-          //   't',
-          // );
-          return throwError(() => new Error('Failed to approve application'));
-        }),
-      )
-      .subscribe(() => {
-        this.getMyGuild();
-      });
+      catchError(() => {
+        return throwError(() => new Error('Failed to approve application'));
+      }),
+    );
   }
 
   rejectApplication(characterId: string) {
-    this.api
-      .post('guild/rejectApplication', characterId)
-      .pipe(
-        map((guild) => {
-          // this.toastService.showToast(
-          //   'Action completed successfully!',
-          //   'success',
-          // );
-          return guild;
-        }),
+    return this.api.post('guild/rejectApplication', characterId).pipe(
+      map((guild) => {
+        return guild;
+      }),
 
-        catchError(() => {
-          // this.toastService.showToast(
-          //   'Login Failed',
-          //   'Wrong email or password',
-          //   'error',
-          //   't',
-          // );
-          return throwError(() => new Error('Failed to reject application'));
-        }),
-      )
-      .subscribe(() => {
-        let currentGuild = this._guild$.value;
-        if (!currentGuild) return;
-        currentGuild.invites = currentGuild.invites.filter(
-          (i) => i.characterId !== characterId,
-        );
-        this._guild$.next(currentGuild);
-      });
+      catchError(() => {
+        return throwError(() => new Error('Failed to reject application'));
+      }),
+    );
   }
 
   leave() {
-    this.api
-      .post('guild/leaveGuild')
-      .pipe(
-        map((opponents) => {
-          // this.toastService.showToast(
-          //   'Action completed successfully!',
-          //   'success',
-          // );
-          return opponents;
-        }),
+    return this.api.post('guild/leaveGuild').pipe(
+      map((opponents) => {
+        return opponents;
+      }),
 
-        catchError(() => {
-          // this.toastService.showToast(
-          //   'Login Failed',
-          //   'Wrong email or password',
-          //   'error',
-          //   't',
-          // );
-          return throwError(() => new Error('Failed to leave guild'));
-        }),
-      )
-      .subscribe(() => {
-        this._guild$.next(null);
-        this.getAllGuilds();
-        this.getMyInvites();
-      });
+      catchError(() => {
+        return throwError(() => new Error('Failed to leave guild'));
+      }),
+    );
   }
 
   disband() {
-    this.api
-      .post('guild/disbandGuild')
-      .pipe(
-        map((opponents) => {
-          // this.toastService.showToast(
-          //   'Action completed successfully!',
-          //   'success',
-          // );
-          return opponents;
-        }),
+    return this.api.post('guild/disbandGuild').pipe(
+      map((opponents) => {
+        return opponents;
+      }),
 
-        catchError(() => {
-          // this.toastService.showToast(
-          //   'Login Failed',
-          //   'Wrong email or password',
-          //   'error',
-          //   't',
-          // );
-          return throwError(() => new Error('Failed to disband guild'));
-        }),
-      )
-      .subscribe(() => {
-        this._guild$.next(null);
-        this.getAllGuilds();
-        this.getMyInvites();
-      });
+      catchError(() => {
+        return throwError(() => new Error('Failed to disband guild'));
+      }),
+    );
   }
 }

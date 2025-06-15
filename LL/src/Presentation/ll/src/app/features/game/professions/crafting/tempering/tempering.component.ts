@@ -203,7 +203,7 @@ export class TemperingComponent implements OnInit {
     this.craftingService.removeItemFromQueue(queueItem).subscribe((success) => {
       /* TODO: might be necessary, but only if removing items from queue is deemed troublesome in the backend, causing client-side miss-match */
     });
-    this.inventoryState.add({
+    this.inventoryState.addOrIncrement({
       id: items[0].id,
       quantity: 1,
       itemInstance: queueItem.equipmentInstance,
@@ -222,7 +222,7 @@ export class TemperingComponent implements OnInit {
     if (!items) return;
 
     queue.forEach((queueItem) => {
-      this.inventoryState.add({
+      this.inventoryState.addOrIncrement({
         id: items[0].id,
         quantity: 1,
         itemInstance: queueItem.equipmentInstance,

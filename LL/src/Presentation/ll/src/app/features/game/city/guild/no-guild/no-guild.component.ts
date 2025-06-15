@@ -1,71 +1,52 @@
-import { Component, OnInit } from '@angular/core';
-import { GuildSimple } from '../../../../../shared/models/Dtos/guild/guild';
-import { GuildService } from '../../../../../core/services/api/guild/guild.service';
-import { AsyncPipe, NgFor, NgIf } from '@angular/common';
-import { GuildInvite } from '../../../../../shared/models/Dtos/guild/guildInvite';
+import { Component, computed, signal } from '@angular/core';
+import { NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Observable, Subscription } from 'rxjs';
+import { GuildStateService } from '../../../../../core/services/api/guild/guild-state.service';
 
 @Component({
   selector: 'app-no-guild',
   standalone: true,
-  imports: [NgIf, NgFor, FormsModule, AsyncPipe],
+  imports: [NgIf, NgFor, FormsModule],
   templateUrl: './no-guild.component.html',
 })
-export class NoGuildComponent implements OnInit {
-  guilds$!: Observable<GuildSimple[]>;
-  guildInvites!: GuildInvite[];
-  guildApplications!: GuildInvite[];
-  subscription: Subscription = new Subscription();
-  showModal = false;
-  guildName = '';
+export class NoGuildComponent {
+  /* ─────────── read data from the state ─────────── */
+  readonly guilds;
+  readonly guildInvites = computed(() =>
+    this.guildState.invites().filter((i) => i.isInvite),
+  );
+  readonly guildApplications = computed(() =>
+    this.guildState.invites().filter((i) => !i.isInvite),
+  );
 
-  constructor(private guildService: GuildService) {}
+  /* ─────────── local UI state ─────────── */
+  showModal = signal(false);
+  guildName = signal('');
 
-  ngOnInit(): void {
-    this.guilds$ = this.guildService.allGuilds$;
-    this.subscription.add(
-      this.guildService.invites$.subscribe((invites) => {
-        this.guildInvites = invites.filter((i) => i.isInvite);
-        this.guildApplications = invites.filter((i) => !i.isInvite);
-      }),
-    );
+  constructor(private readonly guildState: GuildStateService) {
+    this.guilds = guildState.allGuilds;
   }
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+  /* ─────────── helpers for the template ─────────── */
+  isGuildAppliedTo = (guildId: string): boolean =>
+    this.guildApplications().some((inv) => inv.guildId === guildId);
+
+  /* ─────────── delegating actions to the state ─────────── */
+  acceptInvite = (guildId: string) => this.guildState.acceptInvite(guildId);
+  rejectInvite = (guildId: string) => this.guildState.rejectInvite(guildId);
+  applyToGuild = (guildId: string) => this.guildState.applyToGuild(guildId);
+
+  create(): void {
+    const name = this.guildName().trim();
+    if (!name) return;
+
+    this.guildState.create(name);
+    this.closeModal();
   }
 
-  isGuildAppliedTo(guildId: string): boolean {
-    return this.guildApplications.some((invite) => invite.guildId === guildId);
-  }
-
-  acceptInvite(guildId: string) {
-    this.guildService.acceptInvite(guildId);
-  }
-
-  rejectInvite(guildId: string) {
-    this.guildService.rejectInvite(guildId);
-  }
-
-  applyToGuild(guildId: string) {
-    this.guildService.applyToGuild(guildId);
-  }
-
-  create() {
-    if (this.guildName.trim()) {
-      this.guildService.create(this.guildName);
-
-      this.closeModal();
-    }
-  }
-
-  openModal() {
-    this.showModal = true;
-  }
-
-  closeModal() {
-    this.showModal = false;
-    this.guildName = '';
-  }
+  openModal = () => this.showModal.set(true);
+  closeModal = () => {
+    this.showModal.set(false);
+    this.guildName.set('');
+  };
 }

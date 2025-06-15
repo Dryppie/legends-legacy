@@ -169,7 +169,7 @@ export class MarketPlaceSellComponent implements OnInit {
         itemInstance: listing.itemInstance,
         quantity: listing.quantity,
       };
-      this.inventoryState.add(inventoryItem);
+      this.inventoryState.addOrIncrement(inventoryItem);
       if (this.selectedItemId === inventoryItem.itemInstance.id)
         this.selectedItemId = '';
     });

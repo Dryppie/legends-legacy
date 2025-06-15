@@ -1,4 +1,7 @@
-<div class="flex h-full w-full flex-col gap-2 text-white">
+<div
+  *ngIf="character() as character"
+  class="flex h-full w-full flex-col gap-2 text-white"
+>
   <div
     class="flex min-h-48 w-full justify-between rounded-lg border border-light_gray p-4"
   >
@@ -45,7 +48,8 @@
         class="grid grid-cols-4 items-center border-b border-light_gray p-2 text-white"
         *ngFor="let member of guildMembers"
         [ngClass]="{
-          'bg-zinc-300/10 text-primary': member.characterId === id,
+          'bg-zinc-300/10 text-primary':
+            member.characterId === character.characterId,
         }"
       >
         <div class="break-words pr-2">
@@ -54,7 +58,7 @@
         <div>{{ member.level }}</div>
         <div>{{ member.role }}</div>
         <app-regular-button
-          *ngIf="member.characterId === id"
+          *ngIf="member.characterId === character.characterId"
           variant="danger"
           class="col-start-4 justify-self-end"
           (pressed)="

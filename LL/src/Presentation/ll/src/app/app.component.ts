@@ -1,4 +1,11 @@
-import { Component, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  effect,
+  OnInit,
+  signal,
+  ViewChild,
+} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ToastComponent } from './shared/components/toast/toast.component';
 import { ToastService } from './core/services/client-side/toast/toast.service';
@@ -20,35 +27,41 @@ import { GoogleAuthService } from './core/services/api/auth/google-auth.service'
   ],
   templateUrl: './app.component.html',
 })
-export class AppComponent {
+export class AppComponent implements OnInit, AfterViewInit {
   title = 'll';
-  @ViewChild('toast') toastComponent!: ToastComponent;
+
+  @ViewChild('toast', { static: true }) toastComponent!: ToastComponent;
+
+  /** Prevents calling `characterActionsService.init()` more than once */
+  private readonly initDone = signal(false);
 
   constructor(
-    private authService: AuthService,
-    private googleAuth: GoogleAuthService,
-    private characterActionsService: CharacterActionsService,
-    private toastService: ToastService,
-  ) {}
-
-  ngOnInit(): void {
-    this.googleAuth.init();
-    this.authService.isAuthenticated$
-      .pipe(
-        switchMap((isAuthenticated) => {
-          if (isAuthenticated) {
-            this.characterActionsService.init();
-          }
-          return [];
-        }),
-        take(1),
-      )
-      .subscribe();
+    private readonly authService: AuthService, // now exposes `isAuthenticated()` signal
+    private readonly googleAuth: GoogleAuthService,
+    private readonly characterActionsService: CharacterActionsService,
+    private readonly toastService: ToastService,
+  ) {
+    /* ───────────────────────────────────────────────
+     *  Side-effect : run when `isAuthenticated` flips
+     * ─────────────────────────────────────────────── */
+    effect(
+      () => {
+        const loggedIn = this.authService.isAuthenticated(); // read only
+        if (loggedIn && !this.initDone()) {
+          this.characterActionsService.init();
+          this.initDone.set(true); // <-- write
+        }
+      },
+      { allowSignalWrites: true },
+    );
   }
 
-  ngOnDestroy(): void {}
+  /* ─────────────────────────────────────────────── */
+  ngOnInit(): void {
+    this.googleAuth.init(); // load GSI script once
+  }
 
-  ngAfterViewInit() {
-    this.toastService.register(this.toastComponent);
+  ngAfterViewInit(): void {
+    this.toastService.register(this.toastComponent); // hook up toast outlet
   }
 }

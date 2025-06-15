@@ -5,15 +5,16 @@ import { take } from 'rxjs';
 declare const google: any; // GIS is loaded globally
 
 @Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: 'root' })
 export class GoogleAuthService {
   private scriptLoaded?: Promise<void>;
   private gisReady = false;
 
-  constructor(private auth: AuthService) {}
+  constructor(private readonly auth: AuthService) {}
 
   /** Call once, e.g. from app.component.ts → ngOnInit() */
-  init() {
-    if (this.gisReady) return;
+  init(): void {
+    if (this.gisReady) return; // already initialised
 
     (this.scriptLoaded ??= this.injectScript()).then(() => {
       google.accounts.id.initialize({
@@ -28,25 +29,26 @@ export class GoogleAuthService {
     });
   }
 
-  prompt() {
-    this.init();
-    google.accounts.id.prompt((notification: any) => {});
+  prompt(): void {
+    this.init(); // guard: ensure GIS loaded
+    google.accounts.id.prompt(() => {}); // noop callback
   }
 
-  // ────────────────────────────────────────────────────────────────
-  private handleIdToken(idToken: string) {
-    this.auth.isAuthenticated$.pipe(take(1)).subscribe((isLoggedIn) => {
-      if (isLoggedIn) {
-        this.auth.bindGoogle(idToken); // bind to existing user
-      } else {
-        this.auth.googleLogin(idToken); // fresh sign‑in / sign‑up
-      }
-    });
+  // ─────────────────────────────────────────────────────────
+  private handleIdToken(idToken: string): void {
+    /*  ✅ Synchronous, signal-driven read – no take(1), no subscribe */
+    const loggedIn = this.auth.isAuthenticated(); // signal<boolean>
+    if (loggedIn) {
+      this.auth.bindGoogle(idToken); // bind to existing user
+    } else {
+      this.auth.googleLogin(idToken); // fresh sign-in / sign-up
+    }
   }
 
   private injectScript(): Promise<void> {
     return new Promise((resolve, reject) => {
       if ((window as any).google?.accounts?.id) {
+        // already present
         resolve();
         return;
       }

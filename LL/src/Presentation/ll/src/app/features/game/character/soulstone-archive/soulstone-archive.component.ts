@@ -20,7 +20,7 @@ import { SoulstoneUpgradeCardComponent } from './soulstone-upgrade-card/soulston
   templateUrl: './soulstone-archive.component.html',
 })
 export class SoulstoneArchiveComponent implements OnInit {
-  readonly character$;
+  readonly character;
   readonly soulstoneUpgrades$;
 
   combatUpgrades$!: Observable<SoulstoneUpgradeView[]>;
@@ -32,7 +32,7 @@ export class SoulstoneArchiveComponent implements OnInit {
     private readonly characterService: CharacterService,
     private readonly soulstoneUpgradeService: SoulstoneUpgradeService,
   ) {
-    this.character$ = this.characterService.getCurrentCharacter();
+    this.character = this.characterService.getCurrentCharacter();
     this.soulstoneUpgrades$ = this.soulstoneUpgradeService.soulstoneUpgrades$;
   }
 

@@ -18,20 +18,20 @@ export class SettingsComponent {
 
   disableLoginLink: boolean = false;
 
+  readonly currentCharacter;
+
   constructor(
     private authService: AuthService,
     private googleService: GoogleAuthService,
-  ) {}
+  ) {
+    this.currentCharacter = this.authService.currentCharacter;
+  }
 
   version = '1.0.0'; // or pull from environment
 
   ngOnInit() {
     this.authService.getUserInfo().subscribe((userInfo) => {
       this.userInfo = userInfo;
-    });
-
-    this.authService.currentCharacter$.subscribe((character) => {
-      this.character = character;
     });
   }
 

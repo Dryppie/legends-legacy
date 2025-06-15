@@ -8,7 +8,7 @@
     class="flex flex-col gap-4 overflow-y-auto pr-4 sm:pr-6"
     *ngIf="soulstoneUpgrades$ | async as soulstoneUpgrades"
   >
-    <ng-container *ngIf="character$ | async as character">
+    <ng-container *ngIf="character() as character">
       <app-soulstone-upgrade-card
         [upgrades]="(combatUpgrades$ | async) ?? []"
         upgradeType="Combat"

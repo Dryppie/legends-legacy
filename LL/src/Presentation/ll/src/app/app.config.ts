@@ -22,12 +22,15 @@ import { CombatLogService } from './core/services/client-side/combat/combat-log/
 import { LevelingService } from './core/services/client-side/leveling/leveling.service';
 import { ColosseumPlaybackStrategy } from './core/services/client-side/combat/combat-playback/colosseum-playback-strategy';
 import { AuthInterceptor } from './core/interceptors/auth-interceptor';
+import { RealTimeFacade } from './core/services/real-time/real-time-facade';
 
 export function initializeApp(authService: AuthService) {
   return () =>
     firstValueFrom(authService.checkAuth()).catch(() => Promise.resolve());
 }
-
+function startRealTime(realTime: RealTimeFacade) {
+  return () => {}; // noop; DI only cares that the factory runs
+}
 export const appConfig: ApplicationConfig = {
   providers: [
     {
@@ -43,6 +46,12 @@ export const appConfig: ApplicationConfig = {
         [BattleType.Colosseum]: new ColosseumPlaybackStrategy(),
       }),
       deps: [CombatLogService, LevelingService],
+    },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: startRealTime,
+      deps: [RealTimeFacade], // 👈 forces construction
+      multi: true,
     },
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     provideZoneChangeDetection({ eventCoalescing: true }),

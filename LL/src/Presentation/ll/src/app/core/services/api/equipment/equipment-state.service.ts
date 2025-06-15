@@ -68,7 +68,7 @@ export class EquipmentStateService {
 
     const unequip = (slot?: EquipmentSlot) => {
       if (slot && slot.equipmentInstance) {
-        this.inventoryState.add({
+        this.inventoryState.addOrIncrement({
           id: crypto.randomUUID(),
           itemInstance: slot.equipmentInstance,
           quantity: 1,
@@ -206,7 +206,7 @@ export class EquipmentStateService {
     const instance = target.equipmentInstance;
 
     // Always add the unequipped item to inventory
-    this.inventoryState.add({
+    this.inventoryState.addOrIncrement({
       id: crypto.randomUUID(),
       itemInstance: instance,
       quantity: 1,

@@ -1,23 +1,22 @@
 import { Component, OnInit } from '@angular/core';
-import { GuildService } from '../../../../core/services/api/guild/guild.service';
 import { NoGuildComponent } from './no-guild/no-guild.component';
 import { InAGuildComponent } from './in-a-guild/in-a-guild.component';
-import { Observable } from 'rxjs';
-import { Guild } from '../../../../shared/models/Dtos/guild/guild';
-import { AsyncPipe, NgIf } from '@angular/common';
+import { NgIf } from '@angular/common';
+import { GuildStateService } from '../../../../core/services/api/guild/guild-state.service';
 
 @Component({
   selector: 'app-guild',
   standalone: true,
-  imports: [NoGuildComponent, InAGuildComponent, AsyncPipe, NgIf],
+  imports: [NoGuildComponent, InAGuildComponent, NgIf],
   templateUrl: './guild.component.html',
 })
 export class GuildComponent implements OnInit {
-  guild$!: Observable<Guild | null>;
+  readonly guild;
 
-  constructor(private guildService: GuildService) {}
+  constructor(private state: GuildStateService) {
+    this.guild = this.state.guild;
+  }
   ngOnInit(): void {
-    this.guild$ = this.guildService.guild$;
-    this.guildService.getMyGuild();
+    this.state.refresh();
   }
 }

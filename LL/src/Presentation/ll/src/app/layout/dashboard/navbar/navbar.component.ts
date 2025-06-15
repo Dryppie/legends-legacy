@@ -2,15 +2,14 @@ import {
   Component,
   EventEmitter,
   Input,
-  OnDestroy,
   OnInit,
   Output,
+  Signal,
 } from '@angular/core';
 import { CharacterBadgeComponent } from '../../../shared/components/character-badge/character-badge.component';
 import { NavbuttonComponent } from './navbutton/navbutton.component';
 import { NgFor, NgIf } from '@angular/common';
 import { AuthService } from '../../../core/services/api/auth/auth.service';
-import { Subscription } from 'rxjs';
 import { CharacterDto } from '../../../shared/models/Dtos/characterDto';
 
 @Component({
@@ -19,7 +18,7 @@ import { CharacterDto } from '../../../shared/models/Dtos/characterDto';
   imports: [CharacterBadgeComponent, NavbuttonComponent, NgIf, NgFor],
   templateUrl: './navbar.component.html',
 })
-export class NavbarComponent implements OnInit, OnDestroy {
+export class NavbarComponent {
   @Output() itemTapped = new EventEmitter<void>();
   @Input() isScreenSmall!: boolean;
   showList = false;
@@ -33,21 +32,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
     { link: '/game/settings', label: 'Settings' },
   ];
 
-  currentCharacter: CharacterDto | null = null;
-  private subscription: Subscription = new Subscription();
+  readonly currentCharacter;
 
-  constructor(private authService: AuthService) {}
-
-  ngOnInit() {
-    this.subscription.add(
-      this.authService.currentCharacter$.subscribe((character) => {
-        this.currentCharacter = character;
-      }),
-    );
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
+  constructor(private authService: AuthService) {
+    this.currentCharacter = this.authService.currentCharacter;
   }
 
   toggleList() {

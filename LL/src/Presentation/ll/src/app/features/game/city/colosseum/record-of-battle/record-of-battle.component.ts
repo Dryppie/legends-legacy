@@ -1,8 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { ColosseumMatchResult } from '../../../../../shared/models/Dtos/colosseum/colosseumMatchResult';
 import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
-import { CharacterService } from '../../../../../core/services/api/character/character.service';
-import { Subscription } from 'rxjs';
+import { CharacterStateService } from '../../../../../core/services/api/character/character-state.service';
 
 @Component({
   selector: 'app-record-of-battle',
@@ -12,16 +11,9 @@ import { Subscription } from 'rxjs';
 })
 export class RecordOfBattleComponent {
   @Input() previousMatches: ColosseumMatchResult[] = [];
-  id!: string;
-  subscriptions: Subscription = new Subscription();
+  readonly id;
 
-  constructor(private characterService: CharacterService) {}
-
-  ngOnInit(): void {
-    this.subscriptions.add(
-      this.characterService.getCurrentCharacter().subscribe((character) => {
-        if (character) this.id = character.id;
-      }),
-    );
+  constructor(private state: CharacterStateService) {
+    this.id = state.currentCharacterId();
   }
 }

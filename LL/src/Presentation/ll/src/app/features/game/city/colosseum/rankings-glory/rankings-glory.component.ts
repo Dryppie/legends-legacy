@@ -3,6 +3,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { CharacterService } from '../../../../../core/services/api/character/character.service';
 import { Subscription } from 'rxjs';
 import { ColosseumRank } from '../../../../../shared/models/Dtos/colosseum/colosseumRank';
+import { CharacterStateService } from '../../../../../core/services/api/character/character-state.service';
 
 @Component({
   selector: 'app-rankings-glory',
@@ -12,18 +13,15 @@ import { ColosseumRank } from '../../../../../shared/models/Dtos/colosseum/colos
 })
 export class RankingsGloryComponent implements OnInit {
   @Input() rankings: ColosseumRank[] = [];
-  id!: string;
+  readonly id;
   myRanking: ColosseumRank | undefined;
   subscriptions: Subscription = new Subscription();
 
-  constructor(private characterService: CharacterService) {}
+  constructor(private state: CharacterStateService) {
+    this.id = state.currentCharacterId();
+  }
 
   ngOnInit(): void {
-    this.subscriptions.add(
-      this.characterService.getCurrentCharacter().subscribe((character) => {
-        if (character) this.id = character.id;
-      }),
-    );
     this.myRanking = this.getMyRanking();
   }
 

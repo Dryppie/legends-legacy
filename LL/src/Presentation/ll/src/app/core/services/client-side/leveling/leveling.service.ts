@@ -1,65 +1,69 @@
 import { Injectable } from '@angular/core';
-import { CharacterService } from '../../api/character/character.service';
-import { take } from 'rxjs';
 import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { ProfessionsService } from '../../api/professions/professions.service';
 import { ProfessionType } from '../../../../shared/models/Dtos/characterProfession';
+import { CharacterStateService } from '../../api/character/character-state.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LevelingService {
   constructor(
-    private characterService: CharacterService,
-    private professionService: ProfessionsService,
+    private readonly state: CharacterStateService,
+    private readonly professionService: ProfessionsService,
   ) {}
 
-  gainExperience(experience: number): void {
-    this.characterService
-      .getCurrentCharacter()
-      .pipe(take(1))
-      .subscribe((character) => {
-        if (!character) return;
-        let currentLevel = character.level;
-        let newExperience = character.experience + experience;
-        let newLevel = currentLevel;
-        let requiredExp = character.experienceUntilNextLevel;
+  /* ────────────────────────────────────────────────────────
+   *  CHARACTER XP / LEVEL
+   * ────────────────────────────────────────────────────────*/
+  gainExperience(xp: number): void {
+    const char = this.state.currentCharacter(); // sync read
+    if (!char) return;
 
-        if (newExperience >= requiredExp) {
-          newExperience -= requiredExp;
-          newLevel++;
-        }
+    let { level, experience, experienceUntilNextLevel } = char;
 
-        const updatedCharacter: CharacterDto = {
-          ...character,
-          experience: newExperience,
-          level: newLevel,
-        };
+    let newExp = experience + xp;
+    let newLevel = level;
 
-        this.characterService.updateCharacter(updatedCharacter);
-      });
+    if (newExp >= experienceUntilNextLevel) {
+      newExp -= experienceUntilNextLevel;
+      newLevel += 1;
+      /* If you have a formula/table for the *next* threshold,
+         update `experienceUntilNextLevel` here as well. */
+    }
+
+    const updated: CharacterDto = {
+      ...char,
+      experience: newExp,
+      level: newLevel,
+    };
+
+    /* single call updates the global store; every component that
+       depends on `currentCharacter` will react automatically      */
+    this.state.updateCharacter(updated);
   }
 
-  gainProfessionExperience(
-    professionType: ProfessionType,
-    experience: number,
-  ): void {
-    const profession = this.professionService.getProfession(professionType);
-    if (!profession) return;
+  /* ────────────────────────────────────────────────────────
+   *  PROFESSION XP / LEVEL
+   * ────────────────────────────────────────────────────────*/
+  gainProfessionExperience(type: ProfessionType, xp: number): void {
+    const prof = this.professionService.getProfession(type);
+    if (!prof) return;
 
-    profession.experience += experience;
+    prof.experience += xp;
 
     let leveledUp = false;
-    while (profession.experience >= profession.experienceUntilNextLevel) {
-      profession.experience -= profession.experienceUntilNextLevel;
-      profession.level++;
+    while (prof.experience >= prof.experienceUntilNextLevel) {
+      prof.experience -= prof.experienceUntilNextLevel;
+      prof.level += 1;
       leveledUp = true;
     }
 
-    this.professionService.emitUpdate();
+    this.professionService.emitUpdate(); // toast / signal to UI
 
     if (leveledUp) {
-      this.professionService.refresh(); // sync from backend
+      /* optional round-trip to backend to make sure numbers are canonical */
+      this.professionService.refresh();
     }
   }
 }

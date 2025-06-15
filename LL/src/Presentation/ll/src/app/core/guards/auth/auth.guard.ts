@@ -17,12 +17,7 @@ export const authGuard: CanActivateFn = async (
 
   authService.returnUrl = state.url;
 
-  const isAuthed = await firstValueFrom(
-    authService.isAuthenticated$.pipe(
-      filter((value) => value !== null), // Wait for non-null authentication status
-      take(1),
-    ),
-  );
+  const isAuthed = authService.isAuthenticated();
 
   if (isAuthed) {
     return true; // Allow access to the authenticated route

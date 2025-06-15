@@ -1,4 +1,7 @@
-<div class="flex h-full w-full text-white">
+<div
+  class="flex h-full w-full text-white"
+  *ngIf="currentCharacter() as character"
+>
   <!-- LEFT PROFILE PANEL -->
   <aside class="w-64 p-12">
     <div class="flex flex-col items-center space-y-2">
@@ -8,11 +11,11 @@
         class="h-24 w-24 rounded-full border-2 border-yellow-500"
       />
       <div class="text-center">
-        <h2 class="text-xl font-semibold">{{ character?.name }}</h2>
-        <p class="text-sm text-orange-300">LEVEL: {{ character?.level }}</p>
+        <h2 class="text-xl font-semibold">{{ character.name }}</h2>
+        <p class="text-sm text-orange-300">LEVEL: {{ character.level }}</p>
         <p class="text-sm text-orange-300">
-          XP: {{ character?.experience }}/{{
-            character?.experienceUntilNextLevel
+          XP: {{ character.experience }}/{{
+            character.experienceUntilNextLevel
           }}
         </p>
         <p class="text-gray-400 mt-2">GUILD: BASED</p>
@@ -141,7 +144,7 @@
           <div class="flex max-h-full flex-1 flex-col overflow-hidden">
             <app-signup
               [convertAccount]="true"
-              [prefilledUsername]="character?.name ?? null"
+              [prefilledUsername]="character.name"
               [disableLoginLink]="true"
               [headerText1]="'Register your account'"
               [headerText2]="'and continue your legend!'"
