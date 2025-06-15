@@ -24,9 +24,12 @@ public static class BasicAttackLoader
         var equipment = slot?.EquipmentInstance;
         if (equipment != null)
         {
-            magnitude = equipment.EquipmentBase.Magnitude;
-            scalingAttribute = equipment.EquipmentBase.ScalingAttribute;
-            scalingAmount = equipment.EquipmentBase.ScalingAmount;
+            magnitude = 5;
+            scalingAttribute = equipment.EquipmentBase.AttributeModifiers.First().AttributeType;
+            scalingAmount = 0.1f;
+            //magnitude = equipment.EquipmentBase.Magnitude;
+            //scalingAttribute = equipment.EquipmentBase.ScalingAttribute;
+            //scalingAmount = equipment.EquipmentBase.ScalingAmount;
         }
         // Find the main hand equipment
         // Create the basic attack ability instance
