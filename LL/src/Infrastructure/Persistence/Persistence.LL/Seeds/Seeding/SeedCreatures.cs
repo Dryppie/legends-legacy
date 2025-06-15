@@ -46,19 +46,6 @@ public static class SeedCreatures
         
         var hobgoblinId = Guid.Parse("00000000-0000-0000-0000-000000000020");
 
-        var mossLizardId = Guid.Parse("00000000-0000-0000-0000-000000000021");
-        var spiderId = Guid.Parse("00000000-0000-0000-0000-000000000022");
-        var treantSaplingId = Guid.Parse("00000000-0000-0000-0000-000000000023");
-        var venomousSnakeId = Guid.Parse("00000000-0000-0000-0000-000000000024");
-        var viperId = Guid.Parse("00000000-0000-0000-0000-000000000025");
-
-        var feralGhoulId = Guid.Parse("00000000-0000-0000-0000-000000000026");
-        var plagueGhoulId = Guid.Parse("00000000-0000-0000-0000-000000000027");
-        var ravenousGhoulId = Guid.Parse("00000000-0000-0000-0000-000000000028");
-        var skeletonArcherId = Guid.Parse("00000000-0000-0000-0000-000000000029");
-        var skeletonMageId = Guid.Parse("00000000-0000-0000-0000-000000000030");
-        var skeletonWarriorId = Guid.Parse("00000000-0000-0000-0000-000000000031");
-
         // Step 2 - Essences
         var goblinEssence = new Essence()
         {
@@ -200,86 +187,6 @@ public static class SeedCreatures
             ActiveAbilityId = "frenzy",
             PassiveAbilityId = "savageOnslaught",
         };
-
-        var mossLizardEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Moss Lizard's Essence",
-            ActiveAbilityId = "mossCamouflage",
-            PassiveAbilityId = "lostTail",
-        };
-        var spiderEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Spider's Essence",
-            ActiveAbilityId = "skitteringStrike",
-            PassiveAbilityId = "spiderEyes",
-        };
-        var treantSaplingEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Treant Sapling's Essence",
-            ActiveAbilityId = "sproutingSurge",
-            PassiveAbilityId = "naturingRoots",
-        };
-        var venomousSnakeEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Venomous Snake's Essence",
-            ActiveAbilityId = "venomousSpit",
-            PassiveAbilityId = "toxicHide",
-        };
-        var viperEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Viper's Essence",
-            ActiveAbilityId = "piercingFangs",
-            PassiveAbilityId = "potentToxins",
-        };
-        var feralGhoulEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Feral Ghoul's Essence",
-            ActiveAbilityId = "feralPounce",
-            PassiveAbilityId = "shreddingClaws",
-        };
-        var plagueGhoulEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Plague Ghoul's Essence",
-            ActiveAbilityId = "plagueSwipe",
-            PassiveAbilityId = "pestilentTouch",
-        };
-        var ravenousGhoulEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Ravenous Ghoul's Essence",
-            ActiveAbilityId = "drainingClaws",
-            PassiveAbilityId = "vileFeast",
-        };
-        var skeletonArcherEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Skeleton Archer's Essence",
-            ActiveAbilityId = "boneArrow",
-            PassiveAbilityId = "piercingArrow",
-        };
-        var skeletonMageEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Skeleton Mage's Essence",
-            ActiveAbilityId = "siphon",
-            PassiveAbilityId = "protectiveBoneBarrier",
-        };
-        var skeletonWarriorEssence = new Essence()
-        {
-            Id = Guid.NewGuid(),
-            Name = "Skeleton Warrior's Essence",
-            ActiveAbilityId = "boneShield",
-            PassiveAbilityId = "spikedDefense",
-        };
-
-
 
         // Step 3 - Essence Items
         var goblinEssenceItem = new EssenceItemBase
@@ -442,95 +349,6 @@ public static class SeedCreatures
             ItemType = ItemType.Essence,
             Rarity = Rarity.Unique
         };
-        var mossLizardEssenceItem = new EssenceItemBase
-        {
-            Id = "mossLizardId",
-            Name = mossLizardEssence.Name,
-            Essence = mossLizardEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
-        var spiderEssenceItem = new EssenceItemBase
-        {
-            Id = "spiderId",
-            Name = spiderEssence.Name,
-            Essence = spiderEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
-        var treantSaplingEssenceItem = new EssenceItemBase
-        {
-            Id = "treantSaplingId",
-            Name = treantSaplingEssence.Name,
-            Essence = treantSaplingEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
-        var venomousSnakeEssenceItem = new EssenceItemBase
-        {
-            Id = "venomousSnakeId",
-            Name = venomousSnakeEssence.Name,
-            Essence = venomousSnakeEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
-        var viperEssenceItem = new EssenceItemBase
-        {
-            Id = "viperId",
-            Name = viperEssence.Name,
-            Essence = viperEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
-        var feralGhoulEssenceItem = new EssenceItemBase
-        {
-            Id = "feralGhoulId",
-            Name = feralGhoulEssence.Name,
-            Essence = feralGhoulEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
-        var plagueGhoulEssenceItem = new EssenceItemBase
-        {
-            Id = "plagueGhoulId",
-            Name = plagueGhoulEssence.Name,
-            Essence = plagueGhoulEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
-        var ravenousGhoulEssenceItem = new EssenceItemBase
-        {
-            Id = "ravenousGhoulId",
-            Name = ravenousGhoulEssence.Name,
-            Essence = ravenousGhoulEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
-        var skeletonArcherEssenceItem = new EssenceItemBase
-        {
-            Id = "skeletonArcherId",
-            Name = skeletonArcherEssence.Name,
-            Essence = skeletonArcherEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
-        var skeletonMageEssenceItem = new EssenceItemBase
-        {
-            Id = "skeletonMageId",
-            Name = skeletonMageEssence.Name,
-            Essence = skeletonMageEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
-        var skeletonWarriorEssenceItem = new EssenceItemBase
-        {
-            Id = "skeletonWarriorId",
-            Name = skeletonWarriorEssence.Name,
-            Essence = skeletonWarriorEssence,
-            ItemType = ItemType.Essence,
-            Rarity = Rarity.Unique
-        };
-
 
         // Step 4 - Loot Tables
         var goblinEssenceLootTableItem = new LootTableItem { ItemId = goblinEssenceItem.Id, Weight = 10 };
@@ -553,18 +371,6 @@ public static class SeedCreatures
         var nightshadeBlossomEssenceLootTableItem = new LootTableItem { ItemId = nightshadeBlossomEssenceItem.Id, Weight = 5 };
         var pixieEssenceLootTableItem = new LootTableItem { ItemId = pixieEssenceItem.Id, Weight = 5 };
         var hobgoblinEssenceLootTableItem = new LootTableItem { ItemId = hobgoblinEssenceItem.Id, Weight = 5 };
-        var mossLizardEssenceLootTableItem = new LootTableItem { ItemId = mossLizardEssenceItem.Id, Weight = 5 };
-        var spiderEssenceLootTableItem = new LootTableItem { ItemId = spiderEssenceItem.Id, Weight = 5 };
-        var treantSaplingEssenceLootTableItem = new LootTableItem { ItemId = treantSaplingEssenceItem.Id, Weight = 5 };
-        var venomousSnakeEssenceLootTableItem = new LootTableItem { ItemId = venomousSnakeEssenceItem.Id, Weight = 5 };
-        var viperEssenceLootTableItem = new LootTableItem { ItemId = viperEssenceItem.Id, Weight = 5 };
-        var feralGhoulEssenceLootTableItem = new LootTableItem { ItemId = feralGhoulEssenceItem.Id, Weight = 5 };
-        var plagueGhoulEssenceLootTableItem = new LootTableItem { ItemId = plagueGhoulEssenceItem.Id, Weight = 5 };
-        var ravenousGhoulEssenceLootTableItem = new LootTableItem { ItemId = ravenousGhoulEssenceItem.Id, Weight = 5 };
-        var skeletonArcherEssenceLootTableItem = new LootTableItem { ItemId = skeletonArcherEssenceItem.Id, Weight = 5 };
-        var skeletonMageEssenceLootTableItem = new LootTableItem { ItemId = skeletonMageEssenceItem.Id, Weight = 5 };
-        var skeletonWarriorEssenceLootTableItem = new LootTableItem { ItemId = skeletonWarriorEssenceItem.Id, Weight = 5 };
-
 
 
         // Create LootTableRarities for Goblin
@@ -807,138 +613,6 @@ public static class SeedCreatures
             Id = Guid.NewGuid(),
             Entries = [hobgoblinLootTableLegendary]
         };
-        // Create LootTableRarities for Moss Lizard
-        var mossLizardLootTableLegendary = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [mossLizardEssenceLootTableItem],
-            Weight = 5 // 0.02%
-        };
-        var mossLizardLootTable = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [mossLizardLootTableLegendary]
-        };
-        // Create LootTableRarities for Spider
-        var spiderLootTableLegendary = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [spiderEssenceLootTableItem],
-            Weight = 5 // 0.02%
-        };
-        var spiderLootTable = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [spiderLootTableLegendary]
-        };
-        // Create LootTableRarities for Treant Sapling
-        var treantSaplingLootTableLegendary = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [treantSaplingEssenceLootTableItem],
-            Weight = 5 // 0.02%
-        };
-        var treantSaplingLootTable = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [treantSaplingLootTableLegendary]
-        };
-        // Create LootTableRarities for Venomous Snake
-        var venomousSnakeLootTableLegendary = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [venomousSnakeEssenceLootTableItem],
-            Weight = 5 // 0.02%
-        };
-        var venomousSnakeLootTable = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [venomousSnakeLootTableLegendary]
-        };
-        // Create LootTableRarities for Viper
-        var viperLootTableLegendary = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [viperEssenceLootTableItem],
-            Weight = 5 // 0.02%
-        };
-        var viperLootTable = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [viperLootTableLegendary]
-        };
-        // Create LootTableRarities for Feral Ghoul
-        var feralGhoulLootTableLegendary = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [feralGhoulEssenceLootTableItem],
-            Weight = 5 // 0.02%
-        };
-        var feralGhoulLootTable = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [feralGhoulLootTableLegendary]
-        };
-        // Create LootTableRarities for Plague Ghoul
-        var plagueGhoulLootTableLegendary = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [plagueGhoulEssenceLootTableItem],
-            Weight = 5 // 0.02%
-        };
-        var plagueGhoulLootTable = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [plagueGhoulLootTableLegendary]
-        };
-        // Create LootTableRarities for Ravenous Ghoul
-        var ravenousGhoulLootTableLegendary = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [ravenousGhoulEssenceLootTableItem],
-            Weight = 5 // 0.02%
-        };
-        var ravenousGhoulLootTable = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [ravenousGhoulLootTableLegendary]
-        };
-        // Create LootTableRarities for Skeleton Archer
-        var skeletonArcherLootTableLegendary = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [skeletonArcherEssenceLootTableItem],
-            Weight = 5 // 0.02%
-        };
-        var skeletonArcherLootTable = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [skeletonArcherLootTableLegendary]
-        };
-        // Create LootTableRarities for Skeleton Mage
-        var skeletonMageLootTableLegendary = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [skeletonMageEssenceLootTableItem],
-            Weight = 5 // 0.02%
-        };
-        var skeletonMageLootTable = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [skeletonMageLootTableLegendary]
-        };
-        // Create LootTableRarities for Skeleton Warrior
-        var skeletonWarriorLootTableLegendary = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [skeletonWarriorEssenceLootTableItem],
-            Weight = 5 // 0.02%
-        };
-        var skeletonWarriorLootTable = new LootTable
-        {
-            Id = Guid.NewGuid(),
-            Entries = [skeletonWarriorLootTableLegendary]
-        };
 
 
         await context.ItemBases.AddRangeAsync(goblinEssenceItem, goblinWarriorEssenceItem, goblinArcherEssenceItem, largeRatEssenceItem);
@@ -956,9 +630,6 @@ public static class SeedCreatures
         await context.LootTables.AddRangeAsync(blueSlimeLootTable, brownSlimeLootTable, greenSlimeLootTable, rainbowSlimeLootTable, redSlimeLootTable, transparentSlimeLootTable);
         await context.LootTables.AddRangeAsync(enchantedFairyLootTable, gladePantherLootTable, illusionFoxLootTable, nightshadeBlossomLootTable, pixieLootTable);
         await context.LootTables.AddRangeAsync(hobgoblinLootTable);
-        await context.LootTables.AddRangeAsync(mossLizardLootTable, spiderLootTable, treantSaplingLootTable, venomousSnakeLootTable, viperLootTable);
-        await context.LootTables.AddRangeAsync(feralGhoulLootTable, plagueGhoulLootTable, ravenousGhoulLootTable, skeletonArcherLootTable, skeletonMageLootTable, skeletonWarriorLootTable);
-
 
         var goblinEssenceSlot = new EssenceSlot()
         {
@@ -1122,95 +793,6 @@ public static class SeedCreatures
             OccupiedEssence = hobgoblinEssence,
             EntityId = hobgoblinId
         };
-        var mossLizardEssenceSlot = new EssenceSlot()
-        {
-            Id = Guid.NewGuid(),
-            SlotState = SlotState.Active,
-            SlotType = SlotType.Standard,
-            OccupiedEssence = mossLizardEssence,
-            EntityId = mossLizardId
-        };
-        var spiderEssenceSlot = new EssenceSlot()
-        {
-            Id = Guid.NewGuid(),
-            SlotState = SlotState.Active,
-            SlotType = SlotType.Standard,
-            OccupiedEssence = spiderEssence,
-            EntityId = spiderId
-        };
-        var treantSaplingEssenceSlot = new EssenceSlot()
-        {
-            Id = Guid.NewGuid(),
-            SlotState = SlotState.Active,
-            SlotType = SlotType.Standard,
-            OccupiedEssence = treantSaplingEssence,
-            EntityId = treantSaplingId
-        };
-        var venomousSnakeEssenceSlot = new EssenceSlot()
-        {
-            Id = Guid.NewGuid(),
-            SlotState = SlotState.Active,
-            SlotType = SlotType.Standard,
-            OccupiedEssence = venomousSnakeEssence,
-            EntityId = venomousSnakeId
-        };
-        var viperEssenceSlot = new EssenceSlot()
-        {
-            Id = Guid.NewGuid(),
-            SlotState = SlotState.Active,
-            SlotType = SlotType.Standard,
-            OccupiedEssence = viperEssence,
-            EntityId = viperId
-        };
-        var feralGhoulEssenceSlot = new EssenceSlot()
-        {
-            Id = Guid.NewGuid(),
-            SlotState = SlotState.Active,
-            SlotType = SlotType.Standard,
-            OccupiedEssence = feralGhoulEssence,
-            EntityId = feralGhoulId
-        };
-        var plagueGhoulEssenceSlot = new EssenceSlot()
-        {
-            Id = Guid.NewGuid(),
-            SlotState = SlotState.Active,
-            SlotType = SlotType.Standard,
-            OccupiedEssence = plagueGhoulEssence,
-            EntityId = plagueGhoulId
-        };
-        var ravenousGhoulEssenceSlot = new EssenceSlot()
-        {
-            Id = Guid.NewGuid(),
-            SlotState = SlotState.Active,
-            SlotType = SlotType.Standard,
-            OccupiedEssence = ravenousGhoulEssence,
-            EntityId = ravenousGhoulId
-        };
-        var skeletonArcherEssenceSlot = new EssenceSlot()
-        {
-            Id = Guid.NewGuid(),
-            SlotState = SlotState.Active,
-            SlotType = SlotType.Standard,
-            OccupiedEssence = skeletonArcherEssence,
-            EntityId = skeletonArcherId
-        };
-        var skeletonMageEssenceSlot = new EssenceSlot()
-        {
-            Id = Guid.NewGuid(),
-            SlotState = SlotState.Active,
-            SlotType = SlotType.Standard,
-            OccupiedEssence = skeletonMageEssence,
-            EntityId = skeletonMageId
-        };
-        var skeletonWarriorEssenceSlot = new EssenceSlot()
-        {
-            Id = Guid.NewGuid(),
-            SlotState = SlotState.Active,
-            SlotType = SlotType.Standard,
-            OccupiedEssence = skeletonWarriorEssence,
-            EntityId = skeletonWarriorId
-        };
-
 
         // Step 5 - Create creatures
         var lumoRuinsCreatures = new List<Creature>
@@ -1253,33 +835,11 @@ public static class SeedCreatures
             new() { Id = hobgoblinId, Name = "Hobgoblin", ImagePath = "hobgoblin", LootTableId = hobgoblinLootTable.Id, EssenceSlots = [hobgoblinEssenceSlot], ExperienceReward = 20 },
         };
 
-        var oakThicketCreatures = new List<Creature>
-        {
-            new() { Id = mossLizardId, Name = "Moss Lizard", ImagePath = "moss_lizard", LootTableId = mossLizardLootTable.Id, EssenceSlots = [mossLizardEssenceSlot], ExperienceReward = 8 },
-            new() { Id = spiderId, Name = "Spider", ImagePath = "spider", LootTableId = spiderLootTable.Id, EssenceSlots = [spiderEssenceSlot], ExperienceReward = 9 },
-            new() { Id = treantSaplingId, Name = "Treant Sapling", ImagePath = "treant_sapling", LootTableId = treantSaplingLootTable.Id, EssenceSlots = [treantSaplingEssenceSlot], ExperienceReward = 10 },
-            new() { Id = venomousSnakeId, Name = "Venomous Snake", ImagePath = "venomous_snake", LootTableId = venomousSnakeLootTable.Id, EssenceSlots = [venomousSnakeEssenceSlot], ExperienceReward = 11 },
-            new() { Id = viperId, Name = "Viper", ImagePath = "viper", LootTableId = viperLootTable.Id, EssenceSlots = [viperEssenceSlot], ExperienceReward = 12 },
-        };
-
-        var forgottenRuinsCreatures = new List<Creature>
-        {
-            new() { Id = feralGhoulId, Name = "Feral Ghoul", ImagePath = "feral_ghoul", LootTableId = feralGhoulLootTable.Id, EssenceSlots = [feralGhoulEssenceSlot], ExperienceReward = 15 },
-            new() { Id = plagueGhoulId, Name = "Plague Ghoul", ImagePath = "plague_ghoul", LootTableId = plagueGhoulLootTable.Id, EssenceSlots = [plagueGhoulEssenceSlot], ExperienceReward = 16 },
-            new() { Id = ravenousGhoulId, Name = "Ravenous Ghoul", ImagePath = "ravenous_ghoul", LootTableId = ravenousGhoulLootTable.Id, EssenceSlots = [ravenousGhoulEssenceSlot], ExperienceReward = 17 },
-            new() { Id = skeletonArcherId, Name = "Skeleton Archer", ImagePath = "skeleton_archer", LootTableId = skeletonArcherLootTable.Id, EssenceSlots = [skeletonArcherEssenceSlot], ExperienceReward = 18 },
-            new() { Id = skeletonMageId, Name = "Skeleton Mage", ImagePath = "skeleton_mage", LootTableId = skeletonMageLootTable.Id, EssenceSlots = [skeletonMageEssenceSlot], ExperienceReward = 19 },
-            new() { Id = skeletonWarriorId, Name = "Skeleton Warrior", ImagePath = "skeleton_warrior", LootTableId = skeletonWarriorLootTable.Id, EssenceSlots = [skeletonWarriorEssenceSlot], ExperienceReward = 20 },
-        };
-
         await context.Creatures.AddRangeAsync(lumoRuinsCreatures);
         await context.Creatures.AddRangeAsync(bloodGroveCreatures);
         await context.Creatures.AddRangeAsync(crystalCreekCreatures);
         await context.Creatures.AddRangeAsync(twilightClearingCreatures);
         await context.Creatures.AddRangeAsync(goblinMinesCreatures);
-        await context.Creatures.AddRangeAsync(oakThicketCreatures);
-        await context.Creatures.AddRangeAsync(forgottenRuinsCreatures);
-
 
         // Step 6 - Create area
         var lumoRuinsAreaId = "region_01_area_01";
@@ -1326,28 +886,6 @@ public static class SeedCreatures
         {
             new AreaCreature() { AreaId = goblinMinesAreaId, CreatureId = hobgoblinId, WeightedSpawnRate = 1f },
         };
-
-        var oakThicketAreaId = "region_01_area_06";
-        var oakThicketAreaCreatures = new List<AreaCreature>
-        {
-            new AreaCreature() { AreaId = oakThicketAreaId, CreatureId = mossLizardId, WeightedSpawnRate = 0.20f },
-            new AreaCreature() { AreaId = oakThicketAreaId, CreatureId = spiderId, WeightedSpawnRate = 0.20f },
-            new AreaCreature() { AreaId = oakThicketAreaId, CreatureId = treantSaplingId, WeightedSpawnRate = 0.20f },
-            new AreaCreature() { AreaId = oakThicketAreaId, CreatureId = venomousSnakeId, WeightedSpawnRate = 0.20f },
-            new AreaCreature() { AreaId = oakThicketAreaId, CreatureId = viperId, WeightedSpawnRate = 0.20f },
-        };
-
-        var forgottenRuinsAreaId = "region_01_area_07";
-        var forgottenRuinsAreaCreatures = new List<AreaCreature>
-        {
-            new AreaCreature() { AreaId = forgottenRuinsAreaId, CreatureId = feralGhoulId, WeightedSpawnRate = 0.20f },
-            new AreaCreature() { AreaId = forgottenRuinsAreaId, CreatureId = plagueGhoulId, WeightedSpawnRate = 0.20f },
-            new AreaCreature() { AreaId = forgottenRuinsAreaId, CreatureId = ravenousGhoulId, WeightedSpawnRate = 0.10f },
-            new AreaCreature() { AreaId = forgottenRuinsAreaId, CreatureId = skeletonArcherId, WeightedSpawnRate = 0.15f },
-            new AreaCreature() { AreaId = forgottenRuinsAreaId, CreatureId = skeletonMageId, WeightedSpawnRate = 0.20f },
-            new AreaCreature() { AreaId = forgottenRuinsAreaId, CreatureId = skeletonWarriorId, WeightedSpawnRate = 0.15f },
-        };
-
         // Create attributes
         var attributes = new List<EntityAttribute>();
         attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(goblinId, -0.5f));
@@ -1370,18 +908,6 @@ public static class SeedCreatures
         attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(nightshadeBlossomId, 2f));
         attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(pixieId, 1.4f));
         attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(hobgoblinId, 4f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(mossLizardId, 2.1f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(spiderId, 1.9f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(treantSaplingId, 2f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(venomousSnakeId, 1.9f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(viperId, 1.7f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(feralGhoulId, 2.4f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(plagueGhoulId, 2.3f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(ravenousGhoulId, 2.7f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(skeletonArcherId, 2.8f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(skeletonMageId, 2.9f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(skeletonWarriorId, 2.6f));
-
         await context.EntityAttributes.AddRangeAsync(attributes);
 
         if (!context.Regions.Any())
@@ -1449,32 +975,6 @@ public static class SeedCreatures
                     SpawnProbabilities = new List<float>
                     {
                         1f,
-                    }
-                },
-                new Area
-                {
-                    Id = oakThicketAreaId, // region, [area, dungeon, raid, or rift], area
-                    Name = "Oak Thicket",
-                    LevelRequirement = 25,
-                    Creatures = oakThicketAreaCreatures,
-                    SpawnProbabilities = new List<float>
-                    {
-                        0.03f,
-                        0.969f,
-                        0.001f,
-                    }
-                },
-                new Area
-                {
-                    Id = forgottenRuinsAreaId, // region, [area, dungeon, raid, or rift], area
-                    Name = "Forgotten Ruins",
-                    LevelRequirement = 30,
-                    Creatures = forgottenRuinsAreaCreatures,
-                    SpawnProbabilities = new List<float>
-                    {
-                        0.03f,
-                        0.969f,
-                        0.001f,
                     }
                 }
             };

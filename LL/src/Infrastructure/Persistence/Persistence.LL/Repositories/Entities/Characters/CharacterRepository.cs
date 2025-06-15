@@ -3,6 +3,7 @@ using Common.Exceptions;
 using Common.Helpers.Essences;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
+using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
@@ -39,7 +40,7 @@ public class CharacterRepository : ICharacterRepository
                 SlotType = SlotType.Standard,
             },
         };
-        character.Soulstones = 750;
+        character.Soulstones = 500;
         character.EssenceSlots = essenceSlots;
         character.Professions = ProfessionsSeederHelper.CreateProfessions(character.Id);
         await _context.EssenceSlots.AddRangeAsync(essenceSlots, cancellationToken);

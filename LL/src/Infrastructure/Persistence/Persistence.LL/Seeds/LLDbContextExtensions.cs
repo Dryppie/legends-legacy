@@ -27,9 +27,8 @@ public static class LLDbContextExtensions
             await SeedCreatures.SeedCreaturesData(context);
             await SeedItems.SeedItemsData(context);
             await SeedProfessions.SeedProfessionsData(context);
-#if DEBUG
             await SeedAdminData(context, hasher);
-#endif
+
             await SeedInventoryItems(context);
 
             await context.SaveChangesAsync();
