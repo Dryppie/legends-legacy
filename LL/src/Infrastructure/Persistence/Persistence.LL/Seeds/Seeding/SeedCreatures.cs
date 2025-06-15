@@ -46,18 +46,18 @@ public static class SeedCreatures
         
         var hobgoblinId = Guid.Parse("00000000-0000-0000-0000-000000000020");
 
-        var mossLizardId = Guid.Parse("00000000-0000-0000-0000-000000000021");
-        var spiderId = Guid.Parse("00000000-0000-0000-0000-000000000022");
-        var treantSaplingId = Guid.Parse("00000000-0000-0000-0000-000000000023");
-        var venomousSnakeId = Guid.Parse("00000000-0000-0000-0000-000000000024");
-        var viperId = Guid.Parse("00000000-0000-0000-0000-000000000025");
+        //var mossLizardId = Guid.Parse("00000000-0000-0000-0000-000000000021");
+        //var spiderId = Guid.Parse("00000000-0000-0000-0000-000000000022");
+        //var treantSaplingId = Guid.Parse("00000000-0000-0000-0000-000000000023");
+        //var venomousSnakeId = Guid.Parse("00000000-0000-0000-0000-000000000024");
+        //var viperId = Guid.Parse("00000000-0000-0000-0000-000000000025");
 
-        var feralGhoulId = Guid.Parse("00000000-0000-0000-0000-000000000026");
-        var plagueGhoulId = Guid.Parse("00000000-0000-0000-0000-000000000027");
-        var ravenousGhoulId = Guid.Parse("00000000-0000-0000-0000-000000000028");
-        var skeletonArcherId = Guid.Parse("00000000-0000-0000-0000-000000000029");
-        var skeletonMageId = Guid.Parse("00000000-0000-0000-0000-000000000030");
-        var skeletonWarriorId = Guid.Parse("00000000-0000-0000-0000-000000000031");
+        //var feralGhoulId = Guid.Parse("00000000-0000-0000-0000-000000000026");
+        //var plagueGhoulId = Guid.Parse("00000000-0000-0000-0000-000000000027");
+        //var ravenousGhoulId = Guid.Parse("00000000-0000-0000-0000-000000000028");
+        //var skeletonArcherId = Guid.Parse("00000000-0000-0000-0000-000000000029");
+        //var skeletonMageId = Guid.Parse("00000000-0000-0000-0000-000000000030");
+        //var skeletonWarriorId = Guid.Parse("00000000-0000-0000-0000-000000000031");
 
         // Step 2 - Essences
         var goblinEssence = new Essence()
@@ -1451,32 +1451,32 @@ public static class SeedCreatures
                         1f,
                     }
                 },
-                //new Area
-                //{
-                //    Id = oakThicketAreaId, // region, [area, dungeon, raid, or rift], area
-                //    Name = "Oak Thicket",
-                //    LevelRequirement = 25,
-                //    Creatures = oakThicketAreaCreatures,
-                //    SpawnProbabilities = new List<float>
-                //    {
-                //        0.03f,
-                //        0.969f,
-                //        0.001f,
-                //    }
-                //},
-                //new Area
-                //{
-                //    Id = forgottenRuinsAreaId, // region, [area, dungeon, raid, or rift], area
-                //    Name = "Forgotten Ruins",
-                //    LevelRequirement = 30,
-                //    Creatures = forgottenRuinsAreaCreatures,
-                //    SpawnProbabilities = new List<float>
-                //    {
-                //        0.03f,
-                //        0.969f,
-                //        0.001f,
-                //    }
-                //}
+                new Area
+                {
+                    Id = oakThicketAreaId, // region, [area, dungeon, raid, or rift], area
+                    Name = "Oak Thicket",
+                    LevelRequirement = 25,
+                    Creatures = oakThicketAreaCreatures,
+                    SpawnProbabilities = new List<float>
+                    {
+                        0.03f,
+                        0.969f,
+                        0.001f,
+                    }
+                },
+                new Area
+                {
+                    Id = forgottenRuinsAreaId, // region, [area, dungeon, raid, or rift], area
+                    Name = "Forgotten Ruins",
+                    LevelRequirement = 30,
+                    Creatures = forgottenRuinsAreaCreatures,
+                    SpawnProbabilities = new List<float>
+                    {
+                        0.03f,
+                        0.969f,
+                        0.001f,
+                    }
+                }
             };
 
             await context.Areas.AddRangeAsync(areas);
