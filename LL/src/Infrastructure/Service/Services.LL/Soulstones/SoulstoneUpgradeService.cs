@@ -107,4 +107,32 @@ public class SoulstoneUpgradeService : ISoulstoneUpgradeService
         character.Soulstones -= cost;
         return true;
     }
+
+    public async Task<bool> ResetSoulstoneUpgradesAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        var character = await _characterService.GetCharacterWithSoulstoneUpgradesAsync(characterId, cancellationToken);
+        if (character == null) return false;
+
+        var upgrades = character.CharacterSoulstoneUpgrades;
+        if (upgrades.Count == 0) return true; // Nothing to reset
+
+        int totalRefund = 0;
+
+        foreach (var upgrade in upgrades)
+        {
+            if (_defs.TryGetValue(upgrade.SoulstoneUpgradeDefinitionId, out var def))
+            {
+                for (int level = 1; level <= upgrade.Level; level++)
+                {
+                    totalRefund += def.Cost.CostOfLevel(level);
+                }
+            }
+        }
+
+        character.CharacterSoulstoneUpgrades.Clear(); // Remove all upgrades
+        character.Soulstones += totalRefund;         // Refund total cost
+
+        await _characterService.SaveChangesAsync(cancellationToken);
+        return true;
+    }
 }

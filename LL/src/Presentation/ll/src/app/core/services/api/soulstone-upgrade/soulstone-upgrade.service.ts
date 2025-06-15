@@ -37,4 +37,13 @@ export class SoulstoneUpgradeService {
       }),
     );
   }
+
+  resetSoulstoneUpgrades() {
+    return this.api.post('soulstoneUpgrade/reset').pipe(
+      tap(() => {}),
+      catchError((e) => {
+        return throwError(() => e);
+      }),
+    );
+  }
 }

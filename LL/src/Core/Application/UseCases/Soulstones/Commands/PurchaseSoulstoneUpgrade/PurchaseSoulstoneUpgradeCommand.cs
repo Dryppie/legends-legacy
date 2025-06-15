@@ -2,7 +2,7 @@
 using Common.Primitives;
 using MediatR;
 
-namespace Application.UseCases.Soulstones.Commands;
+namespace Application.UseCases.Soulstones.Commands.PurchaseSoulstoneUpgrade;
 public record PurchaseSoulstoneUpgradeCommand(Guid CharacterId, string SoulstoneUpgradeId) : IRequest<Response<bool>>;
 public class PurchaseSoulstoneUpgradeCommandHandler : IRequestHandler<PurchaseSoulstoneUpgradeCommand, Response<bool>>
 {

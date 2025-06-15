@@ -1,9 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { SoulstoneUpgradeView } from '../../../../../shared/models/soulstones/soulstone-upgrade-view';
 import { CommonModule } from '@angular/common';
-import { CharacterService } from '../../../../../core/services/api/character/character.service';
 import { SoulstoneUpgradeService } from '../../../../../core/services/api/soulstone-upgrade/soulstone-upgrade.service';
-import { filter, switchMap, take, tap } from 'rxjs';
+import { filter } from 'rxjs';
 import { CharacterDto } from '../../../../../shared/models/Dtos/characterDto';
 import { CharacterStateService } from '../../../../../core/services/api/character/character-state.service';
 

@@ -4,6 +4,12 @@
     title="Soulstone Archives"
     icon="character/essences"
   ></app-default-header>
+  <app-regular-button
+    class="place-self-end pr-4 sm:place-self-start"
+    variant="danger"
+    (pressed)="resetSoulstoneUpgrades()"
+    >Reset - free</app-regular-button
+  >
   <div
     class="flex flex-col gap-4 overflow-y-auto pr-4 sm:pr-6"
     *ngIf="soulstoneUpgrades$ | async as soulstoneUpgrades"

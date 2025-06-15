@@ -1,4 +1,5 @@
-﻿using Application.UseCases.Soulstones.Commands;
+﻿using Application.UseCases.Soulstones.Commands.PurchaseSoulstoneUpgrade;
+using Application.UseCases.Soulstones.Commands.ResetSoulstoneUpgrades;
 using Application.UseCases.Soulstones.Queries;
 using Common.Primitives;
 using Domain.Models.Soulstones.UpgradeDefinition;
@@ -14,4 +15,8 @@ public class SoulstoneUpgradeController : BaseController
     [HttpPost("Upgrade")]
     public async Task<ActionResult<Response<bool>>> Upgrade([FromBody] string soulstoneUpgradeId) =>
         await Mediator.Send(new PurchaseSoulstoneUpgradeCommand(CurrentCharacterGuid, soulstoneUpgradeId));
+
+    [HttpPost("Reset")]
+    public async Task<ActionResult<Response<bool>>> Reset() =>
+        await Mediator.Send(new ResetSoulstoneUpgradesCommand(CurrentCharacterGuid));
 }
