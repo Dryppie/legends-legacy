@@ -1,4 +1,6 @@
 ﻿using Application.Common.Interfaces;
+using Domain.Models.Items.Equipments;
+using Domain.Models.Items.EssenceItems;
 using Domain.Models.MarketPlaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +18,10 @@ public class MarketPlaceRepository : IMarketPlaceRepository
         return await _dbContext.MarketPlaceListings
             .Include(mpl => mpl.ItemInstance)
                 .ThenInclude(ii => ii.ItemBase)
+                    .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
+            .Include(mpl => mpl.ItemInstance)
+                .ThenInclude(ii => ii.ItemBase)
+                    .ThenInclude(ib => (ib as EssenceItemBase).Essence)
             .ToListAsync(cancellationToken);
     }
 
