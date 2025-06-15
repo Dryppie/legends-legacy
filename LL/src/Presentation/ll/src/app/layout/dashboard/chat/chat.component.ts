@@ -4,7 +4,7 @@ import {
   ChatService,
 } from '../../../core/services/ll-chat/chat-service/chat.service';
 import { Subscription } from 'rxjs';
-import { AsyncPipe, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe, DatePipe, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RegularButtonComponent } from '../../../shared/components/buttons/regular-button/regular-button.component';
 import { StickyScrollDirective } from '../../../shared/directives/sticky-scroll/sticky-scroll.directive';
@@ -19,6 +19,7 @@ import { StickyScrollDirective } from '../../../shared/directives/sticky-scroll/
     AsyncPipe,
     RegularButtonComponent,
     StickyScrollDirective,
+    DatePipe,
   ],
   templateUrl: './chat.component.html',
 })

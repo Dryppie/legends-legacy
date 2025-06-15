@@ -55,12 +55,12 @@ export class CraftingComponent implements OnInit {
     [CraftType.JewelryCrafting]: [
       EquipmentType.Ring,
       EquipmentType.Necklace,
-      EquipmentType.Legs,
+      EquipmentType.Relic,
     ],
     [CraftType.ArmorForging]: [
       EquipmentType.Head,
       EquipmentType.Chest,
-      EquipmentType.Relic,
+      EquipmentType.Legs,
     ],
     [CraftType.WeaponSmithing]: [
       EquipmentType.TwoHanded,

@@ -20,7 +20,13 @@
           class="p-1 odd:bg-zinc-300/5 even:bg-transparent"
         >
           <span class="animate-fade-in-up break-words">
-            <span class="font-bold">{{ m.senderName }}:</span> {{ m.body }}
+            <div>
+              <span>{{ m.sentAt | date: "shortTime" }}:</span>
+              <span class="font-bold"> {{ m.senderName }}:</span>
+            </div>
+            <div>
+              {{ m.body }}
+            </div>
           </span>
         </div>
       </ng-container>
