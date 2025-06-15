@@ -32,7 +32,6 @@ public class InventoryRepository : IInventoryRepository
 
         NotFoundException.ThrowIfNull(inventory, nameof(inventory), characterId);
 
-        var essenceItems = new List<EssenceItemBase>();
         foreach (var inventoryItem in inventory.InventoryItems)
         {
             if (inventoryItem.ItemInstance is EssenceItemInstance ei && ei.ItemBase is EssenceItemBase eib && eib.Essence != null)

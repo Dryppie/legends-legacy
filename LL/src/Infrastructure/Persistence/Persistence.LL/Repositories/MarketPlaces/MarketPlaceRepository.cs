@@ -1,4 +1,6 @@
 ﻿using Application.Common.Interfaces;
+using Common.Helpers.Essences;
+using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.MarketPlaces;
@@ -15,7 +17,7 @@ public class MarketPlaceRepository : IMarketPlaceRepository
     }
     public async Task<List<MarketPlaceListing>> GetMarketPlaceListingsAsync(CancellationToken cancellationToken)
     {
-        return await _dbContext.MarketPlaceListings
+        var marketPlaceListings = await _dbContext.MarketPlaceListings
             .Include(mpl => mpl.ItemInstance)
                 .ThenInclude(ii => ii.ItemBase)
                     .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
@@ -23,6 +25,16 @@ public class MarketPlaceRepository : IMarketPlaceRepository
                 .ThenInclude(ii => ii.ItemBase)
                     .ThenInclude(ib => (ib as EssenceItemBase).Essence)
             .ToListAsync(cancellationToken);
+
+        foreach (var listing in marketPlaceListings)
+        {
+            if (listing.ItemInstance is EssenceItemInstance ei && ei.ItemBase is EssenceItemBase eib && eib.Essence != null)
+            {
+                EssenceLoader.Instance.LoadAbilitiesForEssence(eib.Essence);
+            }
+        }
+
+        return marketPlaceListings;
     }
 
     public Task<bool> BuyoutMarketPlaceListingAsync(Guid characterId, Guid listingId, int quantity, CancellationToken cancellationToken)
