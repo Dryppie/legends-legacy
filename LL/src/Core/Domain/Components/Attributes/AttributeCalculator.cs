@@ -190,16 +190,16 @@ public static class AttributeCalculator
         derived.Add(AttributeType.HealthRegeneration, (int)totalHPRegen);
         derived.Add(AttributeType.MaxMana, (int)totalMaxMana);
         derived.Add(AttributeType.ManaRegeneration, (int)totalMPRegen);
-        derived.Add(AttributeType.CrowdControlResistance, (int)totalCCResistance);
-        derived.Add(AttributeType.CritChance, (int)critChance);
-        derived.Add(AttributeType.CritDamage, (int)critDamage);
-        derived.Add(AttributeType.Dodge, (int)dodgeChance);
+        derived.Add(AttributeType.CrowdControlResistance, totalCCResistance);
+        derived.Add(AttributeType.CritChance, critChance);
+        derived.Add(AttributeType.CritDamage, critDamage);
+        derived.Add(AttributeType.Dodge, dodgeChance);
         derived.Add(AttributeType.BasicAttackSpeed, (int)basicAttackSpeed);
         derived.Add(AttributeType.PhysicalDefense, (int)physicalDefense);
         derived.Add(AttributeType.MagicalDefense, (int)magicalDefense);
-        derived.Add(AttributeType.CritDamageReduction, (int)critDamageReduction);
-        derived.Add(AttributeType.Block, (int)block);
-        derived.Add(AttributeType.Parry, (int)parry);
+        derived.Add(AttributeType.CritDamageReduction, critDamageReduction);
+        derived.Add(AttributeType.Block, block);
+        derived.Add(AttributeType.Parry, parry);
 
         return derived;
     }
