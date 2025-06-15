@@ -940,17 +940,23 @@ public static class SeedCreatures
             Entries = [skeletonWarriorLootTableLegendary]
         };
 
-
+        // Items
         await context.ItemBases.AddRangeAsync(goblinEssenceItem, goblinWarriorEssenceItem, goblinArcherEssenceItem, largeRatEssenceItem);
         await context.ItemBases.AddRangeAsync(flameImpEssenceItem, frostImpEssenceItem, shadowImpEssenceItem, vampireBatEssenceItem);
         await context.ItemBases.AddRangeAsync(blueSlimeEssenceItem, brownSlimeEssenceItem, greenSlimeEssenceItem, rainbowSlimeEssenceItem, redSlimeEssenceItem, transparentSlimeEssenceItem);
         await context.ItemBases.AddRangeAsync(enchantedFairyEssenceItem, gladePantherEssenceItem, illusionFoxEssenceItem, nightshadeBlossomEssenceItem, pixieEssenceItem);
         await context.ItemBases.AddRangeAsync(hobgoblinEssenceItem);
+        await context.ItemBases.AddRangeAsync(mossLizardEssenceItem, spiderEssenceItem, treantSaplingEssenceItem, venomousSnakeEssenceItem, viperEssenceItem);
+        await context.ItemBases.AddRangeAsync(feralGhoulEssenceItem, plagueGhoulEssenceItem, ravenousGhoulEssenceItem, skeletonArcherEssenceItem, skeletonMageEssenceItem, skeletonWarriorEssenceItem);
+        // Essences
         await context.Essences.AddRangeAsync(goblinEssence, goblinWarriorEssence, goblinArcherEssence, largeRatEssence);
         await context.Essences.AddRangeAsync(flameImpEssence, frostImpEssence, shadowImpEssence, vampireBatEssence);
         await context.Essences.AddRangeAsync(blueSlimeEssence, brownSlimeEssence, greenSlimeEssence, rainbowSlimeEssence, redSlimeEssence, transparentSlimeEssence);
         await context.Essences.AddRangeAsync(enchantedFairyEssence, gladePantherEssence, illusionFoxEssence, nightshadeBlossomEssence, pixieEssence);
         await context.Essences.AddRangeAsync(hobgoblinEssence);
+        await context.Essences.AddRangeAsync(mossLizardEssence, spiderEssence, treantSaplingEssence, venomousSnakeEssence, viperEssence);
+        await context.Essences.AddRangeAsync(feralGhoulEssence, plagueGhoulEssence, ravenousGhoulEssence, skeletonArcherEssence, skeletonMageEssence, skeletonWarriorEssence);
+        // Loot tables
         await context.LootTables.AddRangeAsync(goblinLootTable, goblinWarriorLootTable, goblinArcherLootTable, largeRatLootTable);
         await context.LootTables.AddRangeAsync(flameImpLootTable, frostImpLootTable, shadowImpLootTable, vampireBatLootTable);
         await context.LootTables.AddRangeAsync(blueSlimeLootTable, brownSlimeLootTable, greenSlimeLootTable, rainbowSlimeLootTable, redSlimeLootTable, transparentSlimeLootTable);
