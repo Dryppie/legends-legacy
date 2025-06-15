@@ -1328,13 +1328,13 @@
     "equipmentType": "Head",
     "attributeModifiers": [
       {
-        "id": "3459045f-bb38-48a9-81b1-07552ff5894c",
+        "id": "fa253747-8097-47bf-b3c1-d86510a6894e",
         "attributeType": "Willpower",
-        "amount": 1,
+        "amount": 3,
         "modifierType": "Flat"
       },
       {
-        "id": "c742b5de-e223-4112-89e5-e47562edadcd",
+        "id": "ae0a5157-2a5a-4104-accc-8378f6f43ae9",
         "attributeType": "Threat",
         "amount": 1,
         "modifierType": "Flat"
@@ -1353,9 +1353,9 @@
     "equipmentType": "Chest",
     "attributeModifiers": [
       {
-        "id": "0696fc44-d48e-4a54-9f81-a3866f780c1f",
+        "id": "6bf4e5e8-49eb-4f86-bf2c-e3602ea066c8",
         "attributeType": "Constitution",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       }
     ],
@@ -1372,9 +1372,9 @@
     "equipmentType": "Legs",
     "attributeModifiers": [
       {
-        "id": "e9595040-9c93-43cd-99c1-f3cf66d839b5",
+        "id": "5e806cc6-98c9-4673-81f9-8b94d1883700",
         "attributeType": "Endurance",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       }
     ],
@@ -1391,15 +1391,15 @@
     "equipmentType": "Head",
     "attributeModifiers": [
       {
-        "id": "81a161cb-4f50-40a3-bf65-0e073bedaca6",
+        "id": "647795c0-faf8-476b-9ef7-c026e3621da9",
         "attributeType": "Instinct",
-        "amount": 3,
+        "amount": 4,
         "modifierType": "Flat"
       },
       {
-        "id": "106d937e-da42-47fe-9d6f-0525d25daf5a",
+        "id": "cd653f0f-50de-470e-bb97-9bd9f4d6f114",
         "attributeType": "Health",
-        "amount": 5,
+        "amount": 7,
         "modifierType": "Flat"
       }
     ],
@@ -1416,9 +1416,9 @@
     "equipmentType": "Chest",
     "attributeModifiers": [
       {
-        "id": "dcbf23e2-8d10-47f4-b7d0-d27130a957f6",
+        "id": "ab7c1d68-caf8-488e-a565-c14a6a59a5ee",
         "attributeType": "Strength",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       }
     ],
@@ -1435,9 +1435,9 @@
     "equipmentType": "Legs",
     "attributeModifiers": [
       {
-        "id": "85b2ebf3-8684-45b2-b342-80b899bc2a4f",
+        "id": "f3e3534d-aa32-4f46-893a-5ba5ecd54fa7",
         "attributeType": "FightingSpirit",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       }
     ],
@@ -1454,15 +1454,15 @@
     "equipmentType": "Head",
     "attributeModifiers": [
       {
-        "id": "0be456f7-f48e-4130-96c0-24808182c794",
+        "id": "92eaeee1-8a7e-4ba7-8890-e8be9073ada5",
         "attributeType": "Luck",
-        "amount": 3,
+        "amount": 4,
         "modifierType": "Flat"
       },
       {
-        "id": "3636411b-8de1-4f9d-a92b-77046d6b0d3d",
+        "id": "6865d901-137b-4a86-b026-c07426034b92",
         "attributeType": "CritChance",
-        "amount": 1,
+        "amount": 2,
         "modifierType": "Flat"
       }
     ],
@@ -1479,9 +1479,9 @@
     "equipmentType": "Chest",
     "attributeModifiers": [
       {
-        "id": "436e642f-f43d-42a2-ace5-bcd47388b26e",
+        "id": "6200332a-7797-4b8a-bb91-77f1336278d5",
         "attributeType": "Dexterity",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       }
     ],
@@ -1498,9 +1498,9 @@
     "equipmentType": "Legs",
     "attributeModifiers": [
       {
-        "id": "13c287d8-5ed0-4db7-9884-ef1fa3b727db",
+        "id": "c93302e5-372d-442e-a1c9-7746ad21ad6c",
         "attributeType": "Agility",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       }
     ],
@@ -1517,15 +1517,15 @@
     "equipmentType": "Head",
     "attributeModifiers": [
       {
-        "id": "2583d815-9289-499a-b5e0-2a22607ab8f1",
+        "id": "80543d88-9298-4ec1-aa99-4da85faa68b5",
         "attributeType": "Perception",
-        "amount": 3,
+        "amount": 4,
         "modifierType": "Flat"
       },
       {
-        "id": "7cfc60ba-e706-4233-bb0c-196a092ccb4b",
+        "id": "c2ebd804-df2b-4250-9c19-252fabff65bc",
         "attributeType": "Mana",
-        "amount": 5,
+        "amount": 7,
         "modifierType": "Flat"
       }
     ],
@@ -1542,9 +1542,9 @@
     "equipmentType": "Chest",
     "attributeModifiers": [
       {
-        "id": "4ede2581-6333-429a-afc9-ee7d454c9e9e",
+        "id": "75b37cb2-6356-4f7f-a9d7-5538a65c75bc",
         "attributeType": "Intelligence",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       }
     ],
@@ -1561,9 +1561,9 @@
     "equipmentType": "Legs",
     "attributeModifiers": [
       {
-        "id": "4a790e93-4d23-4248-9227-6473140cdf4f",
+        "id": "5e6b9978-62f0-45b7-a47a-ceb5c22d8d45",
         "attributeType": "Wisdom",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       }
     ],
@@ -1580,9 +1580,9 @@
     "equipmentType": "Necklace",
     "attributeModifiers": [
       {
-        "id": "8d69f7ff-d48a-4f4e-9f45-7a6de9c9ac60",
+        "id": "bf899508-1166-4f21-b36b-9710202b453a",
         "attributeType": "MaxMana",
-        "amount": 20,
+        "amount": 11,
         "modifierType": "Flat"
       }
     ],
@@ -1599,9 +1599,9 @@
     "equipmentType": "Necklace",
     "attributeModifiers": [
       {
-        "id": "73d627f8-3130-4376-8d0e-f36cc7556769",
+        "id": "0cb5ce0d-e31c-4f2b-bc31-c81ab17326a8",
         "attributeType": "Agility",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       }
     ],
@@ -1618,9 +1618,9 @@
     "equipmentType": "Necklace",
     "attributeModifiers": [
       {
-        "id": "ef1299dc-a4b4-42b7-a38a-31dd6802e470",
+        "id": "b52e2a40-1465-4080-ad42-b2f982ec21ab",
         "attributeType": "MaxHealth",
-        "amount": 60,
+        "amount": 16,
         "modifierType": "Flat"
       }
     ],
@@ -1637,9 +1637,9 @@
     "equipmentType": "Ring",
     "attributeModifiers": [
       {
-        "id": "8f13a3df-d0ff-4e4d-96b7-3498b40b06af",
+        "id": "b02305e3-ec10-451b-a1af-6dee4150955d",
         "attributeType": "CritDamage",
-        "amount": 8,
+        "amount": 7,
         "modifierType": "Flat"
       }
     ],
@@ -1656,9 +1656,9 @@
     "equipmentType": "Ring",
     "attributeModifiers": [
       {
-        "id": "c9093b63-bf43-41f7-824c-d5b31382d5a0",
+        "id": "a5a9cd97-bcc3-414c-95aa-737e43d35883",
         "attributeType": "Wisdom",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       }
     ],
@@ -1675,9 +1675,9 @@
     "equipmentType": "Ring",
     "attributeModifiers": [
       {
-        "id": "5adebb8c-b005-497b-ae98-b7f205aeb403",
+        "id": "586023dd-2bb9-4f4d-8d8b-38180ee3784e",
         "attributeType": "PhysicalDefense",
-        "amount": 25,
+        "amount": 18,
         "modifierType": "Flat"
       }
     ],
@@ -1694,9 +1694,9 @@
     "equipmentType": "Relic",
     "attributeModifiers": [
       {
-        "id": "0fadba9d-fed6-4afa-95f1-42ea5ca8b6cc",
+        "id": "b8bc4ec7-1c7b-426a-8b22-1040328a3621",
         "attributeType": "Perception",
-        "amount": 3,
+        "amount": 4,
         "modifierType": "Flat"
       }
     ],
@@ -1751,21 +1751,21 @@
     "equipmentType": "OneHanded",
     "attributeModifiers": [
       {
-        "id": "661f4b29-d31f-488a-b763-6df96045e22a",
+        "id": "0db00f71-c8ed-48b5-ac50-00afd441ccde",
         "attributeType": "FightingSpirit",
-        "amount": 1,
+        "amount": 2,
         "modifierType": "Flat"
       },
       {
-        "id": "022e8a2d-c76c-4284-bec0-36e542d22cff",
+        "id": "9aee1f92-e1b5-4e4d-89fb-2b2b61caa9e0",
         "attributeType": "Strength",
         "amount": 1,
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 5,
-    "scalingAttribute": "FightingSpirit",
-    "scalingAmount": 0.1
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "jagged_obsidian_hatchet",
@@ -1776,15 +1776,15 @@
     "equipmentType": "OneHanded",
     "attributeModifiers": [
       {
-        "id": "7527e5f8-b861-4bcf-9634-7d91e3c0637a",
+        "id": "6da90889-7bdd-4c0e-a1aa-8ab3c06f7dc6",
         "attributeType": "Strength",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 5,
-    "scalingAttribute": "Strength",
-    "scalingAmount": 0.1
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "flint_morning_star",
@@ -1795,15 +1795,15 @@
     "equipmentType": "OneHanded",
     "attributeModifiers": [
       {
-        "id": "bbc014e5-4a17-4770-b7bb-282e545245cd",
+        "id": "d4a52fc8-24d6-42a8-b5e5-2dadad182138",
         "attributeType": "Endurance",
-        "amount": 3,
+        "amount": 4,
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 5,
-    "scalingAttribute": "Endurance",
-    "scalingAmount": 0.1
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "silkshadow_stiletto",
@@ -1814,15 +1814,15 @@
     "equipmentType": "OneHanded",
     "attributeModifiers": [
       {
-        "id": "a1a501f5-7791-4991-8aab-944102012c14",
+        "id": "2a493ec2-83ab-41d4-8e31-09c95d892284",
         "attributeType": "Dexterity",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 5,
-    "scalingAttribute": "Dexterity",
-    "scalingAmount": 0.1
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "willow_cleaver",
@@ -1833,21 +1833,21 @@
     "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
-        "id": "f3187da5-0f40-4efe-9678-4ba61f404507",
+        "id": "4ba260d1-91f5-42cd-8686-cb8f5e566d52",
         "attributeType": "FightingSpirit",
-        "amount": 3,
+        "amount": 4,
         "modifierType": "Flat"
       },
       {
-        "id": "81f01556-5c49-4ecb-9841-fb9ca03f783f",
+        "id": "642a813a-1121-447c-b4b5-a758c500a0c0",
         "attributeType": "Strength",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 5,
-    "scalingAttribute": "FightingSpirit",
-    "scalingAmount": 0.1
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "stone_reaver_greataxe",
@@ -1858,15 +1858,15 @@
     "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
-        "id": "103daa3a-d5df-42e9-9623-2c3d13dad3a0",
+        "id": "6b6bfbda-03c3-4310-b9dd-9a70fd325e0f",
         "attributeType": "Strength",
-        "amount": 4,
+        "amount": 5,
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 5,
-    "scalingAttribute": "Strength",
-    "scalingAmount": 0.1
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "powder_core_maul",
@@ -1877,21 +1877,21 @@
     "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
-        "id": "9f518948-6f9b-43d7-b206-5dac5bd0a4d1",
+        "id": "1a4d0a25-49b2-45ba-a956-742681c74063",
         "attributeType": "Endurance",
-        "amount": 3,
+        "amount": 4,
         "modifierType": "Flat"
       },
       {
-        "id": "17281c8c-0ac4-4e58-b4f2-06e8c5d74d13",
+        "id": "a2e877fb-50ed-463a-a619-511339261c08",
         "attributeType": "Willpower",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 5,
-    "scalingAttribute": "Endurance",
-    "scalingAmount": 0.1
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "nest_tip_pike",
@@ -1902,21 +1902,21 @@
     "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
-        "id": "f472a147-2254-4df1-909b-a60c02737d0e",
+        "id": "b751199e-e6b1-4ee5-ae71-128497a6c9af",
         "attributeType": "FightingSpirit",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       },
       {
-        "id": "dfc90461-e2c1-4bc7-aa4e-93b1b949f104",
+        "id": "58b302f8-4a55-447e-b9ee-c504cbcb1541",
         "attributeType": "Dexterity",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 5,
-    "scalingAttribute": "Dexterity",
-    "scalingAmount": 0.1
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "stonebark_heater",
@@ -1927,15 +1927,15 @@
     "equipmentType": "OffHand",
     "attributeModifiers": [
       {
-        "id": "56d3e277-2538-4cbc-a068-ea5457688497",
+        "id": "3746fe80-9dbf-485f-9206-746967783f10",
         "attributeType": "PhysicalDefense",
-        "amount": 20,
+        "amount": 15,
         "modifierType": "Flat"
       },
       {
-        "id": "fa36f7c2-5279-404b-95e0-9445a378fac3",
+        "id": "479426de-d5ce-4297-9a25-612008f02787",
         "attributeType": "Block",
-        "amount": 50,
+        "amount": 25,
         "modifierType": "Flat"
       }
     ],
@@ -1952,15 +1952,15 @@
     "equipmentType": "OffHand",
     "attributeModifiers": [
       {
-        "id": "117b6e8b-c643-4e56-ad49-921f8ab59e18",
+        "id": "9cb2ec79-83e9-4077-9ef5-3eebc2901da5",
         "attributeType": "MagicalDefense",
-        "amount": 20,
+        "amount": 15,
         "modifierType": "Flat"
       },
       {
-        "id": "aa8d130e-ed0b-4d83-b59d-b93752473da9",
+        "id": "b88d421d-711c-40f3-97c4-6a17f1f7fb7f",
         "attributeType": "Block",
-        "amount": 50,
+        "amount": 25,
         "modifierType": "Flat"
       }
     ],
@@ -1996,9 +1996,9 @@
     "equipmentType": "OffHand",
     "attributeModifiers": [
       {
-        "id": "07ed2161-2777-4cb1-9f72-5ff55aedef66",
+        "id": "975096c9-857e-4d37-b5a2-412ac40bb953",
         "attributeType": "Intelligence",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       }
     ],
@@ -2015,15 +2015,15 @@
     "equipmentType": "OneHanded",
     "attributeModifiers": [
       {
-        "id": "d2354e29-9496-4666-930e-ced3a50a4ce4",
+        "id": "94caa597-a420-4865-83ec-0064e14b86a1",
         "attributeType": "Wisdom",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 5,
-    "scalingAttribute": "Wisdom",
-    "scalingAmount": 0.1
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "powdered_crystal_orb",
@@ -2034,9 +2034,9 @@
     "equipmentType": "OffHand",
     "attributeModifiers": [
       {
-        "id": "7ace81ec-11c8-4864-90af-11da75c08b8a",
+        "id": "b45512cb-21b4-4c9d-83c8-fe54925068b0",
         "attributeType": "Wisdom",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       }
     ],
@@ -2053,15 +2053,15 @@
     "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
-        "id": "71087684-332b-43a8-9e03-2de2f08e3524",
+        "id": "78208f19-7d71-427f-a106-a51cfa0ec70f",
         "attributeType": "Agility",
-        "amount": 4,
+        "amount": 5,
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 5,
-    "scalingAttribute": "Agility",
-    "scalingAmount": 0.1
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "flintlock_crossbow",
@@ -2072,21 +2072,21 @@
     "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
-        "id": "4c65fa15-4b39-4f1c-b413-3846a4ff8d00",
+        "id": "cb782e21-e007-4422-95e6-3ed357c7959c",
         "attributeType": "Agility",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       },
       {
-        "id": "c888c2c0-cb21-487e-84c1-5d7364b4ab0e",
+        "id": "f78af5bc-c669-46cc-b96a-bb586b222a6d",
         "attributeType": "Willpower",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 5,
-    "scalingAttribute": "Agility",
-    "scalingAmount": 0.1
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   },
   {
     "id": "jagged_obsidian_knuckles",
@@ -2097,20 +2097,20 @@
     "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
-        "id": "da9831b4-954f-4747-b459-80716bf0907d",
+        "id": "de10fd22-b1d9-428b-910d-7c0032b5a67c",
         "attributeType": "FightingSpirit",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       },
       {
-        "id": "caf0c8d2-27d5-4319-96b0-86161228eb63",
+        "id": "28164257-0d2f-4b4a-b628-471d51a7e563",
         "attributeType": "MaxHealth",
-        "amount": 50,
+        "amount": 25,
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 5,
-    "scalingAttribute": "FightingSpirit",
-    "scalingAmount": 0.1
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
   }
 ]

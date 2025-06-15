@@ -14,7 +14,7 @@
       "attributeModifiers": [
         {
           "attributeType": "Willpower",
-          "amount": 1,
+          "amount": 3,
           "modifierType": "Flat"
         },
         {
@@ -101,7 +101,7 @@
       "attributeModifiers": [
         {
           "attributeType": "Constitution",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         }
       ],
@@ -183,7 +183,7 @@
       "attributeModifiers": [
         {
           "attributeType": "Endurance",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         }
       ],
@@ -265,12 +265,12 @@
       "attributeModifiers": [
         {
           "attributeType": "Instinct",
-          "amount": 3,
+          "amount": 4,
           "modifierType": "Flat"
         },
         {
           "attributeType": "Health",
-          "amount": 5,
+          "amount": 7,
           "modifierType": "Flat"
         }
       ],
@@ -352,7 +352,7 @@
       "attributeModifiers": [
         {
           "attributeType": "Strength",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         }
       ],
@@ -434,7 +434,7 @@
       "attributeModifiers": [
         {
           "attributeType": "FightingSpirit",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         }
       ],
@@ -516,12 +516,12 @@
       "attributeModifiers": [
         {
           "attributeType": "Luck",
-          "amount": 3,
+          "amount": 4,
           "modifierType": "Flat"
         },
         {
           "attributeType": "CritChance",
-          "amount": 1,
+          "amount": 2,
           "modifierType": "Flat"
         }
       ],
@@ -603,7 +603,7 @@
       "attributeModifiers": [
         {
           "attributeType": "Dexterity",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         }
       ],
@@ -685,7 +685,7 @@
       "attributeModifiers": [
         {
           "attributeType": "Agility",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         }
       ],
@@ -767,12 +767,12 @@
       "attributeModifiers": [
         {
           "attributeType": "Perception",
-          "amount": 3,
+          "amount": 4,
           "modifierType": "Flat"
         },
         {
           "attributeType": "Mana",
-          "amount": 5,
+          "amount": 7,
           "modifierType": "Flat"
         }
       ],
@@ -854,7 +854,7 @@
       "attributeModifiers": [
         {
           "attributeType": "Intelligence",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         }
       ],
@@ -936,7 +936,7 @@
       "attributeModifiers": [
         {
           "attributeType": "Wisdom",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         }
       ],
@@ -1018,7 +1018,7 @@
       "attributeModifiers": [
         {
           "attributeType": "MaxMana",
-          "amount": 20,
+          "amount": 11,
           "modifierType": "Flat"
         }
       ],
@@ -1087,7 +1087,7 @@
       "attributeModifiers": [
         {
           "attributeType": "Agility",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         }
       ],
@@ -1156,7 +1156,7 @@
       "attributeModifiers": [
         {
           "attributeType": "MaxHealth",
-          "amount": 60,
+          "amount": 16,
           "modifierType": "Flat"
         }
       ],
@@ -1225,7 +1225,7 @@
       "attributeModifiers": [
         {
           "attributeType": "CritDamage",
-          "amount": 8,
+          "amount": 7,
           "modifierType": "Flat"
         }
       ],
@@ -1294,7 +1294,7 @@
       "attributeModifiers": [
         {
           "attributeType": "Wisdom",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         }
       ],
@@ -1363,7 +1363,7 @@
       "attributeModifiers": [
         {
           "attributeType": "PhysicalDefense",
-          "amount": 25,
+          "amount": 18,
           "modifierType": "Flat"
         }
       ],
@@ -1432,7 +1432,7 @@
       "attributeModifiers": [
         {
           "attributeType": "Perception",
-          "amount": 3,
+          "amount": 4,
           "modifierType": "Flat"
         }
       ],
@@ -1600,7 +1600,7 @@
       "attributeModifiers": [
         {
           "attributeType": "FightingSpirit",
-          "amount": 1,
+          "amount": 2,
           "modifierType": "Flat"
         },
         {
@@ -1609,9 +1609,9 @@
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": "FightingSpirit",
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -1687,13 +1687,13 @@
       "attributeModifiers": [
         {
           "attributeType": "Strength",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -1769,13 +1769,13 @@
       "attributeModifiers": [
         {
           "attributeType": "Endurance",
-          "amount": 3,
+          "amount": 4,
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": "Endurance",
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -1851,13 +1851,13 @@
       "attributeModifiers": [
         {
           "attributeType": "Dexterity",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": "Dexterity",
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -1933,18 +1933,18 @@
       "attributeModifiers": [
         {
           "attributeType": "FightingSpirit",
-          "amount": 3,
+          "amount": 4,
           "modifierType": "Flat"
         },
         {
           "attributeType": "Strength",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": "FightingSpirit",
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2020,13 +2020,13 @@
       "attributeModifiers": [
         {
           "attributeType": "Strength",
-          "amount": 4,
+          "amount": 5,
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": "Strength",
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2102,18 +2102,18 @@
       "attributeModifiers": [
         {
           "attributeType": "Endurance",
-          "amount": 3,
+          "amount": 4,
           "modifierType": "Flat"
         },
         {
           "attributeType": "Willpower",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": "Endurance",
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2189,18 +2189,18 @@
       "attributeModifiers": [
         {
           "attributeType": "FightingSpirit",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         },
         {
           "attributeType": "Dexterity",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": "Dexterity",
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2276,12 +2276,12 @@
       "attributeModifiers": [
         {
           "attributeType": "PhysicalDefense",
-          "amount": 20,
+          "amount": 15,
           "modifierType": "Flat"
         },
         {
           "attributeType": "Block",
-          "amount": 50,
+          "amount": 25,
           "modifierType": "Flat"
         }
       ],
@@ -2363,12 +2363,12 @@
       "attributeModifiers": [
         {
           "attributeType": "MagicalDefense",
-          "amount": 20,
+          "amount": 15,
           "modifierType": "Flat"
         },
         {
           "attributeType": "Block",
-          "amount": 50,
+          "amount": 25,
           "modifierType": "Flat"
         }
       ],
@@ -2532,7 +2532,7 @@
       "attributeModifiers": [
         {
           "attributeType": "Intelligence",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         }
       ],
@@ -2614,13 +2614,13 @@
       "attributeModifiers": [
         {
           "attributeType": "Wisdom",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": "Wisdom",
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2696,7 +2696,7 @@
       "attributeModifiers": [
         {
           "attributeType": "Wisdom",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         }
       ],
@@ -2778,13 +2778,13 @@
       "attributeModifiers": [
         {
           "attributeType": "Agility",
-          "amount": 4,
+          "amount": 5,
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": "Agility",
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2860,18 +2860,18 @@
       "attributeModifiers": [
         {
           "attributeType": "Agility",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         },
         {
           "attributeType": "Willpower",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": "Agility",
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
@@ -2947,18 +2947,18 @@
       "attributeModifiers": [
         {
           "attributeType": "FightingSpirit",
-          "amount": 2,
+          "amount": 3,
           "modifierType": "Flat"
         },
         {
           "attributeType": "MaxHealth",
-          "amount": 50,
+          "amount": 25,
           "modifierType": "Flat"
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": "FightingSpirit",
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": "Luck",
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": "WeaponSmithing",
