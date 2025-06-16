@@ -1,10 +1,9 @@
 ﻿using API.Chat.Hubs.Interfaces;
+using API.Chat.Utility;
 using Application.UsesCases.Chats.Commands.SendMessage;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Caching.Distributed;
-using System.Text.RegularExpressions;
-using System.Threading.RateLimiting;
 
 namespace API.Chat.Hubs;
 
@@ -21,8 +20,14 @@ public sealed class ChatHub : Hub<IChatClient>
 
     public async Task Send(string channel, string body)
     {
-        // (optional) rate limit via Redis
-        //await RateLimiter.EnsureAllowedAsync(_cache, Context.UserIdentifier!);
+        var userId = Context.UserIdentifier!;
+        var allowed = await RateLimiter.EnsureAllowedAsync(_cache, userId);
+
+        if (!allowed)
+        {
+            //await Clients.Caller.ReceiveSystemMessage("You're sending messages too quickly. Please slow down.");
+            return;
+        }
 
         var senderId = Context.UserIdentifier!;
         var senderName = Context.User!.Identity!.Name ?? "Unknown Sender";

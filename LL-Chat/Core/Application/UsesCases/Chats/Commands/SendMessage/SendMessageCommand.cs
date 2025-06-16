@@ -20,6 +20,9 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Cha
     public async Task<ChatMessageDto?> Handle(SendMessageCommand request, CancellationToken cancellationToken)
     {
         if (!Guid.TryParse(request.SenderId, out var senderId)) return null;
+        if (!SendMessageValidator.IsValid(request.Body))
+            return null;
+
         var message = new ChatMessage()
         {
             SenderId = senderId,
