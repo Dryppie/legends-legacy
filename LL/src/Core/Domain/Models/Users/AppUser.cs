@@ -16,6 +16,7 @@ public sealed class AppUser
 
     public ICollection<ExternalLogin> ExternalLogins { get; set; } = [];
     public ICollection<RefreshToken> RefreshTokens { get; set; } = [];
+    public bool IsNameEdited { get; set; }
 
     // factory helpers --------------------------------------------------------
 

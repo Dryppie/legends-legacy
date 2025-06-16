@@ -15,6 +15,7 @@ public interface IUserService
     /// <param name="userId"></param>
     /// <returns></returns>
     Task<AppUser?> ConvertGuestToUser(Guid userId, string username, string email, string password, CancellationToken cancellationToken);
+    Task<bool> UpdateUserInfo(Guid userId, UserInfo user, CancellationToken cancellationToken);
 
     ///// <summary>
     ///// Login with the given Email and Password

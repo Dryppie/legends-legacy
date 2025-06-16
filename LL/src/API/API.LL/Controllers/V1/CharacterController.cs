@@ -1,4 +1,6 @@
-﻿using Application.UseCases.Characters.Dtos;
+﻿using Application.UseCases.CharacterActions.Commands.StartGatheringAction;
+using Application.UseCases.Characters.Commands.RenameCharacter;
+using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Characters.Queries.GetCharacter;
 using Application.UseCases.Characters.Queries.GetCharacterOverview;
 using Common.Primitives;
@@ -17,4 +19,8 @@ public class CharacterController : BaseController
     [HttpGet("Overview")]
     public async Task<ActionResult<Response<CharacterOverviewDto>>> Overview() =>
         await Mediator.Send(new GetCharacterOverviewQuery(CurrentCharacterGuid));
+
+    [HttpPost("Rename")]
+    public async Task<ActionResult<Response<bool>>> Rename([FromBody] string newName) =>
+        await Mediator.Send(new RenameCharacterCommand(CurrentUserId, newName));
 }

@@ -25,6 +25,7 @@ public class GetUserInfoQueryHandler : IRequestHandler<GetUserInfoQuery, Respons
             Email = userInfo.Email,
             IsRegisteredUser = userInfo.IsRegisteredUser,
             IsGmailBound = userInfo.IsGmailBound,
+            IsNameEdited = userInfo.IsNameEdited,
         };
 
         return Response<UserInfoDto>.Success(userInfoDto);

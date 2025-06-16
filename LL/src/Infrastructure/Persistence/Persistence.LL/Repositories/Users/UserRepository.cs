@@ -38,6 +38,7 @@ public class UserRepository : IUserRepository
             Email = user.Email ?? string.Empty,
             IsRegisteredUser = !user.IsGuest,
             IsGmailBound = user.ExternalLogins.Count > 0,
+            IsNameEdited = user.IsNameEdited,
         };
     }
 

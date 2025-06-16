@@ -125,15 +125,16 @@ public class CharacterRepository : ICharacterRepository
         return character;
     }
 
-    public async Task UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken)
+    public async Task<bool> UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken)
     {
         var character = await _context.Characters
-            .FirstOrDefaultAsync(c => c.UserId.Equals(userId));
-            NotFoundException.ThrowIfNull(character, nameof(Character), userId);
-
+            .FirstOrDefaultAsync(c => c.UserId.Equals(userId), cancellationToken);
+        
+        if (character == null) return false;
         character.Name = username;
 
         await _context.SaveChangesAsync(cancellationToken);
+        return true;
     }
 
     public async Task<Character?> GetCharacterWithSoulstoneUpgradesAsync(Guid characterId, CancellationToken cancellationToken)

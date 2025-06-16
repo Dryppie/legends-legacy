@@ -102,4 +102,14 @@ public sealed class UserService : IUserService
 
         return $"{prefix}{animal}{suffix}_{random.Next(1000, 9999)}";
     }
+
+    public async Task<bool> UpdateUserInfo(Guid userId, UserInfo user, CancellationToken cancellationToken)
+    {
+        var existingUser = await _userRepository.FindByIdAsync(userId, CancellationToken.None);
+        if (existingUser == null) return false;
+        existingUser.IsNameEdited = true;
+
+        await _userRepository.SaveChangesAsync(cancellationToken);
+        return true;
+    }
 }
