@@ -78,7 +78,7 @@ export class GameSocketService {
     if (this.socket$) return; // already live
     /* create the WS subject */
     this.socket$ = webSocket<Incoming>({
-      url: buildGameWsUrl(environment.apiBaseUrl),
+      url: buildGameWsUrl('https://dev.legends-legacy.com'),
       deserializer: ({ data }) => {
         return JSON.parse(data);
       },
