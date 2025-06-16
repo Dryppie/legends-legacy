@@ -29,11 +29,11 @@ function backoffRetry<T>(
 }
 
 function buildGameWsUrl(apiUrl: string): string {
-  const base = new URL(apiUrl); // e.g. https://localhost:7060/
-  const protocol = base.protocol === 'https:' ? 'wss:' : 'ws:';
-
-  // token travels as a query parameter
-  return `${protocol}//${base.host}/api/v1/GameHub/game`;
+  const wsProtocol = apiUrl.startsWith('http') ? 'ws' : 'wss';
+  const withoutProtocol = apiUrl
+    .replace(/^https?:\/\//, '')
+    .replace(/\/+$/, '');
+  return `${wsProtocol}://${withoutProtocol}/api/v1/GameHub/game`;
 }
 type IncomingByType = {
   [I in Incoming as I['type']]: I['payload'];

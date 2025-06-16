@@ -9,7 +9,6 @@ export class PlayerService {
   getOnlinePlayerCount(): Observable<number> {
     return this.api.get('player/onlineCount').pipe(
       map((playerCount) => {
-        console.log(playerCount);
         return playerCount;
       }),
 

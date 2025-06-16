@@ -48,7 +48,6 @@ export class NavbarComponent {
   loadOnlinePlayers() {
     this.playerService.getOnlinePlayerCount().subscribe({
       next: (count) => {
-        console.log(count);
         this.onlinePlayers = count;
       },
       error: (err) => console.error('Failed to load online players', err),
