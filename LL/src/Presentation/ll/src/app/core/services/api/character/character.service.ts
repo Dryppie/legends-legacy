@@ -13,7 +13,6 @@ import {
   CharacterOverviewDto,
 } from '../../../../shared/models/Dtos/characterDto';
 import { AuthService } from '../auth/auth.service';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root',
@@ -67,5 +66,9 @@ export class CharacterService {
 
   public getCharacterOverview(): Observable<CharacterOverviewDto> {
     return this.api.get('Character/Overview');
+  }
+
+  renameCharacter(newName: string) {
+    return this.api.post('Character/Rename', newName);
   }
 }
