@@ -51,7 +51,6 @@ export class SettingsComponent {
   }
 
   editName() {
-    console.log(this.userInfo);
     this.newCharacterName = this.currentCharacter()?.name ?? '';
     this.showNameModal = true;
   }

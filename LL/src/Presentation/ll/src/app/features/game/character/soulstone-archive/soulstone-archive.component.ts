@@ -96,9 +96,7 @@ export class SoulstoneArchiveComponent implements OnInit {
 
       // Step 4: call the backend to persist the reset
       this.soulstoneUpgradeService.resetSoulstoneUpgrades().subscribe({
-        next: () => {
-          console.log(`Reset successful, refunded ${refund} soulstones`);
-        },
+        next: () => {},
         error: (err) => {
           console.error('Reset failed on backend:', err);
           // Optionally: rollback or notify user
