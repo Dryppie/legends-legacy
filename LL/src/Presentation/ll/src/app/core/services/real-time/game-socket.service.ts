@@ -31,9 +31,7 @@ function backoffRetry<T>(
 function buildGameWsUrl(apiUrl: string): string {
   const url = environment.isLocal ? apiUrl : 'https://dev.legends-legacy.com';
   const wsProtocol = url.startsWith('https') ? 'wss' : 'ws';
-  const withoutProtocol = apiUrl
-    .replace(/^https?:\/\//, '')
-    .replace(/\/+$/, '');
+  const withoutProtocol = url.replace(/^https?:\/\//, '').replace(/\/+$/, '');
   return `${wsProtocol}://${withoutProtocol}/api/v1/GameHub/game`;
 }
 type IncomingByType = {
