@@ -8,6 +8,7 @@ import { GoogleAuthService } from '../../../core/services/api/auth/google-auth.s
 import { CharacterService } from '../../../core/services/api/character/character.service';
 import { FormsModule } from '@angular/forms';
 import { RegularButtonComponent } from '../../../shared/components/buttons/regular-button/regular-button.component';
+import { GuildStateService } from '../../../core/services/api/guild/guild-state.service';
 
 @Component({
   selector: 'app-settings',
@@ -25,12 +26,15 @@ export class SettingsComponent {
   newCharacterName = '';
 
   readonly currentCharacter;
+  public readonly guild;
 
   constructor(
     private authService: AuthService,
     private googleService: GoogleAuthService,
     private readonly characterService: CharacterService,
+    private readonly guildState: GuildStateService,
   ) {
+    this.guild = guildState.guild;
     this.currentCharacter = this.authService.currentCharacter;
   }
 

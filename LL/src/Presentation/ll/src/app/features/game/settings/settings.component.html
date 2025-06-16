@@ -18,7 +18,9 @@
             character.experienceUntilNextLevel
           }}
         </p>
-        <p class="text-gray-400 mt-2">GUILD: BASED</p>
+        <p *ngIf="guild() as guild" class="text-gray-400 mt-2">
+          GUILD: {{ guild.name }}
+        </p>
       </div>
     </div>
   </aside>
