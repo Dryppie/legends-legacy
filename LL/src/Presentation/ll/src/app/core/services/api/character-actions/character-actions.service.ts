@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { effect, Injectable } from '@angular/core';
 import {
   BehaviorSubject,
   EMPTY,
@@ -54,16 +54,20 @@ export class CharacterActionsService {
     private apiService: ApiService,
     private combatService: CombatService,
     private gameService: GameService,
-    private eventBusService: EventBusService,
+    private eventBus: EventBusService,
     private sessionSummaryService: SessionSummaryService,
     private craftingService: CraftingService,
     private levelingService: LevelingService,
   ) {
-    this.eventBusService.logout$.subscribe(() => {
-      this.handleLogout();
+    effect(() => {
+      if (this.eventBus.logout()) {
+        this.handleLogout();
+      }
     });
-    this.eventBusService.currentActionSubject$.subscribe(() => {
-      this.getCharacterAction();
+    effect(() => {
+      if (this.eventBus.currentAction()) {
+        this.getCharacterAction();
+      }
     });
   }
 

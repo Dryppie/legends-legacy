@@ -1,11 +1,20 @@
-import { Injectable, NgZone, signal } from '@angular/core';
-import { firstValueFrom, ReplaySubject } from 'rxjs';
+import { effect, Injectable, NgZone, signal } from '@angular/core';
+import {
+  combineLatest,
+  distinctUntilChanged,
+  firstValueFrom,
+  ReplaySubject,
+  Subject,
+  switchMap,
+} from 'rxjs';
 import * as signalR from '@microsoft/signalr';
 import { HubConnection } from '@microsoft/signalr';
 import { environment } from '../../../../../environments/environment';
 import { ChatApiService } from '../chat-api.service';
 import { HttpParams } from '@angular/common/http';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { EventBusService } from '../../client-side/event-bus/event-bus.service';
+import { AuthService } from '../../api/auth/auth.service';
 
 export interface ChatMessageDto {
   id: string;
@@ -21,7 +30,7 @@ export interface ChatMessageDto {
 })
 export class ChatService {
   private hub?: HubConnection;
-  private readonly incoming$ = new ReplaySubject<ChatMessageDto>();
+  private incoming$ = new Subject<ChatMessageDto>();
   // expose an observable stream of all messages
   private readonly messageList = signal<ChatMessageDto[]>([]);
   public messages$ = toObservable(this.messageList);
@@ -30,16 +39,28 @@ export class ChatService {
   constructor(
     private zone: NgZone,
     private chatApi: ChatApiService,
+    private eventBus: EventBusService,
+    private auth: AuthService,
   ) {
-    this.connectAndLoad('global');
+    this.incoming$.subscribe((msg) => {
+      this.messageList.update((prev) => [...prev, msg]);
+    });
+    effect((onCleanup) => {
+      const id = this.auth.identity(); // ← depends on username + login
+      if (!id) {
+        this.disconnect();
+        return;
+      }
+
+      this.connectAndLoad('global'); // or current channel from state
+
+      /* make sure we disconnect when the effect re-runs or is destroyed */
+      onCleanup(() => this.disconnect());
+    });
   }
 
   /** Connect + load history in one call. */
   async connectAndLoad(channel: string, take = 50): Promise<void> {
-    this.incoming$.subscribe((msg) => {
-      this.messageList.update((prev) => [...prev, msg]);
-    });
-
     await this.joinChannel(channel);
     await this.loadHistory(channel, take);
   }
@@ -75,10 +96,14 @@ export class ChatService {
       .sort(
         (a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime(),
       )
-      .forEach((m) => this.incoming$.next(m));
+      .forEach((m) => this.addMessage(m));
   }
 
   /* -------------------- private helpers -------------------- */
+
+  private addMessage(msg: ChatMessageDto): void {
+    this.messageList.update((prev) => [...prev, msg]);
+  }
 
   private async buildHubConnection(channel: string): Promise<void> {
     this.hub = new signalR.HubConnectionBuilder()
@@ -100,8 +125,7 @@ export class ChatService {
 
     // server method name is Receive(msg)
     this.hub.on('Receive', (msg: ChatMessageDto) => {
-      // SignalR callbacks are outside Angular’s zone → re-enter so change-detection runs
-      this.zone.run(() => this.incoming$.next(msg));
+      this.zone.run(() => this.addMessage(msg));
     });
 
     await this.hub.start();
@@ -111,5 +135,25 @@ export class ChatService {
     if (!this.hub || this.hub.state !== signalR.HubConnectionState.Connected) {
       await this.buildHubConnection(channel);
     }
+  }
+
+  async reconnect(channel: string = 'global', take = 50): Promise<void> {
+    await this.disconnect();
+    await this.connectAndLoad(channel, take);
+  }
+
+  async disconnect(): Promise<void> {
+    if (
+      this.hub &&
+      this.hub.state !== signalR.HubConnectionState.Disconnected
+    ) {
+      await this.hub.stop();
+    }
+    this.hub = undefined;
+    this.messageList.set([]);
+
+    // 🧼 Reset incoming$ so loadHistory won't push duplicates
+    this.incoming$.complete(); // ends the old stream
+    this.incoming$ = new ReplaySubject<ChatMessageDto>();
   }
 }

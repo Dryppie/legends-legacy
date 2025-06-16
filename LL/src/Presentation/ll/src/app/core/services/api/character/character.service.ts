@@ -69,6 +69,6 @@ export class CharacterService {
   }
 
   renameCharacter(newName: string) {
-    return this.api.post('Character/Rename', newName);
+    return this.authService.renameCharacter(newName);
   }
 }

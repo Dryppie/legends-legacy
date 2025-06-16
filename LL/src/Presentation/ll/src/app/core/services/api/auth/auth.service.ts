@@ -19,6 +19,8 @@ import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { ToastService } from '../../client-side/toast/toast.service';
 import { UserInfoDto } from '../../../../shared/models/Dtos/userInfoDto';
+import { ChatService } from '../../ll-chat/chat-service/chat.service';
+import { SilentRefreshService } from './helpers/silent-refresh.service';
 
 @Injectable({
   providedIn: 'root',
@@ -35,11 +37,17 @@ export class AuthService {
   readonly isAuthenticated = computed(() => this._isAuthenticated());
   public returnUrl = '/';
 
+  readonly identity = computed(() => {
+    const ch = this._currentCharacter();
+    return ch ? `${ch.id}:${ch.name}` : null;
+  });
+
   constructor(
     private router: Router,
     private api: ApiService,
     private toast: ToastService,
     private event: EventBusService,
+    private silent: SilentRefreshService,
   ) {}
 
   private markAuthenticated() {
@@ -167,6 +175,22 @@ export class AuthService {
       );
   }
 
+  renameCharacter(newName: string) {
+    return this.api.post('auth/rename', newName).pipe(
+      tap(async ({ accessExpiresAt }) => {
+        this.toast.showToast('Edited name', '', true);
+        this.afterSuccessfulAuth(accessExpiresAt);
+
+        // reconnect chat after rename
+        // await this.chat.reconnect('global'); // or current channel if tracked
+      }),
+      catchError((e) => {
+        this.toast.showToast('Failed to edit name', e.message, false);
+        return throwError(() => e);
+      }),
+    );
+  }
+
   logout(): void {
     this.api
       .post('auth/logout')
@@ -211,31 +235,21 @@ export class AuthService {
     );
   }
 
+  private cancelSilent?: () => void;
   private afterSuccessfulAuth(accessExpiresAt: number) {
     this.markAuthenticated();
-    this.armRefreshScheduler(accessExpiresAt);
+    this.cancelSilent?.(); // dispose old timer if any
+    this.cancelSilent = this.silent.schedule(
+      accessExpiresAt,
+      () => this.tryRefresh(),
+      () => this.logout(),
+    );
 
     // preload character, then redirect
     this.fetchCharacter().subscribe({
       next: () => this.router.navigateByUrl('/game'),
       error: () => this.router.navigateByUrl('/game'),
     });
-  }
-
-  private armRefreshScheduler(accessExpiresAt: number): void {
-    // Cancel any previous timer
-    this.refreshSub?.unsubscribe();
-
-    const nowSec = Date.now() / 1000;
-    const ttlSec = accessExpiresAt - nowSec;
-    // Refresh when 70 % of lifetime has elapsed (i.e. 30 % remains)
-    const delayMs = Math.max(ttlSec * 0.7 * 1000, 1000);
-
-    this.refreshSub = timer(delayMs)
-      .pipe(switchMap(() => this.tryRefresh()))
-      .subscribe((ok) => {
-        if (!ok) this.logout(); // refresh token invalid / expired
-      });
   }
 
   getUserInfo(): Observable<UserInfoDto> {

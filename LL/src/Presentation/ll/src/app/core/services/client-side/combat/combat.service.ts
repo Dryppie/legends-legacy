@@ -1,10 +1,8 @@
-import { Injectable } from '@angular/core';
-import { delay, of, Subscription } from 'rxjs';
+import { effect, Injectable } from '@angular/core';
+import { delay, of } from 'rxjs';
 import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
 import { CombatStateService } from '../../../state/combat-state/combat-state.service';
-import { LevelingService } from '../leveling/leveling.service';
 import { EventBusService } from '../event-bus/event-bus.service';
-import { CombatLogService } from './combat-log/combat-log.service';
 import { BattleType } from '../../../state/combat-state/combatState';
 import { CombatPlaybackService } from './combat-playback/combat-playback-service';
 import { CombatResultDto } from '../../../../shared/models/Dtos/combatResultDto';
@@ -16,10 +14,12 @@ export class CombatService {
   constructor(
     private playback: CombatPlaybackService,
     private combatStateService: CombatStateService,
-    private eventBusService: EventBusService,
+    private eventBus: EventBusService,
   ) {
-    this.eventBusService.logout$.subscribe(() => {
-      this.handleLogout();
+    effect(() => {
+      if (this.eventBus.logout()) {
+        this.handleLogout();
+      }
     });
   }
 

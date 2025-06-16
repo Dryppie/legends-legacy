@@ -32,7 +32,7 @@ public interface ICharacterService
     /// <param name="characterId"></param>
     /// <returns></returns>
     Task<Character?> GetMyCharacterOverviewAsync(Guid characterId, CancellationToken cancellationToken);
-    Task<bool> UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken);
+    Task<Character?> UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken);
     /// <summary>
     /// Get a bare minimum character, with no includes
     /// </summary>

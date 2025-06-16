@@ -6,6 +6,7 @@ using Application.UseCases.Users.Commands.ConvertGuestToUser;
 using Application.UseCases.Users.Commands.GoogleLogin;
 using Application.UseCases.Users.Commands.GuestLogin;
 using Application.UseCases.Users.Commands.Register;
+using Application.UseCases.Users.Commands.RenameCharacter;
 using Application.UseCases.Users.Dtos;
 using Application.UseCases.Users.Queries.GetUserInfo;
 using Application.UseCases.Users.Queries.Login;
@@ -97,6 +98,16 @@ public class AuthController : BaseController
         Response.Cookies.Delete(AccessTokenCookie, opts);
         Response.Cookies.Delete(RefreshTokenCookie, opts);
         return Ok();
+    }
+
+    [HttpPost("Rename")]
+    public async Task<ActionResult<Response<bool>>> Rename([FromBody] string newName)
+    {
+        var result = await Mediator.Send(new RenameCharacterCommand(CurrentUserId, newName));
+        if (result.Data is null) return BadRequest(result);
+
+        SetAuthCookies(result.Data);
+        return Ok(result);
     }
 
     [HttpPost("createNewTokens")]

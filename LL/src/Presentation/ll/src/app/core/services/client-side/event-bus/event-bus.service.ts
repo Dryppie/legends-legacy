@@ -1,28 +1,21 @@
-import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { computed, Injectable, signal } from '@angular/core';
 
 @Injectable({
   providedIn: 'root',
 })
 export class EventBusService {
-  private logoutSubject = new Subject<void>();
-  private currentActionSubject = new Subject<void>();
+  private readonly _logout = signal(false);
+  private readonly _currentAction = signal(0);
 
-  // Exposed as an observable so others can subscribe
-  get logout$(): Observable<void> {
-    return this.logoutSubject.asObservable();
-  }
-
-  get currentActionSubject$(): Observable<void> {
-    return this.currentActionSubject.asObservable();
-  }
+  // Exposed signals
+  readonly logout = computed(() => this._logout());
+  readonly currentAction = computed(() => this._currentAction());
 
   emitLogout() {
-    this.logoutSubject.next();
-    this.logoutSubject.complete();
+    this._logout.set(true);
   }
 
   emitFetchCurrentAction() {
-    this.currentActionSubject.next();
+    this._currentAction.update((val) => val + 1);
   }
 }

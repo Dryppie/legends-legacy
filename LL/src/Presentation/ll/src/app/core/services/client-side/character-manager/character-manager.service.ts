@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { effect, Injectable } from '@angular/core';
 import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { InventoryDto } from '../../../../shared/models/Dtos/inventoryDto';
 import {
@@ -25,9 +25,11 @@ export class CharacterManagerService {
   private equipmentSubject = new BehaviorSubject<EquipmentSlot[]>([]);
   equipment$ = this.equipmentSubject.asObservable();
 
-  constructor(private eventBusService: EventBusService) {
-    this.eventBusService.logout$.subscribe(() => {
-      this.handleLogout();
+  constructor(private eventBus: EventBusService) {
+    effect(() => {
+      if (this.eventBus.logout()) {
+        this.handleLogout();
+      }
     });
   }
 

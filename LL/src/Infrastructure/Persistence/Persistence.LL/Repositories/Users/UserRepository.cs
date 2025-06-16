@@ -43,4 +43,9 @@ public class UserRepository : IUserRepository
     }
 
     public async Task SaveChangesAsync(CancellationToken cancellationToken) => await _context.SaveChangesAsync(cancellationToken);
+
+    public async Task<AppUser?> GetUserById(Guid userId, CancellationToken cancellationToken)
+    {
+        return await _context.Users.FindAsync([userId], cancellationToken);
+    }
 }

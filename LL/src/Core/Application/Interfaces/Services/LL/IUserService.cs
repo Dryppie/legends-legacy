@@ -15,28 +15,6 @@ public interface IUserService
     /// <param name="userId"></param>
     /// <returns></returns>
     Task<AppUser?> ConvertGuestToUser(Guid userId, string username, string email, string password, CancellationToken cancellationToken);
-    Task<bool> UpdateUserInfo(Guid userId, UserInfo user, CancellationToken cancellationToken);
-
-    ///// <summary>
-    ///// Login with the given Email and Password
-    ///// </summary>
-    ///// <param name="email"></param>
-    ///// <param name="password"></param>
-    ///// <returns></returns>
-    //public Task<AuthInfo> Login(string email, string password);
-
-    ///// <summary>
-    ///// Register with the given Username, Email, and Password
-    ///// </summary>
-    ///// <param name="username"></param>
-    ///// <param name="email"></param>
-    ///// <param name="password"></param>
-    ///// <returns></returns>
-    //public Task<AuthInfo> Register(string username, string email, string password);
-
-    ///// <summary>
-    ///// Register as a guest user
-    ///// </summary>
-    ///// <returns></returns>
-    //public Task<AuthInfo> RegisterGuest();
+    Task<bool> UpdateUserInfo(Guid userId, AppUser user, CancellationToken cancellationToken);
+    Task<AppUser?> GetUserById(Guid userId, CancellationToken cancellationToken);
 }

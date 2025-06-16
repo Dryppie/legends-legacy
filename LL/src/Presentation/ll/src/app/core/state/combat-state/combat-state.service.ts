@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { effect, Injectable } from '@angular/core';
 import {
   BattleOutcome,
   CombatResultDto,
@@ -27,9 +27,11 @@ export class CombatStateService {
 
   private stateMap = new Map<BattleType, BehaviorSubject<CombatState>>();
 
-  constructor(private eventBusService: EventBusService) {
-    this.eventBusService.logout$.subscribe(() => {
-      this.handleLogout();
+  constructor(private eventBus: EventBusService) {
+    effect(() => {
+      if (this.eventBus.logout()) {
+        this.handleLogout();
+      }
     });
   }
 

@@ -125,16 +125,24 @@ public class CharacterRepository : ICharacterRepository
         return character;
     }
 
-    public async Task<bool> UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken)
+    public async Task<Character?> UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken)
     {
+        // Check if the desired username is already taken by someone else
+        var nameTaken = await _context.Characters
+            .AnyAsync(c => c.Name == username && c.UserId != userId, cancellationToken);
+
+        if (nameTaken)
+            return null; // or throw a custom exception if you prefer
+
         var character = await _context.Characters
-            .FirstOrDefaultAsync(c => c.UserId.Equals(userId), cancellationToken);
-        
-        if (character == null) return false;
+            .FirstOrDefaultAsync(c => c.UserId == userId, cancellationToken);
+
+        if (character == null) return null;
+
         character.Name = username;
 
         await _context.SaveChangesAsync(cancellationToken);
-        return true;
+        return character;
     }
 
     public async Task<Character?> GetCharacterWithSoulstoneUpgradesAsync(Guid characterId, CancellationToken cancellationToken)
