@@ -29,7 +29,8 @@ function backoffRetry<T>(
 }
 
 function buildGameWsUrl(apiUrl: string): string {
-  const wsProtocol = apiUrl.startsWith('http') ? 'ws' : 'wss';
+  const url = environment.isLocal ? apiUrl : 'https://dev.legends-legacy.com';
+  const wsProtocol = apiUrl.startsWith('https') ? 'wss' : 'ws';
   const withoutProtocol = apiUrl
     .replace(/^https?:\/\//, '')
     .replace(/\/+$/, '');
@@ -78,7 +79,7 @@ export class GameSocketService {
     if (this.socket$) return; // already live
     /* create the WS subject */
     this.socket$ = webSocket<Incoming>({
-      url: buildGameWsUrl('https://dev.legends-legacy.com'),
+      url: buildGameWsUrl(environment.apiBaseUrl),
       deserializer: ({ data }) => {
         return JSON.parse(data);
       },
