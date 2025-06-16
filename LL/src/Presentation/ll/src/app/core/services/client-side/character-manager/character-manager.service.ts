@@ -9,7 +9,6 @@ import { BehaviorSubject } from 'rxjs';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { Equipment, EquipmentInstance } from '../../../../shared/models/item';
 import { EventBusService } from '../event-bus/event-bus.service';
-import { getAllowedEquipmentTypesForSlot } from '../../../../shared/utils/equipment/equipment.utils';
 import { EquipmentType } from '../../../../shared/models/enums/equipmentType';
 
 @Injectable({

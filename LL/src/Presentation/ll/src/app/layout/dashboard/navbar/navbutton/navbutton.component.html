@@ -2,12 +2,12 @@
   routerLink="{{ link }}"
   routerLinkActive="text-primary"
   #rla="routerLinkActive"
-  class="flex items-center space-x-1 p-2"
+  class="flex items-center p-2"
   (click)="updateSidebar()"
 >
   <img
     [src]="rla.isActive ? activeIcon : inactiveIcon"
-    class="max-h-8 max-w-8"
+    class="h-6 w-6 pb-[2px]"
   />
-  <h3>{{ label }}</h3>
+  <h2>{{ label }}</h2>
 </button>

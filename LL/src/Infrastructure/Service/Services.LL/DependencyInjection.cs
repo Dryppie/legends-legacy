@@ -33,6 +33,7 @@ using Services.LL.Levels;
 using Services.LL.Loots;
 using Services.LL.LootTables;
 using Services.LL.MarketPlaces;
+using Services.LL.Players;
 using Services.LL.Professions;
 using Services.LL.Professions.Craftings;
 using Services.LL.Professions.Gatherings;
@@ -96,6 +97,8 @@ public static class DependencyInjection
 
         services.AddScoped<IProfessionService, ProfessionService>();
         services.AddScoped<IRecipeService, RecipeService>();
+
+        services.AddScoped<IPlayerService, PlayerService>();
 
         services.AddScoped<ISoulstoneUpgradeService, SoulstoneUpgradeService>();
 

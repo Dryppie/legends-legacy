@@ -8,8 +8,10 @@
   <div
     class="border-gradient relative flex h-24 w-full items-center rounded-r-md py-[1px]"
   >
-    <div class="flex h-full w-full rounded-r-md bg-texture bg-auto pl-10 sm:pl-12">
-      <div class="flex flex-col justify-center sm:space-y-2 pl-4">
+    <div
+      class="flex h-full w-full rounded-r-md bg-texture bg-auto pl-10 sm:pl-12"
+    >
+      <div class="flex flex-col justify-center pl-4 sm:space-y-2">
         <h2
           class="max-w-[5ch] truncate text-white sm:max-w-[8ch] lg:max-w-none"
         >
@@ -35,27 +37,32 @@
         </div>
       </div>
       <div
-        class="ml-4 flex w-full items-start justify-end pt-6 sm:items-center sm:pt-0"
+        class="ml-4 flex w-full items-start justify-end pt-1 sm:items-start sm:pt-0"
       >
-        <div
-          class="flex items-center justify-between bg-transparent p-4 text-[#6D6D6D] sm:hidden"
-          (click)="toggleList()"
-          *ngIf="!showList"
-        >
-          <img src="core/button/Hamburger.png" class="cursor-pointer" />
-          <h3 class="cursor-pointer pl-2 text-primary">{{ activeLabel }}</h3>
-        </div>
-        <div
-          class="z-10 flex flex-col text-nowrap rounded-md border bg-texture p-2 text-[#a1a1a1] sm:flex-row sm:items-center sm:space-x-6 sm:border-none sm:bg-none sm:p-6"
-          *ngIf="(showList && isScreenSmall) || !isScreenSmall"
-        >
-          <app-navbutton
-            *ngFor="let button of navButtons"
-            [link]="button.link"
-            [label]="button.label"
+        <div class="flex flex-col">
+          <div *ngIf="onlinePlayers" class="flex justify-end pr-4 text-white">
+            {{ onlinePlayers }} Online
+          </div>
+          <div
+            class="flex items-center justify-between bg-transparent p-4 text-[#6D6D6D] sm:hidden"
             (click)="toggleList()"
-            (itemTapped)="activeNavbar(button.label)"
-          ></app-navbutton>
+            *ngIf="!showList"
+          >
+            <img src="core/button/Hamburger.png" class="cursor-pointer" />
+            <h3 class="cursor-pointer pl-2 text-primary">{{ activeLabel }}</h3>
+          </div>
+          <div
+            class="z-10 flex flex-col text-nowrap rounded-md border bg-texture p-2 text-[#a1a1a1] sm:flex-row sm:items-center sm:space-x-6 sm:border-none sm:bg-none"
+            *ngIf="(showList && isScreenSmall) || !isScreenSmall"
+          >
+            <app-navbutton
+              *ngFor="let button of navButtons"
+              [link]="button.link"
+              [label]="button.label"
+              (click)="toggleList()"
+              (itemTapped)="activeNavbar(button.label)"
+            ></app-navbutton>
+          </div>
         </div>
       </div>
     </div>

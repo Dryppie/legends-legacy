@@ -95,6 +95,8 @@ public static class DependencyInjection
         services.AddScoped<ICraftingRepository, CraftingRepository>();
         services.AddScoped<IRecipeRepository, RecipeRepository>();
 
+        services.AddScoped<IPlayerRepository, PlayerRepository>();
+
         services.AddScoped<ISoulstoneUpgradeRepository, SoulstoneUpgradeRepository>();
 
         services.AddScoped<IUserRepository, UserRepository>();

@@ -44,7 +44,7 @@ public class SimulatorService : ISimulatorService
     /// <returns></returns>
     public async Task SimulateCombat(int playerTeamSize, int enemyTeamSize, int fights, int tier, int locationId)
     {
-        var start = DateTimeOffset.Now;
+        var start = DateTimeOffset.UtcNow;
 
         var numberOfDraws = 0;
 
@@ -97,7 +97,7 @@ public class SimulatorService : ISimulatorService
         // Sort results by win rate descending
         var resultList = _essenceStats.Values.OrderByDescending(a => a.WinRate).ToList();
 
-        var end = DateTimeOffset.Now;
+        var end = DateTimeOffset.UtcNow;
 
         // Print combination results
         foreach (var result in resultList)

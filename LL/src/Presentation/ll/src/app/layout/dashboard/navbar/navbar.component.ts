@@ -11,6 +11,8 @@ import { NavbuttonComponent } from './navbutton/navbutton.component';
 import { NgFor, NgIf } from '@angular/common';
 import { AuthService } from '../../../core/services/api/auth/auth.service';
 import { CharacterDto } from '../../../shared/models/Dtos/characterDto';
+import { interval } from 'rxjs';
+import { PlayerService } from '../../../core/services/api/players/player.service';
 
 @Component({
   selector: 'app-navbar',
@@ -33,9 +35,31 @@ export class NavbarComponent {
   ];
 
   readonly currentCharacter;
+  onlinePlayers: number = 2;
 
-  constructor(private authService: AuthService) {
+  constructor(
+    private authService: AuthService,
+    private readonly playerService: PlayerService,
+  ) {
     this.currentCharacter = this.authService.currentCharacter;
+    this.loadOnlinePlayers();
+  }
+
+  loadOnlinePlayers() {
+    this.playerService.getOnlinePlayerCount().subscribe({
+      next: (count) => {
+        console.log(count);
+        this.onlinePlayers = count;
+      },
+      error: (err) => console.error('Failed to load online players', err),
+    });
+  }
+  ngOnInit(): void {
+    this.loadOnlinePlayers();
+
+    interval(1000 * 60 * 2).subscribe(() => {
+      this.loadOnlinePlayers();
+    });
   }
 
   toggleList() {
