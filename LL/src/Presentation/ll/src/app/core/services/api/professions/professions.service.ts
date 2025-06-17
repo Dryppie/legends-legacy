@@ -1,21 +1,8 @@
 import { Injectable, Signal, signal } from '@angular/core';
-import {
-  BehaviorSubject,
-  catchError,
-  Observable,
-  of,
-  shareReplay,
-  startWith,
-  Subject,
-  switchMap,
-  tap,
-  throwError,
-} from 'rxjs';
 import { GatheringNode } from '../../../../shared/models/Dtos/gatheringNode';
 import { ApiService } from '../../api/api.service';
 import {
   CraftingProfession,
-  CraftType,
   GatheringProfession,
   Profession,
   Recipe,

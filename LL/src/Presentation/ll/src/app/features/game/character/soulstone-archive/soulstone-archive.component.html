@@ -8,30 +8,31 @@
     class="place-self-end pr-4 sm:place-self-start"
     variant="danger"
     (pressed)="resetSoulstoneUpgrades()"
+    [disabled]="loading()"
     >Reset - free</app-regular-button
   >
   <div
     class="flex flex-col gap-4 overflow-y-auto pr-4 sm:pr-6"
-    *ngIf="soulstoneUpgrades$ | async as soulstoneUpgrades"
+    *ngIf="combatUpgrades()"
   >
     <ng-container *ngIf="character() as character">
       <app-soulstone-upgrade-card
-        [upgrades]="(combatUpgrades$ | async) ?? []"
+        [upgrades]="combatUpgrades()"
         upgradeType="Combat"
         [character]="character"
       ></app-soulstone-upgrade-card>
       <app-soulstone-upgrade-card
-        [upgrades]="(gatheringUpgrades$ | async) ?? []"
+        [upgrades]="gatheringUpgrades()"
         upgradeType="Gathering"
         [character]="character"
       ></app-soulstone-upgrade-card>
       <app-soulstone-upgrade-card
-        [upgrades]="(craftingUpgrades$ | async) ?? []"
+        [upgrades]="craftingUpgrades()"
         upgradeType="Crafting"
         [character]="character"
       ></app-soulstone-upgrade-card>
       <app-soulstone-upgrade-card
-        [upgrades]="(miscUpgrades$ | async) ?? []"
+        [upgrades]="miscUpgrades()"
         upgradeType="Miscellaneous"
         [character]="character"
       ></app-soulstone-upgrade-card>
