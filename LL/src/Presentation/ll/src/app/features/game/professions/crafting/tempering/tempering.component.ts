@@ -38,7 +38,11 @@ import { CharacterActionsStateService } from '../../../../../core/services/api/c
 export class TemperingComponent implements OnInit {
   @Input({ required: true }) inventory!: Signal<InventoryItem[]>;
   @Input({ required: true }) craftType!: CraftType;
-
+  filteredInventory = computed(() => {
+    return this.inventory().filter(
+      (ii) => (ii.itemInstance as EquipmentInstance).potential,
+    );
+  });
   readonly craftingQueue;
   readonly isPerformingOtherAction = signal(false);
 

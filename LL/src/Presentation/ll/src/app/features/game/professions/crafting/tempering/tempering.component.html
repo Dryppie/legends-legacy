@@ -181,9 +181,9 @@
   <div
     class="flex max-h-full min-h-24 w-full flex-col space-y-2 overflow-y-auto md:order-1"
   >
-    <ng-container *ngIf="inventory().length; else noItemsToTemper">
+    <ng-container *ngIf="filteredInventory().length; else noItemsToTemper">
       <h2 class="flex text-primary">Items to temper</h2>
-      <ng-container *ngIf="inventory() as inventory">
+      <ng-container *ngIf="filteredInventory() as inventory">
         <div
           *ngFor="let item of inventory"
           class="cursor-pointer rounded-lg border p-3 hover:border-primary/60 hover:bg-zinc-300/30"
