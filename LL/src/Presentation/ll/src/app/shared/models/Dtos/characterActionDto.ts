@@ -36,7 +36,7 @@ export interface CombatActionDetails {
 
 export interface GatheringActionDetails {
   name: string;
-  gatheringType: GatheringType;
+  professionType: GatheringType;
 }
 
 export interface CraftingActionDetails {

@@ -101,12 +101,6 @@ export class CharacterActionsStateService {
         this._currentAction.set(action);
         if (action) {
           this.persistence.set(action.characterActionType);
-          if (
-            action.characterActionType === CharacterActionType.Combat &&
-            action.combatSession?.combatResult.eventLog.length
-          ) {
-            this.gameService.startCombat();
-          }
         }
       },
     );
@@ -119,12 +113,14 @@ export class CharacterActionsStateService {
     this.persistence.set(type);
     let call$: Observable<boolean>;
 
+    let isCombat = false;
     switch (type) {
       case CharacterActionType.Combat:
         this._loadingCombat.set(true);
         call$ = this.actionsService.startCombat(
           payload as StartCombatActionRequest,
         );
+        isCombat = true;
         break;
       case CharacterActionType.Crafting:
         call$ = this.actionsService.startCrafting(
@@ -146,6 +142,9 @@ export class CharacterActionsStateService {
             this.reset();
           } else {
             this.startPolling();
+            if (isCombat) {
+              this.gameService.startCombat();
+            }
           }
         }),
         catchError((err) => {

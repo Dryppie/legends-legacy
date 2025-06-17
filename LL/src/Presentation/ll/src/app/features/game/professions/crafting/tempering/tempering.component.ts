@@ -86,48 +86,49 @@ export class TemperingComponent implements OnInit {
       initialValue: [] as CraftingQueueItem[],
     });
 
-    effect(
-      () => {
-        const action = this.characterActionService.currentAction();
+    effect(() => {
+      const action = this.characterActionService.currentAction();
 
-        if (!action) {
-          this.clearCheckTimeout();
-          this.isPerformingOtherAction.set(false);
-          return;
-        }
+      if (!action) {
+        this.clearCheckTimeout();
+        queueMicrotask(() => this.isPerformingOtherAction.set(false));
+        return;
+      }
 
-        const isCrafting =
-          action.characterActionType === CharacterActionType.Crafting;
+      const isCrafting =
+        action.characterActionType === CharacterActionType.Crafting;
 
-        if (isCrafting && action.isDeleted) {
-          this.cancelEntireQueue(
-            action.craftingActionDetails?.craftingQueueItems ?? [],
-          );
-        }
+      if (
+        isCrafting &&
+        action.isDeleted &&
+        action.craftingActionDetails?.craftingQueueItems.length
+      ) {
+        const queueCopy = [
+          ...(action.craftingActionDetails?.craftingQueueItems ?? []),
+        ];
+        queueMicrotask(() => this.cancelEntireQueue(queueCopy));
+      }
 
-        if (isCrafting) {
-          this.clearCheckTimeout();
-          this.isPerformingOtherAction.set(false);
-          return;
-        }
+      if (isCrafting) {
+        this.clearCheckTimeout();
+        queueMicrotask(() => this.isPerformingOtherAction.set(false));
+        return;
+      }
 
-        const updatedAt = new Date(action.updatedAt ?? 0).getTime();
-        const now = Date.now();
-        const isBusy = !action.isDeleted || updatedAt > now;
+      const updatedAt = new Date(action.updatedAt ?? 0).getTime();
+      const now = Date.now();
 
-        if (action.isDeleted && updatedAt > now) {
-          this.clearCheckTimeout();
-          this.checkTimeout = setTimeout(() => {
-            this.isPerformingOtherAction.set(false);
-          }, updatedAt - now);
-        } else {
-          this.clearCheckTimeout();
-        }
+      if (action.isDeleted && updatedAt > now) {
+        this.clearCheckTimeout();
+        this.checkTimeout = setTimeout(() => {
+          queueMicrotask(() => this.isPerformingOtherAction.set(false));
+        }, updatedAt - now);
+      } else {
+        this.clearCheckTimeout();
+      }
 
-        this.isPerformingOtherAction.set(isBusy);
-      },
-      { allowSignalWrites: true },
-    );
+      queueMicrotask(() => this.isPerformingOtherAction.set(false));
+    });
   }
 
   ngOnInit(): void {}
@@ -206,8 +207,9 @@ export class TemperingComponent implements OnInit {
       itemInstance: queueItem.equipmentInstance,
     });
     this.craftingService.dequeueTempering(queueItem.id);
-    if (this.craftingService.currentQueue.length === 0)
-      this.characterActionService.clear();
+    if (this.craftingService.currentQueue.length === 0) {
+      this.clearCurrentAction();
+    }
 
     this.selectedItemId.set(null);
   }
@@ -226,8 +228,15 @@ export class TemperingComponent implements OnInit {
       });
       this.craftingService.dequeueTempering(queueItem.id);
     });
-
+    this.clearCurrentAction();
     this.selectedItemId.set(null);
+  }
+
+  clearCurrentAction() {
+    let action = this.characterActionService.currentAction();
+    action!.craftingActionDetails!.craftingQueueItems = [];
+    this.characterActionService.currentAction.set(action);
+    this.characterActionService.clear();
   }
 
   getEstimatedTime(queue: CraftingQueueItem[]): string {

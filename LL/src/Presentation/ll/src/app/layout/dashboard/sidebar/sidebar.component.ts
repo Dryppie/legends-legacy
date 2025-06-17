@@ -14,9 +14,11 @@ import { SidebarService } from '../../../core/services/client-side/sidebar/sideb
 import { TabComponent } from '../../../shared/components/tabs/tab/tab.component';
 import { GameService } from '../../../core/services/client-side/game/game.service';
 import { CurrentActionComponent } from '../../../shared/components/current-action/current-action.component';
-import { NamedStorageKeys } from '../../../core/common/enums/named-storage-keys';
 import { FilterTabsComponent } from '../../../shared/components/tabs/filter-tabs/filter-tabs.component';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
+import { CharacterActionType } from '../../../shared/models/enums/characterActionType';
+import { Equipment } from '../../../shared/models/item';
+import { EquipmentType } from '../../../shared/models/enums/equipmentType';
 
 @Component({
   selector: 'app-sidebar',
@@ -94,13 +96,43 @@ export class SidebarComponent implements OnInit {
 
   navigateToAction() {
     const action = this.state.currentAction();
-    const actionType = localStorage.getItem(
-      NamedStorageKeys.CharacterActionType,
-    );
-    if (actionType === 'Combat') this.gameService.showCombat();
+    if (!action) return;
+    const actionType = action.characterActionType;
+    const now = Date.now();
+    const updatedAt = new Date(action.updatedAt ?? 0).getTime();
+    if (updatedAt > now) this.gameService.showCombat();
     else {
-      this.router.navigate(['game/professions']);
-      this.sidebarService.updateContent('game/professions');
+      let extendedPath = '';
+      if (actionType === CharacterActionType.Gathering) {
+        console.log(action.gatheringActionDetails);
+        extendedPath =
+          'gathering/' +
+          action.gatheringActionDetails!.professionType.toLowerCase();
+      } else {
+        const equipmentType = (
+          action.craftingActionDetails?.craftingQueueItems[0].equipmentInstance
+            .itemBase as Equipment
+        ).equipmentType;
+        switch (equipmentType) {
+          case EquipmentType.Head:
+          case EquipmentType.Chest:
+          case EquipmentType.Legs:
+            extendedPath = '/crafting/armorforging';
+            break;
+          case EquipmentType.TwoHanded:
+          case EquipmentType.OneHanded:
+          case EquipmentType.OffHand:
+            extendedPath = '/crafting/weaponsmithing';
+            break;
+          case EquipmentType.Relic:
+          case EquipmentType.Necklace:
+          case EquipmentType.Ring:
+            extendedPath = '/crafting/jewelrycrafting';
+            break;
+        }
+      }
+      this.router.navigate([`game/professions/${extendedPath}`]);
+      this.sidebarService.updateContent(`game/professions/${extendedPath}`);
     }
   }
 }

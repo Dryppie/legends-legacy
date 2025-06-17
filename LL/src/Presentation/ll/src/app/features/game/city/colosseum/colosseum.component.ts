@@ -25,7 +25,6 @@ import { TabsComponent } from '../../../../shared/components/tabs/tabs.component
     TabComponent,
     CombatComponent,
     NgIf,
-    AsyncPipe,
     ArenaBattleComponent,
     ChampionsMarketComponent,
     RankingsGloryComponent,

@@ -88,6 +88,7 @@ export class CombatComponent implements OnInit {
     effect(() => {
       const time = this.combatStateService.getNextCombat(this.battleType)();
       if (time) this.nextCombatIn = time;
+      else this.nextCombatIn = this.currentAction()?.updatedAt ?? new Date();
     });
 
     /** Handle combat result */
