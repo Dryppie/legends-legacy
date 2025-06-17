@@ -1,12 +1,20 @@
 ﻿using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.TierPackages;
 using Domain.Models.Professions.Crafting;
 using Services.LL.Interfaces;
 
 namespace Services.LL.Professions.Craftings;
 public class TemperingService : ITemperingService
 {
+    private readonly ITierPackageProvider _packageProvider;
+
+    public TemperingService(ITierPackageProvider packageProvider)
+    {
+        _packageProvider = packageProvider;
+    }
+
     public void HandleTempering(CraftingQueueItem current, TemperingSummary temperingSummary, Random rng, Dictionary<TemperingOutcome, double> temperingBonuses)
     {
         temperingBonuses.TryGetValue(TemperingOutcome.Positive, out var doubleItemExpChance);
@@ -42,7 +50,7 @@ public class TemperingService : ITemperingService
         AllocateExpBasedOnCraftingProfession(temperingSummary, experience, current.CraftType);
     }
 
-    private static void HandlePositiveOutcome(CraftingQueueItem current, Random rng, double doubleItemExpChance)
+    private void HandlePositiveOutcome(CraftingQueueItem current, Random rng, double doubleItemExpChance)
     {
         var experience = 1;
         if (rng.NextDouble() < (doubleItemExpChance / 100)) experience *= 2;
@@ -97,7 +105,7 @@ public class TemperingService : ITemperingService
         }
     }
 
-    private static void TryUpgradeRarity(EquipmentInstance eq)
+    private void TryUpgradeRarity(EquipmentInstance eq)
     {
         const int XpPerTier = 10;
 
@@ -105,13 +113,19 @@ public class TemperingService : ITemperingService
         {
             eq.ItemXp -= XpPerTier;
             eq.Rarity = eq.Rarity + 1;        // next tier
-            ApplyTierPackage(eq);              // stats / sockets / visuals / etc.
+            //ApplyTierPackage(eq);              // stats / sockets / visuals / etc.
         }
     }
 
-    private static void ApplyTierPackage(EquipmentInstance eq)
+    private void ApplyTierPackage(EquipmentInstance eq)
     {
-        // Implement the details in one place so it can be reused from everywhere.
+        var tierPackage = _packageProvider.GetPackage(eq.Rarity);
+        if (tierPackage == null) return;
+        // Apply the tier package modifiers to the equipment instance
+        foreach (var modifier in tierPackage.AttributeModifiers)
+        {
+            //eq.InstanceModifiers.Add(modifier);
+        }
     }
 
 

@@ -12,8 +12,20 @@ public class EquipmentInstance : ItemInstance
     [NotMapped]
     public EquipmentBase EquipmentBase => (EquipmentBase)ItemBase;
     [NotMapped]
-    public List<ItemAttributeModifier> AttributeModifiers => EquipmentBase.AttributeModifiers
-            .Select(attr => new ItemAttributeModifier(attr.AttributeType, (int)Math.Ceiling(attr.Amount * Boost), attr.ModifierType)).ToList();
+    private IReadOnlyCollection<ItemAttributeModifier> TemplateModifiers =>
+        [.. EquipmentBase.AttributeModifiers];
+
+
+    /// <summary>Modifiers that were added to *this* item as it levelled up.</summary>
+    //public List<ItemAttributeModifier> InstanceModifiers { get; private set; } = new();
+
+    [NotMapped]
+    public List<ItemAttributeModifier> AttributeModifiers =>
+    [
+        .. TemplateModifiers.Select(attr => new ItemAttributeModifier(attr.AttributeType, (int)Math.Ceiling(attr.Amount * Boost), attr.ModifierType)),
+        //.. InstanceModifiers,
+    ];
+
     public float Boost => Rarity switch
     {
         Rarity.Common => 1.0f,

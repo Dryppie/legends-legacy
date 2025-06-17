@@ -3,7 +3,6 @@ using Application.UseCases.Equipments.Commands.UnequipEquipment;
 using Application.UseCases.Equipments.Dtos;
 using Application.UseCases.Equipments.Queries.GetMyEquipment;
 using Common.Primitives;
-using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Microsoft.AspNetCore.Mvc;
 

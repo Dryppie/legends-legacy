@@ -10,6 +10,7 @@ using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Guilds;
 using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.TierPackages;
 using Domain.Models.Leaderboards;
 using Domain.Models.LootTables;
 using Domain.Models.MarketPlaces;
@@ -102,8 +103,9 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IExternalLoginRepository, ExternalLoginRepository>();
-        services.AddSingleton<ITokenHasher, Sha256TokenHasher>();
 
+        services.AddSingleton<ITokenHasher, Sha256TokenHasher>();
+        services.AddSingleton<ITierPackageProvider, InMemoryTierPackageProvider>();
 
         return services;
     }
