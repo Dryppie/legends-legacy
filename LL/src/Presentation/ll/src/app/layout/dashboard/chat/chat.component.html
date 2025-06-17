@@ -2,10 +2,12 @@
   class="flex h-full w-96 flex-col justify-between bg-texture xl:rounded-tl-md"
 >
   <div class="relative flex h-full flex-col overflow-hidden">
-    <div class="text-gold flex justify-between border-b border-primary p-2">
+    <div
+      class="text-gold flex items-center justify-between border-b border-primary p-2"
+    >
       <span class="text-white">Global</span>
       <button
-        class="hover:text-gold/70 text-xs uppercase xl:hidden"
+        class="hover:text-gold/70 p-1 px-2 text-xs uppercase text-white xl:hidden"
         aria-label="Close chat"
         (click)="close.emit()"
       >
