@@ -1,18 +1,18 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, effect, Input, OnDestroy, OnInit } from '@angular/core';
 import { CombatAvatarComponent } from './combat-avatar/combat-avatar.component';
 import { CombatOverviewComponent } from './combat-overview/combat-overview.component';
 import { CombatEvent, EventType } from '../../models/Dtos/combatEventDto';
-import { AsyncPipe, NgFor, NgIf, NgStyle } from '@angular/common';
+import { NgFor, NgIf, NgStyle } from '@angular/common';
 import { SimpleCombatEntityDto } from '../../models/Dtos/combatResultDto';
-import { Observable, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { CountdownComponent } from '../countdown/countdown.component';
-import { CharacterActionsService } from '../../../core/services/api/character-actions/character-actions.service';
 import { GameService } from '../../../core/services/client-side/game/game.service';
 import { CombatStateService } from '../../../core/state/combat-state/combat-state.service';
-import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
 import { MiniButtonComponent } from '../mini-button/mini-button.component';
 import { CombatLogComponent } from './combat-log/combat-log.component';
 import { BattleType } from '../../../core/state/combat-state/combatState';
+import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-combat',
@@ -24,13 +24,12 @@ import { BattleType } from '../../../core/state/combat-state/combatState';
     NgIf,
     NgStyle,
     CountdownComponent,
-    AsyncPipe,
     MiniButtonComponent,
     CombatLogComponent,
   ],
   templateUrl: './combat.component.html',
 })
-export class CombatComponent implements OnInit, OnDestroy {
+export class CombatComponent implements OnInit {
   combatEvents: CombatEvent[] = [];
   private lastEventsLength = 0;
   @Input() battleType: BattleType = BattleType.Idle;
@@ -41,29 +40,88 @@ export class CombatComponent implements OnInit, OnDestroy {
   playerCharacters: SimpleCombatEntityDto[] = [];
   enemyCharacters: SimpleCombatEntityDto[] = [];
   subscriptions: Subscription = new Subscription();
-  currentAction$!: Observable<CharacterActionDto | null>;
-
+  readonly currentAction;
   // Only set to true if a combat result has been received, or if start combat has been
   displayCombat = false;
-  isCombatVisible$!: Observable<boolean>;
   isLoading = false;
 
   constructor(
-    private characterActionService: CharacterActionsService,
-    private gameService: GameService,
-    public combatStateService: CombatStateService,
-  ) {}
+    private readonly characterActionService: CharacterActionsStateService,
+    private readonly gameService: GameService,
+    public readonly combatStateService: CombatStateService,
+  ) {
+    this.currentAction = this.characterActionService.currentAction;
+
+    const isLoadingSig = this.characterActionService.loadingCombat;
+    effect(() => {
+      this.isLoading = isLoadingSig();
+    });
+    const isCombatActiveSig = toSignal(this.gameService.combatActive$, {
+      initialValue: false,
+    });
+    effect(() => {
+      this.displayCombat = isCombatActiveSig();
+    });
+
+    effect(() => {
+      this.playerCharacters = this.combatStateService.getPlayerCharacters(
+        this.battleType,
+      )();
+      this.enemyCharacters = this.combatStateService.getEnemyCharacters(
+        this.battleType,
+      )();
+    });
+
+    /** Handle combat event stream */
+    effect(() => {
+      const allEvents = this.combatStateService.getCombatEvents(
+        this.battleType,
+      )();
+      const previousLength = this.lastEventsLength;
+      const newEvents = allEvents.slice(previousLength);
+      this.lastEventsLength = allEvents.length;
+
+      newEvents.forEach((event) => this.handleCombatEvent(event));
+    });
+
+    /** Handle next combat tick */
+    effect(() => {
+      const time = this.combatStateService.getNextCombat(this.battleType)();
+      if (time) this.nextCombatIn = time;
+    });
+
+    /** Handle combat result */
+    effect(() => {
+      const result = this.combatStateService.getCombatResult(this.battleType)();
+      if (result) {
+        this.displayCombat = true;
+        this.setupCombat();
+      }
+    });
+
+    /** Handle outcome to optionally trigger auto-exit */
+    effect(() => {
+      const outcome = this.combatStateService.getCombatOutcome(
+        this.battleType,
+      )();
+      if (outcome && this.isStoppingCombat) {
+        setTimeout(() => {
+          this.stopCombat();
+        }, 1000);
+      }
+    });
+  }
 
   ngOnInit(): void {
-    this.currentAction$ = this.characterActionService.currentAction$;
+    // this.currentAction$ = this.characterActionService.currentAction$;
 
-    const isLoadingSub =
-      this.characterActionService.loadingCombatAction$.subscribe(
-        (isLoading) => {
-          this.isLoading = isLoading;
-        },
-      );
-    this.subscriptions.add(isLoadingSub);
+    // const isLoadingSub =
+    //   this.characterActionService.loadingCombatAction$.subscribe(
+    //     (isLoading) => {
+    //       this.isLoading = isLoading;
+    //     },
+    //   );
+    // this.subscriptions.add(isLoadingSub);
 
     this.playerCharacters = [
       {
@@ -89,84 +147,15 @@ export class CombatComponent implements OnInit, OnDestroy {
         barrier: 0,
       },
     ];
-    this.subscriptions.add(
-      this.gameService.combatActive$.subscribe((isCombatActive) => {
-        this.displayCombat = isCombatActive;
-      }),
-    );
-
-    this.subscriptions.add(
-      this.combatStateService
-        .getPlayerCharacters$(this.battleType)
-        .subscribe((entities) => (this.playerCharacters = entities)),
-    );
-
-    this.subscriptions.add(
-      this.combatStateService
-        .getEnemyCharacters$(this.battleType)
-        .subscribe((entities) => (this.enemyCharacters = entities)),
-    );
-
-    this.subscriptions.add(
-      this.combatStateService
-        .getCombatEvents$(this.battleType)
-        .subscribe((allEvents) => {
-          // Only process new events
-          const newEvents = allEvents.slice(
-            this.combatStateService.getLastEventsLength(this.battleType),
-          );
-          this.combatStateService.setLastEventsLength(
-            this.battleType,
-            allEvents.length,
-          );
-          newEvents.forEach((event) => this.handleCombatEvent(event));
-        }),
-    );
-
-    this.subscriptions.add(
-      this.combatStateService
-        .getNextCombat$(this.battleType)
-        .subscribe((time) => {
-          if (time == null) return;
-          this.nextCombatIn = time;
-        }),
-    );
-
-    this.subscriptions.add(
-      this.combatStateService
-        .getCombatResult$(this.battleType)
-        .subscribe((result) => {
-          if (result == null) return;
-          this.displayCombat = true;
-          this.setupCombat();
-        }),
-    );
-
-    this.subscriptions.add(
-      this.combatStateService
-        .getCombatOutcome$(this.battleType)
-        .subscribe((outcome) => {
-          if (outcome == null) return;
-          setTimeout(() => {
-            if (this.isStoppingCombat) {
-              this.stopCombat();
-            }
-          }, 1000);
-        }),
-    );
 
     this.pickRandomFlavorText();
     setInterval(() => this.pickRandomFlavorText(), 5000);
   }
 
-  ngOnDestroy() {
-    this.subscriptions.unsubscribe();
-  }
-
   initiateStoppingCombat() {
     this.isStoppingCombat = true;
     this.stopCombatButtonText = 'Stopping combat..';
-    this.characterActionService.stopCharacterAction();
+    this.characterActionService.stopAction();
     // If we're seeing the "You're already in combat screen", and click to stop combat from there, it should call all the stop logic
     if (!this.displayCombat) this.stopCombat();
   }
@@ -174,7 +163,7 @@ export class CombatComponent implements OnInit, OnDestroy {
   stopCombat() {
     this.subscriptions.unsubscribe();
     this.gameService.endCombat();
-    this.characterActionService.clearCurrentAction();
+    this.characterActionService.clear();
   }
 
   setupCombat() {

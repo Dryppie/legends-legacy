@@ -1,10 +1,9 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, effect } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { ProgressBarComponent } from '../../progress-bar/progress-bar.component';
 import { CharacterActionDto } from '../../../models/Dtos/characterActionDto';
-import { Subscription } from 'rxjs';
-import { CharacterActionsService } from '../../../../core/services/api/character-actions/character-actions.service';
 import { CharacterActionType } from '../../../models/enums/characterActionType';
+import { CharacterActionsStateService } from '../../../../core/services/api/character-actions/character-actions.state.service';
 
 @Component({
   selector: 'app-profession-action',
@@ -12,40 +11,37 @@ import { CharacterActionType } from '../../../models/enums/characterActionType';
   imports: [ProgressBarComponent, NgIf],
   templateUrl: './profession-action.component.html',
 })
-export class ProfessionActionComponent implements OnInit, OnDestroy {
+export class ProfessionActionComponent {
   currentAction: CharacterActionDto | null = null;
-  private subscription: Subscription = new Subscription();
   remainingTime: string = '00:00'; // Add a property to track the remaining time
   performingAction = '';
 
-  constructor(private characterActionsService: CharacterActionsService) {}
+  constructor(private state: CharacterActionsStateService) {
+    effect(() => {
+      const action = this.state.currentAction();
+      this.currentAction = action;
 
-  ngOnInit(): void {
-    this.subscription.add(
-      this.characterActionsService.currentAction$.subscribe((action) => {
-        if (action?.isDeleted) {
+      if (!action || action.isDeleted) {
+        this.performingAction = '';
+        return;
+      }
+
+      switch (action.characterActionType) {
+        case CharacterActionType.Gathering:
+          this.performingAction = `Gathering - ${action.gatheringActionDetails?.name}`;
+          break;
+
+        case CharacterActionType.Crafting:
+          const itemName =
+            action.craftingActionDetails?.craftingQueueItems?.[0]
+              ?.equipmentInstance?.itemBase?.name ?? 'Unknown Item';
+          this.performingAction = `Tempering - ${itemName}`;
+          break;
+
+        default:
           this.performingAction = '';
-          return;
-        }
-        this.currentAction = action;
-
-        if (
-          this.currentAction?.characterActionType ===
-          CharacterActionType.Gathering
-        )
-          this.performingAction = `Gathering - ${action?.gatheringActionDetails!.name}`;
-
-        if (
-          this.currentAction?.characterActionType ===
-          CharacterActionType.Crafting
-        )
-          this.performingAction = `Tempering - ${action?.craftingActionDetails!.craftingQueueItems[0].equipmentInstance.itemBase.name}`;
-      }),
-    );
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+      }
+    });
   }
 
   // Update the remaining time when received from the progress bar
@@ -54,7 +50,7 @@ export class ProfessionActionComponent implements OnInit, OnDestroy {
   }
 
   stopAction(): void {
-    this.characterActionsService.stopCharacterAction();
+    this.state.stopAction();
     this.performingAction = '';
   }
 }

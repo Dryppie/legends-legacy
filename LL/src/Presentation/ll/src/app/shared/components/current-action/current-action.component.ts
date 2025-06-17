@@ -1,9 +1,8 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CharacterActionsService } from '../../../core/services/api/character-actions/character-actions.service';
-import { Subscription } from 'rxjs';
+import { Component, effect, OnInit } from '@angular/core';
 import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
 import { CharacterActionType } from '../../models/enums/characterActionType';
 import { ProgressBarComponent } from '../progress-bar/progress-bar.component';
+import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 
 @Component({
   selector: 'app-current-action',
@@ -11,27 +10,19 @@ import { ProgressBarComponent } from '../progress-bar/progress-bar.component';
   imports: [ProgressBarComponent],
   templateUrl: './current-action.component.html',
 })
-export class CurrentActionComponent implements OnInit, OnDestroy {
+export class CurrentActionComponent {
   currentAction: CharacterActionDto | null = null;
-  private subscription: Subscription = new Subscription();
   remainingTime: string = '00:00'; // Add a property to track the remaining time
   isGatheringAction = false;
   performingAction = '';
   duration = 0;
 
-  constructor(private characterActionsService: CharacterActionsService) {}
-
-  ngOnInit(): void {
-    this.subscription.add(
-      this.characterActionsService.currentAction$.subscribe((action) => {
-        this.currentAction = action;
-        this.setPerformingAction();
-      }),
-    );
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
+  constructor(private state: CharacterActionsStateService) {
+    effect(() => {
+      const action = this.state.currentAction();
+      this.currentAction = action;
+      this.setPerformingAction();
+    });
   }
 
   // Update the remaining time when received from the progress bar
@@ -40,37 +31,45 @@ export class CurrentActionComponent implements OnInit, OnDestroy {
   }
 
   stopAction(): void {
-    this.characterActionsService.stopCharacterAction();
+    this.state.stopAction();
   }
 
-  setPerformingAction() {
-    if (!this.currentAction) {
+  private setPerformingAction(): void {
+    const action = this.currentAction;
+
+    if (!action) {
       this.performingAction = 'Idle';
-      return;
-    }
-    if (
-      this.currentAction.isDeleted &&
-      new Date(this.currentAction.updatedAt).getTime() > Date.now()
-    ) {
-      this.performingAction = 'Engaged in Combat - Stopping..';
+      this.isGatheringAction = false;
       return;
     }
 
-    switch (this.currentAction.characterActionType) {
+    if (action.isDeleted && new Date(action.updatedAt).getTime() > Date.now()) {
+      this.performingAction = 'Engaged in Combat - Stopping..';
+      this.isGatheringAction = false;
+      return;
+    }
+
+    switch (action.characterActionType) {
       case CharacterActionType.Combat:
         this.performingAction = 'Engaged in Combat';
+        this.isGatheringAction = false;
         break;
       case CharacterActionType.Gathering:
         this.performingAction = 'Gathering Resources';
+        this.isGatheringAction = true;
         break;
       case CharacterActionType.Crafting:
         this.performingAction = 'Tempering Items';
+        this.isGatheringAction = false;
         break;
       case CharacterActionType.Idle:
         this.performingAction = 'Idle';
+        this.isGatheringAction = false;
         break;
       default:
         this.performingAction = 'Idle';
+        this.isGatheringAction = false;
+        break;
     }
   }
 }

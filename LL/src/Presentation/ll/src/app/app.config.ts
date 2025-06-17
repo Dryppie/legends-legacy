@@ -23,14 +23,13 @@ import { LevelingService } from './core/services/client-side/leveling/leveling.s
 import { ColosseumPlaybackStrategy } from './core/services/client-side/combat/combat-playback/colosseum-playback-strategy';
 import { AuthInterceptor } from './core/interceptors/auth-interceptor';
 import { RealTimeFacade } from './core/services/real-time/real-time-facade';
-import { TokenRefreshInterceptor } from './core/interceptors/token-refresh-interceptor';
 
 export function initializeApp(authService: AuthService) {
   return () =>
     firstValueFrom(authService.checkAuth()).catch(() => Promise.resolve());
 }
 function startRealTime(realTime: RealTimeFacade) {
-  return () => {}; // noop; DI only cares that the factory runs
+  return () => {};
 }
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -51,12 +50,7 @@ export const appConfig: ApplicationConfig = {
     {
       provide: APP_INITIALIZER,
       useFactory: startRealTime,
-      deps: [RealTimeFacade], // 👈 forces construction
-      multi: true,
-    },
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: TokenRefreshInterceptor,
+      deps: [RealTimeFacade],
       multi: true,
     },
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },

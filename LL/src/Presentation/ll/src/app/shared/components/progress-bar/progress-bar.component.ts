@@ -1,5 +1,6 @@
 import {
   Component,
+  effect,
   ElementRef,
   EventEmitter,
   OnDestroy,
@@ -7,11 +8,11 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
-import { CharacterActionsService } from '../../../core/services/api/character-actions/character-actions.service';
 import { CharacterActionDto } from '../../models/Dtos/characterActionDto';
 import { Subscription } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { CharacterActionType } from '../../models/enums/characterActionType';
+import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 
 @Component({
   selector: 'app-progress-bar',
@@ -19,7 +20,7 @@ import { CharacterActionType } from '../../models/enums/characterActionType';
   imports: [],
   templateUrl: './progress-bar.component.html',
 })
-export class ProgressBarComponent implements OnInit, OnDestroy {
+export class ProgressBarComponent implements OnDestroy {
   @ViewChild('progressBar', { static: true })
   progressBar!: ElementRef<HTMLDivElement>;
   @Output() remainingTimeChange = new EventEmitter<string>();
@@ -27,17 +28,15 @@ export class ProgressBarComponent implements OnInit, OnDestroy {
   private animationFrameId: number = 0;
   private actionSubscription: Subscription | null = null;
 
-  constructor(private characterActionsService: CharacterActionsService) {}
-
-  ngOnInit(): void {
-    this.actionSubscription =
-      this.characterActionsService.currentAction$.subscribe((action) => {
-        if (action) {
-          this.startProgressBar(action);
-        } else {
-          this.stopProgressBar();
-        }
-      });
+  constructor(private readonly state: CharacterActionsStateService) {
+    effect(() => {
+      const action = this.state.currentAction();
+      if (action) {
+        this.startProgressBar(action);
+      } else {
+        this.stopProgressBar();
+      }
+    });
   }
 
   ngOnDestroy(): void {

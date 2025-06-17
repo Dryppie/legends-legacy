@@ -18,11 +18,4 @@ export class CombatAvatarComponent {
   @Input() maxMp!: number;
   @Input() barrier!: number;
   @Input() isLoading = true;
-
-  imageLoaded = false;
-
-  onImageLoad() {
-    console.log('[✔] Image loaded');
-    this.imageLoaded = true;
-  }
 }

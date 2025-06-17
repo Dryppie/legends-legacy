@@ -19,7 +19,6 @@ import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { ToastService } from '../../client-side/toast/toast.service';
 import { UserInfoDto } from '../../../../shared/models/Dtos/userInfoDto';
-import { ChatService } from '../../ll-chat/chat-service/chat.service';
 import { SilentRefreshService } from './helpers/silent-refresh.service';
 
 @Injectable({
@@ -235,15 +234,25 @@ export class AuthService {
     );
   }
 
-  private cancelSilent?: () => void;
+  private armRefreshScheduler(accessExpiresAt: number): void {
+    // Cancel any previous timer
+    this.refreshSub?.unsubscribe();
+
+    const nowSec = Date.now() / 1000;
+    const ttlSec = accessExpiresAt - nowSec;
+    // Refresh when 70 % of lifetime has elapsed (i.e. 30 % remains)
+    const delayMs = Math.max(ttlSec * 0.7 * 1000, 1000);
+
+    this.refreshSub = timer(delayMs)
+      .pipe(switchMap(() => this.tryRefresh()))
+      .subscribe((ok) => {
+        if (!ok) this.logout(); // refresh token invalid / expired
+      });
+  }
+
   private afterSuccessfulAuth(accessExpiresAt: number) {
     this.markAuthenticated();
-    this.cancelSilent?.(); // dispose old timer if any
-    this.cancelSilent = this.silent.schedule(
-      accessExpiresAt,
-      () => this.tryRefresh(),
-      () => this.logout(),
-    );
+    this.armRefreshScheduler(accessExpiresAt);
 
     // preload character, then redirect
     this.fetchCharacter().subscribe({

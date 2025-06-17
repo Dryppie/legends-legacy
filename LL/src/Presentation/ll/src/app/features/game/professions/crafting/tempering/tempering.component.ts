@@ -18,7 +18,6 @@ import {
 } from '../../../../../shared/models/item';
 import { InventoryDto } from '../../../../../shared/models/Dtos/inventoryDto';
 import { AttributeTypeFormatPipe } from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
-import { CharacterActionsService } from '../../../../../core/services/api/character-actions/character-actions.service';
 import {
   CharacterActionDto,
   StartCraftingActionRequest,
@@ -27,8 +26,8 @@ import { CraftingService } from '../../../../../core/services/api/crafting/craft
 import { toSignal } from '@angular/core/rxjs-interop';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
-import { map, Subscription } from 'rxjs';
 import { CharacterActionType } from '../../../../../shared/models/enums/characterActionType';
+import { CharacterActionsStateService } from '../../../../../core/services/api/character-actions/character-actions.state.service';
 
 @Component({
   selector: 'app-tempering',
@@ -76,38 +75,37 @@ export class TemperingComponent implements OnInit {
       !!id && !this.inventoryState.items().some((i) => i.itemInstance.id === id)
     );
   });
-  private subscriptions = new Subscription();
   private checkTimeout: any = null;
 
   constructor(
     private readonly inventoryState: InventoryStateService,
-    private readonly characterActionService: CharacterActionsService,
+    private readonly characterActionService: CharacterActionsStateService,
     private readonly craftingService: CraftingService,
   ) {
     this.craftingQueue = toSignal(this.craftingService.craftingQueue$, {
       initialValue: [] as CraftingQueueItem[],
     });
-  }
 
-  ngOnInit(): void {
-    const currentActionSub =
-      this.characterActionService.currentAction$.subscribe((action) => {
+    effect(
+      () => {
+        const action = this.characterActionService.currentAction();
+
         if (!action) {
           this.clearCheckTimeout();
           this.isPerformingOtherAction.set(false);
           return;
         }
 
-        if (
-          action.characterActionType === CharacterActionType.Crafting &&
-          action.isDeleted
-        ) {
+        const isCrafting =
+          action.characterActionType === CharacterActionType.Crafting;
+
+        if (isCrafting && action.isDeleted) {
           this.cancelEntireQueue(
             action.craftingActionDetails?.craftingQueueItems ?? [],
           );
         }
 
-        if (action.characterActionType === CharacterActionType.Crafting) {
+        if (isCrafting) {
           this.clearCheckTimeout();
           this.isPerformingOtherAction.set(false);
           return;
@@ -118,23 +116,23 @@ export class TemperingComponent implements OnInit {
         const isBusy = !action.isDeleted || updatedAt > now;
 
         if (action.isDeleted && updatedAt > now) {
-          this.clearCheckTimeout(); // Clear any existing timer first
+          this.clearCheckTimeout();
           this.checkTimeout = setTimeout(() => {
-            // Trigger re-check by setting again (or use change detector / refresh logic)
-            this.isPerformingOtherAction.set(false); // or trigger a re-evaluation
+            this.isPerformingOtherAction.set(false);
           }, updatedAt - now);
         } else {
           this.clearCheckTimeout();
         }
 
         this.isPerformingOtherAction.set(isBusy);
-      });
-
-    this.subscriptions.add(currentActionSub);
+      },
+      { allowSignalWrites: true },
+    );
   }
 
+  ngOnInit(): void {}
+
   ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
     this.clearCheckTimeout();
   }
 
@@ -184,15 +182,14 @@ export class TemperingComponent implements OnInit {
       queueId: queueItem.id,
       itemInstanceId: equipment.id,
     };
-    this.characterActionService
-      .startCraftingAction(startCraftingActionRequest)
-      .subscribe((success) => {
-        if (success) {
-          this.selectedItemId.set(null);
-          this.craftingService.enqueueTempering(queueItem);
-          this.inventoryState.removeItem(equipment.id);
-        }
-      });
+    this.characterActionService.startAction(
+      CharacterActionType.Crafting,
+      startCraftingActionRequest,
+    );
+
+    this.selectedItemId.set(null);
+    this.craftingService.enqueueTempering(queueItem);
+    this.inventoryState.removeItem(equipment.id);
   }
 
   cancelCraft(queueItem: CraftingQueueItem): void {
@@ -210,7 +207,7 @@ export class TemperingComponent implements OnInit {
     });
     this.craftingService.dequeueTempering(queueItem.id);
     if (this.craftingService.currentQueue.length === 0)
-      this.characterActionService.clearCurrentAction();
+      this.characterActionService.clear();
 
     this.selectedItemId.set(null);
   }

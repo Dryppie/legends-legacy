@@ -1,14 +1,14 @@
-import { Component, Input } from '@angular/core';
+import { Component, effect, Input, OnInit } from '@angular/core';
 import { Area } from '../../../models/Dtos/regionDto';
 import { MiniButtonComponent } from '../../mini-button/mini-button.component';
 import {
   CharacterActionDto,
   StartCombatActionRequest,
 } from '../../../../shared/models/Dtos/characterActionDto';
-import { CharacterActionsService } from '../../../../core/services/api/character-actions/character-actions.service';
 import { CommonModule, NgIf } from '@angular/common';
-import { Subscription } from 'rxjs';
 import { CharacterService } from '../../../../core/services/api/character/character.service';
+import { CharacterActionsStateService } from '../../../../core/services/api/character-actions/character-actions.state.service';
+import { CharacterActionType } from '../../../models/enums/characterActionType';
 
 @Component({
   selector: 'app-combat-area-card',
@@ -16,7 +16,29 @@ import { CharacterService } from '../../../../core/services/api/character/charac
   imports: [MiniButtonComponent, NgIf, CommonModule],
   templateUrl: './combat-area-card.component.html',
 })
-export class CombatAreaCardComponent {
+export class CombatAreaCardComponent implements OnInit {
+  @Input() area!: Area;
+  @Input() isLastInRow = false;
+
+  currentAction: CharacterActionDto | null = null;
+  readonly currentCharacter;
+  isLocked = true;
+
+  constructor(
+    private readonly characterActionService: CharacterActionsStateService,
+    private readonly characterService: CharacterService,
+  ) {
+    this.currentCharacter = this.characterService.getCurrentCharacter();
+
+    effect(() => {
+      this.currentAction = this.characterActionService.currentAction();
+    });
+  }
+
+  ngOnInit(): void {
+    this.setIsLocked();
+  }
+
   canStartAction(): boolean {
     return (
       this.currentAction == null ||
@@ -24,44 +46,23 @@ export class CombatAreaCardComponent {
         this.currentAction.isDeleted)
     );
   }
-  @Input() area!: Area;
-  @Input() isLastInRow: boolean = false;
-  currentAction: CharacterActionDto | null = null;
-  readonly currentCharacter;
-  isLocked = true;
-  private subscription: Subscription = new Subscription();
 
-  constructor(
-    private characterActionService: CharacterActionsService,
-    private readonly characterService: CharacterService,
-  ) {
-    this.currentCharacter = this.characterService.getCurrentCharacter();
-  }
-
-  ngOnInit(): void {
-    this.subscription.add(
-      this.characterActionService.currentAction$.subscribe((action) => {
-        this.currentAction = action;
-      }),
-    );
-    this.setIsLocked();
-  }
-
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-  }
-
-  specificCard(): void {}
-
-  startCombat() {
-    const startCharacterActionRequest: StartCombatActionRequest = {
+  startCombat(): void {
+    const startRequest: StartCombatActionRequest = {
       areaId: this.area.id,
     };
-    this.characterActionService.startCombatAction(startCharacterActionRequest);
+    this.characterActionService.startAction(
+      CharacterActionType.Combat,
+      startRequest,
+    );
   }
 
-  setIsLocked() {
+  setIsLocked(): void {
     const character = this.currentCharacter();
     this.isLocked = !character || character.level < this.area.levelRequirement;
+  }
+
+  specificCard(): void {
+    // placeholder or actual logic
   }
 }

@@ -22,7 +22,7 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Willpower,
-          "amount": 1,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         },
         {
@@ -109,7 +109,7 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Constitution,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -191,7 +191,7 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Endurance,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -273,12 +273,12 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Instinct,
-          "amount": 3,
+          "amount": 4,
           "modifierType": ModifierType.Flat
         },
         {
           "attributeType": AttributeType.Health,
-          "amount": 5,
+          "amount": 7,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -360,7 +360,7 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Strength,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -442,7 +442,7 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.FightingSpirit,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -524,12 +524,12 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Luck,
-          "amount": 3,
+          "amount": 4,
           "modifierType": ModifierType.Flat
         },
         {
           "attributeType": AttributeType.CritChance,
-          "amount": 1,
+          "amount": 2,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -611,7 +611,7 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Dexterity,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -693,7 +693,7 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Agility,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -775,12 +775,12 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Perception,
-          "amount": 3,
+          "amount": 4,
           "modifierType": ModifierType.Flat
         },
         {
           "attributeType": AttributeType.Mana,
-          "amount": 5,
+          "amount": 7,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -862,7 +862,7 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Intelligence,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -944,7 +944,7 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Wisdom,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -1026,7 +1026,7 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.MaxMana,
-          "amount": 20,
+          "amount": 11,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -1095,7 +1095,7 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Agility,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -1164,7 +1164,7 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.MaxHealth,
-          "amount": 60,
+          "amount": 16,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -1233,7 +1233,7 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.CritDamage,
-          "amount": 8,
+          "amount": 7,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -1302,7 +1302,7 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Wisdom,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -1371,7 +1371,7 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.PhysicalDefense,
-          "amount": 25,
+          "amount": 18,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -1440,7 +1440,7 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Perception,
-          "amount": 3,
+          "amount": 4,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -1608,7 +1608,7 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.FightingSpirit,
-          "amount": 1,
+          "amount": 2,
           "modifierType": ModifierType.Flat
         },
         {
@@ -1617,9 +1617,9 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": AttributeType.FightingSpirit,
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -1695,13 +1695,13 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Strength,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -1777,13 +1777,13 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Endurance,
-          "amount": 3,
+          "amount": 4,
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": AttributeType.Endurance,
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -1859,13 +1859,13 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Dexterity,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": AttributeType.Dexterity,
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -1941,18 +1941,18 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.FightingSpirit,
-          "amount": 3,
+          "amount": 4,
           "modifierType": ModifierType.Flat
         },
         {
           "attributeType": AttributeType.Strength,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": AttributeType.FightingSpirit,
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2028,13 +2028,13 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Strength,
-          "amount": 4,
+          "amount": 5,
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": AttributeType.Strength,
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2110,18 +2110,18 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Endurance,
-          "amount": 3,
+          "amount": 4,
           "modifierType": ModifierType.Flat
         },
         {
           "attributeType": AttributeType.Willpower,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": AttributeType.Endurance,
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2197,18 +2197,18 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.FightingSpirit,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         },
         {
           "attributeType": AttributeType.Dexterity,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": AttributeType.Dexterity,
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2284,12 +2284,12 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.PhysicalDefense,
-          "amount": 20,
+          "amount": 15,
           "modifierType": ModifierType.Flat
         },
         {
           "attributeType": AttributeType.Block,
-          "amount": 50,
+          "amount": 25,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -2371,12 +2371,12 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.MagicalDefense,
-          "amount": 20,
+          "amount": 15,
           "modifierType": ModifierType.Flat
         },
         {
           "attributeType": AttributeType.Block,
-          "amount": 50,
+          "amount": 25,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -2540,7 +2540,7 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Intelligence,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -2622,13 +2622,13 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Wisdom,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": AttributeType.Wisdom,
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2704,7 +2704,7 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Wisdom,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -2786,13 +2786,13 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Agility,
-          "amount": 4,
+          "amount": 5,
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": AttributeType.Agility,
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2868,18 +2868,18 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.Agility,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         },
         {
           "attributeType": AttributeType.Willpower,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": AttributeType.Agility,
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,
@@ -2955,18 +2955,18 @@ export const RECIPES_CONTENT = [
       "attributeModifiers": [
         {
           "attributeType": AttributeType.FightingSpirit,
-          "amount": 2,
+          "amount": 3,
           "modifierType": ModifierType.Flat
         },
         {
           "attributeType": AttributeType.MaxHealth,
-          "amount": 50,
+          "amount": 25,
           "modifierType": ModifierType.Flat
         }
       ],
-      "magnitude": 5,
-      "scalingAttribute": AttributeType.FightingSpirit,
-      "scalingAmount": 0.1
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Luck,
+      "scalingAmount": 0
     },
     "quantity": 1,
     "craftType": CraftType.WeaponSmithing,

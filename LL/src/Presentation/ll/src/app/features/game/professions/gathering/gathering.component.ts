@@ -8,7 +8,6 @@ import {
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ProfessionsService } from '../../../../core/services/api/professions/professions.service';
-import { CharacterActionsService } from '../../../../core/services/api/character-actions/character-actions.service';
 import { map } from 'rxjs';
 import { GatheringNode } from '../../../../shared/models/Dtos/gatheringNode';
 import { ProfessionHeaderComponent } from '../../../../shared/components/professions/profession-header/profession-header.component';
@@ -16,6 +15,7 @@ import { NgFor, NgIf } from '@angular/common';
 import { ProfessionCardComponent } from '../../../../shared/components/professions/profession-card/profession-card.component';
 import { GatheringProfession } from '../../../../shared/models/profession';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { CharacterActionsStateService } from '../../../../core/services/api/character-actions/character-actions.state.service';
 
 @Component({
   selector: 'app-gathering',
@@ -26,26 +26,27 @@ import { toSignal } from '@angular/core/rxjs-interop';
 export class GatheringComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly professionService = inject(ProfessionsService);
-  private readonly characterActionService = inject(CharacterActionsService);
+  private readonly characterActionService = inject(
+    CharacterActionsStateService,
+  );
 
   readonly professionId = toSignal(
     this.route.paramMap.pipe(map((p) => p.get('id') ?? '')),
     { initialValue: '' },
   );
 
-  readonly currentAction = toSignal(
-    this.characterActionService.currentAction$,
-    { initialValue: null },
-  );
+  readonly currentAction = this.characterActionService.currentAction;
   readonly characterProfessions = this.professionService.characterProfessions;
+
   readonly characterProfession = computed(() =>
     this.characterProfessions().find(
-      (p) => p.professionType.toLocaleLowerCase() === this.professionId(),
+      (p) => p.professionType.toLowerCase() === this.professionId(),
     ),
   );
 
   readonly profession = signal<GatheringProfession | null>(null);
   readonly gatheringNodes = signal<GatheringNode[]>([]);
+
   combatStarted = false;
 
   constructor() {
@@ -64,9 +65,7 @@ export class GatheringComponent implements OnInit {
     this.professionService.refresh();
   }
 
-  ngOnDestroy(): void {}
-
-  getProfessionDetails(id: string) {
+  getProfessionDetails(id: string): void {
     const prof = this.professionService.getProfessionById(
       id,
     ) as GatheringProfession;

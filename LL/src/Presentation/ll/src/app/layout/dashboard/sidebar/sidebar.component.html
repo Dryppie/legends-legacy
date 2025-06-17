@@ -4,7 +4,7 @@
   >
     <div class="flex min-h-20 p-2">
       <app-current-action
-        *ngIf="displayCurrentAction$ | async"
+        *ngIf="displayCurrentAction"
         class="w-full"
         (click)="toggleSidebar()"
         (click)="navigateToAction()"

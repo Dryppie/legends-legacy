@@ -1,6 +1,6 @@
 <ng-container
   *ngIf="
-    combatStateService.getIsCombatActive$(battleType) | async as isCombatActive;
+    combatStateService.getIsCombatActive(battleType)() as isCombatActive;
     else showNonCombat
   "
 >

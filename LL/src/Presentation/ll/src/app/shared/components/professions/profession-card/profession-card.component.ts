@@ -1,6 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, effect, Input, OnInit } from '@angular/core';
 import { MiniButtonComponent } from '../../mini-button/mini-button.component';
-import { CharacterActionsService } from '../../../../core/services/api/character-actions/character-actions.service';
 import { CharacterActionDto } from '../../../models/Dtos/characterActionDto';
 import { Subscription } from 'rxjs';
 import { NgIf } from '@angular/common';
@@ -9,6 +8,8 @@ import {
   CharacterProfession,
   ProfessionType,
 } from '../../../models/Dtos/characterProfession';
+import { CharacterActionsStateService } from '../../../../core/services/api/character-actions/character-actions.state.service';
+import { CharacterActionType } from '../../../models/enums/characterActionType';
 
 @Component({
   selector: 'app-profession-card',
@@ -26,15 +27,15 @@ export class ProfessionCardComponent implements OnInit {
   private subscription: Subscription = new Subscription();
   isLocked = true;
   canStartAction: boolean = false;
-  constructor(private characterActionsService: CharacterActionsService) {}
+  constructor(public state: CharacterActionsStateService) {
+    effect(() => {
+      const action = this.state.currentAction();
+      this.currentAction = action;
+      this.setCanStartAction();
+    });
+  }
 
   ngOnInit(): void {
-    this.subscription.add(
-      this.characterActionsService.currentAction$.subscribe((action) => {
-        this.currentAction = action;
-        this.setCanStartAction();
-      }),
-    );
     this.setIsLocked();
   }
 
@@ -54,13 +55,17 @@ export class ProfessionCardComponent implements OnInit {
     );
   }
 
-  startGatheringAction() {
-    this.characterActionsService.startGatheringAction(this.gatheringNode.id);
+  startGatheringAction(): void {
+    this.state.startAction(
+      CharacterActionType.Gathering,
+      this.gatheringNode.id,
+    );
   }
 
-  cancelCharacterAction() {
-    this.characterActionsService.stopCharacterAction();
+  cancelCharacterAction(): void {
+    this.state.stopAction();
   }
+
   setIsLocked() {
     this.isLocked =
       !this.characterProfession ||

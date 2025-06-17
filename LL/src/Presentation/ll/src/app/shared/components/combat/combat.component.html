@@ -43,10 +43,7 @@
         </ng-container>
         <!-- Display area details once loading is complete -->
         <ng-template #areaDisplay>
-          <h2
-            *ngIf="currentAction$ | async as currentAction"
-            class="text-primary"
-          >
+          <h2 *ngIf="currentAction() as currentAction" class="text-primary">
             Shenic - {{ currentAction.combatActionDetails?.area?.name }}
           </h2>
         </ng-template>
@@ -133,10 +130,7 @@
     </div>
     <div class="flex h-full w-full overflow-hidden">
       <app-combat-overview
-        *ngIf="
-          combatStateService.getCombatEvents$(battleType)
-            | async as combatEvents
-        "
+        *ngIf="combatStateService.getCombatEvents(battleType)() as combatEvents"
         [combatEvents]="combatEvents"
         [isLoading]="isLoading"
         class="h-full w-full"

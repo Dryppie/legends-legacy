@@ -9,12 +9,11 @@ import {
 import { RouterOutlet } from '@angular/router';
 import { ToastComponent } from './shared/components/toast/toast.component';
 import { ToastService } from './core/services/client-side/toast/toast.service';
-import { CharacterActionsService } from './core/services/api/character-actions/character-actions.service';
 import { ModalContainerComponent } from './shared/components/modal-container/modal-container.component';
 import { AuthService } from './core/services/api/auth/auth.service';
-import { switchMap, take } from 'rxjs';
 import { SessionSummaryPopupComponent } from './shared/components/session-summary-popup/session-summary-popup.component';
 import { GoogleAuthService } from './core/services/api/auth/google-auth.service';
+import { CharacterActionsStateService } from './core/services/api/character-actions/character-actions.state.service';
 
 @Component({
   selector: 'app-root',
@@ -38,7 +37,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   constructor(
     private readonly authService: AuthService, // now exposes `isAuthenticated()` signal
     private readonly googleAuth: GoogleAuthService,
-    private readonly characterActionsService: CharacterActionsService,
+    private readonly state: CharacterActionsStateService,
     private readonly toastService: ToastService,
   ) {
     /* ───────────────────────────────────────────────
@@ -48,7 +47,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       () => {
         const loggedIn = this.authService.isAuthenticated(); // read only
         if (loggedIn && !this.initDone()) {
-          this.characterActionsService.init();
+          this.state.init();
           this.initDone.set(true); // <-- write
         }
       },

@@ -16,11 +16,14 @@ export class CombatService {
     private combatStateService: CombatStateService,
     private eventBus: EventBusService,
   ) {
-    effect(() => {
-      if (this.eventBus.logout()) {
-        this.handleLogout();
-      }
-    });
+    effect(
+      () => {
+        if (this.eventBus.logout()) {
+          this.handleLogout();
+        }
+      },
+      { allowSignalWrites: true },
+    );
   }
 
   clearAllCombat() {

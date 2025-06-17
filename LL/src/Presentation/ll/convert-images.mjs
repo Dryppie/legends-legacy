@@ -18,10 +18,6 @@ for (const file of files) {
   await fs.ensureDir(path.dirname(outputPath));
 
   await sharp(file).resize(512).webp({ quality: 80 }).toFile(outputPath);
-
-  console.log(`✔ Converted: ${relativePath}`);
 }
-
-console.log("✅ All PNGs converted to WebP and resized.");
 
 // run "node convert-images.mjs" from command-line

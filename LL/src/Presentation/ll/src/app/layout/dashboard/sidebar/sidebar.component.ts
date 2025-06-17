@@ -1,6 +1,7 @@
-import { AsyncPipe, NgFor, NgIf } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import {
   Component,
+  effect,
   EventEmitter,
   OnInit,
   Output,
@@ -12,11 +13,10 @@ import { SidebarItem, Tab } from '../../../shared/models/sidebar-item';
 import { SidebarService } from '../../../core/services/client-side/sidebar/sidebar.service';
 import { TabComponent } from '../../../shared/components/tabs/tab/tab.component';
 import { GameService } from '../../../core/services/client-side/game/game.service';
-import { CharacterActionsService } from '../../../core/services/api/character-actions/character-actions.service';
 import { CurrentActionComponent } from '../../../shared/components/current-action/current-action.component';
 import { NamedStorageKeys } from '../../../core/common/enums/named-storage-keys';
-import { Observable } from 'rxjs';
 import { FilterTabsComponent } from '../../../shared/components/tabs/filter-tabs/filter-tabs.component';
+import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -27,7 +27,6 @@ import { FilterTabsComponent } from '../../../shared/components/tabs/filter-tabs
     SidebarItemComponent,
     RouterLink,
     CurrentActionComponent,
-    AsyncPipe,
     FilterTabsComponent,
   ],
   templateUrl: './sidebar.component.html',
@@ -39,17 +38,21 @@ export class SidebarComponent implements OnInit {
   tabs: Tab[] = [{ label: '', items: [] as SidebarItem[] }];
   activeTab: string = '';
   activeItem: string = '';
-  displayCurrentAction$!: Observable<boolean>;
+  displayCurrentAction = false;
 
   constructor(
     private sidebarService: SidebarService,
     private gameService: GameService,
-    private actionService: CharacterActionsService,
+    private state: CharacterActionsStateService,
     private router: Router,
-  ) {}
-  ngOnInit() {
-    this.displayCurrentAction$ = this.actionService.displayCurrentAction$;
+  ) {
+    effect(() => {
+      this.displayCurrentAction = this.state.displayCurrentAction();
+    });
+  }
 
+  ngOnInit(): void {
+    // Observable: currentContent$ still RxJS based
     this.sidebarService.currentContent$.subscribe((link) => {
       this.tabs = [];
       this.updateSidebar(link);
@@ -90,6 +93,7 @@ export class SidebarComponent implements OnInit {
   }
 
   navigateToAction() {
+    const action = this.state.currentAction();
     const actionType = localStorage.getItem(
       NamedStorageKeys.CharacterActionType,
     );
