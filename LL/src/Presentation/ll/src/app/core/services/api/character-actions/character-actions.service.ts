@@ -292,7 +292,7 @@ export class CharacterActionsService {
     if (action.craftingActionDetails?.craftingQueueItems.length === 0) {
       this.clearCurrentAction();
     }
-    this.currencyService.gainCinders(summary.totalSoulstones);
+    this.currencyService.gainSoulstones(summary.totalSoulstones);
   }
 
   private handleCombatAction(action: CharacterActionDto | null) {
@@ -322,7 +322,7 @@ export class CharacterActionsService {
         summary.professionType,
         summary.totalExperience,
       );
-      this.currencyService.gainCinders(summary.totalSoulstones);
+      this.currencyService.gainSoulstones(summary.totalSoulstones);
     }
   }
 
