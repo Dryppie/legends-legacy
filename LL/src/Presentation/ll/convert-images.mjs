@@ -3,8 +3,9 @@ import fs from "fs-extra";
 import { globby } from "globby";
 import path from "path";
 
-const inputFolder = "./src/assets/entities";
-const outputFolder = "./src/assets/entities-optimized";
+const folder = "backgrounds";
+const inputFolder = `./src/assets/${folder}`;
+const outputFolder = `./src/assets/${folder}/optimized`;
 
 const files = await globby([`${inputFolder}/**/*.png`]);
 
@@ -22,3 +23,5 @@ for (const file of files) {
 }
 
 console.log("✅ All PNGs converted to WebP and resized.");
+
+// run "node convert-images.mjs" from command-line
