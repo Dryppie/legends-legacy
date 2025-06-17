@@ -24,7 +24,9 @@ export class SoulstoneUpgradeCardComponent {
 
   disablePurchase(upgrade: SoulstoneUpgradeView): boolean {
     return (
-      upgrade.nextCost == null || upgrade.nextCost > this.character?.soulstones
+      upgrade.nextCost == null ||
+      upgrade.nextCost > this.character?.soulstones ||
+      this.soulstoneState.isUpgradeLoading(upgrade.definition.id)()
     );
   }
 

@@ -14,11 +14,14 @@ export class SoulstoneUpgradeStateService {
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
   private readonly _lastRefund = signal(0); // Optional: Expose latest refund for UI or sync
+  private readonly _upgradeLoading = signal(new Map<string, boolean>());
 
   readonly upgrades = computed(() => this._upgrades());
   readonly loading = computed(() => this._loading());
   readonly error = computed(() => this._error());
   readonly lastRefund = computed(() => this._lastRefund());
+  isUpgradeLoading = (id: string) =>
+    computed(() => this._upgradeLoading().get(id) === true);
 
   constructor(
     private readonly service: SoulstoneUpgradeService,
@@ -40,8 +43,6 @@ export class SoulstoneUpgradeStateService {
   }
 
   upgrade(id: string): void {
-    if (this._loading()) return;
-
     const upgrades = this._upgrades();
     const index = upgrades.findIndex((u) => u.definition.id === id);
     if (index === -1) return;
@@ -52,10 +53,20 @@ export class SoulstoneUpgradeStateService {
 
     if (!character || cost == null || character.soulstones < cost) return;
 
-    this._loading.set(true);
+    const map = new Map(this._upgradeLoading());
+    if (map.get(id)) return; // already loading
+    map.set(id, true);
+    this._upgradeLoading.set(map);
+
     this.service
       .upgrade(id)
-      .pipe(finalize(() => this._loading.set(false)))
+      .pipe(
+        finalize(() => {
+          const map = new Map(this._upgradeLoading());
+          map.set(id, false);
+          this._upgradeLoading.set(map);
+        }),
+      )
       .subscribe({
         next: (success) => {
           if (!success) return;
@@ -89,7 +100,7 @@ export class SoulstoneUpgradeStateService {
 
   reset(): void {
     if (this._loading()) return;
-
+    this._upgradeLoading.set(new Map());
     const current = this.characterState.currentCharacter();
     if (!current) return;
 
