@@ -104,7 +104,6 @@ export class SidebarComponent implements OnInit {
     else {
       let extendedPath = '';
       if (actionType === CharacterActionType.Gathering) {
-        console.log(action.gatheringActionDetails);
         extendedPath =
           'gathering/' +
           action.gatheringActionDetails!.professionType.toLowerCase();
