@@ -13,4 +13,5 @@ export interface GatheringSummary {
   loot: InventoryItem[];
   totalActions: number;
   totalExperience: number;
+  totalSoulstones: number;
 }

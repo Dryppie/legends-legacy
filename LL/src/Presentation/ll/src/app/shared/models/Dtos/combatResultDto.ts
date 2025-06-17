@@ -38,6 +38,8 @@ export interface SessionSummary {
   draws: number;
   totalExperience: number;
   totalGold: number;
+  totalCinders: number;
+  totalSoulstones: number;
 }
 
 export enum BattleOutcome {

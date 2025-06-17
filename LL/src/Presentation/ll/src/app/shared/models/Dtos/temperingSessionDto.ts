@@ -10,6 +10,7 @@ export interface TemperingSummary {
   masterpieces: number;
   levelingItems: number;
   totalActions: number;
+  totalSoulstones: number;
   armorForgingExperience: number;
   jewelryCraftingExperience: number;
   weaponSmithingExperience: number;

@@ -90,27 +90,28 @@ public class GatheringService : IGatheringService
             })
             .ToList();
 
+
+        gatheringSummary.TotalSoulstones = await ProcessSoulstoneDrops(characterAction.CharacterId, actionsToPerform, soulstoneDropRate, soulstoneDoubleDropChance, cancellationToken);
+        await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
+        await UpdateCharacterProfessionsAsync(characterAction.CharacterId, gatheringSummary, cancellationToken);
+
         var gatheringSession = new GatheringSession()
         {
             From = startedAt,
             To = now,
             GatheringSummary = gatheringSummary,
         };
-
-        await ProcessSoulstoneDrops(characterAction.CharacterId, actionsToPerform, soulstoneDropRate, soulstoneDoubleDropChance, cancellationToken);
-        await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
-        await UpdateCharacterProfessionsAsync(characterAction.CharacterId, gatheringSummary, cancellationToken);
-
         return gatheringSession;
     }
 
-    private async Task ProcessSoulstoneDrops(Guid characterId, int actionsToPerform, double dropRate, double doubleDropChance, CancellationToken cancellationToken)
+    private async Task<int> ProcessSoulstoneDrops(Guid characterId, int actionsToPerform, double dropRate, double doubleDropChance, CancellationToken cancellationToken)
     {
         var durationInSeconds = 6 * actionsToPerform;
         var soulstonesEarned = _lootService.GenerateSoulstoneLoot(durationInSeconds, dropRate, doubleDropChance);
-        if (soulstonesEarned < 1) return;
+        if (soulstonesEarned < 1) return 0;
 
         await _publisher.Publish(new SoulstoneDropEvent(characterId, soulstonesEarned), cancellationToken);
+        return soulstonesEarned;
     }
 
     private async Task UpdateCharacterProfessionsAsync(Guid characterId, GatheringSummary gatheringSummary, CancellationToken cancellationToken)

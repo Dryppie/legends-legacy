@@ -30,6 +30,7 @@ import { SessionSummaryService } from '../../client-side/session-summary/session
 import { CraftingService } from '../crafting/crafting.service';
 import { LevelingService } from '../../client-side/leveling/leveling.service';
 import { ProfessionType } from '../../../../shared/models/Dtos/characterProfession';
+import { CurrencyService } from '../currency/currency.service';
 
 @Injectable({
   providedIn: 'root',
@@ -58,6 +59,7 @@ export class CharacterActionsService {
     private sessionSummaryService: SessionSummaryService,
     private craftingService: CraftingService,
     private levelingService: LevelingService,
+    private currencyService: CurrencyService,
   ) {
     effect(() => {
       if (this.eventBus.logout()) {
@@ -290,6 +292,7 @@ export class CharacterActionsService {
     if (action.craftingActionDetails?.craftingQueueItems.length === 0) {
       this.clearCurrentAction();
     }
+    this.currencyService.gainCinders(summary.totalSoulstones);
   }
 
   private handleCombatAction(action: CharacterActionDto | null) {
@@ -297,6 +300,14 @@ export class CharacterActionsService {
       this.loadingCombatActionSubject.next(false);
       this.combatService.startCombatSimulation(action);
       this.sessionSummaryService.loadCombatSince(action.combatSession);
+      if (action.combatSession?.combatSummary) {
+        this.currencyService.gainCinders(
+          action.combatSession.combatSummary.totalCinders,
+        );
+        this.currencyService.gainCinders(
+          action.combatSession.combatSummary.totalSoulstones,
+        );
+      }
     }
   }
 
@@ -311,6 +322,7 @@ export class CharacterActionsService {
         summary.professionType,
         summary.totalExperience,
       );
+      this.currencyService.gainCinders(summary.totalSoulstones);
     }
   }
 

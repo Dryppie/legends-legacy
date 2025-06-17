@@ -142,9 +142,11 @@ public class CombatService : ICombatService
         var durationInSeconds = (int)Math.Abs((characterAction.UpdatedAt - sessionStartedAt).TotalSeconds);
         var soulstoneDropRate = soulstoneBonuses.Get(SoulstoneUpgradeContants.SoulstoneDropRate);
         var soulstoneDoubleDropChance = soulstoneBonuses.Get(SoulstoneUpgradeContants.SoulstoneDoubleDropChance);
-        await ProcessSoulstoneDrops(characterAction.CharacterId, durationInSeconds, soulstoneDropRate, soulstoneDoubleDropChance, cancellationToken);
+        combatSession.CombatSummary.TotalSoulstones = await ProcessSoulstoneDrops(characterAction.CharacterId, durationInSeconds, soulstoneDropRate, soulstoneDoubleDropChance, cancellationToken);
 
-        playerCharacters.OfType<Character>().First().Cinders += ProcessCinderDrop(creatureKills, baseCinderValues);
+        var cindersDrop = ProcessCinderDrop(creatureKills, baseCinderValues);
+        combatSession.CombatSummary.TotalCinders = cindersDrop;
+        playerCharacters.OfType<Character>().First().Cinders += cindersDrop;
 
         await UpdateCharacterStatsAsync(playerCharacters, combatSession.CombatSummary.TotalExperience, cancellationToken);
         await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
@@ -152,12 +154,13 @@ public class CombatService : ICombatService
         return combatSession;
     }
 
-    private async Task ProcessSoulstoneDrops(Guid characterId, int durationInSeconds, double dropRate, double doubleDropChance, CancellationToken cancellationToken)
+    private async Task<int> ProcessSoulstoneDrops(Guid characterId, int durationInSeconds, double dropRate, double doubleDropChance, CancellationToken cancellationToken)
     {
         var soulstonesEarned = _lootService.GenerateSoulstoneLoot(durationInSeconds, dropRate, doubleDropChance);
-        if (soulstonesEarned < 1) return;
+        if (soulstonesEarned < 1) return 0;
 
         await _publisher.Publish(new SoulstoneDropEvent(characterId, soulstonesEarned), cancellationToken);
+        return soulstonesEarned;
     }
     private int ProcessCinderDrop(Dictionary<Guid, int> creatureKills, Dictionary<Guid, int> baseCinderValues)
     {

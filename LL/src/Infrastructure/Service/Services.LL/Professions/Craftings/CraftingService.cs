@@ -139,7 +139,7 @@ public class CraftingService : ICraftingService
             //characterAction.ActionDetails = null;
         }
 
-        await ProcessSoulstoneDrops(characterAction.CharacterId, temperingSummary.TotalActions, soulstoneDropRate, soulstoneDoubleDropChance, cancellationToken);
+        temperingSummary.TotalSoulstones = await ProcessSoulstoneDrops(characterAction.CharacterId, temperingSummary.TotalActions, soulstoneDropRate, soulstoneDoubleDropChance, cancellationToken);
         await UpdateCharacterProfessionsAsync(characterAction.CharacterId, temperingSummary, cancellationToken);
 
         // TODO: Publish event to handle earning soulstones
@@ -154,13 +154,14 @@ public class CraftingService : ICraftingService
         return temperingSession;
     }
 
-    private async Task ProcessSoulstoneDrops(Guid characterId, int actionsPerformed, double dropRate, double doubleDropChance, CancellationToken cancellationToken)
+    private async Task<int> ProcessSoulstoneDrops(Guid characterId, int actionsPerformed, double dropRate, double doubleDropChance, CancellationToken cancellationToken)
     {
         var durationInSeconds = 6 * actionsPerformed;
         var soulstonesEarned = _lootService.GenerateSoulstoneLoot(durationInSeconds, dropRate, doubleDropChance);
-        if (soulstonesEarned < 1) return;
+        if (soulstonesEarned < 1) return 0;
 
         await _publisher.Publish(new SoulstoneDropEvent(characterId, soulstonesEarned), cancellationToken);
+        return soulstonesEarned;
     }
 
     private async Task UpdateCharacterProfessionsAsync(Guid characterId, TemperingSummary temperingSummary, CancellationToken cancellationToken)

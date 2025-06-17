@@ -8,4 +8,5 @@ public class GatheringSummary
     public List<InventoryItem> Loot { get; set; } = [];
     public int TotalActions { get; set; }
     public int TotalExperience { get; set; }
+    public int TotalSoulstones { get; set; } = 0;
 }
