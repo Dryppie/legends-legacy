@@ -402,7 +402,7 @@
                 "Amount": 4
               },
               "Targeting": "CauseOfTrigger",
-              "Chance": 100,
+              "Chance": 30,
               "AttackType": "None",
               "DamageType": "Burn",
               "EffectTags": [],
