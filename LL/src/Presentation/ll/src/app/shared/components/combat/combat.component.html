@@ -1,6 +1,6 @@
 <div class="flex h-full w-full">
   <div
-    *ngIf="!displayCombat && battleType === 'Idle'"
+    *ngIf="!displayCombat && battleType === 'IdleCombat'"
     class="flex h-full w-full flex-col items-center justify-center text-center text-primary"
   >
     <div class="mb-4 flex items-center justify-center">
@@ -19,7 +19,7 @@
 
     <app-mini-button
       [text]="stopCombatButtonText"
-      [disabled]="false"
+      [disabled]="isStoppingCombat"
       [width]="'128px'"
       (click)="initiateStoppingCombat()"
       class="mt-6 w-64"
@@ -34,7 +34,7 @@
       class="flex h-16 w-full flex-col items-center justify-between gap-4 sm:flex-row"
     >
       <div
-        *ngIf="battleType === 'Idle'"
+        *ngIf="battleType === 'IdleCombat'"
         class="flex w-full flex-col items-center justify-center gap-1 text-white"
       >
         <span>Battle</span>
@@ -90,7 +90,7 @@
           />
         </div>
         <div
-          *ngIf="battleType === 'Idle'"
+          *ngIf="battleType === 'IdleCombat'"
           class="mt-2 flex flex-col items-center justify-center"
         >
           <app-combat-log></app-combat-log>
@@ -133,15 +133,11 @@
         *ngIf="combatStateService.getCombatEvents(battleType)() as combatEvents"
         [combatEvents]="combatEvents"
         [isLoading]="isLoading"
+        [isStoppingCombat]="isStoppingCombat"
+        (stopCombatEvent)="initiateStoppingCombat()"
+        [battleType]="battleType"
         class="h-full w-full"
       ></app-combat-overview>
-      <button
-        *ngIf="battleType === 'Idle'"
-        (click)="initiateStoppingCombat()"
-        class="text-primary"
-      >
-        {{ stopCombatButtonText }}
-      </button>
     </div>
   </div>
 </div>

@@ -13,6 +13,7 @@ import { CombatLogComponent } from './combat-log/combat-log.component';
 import { BattleType } from '../../../core/state/combat-state/combatState';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { RegularButtonComponent } from '../buttons/regular-button/regular-button.component';
 
 @Component({
   selector: 'app-combat',
@@ -32,7 +33,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 export class CombatComponent implements OnInit {
   combatEvents: CombatEvent[] = [];
   private lastEventsLength = 0;
-  @Input() battleType: BattleType = BattleType.Idle;
+  @Input() battleType: BattleType = BattleType.IdleCombat;
   isStoppingCombat = false;
   nextCombatIn: Date | null = null;
   stopCombatButtonText: string = 'Stop Combat';
@@ -154,6 +155,7 @@ export class CombatComponent implements OnInit {
   }
 
   initiateStoppingCombat() {
+    if (this.isStoppingCombat) return;
     this.isStoppingCombat = true;
     this.stopCombatButtonText = 'Stopping combat..';
     this.characterActionService.stopAction();

@@ -2,19 +2,24 @@
   class="flex h-full flex-col overflow-hidden rounded-md bg-black/40"
   [ngClass]="{ 'animate-pulse': isLoading }"
 >
-  <div class="flex items-center justify-between">
-    <h3 class="h-16 min-h-16 content-center p-4 text-primary">
-      Battle overview
-    </h3>
-    <div class="flex items-center gap-2 text-primary">
-      Filter
+  <div class="flex items-center justify-between px-4 py-2">
+    <div class="flex items-center gap-2 py-2 text-primary">
+      Battle overview - Filter
       <img
         src="icons/settings/filters.svg"
         alt="Logo"
-        class="h-10 w-10 object-contain pr-4 hover:cursor-pointer"
+        class="h-6 w-6 object-contain hover:cursor-pointer"
         (click)="openFilters()"
       />
     </div>
+    <app-regular-button
+      *ngIf="battleType === 'IdleCombat'"
+      class="text-primary"
+      [text]="stopCombatButtonText"
+      [disabled]="isStoppingCombat"
+      (pressed)="initiateStoppingCombat()"
+    >
+    </app-regular-button>
   </div>
   <div class="chat-gradient mb-4 h-[1px]"></div>
   <div class="overflow-y-auto" appStickyScroll>

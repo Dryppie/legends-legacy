@@ -31,7 +31,7 @@ export class CombatService {
   }
 
   clearCurrentCombat() {
-    this.combatStateService.resetCombatState(BattleType.Idle);
+    this.combatStateService.resetCombatState(BattleType.IdleCombat);
   }
 
   startColosseumMatchSimulation(combatResult: CombatResultDto): void {
@@ -45,7 +45,7 @@ export class CombatService {
   startCombatSimulation(characterAction: CharacterActionDto): void {
     const combatResult = characterAction.combatSession?.combatResult;
     if (!combatResult) return;
-    combatResult.battleType = BattleType.Idle;
+    combatResult.battleType = BattleType.IdleCombat;
     this.clearCurrentCombat();
 
     this.combatStateService.setNextCombatIn(

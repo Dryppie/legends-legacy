@@ -6,7 +6,7 @@ import {
 } from '../../../shared/models/Dtos/combatResultDto';
 
 export enum BattleType {
-  Idle = 'Idle',
+  IdleCombat = 'IdleCombat',
   Colosseum = 'Colosseum',
 }
 

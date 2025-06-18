@@ -39,7 +39,7 @@ export const appConfig: ApplicationConfig = {
         combatLogService: CombatLogService,
         levelingService: LevelingService,
       ) => ({
-        [BattleType.Idle]: new IdlePlaybackStrategy(
+        [BattleType.IdleCombat]: new IdlePlaybackStrategy(
           combatLogService,
           levelingService,
         ),
