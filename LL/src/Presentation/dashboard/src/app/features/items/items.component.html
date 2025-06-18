@@ -113,7 +113,42 @@
             </select>
           </div>
         </div>
+        <div class="flex flex-col">
+          <label class="font-medium">Magnitude</label>
+          <input
+            type="number"
+            class="rounded border border-light_gray bg-zinc-300/10 p-2"
+            formControlName="magnitude"
+            min="0"
+          />
+        </div>
 
+        <!-- Scaling Attribute -->
+        <div class="flex flex-col">
+          <label class="font-medium">Scaling Attribute</label>
+          <select
+            class="rounded border border-light_gray bg-zinc-300/10 p-2"
+            formControlName="scalingAttribute"
+          >
+            <option
+              *ngFor="let attr of attributes"
+              [ngValue]="attr"
+              [innerText]="attr | splitCamelCase"
+              class="bg-black text-primary"
+            ></option>
+          </select>
+        </div>
+
+        <!-- Scaling Amount -->
+        <div class="flex flex-col">
+          <label class="font-medium">Scaling Amount</label>
+          <input
+            type="number"
+            class="rounded border border-light_gray bg-zinc-300/10 p-2"
+            formControlName="scalingAmount"
+            min="0"
+          />
+        </div>
         <!-- Attribute Modifiers -->
         <div class="mt-4">
           <div
@@ -159,25 +194,6 @@
         </div>
       </div>
 
-      <!-- Essence specific -->
-      <!-- <div *ngIf="itemForm.get('itemType')!.value === 'Essence'" class="mt-6">
-        <h3 class="mb-2 text-lg font-semibold">Essence Details</h3>
-        <div class="flex flex-col">
-          <label class="font-medium">Essence</label>
-          <select
-            class="rounded border border-light_gray bg-zinc-300/10 p-2"
-            formControlName="essence"
-          >
-            <option
-              *ngFor="let es of essences"
-              [ngValue]="es"
-              [innerText]="es"
-            ></option>
-          </select>
-        </div>
-      </div> -->
-
-      <!-- Save -->
       <button
         type="submit"
         class="mt-6 w-full rounded bg-blue-500 px-4 py-2 font-bold hover:bg-blue-600"

@@ -24,7 +24,6 @@ import { CommonModule, NgFor } from '@angular/common';
     NgFor,
   ],
   templateUrl: './creatures.component.html',
-  styleUrl: './creatures.component.css',
 })
 export class CreaturesComponent implements OnInit {
   creatures: Creature[] = [];

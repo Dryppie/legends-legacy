@@ -14,6 +14,7 @@ export enum EquipmentType {
   Necklace = 'Necklace',
   Legs = 'Legs',
   Ring = 'Ring',
-  MainHand = 'MainHand',
+  TwoHanded = 'TwoHanded',
+  OneHanded = 'OneHanded',
   OffHand = 'OffHand',
 }

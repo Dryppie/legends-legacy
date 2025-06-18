@@ -21,7 +21,6 @@ import { AttributeType } from '../../shared/models/enums/attributeType';
   standalone: true,
   imports: [FormsModule, ReactiveFormsModule, SplitCamelCasePipe, CommonModule],
   templateUrl: './items.component.html',
-  styleUrl: './items.component.css',
 })
 export class ItemsComponent implements OnInit {
   items: ItemBase[] = [];
@@ -60,10 +59,13 @@ export class ItemsComponent implements OnInit {
       rarity: [null, Validators.required],
       itemType: [null, Validators.required],
       description: [''],
-      // Equipment
+      // Equipment-specific
       equipmentType: [null],
       attributeModifiers: this.fb.array([]),
-      // Essence
+      magnitude: [0, [Validators.required, Validators.min(0)]],
+      scalingAttribute: [null, Validators.required],
+      scalingAmount: [0, [Validators.required, Validators.min(0)]],
+      // Essence-specific
       essence: [null],
     });
 
@@ -73,7 +75,9 @@ export class ItemsComponent implements OnInit {
         this.itemForm.get('essence')!.reset();
       } else if (type === 'Essence') {
         this.itemForm.get('equipmentType')!.reset();
-        // clear modifiers
+        this.itemForm.get('magnitude')!.reset();
+        this.itemForm.get('scalingAttribute')!.reset();
+        this.itemForm.get('scalingAmount')!.reset();
         while (this.attributeModifiers.length) {
           this.attributeModifiers.removeAt(0);
         }
@@ -95,6 +99,11 @@ export class ItemsComponent implements OnInit {
       rarity: null,
       itemType: null,
       description: '',
+      equipmentType: null,
+      magnitude: 0,
+      scalingAttribute: null,
+      scalingAmount: 0,
+      essence: null,
     });
     // clear modifiers array
     while (this.attributeModifiers.length) {
@@ -110,7 +119,12 @@ export class ItemsComponent implements OnInit {
     if (item.itemType === 'Equipment') {
       const eq = item as Equipment;
       // patch equipmentType
-      this.itemForm.get('equipmentType')!.setValue(eq.equipmentType);
+      this.itemForm.patchValue({
+        equipmentType: eq.equipmentType,
+        magnitude: eq.magnitude,
+        scalingAttribute: eq.scalingAttribute,
+        scalingAmount: eq.scalingAmount,
+      });
       // clear and repopulate attribute modifiers
       this.attributeModifiers.clear();
       eq.attributeModifiers.forEach((m) => {

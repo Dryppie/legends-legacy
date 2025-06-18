@@ -20,7 +20,6 @@ import { EquipmentType } from '../../shared/models/Dtos/equipmentSlot';
   standalone: true,
   imports: [NgFor, NgIf, FormsModule, ReactiveFormsModule, CommonModule],
   templateUrl: './recipes.component.html',
-  styleUrl: './recipes.component.css',
 })
 export class RecipesComponent implements OnInit {
   /* DATA */
@@ -173,7 +172,11 @@ export class RecipesComponent implements OnInit {
       eqType === EquipmentType.Legs
     )
       return CraftType.ArmorForging;
-    if (eqType === EquipmentType.OffHand || eqType === EquipmentType.MainHand)
+    if (
+      eqType === EquipmentType.OffHand ||
+      eqType === EquipmentType.TwoHanded ||
+      eqType === EquipmentType.OneHanded
+    )
       return CraftType.WeaponSmithing;
     return CraftType.JewelryCrafting;
   }

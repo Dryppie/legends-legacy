@@ -2494,7 +2494,7 @@
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 0,
+    "magnitude": 10,
     "scalingAttribute": "Strength",
     "scalingAmount": 1
   },
@@ -2513,7 +2513,7 @@
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 0,
+    "magnitude": 10,
     "scalingAttribute": "Constitution",
     "scalingAmount": 1
   },
@@ -2532,7 +2532,7 @@
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 0,
+    "magnitude": 10,
     "scalingAttribute": "Willpower",
     "scalingAmount": 1
   },
@@ -2551,7 +2551,7 @@
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 0,
+    "magnitude": 10,
     "scalingAttribute": "Agility",
     "scalingAmount": 1
   },
@@ -2576,7 +2576,7 @@
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 0,
+    "magnitude": 10,
     "scalingAttribute": "Strength",
     "scalingAmount": 1
   },
@@ -2601,7 +2601,7 @@
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 0,
+    "magnitude": 10,
     "scalingAttribute": "Constitution",
     "scalingAmount": 1
   },
@@ -2626,7 +2626,7 @@
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 0,
+    "magnitude": 10,
     "scalingAttribute": "Dexterity",
     "scalingAmount": 1
   },
@@ -2651,7 +2651,7 @@
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 0,
+    "magnitude": 10,
     "scalingAttribute": "Constitution",
     "scalingAmount": 1
   },
@@ -2676,7 +2676,7 @@
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 0,
+    "magnitude": 10,
     "scalingAttribute": "Wisdom",
     "scalingAmount": 1
   },
@@ -2714,7 +2714,7 @@
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 0,
+    "magnitude": 10,
     "scalingAttribute": "Wisdom",
     "scalingAmount": 0
   },
@@ -2733,7 +2733,7 @@
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 0,
+    "magnitude": 10,
     "scalingAttribute": "Wisdom",
     "scalingAmount": 1
   },
@@ -2752,7 +2752,7 @@
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 0,
+    "magnitude": 10,
     "scalingAttribute": "Luck",
     "scalingAmount": 0
   },
@@ -2771,7 +2771,7 @@
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 0,
+    "magnitude": 10,
     "scalingAttribute": "Dexterity",
     "scalingAmount": 1
   },
@@ -2796,7 +2796,7 @@
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 0,
+    "magnitude": 10,
     "scalingAttribute": "Dexterity",
     "scalingAmount": 1
   },
@@ -2809,19 +2809,19 @@
     "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
-        "id": "d1c5df6a-e30d-46f5-b978-12f68db10400",
+        "id": "b0d082eb-b721-4d9a-b391-5ee2ed568d49",
         "attributeType": "FightingSpirit",
         "amount": 4,
         "modifierType": "Flat"
       },
       {
-        "id": "4d6eb8a4-2d71-45cb-bd76-ec235ec47a4e",
+        "id": "b9ce44d1-1ab5-47fd-9e94-21fd7dd4eb10",
         "attributeType": "MaxHealth",
         "amount": 35,
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 0,
+    "magnitude": 10,
     "scalingAttribute": "Endurance",
     "scalingAmount": 1
   }

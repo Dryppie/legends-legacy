@@ -17,7 +17,6 @@ import { TabComponent } from '../../../shared/components/tab/tab.component';
   standalone: true,
   imports: [NgFor, NgIf, SidebarItemComponent, RouterLink, TabComponent],
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.css',
 })
 export class SidebarComponent implements OnInit {
   @Output() itemTapped = new EventEmitter<void>();
