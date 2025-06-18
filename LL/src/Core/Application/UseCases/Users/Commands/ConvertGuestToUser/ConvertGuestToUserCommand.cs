@@ -26,6 +26,8 @@ public class ConvertGuestToUserCommandHandler : IRequestHandler<ConvertGuestToUs
 
     public async Task<Response<Tokens>> Handle(ConvertGuestToUserCommand request, CancellationToken cancellationToken)
     {
+        if (request.Username.Length > 26) return Response<Tokens>.Fail("Username is too long.");
+
         var user = await _userService.ConvertGuestToUser(request.UserId, request.Username, request.Email, request.Password, cancellationToken);
         if (user == null) return Response<Tokens>.Fail("Username or email might already be in use.");
 

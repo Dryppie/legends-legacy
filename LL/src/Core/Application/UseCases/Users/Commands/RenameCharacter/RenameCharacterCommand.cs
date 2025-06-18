@@ -20,6 +20,8 @@ public class RenameCharacterCommandHandler : IRequestHandler<RenameCharacterComm
     }
     public async Task<Response<Tokens>> Handle(RenameCharacterCommand request, CancellationToken cancellationToken)
     {
+        if (request.NewName.Length > 26) return Response<Tokens>.Fail("Username is too long.");
+
         var user = await _userService.GetUserById(request.UserId, cancellationToken);
         if (user == null || user.IsNameEdited) return Response<Tokens>.Fail("Character has already been renamed once. No more edits are allowed.");
 

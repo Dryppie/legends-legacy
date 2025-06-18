@@ -21,6 +21,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Response<
         try
         {
             // Register the user
+            if (request.Username.Length > 26) return Response<Unit>.Fail("Username is too long.");
             var user = await _userService.RegisterAsync(request.Username, request.Email, request.Password, cancellationToken);
             if (user == null) return Response<Unit>.Fail("Email or username is already in use.");
 
