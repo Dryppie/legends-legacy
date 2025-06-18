@@ -3018,5 +3018,99 @@
       }
     ],
     "itemType": "Equipment"
+  },
+  {
+    "id": "verdant_helm_recipe",
+    "name": "Verdant Helm",
+    "itemId": "verdant_helm",
+    "itemType": "Equipment",
+    "craftType": "ArmorForging",
+    "levelRequirement": 10,
+    "quantity": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 18,
+        "itemId": "copper_ore"
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 12,
+        "itemId": "veinstone_chip"
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 6,
+        "itemId": "malachite_shard"
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 2,
+        "itemId": "living_amber"
+      }
+    ]
+  },
+  {
+    "id": "verdant_cuirass_recipe",
+    "name": "Verdant Cuirass",
+    "itemId": "verdant_cuirass",
+    "itemType": "Equipment",
+    "craftType": "ArmorForging",
+    "levelRequirement": 10,
+    "quantity": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 30,
+        "itemId": "copper_ore"
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 16,
+        "itemId": "veinstone_chip"
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 8,
+        "itemId": "malachite_shard"
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 3,
+        "itemId": "living_amber"
+      }
+    ]
+  },
+  {
+    "id": "verdant_greaves_recipe",
+    "name": "Verdant Greaves",
+    "itemId": "verdant_greaves",
+    "itemType": "Equipment",
+    "craftType": "ArmorForging",
+    "levelRequirement": 10,
+    "quantity": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 22,
+        "itemId": "copper_ore"
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 12,
+        "itemId": "veinstone_chip"
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 5,
+        "itemId": "malachite_shard"
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 2,
+        "itemId": "living_amber"
+      }
+    ]
   }
+
 ]
