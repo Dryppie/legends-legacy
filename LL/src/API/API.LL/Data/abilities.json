@@ -403,7 +403,7 @@
               },
               "Targeting": "CauseOfTrigger",
               "Chance": 100,
-              "AttackType": "Melee",
+              "AttackType": "None",
               "DamageType": "Burn",
               "EffectTags": [],
               "Log": "{Target} received {Amount} burn damage after attacking {Actor}."
