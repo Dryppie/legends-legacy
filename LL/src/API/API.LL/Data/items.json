@@ -2114,6 +2114,69 @@
     "scalingAmount": 0
   },
   {
+    "id": "verdant_mask",
+    "name": "Verdant Mask",
+    "description": "A mossy ore mask exuding ancient calm.",
+    "itemType": "Equipment",
+    "rarity": "Uncommon",
+    "equipmentType": "Head",
+    "attributeModifiers": [
+      {
+        "id": "01bfc986-73b5-4985-a03e-4f7c77d9b5d7",
+        "attributeType": "Wisdom",
+        "amount": 5,
+        "modifierType": "Flat"
+      },
+      {
+        "id": "674a6ae7-3c6b-4537-a76d-54c702d8c186",
+        "attributeType": "Mana",
+        "amount": 10,
+        "modifierType": "Flat"
+      }
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Intelligence",
+    "scalingAmount": 1
+  },
+  {
+    "id": "verdant_chest",
+    "name": "Verdant Chestwrap",
+    "description": "A robe layered with verdant ore fragments.",
+    "itemType": "Equipment",
+    "rarity": "Uncommon",
+    "equipmentType": "Chest",
+    "attributeModifiers": [
+      {
+        "id": "f0a5f18e-298b-4208-9db4-6ec0976f3e2d",
+        "attributeType": "Intelligence",
+        "amount": 5,
+        "modifierType": "Flat"
+      }
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Intelligence",
+    "scalingAmount": 1
+  },
+  {
+    "id": "verdant_leggings",
+    "name": "Verdant Leggings",
+    "description": "Trousers infused with the calm of living ore.",
+    "itemType": "Equipment",
+    "rarity": "Uncommon",
+    "equipmentType": "Legs",
+    "attributeModifiers": [
+      {
+        "id": "d7ebcfea-32f0-4e89-94a9-1d09db73de74",
+        "attributeType": "Perception",
+        "amount": 5,
+        "modifierType": "Flat"
+      }
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "Intelligence",
+    "scalingAmount": 1
+  },
+  {
     "id": "maple_guard_helm",
     "name": "Maple Guard Helm",
     "description": "A protective helm carved from resilient maple wood and reinforced with amber syrup.",
@@ -2240,21 +2303,19 @@
     "scalingAmount": 1
   },
   {
-    "id": "verdant_mask",
-    "name": "Verdant Mask",
-    "description": "A mossy ore mask exuding ancient calm.",
+    "id": "ambervein_hat",
+    "name": "Ambervein Hat",
+    "description": "A hat of amber and ore, whispering with woodland echoes.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [
       {
-        "id": "01bfc986-73b5-4985-a03e-4f7c77d9b5d7",
         "attributeType": "Wisdom",
-        "amount": 5,
+        "amount": 6,
         "modifierType": "Flat"
       },
       {
-        "id": "674a6ae7-3c6b-4537-a76d-54c702d8c186",
         "attributeType": "Mana",
         "amount": 10,
         "modifierType": "Flat"
@@ -2265,41 +2326,49 @@
     "scalingAmount": 1
   },
   {
-    "id": "verdant_chest",
-    "name": "Verdant Chestwrap",
-    "description": "A robe layered with verdant ore fragments.",
+    "id": "ambervein_chest",
+    "name": "Ambervein Chestguard",
+    "description": "Bark-wrapped ore plates glowing faintly with amber light.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Rare",
     "equipmentType": "Chest",
     "attributeModifiers": [
       {
-        "id": "f0a5f18e-298b-4208-9db4-6ec0976f3e2d",
         "attributeType": "Intelligence",
         "amount": 5,
         "modifierType": "Flat"
+      },
+      {
+        "attributeType": "Vitality",
+        "amount": 6,
+        "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Intelligence",
+    "scalingAttribute": "Wisdom",
     "scalingAmount": 1
   },
   {
-    "id": "verdant_leggings",
-    "name": "Verdant Leggings",
-    "description": "Trousers infused with the calm of living ore.",
+    "id": "ambervein_leggings",
+    "name": "Ambervein Leggings",
+    "description": "Flexible ore-threaded greaves laced with sweet bark fibers.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Rare",
     "equipmentType": "Legs",
     "attributeModifiers": [
       {
-        "id": "d7ebcfea-32f0-4e89-94a9-1d09db73de74",
         "attributeType": "Perception",
+        "amount": 5,
+        "modifierType": "Flat"
+      },
+      {
+        "attributeType": "Agility",
         "amount": 5,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Intelligence",
+    "scalingAttribute": "Perception",
     "scalingAmount": 1
   },
   {
