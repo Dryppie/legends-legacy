@@ -42,7 +42,10 @@ export class SignupComponent {
 
   registerForm = new FormGroup(
     {
-      username: new FormControl(environment.isLocal ? 'Dryp' : ''),
+      username: new FormControl(
+        environment.isLocal ? 'Dryp' : '',
+        Validators.maxLength(26),
+      ),
       email: new FormControl(environment.isLocal ? 'Dryp@hotmail.com' : '', [
         Validators.required,
         emailValidator(),
@@ -126,6 +129,10 @@ export class SignupComponent {
 
   resetLoginError() {
     this.loginError = false;
+  }
+
+  validateUsername() {
+    return this.validateField('username');
   }
 
   validateEmail() {

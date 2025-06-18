@@ -26,7 +26,7 @@
       <label
         class="group relative flex h-12 w-full items-center border border-[#494949] bg-gray focus-within:border-[#B57D0B]"
         [ngClass]="{
-          'border-[#D72E34]': loginError || validateEmail(),
+          'border-[#D72E34]': loginError || validateUsername(),
           'border-[#494949]': !loginError,
         }"
       >
@@ -42,6 +42,9 @@
           formControlName="username"
         />
       </label>
+      <div *ngIf="validateUsername()" class="mt-1 text-sm text-[#D72E34]">
+        Username is too long. Max 26 character
+      </div>
       <label
         class="group relative mt-4 flex h-12 w-full items-center border border-[#494949] bg-gray focus-within:border-[#B57D0B]"
         [ngClass]="{
