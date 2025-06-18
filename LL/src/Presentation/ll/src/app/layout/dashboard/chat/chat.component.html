@@ -24,7 +24,13 @@
           <span class="animate-fade-in-up break-words">
             <div>
               <span>{{ m.sentAt | date: "shortTime" }}:</span>
-              <span class="font-bold"> {{ m.senderName }}:</span>
+              <span class="font-bold">
+                {{
+                  m.senderName.length > 36
+                    ? (m.senderName | slice: 0 : 36) + "…"
+                    : m.senderName
+                }}:</span
+              >
             </div>
             <div class="overflow-hidden">
               {{ m.body }}
