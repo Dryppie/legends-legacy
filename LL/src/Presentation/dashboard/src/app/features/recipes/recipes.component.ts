@@ -124,6 +124,7 @@ export class RecipesComponent implements OnInit {
     this.recipeForm.reset({
       id: '',
       name: '',
+      itemId: this.craftableItems[0].id,
       item: this.craftableItems[0],
       quantity: 1,
       craftType: this.craftTypeBasedOnEquipmentType(this.craftableItems[0]),
@@ -186,10 +187,10 @@ export class RecipesComponent implements OnInit {
       this.recipeForm.markAllAsTouched();
       return;
     }
-    console.log(this.recipeForm.getRawValue());
     const raw: Recipe = {
       ...this.recipeForm.getRawValue(),
       /* ensure disabled control value is carried over */
+      id: crypto.randomUUID(),
       name: this.recipeForm.get('item')!.value.name,
       itemType: this.recipeForm.get('itemType')!.value,
     };
@@ -198,6 +199,7 @@ export class RecipesComponent implements OnInit {
       itemId: m.item.id,
       quantity: m.quantity,
     }));
+    console.log(raw as Recipe);
 
     if (this.isCreating) {
       raw.id = crypto.randomUUID();

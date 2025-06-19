@@ -1650,15 +1650,15 @@
   {
     "id": "nestling_band",
     "name": "Nestling Band",
-    "description": "A ring that enhances ranged accuracy and reduces fall damage.",
+    "description": "A ring that enhances ranged accuracy.",
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "Ring",
     "attributeModifiers": [
       {
         "id": "a5a9cd97-bcc3-414c-95aa-737e43d35883",
-        "attributeType": "Wisdom",
-        "amount": 3,
+        "attributeType": "Perception",
+        "amount": 5,
         "modifierType": "Flat"
       }
     ],
@@ -2118,24 +2118,24 @@
     "name": "Verdant Mask",
     "description": "A mossy ore mask exuding ancient calm.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [
       {
-        "id": "01bfc986-73b5-4985-a03e-4f7c77d9b5d7",
-        "attributeType": "Wisdom",
-        "amount": 5,
+        "id": "fb0c1bb5-1d2f-4b87-85c7-239ac6db86e6",
+        "attributeType": "Willpower",
+        "amount": 12,
         "modifierType": "Flat"
       },
       {
-        "id": "674a6ae7-3c6b-4537-a76d-54c702d8c186",
-        "attributeType": "Mana",
-        "amount": 10,
+        "id": "a5127c06-5ef8-4ee4-b915-01bb19f9f7c3",
+        "attributeType": "MaxHealth",
+        "amount": 43,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Intelligence",
+    "scalingAttribute": "Strength",
     "scalingAmount": 1
   },
   {
@@ -2143,18 +2143,18 @@
     "name": "Verdant Chestwrap",
     "description": "A robe layered with verdant ore fragments.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "Chest",
     "attributeModifiers": [
       {
-        "id": "f0a5f18e-298b-4208-9db4-6ec0976f3e2d",
-        "attributeType": "Intelligence",
-        "amount": 5,
+        "id": "01a188c0-1113-4e31-8e5c-50f6c0565460",
+        "attributeType": "Constitution",
+        "amount": 22,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Intelligence",
+    "scalingAttribute": "Strength",
     "scalingAmount": 1
   },
   {
@@ -2162,18 +2162,18 @@
     "name": "Verdant Leggings",
     "description": "Trousers infused with the calm of living ore.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "Legs",
     "attributeModifiers": [
       {
-        "id": "d7ebcfea-32f0-4e89-94a9-1d09db73de74",
-        "attributeType": "Perception",
-        "amount": 5,
+        "id": "47d7c8c9-4a35-4662-b276-8467d362e67b",
+        "attributeType": "Endurance",
+        "amount": 18,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Intelligence",
+    "scalingAttribute": "Strength",
     "scalingAmount": 1
   },
   {
@@ -2181,19 +2181,19 @@
     "name": "Maple Guard Helm",
     "description": "A protective helm carved from resilient maple wood and reinforced with amber syrup.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [
       {
-        "id": "d8b1a6a1-ced3-40a9-9bfb-5e6a3b9a8f3a",
-        "attributeType": "Willpower",
-        "amount": 5,
+        "id": "fc84be67-1f43-4db3-8968-8ff403163dca",
+        "attributeType": "FightingSpirit",
+        "amount": 13,
         "modifierType": "Flat"
       },
       {
-        "id": "a4f07fd0-19f0-4d25-857e-5114be930d62",
-        "attributeType": "Health",
-        "amount": 10,
+        "id": "dd7f3020-8b1b-42a4-bd46-ebd30f28772b",
+        "attributeType": "Instinct",
+        "amount": 9,
         "modifierType": "Flat"
       }
     ],
@@ -2206,13 +2206,19 @@
     "name": "Maple Guard Plate",
     "description": "A chestplate of layered maple and hardened bark chips.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "Chest",
     "attributeModifiers": [
       {
-        "id": "6e503456-7ae4-470e-9c0a-6b9632a7b4d2",
-        "attributeType": "Constitution",
-        "amount": 5,
+        "id": "046aa08f-47c5-4599-a320-f0a9125d23c6",
+        "attributeType": "Willpower",
+        "amount": 6,
+        "modifierType": "Flat"
+      },
+      {
+        "id": "bbb5d5e2-3c4b-4315-9ce0-41113c2b5947",
+        "attributeType": "Strength",
+        "amount": 15,
         "modifierType": "Flat"
       }
     ],
@@ -2225,13 +2231,13 @@
     "name": "Maple Guard Greaves",
     "description": "Heavy greaves wrapped in amber syrup-infused bark.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "Legs",
     "attributeModifiers": [
       {
-        "id": "33958cf4-8842-42a4-b60b-2f02a9f0ee4c",
+        "id": "bb77e062-f7ce-498f-9e04-28b067e44e4e",
         "attributeType": "Endurance",
-        "amount": 5,
+        "amount": 18,
         "modifierType": "Flat"
       }
     ],
@@ -2244,24 +2250,24 @@
     "name": "Glimmer Hood",
     "description": "A glowing amber-thread hood emitting a faint light.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [
       {
-        "id": "487ed5c3-e3b6-443e-9d3a-02f1039d89d2",
-        "attributeType": "CritChance",
-        "amount": 3,
+        "id": "d26eb0c9-7867-4f60-aba3-374b0a08523b",
+        "attributeType": "Dexterity",
+        "amount": 2,
         "modifierType": "Flat"
       },
       {
-        "id": "fd34a4e3-4474-4452-9a6a-6df3546502b0",
+        "id": "c2785682-a135-4235-80fe-e5eb5ba76b06",
         "attributeType": "Luck",
-        "amount": 5,
+        "amount": 11,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Dexterity",
+    "scalingAttribute": "Strength",
     "scalingAmount": 1
   },
   {
@@ -2269,18 +2275,18 @@
     "name": "Glimmer Wrap",
     "description": "A flexible wrap glimmering with threads of glowing amber and honeycomb.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "Chest",
     "attributeModifiers": [
       {
-        "id": "c5ed6e63-4f80-4015-b495-fd7d2d4e0bb6",
+        "id": "f1823172-b66b-4ef9-9655-9d50cd11fe06",
         "attributeType": "Dexterity",
-        "amount": 5,
+        "amount": 23,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Dexterity",
+    "scalingAttribute": "Strength",
     "scalingAmount": 1
   },
   {
@@ -2288,18 +2294,18 @@
     "name": "Glimmer Pants",
     "description": "Pants woven from silky vine and glowing amber resin.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "Legs",
     "attributeModifiers": [
       {
-        "id": "15aa1c47-839f-4a14-a5fb-20f423ee83d6",
+        "id": "17426d25-9f2c-41b9-804c-8a1b0d09fe2f",
         "attributeType": "Agility",
-        "amount": 5,
+        "amount": 17,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Dexterity",
+    "scalingAttribute": "Strength",
     "scalingAmount": 1
   },
   {
@@ -2307,22 +2313,24 @@
     "name": "Ambervein Hat",
     "description": "A hat of amber and ore, whispering with woodland echoes.",
     "itemType": "Equipment",
-    "rarity": "Rare",
+    "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [
       {
+        "id": "e91fc048-3f34-4b0e-959c-04f45b89944f",
         "attributeType": "Wisdom",
-        "amount": 6,
+        "amount": 9,
         "modifierType": "Flat"
       },
       {
-        "attributeType": "Mana",
-        "amount": 10,
+        "id": "5f0699c9-5a90-4c89-9e19-0334f958a230",
+        "attributeType": "ManaRegeneration",
+        "amount": 2,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Intelligence",
+    "scalingAttribute": "Strength",
     "scalingAmount": 1
   },
   {
@@ -2330,22 +2338,18 @@
     "name": "Ambervein Chestguard",
     "description": "Bark-wrapped ore plates glowing faintly with amber light.",
     "itemType": "Equipment",
-    "rarity": "Rare",
+    "rarity": "Common",
     "equipmentType": "Chest",
     "attributeModifiers": [
       {
+        "id": "0346bbe0-8290-4bd2-b1c6-d7d555651de2",
         "attributeType": "Intelligence",
-        "amount": 5,
-        "modifierType": "Flat"
-      },
-      {
-        "attributeType": "Vitality",
-        "amount": 6,
+        "amount": 25,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Wisdom",
+    "scalingAttribute": "Strength",
     "scalingAmount": 1
   },
   {
@@ -2353,41 +2357,43 @@
     "name": "Ambervein Leggings",
     "description": "Flexible ore-threaded greaves laced with sweet bark fibers.",
     "itemType": "Equipment",
-    "rarity": "Rare",
+    "rarity": "Common",
     "equipmentType": "Legs",
     "attributeModifiers": [
       {
+        "id": "48d91e18-6c19-4874-9a29-55ea18086ea4",
         "attributeType": "Perception",
-        "amount": 5,
+        "amount": 14,
         "modifierType": "Flat"
       },
       {
-        "attributeType": "Agility",
-        "amount": 5,
+        "id": "e1e6b307-c3de-4105-8393-880c3935f291",
+        "attributeType": "MaxMana",
+        "amount": 25,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Perception",
+    "scalingAttribute": "Strength",
     "scalingAmount": 1
   },
   {
     "id": "copper_core_pendant",
     "name": "Copper Core Pendant",
-    "description": "A pendant charged with latent energy from copper veins. Slightly improves magical resistance and increases maximum mana.",
+    "description": "A pendant charged with latent energy from copper veins. Slightly increases maximum mana.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "Necklace",
     "attributeModifiers": [
       {
-        "id": "9dba8c61-59fb-44f3-930a-c7b1558c99f6",
+        "id": "b7bdcf70-4fa8-44df-9010-31c422a86811",
         "attributeType": "MaxMana",
-        "amount": 16,
+        "amount": 38,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Intelligence",
+    "scalingAttribute": "Strength",
     "scalingAmount": 1
   },
   {
@@ -2395,18 +2401,24 @@
     "name": "Amberleaf Pendant",
     "description": "A leaf-shaped amber gem that pulses with nature\u2019s essence. Increases agility and grants minor mana regeneration.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "Necklace",
     "attributeModifiers": [
       {
-        "id": "ef23a198-2dd2-4ec6-8e27-6a72b221ca3e",
+        "id": "d46ff61d-6f92-42c7-9490-d5b153396c0c",
         "attributeType": "Agility",
-        "amount": 5,
+        "amount": 16,
+        "modifierType": "Flat"
+      },
+      {
+        "id": "0b79a4cb-58cc-4095-88b6-eacd20cd4ed1",
+        "attributeType": "ManaRegeneration",
+        "amount": 1,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Dexterity",
+    "scalingAttribute": "Strength",
     "scalingAmount": 1
   },
   {
@@ -2414,18 +2426,24 @@
     "name": "Molten Shard Necklace",
     "description": "Embedded with molten ore slivers, this necklace bolsters endurance and fire resistance.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "Necklace",
     "attributeModifiers": [
       {
-        "id": "de1b8d45-2757-4ef1-b183-e240daffb1a2",
-        "attributeType": "MaxHealth",
-        "amount": 22,
+        "id": "74c383d9-fdb8-48fd-ac7d-bc103111e5e8",
+        "attributeType": "Endurance",
+        "amount": 16,
+        "modifierType": "Flat"
+      },
+      {
+        "id": "c7c2a06e-5fa2-42f5-b15e-9a5faf4ee728",
+        "attributeType": "FireResistance",
+        "amount": 3,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Constitution",
+    "scalingAttribute": "Strength",
     "scalingAmount": 1
   },
   {
@@ -2433,13 +2451,13 @@
     "name": "Veinstone Fireloop",
     "description": "Forged from flint and copper, this ring channels internal fire into critical bursts.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "Ring",
     "attributeModifiers": [
       {
-        "id": "44c78b50-72ff-46d9-81dc-9ea10d0e35f3",
+        "id": "1f37795b-d2c6-415d-b9b4-1539210b2dd3",
         "attributeType": "CritDamage",
-        "amount": 10,
+        "amount": 8,
         "modifierType": "Flat"
       }
     ],
@@ -2452,56 +2470,68 @@
     "name": "Nestling Band Mk.II",
     "description": "An improved version of the original, enhanced with maple essence. Grants keen vision and greater ranged precision.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "Ring",
     "attributeModifiers": [
       {
-        "id": "d5fc49a7-ec2b-4f36-a40b-8a8a5b6015bc",
-        "attributeType": "Wisdom",
-        "amount": 5,
+        "id": "a1caa281-718e-450e-b4d0-075a5eb919d5",
+        "attributeType": "Perception",
+        "amount": 15,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Perception",
+    "scalingAttribute": "Strength",
     "scalingAmount": 1
   },
   {
     "id": "amberguard_ring",
     "name": "Amberguard Ring",
-    "description": "Crafted from solidified glowing amber. Enhances health and defensive recovery out of combat.",
+    "description": "Crafted from solidified glowing amber. Enhances defense and health recovery.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "Ring",
     "attributeModifiers": [
       {
-        "id": "6832a4e7-07e4-4323-802b-fb382d6821c0",
+        "id": "dd136e4e-5f27-45f1-beb0-2235ba8e21be",
         "attributeType": "PhysicalDefense",
-        "amount": 25,
+        "amount": 22,
+        "modifierType": "Flat"
+      },
+      {
+        "id": "d4e4cb5b-8963-4bdb-9582-81c23a9d00fc",
+        "attributeType": "HealthRegeneration",
+        "amount": 1,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Constitution",
+    "scalingAttribute": "Strength",
     "scalingAmount": 1
   },
   {
     "id": "verdant_lens",
     "name": "Verdant Lens",
-    "description": "A polished lens from verdant ore. Enhances vision and perception of magical currents.",
+    "description": "A polished lens from verdant ore. Enhances perception of magical currents.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "Relic",
     "attributeModifiers": [
       {
-        "id": "9f62b3a0-c6b4-499a-8cd3-49f527fb8a92",
+        "id": "fbf0ec3e-d850-4bd8-9985-d6731ad05641",
         "attributeType": "Perception",
-        "amount": 6,
+        "amount": 7,
+        "modifierType": "Flat"
+      },
+      {
+        "id": "b8e259c6-fd19-45fa-bff4-9f3ece17525b",
+        "attributeType": "Wisdom",
+        "amount": 9,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Intelligence",
+    "scalingAttribute": "Strength",
     "scalingAmount": 1
   },
   {
@@ -2509,18 +2539,18 @@
     "name": "Totem of Living Growth",
     "description": "A totem pulsing with life, made of living amber. Grants passive mana regeneration when not moving.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "Relic",
     "attributeModifiers": [
       {
-        "id": "e087dc34-fc13-4f15-9267-5f0ff14dd20f",
+        "id": "fcb7a021-3b79-4b7c-b4f4-f51f8ea9c7e9",
         "attributeType": "ManaRegeneration",
-        "amount": 2,
+        "amount": 3,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Wisdom",
+    "scalingAttribute": "Strength",
     "scalingAmount": 1
   },
   {
@@ -2528,18 +2558,18 @@
     "name": "Idol of Verdant Echo",
     "description": "An idol carved from verdant ore that hums with battle presence.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "Relic",
     "attributeModifiers": [
       {
-        "id": "c7c183a7-8e0b-48c6-bc28-44e810c0ac86",
+        "id": "776aca3e-f7e8-4d94-9996-c723541eb829",
         "attributeType": "Threat",
         "amount": 5,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Endurance",
+    "scalingAttribute": "Strength",
     "scalingAmount": 1
   },
   {
@@ -2547,351 +2577,376 @@
     "name": "Copper-Edge Shortsword",
     "description": "A well-balanced shortsword forged from copper and veinstone. Fast and sharp.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "OneHanded",
     "attributeModifiers": [
       {
-        "id": "e7c788f9-4d46-4db9-b496-e03237f02aab",
+        "id": "bd041689-978d-4f96-bf42-7e1699f09891",
         "attributeType": "FightingSpirit",
-        "amount": 3,
+        "amount": 11,
         "modifierType": "Flat"
       },
       {
-        "id": "648c97de-7b0b-4c2f-bb5a-07f58209b2f9",
+        "id": "46532b28-c1bd-4fa5-8530-401ad64baa72",
         "attributeType": "Strength",
-        "amount": 2,
+        "amount": 4,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
     "scalingAttribute": "Strength",
-    "scalingAmount": 1
+    "scalingAmount": 0.1
   },
   {
     "id": "verdant_fang_hatchet",
     "name": "Verdant Fang Hatchet",
     "description": "An axe laced with verdant ore, known for its vicious bite.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "OneHanded",
     "attributeModifiers": [
       {
-        "id": "9b86b3f1-2b02-4ac3-93d0-e841dbb0c4ff",
+        "id": "0924e0bf-2097-4703-bdff-670b5909a5ae",
         "attributeType": "Strength",
-        "amount": 5,
+        "amount": 14,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Constitution",
-    "scalingAmount": 1
+    "scalingAttribute": "Strength",
+    "scalingAmount": 0.1
   },
   {
     "id": "amberlight_mace",
     "name": "Amberlight Mace",
     "description": "A mace with a living amber core that pulses with every strike.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "OneHanded",
     "attributeModifiers": [
       {
-        "id": "2c9f4a9a-ecb7-4346-a918-7be1b60b3423",
+        "id": "0ae20745-0055-462f-abab-13877a751ba2",
         "attributeType": "Endurance",
-        "amount": 5,
+        "amount": 16,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Willpower",
-    "scalingAmount": 1
+    "scalingAttribute": "Strength",
+    "scalingAmount": 0.1
   },
   {
     "id": "honeyfang_shiv",
     "name": "Honeyfang Shiv",
     "description": "A slick dagger made from hardened bark and honeycomb resin.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "OneHanded",
     "attributeModifiers": [
       {
-        "id": "8cd49601-25b2-47b5-8412-fd2cc2a4721e",
+        "id": "198cabe6-a9af-4ca1-af92-bed3d822e63d",
         "attributeType": "Dexterity",
-        "amount": 5,
+        "amount": 15,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Agility",
-    "scalingAmount": 1
+    "scalingAttribute": "Strength",
+    "scalingAmount": 0.1
   },
   {
     "id": "maplewood_greatsword",
     "name": "Maplewood Greatsword",
     "description": "A brutal two-handed sword infused with maple and amber syrup.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
-        "id": "445fc683-91ec-4827-9772-5dcaa96f033f",
+        "id": "359c69ac-b048-49fd-8264-8985613fa1ea",
         "attributeType": "FightingSpirit",
-        "amount": 6,
+        "amount": 22,
         "modifierType": "Flat"
       },
       {
-        "id": "2f9861a3-c99d-46ee-a94e-7b3cbec7f822",
+        "id": "f83c8f36-384e-46f0-bf6c-a06f4e93bc92",
         "attributeType": "Strength",
-        "amount": 4,
+        "amount": 7,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
     "scalingAttribute": "Strength",
-    "scalingAmount": 1
+    "scalingAmount": 0.1
+  },
+  {
+    "id": "malachite_battle_axe",
+    "name": "Malachite Battle Axe",
+    "description": "A huge axe crafted from solid malachite.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "TwoHanded",
+    "attributeModifiers": [
+      {
+        "id": "133e7518-d5f6-43fa-b772-4916759c75a1",
+        "attributeType": "Strength",
+        "amount": 27,
+        "modifierType": "Flat"
+      }
+    ],
+    "magnitude": 10,
+    "scalingAttribute": "Strength",
+    "scalingAmount": 0.1
   },
   {
     "id": "verdant_maul",
     "name": "Verdant Maul",
     "description": "A colossal maul filled with glowing ore and living amber.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
-        "id": "93b6cc6b-0cc0-4b9d-a482-74609e973727",
+        "id": "02c9fe62-8595-405e-a2e9-ab84be4b32b4",
         "attributeType": "Endurance",
-        "amount": 5,
-        "modifierType": "Flat"
-      },
-      {
-        "id": "d774e4e4-6948-468f-8775-8e70e1e69c76",
-        "attributeType": "Willpower",
-        "amount": 4,
+        "amount": 29,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Constitution",
-    "scalingAmount": 1
+    "scalingAttribute": "Strength",
+    "scalingAmount": 0.1
   },
   {
     "id": "glowspear_pike",
     "name": "Glowspear Pike",
     "description": "A luminous polearm tipped with glowing amber and verdant stone.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
-        "id": "3bfc2b1c-960c-4683-95e0-59fdfb22e0e3",
+        "id": "a4984cfe-d62a-483a-a755-eae3ffb966df",
         "attributeType": "FightingSpirit",
-        "amount": 4,
+        "amount": 16,
         "modifierType": "Flat"
       },
       {
-        "id": "ffb1e7f3-1b44-4d6b-88dc-c0ea833f03cb",
+        "id": "a3e9a7d3-1321-4e81-8926-f7b27e3a7b01",
         "attributeType": "Dexterity",
-        "amount": 4,
+        "amount": 15,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Dexterity",
-    "scalingAmount": 1
+    "scalingAttribute": "Strength",
+    "scalingAmount": 0.1
   },
   {
     "id": "veinstone_tower_shield",
     "name": "Veinstone Tower Shield",
     "description": "A heavy tower shield forged from dense veinstone and maple bark.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "OffHand",
     "attributeModifiers": [
       {
-        "id": "2f2268d3-5066-4d62-85c5-cbfda0b62313",
+        "id": "5624a4dc-0462-4421-bbb7-1562703b7ba6",
         "attributeType": "PhysicalDefense",
-        "amount": 22,
+        "amount": 32,
         "modifierType": "Flat"
       },
       {
-        "id": "661be1cb-1a9c-41fd-bd70-4ce7c13b12c4",
+        "id": "b16cbf10-fe41-44cf-b634-8b4fef0b0b3a",
         "attributeType": "Block",
-        "amount": 35,
+        "amount": 65,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Constitution",
-    "scalingAmount": 1
+    "scalingAttribute": "Strength",
+    "scalingAmount": 0.1
   },
   {
     "id": "glimmering_ward",
     "name": "Glimmering Ward",
     "description": "A shimmering ward woven from glowing amber and bark chips, excellent against spells.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "OffHand",
     "attributeModifiers": [
       {
-        "id": "be0f91f2-39c1-4e7d-8fd7-1c05956e8316",
+        "id": "71a68efd-3513-4120-bbd1-39d87c2a13e9",
         "attributeType": "MagicalDefense",
-        "amount": 22,
+        "amount": 32,
         "modifierType": "Flat"
       },
       {
-        "id": "d727e2ce-9d29-4c16-bff7-7b5d4b4f4696",
+        "id": "f00813dd-7b0f-4ba9-ba33-6f36f5317f97",
         "attributeType": "Block",
-        "amount": 35,
+        "amount": 65,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Wisdom",
-    "scalingAmount": 1
+    "scalingAttribute": "Strength",
+    "scalingAmount": 0.1
   },
   {
     "id": "verdant_channeler_staff",
     "name": "Verdant Channeler Staff",
     "description": "A staff woven from living amber and verdant ore, humming with natural mana.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
-        "id": "c339d193-d06a-4d0c-a7c0-f4f2521d13c4",
+        "id": "1817c72b-a101-4f3b-927c-30eedaf2688f",
         "attributeType": "Intelligence",
-        "amount": 6,
+        "amount": 27,
         "modifierType": "Flat"
       }
     ],
-    "magnitude": 7,
-    "scalingAttribute": "Intelligence",
-    "scalingAmount": 0.15
+    "magnitude": 10,
+    "scalingAttribute": "Strength",
+    "scalingAmount": 0.1
   },
   {
     "id": "amber_runed_grimoire",
     "name": "Amber-Runed Grimoire",
     "description": "A thick tome laced with glowing amber runes, storing potent knowledge.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "OffHand",
     "attributeModifiers": [
       {
-        "id": "78de21f4-41c6-4520-b6de-2129bdb7caa7",
+        "id": "0cd08f63-9f16-48f2-9e70-8ea4ca2d65d7",
         "attributeType": "Intelligence",
-        "amount": 5,
+        "amount": 12,
+        "modifierType": "Flat"
+      },
+      {
+        "id": "18697840-57c0-4100-ac32-aad424df0695",
+        "attributeType": "ManaRegeneration",
+        "amount": 1,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Wisdom",
-    "scalingAmount": 0
+    "scalingAttribute": "Strength",
+    "scalingAmount": 0.1
   },
   {
     "id": "glowing_amber_wand",
     "name": "Glowing Amber Wand",
     "description": "A wand pulsing with warmth from its glowing amber core.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "OneHanded",
     "attributeModifiers": [
       {
-        "id": "61bd19df-d9f9-4c24-82c3-2eb6c36f421e",
+        "id": "140f4a9b-183c-47de-91a6-6630bad7e85c",
         "attributeType": "Wisdom",
-        "amount": 5,
+        "amount": 14,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Wisdom",
-    "scalingAmount": 1
+    "scalingAttribute": "Strength",
+    "scalingAmount": 0.1
   },
   {
     "id": "crystalbloom_orb",
     "name": "Crystalbloom Orb",
     "description": "An elegant orb grown from powdered crystal and amber pollen.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "OffHand",
     "attributeModifiers": [
       {
-        "id": "2a0d4e47-7bb8-43b1-bb5d-bf2e2b92b81a",
+        "id": "e6982544-3ac6-4d63-b827-ff598a6ec5b9",
         "attributeType": "Wisdom",
-        "amount": 5,
+        "amount": 12,
+        "modifierType": "Flat"
+      },
+      {
+        "id": "31c6e852-9021-4b8d-9858-72e2aca87d90",
+        "attributeType": "MaxMana",
+        "amount": 24,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Luck",
-    "scalingAmount": 0
+    "scalingAttribute": "Strength",
+    "scalingAmount": 0.1
   },
   {
     "id": "amberstrung_longbow",
     "name": "Amberstrung Longbow",
     "description": "A longbow strung with hardened amber syrup and crafted from maple.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
-        "id": "aaa41625-d772-4d73-9cd4-01c755e984e7",
+        "id": "d14960ca-d414-4557-ac12-92ba1791d983",
         "attributeType": "Agility",
-        "amount": 7,
+        "amount": 26,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Dexterity",
-    "scalingAmount": 1
+    "scalingAttribute": "Strength",
+    "scalingAmount": 0.1
   },
   {
     "id": "barksteel_crossbow",
     "name": "Barksteel Crossbow",
     "description": "Reinforced with sweet bark and copper veins, this crossbow is deadly and durable.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
-        "id": "2ff4dc61-ff92-49a5-86b2-1218b65e83dc",
+        "id": "28146cef-2806-4f8b-a0e7-d97b60cdabde",
         "attributeType": "Agility",
-        "amount": 4,
+        "amount": 12,
         "modifierType": "Flat"
       },
       {
-        "id": "0c29eaed-8a0c-476b-873c-d4719175fc62",
+        "id": "57a3193d-bc4c-4ce8-8493-09dd75fc78fb",
         "attributeType": "Willpower",
-        "amount": 4,
+        "amount": 17,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Dexterity",
-    "scalingAmount": 1
+    "scalingAttribute": "Strength",
+    "scalingAmount": 0.1
   },
   {
     "id": "livingstone_knuckles",
     "name": "Livingstone Knuckles",
     "description": "Knuckles carved from verdant ore and pulsing with lifeforce.",
     "itemType": "Equipment",
-    "rarity": "Uncommon",
+    "rarity": "Common",
     "equipmentType": "TwoHanded",
     "attributeModifiers": [
       {
-        "id": "b0d082eb-b721-4d9a-b391-5ee2ed568d49",
+        "id": "7627d42d-76db-4a9e-ba95-17f76ced2c21",
         "attributeType": "FightingSpirit",
-        "amount": 4,
+        "amount": 14,
         "modifierType": "Flat"
       },
       {
-        "id": "b9ce44d1-1ab5-47fd-9e94-21fd7dd4eb10",
+        "id": "01da6f2b-64ef-4224-8cca-2d7daf229449",
         "attributeType": "MaxHealth",
-        "amount": 35,
+        "amount": 47,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Endurance",
-    "scalingAmount": 1
+    "scalingAttribute": "Strength",
+    "scalingAmount": 0.1
   }
 ]
