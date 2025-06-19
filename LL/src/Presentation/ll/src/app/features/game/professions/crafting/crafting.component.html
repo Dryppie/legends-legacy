@@ -1,5 +1,5 @@
-<div class="flex h-full w-full flex-col text-white sm:gap-4">
-  <ng-container *ngIf="characterProfession() as characterProfession">
+<ng-container *ngIf="characterProfession() as characterProfession">
+  <div class="flex h-full w-full flex-col text-white sm:gap-4">
     <app-profession-header
       *ngIf="profession() as profession"
       class="pr-4 sm:pr-6"
@@ -9,21 +9,22 @@
       [experience]="characterProfession.experience"
       [experienceUntilNextLevel]="characterProfession.experienceUntilNextLevel"
     ></app-profession-header>
-  </ng-container>
-  <app-tabs class="flex h-full flex-col overflow-hidden">
-    <app-tab label="Crafting">
-      <app-regular-crafting
-        class="overflow-hidden"
-        [recipes]="recipes"
-        [inventory]="inventory"
-      ></app-regular-crafting>
-    </app-tab>
-    <app-tab label="Tempering">
-      <app-tempering
-        class="overflow-hidden"
-        [inventory]="inventoryEquipment"
-        [craftType]="craftType()"
-      ></app-tempering>
-    </app-tab>
-  </app-tabs>
-</div>
+    <app-tabs class="flex h-full flex-col overflow-hidden">
+      <app-tab label="Crafting">
+        <app-regular-crafting
+          class="overflow-hidden"
+          [recipes]="recipes"
+          [inventory]="inventory"
+          [characterProfession]="characterProfession"
+        ></app-regular-crafting>
+      </app-tab>
+      <app-tab label="Tempering">
+        <app-tempering
+          class="overflow-hidden"
+          [inventory]="inventoryEquipment"
+          [craftType]="craftType()"
+        ></app-tempering>
+      </app-tab>
+    </app-tabs>
+  </div>
+</ng-container>

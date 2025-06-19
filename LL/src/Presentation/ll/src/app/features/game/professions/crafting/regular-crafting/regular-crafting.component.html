@@ -46,17 +46,29 @@
         </div>
 
         <div class="mt-4 flex items-center gap-2">
-          <ng-container *ngIf="canCraftSelected() as canCraft; else nothing">
-            <button
-              class="rounded border border-light_gray px-3 py-1 text-white hover:bg-zinc-300/10"
-              (click)="craft(selectedRecipe)"
-            >
-              Craft
-            </button>
+          <ng-container
+            *ngIf="meetsLevelRequirement(selectedRecipe); else levelTooLow"
+          >
+            <ng-container *ngIf="canCraftSelected() as canCraft; else nothing">
+              <app-regular-button
+                (pressed)="craft(selectedRecipe)"
+                [disabled]="!meetsLevelRequirement(selectedRecipe)"
+              >
+                Craft
+              </app-regular-button>
+            </ng-container>
+            <ng-template #nothing>
+              <span *ngIf="!canCraftSelected()" class="text-rose-500">
+                Not enough materials
+              </span>
+            </ng-template>
           </ng-container>
-          <ng-template #nothing>
-            <span *ngIf="!canCraftSelected()" class="text-rose-500">
-              Not enough materials
+          <ng-template #levelTooLow>
+            <span
+              *ngIf="!meetsLevelRequirement(selectedRecipe)"
+              class="text-rose-500"
+            >
+              Crafting level is too low.
             </span>
           </ng-template>
         </div>

@@ -21,9 +21,11 @@ public static class LLDbContextExtensions
 
     public static async Task SeedData(this LLDbContext context, IPasswordHasher<AppUser> hasher)
     {
+        // Always seed from the json files. Might update old data
+        await DbJsonSeeder.RunAsync(context);
+        
         if (!context.Entities.Any())
         {
-            await DbJsonSeeder.RunAsync(context);
             await SeedCreatures.SeedCreaturesData(context);
             await SeedProfessions.SeedProfessionsData(context);
 #if DEBUG

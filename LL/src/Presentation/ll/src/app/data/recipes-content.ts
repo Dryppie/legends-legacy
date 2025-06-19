@@ -1294,15 +1294,15 @@ export const RECIPES_CONTENT = [
     "item": {
       "id": "nestling_band",
       "name": "Nestling Band",
-      "description": "A ring that enhances ranged accuracy and reduces fall damage.",
+      "description": "A ring that enhances ranged accuracy.",
       "stackable": false,
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
       "equipmentType": EquipmentType.Ring,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Wisdom,
-          "amount": 3,
+          "attributeType": AttributeType.Perception,
+          "amount": 5,
           "modifierType": ModifierType.Flat
         }
       ],
@@ -2216,7 +2216,7 @@ export const RECIPES_CONTENT = [
     "materials": [
       {
         "recipeId": "00000000-0000-0000-0000-000000000000",
-        "quantity": 8,
+        "quantity": 68,
         "itemId": "willow_log",
         "item": {
           "id": "willow_log",
@@ -3018,6 +3018,3061 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "8774584d-d60a-4584-81c4-22ca035f562b",
+    "name": "Verdant Mask",
+    "itemId": "verdant_mask",
+    "item": {
+      "id": "verdant_mask",
+      "name": "Verdant Mask",
+      "description": "A mossy ore mask exuding ancient calm.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.Head,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Willpower,
+          "amount": 12,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.MaxHealth,
+          "amount": 43,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": CraftType.ArmorForging,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 16,
+        "itemId": "copper_ore",
+        "item": {
+          "id": "copper_ore",
+          "name": "Copper Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 11,
+        "itemId": "veinstone_chip",
+        "item": {
+          "id": "veinstone_chip",
+          "name": "Veinstone Chip",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 5,
+        "itemId": "verdant_ore",
+        "item": {
+          "id": "verdant_ore",
+          "name": "Verdant Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "5bf11278-6628-4827-af13-06b479ca4757",
+    "name": "Verdant Chestwrap",
+    "itemId": "verdant_chest",
+    "item": {
+      "id": "verdant_chest",
+      "name": "Verdant Chestwrap",
+      "description": "A robe layered with verdant ore fragments.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.Chest,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Constitution,
+          "amount": 22,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": CraftType.ArmorForging,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 28,
+        "itemId": "copper_ore",
+        "item": {
+          "id": "copper_ore",
+          "name": "Copper Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 14,
+        "itemId": "veinstone_chip",
+        "item": {
+          "id": "veinstone_chip",
+          "name": "Veinstone Chip",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 7,
+        "itemId": "verdant_ore",
+        "item": {
+          "id": "verdant_ore",
+          "name": "Verdant Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 2,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "6d6f82a7-d319-44c2-ba4f-517ad0490bbc",
+    "name": "Verdant Leggings",
+    "itemId": "verdant_leggings",
+    "item": {
+      "id": "verdant_leggings",
+      "name": "Verdant Leggings",
+      "description": "Trousers infused with the calm of living ore.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.Legs,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Endurance,
+          "amount": 18,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": CraftType.ArmorForging,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 20,
+        "itemId": "copper_ore",
+        "item": {
+          "id": "copper_ore",
+          "name": "Copper Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "veinstone_chip",
+        "item": {
+          "id": "veinstone_chip",
+          "name": "Veinstone Chip",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 3,
+        "itemId": "verdant_ore",
+        "item": {
+          "id": "verdant_ore",
+          "name": "Verdant Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "b94e786b-fac5-4ab6-9138-c9786cde8d2c",
+    "name": "Maple Guard Helm",
+    "itemId": "maple_guard_helm",
+    "item": {
+      "id": "maple_guard_helm",
+      "name": "Maple Guard Helm",
+      "description": "A protective helm carved from resilient maple wood and reinforced with amber syrup.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.Head,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.FightingSpirit,
+          "amount": 13,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.Instinct,
+          "amount": 9,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": CraftType.ArmorForging,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 13,
+        "itemId": "copper_ore",
+        "item": {
+          "id": "copper_ore",
+          "name": "Copper Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 18,
+        "itemId": "maple_log",
+        "item": {
+          "id": "maple_log",
+          "name": "Maple Log",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 5,
+        "itemId": "malachite_shard",
+        "item": {
+          "id": "malachite_shard",
+          "name": "Malachite Shard",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "b84f2628-ce7f-4348-80ec-82858173585e",
+    "name": "Maple Guard Plate",
+    "itemId": "maple_guard_plate",
+    "item": {
+      "id": "maple_guard_plate",
+      "name": "Maple Guard Plate",
+      "description": "A chestplate of layered maple and hardened bark chips.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.Chest,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Willpower,
+          "amount": 6,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.Strength,
+          "amount": 15,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": CraftType.ArmorForging,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 21,
+        "itemId": "copper_ore",
+        "item": {
+          "id": "copper_ore",
+          "name": "Copper Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 26,
+        "itemId": "maple_log",
+        "item": {
+          "id": "maple_log",
+          "name": "Maple Log",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 7,
+        "itemId": "malachite_shard",
+        "item": {
+          "id": "malachite_shard",
+          "name": "Malachite Shard",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 2,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "57374b82-71f6-4759-9030-a9bbdbab83b2",
+    "name": "Maple Guard Greaves",
+    "itemId": "maple_guard_greaves",
+    "item": {
+      "id": "maple_guard_greaves",
+      "name": "Maple Guard Greaves",
+      "description": "Heavy greaves wrapped in amber syrup-infused bark.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.Legs,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Endurance,
+          "amount": 18,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": CraftType.ArmorForging,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 16,
+        "itemId": "copper_ore",
+        "item": {
+          "id": "copper_ore",
+          "name": "Copper Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 12,
+        "itemId": "maple_log",
+        "item": {
+          "id": "maple_log",
+          "name": "Maple Log",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 4,
+        "itemId": "malachite_shard",
+        "item": {
+          "id": "malachite_shard",
+          "name": "Malachite Shard",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "c05d27a8-c37e-4745-bd8b-afa060c3fc4b",
+    "name": "Glimmer Hood",
+    "itemId": "glimmer_hood",
+    "item": {
+      "id": "glimmer_hood",
+      "name": "Glimmer Hood",
+      "description": "A glowing amber-thread hood emitting a faint light.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.Head,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Dexterity,
+          "amount": 2,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.Luck,
+          "amount": 11,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": CraftType.ArmorForging,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 12,
+        "itemId": "veinstone_chip",
+        "item": {
+          "id": "veinstone_chip",
+          "name": "Veinstone Chip",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 16,
+        "itemId": "amber_syrup",
+        "item": {
+          "id": "amber_syrup",
+          "name": "Amber Syrup",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 4,
+        "itemId": "honeycomb",
+        "item": {
+          "id": "honeycomb",
+          "name": "Honeycomb",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "268023fa-ec40-4f21-9f9f-b16e0e3588b9",
+    "name": "Glimmer Wrap",
+    "itemId": "glimmer_wrap",
+    "item": {
+      "id": "glimmer_wrap",
+      "name": "Glimmer Wrap",
+      "description": "A flexible wrap glimmering with threads of glowing amber and honeycomb.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.Chest,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Dexterity,
+          "amount": 23,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": CraftType.ArmorForging,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 25,
+        "itemId": "veinstone_chip",
+        "item": {
+          "id": "veinstone_chip",
+          "name": "Veinstone Chip",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 18,
+        "itemId": "amber_syrup",
+        "item": {
+          "id": "amber_syrup",
+          "name": "Amber Syrup",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 6,
+        "itemId": "honeycomb",
+        "item": {
+          "id": "honeycomb",
+          "name": "Honeycomb",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 2,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "5689f1b2-5a6b-4087-8b08-05075e222dbe",
+    "name": "Glimmer Pants",
+    "itemId": "glimmer_pants",
+    "item": {
+      "id": "glimmer_pants",
+      "name": "Glimmer Pants",
+      "description": "Pants woven from silky vine and glowing amber resin.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.Legs,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Agility,
+          "amount": 17,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": CraftType.ArmorForging,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 22,
+        "itemId": "veinstone_chip",
+        "item": {
+          "id": "veinstone_chip",
+          "name": "Veinstone Chip",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 16,
+        "itemId": "amber_syrup",
+        "item": {
+          "id": "amber_syrup",
+          "name": "Amber Syrup",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 6,
+        "itemId": "honeycomb",
+        "item": {
+          "id": "honeycomb",
+          "name": "Honeycomb",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "d0ed1f0b-9646-42bb-ab5d-e51c11b59914",
+    "name": "Ambervein Hat",
+    "itemId": "ambervein_hat",
+    "item": {
+      "id": "ambervein_hat",
+      "name": "Ambervein Hat",
+      "description": "A hat of amber and ore, whispering with woodland echoes.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.Head,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Wisdom,
+          "amount": 9,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.ManaRegeneration,
+          "amount": 2,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": CraftType.ArmorForging,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 16,
+        "itemId": "maple_log",
+        "item": {
+          "id": "maple_log",
+          "name": "Maple Log",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 16,
+        "itemId": "amber_syrup",
+        "item": {
+          "id": "amber_syrup",
+          "name": "Amber Syrup",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 5,
+        "itemId": "sweet_bark_chips",
+        "item": {
+          "id": "sweet_bark_chips",
+          "name": "Sweet Bark Chips",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "228482ac-03a3-4f4f-b31f-72396e4ec364",
+    "name": "Ambervein Chestguard",
+    "itemId": "ambervein_chest",
+    "item": {
+      "id": "ambervein_chest",
+      "name": "Ambervein Chestguard",
+      "description": "Bark-wrapped ore plates glowing faintly with amber light.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.Chest,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Intelligence,
+          "amount": 25,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": CraftType.ArmorForging,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 25,
+        "itemId": "maple_log",
+        "item": {
+          "id": "maple_log",
+          "name": "Maple Log",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 18,
+        "itemId": "amber_syrup",
+        "item": {
+          "id": "amber_syrup",
+          "name": "Amber Syrup",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 6,
+        "itemId": "sweet_bark_chips",
+        "item": {
+          "id": "sweet_bark_chips",
+          "name": "Sweet Bark Chips",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 2,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "f774e77f-45d4-4e7e-8393-413e30e9221a",
+    "name": "Ambervein Leggings",
+    "itemId": "ambervein_leggings",
+    "item": {
+      "id": "ambervein_leggings",
+      "name": "Ambervein Leggings",
+      "description": "Flexible ore-threaded greaves laced with sweet bark fibers.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.Legs,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Perception,
+          "amount": 14,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.MaxMana,
+          "amount": 25,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": CraftType.ArmorForging,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 22,
+        "itemId": "maple_log",
+        "item": {
+          "id": "maple_log",
+          "name": "Maple Log",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 16,
+        "itemId": "amber_syrup",
+        "item": {
+          "id": "amber_syrup",
+          "name": "Amber Syrup",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 5,
+        "itemId": "sweet_bark_chips",
+        "item": {
+          "id": "sweet_bark_chips",
+          "name": "Sweet Bark Chips",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "76c2ca0c-60d2-402d-86ba-0462b32e615e",
+    "name": "Copper Core Pendant",
+    "itemId": "copper_core_pendant",
+    "item": {
+      "id": "copper_core_pendant",
+      "name": "Copper Core Pendant",
+      "description": "A pendant charged with latent energy from copper veins. Slightly increases maximum mana.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.Necklace,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.MaxMana,
+          "amount": 38,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": CraftType.JewelryCrafting,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 30,
+        "itemId": "maple_log",
+        "item": {
+          "id": "maple_log",
+          "name": "Maple Log",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 4,
+        "itemId": "honeycomb",
+        "item": {
+          "id": "honeycomb",
+          "name": "Honeycomb",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "9c911d61-ac59-4d67-afa3-44d975ad235b",
+    "name": "Amberleaf Pendant",
+    "itemId": "amberleaf_pendant",
+    "item": {
+      "id": "amberleaf_pendant",
+      "name": "Amberleaf Pendant",
+      "description": "A leaf-shaped amber gem that pulses with nature’s essence. Increases agility and grants minor mana regeneration.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.Necklace,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Agility,
+          "amount": 16,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.ManaRegeneration,
+          "amount": 1,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": CraftType.JewelryCrafting,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 30,
+        "itemId": "maple_log",
+        "item": {
+          "id": "maple_log",
+          "name": "Maple Log",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 4,
+        "itemId": "honeycomb",
+        "item": {
+          "id": "honeycomb",
+          "name": "Honeycomb",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "b8a2f415-9491-4d47-bae8-ac51a8d34a2c",
+    "name": "Molten Shard Necklace",
+    "itemId": "molten_shard_necklace",
+    "item": {
+      "id": "molten_shard_necklace",
+      "name": "Molten Shard Necklace",
+      "description": "Embedded with molten ore slivers, this necklace bolsters endurance and fire resistance.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.Necklace,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Endurance,
+          "amount": 16,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.FireResistance,
+          "amount": 3,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": CraftType.JewelryCrafting,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 30,
+        "itemId": "maple_log",
+        "item": {
+          "id": "maple_log",
+          "name": "Maple Log",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 4,
+        "itemId": "honeycomb",
+        "item": {
+          "id": "honeycomb",
+          "name": "Honeycomb",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "c0e08156-a98c-462b-8b63-77c2d056942c",
+    "name": "Veinstone Fireloop",
+    "itemId": "veinstone_fireloop",
+    "item": {
+      "id": "veinstone_fireloop",
+      "name": "Veinstone Fireloop",
+      "description": "Forged from flint and copper, this ring channels internal fire into critical bursts.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.Ring,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.CritDamage,
+          "amount": 8,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": CraftType.JewelryCrafting,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 30,
+        "itemId": "copper_ore",
+        "item": {
+          "id": "copper_ore",
+          "name": "Copper Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 4,
+        "itemId": "verdant_ore",
+        "item": {
+          "id": "verdant_ore",
+          "name": "Verdant Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "723cd21c-8c03-461f-a269-2a480caa563c",
+    "name": "Nestling Band Mk.II",
+    "itemId": "nestling_band_mk2",
+    "item": {
+      "id": "nestling_band_mk2",
+      "name": "Nestling Band Mk.II",
+      "description": "An improved version of the original, enhanced with maple essence. Grants keen vision and greater ranged precision.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.Ring,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Perception,
+          "amount": 15,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": CraftType.JewelryCrafting,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 30,
+        "itemId": "copper_ore",
+        "item": {
+          "id": "copper_ore",
+          "name": "Copper Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 4,
+        "itemId": "verdant_ore",
+        "item": {
+          "id": "verdant_ore",
+          "name": "Verdant Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "639d7506-dd3f-44ec-a7fc-9e524e34b367",
+    "name": "Amberguard Ring",
+    "itemId": "amberguard_ring",
+    "item": {
+      "id": "amberguard_ring",
+      "name": "Amberguard Ring",
+      "description": "Crafted from solidified glowing amber. Enhances defense and health recovery.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.Ring,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.PhysicalDefense,
+          "amount": 22,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.HealthRegeneration,
+          "amount": 1,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": CraftType.JewelryCrafting,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 30,
+        "itemId": "copper_ore",
+        "item": {
+          "id": "copper_ore",
+          "name": "Copper Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 4,
+        "itemId": "verdant_ore",
+        "item": {
+          "id": "verdant_ore",
+          "name": "Verdant Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "e86c6f6b-0fbb-498a-a860-f7b6c546da8b",
+    "name": "Verdant Lens",
+    "itemId": "verdant_lens",
+    "item": {
+      "id": "verdant_lens",
+      "name": "Verdant Lens",
+      "description": "A polished lens from verdant ore. Enhances perception of magical currents.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.Relic,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Perception,
+          "amount": 7,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.Wisdom,
+          "amount": 9,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": CraftType.JewelryCrafting,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "4332bdf0-9c42-4467-9c4c-c9b3bd2b1a4f",
+    "name": "Totem of Living Growth",
+    "itemId": "living_growth_totem",
+    "item": {
+      "id": "living_growth_totem",
+      "name": "Totem of Living Growth",
+      "description": "A totem pulsing with life, made of living amber. Grants passive mana regeneration when not moving.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.Relic,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.ManaRegeneration,
+          "amount": 3,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": CraftType.JewelryCrafting,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "fcf12747-2833-410c-a565-4bb5f8a1a68f",
+    "name": "Idol of Verdant Echo",
+    "itemId": "verdant_echo_idol",
+    "item": {
+      "id": "verdant_echo_idol",
+      "name": "Idol of Verdant Echo",
+      "description": "An idol carved from verdant ore that hums with battle presence.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.Relic,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Threat,
+          "amount": 5,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": CraftType.JewelryCrafting,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "55749d86-4c48-4df0-80d3-3e5e97f1b35c",
+    "name": "Copper-Edge Shortsword",
+    "itemId": "copper_edge_shortsword",
+    "item": {
+      "id": "copper_edge_shortsword",
+      "name": "Copper-Edge Shortsword",
+      "description": "A well-balanced shortsword forged from copper and veinstone. Fast and sharp.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.OneHanded,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.FightingSpirit,
+          "amount": 11,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.Strength,
+          "amount": 4,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 10,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
+    },
+    "quantity": 1,
+    "craftType": CraftType.WeaponSmithing,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 26,
+        "itemId": "copper_ore",
+        "item": {
+          "id": "copper_ore",
+          "name": "Copper Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 6,
+        "itemId": "honeycomb",
+        "item": {
+          "id": "honeycomb",
+          "name": "Honeycomb",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 2,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "c81f5b3f-81df-41e3-afc3-dd7023337bec",
+    "name": "Verdant Fang Hatchet",
+    "itemId": "verdant_fang_hatchet",
+    "item": {
+      "id": "verdant_fang_hatchet",
+      "name": "Verdant Fang Hatchet",
+      "description": "An axe laced with verdant ore, known for its vicious bite.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.OneHanded,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Strength,
+          "amount": 14,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 10,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
+    },
+    "quantity": 1,
+    "craftType": CraftType.WeaponSmithing,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 29,
+        "itemId": "maple_log",
+        "item": {
+          "id": "maple_log",
+          "name": "Maple Log",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 7,
+        "itemId": "verdant_ore",
+        "item": {
+          "id": "verdant_ore",
+          "name": "Verdant Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 2,
+        "itemId": "crystalline_powder",
+        "item": {
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "5ea7a79d-b6d3-4442-9e2c-0f455b7452ab",
+    "name": "Amberlight Mace",
+    "itemId": "amberlight_mace",
+    "item": {
+      "id": "amberlight_mace",
+      "name": "Amberlight Mace",
+      "description": "A mace with a living amber core that pulses with every strike.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.OneHanded,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Endurance,
+          "amount": 16,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 10,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
+    },
+    "quantity": 1,
+    "craftType": CraftType.WeaponSmithing,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 25,
+        "itemId": "veinstone_chip",
+        "item": {
+          "id": "veinstone_chip",
+          "name": "Veinstone Chip",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 21,
+        "itemId": "amber_syrup",
+        "item": {
+          "id": "amber_syrup",
+          "name": "Amber Syrup",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 6,
+        "itemId": "malachite_shard",
+        "item": {
+          "id": "malachite_shard",
+          "name": "Malachite Shard",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 3,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "f1f1ee7b-b86c-4e52-83da-6b51047fdc9b",
+    "name": "Honeyfang Shiv",
+    "itemId": "honeyfang_shiv",
+    "item": {
+      "id": "honeyfang_shiv",
+      "name": "Honeyfang Shiv",
+      "description": "A slick dagger made from hardened bark and honeycomb resin.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.OneHanded,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Dexterity,
+          "amount": 15,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 10,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
+    },
+    "quantity": 1,
+    "craftType": CraftType.WeaponSmithing,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 24,
+        "itemId": "veinstone_chip",
+        "item": {
+          "id": "veinstone_chip",
+          "name": "Veinstone Chip",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 7,
+        "itemId": "honeycomb",
+        "item": {
+          "id": "honeycomb",
+          "name": "Honeycomb",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 2,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "2098a07e-accf-46a1-9581-06c7e26f0d46",
+    "name": "Maplewood Greatsword",
+    "itemId": "maplewood_greatsword",
+    "item": {
+      "id": "maplewood_greatsword",
+      "name": "Maplewood Greatsword",
+      "description": "A brutal two-handed sword infused with maple and amber syrup.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.TwoHanded,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.FightingSpirit,
+          "amount": 22,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.Strength,
+          "amount": 7,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 10,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
+    },
+    "quantity": 1,
+    "craftType": CraftType.WeaponSmithing,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 63,
+        "itemId": "maple_log",
+        "item": {
+          "id": "maple_log",
+          "name": "Maple Log",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 6,
+        "itemId": "sweet_bark_chips",
+        "item": {
+          "id": "sweet_bark_chips",
+          "name": "Sweet Bark Chips",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 4,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 2,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "2cf6db13-356a-4ef4-811e-06c964d23d8c",
+    "name": "Malachite Battle Axe",
+    "itemId": "malachite_battle_axe",
+    "item": {
+      "id": "malachite_battle_axe",
+      "name": "Malachite Battle Axe",
+      "description": "A huge axe crafted from solid malachite.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.TwoHanded,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Strength,
+          "amount": 27,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 10,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
+    },
+    "quantity": 1,
+    "craftType": CraftType.WeaponSmithing,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 75,
+        "itemId": "veinstone_chip",
+        "item": {
+          "id": "veinstone_chip",
+          "name": "Veinstone Chip",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 5,
+        "itemId": "malachite_shard",
+        "item": {
+          "id": "malachite_shard",
+          "name": "Malachite Shard",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 3,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 3,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "3476cb29-34ed-4ad1-b6c5-e4fa47a303d8",
+    "name": "Verdant Maul",
+    "itemId": "verdant_maul",
+    "item": {
+      "id": "verdant_maul",
+      "name": "Verdant Maul",
+      "description": "A colossal maul filled with glowing ore and living amber.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.TwoHanded,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Endurance,
+          "amount": 29,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 10,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
+    },
+    "quantity": 1,
+    "craftType": CraftType.WeaponSmithing,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 59,
+        "itemId": "copper_ore",
+        "item": {
+          "id": "copper_ore",
+          "name": "Copper Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 7,
+        "itemId": "verdant_ore",
+        "item": {
+          "id": "verdant_ore",
+          "name": "Verdant Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 3,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 3,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "b7402e1a-364b-4979-a530-c83c3fe9e40e",
+    "name": "Glowspear Pike",
+    "itemId": "glowspear_pike",
+    "item": {
+      "id": "glowspear_pike",
+      "name": "Glowspear Pike",
+      "description": "A luminous polearm tipped with glowing amber and verdant stone.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.TwoHanded,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.FightingSpirit,
+          "amount": 16,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.Dexterity,
+          "amount": 15,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 10,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
+    },
+    "quantity": 1,
+    "craftType": CraftType.WeaponSmithing,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 68,
+        "itemId": "maple_log",
+        "item": {
+          "id": "maple_log",
+          "name": "Maple Log",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 4,
+        "itemId": "sweet_bark_chips",
+        "item": {
+          "id": "sweet_bark_chips",
+          "name": "Sweet Bark Chips",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 1,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 5,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "b17532da-8796-4d0d-893b-08b135bd01ef",
+    "name": "Veinstone Tower Shield",
+    "itemId": "veinstone_tower_shield",
+    "item": {
+      "id": "veinstone_tower_shield",
+      "name": "Veinstone Tower Shield",
+      "description": "A heavy tower shield forged from dense veinstone and maple bark.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.OffHand,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.PhysicalDefense,
+          "amount": 32,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.Block,
+          "amount": 65,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 10,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
+    },
+    "quantity": 1,
+    "craftType": CraftType.WeaponSmithing,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 21,
+        "itemId": "copper_ore",
+        "item": {
+          "id": "copper_ore",
+          "name": "Copper Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 18,
+        "itemId": "maple_log",
+        "item": {
+          "id": "maple_log",
+          "name": "Maple Log",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 5,
+        "itemId": "sweet_bark_chips",
+        "item": {
+          "id": "sweet_bark_chips",
+          "name": "Sweet Bark Chips",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 3,
+        "itemId": "crystalline_powder",
+        "item": {
+          "id": "crystalline_powder",
+          "name": "Crystalline Powder",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "7eff609c-9c31-4fc1-82de-4b03d67d6bde",
+    "name": "Glimmering Ward",
+    "itemId": "glimmering_ward",
+    "item": {
+      "id": "glimmering_ward",
+      "name": "Glimmering Ward",
+      "description": "A shimmering ward woven from glowing amber and bark chips, excellent against spells.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.OffHand,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.MagicalDefense,
+          "amount": 32,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.Block,
+          "amount": 65,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 10,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
+    },
+    "quantity": 1,
+    "craftType": CraftType.WeaponSmithing,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 15,
+        "itemId": "veinstone_chip",
+        "item": {
+          "id": "veinstone_chip",
+          "name": "Veinstone Chip",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 23,
+        "itemId": "amber_syrup",
+        "item": {
+          "id": "amber_syrup",
+          "name": "Amber Syrup",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 6,
+        "itemId": "honeycomb",
+        "item": {
+          "id": "honeycomb",
+          "name": "Honeycomb",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 3,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "a9224dfd-0263-4cdd-882f-6052cd2e3c98",
+    "name": "Verdant Channeler Staff",
+    "itemId": "verdant_channeler_staff",
+    "item": {
+      "id": "verdant_channeler_staff",
+      "name": "Verdant Channeler Staff",
+      "description": "A staff woven from living amber and verdant ore, humming with natural mana.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.TwoHanded,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Intelligence,
+          "amount": 27,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 10,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
+    },
+    "quantity": 1,
+    "craftType": CraftType.WeaponSmithing,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 71,
+        "itemId": "maple_log",
+        "item": {
+          "id": "maple_log",
+          "name": "Maple Log",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 8,
+        "itemId": "verdant_ore",
+        "item": {
+          "id": "verdant_ore",
+          "name": "Verdant Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 2,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 4,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "a9759682-3976-4f68-8f19-69b5886e9ec3",
+    "name": "Amber-Runed Grimoire",
+    "itemId": "amber_runed_grimoire",
+    "item": {
+      "id": "amber_runed_grimoire",
+      "name": "Amber-Runed Grimoire",
+      "description": "A thick tome laced with glowing amber runes, storing potent knowledge.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.OffHand,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Intelligence,
+          "amount": 12,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.ManaRegeneration,
+          "amount": 1,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 10,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
+    },
+    "quantity": 1,
+    "craftType": CraftType.WeaponSmithing,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 18,
+        "itemId": "amber_syrup",
+        "item": {
+          "id": "amber_syrup",
+          "name": "Amber Syrup",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 3,
+        "itemId": "sweet_bark_chips",
+        "item": {
+          "id": "sweet_bark_chips",
+          "name": "Sweet Bark Chips",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 3,
+        "itemId": "honeycomb",
+        "item": {
+          "id": "honeycomb",
+          "name": "Honeycomb",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 3,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "cfe1c002-6492-421c-aad0-aec1a50d3a3e",
+    "name": "Glowing Amber Wand",
+    "itemId": "glowing_amber_wand",
+    "item": {
+      "id": "glowing_amber_wand",
+      "name": "Glowing Amber Wand",
+      "description": "A wand pulsing with warmth from its glowing amber core.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.OneHanded,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Wisdom,
+          "amount": 14,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 10,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
+    },
+    "quantity": 1,
+    "craftType": CraftType.WeaponSmithing,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 18,
+        "itemId": "copper_ore",
+        "item": {
+          "id": "copper_ore",
+          "name": "Copper Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 19,
+        "itemId": "maple_log",
+        "item": {
+          "id": "maple_log",
+          "name": "Maple Log",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 5,
+        "itemId": "verdant_ore",
+        "item": {
+          "id": "verdant_ore",
+          "name": "Verdant Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 3,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "171d09cc-a558-4211-a3e9-f21d8abe380c",
+    "name": "Crystalbloom Orb",
+    "itemId": "crystalbloom_orb",
+    "item": {
+      "id": "crystalbloom_orb",
+      "name": "Crystalbloom Orb",
+      "description": "An elegant orb grown from powdered crystal and amber pollen.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.OffHand,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Wisdom,
+          "amount": 12,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.MaxMana,
+          "amount": 24,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 10,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
+    },
+    "quantity": 1,
+    "craftType": CraftType.WeaponSmithing,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 24,
+        "itemId": "copper_ore",
+        "item": {
+          "id": "copper_ore",
+          "name": "Copper Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 4,
+        "itemId": "malachite_shard",
+        "item": {
+          "id": "malachite_shard",
+          "name": "Malachite Shard",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 2,
+        "itemId": "sweet_bark_chips",
+        "item": {
+          "id": "sweet_bark_chips",
+          "name": "Sweet Bark Chips",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 3,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "3c80b3bb-e38d-4d8e-8c02-8a97dd88f4c2",
+    "name": "Amberstrung Longbow",
+    "itemId": "amberstrung_longbow",
+    "item": {
+      "id": "amberstrung_longbow",
+      "name": "Amberstrung Longbow",
+      "description": "A longbow strung with hardened amber syrup and crafted from maple.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.TwoHanded,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Agility,
+          "amount": 26,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 10,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
+    },
+    "quantity": 1,
+    "craftType": CraftType.WeaponSmithing,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 69,
+        "itemId": "maple_log",
+        "item": {
+          "id": "maple_log",
+          "name": "Maple Log",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 3,
+        "itemId": "sweet_bark_chips",
+        "item": {
+          "id": "sweet_bark_chips",
+          "name": "Sweet Bark Chips",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 6,
+        "itemId": "honeycomb",
+        "item": {
+          "id": "honeycomb",
+          "name": "Honeycomb",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 6,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "a32c9469-e6ec-4f3d-87ba-9e8c061da1b6",
+    "name": "Barksteel Crossbow",
+    "itemId": "barksteel_crossbow",
+    "item": {
+      "id": "barksteel_crossbow",
+      "name": "Barksteel Crossbow",
+      "description": "Reinforced with sweet bark and copper veins, this crossbow is deadly and durable.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.TwoHanded,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.Agility,
+          "amount": 12,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.Willpower,
+          "amount": 17,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 10,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
+    },
+    "quantity": 1,
+    "craftType": CraftType.WeaponSmithing,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 65,
+        "itemId": "veinstone_chip",
+        "item": {
+          "id": "veinstone_chip",
+          "name": "Veinstone Chip",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 4,
+        "itemId": "verdant_ore",
+        "item": {
+          "id": "verdant_ore",
+          "name": "Verdant Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 4,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 2,
+        "itemId": "glowing_amber",
+        "item": {
+          "id": "glowing_amber",
+          "name": "Glowing Amber",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Rare
+        }
+      }
+    ],
+    "itemType": ItemType.Equipment
+  },
+  {
+    "id": "a2d5ee10-dd2b-46d9-bbeb-c7ac620f045f",
+    "name": "Livingstone Knuckles",
+    "itemId": "livingstone_knuckles",
+    "item": {
+      "id": "livingstone_knuckles",
+      "name": "Livingstone Knuckles",
+      "description": "Knuckles carved from verdant ore and pulsing with lifeforce.",
+      "stackable": false,
+      "itemType": ItemType.Equipment,
+      "rarity": Rarity.Common,
+      "equipmentType": EquipmentType.TwoHanded,
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.FightingSpirit,
+          "amount": 14,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.MaxHealth,
+          "amount": 47,
+          "modifierType": ModifierType.Flat
+        }
+      ],
+      "magnitude": 10,
+      "scalingAttribute": AttributeType.Strength,
+      "scalingAmount": 0.1
+    },
+    "quantity": 1,
+    "craftType": CraftType.WeaponSmithing,
+    "levelRequirement": 25,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 58,
+        "itemId": "veinstone_chip",
+        "item": {
+          "id": "veinstone_chip",
+          "name": "Veinstone Chip",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Common
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 9,
+        "itemId": "verdant_ore",
+        "item": {
+          "id": "verdant_ore",
+          "name": "Verdant Ore",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 3,
+        "itemId": "honeycomb",
+        "item": {
+          "id": "honeycomb",
+          "name": "Honeycomb",
+          "description": "",
+          "stackable": true,
+          "itemType": ItemType.Material,
+          "rarity": Rarity.Uncommon
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 6,
+        "itemId": "living_amber",
+        "item": {
+          "id": "living_amber",
+          "name": "Living Amber",
           "description": "",
           "stackable": true,
           "itemType": ItemType.Material,

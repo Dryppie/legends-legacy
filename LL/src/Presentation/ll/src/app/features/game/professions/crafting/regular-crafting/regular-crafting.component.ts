@@ -5,6 +5,8 @@ import { Recipe } from '../../../../../shared/models/profession';
 import { CraftingService } from '../../../../../core/services/api/crafting/crafting.service';
 import { AttributeTypeFormatPipe } from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
+import { CharacterProfession } from '../../../../../shared/models/Dtos/characterProfession';
+import { RegularButtonComponent } from '../../../../../shared/components/buttons/regular-button/regular-button.component';
 
 function hasQuantity(
   inv: InventoryItem[],
@@ -30,12 +32,19 @@ function consumeMaterials(
 @Component({
   selector: 'app-regular-crafting',
   standalone: true,
-  imports: [NgIf, NgFor, NgClass, AttributeTypeFormatPipe],
+  imports: [
+    NgIf,
+    NgFor,
+    NgClass,
+    AttributeTypeFormatPipe,
+    RegularButtonComponent,
+  ],
   templateUrl: './regular-crafting.component.html',
 })
 export class RegularCraftingComponent {
   @Input({ required: true }) recipes!: Signal<Recipe[]>;
   @Input({ required: true }) inventory!: Signal<InventoryItem[]>;
+  @Input({ required: true }) characterProfession!: CharacterProfession;
 
   private readonly selectedRecipeId = signal<string | null>(null);
   readonly selectedRecipe = computed<Recipe | null>(() => {
@@ -55,6 +64,10 @@ export class RegularCraftingComponent {
     private readonly inventoryState: InventoryStateService,
     private readonly craftingService: CraftingService,
   ) {}
+
+  meetsLevelRequirement(recipe: Recipe): boolean {
+    return this.characterProfession.level >= recipe.levelRequirement;
+  }
 
   selectRecipe(recipe: Recipe): void {
     this.selectedRecipeId.set(recipe.id);

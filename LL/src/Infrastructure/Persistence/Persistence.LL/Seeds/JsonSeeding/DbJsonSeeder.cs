@@ -13,7 +13,7 @@ public static class DbJsonSeeder
 
     public static async Task RunAsync(IDbContext ctx)
     {
-        if (await ctx.Recipes.AnyAsync()) return;
+        //if (await ctx.Recipes.AnyAsync()) return;
 
         var opt = new JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase, Converters = { new JsonStringEnumConverter(), new ItemBaseConverter() } };
         await SeedBaseItems(ctx, opt);
@@ -25,27 +25,50 @@ public static class DbJsonSeeder
     {
         var itemPath = Path.Combine(AppContext.BaseDirectory, "Data", "items.json");
         var itemJson = await File.ReadAllTextAsync(itemPath);
-
         var items = JsonSerializer.Deserialize<List<ItemBase>>(itemJson, opt)!;
-        foreach (var item in items.OfType<EquipmentBase>())
+
+        foreach (var item in items)
         {
-            foreach (var attribute in item.AttributeModifiers)
+            var existing = await ctx.ItemBases.FirstOrDefaultAsync(x => x.Id == item.Id);
+
+            if (item is EquipmentBase equipment)
             {
-                attribute.ItemBaseId = item.Id;
+                foreach (var attr in equipment.AttributeModifiers)
+                {
+                    attr.ItemBaseId = item.Id;
+                }
+            }
+
+            if (existing == null)
+            {
+                ctx.ItemBases.Add(item); // New item
+            }
+            else
+            {
+                ctx.GetEntry(existing).CurrentValues.SetValues(item); // Update existing, but not attributes
             }
         }
-
-        ctx.ItemBases.AddRange(items);
     }
 
     private static async Task SeedRecipes(IDbContext ctx, JsonSerializerOptions opt)
     {
         var recipePath = Path.Combine(AppContext.BaseDirectory, "Data", "recipes.json");
         var recipeJson = await File.ReadAllTextAsync(recipePath);
+        var dtos = JsonSerializer.Deserialize<List<RecipeDto>>(recipeJson, opt)!;
 
-        // Deserialize as Dto to filter out unnecessary data,
-        // otherwise EF Core will act up with duplicate ids of same item
-        var recipes = JsonSerializer.Deserialize<List<RecipeDto>>(recipeJson, opt)!;
-        ctx.Recipes.AddRange(recipes.Select(dto => dto.ToEntity()));
+        foreach (var dto in dtos)
+        {
+            var recipe = dto.ToEntity();
+            var existing = await ctx.Recipes.FirstOrDefaultAsync(r => r.Id == recipe.Id);
+
+            if (existing == null)
+            {
+                ctx.Recipes.Add(recipe);
+            }
+            else
+            {
+                ctx.GetEntry(existing).CurrentValues.SetValues(recipe); // Update existing, but not materials
+            }
+        }
     }
 }
