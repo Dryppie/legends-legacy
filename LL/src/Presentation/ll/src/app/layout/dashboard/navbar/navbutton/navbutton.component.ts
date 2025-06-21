@@ -1,11 +1,12 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { SidebarService } from '../../../../core/services/client-side/sidebar/sidebar.service';
+import { NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-navbutton',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, NgClass],
   templateUrl: './navbutton.component.html',
 })
 export class NavbuttonComponent {

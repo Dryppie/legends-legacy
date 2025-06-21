@@ -31,6 +31,7 @@ import {
   startWith,
 } from 'rxjs/operators';
 import { EquipmentTypePipe } from '../../../../../shared/pipes/equipment/equipment-type-format/equipment-type.pipe';
+import { ItemComponent } from '../../../../../shared/components/item/item.component';
 
 @Component({
   selector: 'app-market-place-buy',
@@ -47,6 +48,7 @@ import { EquipmentTypePipe } from '../../../../../shared/pipes/equipment/equipme
     NgSwitch,
     NgSwitchCase,
     NgSwitchDefault,
+    ItemComponent,
   ],
   templateUrl: './market-place-buy.component.html',
 })

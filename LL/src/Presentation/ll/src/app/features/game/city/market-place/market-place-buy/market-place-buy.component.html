@@ -84,9 +84,7 @@
     class="order-1 flex h-fit w-full flex-shrink-0 flex-col gap-4 rounded-lg bg-black/40 p-4 backdrop-blur-sm 2xl:order-2 2xl:w-96"
   >
     <ng-container *ngIf="selectedListing() as sel; else placeholder">
-      <h2 class="text-lg font-semibold">
-        {{ sel.itemInstance.itemBase.name }}
-      </h2>
+      <app-item [item]="sel.itemInstance"></app-item>
 
       <!-- Adaptive description -->
       <p class="whitespace-pre-line text-sm text-neutral-300">

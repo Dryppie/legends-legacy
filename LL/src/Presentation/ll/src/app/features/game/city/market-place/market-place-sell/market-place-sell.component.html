@@ -41,9 +41,7 @@
       <ng-container *ngIf="pendingItem() as p; else placeholder">
         <div class="flex flex-col gap-3">
           <!-- Name -->
-          <div class="">
-            {{ p.itemInstance.itemBase.name }}
-          </div>
+          <app-item [item]="p.itemInstance"></app-item>
 
           <!-- Adaptive description -->
           <p class="whitespace-pre-line text-sm text-neutral-300">
@@ -105,9 +103,7 @@
           <div
             class="flex items-center justify-between rounded bg-neutral-800/70 p-2"
           >
-            <div class="flex items-center gap-2">
-              <span class="text-sm">{{ l.itemInstance.itemBase.name }}</span>
-            </div>
+            <app-item [item]="l.itemInstance"></app-item>
             <div class="flex items-center gap-1 text-sm">
               <span>x{{ l.quantity | numberFormat }}</span>
             </div>

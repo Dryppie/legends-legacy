@@ -20,6 +20,7 @@ import { MarketPlaceListing } from '../../../../../shared/models/Dtos/market-pla
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
 import { FilterTabsComponent } from '../../../../../shared/components/tabs/filter-tabs/filter-tabs.component';
 import { EquipmentTypePipe } from '../../../../../shared/pipes/equipment/equipment-type-format/equipment-type.pipe';
+import { ItemComponent } from '../../../../../shared/components/item/item.component';
 
 @Component({
   selector: 'app-market-place-sell',
@@ -32,6 +33,7 @@ import { EquipmentTypePipe } from '../../../../../shared/pipes/equipment/equipme
     RegularButtonComponent,
     NumberFormatPipe,
     FilterTabsComponent,
+    ItemComponent,
   ],
   templateUrl: './market-place-sell.component.html',
 })
