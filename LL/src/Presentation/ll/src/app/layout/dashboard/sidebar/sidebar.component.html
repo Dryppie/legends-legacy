@@ -1,8 +1,8 @@
 <aside class="border-gradient flex w-full sm:w-80 sm:rounded-tr-md">
   <div
-    class="mt-[1px] flex flex-auto flex-col bg-texture bg-auto text-primary sm:rounded-tr-md"
+    class="flex flex-auto flex-col overflow-hidden bg-texture bg-auto text-primary sm:mt-[1px] sm:rounded-tr-md"
   >
-    <div class="flex min-h-20 p-2">
+    <div class="flex p-2 sm:min-h-20">
       <app-current-action
         *ngIf="displayCurrentAction"
         class="w-full"
@@ -17,18 +17,21 @@
     >
     </app-filter-tabs>
     <!-- Tab Content -->
-    <div *ngFor="let tab of tabs" class="overflow-auto">
-      <div *ngIf="activeTab === tab.label" class="tab-content">
+    <div
+      *ngFor="let tab of tabs"
+      class="flex overflow-auto border-y border-gray sm:border-0"
+    >
+      <div *ngIf="activeTab === tab.label" class="flex w-full sm:flex-col">
         <div
           *ngFor="let item of tab.items"
-          class="flex flex-col first:border-t first:border-gray"
+          class="flex w-full justify-between border-r border-gray last:border-r-0 sm:border-r-0 sm:first:border-t sm:first:border-gray"
         >
           <app-sidebar-item
             (click)="toggleSidebar()"
             [item]="item"
             [routerLink]="item.route"
             (click)="navigateTo(item.id)"
-            class="text-light_gray"
+            class="w-full text-light_gray"
             [isActive]="activeItem === item.id"
           ></app-sidebar-item>
         </div>

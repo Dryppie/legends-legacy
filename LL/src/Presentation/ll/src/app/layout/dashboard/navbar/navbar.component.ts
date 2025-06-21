@@ -5,20 +5,27 @@ import {
   OnDestroy,
   OnInit,
   Output,
-  Signal,
 } from '@angular/core';
 import { CharacterBadgeComponent } from '../../../shared/components/character-badge/character-badge.component';
 import { NavbuttonComponent } from './navbutton/navbutton.component';
 import { NgFor, NgIf } from '@angular/common';
 import { AuthService } from '../../../core/services/api/auth/auth.service';
-import { CharacterDto } from '../../../shared/models/Dtos/characterDto';
 import { interval, Subscription } from 'rxjs';
 import { PlayerService } from '../../../core/services/api/players/player.service';
+import { NumberFormatPipe } from '../../../shared/pipes/number-format/number-format.pipe';
+import { ShortNumberPipe } from '../../../shared/pipes/number-format/short-number.pipe';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CharacterBadgeComponent, NavbuttonComponent, NgIf, NgFor],
+  imports: [
+    CharacterBadgeComponent,
+    NavbuttonComponent,
+    NgIf,
+    NgFor,
+    NumberFormatPipe,
+    ShortNumberPipe,
+  ],
   templateUrl: './navbar.component.html',
 })
 export class NavbarComponent implements OnInit, OnDestroy {
@@ -33,6 +40,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
     { link: '/game/world', label: 'World' },
     { link: '/game/settings', label: 'Settings' },
   ];
+
+  useShortFormat = false;
 
   readonly currentCharacter;
   onlinePlayers: number = 0;
@@ -52,10 +61,18 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.onlinePlayersSub = interval(1000 * 60 * 2).subscribe(() => {
       this.loadOnlinePlayers();
     });
+
+    const stored = localStorage.getItem('useShortFormat');
+    this.useShortFormat = stored === 'true';
   }
 
   ngOnDestroy(): void {
     this.onlinePlayersSub?.unsubscribe();
+  }
+
+  toggleFormat() {
+    this.useShortFormat = !this.useShortFormat;
+    localStorage.setItem('useShortFormat', this.useShortFormat.toString());
   }
 
   loadOnlinePlayers() {

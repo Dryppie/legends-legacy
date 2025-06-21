@@ -7,7 +7,7 @@ import { HelpOverlayService } from './help-overlay.service';
   standalone: true,
   template: `
     <button
-      class="fixed bottom-6 left-6 z-50 h-12 w-12 rounded-full border-r border-t border-primary bg-texture text-xl text-white shadow-lg hover:bg-slate-700 focus:outline-none"
+      class="z-50 h-12 w-12 rounded-full border-b border-l border-primary bg-texture text-xl text-white shadow-lg hover:bg-slate-700 focus:outline-none sm:fixed sm:bottom-6 sm:left-6 sm:border-b-0 sm:border-l-0 sm:border-r sm:border-t"
       (click)="open()"
     >
       ?

@@ -1,4 +1,4 @@
-<div class="flex h-full flex-col gap-4 overflow-hidden text-white">
+<div class="flex h-full flex-col overflow-hidden text-white sm:gap-4">
   <app-default-header
     [text]="numberOfAbsorbedEssence()"
     title="Essences"
@@ -8,13 +8,13 @@
     <app-tab label="Inventory essences">
       <app-essences-absorb
         [inventoryEssences]="inventoryEssences"
-        class="overflow-hidden"
+        class="h-full overflow-hidden"
       ></app-essences-absorb>
     </app-tab>
     <app-tab label="Absorbed essences">
       <app-essences-equipped
         [essenceSlots]="essenceSlots"
-        class="overflow-hidden"
+        class="h-full overflow-hidden"
       ></app-essences-equipped>
     </app-tab>
   </app-tabs>

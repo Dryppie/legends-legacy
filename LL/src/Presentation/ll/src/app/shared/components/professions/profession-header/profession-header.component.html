@@ -1,24 +1,26 @@
 <div
   class="flex w-full flex-col items-center justify-between gap-4 sm:h-16 sm:flex-row"
 >
-  <div class="flex w-full items-center gap-6 text-white">
-    <app-profession-icon [image]="icon"></app-profession-icon>
-    <div class="flex flex-col gap-1">
-      <span>Lv. {{ level }}</span>
-      <h2 class="text-primary">
-        {{ title }}
-        <!-- <span
+  <div class="flex w-full items-center justify-between text-white">
+    <div class="flex gap-6">
+      <app-profession-icon [image]="icon"></app-profession-icon>
+      <div class="flex flex-col gap-1">
+        <span>Lv. {{ level }}</span>
+        <h2 class="text-primary">
+          {{ title }}
+          <!-- <span
           class="cursor-help underline decoration-dotted"
           appHelp="potential"
           >?</span
-        > -->
-        <app-help-launcher
-          *ngIf="guidePageId"
-          [pageId]="guidePageId"
-        ></app-help-launcher>
-      </h2>
-      <small>{{ experience }}/{{ experienceUntilNextLevel }}xp</small>
+          > -->
+        </h2>
+        <small>{{ experience }}/{{ experienceUntilNextLevel }}xp</small>
+      </div>
     </div>
+    <app-help-launcher
+      *ngIf="guidePageId"
+      [pageId]="guidePageId"
+    ></app-help-launcher>
   </div>
   <div class="w-full sm:flex sm:justify-end">
     <app-profession-action></app-profession-action>
