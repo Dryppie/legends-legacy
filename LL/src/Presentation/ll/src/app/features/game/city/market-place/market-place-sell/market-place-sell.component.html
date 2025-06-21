@@ -97,10 +97,10 @@
     <div class="flex flex-col gap-4 overflow-hidden">
       <hr class="border-neutral-700" />
       <!-- Active listings -->
-      <h3 class="font-semibold">
-        Your Listings
-        <label class="font-bold">- {{ myListings().length }}/10</label>
-      </h3>
+      <div class="flex w-full justify-between">
+        <h3 class="font-semibold">Your Listings</h3>
+        <label class="">{{ myListings().length }}/10</label>
+      </div>
       <div class="flex flex-col gap-3 overflow-y-auto">
         <ng-container *ngFor="let l of myListings(); trackBy: trackByListing">
           <div
