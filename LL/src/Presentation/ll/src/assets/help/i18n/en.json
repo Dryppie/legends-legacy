@@ -1,0 +1,10 @@
+{
+  "potential": {
+    "title": "Potential",
+    "body": "Potential is how many tempering actions you can perform on an item."
+  },
+  "willpower": {
+    "title": "Willpower",
+    "body": "Willpower mitigates crowd-control and boosts certain spell durations."
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "title": "Crafting & Tempering - Guide",
+  "sections": [
+    {
+      "heading": "Crafting",
+      "body": "Crafting an item costs materials, and the item you craft receives a base of 500 Potential. The item receives an additional 10 Potential for every crafting level you have for that specific item type (armor, jewelry, or weapon)."
+    },
+    {
+      "heading": "Tempering",
+      "body": "Every tempering action costs 1 Potential, and has four different types of outcomes."
+    },
+    {
+      "heading": "Outcomes",
+      "body": "<strong>Critical</strong> -> Turns the item into a Masterpiece or Growth Item. <br><strong>Positive</strong> -> Increase item exp by 1. Reaching 10 item exp upgrades the item to the next rarity. Each increase in rarity decreases the chance for a positive outcome. <br><strong>Negative</strong> -> A negative outcome has a 5% chance of happening. This increases by +5% for every increase in rarity.<br>A negative outcome either decrease item exp, or consumes 1 extra potential. <br><strong>Neutral</strong> -> Does nothing."
+    }
+  ]
+}
