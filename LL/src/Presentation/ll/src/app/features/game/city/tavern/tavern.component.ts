@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NgFor } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { BannerComponent } from '../../../../shared/components/banner/banner.component';
 import { LeaderboardStateService } from '../../../../core/services/api/leaderboard/leaderboard-state.service';
 import { FilterTabsComponent } from '../../../../shared/components/tabs/filter-tabs/filter-tabs.component';
@@ -13,6 +13,7 @@ import { RegularButtonComponent } from '../../../../shared/components/buttons/re
   imports: [
     BannerComponent,
     NgFor,
+    NgIf,
     FilterTabsComponent,
     RegularButtonComponent,
   ],
@@ -24,6 +25,10 @@ export class TavernComponent {
   tabs: Tab[] = [
     {
       label: 'Combat',
+      items: [],
+    },
+    {
+      label: 'Wealth',
       items: [],
     },
     {
@@ -66,6 +71,9 @@ export class TavernComponent {
     switch (this.activeTab) {
       case 'Combat':
         return this.state.topCombat();
+
+      case 'Wealth':
+        return this.state.topWealth();
 
       case 'Mining':
         return this.state.byProfession('Mining')();

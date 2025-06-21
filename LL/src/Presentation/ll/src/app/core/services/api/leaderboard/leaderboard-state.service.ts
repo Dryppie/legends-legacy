@@ -42,6 +42,7 @@ export class LeaderboardStateService {
   }
 
   /** Ready-made selectors for convenience */
+  readonly topWealth = computed(() => this._leaderboard()?.wealth ?? []);
   readonly topCombat = computed(() => this._leaderboard()?.combat ?? []);
   readonly topProfessions = computed(
     () => this._leaderboard()?.professions ?? {},

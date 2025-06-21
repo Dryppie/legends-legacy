@@ -41,6 +41,26 @@ public class LeaderboardRepository : ILeaderboardRepository
                 combatTop50.Add(requesterEntry);
         }
 
+        var wealthLeaderboard = characters
+            .OrderByDescending(c => c.Cinders)
+            .Select((c, index) => new LeaderboardEntry
+            {
+                CharacterId = c.Id,
+                CharacterName = c.Name,
+                Level = (int)c.Cinders,
+                Rank = index + 1,
+            })
+            .ToList();
+
+        var wealthTop50 = wealthLeaderboard.Take(50).ToList();
+
+        if (!wealthTop50.Any(c => c.CharacterId == characterId))
+        {
+            var requesterEntry = wealthLeaderboard.FirstOrDefault(c => c.CharacterId == characterId);
+            if (requesterEntry != null)
+                wealthTop50.Add(requesterEntry);
+        }
+
         var professions = Enum.GetValues<ProfessionType>();
         var professionLeaderboards = new Dictionary<string, List<LeaderboardEntry>>();
 
@@ -80,6 +100,7 @@ public class LeaderboardRepository : ILeaderboardRepository
         return new Leaderboard
         {
             Combat = combatTop50,
+            Wealth = wealthTop50,
             Professions = professionLeaderboards
         };
     }
