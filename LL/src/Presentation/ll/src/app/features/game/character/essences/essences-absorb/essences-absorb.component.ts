@@ -6,8 +6,7 @@ import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { EssenceItem } from '../../../../../shared/models/item';
 import { NgFor, NgIf, NgClass } from '@angular/common';
 import { RegularButtonComponent } from '../../../../../shared/components/buttons/regular-button/regular-button.component';
-import { EssenceDescriptionComponent } from '../../../../../shared/components/essences/essence-description/essence-description.component';
-import { AttributeTypeFormatPipe } from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
+import { EssenceDetailsComponent } from '../../../../../shared/components/essences/essence-details/essence-details.component';
 
 @Component({
   selector: 'app-essences-absorb',
@@ -16,9 +15,8 @@ import { AttributeTypeFormatPipe } from '../../../../../shared/pipes/attributes/
     NgFor,
     NgIf,
     NgClass,
-    AttributeTypeFormatPipe,
     RegularButtonComponent,
-    EssenceDescriptionComponent,
+    EssenceDetailsComponent,
   ],
   templateUrl: './essences-absorb.component.html',
 })

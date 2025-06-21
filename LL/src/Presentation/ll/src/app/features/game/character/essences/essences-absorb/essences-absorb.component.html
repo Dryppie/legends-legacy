@@ -8,35 +8,7 @@
       <ng-container
         *ngIf="selectedEssence() as selectedEssence; else noEssence"
       >
-        <div class="flex flex-col gap-2">
-          <!-- Essence Name -->
-          <h2 class="text-primary">
-            {{ selectedEssence.name }}
-          </h2>
-          <!-- Description -->
-          <div class="">
-            <div class="font-bold">Active</div>
-            <app-essence-description
-              [description]="selectedEssence.active.description"
-            ></app-essence-description>
-          </div>
-          <div class="">
-            <div class="font-bold">Passive</div>
-            <app-essence-description
-              [description]="selectedEssence.passive.description"
-            ></app-essence-description>
-          </div>
-          <!-- Attributes -->
-          <div *ngIf="selectedEssence.attributeModifiers.length > 0">
-            <div class="font-bold">Attributes:</div>
-            <ul class="ml-5 list-disc text-sm">
-              <li *ngFor="let attr of selectedEssence.attributeModifiers">
-                {{ attr.amount > 0 ? "+" : "" }}{{ attr.amount }}
-                {{ attr.attributeType | attributeTypeFormat }}
-              </li>
-            </ul>
-          </div>
-        </div>
+        <app-essence-details [essence]="selectedEssence"></app-essence-details>
         <div class="mt-4 flex items-center gap-2">
           <ng-container *ngIf="canEquipSelected() as canEquip; else nothing">
             <app-regular-button

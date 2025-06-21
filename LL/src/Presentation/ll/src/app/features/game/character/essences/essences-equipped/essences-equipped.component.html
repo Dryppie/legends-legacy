@@ -9,35 +9,7 @@
         <ng-container
           *ngIf="selectedSlot.occupiedEssence as essence; else emptySlot"
         >
-          <div class="flex flex-col gap-2">
-            <!-- Essence Name -->
-            <h2 class="text-primary">
-              {{ essence.name }}
-            </h2>
-            <!-- Description -->
-            <div class="">
-              <div class="font-bold">Active</div>
-              <app-essence-description
-                [description]="essence.active.description"
-              ></app-essence-description>
-            </div>
-            <div class="">
-              <div class="font-bold">Passive</div>
-              <app-essence-description
-                [description]="essence.passive.description"
-              ></app-essence-description>
-            </div>
-            <!-- Attributes -->
-            <div *ngIf="essence.attributeModifiers.length > 0">
-              <div class="font-bold">Attributes:</div>
-              <ul class="ml-5 list-disc text-sm">
-                <li *ngFor="let attr of essence.attributeModifiers">
-                  {{ attr.amount > 0 ? "+" : "" }}{{ attr.amount }}
-                  {{ attr.attributeType | attributeTypeFormat }}
-                </li>
-              </ul>
-            </div>
-          </div>
+          <app-essence-details [essence]="essence"></app-essence-details>
           <div class="mt-4 flex items-center gap-2">
             <ng-container *ngIf="canEquipSelected() as canEquip; else nothing">
               <app-regular-button

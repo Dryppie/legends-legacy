@@ -3,12 +3,11 @@ import { Component, computed, Input, Signal, signal } from '@angular/core';
 import { EssenceStateService } from '../../../../../core/services/api/essences/essence-state.service';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import { RegularButtonComponent } from '../../../../../shared/components/buttons/regular-button/regular-button.component';
-import { EssenceDescriptionComponent } from '../../../../../shared/components/essences/essence-description/essence-description.component';
 import {
   EssenceSlot,
   SlotState,
 } from '../../../../../shared/models/essenceSlot';
-import { AttributeTypeFormatPipe } from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
+import { EssenceDetailsComponent } from '../../../../../shared/components/essences/essence-details/essence-details.component';
 
 @Component({
   selector: 'app-essences-equipped',
@@ -17,9 +16,8 @@ import { AttributeTypeFormatPipe } from '../../../../../shared/pipes/attributes/
     NgFor,
     NgIf,
     NgClass,
-    AttributeTypeFormatPipe,
     RegularButtonComponent,
-    EssenceDescriptionComponent,
+    EssenceDetailsComponent,
   ],
   templateUrl: './essences-equipped.component.html',
 })

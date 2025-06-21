@@ -27,6 +27,8 @@ export class ProfessionCardComponent implements OnInit {
   private subscription: Subscription = new Subscription();
   isLocked = true;
   canStartAction: boolean = false;
+  startActionText: string = '';
+
   constructor(public state: CharacterActionsStateService) {
     effect(() => {
       const action = this.state.currentAction();
@@ -37,6 +39,8 @@ export class ProfessionCardComponent implements OnInit {
 
   ngOnInit(): void {
     this.setIsLocked();
+    this.startActionText =
+      this.professionType === ProfessionType.Mining ? 'Mine' : 'Cut';
   }
 
   setCanStartAction() {
