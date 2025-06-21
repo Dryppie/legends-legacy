@@ -11,6 +11,7 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
     public Rarity Rarity { get; set; } = Rarity.Common;
     public int? Potential { get; set; } = null;
     public EquipmentBase EquipmentBase { get; set; } = null!;
+    public int ItemXp { get; set; } = 0;
     public List<ItemAttributeModifier> AttributeModifiers { get; set; } = [];
     public void Mapping(Profile profile)
     {

@@ -11,9 +11,7 @@
       >
         <div class="flex flex-col gap-2">
           <!-- Equipment Name and Rarity -->
-          <h2 class="">
-            {{ equipment.itemBase.name }}
-          </h2>
+          <app-item [item]="equipment"></app-item>
           <!-- Type -->
           <span class="text-zinc-300">
             {{ equipment.itemBase.equipmentType }} -
@@ -107,11 +105,31 @@
             }"
           >
             <div class="flex flex-col">
-              <div class="font-semibold text-white">
-                {{ craftingQueue[0].equipmentInstance.itemBase.name }}
-              </div>
+              <app-item [item]="craftingQueue[0].equipmentInstance"></app-item>
               <div class="text-gray-400 text-sm">
                 {{ craftingQueue[0].equipmentInstance.potential }} Potential
+              </div>
+
+              <div class="text-gray-400 text-xs">Tempering progress</div>
+              <div class="group relative flex items-center gap-2">
+                <div
+                  class="relative h-2 w-full overflow-hidden rounded bg-zinc-700"
+                >
+                  <div
+                    class="absolute left-0 top-0 h-full bg-primary transition-all duration-500"
+                    [style.width.%]="
+                      (craftingQueue[0].equipmentInstance.itemXp / 10) * 100
+                    "
+                  ></div>
+                </div>
+                <div class="text-gray-300 whitespace-nowrap text-xs">
+                  {{ craftingQueue[0].equipmentInstance.itemXp }} / 10 EXP
+                </div>
+                <div
+                  class="absolute bottom-full left-0 mb-1 hidden w-max whitespace-nowrap rounded bg-zinc-800 px-2 py-1 text-xs text-white shadow-lg group-hover:block"
+                >
+                  Upgrades to the next rarity at 10 exp.
+                </div>
               </div>
             </div>
 
@@ -152,9 +170,7 @@
                 }"
               >
                 <div class="flex flex-col">
-                  <div class="font-semibold text-white">
-                    {{ queueItem.equipmentInstance.itemBase.name }}
-                  </div>
+                  <app-item [item]="queueItem.equipmentInstance"></app-item>
                   <div class="text-gray-400 text-sm">
                     {{ queueItem.equipmentInstance.potential }} Potential
                   </div>
@@ -198,9 +214,7 @@
               selectedEquipmentInstance()?.id !== item.itemInstance.id,
           }"
         >
-          <div class="font-semibold text-white">
-            {{ item.itemInstance.itemBase.name }}
-          </div>
+          <app-item [item]="item.itemInstance"></app-item>
           <div class="text-gray-400 text-sm">
             <!-- Lv {{ item.levelRequirement }} -->
           </div>

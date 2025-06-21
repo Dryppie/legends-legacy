@@ -28,11 +28,19 @@ import { InventoryStateService } from '../../../../../core/services/api/inventor
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { CharacterActionType } from '../../../../../shared/models/enums/characterActionType';
 import { CharacterActionsStateService } from '../../../../../core/services/api/character-actions/character-actions.state.service';
+import { ItemComponent } from '../../../../../shared/components/item/item.component';
 
 @Component({
   selector: 'app-tempering',
   standalone: true,
-  imports: [NgFor, NgIf, NgClass, AttributeTypeFormatPipe, SlicePipe],
+  imports: [
+    NgFor,
+    NgIf,
+    NgClass,
+    AttributeTypeFormatPipe,
+    SlicePipe,
+    ItemComponent,
+  ],
   templateUrl: './tempering.component.html',
 })
 export class TemperingComponent implements OnInit {
