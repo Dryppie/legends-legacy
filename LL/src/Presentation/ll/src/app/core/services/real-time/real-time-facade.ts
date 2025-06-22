@@ -4,20 +4,27 @@ import { AuthService } from '../api/auth/auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class RealTimeFacade {
+  private initialized = false;
+
   constructor(
     private auth: AuthService,
     private socket: GameSocketService,
   ) {
     effect(
       () => {
-        /* read the auth signal */
+        if (!this.initialized) return;
+
         if (this.auth.isAuthenticated()) {
-          this.socket.connect(); // writes isConnected/lastMsg
+          this.socket.connect();
         } else {
-          this.socket.disconnect(); // writes isConnected/lastMsg
+          this.socket.disconnect();
         }
       },
       { allowSignalWrites: true },
     );
+  }
+
+  initialize() {
+    this.initialized = true;
   }
 }
