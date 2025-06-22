@@ -24,6 +24,10 @@ export class TavernComponent {
 
   tabs: Tab[] = [
     {
+      label: 'Total level',
+      items: [],
+    },
+    {
       label: 'Combat',
       items: [],
     },
@@ -69,6 +73,9 @@ export class TavernComponent {
 
   get filteredLeaderboard(): LeaderboardEntryDto[] {
     switch (this.activeTab) {
+      case 'Total level':
+        return this.state.topTotal();
+
       case 'Combat':
         return this.state.topCombat();
 

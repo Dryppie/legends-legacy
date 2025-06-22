@@ -32,7 +32,7 @@
             Name:
             <h3 class="text-white">{{ item.characterName }}</h3>
           </div>
-          <div *ngIf="activeTab !== 'Wealth'">
+          <div *ngIf="activeTab !== 'Wealth' && activeTab !== 'Total level'">
             <div class="flex gap-2 text-primary">
               Level:
               <h3 class="text-white">{{ item.level }}</h3>
@@ -45,6 +45,12 @@
           <div *ngIf="activeTab === 'Wealth'">
             <div class="flex gap-2 text-primary">
               Cinders:
+              <h3 class="text-white">{{ item.level }}</h3>
+            </div>
+          </div>
+          <div *ngIf="activeTab === 'Total level'">
+            <div class="flex gap-2 text-primary">
+              Total level:
               <h3 class="text-white">{{ item.level }}</h3>
             </div>
           </div>

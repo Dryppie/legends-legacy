@@ -97,11 +97,36 @@ public class LeaderboardRepository : ILeaderboardRepository
             professionLeaderboards[profession.ToString()] = top50;
         }
 
+        var totalLevelLeaderboard = characters
+            .Select(c => new
+            {
+                Character = c,
+                TotalLevel = c.Level + c.Professions.Sum(p => p.Level)
+            })
+            .OrderByDescending(x => x.TotalLevel)
+            .Select((x, index) => new LeaderboardEntry
+            {
+                CharacterId = x.Character.Id,
+                CharacterName = x.Character.Name,
+                Level = x.TotalLevel,
+                Rank = index + 1,
+            })
+            .ToList();
+
+        var totalLevelTop50 = totalLevelLeaderboard.Take(50).ToList();
+        if (!totalLevelTop50.Any(c => c.CharacterId == characterId))
+        {
+            var requesterEntry = totalLevelLeaderboard.FirstOrDefault(c => c.CharacterId == characterId);
+            if (requesterEntry != null)
+                totalLevelTop50.Add(requesterEntry);
+        }
+
         return new Leaderboard
         {
             Combat = combatTop50,
             Wealth = wealthTop50,
-            Professions = professionLeaderboards
+            Professions = professionLeaderboards,
+            TotalLevel = totalLevelTop50
         };
     }
 }
