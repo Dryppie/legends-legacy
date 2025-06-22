@@ -116,13 +116,12 @@ public class AuthController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<Response<Tokens>>> CreateNewTokens()
     {
-        var refreshToken = Request.Cookies[RefreshTokenCookie];
-
-        if (string.IsNullOrWhiteSpace(refreshToken)) return BadRequest();
+        if (!Request.Cookies.TryGetValue(RefreshTokenCookie, out var refresh))
+            return BadRequest();
 
         try
         {
-            var result = await Mediator.Send(new CreateNewTokensCommand(refreshToken));
+            var result = await Mediator.Send(new CreateNewTokensCommand(refresh));
 
             if (result.Data is null) return BadRequest(result);
 
