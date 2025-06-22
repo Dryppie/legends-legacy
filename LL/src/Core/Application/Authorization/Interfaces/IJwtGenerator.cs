@@ -5,7 +5,7 @@ using Domain.Models.Users;
 namespace Application.Authorization.Interfaces;
 public interface IJwtGenerator
 {
-    Tokens IssueTokens(AppUser user, Character character);
+    Task<Tokens> IssueTokens(AppUser user, Character character);
     Task<Tokens?> RefreshAsync(string refreshToken, CancellationToken cancellationToken);
 
     /// <summary>

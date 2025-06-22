@@ -54,7 +54,7 @@ public class JwtGenerator : IJwtGenerator
         };
     }
 
-    public Tokens IssueTokens(AppUser user, Character character)
+    public async Task<Tokens> IssueTokens(AppUser user, Character character)
     {
         var now = DateTimeOffset.UtcNow;
 
@@ -69,8 +69,6 @@ public class JwtGenerator : IJwtGenerator
             new(ClaimTypes.Name, character.Name)
         };
 
-        if (!string.IsNullOrWhiteSpace(user.CharacterId.ToString()))
-            claims.Add(new Claim("CharacterId", user.CharacterId.ToString()!));
         var expiresAt = now.Add(_accessLifespan);
         var jwt = new JwtSecurityToken(
             issuer: _validIssuer,
@@ -90,7 +88,7 @@ public class JwtGenerator : IJwtGenerator
             ExpiresUtc = now.Add(_refreshLifespan).UtcDateTime
         };
 
-        _repo.AddAsync(refreshEntity, CancellationToken.None).GetAwaiter().GetResult();
+        await _repo.AddAsync(refreshEntity, CancellationToken.None);
 
         return new Tokens(access, refresh, expiresAt.ToUnixTimeSeconds());
     }
@@ -113,10 +111,9 @@ public class JwtGenerator : IJwtGenerator
         var character = await _characterService.GetMyCharacterAsync(user.Id, cancellationToken);
         if (character == null) return null;
 
-        var newTokens = IssueTokens(user, character);
+        var newTokens = await IssueTokens(user, character);
         // store the hash of the *new* refresh token inside the old one (`ReplacedBy`) – optional
         record.ReplacedBy = _hasher.Hash(newTokens.RefreshToken);
-        await _repo.SaveChangesAsync(cancellationToken);
 
         return newTokens;
     }
