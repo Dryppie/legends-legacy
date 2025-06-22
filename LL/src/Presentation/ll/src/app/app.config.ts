@@ -25,11 +25,13 @@ import { AuthInterceptor } from './core/interceptors/auth-interceptor';
 import { RealTimeFacade } from './core/services/real-time/real-time-facade';
 
 export function initializeApp(auth: AuthService, realTime: RealTimeFacade) {
-  return () => {
-    firstValueFrom(auth.initAuth()).catch(() => Promise.resolve()); // Make sure this resolves only after checking/refreshing auth
-    realTime.initialize(); // Optional, if you need to manually trigger logic
+  return async () => {
+    return firstValueFrom(auth.initAuth())
+      .catch(() => Promise.resolve()) // Still catch to prevent blocking if auth fails
+      .finally(() => realTime.initialize()); // Call once auth is resolved
   };
 }
+
 export const appConfig: ApplicationConfig = {
   providers: [
     {

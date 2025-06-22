@@ -5,7 +5,6 @@ import {
   Router,
   RouterStateSnapshot,
 } from '@angular/router';
-import { filter, firstValueFrom, Observable, take } from 'rxjs';
 import { AuthService } from '../../services/api/auth/auth.service';
 
 export const authGuard: CanActivateFn = async (
