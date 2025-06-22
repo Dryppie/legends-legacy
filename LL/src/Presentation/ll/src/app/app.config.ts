@@ -24,14 +24,13 @@ import { ColosseumPlaybackStrategy } from './core/services/client-side/combat/co
 import { AuthInterceptor } from './core/interceptors/auth-interceptor';
 import { RealTimeFacade } from './core/services/real-time/real-time-facade';
 
-export function initializeApp(auth: AuthService, realTime: RealTimeFacade) {
-  return async () => {
-    return firstValueFrom(auth.initAuth())
-      .catch(() => Promise.resolve()) // Still catch to prevent blocking if auth fails
-      .finally(() => realTime.initialize()); // Call once auth is resolved
-  };
+export function initializeApp(authService: AuthService) {
+  return () =>
+    firstValueFrom(authService.checkAuth()).catch(() => Promise.resolve());
 }
-
+function startRealTime(realTime: RealTimeFacade) {
+  return () => {};
+}
 export const appConfig: ApplicationConfig = {
   providers: [
     {
@@ -48,6 +47,12 @@ export const appConfig: ApplicationConfig = {
       }),
       deps: [CombatLogService, LevelingService],
     },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: startRealTime,
+      deps: [RealTimeFacade],
+      multi: true,
+    },
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideAnimations(),
@@ -57,7 +62,7 @@ export const appConfig: ApplicationConfig = {
     {
       provide: APP_INITIALIZER,
       useFactory: initializeApp,
-      deps: [AuthService, RealTimeFacade],
+      deps: [AuthService],
       multi: true,
     },
     provideRouter(routes),

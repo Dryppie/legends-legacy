@@ -48,13 +48,16 @@ export class AuthService {
     private event: EventBusService,
   ) {}
 
-  initAuth(): Observable<void> {
-    return this.tryRefresh().pipe(
-      tap((exp) => {
-        if (exp) this.afterSuccessfulAuth(exp);
+  checkAuth(): Observable<CharacterDto | null> {
+    return this.fetchCharacter().pipe(
+      catchError(() => {
+        return this.tryRefresh().pipe(
+          switchMap((ok) => (ok ? this.fetchCharacter() : of(null))),
+        );
       }),
-      map(() => void 0), // hide expiry to callers
-      catchError(() => of(void 0)),
+      tap((ch) => {
+        if (ch) this.markAuthenticated();
+      }),
     );
   }
 
@@ -211,19 +214,6 @@ export class AuthService {
     this.refreshSub?.unsubscribe(); // stop future refresh attempts
     this.markUnauthenticated();
     this.router.navigateByUrl('/');
-  }
-
-  checkAuth(): Observable<CharacterDto | null> {
-    return this.fetchCharacter().pipe(
-      catchError(() => {
-        return this.tryRefresh().pipe(
-          switchMap((ok) => (ok ? this.fetchCharacter() : of(null))),
-        );
-      }),
-      tap((ch) => {
-        if (ch) this.markAuthenticated();
-      }),
-    );
   }
 
   private fetchCharacter(): Observable<CharacterDto> {
