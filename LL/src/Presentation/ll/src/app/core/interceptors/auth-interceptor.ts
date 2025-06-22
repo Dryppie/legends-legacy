@@ -56,7 +56,7 @@ export class AuthInterceptor implements HttpInterceptor {
         return this.auth.tryRefresh().pipe(
           tap((ok) => {
             this.refreshInProgress = false;
-            this.refreshFinished$.next(ok); // wake up the queue
+            this.refreshFinished$.next(!!ok); // wake up the queue
           }),
           switchMap((ok) =>
             ok
