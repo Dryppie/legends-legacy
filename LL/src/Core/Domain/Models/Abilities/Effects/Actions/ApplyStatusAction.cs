@@ -1,6 +1,7 @@
 ﻿using Domain.Interfaces.Abilities;
 using Domain.Interfaces.Combat;
 using Domain.Models.Abilities.Statuses;
+using Domain.Models.Attributes;
 using Domain.Models.Combat;
 
 namespace Domain.Models.Abilities.Effects.Actions;
@@ -31,8 +32,9 @@ public class ApplyStatusAction : IEffectAction
                 .Replace("{Actor}", effect.Source.Name)
                 .Replace("{Target}", effect.Target.Name)
                 .Replace("{Status}", statusDef.Name);
+            var simpleCombatEntity = CreateSimpleCombatEntity(effect.Source);
 
-            combatContext.LogEffectExecution(effect);
+            combatContext.LogEffectExecution(effect, simpleCombatEntity);
         }
 
         // Create runtime instance
@@ -42,6 +44,19 @@ public class ApplyStatusAction : IEffectAction
         //effect.Target.Statuses.Add(statusInstance);
         combatContext.EffectManager.AddStatus(statusInstance);
 
+    }
+
+    private SimpleCombatEntity CreateSimpleCombatEntity(CombatEntity target)
+    {
+        return new SimpleCombatEntity()
+        {
+            Id = target.Id,
+            MaxHealth = target.GetAttributeValue(AttributeType.MaxHealth),
+            Health = target.GetAttributeValue(AttributeType.Health),
+            MaxMana = target.GetAttributeValue(AttributeType.MaxMana),
+            Mana = target.GetAttributeValue(AttributeType.Mana),
+            Barrier = target.GetAttributeValue(AttributeType.Barrier)
+        };
     }
 
     public void OnExpireExecute(EffectContext effect, ICombatContext combatContext)
