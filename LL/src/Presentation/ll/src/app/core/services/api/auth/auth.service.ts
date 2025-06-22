@@ -19,7 +19,6 @@ import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { ToastService } from '../../client-side/toast/toast.service';
 import { UserInfoDto } from '../../../../shared/models/Dtos/userInfoDto';
-import { SilentRefreshService } from './helpers/silent-refresh.service';
 
 @Injectable({
   providedIn: 'root',
@@ -46,7 +45,6 @@ export class AuthService {
     private api: ApiService,
     private toast: ToastService,
     private event: EventBusService,
-    private silent: SilentRefreshService,
   ) {}
 
   private markAuthenticated() {
@@ -227,10 +225,10 @@ export class AuthService {
   }
 
   /** Returns `true` when refresh succeeded. */
-  public tryRefresh(): Observable<boolean> {
+  public tryRefresh(): Observable<number> {
     return this.api.post('auth/createNewTokens').pipe(
-      map(() => true), // tokens set in HttpOnly cookie
-      catchError(() => of(false)),
+      map(({ accessExpiresAt }) => accessExpiresAt), // tokens set in HttpOnly cookie
+      catchError(() => of(0)),
     );
   }
 
@@ -238,15 +236,13 @@ export class AuthService {
     // Cancel any previous timer
     this.refreshSub?.unsubscribe();
 
-    const nowSec = Date.now() / 1000;
-    const ttlSec = accessExpiresAt - nowSec;
-    // Refresh when 70 % of lifetime has elapsed (i.e. 30 % remains)
-    const delayMs = Math.max(ttlSec * 0.7 * 1000, 1000);
+    const delayMs = Math.max((accessExpiresAt * 1000 - Date.now()) * 0.7, 1000);
 
     this.refreshSub = timer(delayMs)
       .pipe(switchMap(() => this.tryRefresh()))
-      .subscribe((ok) => {
-        if (!ok) this.logout(); // refresh token invalid / expired
+      .subscribe({
+        next: (newExpiresAt) => this.armRefreshScheduler(newExpiresAt), // 💡 arm again
+        error: () => this.logout(),
       });
   }
 
