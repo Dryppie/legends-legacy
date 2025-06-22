@@ -1,4 +1,7 @@
-<div *ngIf="tabs.length > 1" class="flex flex-wrap justify-around">
+<div
+  *ngIf="tabs.length > 1"
+  class="flex flex-wrap justify-around hover:cursor-pointer"
+>
   <span
     *ngFor="let tab of tabs"
     class="border-b border-light_gray py-2 text-center font-semibold text-light_gray hover:border-primary focus:outline-none"

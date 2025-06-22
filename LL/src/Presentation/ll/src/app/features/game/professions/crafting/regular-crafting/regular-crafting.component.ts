@@ -7,6 +7,7 @@ import { AttributeTypeFormatPipe } from '../../../../../shared/pipes/attributes/
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import { CharacterProfession } from '../../../../../shared/models/Dtos/characterProfession';
 import { RegularButtonComponent } from '../../../../../shared/components/buttons/regular-button/regular-button.component';
+import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
 
 function hasQuantity(
   inv: InventoryItem[],
@@ -38,6 +39,7 @@ function consumeMaterials(
     NgClass,
     AttributeTypeFormatPipe,
     RegularButtonComponent,
+    NumberFormatPipe,
   ],
   templateUrl: './regular-crafting.component.html',
 })
@@ -45,6 +47,13 @@ export class RegularCraftingComponent {
   @Input({ required: true }) recipes!: Signal<Recipe[]>;
   @Input({ required: true }) inventory!: Signal<InventoryItem[]>;
   @Input({ required: true }) characterProfession!: CharacterProfession;
+
+  /** all | craftable | uncraftable */
+  readonly filterMode = signal<'all' | 'craftable' | 'uncraftable'>('all');
+  /** minimum level (inclusive) */
+  readonly minLevel = signal<number>(1);
+  /** maximum level (inclusive, null ⇒ no upper limit) */
+  readonly maxLevel = signal<number | null>(null);
 
   private readonly selectedRecipeId = signal<string | null>(null);
   readonly selectedRecipe = computed<Recipe | null>(() => {
@@ -58,6 +67,25 @@ export class RegularCraftingComponent {
     return recipe.materials.every((mat) =>
       hasQuantity(inv, mat.item.id, mat.quantity),
     );
+  });
+
+  readonly filteredRecipes = computed<Recipe[]>(() => {
+    const mode = this.filterMode();
+    const min = this.minLevel();
+    const max = this.maxLevel();
+    const inv = this.inventory();
+
+    return this.recipes().filter((r) => {
+      /* level gate */
+      if (r.levelRequirement < min) return false;
+      if (max !== null && r.levelRequirement > max) return false;
+
+      /* craftability gate (if requested) */
+      const craftable = this.canCraft(r, inv);
+      if (mode === 'craftable') return craftable;
+      if (mode === 'uncraftable') return !craftable;
+      return true; // mode === 'all'
+    });
   });
 
   constructor(
@@ -94,6 +122,12 @@ export class RegularCraftingComponent {
         this.inventoryState.setInventory(backup);
       },
     });
+  }
+
+  private canCraft(recipe: Recipe, inv: InventoryItem[]): boolean {
+    return recipe.materials.every((m) =>
+      hasQuantity(inv, m.item.id, m.quantity),
+    );
   }
 
   getOwnedQuantity(itemId: string): number {
