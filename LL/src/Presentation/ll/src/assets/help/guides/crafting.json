@@ -3,7 +3,7 @@
   "sections": [
     {
       "heading": "Crafting",
-      "body": "Crafting an item costs materials, and the item you craft receives a base of 500 Potential. The item receives an additional 10 Potential for every crafting level you have for that specific item type (armor, jewelry, or weapon)."
+      "body": "Crafting an item costs materials, and the item you craft receives a base of 500 Potential. The item receives an additional 10 Potential for every crafting level you have for that specific item type (armor, jewelry, or weapon).<br>Crafting an item does not give you EXP. Only tempering does."
     },
     {
       "heading": "Tempering",

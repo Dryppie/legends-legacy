@@ -45,7 +45,6 @@
       </div>
     </div>
     <app-navbar
-      *ngIf="!(combatVisible$ | async) || isSidebarOpen || !isScreenSmall"
       (itemTapped)="openSidebar()"
       [isScreenSmall]="isScreenSmall"
       class="sm:order-1 sm:p-4"
