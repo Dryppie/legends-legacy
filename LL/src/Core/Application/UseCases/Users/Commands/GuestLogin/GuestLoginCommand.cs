@@ -37,7 +37,7 @@ public class GuestLoginCommandHandler : IRequestHandler<GuestLoginCommand, Respo
             if (character == null) return Response<Tokens>.Fail("Character creation failed during guest registration");
 
             // Generate tokens
-            var tokens = _jwtGenerator.IssueTokens(user, character);
+            var tokens = await _jwtGenerator.IssueTokens(user, character);
 
             return Response<Tokens>.Success(tokens);
         }

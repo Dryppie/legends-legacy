@@ -37,7 +37,7 @@ public class ConvertGuestToUserCommandHandler : IRequestHandler<ConvertGuestToUs
         await _publisher.Publish(new ConvertedGuestToUserEvent(user.Id, user.Username), cancellationToken);
 
 
-        var tokens = _jwtGenerator.IssueTokens(user, character);
+        var tokens = await _jwtGenerator.IssueTokens(user, character);
 
         return Response<Tokens>.Success(tokens);
     }
