@@ -15,56 +15,69 @@ import {
   throwError,
 } from 'rxjs';
 import { AuthService } from '../services/api/auth/auth.service';
-import { Injectable } from '@angular/core';
+import { effect, Injectable } from '@angular/core';
+import { EventBusService } from '../services/client-side/event-bus/event-bus.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-  private refreshInProgress = false;
-  private refreshFinished$ = new Subject<boolean>();
+  private refreshing = false;
+  private queue: Subject<HttpEvent<any>>[] = [];
 
-  constructor(private auth: AuthService) {}
+  constructor(
+    private auth: AuthService,
+    private eventBus: EventBusService,
+  ) {
+    // Flush queued requests after a manual logout
+    effect(() => {
+      if (this.eventBus.logout()) {
+        this.flushQueue(new HttpErrorResponse({ status: 401 }));
+      }
+    });
+  }
 
   intercept(
     req: HttpRequest<any>,
     next: HttpHandler,
   ): Observable<HttpEvent<any>> {
     return next.handle(req).pipe(
-      catchError((err: HttpErrorResponse) => {
-        /* not an auth problem – just bubble it up */
-        if (
-          err.status !== 401 ||
-          req.url.endsWith('createNewTokens') ||
-          req.url.endsWith('/character')
-        ) {
-          return throwError(() => err);
+      catchError((err) => {
+        if (err.status !== 401) return throwError(() => err);
+
+        // 401 ⇒ try one refresh globally
+        if (!this.refreshing) {
+          this.refreshing = true;
+          this.auth['tryRefresh']() // private but okay inside same file, or export it.
+            .subscribe({
+              next: (exp) => {
+                this.refreshing = false;
+                if (exp) {
+                  this.auth['afterSuccessfulAuth'](exp);
+                  this.flushQueue(); // retry queued requests
+                } else {
+                  this.flushQueue(err); // fail all queued requests
+                }
+              },
+              error: () => {
+                this.refreshing = false;
+                this.flushQueue(err);
+                this.auth.logout();
+              },
+            });
         }
 
-        /* a refresh is already running → wait for it */
-        if (this.refreshInProgress) {
-          return this.refreshFinished$.pipe(
-            take(1),
-            switchMap((ok) =>
-              ok
-                ? next.handle(req) // retry original call
-                : throwError(() => err),
-            ),
-          ); // still 401 → logout
-        }
-
-        /* first request that noticed the 401 → start refresh */
-        this.refreshInProgress = true;
-        return this.auth.tryRefresh().pipe(
-          tap((ok) => {
-            this.refreshInProgress = false;
-            this.refreshFinished$.next(!!ok); // wake up the queue
-          }),
-          switchMap((ok) =>
-            ok
-              ? next.handle(req) // retry original call
-              : throwError(() => err),
-          ), // refresh failed
-        );
+        // queue current request
+        const retry$ = new Subject<HttpEvent<any>>();
+        this.queue.push(retry$);
+        return retry$.asObservable();
       }),
     );
+  }
+
+  private flushQueue(error?: any) {
+    while (this.queue.length) {
+      const sub = this.queue.shift()!;
+      if (error) sub.error(error);
+      else sub.complete();
+    }
   }
 }

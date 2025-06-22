@@ -6,6 +6,7 @@ import {
   catchError,
   map,
   of,
+  shareReplay,
   switchMap,
   take,
   tap,
@@ -47,6 +48,16 @@ export class AuthService {
     private event: EventBusService,
   ) {}
 
+  initAuth(): Observable<void> {
+    return this.tryRefresh().pipe(
+      tap((exp) => {
+        if (exp) this.afterSuccessfulAuth(exp);
+      }),
+      map(() => void 0), // hide expiry to callers
+      catchError(() => of(void 0)),
+    );
+  }
+
   private markAuthenticated() {
     this._isAuthenticated.set(true);
     this.event.emitFetchCurrentAction();
@@ -70,6 +81,7 @@ export class AuthService {
           this.toast.showToast('Login successful', '', true);
           this.afterSuccessfulAuth(accessExpiresAt);
         }),
+        map(() => void 0),
         catchError((e) => {
           this.toast.showToast('Login failed', e.message, false);
           return throwError(() => e);
@@ -189,13 +201,10 @@ export class AuthService {
   }
 
   logout(): void {
-    this.api
-      .post('auth/logout')
-      .pipe(take(1))
-      .subscribe({
-        next: () => this.finishLogout(),
-        error: () => this.finishLogout(),
-      });
+    this.api.post('auth/logout').subscribe({
+      next: () => this.finishLogout(),
+      error: () => this.finishLogout(),
+    });
   }
 
   private finishLogout(): void {
@@ -218,30 +227,37 @@ export class AuthService {
   }
 
   private fetchCharacter(): Observable<CharacterDto> {
-    return this.api.get('character').pipe(
-      tap((character) => this._currentCharacter.set(character)),
-      map((character) => character as CharacterDto),
-    );
+    return this.api
+      .get('character')
+      .pipe(tap((character) => this._currentCharacter.set(character)));
   }
 
   /** Returns `true` when refresh succeeded. */
-  public tryRefresh(): Observable<number> {
+  private tryRefresh(): Observable<number> {
     return this.api.post('auth/createNewTokens').pipe(
-      map(({ accessExpiresAt }) => accessExpiresAt), // tokens set in HttpOnly cookie
+      map(({ accessExpiresAt }) => accessExpiresAt),
       catchError(() => of(0)),
+      shareReplay(1), // so concurrent subscribers share the same call
     );
   }
 
   private armRefreshScheduler(accessExpiresAt: number): void {
-    // Cancel any previous timer
     this.refreshSub?.unsubscribe();
 
-    const delayMs = Math.max((accessExpiresAt * 1000 - Date.now()) * 0.7, 1000);
-
+    const delayMs = Math.max(
+      (accessExpiresAt * 1000 - Date.now()) * 0.7,
+      1_000,
+    );
     this.refreshSub = timer(delayMs)
       .pipe(switchMap(() => this.tryRefresh()))
       .subscribe({
-        next: (newExpiresAt) => this.armRefreshScheduler(newExpiresAt), // 💡 arm again
+        next: (newExp) => {
+          if (newExp) {
+            this.armRefreshScheduler(newExp); // re-arm on success
+          } else {
+            this.logout(); // refresh failed
+          }
+        },
         error: () => this.logout(),
       });
   }

@@ -26,7 +26,7 @@ import { RealTimeFacade } from './core/services/real-time/real-time-facade';
 
 export function initializeApp(authService: AuthService) {
   return () =>
-    firstValueFrom(authService.checkAuth()).catch(() => Promise.resolve());
+    firstValueFrom(authService.initAuth()).catch(() => Promise.resolve());
 }
 function startRealTime(realTime: RealTimeFacade) {
   return () => {};
