@@ -1,7 +1,7 @@
 <div
   class="flex h-full w-full flex-col justify-evenly gap-2 overflow-hidden overflow-y-auto px-4 pt-4 sm:px-6 md:flex-row"
 >
-  <!-- ITEM DESCRIPTION + CRAFTING QUEUE -->
+  <!-- ITEM DESCRIPTION -->
   <div class="flex w-full flex-col space-y-2 md:order-2">
     <!-- ITEM DESCRIPTION -->
     <div class="rounded-lg border border-light_gray bg-texture p-4">
@@ -40,7 +40,14 @@
           Requires:
           <ul class="ml-5 list-disc">
             <li *ngFor="let mat of selectedRecipe.materials">
-              {{ mat.item.name }} x{{ mat.quantity }}
+              {{ mat.item.name }}:
+              <span
+                [ngClass]="{
+                  'text-rose-500': getOwnedQuantity(mat.item.id) < mat.quantity,
+                }"
+              >
+                x{{ getOwnedQuantity(mat.item.id) }} / x{{ mat.quantity }}
+              </span>
             </li>
           </ul>
         </div>

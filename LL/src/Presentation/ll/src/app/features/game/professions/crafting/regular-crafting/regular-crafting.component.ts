@@ -96,6 +96,13 @@ export class RegularCraftingComponent {
     });
   }
 
+  getOwnedQuantity(itemId: string): number {
+    const inventoryItem = this.inventory().find(
+      (i) => i.itemInstance.itemBase.id === itemId,
+    );
+    return inventoryItem?.quantity ?? 0;
+  }
+
   trackByRecipe(_: number, recipe: Recipe): string {
     return recipe.id;
   }

@@ -127,6 +127,13 @@ export class TemperingComponent implements OnInit {
         return;
       }
 
+      if (
+        new Date(action.updatedAt).getTime() > new Date(Date.now()).getTime() ||
+        !action.isDeleted
+      ) {
+        queueMicrotask(() => this.isPerformingOtherAction.set(true));
+      }
+
       const updatedAt = new Date(action.updatedAt ?? 0).getTime();
       const now = Date.now();
 

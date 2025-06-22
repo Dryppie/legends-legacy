@@ -2,13 +2,12 @@ import { Component, Input, OnInit } from '@angular/core';
 import { AttributeDto } from '../../models/Dtos/attributesDto';
 import { AttributeTypeFormatPipe } from '../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { Contribution, getContributions } from '../../models/attribute-math';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { NgFor, NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-attribute-display',
   standalone: true,
-  imports: [AttributeTypeFormatPipe, MatTooltipModule, NgIf, NgFor],
+  imports: [AttributeTypeFormatPipe, NgIf, NgFor],
   templateUrl: './attribute-display.component.html',
 })
 export class AttributeDisplayComponent implements OnInit {

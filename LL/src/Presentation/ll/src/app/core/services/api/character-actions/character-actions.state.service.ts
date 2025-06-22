@@ -175,7 +175,13 @@ export class CharacterActionsStateService {
     const currentAction = this._currentAction();
     if (!currentAction) return;
 
-    const updated = { ...currentAction, isDeleted: true };
+    const updated = {
+      ...currentAction,
+      isDeleted: true,
+      craftingActionDetails: undefined,
+      gatheringActionDetails: undefined,
+      combatActionDetails: undefined,
+    };
     this.updateDisplay(updated);
     this._currentAction.set(updated);
   }
