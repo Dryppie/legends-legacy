@@ -4,6 +4,7 @@ import {
   computed,
   signal,
   WritableSignal,
+  NgZone,
 } from '@angular/core';
 import {
   Subject,
@@ -65,8 +66,10 @@ export class GameSocketService {
   private outbound$ = new Subject<unknown>();
   private close$ = new Subject<void>();
 
-  constructor(destroy: DestroyRef) {
-    /* When the DI scope is destroyed (tests / HMR) ensure clean shutdown */
+  constructor(
+    destroy: DestroyRef,
+    private zone: NgZone, // 👈 inject NgZone
+  ) {
     destroy.onDestroy(() => this.disconnect());
   }
 
@@ -78,12 +81,16 @@ export class GameSocketService {
     /* create the WS subject */
     this.socket$ = webSocket<Incoming>({
       url: buildGameWsUrl(environment.apiBaseUrl),
-      deserializer: ({ data }) => {
-        return JSON.parse(data);
-      },
+      deserializer: ({ data }) => JSON.parse(data),
       serializer: (x) => JSON.stringify(x),
-      openObserver: { next: () => this.isConnected.set(true) },
-      closeObserver: { next: () => this.isConnected.set(false) },
+
+      // 👇 FIX: wrap signal.set in zone.run
+      openObserver: {
+        next: () => this.zone.run(() => this.isConnected.set(true)),
+      },
+      closeObserver: {
+        next: () => this.zone.run(() => this.isConnected.set(false)),
+      },
     });
 
     /* outbound queue */
@@ -96,7 +103,9 @@ export class GameSocketService {
       backoffRetry(3, 1_500), // your helper
       takeUntil(this.close$),
     );
-    this.inboundSub = inbound$.subscribe((m) => this.lastMsg.set(m));
+    this.inboundSub = inbound$.subscribe((m) => {
+      this.zone.run(() => this.lastMsg.set(m));
+    });
   }
 
   /** close the connection and reset state */
@@ -110,8 +119,10 @@ export class GameSocketService {
     this.close$.next(); // stop back-off
     this.close$ = new Subject(); // fresh notifier for next connect
 
-    this.isConnected.set(false);
-    this.lastMsg.set(null);
+    this.zone.run(() => {
+      this.isConnected.set(false);
+      this.lastMsg.set(null);
+    });
   }
 
   /** push a command to the server */
