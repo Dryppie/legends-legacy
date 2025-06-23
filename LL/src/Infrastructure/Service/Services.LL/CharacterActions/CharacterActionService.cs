@@ -67,10 +67,10 @@ public class CharacterActionService : ICharacterActionService
         if (characterAction.ActionDetails == null) return characterAction; // Simply just record the character action.It might contain useful information,
                                                                            // such as if the UpdatedAt is in the future (Combat was canceled, and immediately refreshed)
 
-        // If it's been longer than 12 hours since the player checked in, their action is capped
-        // Actions are only calculated from UpdatedAt, to the capped time (12 hours ahead)
-        var isCapped = characterAction.UpdatedAt.AddHours(12) < now;
-        if (isCapped) now = characterAction.UpdatedAt.AddHours(12);
+        // If it's been longer than 16 hours since the player checked in, their action is capped
+        // Actions are only calculated from UpdatedAt, to the capped time (16 hours ahead)
+        var isCapped = characterAction.UpdatedAt.AddHours(16) < now;
+        if (isCapped) now = characterAction.UpdatedAt.AddHours(16);
 
         switch (characterAction.CharacterActionType)
         {
