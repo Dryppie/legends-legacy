@@ -4,11 +4,11 @@ import {
   Observable,
   Subscription,
   catchError,
+  finalize,
   map,
   of,
   shareReplay,
   switchMap,
-  take,
   tap,
   throwError,
   timer,
@@ -26,7 +26,11 @@ import { UserInfoDto } from '../../../../shared/models/Dtos/userInfoDto';
 })
 export class AuthService {
   private refreshSub?: Subscription;
+  /** UNIX seconds when the current access token expires */
+  private _accessExpiresAt = 0;
 
+  /** shared refresh observable while a refresh is in-flight */
+  private _refreshInFlight$?: Observable<number>;
   /* writable signals */
   private readonly _currentCharacter = signal<CharacterDto | null>(null);
   private readonly _isAuthenticated = signal(false);
@@ -269,5 +273,37 @@ export class AuthService {
         return throwError(() => new Error('Failed to register'));
       }),
     );
+  }
+
+  ensureValidToken(): Observable<number> {
+    /* nothing to do for anonymous users */
+    if (!this._isAuthenticated() || !this._accessExpiresAt) {
+      return of(0);
+    }
+
+    const now = Date.now();
+    /* 10 s safety margin */
+    if (now < this._accessExpiresAt * 1000 - 10_000) {
+      return of(this._accessExpiresAt);
+    }
+
+    /* only one refresh for all concurrent requests */
+    if (!this._refreshInFlight$) {
+      this._refreshInFlight$ = this.tryRefresh().pipe(
+        tap((exp) => {
+          if (exp) {
+            this.setAccessExpiry(exp);
+            this.armRefreshScheduler(exp);
+          }
+        }),
+        finalize(() => (this._refreshInFlight$ = undefined)),
+        shareReplay(1),
+      );
+    }
+    return this._refreshInFlight$;
+  }
+
+  private setAccessExpiry(exp: number) {
+    this._accessExpiresAt = exp;
   }
 }
