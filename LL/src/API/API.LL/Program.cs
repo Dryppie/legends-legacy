@@ -95,12 +95,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 }
 #endif
                 var token = ctx.Token;
-                
+
                 // Add support for token origin to either be from a http-header or from a http-only cookie
                 // https://alimozdemir.medium.com/asp-net-core-jwt-and-refresh-token-with-httponly-cookies-b1b96c849742
-                if (ctx.Request.Cookies.ContainsKey("AccessToken") && string.IsNullOrEmpty(ctx.Token))
+                if (string.IsNullOrEmpty(ctx.Token) && ctx.Request.Cookies.TryGetValue("AccessToken", out var cookie))
                 {
-                    ctx.Token = ctx.Request.Cookies["AccessToken"];
+                    ctx.Token = cookie;
                 }
 
                 return Task.CompletedTask;

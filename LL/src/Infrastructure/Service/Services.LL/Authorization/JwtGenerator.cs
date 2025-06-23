@@ -35,7 +35,7 @@ public class JwtGenerator : IJwtGenerator
 
         var opt = jwtOpt.Value;
 
-        _accessLifespan = TimeSpan.FromMinutes(opt.AccessMinutes);
+        _accessLifespan = TimeSpan.FromMinutes(5);
         _refreshLifespan = TimeSpan.FromDays(opt.RefreshDays);
         _validIssuer = opt.Issuer;
         _validAudience = opt.Audience;
@@ -114,6 +114,7 @@ public class JwtGenerator : IJwtGenerator
         var newTokens = await IssueTokens(user, character);
         // store the hash of the *new* refresh token inside the old one (`ReplacedBy`) – optional
         record.ReplacedBy = _hasher.Hash(newTokens.RefreshToken);
+        await _repo.SaveChangesAsync(cancellationToken);
 
         return newTokens;
     }

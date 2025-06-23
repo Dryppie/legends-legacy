@@ -36,7 +36,10 @@ public abstract class BaseController : ControllerBase
     {
         var value = User.FindFirstValue(claimType);
         if (string.IsNullOrWhiteSpace(value))
-            throw new UnauthorizedAccessException($"{name} claim is missing.");
+        {
+            var claims = string.Join(", ", User.Claims.Select(c => $"{c.Type}: {c.Value}"));
+            throw new UnauthorizedAccessException($"{name} claim is missing. Current claims: [{claims}]");
+        }
         if (!Guid.TryParse(value, out var guid))
             throw new UnauthorizedAccessException($"{name} claim is invalid.");
 
