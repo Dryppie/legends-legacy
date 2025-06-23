@@ -79,7 +79,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuer = false, // Needs to be true
             ValidateAudience = false, // Needs to be true
             ValidateLifetime = true,
-            NameClaimType = ClaimTypes.Name
+            NameClaimType = ClaimTypes.UserData
         };
 
         options.Events = new JwtBearerEvents
