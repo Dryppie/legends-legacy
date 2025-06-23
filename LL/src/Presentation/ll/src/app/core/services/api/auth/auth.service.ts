@@ -53,12 +53,12 @@ export class AuthService {
   ) {}
 
   checkAuth(): Observable<CharacterDto | null> {
-    return this.fetchCharacter().pipe(
-      catchError(() => {
-        return this.tryRefresh().pipe(
+    return this.ensureValidToken().pipe(
+      switchMap(() =>
+        this.tryRefresh().pipe(
           switchMap((ok) => (ok ? this.fetchCharacter() : of(null))),
-        );
-      }),
+        ),
+      ),
       tap((ch) => {
         if (ch) this.markAuthenticated();
       }),
@@ -229,37 +229,19 @@ export class AuthService {
   /** Returns `true` when refresh succeeded. */
   private tryRefresh(): Observable<number> {
     return this.api.post('auth/createNewTokens').pipe(
-      map(({ accessExpiresAt }) => accessExpiresAt),
+      map(({ accessExpiresAt }) => {
+        this.setAccessExpiry(accessExpiresAt);
+        return accessExpiresAt;
+      }),
       catchError(() => of(0)),
       shareReplay(1), // so concurrent subscribers share the same call
     );
   }
 
-  private armRefreshScheduler(accessExpiresAt: number): void {
-    this.refreshSub?.unsubscribe();
-
-    const delayMs = Math.max(
-      (accessExpiresAt * 1000 - Date.now()) * 0.7,
-      1_000,
-    );
-    this.refreshSub = timer(delayMs)
-      .pipe(switchMap(() => this.tryRefresh()))
-      .subscribe({
-        next: (newExp) => {
-          if (newExp) {
-            this.armRefreshScheduler(newExp); // re-arm on success
-          } else {
-            this.logout(); // refresh failed
-          }
-        },
-        error: () => this.logout(),
-      });
-  }
-
   private afterSuccessfulAuth(accessExpiresAt: number) {
     this.markAuthenticated();
-    this.armRefreshScheduler(accessExpiresAt);
 
+    this.setAccessExpiry(accessExpiresAt);
     // preload character, then redirect
     this.fetchCharacter().subscribe({
       next: () => this.router.navigateByUrl('/game'),
@@ -276,30 +258,31 @@ export class AuthService {
   }
 
   ensureValidToken(): Observable<number> {
-    /* nothing to do for anonymous users */
     if (!this._isAuthenticated() || !this._accessExpiresAt) {
-      return of(0);
+      return of(0); // or throw error
     }
 
     const now = Date.now();
-    /* 10 s safety margin */
-    if (now < this._accessExpiresAt * 1000 - 10_000) {
+    const expiryMs = this._accessExpiresAt * 1000;
+
+    const REFRESH_BUFFER_MS = 10_000;
+    if (now < expiryMs - REFRESH_BUFFER_MS) {
       return of(this._accessExpiresAt);
     }
 
-    /* only one refresh for all concurrent requests */
     if (!this._refreshInFlight$) {
       this._refreshInFlight$ = this.tryRefresh().pipe(
         tap((exp) => {
           if (exp) {
-            this.setAccessExpiry(exp);
-            this.armRefreshScheduler(exp);
+          } else {
+            this.logout();
           }
         }),
         finalize(() => (this._refreshInFlight$ = undefined)),
         shareReplay(1),
       );
     }
+
     return this._refreshInFlight$;
   }
 

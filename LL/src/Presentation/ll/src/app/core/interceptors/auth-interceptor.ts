@@ -14,7 +14,11 @@ import { EventBusService } from '../services/client-side/event-bus/event-bus.ser
 export class AuthInterceptor implements HttpInterceptor {
   /* 401-recovery (unchanged) */
   private refreshing401 = false;
-  private queue: Subject<HttpEvent<any>>[] = [];
+  private queue: {
+    req: HttpRequest<any>;
+    next: HttpHandler;
+    subject: Subject<HttpEvent<any>>;
+  }[] = [];
 
   constructor(
     private auth: AuthService,
@@ -40,14 +44,18 @@ export class AuthInterceptor implements HttpInterceptor {
     /* 1️⃣  guarantee a fresh token before the call leaves the browser */
     return this.auth.ensureValidToken().pipe(
       switchMap(() => next.handle(req)),
-      catchError((err) => this.handle401(err)),
+      catchError((err) => this.handle401(err, req, next)),
     );
   }
 
   /* ------------------------------------------------------------------ */
   /* existing single-flight 401 handler kept for extreme edge cases      */
   /* ------------------------------------------------------------------ */
-  private handle401(err: HttpErrorResponse): Observable<HttpEvent<any>> {
+  private handle401(
+    err: HttpErrorResponse,
+    req: HttpRequest<any>,
+    next: HttpHandler,
+  ): Observable<HttpEvent<any>> {
     if (err.status !== 401) {
       return throwError(() => err);
     }
@@ -78,15 +86,22 @@ export class AuthInterceptor implements HttpInterceptor {
     }
 
     const retry$ = new Subject<HttpEvent<any>>();
-    this.queue.push(retry$);
+    this.queue.push({ req, next, subject: retry$ });
     return retry$.asObservable();
   }
 
   private flushQueue(error?: any) {
     while (this.queue.length) {
-      const sub = this.queue.shift()!;
-      if (error) sub.error(error);
-      else sub.complete();
+      const { req, next, subject } = this.queue.shift()!;
+      if (error) {
+        subject.error(error);
+      } else {
+        next.handle(req).subscribe({
+          next: (res) => subject.next(res),
+          error: (err) => subject.error(err),
+          complete: () => subject.complete(),
+        });
+      }
     }
   }
 }

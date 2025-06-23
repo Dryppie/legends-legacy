@@ -25,7 +25,6 @@ export class HelpTooltipDirective {
 
   @HostListener('mouseenter') async show() {
     if (this.overlayRef) return;
-    console.log('test');
     const dict = this.help.load('en');
     const entry = dict[this.helpId];
     if (!entry) return;

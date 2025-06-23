@@ -104,7 +104,7 @@
       <div class="flex flex-col gap-3 overflow-y-auto">
         <ng-container *ngFor="let l of myListings(); trackBy: trackByListing">
           <div
-            class="flex items-center justify-between rounded bg-neutral-800/70 p-2"
+            class="flex items-center justify-between gap-2 rounded bg-neutral-800/70 p-2"
           >
             <app-item [item]="l.itemInstance"></app-item>
             <div class="flex items-center gap-1 text-sm">

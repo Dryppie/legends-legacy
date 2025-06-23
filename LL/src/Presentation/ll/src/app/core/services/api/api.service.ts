@@ -13,7 +13,7 @@ export class ApiService {
 
   public apiUrl = `${environment.apiBaseUrl}/api/v1/`;
 
-  deafultHeaders = new HttpHeaders({
+  defaultHeaders = new HttpHeaders({
     'Content-Type': 'application/json',
     Accept: 'application/json',
   });
@@ -27,7 +27,7 @@ export class ApiService {
       .get(`${this.apiUrl}${path}`, {
         params,
         withCredentials: true,
-        headers: this.deafultHeaders,
+        headers: this.defaultHeaders,
       })
       .pipe(catchError(this.formatErrors));
   }
@@ -36,7 +36,7 @@ export class ApiService {
     return this.http
       .put(`${this.apiUrl}${path}`, JSON.stringify(body), {
         withCredentials: true,
-        headers: this.deafultHeaders,
+        headers: this.defaultHeaders,
       })
       .pipe(catchError(this.formatErrors));
   }
@@ -45,7 +45,7 @@ export class ApiService {
     return this.http
       .patch(`${this.apiUrl}${path}`, JSON.stringify(body), {
         withCredentials: true,
-        headers: this.deafultHeaders,
+        headers: this.defaultHeaders,
       })
       .pipe(catchError(this.formatErrors));
   }
@@ -54,7 +54,7 @@ export class ApiService {
     return this.http
       .post(`${this.apiUrl}${path}`, JSON.stringify(body), {
         withCredentials: true,
-        headers: this.deafultHeaders,
+        headers: this.defaultHeaders,
       })
       .pipe(catchError(this.formatErrors));
   }
@@ -63,7 +63,7 @@ export class ApiService {
     return this.http
       .delete(`${this.apiUrl}${path}`, {
         withCredentials: true,
-        headers: this.deafultHeaders,
+        headers: this.defaultHeaders,
         body: JSON.stringify(body),
       })
       .pipe(catchError(this.formatErrors));
