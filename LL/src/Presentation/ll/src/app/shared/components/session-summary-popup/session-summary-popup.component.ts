@@ -26,7 +26,7 @@ export class SessionSummaryPopupComponent {
     if (minutes || parts.length === 0)
       parts.push(`${minutes} minute${minutes !== 1 ? 's' : ''}`);
     let joinedDuration = parts.join(', ');
-    if (days || hours >= 12) joinedDuration += ' (Rewards stop after 12 hours)';
+    if (days || hours >= 16) joinedDuration += ' (Rewards stop after 16 hours)';
     return joinedDuration;
   }
 }
