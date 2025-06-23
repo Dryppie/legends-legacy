@@ -35,7 +35,7 @@ public class JwtGenerator : IJwtGenerator
 
         var opt = jwtOpt.Value;
 
-        _accessLifespan = TimeSpan.FromMinutes(5);
+        _accessLifespan = TimeSpan.FromMinutes(opt.AccessMinutes);
         _refreshLifespan = TimeSpan.FromDays(opt.RefreshDays);
         _validIssuer = opt.Issuer;
         _validAudience = opt.Audience;
