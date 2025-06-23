@@ -23,6 +23,7 @@ import { LevelingService } from './core/services/client-side/leveling/leveling.s
 import { ColosseumPlaybackStrategy } from './core/services/client-side/combat/combat-playback/colosseum-playback-strategy';
 import { AuthInterceptor } from './core/interceptors/auth-interceptor';
 import { RealTimeFacade } from './core/services/real-time/real-time-facade';
+import { TimeSyncService } from './core/services/api/time-sync/time-sync.service';
 
 export function initializeApp(authService: AuthService) {
   return () =>
@@ -31,6 +32,10 @@ export function initializeApp(authService: AuthService) {
 function startRealTime(realTime: RealTimeFacade) {
   return () => {};
 }
+export function initializeTimeSync(timeSyncService: TimeSyncService) {
+  return () => timeSyncService.sync();
+}
+
 export const appConfig: ApplicationConfig = {
   providers: [
     {
@@ -63,6 +68,12 @@ export const appConfig: ApplicationConfig = {
       provide: APP_INITIALIZER,
       useFactory: initializeApp,
       deps: [AuthService],
+      multi: true,
+    },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeTimeSync,
+      deps: [TimeSyncService],
       multi: true,
     },
     provideRouter(routes),

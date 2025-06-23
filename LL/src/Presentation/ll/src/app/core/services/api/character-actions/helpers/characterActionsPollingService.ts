@@ -11,10 +11,13 @@ import { environment } from '../../../../../../environments/environment';
 import { CharacterActionDto } from '../../../../../shared/models/Dtos/characterActionDto';
 import { CharacterActionType } from '../../../../../shared/models/enums/characterActionType';
 import { Injectable } from '@angular/core';
+import { TimeSyncService } from '../../time-sync/time-sync.service';
 
 @Injectable({ providedIn: 'root' })
 export class CharacterActionsPollingService {
   private sub: Subscription | null = null;
+
+  constructor(private timeSync: TimeSyncService) {}
 
   start(
     fetch: () => Observable<CharacterActionDto | null>,
@@ -34,7 +37,7 @@ export class CharacterActionsPollingService {
           }
 
           const updatedAt = new Date(action.updatedAt).getTime();
-          const now = Date.now();
+          const now = this.timeSync.now();
 
           const nextDelay =
             action.characterActionType === CharacterActionType.Combat
