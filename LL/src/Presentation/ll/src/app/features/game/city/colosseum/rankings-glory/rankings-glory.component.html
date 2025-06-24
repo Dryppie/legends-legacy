@@ -18,9 +18,36 @@
         [ngClass]="{
           'font-bold text-primary':
             player.characterId === myRanking?.characterId,
+            'text-xl py-4': player.rank === 1,
+            'text-lg py-3': player.rank === 2,
+            'text-base py-2.5': player.rank === 3,
+            'text-sm py-2': player.rank > 3
         }"
       >
-        <div>{{ player.rank }}</div>
+        <div class="flex-items-center gap-3">
+          <ng-container [ngSwitch]="player.rank">
+            <img
+              *ngSwitchCase="1"
+              src="assets/icons/medals/GoldMedalBlackOutline.svg"
+              alt="Gold Medal"
+              class="h-10 w-10"
+            />
+            <img
+              *ngSwitchCase="2"
+              src="assets/icons/medals/SilverMedalBlackOutline.svg"
+              alt="Silver Medal"
+              class="h-10 w-10"
+            />
+            <img
+              *ngSwitchCase="3"
+              src="assets/icons/medals/BronzeMedalBlackOutline.svg"
+              alt="Bronze Medal"
+              class="h-10 w-10"
+            />
+            <span *ngSwitchDefault>{{ player.rank }}</span>
+          </ng-container>
+        </div>
+
         <div class="col-start-2 col-end-7 break-words">
           {{ player.name
           }}<span *ngIf="player.characterId === myRanking?.characterId">
