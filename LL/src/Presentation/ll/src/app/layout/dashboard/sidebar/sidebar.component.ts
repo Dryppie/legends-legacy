@@ -19,6 +19,9 @@ import { CharacterActionsStateService } from '../../../core/services/api/charact
 import { CharacterActionType } from '../../../shared/models/enums/characterActionType';
 import { Equipment } from '../../../shared/models/item';
 import { EquipmentType } from '../../../shared/models/enums/equipmentType';
+import { ShortNumberPipe } from '../../../shared/pipes/number-format/short-number.pipe';
+import { NumberFormatPipe } from '../../../shared/pipes/number-format/number-format.pipe';
+import { CharacterStateService } from '../../../core/services/api/character/character-state.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -30,6 +33,8 @@ import { EquipmentType } from '../../../shared/models/enums/equipmentType';
     RouterLink,
     CurrentActionComponent,
     FilterTabsComponent,
+    ShortNumberPipe,
+    NumberFormatPipe,
   ],
   templateUrl: './sidebar.component.html',
 })
@@ -41,16 +46,22 @@ export class SidebarComponent implements OnInit {
   activeTab: string = '';
   activeItem: string = '';
   displayCurrentAction = false;
+  useShortFormat = false;
+
+  readonly currentCharacter;
 
   constructor(
     private sidebarService: SidebarService,
     private gameService: GameService,
     private state: CharacterActionsStateService,
+    private characterState: CharacterStateService,
     private router: Router,
   ) {
     effect(() => {
       this.displayCurrentAction = this.state.displayCurrentAction();
     });
+
+    this.currentCharacter = this.characterState.currentCharacter;
   }
 
   ngOnInit(): void {
@@ -59,6 +70,11 @@ export class SidebarComponent implements OnInit {
       this.tabs = [];
       this.updateSidebar(link);
     });
+  }
+
+  toggleFormat() {
+    this.useShortFormat = !this.useShortFormat;
+    localStorage.setItem('useShortFormat', this.useShortFormat.toString());
   }
 
   updateSidebar(url: string) {
