@@ -88,6 +88,13 @@ public class CraftingService : ICraftingService
     {
         var now = DateTimeOffset.UtcNow;
 
+        var actionDetails = (characterAction.ActionDetails as CraftingActionDetails)!;
+        var produced = new List<InventoryItem>(); // TODO: This can be used to send to the frontend to improve the display of what's happened
+        var sessionStartedAt = characterAction.UpdatedAt;
+
+        var temperingSummary = new TemperingSummary();
+        var rng = Random.Shared;
+
         var factors = await _bonusService.GetAggregatedAsync(characterAction.CharacterId, now, cancellationToken);
 
         double soulstoneDropRate = factors.Get(BonusKind.SoulstoneDropRate);
@@ -100,13 +107,6 @@ public class CraftingService : ICraftingService
             { TemperingOutcome.Negative, craftingNegativeOutcome },
             { TemperingOutcome.Positive, craftingDoubleItemExpChance }
         };
-
-        var actionDetails = (characterAction.ActionDetails as CraftingActionDetails)!;
-        var produced = new List<InventoryItem>(); // TODO: This can be used to send to the frontend to improve the display of what's happened
-        var sessionStartedAt = characterAction.UpdatedAt;
-
-        var temperingSummary = new TemperingSummary();
-        var rng = Random.Shared;
 
         while (actionsToPerform > 0 && actionDetails.CraftingQueueItems.Count > 0)
         {

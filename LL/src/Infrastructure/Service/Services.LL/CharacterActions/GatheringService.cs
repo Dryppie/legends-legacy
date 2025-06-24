@@ -35,16 +35,9 @@ public class GatheringService : IGatheringService
 
     public async Task<GatheringSession> PerformGatheringAsync(CharacterAction characterAction, int actionsToPerform, CancellationToken cancellationToken)
     {
-        var factors = await _bonusService.GetAggregatedAsync(characterAction.CharacterId, DateTimeOffset.UtcNow, cancellationToken);
-
-        double soulstoneDropRate = factors.Get(BonusKind.SoulstoneDropRate);
-        double soulstoneDoubleDropChance = factors.Get(BonusKind.SoulstoneDoubleDropChance);
-        double gatheringDoubleDropChance = factors.Get(BonusKind.GatheringDoubleDropChance);
-        double gatheringDoubleExpChance = factors.Get(BonusKind.GatheringDoubleExpChance);
-
+        var now = DateTimeOffset.UtcNow;
         var rng = Random.Shared;
         var startedAt = characterAction.UpdatedAt;
-        var now = DateTimeOffset.UtcNow;
 
         characterAction.UpdatedAt += TimeSpan.FromSeconds(6 * actionsToPerform);
         var actionDetails = (characterAction.ActionDetails as GatheringActionDetails)!;
@@ -56,8 +49,15 @@ public class GatheringService : IGatheringService
         {
             ProfessionType = actionDetails.ProfessionType,
         };
+
+        var factors = await _bonusService.GetAggregatedAsync(characterAction.CharacterId, now, cancellationToken);
+
         // Find other necessary data to generate loot
         // World buffs, personal buffs, and so on
+        double soulstoneDropRate = factors.Get(BonusKind.SoulstoneDropRate);
+        double soulstoneDoubleDropChance = factors.Get(BonusKind.SoulstoneDoubleDropChance);
+        double gatheringDoubleDropChance = factors.Get(BonusKind.GatheringDoubleDropChance);
+        double gatheringDoubleExpChance = factors.Get(BonusKind.GatheringDoubleExpChance);
 
         for (var i = actionsToPerform; i > 0; i--)
         {
