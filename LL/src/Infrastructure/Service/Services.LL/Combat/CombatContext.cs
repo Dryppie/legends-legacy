@@ -5,7 +5,6 @@ using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Abilities.ResourceCosts;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
-using Microsoft.EntityFrameworkCore;
 using Services.LL.Combat.CombatEngine;
 
 namespace Services.LL.Combat;

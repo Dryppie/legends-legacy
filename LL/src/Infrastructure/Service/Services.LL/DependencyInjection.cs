@@ -15,6 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Services.LL._Simulator;
 using Services.LL.Attributes;
 using Services.LL.Authorization;
+using Services.LL.Bonuses;
 using Services.LL.CharacterActions;
 using Services.LL.Colosseum;
 using Services.LL.Combat;
@@ -58,6 +59,9 @@ public static class DependencyInjection
         services.AddScoped<ICharacterActionService, CharacterActionService>();
         services.AddScoped<IActionDetailsService, ActionDetailsService>();
         services.AddScoped<ICreatureService, CreatureService>();
+
+        services.AddScoped<IBonusService, BonusService>();
+        services.AddScoped<IBonusProvider, SoulstoneBonusProvider>();
         
         services.AddScoped<IColosseumService, ColosseumService>();
         services.AddScoped<IRatingService, RatingService>();

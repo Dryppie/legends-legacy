@@ -2,6 +2,7 @@
 using Application.Interfaces.Services.LL.Professions;
 using Application.UseCases.Soulstones.Events;
 using Domain.Helpers.Constants;
+using Domain.Models.Bonuses;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
@@ -10,6 +11,7 @@ using Domain.Models.Items.Equipments;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
 using MediatR;
+using Services.LL.Extensions;
 using Services.LL.Interfaces;
 
 namespace Services.LL.Professions.Craftings;
@@ -21,11 +23,11 @@ public class CraftingService : ICraftingService
     private readonly IRecipeService _recipeService;
     private readonly ITemperingService _temperingService;
     private readonly ILevelingService _levelingService;
-    private readonly ISoulstoneUpgradeService _soulstoneUpgradeService;
+    private readonly IBonusService _bonusService;
     private readonly ILootService _lootService;
     private readonly IPublisher _publisher;
 
-    public CraftingService(ICraftingRepository cr, IInventoryService invS, IProfessionService ps, IRecipeService rs, ITemperingService ts, ILevelingService lvlS, ISoulstoneUpgradeService sus, ILootService ls, IPublisher p)
+    public CraftingService(ICraftingRepository cr, IInventoryService invS, IProfessionService ps, IRecipeService rs, ITemperingService ts, ILevelingService lvlS, IBonusService bs, ILootService ls, IPublisher p)
     {
         _craftingRepository = cr;
         _inventoryService = invS;
@@ -33,7 +35,7 @@ public class CraftingService : ICraftingService
         _recipeService = rs;
         _temperingService = ts;
         _levelingService = lvlS;
-        _soulstoneUpgradeService = sus;
+        _bonusService = bs;
         _lootService = ls;
         _publisher = p;
     }
@@ -84,18 +86,15 @@ public class CraftingService : ICraftingService
 
     public async Task<TemperingSession> PerformIdleCrafting(CharacterAction characterAction, int actionsToPerform, CancellationToken cancellationToken)
     {
-        string[] wantedBonuses = [SoulstoneUpgradeContants.SoulstoneDropRate,
-                                  SoulstoneUpgradeContants.SoulstoneDoubleDropChance,
-                                  SoulstoneUpgradeContants.CraftingDoubleItemExpChance,
-                                  SoulstoneUpgradeContants.CraftingNegativeOutcome];
+        var now = DateTimeOffset.UtcNow;
 
-        var soulstoneBonuses = await _soulstoneUpgradeService.GetSoulstoneBonusesByCharacterIdAsync(characterAction.CharacterId, wantedBonuses, cancellationToken);
+        var factors = await _bonusService.GetAggregatedAsync(characterAction.CharacterId, now, cancellationToken);
 
-        soulstoneBonuses.TryGetValue(SoulstoneUpgradeContants.SoulstoneDropRate, out var soulstoneDropRate);
-        soulstoneBonuses.TryGetValue(SoulstoneUpgradeContants.SoulstoneDoubleDropChance, out var soulstoneDoubleDropChance);
-        soulstoneBonuses.TryGetValue(SoulstoneUpgradeContants.CraftingDoubleItemExpChance, out var craftingDoubleItemExpChance);
-        soulstoneBonuses.TryGetValue(SoulstoneUpgradeContants.CraftingNegativeOutcome, out var craftingNegativeOutcome);
-        
+        double soulstoneDropRate = factors.Get(BonusKind.SoulstoneDropRate);
+        double soulstoneDoubleDropChance = factors.Get(BonusKind.SoulstoneDoubleDropChance);
+        double craftingDoubleItemExpChance = factors.Get(BonusKind.CraftingDoubleItemExpChance);
+        double craftingNegativeOutcome = factors.Get(BonusKind.CraftingNegativeOutcome);
+
         var temperingBonuses = new Dictionary<TemperingOutcome, double>()
         {
             { TemperingOutcome.Negative, craftingNegativeOutcome },
@@ -105,7 +104,6 @@ public class CraftingService : ICraftingService
         var actionDetails = (characterAction.ActionDetails as CraftingActionDetails)!;
         var produced = new List<InventoryItem>();
         var sessionStartedAt = characterAction.UpdatedAt;
-        var now = DateTimeOffset.UtcNow;
 
         var temperingSummary = new TemperingSummary();
         var rng = Random.Shared;

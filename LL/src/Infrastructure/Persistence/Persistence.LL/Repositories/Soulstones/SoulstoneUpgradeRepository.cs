@@ -15,7 +15,7 @@ public class SoulstoneUpgradeRepository : ISoulstoneUpgradeRepository
     public async Task<List<CharacterSoulstoneUpgrade>> GetSoulstoneUpgradesByCharacterIdAsync(Guid characterId, string[] upgrades, CancellationToken cancellationToken)
     {
         return await _context.CharacterSoulstoneUpgrades
-            .Where(csu => csu.CharacterId == characterId && upgrades.Contains(csu.SoulstoneUpgradeDefinitionId))
+            .Where(csu => csu.CharacterId == characterId)
             .ToListAsync(cancellationToken);
     }
 }

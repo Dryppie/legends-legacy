@@ -3,11 +3,13 @@ using Application.Interfaces.Services.LL.Professions;
 using Application.UseCases.Inventories.Events;
 using Application.UseCases.Soulstones.Events;
 using Domain.Helpers.Constants;
+using Domain.Models.Bonuses;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Inventories;
 using MediatR;
+using Services.LL.Extensions;
 using Services.LL.Interfaces;
 
 namespace Services.LL.CharacterActions;
@@ -19,30 +21,26 @@ public class GatheringService : IGatheringService
     private readonly IProfessionService _professionService;
     private readonly ILevelingService _levelingService;
     private readonly ISoulstoneUpgradeService _soulstoneUpgradeService;
+    private readonly IBonusService _bonusService;
 
-    public GatheringService(ILootService ls, ILootTableService lts, IPublisher p, IProfessionService ps, ILevelingService lvlS, ISoulstoneUpgradeService sus)
+    public GatheringService(ILootService ls, ILootTableService lts, IPublisher p, IProfessionService ps, ILevelingService lvlS,  IBonusService bs)
     {
         _lootService = ls;
         _lootTableService = lts;
         _publisher = p;
         _professionService = ps;
         _levelingService = lvlS;
-        _soulstoneUpgradeService = sus;
+        _bonusService = bs;
     }
 
     public async Task<GatheringSession> PerformGatheringAsync(CharacterAction characterAction, int actionsToPerform, CancellationToken cancellationToken)
     {
-        string[] wantedBonuses = [SoulstoneUpgradeContants.SoulstoneDropRate,
-                                  SoulstoneUpgradeContants.SoulstoneDoubleDropChance,
-                                  SoulstoneUpgradeContants.GatheringDoubleDropChance,
-                                  SoulstoneUpgradeContants.GatheringDoubleExpChance];
+        var factors = await _bonusService.GetAggregatedAsync(characterAction.CharacterId, DateTimeOffset.UtcNow, cancellationToken);
 
-        var soulstoneBonuses = await _soulstoneUpgradeService.GetSoulstoneBonusesByCharacterIdAsync(characterAction.CharacterId, wantedBonuses, cancellationToken);
-
-        soulstoneBonuses.TryGetValue(SoulstoneUpgradeContants.SoulstoneDropRate, out var soulstoneDropRate);
-        soulstoneBonuses.TryGetValue(SoulstoneUpgradeContants.SoulstoneDoubleDropChance, out var soulstoneDoubleDropChance);
-        soulstoneBonuses.TryGetValue(SoulstoneUpgradeContants.GatheringDoubleDropChance, out var gatheringDoubleDropChance);
-        soulstoneBonuses.TryGetValue(SoulstoneUpgradeContants.GatheringDoubleExpChance, out var gatheringDoubleExpChance);
+        double soulstoneDropRate = factors.Get(BonusKind.SoulstoneDropRate);
+        double soulstoneDoubleDropChance = factors.Get(BonusKind.SoulstoneDoubleDropChance);
+        double gatheringDoubleDropChance = factors.Get(BonusKind.GatheringDoubleDropChance);
+        double gatheringDoubleExpChance = factors.Get(BonusKind.GatheringDoubleExpChance);
 
         var rng = Random.Shared;
         var startedAt = characterAction.UpdatedAt;

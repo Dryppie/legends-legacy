@@ -3,8 +3,8 @@ using Application.Interfaces.Services.LL.CharacterActions;
 using Application.Interfaces.Services.LL.Entities;
 using Application.UseCases.Inventories.Events;
 using Application.UseCases.Soulstones.Events;
-using Domain.Helpers.Constants;
 using Domain.Interfaces.Combat;
+using Domain.Models.Bonuses;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
@@ -27,13 +27,10 @@ public class CombatService : ICombatService
     private readonly ILootService _lootService;
     private readonly ISpawningService _spawningService;
     private readonly IPublisher _publisher;
-    private readonly ISoulstoneUpgradeService _soulstoneUpgradeService;
     private readonly ICombatContext _combatContext;
+    private readonly IBonusService _bonusService;
 
-    
-    // Create a static SoulstoneUpgradeClass that expands on this, containing all bonuses
-
-    public CombatService(IEntityService es, ICombatSetupService cps, ILevelingService lvlS, ILootService ls, ISpawningService ss, IPublisher p, ISoulstoneUpgradeService sus, ICombatContext cc)
+    public CombatService(IEntityService es, ICombatSetupService cps, ILevelingService lvlS, ILootService ls, ISpawningService ss, IPublisher p, ICombatContext cc, IBonusService bs)
     {
         _entityService = es;
         _combatSetupService = cps;
@@ -41,8 +38,8 @@ public class CombatService : ICombatService
         _lootService = ls;
         _spawningService = ss;
         _publisher = p;
-        _soulstoneUpgradeService = sus;
         _combatContext = cc;
+        _bonusService = bs;
     }
 
     public async Task<CombatSession> PerformIdleCombatAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
@@ -55,13 +52,14 @@ public class CombatService : ICombatService
         var selectedCombatEnemyEntities = new List<CombatEntity>();
         var sessionStartedAt = characterAction.UpdatedAt;
         var combatAction = characterAction.ActionDetails as CombatActionDetails;
+        if (characterAction.UpdatedAt > now) return new CombatSession();
 
-        string[] wantedBonuses = [SoulstoneUpgradeContants.SoulstoneDropRate,
-                                  SoulstoneUpgradeContants.SoulstoneDoubleDropChance,
-                                  SoulstoneUpgradeContants.CombatEssenceDropRate,
-                                  SoulstoneUpgradeContants.CombatDoubleExpChance];
+        var factors = await _bonusService.GetAggregatedAsync(characterAction.CharacterId, now, cancellationToken);
 
-        var soulstoneBonuses = await _soulstoneUpgradeService.GetSoulstoneBonusesByCharacterIdAsync(characterAction.CharacterId, wantedBonuses, cancellationToken);
+        double soulstoneDropRate = factors.Get(BonusKind.SoulstoneDropRate);
+        double soulstoneDoubleDropChance = factors.Get(BonusKind.SoulstoneDoubleDropChance);
+        double essenceDropRate = factors.Get(BonusKind.CombatEssenceDropRate);
+        double doubleExpChance = factors.Get(BonusKind.CombatDoubleExpChance);
 
         // Initialize combatants
         var playerCharacters = await GetEntitiesAsync([.. combatAction.CharacterTeam], cancellationToken);
@@ -107,8 +105,7 @@ public class CombatService : ICombatService
                 var selectedEnemyEntities = new List<Entity>();
                 selectedEnemyIds.ForEach(id => selectedEnemyEntities.Add(allEnemyCharacters.First(ee => ee.Id.Equals(id))));
 
-                var combatEssenceDropRate = soulstoneBonuses.Get(SoulstoneUpgradeContants.CombatEssenceDropRate);
-                var lootThisBattle = _lootService.GenerateIdleCombatLootAsync(selectedEnemyEntities, new Dictionary<ItemType, double>() { { ItemType.Essence, combatEssenceDropRate } });
+                var lootThisBattle = _lootService.GenerateIdleCombatLootAsync(selectedEnemyEntities, new Dictionary<ItemType, double>() { { ItemType.Essence, essenceDropRate } });
                 lastCombatResult.Loot = lootThisBattle;
 
                 foreach (var id in selectedEnemyIds)
@@ -120,7 +117,7 @@ public class CombatService : ICombatService
                 totalLoot.AddRange(lootThisBattle);
 
                 lastCombatResult.ExperienceGained = selectedEnemyEntities.OfType<Creature>().Sum(e => e.ExperienceReward);
-                if (rng.NextDouble() < (soulstoneBonuses.Get(SoulstoneUpgradeContants.CombatDoubleExpChance) / 100))
+                if (rng.NextDouble() < (doubleExpChance / 100))
                     lastCombatResult.ExperienceGained *= 2;
             }
             AddToCombatSummary(combatSummary, lastCombatResult);
@@ -140,8 +137,6 @@ public class CombatService : ICombatService
         };
 
         var durationInSeconds = (int)Math.Abs((characterAction.UpdatedAt - sessionStartedAt).TotalSeconds);
-        var soulstoneDropRate = soulstoneBonuses.Get(SoulstoneUpgradeContants.SoulstoneDropRate);
-        var soulstoneDoubleDropChance = soulstoneBonuses.Get(SoulstoneUpgradeContants.SoulstoneDoubleDropChance);
         combatSession.CombatSummary.TotalSoulstones = await ProcessSoulstoneDrops(characterAction.CharacterId, durationInSeconds, soulstoneDropRate, soulstoneDoubleDropChance, cancellationToken);
 
         var cindersDrop = ProcessCinderDrop(creatureKills, baseCinderValues);
