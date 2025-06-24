@@ -1,5 +1,6 @@
 import { GuildInvite } from './guildInvite';
 import { GuildMember } from './guildMember';
+import { GuildResource } from './guildResource';
 
 export interface Guild {
   id: string;
@@ -9,6 +10,7 @@ export interface Guild {
   members: GuildMember[];
   maxMembers: number;
   invites: GuildInvite[];
+  resources: GuildResource[];
 }
 
 export interface GuildSimple {

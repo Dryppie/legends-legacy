@@ -40,6 +40,8 @@ public class GuildRepository : IGuildRepository
                 .ThenInclude(m => m.Character)
             .Include(g => g.Invites)
                 .ThenInclude(i => i.Character)
+            .Include(g => g.Resources)
+            .Include(g => g.GuildBuildingUpgrades)
             .SingleOrDefaultAsync(g => g.Members.Select(gm => gm.CharacterId).Contains(characterId), cancellationToken);
 
     public async Task<List<Guild>> GetAllGuildsAsync(CancellationToken cancellationToken) =>
@@ -243,4 +245,13 @@ public class GuildRepository : IGuildRepository
         await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
+
+    public async Task<Guild?> GetGuildWithUpgradesAsync(Guid characterId, CancellationToken cancellationToken) =>
+        await _context.Guilds
+            .Include(g => g.Members)
+            .Include(g => g.Resources)
+            .Include(g => g.GuildBuildingUpgrades)
+            .FirstOrDefaultAsync(g => g.Members.Select(gm => gm.CharacterId).Contains(characterId), cancellationToken);
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken) => await _context.SaveChangesAsync(cancellationToken);
 }

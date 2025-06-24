@@ -55,6 +55,18 @@ export class GuildService {
     );
   }
 
+  getUpgrades() {
+    return this.api.get('guild/getUpgrades').pipe(
+      map((upgrades) => {
+        return upgrades;
+      }),
+
+      catchError(() => {
+        return throwError(() => new Error('Failed to get guild upgrades'));
+      }),
+    );
+  }
+
   applyToGuild(guildId: string) {
     return this.api.post('guild/applyToGuild', guildId).pipe(
       map((opponents) => {

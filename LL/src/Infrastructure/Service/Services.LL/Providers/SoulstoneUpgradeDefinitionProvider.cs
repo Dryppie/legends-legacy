@@ -3,8 +3,8 @@ using System.Collections.Concurrent;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Application.UseCases.Soulstones.Providers;
-public class SoulstoneUpgradeDefinitionProvider
+namespace Services.LL.Providers;
+public class SoulstoneUpgradeDefinitionProvider : IDisposable
 {
     private readonly string _filePath;
     private readonly FileSystemWatcher _watcher;
@@ -60,7 +60,7 @@ public class SoulstoneUpgradeDefinitionProvider
 
             // basic sanity check: duplicate Ids?
             var dupes = defs.GroupBy(d => d.Id).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
-            if (dupes.Any())
+            if (dupes.Count != 0)
                 throw new InvalidDataException($"Duplicate upgrade IDs: {string.Join(',', dupes)}");
 
             _cache = new ConcurrentDictionary<string, SoulstoneUpgradeDefinition>(

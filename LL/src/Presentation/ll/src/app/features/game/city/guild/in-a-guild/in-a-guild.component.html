@@ -1,6 +1,9 @@
 <div class="flex h-full w-full flex-col gap-2">
   <div class="flex h-full w-full flex-col overflow-y-auto">
     <app-tabs class="flex h-full flex-col overflow-hidden">
+      <app-tab label="Buildings">
+        <app-guild-buildings></app-guild-buildings>
+      </app-tab>
       <app-tab label="Guild">
         <app-guild-info
           class="overflow-hidden"
@@ -11,9 +14,6 @@
           (rejectEvent)="rejectApplication($event)"
           (approveEvent)="approveApplication($event)"
         ></app-guild-info>
-      </app-tab>
-      <app-tab label="Buildings">
-        <app-guild-buildings></app-guild-buildings>
       </app-tab>
     </app-tabs>
   </div>

@@ -1,8 +1,8 @@
-﻿using Application.UseCases.Soulstones.Providers;
-using Domain.Models.Bonuses;
+﻿using Domain.Models.Bonuses;
 using Domain.Models.Soulstones;
 using Domain.Models.Soulstones.UpgradeDefinition;
 using Services.LL.Interfaces;
+using Services.LL.Providers;
 
 namespace Services.LL.Bonuses;
 public sealed class SoulstoneBonusProvider : IBonusProvider

@@ -11,6 +11,8 @@ public class Guild
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public Guid OwnerId { get; set; }
     public Character Owner { get; set; } = null!;
+    public ICollection<GuildResource> Resources { get; set; } = [];
+    public ICollection<GuildBuildingUpgrade> GuildBuildingUpgrades { get; set; } = [];
     public ICollection<GuildMember> Members { get; set; } = [];
     public ICollection<GuildInvite> Invites { get; set; } = [];
 }

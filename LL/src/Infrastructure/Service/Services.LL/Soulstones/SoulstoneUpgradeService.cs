@@ -1,10 +1,10 @@
 ﻿using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
-using Application.UseCases.Soulstones.Providers;
 using Domain.Extensions.Soulstones;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Soulstones;
 using Domain.Models.Soulstones.UpgradeDefinition;
+using Services.LL.Providers;
 
 namespace Services.LL.Soulstones;
 public class SoulstoneUpgradeService : ISoulstoneUpgradeService
@@ -22,6 +22,7 @@ public class SoulstoneUpgradeService : ISoulstoneUpgradeService
     {
         var character = await _characterService.GetCharacterWithSoulstoneUpgradesAsync(characterId, cancellationToken);
         if (character == null) return [];
+
         var levels = character.CharacterSoulstoneUpgrades.ToDictionary(u => u.SoulstoneUpgradeDefinitionId, u => u.Level);
 
         return _defs.Values.Select(def =>

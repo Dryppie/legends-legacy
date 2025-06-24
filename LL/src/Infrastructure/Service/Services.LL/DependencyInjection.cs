@@ -7,7 +7,6 @@ using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL.Professions;
 using Application.Interfaces.WebSockets;
-using Application.UseCases.Soulstones.Providers;
 using Domain.Interfaces.Combat;
 using Domain.Models.Users;
 using Microsoft.AspNetCore.Identity;
@@ -38,6 +37,7 @@ using Services.LL.Players;
 using Services.LL.Professions;
 using Services.LL.Professions.Craftings;
 using Services.LL.Professions.Gatherings;
+using Services.LL.Providers;
 using Services.LL.Regions;
 using Services.LL.Regions.Areas;
 using Services.LL.Soulstones;
@@ -89,7 +89,8 @@ public static class DependencyInjection
         services.AddScoped<IGatheringService, GatheringService>();
 
         services.AddScoped<IGuildService, GuildService>();
-        
+        services.AddScoped<IGuildBuildingUpgradeService, GuildBuildingUpgradeService>();
+
         services.AddScoped<ILevelingService, LevelingService>();
         services.AddScoped<ILeaderboardService, LeaderboardService>();
 
@@ -116,6 +117,7 @@ public static class DependencyInjection
 
         services.AddScoped<ISimulatorService, SimulatorService>();
 
+        services.AddSingleton<GuildBuildingUpgradeDefinitionProvider>();
         services.AddSingleton<SoulstoneUpgradeDefinitionProvider>();
         services.AddSingleton<IStatusDefinitionService, JsonStatusService>();
         services.AddSingleton<IEventStream, EventStream>();

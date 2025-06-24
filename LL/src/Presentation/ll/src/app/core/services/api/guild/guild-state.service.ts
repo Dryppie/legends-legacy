@@ -1,16 +1,17 @@
-import { Injectable, signal, computed, effect } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
 import { finalize } from 'rxjs';
 import { Guild, GuildSimple } from '../../../../shared/models/Dtos/guild/guild';
 import { GuildInvite } from '../../../../shared/models/Dtos/guild/guildInvite';
 import { InviteToGuild } from '../../../../shared/models/requestDtos/guilds/inviteToGuild';
 import { GameSocketService } from '../../real-time/game-socket.service';
-import { ApiService } from '../api.service';
 import { GuildService } from './guild.service';
+import { BuildingUpgradeView } from '../../../../shared/models/guilds/buildings/buildingUpgradeView';
 
 @Injectable({ providedIn: 'root' })
 export class GuildStateService {
   /* ─────────── writable signals ─────────── */
   private readonly _guild = signal<Guild | null>(null);
+  private readonly _upgrades = signal<BuildingUpgradeView[]>([]);
   private readonly _invites = signal<GuildInvite[]>([]);
   private readonly _allGuilds = signal<GuildSimple[]>([]);
   private readonly _loading = signal(false);
@@ -18,6 +19,7 @@ export class GuildStateService {
 
   /* ─────────── public, read-only selectors ─────────── */
   readonly guild = computed(() => this._guild());
+  readonly upgrades = computed(() => this._upgrades());
   readonly invites = computed(() => this._invites());
   readonly allGuilds = computed(() => this._allGuilds());
   readonly loading = computed(() => this._loading());
@@ -56,6 +58,7 @@ export class GuildStateService {
             this._guild.set(guild);
             this._invites.set([]);
             this._allGuilds.set([]);
+            this.loadGuildUpgrades();
           } else {
             this._guild.set(null);
             this.loadAllGuilds();
@@ -123,6 +126,13 @@ export class GuildStateService {
     this.service.getMyInvites().subscribe({
       next: (inv) => this._invites.set(inv),
       error: (e) => this._error.set(e.message ?? 'Failed to load invites'),
+    });
+  }
+
+  private loadGuildUpgrades(): void {
+    this.service.getUpgrades().subscribe({
+      next: (inv) => this._upgrades.set(inv),
+      error: (e) => this._error.set(e.message ?? 'Failed to load upgrades'),
     });
   }
 

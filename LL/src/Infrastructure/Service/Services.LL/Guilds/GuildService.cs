@@ -19,6 +19,9 @@ public class GuildService : IGuildService
     public async Task<Guild?> GetMyGuildAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _guildRepository.GetMyGuildAsync(characterId, cancellationToken);
 
+    public async Task<Guild?> GetGuildWithUpgradesAsync(Guid characterId, CancellationToken cancellationToken) =>
+        await _guildRepository.GetGuildWithUpgradesAsync(characterId, cancellationToken);
+
     public async Task<List<Guild>> GetAllGuildsAsync(CancellationToken cancellationToken) =>
         await _guildRepository.GetAllGuildsAsync(cancellationToken);
 
@@ -78,4 +81,8 @@ public class GuildService : IGuildService
     public async Task<bool> RejectInviteAsync(Guid characterId, Guid guildId, CancellationToken cancellationToken) => 
         await _guildRepository.RejectInviteAsync(characterId, guildId, cancellationToken);
     #endregion
+
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken) =>
+        await _guildRepository.SaveChangesAsync(cancellationToken);
 }

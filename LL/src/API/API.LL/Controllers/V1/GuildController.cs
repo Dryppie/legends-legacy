@@ -11,12 +11,17 @@ using Application.UseCases.Guilds.Commands.RejectInvite;
 using Application.UseCases.Guilds.Dtos.Requests;
 using Application.UseCases.Guilds.Dtos.Responses;
 using Application.UseCases.Guilds.Queries.GetAllGuilds;
+using Application.UseCases.Guilds.Queries.GetGuildUpgrades;
 using Application.UseCases.Guilds.Queries.GetMyGuild;
 using Application.UseCases.Guilds.Queries.GetMyInvites;
 using Common.Primitives;
+using Domain.Models.Guilds.Buildings;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.LL.Controllers.V1;
+
+[Authorize]
 public class GuildController : BaseController
 {
     [HttpGet("GetMyGuild")]
@@ -71,4 +76,8 @@ public class GuildController : BaseController
     [HttpPost("DisbandGuild")]
     public async Task<ActionResult<Response<bool>>> DisbandGuild() =>
         await Mediator.Send(new DisbandGuildCommand(CurrentCharacterGuid));
+
+    [HttpGet("GetUpgrades")]
+    public async Task<ActionResult<Response<List<BuildingUpgradeView>>>> GetUpgrades() =>
+        await Mediator.Send(new GetGuildUpgradesQuery(CurrentCharacterGuid));
 }
