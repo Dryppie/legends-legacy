@@ -6,6 +6,7 @@ import { FilterTabsComponent } from '../../../../shared/components/tabs/filter-t
 import { LeaderboardEntryDto } from '../../../../shared/models/Dtos/leaderboard/leaderboardEntryDto';
 import { Tab } from '../../../../shared/models/sidebar-item';
 import { RegularButtonComponent } from '../../../../shared/components/buttons/regular-button/regular-button.component';
+import { LeaderboardComponent } from '../../../../shared/components/generic-leaderboard/generic-leaderboard.component';
 
 @Component({
   selector: 'app-tavern',
@@ -16,6 +17,7 @@ import { RegularButtonComponent } from '../../../../shared/components/buttons/re
     NgIf,
     FilterTabsComponent,
     RegularButtonComponent,
+    LeaderboardComponent
   ],
   templateUrl: './tavern.component.html',
 })
@@ -65,6 +67,7 @@ export class TavernComponent {
 
   setActiveTab(tabLabel: string) {
     this.activeTab = tabLabel;
+    console.log(this.filteredLeaderboard);
   }
 
   refresh(): void {
@@ -100,6 +103,12 @@ export class TavernComponent {
       default:
         return this.state.topCombat();
     }
+  }
+
+  get displayMode(): 'wealth' | 'total-level' | 'skill' {
+    if (this.activeTab === 'Wealth') return 'wealth';
+    if (this.activeTab === 'Total level') return 'total-level';
+    return 'skill';
   }
 
   get tabLabels(): string[] {

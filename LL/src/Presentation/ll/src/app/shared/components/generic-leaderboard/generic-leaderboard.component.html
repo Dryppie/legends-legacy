@@ -1,0 +1,126 @@
+<div class="flex h-full w-full flex-col overflow-hidden rounded-xl p-4 text-white">
+    <h2 class="text-primary">{{ title }}</h2>
+  
+    <ng-container *ngIf="rankings?.length; else noRankings">
+      <!-- Podium Section -->
+      <div class="flex justify-center gap-4 mt-4">
+        <!-- 2nd Place (Index 1) -->
+        <ng-container *ngIf="podium[1]">
+          <div class="flex flex-col items-center justify-end w-full">
+            <div class="w-full h-24 text-2xl border-2 border-[#a5a9b4] bg-transparent flex flex-col items-center justify-center">
+              <div class="text-xl font-bold mb-1">{{ displayMode === 'arena' ? podium[1].name : podium[1].characterName }}</div>
+              <ng-container *ngIf="displayMode === 'skill'; else otherStat">
+                <div class="text-sm font-semibold">Level: {{ podium[1].level }}</div>
+                <div class="text-sm font-semibold">EXP: {{ podium[1].experience }}</div>
+              </ng-container>
+
+              <ng-template #otherStat>
+                <div class="text-sm font-semibold">
+                  {{ displayMode === 'arena' ? 'Rating: ' + podium[1].rating :
+                     displayMode === 'wealth' ? 'Cinders: ' + podium[1].level :
+                     displayMode === 'total-level' ? 'Level: ' + podium[1].level :
+                     'EXP: ' + podium[1].experience }}
+                </div>
+              </ng-template>
+            </div>
+          </div>
+        </ng-container>
+      
+        <!-- 1st Place (Index 0) -->
+        <ng-container *ngIf="podium[0]">
+          <div class="flex flex-col items-center justify-end w-full">
+            <div class="w-full h-32 text-3xl border-2 border-[#e9d491] bg-transparent flex flex-col items-center justify-center relative">
+              <img
+                src="assets/icons/podium/Wreath.svg"
+                class="absolute inset-0 w-32 h-32 m-auto opacity-10 pointer-events-none"
+                alt="Wreath"
+              />
+              <div class="text-xl font-bold mb-1 z-10">{{ displayMode === 'arena' ? podium[0].name : podium[0].characterName }}</div>
+              <ng-container *ngIf="displayMode === 'skill'; else otherStat">
+                <div class="text-sm font-semibold">Level: {{ podium[0].level }}</div>
+                <div class="text-sm font-semibold">EXP: {{ podium[0].experience }}</div>
+              </ng-container>
+
+              <ng-template #otherStat>
+                <div class="text-sm font-semibold">
+                  {{ displayMode === 'arena' ? 'Rating: ' + podium[0].rating :
+                     displayMode === 'wealth' ? 'Cinders: ' + podium[0].level :
+                     displayMode === 'total-level' ? 'Level: ' + podium[0].level :
+                     'EXP: ' + podium[0].experience }}
+                </div>
+              </ng-template>
+            </div>
+          </div>
+        </ng-container>
+      
+        <!-- 3rd Place (Index 2) -->
+        <ng-container *ngIf="podium[2]">
+          <div class="flex flex-col items-center justify-end w-full">
+            <div class="w-full h-20 text-2xl border-2 border-[#6e4d25] bg-transparent flex flex-col items-center justify-center">
+              <div class="text-xl font-bold mb-1">{{ displayMode === 'arena' ? podium[2].name : podium[2].characterName }}</div>
+              <ng-container *ngIf="displayMode === 'skill'; else otherStat">
+                <div class="text-sm font-semibold">Level: {{ podium[2].level }}</div>
+                <div class="text-sm font-semibold">EXP: {{ podium[2].experience }}</div>
+              </ng-container>
+
+              <ng-template #otherStat>
+                <div class="text-sm font-semibold">
+                  {{ displayMode === 'arena' ? 'Rating: ' + podium[2].rating :
+                     displayMode === 'wealth' ? 'Cinders: ' + podium[2].level :
+                     displayMode === 'total-level' ? 'Level: ' + podium[2].level :
+                     'EXP: ' + podium[2].experience }}
+                </div>
+              </ng-template>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+  
+      <!-- Rankings Header -->
+      <div class="grid gap-2 p-2 mt-6" [ngClass]="displayMode === 'skill' ? 'grid-cols-8' : 'grid-cols-7'">
+        <div>Rank</div>
+        <div class="col-start-2 col-end-7">Name</div>
+        <div *ngIf="displayMode === 'skill'" class="justify-self-end">Level</div>
+        <div class="justify-self-end">
+            {{ displayMode === 'arena' ? 'Rating' : 
+            displayMode === 'wealth' ? 'Cinders' : 
+            displayMode === 'total-level' ? 'Level' : 
+            'EXP'}}
+        </div>
+      </div>
+  
+      <!-- Normal Rankings Table -->
+      <div class="overflow-y-auto">
+        <div
+          *ngFor="let player of others"
+          class="grid items-center gap-2 border-t border-light_gray p-2"
+          [ngClass]="{
+            'grid-cols-8': displayMode === 'skill',
+            'grid-cols-7': displayMode !== 'skill',
+            'font-bold text-primary': player.characterId === myRanking?.characterId
+          }"
+        >
+          <div>{{ player.rank }}</div>
+          <div class="col-start-2 col-end-7 break-words">
+            {{ displayMode === 'arena' ? player.name :
+            player.characterName }}
+            <span *ngIf="player.characterId === myRanking?.characterId">(You)</span>
+          </div>
+          <div *ngIf="displayMode === 'skill'" class="justify-self-end">
+            {{ player.level }}
+          </div>
+            <div class="justify-self-end">
+            {{ displayMode === 'arena' ? player.rating : 
+            displayMode === 'wealth' ?  player.level : 
+            displayMode === 'total-level' ? player.level: 
+            player.experience}}
+            </div>
+        </div>
+      </div>
+    </ng-container>
+  
+    <ng-template #noRankings>
+      <p>No rankings available.</p>
+    </ng-template>
+  </div>
+  

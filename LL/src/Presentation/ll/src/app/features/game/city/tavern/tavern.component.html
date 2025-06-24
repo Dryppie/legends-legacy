@@ -17,8 +17,15 @@
   </app-regular-button>
   <div class="flex h-full w-full flex-col overflow-hidden">
     <div class="flex-none text-white"></div>
-    <div class="flex flex-col gap-2 overflow-y-auto">
-      <!-- Repeat for each leaderboard item -->
+
+    <app-leaderboard
+      [displayMode]="displayMode"
+      [rankings]="filteredLeaderboard"
+      [myRanking]=""
+      [title]="''"
+    ></app-leaderboard>
+
+    <!-- <div class="flex flex-col gap-2 overflow-y-auto">
       <div
         class="flex flex-col gap-2 border border-primary p-4 text-white"
         *ngFor="let item of filteredLeaderboard; let i = index"
@@ -56,7 +63,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
     <div class="flex flex-col items-center justify-center gap-4"></div>
   </div>
 </div>
