@@ -102,7 +102,7 @@ public class CraftingService : ICraftingService
         };
 
         var actionDetails = (characterAction.ActionDetails as CraftingActionDetails)!;
-        var produced = new List<InventoryItem>();
+        var produced = new List<InventoryItem>(); // TODO: This can be used to send to the frontend to improve the display of what's happened
         var sessionStartedAt = characterAction.UpdatedAt;
 
         var temperingSummary = new TemperingSummary();

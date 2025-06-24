@@ -6,11 +6,17 @@ import { GuildService } from '../../../../../core/services/api/guild/guild.servi
 import { InviteToGuild } from '../../../../../shared/models/requestDtos/guilds/inviteToGuild';
 import { TabsComponent } from '../../../../../shared/components/tabs/tabs.component';
 import { GuildStateService } from '../../../../../core/services/api/guild/guild-state.service';
+import { GuildBuildingsComponent } from './guild-buildings/guild-buildings.component';
 
 @Component({
   selector: 'app-in-a-guild',
   standalone: true,
-  imports: [TabComponent, GuildInfoComponent, TabsComponent],
+  imports: [
+    TabComponent,
+    GuildInfoComponent,
+    TabsComponent,
+    GuildBuildingsComponent,
+  ],
   templateUrl: './in-a-guild.component.html',
 })
 export class InAGuildComponent {
