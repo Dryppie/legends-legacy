@@ -1,6 +1,5 @@
 ﻿using Application.Common.Interfaces;
 using Common.Helpers.Essences;
-using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.MarketPlaces;
