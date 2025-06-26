@@ -2,7 +2,7 @@
   {
     "id": "stone",
     "name": "Stone",
-    "description": "",
+    "description": "Mining material - Stone can be found in \u0027Slate Shard\u0027",
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
@@ -14,7 +14,7 @@
   {
     "id": "flint",
     "name": "Flint",
-    "description": "",
+    "description": "Mining material - Flint can be found in \u0027Slate Shard\u0027",
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
@@ -26,7 +26,7 @@
   {
     "id": "tiny_geode",
     "name": "Tiny Geode",
-    "description": "",
+    "description": "Mining material - Tiny Geode can be found in \u0027Slate Shard\u0027",
     "itemType": "Material",
     "rarity": "Uncommon",
     "equipmentType": "Head",
@@ -38,7 +38,7 @@
   {
     "id": "jagged_obsidian",
     "name": "Jagged Obsidian",
-    "description": "",
+    "description": "Mining material - Jagged Obsidian can be found in \u0027Slate Shard\u0027",
     "itemType": "Material",
     "rarity": "Uncommon",
     "equipmentType": "Head",
@@ -50,7 +50,7 @@
   {
     "id": "crystalline_powder",
     "name": "Crystalline Powder",
-    "description": "",
+    "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
@@ -62,7 +62,7 @@
   {
     "id": "copper_ore",
     "name": "Copper Ore",
-    "description": "",
+    "description": "Mining material - Copper Ore can be found in \u0027Copperbloom Vein\u0027",
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
@@ -74,7 +74,7 @@
   {
     "id": "veinstone_chip",
     "name": "Veinstone Chip",
-    "description": "",
+    "description": "Mining material - Veinstone Chip can be found in \u0027Copperbloom Vein\u0027",
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
@@ -86,7 +86,7 @@
   {
     "id": "malachite_shard",
     "name": "Malachite Shard",
-    "description": "",
+    "description": "Mining material - Malachite Shard can be found in \u0027Copperbloom Vein\u0027",
     "itemType": "Material",
     "rarity": "Uncommon",
     "equipmentType": "Head",
@@ -98,7 +98,7 @@
   {
     "id": "verdant_ore",
     "name": "Verdant Ore",
-    "description": "",
+    "description": "Mining material - Verdant Ore can be found in \u0027Copperbloom Vein\u0027",
     "itemType": "Material",
     "rarity": "Uncommon",
     "equipmentType": "Head",
@@ -110,7 +110,7 @@
   {
     "id": "living_amber",
     "name": "Living Amber",
-    "description": "",
+    "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
@@ -122,7 +122,7 @@
   {
     "id": "tin_ore",
     "name": "Tin Ore",
-    "description": "",
+    "description": "Mining material - Tin Ore can be found in \u0027Tinspine Vein\u0027",
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
@@ -134,7 +134,7 @@
   {
     "id": "river_pearl",
     "name": "River Pearl",
-    "description": "",
+    "description": "Mining material - River Pearl can be found in \u0027Tinspine Vein\u0027",
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
@@ -146,7 +146,7 @@
   {
     "id": "dull_quartz",
     "name": "Dull Quartz",
-    "description": "",
+    "description": "Mining material - Dull Quartz can be found in \u0027Tinspine Vein\u0027",
     "itemType": "Material",
     "rarity": "Uncommon",
     "equipmentType": "Head",
@@ -158,7 +158,7 @@
   {
     "id": "galvanic_dust",
     "name": "Galvanic Dust",
-    "description": "",
+    "description": "Mining material - Galvanic Dust can be found in \u0027Tinspine Vein\u0027",
     "itemType": "Material",
     "rarity": "Uncommon",
     "equipmentType": "Head",
@@ -170,7 +170,7 @@
   {
     "id": "frosted_metal_shard",
     "name": "Frosted Metal Shard",
-    "description": "",
+    "description": "Mining material - Frosted Metal Shard can be found in \u0027Tinspine Vein\u0027",
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
@@ -662,7 +662,7 @@
   {
     "id": "willow_log",
     "name": "Willow Log",
-    "description": "",
+    "description": "Woodcutting material - Willow Log can be found when chopping \u0027Young Willow\u0027",
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
@@ -674,7 +674,7 @@
   {
     "id": "sticky_sap",
     "name": "Sticky Sap",
-    "description": "",
+    "description": "Woodcutting material - Sticky Sap can be found when chopping \u0027Young Willow\u0027",
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
@@ -686,7 +686,7 @@
   {
     "id": "feather_lined_nest",
     "name": "Feather-lined Nest",
-    "description": "",
+    "description": "Woodcutting material - Feather-lined Nest can be found when chopping \u0027Young Willow\u0027",
     "itemType": "Material",
     "rarity": "Uncommon",
     "equipmentType": "Head",
@@ -698,7 +698,7 @@
   {
     "id": "silk_vine",
     "name": "Silk Vine",
-    "description": "",
+    "description": "Woodcutting material - Silk Vine can be found when chopping \u0027Young Willow\u0027",
     "itemType": "Material",
     "rarity": "Uncommon",
     "equipmentType": "Head",
@@ -710,7 +710,7 @@
   {
     "id": "shimmering_leaf",
     "name": "Shimmering Leaf",
-    "description": "",
+    "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
@@ -722,7 +722,7 @@
   {
     "id": "maple_log",
     "name": "Maple Log",
-    "description": "",
+    "description": "Woodcutting material - Maple Log can be found when chopping \u0027Amberleaf Maple\u0027",
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
@@ -734,7 +734,7 @@
   {
     "id": "amber_syrup",
     "name": "Amber Syrup",
-    "description": "",
+    "description": "Woodcutting material - Amber Syrup can be found when chopping \u0027Amberleaf Maple\u0027",
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
@@ -746,7 +746,7 @@
   {
     "id": "sweet_bark_chips",
     "name": "Sweet Bark Chips",
-    "description": "",
+    "description": "Woodcutting material - Sweet Bark Chips can be found when chopping \u0027Amberleaf Maple\u0027",
     "itemType": "Material",
     "rarity": "Uncommon",
     "equipmentType": "Head",
@@ -758,7 +758,7 @@
   {
     "id": "honeycomb",
     "name": "Honeycomb",
-    "description": "",
+    "description": "Woodcutting material - Honeycomb can be found when chopping \u0027Amberleaf Maple\u0027",
     "itemType": "Material",
     "rarity": "Uncommon",
     "equipmentType": "Head",
@@ -770,7 +770,7 @@
   {
     "id": "glowing_amber",
     "name": "Glowing Amber",
-    "description": "",
+    "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",
@@ -782,7 +782,7 @@
   {
     "id": "ash_log",
     "name": "Ash Log",
-    "description": "",
+    "description": "Woodcutting material - Ash Log can be found when chopping \u0027Ember Ash\u0027",
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
@@ -794,7 +794,7 @@
   {
     "id": "charcoal_chunk",
     "name": "Charcoal Chunk",
-    "description": "",
+    "description": "Woodcutting material - Charcoal Chunk can be found when chopping \u0027Ember Ash\u0027",
     "itemType": "Material",
     "rarity": "Common",
     "equipmentType": "Head",
@@ -806,7 +806,7 @@
   {
     "id": "fire_beetle_carapace",
     "name": "Fire Beetle Carapace",
-    "description": "",
+    "description": "Woodcutting material - Fire Beetle Carapace can be found when chopping \u0027Ember Ash\u0027",
     "itemType": "Material",
     "rarity": "Uncommon",
     "equipmentType": "Head",
@@ -818,7 +818,7 @@
   {
     "id": "scorched_resin",
     "name": "Scorched Resin",
-    "description": "",
+    "description": "Woodcutting material - Scorched Resin can be found when chopping \u0027Ember Ash\u0027",
     "itemType": "Material",
     "rarity": "Uncommon",
     "equipmentType": "Head",
@@ -830,7 +830,7 @@
   {
     "id": "inferno_bark",
     "name": "Inferno Bark",
-    "description": "",
+    "description": "Woodcutting material - Inferno Bark can be found when chopping \u0027Ember Ash\u0027",
     "itemType": "Material",
     "rarity": "Rare",
     "equipmentType": "Head",

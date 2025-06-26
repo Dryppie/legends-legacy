@@ -46,7 +46,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "stone",
           "name": "Stone",
-          "description": "",
+          "description": "Mining material - Stone can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -59,7 +59,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "flint",
           "name": "Flint",
-          "description": "",
+          "description": "Mining material - Flint can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -72,7 +72,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "",
+          "description": "Mining material - Jagged Obsidian can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -85,7 +85,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -128,7 +128,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "stone",
           "name": "Stone",
-          "description": "",
+          "description": "Mining material - Stone can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -141,7 +141,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "flint",
           "name": "Flint",
-          "description": "",
+          "description": "Mining material - Flint can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -154,7 +154,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "",
+          "description": "Mining material - Jagged Obsidian can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -167,7 +167,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -210,7 +210,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "stone",
           "name": "Stone",
-          "description": "",
+          "description": "Mining material - Stone can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -223,7 +223,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "flint",
           "name": "Flint",
-          "description": "",
+          "description": "Mining material - Flint can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -236,7 +236,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "",
+          "description": "Mining material - Jagged Obsidian can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -249,7 +249,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -297,7 +297,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "stone",
           "name": "Stone",
-          "description": "",
+          "description": "Mining material - Stone can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -310,7 +310,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "willow_log",
           "name": "Willow Log",
-          "description": "",
+          "description": "Woodcutting material - Willow Log can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -323,7 +323,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "tiny_geode",
           "name": "Tiny Geode",
-          "description": "",
+          "description": "Mining material - Tiny Geode can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -336,7 +336,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -379,7 +379,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "stone",
           "name": "Stone",
-          "description": "",
+          "description": "Mining material - Stone can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -392,7 +392,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "willow_log",
           "name": "Willow Log",
-          "description": "",
+          "description": "Woodcutting material - Willow Log can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -405,7 +405,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "tiny_geode",
           "name": "Tiny Geode",
-          "description": "",
+          "description": "Mining material - Tiny Geode can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -418,7 +418,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -461,7 +461,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "stone",
           "name": "Stone",
-          "description": "",
+          "description": "Mining material - Stone can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -474,7 +474,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "willow_log",
           "name": "Willow Log",
-          "description": "",
+          "description": "Woodcutting material - Willow Log can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -487,7 +487,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "tiny_geode",
           "name": "Tiny Geode",
-          "description": "",
+          "description": "Mining material - Tiny Geode can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -500,7 +500,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -548,7 +548,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "flint",
           "name": "Flint",
-          "description": "",
+          "description": "Mining material - Flint can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -561,7 +561,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "sticky_sap",
           "name": "Sticky Sap",
-          "description": "",
+          "description": "Woodcutting material - Sticky Sap can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -574,7 +574,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "silk_vine",
           "name": "Silk Vine",
-          "description": "",
+          "description": "Woodcutting material - Silk Vine can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -587,7 +587,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -630,7 +630,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "flint",
           "name": "Flint",
-          "description": "",
+          "description": "Mining material - Flint can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -643,7 +643,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "sticky_sap",
           "name": "Sticky Sap",
-          "description": "",
+          "description": "Woodcutting material - Sticky Sap can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -656,7 +656,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "silk_vine",
           "name": "Silk Vine",
-          "description": "",
+          "description": "Woodcutting material - Silk Vine can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -669,7 +669,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -712,7 +712,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "flint",
           "name": "Flint",
-          "description": "",
+          "description": "Mining material - Flint can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -725,7 +725,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "sticky_sap",
           "name": "Sticky Sap",
-          "description": "",
+          "description": "Woodcutting material - Sticky Sap can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -738,7 +738,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "silk_vine",
           "name": "Silk Vine",
-          "description": "",
+          "description": "Woodcutting material - Silk Vine can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -751,7 +751,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -799,7 +799,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "willow_log",
           "name": "Willow Log",
-          "description": "",
+          "description": "Woodcutting material - Willow Log can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -812,7 +812,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "sticky_sap",
           "name": "Sticky Sap",
-          "description": "",
+          "description": "Woodcutting material - Sticky Sap can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -825,7 +825,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "feather_lined_nest",
           "name": "Feather-lined Nest",
-          "description": "",
+          "description": "Woodcutting material - Feather-lined Nest can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -838,7 +838,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -881,7 +881,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "willow_log",
           "name": "Willow Log",
-          "description": "",
+          "description": "Woodcutting material - Willow Log can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -894,7 +894,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "sticky_sap",
           "name": "Sticky Sap",
-          "description": "",
+          "description": "Woodcutting material - Sticky Sap can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -907,7 +907,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "feather_lined_nest",
           "name": "Feather-lined Nest",
-          "description": "",
+          "description": "Woodcutting material - Feather-lined Nest can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -920,7 +920,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -963,7 +963,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "willow_log",
           "name": "Willow Log",
-          "description": "",
+          "description": "Woodcutting material - Willow Log can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -976,7 +976,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "sticky_sap",
           "name": "Sticky Sap",
-          "description": "",
+          "description": "Woodcutting material - Sticky Sap can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -989,7 +989,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "feather_lined_nest",
           "name": "Feather-lined Nest",
-          "description": "",
+          "description": "Woodcutting material - Feather-lined Nest can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -1002,7 +1002,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -1045,7 +1045,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "willow_log",
           "name": "Willow Log",
-          "description": "",
+          "description": "Woodcutting material - Willow Log can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -1058,7 +1058,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "silk_vine",
           "name": "Silk Vine",
-          "description": "",
+          "description": "Woodcutting material - Silk Vine can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -1071,7 +1071,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -1114,7 +1114,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "willow_log",
           "name": "Willow Log",
-          "description": "",
+          "description": "Woodcutting material - Willow Log can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -1127,7 +1127,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "silk_vine",
           "name": "Silk Vine",
-          "description": "",
+          "description": "Woodcutting material - Silk Vine can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -1140,7 +1140,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -1183,7 +1183,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "willow_log",
           "name": "Willow Log",
-          "description": "",
+          "description": "Woodcutting material - Willow Log can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -1196,7 +1196,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "silk_vine",
           "name": "Silk Vine",
-          "description": "",
+          "description": "Woodcutting material - Silk Vine can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -1209,7 +1209,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -1252,7 +1252,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "stone",
           "name": "Stone",
-          "description": "",
+          "description": "Mining material - Stone can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -1265,7 +1265,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "",
+          "description": "Mining material - Jagged Obsidian can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -1278,7 +1278,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -1321,7 +1321,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "stone",
           "name": "Stone",
-          "description": "",
+          "description": "Mining material - Stone can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -1334,7 +1334,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "",
+          "description": "Mining material - Jagged Obsidian can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -1347,7 +1347,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -1390,7 +1390,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "stone",
           "name": "Stone",
-          "description": "",
+          "description": "Mining material - Stone can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -1403,7 +1403,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "",
+          "description": "Mining material - Jagged Obsidian can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -1416,7 +1416,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -1459,7 +1459,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -1472,7 +1472,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -1515,7 +1515,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -1528,7 +1528,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -1571,7 +1571,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -1584,7 +1584,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -1632,7 +1632,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "stone",
           "name": "Stone",
-          "description": "",
+          "description": "Mining material - Stone can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -1645,7 +1645,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "silk_vine",
           "name": "Silk Vine",
-          "description": "",
+          "description": "Woodcutting material - Silk Vine can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -1658,7 +1658,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -1671,7 +1671,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -1714,7 +1714,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "willow_log",
           "name": "Willow Log",
-          "description": "",
+          "description": "Woodcutting material - Willow Log can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -1727,7 +1727,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "",
+          "description": "Mining material - Jagged Obsidian can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -1740,7 +1740,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -1753,7 +1753,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -1796,7 +1796,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "flint",
           "name": "Flint",
-          "description": "",
+          "description": "Mining material - Flint can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -1809,7 +1809,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "sticky_sap",
           "name": "Sticky Sap",
-          "description": "",
+          "description": "Woodcutting material - Sticky Sap can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -1822,7 +1822,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "tiny_geode",
           "name": "Tiny Geode",
-          "description": "",
+          "description": "Mining material - Tiny Geode can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -1835,7 +1835,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -1878,7 +1878,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "flint",
           "name": "Flint",
-          "description": "",
+          "description": "Mining material - Flint can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -1891,7 +1891,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "silk_vine",
           "name": "Silk Vine",
-          "description": "",
+          "description": "Woodcutting material - Silk Vine can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -1904,7 +1904,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -1917,7 +1917,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -1965,7 +1965,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "willow_log",
           "name": "Willow Log",
-          "description": "",
+          "description": "Woodcutting material - Willow Log can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -1978,7 +1978,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "feather_lined_nest",
           "name": "Feather-lined Nest",
-          "description": "",
+          "description": "Woodcutting material - Feather-lined Nest can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -1991,7 +1991,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -2004,7 +2004,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -2047,7 +2047,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "stone",
           "name": "Stone",
-          "description": "",
+          "description": "Mining material - Stone can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -2060,7 +2060,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "",
+          "description": "Mining material - Jagged Obsidian can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -2073,7 +2073,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -2086,7 +2086,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -2134,7 +2134,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "stone",
           "name": "Stone",
-          "description": "",
+          "description": "Mining material - Stone can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -2147,7 +2147,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "tiny_geode",
           "name": "Tiny Geode",
-          "description": "",
+          "description": "Mining material - Tiny Geode can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -2160,7 +2160,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -2173,7 +2173,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -2221,7 +2221,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "willow_log",
           "name": "Willow Log",
-          "description": "",
+          "description": "Woodcutting material - Willow Log can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -2234,7 +2234,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "feather_lined_nest",
           "name": "Feather-lined Nest",
-          "description": "",
+          "description": "Woodcutting material - Feather-lined Nest can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -2247,7 +2247,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -2260,7 +2260,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -2308,7 +2308,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "stone",
           "name": "Stone",
-          "description": "",
+          "description": "Mining material - Stone can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -2321,7 +2321,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "willow_log",
           "name": "Willow Log",
-          "description": "",
+          "description": "Woodcutting material - Willow Log can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -2334,7 +2334,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "feather_lined_nest",
           "name": "Feather-lined Nest",
-          "description": "",
+          "description": "Woodcutting material - Feather-lined Nest can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -2347,7 +2347,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "",
+          "description": "Mining material - Jagged Obsidian can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -2395,7 +2395,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "flint",
           "name": "Flint",
-          "description": "",
+          "description": "Mining material - Flint can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -2408,7 +2408,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "sticky_sap",
           "name": "Sticky Sap",
-          "description": "",
+          "description": "Woodcutting material - Sticky Sap can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -2421,7 +2421,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "silk_vine",
           "name": "Silk Vine",
-          "description": "",
+          "description": "Woodcutting material - Silk Vine can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -2434,7 +2434,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -2477,7 +2477,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "willow_log",
           "name": "Willow Log",
-          "description": "",
+          "description": "Woodcutting material - Willow Log can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -2490,7 +2490,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "tiny_geode",
           "name": "Tiny Geode",
-          "description": "",
+          "description": "Mining material - Tiny Geode can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -2503,7 +2503,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -2516,7 +2516,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -2559,7 +2559,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "sticky_sap",
           "name": "Sticky Sap",
-          "description": "",
+          "description": "Woodcutting material - Sticky Sap can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -2572,7 +2572,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "feather_lined_nest",
           "name": "Feather-lined Nest",
-          "description": "",
+          "description": "Woodcutting material - Feather-lined Nest can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -2585,7 +2585,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "silk_vine",
           "name": "Silk Vine",
-          "description": "",
+          "description": "Woodcutting material - Silk Vine can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -2598,7 +2598,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -2641,7 +2641,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "stone",
           "name": "Stone",
-          "description": "",
+          "description": "Mining material - Stone can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -2654,7 +2654,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "willow_log",
           "name": "Willow Log",
-          "description": "",
+          "description": "Woodcutting material - Willow Log can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -2667,7 +2667,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "",
+          "description": "Mining material - Jagged Obsidian can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -2680,7 +2680,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -2723,7 +2723,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "stone",
           "name": "Stone",
-          "description": "",
+          "description": "Mining material - Stone can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -2736,7 +2736,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "tiny_geode",
           "name": "Tiny Geode",
-          "description": "",
+          "description": "Mining material - Tiny Geode can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -2749,7 +2749,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "feather_lined_nest",
           "name": "Feather-lined Nest",
-          "description": "",
+          "description": "Woodcutting material - Feather-lined Nest can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -2762,7 +2762,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -2805,7 +2805,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "willow_log",
           "name": "Willow Log",
-          "description": "",
+          "description": "Woodcutting material - Willow Log can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -2818,7 +2818,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "feather_lined_nest",
           "name": "Feather-lined Nest",
-          "description": "",
+          "description": "Woodcutting material - Feather-lined Nest can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -2831,7 +2831,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "silk_vine",
           "name": "Silk Vine",
-          "description": "",
+          "description": "Woodcutting material - Silk Vine can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -2844,7 +2844,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -2892,7 +2892,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "flint",
           "name": "Flint",
-          "description": "",
+          "description": "Mining material - Flint can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -2905,7 +2905,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "",
+          "description": "Mining material - Jagged Obsidian can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -2918,7 +2918,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -2931,7 +2931,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "shimmering_leaf",
           "name": "Shimmering Leaf",
-          "description": "",
+          "description": "Woodcutting material - Shimmering Leaf can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -2979,7 +2979,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "flint",
           "name": "Flint",
-          "description": "",
+          "description": "Mining material - Flint can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -2992,7 +2992,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "jagged_obsidian",
           "name": "Jagged Obsidian",
-          "description": "",
+          "description": "Mining material - Jagged Obsidian can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -3005,7 +3005,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "silk_vine",
           "name": "Silk Vine",
-          "description": "",
+          "description": "Woodcutting material - Silk Vine can be found when chopping 'Young Willow'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -3018,7 +3018,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -3066,7 +3066,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "copper_ore",
           "name": "Copper Ore",
-          "description": "",
+          "description": "Mining material - Copper Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3079,7 +3079,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "veinstone_chip",
           "name": "Veinstone Chip",
-          "description": "",
+          "description": "Mining material - Veinstone Chip can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3092,7 +3092,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "verdant_ore",
           "name": "Verdant Ore",
-          "description": "",
+          "description": "Mining material - Verdant Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -3105,7 +3105,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -3148,7 +3148,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "copper_ore",
           "name": "Copper Ore",
-          "description": "",
+          "description": "Mining material - Copper Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3161,7 +3161,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "veinstone_chip",
           "name": "Veinstone Chip",
-          "description": "",
+          "description": "Mining material - Veinstone Chip can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3174,7 +3174,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "verdant_ore",
           "name": "Verdant Ore",
-          "description": "",
+          "description": "Mining material - Verdant Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -3187,7 +3187,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -3230,7 +3230,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "copper_ore",
           "name": "Copper Ore",
-          "description": "",
+          "description": "Mining material - Copper Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3243,7 +3243,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "veinstone_chip",
           "name": "Veinstone Chip",
-          "description": "",
+          "description": "Mining material - Veinstone Chip can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3256,7 +3256,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "verdant_ore",
           "name": "Verdant Ore",
-          "description": "",
+          "description": "Mining material - Verdant Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -3269,7 +3269,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -3317,7 +3317,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "copper_ore",
           "name": "Copper Ore",
-          "description": "",
+          "description": "Mining material - Copper Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3330,7 +3330,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "maple_log",
           "name": "Maple Log",
-          "description": "",
+          "description": "Woodcutting material - Maple Log can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3343,7 +3343,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "malachite_shard",
           "name": "Malachite Shard",
-          "description": "",
+          "description": "Mining material - Malachite Shard can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -3356,7 +3356,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -3404,7 +3404,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "copper_ore",
           "name": "Copper Ore",
-          "description": "",
+          "description": "Mining material - Copper Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3417,7 +3417,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "maple_log",
           "name": "Maple Log",
-          "description": "",
+          "description": "Woodcutting material - Maple Log can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3430,7 +3430,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "malachite_shard",
           "name": "Malachite Shard",
-          "description": "",
+          "description": "Mining material - Malachite Shard can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -3443,7 +3443,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -3486,7 +3486,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "copper_ore",
           "name": "Copper Ore",
-          "description": "",
+          "description": "Mining material - Copper Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3499,7 +3499,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "maple_log",
           "name": "Maple Log",
-          "description": "",
+          "description": "Woodcutting material - Maple Log can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3512,7 +3512,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "malachite_shard",
           "name": "Malachite Shard",
-          "description": "",
+          "description": "Mining material - Malachite Shard can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -3525,7 +3525,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -3573,7 +3573,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "veinstone_chip",
           "name": "Veinstone Chip",
-          "description": "",
+          "description": "Mining material - Veinstone Chip can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3586,7 +3586,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "amber_syrup",
           "name": "Amber Syrup",
-          "description": "",
+          "description": "Woodcutting material - Amber Syrup can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3599,7 +3599,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "honeycomb",
           "name": "Honeycomb",
-          "description": "",
+          "description": "Woodcutting material - Honeycomb can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -3612,7 +3612,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -3655,7 +3655,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "veinstone_chip",
           "name": "Veinstone Chip",
-          "description": "",
+          "description": "Mining material - Veinstone Chip can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3668,7 +3668,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "amber_syrup",
           "name": "Amber Syrup",
-          "description": "",
+          "description": "Woodcutting material - Amber Syrup can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3681,7 +3681,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "honeycomb",
           "name": "Honeycomb",
-          "description": "",
+          "description": "Woodcutting material - Honeycomb can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -3694,7 +3694,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -3737,7 +3737,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "veinstone_chip",
           "name": "Veinstone Chip",
-          "description": "",
+          "description": "Mining material - Veinstone Chip can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3750,7 +3750,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "amber_syrup",
           "name": "Amber Syrup",
-          "description": "",
+          "description": "Woodcutting material - Amber Syrup can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3763,7 +3763,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "honeycomb",
           "name": "Honeycomb",
-          "description": "",
+          "description": "Woodcutting material - Honeycomb can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -3776,7 +3776,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -3824,7 +3824,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "maple_log",
           "name": "Maple Log",
-          "description": "",
+          "description": "Woodcutting material - Maple Log can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3837,7 +3837,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "amber_syrup",
           "name": "Amber Syrup",
-          "description": "",
+          "description": "Woodcutting material - Amber Syrup can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3850,7 +3850,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "sweet_bark_chips",
           "name": "Sweet Bark Chips",
-          "description": "",
+          "description": "Woodcutting material - Sweet Bark Chips can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -3863,7 +3863,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -3906,7 +3906,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "maple_log",
           "name": "Maple Log",
-          "description": "",
+          "description": "Woodcutting material - Maple Log can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3919,7 +3919,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "amber_syrup",
           "name": "Amber Syrup",
-          "description": "",
+          "description": "Woodcutting material - Amber Syrup can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -3932,7 +3932,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "sweet_bark_chips",
           "name": "Sweet Bark Chips",
-          "description": "",
+          "description": "Woodcutting material - Sweet Bark Chips can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -3945,7 +3945,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -3993,7 +3993,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "maple_log",
           "name": "Maple Log",
-          "description": "",
+          "description": "Woodcutting material - Maple Log can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -4006,7 +4006,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "amber_syrup",
           "name": "Amber Syrup",
-          "description": "",
+          "description": "Woodcutting material - Amber Syrup can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -4019,7 +4019,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "sweet_bark_chips",
           "name": "Sweet Bark Chips",
-          "description": "",
+          "description": "Woodcutting material - Sweet Bark Chips can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -4032,7 +4032,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -4075,7 +4075,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "maple_log",
           "name": "Maple Log",
-          "description": "",
+          "description": "Woodcutting material - Maple Log can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -4088,7 +4088,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "honeycomb",
           "name": "Honeycomb",
-          "description": "",
+          "description": "Woodcutting material - Honeycomb can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -4101,7 +4101,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -4149,7 +4149,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "maple_log",
           "name": "Maple Log",
-          "description": "",
+          "description": "Woodcutting material - Maple Log can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -4162,7 +4162,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "honeycomb",
           "name": "Honeycomb",
-          "description": "",
+          "description": "Woodcutting material - Honeycomb can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -4175,7 +4175,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -4223,7 +4223,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "maple_log",
           "name": "Maple Log",
-          "description": "",
+          "description": "Woodcutting material - Maple Log can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -4236,7 +4236,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "honeycomb",
           "name": "Honeycomb",
-          "description": "",
+          "description": "Woodcutting material - Honeycomb can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -4249,7 +4249,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -4292,7 +4292,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "copper_ore",
           "name": "Copper Ore",
-          "description": "",
+          "description": "Mining material - Copper Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -4305,7 +4305,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "verdant_ore",
           "name": "Verdant Ore",
-          "description": "",
+          "description": "Mining material - Verdant Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -4318,7 +4318,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -4361,7 +4361,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "copper_ore",
           "name": "Copper Ore",
-          "description": "",
+          "description": "Mining material - Copper Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -4374,7 +4374,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "verdant_ore",
           "name": "Verdant Ore",
-          "description": "",
+          "description": "Mining material - Verdant Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -4387,7 +4387,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -4435,7 +4435,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "copper_ore",
           "name": "Copper Ore",
-          "description": "",
+          "description": "Mining material - Copper Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -4448,7 +4448,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "verdant_ore",
           "name": "Verdant Ore",
-          "description": "",
+          "description": "Mining material - Verdant Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -4461,7 +4461,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -4509,7 +4509,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -4522,7 +4522,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -4565,7 +4565,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -4578,7 +4578,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -4621,7 +4621,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -4634,7 +4634,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -4682,7 +4682,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "copper_ore",
           "name": "Copper Ore",
-          "description": "",
+          "description": "Mining material - Copper Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -4695,7 +4695,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "honeycomb",
           "name": "Honeycomb",
-          "description": "",
+          "description": "Woodcutting material - Honeycomb can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -4708,7 +4708,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -4721,7 +4721,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -4764,7 +4764,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "maple_log",
           "name": "Maple Log",
-          "description": "",
+          "description": "Woodcutting material - Maple Log can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -4777,7 +4777,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "verdant_ore",
           "name": "Verdant Ore",
-          "description": "",
+          "description": "Mining material - Verdant Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -4790,7 +4790,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -4803,7 +4803,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -4846,7 +4846,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "veinstone_chip",
           "name": "Veinstone Chip",
-          "description": "",
+          "description": "Mining material - Veinstone Chip can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -4859,7 +4859,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "amber_syrup",
           "name": "Amber Syrup",
-          "description": "",
+          "description": "Woodcutting material - Amber Syrup can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -4872,7 +4872,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "malachite_shard",
           "name": "Malachite Shard",
-          "description": "",
+          "description": "Mining material - Malachite Shard can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -4885,7 +4885,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -4928,7 +4928,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "veinstone_chip",
           "name": "Veinstone Chip",
-          "description": "",
+          "description": "Mining material - Veinstone Chip can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -4941,7 +4941,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "honeycomb",
           "name": "Honeycomb",
-          "description": "",
+          "description": "Woodcutting material - Honeycomb can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -4954,7 +4954,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -4967,7 +4967,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -5015,7 +5015,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "maple_log",
           "name": "Maple Log",
-          "description": "",
+          "description": "Woodcutting material - Maple Log can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -5028,7 +5028,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "sweet_bark_chips",
           "name": "Sweet Bark Chips",
-          "description": "",
+          "description": "Woodcutting material - Sweet Bark Chips can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -5041,7 +5041,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -5054,7 +5054,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -5097,7 +5097,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "veinstone_chip",
           "name": "Veinstone Chip",
-          "description": "",
+          "description": "Mining material - Veinstone Chip can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -5110,7 +5110,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "malachite_shard",
           "name": "Malachite Shard",
-          "description": "",
+          "description": "Mining material - Malachite Shard can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -5123,7 +5123,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -5136,7 +5136,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -5179,7 +5179,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "copper_ore",
           "name": "Copper Ore",
-          "description": "",
+          "description": "Mining material - Copper Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -5192,7 +5192,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "verdant_ore",
           "name": "Verdant Ore",
-          "description": "",
+          "description": "Mining material - Verdant Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -5205,7 +5205,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -5218,7 +5218,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -5266,7 +5266,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "maple_log",
           "name": "Maple Log",
-          "description": "",
+          "description": "Woodcutting material - Maple Log can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -5279,7 +5279,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "sweet_bark_chips",
           "name": "Sweet Bark Chips",
-          "description": "",
+          "description": "Woodcutting material - Sweet Bark Chips can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -5292,7 +5292,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -5305,7 +5305,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -5353,7 +5353,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "copper_ore",
           "name": "Copper Ore",
-          "description": "",
+          "description": "Mining material - Copper Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -5366,7 +5366,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "maple_log",
           "name": "Maple Log",
-          "description": "",
+          "description": "Woodcutting material - Maple Log can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -5379,7 +5379,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "sweet_bark_chips",
           "name": "Sweet Bark Chips",
-          "description": "",
+          "description": "Woodcutting material - Sweet Bark Chips can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -5392,7 +5392,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "crystalline_powder",
           "name": "Crystalline Powder",
-          "description": "",
+          "description": "Mining material - Crystalline Powder can be found in 'Slate Shard'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -5440,7 +5440,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "veinstone_chip",
           "name": "Veinstone Chip",
-          "description": "",
+          "description": "Mining material - Veinstone Chip can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -5453,7 +5453,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "amber_syrup",
           "name": "Amber Syrup",
-          "description": "",
+          "description": "Woodcutting material - Amber Syrup can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -5466,7 +5466,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "honeycomb",
           "name": "Honeycomb",
-          "description": "",
+          "description": "Woodcutting material - Honeycomb can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -5479,7 +5479,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -5522,7 +5522,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "maple_log",
           "name": "Maple Log",
-          "description": "",
+          "description": "Woodcutting material - Maple Log can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -5535,7 +5535,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "verdant_ore",
           "name": "Verdant Ore",
-          "description": "",
+          "description": "Mining material - Verdant Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -5548,7 +5548,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -5561,7 +5561,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -5609,7 +5609,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "amber_syrup",
           "name": "Amber Syrup",
-          "description": "",
+          "description": "Woodcutting material - Amber Syrup can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -5622,7 +5622,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "sweet_bark_chips",
           "name": "Sweet Bark Chips",
-          "description": "",
+          "description": "Woodcutting material - Sweet Bark Chips can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -5635,7 +5635,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "honeycomb",
           "name": "Honeycomb",
-          "description": "",
+          "description": "Woodcutting material - Honeycomb can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -5648,7 +5648,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -5691,7 +5691,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "copper_ore",
           "name": "Copper Ore",
-          "description": "",
+          "description": "Mining material - Copper Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -5704,7 +5704,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "maple_log",
           "name": "Maple Log",
-          "description": "",
+          "description": "Woodcutting material - Maple Log can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -5717,7 +5717,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "verdant_ore",
           "name": "Verdant Ore",
-          "description": "",
+          "description": "Mining material - Verdant Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -5730,7 +5730,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -5778,7 +5778,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "copper_ore",
           "name": "Copper Ore",
-          "description": "",
+          "description": "Mining material - Copper Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -5791,7 +5791,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "malachite_shard",
           "name": "Malachite Shard",
-          "description": "",
+          "description": "Mining material - Malachite Shard can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -5804,7 +5804,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "sweet_bark_chips",
           "name": "Sweet Bark Chips",
-          "description": "",
+          "description": "Woodcutting material - Sweet Bark Chips can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -5817,7 +5817,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -5860,7 +5860,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "maple_log",
           "name": "Maple Log",
-          "description": "",
+          "description": "Woodcutting material - Maple Log can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -5873,7 +5873,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "sweet_bark_chips",
           "name": "Sweet Bark Chips",
-          "description": "",
+          "description": "Woodcutting material - Sweet Bark Chips can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -5886,7 +5886,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "honeycomb",
           "name": "Honeycomb",
-          "description": "",
+          "description": "Woodcutting material - Honeycomb can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -5899,7 +5899,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -5947,7 +5947,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "veinstone_chip",
           "name": "Veinstone Chip",
-          "description": "",
+          "description": "Mining material - Veinstone Chip can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -5960,7 +5960,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "verdant_ore",
           "name": "Verdant Ore",
-          "description": "",
+          "description": "Mining material - Verdant Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -5973,7 +5973,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -5986,7 +5986,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "glowing_amber",
           "name": "Glowing Amber",
-          "description": "",
+          "description": "Woodcutting material - Glowing Amber can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
@@ -6034,7 +6034,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "veinstone_chip",
           "name": "Veinstone Chip",
-          "description": "",
+          "description": "Mining material - Veinstone Chip can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Common
@@ -6047,7 +6047,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "verdant_ore",
           "name": "Verdant Ore",
-          "description": "",
+          "description": "Mining material - Verdant Ore can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -6060,7 +6060,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "honeycomb",
           "name": "Honeycomb",
-          "description": "",
+          "description": "Woodcutting material - Honeycomb can be found when chopping 'Amberleaf Maple'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Uncommon
@@ -6073,7 +6073,7 @@ export const RECIPES_CONTENT = [
         "item": {
           "id": "living_amber",
           "name": "Living Amber",
-          "description": "",
+          "description": "Mining material - Living Amber can be found in 'Copperbloom Vein'",
           "stackable": true,
           "itemType": ItemType.Material,
           "rarity": Rarity.Rare
