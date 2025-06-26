@@ -7,6 +7,7 @@ import { InviteToGuild } from '../../../../../shared/models/requestDtos/guilds/i
 import { TabsComponent } from '../../../../../shared/components/tabs/tabs.component';
 import { GuildStateService } from '../../../../../core/services/api/guild/guild-state.service';
 import { GuildBuildingsComponent } from './guild-buildings/guild-buildings.component';
+import { GuildVaultComponent } from './guild-vault/guild-vault.component';
 
 @Component({
   selector: 'app-in-a-guild',
@@ -16,6 +17,7 @@ import { GuildBuildingsComponent } from './guild-buildings/guild-buildings.compo
     GuildInfoComponent,
     TabsComponent,
     GuildBuildingsComponent,
+    GuildVaultComponent,
   ],
   templateUrl: './in-a-guild.component.html',
 })

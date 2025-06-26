@@ -1,22 +1,13 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from '../api.service';
-import { BehaviorSubject, catchError, map, Observable, throwError } from 'rxjs';
-import { Guild, GuildSimple } from '../../../../shared/models/Dtos/guild/guild';
-import { GuildInvite } from '../../../../shared/models/Dtos/guild/guildInvite';
+import { catchError, map, Observable, throwError } from 'rxjs';
 import { InviteToGuild } from '../../../../shared/models/requestDtos/guilds/inviteToGuild';
+import { GuildResourceType } from '../../../../shared/models/Dtos/guild/guildResourceType';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GuildService {
-  private _guild$ = new BehaviorSubject<Guild | null>(null);
-  private _invites$ = new BehaviorSubject<GuildInvite[]>([]);
-  private _allGuilds$ = new BehaviorSubject<GuildSimple[]>([]);
-
-  readonly guild$ = this._guild$.asObservable();
-  readonly invites$ = this._invites$.asObservable();
-  readonly allGuilds$ = this._allGuilds$.asObservable();
-
   constructor(private api: ApiService) {}
 
   create(name: string) {
@@ -63,6 +54,30 @@ export class GuildService {
 
       catchError(() => {
         return throwError(() => new Error('Failed to get guild upgrades'));
+      }),
+    );
+  }
+
+  donate(donations: { type: GuildResourceType; amount: number }[]) {
+    return this.api.post('guild/donate', donations).pipe(
+      map((donations) => {
+        return donations;
+      }),
+
+      catchError(() => {
+        return throwError(() => new Error('Failed to donate to guild'));
+      }),
+    );
+  }
+
+  upgradeGuildBuilding(id: string) {
+    return this.api.post('guild/upgradeGuildBuilding', id).pipe(
+      map((success) => {
+        return success;
+      }),
+
+      catchError(() => {
+        return throwError(() => new Error('Failed to upgrade building'));
       }),
     );
   }

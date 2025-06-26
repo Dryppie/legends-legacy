@@ -1,4 +1,6 @@
-﻿using Application.Interfaces.Services.LL;
+﻿using Application.Common.Interfaces;
+using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Entities;
 using Domain.Extensions.Guilds;
 using Domain.Models.Guilds;
 
@@ -6,10 +8,16 @@ namespace Services.LL.Guilds;
 public class GuildService : IGuildService
 {
     private readonly IGuildRepository _guildRepository;
+    private readonly ICharacterService _characterService;
+    private readonly IInventoryService _inventoryService;
+    private readonly IDbContext _context;
 
-    public GuildService(IGuildRepository guildRepository)
+    public GuildService(IGuildRepository guildRepository, ICharacterService characterService, IInventoryService inventoryService, IDbContext context)
     {
         _guildRepository = guildRepository;
+        _characterService = characterService;
+        _inventoryService = inventoryService;
+        _context = context;
     }
 
     #region guild
@@ -85,4 +93,67 @@ public class GuildService : IGuildService
 
     public async Task SaveChangesAsync(CancellationToken cancellationToken) =>
         await _guildRepository.SaveChangesAsync(cancellationToken);
+
+    public async Task<bool> DonateToGuildAsync(Guid characterId, Dictionary<GuildResourceType, int> donations, CancellationToken cancellationToken)
+    {
+        var guild = await _guildRepository.GetMyGuildAsync(characterId, cancellationToken);
+        if (guild == null) return false;
+
+        var character = await _characterService.GetMyCharacterOverviewAsync(characterId, cancellationToken);
+        if (character == null) return false;
+
+        var inventory = await _inventoryService.GetInventoryByIdAsync(characterId, cancellationToken);
+        if (inventory == null) return false;
+
+        foreach (var (resourceType, amount) in donations)
+        {
+            if (amount <= 0)
+                continue;
+
+            switch (resourceType)
+            {
+                case GuildResourceType.Cinders:
+                    if (character.Cinders < amount)
+                        return false;
+                    character.Cinders -= amount;
+                    break;
+
+                case GuildResourceType.Soulstones:
+                    if (character.Soulstones < amount)
+                        return false;
+                    character.Soulstones -= amount;
+                    break;
+
+                default:
+                    // Inventory-based resources
+                    var matchingItem = inventory.InventoryItems
+                        .FirstOrDefault(i =>
+                            i.ItemInstance?.ItemBase?.Name == resourceType.ToString());
+
+                    if (matchingItem == null || matchingItem.Quantity < amount)
+                        return false;
+
+                    if (matchingItem.Quantity == amount)
+                    {
+                        _context.InventoryItems.Remove(matchingItem);
+                    }
+                    else
+                    {
+                        matchingItem.Quantity -= amount;
+                    }
+
+                    break;
+            }
+
+            // Add to guild vault or resource list (pseudo, depends on how you're storing it)
+            var resource = guild.Resources.FirstOrDefault(r => r.Resource == resourceType);
+            if (resource == null)
+                guild.Resources.Add(new GuildResource { Resource = resourceType, Amount = amount });
+            else
+                resource.Amount += amount;
+        }
+
+        await _guildRepository.SaveChangesAsync(cancellationToken);
+        return true;
+    }
 }

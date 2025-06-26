@@ -6,6 +6,7 @@ import { InviteToGuild } from '../../../../shared/models/requestDtos/guilds/invi
 import { GameSocketService } from '../../real-time/game-socket.service';
 import { GuildService } from './guild.service';
 import { BuildingUpgradeView } from '../../../../shared/models/guilds/buildings/buildingUpgradeView';
+import { GuildResourceType } from '../../../../shared/models/Dtos/guild/guildResourceType';
 
 @Injectable({ providedIn: 'root' })
 export class GuildStateService {
@@ -108,6 +109,80 @@ export class GuildStateService {
         next: () => {
           this._guild.set(null);
           this.refresh();
+        },
+        error: (e) => this._error.set(e.message ?? 'Failed to disband guild'),
+      });
+  }
+
+  donate(donations: { type: GuildResourceType; amount: number }[]) {
+    this._loading.set(true);
+
+    this.service
+      .donate(donations)
+      .pipe(finalize(() => this._loading.set(false)))
+      .subscribe({
+        next: () => {
+          const currentGuild = this._guild();
+          if (!currentGuild) return;
+
+          const updatedResources = [...currentGuild.resources];
+
+          for (const donation of donations) {
+            const existing = updatedResources.find(
+              (r) => r.resource === donation.type,
+            );
+            if (existing) {
+              existing.amount += donation.amount;
+            } else {
+              updatedResources.push({
+                resource: donation.type,
+                amount: donation.amount,
+              });
+            }
+          }
+
+          this._guild.set({ ...currentGuild, resources: updatedResources });
+        },
+        error: (e) => this._error.set(e.message ?? 'Failed to donate to guild'),
+      });
+  }
+
+  upgradeGuildBuilding(upgrade: BuildingUpgradeView) {
+    this._loading.set(true);
+
+    this.service
+      .upgradeGuildBuilding(upgrade.definition.id)
+      .pipe(finalize(() => this._loading.set(false)))
+      .subscribe({
+        next: () => {
+          const guild = this._guild();
+
+          // Shallow clone to trigger reactivity
+          const updatedResources = [...(guild?.resources ?? [])];
+
+          for (const [resourceType, cost] of Object.entries(
+            upgrade.nextCost ?? {},
+          )) {
+            const res = updatedResources.find(
+              (r) => r.resource === resourceType,
+            );
+            if (res) {
+              res.amount -= cost;
+              if (res.amount < 0) res.amount = 0; // safety
+            }
+          }
+
+          this._guild.set({
+            ...guild!,
+            resources: updatedResources,
+          });
+
+          // Optimistically bump upgrade level
+          upgrade.level += 1;
+
+          // TODO: Recalculate `upgrade.nextCost` if needed, or set to null if max level
+          // For now, you may want to just trigger recompute logic
+          // this.refreshUpgrades(); // optional, or adjust locally too
         },
         error: (e) => this._error.set(e.message ?? 'Failed to disband guild'),
       });

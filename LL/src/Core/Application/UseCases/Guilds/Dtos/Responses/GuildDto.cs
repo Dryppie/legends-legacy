@@ -15,6 +15,7 @@ public class GuildDto : IMapFrom<Guild>
     public string OwnerName { get; set; } = string.Empty;
     public List<GuildMemberDto> Members { get; set; } = [];
     public List<GuildInviteDto> Invites { get; set; } = [];
+    public List<GuildResource> Resources { get; set; } = [];
 
     public void Mapping(Profile profile)
     {

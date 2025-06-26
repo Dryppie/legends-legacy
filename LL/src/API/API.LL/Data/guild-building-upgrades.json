@@ -60,5 +60,28 @@
       "perLevel": 0.5
     },
     "type": "Combat"
+  },
+  {
+    "id": "guild.building.obelisk",
+    "name": "Obelisk",
+    "maxLevel": 10,
+    "description": "Increases the drop rate of Soulstones.",
+    "costCurves": [
+      {
+        "resource": "cinders",
+        "base": 150000,
+        "increment": 50000
+      },
+      {
+        "resource": "soulstones",
+        "base": 20,
+        "increment": 10
+      }
+    ],
+    "effect": {
+      "stat": "SoulstoneDropRate",
+      "perLevel": 1
+    },
+    "type": "Misc"
   }
 ]

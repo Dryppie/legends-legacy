@@ -1,17 +1,19 @@
-<div class="flex h-full w-full flex-col text-sm text-neutral-200 lg:flex-row">
+<div
+  class="flex h-full w-full flex-col overflow-hidden text-sm text-neutral-200 lg:flex-row"
+>
   <!-- Building Details -->
   <div
     *ngIf="selected() as selectedUpgrade"
-    class="space-y-6 p-4 lg:order-2 lg:w-2/3"
+    class="space-y-2 p-4 lg:order-2 lg:w-2/3"
   >
-    <h2 class="text-xl font-semibold text-primary">
+    <h2 class="font-semibold text-primary">
       {{ selectedUpgrade.definition.name }}
     </h2>
-    <p class="mb-4 text-primary">
+    <p>
       {{ selectedUpgrade.definition.description }}
     </p>
 
-    <div class="grid grid-cols-2 gap-4 text-sm">
+    <div class="flex justify-between gap-20 text-sm sm:justify-normal">
       <div>
         <div class="font-medium text-primary">Current Level</div>
         <div>
@@ -31,56 +33,32 @@
       </div>
     </div>
 
-    <div class="border-t border-zinc-300/30 pt-4">
-      <h3 class="mb-2 font-semibold text-primary">Upgrade Requirements</h3>
-      <ul
-        *ngFor="let cost of selectedUpgrade.definition.costCurves"
-        class="list-inside list-disc space-y-1"
-      >
-        <li>
-          {{
-            cost.base + cost.increment * selectedUpgrade.level | numberFormat
-          }}
-          {{ cost.resource }}
-        </li>
-      </ul>
-    </div>
-
-    <div class="border-t border-zinc-300/30 pt-4">
-      <h3 class="mb-2 font-semibold text-primary">Donate Resources</h3>
-      <div class="space-y-3">
-        <div class="flex items-center gap-2">
-          <label class="w-24 text-primary">Cinders</label>
-          <input
-            type="number"
-            class="w-32 rounded border border-zinc-300/30 bg-neutral-900 px-2 py-1"
-            placeholder="0"
-          />
-        </div>
-        <div class="flex items-center gap-2">
-          <label class="w-24 text-primary">Soulstones</label>
-          <input
-            type="number"
-            class="w-32 rounded border border-zinc-300/30 bg-neutral-900 px-2 py-1"
-            placeholder="0"
-          />
-        </div>
-        <div class="flex items-center gap-2">
-          <label class="w-24 text-primary">Items</label>
-          <input
-            type="text"
-            class="w-64 rounded border border-zinc-300/30 bg-neutral-900 px-2 py-1"
-            placeholder="e.g. Tempered Ingot x5"
-          />
-        </div>
-        <div class="flex items-center gap-2">
-          <label class="w-24 text-primary">Essences</label>
-          <input
-            type="text"
-            class="w-64 rounded border border-zinc-300/30 bg-neutral-900 px-2 py-1"
-            placeholder="e.g. Essence of Fire x1"
-          />
-        </div>
+    <div
+      class="flex flex-wrap justify-between border-y border-zinc-300/30 py-4"
+    >
+      <div>
+        <h3 class="mb-2 font-semibold text-primary">Upgrade Requirements</h3>
+        <ul
+          *ngFor="let cost of selectedUpgrade.definition.costCurves"
+          class="list-inside list-disc space-y-1"
+        >
+          <li>
+            {{
+              cost.base + cost.increment * selectedUpgrade.level | numberFormat
+            }}
+            {{ cost.resource | humanize }}
+            <span class="text-muted text-xs">
+              ({{ getGuildResourceAmount(cost.resource) | numberFormat }})
+            </span>
+          </li>
+        </ul>
+      </div>
+      <div class="place-self-end pt-2">
+        <app-regular-button
+          [disabled]="!canUpgrade()"
+          (pressed)="upgradeSelected()"
+          text="Upgrade"
+        ></app-regular-button>
       </div>
     </div>
   </div>
@@ -88,7 +66,7 @@
   <!-- Buildings List -->
   <div
     *ngIf="upgrades() as upgrades"
-    class="space-y-3 p-4 lg:order-1 lg:w-1/3 lg:border-r lg:border-zinc-300/30"
+    class="space-y-3 overflow-y-auto border-zinc-300/30 p-4 lg:order-1 lg:w-1/3 lg:border-r lg:border-t-0"
   >
     <h2 class="mb-2 text-lg font-semibold text-primary">Buildings</h2>
 
@@ -97,45 +75,17 @@
         class="rounded-md border border-zinc-300/30 p-3"
         (click)="select(upgrade)"
       >
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between pb-1">
           <span class="font-semibold">{{ upgrade.definition.name }}</span>
-          <button
-            class="rounded border border-zinc-300/30 px-3 py-1 hover:bg-primary/30"
-          >
-            Upgrade
-          </button>
         </div>
-        <div class="text-xs text-primary">{{ upgrade.level }}</div>
+        <div class="text-xs text-primary">Level - {{ upgrade.level }}</div>
         <div class="mt-2 h-1 rounded bg-zinc-700">
-          <div class="h-1 w-2/5 rounded bg-primary"></div>
+          <div
+            class="h-1 rounded bg-primary transition-all duration-300 ease-in-out"
+            [style.width.%]="getUpgradeProgress(upgrade) * 100"
+          ></div>
         </div>
       </div>
-
-      <!-- <div class="border border-zinc-300/30 p-3">
-        <div class="flex items-center justify-between">
-          <span class="font-semibold">Sanctuary</span>
-          <button class="text-primary hover:underline">Contribute</button>
-        </div>
-        <div class="text-xs text-primary">Level 1</div>
-      </div> -->
-
-      <!-- <div
-        *ngFor="
-          let building of [
-            'Essence Vault',
-            'Donation Bank',
-            'Crafter’s Forge',
-            'Summoning Altar',
-            'Market Hall',
-          ]
-        "
-        class="border border-zinc-300/30 p-3"
-      >
-        <div class="flex items-center justify-between">
-          <span class="font-semibold">{{ building }}</span>
-          <span class="text-xs text-primary">Level 1</span>
-        </div>
-      </div> -->
     </div>
   </div>
 </div>

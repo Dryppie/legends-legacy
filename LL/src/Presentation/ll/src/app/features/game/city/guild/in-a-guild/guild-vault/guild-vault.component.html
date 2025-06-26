@@ -1,0 +1,53 @@
+<div
+  class="flex h-full w-full flex-col overflow-y-auto text-sm text-neutral-200 md:flex-row"
+>
+  <div
+    class="space-y-4 border-b border-zinc-300/30 p-4 pt-4 md:border-b-0 md:border-r md:border-zinc-300/30"
+  >
+    <div *ngIf="guild() as guild" class="flex flex-col gap-2">
+      <h2 class="font-semibold text-primary">Guild Resources</h2>
+      <div class="space-y-2 border-b border-zinc-300/30 pb-4">
+        <div
+          *ngFor="let resource of allResources"
+          class="flex items-center justify-between gap-2"
+        >
+          <label class="w-28 text-primary">{{
+            resource.type | humanize
+          }}</label>
+          <label>{{ resource.amount | numberFormat }}</label>
+        </div>
+      </div>
+    </div>
+    <div class="flex flex-col gap-2 pb-4">
+      <h2 class="font-semibold text-primary">Donate</h2>
+      <div class="space-y-2">
+        <div
+          *ngFor="let type of allResourceTypes"
+          class="flex items-center justify-between gap-2"
+        >
+          <label class="w-28 text-primary">
+            {{ type | humanize }}
+          </label>
+          <div class="flex items-center gap-1">
+            <label> {{ formatNumber(availableAmounts[type]) }} / </label>
+            <input
+              type="text"
+              class="no-spinner w-28 rounded border border-zinc-300/30 bg-neutral-900 px-2 py-1"
+              placeholder="0"
+              min="0"
+              [value]="formatNumber(donationForm[type])"
+              (input)="onFormattedInput($event, type)"
+            />
+          </div>
+        </div>
+      </div>
+
+      <app-regular-button
+        [disabled]="disabled()"
+        (pressed)="donate()"
+        text="Donate"
+      >
+      </app-regular-button>
+    </div>
+  </div>
+</div>

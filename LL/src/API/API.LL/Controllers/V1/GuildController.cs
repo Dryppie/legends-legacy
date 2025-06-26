@@ -3,11 +3,13 @@ using Application.UseCases.Guilds.Commands.ApplyToGuild;
 using Application.UseCases.Guilds.Commands.ApproveApplication;
 using Application.UseCases.Guilds.Commands.CreateGuild;
 using Application.UseCases.Guilds.Commands.DisbandGuild;
+using Application.UseCases.Guilds.Commands.DonateToGuild;
 using Application.UseCases.Guilds.Commands.Invite;
 using Application.UseCases.Guilds.Commands.InviteCharacterByName;
 using Application.UseCases.Guilds.Commands.LeaveGuild;
 using Application.UseCases.Guilds.Commands.RejectApplication;
 using Application.UseCases.Guilds.Commands.RejectInvite;
+using Application.UseCases.Guilds.Commands.UpgradeGuildBuilding;
 using Application.UseCases.Guilds.Dtos.Requests;
 using Application.UseCases.Guilds.Dtos.Responses;
 using Application.UseCases.Guilds.Queries.GetAllGuilds;
@@ -15,6 +17,7 @@ using Application.UseCases.Guilds.Queries.GetGuildUpgrades;
 using Application.UseCases.Guilds.Queries.GetMyGuild;
 using Application.UseCases.Guilds.Queries.GetMyInvites;
 using Common.Primitives;
+using Domain.Models.Guilds;
 using Domain.Models.Guilds.Buildings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -80,4 +83,14 @@ public class GuildController : BaseController
     [HttpGet("GetUpgrades")]
     public async Task<ActionResult<Response<List<BuildingUpgradeView>>>> GetUpgrades() =>
         await Mediator.Send(new GetGuildUpgradesQuery(CurrentCharacterGuid));
+
+    public record GuildDonation(GuildResourceType Type, int Amount);
+
+    [HttpPost("Donate")]
+    public async Task<ActionResult<Response<bool>>> Donate([FromBody] List<GuildDonation> donations) =>
+        await Mediator.Send(new DonateToGuildCommand(CurrentCharacterGuid, donations.ToDictionary(k => k.Type, k => k.Amount)));
+
+    [HttpPost("UpgradeGuildBuilding")]
+    public async Task<ActionResult<Response<bool>>> UpgradeGuildBuilding([FromBody] string id) =>
+        await Mediator.Send(new UpgradeGuildBuildingCommand(CurrentCharacterGuid, id));
 }
