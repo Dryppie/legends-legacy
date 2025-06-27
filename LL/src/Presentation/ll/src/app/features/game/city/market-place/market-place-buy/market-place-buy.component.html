@@ -95,6 +95,7 @@
         Unit price: {{ sel.unitPrice | numberFormat }} Cinders
       </p>
       <p class="text-sm text-neutral-300">Quantity: {{ sel.quantity }}</p>
+      <p class="text-sm text-neutral-400">Currently in inventory: {{ userQuantity() }}</p>
       <!-- Quantity selector appears only when > 1 items are in the listing -->
       <div *ngIf="sel.quantity > 1" class="flex items-center gap-2">
         <label for="buyQty" class="whitespace-nowrap text-sm text-neutral-300"

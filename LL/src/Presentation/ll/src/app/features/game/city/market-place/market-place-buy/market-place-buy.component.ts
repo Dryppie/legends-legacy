@@ -32,6 +32,7 @@ import {
 } from 'rxjs/operators';
 import { EquipmentTypePipe } from '../../../../../shared/pipes/equipment/equipment-type-format/equipment-type.pipe';
 import { ItemComponent } from '../../../../../shared/components/item/item.component';
+import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 
 @Component({
   selector: 'app-market-place-buy',
@@ -134,7 +135,11 @@ export class MarketPlaceBuyComponent implements OnInit {
     return items;
   });
 
-  constructor(private readonly marketplaceState: MarketplaceStateService) {
+  constructor(
+    private readonly marketplaceState: MarketplaceStateService,
+    private readonly inventoryState: InventoryStateService
+  ) {
+    this.inventoryState.load();
     /* Keep our local copy of listings in sync with the store */
     effect(
       () => {
@@ -209,6 +214,19 @@ export class MarketPlaceBuyComponent implements OnInit {
         /* Materials or other stackables */
         return `${base.rarity}\n${base.description}`;
     }
+  });
+
+  readonly userQuantity = computed(() => {
+    const listing = this.selectedListing();
+    if (!listing) return 0;
+  
+    const inventory = this.inventoryState.items();
+    const listingBaseId = listing.itemInstance.itemBase.id;
+
+    const matchingItem = inventory.find((invItem) =>
+      invItem.itemInstance.itemBase.id === listingBaseId
+    );
+    return matchingItem?.quantity || 0;
   });
 
   buyoutListing(): void {
