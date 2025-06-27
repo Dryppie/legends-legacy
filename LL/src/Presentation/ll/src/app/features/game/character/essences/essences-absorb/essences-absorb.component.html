@@ -9,20 +9,33 @@
         *ngIf="selectedEssence() as selectedEssence; else noEssence"
       >
         <app-essence-details [essence]="selectedEssence"></app-essence-details>
-        <div class="mt-4 flex items-center gap-2">
-          <ng-container *ngIf="canEquipSelected() as canEquip; else nothing">
-            <app-regular-button
-              [disabled]="!canEquipSelected()"
-              (pressed)="absorb()"
-            >
-              Absorb essence
-            </app-regular-button>
+        <div class="mt-4 flex items-center justify-between gap-2">
+          <ng-container
+            *ngIf="areSlotsAvailable() as canEquip; else noSlotsAvailable"
+          >
+            <ng-container *ngIf="!isEssenceAbsorbed(); else essenceIsAbsorbed">
+              <app-regular-button
+                [disabled]="!areSlotsAvailable()"
+                (pressed)="absorb()"
+                text="Absorb essence"
+              >
+              </app-regular-button>
+            </ng-container>
+            <ng-template #essenceIsAbsorbed>
+              <span class="text-rose-500">
+                This essence is already absorbed
+              </span>
+            </ng-template>
           </ng-container>
-          <ng-template #nothing>
-            <span *ngIf="!canEquipSelected()" class="text-rose-500">
-              No essence slots available
-            </span>
+          <ng-template #noSlotsAvailable>
+            <span class="text-rose-500"> No essence slots available </span>
           </ng-template>
+          <app-regular-button
+            (pressed)="openModal()"
+            variant="danger"
+            text="Shatter"
+          >
+          </app-regular-button>
         </div>
       </ng-container>
       <ng-template #noEssence>
@@ -34,10 +47,12 @@
   </div>
   <!-- INVENTORY ESSENCES LIST -->
   <div class="flex h-full w-full flex-col space-y-2 overflow-y-auto md:order-1">
-    <ng-container *ngIf="inventoryEssences().length; else noEssences">
+    <ng-container
+      *ngIf="inventoryEssences() as inventoryEssences; else noEssences"
+    >
       <h2 class="flex text-primary">Essences in your inventory</h2>
       <div
-        *ngFor="let inventoryItem of inventoryEssences()"
+        *ngFor="let inventoryItem of inventoryEssences"
         class="cursor-pointer rounded-lg border p-3 hover:border-primary/60 hover:bg-zinc-300/30"
         (click)="selectEssence(inventoryItem)"
         [class.border-primary]="
@@ -66,5 +81,68 @@
         You have no essences to absorb.
       </p>
     </ng-template>
+  </div>
+</div>
+
+<div
+  *ngIf="showModal"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+  (click)="closeModal()"
+>
+  <div
+    class="w-96 rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="mb-4">
+      <h3 class="text-primary">Shatter {{ selectedEssence()?.name }}</h3>
+      <label class="italic text-zinc-300"
+        >You gain 1 Soul Dust for every Essence you shatter</label
+      >
+    </div>
+
+    <div class="mb-4">
+      <label class="mb-1 block text-sm text-white">
+        Quantity to Shatter (Owned: {{ selectedEssenceQuantity() }})
+      </label>
+      <input
+        type="number"
+        min="1"
+        [max]="selectedEssenceQuantity()"
+        [(ngModel)]="shatterAmount"
+        class="no-spinner w-full rounded border border-light_gray bg-texture p-2 text-white"
+      />
+      <div class="text-gray-400 mt-2 flex justify-end gap-2 text-xs">
+        <button
+          type="button"
+          (click)="setShatterAmount(1)"
+          class="underline hover:text-white"
+        >
+          One (1)
+        </button>
+        <button
+          type="button"
+          (click)="setShatterAmount(selectedEssenceQuantity() - 1)"
+          class="underline hover:text-white"
+        >
+          All but 1 ({{ selectedEssenceQuantity() - 1 }})
+        </button>
+        <button
+          type="button"
+          (click)="setShatterAmount(selectedEssenceQuantity())"
+          class="underline hover:text-white"
+        >
+          Max ({{ selectedEssenceQuantity() }})
+        </button>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-2">
+      <app-regular-button (pressed)="closeModal()">Cancel</app-regular-button>
+      <app-regular-button
+        [disabled]="disableConfirmShatterButton()"
+        (pressed)="confirmShatter()"
+        >Shatter</app-regular-button
+      >
+    </div>
   </div>
 </div>

@@ -30,4 +30,5 @@ public interface IInventoryService
     Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, MarketPlaceListing marketplaceListing, CancellationToken cancellationToken);
     Task<bool> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken);
     Task AddItemToInventoryFromMarketPlace(Guid characterId, InventoryItem inventoryItem, CancellationToken cancellationToken);
+    Task<InventoryItem> ShatterEssenceAsync(Guid characterId, Guid essenceId, int amount, CancellationToken cancellationToken);
 }

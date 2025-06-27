@@ -4,20 +4,26 @@
   <!-- ESSENCE DESCRIPTION + CRAFTING QUEUE -->
   <div class="flex h-full w-full flex-col space-y-2 overflow-y-auto md:order-2">
     <!-- ESSENCE DESCRIPTION -->
-    <div class="rounded-lg border border-light_gray bg-texture p-4">
+    <div class="rounded-lg border border-light_gray bg-texture p-4 pb-1">
       <ng-container *ngIf="selectedSlot() as selectedSlot; else noSlotSelected">
         <ng-container
           *ngIf="selectedSlot.occupiedEssence as essence; else emptySlot"
         >
           <app-essence-details [essence]="essence"></app-essence-details>
-          <div class="mt-4 flex items-center gap-2">
+          <div class="mt-4 flex w-full flex-col items-center gap-1">
             <ng-container *ngIf="canEquipSelected() as canEquip; else nothing">
               <app-regular-button
+                class="w-full"
                 [disabled]="!canEquipSelected()"
                 (pressed)="remove()"
+                variant="danger"
+                fullWidth
+                text="Remove essence"
               >
-                Remove essence
               </app-regular-button>
+              <label class="italic text-zinc-300">
+                Careful. Removing an essence is permanent.
+              </label>
             </ng-container>
             <ng-template #nothing>
               <span *ngIf="!canEquipSelected()" class="text-rose-500">

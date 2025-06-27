@@ -6,24 +6,15 @@ import {
   EquipmentSlotType,
 } from '../../../../shared/models/Dtos/equipment-slots/equipmentSlot';
 import { EquipmentInstance } from '../../../../shared/models/item';
-import { CharacterManagerService } from '../../client-side/character-manager/character-manager.service';
-import { InventoryStateService } from '../inventory/inventory-state.service';
-import { InventoryItem } from '../../../../shared/models/inventoryItem';
 
 @Injectable({
   providedIn: 'root',
 })
 export class EquipmentService {
-  constructor(
-    private apiService: ApiService,
-    private characterManager: CharacterManagerService,
-    private inventoryState: InventoryStateService,
-  ) {}
+  constructor(private apiService: ApiService) {}
 
   public getEquipment(): Observable<EquipmentSlot[]> {
-    return this.apiService
-      .get('equipment')
-      .pipe(tap((equipment) => this.characterManager.setEquipment(equipment)));
+    return this.apiService.get('equipment').pipe();
   }
 
   public equipEquipment(equipment: EquipmentInstance) {

@@ -88,6 +88,7 @@ export class GuildVaultComponent {
 
     this.guildState.donate(donations);
     this.updateCurrenciesAfterDonation(donations);
+    this.updateAfterDonation(donations);
   }
 
   updateCurrenciesAfterDonation(
@@ -109,29 +110,28 @@ export class GuildVaultComponent {
     });
   }
 
-  // updateAfterDonation(
-  //   donations: { type: GuildResourceType; amount: number }[],
-  // ) {
-  //   const inventory = this.items(); // signal
-  //   if (!inventory) return;
+  updateAfterDonation(
+    donations: { type: GuildResourceType; amount: number }[],
+  ) {
+    const items = this.items(); // signal
+    if (!items) return;
 
-  //   const itemTypes: GuildResourceType[] = ['TemperedScrap', 'SoulDust'];
-  //   const updatedItems = [...inventory.items];
+    const itemTypes: GuildResourceType[] = [
+      GuildResourceType.TemperedScrap,
+      GuildResourceType.SoulDust,
+    ];
+    const updatedItems = [...items];
 
-  //   for (const donation of donations) {
-  //     if (!itemTypes.includes(donation.type)) continue;
+    for (const donation of donations) {
+      if (!itemTypes.includes(donation.type)) continue;
 
-  //     const item = updatedItems.find((i) => i.resource === donation.type);
-  //     if (item) {
-  //       item.quantity = Math.max(0, item.quantity - donation.amount);
-  //     }
-  //   }
-
-  //   this.inventoryState.decrementItem({
-  //     ...inventory,
-  //     items: updatedItems,
-  //   });
-  // }
+      const item = updatedItems.find(
+        (i) => i.itemInstance.itemBase.name.replace(' ', '') === donation.type,
+      );
+      if (!item) return;
+      this.inventoryState.decrementItem(item.itemInstance.id, donation.amount);
+    }
+  }
 
   get availableAmounts(): Record<GuildResourceType, number> {
     const result: Partial<Record<GuildResourceType, number>> = {};
@@ -139,18 +139,6 @@ export class GuildVaultComponent {
     const items = this.items() ?? [];
     const character = this.character();
 
-    // Inventory-based resources
-    // for (const item of items) {
-    //   if (
-    //     Object.values(GuildResourceType)
-    //       .toString()
-    //       .includes(item.itemInstance.itemBase.name)
-    //   ) {
-    //     result[item.itemInstance.itemBase.name as GuildResourceType] =
-    //       (result[item.itemInstance.itemBase.name as GuildResourceType] ?? 0) +
-    //       item.quantity;
-    //   }
-    // }
     if (items) {
       result[GuildResourceType.TemperedScrap] =
         items.find((i) => i.itemInstance.itemBase.name === 'Tempered Scrap')

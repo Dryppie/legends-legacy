@@ -245,4 +245,75 @@ public class InventoryRepository : IInventoryRepository
         await _context.InventoryItems.AddAsync(itemToAdd, cancellationToken);
         return true;
     }
+
+    public async Task<InventoryItem?> ShatterEssenceAsync(Guid characterId, Guid essenceId, int amount, CancellationToken cancellationToken)
+    {
+        // Fetch all inventory items for this character in a single query
+        var inventoryItems = await _context.InventoryItems
+            .Where(i => i.InventoryId == characterId)
+            .Include(i => i.ItemInstance)
+                .ThenInclude(ii => ii.ItemBase)
+                    .ThenInclude(ib => (ib as EssenceItemBase).Essence)
+            .ToListAsync(cancellationToken);
+
+        // Find the essence item
+        var essenceInventoryItem = inventoryItems
+            .FirstOrDefault(i =>
+                i.ItemInstance.ItemBase is EssenceItemBase essenceBase &&
+                essenceBase.Essence.Id == essenceId);
+
+        if (essenceInventoryItem == null) return null;
+        if (amount <= 0 || amount > essenceInventoryItem.Quantity) return null;
+
+        // Define Soul Dust gain logic
+        const int soulDustPerEssence = 1;
+        var soulDustGained = soulDustPerEssence * amount;
+
+        // Reduce or remove essence
+        if (essenceInventoryItem.Quantity == amount)
+            _context.InventoryItems.Remove(essenceInventoryItem);
+        else
+            essenceInventoryItem.Quantity -= amount;
+
+        // Try to find Soul Dust item
+        var soulDustItemId = "soul_dust";
+        var soulDust = inventoryItems
+            .FirstOrDefault(i => i.ItemInstance.ItemBase.Id == soulDustItemId);
+
+        if (soulDust != null) soulDust.Quantity += soulDustGained;
+        else
+        {
+            var itemBase = inventoryItems
+                .Select(i => i.ItemInstance.ItemBase)
+                .FirstOrDefault(b => b.Id == soulDustItemId);
+
+            if (itemBase == null)
+            {
+                // Only query ItemBase if it's *really* not already in memory
+                itemBase = await _context.ItemBases
+                    .Where(b => b.Id == soulDustItemId)
+                    .SingleOrDefaultAsync(cancellationToken);
+
+                if (itemBase == null) return null;
+            }
+
+            var itemInstance = new ItemInstance
+            {
+                Id = Guid.NewGuid(),
+                ItemBase = itemBase
+            };
+
+            soulDust = new InventoryItem
+            {
+                InventoryId = characterId,
+                ItemInstance = itemInstance,
+                Quantity = soulDustGained
+            };
+
+            _context.InventoryItems.Add(soulDust);
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+        return soulDust;
+    }
 }

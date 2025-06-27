@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces.Services.LL;
+using Domain.Extensions.Guilds;
 using Domain.Models.Guilds;
 using Domain.Models.Guilds.Buildings;
 using Services.LL.Providers;
@@ -35,6 +36,9 @@ public class GuildBuildingUpgradeService : IGuildBuildingUpgradeService
     {
         var guild = await _guildService.GetGuildWithUpgradesAsync(characterId, cancellationToken);
         if (guild == null) return false;
+        var guildMember = guild.Members.FirstOrDefault(gm => gm.CharacterId == characterId);
+        if (guildMember == null || !guildMember.IsGuildLeader()) return false;
+
         if (!_defs.TryGetValue(upgradeId, out var def)) return false;
 
         var upgrade = guild.GuildBuildingUpgrades

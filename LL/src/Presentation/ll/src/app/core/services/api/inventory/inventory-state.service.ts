@@ -4,6 +4,7 @@ import { computed, effect, Injectable, signal } from '@angular/core';
 import { InventoryService } from './inventory.service';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { GameSocketService } from '../../real-time/game-socket.service';
+import { EssenceItem } from '../../../../shared/models/item';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryStateService {
@@ -89,6 +90,53 @@ export class InventoryStateService {
       });
   }
 
+  shatterEssences(essence: InventoryItem, shatterAmount: number) {
+    this._loading.set(true);
+    this.inventoryService
+      .shatterEssence(essence, shatterAmount)
+      .pipe(finalize(() => this._loading.set(false)))
+      .subscribe({
+        next: (gainedItem: InventoryItem) => {
+          const items = [...this._items()];
+
+          // Remove or reduce the shattered essence
+          const essenceItem = items.find(
+            (i) =>
+              isEssenceItem(i.itemInstance.itemBase) &&
+              isEssenceItem(essence.itemInstance.itemBase) &&
+              i.itemInstance.itemBase.essence.id ===
+                essence.itemInstance.itemBase.essence.id,
+          );
+
+          if (essenceItem) {
+            essenceItem.quantity -= shatterAmount;
+            if (essenceItem.quantity <= 0) {
+              const index = items.indexOf(essenceItem);
+              if (index !== -1) {
+                items.splice(index, 1);
+              }
+            }
+          }
+
+          // Add or update the gained item (Soul Dust)
+          const existing = items.find(
+            (i) =>
+              i.itemInstance.itemBase.id ===
+              gainedItem.itemInstance.itemBase.id,
+          );
+
+          if (existing) {
+            existing.quantity = gainedItem.quantity;
+          } else {
+            items.push(gainedItem);
+          }
+
+          this._items.set(items);
+        },
+        error: (err) => this._error.set(err.message ?? 'Unknown error'),
+      });
+  }
+
   setInventory(items: InventoryItem[]): void {
     this._items.set(items);
   }
@@ -144,4 +192,8 @@ export class InventoryStateService {
     );
     this._items.set(filtered);
   }
+}
+
+function isEssenceItem(item: any): item is EssenceItem {
+  return item && 'essence' in item;
 }

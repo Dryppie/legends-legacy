@@ -128,7 +128,7 @@ public class GuildService : IGuildService
                     // Inventory-based resources
                     var matchingItem = inventory.InventoryItems
                         .FirstOrDefault(i =>
-                            i.ItemInstance?.ItemBase?.Name == resourceType.ToString());
+                            i.ItemInstance?.ItemBase?.Name.Replace(" ", "") == resourceType.ToString());
 
                     if (matchingItem == null || matchingItem.Quantity < amount)
                         return false;

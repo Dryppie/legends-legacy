@@ -70,4 +70,9 @@ public class InventoryService : IInventoryService
     {
         await _inventoryRepository.AddItemToInventoryFromMarketPlace(characterId, inventoryItem, cancellationToken);
     }
+
+    public async Task<InventoryItem> ShatterEssenceAsync(Guid characterId, Guid essenceId, int amount, CancellationToken cancellationToken)
+    {
+        return await _inventoryRepository.ShatterEssenceAsync(characterId, essenceId, amount, cancellationToken);
+    }
 }

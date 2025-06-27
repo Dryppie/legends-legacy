@@ -16,14 +16,9 @@
         "increment": 25
       },
       {
-        "resource": "temperedScrap",
-        "base": 10,
-        "increment": 5
-      },
-      {
         "resource": "soulDust",
-        "base": 30,
-        "increment": 10,
+        "base": 40,
+        "increment": 20,
         "incrementCap": 3
       }
     ],

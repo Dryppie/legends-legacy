@@ -1,6 +1,5 @@
 ﻿using Domain.Models.Items;
 using Domain.Models.MarketPlaces;
-using Domain.Models.Professions.Crafting;
 
 namespace Domain.Models.Inventories;
 public interface IInventoryRepository
@@ -37,4 +36,5 @@ public interface IInventoryRepository
     Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, MarketPlaceListing listing, CancellationToken cancellationToken);
     Task<bool> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken);
     Task AddItemToInventoryFromMarketPlace(Guid characterId, InventoryItem item, CancellationToken cancellationToken);
+    Task<InventoryItem> ShatterEssenceAsync(Guid characterId, Guid essenceId, int amount, CancellationToken cancellationToken);
 }
