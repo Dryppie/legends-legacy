@@ -53,13 +53,20 @@
           </li>
         </ul>
       </div>
-      <div class="place-self-end pt-2">
-        <app-regular-button
-          [disabled]="!canUpgrade()"
-          (pressed)="upgradeSelected()"
-          text="Upgrade"
-        ></app-regular-button>
-      </div>
+      <ng-container *ngIf="isLeader(); else notLeader">
+        <div class="place-self-end pt-2">
+          <app-regular-button
+            [disabled]="!canUpgrade()"
+            (pressed)="upgradeSelected()"
+            text="Upgrade"
+          ></app-regular-button>
+        </div>
+      </ng-container>
+      <ng-template #notLeader>
+        <p class="mt-4 place-self-end text-center italic text-neutral-400">
+          Only the guild leader can upgrade buildings.
+        </p>
+      </ng-template>
     </div>
   </div>
 

@@ -38,7 +38,7 @@ export class RegularButtonComponent {
       danger: 'border-light_gray text-rose-500 hover:bg-zinc-600/30',
     }[this.variant];
 
-    const disabledStyles = 'text-zinc-300 opacity-50 hover:bg-transparent';
+    const disabledStyles = 'text-zinc-300 opacity-50';
     const width = this.fullWidth ? 'w-full' : '';
 
     return `${palette} ${width} ${this.disabled ? disabledStyles : ''}`;

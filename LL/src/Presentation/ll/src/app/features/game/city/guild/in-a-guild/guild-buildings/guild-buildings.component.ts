@@ -5,6 +5,8 @@ import { BuildingUpgradeView } from '../../../../../../shared/models/guilds/buil
 import { NumberFormatPipe } from '../../../../../../shared/pipes/number-format/number-format.pipe';
 import { RegularButtonComponent } from '../../../../../../shared/components/buttons/regular-button/regular-button.component';
 import { HumanizeEnumPipe } from '../../../../../../shared/pipes/enums/humanize-enum.pipe';
+import { CharacterStateService } from '../../../../../../core/services/api/character/character-state.service';
+import { GuildRole } from '../../../../../../shared/models/Dtos/guild/guildRole';
 
 @Component({
   selector: 'app-guild-buildings',
@@ -21,12 +23,42 @@ import { HumanizeEnumPipe } from '../../../../../../shared/pipes/enums/humanize-
 export class GuildBuildingsComponent {
   readonly upgrades;
   readonly guild;
+  readonly character;
+  readonly guildMember = computed(() => {
+    return this.guild()?.members.find(
+      (m) => m.characterId === this.character()?.id,
+    );
+  });
 
   readonly selected = signal<BuildingUpgradeView | null>(null);
 
-  constructor(private readonly state: GuildStateService) {
+  readonly isLeader = computed(() => {
+    return this.guildMember()?.role === GuildRole.Leader;
+  });
+
+  readonly canUpgrade = computed(() => {
+    if (this.state.loading()) return false;
+
+    const upgrade = this.selected();
+    const guildResources = this.guild()?.resources ?? [];
+    const cost = upgrade?.nextCost ?? {};
+
+    for (const [type, required] of Object.entries(cost)) {
+      const available =
+        guildResources.find((r) => r.resource === type)?.amount ?? 0;
+      if (available < required) return false;
+    }
+
+    return true;
+  });
+
+  constructor(
+    private readonly state: GuildStateService,
+    private readonly characterState: CharacterStateService,
+  ) {
     this.upgrades = this.state.upgrades;
     this.guild = this.state.guild;
+    this.character = this.characterState.currentCharacter;
 
     effect(
       () => {
@@ -66,22 +98,6 @@ export class GuildBuildingsComponent {
 
     return totalRatio / types.length; // average of the ratios
   }
-
-  readonly canUpgrade = computed(() => {
-    if (this.state.loading()) return false;
-
-    const upgrade = this.selected();
-    const guildResources = this.guild()?.resources ?? [];
-    const cost = upgrade?.nextCost ?? {};
-
-    for (const [type, required] of Object.entries(cost)) {
-      const available =
-        guildResources.find((r) => r.resource === type)?.amount ?? 0;
-      if (available < required) return false;
-    }
-
-    return true;
-  });
 
   getGuildResourceAmount(type: string): number {
     return (
