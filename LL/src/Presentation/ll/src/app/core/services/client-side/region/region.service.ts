@@ -78,6 +78,14 @@ export class RegionService {
           description:
             'Deep beneath the hills, the Goblin Mines echo with the clang of stolen tools. Hobgoblins rule here, digging for ancient relics they barely understand.',
         },
+        {
+          id: 'region_01_area_07',
+          name: 'Forgotten Ruins',
+          levelRequirement: 30,
+          creatures: ['Hobgoblin'],
+          description:
+            'Deep beneath the hills, the Goblin Mines echo with the clang of stolen tools. Hobgoblins rule here, digging for ancient relics they barely understand.',
+        },
       ],
       dungeons: [],
       raids: [],
