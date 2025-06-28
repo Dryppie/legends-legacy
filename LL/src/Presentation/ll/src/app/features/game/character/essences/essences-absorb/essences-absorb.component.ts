@@ -69,10 +69,10 @@ export class EssencesAbsorbComponent {
     return this.inventoryEssences().filter((essence) => {
       /* craftability gate (if requested) */
       const absorbed = this.absorbedEssence()
-        .map((s) => s.occupiedEssence)
-        .includes((essence.itemInstance.itemBase as EssenceItem).essence);
-      if (mode === 'already absorbed') return !absorbed;
-      if (mode === 'not absorbed') return absorbed;
+        .map((s) => s.occupiedEssence?.name)
+        .includes((essence.itemInstance.itemBase as EssenceItem).essence.name);
+      if (mode === 'already absorbed') return absorbed;
+      if (mode === 'not absorbed') return !absorbed;
       return true; // mode === 'all'
     });
   });
