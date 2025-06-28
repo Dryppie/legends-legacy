@@ -15,15 +15,12 @@ export class HelpService {
 
   private cache = new Map<string, any>();
 
-  load(locale?: string): Record<string, HelpEntry>;
+  load(locale?: string): Observable<Record<string, HelpEntry>>;
   load<T = unknown>(url: string): Observable<T>;
-
-  // ────── single *implementation* ──────
-  load<T = unknown>(param = 'en'): unknown {
+  load<T = unknown>(param = 'en'): Observable<any> {
     const looksLikeLocale = !param.includes('/') && !param.includes('.');
 
     if (looksLikeLocale) {
-      // locale variant
       if (!this.cache.has(param)) {
         this.cache.set(
           param,
@@ -35,7 +32,6 @@ export class HelpService {
       return this.cache.get(param)!;
     }
 
-    // URL variant
     return this.http.get<T>(param);
   }
 }

@@ -1,6 +1,8 @@
 ﻿using Application.Common.Interfaces;
 using Common.Exceptions;
 using Common.Helpers.Essences;
+using Domain.Models.Entities.Characters;
+using Domain.Models.Essences;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
@@ -315,5 +317,71 @@ public class InventoryRepository : IInventoryRepository
 
         await _context.SaveChangesAsync(cancellationToken);
         return soulDust;
+    }
+
+    public async Task<InventoryItem?> ScrapEquipments(Guid characterId, List<Guid> parsedGuids, CancellationToken cancellationToken)
+    {
+        // Fetch all inventory items for this character in a single query
+        var inventoryItems = await _context.InventoryItems
+            .Where(i => i.InventoryId == characterId)
+            .Include(i => i.ItemInstance)
+                .ThenInclude(ii => ii.ItemBase)
+            .ToListAsync(cancellationToken);
+
+        // Find the equipment items
+        var equipmentInventoryItems = inventoryItems
+            .Where(i => parsedGuids.Contains(i.ItemInstance.Id));
+
+        if (!equipmentInventoryItems.Any()) return null;
+        if (parsedGuids.Count == 0 || parsedGuids.Count != equipmentInventoryItems.Count()) return null;
+
+        // Define Tempered Scrap gain logic
+        const int temperedScrapPerEquipment = 1;
+        var temperedScrapGained = temperedScrapPerEquipment * parsedGuids.Count;
+
+        // Remove equipment
+        if (equipmentInventoryItems.Any(i => (i.ItemInstance as EquipmentInstance).Potential != 0)) return null;
+        _context.InventoryItems.RemoveRange(equipmentInventoryItems);
+
+        // Try to find Tempered Scrap item
+        var temperedScrapItemId = "tempered_scrap";
+        var temperedScrap = inventoryItems
+            .FirstOrDefault(i => i.ItemInstance.ItemBase.Id == temperedScrapItemId);
+
+        if (temperedScrap != null) temperedScrap.Quantity += temperedScrapGained;
+        else
+        {
+            var itemBase = inventoryItems
+                .Select(i => i.ItemInstance.ItemBase)
+                .FirstOrDefault(b => b.Id == temperedScrapItemId);
+
+            if (itemBase == null)
+            {
+                // Only query ItemBase if it's *really* not already in memory
+                itemBase = await _context.ItemBases
+                    .Where(b => b.Id == temperedScrapItemId)
+                    .SingleOrDefaultAsync(cancellationToken);
+
+                if (itemBase == null) return null;
+            }
+
+            var itemInstance = new ItemInstance
+            {
+                Id = Guid.NewGuid(),
+                ItemBase = itemBase
+            };
+
+            temperedScrap = new InventoryItem
+            {
+                InventoryId = characterId,
+                ItemInstance = itemInstance,
+                Quantity = temperedScrapGained
+            };
+
+            _context.InventoryItems.Add(temperedScrap);
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+        return temperedScrap;
     }
 }

@@ -36,5 +36,6 @@ public interface IInventoryRepository
     Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, MarketPlaceListing listing, CancellationToken cancellationToken);
     Task<bool> AddItemInstanceBackToInventory(Guid characterId, ItemInstance itemInstance, CancellationToken cancellationToken);
     Task AddItemToInventoryFromMarketPlace(Guid characterId, InventoryItem item, CancellationToken cancellationToken);
-    Task<InventoryItem> ShatterEssenceAsync(Guid characterId, Guid essenceId, int amount, CancellationToken cancellationToken);
+    Task<InventoryItem?> ShatterEssenceAsync(Guid characterId, Guid essenceId, int amount, CancellationToken cancellationToken);
+    Task<InventoryItem?> ScrapEquipments(Guid characterId, List<Guid> parsedGuids, CancellationToken cancellationToken);
 }

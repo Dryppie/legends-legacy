@@ -57,7 +57,29 @@ export class InventoryService {
         //   'error',
         //   't',
         // );
-        return throwError(() => new Error('Failed to get inventory'));
+        return throwError(() => new Error('Failed to shatter essences'));
+      }),
+    );
+  }
+
+  scrapEquipment(equipmentIds: string[]) {
+    return this.apiService.post('inventory/scrap', equipmentIds).pipe(
+      map((inventory) => {
+        // this.toastService.showToast(
+        //   'Action completed successfully!',
+        //   'success',
+        // );
+        return inventory;
+      }),
+
+      catchError(() => {
+        // this.toastService.showToast(
+        //   'Login Failed',
+        //   'Wrong email or password',
+        //   'error',
+        //   't',
+        // );
+        return throwError(() => new Error('Failed to scrap equipment'));
       }),
     );
   }

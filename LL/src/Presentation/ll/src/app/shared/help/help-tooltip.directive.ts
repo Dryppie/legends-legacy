@@ -10,6 +10,7 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { HelpService } from './help.service';
 import { HelpTooltipPanelComponent } from './help-tooltip-panel.component';
+import { firstValueFrom } from 'rxjs';
 
 @Directive({
   selector: '[appHelp]',
@@ -25,7 +26,7 @@ export class HelpTooltipDirective {
 
   @HostListener('mouseenter') async show() {
     if (this.overlayRef) return;
-    const dict = this.help.load('en');
+    const dict = await firstValueFrom(this.help.load('en'));
     const entry = dict[this.helpId];
     if (!entry) return;
 

@@ -4,7 +4,7 @@ import { computed, effect, Injectable, signal } from '@angular/core';
 import { InventoryService } from './inventory.service';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { GameSocketService } from '../../real-time/game-socket.service';
-import { EssenceItem } from '../../../../shared/models/item';
+import { EquipmentInstance, EssenceItem } from '../../../../shared/models/item';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryStateService {
@@ -117,6 +117,36 @@ export class InventoryStateService {
               }
             }
           }
+
+          // Add or update the gained item (Soul Dust)
+          const existing = items.find(
+            (i) =>
+              i.itemInstance.itemBase.id ===
+              gainedItem.itemInstance.itemBase.id,
+          );
+
+          if (existing) {
+            existing.quantity = gainedItem.quantity;
+          } else {
+            items.push(gainedItem);
+          }
+
+          this._items.set(items);
+        },
+        error: (err) => this._error.set(err.message ?? 'Unknown error'),
+      });
+  }
+
+  scrapEquipment(equipmentIds: string[]) {
+    this._loading.set(true);
+    this.inventoryService
+      .scrapEquipment(equipmentIds)
+      .pipe(finalize(() => this._loading.set(false)))
+      .subscribe({
+        next: (gainedItem: InventoryItem) => {
+          const items = this._items().filter(
+            (i) => !equipmentIds.includes(i.itemInstance.id),
+          );
 
           // Add or update the gained item (Soul Dust)
           const existing = items.find(
