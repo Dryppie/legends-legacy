@@ -33,6 +33,13 @@ import {
 import { EquipmentTypePipe } from '../../../../../shared/pipes/equipment/equipment-type-format/equipment-type.pipe';
 import { ItemComponent } from '../../../../../shared/components/item/item.component';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
+import { EquipmentStateService } from '../../../../../core/services/api/equipment/equipment-state.service';
+import { EquipmentSlotType } from '../../../../../shared/models/Dtos/equipment-slots/equipmentSlot';
+import { getRarityColor } from '../../../../../shared/utils/rarity/rarity.utils';
+import { getSlotTypeFromEquipmentType } from '../../../../../shared/utils/equipment/equipment.utils';
+import { InventoryItem } from '../../../../../shared/models/inventoryItem';
+import { EquipmentType } from '../../../../../shared/models/enums/equipmentType';
+import { AttributeModifier } from '../../../../../shared/models/Dtos/attributesDto';
 
 @Component({
   selector: 'app-market-place-buy',
@@ -54,6 +61,7 @@ import { InventoryStateService } from '../../../../../core/services/api/inventor
   templateUrl: './market-place-buy.component.html',
 })
 export class MarketPlaceBuyComponent implements OnInit {
+  
   readonly allListings = signal<MarketPlaceListing[]>([]);
   selectedListingId: string = '';
 
@@ -137,9 +145,11 @@ export class MarketPlaceBuyComponent implements OnInit {
 
   constructor(
     private readonly marketplaceState: MarketplaceStateService,
-    private readonly inventoryState: InventoryStateService
+    private readonly inventoryState: InventoryStateService,
+    private readonly equipmentState: EquipmentStateService
   ) {
     this.inventoryState.load();
+    this.equipmentState.load();
     /* Keep our local copy of listings in sync with the store */
     effect(
       () => {
@@ -216,18 +226,66 @@ export class MarketPlaceBuyComponent implements OnInit {
     }
   });
 
-  readonly userQuantity = computed(() => {
-    const listing = this.selectedListing();
-    if (!listing) return 0;
-  
-    const inventory = this.inventoryState.items();
-    const listingBaseId = listing.itemInstance.itemBase.id;
+  getAttributeModifiers(e: InventoryItem): AttributeModifier[]{
+    if(e.itemInstance.itemBase.itemType === ItemType.Equipment){
+      return (e.itemInstance as EquipmentInstance).attributeModifiers;
+    }
+    return [];
+  }
 
-    const matchingItem = inventory.find((invItem) =>
-      invItem.itemInstance.itemBase.id === listingBaseId
-    );
-    return matchingItem?.quantity || 0;
-  });
+  readonly selectedListingAsEquipment = computed (() => {
+    const listing = this.selectedListing();
+    if(!listing) return null;
+
+    if(listing.itemInstance.itemBase.itemType === ItemType.Equipment)
+    {
+      const instance = listing.itemInstance;
+      const equippedItems: InventoryItem[] = [];
+      
+      const eq = instance as EquipmentInstance;
+      const primarySlot = getSlotTypeFromEquipmentType(eq.itemBase.equipmentType);
+      const affectedSlots: EquipmentSlotType[] = [primarySlot];
+      
+      //If currently selected is a two-handed, add the off-hand as well
+      if(eq.itemBase.equipmentType === EquipmentType.TwoHanded) {
+        affectedSlots.push(EquipmentSlotType.OffHand);
+      }
+      
+      for (const slot of affectedSlots){
+        const equipped = this.equipmentState.getSlot(slot);
+        if(equipped?.equipmentInstance){
+          equippedItems.push({
+            id: equipped.equipmentInstance.id,
+            itemInstance: equipped.equipmentInstance,
+            quantity: 1,
+          })
+        }
+      }
+    
+      return equippedItems;
+    }
+    return null;
+  })
+
+  readonly selectedListingAsMaterial = computed (() => {
+    const listing = this.selectedListing();
+    if (!listing) return null;
+    if(listing.itemInstance.itemBase.itemType === ItemType.Material)
+    {
+      const items: InventoryItem[] = [];
+
+      const listingBaseId = listing.itemInstance.itemBase.id;
+      const inventory = this.inventoryState.items();
+      
+      for (const invItem of inventory){
+        if(invItem.itemInstance.itemBase.id === listingBaseId){
+          items.push(invItem);
+        }
+      }
+          return items;
+    }
+    return null;
+  })
 
   buyoutListing(): void {
     const sel = this.selectedListing();

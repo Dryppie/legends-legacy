@@ -25,3 +25,30 @@ export function getAllowedEquipmentTypesForSlot(
       return [];
   }
 }
+
+export function getSlotTypeFromEquipmentType(
+  equipmentType: EquipmentType,
+  ): EquipmentSlotType {
+    switch (equipmentType) {
+      case EquipmentType.Head:
+        return EquipmentSlotType.Head;
+      case EquipmentType.Chest:
+        return EquipmentSlotType.Chest;
+      case EquipmentType.Legs:
+        return EquipmentSlotType.Legs;
+      case EquipmentType.Relic:
+        return EquipmentSlotType.Relic;
+      case EquipmentType.Necklace:
+        return EquipmentSlotType.Necklace;
+      case EquipmentType.Ring:
+        return EquipmentSlotType.Ring;
+      case EquipmentType.TwoHanded:
+        return EquipmentSlotType.MainHand;
+      case EquipmentType.OneHanded:
+        return EquipmentSlotType.MainHand;
+      case EquipmentType.OffHand:
+        return EquipmentSlotType.OffHand;
+      default:
+        throw new Error(`Unhandled equipment type: ${equipmentType}`);
+    }
+  }

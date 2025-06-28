@@ -95,7 +95,24 @@
         Unit price: {{ sel.unitPrice | numberFormat }} Cinders
       </p>
       <p class="text-sm text-neutral-300">Quantity: {{ sel.quantity }}</p>
-      <p class="text-sm text-neutral-400">Currently in inventory: {{ userQuantity() }}</p>
+      <ng-container *ngIf="selectedListingAsEquipment() as equipment"> 
+        <div *ngFor="let e of equipment">
+          <p class="text-sm text-neutral-400">
+            Currently equipped: 
+          </p>
+          <app-item [item]="e.itemInstance"></app-item>
+          <div class="text-sm text-neutral-400" *ngFor="let mod of getAttributeModifiers(e)">
+            {{ mod.attributeType }}: + {{ mod.amount }}
+          </div>
+        </div>
+      </ng-container>
+      <ng-container *ngIf="selectedListingAsMaterial() as materials">
+        <div *ngFor="let m of materials">
+          <p class="text-sm text-neutral-400">
+            You have x{{ m.quantity }} {{ m.itemInstance.itemBase.name }}
+          </p>
+        </div>
+      </ng-container>
       <!-- Quantity selector appears only when > 1 items are in the listing -->
       <div *ngIf="sel.quantity > 1" class="flex items-center gap-2">
         <label for="buyQty" class="whitespace-nowrap text-sm text-neutral-300"

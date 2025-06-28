@@ -8,6 +8,7 @@ import { EquipmentType } from '../../../../shared/models/enums/equipmentType';
 import { Equipment, EquipmentInstance } from '../../../../shared/models/item';
 import { EquipmentService } from './equipment.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
+import { getSlotTypeFromEquipmentType } from '../../../../shared/utils/equipment/equipment.utils';
 
 @Injectable({ providedIn: 'root' })
 export class EquipmentStateService {
@@ -156,7 +157,7 @@ export class EquipmentStateService {
       }
 
       default: {
-        const slotType = this.getSlotTypeFromEquipmentType(equipmentType);
+        const slotType = getSlotTypeFromEquipmentType(equipmentType);
         const slot = getSlot(slotType);
         if (!slot) return;
 
@@ -166,28 +167,6 @@ export class EquipmentStateService {
       }
     }
     this._equipmentSlots.set(updated);
-  }
-  private getSlotTypeFromEquipmentType(
-    equipmentType: EquipmentType,
-  ): EquipmentSlotType {
-    switch (equipmentType) {
-      case EquipmentType.Head:
-        return EquipmentSlotType.Head;
-      case EquipmentType.Chest:
-        return EquipmentSlotType.Chest;
-      case EquipmentType.Legs:
-        return EquipmentSlotType.Legs;
-      case EquipmentType.Relic:
-        return EquipmentSlotType.Relic;
-      case EquipmentType.Relic:
-        return EquipmentSlotType.Relic;
-      case EquipmentType.Necklace:
-        return EquipmentSlotType.Necklace;
-      case EquipmentType.Ring:
-        return EquipmentSlotType.Ring;
-      default:
-        throw new Error(`Unhandled equipment type: ${equipmentType}`);
-    }
   }
 
   unequip(slotType: EquipmentSlotType): void {
