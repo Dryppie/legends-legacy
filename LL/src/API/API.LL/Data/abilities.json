@@ -1001,8 +1001,7 @@
                 "Type": "ApplyStatus",
                 "StatusId": "redSlimeFireAura"
               },
-              "Targeting": "EveryoneButYou",
-              "Log": "{Actor}'s core ignites in blazing flames!"
+              "Targeting": "EveryoneButYou"
             }
           ]
         }
@@ -1637,7 +1636,10 @@
       "Description": "Leap to a target, dealing 26 Physical Melee damage with a 30% chance to stun.",
       "Type": "Active",
       "Cooldown": 160,
-      "Cost": { "Type": "Mana", "Amount": 23 },
+      "Cost": {
+        "Type": "Mana",
+        "Amount": 23
+      },
       "Triggers": [
         {
           "Event": "OnAbilityUsed",
@@ -1696,6 +1698,398 @@
       },
       {
         "AttributeType": "Agility",
+        "Amount": 9,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Plague Ghoul's Essence",
+    "Active": {
+      "Id": "plagueSwipe",
+      "Name": "Plague Swipe",
+      "Description": "Swipe at two nearby enemies, dealing {damage1} physical damage and applying 12 poison damage over 3 seconds.",
+      "Type": "Active",
+      "Cooldown": 170,
+      "Cost": {
+        "Type": "Mana",
+        "Amount": 25
+      },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "plagueSwipe" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "plagueSwipePoison"
+              },
+              "Targeting": "TwoEnemies"
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "pestilentTouch",
+      "Name": "Pestilent Touch",
+      "Description": "Melee attacks have a 17% chance to apply 15 poison damage over 6 seconds.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnMeleeAttack",
+          "Filters": [
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "pestilentTouchPoison"
+              },
+              "Chance": 17,
+              "Targeting": "CauseOfTrigger"
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Dexterity",
+        "Amount": 14,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Constitution",
+        "Amount": 4,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Ravenous Ghoul's Essence",
+    "Active": {
+      "Id": "drainingClaws",
+      "Name": "Draining Claws",
+      "Description": "Deal 31 Physical Melee damage to a target, reducing their Strength by 24 for 10 seconds.",
+      "Type": "Active",
+      "Cooldown": 130,
+      "Cost": {
+        "Type": "Mana",
+        "Amount": 24
+      },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "drainingClaws" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "drainingClawsDebuff"
+              },
+              "Targeting": "SingleEnemy"
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "vileFeast",
+      "Name": "Vile Feast",
+      "Description": "The first time anyone dies, eat their corpse and heal 100% of your Max Health. Can only occur once.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnDeath",
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ResourceRestore",
+                "ResourceType": "Health",
+                "Amount": 9999
+              },
+              "Usage": {
+                "Type": "LimitedUsage",
+                "Uses": 1
+              },
+              "Targeting": "Self",
+              "Log": "{Actor} is healed to full health after devouring the corpse."
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Endurance",
+        "Amount": 15,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Threat",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Skeleton Archer's Essence",
+    "Active": {
+      "Id": "boneArrow",
+      "Name": "Bone Arrow",
+      "Description": "Use part of your bone as an arrowhead, dealing 59 physical ranged damage.",
+      "Type": "Active",
+      "Cooldown": 180,
+      "Cost": {
+        "Type": "Health",
+        "Amount": 32
+      },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "boneArrow" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "Damage",
+                "Amount": 59,
+                "ScalingAttribute": "Agility",
+                "ScalingMultiplier": 0.20
+              },
+              "Targeting": "SingleEnemy",
+              "AttackType": "Ranged",
+              "DamageType": "Physical",
+              "EffectTags": [ "Piercing" ],
+              "Log": "{Actor} fired a bone arrow at {Target}, dealing {Amount} physical damage."
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "piercingArrows",
+      "Name": "Piercing Arrows",
+      "Description": "All ranged attacks have a 15% chance to apply bleed, dealing 15 damage over 9 seconds.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnRangedAttack",
+          "Filters": [
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "piercingArrowBleed"
+              },
+              "Targeting": "CauseOfTrigger",
+              "Chance": 15,
+              "Log": "{Actor}'s arrow pierced {Target}, causing them to bleed."
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Dexterity",
+        "Amount": 3,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Perception",
+        "Amount": 11,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Agility",
+        "Amount": 7,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Skeleton Mage's Essence",
+    "Active": {
+      "Id": "siphon",
+      "Name": "Siphon",
+      "Description": "Deal 42 magic damage to the target.",
+      "Type": "Active",
+      "Cooldown": 190,
+      "Cost": {
+        "Type": "Mana",
+        "Amount": 26
+      },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "siphon" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "Damage",
+                "Amount": 42,
+                "ScalingAttribute": "Intelligence",
+                "ScalingMultiplier": 0.3
+              },
+              "Targeting": "SingleEnemy",
+              "AttackType": "Ranged",
+              "DamageType": "Magical",
+              "EffectTags": [ "Magic", "Dark" ],
+              "Log": "{Actor} siphoned energy from {Target}, dealing {Amount} magic damage."
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "protectiveBoneBarrier",
+      "Name": "Protective Bone Barrier",
+      "Description": "Every 10 seconds, form a barrier around you that can absorb up to 25 damage.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnCombatStart",
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ApplyStatus",
+                "StatusId": "boneBarrierShield"
+              },
+              "Duration": { "Type": "IndefiniteDuration" },
+              "Interval": {
+                "Type": "Interval",
+                "Interval": 100
+              },
+              "Targeting": "Self"
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Intelligence",
+        "Amount": 7,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Wisdom",
+        "Amount": 6,
+        "ModifierType": "Flat"
+      }
+    ]
+  },
+  {
+    "Name": "Skeleton Warrior's Essence",
+    "Active": {
+      "Id": "boneShield",
+      "Name": "Bone Shield",
+      "Description": "Form a bone shield around you, reducing damage taken by 10% for 8 seconds.",
+      "Type": "Active",
+      "Cooldown": 140,
+      "Cost": {
+        "Type": "Mana",
+        "Amount": 16
+      },
+      "Triggers": [
+        {
+          "Event": "OnAbilityUsed",
+          "Filters": [
+            {
+              "Type": "AbilityIdFilter",
+              "AllowedIds": [ "boneShield" ]
+            },
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "ModifyAttribute",
+                "Attribute": "DamageReduction",
+                "Amount": 10,
+                "ModifierType": "Flat",
+                "Stackable": false
+              },
+              "Duration": {
+                "Type": "TimedDuration",
+                "Duration": 80
+              },
+              "Targeting": "Self",
+              "Log": "{Actor} summons a protective bone shield, reducing damage taken by 10%."
+            }
+          ]
+        }
+      ]
+    },
+    "Passive": {
+      "Id": "spikedDefense",
+      "Name": "Spiked Defense",
+      "Description": "Whenever taking melee damage, reflect 6 damage to the attacker.",
+      "Type": "Passive",
+      "Cooldown": 0,
+      "Triggers": [
+        {
+          "Event": "OnMeleeAttacked",
+          "Filters": [
+            { "Type": "SourceIsSelfFilter" }
+          ],
+          "Actions": [
+            {
+              "Action": {
+                "Type": "Damage",
+                "Amount": 6
+              },
+              "Targeting": "CauseOfTrigger",
+              "AttackType": "None",
+              "DamageType": "Physical",
+              "EffectTags": [ "Reflect" ],
+              "Log": "{Target} is struck by {Actor}'s spiked bones for {Amount} damage."
+            }
+          ]
+        }
+      ]
+    },
+    "AttributeModifiers": [
+      {
+        "AttributeType": "Endurance",
+        "Amount": 8,
+        "ModifierType": "Flat"
+      },
+      {
+        "AttributeType": "Constitution",
         "Amount": 9,
         "ModifierType": "Flat"
       }

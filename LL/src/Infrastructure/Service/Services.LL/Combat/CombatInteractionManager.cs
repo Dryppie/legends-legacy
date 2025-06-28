@@ -207,6 +207,8 @@ public class CombatInteractionManager : ICombatInteractionManager
         // If target is dead
         if (!target.IsAlive)
         {
+            _combatContext.LogEffectExecution(new EffectContext(source, target, attackType, [], $"{target.Name} was killed by {source.Name}") { EventType = EventType.Death });
+
             _combatContext.EventBus.Publish(new CombatEvent
             {
                 Type = TriggerEvent.OnKill,
@@ -220,8 +222,6 @@ public class CombatInteractionManager : ICombatInteractionManager
                 Source = target,
                 Target = source,
             });
-
-            _combatContext.LogEffectExecution(new EffectContext(source, target, attackType, [], $"{target.Name} was killed by {source.Name}") { EventType = EventType.Death });
         }
     }
 

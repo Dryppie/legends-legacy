@@ -478,11 +478,175 @@
               "Type": "Interval",
               "Interval": 10
             },
-            "Chance": 50,
             "AttackType": "DamageOverTime",
             "DamageType": "Bleed",
             "Targeting": "Self",
             "Log": "{Target} takes {Amount} bleed damage."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "plagueSwipePoison",
+    "Name": "Plague Swipe Poison",
+    "Description": "Swipe at two nearby enemies, dealing {damage1} physical damage and applying 12 poison damage over 3 seconds.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "Damage",
+              "Amount": 23,
+              "ScalingAttribute": "Dexterity",
+              "ScalingMultiplier": 0.25
+            },
+            "Duration": { "Type": "NoDuration" },
+            "Targeting": "Self",
+            "AttackType": "Melee",
+            "DamageType": "Physical",
+            "Log": "{Target} received {Amount} damage."
+          },
+          {
+            "Action": {
+              "Type": "Damage",
+              "Amount": 4
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 30
+            },
+            "Interval": {
+              "Type": "Interval",
+              "Interval": 10
+            },
+            "Targeting": "Self",
+            "AttackType": "DamageOverTime",
+            "DamageType": "Bleed",
+            "Log": "{Target} is poisoned, and took {Amount} damage."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "pestilentTouchPoison",
+    "Name": "Pestilent Touch Poison",
+    "Description": "Bleeding by Shredding Claws.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "Damage",
+              "Amount": 5
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 60
+            },
+            "Interval": {
+              "Type": "Interval",
+              "Interval": 20
+            },
+            "AttackType": "DamageOverTime",
+            "DamageType": "Poison",
+            "Targeting": "Self",
+            "Log": "{Target} takes {Amount} poison damage."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "drainingClawsDebuff",
+    "Name": "Sapped Strength",
+    "Description": "Attack Power reduced by 24.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "Damage",
+              "Amount": 31,
+              "ScalingAttribute": "Strength",
+              "ScalingMultiplier": 0.25
+            },
+            "Targeting": "Self",
+            "AttackType": "Melee",
+            "DamageType": "Physical",
+            "EffectTags": [ "Unarmed" ],
+            "Log": "{Actor} slashed {Target} with draining claws for {Amount} physical damage."
+          },
+          {
+            "Action": {
+              "Type": "ModifyAttribute",
+              "Attribute": "Strength",
+              "Amount": -24,
+              "ModifierType": "Flat",
+              "Stackable": false
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 100
+            },
+            "Targeting": "Self",
+            "Log": "{Target}'s strength is sapped, reduced by 24."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "piercingArrowBleed",
+    "Name": "Pierced Bleed",
+    "Description": "Bleeding from a bone arrow, taking damage over time.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "Damage",
+              "Amount": 5
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 90
+            },
+            "Interval": {
+              "Type": "Interval",
+              "Interval": 30
+            },
+            "Targeting": "Self",
+            "AttackType": "DamageOverTime",
+            "DamageType": "Bleed",
+            "EffectTags": [],
+            "Log": "{Target} is bleeding from a pierced wound, taking {Amount} damage."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "boneBarrierShield",
+    "Name": "Bone Barrier",
+    "Description": "A protective bone barrier that absorbs up to 25 damage.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "ResourceRestore",
+              "ResourceType": "Barrier",
+              "Amount": 25
+            },
+            "Targeting": "Self",
+            "Log": "{Actor} gains a bone shield, absorbing up to {Amount} damage."
           }
         ]
       }
