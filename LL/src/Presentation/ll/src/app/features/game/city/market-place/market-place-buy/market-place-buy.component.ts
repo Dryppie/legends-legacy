@@ -260,6 +260,10 @@ export class MarketPlaceBuyComponent implements OnInit {
             quantity: 1,
           })
         }
+        //if the equipped piece is a two-handed weapon we break early to avoid showing the equipment piece twice
+        if (equipped?.equipmentInstance?.itemBase.equipmentType === EquipmentType.TwoHanded) {
+          break;
+        }
       }
     
       return equippedItems;
