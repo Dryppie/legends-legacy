@@ -78,16 +78,17 @@ public class CombatContext : ICombatContext
             CurrentTime += TimeStep;
         }
 
-        // Determine outcome
+        //// Determine outcome
         var outcome = DetermineOutcome();
-        if (true)
-        {
-            foreach (var log in _eventLog)
-            {
-                Console.WriteLine($"Time: {log.Timestamp} - {log.Details}");
-            }
-            Console.WriteLine(outcome);
-        }
+
+        //if (true)
+        //{
+        //    foreach (var log in _eventLog)
+        //    {
+        //        Console.WriteLine($"Time: {log.Timestamp} - {log.Details}");
+        //    }
+        //    Console.WriteLine(outcome);
+        //}
 
         return new CombatResult
         {

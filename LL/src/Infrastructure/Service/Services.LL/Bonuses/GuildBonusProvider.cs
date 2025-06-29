@@ -1,31 +1,29 @@
 ﻿using Domain.Models.Bonuses;
-using Domain.Models.Soulstones;
-using Domain.Models.Soulstones.UpgradeDefinition;
+using Domain.Models.Guilds.Buildings;
 using Services.LL.Interfaces;
 using Services.LL.Providers;
 
 namespace Services.LL.Bonuses;
-public sealed class SoulstoneBonusProvider : IBonusProvider
+public class GuildBonusProvider : IBonusProvider
 {
-    private readonly ISoulstoneUpgradeRepository _repo;
-    private readonly IReadOnlyDictionary<string, SoulstoneUpgradeDefinition> _defs;
+    private readonly IGuildBuildingUpgradeRepository _repo;
+    private readonly IReadOnlyDictionary<string, BuildingUpgradeDefinition> _defs;
 
-    public SoulstoneBonusProvider(ISoulstoneUpgradeRepository repo, SoulstoneUpgradeDefinitionProvider defProvider)
+    public GuildBonusProvider(IGuildBuildingUpgradeRepository repo, GuildBuildingUpgradeDefinitionProvider defProvider)
     {
         _repo = repo;
-        _defs = defProvider.All;          // hot-reloaded view
+        _defs = defProvider.All;
     }
 
     public async ValueTask<IReadOnlyCollection<Bonus>> GetBonusesAsync(Guid characterId, DateTimeOffset now, CancellationToken ct = default)
     {
-        // 2. fetch only the character’s owned upgrades (cheap query)              // no filter – we want *all*
-        var owned = await _repo.GetSoulstoneUpgradesByCharacterIdAsync(characterId,[], ct);
+        var owned = await _repo.GetGuildBuildingUpgradesByCharacterIdAsync(characterId, [], ct);
 
         var list = new List<Bonus>(owned.Count);
 
         foreach (var up in owned)
         {
-            if (!_defs.TryGetValue(up.SoulstoneUpgradeDefinitionId, out var def))
+            if (!_defs.TryGetValue(up.BuildingUpgradeDefinitionId, out var def))
                 continue;                                   // invalid id – ignore
 
             // 3. flatten “per-level” into one number

@@ -8,6 +8,7 @@ using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Guilds;
+using Domain.Models.Guilds.Buildings;
 using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.TierPackages;
@@ -80,6 +81,7 @@ public static class DependencyInjection
         services.AddScoped<IEssenceSlotRepository, EssenceSlotRepository>();
 
         services.AddScoped<IGuildRepository, GuildRepository>();
+        services.AddScoped<IGuildBuildingUpgradeRepository, GuildBuildingUpgradeRepository>();
 
         services.AddScoped<IGatheringNodeRepository, GatheringNodeRepository>();
 

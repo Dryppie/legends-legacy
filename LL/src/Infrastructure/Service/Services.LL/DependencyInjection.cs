@@ -62,7 +62,8 @@ public static class DependencyInjection
 
         services.AddScoped<IBonusService, BonusService>();
         services.AddScoped<IBonusProvider, SoulstoneBonusProvider>();
-        
+        services.AddScoped<IBonusProvider, GuildBonusProvider>();
+
         services.AddScoped<IColosseumService, ColosseumService>();
         services.AddScoped<IRatingService, RatingService>();
 
@@ -70,9 +71,6 @@ public static class DependencyInjection
         services.AddScoped<ICombatSetupService, CombatSetupService>();
         services.AddScoped<ICombatContext, CombatContext>();
         services.AddScoped<ICombatEventBus, CombatEventBus>();
-        //services.AddScoped<ICombatEffectManager, CombatEffectManager>();
-        //services.AddScoped<ICombatEntityManager, CombatEntityManager>();
-        //services.AddScoped<ICombatInteractionManager, CombatInteractionManager>();
 
         services.AddScoped<ICraftingService, CraftingService>();
         services.AddScoped<ITemperingService, TemperingService>();
