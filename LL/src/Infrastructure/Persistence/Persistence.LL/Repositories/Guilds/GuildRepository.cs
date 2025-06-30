@@ -128,38 +128,6 @@ public class GuildRepository : IGuildRepository
         return true;
     }
 
-    public async Task<bool> AcceptInviteAsync(Guid characterId, Guid guildId, CancellationToken cancellationToken)
-    {
-        var guild = await _context.Guilds
-            .Include(g => g.Members)
-            .FirstOrDefaultAsync(g => g.Id == guildId, cancellationToken);
-        if (guild == null || guild.IsGuildFull()) return false;
-
-        var invite = await _context.GuildInvites
-            .FirstOrDefaultAsync(i => i.GuildId == guildId && i.CharacterId == characterId, cancellationToken);
-
-        if (invite == null) return false;
-
-        // Player can not accept an invitation to a guild that they applied for
-        if (!invite.IsInvite) return false;
-
-        var isInGuild = await _context.GuildMembers
-            .AnyAsync(gm => gm.CharacterId == characterId, cancellationToken);
-
-        if (isInGuild) return false;
-
-        _context.GuildMembers.Add(new GuildMember
-        {
-            GuildId = guildId,
-            CharacterId = characterId,
-            Role = GuildRole.Member
-        });
-        _context.GuildInvites.Remove(invite);
-
-        await _context.SaveChangesAsync(cancellationToken);
-        return true;
-    }
-
     public async Task<List<GuildInvite>> GetMyInvitesAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _context.GuildInvites
             .Include(gi => gi.Guild)
@@ -191,49 +159,58 @@ public class GuildRepository : IGuildRepository
         return true;
     }
 
+    public async Task<bool> AcceptInviteAsync(Guid characterId, Guid guildId, CancellationToken cancellationToken)
+    {
+        var invite = await _context.GuildInvites
+            .FirstOrDefaultAsync(i => i.GuildId == guildId && i.CharacterId == characterId, cancellationToken);
+
+        // Must be a real invite, not an application
+        if (invite == null || !invite.IsInvite) return false;
+
+        return await TryAddCharacterToGuildAsync(characterId, guildId, cancellationToken);
+    }
+
     public async Task<bool> ApproveApplicationAsync(Guid guildId, Guid applicationCharacterId, CancellationToken cancellationToken)
+    {
+        var application = await _context.GuildInvites
+            .FirstOrDefaultAsync(i => i.GuildId == guildId && i.CharacterId == applicationCharacterId, cancellationToken);
+
+        // Must be a real application, not an invite
+        if (application == null || application.IsInvite) return false;
+
+        return await TryAddCharacterToGuildAsync(applicationCharacterId, guildId, cancellationToken);
+    }
+    private async Task<bool> TryAddCharacterToGuildAsync(Guid characterId, Guid guildId, CancellationToken cancellationToken)
     {
         var guild = await _context.Guilds
             .Include(g => g.Members)
             .FirstOrDefaultAsync(g => g.Id == guildId, cancellationToken);
+
         if (guild == null || guild.IsGuildFull()) return false;
 
-        var invite = await _context.GuildInvites
-            .FirstOrDefaultAsync(i => i.GuildId == guildId && i.CharacterId == applicationCharacterId, cancellationToken);
-
-        if (invite == null) return false;
-
         var isInGuild = await _context.GuildMembers
-            .AnyAsync(gm => gm.CharacterId == applicationCharacterId, cancellationToken);
+            .AnyAsync(gm => gm.CharacterId == characterId, cancellationToken);
 
         if (isInGuild) return false;
 
         _context.GuildMembers.Add(new GuildMember
         {
             GuildId = guildId,
-            CharacterId = applicationCharacterId,
+            CharacterId = characterId,
             Role = GuildRole.Member
         });
-        _context.GuildInvites.Remove(invite);
+
+        // Remove *all* invites/applications by this character to clean up
+        var allInvites = await _context.GuildInvites
+            .Where(i => i.CharacterId == characterId)
+            .ToListAsync(cancellationToken);
+        _context.GuildInvites.RemoveRange(allInvites);
 
         await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
 
-    public async Task<bool> RejectApplicationAsync(Guid guildId, Guid applicationCharacterId, CancellationToken cancellationToken)
-    {
-        var invite = await _context.GuildInvites
-            .FirstOrDefaultAsync(i => i.GuildId == guildId && i.CharacterId == applicationCharacterId, cancellationToken);
-
-        if (invite == null) return false;
-
-        _context.GuildInvites.Remove(invite);
-
-        await _context.SaveChangesAsync(cancellationToken);
-        return true;
-    }
-
-    public async Task<bool> RejectInviteAsync(Guid characterId, Guid guildId, CancellationToken cancellationToken)
+    public async Task<bool> RejectGuildInviteAsync(Guid characterId, Guid guildId, CancellationToken cancellationToken)
     {
         var invite = await _context.GuildInvites
             .FirstOrDefaultAsync(i => i.GuildId == guildId && i.CharacterId == characterId, cancellationToken);
@@ -241,7 +218,6 @@ public class GuildRepository : IGuildRepository
         if (invite == null) return false;
 
         _context.GuildInvites.Remove(invite);
-
         await _context.SaveChangesAsync(cancellationToken);
         return true;
     }

@@ -75,7 +75,7 @@ public class GuildService : IGuildService
         var requestingMember = await _guildRepository.GetGuildMember(characterId, cancellationToken);
         if (requestingMember == null || !requestingMember.HasInvitePermissions()) return false;
 
-        return await _guildRepository.RejectApplicationAsync(requestingMember.GuildId, applicationCharacterId, cancellationToken);
+        return await _guildRepository.RejectGuildInviteAsync(applicationCharacterId, requestingMember.GuildId, cancellationToken);
     }
 
     public async Task<bool> ApproveApplicationAsync(Guid characterId, Guid applicationCharacterId, CancellationToken cancellationToken)
@@ -87,7 +87,7 @@ public class GuildService : IGuildService
     }
 
     public async Task<bool> RejectInviteAsync(Guid characterId, Guid guildId, CancellationToken cancellationToken) => 
-        await _guildRepository.RejectInviteAsync(characterId, guildId, cancellationToken);
+        await _guildRepository.RejectGuildInviteAsync(characterId, guildId, cancellationToken);
     #endregion
 
 
