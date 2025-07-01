@@ -2,7 +2,6 @@ import { Component, Input } from '@angular/core';
 import { EquipmentInstance, ItemInstance } from '../../models/item';
 import { NgClass } from '@angular/common';
 import { Rarity } from '../../models/enums/rarity';
-import { ItemType } from '../../models/enums/itemType';
 
 @Component({
   selector: 'app-item',
@@ -19,7 +18,7 @@ export class ItemComponent {
     let rarity = Rarity.Common;
     const equipmentInstance = this.item as EquipmentInstance;
 
-    if (this.item.itemBase.itemType === ItemType.Equipment) {
+    if (equipmentInstance && equipmentInstance.rarity !== undefined) {
       rarity = equipmentInstance.rarity;
     } else {
       rarity = this.item.itemBase.rarity;
