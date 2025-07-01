@@ -179,7 +179,6 @@ export class InventoryStateService {
         i.itemInstance.itemBase.stackable &&
         i.itemInstance.itemBase.id === item.itemInstance.itemBase.id,
     );
-    console.log(item);
     if (index !== -1) {
       const updated = [...items];
       updated[index] = {
