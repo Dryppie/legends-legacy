@@ -84,7 +84,6 @@ export class InventoryComponent implements OnInit {
   toggleSelectItem(selectedItem: InventoryItem) {
     if (this.selectedItems.includes(selectedItem)) {
       this.selectedItems = this.selectedItems.filter((item) => {
-        console.log(item);
         return item.itemInstance.id !== selectedItem.itemInstance.id;
       });
     } else {

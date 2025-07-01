@@ -1,6 +1,5 @@
 ﻿using Application.Behaviors;
 using Application.Common.Mappings;
-using Application.WebSockets.Handlers;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -17,7 +16,6 @@ public static class DependencyInjection
 
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
         services.AddTransient<DomainToClientMapper>();
-        services.AddSingleton<GameSocketHandler>();
 
         return services;
     }

@@ -6,7 +6,6 @@ using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL.Professions;
-using Application.Interfaces.WebSockets;
 using Domain.Interfaces.Combat;
 using Domain.Models.Users;
 using Microsoft.AspNetCore.Identity;
@@ -43,7 +42,6 @@ using Services.LL.Regions.Areas;
 using Services.LL.Soulstones;
 using Services.LL.Spawnings;
 using Services.LL.Users;
-using Services.LL.WebSockets;
 
 namespace Services.LL;
 public static class DependencyInjection
@@ -118,7 +116,6 @@ public static class DependencyInjection
         services.AddSingleton<GuildBuildingUpgradeDefinitionProvider>();
         services.AddSingleton<SoulstoneUpgradeDefinitionProvider>();
         services.AddSingleton<IStatusDefinitionService, JsonStatusService>();
-        services.AddSingleton<IEventStream, EventStream>();
 
         return services;
     }

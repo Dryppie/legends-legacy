@@ -3,8 +3,8 @@ import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { computed, effect, Injectable, signal } from '@angular/core';
 import { InventoryService } from './inventory.service';
 import { ItemType } from '../../../../shared/models/enums/itemType';
-import { GameSocketService } from '../../real-time/game-socket.service';
-import { EquipmentInstance, EssenceItem } from '../../../../shared/models/item';
+import { GameEventService } from '../../real-time/game-event.service';
+import { EssenceItem } from '../../../../shared/models/item';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryStateService {
@@ -22,15 +22,15 @@ export class InventoryStateService {
 
   constructor(
     private inventoryService: InventoryService,
-    private readonly socket: GameSocketService,
+    private readonly eventService: GameEventService,
   ) {
     this.load();
 
     effect(
       () => {
-        const loot = this.socket.ofType('loot')();
+        const loot = this.eventService.event.LootReceivedMsg();
         if (loot) {
-          this._lastLoot.set(loot);
+          this._lastLoot.set(loot.payload);
         }
       },
       { allowSignalWrites: true },

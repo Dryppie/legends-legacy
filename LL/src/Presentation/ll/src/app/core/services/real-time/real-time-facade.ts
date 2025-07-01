@@ -1,5 +1,5 @@
 import { Injectable, effect } from '@angular/core';
-import { GameSocketService } from './game-socket.service';
+import { GameEventService } from './game-event.service';
 import { AuthService } from '../api/auth/auth.service';
 
 @Injectable({ providedIn: 'root' })
@@ -8,14 +8,14 @@ export class RealTimeFacade {
 
   constructor(
     private auth: AuthService,
-    private socket: GameSocketService,
+    private socket: GameEventService,
   ) {
     effect(
       () => {
         if (!this.initialized) return;
 
         if (this.auth.isAuthenticated()) {
-          this.socket.connect();
+          this.socket.connect({ kind: 'World' });
         } else {
           this.socket.disconnect();
         }

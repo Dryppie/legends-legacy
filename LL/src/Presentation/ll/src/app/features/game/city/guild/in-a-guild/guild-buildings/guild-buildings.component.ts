@@ -78,7 +78,6 @@ export class GuildBuildingsComponent {
   upgradeSelected(): void {
     const current = this.selected();
     if (!current?.definition?.id || !current.nextCost) return;
-    console.log(current);
     this.state.upgradeGuildBuilding(current);
   }
 

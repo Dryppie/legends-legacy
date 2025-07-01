@@ -7,11 +7,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.WebSockets;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Persistence.LL;
 using Persistence.LL.Seeds;
+using RealTime.LL;
 using Services.AdminDashboard;
 using Services.LL;
 using System.Security.Claims;
@@ -32,6 +32,8 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
+
+builder.Services.AddSignalR();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -62,6 +64,7 @@ builder.Services.AddPersistence(config);
 builder.Services.AddRepositories();
 builder.Services.AddApplication();
 builder.Services.AddServices();
+builder.Services.AddRealTime(); // RealTime services must be added after Application and Persistence, as they depend on them
 builder.Services.AddAdminDashboardServices(); // TODO: Application layer makes use of AdminDashboard services, so this is necessary at the moment.
                                               // At some point the application layer should perhaps be split up into two? One for LL, another for Dashboard
 builder.Services.AddCommonServices();
@@ -168,10 +171,8 @@ if (!app.Environment.IsDevelopment())       // prod only
     app.UseHttpsRedirection();
 }
 
-app.UseWebSockets(new WebSocketOptions
-{
-    KeepAliveInterval = TimeSpan.FromSeconds(30),
-});
+app.MapHub<GameHub>("/hub");
+
 app.UseAuthentication();
 app.UseAuthorization();
 

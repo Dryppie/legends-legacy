@@ -1,0 +1,7 @@
+﻿namespace Application.Interfaces.WebSockets;
+public abstract record Audience
+{
+    public sealed record Character(Guid CharacterId) : Audience;
+    public sealed record Guild(Guid GuildId) : Audience;
+    public sealed record World : Audience;
+}

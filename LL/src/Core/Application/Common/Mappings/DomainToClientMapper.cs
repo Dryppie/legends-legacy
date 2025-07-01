@@ -14,10 +14,9 @@ public class DomainToClientMapper
         _mapper = mapper;
     }
 
-    public IMessage Map(INotification e) => e switch
+    public GameEventMsg Map(INotification e) => e switch
     {
-        LootGeneratedEvent l => new LootReceivedMsg(
-            l.Loot.Select(i => _mapper.Map<InventoryItemDto>(i)).ToList()),
+        LootGeneratedEvent l => new LootReceivedMsg(l.CharacterId, l.Loot.Select(i => _mapper.Map<InventoryItemDto>(i)).ToList()),
 
         // Example for another event:
         // AchievementUnlockedEvent a => _mapper.Map<AchievementUnlockedMsg>(a),

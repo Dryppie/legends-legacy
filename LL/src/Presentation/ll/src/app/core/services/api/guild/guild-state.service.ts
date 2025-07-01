@@ -3,7 +3,6 @@ import { finalize } from 'rxjs';
 import { Guild, GuildSimple } from '../../../../shared/models/Dtos/guild/guild';
 import { GuildInvite } from '../../../../shared/models/Dtos/guild/guildInvite';
 import { InviteToGuild } from '../../../../shared/models/requestDtos/guilds/inviteToGuild';
-import { GameSocketService } from '../../real-time/game-socket.service';
 import { GuildService } from './guild.service';
 import { BuildingUpgradeView } from '../../../../shared/models/guilds/buildings/buildingUpgradeView';
 import { GuildResourceType } from '../../../../shared/models/Dtos/guild/guildResourceType';
@@ -28,10 +27,7 @@ export class GuildStateService {
   readonly isInGuild = computed(() => !!this._guild());
   readonly hasInvites = computed(() => this._invites().length > 0);
 
-  constructor(
-    private readonly service: GuildService,
-    private readonly socket: GameSocketService,
-  ) {
+  constructor(private readonly service: GuildService) {
     this.refresh(); // initial fetch
 
     /* real-time updates pushed over the socket */

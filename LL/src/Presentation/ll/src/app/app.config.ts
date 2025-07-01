@@ -30,7 +30,7 @@ export function initializeApp(authService: AuthService) {
     firstValueFrom(authService.checkAuth()).catch(() => Promise.resolve());
 }
 function startRealTime(realTime: RealTimeFacade) {
-  return () => {};
+  return () => realTime.initialize();
 }
 export function initializeTimeSync(timeSyncService: TimeSyncService) {
   return () => timeSyncService.sync();
