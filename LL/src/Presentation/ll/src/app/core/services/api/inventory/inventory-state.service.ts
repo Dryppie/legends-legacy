@@ -49,11 +49,6 @@ export class InventoryStateService {
     );
   }
 
-  private handleLoot(loot: InventoryItem[]) {
-    // ✅ Safe: Not inside an effect, can freely write to signals
-    this.addOrIncrementMany(loot);
-  }
-
   /* Generic selector: reuse everywhere */
   byType = (type: ItemType) =>
     computed(
@@ -184,7 +179,7 @@ export class InventoryStateService {
         i.itemInstance.itemBase.stackable &&
         i.itemInstance.itemBase.id === item.itemInstance.itemBase.id,
     );
-
+    console.log(item);
     if (index !== -1) {
       const updated = [...items];
       updated[index] = {

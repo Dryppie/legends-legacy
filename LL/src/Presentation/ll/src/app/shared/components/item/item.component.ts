@@ -18,7 +18,7 @@ export class ItemComponent {
     let rarity = Rarity.Common;
     const equipmentInstance = this.item as EquipmentInstance;
 
-    if (equipmentInstance && equipmentInstance.rarity !== undefined) {
+    if (isEquipmentInstance(this.item)) {
       rarity = equipmentInstance.rarity;
     } else {
       rarity = this.item.itemBase.rarity;
@@ -43,4 +43,8 @@ export class ItemComponent {
         return 'text-light_gray';
     }
   }
+}
+
+function isEquipmentInstance(item: any): item is EquipmentInstance {
+  return !!item && 'rarity' in item;
 }
