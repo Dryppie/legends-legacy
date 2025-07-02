@@ -3,7 +3,10 @@ import { CombatAvatarComponent } from './combat-avatar/combat-avatar.component';
 import { CombatOverviewComponent } from './combat-overview/combat-overview.component';
 import { CombatEvent, EventType } from '../../models/Dtos/combatEventDto';
 import { NgFor, NgIf, NgStyle } from '@angular/common';
-import { SimpleCombatEntityDto } from '../../models/Dtos/combatResultDto';
+import {
+  BattleOutcome,
+  SimpleCombatEntityDto,
+} from '../../models/Dtos/combatResultDto';
 import { Subscription } from 'rxjs';
 import { CountdownComponent } from '../countdown/countdown.component';
 import { GameService } from '../../../core/services/client-side/game/game.service';
@@ -13,7 +16,6 @@ import { CombatLogComponent } from './combat-log/combat-log.component';
 import { BattleType } from '../../../core/state/combat-state/combatState';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { RegularButtonComponent } from '../buttons/regular-button/regular-button.component';
 
 @Component({
   selector: 'app-combat',
@@ -36,6 +38,7 @@ export class CombatComponent implements OnInit {
   @Input() battleType: BattleType = BattleType.IdleCombat;
   isStoppingCombat = false;
   nextCombatIn: Date | null = null;
+  outcome: BattleOutcome | null = null;
   stopCombatButtonText: string = 'Stop Combat';
 
   playerCharacters: SimpleCombatEntityDto[] = [];
@@ -106,10 +109,13 @@ export class CombatComponent implements OnInit {
       const outcome = this.combatStateService.getCombatOutcome(
         this.battleType,
       )();
+
+      this.outcome = outcome;
+
       if (outcome && this.isStoppingCombat) {
         setTimeout(() => {
           this.stopCombat();
-        }, 1000);
+        }, 3000);
       }
     });
   }

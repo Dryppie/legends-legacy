@@ -23,13 +23,13 @@ export class SessionSummaryService {
 
   loadCraftingSince(session: TemperingSessionDto) {
     if (!session?.temperingSummary) return;
-    if (session.temperingSummary.totalActions <= 6) return;
+    if (session.temperingSummary.totalActions <= 10) return;
     this.temperingSession.set(session);
   }
 
   loadGatheringSince(session: GatheringSessionDto) {
     if (!session?.gatheringSummary) return;
-    if (session.gatheringSummary.totalActions <= 6) return;
+    if (session.gatheringSummary.totalActions <= 10) return;
     this.gatheringSession.set(session);
   }
 
