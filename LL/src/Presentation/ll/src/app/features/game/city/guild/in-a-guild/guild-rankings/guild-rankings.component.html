@@ -11,7 +11,8 @@
         >
           <div>Name</div>
           <div>Owner</div>
-          <div>Members</div>
+          <div class="justify-self-end">Members</div>
+          <div class="justify-self-end">Upgrades</div>
         </div>
         <div class="overflow-y-auto">
           <div
@@ -24,7 +25,10 @@
             <div class="break-words">
               {{ guild.ownerName }}
             </div>
-            <div>{{ guild.memberCount }}/{{ guild.maxMembers }}</div>
+            <div class="justify-self-end">
+              {{ guild.memberCount }}/{{ guild.maxMembers }}
+            </div>
+            <div class="justify-self-end">{{ guild.upgrades }}</div>
           </div>
         </div>
       </div>
@@ -32,7 +36,7 @@
   </ng-container>
   <ng-template #noGuilds>
     <p class="mt-4 text-center italic text-neutral-400">
-      No guilds exist! That's.. odd.
+      No guilds exist! That's.. odd. Aren't you in one?
     </p>
   </ng-template>
 </div>

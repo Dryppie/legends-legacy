@@ -48,6 +48,7 @@ public class GuildRepository : IGuildRepository
         await _context.Guilds
             .Include(g => g.Owner)
             .Include(g => g.Members)
+            .Include(g => g.GuildBuildingUpgrades)
             .ToListAsync(cancellationToken);
 
     public async Task<bool> LeaveGuildAsync(Guid characterId, CancellationToken cancellationToken)

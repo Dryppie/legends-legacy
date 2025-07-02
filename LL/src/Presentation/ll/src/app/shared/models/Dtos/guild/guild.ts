@@ -19,4 +19,5 @@ export interface GuildSimple {
   ownerName: string;
   memberCount: number;
   maxMembers: number;
+  upgrades: number;
 }

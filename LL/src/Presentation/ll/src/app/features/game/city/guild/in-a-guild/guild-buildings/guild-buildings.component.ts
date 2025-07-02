@@ -1,6 +1,6 @@
 import { Component, computed, effect, signal } from '@angular/core';
 import { GuildStateService } from '../../../../../../core/services/api/guild/guild-state.service';
-import { NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { BuildingUpgradeView } from '../../../../../../shared/models/guilds/buildings/buildingUpgradeView';
 import { NumberFormatPipe } from '../../../../../../shared/pipes/number-format/number-format.pipe';
 import { RegularButtonComponent } from '../../../../../../shared/components/buttons/regular-button/regular-button.component';
@@ -14,6 +14,7 @@ import { GuildRole } from '../../../../../../shared/models/Dtos/guild/guildRole'
   imports: [
     NgIf,
     NgFor,
+    NgClass,
     NumberFormatPipe,
     RegularButtonComponent,
     HumanizeEnumPipe,
