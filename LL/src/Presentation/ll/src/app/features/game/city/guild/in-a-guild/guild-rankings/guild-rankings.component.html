@@ -1,0 +1,41 @@
+<div
+  *ngIf="sortedGuilds() as guilds"
+  class="flex h-full w-full flex-col space-y-4 overflow-y-auto border-b border-zinc-300/30 p-4 pt-4 text-sm text-neutral-200 md:border-b-0 md:border-r md:border-zinc-300/30"
+>
+  <div class="flex flex-col gap-2">
+    <h2 class="text-primary">Guilds</h2>
+  </div>
+  <ng-container *ngIf="guilds.length > 0; else noGuilds">
+    <div class="flex flex-col overflow-hidden text-white">
+      <h3 class="p-2 text-primary">Guilds</h3>
+      <div class="flex flex-col overflow-hidden">
+        <div
+          class="grid grid-cols-4 items-center gap-2 border-b border-light_gray p-2"
+        >
+          <div>Name</div>
+          <div>Owner</div>
+          <div>Members</div>
+        </div>
+        <div class="overflow-y-auto">
+          <div
+            class="grid grid-cols-4 items-center justify-between gap-2 border-b border-light_gray p-2 hover:bg-zinc-300/10"
+            *ngFor="let guild of guilds"
+          >
+            <div class="break-words">
+              {{ guild.name }}
+            </div>
+            <div class="break-words">
+              {{ guild.ownerName }}
+            </div>
+            <div>{{ guild.memberCount }}/{{ guild.maxMembers }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+  <ng-template #noGuilds>
+    <p class="mt-4 text-center italic text-neutral-400">
+      No guilds exist! That's.. odd.
+    </p>
+  </ng-template>
+</div>

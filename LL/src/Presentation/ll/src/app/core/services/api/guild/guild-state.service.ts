@@ -56,6 +56,7 @@ export class GuildStateService {
             this._invites.set([]);
             this._allGuilds.set([]);
             this.loadGuildUpgrades();
+            this.loadAllGuilds();
           } else {
             this._guild.set(null);
             this.loadAllGuilds();

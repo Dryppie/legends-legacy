@@ -42,40 +42,44 @@
     </div>
   </ng-container>
   <ng-container *ngIf="guilds.length > 0; else noGuilds">
-    <div class="flex flex-col text-white">
+    <div class="flex flex-col overflow-hidden text-white">
       <h3 class="p-2 text-primary">Guilds</h3>
-      <div class="flex flex-col">
-        <div class="grid grid-cols-4 items-center gap-2 p-2">
+      <div class="flex flex-col overflow-hidden">
+        <div
+          class="grid grid-cols-4 items-center gap-2 border-b border-light_gray p-2"
+        >
           <div>Name</div>
           <div>Owner</div>
           <div>Members</div>
         </div>
-        <div
-          class="grid grid-cols-4 items-center justify-between gap-2 border-t border-light_gray p-2 hover:bg-zinc-300/10"
-          *ngFor="let guild of guilds"
-        >
-          <div class="break-words">
-            {{ guild.name }}
-          </div>
-          <div class="break-words">
-            {{ guild.ownerName }}
-          </div>
-          <div>{{ guild.memberCount }}/{{ guild.maxMembers }}</div>
-
+        <div class="overflow-y-auto">
           <div
-            class="justify-self-end rounded-md border border-light_gray p-2 text-white hover:cursor-pointer hover:bg-zinc-300/10"
-            (click)="!isGuildAppliedTo(guild.id) && applyToGuild(guild.id)"
+            class="grid grid-cols-4 items-center justify-between gap-2 border-b border-light_gray p-2 hover:bg-zinc-300/10"
+            *ngFor="let guild of guilds"
           >
-            <ng-container
-              *ngIf="!isGuildAppliedTo(guild.id); else appliedTemplate"
-            >
-              Apply
-            </ng-container>
-            <ng-template #appliedTemplate> Applied </ng-template>
-          </div>
+            <div class="break-words">
+              {{ guild.name }}
+            </div>
+            <div class="break-words">
+              {{ guild.ownerName }}
+            </div>
+            <div>{{ guild.memberCount }}/{{ guild.maxMembers }}</div>
 
-          <div *ngIf="guilds.length === 0" class="text-white">
-            <p>No guilds available yet. Be the first to create one!</p>
+            <div
+              class="justify-self-end rounded-md border border-light_gray p-2 text-white hover:cursor-pointer hover:bg-zinc-300/10"
+              (click)="!isGuildAppliedTo(guild.id) && applyToGuild(guild.id)"
+            >
+              <ng-container
+                *ngIf="!isGuildAppliedTo(guild.id); else appliedTemplate"
+              >
+                Apply
+              </ng-container>
+              <ng-template #appliedTemplate> Applied </ng-template>
+            </div>
+
+            <div *ngIf="guilds.length === 0" class="text-white">
+              <p>No guilds available yet. Be the first to create one!</p>
+            </div>
           </div>
         </div>
       </div>
