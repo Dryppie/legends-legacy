@@ -1,5 +1,4 @@
 ﻿using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
-using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Colosseum.Commands.StartArenaBattle;
 using Application.UseCases.Colosseum.Dtos;
 using Application.UseCases.Colosseum.Queries.GetArenaOpponents;
@@ -13,7 +12,7 @@ namespace API.LL.Controllers.V1;
 public class ColosseumController : BaseController
 {
     [HttpGet("GetArenaOpponents")]
-    public async Task<ActionResult<List<CharacterDto>>> GetArenaOpponents() =>
+    public async Task<ActionResult<List<ArenaOpponentPreviewDto>>> GetArenaOpponents() =>
         await Mediator.Send(new GetArenaOpponentsQuery(CurrentCharacterGuid));
 
     [HttpGet("GetArenaTicketStatus")]

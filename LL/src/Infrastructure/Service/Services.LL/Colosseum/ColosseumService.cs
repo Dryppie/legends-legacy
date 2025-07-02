@@ -3,8 +3,6 @@ using Application.Interfaces.Services.LL.Entities;
 using Domain.Interfaces.Combat;
 using Domain.Models.Colosseum;
 using Domain.Models.Combat;
-using Domain.Models.Entities.Characters;
-using Services.LL.Combat;
 using Services.LL.Interfaces;
 
 namespace Services.LL.Colosseum;
@@ -15,14 +13,16 @@ public class ColosseumService : IColosseumService
     private readonly ICombatSetupService _combatSetupService;
     private readonly IColosseumRepository _colosseumRepository;
     private readonly ICombatContext _combatContext;
+    private readonly IRatingService _ratingService;
 
-    public ColosseumService(IEntityService es, ICharacterService cs, ICombatSetupService css, IColosseumRepository cr, ICombatContext cc)
+    public ColosseumService(IEntityService es, ICharacterService cs, ICombatSetupService css, IColosseumRepository cr, ICombatContext cc, IRatingService rs)
     {
         _entityService = es;
         _characterService = cs;
         _combatSetupService = css;
         _colosseumRepository = cr;
         _combatContext = cc;
+        _ratingService = rs;
     }
 
     public async Task<CombatResult?> StartArenaBattle(Guid characterId, Guid enemyId, CancellationToken cancellationToken)
@@ -57,14 +57,31 @@ public class ColosseumService : IColosseumService
     }
 
     /// <summary>
-    /// Get the opponents you are eligible to fight
+    /// Get the opponents you are eligible to fight, including rating gains / losses
     /// </summary>
     /// <param name="characterId"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public async Task<List<Character>> GetArenaOpponents(Guid characterId, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<ArenaOpponentPreview>> GetArenaOpponents(Guid characterId, CancellationToken cancellationToken)
     {
-        return await _colosseumRepository.GetArenaOpponents(characterId, cancellationToken);
+        var opponents = await _colosseumRepository.GetArenaOpponents(characterId, cancellationToken);
+
+        // Run 20 preview calculations in parallel – trivial load, but avoids N+1 latency
+        var previewTasks = opponents
+            .Select(o => _ratingService.PreviewColosseumRatingAsync(characterId, o.Id, cancellationToken))
+            .ToList();
+
+        var previews = await Task.WhenAll(previewTasks);
+
+        var result = opponents
+            .Zip(previews, (opp, prev) => new ArenaOpponentPreview
+            {
+                Opponent = opp,
+                RatingDelta = prev
+            })
+            .ToList();
+
+        return result;
     }
 
     public async Task SaveArenaMatchResult(Guid characterId, Guid enemyId, BattleOutcome outcome, CancellationToken cancellationToken)

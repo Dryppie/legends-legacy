@@ -41,11 +41,11 @@
     >
       <div class="break-words pr-2">{{ o.name }}</div>
       <div>{{ o.level }}</div>
-      <div>{{ o.arenaRating }}</div>
+      <div>{{ o.opponentRating }}</div>
       <app-regular-button
         class="justify-self-end"
         text="Challenge"
-        (pressed)="onChallenge(o.id)"
+        (pressed)="onChallenge(o.characterId)"
         [disabled]="
           arenaTicketStatus == undefined || arenaTicketStatus.currentTickets < 1
         "

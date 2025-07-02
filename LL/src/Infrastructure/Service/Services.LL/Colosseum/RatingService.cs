@@ -25,4 +25,28 @@ public class RatingService : IRatingService
         await _ratingRepository.SetColosseumRatingAsync(characterId, newA, cancellationToken);
         await _ratingRepository.SetColosseumRatingAsync(enemyId, newB, cancellationToken);
     }
+
+    public async Task<ColosseumRatingPreview> PreviewColosseumRatingAsync(Guid characterId, Guid enemyId, CancellationToken cancellationToken)
+    {
+        // 1. Read current ratings
+        int ratingA = await _ratingRepository.GetColosseumRatingAsync(characterId, cancellationToken);
+        int ratingB = await _ratingRepository.GetColosseumRatingAsync(enemyId, cancellationToken);
+
+        // 2. Run the calculator for each possible outcome
+        var calculator = new Elo32Calculator();
+
+        var (aIfWin, _) = calculator.Calculate(ratingA, ratingB, BattleOutcome.Victory);
+        var (aIfLoss, _) = calculator.Calculate(ratingA, ratingB, BattleOutcome.Defeat);
+        var (aIfDraw, _) = calculator.Calculate(ratingA, ratingB, BattleOutcome.Draw);
+
+        // 3. Package and return (note: **nothing** is persisted here)
+        return new ColosseumRatingPreview
+        {
+            CurrentRating = ratingA,
+            OpponentRating = ratingB,
+            RatingIfVictory = aIfWin,
+            RatingIfDefeat = aIfLoss,
+            RatingIfDraw = aIfDraw
+        };
+    }
 }

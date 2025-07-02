@@ -5,7 +5,7 @@ using Domain.Models.Entities.Characters;
 namespace Application.Interfaces.Services.LL.Colosseum;
 public interface IColosseumService
 {
-    Task<List<Character>> GetArenaOpponents(Guid characterId, CancellationToken cancellationToken);
+    Task<IReadOnlyList<ArenaOpponentPreview>> GetArenaOpponents(Guid characterId, CancellationToken cancellationToken);
     Task<ArenaTicketStatus> GetArenaTicketStatusAsync(Guid characterId, CancellationToken cancellationToken);
 
     /// <summary>

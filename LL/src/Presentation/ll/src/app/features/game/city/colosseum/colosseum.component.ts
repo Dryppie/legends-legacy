@@ -16,6 +16,7 @@ import { ColosseumMatchResult } from '../../../../shared/models/Dtos/colosseum/c
 import { ColosseumRank } from '../../../../shared/models/Dtos/colosseum/colosseumRank';
 import { ArenaTicketStatus } from '../../../../shared/models/Dtos/colosseum/arenaTicketStatus';
 import { TabsComponent } from '../../../../shared/components/tabs/tabs.component';
+import { ArenaOpponentPreview } from '../../../../shared/models/Dtos/colosseum/arenaOpponentPreview';
 
 @Component({
   selector: 'app-colosseum',
@@ -35,8 +36,8 @@ import { TabsComponent } from '../../../../shared/components/tabs/tabs.component
   templateUrl: './colosseum.component.html',
 })
 export class ColosseumComponent implements OnInit {
-  allOpponents: CharacterDto[] = [];
-  opponents: CharacterDto[] = [];
+  allOpponents: ArenaOpponentPreview[] = [];
+  opponents: ArenaOpponentPreview[] = [];
   arenaTicketStatus!: ArenaTicketStatus;
 
   rankings: ColosseumRank[] = [];
@@ -88,7 +89,7 @@ export class ColosseumComponent implements OnInit {
       .map((x) => ({ ...x }))
       .sort(() => Math.random() - 0.5)
       .slice(0, 5)
-      .sort((a, b) => b.arenaRating - a.arenaRating);
+      .sort((a, b) => b.opponentRating - a.opponentRating);
   }
 
   onRefreshOpponents(): void {

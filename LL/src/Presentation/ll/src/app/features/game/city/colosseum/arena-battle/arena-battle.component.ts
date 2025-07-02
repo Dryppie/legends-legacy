@@ -1,9 +1,9 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { CharacterDto } from '../../../../../shared/models/Dtos/characterDto';
 import { NgFor, NgIf } from '@angular/common';
 import { ArenaTicketStatus } from '../../../../../shared/models/Dtos/colosseum/arenaTicketStatus';
 import { ColosseumService } from '../../../../../core/services/api/colosseum/colosseum.service';
 import { RegularButtonComponent } from '../../../../../shared/components/buttons/regular-button/regular-button.component';
+import { ArenaOpponentPreview } from '../../../../../shared/models/Dtos/colosseum/arenaOpponentPreview';
 
 @Component({
   selector: 'app-arena-battle',
@@ -12,7 +12,7 @@ import { RegularButtonComponent } from '../../../../../shared/components/buttons
   templateUrl: './arena-battle.component.html',
 })
 export class ArenaBattleComponent implements OnInit {
-  @Input() opponents!: CharacterDto[];
+  @Input() opponents!: ArenaOpponentPreview[];
   arenaTicketStatus!: ArenaTicketStatus;
 
   @Output() refreshOpponents = new EventEmitter<void>();

@@ -1,19 +1,12 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from '../api.service';
-import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
-import {
-  BehaviorSubject,
-  catchError,
-  map,
-  Observable,
-  of,
-  throwError,
-} from 'rxjs';
+import { BehaviorSubject, catchError, map, Observable, throwError } from 'rxjs';
 import { CombatResultDto } from '../../../../shared/models/Dtos/combatResultDto';
 import { CombatService } from '../../client-side/combat/combat.service';
 import { ColosseumMatchResult } from '../../../../shared/models/Dtos/colosseum/colosseumMatchResult';
 import { ColosseumRank } from '../../../../shared/models/Dtos/colosseum/colosseumRank';
 import { ArenaTicketStatus } from '../../../../shared/models/Dtos/colosseum/arenaTicketStatus';
+import { ArenaOpponentPreview } from '../../../../shared/models/Dtos/colosseum/arenaOpponentPreview';
 
 @Injectable({
   providedIn: 'root',
@@ -28,7 +21,7 @@ export class ColosseumService {
     private combatService: CombatService,
   ) {}
 
-  public getArenaOpponents(): Observable<CharacterDto[]> {
+  public getArenaOpponents(): Observable<ArenaOpponentPreview[]> {
     return this.apiService.get('colosseum/getArenaOpponents').pipe(
       map((opponents) => {
         // this.toastService.showToast(

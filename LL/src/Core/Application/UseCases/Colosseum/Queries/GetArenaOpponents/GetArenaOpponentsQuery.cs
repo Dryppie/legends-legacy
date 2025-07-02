@@ -1,11 +1,11 @@
 ﻿using Application.Interfaces.Services.LL.Colosseum;
-using Application.UseCases.Characters.Dtos;
+using Application.UseCases.Colosseum.Dtos;
 using AutoMapper;
 using MediatR;
 
 namespace Application.UseCases.Colosseum.Queries.GetArenaOpponents;
-public record GetArenaOpponentsQuery(Guid CharacterId) : IRequest<List<CharacterDto>>;
-public class GetArenaOpponentsQueryHandler : IRequestHandler<GetArenaOpponentsQuery, List<CharacterDto>>
+public record GetArenaOpponentsQuery(Guid CharacterId) : IRequest<List<ArenaOpponentPreviewDto>>;
+public class GetArenaOpponentsQueryHandler : IRequestHandler<GetArenaOpponentsQuery, List<ArenaOpponentPreviewDto>>
 {
 
     private readonly IColosseumService _colosseumService;
@@ -17,10 +17,11 @@ public class GetArenaOpponentsQueryHandler : IRequestHandler<GetArenaOpponentsQu
         _mapper = mapper;
     }
 
-    public async Task<List<CharacterDto>> Handle(GetArenaOpponentsQuery request, CancellationToken cancellationToken)
+    public async Task<List<ArenaOpponentPreviewDto>> Handle(GetArenaOpponentsQuery request, CancellationToken cancellationToken)
     {
+
         var arenaOpponents = await _colosseumService.GetArenaOpponents(request.CharacterId, cancellationToken);
 
-        return _mapper.Map<List<CharacterDto>>(arenaOpponents);
+        return _mapper.Map<List<ArenaOpponentPreviewDto>>(arenaOpponents);
     }
 }

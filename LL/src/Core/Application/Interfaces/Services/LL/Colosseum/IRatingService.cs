@@ -1,4 +1,5 @@
-﻿using Domain.Models.Combat;
+﻿using Domain.Models.Colosseum;
+using Domain.Models.Combat;
 
 namespace Application.Interfaces.Services.LL.Colosseum;
 public interface IRatingService
@@ -10,4 +11,6 @@ public interface IRatingService
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task CalculateNewColosseumRatingsAsync(Guid characterId, Guid enemyId, BattleOutcome outcome, CancellationToken cancellationToken);
+
+    Task<ColosseumRatingPreview> PreviewColosseumRatingAsync(Guid characterId, Guid enemyId, CancellationToken cancellationToken);
 }
