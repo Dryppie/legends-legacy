@@ -1,13 +1,10 @@
 <div
   *ngIf="sortedGuilds() as guilds"
-  class="flex h-full w-full flex-col space-y-4 overflow-y-auto border-b border-zinc-300/30 p-4 pt-4 text-sm text-neutral-200 md:border-b-0 md:border-r md:border-zinc-300/30"
+  class="flex h-full w-full flex-col space-y-4 overflow-y-auto p-4 pt-4"
 >
-  <div class="flex flex-col gap-2">
-    <h2 class="text-primary">Guilds</h2>
-  </div>
   <ng-container *ngIf="guilds.length > 0; else noGuilds">
     <div class="flex flex-col overflow-hidden text-white">
-      <h3 class="p-2 text-primary">Guilds</h3>
+      <h2 class="p-2 text-primary">Guilds</h2>
       <div class="flex flex-col overflow-hidden">
         <div
           class="grid grid-cols-4 items-center gap-2 border-b border-light_gray p-2"
