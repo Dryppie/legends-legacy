@@ -107,6 +107,29 @@ export class CombatService {
     }
   }
 
+  skipCurrentColosseum(): void {
+    const type = BattleType.Colosseum;
+
+    // Only allowed if a Colosseum fight is running
+    if (!this.combatStateService.getIsCombatActive(type)()) return;
+
+    const combatResult = this.combatStateService.getCombatResult(type)();
+    if (!combatResult) return;
+
+    const alreadyPlayed =
+      this.combatStateService.getCombatEvents(type)().length;
+    combatResult.eventLog
+      .slice(alreadyPlayed)
+      .forEach((ev) => this.combatStateService.addCombatEvent(type, ev));
+
+    // Publish the outcome and mark the fight as finished
+    this.combatStateService.setCombatOutcome(type, combatResult.outcome);
+    this.combatStateService.setCombatActive(type, false);
+
+    // If you still want the original reset behaviour, call handleCombatComplete.
+    this.handleCombatComplete(combatResult);
+  }
+
   private handleCombatComplete(combatResult: CombatResultDto) {
     if (combatResult.battleType === BattleType.Colosseum) {
       this.combatStateService.setCombatActive(combatResult.battleType, false);

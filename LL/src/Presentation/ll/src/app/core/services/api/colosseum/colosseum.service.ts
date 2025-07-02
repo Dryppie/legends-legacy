@@ -136,4 +136,8 @@ export class ColosseumService {
         }
       });
   }
+
+  skipColosseumMatch() {
+    this.combatService.skipCurrentColosseum();
+  }
 }

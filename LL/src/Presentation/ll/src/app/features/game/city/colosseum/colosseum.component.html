@@ -4,7 +4,11 @@
     else showNonCombat
   "
 >
-  <app-combat class="flex h-full w-full" [battleType]="battleType"></app-combat>
+  <app-combat
+    class="flex h-full w-full"
+    [battleType]="battleType"
+    (skipBattle)="skipBattle()"
+  ></app-combat>
 </ng-container>
 <ng-template #showNonCombat>
   <div

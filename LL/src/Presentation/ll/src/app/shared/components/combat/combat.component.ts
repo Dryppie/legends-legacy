@@ -1,4 +1,12 @@
-import { Component, effect, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  Component,
+  effect,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { CombatAvatarComponent } from './combat-avatar/combat-avatar.component';
 import { CombatOverviewComponent } from './combat-overview/combat-overview.component';
 import { CombatEvent, EventType } from '../../models/Dtos/combatEventDto';
@@ -36,6 +44,8 @@ export class CombatComponent implements OnInit {
   combatEvents: CombatEvent[] = [];
   private lastEventsLength = 0;
   @Input() battleType: BattleType = BattleType.IdleCombat;
+  @Output() skipBattle = new EventEmitter<void>();
+
   isStoppingCombat = false;
   nextCombatIn: Date | null = null;
   outcome: BattleOutcome | null = null;
@@ -158,6 +168,20 @@ export class CombatComponent implements OnInit {
 
     this.pickRandomFlavorText();
     setInterval(() => this.pickRandomFlavorText(), 5000);
+  }
+
+  onStopOrSkip(): void {
+    if (this.battleType === BattleType.IdleCombat) {
+      // Original behaviour
+      this.initiateStoppingCombat();
+    } else if (this.battleType === BattleType.Colosseum) {
+      // New behaviour
+      this.skipCombat();
+    }
+  }
+
+  skipCombat() {
+    this.skipBattle.emit();
   }
 
   initiateStoppingCombat() {

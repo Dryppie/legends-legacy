@@ -3,7 +3,7 @@ import { BannerComponent } from '../../../../shared/components/banner/banner.com
 import { TabComponent } from '../../../../shared/components/tabs/tab/tab.component';
 import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { ColosseumService } from '../../../../core/services/api/colosseum/colosseum.service';
-import { AsyncPipe, NgIf } from '@angular/common';
+import { NgIf } from '@angular/common';
 import { CombatComponent } from '../../../../shared/components/combat/combat.component';
 import { BattleType } from '../../../../core/state/combat-state/combatState';
 import { CombatStateService } from '../../../../core/state/combat-state/combat-state.service';
@@ -76,6 +76,10 @@ export class ColosseumComponent implements OnInit {
     });
 
     this.colosseumService.getArenaTicketStatus();
+  }
+
+  skipBattle() {
+    this.colosseumService.skipColosseumMatch();
   }
 
   pickRandomOpponents(): void {

@@ -32,6 +32,7 @@ export class CombatOverviewComponent {
   @Input() isStoppingCombat = false;
   @Output() stopCombatEvent = new EventEmitter<void>();
   stopCombatButtonText = 'Stop Combat';
+  skipColosseumMatch = 'Skip Battle';
   filteredCombatEvents: CombatEvent[] = [];
 
   constructor(private modalService: ModalService) {}

@@ -13,9 +13,10 @@
       />
     </div>
     <app-regular-button
-      *ngIf="battleType === 'IdleCombat'"
       class="text-primary"
-      [text]="stopCombatButtonText"
+      [text]="
+        battleType === 'IdleCombat' ? stopCombatButtonText : skipColosseumMatch
+      "
       [disabled]="isStoppingCombat"
       (pressed)="initiateStoppingCombat()"
     >

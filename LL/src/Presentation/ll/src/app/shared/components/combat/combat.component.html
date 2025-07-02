@@ -154,7 +154,7 @@
         [combatEvents]="combatEvents"
         [isLoading]="isLoading"
         [isStoppingCombat]="isStoppingCombat"
-        (stopCombatEvent)="initiateStoppingCombat()"
+        (stopCombatEvent)="onStopOrSkip()"
         [battleType]="battleType"
         class="h-full w-full"
       ></app-combat-overview>
