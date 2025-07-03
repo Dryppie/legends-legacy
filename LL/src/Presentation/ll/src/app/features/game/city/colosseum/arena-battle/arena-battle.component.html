@@ -2,12 +2,6 @@
   class="flex h-full w-full flex-col overflow-hidden rounded-xl p-4 text-white"
 >
   <div class="flex-1">
-    <div class="pb-2 italic text-white">
-      <p>
-        Ah, a challenger approaches! Looking to test your might in the arena?
-      </p>
-      <p>Glory awaits, champion.</p>
-    </div>
     <div class="flex items-center justify-between">
       <h2 class="text-primary">Arena Battles</h2>
       <div
@@ -22,7 +16,7 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-4 items-center p-2">
+    <div class="grid grid-cols-4 items-center border-b border-light_gray p-2">
       <div>Name</div>
       <div>Level</div>
       <div>Arena Rating</div>
@@ -36,20 +30,57 @@
   </div>
   <div class="overflow-y-auto">
     <div
-      class="grid grid-cols-4 items-center border-t border-light_gray p-2"
+      class="grid grid-cols-4 items-center border-b border-light_gray p-2"
       *ngFor="let o of opponents"
     >
-      <div class="break-words pr-2">{{ o.name }}</div>
+      <div class="break-words pr-2 sm:truncate">{{ o.name }}</div>
       <div>{{ o.level }}</div>
       <div>{{ o.opponentRating }}</div>
-      <app-regular-button
-        class="justify-self-end"
-        text="Challenge"
-        (pressed)="onChallenge(o.characterId)"
-        [disabled]="
-          arenaTicketStatus == undefined || arenaTicketStatus.currentTickets < 1
-        "
-      />
+      <div class="justify-self-end">
+        <div class="flex gap-2 justify-self-end">
+          <div class="flex flex-col">
+            <span class="text-gray-400 text-xs">Win</span>
+            <span
+              [ngClass]="o.deltaIfVictory > 0 ? 'text-green-400' : 'text-white'"
+            >
+              {{
+                o.deltaIfVictory > 0 ? "+" + o.deltaIfVictory : o.deltaIfVictory
+              }}
+            </span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-gray-400 text-xs">Draw</span>
+            <span
+              class="text-center"
+              [ngClass]="
+                o.deltaIfDraw > 0
+                  ? 'text-yellow-400'
+                  : o.deltaIfDraw < 0
+                    ? 'text-red-400'
+                    : 'text-white'
+              "
+            >
+              {{ o.deltaIfDraw > 0 ? "+" + o.deltaIfDraw : o.deltaIfDraw }}
+            </span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-gray-400 text-xs">Loss</span>
+            <span class="text-red-400">
+              {{
+                o.deltaIfDefeat > 0 ? "+" + o.deltaIfDefeat : o.deltaIfDefeat
+              }}
+            </span>
+          </div>
+        </div>
+        <app-regular-button
+          text="Challenge"
+          (pressed)="onChallenge(o.characterId)"
+          [disabled]="
+            arenaTicketStatus == undefined ||
+            arenaTicketStatus.currentTickets < 1
+          "
+        />
+      </div>
     </div>
   </div>
 </div>

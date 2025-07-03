@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { ArenaTicketStatus } from '../../../../../shared/models/Dtos/colosseum/arenaTicketStatus';
 import { ColosseumService } from '../../../../../core/services/api/colosseum/colosseum.service';
 import { RegularButtonComponent } from '../../../../../shared/components/buttons/regular-button/regular-button.component';
@@ -8,7 +8,7 @@ import { ArenaOpponentPreview } from '../../../../../shared/models/Dtos/colosseu
 @Component({
   selector: 'app-arena-battle',
   standalone: true,
-  imports: [NgFor, NgIf, RegularButtonComponent],
+  imports: [NgFor, NgIf, NgClass, RegularButtonComponent],
   templateUrl: './arena-battle.component.html',
 })
 export class ArenaBattleComponent implements OnInit {

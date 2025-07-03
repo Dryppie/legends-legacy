@@ -5,12 +5,12 @@
     icon="character/essences"
   ></app-default-header>
   <app-regular-button
-    class="place-self-end pr-4 sm:place-self-start"
+    class="place-self-end pl-1 pr-4 sm:place-self-start"
     variant="danger"
+    text="Reset - free"
     (pressed)="resetSoulstoneUpgrades()"
     [disabled]="loading()"
-    >Reset - free</app-regular-button
-  >
+  ></app-regular-button>
   <div
     class="flex flex-col gap-4 overflow-y-auto pr-4 sm:pr-6"
     *ngIf="combatUpgrades()"
