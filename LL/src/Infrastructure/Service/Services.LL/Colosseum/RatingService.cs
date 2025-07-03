@@ -6,6 +6,7 @@ namespace Services.LL.Colosseum;
 public class RatingService : IRatingService
 {
     private readonly IRatingRepository _ratingRepository;
+    private readonly Elo32Calculator _calculator = new();
 
     public RatingService(IRatingRepository ratingRepository)
     {
@@ -18,35 +19,26 @@ public class RatingService : IRatingService
         int ratingB = await _ratingRepository.GetColosseumRatingAsync(enemyId, cancellationToken);
 
         // 2. Calculate new ratings
-        var calculator = new Elo32Calculator();
-        var (newA, newB) = calculator.Calculate(ratingA, ratingB, outcome);
+        var (newA, newB) = _calculator.Calculate(ratingA, ratingB, outcome);
 
         // 3. Save new ratings (replace with your actual saving logic)
         await _ratingRepository.SetColosseumRatingAsync(characterId, newA, cancellationToken);
         await _ratingRepository.SetColosseumRatingAsync(enemyId, newB, cancellationToken);
     }
 
-    public async Task<ColosseumRatingPreview> PreviewColosseumRatingAsync(Guid characterId, Guid enemyId, CancellationToken cancellationToken)
+    public ColosseumRatingPreview Preview(int myRating, int opponentRating)
     {
-        // 1. Read current ratings
-        int ratingA = await _ratingRepository.GetColosseumRatingAsync(characterId, cancellationToken);
-        int ratingB = await _ratingRepository.GetColosseumRatingAsync(enemyId, cancellationToken);
+        var (win, _) = _calculator.Calculate(myRating, opponentRating, BattleOutcome.Victory);
+        var (loss, _) = _calculator.Calculate(myRating, opponentRating, BattleOutcome.Defeat);
+        var (draw, _) = _calculator.Calculate(myRating, opponentRating, BattleOutcome.Draw);
 
-        // 2. Run the calculator for each possible outcome
-        var calculator = new Elo32Calculator();
-
-        var (aIfWin, _) = calculator.Calculate(ratingA, ratingB, BattleOutcome.Victory);
-        var (aIfLoss, _) = calculator.Calculate(ratingA, ratingB, BattleOutcome.Defeat);
-        var (aIfDraw, _) = calculator.Calculate(ratingA, ratingB, BattleOutcome.Draw);
-
-        // 3. Package and return (note: **nothing** is persisted here)
         return new ColosseumRatingPreview
         {
-            CurrentRating = ratingA,
-            OpponentRating = ratingB,
-            RatingIfVictory = aIfWin,
-            RatingIfDefeat = aIfLoss,
-            RatingIfDraw = aIfDraw
+            CurrentRating = myRating,
+            OpponentRating = opponentRating,
+            RatingIfVictory = win,
+            RatingIfDefeat = loss,
+            RatingIfDraw = draw
         };
     }
 }

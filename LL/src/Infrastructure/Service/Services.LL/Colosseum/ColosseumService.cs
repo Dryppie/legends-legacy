@@ -64,24 +64,14 @@ public class ColosseumService : IColosseumService
     /// <returns></returns>
     public async Task<IReadOnlyList<ArenaOpponentPreview>> GetArenaOpponents(Guid characterId, CancellationToken cancellationToken)
     {
-        var opponents = await _colosseumRepository.GetArenaOpponents(characterId, cancellationToken);
-
-        // Run 20 preview calculations in parallel – trivial load, but avoids N+1 latency
-        var previewTasks = opponents
-            .Select(o => _ratingService.PreviewColosseumRatingAsync(characterId, o.Id, cancellationToken))
-            .ToList();
-
-        var previews = await Task.WhenAll(previewTasks);
-
-        var result = opponents
-            .Zip(previews, (opp, prev) => new ArenaOpponentPreview
+        var (opponents, myRating) = await _colosseumRepository.GetArenaOpponentsWithRating(characterId, cancellationToken);
+        return opponents
+            .Select(opp => new ArenaOpponentPreview
             {
                 Opponent = opp,
-                RatingDelta = prev
+                RatingDelta = _ratingService.Preview(myRating, opp.ArenaRating)
             })
             .ToList();
-
-        return result;
     }
 
     public async Task SaveArenaMatchResult(Guid characterId, Guid enemyId, BattleOutcome outcome, CancellationToken cancellationToken)

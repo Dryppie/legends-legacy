@@ -13,27 +13,24 @@ public class ColosseumRepository : IColosseumRepository
         _context = context;
     }
 
-    public async Task<List<Character>> GetArenaOpponents(Guid characterId, CancellationToken cancellationToken)
+    public async Task<(List<Character> Opponents, int MyRating)> GetArenaOpponentsWithRating(Guid characterId, CancellationToken cancellationToken)
     {
-        // First, get the current character's ArenaRating
-        var myCharacter = await _context.Characters
-            .Where(c => c.Id == characterId)
-            .Select(c => new { c.ArenaRating })
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (myCharacter == null)
-            return [];
-
-        var myArenaRating = myCharacter.ArenaRating;
-
-        // Get up to 25 characters closest in ArenaRating, excluding self
         var characters = await _context.Characters
-            .Where(c => c.Id != characterId)
-            .OrderBy(c => Math.Abs(c.ArenaRating - myArenaRating))
-            .Take(25)
+            .Where(c => c.Id == characterId || c.Id != characterId)
+            .Select(c => new { c.Id, c.Name, c.ArenaRating, Character = c })
             .ToListAsync(cancellationToken);
 
-        return characters;
+        var self = characters.FirstOrDefault(c => c.Id == characterId);
+        if (self == null) return ([], 0);
+
+        var opponents = characters
+            .Where(c => c.Id != characterId)
+            .OrderBy(c => Math.Abs(c.ArenaRating - self.ArenaRating))
+            .Take(25)
+            .Select(c => c.Character)
+            .ToList();
+
+        return (opponents, self.ArenaRating);
     }
 
     public async Task<List<ColosseumMatchResult>> GetColosseumMatchResults(Guid characterId, CancellationToken cancellationToken)

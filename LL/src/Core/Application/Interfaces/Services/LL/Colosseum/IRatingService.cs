@@ -12,5 +12,5 @@ public interface IRatingService
     /// <returns></returns>
     Task CalculateNewColosseumRatingsAsync(Guid characterId, Guid enemyId, BattleOutcome outcome, CancellationToken cancellationToken);
 
-    Task<ColosseumRatingPreview> PreviewColosseumRatingAsync(Guid characterId, Guid enemyId, CancellationToken cancellationToken);
+    ColosseumRatingPreview Preview(int myRating, int opponentRating);
 }
