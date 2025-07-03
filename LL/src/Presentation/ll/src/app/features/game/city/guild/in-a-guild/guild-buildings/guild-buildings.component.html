@@ -79,9 +79,9 @@
 
     <div *ngFor="let upgrade of upgrades" class="space-y-2">
       <div
-        class="rounded-md border border-zinc-300/30 p-3"
+        class="rounded-md border border-zinc-300/30 p-3 hover:cursor-pointer"
         [ngClass]="{
-          'border-primary bg-zinc-800/50':
+          'scale-[1.02] border-primary bg-zinc-800/50':
             selected()?.definition?.id === upgrade.definition.id,
           'border-zinc-300/30 hover:bg-zinc-800/30':
             selected()?.definition?.id !== upgrade.definition.id,
