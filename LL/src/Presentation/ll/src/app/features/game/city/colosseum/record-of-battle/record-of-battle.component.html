@@ -20,21 +20,53 @@
         class="grid grid-cols-4 items-center gap-2 overflow-y-auto border-b border-light_gray p-2"
         *ngFor="let match of previousMatches"
       >
-        <div
-          class="break-words"
-          [ngClass]="{
-            'font-bold text-primary': match.characterAId === id,
-          }"
-        >
-          {{ match.characterAName }}
+        <div>
+          <span
+            [ngClass]="{
+              'text-emerald-400':
+                match.characterARatingAfter - match.characterARatingBefore > 0,
+              'text-rose-500':
+                match.characterARatingAfter - match.characterARatingBefore < 0,
+            }"
+          >
+            {{
+              match.characterARatingAfter - match.characterARatingBefore > 0
+                ? "+"
+                : ""
+            }}{{ match.characterARatingAfter - match.characterARatingBefore }}
+          </span>
+          <div
+            class="break-words"
+            [ngClass]="{
+              'font-bold text-primary': match.characterAId === id,
+            }"
+          >
+            {{ match.characterAName }}
+          </div>
         </div>
-        <div
-          class="break-words"
-          [ngClass]="{
-            'font-bold text-primary': match.characterBId === id,
-          }"
-        >
-          {{ match.characterBName }}
+        <div>
+          <span
+            [ngClass]="{
+              'text-emerald-400':
+                match.characterBRatingAfter - match.characterBRatingBefore > 0,
+              'text-rose-500':
+                match.characterBRatingAfter - match.characterBRatingBefore < 0,
+            }"
+          >
+            {{
+              match.characterBRatingAfter - match.characterBRatingBefore > 0
+                ? "+"
+                : ""
+            }}{{ match.characterBRatingAfter - match.characterBRatingBefore }}
+          </span>
+          <div
+            class="break-words"
+            [ngClass]="{
+              'font-bold text-primary': match.characterBId === id,
+            }"
+          >
+            {{ match.characterBName }}
+          </div>
         </div>
         <ng-container *ngIf="match.winnerName; else draw">
           <div
