@@ -29,7 +29,10 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 
 builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSignalR();//.AddStackExchangeRedis(builder.Configuration.GetConnectionString("Redis")!);
+builder.Services.AddSignalR(o => { o.EnableDetailedErrors = true; }).AddJsonProtocol(options =>
+{
+    options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()); // optional, depends on your style
+});//.AddStackExchangeRedis(builder.Configuration.GetConnectionString("Redis")!);
 // TODO: For production
 //builder.Services.AddSignalR().AddStackExchangeRedis(builder.Configuration.GetConnectionString("Redis")!);
 

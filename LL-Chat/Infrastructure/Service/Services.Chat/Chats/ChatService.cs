@@ -16,8 +16,8 @@ public class ChatService : IChatService
         await _messageRepository.AddAsync(message, cancellationToken);
     }
 
-    public async Task<IReadOnlyList<ChatMessage>> LatestAsync(string channel, int take, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<ChatMessage>> LatestAsync(Guid userId, int take, string? guildChannel, CancellationToken cancellationToken)
     {
-        return await _messageRepository.LatestAsync(channel, take, cancellationToken);
+        return await _messageRepository.LatestAsync(userId, take, guildChannel, cancellationToken);
     }
 }

@@ -18,13 +18,31 @@ public class ChatMessageRepository : IChatMessageRepository
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<ChatMessage>> LatestAsync(string channel, int take, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<ChatMessage>> LatestAsync(Guid userId, int take, string? guildChannel, CancellationToken cancellationToken)
     {
-        return await _context.ChatMessages
-            .Where(m => m.Channel == channel)
+        var publicChannels = new List<ChatChannelType> { ChatChannelType.General, ChatChannelType.Trade, ChatChannelType.Help };
+
+        var publicMessages = await _context.ChatMessages
+            .AsNoTracking()
+            .Where(m => publicChannels.Contains(m.ChannelType))
             .OrderByDescending(m => m.SentAt)
             .Take(take)
-            .AsNoTracking()
             .ToListAsync(cancellationToken);
+
+        var guildMessages = await _context.ChatMessages
+            .AsNoTracking()
+            .Where(m => m.ChannelType == ChatChannelType.Guild && m.ContextKey == guildChannel)
+            .OrderByDescending(m => m.SentAt)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+
+        var whisperMessages = await _context.ChatMessages
+            .AsNoTracking()
+            .Where(m => m.ChannelType == ChatChannelType.Whisper && (m.SenderId == userId || m.TargetUserId == userId))
+            .OrderByDescending(m => m.SentAt)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+
+        return [.. publicMessages, .. guildMessages, .. whisperMessages];
     }
 }

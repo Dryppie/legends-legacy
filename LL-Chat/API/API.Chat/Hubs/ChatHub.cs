@@ -1,6 +1,7 @@
 ﻿using API.Chat.Hubs.Interfaces;
 using API.Chat.Utility;
 using Application.UsesCases.Chats.Commands.SendMessage;
+using Domain.Models.Chats;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Caching.Distributed;
@@ -9,6 +10,10 @@ namespace API.Chat.Hubs;
 
 public sealed class ChatHub : Hub<IChatClient>
 {
+    private const string PublicPrefix = "pub:";   // e.g.  "pub:general"
+    private const string GuildPrefix = "guild:"; // e.g.  "guild:5f7e…"  (GUID or slug)
+    private const string StatsGroup = "stats";   // e.g.  "pub:general"
+
     private readonly IMediator _mediator;
     private readonly IDistributedCache _cache;   // for rate-limit / presence
 
@@ -18,30 +23,64 @@ public sealed class ChatHub : Hub<IChatClient>
         _cache = cache;
     }
 
-    public async Task Send(string channel, string body)
+    public async Task Send(string contextKey, string body, ChatChannelType channelType, string? targetUserId = null)
     {
-        var userId = Context.UserIdentifier!;
-        var allowed = await RateLimiter.EnsureAllowedAsync(_cache, userId);
-
-        if (!allowed)
-        {
-            //await Clients.Caller.ReceiveSystemMessage("You're sending messages too quickly. Please slow down.");
-            return;
-        }
-
         var senderId = Context.UserIdentifier!;
+        if (!await RateLimiter.EnsureAllowedAsync(_cache, senderId))
+            return;
+
         var senderName = Context.User!.Identity!.Name ?? "Unknown Sender";
 
-        var msg = await _mediator.Send(new SendMessageCommand(channel, body, senderId, senderName));
-
+        var msg = await _mediator.Send(new SendMessageCommand(contextKey, body, senderId, senderName, channelType, targetUserId));
         if (msg == null) return;
 
-        await Clients.Group(channel).Receive(msg);
+        switch (channelType)
+        {
+            case ChatChannelType.General:
+            case ChatChannelType.Trade:
+            case ChatChannelType.Help:
+                if (string.IsNullOrWhiteSpace(contextKey))
+                    return; // invalid room
+
+                await Clients.Group(PublicPrefix).Receive(msg);
+                break;
+
+            case ChatChannelType.Guild:
+                if (string.IsNullOrWhiteSpace(contextKey))
+                    return; // invalid guild id
+
+                await Clients.Group(GuildPrefix + contextKey).Receive(msg);
+                break;
+
+            case ChatChannelType.Whisper:
+                if (string.IsNullOrWhiteSpace(targetUserId))
+                    return; // recipient missing
+
+                await Clients.User(targetUserId).Receive(msg); // recipient
+                await Clients.User(senderId).Receive(msg);     // echo to sender
+                break;
+        }
     }
 
-    public override Task OnConnectedAsync()
+    /// <summary>Client requests to join a public room.</summary>
+    public Task JoinPublic(string room)
+        => Groups.AddToGroupAsync(Context.ConnectionId, PublicPrefix + room);
+
+    public Task LeavePublic(string room)
+        => Groups.RemoveFromGroupAsync(Context.ConnectionId, PublicPrefix + room);
+
+    /// <summary>Server-side code (e.g. after auth) calls this to enrol a connection in its guilds.</summary>
+    public Task JoinGuild(string guildId)
+        => Groups.AddToGroupAsync(Context.ConnectionId, GuildPrefix + guildId);
+
+    public Task LeaveGuild(string guildId)
+        => Groups.RemoveFromGroupAsync(Context.ConnectionId, GuildPrefix + guildId);
+
+    // ---------------------------  LIFECYCLE  ---------------------------
+
+    public override async Task OnConnectedAsync()
     {
-        var ch = Context.GetHttpContext()!.Request.Query["channel"];
-        return Groups.AddToGroupAsync(Context.ConnectionId, ch);
+        //await Groups.AddToGroupAsync(Context.ConnectionId, StatsGroup);
+        await Groups.AddToGroupAsync(Context.ConnectionId, PublicPrefix);
     }
 }
