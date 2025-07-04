@@ -166,8 +166,8 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.draft = '';
 
-    const { type, contextKey } = this.activeChannel;
-
+    let { type, contextKey } = this.activeChannel;
+    if (contextKey === 'all') contextKey = 'general';
     switch (type) {
       case ChatChannelType.General:
       case ChatChannelType.Trade:
