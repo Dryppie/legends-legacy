@@ -62,6 +62,8 @@ export class ColosseumComponent implements OnInit {
         if (finished) {
           this.displayResultScreen(finished.outcome); // Your custom logic here
           this.eventBus.clear('colosseum-combat-finished');
+          this.loadArenaOpponents();
+          this.loadColosseumMatchResults();
         }
       },
       { allowSignalWrites: true },
@@ -77,6 +79,14 @@ export class ColosseumComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loadArenaOpponents();
+    this.loadColosseumMatchResults();
+    this.loadColosseumRankings();
+
+    this.colosseumService.getArenaTicketStatus();
+  }
+
+  private loadArenaOpponents(): void {
     this.colosseumService.getArenaOpponents().subscribe({
       next: (data) => {
         this.allOpponents = data;
@@ -86,6 +96,9 @@ export class ColosseumComponent implements OnInit {
         console.error('Failed to fetch arena opponents:', err);
       },
     });
+  }
+
+  private loadColosseumMatchResults(): void {
     this.colosseumService.getColosseumMatchResults().subscribe({
       next: (data) => {
         this.previousMatches = data.sort(
@@ -93,15 +106,21 @@ export class ColosseumComponent implements OnInit {
             new Date(b.playedAt).getTime() - new Date(a.playedAt).getTime(),
         );
       },
+      error: (err) => {
+        console.error('Failed to fetch colosseum match results:', err);
+      },
     });
+  }
 
+  private loadColosseumRankings(): void {
     this.colosseumService.getColosseumRankings().subscribe({
       next: (data) => {
         this.rankings = data.sort((a, b) => a.rank - b.rank);
       },
+      error: (err) => {
+        console.error('Failed to fetch colosseum rankings:', err);
+      },
     });
-
-    this.colosseumService.getArenaTicketStatus();
   }
 
   skipBattle() {
