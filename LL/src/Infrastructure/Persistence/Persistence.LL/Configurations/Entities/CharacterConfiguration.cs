@@ -18,5 +18,10 @@ public class CharacterConfiguration : IEntityTypeConfiguration<Character>
             .HasMany(c => c.ColosseumMatches)
             .WithOne()
             .HasForeignKey(c => c.CharacterBId);
+
+        //builder.HasOne(c => c.Guild)
+        //    .WithMany(g => g.Members)
+        //    .HasForeignKey(c => c.GuildId)
+        //    .OnDelete(DeleteBehavior.SetNull);
     }
 }

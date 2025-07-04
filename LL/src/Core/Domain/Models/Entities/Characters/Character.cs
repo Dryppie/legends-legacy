@@ -26,6 +26,7 @@ public class Character : Entity
     public int ArenaRating { get; set; } = 1000;
     public ICollection<ColosseumMatchResult> ColosseumMatches { get; set; } = [];
     public ArenaTicketStatus ArenaTicketStatus { get; set; } = null!;
+    //public Guid? GuildId { get; set; }
     public Guild? Guild { get; set; }
     public ICollection<Profession> Professions { get; set; } = [];
 }
