@@ -52,12 +52,6 @@ export const appConfig: ApplicationConfig = {
       }),
       deps: [CombatLogService, LevelingService],
     },
-    {
-      provide: APP_INITIALIZER,
-      useFactory: startRealTime,
-      deps: [RealTimeFacade],
-      multi: true,
-    },
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideAnimations(),
@@ -68,6 +62,12 @@ export const appConfig: ApplicationConfig = {
       provide: APP_INITIALIZER,
       useFactory: initializeApp,
       deps: [AuthService],
+      multi: true,
+    },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: startRealTime,
+      deps: [RealTimeFacade],
       multi: true,
     },
     {

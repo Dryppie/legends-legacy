@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, effect, OnInit } from '@angular/core';
 import { BannerComponent } from '../../../../shared/components/banner/banner.component';
 import { TabComponent } from '../../../../shared/components/tabs/tab/tab.component';
 import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
@@ -17,6 +17,8 @@ import { ColosseumRank } from '../../../../shared/models/Dtos/colosseum/colosseu
 import { ArenaTicketStatus } from '../../../../shared/models/Dtos/colosseum/arenaTicketStatus';
 import { TabsComponent } from '../../../../shared/components/tabs/tabs.component';
 import { ArenaOpponentPreview } from '../../../../shared/models/Dtos/colosseum/arenaOpponentPreview';
+import { EventBusService } from '../../../../core/services/client-side/event-bus/event-bus.service';
+import { ColosseumResultComponent } from '../../../../shared/components/colosseum/colosseum-result/colosseum-result.component';
 
 @Component({
   selector: 'app-colosseum',
@@ -32,6 +34,7 @@ import { ArenaOpponentPreview } from '../../../../shared/models/Dtos/colosseum/a
     RecordOfBattleComponent,
     TournamentGroundsComponent,
     TabsComponent,
+    ColosseumResultComponent,
   ],
   templateUrl: './colosseum.component.html',
 })
@@ -44,12 +47,34 @@ export class ColosseumComponent implements OnInit {
 
   previousMatches: ColosseumMatchResult[] = [];
 
+  colosseumBattleResult: 'Victory' | 'Defeat' | 'Draw' | null = null;
+
   battleType = BattleType.Colosseum;
   displayCombat = false;
   constructor(
     public combatStateService: CombatStateService,
     private colosseumService: ColosseumService,
-  ) {}
+    private eventBus: EventBusService,
+  ) {
+    effect(
+      () => {
+        const finished = this.eventBus.on('colosseum-combat-finished')();
+        if (finished) {
+          this.displayResultScreen(finished.outcome); // Your custom logic here
+          this.eventBus.clear('colosseum-combat-finished');
+        }
+      },
+      { allowSignalWrites: true },
+    );
+  }
+
+  displayResultScreen(outcome: 'Victory' | 'Defeat' | 'Draw' | null) {
+    this.colosseumBattleResult = outcome;
+  }
+
+  hideBattleResult() {
+    this.colosseumBattleResult = null;
+  }
 
   ngOnInit(): void {
     this.colosseumService.getArenaOpponents().subscribe({

@@ -53,3 +53,9 @@
     </app-tabs>
   </div>
 </ng-template>
+<app-colosseum-result
+  *ngIf="colosseumBattleResult"
+  [outcome]="colosseumBattleResult"
+  (closed)="hideBattleResult()"
+>
+</app-colosseum-result>

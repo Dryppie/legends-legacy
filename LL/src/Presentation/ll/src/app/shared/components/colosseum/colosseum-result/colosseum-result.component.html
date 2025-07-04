@@ -1,0 +1,21 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+  <div
+    class="w-[90%] max-w-md rounded-2xl border-2 bg-neutral-900 px-8 py-6 shadow-xl"
+    [ngClass]="colorClasses"
+  >
+    <h2 class="mb-4 text-center text-3xl font-bold">{{ title }}</h2>
+    <p class="mb-6 text-center text-sm">
+      {{
+        outcome === "Victory"
+          ? "You've bested your opponent in glorious combat!"
+          : outcome === "Defeat"
+            ? "You have fallen. Grow stronger and try again."
+            : "An even match. No winner this time."
+      }}
+    </p>
+
+    <div class="flex justify-center">
+      <app-regular-button (pressed)="closed.emit()"> Close </app-regular-button>
+    </div>
+  </div>
+</div>
