@@ -1,19 +1,36 @@
 import {
   Component,
+  effect,
   EventEmitter,
   OnDestroy,
   OnInit,
   Output,
 } from '@angular/core';
 import {
+  ChatChannelType,
   ChatMessageDto,
   ChatService,
 } from '../../../core/services/ll-chat/chat-service/chat.service';
 import { Subscription } from 'rxjs';
-import { AsyncPipe, DatePipe, NgFor, NgIf, SlicePipe } from '@angular/common';
+import {
+  DatePipe,
+  NgClass,
+  NgFor,
+  NgIf,
+  SlicePipe,
+  TitleCasePipe,
+} from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RegularButtonComponent } from '../../../shared/components/buttons/regular-button/regular-button.component';
 import { StickyScrollDirective } from '../../../shared/directives/sticky-scroll/sticky-scroll.directive';
+import { GuildStateService } from '../../../core/services/api/guild/guild-state.service';
+
+interface ChatRoom {
+  label: string;
+  contextKey: string;
+  channelType: ChatChannelType;
+  requiresGuild?: boolean;
+}
 
 @Component({
   selector: 'app-chat',
@@ -21,8 +38,8 @@ import { StickyScrollDirective } from '../../../shared/directives/sticky-scroll/
   imports: [
     NgFor,
     NgIf,
+    NgClass,
     FormsModule,
-    AsyncPipe,
     RegularButtonComponent,
     StickyScrollDirective,
     DatePipe,
@@ -32,25 +49,109 @@ import { StickyScrollDirective } from '../../../shared/directives/sticky-scroll/
 })
 export class ChatComponent implements OnInit, OnDestroy {
   @Output() close = new EventEmitter<void>();
+  ChatChannelType = ChatChannelType;
+  public activeChannel: {
+    type: ChatChannelType;
+    contextKey: string;
+  } = { type: ChatChannelType.General, contextKey: 'all' };
 
-  channel = 'global';
+  readonly guild;
+
+  readonly availableRooms: ChatRoom[] = [
+    { label: 'All', contextKey: 'all', channelType: ChatChannelType.General },
+    // {
+    //   label: 'Whisper',
+    //   contextKey: 'whisper',
+    //   channelType: ChatChannelType.Whisper,
+    // },
+    {
+      label: 'General',
+      contextKey: 'general',
+      channelType: ChatChannelType.General,
+    },
+    {
+      label: 'Guild',
+      contextKey: 'guild',
+      channelType: ChatChannelType.Guild,
+      requiresGuild: true,
+    },
+    {
+      label: 'Trade',
+      contextKey: 'trade',
+      channelType: ChatChannelType.Trade,
+    },
+    { label: 'Help', contextKey: 'help', channelType: ChatChannelType.Help },
+    // {
+    //   label: 'System',
+    //   contextKey: 'system',
+    //   channelType: ChatChannelType.Public,
+    // },
+  ];
+
+  get visibleRooms(): ChatRoom[] {
+    return this.availableRooms.filter(
+      (r) => !r.requiresGuild || !!this.guild(),
+    );
+  }
+
   messages: ChatMessageDto[] = [];
   draft = '';
-  private subscription?: Subscription;
+  private sub?: Subscription;
 
-  constructor(public chat: ChatService) {}
+  get activeRoomKey(): string {
+    return this.activeChannel.contextKey;
+  }
 
-  async ngOnInit() {
-    // await this.chat.connectAndLoad(this.channel);
-    // this.subscription = this.chat.messages$.subscribe((m) => {
-    //   if (m.channel === this.channel) {
-    //     this.messages.push(m);
+  get activeRoomType(): ChatChannelType {
+    return this.activeChannel.type;
+  }
+
+  constructor(
+    public chat: ChatService,
+    private readonly guildState: GuildStateService,
+  ) {
+    this.guild = this.guildState.guild;
+    // effect(() => {
+    //   const id = this.guild()?.id;
+    //   if (id) {
+    //     this.chat.joinGuildChannel(id);
     //   }
     // });
   }
 
-  ngOnDestroy() {
-    this.subscription?.unsubscribe();
+  ngOnInit(): void {
+    this.sub = this.chat.messages$.subscribe((m) => {
+      this.messages = m;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+  }
+
+  setChannel(type: ChatChannelType, contextKey: string): void {
+    this.activeChannel = { type, contextKey };
+  }
+
+  get filteredMessages(): ChatMessageDto[] {
+    if (this.activeRoomKey === 'all') {
+      return this.messages;
+    }
+    if (
+      this.activeRoomType === ChatChannelType.Guild &&
+      this.activeRoomKey === 'guild'
+    ) {
+      return this.messages.filter(
+        (m) =>
+          m.channelType === this.activeRoomType &&
+          m.contextKey === this.guild()?.id,
+      );
+    }
+    return this.messages.filter(
+      (m) =>
+        m.channelType === this.activeRoomType &&
+        m.contextKey === this.activeRoomKey,
+    );
   }
 
   onDraftChange(): void {
@@ -60,11 +161,28 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   async send(): Promise<void> {
-    const msg = this.draft.trim();
-    if (!msg || !isMessageAllowed(msg)) return;
+    const body = this.draft.trim();
+    if (!body || !isMessageAllowed(body)) return;
 
     this.draft = '';
-    await this.chat.send(this.channel, msg);
+
+    const { type, contextKey } = this.activeChannel;
+
+    switch (type) {
+      case ChatChannelType.General:
+      case ChatChannelType.Trade:
+      case ChatChannelType.Help:
+        await this.chat.sendPublic(type, contextKey, body);
+        break;
+      case ChatChannelType.Whisper:
+        // if (this.chat.targetUserId) {
+        //   await this.chat.sendWhisper(this.chat.targetUserId, body);
+        // }
+        break;
+      case ChatChannelType.Guild:
+        await this.chat.sendGuild(this.guild()!.id, body);
+        break;
+    }
   }
 }
 

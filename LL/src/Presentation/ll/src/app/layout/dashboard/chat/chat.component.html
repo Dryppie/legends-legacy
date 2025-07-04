@@ -2,10 +2,20 @@
   class="flex h-full w-96 flex-col justify-between bg-texture xl:rounded-tl-md 2xl:w-[430px]"
 >
   <div class="relative flex h-full flex-col overflow-hidden">
-    <div
-      class="text-gold flex items-center justify-between border-b border-primary p-2"
-    >
-      <span class="text-white">Global</span>
+    <div class="flex flex-wrap items-center gap-2 border-b border-primary p-2">
+      <ng-container *ngFor="let room of visibleRooms">
+        <button
+          class="flex items-center justify-between gap-1 whitespace-nowrap text-nowrap rounded border border-zinc-300/30 px-2 py-1 text-sm text-neutral-300 hover:bg-zinc-300/30"
+          [ngClass]="{
+            'bg-primary/30 hover:bg-primary/40':
+              activeRoomKey === room.contextKey &&
+              activeRoomType === room.channelType,
+          }"
+          (click)="setChannel(room.channelType, room.contextKey)"
+        >
+          {{ room.label }}
+        </button>
+      </ng-container>
       <button
         class="hover:text-gold/70 p-1 px-2 text-xs uppercase text-white xl:hidden"
         aria-label="Close chat"
@@ -16,7 +26,7 @@
     </div>
 
     <section class="flex flex-col overflow-y-auto text-white" appStickyScroll>
-      <ng-container *ngIf="chat.messages$ | async as messages">
+      <ng-container *ngIf="filteredMessages as messages">
         <div
           *ngFor="let m of messages"
           class="p-1 odd:bg-zinc-300/5 even:bg-transparent"
@@ -32,8 +42,8 @@
                 }}:</span
               >
             </div>
-            <div class="overflow-hidden">
-              {{ m.body }}
+            <div class="flex gap-1 overflow-hidden">
+              <span>[{{ m.channelType }}]</span>{{ m.body }}
             </div>
           </span>
         </div>
