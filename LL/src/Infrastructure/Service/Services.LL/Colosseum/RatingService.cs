@@ -13,17 +13,23 @@ public class RatingService : IRatingService
         _ratingRepository = ratingRepository;
     }
 
-    public async Task CalculateNewColosseumRatingsAsync(Guid characterId, Guid enemyId, BattleOutcome outcome, CancellationToken cancellationToken)
+    public async Task<ColosseumRatingResult> CalculateNewColosseumRatingsAsync(Guid characterId, Guid enemyId, BattleOutcome outcome, CancellationToken cancellationToken)
     {
         int ratingA = await _ratingRepository.GetColosseumRatingAsync(characterId, cancellationToken);
         int ratingB = await _ratingRepository.GetColosseumRatingAsync(enemyId, cancellationToken);
 
-        // 2. Calculate new ratings
         var (newA, newB) = _calculator.Calculate(ratingA, ratingB, outcome);
 
-        // 3. Save new ratings (replace with your actual saving logic)
         await _ratingRepository.SetColosseumRatingAsync(characterId, newA, cancellationToken);
         await _ratingRepository.SetColosseumRatingAsync(enemyId, newB, cancellationToken);
+
+        return new ColosseumRatingResult
+        {
+            CharacterARatingBefore = ratingA,
+            CharacterARatingAfter = newA,
+            CharacterBRatingBefore = ratingB,
+            CharacterBRatingAfter = newB
+        };
     }
 
     public ColosseumRatingPreview Preview(int myRating, int opponentRating)

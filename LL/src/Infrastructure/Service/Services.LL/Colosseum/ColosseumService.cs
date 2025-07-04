@@ -74,22 +74,28 @@ public class ColosseumService : IColosseumService
             .ToList();
     }
 
-    public async Task SaveArenaMatchResult(Guid characterId, Guid enemyId, BattleOutcome outcome, CancellationToken cancellationToken)
+    public async Task SaveArenaMatchResult(Guid characterId, Guid enemyId, BattleOutcome outcome, ColosseumRatingResult ratingResult, CancellationToken cancellationToken)
     {
         var characterA = await _characterService.GetBaseCharacterByIdAsync(characterId, cancellationToken);
-        if (characterA == null) return; // TODO: Log errors
+        if (characterA == null) return;
         var characterB = await _characterService.GetBaseCharacterByIdAsync(enemyId, cancellationToken);
-        if (characterB == null) return; // TODO: Log errors
+        if (characterB == null) return;
 
-        var arenaMatchResult = new ColosseumMatchResult()
+        var arenaMatchResult = new ColosseumMatchResult
         {
             CharacterAId = characterId,
             CharacterAName = characterA.Name,
+            CharacterARatingBefore = ratingResult.CharacterARatingBefore,
+            CharacterARatingAfter = ratingResult.CharacterARatingAfter,
+
             CharacterBId = enemyId,
             CharacterBName = characterB.Name,
+            CharacterBRatingBefore = ratingResult.CharacterBRatingBefore,
+            CharacterBRatingAfter = ratingResult.CharacterBRatingAfter,
+
             WinnerId = outcome == BattleOutcome.Victory ? characterId : outcome == BattleOutcome.Defeat ? enemyId : null,
             WinnerName = outcome == BattleOutcome.Victory ? characterA.Name : outcome == BattleOutcome.Defeat ? characterB.Name : "",
-            PlayedAt = DateTimeOffset.UtcNow,
+            PlayedAt = DateTimeOffset.UtcNow
         };
 
         await _colosseumRepository.SaveArenaMatchResult(arenaMatchResult, cancellationToken);

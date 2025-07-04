@@ -25,6 +25,6 @@ public interface IColosseumService
     /// <param name="outcome"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task SaveArenaMatchResult(Guid characterId, Guid enemyId, BattleOutcome outcome, CancellationToken cancellationToken);
+    Task SaveArenaMatchResult(Guid characterId, Guid enemyId, BattleOutcome outcome, ColosseumRatingResult ratingResult, CancellationToken cancellationToken);
     Task<CombatResult?> StartArenaBattle(Guid characterId, Guid enemyId, CancellationToken cancellationToken);
 }

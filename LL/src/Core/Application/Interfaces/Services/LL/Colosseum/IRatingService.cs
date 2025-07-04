@@ -10,7 +10,7 @@ public interface IRatingService
     /// <param name="characterId"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task CalculateNewColosseumRatingsAsync(Guid characterId, Guid enemyId, BattleOutcome outcome, CancellationToken cancellationToken);
+    Task<ColosseumRatingResult> CalculateNewColosseumRatingsAsync(Guid characterId, Guid enemyId, BattleOutcome outcome, CancellationToken cancellationToken);
 
     ColosseumRatingPreview Preview(int myRating, int opponentRating);
 }

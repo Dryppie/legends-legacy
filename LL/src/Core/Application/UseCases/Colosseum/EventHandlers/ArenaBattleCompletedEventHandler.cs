@@ -16,8 +16,10 @@ public class ArenaBattleCompletedEventHandler : INotificationHandler<ArenaBattle
     }
 
     public async Task Handle(ArenaBattleCompletedEvent notification, CancellationToken cancellationToken)
-    {
-        await _ratingService.CalculateNewColosseumRatingsAsync(notification.CharacterId, notification.EnemyId, notification.Outcome, cancellationToken);
-        await _colosseumService.SaveArenaMatchResult(notification.CharacterId, notification.EnemyId, notification.Outcome, cancellationToken);
-    }
+{
+    var ratingResult = await _ratingService.CalculateNewColosseumRatingsAsync(
+        notification.CharacterId, notification.EnemyId, notification.Outcome, cancellationToken);
+
+    await _colosseumService.SaveArenaMatchResult(notification.CharacterId, notification.EnemyId, notification.Outcome, ratingResult, cancellationToken);
+}
 }
