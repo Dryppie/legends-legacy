@@ -43,7 +43,16 @@
               >
             </div>
             <div class="flex gap-1 overflow-hidden">
-              <span>[{{ m.channelType }}]</span>{{ m.body }}
+              <span
+                [ngClass]="{
+                  'text-white': m.channelType === 'General',
+                  'text-emerald-400': m.channelType === 'Trade',
+                  'text-sky-400': m.channelType === 'Help',
+                  'text-primary': m.channelType === 'Guild',
+                  'text-purple-400': m.channelType === 'Whisper',
+                }"
+                >[{{ m.channelType }}]</span
+              >{{ m.body }}
             </div>
           </span>
         </div>
