@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../api.service';
-import { LeaderboardDto } from '../../../../shared/models/Dtos/leaderboard/leaderboardDto';
+import { Leaderboard } from '../../../../shared/models/Dtos/leaderboard/leaderboard';
 
 @Injectable({
   providedIn: 'root',
@@ -9,7 +9,7 @@ import { LeaderboardDto } from '../../../../shared/models/Dtos/leaderboard/leade
 export class LeaderboardService {
   constructor(private api: ApiService) {}
 
-  getLeaderboard(): Observable<LeaderboardDto> {
+  getLeaderboard(): Observable<Leaderboard> {
     return this.api.get('Leaderboard');
   }
 }

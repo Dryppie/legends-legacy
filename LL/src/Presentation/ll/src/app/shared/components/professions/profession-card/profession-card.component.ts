@@ -1,8 +1,8 @@
-import { Component, effect, Input, OnInit } from '@angular/core';
+import { Component, effect, input, Input, OnInit } from '@angular/core';
 import { MiniButtonComponent } from '../../mini-button/mini-button.component';
 import { CharacterActionDto } from '../../../models/Dtos/characterActionDto';
 import { Subscription } from 'rxjs';
-import { NgIf } from '@angular/common';
+import { NgIf, NgClass } from '@angular/common';
 import { GatheringNode } from '../../../models/Dtos/gatheringNode';
 import {
   CharacterProfession,
@@ -14,7 +14,7 @@ import { CharacterActionType } from '../../../models/enums/characterActionType';
 @Component({
   selector: 'app-profession-card',
   standalone: true,
-  imports: [MiniButtonComponent, NgIf],
+  imports: [MiniButtonComponent, NgIf, NgClass],
   templateUrl: './profession-card.component.html',
 })
 export class ProfessionCardComponent implements OnInit {

@@ -1,13 +1,13 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { finalize } from 'rxjs';
-import { LeaderboardDto } from '../../../../shared/models/Dtos/leaderboard/leaderboardDto';
+import { Leaderboard } from '../../../../shared/models/Dtos/leaderboard/leaderboard';
 import { LeaderboardService } from './leaderboard.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LeaderboardStateService {
-  private readonly _leaderboard = signal<LeaderboardDto | null>(null);
+  private readonly _leaderboard = signal<Leaderboard | null>(null);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
 

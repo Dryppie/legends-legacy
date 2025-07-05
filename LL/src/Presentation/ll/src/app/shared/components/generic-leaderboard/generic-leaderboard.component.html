@@ -1,0 +1,54 @@
+<div
+  class="flex h-full w-full flex-col overflow-hidden rounded-xl p-4 text-white"
+>
+  <h2 class="text-xl font-semibold text-primary">{{ title }}</h2>
+
+  <!-- Nothing to show -->
+  <ng-container *ngIf="data?.length; else noData">
+    <!-- === Podium (top 3) ================================== -->
+    <app-leaderboard-podium class="mt-4" [entries]="podium" [columns]="columns">
+    </app-leaderboard-podium>
+
+    <!-- === Table header ==================================== -->
+    <div
+      class="mt-6 grid grid-flow-col gap-2 p-2"
+      [ngClass]="'grid-cols-' + (columns.length + 1)"
+    >
+      <div>Rank</div>
+      <ng-container *ngFor="let col of columns">
+        <div [class.text-right]="col.alignRight" class="font-semibold">
+          {{ col.header }}
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- === Table body ====================================== -->
+    <div class="overflow-y-auto">
+      <div
+        *ngFor="let row of rows; trackBy: trackByRank"
+        class="grid grid-flow-col items-center gap-2 border-t border-light_gray p-2"
+        [ngClass]="[
+          'grid-cols-' + (columns.length + 1),
+          row.characterId === highlightId ? 'font-bold text-primary' : '',
+        ]"
+      >
+        <!-- rank -->
+        <div>{{ row.rank }}</div>
+
+        <!-- data columns -->
+        <ng-container *ngFor="let col of columns">
+          <div
+            [class.text-right]="col.alignRight"
+            [ngClass]="col.cellClass ?? ''"
+          >
+            {{ col.value(row) }}
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #noData>
+    <p>No rankings available.</p>
+  </ng-template>
+</div>
