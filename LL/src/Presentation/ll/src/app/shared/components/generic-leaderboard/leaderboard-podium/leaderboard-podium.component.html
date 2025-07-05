@@ -1,0 +1,29 @@
+<div class="flex justify-center gap-4">
+  <ng-container *ngFor="let medal of [1, 0, 2]">
+    <!-- order: 2nd, 1st, 3rd -->
+    <ng-container *ngIf="entries.length > medal">
+      <div class="flex w-full flex-col items-center justify-end">
+        <div
+          [ngClass]="{
+            'h-32 border-[#e9d491] text-3xl': medal === 0,
+            'h-24 border-[#a5a9b4] text-2xl': medal === 1,
+            'h-20 border-[#6e4d25] text-2xl': medal === 2,
+          }"
+          class="flex w-full flex-col items-center justify-center border-2 bg-transparent"
+        >
+          <ng-container *ngFor="let col of columns.slice(0, 1)">
+            <div class="mb-1 text-xl font-bold">
+              {{ col.value(entries[medal]) }}
+            </div>
+          </ng-container>
+
+          <ng-container *ngFor="let col of columns.slice(1)">
+            <div class="text-sm font-semibold">
+              {{ col.header }}: {{ col.value(entries[medal]) }}
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </ng-container>
+  </ng-container>
+</div>
