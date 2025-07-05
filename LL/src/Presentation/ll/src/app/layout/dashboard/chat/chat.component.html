@@ -42,17 +42,21 @@
                 }}:</span
               >
             </div>
-            <div class="flex gap-1 overflow-hidden">
-              <span
+            <div class="break-words text-sm">
+              <label
                 [ngClass]="{
-                  'text-white': m.channelType === 'General',
+                  'text-primary': m.channelType === 'General',
                   'text-emerald-400': m.channelType === 'Trade',
                   'text-sky-400': m.channelType === 'Help',
-                  'text-primary': m.channelType === 'Guild',
-                  'text-purple-400': m.channelType === 'Whisper',
+                  'text-rose-400': m.channelType === 'Guild',
+                  'text-fuchsia-400': m.channelType === 'Whisper',
+                  'text-slate-400': m.channelType === 'System',
                 }"
-                >[{{ m.channelType }}]</span
-              >{{ m.body }}
+                >[{{ m.channelType }}]</label
+              >
+              <span>
+                {{ m.body }}
+              </span>
             </div>
           </span>
         </div>

@@ -25,6 +25,7 @@ export enum ChatChannelType {
   Help = 'Help',
   Guild = 'Guild',
   Whisper = 'Whisper',
+  System = 'System',
 }
 
 @Injectable({
