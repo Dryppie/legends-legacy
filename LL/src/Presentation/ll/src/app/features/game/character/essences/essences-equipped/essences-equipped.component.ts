@@ -25,15 +25,27 @@ export class EssencesEquippedComponent {
   @Input({ required: true }) essenceSlots!: Signal<EssenceSlot[]>;
 
   readonly activeSlots = computed(() => {
-    return this.essenceSlots().filter(
-      (es) => es.slotState === SlotState.Active,
-    );
+    return this.essenceSlots()
+      .filter((es) => es.slotState === SlotState.Active)
+      .sort((a, b) => {
+        const aHasEssence = !!a.occupiedEssence;
+        const bHasEssence = !!b.occupiedEssence;
+
+        if (aHasEssence === bHasEssence) return 0;
+        return aHasEssence ? -1 : 1;
+      });
   });
 
   readonly reservedSlots = computed(() => {
-    return this.essenceSlots().filter(
-      (es) => es.slotState === SlotState.Reserved,
-    );
+    return this.essenceSlots()
+      .filter((es) => es.slotState === SlotState.Reserved)
+      .sort((a, b) => {
+        const aHasEssence = !!a.occupiedEssence;
+        const bHasEssence = !!b.occupiedEssence;
+
+        if (aHasEssence === bHasEssence) return 0;
+        return aHasEssence ? -1 : 1;
+      });
   });
 
   private readonly selectedEssenceSlotId = signal<string | null>(null);
