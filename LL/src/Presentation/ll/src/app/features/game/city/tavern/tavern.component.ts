@@ -1,21 +1,24 @@
 import { Component } from '@angular/core';
-import { NgFor, NgIf } from '@angular/common';
 import { BannerComponent } from '../../../../shared/components/banner/banner.component';
 import { LeaderboardStateService } from '../../../../core/services/api/leaderboard/leaderboard-state.service';
 import { FilterTabsComponent } from '../../../../shared/components/tabs/filter-tabs/filter-tabs.component';
-import { LeaderboardEntryDto } from '../../../../shared/models/Dtos/leaderboard/leaderboardEntryDto';
+import {
+  LeaderboardColumn,
+  LeaderboardEntry,
+} from '../../../../shared/models/Dtos/leaderboard/leaderboardEntry';
 import { Tab } from '../../../../shared/models/sidebar-item';
 import { RegularButtonComponent } from '../../../../shared/components/buttons/regular-button/regular-button.component';
+import { LeaderboardComponent } from '../../../../shared/components/generic-leaderboard/generic-leaderboard.component';
+import { COLUMNS_BY_TAB } from '../../../../shared/models/Dtos/leaderboard/leaderboard.config';
 
 @Component({
   selector: 'app-tavern',
   standalone: true,
   imports: [
     BannerComponent,
-    NgFor,
-    NgIf,
     FilterTabsComponent,
     RegularButtonComponent,
+    LeaderboardComponent,
   ],
   templateUrl: './tavern.component.html',
 })
@@ -71,35 +74,39 @@ export class TavernComponent {
     this.state.refresh();
   }
 
-  get filteredLeaderboard(): LeaderboardEntryDto[] {
+  get rows(): LeaderboardEntry[] {
     switch (this.activeTab) {
       case 'Total level':
         return this.state.topTotal();
-
       case 'Combat':
         return this.state.topCombat();
-
       case 'Wealth':
         return this.state.topWealth();
-
       case 'Mining':
         return this.state.byProfession('Mining')();
-
       case 'Woodcutting':
         return this.state.byProfession('Woodcutting')();
-
       case 'Armorforging':
         return this.state.byProfession('ArmorForging')();
-
       case 'Jewelrycrafting':
         return this.state.byProfession('JewelryCrafting')();
-
       case 'Weaponsmithing':
         return this.state.byProfession('WeaponSmithing')();
-
       default:
-        return this.state.topCombat();
+        return [];
     }
+  }
+
+  get columns(): readonly LeaderboardColumn<LeaderboardEntry>[] {
+    // The cast is only to widen the row-specific column set to the generic
+    // `LeaderboardColumn<LeaderboardEntry>[]` that <app-leaderboard> expects.
+    return COLUMNS_BY_TAB[
+      this.activeTab as keyof typeof COLUMNS_BY_TAB
+    ] as readonly LeaderboardColumn<LeaderboardEntry>[];
+  }
+
+  get highlightId(): string | number | undefined {
+    return 'this.state.currentPlayerId?.()';
   }
 
   get tabLabels(): string[] {

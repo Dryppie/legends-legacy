@@ -26,7 +26,7 @@
     <div class="overflow-y-auto">
       <div
         *ngFor="let row of rows; trackBy: trackByRank"
-        class="grid grid-flow-col gap-2 border-t border-light_gray p-2"
+        class="grid grid-flow-col items-center gap-2 border-t border-light_gray p-2"
         [ngClass]="[
           'grid-cols-' + (columns.length + 1),
           row.characterId === highlightId ? 'font-bold text-primary' : '',

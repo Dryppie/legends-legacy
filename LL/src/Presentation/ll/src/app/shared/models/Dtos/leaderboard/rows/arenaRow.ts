@@ -1,0 +1,11 @@
+import { LeaderboardColumn, LeaderboardEntry } from '../leaderboardEntry';
+
+export interface ArenaRow extends LeaderboardEntry {
+  name: string;
+  rating: number;
+}
+
+export const ARENA_COLUMNS: readonly LeaderboardColumn<ArenaRow>[] = [
+  { header: 'Name', value: (r) => r.name },
+  { header: 'Rating', value: (r) => r.rating, alignRight: true },
+];

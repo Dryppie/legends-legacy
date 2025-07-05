@@ -17,46 +17,15 @@
   </app-regular-button>
   <div class="flex h-full w-full flex-col overflow-hidden">
     <div class="flex-none text-white"></div>
-    <div class="flex flex-col gap-2 overflow-y-auto">
-      <!-- Repeat for each leaderboard item -->
-      <div
-        class="flex flex-col gap-2 border border-primary p-4 text-white"
-        *ngFor="let item of filteredLeaderboard; let i = index"
-      >
-        <h2 class="flex gap-2 text-primary">
-          Rank:
-          <h2 class="text-white">{{ i + 1 }}</h2>
-        </h2>
-        <div class="flex flex-col">
-          <div class="flex gap-2 text-primary">
-            Name:
-            <h3 class="text-white">{{ item.characterName }}</h3>
-          </div>
-          <div *ngIf="activeTab !== 'Wealth' && activeTab !== 'Total level'">
-            <div class="flex gap-2 text-primary">
-              Level:
-              <h3 class="text-white">{{ item.level }}</h3>
-            </div>
-            <div class="flex gap-2 text-primary">
-              EXP:
-              <h3 class="text-white">{{ item.experience }}</h3>
-            </div>
-          </div>
-          <div *ngIf="activeTab === 'Wealth'">
-            <div class="flex gap-2 text-primary">
-              Cinders:
-              <h3 class="text-white">{{ item.level }}</h3>
-            </div>
-          </div>
-          <div *ngIf="activeTab === 'Total level'">
-            <div class="flex gap-2 text-primary">
-              Total level:
-              <h3 class="text-white">{{ item.level }}</h3>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+
+    <app-leaderboard
+      class="h-full"
+      [title]="activeTab"
+      [data]="rows"
+      [columns]="columns"
+      [highlightId]="highlightId"
+    >
+    </app-leaderboard>
     <div class="flex flex-col items-center justify-center gap-4"></div>
   </div>
 </div>
