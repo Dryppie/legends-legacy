@@ -16,7 +16,7 @@
   />
 
   <app-item [item]="inventoryItem.itemInstance"></app-item>
-  <div *ngIf="inventoryItem.quantity > 1" class="rounded-full pl-1 text-white">
+  <div *ngIf="!isEquipment" class="rounded-full pl-1 text-white">
     x{{ inventoryItem.quantity }}
   </div>
 </div>
