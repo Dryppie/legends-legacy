@@ -1,8 +1,8 @@
 <div
-  class="flex h-full flex-col gap-6 overflow-y-auto py-2 text-white lg:flex-row"
+  class="flex h-full w-full flex-col gap-6 overflow-y-auto py-2 text-white 2xl:flex-row"
 >
   <!-- LEFT ▸ INVENTORY -->
-  <div class="flex h-full w-full flex-col">
+  <div class="order-2 flex h-full w-full flex-col 2xl:order-1">
     <app-filter-tabs
       [tabs]="tabLabels"
       [activeTab]="activeTab"
@@ -32,7 +32,7 @@
 
   <!-- RIGHT ▸ LISTING PANEL -->
   <div
-    class="flex h-full w-full flex-shrink-0 flex-col gap-4 rounded-lg bg-black/40 p-4 backdrop-blur-sm lg:w-96"
+    class="order-1 flex h-full w-full flex-col gap-4 rounded-lg bg-black/40 p-4 backdrop-blur-sm 2xl:order-2 2xl:w-96"
   >
     <div class="">
       <h2 class="text-lg font-semibold">Create a Listing</h2>
