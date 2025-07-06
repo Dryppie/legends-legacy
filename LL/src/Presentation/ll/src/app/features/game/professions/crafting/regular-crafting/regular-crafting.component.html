@@ -39,7 +39,10 @@
         <div class="text-gray-400 mt-2 text-sm">
           Requires:
           <ul class="ml-5 list-disc">
-            <li *ngFor="let mat of selectedRecipe.materials" class="group relative cursor-help">
+            <li
+              *ngFor="let mat of selectedRecipe.materials"
+              class="group relative"
+            >
               {{ mat.item.name }}:
               <span
                 [ngClass]="{
@@ -52,11 +55,11 @@
               </span>
 
               <!-- Tooltip -->
-               <div
-                class="absolute hidden right-0 top-1/2 -translate-y-1/2 z-20 w-64 rounded bg-texture border border-light_gray p-2 text-sm text-white shadow-lg group-hover:block"
+              <div
+                class="absolute right-0 top-1/2 z-20 hidden w-64 -translate-y-1/2 rounded border border-light_gray bg-texture p-2 text-sm text-white shadow-lg group-hover:block"
               >
                 {{ mat.item.description }}
-               </div>
+              </div>
             </li>
           </ul>
         </div>
