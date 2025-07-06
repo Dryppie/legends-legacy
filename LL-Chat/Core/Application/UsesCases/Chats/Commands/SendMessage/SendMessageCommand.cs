@@ -5,7 +5,7 @@ using Domain.Models.Chats;
 using MediatR;
 
 namespace Application.UsesCases.Chats.Commands.SendMessage;
-public record SendMessageCommand(string Channel, string Body, string SenderId, string SenderName, ChatChannelType ChannelType, string? TargetUserId = null) : IRequest<ChatMessageDto?>;
+public record SendMessageCommand(string Channel, string Body, string SenderId, string SenderName, ChatChannelType ChannelType, string? TargetCharacterId = null, string? TargetCharacterName = null) : IRequest<ChatMessageDto?>;
 public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, ChatMessageDto?>
 {
     private readonly IChatService _chatService;
@@ -20,12 +20,12 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Cha
     public async Task<ChatMessageDto?> Handle(SendMessageCommand request, CancellationToken cancellationToken)
     {
         if (!Guid.TryParse(request.SenderId, out var senderId)) return null;
-        var targetUserId = Guid.Empty; // Default to empty GUID for whisper messages
-        if (request.TargetUserId != null)
+        var targetCharacterId = Guid.Empty; // Default to empty GUID for whisper messages
+        if (request.TargetCharacterId != null && request.TargetCharacterName != null)
         {
-            if (!Guid.TryParse(request.TargetUserId, out var targetUserGuid)) 
-                return null; // Invalid target user ID
-            targetUserId = targetUserGuid; // Set the target user ID for whisper messages
+            if (request.SenderId.Equals(request.TargetCharacterId)) return null;
+            if (!Guid.TryParse(request.TargetCharacterId, out var targetCharacterGuid)) return null; // Invalid target user ID
+            targetCharacterId = targetCharacterGuid; // Set the target user ID for whisper messages
         }
 
         if (!SendMessageValidator.IsValid(request.Body))
@@ -39,7 +39,8 @@ public class SendMessageCommandHandler : IRequestHandler<SendMessageCommand, Cha
             ContextKey = request.Channel,
             SentAt = DateTime.UtcNow,
             ChannelType = request.ChannelType,
-            TargetUserId = targetUserId
+            TargetCharacterId = targetCharacterId,
+            TargetCharacterName = request.TargetCharacterName
         };
 
         await _chatService.AddAsync(message, cancellationToken);

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from '../api.service';
-import { Observable, tap } from 'rxjs';
+import { Observable } from 'rxjs';
 import {
   EquipmentSlot,
   EquipmentSlotType,

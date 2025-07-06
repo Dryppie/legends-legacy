@@ -24,6 +24,7 @@ import { FormsModule } from '@angular/forms';
 import { RegularButtonComponent } from '../../../shared/components/buttons/regular-button/regular-button.component';
 import { StickyScrollDirective } from '../../../shared/directives/sticky-scroll/sticky-scroll.directive';
 import { GuildStateService } from '../../../core/services/api/guild/guild-state.service';
+import { CharacterStateService } from '../../../core/services/api/character/character-state.service';
 
 interface ChatRoom {
   label: string;
@@ -56,14 +57,15 @@ export class ChatComponent implements OnInit, OnDestroy {
   } = { type: ChatChannelType.General, contextKey: 'all' };
 
   readonly guild;
+  readonly characterId;
 
   readonly availableRooms: ChatRoom[] = [
     { label: 'All', contextKey: 'all', channelType: ChatChannelType.General },
-    // {
-    //   label: 'Whisper',
-    //   contextKey: 'whisper',
-    //   channelType: ChatChannelType.Whisper,
-    // },
+    {
+      label: 'Whisper',
+      contextKey: 'whisper',
+      channelType: ChatChannelType.Whisper,
+    },
     {
       label: 'General',
       contextKey: 'general',
@@ -109,8 +111,10 @@ export class ChatComponent implements OnInit, OnDestroy {
   constructor(
     public chat: ChatService,
     private readonly guildState: GuildStateService,
+    private readonly characterState: CharacterStateService,
   ) {
     this.guild = this.guildState.guild;
+    this.characterId = this.characterState.currentCharacterId;
     // effect(() => {
     //   const id = this.guild()?.id;
     //   if (id) {
@@ -147,6 +151,9 @@ export class ChatComponent implements OnInit, OnDestroy {
           m.contextKey === this.guild()?.id,
       );
     }
+    if (this.activeRoomKey === 'whisper') {
+      return this.messages.filter((m) => m.channelType === this.activeRoomType);
+    }
     return this.messages.filter(
       (m) =>
         m.channelType === this.activeRoomType &&
@@ -167,6 +174,25 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.draft = '';
 
     let { type, contextKey } = this.activeChannel;
+
+    if (body.startsWith('/w ')) {
+      const parts = body.split(' ');
+      if (parts.length < 3) return; // Invalid
+
+      const targetName = parts[1];
+      const messageBody = body
+        .slice(body.indexOf(targetName) + targetName.length)
+        .trim();
+
+      try {
+        await this.chat.sendWhisperToName(targetName, messageBody);
+      } catch (err) {
+        // You could show a toast or log error here
+        console.warn(err);
+      }
+      return;
+    }
+
     if (contextKey === 'all') contextKey = 'general';
     switch (type) {
       case ChatChannelType.General:
@@ -174,11 +200,11 @@ export class ChatComponent implements OnInit, OnDestroy {
       case ChatChannelType.Help:
         await this.chat.sendPublic(type, contextKey, body);
         break;
-      case ChatChannelType.Whisper:
-        // if (this.chat.targetUserId) {
-        //   await this.chat.sendWhisper(this.chat.targetUserId, body);
-        // }
-        break;
+      // case ChatChannelType.Whisper:
+      //   if (this.chat.targetUserId) {
+      //     await this.chat.sendWhisper(this.chat.targetUserId, body);
+      //   }
+      //   break;
       case ChatChannelType.Guild:
         await this.chat.sendGuild(this.guild()!.id, body);
         break;

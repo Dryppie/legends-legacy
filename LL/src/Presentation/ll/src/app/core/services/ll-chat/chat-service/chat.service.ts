@@ -9,6 +9,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
 import { AuthService } from '../../api/auth/auth.service';
 import { GuildStateService } from '../../api/guild/guild-state.service';
+import { CharacterService } from '../../api/character/character.service';
 
 export interface ChatMessageDto {
   id: string;
@@ -16,6 +17,8 @@ export interface ChatMessageDto {
   contextKey: string;
   senderId: string;
   senderName: string;
+  targetCharacterId?: string;
+  targetCharacterName?: string;
   body: string;
   sentAt: Date;
 }
@@ -42,6 +45,7 @@ export class ChatService {
   constructor(
     private zone: NgZone,
     private chatApi: ChatApiService,
+    private characterService: CharacterService,
     private guildState: GuildStateService,
     private eventBus: EventBusService,
     private auth: AuthService,
@@ -95,15 +99,36 @@ export class ChatService {
     body: string,
   ): Promise<void> {
     await this.ensureConnected();
-    await this.hub!.invoke('Send', contextKey, body, channelType, null);
+    await this.hub!.invoke('Send', contextKey, body, channelType, null, null);
   }
 
   async sendGuild(guildId: string, body: string): Promise<void> {
     await this.ensureConnected();
-    await this.hub!.invoke('Send', guildId, body, ChatChannelType.Guild, null);
+    await this.hub!.invoke(
+      'Send',
+      guildId,
+      body,
+      ChatChannelType.Guild,
+      null,
+      null,
+    );
   }
 
-  async sendWhisper(targetUserId: string, body: string): Promise<void> {
+  async sendWhisperToName(targetName: string, body: string): Promise<void> {
+    const targetId = await firstValueFrom(
+      this.characterService.resolveCharacterIdByName(targetName),
+    );
+
+    if (!targetId) return;
+
+    return this.sendWhisper(targetId, targetName, body);
+  }
+
+  async sendWhisper(
+    targetUserId: string,
+    targetName: string,
+    body: string,
+  ): Promise<void> {
     await this.ensureConnected();
     await this.hub!.invoke(
       'Send',
@@ -111,6 +136,7 @@ export class ChatService {
       body,
       ChatChannelType.Whisper,
       targetUserId,
+      targetName,
     );
   }
 

@@ -38,7 +38,7 @@ public class ChatMessageRepository : IChatMessageRepository
 
         var whisperMessages = await _context.ChatMessages
             .AsNoTracking()
-            .Where(m => m.ChannelType == ChatChannelType.Whisper && (m.SenderId == userId || m.TargetUserId == userId))
+            .Where(m => m.ChannelType == ChatChannelType.Whisper && (m.SenderId == userId || m.TargetCharacterId == userId))
             .OrderByDescending(m => m.SentAt)
             .Take(take)
             .ToListAsync(cancellationToken);

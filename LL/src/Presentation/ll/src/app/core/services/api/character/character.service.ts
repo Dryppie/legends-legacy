@@ -2,17 +2,21 @@ import { computed, Injectable, Signal } from '@angular/core';
 import { ApiService } from '../api.service';
 import {
   BehaviorSubject,
+  catchError,
+  map,
   Observable,
   shareReplay,
   startWith,
   Subject,
   switchMap,
+  throwError,
 } from 'rxjs';
 import {
   CharacterDto,
   CharacterOverviewDto,
 } from '../../../../shared/models/Dtos/characterDto';
 import { AuthService } from '../auth/auth.service';
+import { HttpParams } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root',
@@ -62,6 +66,31 @@ export class CharacterService {
 
   getCurrentCharacter(): Signal<CharacterDto | null> {
     return this.authService.currentCharacter;
+  }
+
+  resolveCharacterIdByName(name: string): Observable<string> {
+    const params = new HttpParams().set('name', name);
+    return this.api.get('Character/resolveName', params).pipe(
+      map((characterId) => {
+        // this.toastService.showToast(
+        //   'Action completed successfully!',
+        //   'success',
+        // );
+        return characterId;
+      }),
+
+      catchError(() => {
+        // this.toastService.showToast(
+        //   'Login Failed',
+        //   'Wrong email or password',
+        //   'error',
+        //   't',
+        // );
+        return throwError(
+          () => new Error('No character with this name exists'),
+        );
+      }),
+    );
   }
 
   public getCharacterOverview(): Observable<CharacterOverviewDto> {

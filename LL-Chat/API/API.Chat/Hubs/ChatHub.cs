@@ -5,6 +5,7 @@ using Domain.Models.Chats;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Caching.Distributed;
+using System.Security.Claims;
 
 namespace API.Chat.Hubs;
 
@@ -23,15 +24,16 @@ public sealed class ChatHub : Hub<IChatClient>
         _cache = cache;
     }
 
-    public async Task Send(string contextKey, string body, ChatChannelType channelType, string? targetUserId = null)
+    public async Task Send(string contextKey, string body, ChatChannelType channelType, string? targetCharacterId = null, string? targetCharacterName = null)
     {
-        var senderId = Context.UserIdentifier!;
+
+        var senderId = Context.UserIdentifier;
         if (!await RateLimiter.EnsureAllowedAsync(_cache, senderId))
             return;
 
         var senderName = Context.User!.Identity!.Name ?? "Unknown Sender";
 
-        var msg = await _mediator.Send(new SendMessageCommand(contextKey, body, senderId, senderName, channelType, targetUserId));
+        var msg = await _mediator.Send(new SendMessageCommand(contextKey, body, senderId, senderName, channelType, targetCharacterId, targetCharacterName));
         if (msg == null) return;
 
         switch (channelType)
@@ -53,10 +55,10 @@ public sealed class ChatHub : Hub<IChatClient>
                 break;
 
             case ChatChannelType.Whisper:
-                if (string.IsNullOrWhiteSpace(targetUserId))
+                if (string.IsNullOrWhiteSpace(targetCharacterId))
                     return; // recipient missing
 
-                await Clients.User(targetUserId).Receive(msg); // recipient
+                await Clients.User(targetCharacterId).Receive(msg); // recipient
                 await Clients.User(senderId).Receive(msg);     // echo to sender
                 break;
         }

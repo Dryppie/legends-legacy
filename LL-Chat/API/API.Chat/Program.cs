@@ -1,10 +1,12 @@
 using API.Chat;
 using API.Chat.Hubs;
+using API.Chat.Hubs.Providers;
 using Application;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Persistence.Chat;
@@ -29,12 +31,14 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 });
 
 builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSignalR(o => { o.EnableDetailedErrors = true; }).AddJsonProtocol(options =>
-{
-    options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()); // optional, depends on your style
-});//.AddStackExchangeRedis(builder.Configuration.GetConnectionString("Redis")!);
+builder.Services.AddSignalR(o => { o.EnableDetailedErrors = true; })
+    .AddJsonProtocol(options =>
+    {
+        options.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()); // optional, depends on your style
+    });//.AddStackExchangeRedis(builder.Configuration.GetConnectionString("Redis")!);
 // TODO: For production
 //builder.Services.AddSignalR().AddStackExchangeRedis(builder.Configuration.GetConnectionString("Redis")!);
+builder.Services.AddSingleton<IUserIdProvider, CharacterIdProvider>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
