@@ -81,7 +81,7 @@ export class CombatService {
     this.combatStateService.setCombatResult(type, combatAction);
 
     const combatDurationMs = combatAction.duration * 100;
-    const remainingDuration = combatStartTime + combatDurationMs + 1000 - now;
+    const remainingDuration = combatStartTime + combatDurationMs + 3000 - now;
 
     const onComplete = (finalResult: CombatResultDto) => {
       // Defensive: skip execution if combat was deactivated
