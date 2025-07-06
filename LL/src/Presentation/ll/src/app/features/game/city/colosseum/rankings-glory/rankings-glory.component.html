@@ -1,6 +1,7 @@
-<!-- <app-leaderboard
+<app-leaderboard
   title="Arena"
-  [data]="arenaRanking$ | async"
-  [columns]="arenaColumns"
-  [highlightId]="currentPlayerId">
-</app-leaderboard> -->
+  [data]="rankings"
+  [columns]="columns"
+  [highlightId]="myRanking?.characterId"
+>
+</app-leaderboard>

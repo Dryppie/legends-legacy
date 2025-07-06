@@ -1,3 +1,4 @@
+import { ARENA_COLUMNS } from './rows/arenaRow';
 import { COMBAT_COLUMNS } from './rows/combatRow';
 import { PROFESSION_COLUMNS } from './rows/professionRow';
 import { TOTAL_LEVEL_COLUMNS } from './rows/totalLevelRow';
@@ -12,4 +13,5 @@ export const COLUMNS_BY_TAB = {
   Armorforging: PROFESSION_COLUMNS,
   Jewelrycrafting: PROFESSION_COLUMNS,
   Weaponsmithing: PROFESSION_COLUMNS,
+  arena: ARENA_COLUMNS,
 } as const;

@@ -1,8 +1,12 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { ColosseumRank } from '../../../../../shared/models/Dtos/colosseum/colosseumRank';
 import { CharacterStateService } from '../../../../../core/services/api/character/character-state.service';
 import { LeaderboardComponent } from '../../../../../shared/components/generic-leaderboard/generic-leaderboard.component';
+import {
+  LeaderboardColumn,
+  LeaderboardEntry,
+} from '../../../../../shared/models/Dtos/leaderboard/leaderboardEntry';
+import { ARENA_COLUMNS } from '../../../../../shared/models/Dtos/leaderboard/rows/arenaRow';
 
 @Component({
   selector: 'app-rankings-glory',
@@ -11,11 +15,12 @@ import { LeaderboardComponent } from '../../../../../shared/components/generic-l
   templateUrl: './rankings-glory.component.html',
 })
 export class RankingsGloryComponent implements OnInit {
-  @Input() rankings: ColosseumRank[] = [];
+  @Input() rankings: LeaderboardEntry[] = [];
   readonly id;
-  myRanking: ColosseumRank | undefined;
+  myRanking: LeaderboardEntry | undefined;
   subscriptions: Subscription = new Subscription();
 
+  columns = ARENA_COLUMNS as LeaderboardColumn<LeaderboardEntry>[];
   top3 = this.rankings.slice(0, 3);
 
   constructor(private state: CharacterStateService) {
@@ -30,7 +35,7 @@ export class RankingsGloryComponent implements OnInit {
     this.subscriptions.unsubscribe();
   }
 
-  getMyRanking(): ColosseumRank | undefined {
+  getMyRanking(): LeaderboardEntry | undefined {
     return this.rankings.find((r) => r.characterId === this.id);
   }
 }

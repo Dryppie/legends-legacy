@@ -5,6 +5,7 @@ using Application.UseCases.Colosseum.Queries.GetArenaOpponents;
 using Application.UseCases.Colosseum.Queries.GetArenaTickets;
 using Application.UseCases.Colosseum.Queries.GetColosseumMatchResults;
 using Application.UseCases.Colosseum.Queries.GetRankings;
+using Application.UseCases.Leaderboards.Dtos;
 using Common.Primitives;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,7 +21,7 @@ public class ColosseumController : BaseController
         await Mediator.Send(new GetArenaTicketsQuery(CurrentCharacterGuid));
 
     [HttpGet("GetRankings")]
-    public async Task<ActionResult<List<ColosseumArenaRankDto>>> GetRankings() =>
+    public async Task<ActionResult<List<LeaderboardEntryDto>>> GetRankings() =>
         await Mediator.Send(new GetRankingsQuery(CurrentCharacterGuid));
 
     [HttpGet("GetColosseumMatchResults")]

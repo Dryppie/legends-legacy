@@ -3,6 +3,7 @@ using Application.Interfaces.Services.LL.Entities;
 using Domain.Interfaces.Combat;
 using Domain.Models.Colosseum;
 using Domain.Models.Combat;
+using Domain.Models.Leaderboards;
 using Services.LL.Interfaces;
 
 namespace Services.LL.Colosseum;
@@ -106,7 +107,7 @@ public class ColosseumService : IColosseumService
         return await _colosseumRepository.GetColosseumMatchResults(characterId, cancellationToken);
     }
 
-    public async Task<List<ColosseumArenaRank>> GetRankings(Guid characterId, CancellationToken cancellationToken)
+    public async Task<List<LeaderboardEntry>> GetRankings(Guid characterId, CancellationToken cancellationToken)
     {
         var characters = await _colosseumRepository.GetRankings(characterId, cancellationToken);
 
@@ -133,11 +134,11 @@ public class ColosseumService : IColosseumService
 
         // Create the result list
         var rankings = top50
-            .Select(ranking => new ColosseumArenaRank()
+            .Select(ranking => new LeaderboardEntry()
             {
                 CharacterId = ranking.Character.Id,
-                Character = ranking.Character,
-                Rating = ranking.Character.ArenaRating,
+                CharacterName = ranking.Character.Name,
+                Level = ranking.Character.ArenaRating,
                 Rank = ranking.Rank,
             })
             .ToList();

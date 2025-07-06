@@ -7,6 +7,7 @@ import { ColosseumMatchResult } from '../../../../shared/models/Dtos/colosseum/c
 import { ColosseumRank } from '../../../../shared/models/Dtos/colosseum/colosseumRank';
 import { ArenaTicketStatus } from '../../../../shared/models/Dtos/colosseum/arenaTicketStatus';
 import { ArenaOpponentPreview } from '../../../../shared/models/Dtos/colosseum/arenaOpponentPreview';
+import { LeaderboardEntry } from '../../../../shared/models/Dtos/leaderboard/leaderboardEntry';
 
 @Injectable({
   providedIn: 'root',
@@ -68,7 +69,7 @@ export class ColosseumService {
       .subscribe((status) => this.arenaTicketStatusSubject.next(status));
   }
 
-  getColosseumRankings(): Observable<ColosseumRank[]> {
+  getColosseumRankings(): Observable<LeaderboardEntry[]> {
     return this.apiService.get('colosseum/getRankings').pipe(
       map((opponents) => {
         // this.toastService.showToast(

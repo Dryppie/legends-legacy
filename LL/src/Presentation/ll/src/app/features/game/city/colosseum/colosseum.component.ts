@@ -1,7 +1,6 @@
 import { Component, effect, OnInit } from '@angular/core';
 import { BannerComponent } from '../../../../shared/components/banner/banner.component';
 import { TabComponent } from '../../../../shared/components/tabs/tab/tab.component';
-import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { ColosseumService } from '../../../../core/services/api/colosseum/colosseum.service';
 import { NgIf } from '@angular/common';
 import { CombatComponent } from '../../../../shared/components/combat/combat.component';
@@ -13,12 +12,12 @@ import { RankingsGloryComponent } from './rankings-glory/rankings-glory.componen
 import { RecordOfBattleComponent } from './record-of-battle/record-of-battle.component';
 import { TournamentGroundsComponent } from './tournament-grounds/tournament-grounds.component';
 import { ColosseumMatchResult } from '../../../../shared/models/Dtos/colosseum/colosseumMatchResult';
-import { ColosseumRank } from '../../../../shared/models/Dtos/colosseum/colosseumRank';
 import { ArenaTicketStatus } from '../../../../shared/models/Dtos/colosseum/arenaTicketStatus';
 import { TabsComponent } from '../../../../shared/components/tabs/tabs.component';
 import { ArenaOpponentPreview } from '../../../../shared/models/Dtos/colosseum/arenaOpponentPreview';
 import { EventBusService } from '../../../../core/services/client-side/event-bus/event-bus.service';
 import { ColosseumResultComponent } from '../../../../shared/components/colosseum/colosseum-result/colosseum-result.component';
+import { LeaderboardEntry } from '../../../../shared/models/Dtos/leaderboard/leaderboardEntry';
 
 @Component({
   selector: 'app-colosseum',
@@ -43,8 +42,7 @@ export class ColosseumComponent implements OnInit {
   opponents: ArenaOpponentPreview[] = [];
   arenaTicketStatus!: ArenaTicketStatus;
 
-  rankings: ColosseumRank[] = [];
-
+  rankings: LeaderboardEntry[] = [];
   previousMatches: ColosseumMatchResult[] = [];
 
   colosseumBattleResult: 'Victory' | 'Defeat' | 'Draw' | null = null;
