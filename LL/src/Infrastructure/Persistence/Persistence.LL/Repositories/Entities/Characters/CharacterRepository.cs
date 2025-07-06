@@ -152,6 +152,14 @@ public class CharacterRepository : ICharacterRepository
             .FirstOrDefaultAsync(c => c.Id.Equals(characterId), cancellationToken);
     }
 
+    public async Task<Guid?> GetCharacterIdByNameAsync(string name, CancellationToken cancellationToken)
+    {
+        return await _context.Characters
+            .Where(c => c.Name.ToLower() == name.ToLower())
+            .Select(c => c.Id)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
     public async Task SaveChangesAsync(CancellationToken cancellationToken)
     {
         await _context.SaveChangesAsync(cancellationToken);

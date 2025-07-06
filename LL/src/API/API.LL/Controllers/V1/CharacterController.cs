@@ -1,5 +1,6 @@
 ﻿using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Characters.Queries.GetCharacter;
+using Application.UseCases.Characters.Queries.GetCharacterIdByName;
 using Application.UseCases.Characters.Queries.GetCharacterOverview;
 using Common.Primitives;
 using Microsoft.AspNetCore.Authorization;
@@ -17,4 +18,8 @@ public class CharacterController : BaseController
     [HttpGet("Overview")]
     public async Task<ActionResult<Response<CharacterOverviewDto>>> Overview() =>
         await Mediator.Send(new GetCharacterOverviewQuery(CurrentCharacterGuid));
+
+    [HttpGet("ResolveName")]
+    public async Task<ActionResult<Response<Guid>>> ResolveName([FromBody] string name) =>
+        await Mediator.Send(new GetCharacterIdByNameQuery(name));
 }

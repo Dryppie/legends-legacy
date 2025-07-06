@@ -53,23 +53,18 @@ public class CharacterService : ICharacterService
         return character;
     }
 
-    public async Task<Character?> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken)
-    {
-        return await _characterRepository.GetBaseCharacterByIdAsync(characterId, cancellationToken);
-    }
+    public async Task<Character?> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken) =>
+        await _characterRepository.GetBaseCharacterByIdAsync(characterId, cancellationToken);
 
-    public async Task<Character?> UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken)
-    {
-        return await _characterRepository.UpdateCharacterNameAsync(userId, username, cancellationToken);
-    }
+    public async Task<Character?> UpdateCharacterNameAsync(Guid userId, string username, CancellationToken cancellationToken) =>
+        await _characterRepository.UpdateCharacterNameAsync(userId, username, cancellationToken);
 
-    public async Task<Character?> GetCharacterWithSoulstoneUpgradesAsync(Guid characterId, CancellationToken cancellationToken)
-    {
-        return await _characterRepository.GetCharacterWithSoulstoneUpgradesAsync(characterId, cancellationToken);
-    }
+    public async Task<Character?> GetCharacterWithSoulstoneUpgradesAsync(Guid characterId, CancellationToken cancellationToken) =>
+        await _characterRepository.GetCharacterWithSoulstoneUpgradesAsync(characterId, cancellationToken);
 
-    public async Task SaveChangesAsync(CancellationToken cancellationToken)
-    {
+    public async Task<Guid?> GetCharacterIdByNameAsync(string name, CancellationToken cancellationToken) =>
+        await _characterRepository.GetCharacterIdByNameAsync(name, cancellationToken);
+
+    public async Task SaveChangesAsync(CancellationToken cancellationToken) =>
         await _characterRepository.SaveChangesAsync(cancellationToken);
-    }
 }
