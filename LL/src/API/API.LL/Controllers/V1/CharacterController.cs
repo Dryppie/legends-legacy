@@ -20,6 +20,12 @@ public class CharacterController : BaseController
         await Mediator.Send(new GetCharacterOverviewQuery(CurrentCharacterGuid));
 
     [HttpGet("ResolveName")]
-    public async Task<ActionResult<Response<Guid>>> ResolveName([FromQuery] string name) =>
-        await Mediator.Send(new GetCharacterIdByNameQuery(name));
+    public async Task<ActionResult<Guid?>> ResolveName([FromQuery] string name)
+    {
+        var result = await Mediator.Send(new GetCharacterIdByNameQuery(name));
+        if (!result.IsSuccess || result.Data == null)
+            return NotFound();
+
+        return Ok(result.Data);
+    }
 }

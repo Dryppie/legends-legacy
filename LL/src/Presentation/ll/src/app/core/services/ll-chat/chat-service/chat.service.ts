@@ -118,7 +118,7 @@ export class ChatService {
     const targetId = await firstValueFrom(
       this.characterService.resolveCharacterIdByName(targetName),
     );
-
+    console.log(targetId);
     if (!targetId) return;
 
     return this.sendWhisper(targetId, targetName, body);
