@@ -17,30 +17,36 @@ export class LevelingService {
    *  CHARACTER XP / LEVEL
    * ────────────────────────────────────────────────────────*/
   gainExperience(xp: number): void {
-    const char = this.state.currentCharacter(); // sync read
+    const char = this.state.currentCharacter();
     if (!char) return;
 
-    let { level, experience, experienceUntilNextLevel } = char;
+    let experience = char.experience + xp;
+    let level = char.level;
+    let experienceUntilNextLevel = char.experienceUntilNextLevel;
 
-    let newExp = experience + xp;
-    let newLevel = level;
+    let leveledUp = false;
+    while (experience >= experienceUntilNextLevel) {
+      experience -= experienceUntilNextLevel;
+      level += 1;
+      leveledUp = true;
 
-    if (newExp >= experienceUntilNextLevel) {
-      newExp -= experienceUntilNextLevel;
-      newLevel += 1;
-      /* If you have a formula/table for the *next* threshold,
-         update `experienceUntilNextLevel` here as well. */
+      // TODO: Update this to a real formula or lookup
+      experienceUntilNextLevel = char.experienceUntilNextLevel;
     }
 
     const updated: CharacterDto = {
       ...char,
-      experience: newExp,
-      level: newLevel,
+      experience,
+      level,
+      experienceUntilNextLevel,
     };
 
-    /* single call updates the global store; every component that
-       depends on `currentCharacter` will react automatically      */
     this.state.updateCharacter(updated);
+
+    if (leveledUp) {
+      // Optional: Sync with backend to avoid discrepancies
+      this.state.refresh();
+    }
   }
 
   /* ────────────────────────────────────────────────────────
