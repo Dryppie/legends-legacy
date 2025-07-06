@@ -139,7 +139,7 @@ export class CombatService {
     }
 
     this.combatStateService.setCombatActive(type, false);
-    this.combatStateService.resetCombatState(type);
+    this.stop(type);
   }
 
   /** stop & forget a particular fight (e.g. UI tab closed) */
