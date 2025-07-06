@@ -9,7 +9,15 @@ import { CombatActionHandler } from './handlers/combat-action-handler';
 import { CraftingActionHandler } from './handlers/crafting-action-handler';
 import { GatheringActionHandler } from './handlers/gathering-action-handler';
 import { CharacterActionsPollingService } from './helpers/characterActionsPollingService';
-import { catchError, of, Observable, tap } from 'rxjs';
+import {
+  catchError,
+  of,
+  Observable,
+  tap,
+  interval,
+  map,
+  startWith,
+} from 'rxjs';
 import { CharacterActionsService } from './character-actions.service';
 import { CharacterActionTypePersistenceService } from './helpers/character-action-type-persistence.service';
 import { GameService } from '../../client-side/game/game.service';
@@ -25,6 +33,16 @@ export class CharacterActionsStateService {
 
   private readonly _loadingCombat = signal(false);
   readonly loadingCombat = computed(() => this._loadingCombat());
+
+  private readonly _startTime = signal<number | null>(null);
+  private readonly _tickingDuration = signal<number>(0);
+  readonly tickingDuration = computed(() => {
+    const ms = this._tickingDuration();
+    const sec = Math.floor(ms / 1000) % 60;
+    const min = Math.floor(ms / 60000) % 60;
+    const hr = Math.floor(ms / 3600000);
+    return `${hr}h ${min}m ${sec}s`;
+  });
 
   readonly isCombatAction = computed(
     () =>
@@ -82,6 +100,17 @@ export class CharacterActionsStateService {
           break;
       }
     });
+
+    effect((onCleanup) => {
+      const start = this._startTime();
+      if (start === null) return;
+
+      const intervalId = setInterval(() => {
+        this._tickingDuration.set(Date.now() - start);
+      }, 1000);
+
+      onCleanup(() => clearInterval(intervalId));
+    });
   }
 
   init(): void {
@@ -89,6 +118,7 @@ export class CharacterActionsStateService {
   }
 
   private startPolling(): void {
+    this._startTime.set(Date.now());
     this.polling.start(
       () =>
         this.actionsService.getCurrentAction().pipe(
@@ -193,6 +223,9 @@ export class CharacterActionsStateService {
   clear(): void {
     this.polling.stop();
     this.persistence.clear();
+
+    this._tickingDuration.set(0);
+    this._startTime.set(null);
 
     const action = this._currentAction();
     if (!action) return;

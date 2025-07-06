@@ -16,8 +16,11 @@ export class CurrentActionComponent {
   isGatheringAction = false;
   performingAction = '';
   duration = 0;
+  readonly totalDuration;
 
   constructor(private state: CharacterActionsStateService) {
+    this.totalDuration = this.state.tickingDuration;
+
     effect(() => {
       const action = this.state.currentAction();
       this.currentAction = action;

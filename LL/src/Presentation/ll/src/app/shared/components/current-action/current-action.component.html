@@ -6,7 +6,10 @@
         url(&quot;core/Light.svg&quot;);
     "
   >
-    <label class="whitespace-nowrap">{{ performingAction }}</label>
+    <div class="flex justify-between">
+      <label class="whitespace-nowrap">{{ performingAction }}</label>
+      <label class="hidden sm:block">{{ totalDuration() }}</label>
+    </div>
     <div class="flex w-full gap-2">
       <div class="flex w-full items-center gap-2 rounded-md">
         <label class="block w-14 text-nowrap text-center">{{
