@@ -24,6 +24,30 @@
     "scalingAmount": 0
   },
   {
+    "id": "ore",
+    "name": "Ore",
+    "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
+  },
+  {
+    "id": "wood",
+    "name": "Wood",
+    "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+    "itemType": "Material",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "Luck",
+    "scalingAmount": 0
+  },
+  {
     "id": "stone",
     "name": "Stone",
     "description": "Mining material - Stone can be found in \u0027Slate Shard\u0027",
