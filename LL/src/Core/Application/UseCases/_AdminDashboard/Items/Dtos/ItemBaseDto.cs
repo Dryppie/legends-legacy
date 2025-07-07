@@ -14,6 +14,6 @@ public class ItemBaseDto
     public EquipmentType EquipmentType { get; set; }
     public List<ItemAttributeModifier> AttributeModifiers { get; set; } = [];
     public int Magnitude { get; set; } = 0;
-    public AttributeType ScalingAttribute { get; set; } = AttributeType.Luck;
+    public AttributeType ScalingAttribute { get; set; } = AttributeType.AttackPower;
     public float ScalingAmount { get; set; } = 0.0f;
 }

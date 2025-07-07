@@ -56,9 +56,6 @@ public class CombatInteractionManager : ICombatInteractionManager
 
     public DamageResult CalculateDamageBreakdown(CombatEntity target, float baseDamage, AttackOutcome outcome, DamageType damageType)
     {
-        // Subtract flat damage reduction
-        baseDamage -= target.CombatAttributes[AttributeType.FlatDamageReduction];
-
         // Subtract damage if it's blocked or parried
         if (outcome == AttackOutcome.Block)
             baseDamage = baseDamage * (1 - CombatConstants.BLOCK_DAMAGE_DECREASE);
@@ -143,7 +140,7 @@ public class CombatInteractionManager : ICombatInteractionManager
         //var weapon = actor.Equipment.FirstOrDefault(e => e.EquipmentBase.EquipmentType == EquipmentType.MainHand)
         //             ?? new Weapon { DamageType = DamageType.Physical };
 
-        var finalDamage = baseDamage + (actor.CombatAttributes[AttributeType.Strength] / 6); //TODO: Need proper calculation. Likely scaling of weapon
+        var finalDamage = baseDamage + (actor.CombatAttributes[AttributeType.AttackPower] / 6); //TODO: Need proper calculation. Likely scaling of weapon
         finalDamage = CombatConstants.GetRandomValue(finalDamage);
 
         // Potential for more complex calculations, crit chance, etc.

@@ -31,7 +31,7 @@ public static class SummonCreatureFactory
             summonedCombatEntity.ImagePath = "shadow_image";
             var maxHealth = summonedCombatEntity.BaseAttributes.First(ba => ba.AttributeType.Equals(AttributeType.MaxHealth));
             var health = summonedCombatEntity.BaseAttributes.First(ba => ba.AttributeType.Equals(AttributeType.Health));
-            var baseAttack = summonedCombatEntity.BaseAttributes.First(ba => ba.AttributeType.Equals(AttributeType.BasicAttackSpeed));
+            var baseAttack = summonedCombatEntity.BaseAttributes.First(ba => ba.AttributeType.Equals(AttributeType.AttackSpeed));
             maxHealth.Value = 1;
             health.Value = 1;
             baseAttack.Value = 0;

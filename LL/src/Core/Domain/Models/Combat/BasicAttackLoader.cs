@@ -18,7 +18,7 @@ public static class BasicAttackLoader
     public static AbilityInstance LoadBasicAttack(EquipmentSlot? slot)
     {
         var magnitude = 5;
-        var scalingAttribute = AttributeType.Strength;
+        var scalingAttribute = AttributeType.AttackPower;
         var scalingAmount = 0.1f;
 
         var equipment = slot?.EquipmentInstance;

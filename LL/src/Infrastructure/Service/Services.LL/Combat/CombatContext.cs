@@ -151,7 +151,7 @@ public class CombatContext : ICombatContext
                 entity.NextBasicAttackIn = 300; // TODO: Turn 300 into a Constant somewhere, as it is also stored in the Entity class
             }
 
-            entity.NextBasicAttackIn -= (int)entity.CombatAttributes[AttributeType.BasicAttackSpeed];
+            entity.NextBasicAttackIn -= (int)entity.CombatAttributes[AttributeType.AttackSpeed];
 
             EndTick(entity);
         }

@@ -9,7 +9,7 @@ public static class EntityBaseAttributeHelper
         foreach (var entityAttribute in entityAttributes)
         {
             // Increase the value by the specified percentage
-            if (entityAttribute.AttributeType != AttributeType.BasicAttackSpeed && entityAttribute.AttributeType != AttributeType.RecoveryRate)
+            if (entityAttribute.AttributeType != AttributeType.AttackSpeed && entityAttribute.AttributeType != AttributeType.RecoveryRate)
             {
                 entityAttribute.Value = (int)(entityAttribute.Value * (1 + percentage));
             }
@@ -37,22 +37,7 @@ public static class EntityBaseAttributeHelper
         // Define base values for each attribute type
         switch (attributeType)
         {
-            // Primary Stats
-            case AttributeType.Constitution:
-            case AttributeType.Endurance:
-            case AttributeType.Willpower:
-            case AttributeType.Strength:
-            case AttributeType.FightingSpirit:
-            case AttributeType.Dexterity:
-            case AttributeType.Agility:
-            case AttributeType.Intelligence:
-            case AttributeType.Wisdom:
-            case AttributeType.Instinct:
-            case AttributeType.Perception:
-            case AttributeType.Luck:
-                return 0; // Base value for primary stats
-
-            // Combat Stats
+            /* ===== VITALITY ===== */
             case AttributeType.MaxHealth:
             case AttributeType.Health:
                 return 100;
@@ -63,50 +48,53 @@ public static class EntityBaseAttributeHelper
                 return 100;
             case AttributeType.ManaRegeneration:
                 return 2;
-            case AttributeType.BasicAttackSpeed:
-                return 10;
             case AttributeType.RecoveryRate:
                 return 10; // Determines how often you naturally recover health and mana (HealthRegeneration, ManaRegeneration)
-            case AttributeType.Power:
-                return 10; // Base power
-            case AttributeType.PhysicalDefense:
-            case AttributeType.MagicalDefense:
-                return 10; // Base defense
-            case AttributeType.FlatDamageReduction:
-                return 0;
-            case AttributeType.DamageReduction:
-                return 0;
-            case AttributeType.CritChance:
-                return 0; // Base speed
-            case AttributeType.CritDamage:
-                return 100; // Base speed
-            case AttributeType.CritDamageReduction:
-                return 0; // Base speed
-            case AttributeType.Threat:
-                return 10; // Base speed
-            case AttributeType.CrowdControlResistance:
-                return 0; // Base speed
-            case AttributeType.Accuracy:
-                return 100; // Base speed
-            case AttributeType.Dodge:
-                return 0; // Base speed
-            case AttributeType.Block:
-            case AttributeType.Parry:
             case AttributeType.Barrier:
+                return 0;
+
+            /* ===== OFFENSE =====*/
+            case AttributeType.AttackPower:
+                return 10; // Base attack power
+            case AttributeType.SpellPower:
+                return 10; // Base spell power
+            case AttributeType.AttackSpeed:
+                return 10;
+            case AttributeType.Accuracy:
+                return 100;
+            case AttributeType.CritChance:
+                return 0;
+            case AttributeType.CritDamage:
+                return 100;
             case AttributeType.MultiStrike:
             case AttributeType.MultiCast:
-            case AttributeType.CooldownReduction:
+                return 0;
             case AttributeType.ArmorPenetration:
             case AttributeType.ManaPenetration:
-            case AttributeType.LifeSteal:
-                return 0; // Base speed
+                return 0;
 
-            // Resistances
+            /* ===== DEFENSE ===== */
+            case AttributeType.PhysicalDefense:
+            case AttributeType.MagicalDefense:
+            case AttributeType.DamageReduction:
+            case AttributeType.CritDamageReduction:
+            case AttributeType.CrowdControlResistance:
+            case AttributeType.Dodge:
+            case AttributeType.Block:
+            case AttributeType.Parry:
+                return 0;
+
+            /* ===== CONTROL & UTILITY ===== */
+            case AttributeType.Threat:
+                return 10;
+            case AttributeType.CooldownReduction:
+                return 0;
+
+            /* ===== Resistances ===== */
             case AttributeType.FireResistance:
             case AttributeType.WaterResistance:
             case AttributeType.EarthResistance:
             case AttributeType.AirResistance:
-            case AttributeType.PoisonResistance:
                 return 0; // Base resistance
 
             default:
