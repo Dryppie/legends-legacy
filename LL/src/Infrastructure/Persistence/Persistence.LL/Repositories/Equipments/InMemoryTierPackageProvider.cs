@@ -7,23 +7,9 @@ namespace Persistence.LL.Repositories.Equipments;
 public class InMemoryTierPackageProvider : ITierPackageProvider
 {
     private readonly Random _rnd = new();
-    public int Next(int min, int maxInclusive) => _rnd.Next(min, maxInclusive + 1);
-    public T Pick<T>(T[] src) => src[_rnd.Next(src.Length)];
-
-    private readonly IReadOnlyDictionary<Rarity, Func<TierPackage>> _factories;
-
-
-    public TierPackage GetPackage(Rarity rarity)
-    {
-        if (!_factories.TryGetValue(rarity, out var factory))
-            throw new ArgumentOutOfRangeException(nameof(rarity), rarity,
-                "No package defined for this rarity");
-
-        return factory();
-    }
 
     public InMemoryTierPackageProvider()
-    {;
+    {
         _factories = new Dictionary<Rarity, Func<TierPackage>>
         {
             [Rarity.Uncommon] = () => BuildRandomSingleStatPackage(Rarity.Uncommon),
@@ -34,14 +20,41 @@ public class InMemoryTierPackageProvider : ITierPackageProvider
             [Rarity.Legacy] = () => BuildRandomSingleStatPackage(Rarity.Legacy),
         };
     }
-    private TierPackage BuildRandomSingleStatPackage(Rarity rarity)
-    {
-        var attr = Pick(AttributeLists.PrimaryAttributes);
-        var amount = Next(1, 15);
 
-        var mod = new ItemAttributeModifier(attr, amount, ModifierType.Flat);
-        return new TierPackage(rarity, [mod]);
+    private readonly IReadOnlyDictionary<Rarity, Func<TierPackage>> _factories;
+
+    public TierPackage GetPackage(Rarity rarity)
+        => _factories.TryGetValue(rarity, out var f)
+           ? f()
+           : throw new ArgumentOutOfRangeException(nameof(rarity), rarity, "No package for this rarity");
+
+    // -----------------------------------------------------------------------
+    private TierPackage BuildRandomSingleStatPackage(Rarity rarity, int itemLevel = 1)
+    {
+        var attr = Pick(EquipmentAttributeRules.Rules.Keys.ToArray());
+        var rule = EquipmentAttributeRules.Rules[attr];
+
+        // Scale if requested
+        var (min, max) = rule.ScalesWithItemLevel
+            ? (rule.Min * itemLevel, rule.Max * itemLevel)
+            : (rule.Min, rule.Max);
+
+        // Safety: clamp max to soft-cap if present and not scaling
+        if (!rule.ScalesWithItemLevel && rule.SoftCap is { } cap)
+            max = Math.Min(max, cap);
+
+        var amount = Next(min, max);
+
+        var mod = new ItemAttributeModifier(attr, amount, rule.ModType);
+        return new TierPackage(rarity, new[] { mod });
     }
+
+    // -----------------------------------------------------------------------
+    private int Next(int inclusiveMin, int inclusiveMax) =>
+        _rnd.Next(inclusiveMin, inclusiveMax + 1);
+
+    private T Pick<T>(IReadOnlyList<T> src) =>
+        src[_rnd.Next(src.Count)];
 }
 
 public static class AttributeLists
