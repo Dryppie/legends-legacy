@@ -15,13 +15,12 @@
     <ProjectReference Include="..\..\Core\Application\Application.csproj" />
     <ProjectReference Include="..\..\Core\Domain\Domain.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Persistence\Persistence.LL\Persistence.LL.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\RealTime\RealTime.LL\RealTime.LL.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Service\Services.AdminDashboard\Services.AdminDashboard.csproj" />
     <ProjectReference Include="..\..\Infrastructure\Service\Services.LL\Services.LL.csproj" />
   </ItemGroup>
 
     <Target Name="CopyAppSettings" AfterTargets="Build">
-	    <Copy SourceFiles="..\API.LL\appsettings.json"
-			    DestinationFolder="$(OutDir)"
-			    OverwriteReadOnlyFiles="true" />
+	    <Copy SourceFiles="..\API.LL\appsettings.json" DestinationFolder="$(OutDir)" OverwriteReadOnlyFiles="true" />
     </Target>
 </Project>

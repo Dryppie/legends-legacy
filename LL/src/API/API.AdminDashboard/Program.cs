@@ -4,6 +4,7 @@ using Common;
 using Persistence.LL;
 using Services.AdminDashboard;
 using Services.LL;
+using RealTime.LL;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -37,11 +38,12 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddSignalR();
 builder.Services.AddPersistence(config);
 builder.Services.AddRepositories();
 builder.Services.AddApplication();
 builder.Services.AddServices();
+builder.Services.AddRealTime();
 builder.Services.AddAdminDashboardServices();
 builder.Services.AddCommonServices();
 
