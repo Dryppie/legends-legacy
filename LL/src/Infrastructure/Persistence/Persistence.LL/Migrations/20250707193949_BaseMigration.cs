@@ -63,7 +63,8 @@ namespace Persistence.LL.Migrations
                     IsGuest = table.Column<bool>(type: "boolean", nullable: false),
                     EmailConfirmed = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    UpdatedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    UpdatedUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsNameEdited = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -464,8 +465,12 @@ namespace Persistence.LL.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     CharacterAId = table.Column<Guid>(type: "uuid", nullable: false),
                     CharacterAName = table.Column<string>(type: "text", nullable: false),
+                    CharacterARatingBefore = table.Column<int>(type: "integer", nullable: false),
+                    CharacterARatingAfter = table.Column<int>(type: "integer", nullable: false),
                     CharacterBId = table.Column<Guid>(type: "uuid", nullable: false),
                     CharacterBName = table.Column<string>(type: "text", nullable: false),
+                    CharacterBRatingBefore = table.Column<int>(type: "integer", nullable: false),
+                    CharacterBRatingAfter = table.Column<int>(type: "integer", nullable: false),
                     WinnerId = table.Column<Guid>(type: "uuid", nullable: true),
                     WinnerName = table.Column<string>(type: "text", nullable: false),
                     PlayedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
@@ -648,6 +653,25 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "GuildBuildingUpgrade",
+                columns: table => new
+                {
+                    GuildId = table.Column<Guid>(type: "uuid", nullable: false),
+                    BuildingUpgradeDefinitionId = table.Column<string>(type: "text", nullable: false),
+                    Level = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GuildBuildingUpgrade", x => new { x.GuildId, x.BuildingUpgradeDefinitionId });
+                    table.ForeignKey(
+                        name: "FK_GuildBuildingUpgrade_Guilds_GuildId",
+                        column: x => x.GuildId,
+                        principalTable: "Guilds",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "GuildInvites",
                 columns: table => new
                 {
@@ -697,6 +721,25 @@ namespace Persistence.LL.Migrations
                         principalTable: "Guilds",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GuildResource",
+                columns: table => new
+                {
+                    GuildId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Resource = table.Column<int>(type: "integer", nullable: false),
+                    Amount = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GuildResource", x => new { x.GuildId, x.Resource });
+                    table.ForeignKey(
+                        name: "FK_GuildResource_Guilds_GuildId",
+                        column: x => x.GuildId,
+                        principalTable: "Guilds",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -952,10 +995,16 @@ namespace Persistence.LL.Migrations
                 name: "GatheringNodes");
 
             migrationBuilder.DropTable(
+                name: "GuildBuildingUpgrade");
+
+            migrationBuilder.DropTable(
                 name: "GuildInvites");
 
             migrationBuilder.DropTable(
                 name: "GuildMembers");
+
+            migrationBuilder.DropTable(
+                name: "GuildResource");
 
             migrationBuilder.DropTable(
                 name: "InventoryItems");

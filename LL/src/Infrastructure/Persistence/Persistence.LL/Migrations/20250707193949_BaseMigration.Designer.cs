@@ -13,8 +13,8 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250616115910_EditCharacterName")]
-    partial class EditCharacterName
+    [Migration("20250707193949_BaseMigration")]
+    partial class BaseMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -155,12 +155,24 @@ namespace Persistence.LL.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("CharacterARatingAfter")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CharacterARatingBefore")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("CharacterBId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("CharacterBName")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("CharacterBRatingAfter")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CharacterBRatingBefore")
+                        .HasColumnType("integer");
 
                     b.Property<DateTimeOffset>("PlayedAt")
                         .HasColumnType("timestamp with time zone");
@@ -293,6 +305,22 @@ namespace Persistence.LL.Migrations
                     b.ToTable("Guilds");
                 });
 
+            modelBuilder.Entity("Domain.Models.Guilds.GuildBuildingUpgrade", b =>
+                {
+                    b.Property<Guid>("GuildId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BuildingUpgradeDefinitionId")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer");
+
+                    b.HasKey("GuildId", "BuildingUpgradeDefinitionId");
+
+                    b.ToTable("GuildBuildingUpgrade");
+                });
+
             modelBuilder.Entity("Domain.Models.Guilds.GuildInvite", b =>
                 {
                     b.Property<Guid>("GuildId")
@@ -333,6 +361,22 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("CharacterId");
 
                     b.ToTable("GuildMembers");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.GuildResource", b =>
+                {
+                    b.Property<Guid>("GuildId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Resource")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("GuildId", "Resource");
+
+                    b.ToTable("GuildResource");
                 });
 
             modelBuilder.Entity("Domain.Models.Inventories.Inventory", b =>
@@ -1069,6 +1113,17 @@ namespace Persistence.LL.Migrations
                     b.Navigation("Owner");
                 });
 
+            modelBuilder.Entity("Domain.Models.Guilds.GuildBuildingUpgrade", b =>
+                {
+                    b.HasOne("Domain.Models.Guilds.Guild", "Guild")
+                        .WithMany("GuildBuildingUpgrades")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
+                });
+
             modelBuilder.Entity("Domain.Models.Guilds.GuildInvite", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Characters.Character", "Character")
@@ -1105,6 +1160,15 @@ namespace Persistence.LL.Migrations
                     b.Navigation("Character");
 
                     b.Navigation("Guild");
+                });
+
+            modelBuilder.Entity("Domain.Models.Guilds.GuildResource", b =>
+                {
+                    b.HasOne("Domain.Models.Guilds.Guild", null)
+                        .WithMany("Resources")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.Models.Inventories.Inventory", b =>
@@ -1391,9 +1455,13 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.Guilds.Guild", b =>
                 {
+                    b.Navigation("GuildBuildingUpgrades");
+
                     b.Navigation("Invites");
 
                     b.Navigation("Members");
+
+                    b.Navigation("Resources");
                 });
 
             modelBuilder.Entity("Domain.Models.Inventories.Inventory", b =>
