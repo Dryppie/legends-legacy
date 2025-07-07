@@ -120,9 +120,7 @@ export class SidebarComponent implements OnInit {
     else {
       let extendedPath = '';
       if (actionType === CharacterActionType.Gathering) {
-        extendedPath =
-          'gathering/' +
-          action.gatheringActionDetails!.professionType.toLowerCase();
+        extendedPath = 'gathering';
       } else {
         const equipmentType = (
           action.craftingActionDetails?.craftingQueueItems[0].equipmentInstance
