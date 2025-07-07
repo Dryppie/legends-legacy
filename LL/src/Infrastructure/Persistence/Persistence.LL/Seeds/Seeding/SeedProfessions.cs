@@ -96,7 +96,7 @@ public static class SeedProfessions
                 new LootTableItem { Id = Guid.NewGuid(), ItemId = WOOD_ID, Weight = 20 },
                 //new LootTableItem { Id = Guid.NewGuid(), ItemId = STICKY_SAP_ID, Weight = 20 }
             ],
-            tableWeight: 60); // 16 %
+            tableWeight: 60); // 12 %
 
         //var willowUncommon = MakeItemTable(
         //    [

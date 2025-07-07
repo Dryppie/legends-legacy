@@ -5,7 +5,6 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Inventories;
-using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.Users;
