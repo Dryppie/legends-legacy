@@ -151,8 +151,8 @@ export class ProfessionsService {
 
   getWoodcuttingNode(): GatheringNode {
     const gatheringNode: GatheringNode = {
-      id: 'woodcutting_young_willow',
-      name: 'Yggdrasil',
+      id: 'woodcutting_tree',
+      name: 'Tree',
       levelRequirement: 1,
       description:
         'A slender, supple tree often found near rivers. Its soft wood is easy to cut, making it ideal for novice woodcutters.',
@@ -164,8 +164,8 @@ export class ProfessionsService {
 
   getMiningNode(): GatheringNode {
     const gatheringNode: GatheringNode = {
-      id: 'mining_slate_shard',
-      name: 'Primordial Vein',
+      id: 'mining_vein',
+      name: 'Vein',
       levelRequirement: 1,
       description:
         'Loose chunks of brittle slate scattered near the surface. Ideal for beginners learning the basics of mining.',
