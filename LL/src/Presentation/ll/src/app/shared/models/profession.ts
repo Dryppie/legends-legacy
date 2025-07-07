@@ -10,7 +10,7 @@ export interface Profession {
 }
 
 export interface GatheringProfession extends Profession {
-  gatheringNodes: GatheringNode[];
+  gatheringNode: GatheringNode;
 }
 
 export interface CraftingProfession extends Profession {

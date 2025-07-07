@@ -16,6 +16,10 @@ import { ProfessionCardComponent } from '../../../../shared/components/professio
 import { GatheringProfession } from '../../../../shared/models/profession';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CharacterActionsStateService } from '../../../../core/services/api/character-actions/character-actions.state.service';
+import {
+  CharacterProfession,
+  ProfessionType,
+} from '../../../../shared/models/Dtos/characterProfession';
 
 @Component({
   selector: 'app-gathering',
@@ -37,6 +41,7 @@ export class GatheringComponent implements OnInit {
 
   readonly currentAction = this.characterActionService.currentAction;
   readonly characterProfessions = this.professionService.characterProfessions;
+  readonly gatheringProfessions = signal<GatheringProfession[]>([]);
 
   readonly characterProfession = computed(() =>
     this.characterProfessions().find(
@@ -52,10 +57,8 @@ export class GatheringComponent implements OnInit {
   constructor() {
     effect(
       () => {
-        const id = this.professionId();
-        if (id) {
-          this.getProfessionDetails(id);
-        }
+        this.characterProfessions();
+        this.loadAllGatheringProfessions();
       },
       { allowSignalWrites: true },
     );
@@ -65,11 +68,16 @@ export class GatheringComponent implements OnInit {
     this.professionService.refresh();
   }
 
-  getProfessionDetails(id: string): void {
-    const prof = this.professionService.getProfessionById(
-      id,
-    ) as GatheringProfession;
-    this.profession.set(prof);
-    this.gatheringNodes.set(prof.gatheringNodes);
+  getCharacterProfessionFor(
+    professionType: ProfessionType,
+  ): CharacterProfession {
+    return this.characterProfessions().find(
+      (cp) => cp.professionType === professionType,
+    )!;
+  }
+
+  loadAllGatheringProfessions(): void {
+    const professions = this.professionService.getGatheringProfessionsList();
+    this.gatheringProfessions.set(professions);
   }
 }

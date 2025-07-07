@@ -10,11 +10,11 @@ export const PROFESSIONS_ROUTES: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'gathering/mining',
+        redirectTo: 'gathering',
         pathMatch: 'full',
       },
       {
-        path: 'gathering/:id',
+        path: 'gathering',
         component: GatheringComponent,
       },
       {
