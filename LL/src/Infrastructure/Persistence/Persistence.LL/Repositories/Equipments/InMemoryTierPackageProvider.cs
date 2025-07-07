@@ -31,7 +31,7 @@ public class InMemoryTierPackageProvider : ITierPackageProvider
     // -----------------------------------------------------------------------
     private TierPackage BuildRandomSingleStatPackage(Rarity rarity, int itemLevel = 1)
     {
-        var attr = Pick(EquipmentAttributeRules.Rules.Keys.ToArray());
+        var attr = Pick([.. EquipmentAttributeRules.Rules.Keys]);
         var rule = EquipmentAttributeRules.Rules[attr];
 
         // Scale if requested
@@ -46,15 +46,15 @@ public class InMemoryTierPackageProvider : ITierPackageProvider
         var amount = Next(min, max);
 
         var mod = new ItemAttributeModifier(attr, amount, rule.ModType);
-        return new TierPackage(rarity, new[] { mod });
+        return new TierPackage(rarity, [mod]);
     }
 
     // -----------------------------------------------------------------------
     private int Next(int inclusiveMin, int inclusiveMax) =>
         _rnd.Next(inclusiveMin, inclusiveMax + 1);
 
-    private T Pick<T>(IReadOnlyList<T> src) =>
-        src[_rnd.Next(src.Count)];
+    private AttributeType Pick(AttributeType[] src) =>
+        src[_rnd.Next(src.Length)];
 }
 
 public static class AttributeLists
