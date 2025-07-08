@@ -13,7 +13,7 @@
       "equipmentType": "Head",
       "attributeModifiers": [
         {
-          "attributeType": "Willpower",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         },
@@ -24,7 +24,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -100,13 +100,13 @@
       "equipmentType": "Chest",
       "attributeModifiers": [
         {
-          "attributeType": "Constitution",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -182,13 +182,13 @@
       "equipmentType": "Legs",
       "attributeModifiers": [
         {
-          "attributeType": "Endurance",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -264,7 +264,7 @@
       "equipmentType": "Head",
       "attributeModifiers": [
         {
-          "attributeType": "Instinct",
+          "attributeType": "MaxHealth",
           "amount": 4,
           "modifierType": "Flat"
         },
@@ -275,7 +275,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -351,13 +351,13 @@
       "equipmentType": "Chest",
       "attributeModifiers": [
         {
-          "attributeType": "Strength",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -433,13 +433,13 @@
       "equipmentType": "Legs",
       "attributeModifiers": [
         {
-          "attributeType": "FightingSpirit",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -515,7 +515,7 @@
       "equipmentType": "Head",
       "attributeModifiers": [
         {
-          "attributeType": "Luck",
+          "attributeType": "MaxHealth",
           "amount": 4,
           "modifierType": "Flat"
         },
@@ -526,7 +526,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -602,13 +602,13 @@
       "equipmentType": "Chest",
       "attributeModifiers": [
         {
-          "attributeType": "Dexterity",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -684,13 +684,13 @@
       "equipmentType": "Legs",
       "attributeModifiers": [
         {
-          "attributeType": "Agility",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -766,7 +766,7 @@
       "equipmentType": "Head",
       "attributeModifiers": [
         {
-          "attributeType": "Perception",
+          "attributeType": "MaxHealth",
           "amount": 4,
           "modifierType": "Flat"
         },
@@ -777,7 +777,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -853,13 +853,13 @@
       "equipmentType": "Chest",
       "attributeModifiers": [
         {
-          "attributeType": "Intelligence",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -935,13 +935,13 @@
       "equipmentType": "Legs",
       "attributeModifiers": [
         {
-          "attributeType": "Wisdom",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1023,7 +1023,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1086,13 +1086,13 @@
       "equipmentType": "Necklace",
       "attributeModifiers": [
         {
-          "attributeType": "Agility",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1161,7 +1161,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1230,7 +1230,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1293,13 +1293,13 @@
       "equipmentType": "Ring",
       "attributeModifiers": [
         {
-          "attributeType": "Perception",
+          "attributeType": "MaxHealth",
           "amount": 5,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1368,7 +1368,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1431,13 +1431,13 @@
       "equipmentType": "Relic",
       "attributeModifiers": [
         {
-          "attributeType": "Perception",
+          "attributeType": "MaxHealth",
           "amount": 4,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1493,7 +1493,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1549,7 +1549,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1599,18 +1599,18 @@
       "equipmentType": "OneHanded",
       "attributeModifiers": [
         {
-          "attributeType": "FightingSpirit",
+          "attributeType": "MaxHealth",
           "amount": 2,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Strength",
+          "attributeType": "MaxHealth",
           "amount": 1,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1686,13 +1686,13 @@
       "equipmentType": "OneHanded",
       "attributeModifiers": [
         {
-          "attributeType": "Strength",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1768,13 +1768,13 @@
       "equipmentType": "OneHanded",
       "attributeModifiers": [
         {
-          "attributeType": "Endurance",
+          "attributeType": "MaxHealth",
           "amount": 4,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1850,13 +1850,13 @@
       "equipmentType": "OneHanded",
       "attributeModifiers": [
         {
-          "attributeType": "Dexterity",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1932,18 +1932,18 @@
       "equipmentType": "TwoHanded",
       "attributeModifiers": [
         {
-          "attributeType": "FightingSpirit",
+          "attributeType": "MaxHealth",
           "amount": 4,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Strength",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2019,13 +2019,13 @@
       "equipmentType": "TwoHanded",
       "attributeModifiers": [
         {
-          "attributeType": "Strength",
+          "attributeType": "MaxHealth",
           "amount": 5,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2101,18 +2101,18 @@
       "equipmentType": "TwoHanded",
       "attributeModifiers": [
         {
-          "attributeType": "Endurance",
+          "attributeType": "MaxHealth",
           "amount": 4,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Willpower",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2188,18 +2188,18 @@
       "equipmentType": "TwoHanded",
       "attributeModifiers": [
         {
-          "attributeType": "FightingSpirit",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Dexterity",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2286,7 +2286,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2373,7 +2373,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2449,13 +2449,13 @@
       "equipmentType": "TwoHanded",
       "attributeModifiers": [
         {
-          "attributeType": "Intelligence",
+          "attributeType": "MaxHealth",
           "amount": 4,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 5,
-      "scalingAttribute": "Intelligence",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -2531,13 +2531,13 @@
       "equipmentType": "OffHand",
       "attributeModifiers": [
         {
-          "attributeType": "Intelligence",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2613,13 +2613,13 @@
       "equipmentType": "OneHanded",
       "attributeModifiers": [
         {
-          "attributeType": "Wisdom",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2695,13 +2695,13 @@
       "equipmentType": "OffHand",
       "attributeModifiers": [
         {
-          "attributeType": "Wisdom",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2777,13 +2777,13 @@
       "equipmentType": "TwoHanded",
       "attributeModifiers": [
         {
-          "attributeType": "Agility",
+          "attributeType": "MaxHealth",
           "amount": 5,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2859,18 +2859,18 @@
       "equipmentType": "TwoHanded",
       "attributeModifiers": [
         {
-          "attributeType": "Agility",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Willpower",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2946,7 +2946,7 @@
       "equipmentType": "TwoHanded",
       "attributeModifiers": [
         {
-          "attributeType": "FightingSpirit",
+          "attributeType": "MaxHealth",
           "amount": 3,
           "modifierType": "Flat"
         },
@@ -2957,7 +2957,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Luck",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -3033,7 +3033,7 @@
       "equipmentType": "Head",
       "attributeModifiers": [
         {
-          "attributeType": "Willpower",
+          "attributeType": "MaxHealth",
           "amount": 12,
           "modifierType": "Flat"
         },
@@ -3044,7 +3044,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3120,13 +3120,13 @@
       "equipmentType": "Chest",
       "attributeModifiers": [
         {
-          "attributeType": "Constitution",
+          "attributeType": "MaxHealth",
           "amount": 22,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3202,13 +3202,13 @@
       "equipmentType": "Legs",
       "attributeModifiers": [
         {
-          "attributeType": "Endurance",
+          "attributeType": "MaxHealth",
           "amount": 18,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3284,18 +3284,18 @@
       "equipmentType": "Head",
       "attributeModifiers": [
         {
-          "attributeType": "FightingSpirit",
+          "attributeType": "MaxHealth",
           "amount": 13,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Instinct",
+          "attributeType": "MaxHealth",
           "amount": 9,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3371,18 +3371,18 @@
       "equipmentType": "Chest",
       "attributeModifiers": [
         {
-          "attributeType": "Willpower",
+          "attributeType": "MaxHealth",
           "amount": 6,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Strength",
+          "attributeType": "MaxHealth",
           "amount": 15,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3458,13 +3458,13 @@
       "equipmentType": "Legs",
       "attributeModifiers": [
         {
-          "attributeType": "Endurance",
+          "attributeType": "MaxHealth",
           "amount": 18,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3540,18 +3540,18 @@
       "equipmentType": "Head",
       "attributeModifiers": [
         {
-          "attributeType": "Dexterity",
+          "attributeType": "MaxHealth",
           "amount": 2,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Luck",
+          "attributeType": "MaxHealth",
           "amount": 11,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3627,13 +3627,13 @@
       "equipmentType": "Chest",
       "attributeModifiers": [
         {
-          "attributeType": "Dexterity",
+          "attributeType": "MaxHealth",
           "amount": 23,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3709,13 +3709,13 @@
       "equipmentType": "Legs",
       "attributeModifiers": [
         {
-          "attributeType": "Agility",
+          "attributeType": "MaxHealth",
           "amount": 17,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3791,7 +3791,7 @@
       "equipmentType": "Head",
       "attributeModifiers": [
         {
-          "attributeType": "Wisdom",
+          "attributeType": "MaxHealth",
           "amount": 9,
           "modifierType": "Flat"
         },
@@ -3802,7 +3802,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3878,13 +3878,13 @@
       "equipmentType": "Chest",
       "attributeModifiers": [
         {
-          "attributeType": "Intelligence",
+          "attributeType": "MaxHealth",
           "amount": 25,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3960,7 +3960,7 @@
       "equipmentType": "Legs",
       "attributeModifiers": [
         {
-          "attributeType": "Perception",
+          "attributeType": "MaxHealth",
           "amount": 14,
           "modifierType": "Flat"
         },
@@ -3971,7 +3971,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -4053,7 +4053,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -4116,7 +4116,7 @@
       "equipmentType": "Necklace",
       "attributeModifiers": [
         {
-          "attributeType": "Agility",
+          "attributeType": "MaxHealth",
           "amount": 16,
           "modifierType": "Flat"
         },
@@ -4127,7 +4127,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -4190,7 +4190,7 @@
       "equipmentType": "Necklace",
       "attributeModifiers": [
         {
-          "attributeType": "Endurance",
+          "attributeType": "MaxHealth",
           "amount": 16,
           "modifierType": "Flat"
         },
@@ -4201,7 +4201,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -4270,7 +4270,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -4333,13 +4333,13 @@
       "equipmentType": "Ring",
       "attributeModifiers": [
         {
-          "attributeType": "Perception",
+          "attributeType": "MaxHealth",
           "amount": 15,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -4413,7 +4413,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -4476,18 +4476,18 @@
       "equipmentType": "Relic",
       "attributeModifiers": [
         {
-          "attributeType": "Perception",
+          "attributeType": "MaxHealth",
           "amount": 7,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Wisdom",
+          "attributeType": "MaxHealth",
           "amount": 9,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -4543,7 +4543,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -4599,7 +4599,7 @@
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -4649,18 +4649,18 @@
       "equipmentType": "OneHanded",
       "attributeModifiers": [
         {
-          "attributeType": "FightingSpirit",
+          "attributeType": "MaxHealth",
           "amount": 11,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Strength",
+          "attributeType": "MaxHealth",
           "amount": 4,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -4736,13 +4736,13 @@
       "equipmentType": "OneHanded",
       "attributeModifiers": [
         {
-          "attributeType": "Strength",
+          "attributeType": "MaxHealth",
           "amount": 14,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -4818,13 +4818,13 @@
       "equipmentType": "OneHanded",
       "attributeModifiers": [
         {
-          "attributeType": "Endurance",
+          "attributeType": "MaxHealth",
           "amount": 16,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -4900,13 +4900,13 @@
       "equipmentType": "OneHanded",
       "attributeModifiers": [
         {
-          "attributeType": "Dexterity",
+          "attributeType": "MaxHealth",
           "amount": 15,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -4982,18 +4982,18 @@
       "equipmentType": "TwoHanded",
       "attributeModifiers": [
         {
-          "attributeType": "FightingSpirit",
+          "attributeType": "MaxHealth",
           "amount": 22,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Strength",
+          "attributeType": "MaxHealth",
           "amount": 7,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5069,13 +5069,13 @@
       "equipmentType": "TwoHanded",
       "attributeModifiers": [
         {
-          "attributeType": "Strength",
+          "attributeType": "MaxHealth",
           "amount": 27,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5151,13 +5151,13 @@
       "equipmentType": "TwoHanded",
       "attributeModifiers": [
         {
-          "attributeType": "Endurance",
+          "attributeType": "MaxHealth",
           "amount": 29,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5233,18 +5233,18 @@
       "equipmentType": "TwoHanded",
       "attributeModifiers": [
         {
-          "attributeType": "FightingSpirit",
+          "attributeType": "MaxHealth",
           "amount": 16,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Dexterity",
+          "attributeType": "MaxHealth",
           "amount": 15,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5331,7 +5331,7 @@
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5418,7 +5418,7 @@
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5494,13 +5494,13 @@
       "equipmentType": "TwoHanded",
       "attributeModifiers": [
         {
-          "attributeType": "Intelligence",
+          "attributeType": "MaxHealth",
           "amount": 27,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5576,7 +5576,7 @@
       "equipmentType": "OffHand",
       "attributeModifiers": [
         {
-          "attributeType": "Intelligence",
+          "attributeType": "MaxHealth",
           "amount": 12,
           "modifierType": "Flat"
         },
@@ -5587,7 +5587,7 @@
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5663,13 +5663,13 @@
       "equipmentType": "OneHanded",
       "attributeModifiers": [
         {
-          "attributeType": "Wisdom",
+          "attributeType": "MaxHealth",
           "amount": 14,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5745,7 +5745,7 @@
       "equipmentType": "OffHand",
       "attributeModifiers": [
         {
-          "attributeType": "Wisdom",
+          "attributeType": "MaxHealth",
           "amount": 12,
           "modifierType": "Flat"
         },
@@ -5756,7 +5756,7 @@
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5832,13 +5832,13 @@
       "equipmentType": "TwoHanded",
       "attributeModifiers": [
         {
-          "attributeType": "Agility",
+          "attributeType": "MaxHealth",
           "amount": 26,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5914,18 +5914,18 @@
       "equipmentType": "TwoHanded",
       "attributeModifiers": [
         {
-          "attributeType": "Agility",
+          "attributeType": "MaxHealth",
           "amount": 12,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Willpower",
+          "attributeType": "MaxHealth",
           "amount": 17,
           "modifierType": "Flat"
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -6001,7 +6001,7 @@
       "equipmentType": "TwoHanded",
       "attributeModifiers": [
         {
-          "attributeType": "FightingSpirit",
+          "attributeType": "MaxHealth",
           "amount": 14,
           "modifierType": "Flat"
         },
@@ -6012,7 +6012,7 @@
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": "Strength",
+      "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
     "quantity": 1,

@@ -11,7 +11,7 @@
             "Action": {
               "Type": "Damage",
               "Amount": 5,
-              "ScalingAttribute": "Dexterity",
+              "ScalingAttribute": "AttackPower",
               "ScalingMultiplier": 0.15
             },
             "Duration": { "Type": "NoDuration" },
@@ -191,7 +191,7 @@
   {
     "Id": "unstableColorsBuff",
     "Name": "Unstable Colors",
-    "Description": "Increases Strength and Intelligence by 20 for 10 seconds.",
+    "Description": "Increases Attack Power and Spell Power by 20 for 10 seconds.",
     "Triggers": [
       {
         "Event": "OnStatusAppliedIfThis",
@@ -199,7 +199,7 @@
           {
             "Action": {
               "Type": "ModifyAttribute",
-              "Attribute": "Intelligence",
+              "Attribute": "SpellPower",
               "Amount": 20,
               "ModifierType": "Flat"
             },
@@ -208,12 +208,12 @@
               "Duration": 100
             },
             "Targeting": "Self",
-            "Log": "{Target}'s mind surges with color, gaining 20 Intelligence."
+            "Log": "{Target}'s mind surges with color, gaining 20 Spell Power."
           },
           {
             "Action": {
               "Type": "ModifyAttribute",
-              "Attribute": "Strength",
+              "Attribute": "AttackPower",
               "Amount": 20,
               "ModifierType": "Flat"
             },
@@ -222,7 +222,7 @@
               "Duration": 100
             },
             "Targeting": "Self",
-            "Log": "{Target}'s body glows with power, gaining 20 Strength."
+            "Log": "{Target}'s body glows with power, gaining 20 Attack Power."
           }
         ]
       }
@@ -431,7 +431,7 @@
             "Action": {
               "Type": "Damage",
               "Amount": 26,
-              "ScalingAttribute": "FightingSpirit",
+              "ScalingAttribute": "AttackPower",
               "ScalingMultiplier": 0.3
             },
             "Targeting": "Self",
@@ -499,7 +499,7 @@
             "Action": {
               "Type": "Damage",
               "Amount": 23,
-              "ScalingAttribute": "Dexterity",
+              "ScalingAttribute": "AttackPower",
               "ScalingMultiplier": 0.25
             },
             "Duration": { "Type": "NoDuration" },
@@ -562,7 +562,7 @@
   },
   {
     "Id": "drainingClawsDebuff",
-    "Name": "Sapped Strength",
+    "Name": "Sapped Attack Power",
     "Description": "Attack Power reduced by 24.",
     "Triggers": [
       {
@@ -572,7 +572,7 @@
             "Action": {
               "Type": "Damage",
               "Amount": 31,
-              "ScalingAttribute": "Strength",
+              "ScalingAttribute": "AttackPower",
               "ScalingMultiplier": 0.25
             },
             "Targeting": "Self",
@@ -584,7 +584,7 @@
           {
             "Action": {
               "Type": "ModifyAttribute",
-              "Attribute": "Strength",
+              "Attribute": "AttackPower",
               "Amount": -24,
               "ModifierType": "Flat",
               "Stackable": false
@@ -594,7 +594,7 @@
               "Duration": 100
             },
             "Targeting": "Self",
-            "Log": "{Target}'s strength is sapped, reduced by 24."
+            "Log": "{Target}'s Attack Power is sapped, reduced by 24."
           }
         ]
       }

@@ -8,7 +8,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -20,7 +20,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -32,7 +32,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -44,7 +44,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -56,7 +56,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -68,7 +68,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -80,7 +80,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -92,7 +92,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -104,7 +104,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -116,7 +116,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -128,7 +128,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -140,7 +140,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -152,7 +152,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -164,7 +164,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -176,7 +176,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -188,7 +188,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -200,7 +200,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -212,7 +212,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -224,7 +224,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -236,7 +236,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -248,7 +248,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -260,7 +260,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -272,7 +272,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -284,7 +284,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -296,7 +296,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -308,7 +308,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -320,7 +320,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -332,7 +332,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -344,7 +344,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -356,7 +356,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -368,7 +368,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -380,7 +380,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -392,7 +392,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -404,7 +404,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -416,7 +416,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -428,7 +428,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -440,7 +440,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -452,7 +452,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -464,7 +464,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -476,7 +476,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -488,7 +488,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -500,7 +500,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -512,7 +512,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -524,7 +524,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -536,7 +536,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -548,7 +548,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -560,7 +560,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -572,7 +572,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -584,7 +584,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -596,7 +596,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -608,7 +608,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -620,7 +620,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -632,7 +632,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -644,7 +644,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -656,7 +656,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -668,7 +668,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -680,7 +680,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -692,7 +692,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -704,7 +704,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -716,7 +716,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -728,7 +728,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -740,7 +740,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -752,7 +752,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -764,7 +764,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -776,7 +776,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -788,7 +788,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -800,7 +800,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -812,7 +812,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -824,7 +824,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -836,7 +836,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -848,7 +848,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -860,7 +860,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -872,7 +872,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -884,7 +884,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -896,7 +896,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -908,7 +908,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -920,7 +920,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -932,7 +932,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -944,7 +944,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -956,7 +956,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -968,7 +968,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -980,7 +980,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -992,7 +992,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1004,7 +1004,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1016,7 +1016,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1028,7 +1028,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1040,7 +1040,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1052,7 +1052,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1064,7 +1064,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1076,7 +1076,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1088,7 +1088,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1100,7 +1100,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1112,7 +1112,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1124,7 +1124,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1136,7 +1136,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1148,7 +1148,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1160,7 +1160,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1172,7 +1172,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1184,7 +1184,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1196,7 +1196,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1208,7 +1208,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1220,7 +1220,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1232,7 +1232,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1244,7 +1244,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1256,7 +1256,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1268,7 +1268,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1280,7 +1280,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1292,7 +1292,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1304,7 +1304,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1316,7 +1316,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1328,7 +1328,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1340,7 +1340,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1352,7 +1352,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1364,7 +1364,7 @@
     "equipmentType": "Head",
     "attributeModifiers": [],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1377,7 +1377,7 @@
     "attributeModifiers": [
       {
         "id": "fa253747-8097-47bf-b3c1-d86510a6894e",
-        "attributeType": "Willpower",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       },
@@ -1389,7 +1389,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1402,13 +1402,13 @@
     "attributeModifiers": [
       {
         "id": "6bf4e5e8-49eb-4f86-bf2c-e3602ea066c8",
-        "attributeType": "Constitution",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1421,13 +1421,13 @@
     "attributeModifiers": [
       {
         "id": "5e806cc6-98c9-4673-81f9-8b94d1883700",
-        "attributeType": "Endurance",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1440,7 +1440,7 @@
     "attributeModifiers": [
       {
         "id": "647795c0-faf8-476b-9ef7-c026e3621da9",
-        "attributeType": "Instinct",
+        "attributeType": "MaxHealth",
         "amount": 4,
         "modifierType": "Flat"
       },
@@ -1452,7 +1452,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1465,13 +1465,13 @@
     "attributeModifiers": [
       {
         "id": "ab7c1d68-caf8-488e-a565-c14a6a59a5ee",
-        "attributeType": "Strength",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1484,13 +1484,13 @@
     "attributeModifiers": [
       {
         "id": "f3e3534d-aa32-4f46-893a-5ba5ecd54fa7",
-        "attributeType": "FightingSpirit",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1503,7 +1503,7 @@
     "attributeModifiers": [
       {
         "id": "92eaeee1-8a7e-4ba7-8890-e8be9073ada5",
-        "attributeType": "Luck",
+        "attributeType": "MaxHealth",
         "amount": 4,
         "modifierType": "Flat"
       },
@@ -1515,7 +1515,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1528,13 +1528,13 @@
     "attributeModifiers": [
       {
         "id": "6200332a-7797-4b8a-bb91-77f1336278d5",
-        "attributeType": "Dexterity",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1547,13 +1547,13 @@
     "attributeModifiers": [
       {
         "id": "c93302e5-372d-442e-a1c9-7746ad21ad6c",
-        "attributeType": "Agility",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1566,7 +1566,7 @@
     "attributeModifiers": [
       {
         "id": "80543d88-9298-4ec1-aa99-4da85faa68b5",
-        "attributeType": "Perception",
+        "attributeType": "MaxHealth",
         "amount": 4,
         "modifierType": "Flat"
       },
@@ -1578,7 +1578,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1591,13 +1591,13 @@
     "attributeModifiers": [
       {
         "id": "75b37cb2-6356-4f7f-a9d7-5538a65c75bc",
-        "attributeType": "Intelligence",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1610,13 +1610,13 @@
     "attributeModifiers": [
       {
         "id": "5e6b9978-62f0-45b7-a47a-ceb5c22d8d45",
-        "attributeType": "Wisdom",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1635,7 +1635,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1648,13 +1648,13 @@
     "attributeModifiers": [
       {
         "id": "0cb5ce0d-e31c-4f2b-bc31-c81ab17326a8",
-        "attributeType": "Agility",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1673,7 +1673,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1692,7 +1692,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1705,13 +1705,13 @@
     "attributeModifiers": [
       {
         "id": "a5a9cd97-bcc3-414c-95aa-737e43d35883",
-        "attributeType": "Perception",
+        "attributeType": "MaxHealth",
         "amount": 5,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1730,7 +1730,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1743,13 +1743,13 @@
     "attributeModifiers": [
       {
         "id": "b8bc4ec7-1c7b-426a-8b22-1040328a3621",
-        "attributeType": "Perception",
+        "attributeType": "MaxHealth",
         "amount": 4,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1768,7 +1768,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1787,7 +1787,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1800,19 +1800,19 @@
     "attributeModifiers": [
       {
         "id": "0db00f71-c8ed-48b5-ac50-00afd441ccde",
-        "attributeType": "FightingSpirit",
+        "attributeType": "MaxHealth",
         "amount": 2,
         "modifierType": "Flat"
       },
       {
         "id": "9aee1f92-e1b5-4e4d-89fb-2b2b61caa9e0",
-        "attributeType": "Strength",
+        "attributeType": "MaxHealth",
         "amount": 1,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1825,13 +1825,13 @@
     "attributeModifiers": [
       {
         "id": "6da90889-7bdd-4c0e-a1aa-8ab3c06f7dc6",
-        "attributeType": "Strength",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1844,13 +1844,13 @@
     "attributeModifiers": [
       {
         "id": "d4a52fc8-24d6-42a8-b5e5-2dadad182138",
-        "attributeType": "Endurance",
+        "attributeType": "MaxHealth",
         "amount": 4,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1863,13 +1863,13 @@
     "attributeModifiers": [
       {
         "id": "2a493ec2-83ab-41d4-8e31-09c95d892284",
-        "attributeType": "Dexterity",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1882,19 +1882,19 @@
     "attributeModifiers": [
       {
         "id": "4ba260d1-91f5-42cd-8686-cb8f5e566d52",
-        "attributeType": "FightingSpirit",
+        "attributeType": "MaxHealth",
         "amount": 4,
         "modifierType": "Flat"
       },
       {
         "id": "642a813a-1121-447c-b4b5-a758c500a0c0",
-        "attributeType": "Strength",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1907,13 +1907,13 @@
     "attributeModifiers": [
       {
         "id": "6b6bfbda-03c3-4310-b9dd-9a70fd325e0f",
-        "attributeType": "Strength",
+        "attributeType": "MaxHealth",
         "amount": 5,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1926,19 +1926,19 @@
     "attributeModifiers": [
       {
         "id": "1a4d0a25-49b2-45ba-a956-742681c74063",
-        "attributeType": "Endurance",
+        "attributeType": "MaxHealth",
         "amount": 4,
         "modifierType": "Flat"
       },
       {
         "id": "a2e877fb-50ed-463a-a619-511339261c08",
-        "attributeType": "Willpower",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1951,19 +1951,19 @@
     "attributeModifiers": [
       {
         "id": "b751199e-e6b1-4ee5-ae71-128497a6c9af",
-        "attributeType": "FightingSpirit",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       },
       {
         "id": "58b302f8-4a55-447e-b9ee-c504cbcb1541",
-        "attributeType": "Dexterity",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -1988,7 +1988,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -2013,7 +2013,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -2026,13 +2026,13 @@
     "attributeModifiers": [
       {
         "id": "c499f044-fac4-4390-b1bc-25cfa7150f87",
-        "attributeType": "Intelligence",
+        "attributeType": "MaxHealth",
         "amount": 4,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 5,
-    "scalingAttribute": "Intelligence",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
   {
@@ -2045,13 +2045,13 @@
     "attributeModifiers": [
       {
         "id": "975096c9-857e-4d37-b5a2-412ac40bb953",
-        "attributeType": "Intelligence",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -2064,13 +2064,13 @@
     "attributeModifiers": [
       {
         "id": "94caa597-a420-4865-83ec-0064e14b86a1",
-        "attributeType": "Wisdom",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -2083,13 +2083,13 @@
     "attributeModifiers": [
       {
         "id": "b45512cb-21b4-4c9d-83c8-fe54925068b0",
-        "attributeType": "Wisdom",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -2102,13 +2102,13 @@
     "attributeModifiers": [
       {
         "id": "78208f19-7d71-427f-a106-a51cfa0ec70f",
-        "attributeType": "Agility",
+        "attributeType": "MaxHealth",
         "amount": 5,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -2121,19 +2121,19 @@
     "attributeModifiers": [
       {
         "id": "cb782e21-e007-4422-95e6-3ed357c7959c",
-        "attributeType": "Agility",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       },
       {
         "id": "f78af5bc-c669-46cc-b96a-bb586b222a6d",
-        "attributeType": "Willpower",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -2146,7 +2146,7 @@
     "attributeModifiers": [
       {
         "id": "de10fd22-b1d9-428b-910d-7c0032b5a67c",
-        "attributeType": "FightingSpirit",
+        "attributeType": "MaxHealth",
         "amount": 3,
         "modifierType": "Flat"
       },
@@ -2158,7 +2158,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Luck",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
@@ -2171,7 +2171,7 @@
     "attributeModifiers": [
       {
         "id": "fb0c1bb5-1d2f-4b87-85c7-239ac6db86e6",
-        "attributeType": "Willpower",
+        "attributeType": "MaxHealth",
         "amount": 12,
         "modifierType": "Flat"
       },
@@ -2183,7 +2183,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
   {
@@ -2196,13 +2196,13 @@
     "attributeModifiers": [
       {
         "id": "01a188c0-1113-4e31-8e5c-50f6c0565460",
-        "attributeType": "Constitution",
+        "attributeType": "MaxHealth",
         "amount": 22,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
   {
@@ -2215,13 +2215,13 @@
     "attributeModifiers": [
       {
         "id": "47d7c8c9-4a35-4662-b276-8467d362e67b",
-        "attributeType": "Endurance",
+        "attributeType": "MaxHealth",
         "amount": 18,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
   {
@@ -2234,19 +2234,19 @@
     "attributeModifiers": [
       {
         "id": "fc84be67-1f43-4db3-8968-8ff403163dca",
-        "attributeType": "FightingSpirit",
+        "attributeType": "MaxHealth",
         "amount": 13,
         "modifierType": "Flat"
       },
       {
         "id": "dd7f3020-8b1b-42a4-bd46-ebd30f28772b",
-        "attributeType": "Instinct",
+        "attributeType": "MaxHealth",
         "amount": 9,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
   {
@@ -2259,19 +2259,19 @@
     "attributeModifiers": [
       {
         "id": "046aa08f-47c5-4599-a320-f0a9125d23c6",
-        "attributeType": "Willpower",
+        "attributeType": "MaxHealth",
         "amount": 6,
         "modifierType": "Flat"
       },
       {
         "id": "bbb5d5e2-3c4b-4315-9ce0-41113c2b5947",
-        "attributeType": "Strength",
+        "attributeType": "MaxHealth",
         "amount": 15,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
   {
@@ -2284,13 +2284,13 @@
     "attributeModifiers": [
       {
         "id": "bb77e062-f7ce-498f-9e04-28b067e44e4e",
-        "attributeType": "Endurance",
+        "attributeType": "MaxHealth",
         "amount": 18,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
   {
@@ -2303,19 +2303,19 @@
     "attributeModifiers": [
       {
         "id": "d26eb0c9-7867-4f60-aba3-374b0a08523b",
-        "attributeType": "Dexterity",
+        "attributeType": "MaxHealth",
         "amount": 2,
         "modifierType": "Flat"
       },
       {
         "id": "c2785682-a135-4235-80fe-e5eb5ba76b06",
-        "attributeType": "Luck",
+        "attributeType": "MaxHealth",
         "amount": 11,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
   {
@@ -2328,13 +2328,13 @@
     "attributeModifiers": [
       {
         "id": "f1823172-b66b-4ef9-9655-9d50cd11fe06",
-        "attributeType": "Dexterity",
+        "attributeType": "MaxHealth",
         "amount": 23,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
   {
@@ -2347,13 +2347,13 @@
     "attributeModifiers": [
       {
         "id": "17426d25-9f2c-41b9-804c-8a1b0d09fe2f",
-        "attributeType": "Agility",
+        "attributeType": "MaxHealth",
         "amount": 17,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
   {
@@ -2366,7 +2366,7 @@
     "attributeModifiers": [
       {
         "id": "e91fc048-3f34-4b0e-959c-04f45b89944f",
-        "attributeType": "Wisdom",
+        "attributeType": "MaxHealth",
         "amount": 9,
         "modifierType": "Flat"
       },
@@ -2378,7 +2378,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
   {
@@ -2391,13 +2391,13 @@
     "attributeModifiers": [
       {
         "id": "0346bbe0-8290-4bd2-b1c6-d7d555651de2",
-        "attributeType": "Intelligence",
+        "attributeType": "MaxHealth",
         "amount": 25,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
   {
@@ -2410,7 +2410,7 @@
     "attributeModifiers": [
       {
         "id": "48d91e18-6c19-4874-9a29-55ea18086ea4",
-        "attributeType": "Perception",
+        "attributeType": "MaxHealth",
         "amount": 14,
         "modifierType": "Flat"
       },
@@ -2422,7 +2422,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
   {
@@ -2441,7 +2441,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
   {
@@ -2454,7 +2454,7 @@
     "attributeModifiers": [
       {
         "id": "d46ff61d-6f92-42c7-9490-d5b153396c0c",
-        "attributeType": "Agility",
+        "attributeType": "MaxHealth",
         "amount": 16,
         "modifierType": "Flat"
       },
@@ -2466,7 +2466,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
   {
@@ -2479,7 +2479,7 @@
     "attributeModifiers": [
       {
         "id": "74c383d9-fdb8-48fd-ac7d-bc103111e5e8",
-        "attributeType": "Endurance",
+        "attributeType": "MaxHealth",
         "amount": 16,
         "modifierType": "Flat"
       },
@@ -2491,7 +2491,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
   {
@@ -2510,7 +2510,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
   {
@@ -2523,13 +2523,13 @@
     "attributeModifiers": [
       {
         "id": "a1caa281-718e-450e-b4d0-075a5eb919d5",
-        "attributeType": "Perception",
+        "attributeType": "MaxHealth",
         "amount": 15,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
   {
@@ -2554,7 +2554,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
   {
@@ -2567,19 +2567,19 @@
     "attributeModifiers": [
       {
         "id": "fbf0ec3e-d850-4bd8-9985-d6731ad05641",
-        "attributeType": "Perception",
+        "attributeType": "MaxHealth",
         "amount": 7,
         "modifierType": "Flat"
       },
       {
         "id": "b8e259c6-fd19-45fa-bff4-9f3ece17525b",
-        "attributeType": "Wisdom",
+        "attributeType": "MaxHealth",
         "amount": 9,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
   {
@@ -2598,7 +2598,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
   {
@@ -2617,7 +2617,7 @@
       }
     ],
     "magnitude": 0,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
   {
@@ -2630,19 +2630,19 @@
     "attributeModifiers": [
       {
         "id": "bd041689-978d-4f96-bf42-7e1699f09891",
-        "attributeType": "FightingSpirit",
+        "attributeType": "MaxHealth",
         "amount": 11,
         "modifierType": "Flat"
       },
       {
         "id": "46532b28-c1bd-4fa5-8530-401ad64baa72",
-        "attributeType": "Strength",
+        "attributeType": "MaxHealth",
         "amount": 4,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
   {
@@ -2655,13 +2655,13 @@
     "attributeModifiers": [
       {
         "id": "0924e0bf-2097-4703-bdff-670b5909a5ae",
-        "attributeType": "Strength",
+        "attributeType": "MaxHealth",
         "amount": 14,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
   {
@@ -2674,13 +2674,13 @@
     "attributeModifiers": [
       {
         "id": "0ae20745-0055-462f-abab-13877a751ba2",
-        "attributeType": "Endurance",
+        "attributeType": "MaxHealth",
         "amount": 16,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
   {
@@ -2693,13 +2693,13 @@
     "attributeModifiers": [
       {
         "id": "198cabe6-a9af-4ca1-af92-bed3d822e63d",
-        "attributeType": "Dexterity",
+        "attributeType": "MaxHealth",
         "amount": 15,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
   {
@@ -2712,19 +2712,19 @@
     "attributeModifiers": [
       {
         "id": "359c69ac-b048-49fd-8264-8985613fa1ea",
-        "attributeType": "FightingSpirit",
+        "attributeType": "MaxHealth",
         "amount": 22,
         "modifierType": "Flat"
       },
       {
         "id": "f83c8f36-384e-46f0-bf6c-a06f4e93bc92",
-        "attributeType": "Strength",
+        "attributeType": "MaxHealth",
         "amount": 7,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
   {
@@ -2737,13 +2737,13 @@
     "attributeModifiers": [
       {
         "id": "133e7518-d5f6-43fa-b772-4916759c75a1",
-        "attributeType": "Strength",
+        "attributeType": "MaxHealth",
         "amount": 27,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
   {
@@ -2756,13 +2756,13 @@
     "attributeModifiers": [
       {
         "id": "02c9fe62-8595-405e-a2e9-ab84be4b32b4",
-        "attributeType": "Endurance",
+        "attributeType": "MaxHealth",
         "amount": 29,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
   {
@@ -2775,19 +2775,19 @@
     "attributeModifiers": [
       {
         "id": "a4984cfe-d62a-483a-a755-eae3ffb966df",
-        "attributeType": "FightingSpirit",
+        "attributeType": "MaxHealth",
         "amount": 16,
         "modifierType": "Flat"
       },
       {
         "id": "a3e9a7d3-1321-4e81-8926-f7b27e3a7b01",
-        "attributeType": "Dexterity",
+        "attributeType": "MaxHealth",
         "amount": 15,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
   {
@@ -2812,7 +2812,7 @@
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
   {
@@ -2837,7 +2837,7 @@
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
   {
@@ -2850,13 +2850,13 @@
     "attributeModifiers": [
       {
         "id": "1817c72b-a101-4f3b-927c-30eedaf2688f",
-        "attributeType": "Intelligence",
+        "attributeType": "MaxHealth",
         "amount": 27,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
   {
@@ -2869,7 +2869,7 @@
     "attributeModifiers": [
       {
         "id": "0cd08f63-9f16-48f2-9e70-8ea4ca2d65d7",
-        "attributeType": "Intelligence",
+        "attributeType": "MaxHealth",
         "amount": 12,
         "modifierType": "Flat"
       },
@@ -2881,7 +2881,7 @@
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
   {
@@ -2894,13 +2894,13 @@
     "attributeModifiers": [
       {
         "id": "140f4a9b-183c-47de-91a6-6630bad7e85c",
-        "attributeType": "Wisdom",
+        "attributeType": "MaxHealth",
         "amount": 14,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
   {
@@ -2913,7 +2913,7 @@
     "attributeModifiers": [
       {
         "id": "e6982544-3ac6-4d63-b827-ff598a6ec5b9",
-        "attributeType": "Wisdom",
+        "attributeType": "MaxHealth",
         "amount": 12,
         "modifierType": "Flat"
       },
@@ -2925,7 +2925,7 @@
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
   {
@@ -2938,13 +2938,13 @@
     "attributeModifiers": [
       {
         "id": "d14960ca-d414-4557-ac12-92ba1791d983",
-        "attributeType": "Agility",
+        "attributeType": "MaxHealth",
         "amount": 26,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
   {
@@ -2957,19 +2957,19 @@
     "attributeModifiers": [
       {
         "id": "28146cef-2806-4f8b-a0e7-d97b60cdabde",
-        "attributeType": "Agility",
+        "attributeType": "MaxHealth",
         "amount": 12,
         "modifierType": "Flat"
       },
       {
         "id": "57a3193d-bc4c-4ce8-8493-09dd75fc78fb",
-        "attributeType": "Willpower",
+        "attributeType": "MaxHealth",
         "amount": 17,
         "modifierType": "Flat"
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
   {
@@ -2982,7 +2982,7 @@
     "attributeModifiers": [
       {
         "id": "7627d42d-76db-4a9e-ba95-17f76ced2c21",
-        "attributeType": "FightingSpirit",
+        "attributeType": "MaxHealth",
         "amount": 14,
         "modifierType": "Flat"
       },
@@ -2994,7 +2994,7 @@
       }
     ],
     "magnitude": 10,
-    "scalingAttribute": "Strength",
+    "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   }
 ]

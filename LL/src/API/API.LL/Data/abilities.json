@@ -67,26 +67,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Agility",
-        "Amount": 4,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Dexterity",
-        "Amount": 5,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Perception",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Instinct",
-        "Amount": 1,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -113,7 +93,7 @@
               "Action": {
                 "Type": "Damage",
                 "Amount": 8,
-                "ScalingAttribute": "Strength",
+                "ScalingAttribute": "AttackPower",
                 "ScalingMultiplier": 0.2
               },
               "Targeting": "TwoEnemies",
@@ -129,7 +109,7 @@
     "Passive": {
       "Id": "recklessAssault",
       "Name": "Reckless Assault",
-      "Description": "Increase Strength by 20, but decrease Endurance by 20",
+      "Description": "Increase Attack Power by 20, but decrease Physical Defense by 20",
       "Type": "Passive",
       "Cooldown": 0,
       "Triggers": [
@@ -139,7 +119,7 @@
             {
               "Action": {
                 "Type": "ModifyAttribute",
-                "Attribute": "Strength",
+                "Attribute": "AttackPower",
                 "Amount": 20,
                 "ModifierType": "Flat",
                 "Stackable": true
@@ -148,12 +128,12 @@
                 "Type": "IndefiniteDuration"
               },
               "Targeting": "Self",
-              "Log": "{Actor}'s Strength is increased by 20."
+              "Log": "{Actor}'s Attack Power is increased by 20."
             },
             {
               "Action": {
                 "Type": "ModifyAttribute",
-                "Attribute": "Endurance",
+                "Attribute": "PhysicalDefense ",
                 "Amount": -20,
                 "ModifierType": "Flat",
                 "Stackable": true
@@ -162,28 +142,13 @@
                 "Type": "IndefiniteDuration"
               },
               "Targeting": "Self",
-              "Log": "{Actor}'s Endurance is decreased by 20."
+              "Log": "{Actor}'s Physical Defense is decreased by 20."
             }
           ]
         }
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "FightingSpirit",
-        "Amount": 10,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Endurance",
-        "Amount": 4,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Threat",
-        "Amount": 6,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -210,7 +175,7 @@
               "Action": {
                 "Type": "Damage",
                 "Amount": 15,
-                "ScalingAttribute": "Agility",
+                "ScalingAttribute": "AttackPower",
                 "ScalingMultiplier": 0.1
               },
               "EffectModifiers": [
@@ -257,16 +222,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Agility",
-        "Amount": 10,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Perception",
-        "Amount": 6,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -293,7 +248,7 @@
               "Action": {
                 "Type": "Damage",
                 "Amount": 12,
-                "ScalingAttribute": "Strength",
+                "ScalingAttribute": "AttackPower",
                 "ScalingMultiplier": 0.2
               },
               "Targeting": "SingleEnemy",
@@ -334,16 +289,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Willpower",
-        "Amount": 4,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Endurance",
-        "Amount": 13,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -370,7 +315,7 @@
               "Action": {
                 "Type": "Damage",
                 "Amount": 11,
-                "ScalingAttribute": "Intelligence",
+                "ScalingAttribute": "SpellPower",
                 "ScalingMultiplier": 0.2
               },
               "Targeting": "SingleEnemy",
@@ -413,16 +358,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Intelligence",
-        "Amount": 9,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Willpower",
-        "Amount": 4,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -492,16 +427,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Wisdom",
-        "Amount": 8,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Intelligence",
-        "Amount": 6,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -565,21 +490,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Intelligence",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Luck",
-        "Amount": 6,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Threat",
-        "Amount": -1,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -606,7 +516,7 @@
               "Action": {
                 "Type": "Damage",
                 "Amount": 11,
-                "ScalingAttribute": "Strength",
+                "ScalingAttribute": "AttackPower",
                 "ScalingMultiplier": 0.2,
                 "Lifesteal": 30
               },
@@ -647,16 +557,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Agility",
-        "Amount": 8,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Strength",
-        "Amount": 4,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -684,7 +584,7 @@
                 "Type": "ResourceRestore",
                 "ResourceType": "Health",
                 "Amount": 2,
-                "ScalingAttribute": "Wisdom",
+                "ScalingAttribute": "AttackPower",
                 "ScalingMultiplier": 0.2
               },
               "Duration": {
@@ -729,16 +629,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Wisdom",
-        "Amount": 7,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Willpower",
-        "Amount": 7,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -746,7 +636,7 @@
     "Active": {
       "Id": "mudArmor",
       "Name": "Mud Armor",
-      "Description": "Decrease all damage taken by 2 for 6.5 seconds.",
+      "Description": "Decrease all damage taken by 2% for 6.5 seconds.",
       "Type": "Active",
       "Cooldown": 140,
       "Cost": { "Type": "Mana", "Amount": 6 },
@@ -764,7 +654,7 @@
             {
               "Action": {
                 "Type": "ModifyAttribute",
-                "Attribute": "FlatDamageReduction",
+                "Attribute": "DamageReduction",
                 "Amount": 2,
                 "ModifierType": "Flat"
               },
@@ -773,7 +663,7 @@
                 "Duration": 65
               },
               "Targeting": "Self",
-              "Log": "{Actor} is covered in thick mud, reducing all damage taken by 2."
+              "Log": "{Actor} is covered in thick mud, reducing all damage taken by 2%."
             }
           ]
         }
@@ -807,16 +697,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Constitution",
-        "Amount": 6,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Endurance",
-        "Amount": 8,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -877,16 +757,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Wisdom",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Intelligence",
-        "Amount": 11,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -894,7 +764,7 @@
     "Active": {
       "Id": "unstableColors",
       "Name": "Unstable Colors",
-      "Description": "30% chance to apply a buff to everyone on your team, increasing Strength and Intelligence by 20 for 10 seconds.",
+      "Description": "30% chance to apply a buff to everyone on your team, increasing Attack Power and Spell Power by 20 for 10 seconds.",
       "Type": "Active",
       "Cooldown": 150,
       "Cost": { "Type": "Mana", "Amount": 8 },
@@ -949,31 +819,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Constitution",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Strength",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Dexterity",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Intelligence",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Luck",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -1035,16 +880,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Instinct",
-        "Amount": 7,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Intelligence",
-        "Amount": 6,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -1113,16 +948,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Endurance",
-        "Amount": 9,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Wisdom",
-        "Amount": 8,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -1188,16 +1013,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Wisdom",
-        "Amount": 8,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Willpower",
-        "Amount": 8,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -1224,7 +1039,7 @@
               "Action": {
                 "Type": "Damage",
                 "Amount": 15,
-                "ScalingAttribute": "Agility",
+                "ScalingAttribute": "AttackPower",
                 "ScalingMultiplier": 0.2
               },
               "EffectModifiers": [
@@ -1271,16 +1086,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Agility",
-        "Amount": 12,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Dexterity",
-        "Amount": 9,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -1346,16 +1151,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Intelligence",
-        "Amount": 14,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Agility",
-        "Amount": 7,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -1419,21 +1214,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Willpower",
-        "Amount": 11,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Intelligence",
-        "Amount": 7,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Wisdom",
-        "Amount": 7,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -1460,7 +1240,7 @@
               "Action": {
                 "Type": "Damage",
                 "Amount": 15,
-                "ScalingAttribute": "Intelligence",
+                "ScalingAttribute": "SpellPower",
                 "ScalingMultiplier": 0.3
               },
               "Targeting": "AllEnemies",
@@ -1504,16 +1284,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Intelligence",
-        "Amount": 11,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Luck",
-        "Amount": 12,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -1539,7 +1309,7 @@
             {
               "Action": {
                 "Type": "ModifyAttribute",
-                "Attribute": "BasicAttackSpeed",
+                "Attribute": "AttackSpeed",
                 "Amount": 24,
                 "ModifierType": "Additive",
                 "Stackable": true
@@ -1573,7 +1343,7 @@
     "Passive": {
       "Id": "savageOnslaught",
       "Name": "Savage Onslaught",
-      "Description": "Increase Strength by 95 the first time dropping below 80% Health.",
+      "Description": "Increase Attack Power by 95 the first time dropping below 80% Health.",
       "Type": "Passive",
       "Cooldown": 0,
       "Triggers": [
@@ -1586,7 +1356,7 @@
             {
               "Action": {
                 "Type": "ModifyAttribute",
-                "Attribute": "Strength",
+                "Attribute": "AttackPower",
                 "Amount": 95,
                 "ModifierType": "Flat",
                 "Stackable": true
@@ -1604,28 +1374,13 @@
                 "Uses": 1
               },
               "Targeting": "Self",
-              "Log": "{Actor}'s Strength is increased by 95 due to falling below 80% health."
+              "Log": "{Actor}'s Attack Power is increased by 95 due to falling below 80% health."
             }
           ]
         }
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Constitution",
-        "Amount": 13,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "FightingSpirit",
-        "Amount": 7,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Willpower",
-        "Amount": 11,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -1691,16 +1446,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Strength",
-        "Amount": 12,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Agility",
-        "Amount": 9,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -1763,16 +1508,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Dexterity",
-        "Amount": 14,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Constitution",
-        "Amount": 4,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -1780,7 +1515,7 @@
     "Active": {
       "Id": "drainingClaws",
       "Name": "Draining Claws",
-      "Description": "Deal 31 Physical Melee damage to a target, reducing their Strength by 24 for 10 seconds.",
+      "Description": "Deal 31 Physical Melee damage to a target, reducing their Attack Power by 24 for 10 seconds.",
       "Type": "Active",
       "Cooldown": 130,
       "Cost": {
@@ -1837,16 +1572,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Endurance",
-        "Amount": 15,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Threat",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -1876,7 +1601,7 @@
               "Action": {
                 "Type": "Damage",
                 "Amount": 59,
-                "ScalingAttribute": "Agility",
+                "ScalingAttribute": "AttackPower",
                 "ScalingMultiplier": 0.20
               },
               "Targeting": "SingleEnemy",
@@ -1916,21 +1641,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Dexterity",
-        "Amount": 3,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Perception",
-        "Amount": 11,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Agility",
-        "Amount": 7,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -1960,7 +1670,7 @@
               "Action": {
                 "Type": "Damage",
                 "Amount": 42,
-                "ScalingAttribute": "Intelligence",
+                "ScalingAttribute": "SpellPower",
                 "ScalingMultiplier": 0.3
               },
               "Targeting": "SingleEnemy",
@@ -2000,16 +1710,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Intelligence",
-        "Amount": 7,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Wisdom",
-        "Amount": 6,
-        "ModifierType": "Flat"
-      }
     ]
   },
   {
@@ -2083,16 +1783,6 @@
       ]
     },
     "AttributeModifiers": [
-      {
-        "AttributeType": "Endurance",
-        "Amount": 8,
-        "ModifierType": "Flat"
-      },
-      {
-        "AttributeType": "Constitution",
-        "Amount": 9,
-        "ModifierType": "Flat"
-      }
     ]
   }
 ]
