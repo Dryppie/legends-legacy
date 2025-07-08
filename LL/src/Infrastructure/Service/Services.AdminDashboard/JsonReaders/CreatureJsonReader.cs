@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using Application.UseCases._AdminDashboard.Creatures.Dtos;
+using Common.Utilities.EnumConverters;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Creatures;
 
@@ -21,7 +22,7 @@ public class CreatureJsonReader
         {
             WriteIndented = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            Converters = { new JsonStringEnumConverter() }
+            Converters = { new SafeEnumConverter<AttributeType>(), new JsonStringEnumConverter() }
         })!;
         ValidateAndFixCreatureAttributes(AllCreatures);
 
