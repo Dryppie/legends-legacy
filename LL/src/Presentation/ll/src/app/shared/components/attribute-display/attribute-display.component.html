@@ -3,24 +3,4 @@
 >
   <div>{{ attribute.attributeType | attributeTypeFormat }}</div>
   <div class="text-white">{{ attribute.value }}</div>
-
-  <!-- tooltip wrapper -->
-  <div
-    *ngIf="tooltip.length"
-    class="pointer-events-none absolute left-1/2 top-6 z-10 flex -translate-x-1/2 translate-y-2 flex-col items-center opacity-0 transition-all duration-150 ease-out group-hover:opacity-100 group-focus:translate-y-0 group-focus:opacity-100"
-  >
-    <!-- arrow -->
-    <div
-      class="mb-[-4px] h-2 w-2 rotate-45 border border-light_gray bg-zinc-800/90"
-    ></div>
-
-    <!-- bubble -->
-    <div
-      class="space-y-1 whitespace-pre rounded-md border border-light_gray bg-zinc-800/90 p-1 text-zinc-200 shadow-lg backdrop-blur-sm"
-    >
-      <div *ngFor="let c of tooltip">
-        <span> +{{ c.value }} {{ c.to | attributeTypeFormat }} </span>
-      </div>
-    </div>
-  </div>
 </div>

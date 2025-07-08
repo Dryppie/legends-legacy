@@ -21,7 +21,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Head,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Willpower,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         },
@@ -32,7 +32,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -108,13 +108,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Chest,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Constitution,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -190,13 +190,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Legs,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Endurance,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -272,7 +272,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Head,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Instinct,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 4,
           "modifierType": ModifierType.Flat
         },
@@ -283,7 +283,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -359,13 +359,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Chest,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Strength,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -441,13 +441,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Legs,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.FightingSpirit,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -523,7 +523,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Head,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Luck,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 4,
           "modifierType": ModifierType.Flat
         },
@@ -534,7 +534,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -610,13 +610,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Chest,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Dexterity,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -692,13 +692,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Legs,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Agility,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -774,7 +774,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Head,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Perception,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 4,
           "modifierType": ModifierType.Flat
         },
@@ -785,7 +785,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -861,13 +861,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Chest,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Intelligence,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -943,13 +943,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Legs,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Wisdom,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1031,7 +1031,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1094,13 +1094,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Necklace,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Agility,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1169,7 +1169,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1238,7 +1238,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1301,13 +1301,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Ring,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Perception,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 5,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1376,7 +1376,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1439,13 +1439,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Relic,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Perception,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 4,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1501,7 +1501,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1557,7 +1557,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1607,18 +1607,18 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.OneHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.FightingSpirit,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 2,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Strength,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 1,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1694,13 +1694,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.OneHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Strength,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1776,13 +1776,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.OneHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Endurance,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 4,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1858,13 +1858,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.OneHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Dexterity,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -1940,18 +1940,18 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.FightingSpirit,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 4,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Strength,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2027,13 +2027,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Strength,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 5,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2109,18 +2109,18 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Endurance,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 4,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Willpower,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2196,18 +2196,18 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.FightingSpirit,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Dexterity,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2294,7 +2294,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2381,7 +2381,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2457,13 +2457,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Intelligence,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 4,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 5,
-      "scalingAttribute": AttributeType.Intelligence,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -2539,13 +2539,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.OffHand,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Intelligence,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2621,13 +2621,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.OneHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Wisdom,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2703,13 +2703,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.OffHand,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Wisdom,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2785,13 +2785,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Agility,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 5,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2867,18 +2867,18 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Agility,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Willpower,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -2954,7 +2954,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.FightingSpirit,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 3,
           "modifierType": ModifierType.Flat
         },
@@ -2965,7 +2965,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Luck,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0
     },
     "quantity": 1,
@@ -3041,7 +3041,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Head,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Willpower,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 12,
           "modifierType": ModifierType.Flat
         },
@@ -3052,7 +3052,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3128,13 +3128,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Chest,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Constitution,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 22,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3210,13 +3210,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Legs,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Endurance,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 18,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3292,18 +3292,18 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Head,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.FightingSpirit,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 13,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Instinct,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 9,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3379,18 +3379,18 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Chest,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Willpower,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 6,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Strength,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 15,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3466,13 +3466,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Legs,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Endurance,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 18,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3548,18 +3548,18 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Head,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Dexterity,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 2,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Luck,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 11,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3635,13 +3635,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Chest,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Dexterity,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 23,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3717,13 +3717,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Legs,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Agility,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 17,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3799,7 +3799,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Head,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Wisdom,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 9,
           "modifierType": ModifierType.Flat
         },
@@ -3810,7 +3810,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3886,13 +3886,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Chest,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Intelligence,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 25,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -3968,7 +3968,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Legs,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Perception,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 14,
           "modifierType": ModifierType.Flat
         },
@@ -3979,7 +3979,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -4061,7 +4061,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -4124,7 +4124,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Necklace,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Agility,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 16,
           "modifierType": ModifierType.Flat
         },
@@ -4135,7 +4135,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -4198,7 +4198,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Necklace,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Endurance,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 16,
           "modifierType": ModifierType.Flat
         },
@@ -4209,7 +4209,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -4278,7 +4278,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -4341,13 +4341,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Ring,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Perception,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 15,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -4421,7 +4421,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -4484,18 +4484,18 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Relic,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Perception,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 7,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Wisdom,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 9,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -4551,7 +4551,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -4607,7 +4607,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 0,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -4657,18 +4657,18 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.OneHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.FightingSpirit,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 11,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Strength,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 4,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -4744,13 +4744,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.OneHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Strength,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 14,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -4826,13 +4826,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.OneHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Endurance,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 16,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -4908,13 +4908,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.OneHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Dexterity,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 15,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -4990,18 +4990,18 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.FightingSpirit,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 22,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Strength,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 7,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5077,13 +5077,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Strength,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 27,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5159,13 +5159,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Endurance,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 29,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5241,18 +5241,18 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.FightingSpirit,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 16,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Dexterity,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 15,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5339,7 +5339,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5426,7 +5426,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5502,13 +5502,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Intelligence,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 27,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5584,7 +5584,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.OffHand,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Intelligence,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 12,
           "modifierType": ModifierType.Flat
         },
@@ -5595,7 +5595,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5671,13 +5671,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.OneHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Wisdom,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 14,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5753,7 +5753,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.OffHand,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Wisdom,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 12,
           "modifierType": ModifierType.Flat
         },
@@ -5764,7 +5764,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5840,13 +5840,13 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Agility,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 26,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -5922,18 +5922,18 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Agility,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 12,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Willpower,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 17,
           "modifierType": ModifierType.Flat
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0.1
     },
     "quantity": 1,
@@ -6009,7 +6009,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.TwoHanded,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.FightingSpirit,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 14,
           "modifierType": ModifierType.Flat
         },
@@ -6020,7 +6020,7 @@ export const RECIPES_CONTENT = [
         }
       ],
       "magnitude": 10,
-      "scalingAttribute": AttributeType.Strength,
+      "scalingAttribute": AttributeType.MaxHealth,
       "scalingAmount": 0.1
     },
     "quantity": 1,

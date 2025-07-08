@@ -9,39 +9,6 @@
         <li
           class="flex w-full justify-between gap-4 odd:bg-secondary/10 even:bg-secondary/5"
           *ngFor="
-            let attribute of (attributes | primaryAttributes).slice(
-              0,
-              (attributes | primaryAttributes).length / 2
-            )
-          "
-        >
-          <app-attribute-display
-            class="w-full"
-            [attribute]="attribute"
-          ></app-attribute-display>
-        </li>
-      </ul>
-      <ul class="flex w-full flex-col">
-        <li
-          class="flex w-full justify-between gap-4 odd:bg-secondary/5 even:bg-secondary/10"
-          *ngFor="
-            let attribute of (attributes | primaryAttributes).slice(
-              (attributes | primaryAttributes).length / 2
-            )
-          "
-        >
-          <app-attribute-display
-            class="w-full"
-            [attribute]="attribute"
-          ></app-attribute-display>
-        </li>
-      </ul>
-    </div>
-    <div class="flex w-full flex-col gap-4 sm:flex-row">
-      <ul class="flex w-full flex-col">
-        <li
-          class="flex w-full justify-between gap-4 odd:bg-secondary/10 even:bg-secondary/5"
-          *ngFor="
             let attribute of (attributes | secondaryAttributes).slice(
               0,
               (attributes | secondaryAttributes).length / 2

@@ -12,12 +12,11 @@ export class SecondaryAttributesPipe implements PipeTransform {
     AttributeType.HealthRegeneration,
     AttributeType.Mana,
     AttributeType.ManaRegeneration,
-    AttributeType.BasicAttackSpeed,
-    AttributeType.RecoveryRate,
-    AttributeType.Power,
     AttributeType.PhysicalDefense,
     AttributeType.MagicalDefense,
     AttributeType.DamageReduction,
+    AttributeType.AttackPower,
+    AttributeType.SpellPower,
     AttributeType.CritChance,
     AttributeType.CritDamage,
     AttributeType.CritDamageReduction,
@@ -33,12 +32,10 @@ export class SecondaryAttributesPipe implements PipeTransform {
     AttributeType.CooldownReduction,
     AttributeType.ArmorPenetration,
     AttributeType.ManaPenetration,
-    AttributeType.LifeSteal,
     AttributeType.FireResistance,
     AttributeType.WaterResistance,
     AttributeType.EarthResistance,
     AttributeType.AirResistance,
-    AttributeType.PoisonResistance,
   ];
 
   transform(values: AttributeDto[], ...args: unknown[]): AttributeDto[] {
