@@ -2996,5 +2996,41 @@
     "magnitude": 10,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
+  },
+  {
+    "id": "heavy_warhelm",
+    "name": "Heavy Warhelm",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "heavy_battleplate",
+    "name": "Heavy Battleplate",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Chest",
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "heavy_greaves",
+    "name": "Heavy Greaves",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Legs",
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
   }
 ]
