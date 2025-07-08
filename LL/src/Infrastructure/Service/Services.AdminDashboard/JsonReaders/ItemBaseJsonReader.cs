@@ -1,4 +1,6 @@
 ﻿using Application.UseCases._AdminDashboard.Items.Dtos;
+using Common.Utilities.EnumConverters;
+using Domain.Models.Attributes;
 using Domain.Models.Items.Equipments;
 using Services.AdminDashboard.Converters;
 using System.Text.Json;
@@ -20,7 +22,7 @@ public class ItemBaseJsonReader
         {
             WriteIndented = true,
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            Converters = { new FallbackEnumConverter<EquipmentType>(EquipmentType.Head), new JsonStringEnumConverter()  }
+            Converters = { new SafeEnumConverter<AttributeType>(), new FallbackEnumConverter<EquipmentType>(EquipmentType.Head), new JsonStringEnumConverter()  }
         }) ?? [];
         OverWriteJSON();
     }

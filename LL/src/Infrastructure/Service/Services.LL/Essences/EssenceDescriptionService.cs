@@ -12,7 +12,7 @@ public enum TooltipKind { Damage, Heal, Modify }
 public record TooltipValue(
     string DisplayValue,    //  "40‑60"
     string BaseValue,       //  "20"
-    string? Attribute,      //  "Strength" | null
+    string? Attribute,      //  "AttackPower" | null
     string AttributeValue,  //  "37"
     string Scale,           //  "0.15"
     string BonusValue,      //  "15"

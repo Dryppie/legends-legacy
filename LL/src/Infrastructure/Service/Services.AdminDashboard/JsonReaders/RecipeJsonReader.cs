@@ -1,4 +1,6 @@
 ﻿using Application.UseCases._AdminDashboard.Items.Dtos;
+using Common.Utilities.EnumConverters;
+using Domain.Models.Attributes;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting;
@@ -13,7 +15,8 @@ public class RecipeJsonReader
 {
     private readonly string _filePath;
     private readonly JsonSerializerOptions _opts =
-        new() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase, Converters = { new FallbackEnumConverter<EquipmentType>(EquipmentType.Head), new JsonStringEnumConverter() } };
+        new() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase, Converters = { new SafeEnumConverter<AttributeType>(),
+                new FallbackEnumConverter<EquipmentType>(EquipmentType.Head), new JsonStringEnumConverter() } };
 
     private List<RecipeToJsonDto> _cache = [];
 
