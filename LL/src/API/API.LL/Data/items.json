@@ -3148,7 +3148,14 @@
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "Ring",
-    "attributeModifiers": [],
+    "attributeModifiers": [
+      {
+        "id": "def82341-401b-4972-8318-65d8182701a6",
+        "attributeType": "AttackPower",
+        "amount": 10,
+        "modifierType": "Additive"
+      }
+    ],
     "magnitude": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
@@ -3160,7 +3167,14 @@
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "Ring",
-    "attributeModifiers": [],
+    "attributeModifiers": [
+      {
+        "id": "10198082-7714-4c26-be9c-8899a6485f92",
+        "attributeType": "SpellPower",
+        "amount": 10,
+        "modifierType": "Additive"
+      }
+    ],
     "magnitude": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
@@ -3172,7 +3186,71 @@
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "Ring",
-    "attributeModifiers": [],
+    "attributeModifiers": [
+      {
+        "id": "d77a299f-886a-4ea6-8fa1-60e2a26db60c",
+        "attributeType": "CritDamage",
+        "amount": 10,
+        "modifierType": "Additive"
+      }
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "amulet_of_aegis",
+    "name": "Amulet of Aegis",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Necklace",
+    "attributeModifiers": [
+      {
+        "id": "b90add3d-83ab-4b1c-aea0-6b1c91222911",
+        "attributeType": "PhysicalDefense",
+        "amount": 10,
+        "modifierType": "Additive"
+      }
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "charm_of_the_warden",
+    "name": "Charm of the Warden",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Necklace",
+    "attributeModifiers": [
+      {
+        "id": "cb07d896-3054-4315-9451-d2794378b593",
+        "attributeType": "MagicalDefense",
+        "amount": 10,
+        "modifierType": "Additive"
+      }
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "talisman_of_endurance",
+    "name": "Talisman of Endurance",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Necklace",
+    "attributeModifiers": [
+      {
+        "id": "ad209c0c-4598-40c7-b2cb-57bd9673f157",
+        "attributeType": "MaxHealth",
+        "amount": 10,
+        "modifierType": "Additive"
+      }
+    ],
     "magnitude": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
