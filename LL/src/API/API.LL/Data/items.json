@@ -2998,8 +2998,8 @@
     "scalingAmount": 0.1
   },
   {
-    "id": "heavy_warhelm",
-    "name": "Heavy Warhelm",
+    "id": "heavy_helm",
+    "name": "Heavy Helm",
     "description": "",
     "itemType": "Equipment",
     "rarity": "Common",
@@ -3010,8 +3010,8 @@
     "scalingAmount": 0
   },
   {
-    "id": "heavy_battleplate",
-    "name": "Heavy Battleplate",
+    "id": "heavy_breastplate",
+    "name": "Heavy Breastplate",
     "description": "",
     "itemType": "Equipment",
     "rarity": "Common",
@@ -3022,8 +3022,44 @@
     "scalingAmount": 0
   },
   {
-    "id": "heavy_greaves",
-    "name": "Heavy Greaves",
+    "id": "heavy_legplates",
+    "name": "Heavy Legplates",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Legs",
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "medium_helm",
+    "name": "Medium Helm",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "medium_mail",
+    "name": "Medium Mail",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Chest",
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "medium_greaves",
+    "name": "Medium Greaves",
     "description": "",
     "itemType": "Equipment",
     "rarity": "Common",
