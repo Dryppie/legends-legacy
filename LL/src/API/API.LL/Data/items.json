@@ -3254,5 +3254,62 @@
     "magnitude": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
+  },
+  {
+    "id": "phoenix_vial",
+    "name": "Phoenix Vial",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Relic",
+    "attributeModifiers": [
+      {
+        "id": "b3ecc229-542b-4cde-8295-741bb999b695",
+        "attributeType": "HealthRegeneration",
+        "amount": 10,
+        "modifierType": "Additive"
+      }
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "mana_heart",
+    "name": "Mana Heart",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Relic",
+    "attributeModifiers": [
+      {
+        "id": "b5ce08a3-5b2d-42e0-8095-71f512cbef2b",
+        "attributeType": "ManaRegeneration",
+        "amount": 10,
+        "modifierType": "Additive"
+      }
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "primal_totem",
+    "name": "Primal Totem",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Relic",
+    "attributeModifiers": [
+      {
+        "id": "41284c13-07af-4ed8-b61b-f08c5e5f71f0",
+        "attributeType": "Threat",
+        "amount": 10,
+        "modifierType": "Additive"
+      }
+    ],
+    "magnitude": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
   }
 ]
