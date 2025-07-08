@@ -3140,5 +3140,41 @@
     "magnitude": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
+  },
+  {
+    "id": "band_of_fury",
+    "name": "Band of Fury",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Ring",
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "band_of_arcane",
+    "name": "Band of Arcane",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Ring",
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "band_of_execution",
+    "name": "Band of Execution",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Ring",
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
   }
 ]
