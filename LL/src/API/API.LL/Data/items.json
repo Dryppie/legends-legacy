@@ -3104,5 +3104,41 @@
     "magnitude": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
+  },
+  {
+    "id": "cloth_cowl",
+    "name": "Cloth Cowl",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "cloth_robe",
+    "name": "Cloth Robe",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Chest",
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "cloth_pants",
+    "name": "Cloth Pants",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Legs",
+    "attributeModifiers": [],
+    "magnitude": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
   }
 ]
