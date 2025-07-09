@@ -9,37 +9,7 @@
       <ng-container
         *ngIf="selectedEquipmentInstance() as equipment; else noItem"
       >
-        <div class="flex flex-col gap-2">
-          <!-- Equipment Name and Rarity -->
-          <app-item [item]="equipment"></app-item>
-          <!-- Type -->
-          <span class="text-zinc-300">
-            {{ equipment.itemBase.equipmentType }} -
-            {{ equipment.rarity }}
-          </span>
-          <!-- Description -->
-          <div
-            *ngIf="equipment.itemBase.description"
-            class="text-gray-400 text-sm italic"
-          >
-            {{ equipment.itemBase.description }}
-          </div>
-          <!-- Attributes -->
-          <div *ngIf="equipment.attributeModifiers.length > 0">
-            <div class="mb-1">Attributes:</div>
-            <ul class="ml-5 list-disc text-sm">
-              <li *ngFor="let attr of equipment.attributeModifiers">
-                {{ attr.amount > 0 ? "+" : "" }}{{ attr.amount }}
-                {{ attr.attributeType | attributeTypeFormat }}
-              </li>
-            </ul>
-          </div>
-        </div>
-        <div class="pt-2">
-          <span *ngIf="equipment.potential as potential">
-            Potential: {{ potential }}
-          </span>
-        </div>
+        <app-equipment-display [item]="equipment"></app-equipment-display>
         <div class="flex items-center gap-2">
           <ng-container *ngIf="isPerformingOtherAction(); else canPerform">
             <span class="py-1 italic text-zinc-300">

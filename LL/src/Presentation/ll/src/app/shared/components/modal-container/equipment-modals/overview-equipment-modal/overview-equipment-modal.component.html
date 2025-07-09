@@ -19,7 +19,9 @@
           {{ currentEquippedEquipment.itemBase.name }}
         </div>
         <span class="italic text-zinc-300">
-          {{ currentEquippedEquipment.itemBase.equipmentType | equipmentType }}
+          {{
+            currentEquippedEquipment.equipmentBase.equipmentType | equipmentType
+          }}
         </span>
       </div>
       <div
@@ -62,7 +64,7 @@
               {{ equipment.itemBase.name }}
             </div>
             <span class="italic text-zinc-300">
-              {{ equipment.itemBase.equipmentType | equipmentType }}
+              {{ equipment.equipmentBase.equipmentType | equipmentType }}
             </span>
           </div>
           <div

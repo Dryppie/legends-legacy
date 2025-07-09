@@ -7,58 +7,8 @@
     <div class="rounded-lg border border-light_gray bg-texture p-4">
       <h2 class="text-primary">Item Description</h2>
       <ng-container *ngIf="selectedRecipe() as selectedRecipe; else noRecipe">
-        <div class="flex flex-col gap-2">
-          <!-- Equipment Name and Rarity -->
-          <h2 class="">
-            {{ selectedRecipe.item.name }}
-          </h2>
-          <!-- Type -->
-          <span class="text-zinc-300">
-            {{ selectedRecipe.item.equipmentType }} -
-            {{ selectedRecipe.item.rarity }}
-          </span>
-          <!-- Description -->
-          <div
-            *ngIf="selectedRecipe.item.description"
-            class="text-gray-400 text-sm italic"
-          >
-            {{ selectedRecipe.item.description }}
-          </div>
-          <!-- Weapon stats -->
-          <div *ngIf="selectedRecipe.item.magnitudeRange">
-            <div class="text-sm">Base Damage</div>
-            <div class="flex items-center gap-1 text-sm">
-              {{
-                selectedRecipe.item.magnitude *
-                  (1 - selectedRecipe.item.magnitudeRange / 100)
-                  | number: "1.0-0"
-              }}-{{
-                selectedRecipe.item.magnitude *
-                  (1 + selectedRecipe.item.magnitudeRange / 100)
-                  | number: "1.0-0"
-              }}
-              ({{ selectedRecipe.item.scalingAmount * 100 }}%
-              {{ selectedRecipe.item.scalingAttribute | attributeTypeFormat }})
-            </div>
-          </div>
-          <div *ngIf="selectedRecipe.item.attackSpeed">
-            <div class="text-sm">Attack Speed</div>
-            <div class="flex items-center gap-1 text-sm">
-              {{ 60 / selectedRecipe.item.attackSpeed }}s
-            </div>
-          </div>
-          <!-- Attributes -->
-          <div *ngIf="selectedRecipe.item.attributeModifiers.length > 0">
-            <div class="mb-1">Attributes:</div>
-            <ul class="ml-5 list-disc text-sm">
-              <li *ngFor="let attr of selectedRecipe.item.attributeModifiers">
-                {{ attr.amount > 0 ? "+" : "" }}{{ attr.amount }}
-                {{ attr.attributeType | attributeTypeFormat }}
-              </li>
-            </ul>
-          </div>
-        </div>
-
+        <app-equipment-display [item]="selectedRecipe.item">
+        </app-equipment-display>
         <div class="text-gray-400 mt-2 text-sm">
           Requires:
           <ul class="ml-5 list-disc">

@@ -61,7 +61,6 @@ import { AttributeModifier } from '../../../../../shared/models/Dtos/attributesD
   templateUrl: './market-place-buy.component.html',
 })
 export class MarketPlaceBuyComponent implements OnInit {
-  
   readonly allListings = signal<MarketPlaceListing[]>([]);
   selectedListingId: string = '';
 
@@ -146,7 +145,7 @@ export class MarketPlaceBuyComponent implements OnInit {
   constructor(
     private readonly marketplaceState: MarketplaceStateService,
     private readonly inventoryState: InventoryStateService,
-    private readonly equipmentState: EquipmentStateService
+    private readonly equipmentState: EquipmentStateService,
   ) {
     this.inventoryState.load();
     this.equipmentState.load();
@@ -209,7 +208,7 @@ export class MarketPlaceBuyComponent implements OnInit {
         const mods = eq.attributeModifiers
           .map((m) => `• ${m.attributeType}: +${m.amount}`)
           .join('\n');
-        return `Rarity: ${eq.rarity}\nType: ${new EquipmentTypePipe().transform(eq.itemBase.equipmentType)}\n${mods}`;
+        return `Rarity: ${eq.rarity}\nType: ${new EquipmentTypePipe().transform(eq.equipmentBase.equipmentType)}\n${mods}`;
       }
 
       case 'Essence': {
@@ -226,70 +225,73 @@ export class MarketPlaceBuyComponent implements OnInit {
     }
   });
 
-  getAttributeModifiers(e: InventoryItem): AttributeModifier[]{
-    if(e.itemInstance.itemBase.itemType === ItemType.Equipment){
+  getAttributeModifiers(e: InventoryItem): AttributeModifier[] {
+    if (e.itemInstance.itemBase.itemType === ItemType.Equipment) {
       return (e.itemInstance as EquipmentInstance).attributeModifiers;
     }
     return [];
   }
 
-  readonly selectedListingAsEquipment = computed (() => {
+  readonly selectedListingAsEquipment = computed(() => {
     const listing = this.selectedListing();
-    if(!listing) return null;
+    if (!listing) return null;
 
-    if(listing.itemInstance.itemBase.itemType === ItemType.Equipment)
-    {
+    if (listing.itemInstance.itemBase.itemType === ItemType.Equipment) {
       const instance = listing.itemInstance;
       const equippedItems: InventoryItem[] = [];
-      
+
       const eq = instance as EquipmentInstance;
-      const primarySlot = getSlotTypeFromEquipmentType(eq.itemBase.equipmentType);
+      const primarySlot = getSlotTypeFromEquipmentType(
+        eq.equipmentBase.equipmentType,
+      );
       const affectedSlots: EquipmentSlotType[] = [primarySlot];
-      
+
       //If currently selected is a two-handed, add the off-hand as well
-      if(eq.itemBase.equipmentType === EquipmentType.TwoHanded) {
+      if (eq.equipmentBase.equipmentType === EquipmentType.TwoHanded) {
         affectedSlots.push(EquipmentSlotType.OffHand);
       }
-      
-      for (const slot of affectedSlots){
+
+      for (const slot of affectedSlots) {
         const equipped = this.equipmentState.getSlot(slot);
-        if(equipped?.equipmentInstance){
+        if (equipped?.equipmentInstance) {
           equippedItems.push({
             id: equipped.equipmentInstance.id,
             itemInstance: equipped.equipmentInstance,
             quantity: 1,
-          })
+          });
         }
         //if the equipped piece is a two-handed weapon we break early to avoid showing the equipment piece twice
-        if (equipped?.equipmentInstance?.itemBase.equipmentType === EquipmentType.TwoHanded) {
+        if (
+          equipped?.equipmentInstance?.equipmentBase.equipmentType ===
+          EquipmentType.TwoHanded
+        ) {
           break;
         }
       }
-    
+
       return equippedItems;
     }
     return null;
-  })
+  });
 
-  readonly selectedListingAsMaterial = computed (() => {
+  readonly selectedListingAsMaterial = computed(() => {
     const listing = this.selectedListing();
     if (!listing) return null;
-    if(listing.itemInstance.itemBase.itemType === ItemType.Material)
-    {
+    if (listing.itemInstance.itemBase.itemType === ItemType.Material) {
       const items: InventoryItem[] = [];
 
       const listingBaseId = listing.itemInstance.itemBase.id;
       const inventory = this.inventoryState.items();
-      
-      for (const invItem of inventory){
-        if(invItem.itemInstance.itemBase.id === listingBaseId){
+
+      for (const invItem of inventory) {
+        if (invItem.itemInstance.itemBase.id === listingBaseId) {
           items.push(invItem);
         }
       }
-          return items;
+      return items;
     }
     return null;
-  })
+  });
 
   buyoutListing(): void {
     const sel = this.selectedListing();

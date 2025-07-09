@@ -29,6 +29,7 @@ import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { CharacterActionType } from '../../../../../shared/models/enums/characterActionType';
 import { CharacterActionsStateService } from '../../../../../core/services/api/character-actions/character-actions.state.service';
 import { ItemComponent } from '../../../../../shared/components/item/item.component';
+import { EquipmentDisplayComponent } from '../../../../../shared/components/equipment/equipment-display/equipment-display.component';
 
 @Component({
   selector: 'app-tempering',
@@ -40,6 +41,7 @@ import { ItemComponent } from '../../../../../shared/components/item/item.compon
     AttributeTypeFormatPipe,
     SlicePipe,
     ItemComponent,
+    EquipmentDisplayComponent,
   ],
   templateUrl: './tempering.component.html',
 })

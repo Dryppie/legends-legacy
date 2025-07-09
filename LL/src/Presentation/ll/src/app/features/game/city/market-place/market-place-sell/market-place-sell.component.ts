@@ -111,7 +111,7 @@ export class MarketPlaceSellComponent implements OnInit {
         const mods = eq.attributeModifiers
           .map((m) => `• ${m.attributeType}: +${m.amount}`)
           .join('\n');
-        return `Rarity: ${eq.rarity}\nType: ${new EquipmentTypePipe().transform(eq.itemBase.equipmentType)}\n${mods}`;
+        return `Rarity: ${eq.rarity}\nType: ${new EquipmentTypePipe().transform(eq.equipmentBase.equipmentType)}\n${mods}`;
       }
 
       case 'Essence': {

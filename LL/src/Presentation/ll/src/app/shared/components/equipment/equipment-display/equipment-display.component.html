@@ -1,0 +1,49 @@
+<!-- equipment-display.component.html -->
+<div class="flex flex-col gap-2">
+  <h2>{{ data.name }}</h2>
+
+  <span class="text-zinc-300">
+    {{ data.equipmentType }} – {{ data.rarity }}
+  </span>
+
+  <p *ngIf="data.description" class="text-gray-400 text-sm italic">
+    {{ data.description }}
+  </p>
+
+  <!-- Weapon-only stats -->
+  <ng-container *ngIf="data.magnitude && data.magnitudeRange">
+    <div class="text-sm">Base Damage</div>
+    <div class="flex items-center gap-1 text-sm">
+      {{
+        data.magnitude * (1 - data.magnitudeRange / 100) | number: "1.0-0"
+      }}–{{
+        data.magnitude * (1 + data.magnitudeRange / 100) | number: "1.0-0"
+      }}
+      ({{ data.scalingAmount! * 100 }}%
+      {{ data.scalingAttribute! | attributeTypeFormat }})
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="data.attackSpeed">
+    <div class="text-sm">Attack Speed</div>
+    <div class="flex items-center gap-1 text-sm">
+      {{ 60 / data.attackSpeed | number: "1.1-1" }} s
+    </div>
+  </ng-container>
+
+  <!-- Attributes -->
+  <div *ngIf="data.attributeModifiers?.length">
+    <div class="mb-1">Attributes:</div>
+    <ul class="ml-5 list-disc text-sm">
+      <li *ngFor="let attr of data.attributeModifiers">
+        {{ attr.amount > 0 ? "+" : "" }}{{ attr.amount }}
+        {{ attr.attributeType | attributeTypeFormat }}
+      </li>
+    </ul>
+  </div>
+
+  <!-- Instance-only -->
+  <div *ngIf="data.potential != null" class="pt-2">
+    Potential: {{ data.potential }}
+  </div>
+</div>

@@ -19,7 +19,8 @@ export class EquipmentOverviewComponent implements OnInit {
   isGhost(slot: EquipmentSlot): boolean {
     return (
       slot.equipmentSlotType === EquipmentSlotType.OffHand &&
-      slot.equipmentInstance?.itemBase.equipmentType === EquipmentType.TwoHanded
+      slot.equipmentInstance?.equipmentBase.equipmentType ===
+        EquipmentType.TwoHanded
     );
   }
   constructor(

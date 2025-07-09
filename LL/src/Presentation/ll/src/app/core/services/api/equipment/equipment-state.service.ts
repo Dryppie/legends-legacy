@@ -193,10 +193,10 @@ export class EquipmentStateService {
 
     // If either main or off hand is TwoHanded, clear both slots
     const mainIsTwoHanded =
-      main?.equipmentInstance?.itemBase.equipmentType ===
+      main?.equipmentInstance?.equipmentBase.equipmentType ===
       EquipmentType.TwoHanded;
     const offIsTwoHanded =
-      off?.equipmentInstance?.itemBase.equipmentType ===
+      off?.equipmentInstance?.equipmentBase.equipmentType ===
       EquipmentType.TwoHanded;
 
     if (

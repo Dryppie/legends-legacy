@@ -1,13 +1,13 @@
-import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, computed, Input, signal, Signal } from '@angular/core';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { Recipe } from '../../../../../shared/models/profession';
 import { CraftingService } from '../../../../../core/services/api/crafting/crafting.service';
-import { AttributeTypeFormatPipe } from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import { CharacterProfession } from '../../../../../shared/models/Dtos/characterProfession';
 import { RegularButtonComponent } from '../../../../../shared/components/buttons/regular-button/regular-button.component';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
+import { EquipmentDisplayComponent } from '../../../../../shared/components/equipment/equipment-display/equipment-display.component';
 
 function hasQuantity(
   inv: InventoryItem[],
@@ -37,10 +37,9 @@ function consumeMaterials(
     NgIf,
     NgFor,
     NgClass,
-    AttributeTypeFormatPipe,
     RegularButtonComponent,
     NumberFormatPipe,
-    DecimalPipe,
+    EquipmentDisplayComponent,
   ],
   templateUrl: './regular-crafting.component.html',
 })
@@ -99,7 +98,6 @@ export class RegularCraftingComponent {
   }
 
   selectRecipe(recipe: Recipe): void {
-    console.log(recipe.item);
     this.selectedRecipeId.set(recipe.id);
   }
 
