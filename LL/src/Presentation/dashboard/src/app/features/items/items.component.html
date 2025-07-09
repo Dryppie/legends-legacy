@@ -114,11 +114,29 @@
           </div>
         </div>
         <div class="flex flex-col">
+          <label class="font-medium">Attack Speed</label>
+          <input
+            type="number"
+            class="rounded border border-light_gray bg-zinc-300/10 p-2"
+            formControlName="attackSpeed"
+            min="0"
+          />
+        </div>
+        <div class="flex flex-col">
           <label class="font-medium">Magnitude</label>
           <input
             type="number"
             class="rounded border border-light_gray bg-zinc-300/10 p-2"
             formControlName="magnitude"
+            min="0"
+          />
+        </div>
+        <div class="flex flex-col">
+          <label class="font-medium">Magnitude Range</label>
+          <input
+            type="number"
+            class="rounded border border-light_gray bg-zinc-300/10 p-2"
+            formControlName="magnitudeRange"
             min="0"
           />
         </div>

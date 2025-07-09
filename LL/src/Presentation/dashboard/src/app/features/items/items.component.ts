@@ -78,6 +78,8 @@ export class ItemsComponent implements OnInit {
         this.itemForm.get('magnitude')!.reset();
         this.itemForm.get('scalingAttribute')!.reset();
         this.itemForm.get('scalingAmount')!.reset();
+        this.itemForm.get('attackSpeed')!.reset();
+        this.itemForm.get('magnitudeRange')!.reset();
         while (this.attributeModifiers.length) {
           this.attributeModifiers.removeAt(0);
         }
@@ -103,6 +105,8 @@ export class ItemsComponent implements OnInit {
       magnitude: 0,
       scalingAttribute: null,
       scalingAmount: 0,
+      attackSpeed: 0,
+      magnitudeRange: 0,
       essence: null,
     });
     // clear modifiers array
@@ -124,6 +128,8 @@ export class ItemsComponent implements OnInit {
         magnitude: eq.magnitude,
         scalingAttribute: eq.scalingAttribute,
         scalingAmount: eq.scalingAmount,
+        attackSpeed: eq.attackSpeed,
+        magnitudeRange: eq.magnitudeRange,
       });
       // clear and repopulate attribute modifiers
       this.attributeModifiers.clear();

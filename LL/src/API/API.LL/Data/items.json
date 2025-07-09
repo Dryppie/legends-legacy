@@ -3311,5 +3311,53 @@
     "magnitude": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
+  },
+  {
+    "id": "shortsword",
+    "name": "Shortsword",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "OneHanded",
+    "attributeModifiers": [],
+    "magnitude": 5,
+    "scalingAttribute": "AttackPower",
+    "scalingAmount": 0.1
+  },
+  {
+    "id": "hatchet",
+    "name": "Hatchet",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "OneHanded",
+    "attributeModifiers": [],
+    "magnitude": 5,
+    "scalingAttribute": "AttackPower",
+    "scalingAmount": 0.1
+  },
+  {
+    "id": "mace",
+    "name": "Mace",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "OneHanded",
+    "attributeModifiers": [],
+    "magnitude": 5,
+    "scalingAttribute": "AttackPower",
+    "scalingAmount": 0.1
+  },
+  {
+    "id": "dagger",
+    "name": "Dagger",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "OneHanded",
+    "attributeModifiers": [],
+    "magnitude": 5,
+    "scalingAttribute": "AttackPower",
+    "scalingAmount": 0.1
   }
 ]

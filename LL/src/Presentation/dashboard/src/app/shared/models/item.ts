@@ -28,6 +28,8 @@ export interface Equipment extends ItemBase {
   magnitude: number;
   scalingAttribute: AttributeType;
   scalingAmount: number;
+  attackSpeed: number;
+  magnitudeRange: number;
 }
 
 export interface EssenceItem extends ItemBase {
