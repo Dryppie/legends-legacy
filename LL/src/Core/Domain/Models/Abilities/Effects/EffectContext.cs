@@ -6,17 +6,20 @@ using Domain.Models.Damages;
 namespace Domain.Models.Abilities.Effects;
 public class EffectContext
 {
+    public string SourceName { get; set; } = string.Empty;
     public CombatEntity Source { get; set; }
     public CombatEntity Target { get; set; }
     public AttackType AttackType { get; set; } = AttackType.None;
     public List<EffectModification> EffectModifications { get; set; } = [];
     public string Details { get; set; } = string.Empty;
-    public EffectContext(CombatEntity source,
+    public EffectContext(string sourceName,
+                         CombatEntity source,
                          CombatEntity target,
                          AttackType attackType,
                          List<EffectModification> effectModifications,
                          string details)
     {
+        SourceName = sourceName;
         Source = source;
         Target = target;
         AttackType = attackType;

@@ -1,7 +1,6 @@
 ﻿using Domain.Interfaces.Abilities;
 using Domain.Models.Abilities.Effects.Actions;
 using Domain.Models.Abilities.Effects.EffectModifications;
-using Domain.Models.Abilities.Effects.Trigger;
 using Domain.Models.Damages;
 
 namespace Domain.Models.Abilities.Effects;
@@ -29,7 +28,7 @@ public class EffectDefinition
     public DamageType DamageType { get; set; }
     public List<EffectTag> EffectTags { get; set; } = [];
     public string Log { get; set; } = string.Empty;
-    public string SourceId { get; set; } = string.Empty;
+    public string SourceName { get; set; } = string.Empty;
 
     public EffectDefinition(IEffectAction action,
                   IEffectDuration duration,
@@ -70,7 +69,7 @@ public class EffectDefinition
                             attackType: AttackType,
                             damageType: DamageType);
         copy.Log = Log;
-        copy.SourceId = SourceId;
+        copy.SourceName = SourceName;
 
         return copy;
     }

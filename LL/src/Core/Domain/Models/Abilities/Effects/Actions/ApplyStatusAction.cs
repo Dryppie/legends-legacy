@@ -23,7 +23,7 @@ public class ApplyStatusAction : IEffectAction
             combatContext.LogEffectExecution(effect); // Optional logging
             return;
         }
-
+        SetSourceIdForEffects(statusDef, effect.SourceName);
         // Optional log message
         if (!string.IsNullOrEmpty(effect.Details))
         {
@@ -62,5 +62,17 @@ public class ApplyStatusAction : IEffectAction
     public void OnExpireExecute(EffectContext effect, ICombatContext combatContext)
     {
 
+    }
+
+    private static void SetSourceIdForEffects(StatusDefinition definition, string name)
+    {
+        if (definition is null) return;
+        foreach (var trigger in definition.Triggers)
+        {
+            foreach (var effect in trigger.Actions)
+            {
+                effect.SourceName = name;   // or essence.Id.ToString()
+            }
+        }
     }
 }

@@ -1,9 +1,11 @@
-﻿using System.Text.Json;
-using Common.Utilities;
+﻿using Common.Utilities;
 using Domain.Extensions;
+using Domain.Models.Abilities;
+using Domain.Models.Abilities.Effects;
 using Domain.Models.Combat;
 using Domain.Models.Entities;
 using Domain.Models.Essences;
+using System.Text.Json;
 
 namespace Common.Helpers.Essences;
 // TODO: Make it such that whenever I edit the json file, it'll trigger an endpoint that causes this to reload all the essences.
@@ -150,19 +152,33 @@ public sealed class EssenceLoader
         }
     }
 
-    /// <summary>
-    /// Helper method to set source IDs for effects. 
-    /// </summary>
     private static void SetSourceIdForEffects(Essence essence)
     {
-        //for (int i = 0; i < essence.Active.Effects.Count; i++)
-        //{
-        //    essence.Active.Effects[i].SourceId = $"{essence.Active.Id}_{i}";
-        //}
+        if (essence is null) throw new ArgumentNullException(nameof(essence));
 
-        //for (int i = 0; i < essence.Passive.Effects.Count; i++)
-        //{
-        //    essence.Passive.Effects[i].SourceId = $"{essence.Passive.Id}_{i}";
-        //}
+        // Helper local so we don’t repeat ourselves.
+        void MarkAbility(AbilityDefinition? ability)
+        {
+            if (ability is null) return;
+            foreach (var trigger in ability.Triggers)
+            {
+                foreach (var effect in trigger.Actions)
+                {
+                    SetSourceRecursive(effect, ability.Name);   // or essence.Id.ToString()
+                }
+            }
+        }
+
+        MarkAbility(essence.Passive);
+        MarkAbility(essence.Active);
+    }
+
+    /// <summary>
+    /// Sets SourceId on the given effect and, if the action contains further
+    /// embedded effects, walks those recursively.
+    /// </summary>
+    private static void SetSourceRecursive(EffectDefinition effect, string sourceName)
+    {
+        effect.SourceName = sourceName;
     }
 }
