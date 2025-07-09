@@ -35,7 +35,6 @@ import { ItemComponent } from '../../../../../shared/components/item/item.compon
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import { EquipmentStateService } from '../../../../../core/services/api/equipment/equipment-state.service';
 import { EquipmentSlotType } from '../../../../../shared/models/Dtos/equipment-slots/equipmentSlot';
-import { getRarityColor } from '../../../../../shared/utils/rarity/rarity.utils';
 import { getSlotTypeFromEquipmentType } from '../../../../../shared/utils/equipment/equipment.utils';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { EquipmentType } from '../../../../../shared/models/enums/equipmentType';
