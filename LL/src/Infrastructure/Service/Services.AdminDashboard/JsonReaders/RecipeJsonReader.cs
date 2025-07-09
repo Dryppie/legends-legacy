@@ -101,7 +101,7 @@ public class RecipeJsonReader
         SaveFile();
     }
 
-    private EquipmentBase EquipmentBase(ItemBaseDto itemDto)
+    private static EquipmentBase EquipmentBase(ItemBaseDto itemDto)
     {
         return new EquipmentBase()
         {
@@ -112,7 +112,9 @@ public class RecipeJsonReader
             Rarity = itemDto.Rarity,
             EquipmentType = itemDto.EquipmentType,
             AttributeModifiers = itemDto.AttributeModifiers,
+            AttackSpeed = itemDto.AttackSpeed,
             Magnitude = itemDto.Magnitude,
+            MagnitudeRange = itemDto.MagnitudeRange,
             ScalingAttribute = itemDto.ScalingAttribute,
             ScalingAmount = itemDto.ScalingAmount
         };

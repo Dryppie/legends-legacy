@@ -7,7 +7,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -19,7 +21,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -31,7 +35,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -43,7 +49,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -55,7 +63,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -67,7 +77,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -79,7 +91,9 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -91,7 +105,9 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -103,7 +119,9 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -115,7 +133,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -127,7 +147,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -139,7 +161,9 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -151,7 +175,9 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -163,7 +189,9 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -175,7 +203,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -187,7 +217,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -199,7 +231,9 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -211,7 +245,9 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -223,7 +259,9 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -235,7 +273,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -247,7 +287,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -259,7 +301,9 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -271,7 +315,9 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -283,7 +329,9 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -295,7 +343,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -307,7 +357,9 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -319,7 +371,9 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -331,7 +385,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -343,7 +399,9 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -355,7 +413,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -367,7 +427,9 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -379,7 +441,9 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -391,7 +455,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -403,7 +469,9 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -415,7 +483,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -427,7 +497,9 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -439,7 +511,9 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -451,7 +525,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -463,7 +539,9 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -475,7 +553,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -487,7 +567,9 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -499,7 +581,9 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -511,7 +595,9 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -523,7 +609,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -535,7 +623,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -547,7 +637,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -559,7 +651,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -571,7 +665,9 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -583,7 +679,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -595,7 +693,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -607,7 +707,9 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -619,7 +721,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -631,7 +735,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -643,7 +749,9 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -655,7 +763,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -667,7 +777,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -679,7 +791,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -691,7 +805,9 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -703,7 +819,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -715,7 +833,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -727,7 +847,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -739,7 +861,9 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -751,7 +875,9 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -763,7 +889,9 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -775,7 +903,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -787,7 +917,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -799,7 +931,9 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -811,7 +945,9 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -823,7 +959,9 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -835,7 +973,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -847,7 +987,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -859,7 +1001,9 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -871,7 +1015,9 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -883,7 +1029,9 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -895,7 +1043,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -907,7 +1057,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -919,7 +1071,9 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -931,7 +1085,9 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -943,7 +1099,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -955,7 +1113,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -967,7 +1127,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -979,7 +1141,9 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -991,7 +1155,9 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1003,7 +1169,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1015,7 +1183,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1027,7 +1197,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1039,7 +1211,9 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1051,7 +1225,9 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1063,7 +1239,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1075,7 +1253,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1087,7 +1267,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1099,7 +1281,9 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1111,7 +1295,9 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1123,7 +1309,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1135,7 +1323,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1147,7 +1337,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1159,7 +1351,9 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1171,7 +1365,9 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1183,7 +1379,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1195,7 +1393,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1207,7 +1407,9 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1219,7 +1421,9 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1231,7 +1435,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1243,7 +1449,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1255,7 +1463,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1267,7 +1477,9 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1279,7 +1491,9 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1291,7 +1505,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1303,7 +1519,9 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1315,7 +1533,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1327,7 +1547,9 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1339,7 +1561,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1351,7 +1575,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1363,7 +1589,9 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1388,7 +1616,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1407,7 +1637,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1426,7 +1658,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1451,7 +1685,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1470,7 +1706,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1489,7 +1727,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1514,7 +1754,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1533,7 +1775,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1552,7 +1796,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1577,7 +1823,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1596,7 +1844,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1615,7 +1865,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1634,7 +1886,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1653,7 +1907,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1672,7 +1928,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1691,7 +1949,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1710,7 +1970,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1729,7 +1991,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1748,7 +2012,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1767,7 +2033,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1786,7 +2054,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1811,7 +2081,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1830,7 +2102,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1849,7 +2123,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1868,7 +2144,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1893,7 +2171,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1912,7 +2192,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1937,7 +2219,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1962,7 +2246,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1987,7 +2273,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2012,7 +2300,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2031,7 +2321,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 5,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -2050,7 +2342,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2069,7 +2363,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2088,7 +2384,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2107,7 +2405,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2132,7 +2432,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2157,7 +2459,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2182,7 +2486,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2201,7 +2507,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2220,7 +2528,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2245,7 +2555,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2270,7 +2582,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2289,7 +2603,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2314,7 +2630,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2333,7 +2651,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2352,7 +2672,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2377,7 +2699,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2396,7 +2720,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2421,7 +2747,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2440,7 +2768,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2465,7 +2795,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2490,7 +2822,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2509,7 +2843,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2528,7 +2864,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2553,7 +2891,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2578,7 +2918,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2597,7 +2939,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2616,7 +2960,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2641,7 +2987,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 10,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -2660,7 +3008,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 10,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -2679,7 +3029,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 10,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -2698,7 +3050,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 10,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -2723,7 +3077,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 10,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -2742,7 +3098,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 10,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -2761,7 +3119,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 10,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -2786,7 +3146,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 10,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -2811,7 +3173,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 10,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -2836,7 +3200,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 10,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -2855,7 +3221,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 10,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -2880,7 +3248,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 10,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -2899,7 +3269,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 10,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -2924,7 +3296,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 10,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -2943,7 +3317,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 10,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -2968,7 +3344,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 10,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -2993,7 +3371,9 @@
         "modifierType": "Flat"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 10,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -3005,7 +3385,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3017,7 +3399,9 @@
     "rarity": "Common",
     "equipmentType": "Chest",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3029,7 +3413,9 @@
     "rarity": "Common",
     "equipmentType": "Legs",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3041,7 +3427,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3053,7 +3441,9 @@
     "rarity": "Common",
     "equipmentType": "Chest",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3065,7 +3455,9 @@
     "rarity": "Common",
     "equipmentType": "Legs",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3077,7 +3469,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3089,7 +3483,9 @@
     "rarity": "Common",
     "equipmentType": "Chest",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3101,7 +3497,9 @@
     "rarity": "Common",
     "equipmentType": "Legs",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3113,7 +3511,9 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3125,7 +3525,9 @@
     "rarity": "Common",
     "equipmentType": "Chest",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3137,7 +3539,9 @@
     "rarity": "Common",
     "equipmentType": "Legs",
     "attributeModifiers": [],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3156,7 +3560,9 @@
         "modifierType": "Additive"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3175,7 +3581,9 @@
         "modifierType": "Additive"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3194,7 +3602,9 @@
         "modifierType": "Additive"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3213,7 +3623,9 @@
         "modifierType": "Additive"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3232,7 +3644,9 @@
         "modifierType": "Additive"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3251,7 +3665,9 @@
         "modifierType": "Additive"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3270,7 +3686,9 @@
         "modifierType": "Additive"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3289,7 +3707,9 @@
         "modifierType": "Additive"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3308,7 +3728,9 @@
         "modifierType": "Additive"
       }
     ],
+    "attackSpeed": 0,
     "magnitude": 0,
+    "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3320,9 +3742,11 @@
     "rarity": "Common",
     "equipmentType": "OneHanded",
     "attributeModifiers": [],
-    "magnitude": 5,
+    "attackSpeed": 20,
+    "magnitude": 10,
+    "magnitudeRange": 20,
     "scalingAttribute": "AttackPower",
-    "scalingAmount": 0.1
+    "scalingAmount": 1
   },
   {
     "id": "hatchet",
@@ -3332,9 +3756,11 @@
     "rarity": "Common",
     "equipmentType": "OneHanded",
     "attributeModifiers": [],
-    "magnitude": 5,
+    "attackSpeed": 20,
+    "magnitude": 10,
+    "magnitudeRange": 30,
     "scalingAttribute": "AttackPower",
-    "scalingAmount": 0.1
+    "scalingAmount": 1
   },
   {
     "id": "mace",
@@ -3344,9 +3770,11 @@
     "rarity": "Common",
     "equipmentType": "OneHanded",
     "attributeModifiers": [],
-    "magnitude": 5,
+    "attackSpeed": 20,
+    "magnitude": 10,
+    "magnitudeRange": 25,
     "scalingAttribute": "AttackPower",
-    "scalingAmount": 0.1
+    "scalingAmount": 1
   },
   {
     "id": "dagger",
@@ -3356,8 +3784,211 @@
     "rarity": "Common",
     "equipmentType": "OneHanded",
     "attributeModifiers": [],
-    "magnitude": 5,
+    "attackSpeed": 24,
+    "magnitude": 8,
+    "magnitudeRange": 15,
     "scalingAttribute": "AttackPower",
-    "scalingAmount": 0.1
+    "scalingAmount": 0.8
+  },
+  {
+    "id": "greatsword",
+    "name": "Greatsword",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "TwoHanded",
+    "attributeModifiers": [],
+    "attackSpeed": 10,
+    "magnitude": 15,
+    "magnitudeRange": 30,
+    "scalingAttribute": "AttackPower",
+    "scalingAmount": 2
+  },
+  {
+    "id": "battle_axe",
+    "name": "Battle Axe",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "TwoHanded",
+    "attributeModifiers": [],
+    "attackSpeed": 10,
+    "magnitude": 15,
+    "magnitudeRange": 50,
+    "scalingAttribute": "AttackPower",
+    "scalingAmount": 2
+  },
+  {
+    "id": "maul",
+    "name": "Maul",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "TwoHanded",
+    "attributeModifiers": [],
+    "attackSpeed": 10,
+    "magnitude": 15,
+    "magnitudeRange": 40,
+    "scalingAttribute": "AttackPower",
+    "scalingAmount": 2
+  },
+  {
+    "id": "spear",
+    "name": "Spear",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "TwoHanded",
+    "attributeModifiers": [],
+    "attackSpeed": 12,
+    "magnitude": 14,
+    "magnitudeRange": 25,
+    "scalingAttribute": "AttackPower",
+    "scalingAmount": 1.8
+  },
+  {
+    "id": "towershield",
+    "name": "Towershield",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "OffHand",
+    "attributeModifiers": [
+      {
+        "id": "1c432e25-a7d6-41e5-aaca-6463473c5e7d",
+        "attributeType": "PhysicalDefense",
+        "amount": 10,
+        "modifierType": "Flat"
+      },
+      {
+        "id": "274001ff-288d-4dfc-b482-2d85ba5a1ebe",
+        "attributeType": "Block",
+        "amount": 50,
+        "modifierType": "Flat"
+      }
+    ],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "manaward",
+    "name": "Manaward",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "OffHand",
+    "attributeModifiers": [
+      {
+        "id": "ea387086-d8b9-42da-b1f2-79dbdba22094",
+        "attributeType": "MagicalDefense",
+        "amount": 10,
+        "modifierType": "Flat"
+      },
+      {
+        "id": "067b7b8a-4370-45ba-9312-e7ba5a1e05f3",
+        "attributeType": "Block",
+        "amount": 50,
+        "modifierType": "Flat"
+      }
+    ],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "staff",
+    "name": "Staff",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "TwoHanded",
+    "attributeModifiers": [],
+    "attackSpeed": 10,
+    "magnitude": 15,
+    "magnitudeRange": 35,
+    "scalingAttribute": "SpellPower",
+    "scalingAmount": 2
+  },
+  {
+    "id": "grimoire",
+    "name": "Grimoire",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "OffHand",
+    "attributeModifiers": [
+      {
+        "id": "c5548c41-4d91-4f1d-981c-6238eb98222a",
+        "attributeType": "SpellPower",
+        "amount": 10,
+        "modifierType": "Flat"
+      }
+    ],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "wand",
+    "name": "Wand",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "OneHanded",
+    "attributeModifiers": [],
+    "attackSpeed": 20,
+    "magnitude": 10,
+    "magnitudeRange": 20,
+    "scalingAttribute": "SpellPower",
+    "scalingAmount": 1
+  },
+  {
+    "id": "longbow",
+    "name": "Longbow",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "TwoHanded",
+    "attributeModifiers": [],
+    "attackSpeed": 15,
+    "magnitude": 13,
+    "magnitudeRange": 25,
+    "scalingAttribute": "AttackPower",
+    "scalingAmount": 1.7
+  },
+  {
+    "id": "crossbow",
+    "name": "Crossbow",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "TwoHanded",
+    "attributeModifiers": [],
+    "attackSpeed": 20,
+    "magnitude": 10,
+    "magnitudeRange": 40,
+    "scalingAttribute": "AttackPower",
+    "scalingAmount": 1.5
+  },
+  {
+    "id": "gauntlets",
+    "name": "Gauntlets",
+    "description": "",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "TwoHanded",
+    "attributeModifiers": [],
+    "attackSpeed": 25,
+    "magnitude": 12,
+    "magnitudeRange": 20,
+    "scalingAttribute": "AttackPower",
+    "scalingAmount": 1.3
   }
 ]

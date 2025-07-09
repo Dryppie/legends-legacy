@@ -62,7 +62,9 @@ export class ItemsComponent implements OnInit {
       // Equipment-specific
       equipmentType: [null],
       attributeModifiers: this.fb.array([]),
+      attackSpeed: [0, [Validators.required, Validators.min(0)]],
       magnitude: [0, [Validators.required, Validators.min(0)]],
+      magnitudeRange: [0, [Validators.required, Validators.min(0)]],
       scalingAttribute: [null, Validators.required],
       scalingAmount: [0, [Validators.required, Validators.min(0)]],
       // Essence-specific
@@ -102,11 +104,11 @@ export class ItemsComponent implements OnInit {
       itemType: null,
       description: '',
       equipmentType: null,
+      attackSpeed: 0,
       magnitude: 0,
+      magnitudeRange: 0,
       scalingAttribute: null,
       scalingAmount: 0,
-      attackSpeed: 0,
-      magnitudeRange: 0,
       essence: null,
     });
     // clear modifiers array
