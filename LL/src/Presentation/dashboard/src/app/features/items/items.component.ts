@@ -132,6 +132,7 @@ export class ItemsComponent implements OnInit {
           this.fb.group({
             attributeType: [m.attributeType, Validators.required],
             amount: [m.amount, Validators.required],
+            modifierType: [m.modifierType, Validators.required],
           }),
         );
       });
@@ -147,6 +148,7 @@ export class ItemsComponent implements OnInit {
       this.fb.group({
         attributeType: ['', Validators.required],
         amount: [0, Validators.required],
+        modifierType: ['', Validators.required],
       }),
     );
   }
