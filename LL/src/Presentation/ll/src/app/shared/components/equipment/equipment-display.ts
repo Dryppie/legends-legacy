@@ -43,7 +43,6 @@ export function mapInstanceToDisplay(
   inst: EquipmentInstance,
 ): EquipmentDisplay {
   const base = inst.equipmentBase;
-  console.log(base);
   return {
     name: base.name,
     rarity: inst.rarity ?? base.rarity,

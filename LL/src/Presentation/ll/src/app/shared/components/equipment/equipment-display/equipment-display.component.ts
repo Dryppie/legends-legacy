@@ -21,7 +21,6 @@ export class EquipmentDisplayComponent {
   data!: EquipmentDisplay;
 
   ngOnChanges(): void {
-    console.log(this.item);
     this.data = isInstance(this.item)
       ? mapInstanceToDisplay(this.item)
       : mapEquipmentToDisplay(this.item);
