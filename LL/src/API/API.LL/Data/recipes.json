@@ -6073,5 +6073,1937 @@
       }
     ],
     "itemType": "Equipment"
+  },
+  {
+    "id": "918aa9f1-5868-4ac6-8020-c8d9827355c7",
+    "name": "Heavy Helm",
+    "itemId": "heavy_helm",
+    "item": {
+      "id": "heavy_helm",
+      "name": "Heavy Helm",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "Head",
+      "attributeModifiers": [],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "ArmorForging",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "e7ef5edf-fa27-4045-9937-eb6f7be80668",
+    "name": "Heavy Breastplate",
+    "itemId": "heavy_breastplate",
+    "item": {
+      "id": "heavy_breastplate",
+      "name": "Heavy Breastplate",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "Chest",
+      "attributeModifiers": [],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "ArmorForging",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "7bccae5a-8533-45e8-b378-73c04ffd9e2b",
+    "name": "Heavy Legplates",
+    "itemId": "heavy_legplates",
+    "item": {
+      "id": "heavy_legplates",
+      "name": "Heavy Legplates",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "Legs",
+      "attributeModifiers": [],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "ArmorForging",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "a99da7aa-31e5-4d70-a21a-252ac41f609d",
+    "name": "Medium Helm",
+    "itemId": "medium_helm",
+    "item": {
+      "id": "medium_helm",
+      "name": "Medium Helm",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "Head",
+      "attributeModifiers": [],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "ArmorForging",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "98775811-9a72-4f58-867e-5824a94a2fbd",
+    "name": "Medium Mail",
+    "itemId": "medium_mail",
+    "item": {
+      "id": "medium_mail",
+      "name": "Medium Mail",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "Chest",
+      "attributeModifiers": [],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "ArmorForging",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "3de1cb0c-ede7-42ee-a783-c0d3fd498243",
+    "name": "Medium Greaves",
+    "itemId": "medium_greaves",
+    "item": {
+      "id": "medium_greaves",
+      "name": "Medium Greaves",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "Legs",
+      "attributeModifiers": [],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "ArmorForging",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "3b445d2b-0a1d-4215-b0a5-ecce62337f4b",
+    "name": "Light Hood",
+    "itemId": "light_hood",
+    "item": {
+      "id": "light_hood",
+      "name": "Light Hood",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "Head",
+      "attributeModifiers": [],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "ArmorForging",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "9108949b-3c4f-49e1-8493-c1d919b18915",
+    "name": "Light Vest",
+    "itemId": "light_vest",
+    "item": {
+      "id": "light_vest",
+      "name": "Light Vest",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "Chest",
+      "attributeModifiers": [],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "ArmorForging",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "51aa450c-04b3-4e3e-8a49-cb0a9e2c1578",
+    "name": "Light Legwraps",
+    "itemId": "light_leggings",
+    "item": {
+      "id": "light_leggings",
+      "name": "Light Legwraps",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "Legs",
+      "attributeModifiers": [],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "ArmorForging",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "419f3ff7-ed48-4f79-a457-e06c046902f2",
+    "name": "Cloth Cowl",
+    "itemId": "cloth_cowl",
+    "item": {
+      "id": "cloth_cowl",
+      "name": "Cloth Cowl",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "Head",
+      "attributeModifiers": [],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "ArmorForging",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "1599c505-4c7f-4c78-bf6b-640f90edb8c5",
+    "name": "Cloth Robe",
+    "itemId": "cloth_robe",
+    "item": {
+      "id": "cloth_robe",
+      "name": "Cloth Robe",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "Chest",
+      "attributeModifiers": [],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "ArmorForging",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "e90c9fa3-d2be-4dd4-8a36-795c0629738b",
+    "name": "Cloth Pants",
+    "itemId": "cloth_pants",
+    "item": {
+      "id": "cloth_pants",
+      "name": "Cloth Pants",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "Legs",
+      "attributeModifiers": [],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "ArmorForging",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "2a5b101b-19b4-4ad1-84f6-52adaa948b89",
+    "name": "Band of Fury",
+    "itemId": "band_of_fury",
+    "item": {
+      "id": "band_of_fury",
+      "name": "Band of Fury",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "Ring",
+      "attributeModifiers": [
+        {
+          "attributeType": "AttackPower",
+          "amount": 10,
+          "modifierType": "Additive"
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "JewelryCrafting",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "a996d36e-a1fe-441e-9038-7e3dbdb233d3",
+    "name": "Band of Arcane",
+    "itemId": "band_of_arcane",
+    "item": {
+      "id": "band_of_arcane",
+      "name": "Band of Arcane",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "Ring",
+      "attributeModifiers": [
+        {
+          "attributeType": "SpellPower",
+          "amount": 10,
+          "modifierType": "Additive"
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "JewelryCrafting",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "c94a17c9-a8b3-459c-8685-5de1ce595da2",
+    "name": "Band of Execution",
+    "itemId": "band_of_execution",
+    "item": {
+      "id": "band_of_execution",
+      "name": "Band of Execution",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "Ring",
+      "attributeModifiers": [
+        {
+          "attributeType": "CritDamage",
+          "amount": 10,
+          "modifierType": "Additive"
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "JewelryCrafting",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "bafce315-48f7-4a7c-81c7-921db8e965b0",
+    "name": "Amulet of Aegis",
+    "itemId": "amulet_of_aegis",
+    "item": {
+      "id": "amulet_of_aegis",
+      "name": "Amulet of Aegis",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "Necklace",
+      "attributeModifiers": [
+        {
+          "attributeType": "PhysicalDefense",
+          "amount": 10,
+          "modifierType": "Additive"
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "JewelryCrafting",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "0325d114-54af-4548-b106-f6c56ffa5a16",
+    "name": "Charm of the Warden",
+    "itemId": "charm_of_the_warden",
+    "item": {
+      "id": "charm_of_the_warden",
+      "name": "Charm of the Warden",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "Necklace",
+      "attributeModifiers": [
+        {
+          "attributeType": "MagicalDefense",
+          "amount": 10,
+          "modifierType": "Additive"
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "JewelryCrafting",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "1574077e-2d64-49fc-9cd9-c8c22aaa7493",
+    "name": "Talisman of Endurance",
+    "itemId": "talisman_of_endurance",
+    "item": {
+      "id": "talisman_of_endurance",
+      "name": "Talisman of Endurance",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "Necklace",
+      "attributeModifiers": [
+        {
+          "attributeType": "MaxHealth",
+          "amount": 10,
+          "modifierType": "Additive"
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "JewelryCrafting",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "4b7ab3b4-800e-4ad6-b06e-fc35cd64819e",
+    "name": "Phoenix Vial",
+    "itemId": "phoenix_vial",
+    "item": {
+      "id": "phoenix_vial",
+      "name": "Phoenix Vial",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "Relic",
+      "attributeModifiers": [
+        {
+          "attributeType": "HealthRegeneration",
+          "amount": 10,
+          "modifierType": "Additive"
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "JewelryCrafting",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "3e301ebf-006d-4518-94fe-a9014a532c04",
+    "name": "Mana Heart",
+    "itemId": "mana_heart",
+    "item": {
+      "id": "mana_heart",
+      "name": "Mana Heart",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "Relic",
+      "attributeModifiers": [
+        {
+          "attributeType": "ManaRegeneration",
+          "amount": 10,
+          "modifierType": "Additive"
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "JewelryCrafting",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "9344ad6b-8721-4c99-81d4-00ca1a92f748",
+    "name": "Primal Totem",
+    "itemId": "primal_totem",
+    "item": {
+      "id": "primal_totem",
+      "name": "Primal Totem",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "Relic",
+      "attributeModifiers": [
+        {
+          "attributeType": "Threat",
+          "amount": 10,
+          "modifierType": "Additive"
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "JewelryCrafting",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "b7fadf85-9ff3-4aae-8ec8-b272089b9b03",
+    "name": "Shortsword",
+    "itemId": "shortsword",
+    "item": {
+      "id": "shortsword",
+      "name": "Shortsword",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "OneHanded",
+      "attributeModifiers": [],
+      "magnitude": 10,
+      "scalingAttribute": "AttackPower",
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": "WeaponSmithing",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "69419ef0-8cee-4518-ac9e-25b327ccfac3",
+    "name": "Hatchet",
+    "itemId": "hatchet",
+    "item": {
+      "id": "hatchet",
+      "name": "Hatchet",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "OneHanded",
+      "attributeModifiers": [],
+      "magnitude": 10,
+      "scalingAttribute": "AttackPower",
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": "WeaponSmithing",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "2362449c-54ce-4914-9799-62907dc36126",
+    "name": "Mace",
+    "itemId": "mace",
+    "item": {
+      "id": "mace",
+      "name": "Mace",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "OneHanded",
+      "attributeModifiers": [],
+      "magnitude": 10,
+      "scalingAttribute": "AttackPower",
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": "WeaponSmithing",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "7151eb1f-4fc6-4853-aab4-7169336f6775",
+    "name": "Dagger",
+    "itemId": "dagger",
+    "item": {
+      "id": "dagger",
+      "name": "Dagger",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "OneHanded",
+      "attributeModifiers": [],
+      "magnitude": 8,
+      "scalingAttribute": "AttackPower",
+      "scalingAmount": 0.8
+    },
+    "quantity": 1,
+    "craftType": "WeaponSmithing",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "ac864e87-1021-4d84-8cb8-cb14077bbf1b",
+    "name": "Greatsword",
+    "itemId": "greatsword",
+    "item": {
+      "id": "greatsword",
+      "name": "Greatsword",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "TwoHanded",
+      "attributeModifiers": [],
+      "magnitude": 15,
+      "scalingAttribute": "AttackPower",
+      "scalingAmount": 2
+    },
+    "quantity": 1,
+    "craftType": "WeaponSmithing",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "9be8e1dc-98c8-4477-ae0a-6a41799ce246",
+    "name": "Battle Axe",
+    "itemId": "battle_axe",
+    "item": {
+      "id": "battle_axe",
+      "name": "Battle Axe",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "TwoHanded",
+      "attributeModifiers": [],
+      "magnitude": 15,
+      "scalingAttribute": "AttackPower",
+      "scalingAmount": 2
+    },
+    "quantity": 1,
+    "craftType": "WeaponSmithing",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "010765bd-9b46-4147-9013-00c855f9c1b4",
+    "name": "Maul",
+    "itemId": "maul",
+    "item": {
+      "id": "maul",
+      "name": "Maul",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "TwoHanded",
+      "attributeModifiers": [],
+      "magnitude": 15,
+      "scalingAttribute": "AttackPower",
+      "scalingAmount": 2
+    },
+    "quantity": 1,
+    "craftType": "WeaponSmithing",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "9cc81f2b-7b8e-4dd0-be45-7ff32fa97da2",
+    "name": "Spear",
+    "itemId": "spear",
+    "item": {
+      "id": "spear",
+      "name": "Spear",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "TwoHanded",
+      "attributeModifiers": [],
+      "magnitude": 14,
+      "scalingAttribute": "AttackPower",
+      "scalingAmount": 1.8
+    },
+    "quantity": 1,
+    "craftType": "WeaponSmithing",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "62d8a5d6-5c1a-4393-9d0b-2a765dc6431d",
+    "name": "Towershield",
+    "itemId": "towershield",
+    "item": {
+      "id": "towershield",
+      "name": "Towershield",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "OffHand",
+      "attributeModifiers": [
+        {
+          "attributeType": "PhysicalDefense",
+          "amount": 10,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "Block",
+          "amount": 50,
+          "modifierType": "Flat"
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "WeaponSmithing",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "fc1e6931-c552-44b9-96e9-412a2e24a1fa",
+    "name": "Manaward",
+    "itemId": "manaward",
+    "item": {
+      "id": "manaward",
+      "name": "Manaward",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "OffHand",
+      "attributeModifiers": [
+        {
+          "attributeType": "MagicalDefense",
+          "amount": 10,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "Block",
+          "amount": 50,
+          "modifierType": "Flat"
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "WeaponSmithing",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "f6b45215-340d-491b-ae16-9b4824cdd33b",
+    "name": "Staff",
+    "itemId": "staff",
+    "item": {
+      "id": "staff",
+      "name": "Staff",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "TwoHanded",
+      "attributeModifiers": [],
+      "magnitude": 15,
+      "scalingAttribute": "SpellPower",
+      "scalingAmount": 2
+    },
+    "quantity": 1,
+    "craftType": "WeaponSmithing",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "eb72b55f-4feb-4ee6-a0b4-da00f426e261",
+    "name": "Grimoire",
+    "itemId": "grimoire",
+    "item": {
+      "id": "grimoire",
+      "name": "Grimoire",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "OffHand",
+      "attributeModifiers": [
+        {
+          "attributeType": "SpellPower",
+          "amount": 10,
+          "modifierType": "Flat"
+        }
+      ],
+      "magnitude": 0,
+      "scalingAttribute": "MaxHealth",
+      "scalingAmount": 0
+    },
+    "quantity": 1,
+    "craftType": "WeaponSmithing",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "de0d743b-2835-48f6-bdac-d2ab38875dbf",
+    "name": "Wand",
+    "itemId": "wand",
+    "item": {
+      "id": "wand",
+      "name": "Wand",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "OneHanded",
+      "attributeModifiers": [],
+      "magnitude": 10,
+      "scalingAttribute": "SpellPower",
+      "scalingAmount": 1
+    },
+    "quantity": 1,
+    "craftType": "WeaponSmithing",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "dfedb767-155c-4956-aa48-17fb85848788",
+    "name": "Longbow",
+    "itemId": "longbow",
+    "item": {
+      "id": "longbow",
+      "name": "Longbow",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "TwoHanded",
+      "attributeModifiers": [],
+      "magnitude": 13,
+      "scalingAttribute": "AttackPower",
+      "scalingAmount": 1.7
+    },
+    "quantity": 1,
+    "craftType": "WeaponSmithing",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "46eeccf3-7c89-46d2-ac24-1f5c72daf1b8",
+    "name": "Crossbow",
+    "itemId": "crossbow",
+    "item": {
+      "id": "crossbow",
+      "name": "Crossbow",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "TwoHanded",
+      "attributeModifiers": [],
+      "magnitude": 10,
+      "scalingAttribute": "AttackPower",
+      "scalingAmount": 1.5
+    },
+    "quantity": 1,
+    "craftType": "WeaponSmithing",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
+  },
+  {
+    "id": "fc619677-cc30-4da3-8949-f151cbe72d57",
+    "name": "Gauntlets",
+    "itemId": "gauntlets",
+    "item": {
+      "id": "gauntlets",
+      "name": "Gauntlets",
+      "description": "",
+      "stackable": false,
+      "itemType": "Equipment",
+      "rarity": "Common",
+      "equipmentType": "TwoHanded",
+      "attributeModifiers": [],
+      "magnitude": 12,
+      "scalingAttribute": "AttackPower",
+      "scalingAmount": 1.3
+    },
+    "quantity": 1,
+    "craftType": "WeaponSmithing",
+    "levelRequirement": 1,
+    "materials": [
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "ore",
+        "item": {
+          "id": "ore",
+          "name": "Ore",
+          "description": "Mining material - Ore can be found in \u0027Vein\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      },
+      {
+        "recipeId": "00000000-0000-0000-0000-000000000000",
+        "quantity": 10,
+        "itemId": "wood",
+        "item": {
+          "id": "wood",
+          "name": "Wood",
+          "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
+          "stackable": true,
+          "itemType": "Material",
+          "rarity": "Common"
+        }
+      }
+    ],
+    "itemType": "Equipment"
   }
 ]
