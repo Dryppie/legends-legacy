@@ -17,7 +17,6 @@ import {
   ItemInstance,
 } from '../../../../../shared/models/item';
 import { InventoryDto } from '../../../../../shared/models/Dtos/inventoryDto';
-import { AttributeTypeFormatPipe } from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import {
   CharacterActionDto,
   StartCraftingActionRequest,
@@ -38,7 +37,6 @@ import { EquipmentDisplayComponent } from '../../../../../shared/components/equi
     NgFor,
     NgIf,
     NgClass,
-    AttributeTypeFormatPipe,
     SlicePipe,
     ItemComponent,
     EquipmentDisplayComponent,
