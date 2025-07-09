@@ -131,8 +131,8 @@ public static class SeedProfessions
 
         var willowGatheringNode = new GatheringNode
         {
-            Id = "woodcutting_young_willow",
-            Name = "Young Willow",
+            Id = "woodcutting_tree",
+            Name = "Tree",
             LevelRequirement = 1,
             ProfessionType = ProfessionType.Woodcutting,
             LootTableId = willowRoot.Id

@@ -943,10 +943,16 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Items.ItemBase");
 
+                    b.Property<int>("AttackSpeed")
+                        .HasColumnType("integer");
+
                     b.Property<int>("EquipmentType")
                         .HasColumnType("integer");
 
                     b.Property<int>("Magnitude")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MagnitudeRange")
                         .HasColumnType("integer");
 
                     b.Property<float>("ScalingAmount")
