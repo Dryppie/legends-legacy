@@ -13,7 +13,9 @@ public static class EquipmentMapper
         Stackable = r.Stackable,
         EquipmentType = r.EquipmentType,
         AttributeModifiers = r.AttributeModifiers.Select(a => a.ToDto()).ToList(),
+        AttackSpeed = r.AttackSpeed,
         Magnitude = r.Magnitude,
+        MagnitudeRange = r.MagnitudeRange,
         ScalingAttribute = r.ScalingAttribute,
         ScalingAmount = r.ScalingAmount
     };
@@ -28,7 +30,9 @@ public static class EquipmentMapper
         Stackable = dto.Stackable,
         EquipmentType = dto.EquipmentType,
         AttributeModifiers = dto.AttributeModifiers.Select(a => a.ToEntity()).ToList(),
+        AttackSpeed = dto.AttackSpeed,
         Magnitude = dto.Magnitude,
+        MagnitudeRange = dto.MagnitudeRange,
         ScalingAttribute = dto.ScalingAttribute,
         ScalingAmount = dto.ScalingAmount,
     };

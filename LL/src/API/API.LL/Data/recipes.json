@@ -23,7 +23,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -105,7 +107,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -187,7 +191,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -274,7 +280,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -356,7 +364,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -438,7 +448,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -525,7 +537,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -607,7 +621,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -689,7 +705,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -776,7 +794,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -858,7 +878,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -940,7 +962,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1022,7 +1046,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1091,7 +1117,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1160,7 +1188,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1229,7 +1259,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1298,7 +1330,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1367,7 +1401,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1436,7 +1472,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1492,7 +1530,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1548,7 +1588,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1609,7 +1651,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1691,7 +1735,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1773,7 +1819,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1855,7 +1903,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1942,7 +1992,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2024,7 +2076,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2111,7 +2165,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2198,7 +2254,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2285,7 +2343,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2372,7 +2432,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2454,7 +2516,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 5,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -2536,7 +2600,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2618,7 +2684,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2700,7 +2768,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2782,7 +2852,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2869,7 +2941,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2956,7 +3030,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -3043,7 +3119,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3125,7 +3203,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3207,7 +3287,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3294,7 +3376,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3381,7 +3465,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3463,7 +3549,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3550,7 +3638,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3632,7 +3722,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3714,7 +3806,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3801,7 +3895,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3883,7 +3979,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3970,7 +4068,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -4052,7 +4152,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -4126,7 +4228,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -4200,7 +4304,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -4269,7 +4375,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -4338,7 +4446,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -4412,7 +4522,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -4486,7 +4598,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -4542,7 +4656,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -4598,7 +4714,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -4659,7 +4777,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 10,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -4741,7 +4861,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 10,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -4823,7 +4945,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 10,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -4905,7 +5029,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 10,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -4992,7 +5118,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 10,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5074,7 +5202,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 10,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5156,7 +5286,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 10,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5243,7 +5375,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 10,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5330,7 +5464,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 10,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5417,7 +5553,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 10,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5499,7 +5637,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 10,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5586,7 +5726,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 10,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5668,7 +5810,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 10,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5755,7 +5899,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 10,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5837,7 +5983,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 10,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5924,7 +6072,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 10,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -6011,7 +6161,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 10,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -6087,7 +6239,9 @@
       "rarity": "Common",
       "equipmentType": "Head",
       "attributeModifiers": [],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6137,7 +6291,9 @@
       "rarity": "Common",
       "equipmentType": "Chest",
       "attributeModifiers": [],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6187,7 +6343,9 @@
       "rarity": "Common",
       "equipmentType": "Legs",
       "attributeModifiers": [],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6237,7 +6395,9 @@
       "rarity": "Common",
       "equipmentType": "Head",
       "attributeModifiers": [],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6287,7 +6447,9 @@
       "rarity": "Common",
       "equipmentType": "Chest",
       "attributeModifiers": [],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6337,7 +6499,9 @@
       "rarity": "Common",
       "equipmentType": "Legs",
       "attributeModifiers": [],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6387,7 +6551,9 @@
       "rarity": "Common",
       "equipmentType": "Head",
       "attributeModifiers": [],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6437,7 +6603,9 @@
       "rarity": "Common",
       "equipmentType": "Chest",
       "attributeModifiers": [],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6487,7 +6655,9 @@
       "rarity": "Common",
       "equipmentType": "Legs",
       "attributeModifiers": [],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6537,7 +6707,9 @@
       "rarity": "Common",
       "equipmentType": "Head",
       "attributeModifiers": [],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6587,7 +6759,9 @@
       "rarity": "Common",
       "equipmentType": "Chest",
       "attributeModifiers": [],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6637,7 +6811,9 @@
       "rarity": "Common",
       "equipmentType": "Legs",
       "attributeModifiers": [],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6693,7 +6869,9 @@
           "modifierType": "Additive"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6749,7 +6927,9 @@
           "modifierType": "Additive"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6805,7 +6985,9 @@
           "modifierType": "Additive"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6861,7 +7043,9 @@
           "modifierType": "Additive"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6917,7 +7101,9 @@
           "modifierType": "Additive"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6973,7 +7159,9 @@
           "modifierType": "Additive"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -7029,7 +7217,9 @@
           "modifierType": "Additive"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -7085,7 +7275,9 @@
           "modifierType": "Additive"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -7141,7 +7333,9 @@
           "modifierType": "Additive"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -7191,7 +7385,9 @@
       "rarity": "Common",
       "equipmentType": "OneHanded",
       "attributeModifiers": [],
+      "attackSpeed": 20,
       "magnitude": 10,
+      "magnitudeRange": 20,
       "scalingAttribute": "AttackPower",
       "scalingAmount": 1
     },
@@ -7241,7 +7437,9 @@
       "rarity": "Common",
       "equipmentType": "OneHanded",
       "attributeModifiers": [],
+      "attackSpeed": 20,
       "magnitude": 10,
+      "magnitudeRange": 30,
       "scalingAttribute": "AttackPower",
       "scalingAmount": 1
     },
@@ -7291,7 +7489,9 @@
       "rarity": "Common",
       "equipmentType": "OneHanded",
       "attributeModifiers": [],
+      "attackSpeed": 20,
       "magnitude": 10,
+      "magnitudeRange": 25,
       "scalingAttribute": "AttackPower",
       "scalingAmount": 1
     },
@@ -7341,7 +7541,9 @@
       "rarity": "Common",
       "equipmentType": "OneHanded",
       "attributeModifiers": [],
+      "attackSpeed": 24,
       "magnitude": 8,
+      "magnitudeRange": 15,
       "scalingAttribute": "AttackPower",
       "scalingAmount": 0.8
     },
@@ -7391,7 +7593,9 @@
       "rarity": "Common",
       "equipmentType": "TwoHanded",
       "attributeModifiers": [],
+      "attackSpeed": 10,
       "magnitude": 15,
+      "magnitudeRange": 30,
       "scalingAttribute": "AttackPower",
       "scalingAmount": 2
     },
@@ -7441,7 +7645,9 @@
       "rarity": "Common",
       "equipmentType": "TwoHanded",
       "attributeModifiers": [],
+      "attackSpeed": 10,
       "magnitude": 15,
+      "magnitudeRange": 50,
       "scalingAttribute": "AttackPower",
       "scalingAmount": 2
     },
@@ -7491,7 +7697,9 @@
       "rarity": "Common",
       "equipmentType": "TwoHanded",
       "attributeModifiers": [],
+      "attackSpeed": 10,
       "magnitude": 15,
+      "magnitudeRange": 40,
       "scalingAttribute": "AttackPower",
       "scalingAmount": 2
     },
@@ -7541,7 +7749,9 @@
       "rarity": "Common",
       "equipmentType": "TwoHanded",
       "attributeModifiers": [],
+      "attackSpeed": 12,
       "magnitude": 14,
+      "magnitudeRange": 25,
       "scalingAttribute": "AttackPower",
       "scalingAmount": 1.8
     },
@@ -7602,7 +7812,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -7663,7 +7875,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -7713,7 +7927,9 @@
       "rarity": "Common",
       "equipmentType": "TwoHanded",
       "attributeModifiers": [],
+      "attackSpeed": 10,
       "magnitude": 15,
+      "magnitudeRange": 35,
       "scalingAttribute": "SpellPower",
       "scalingAmount": 2
     },
@@ -7769,7 +7985,9 @@
           "modifierType": "Flat"
         }
       ],
+      "attackSpeed": 0,
       "magnitude": 0,
+      "magnitudeRange": 0,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -7819,7 +8037,9 @@
       "rarity": "Common",
       "equipmentType": "OneHanded",
       "attributeModifiers": [],
+      "attackSpeed": 20,
       "magnitude": 10,
+      "magnitudeRange": 20,
       "scalingAttribute": "SpellPower",
       "scalingAmount": 1
     },
@@ -7869,7 +8089,9 @@
       "rarity": "Common",
       "equipmentType": "TwoHanded",
       "attributeModifiers": [],
+      "attackSpeed": 15,
       "magnitude": 13,
+      "magnitudeRange": 25,
       "scalingAttribute": "AttackPower",
       "scalingAmount": 1.7
     },
@@ -7919,7 +8141,9 @@
       "rarity": "Common",
       "equipmentType": "TwoHanded",
       "attributeModifiers": [],
+      "attackSpeed": 20,
       "magnitude": 10,
+      "magnitudeRange": 40,
       "scalingAttribute": "AttackPower",
       "scalingAmount": 1.5
     },
@@ -7969,7 +8193,9 @@
       "rarity": "Common",
       "equipmentType": "TwoHanded",
       "attributeModifiers": [],
+      "attackSpeed": 25,
       "magnitude": 12,
+      "magnitudeRange": 20,
       "scalingAttribute": "AttackPower",
       "scalingAmount": 1.3
     },

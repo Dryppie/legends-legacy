@@ -24,6 +24,29 @@
           >
             {{ selectedRecipe.item.description }}
           </div>
+          <!-- Weapon stats -->
+          <div *ngIf="selectedRecipe.item.magnitudeRange">
+            <div class="text-sm">Base Damage</div>
+            <div class="flex items-center gap-1 text-sm">
+              {{
+                selectedRecipe.item.magnitude *
+                  (1 - selectedRecipe.item.magnitudeRange / 100)
+                  | number: "1.0-0"
+              }}-{{
+                selectedRecipe.item.magnitude *
+                  (1 + selectedRecipe.item.magnitudeRange / 100)
+                  | number: "1.0-0"
+              }}
+              ({{ selectedRecipe.item.scalingAmount * 100 }}%
+              {{ selectedRecipe.item.scalingAttribute | attributeTypeFormat }})
+            </div>
+          </div>
+          <div *ngIf="selectedRecipe.item.attackSpeed">
+            <div class="text-sm">Attack Speed</div>
+            <div class="flex items-center gap-1 text-sm">
+              {{ 60 / selectedRecipe.item.attackSpeed }}s
+            </div>
+          </div>
           <!-- Attributes -->
           <div *ngIf="selectedRecipe.item.attributeModifiers.length > 0">
             <div class="mb-1">Attributes:</div>

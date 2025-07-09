@@ -1,4 +1,4 @@
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, computed, Input, signal, Signal } from '@angular/core';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { Recipe } from '../../../../../shared/models/profession';
@@ -40,6 +40,7 @@ function consumeMaterials(
     AttributeTypeFormatPipe,
     RegularButtonComponent,
     NumberFormatPipe,
+    DecimalPipe,
   ],
   templateUrl: './regular-crafting.component.html',
 })
@@ -98,6 +99,7 @@ export class RegularCraftingComponent {
   }
 
   selectRecipe(recipe: Recipe): void {
+    console.log(recipe.item);
     this.selectedRecipeId.set(recipe.id);
   }
 

@@ -30,7 +30,9 @@ export interface ItemBase {
 export interface Equipment extends ItemBase {
   equipmentType: EquipmentType;
   attributeModifiers: AttributeModifier[];
+  attackSpeed: number;
   magnitude: number;
+  magnitudeRange: number;
   scalingAttribute: AttributeType;
   scalingAmount: number;
 }
