@@ -6,6 +6,7 @@ using Domain.Models.Abilities.ResourceCosts;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Services.LL.Combat.CombatEngine;
+using Services.LL.Interfaces;
 
 namespace Services.LL.Combat;
 public class CombatContext : ICombatContext
@@ -14,6 +15,7 @@ public class CombatContext : ICombatContext
     public ICombatEffectManager EffectManager { get; set; }
     public ICombatInteractionManager InteractionManager { get; set; }
     public IStatusDefinitionService StatusDefinitionService { get; set; }
+    public ICombatStatsTracker StatsTracker { get; set; }
     public ICombatEventBus EventBus { get; set; }
     private TriggerEngine _triggerEngine;
 
@@ -22,10 +24,11 @@ public class CombatContext : ICombatContext
     private const int TimeStep = 1; // Time step in milliseconds
     public int CurrentTime { get; private set; } = 0;
 
-    public CombatContext(ICombatEventBus eventBus, IStatusDefinitionService statusDefinitionService)
+    public CombatContext(ICombatEventBus eventBus, IStatusDefinitionService statusDefinitionService, ICombatStatsTracker statsTracker)
     {
         EventBus = new CombatEventBus();
         StatusDefinitionService = statusDefinitionService;
+        StatsTracker = statsTracker;
 
         EntityManager = new CombatEntityManager();
         EffectManager = new CombatEffectManager(this);
@@ -94,7 +97,8 @@ public class CombatContext : ICombatContext
         {
             EventLog = [.. _eventLog],
             Outcome = outcome,
-            Duration = CurrentTime // CurrentTime 10 (10 ticks) equals 1 second
+            Duration = CurrentTime, // CurrentTime 10 (10 ticks) equals 1 second
+            EntityStats = StatsTracker.GetSnapshot(),
         };
     }
 
@@ -430,6 +434,13 @@ public class CombatContext : ICombatContext
             //Attribute = context.Attribute,
             CombatEntity = combatEntity
         };
+
+        StatsTracker.AddLogEntry(new CombatLogEntry(
+            context.Source.OriginalId,
+            context.SourceName,
+            context.EventType,
+            context.Magnitude,
+            false));
 
         _eventLog.Add(logEntry);
     }

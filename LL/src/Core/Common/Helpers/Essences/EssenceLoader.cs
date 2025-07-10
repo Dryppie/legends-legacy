@@ -154,8 +154,6 @@ public sealed class EssenceLoader
 
     private static void SetSourceIdForEffects(Essence essence)
     {
-        if (essence is null) throw new ArgumentNullException(nameof(essence));
-
         // Helper local so we don’t repeat ourselves.
         void MarkAbility(AbilityDefinition? ability)
         {
@@ -164,21 +162,12 @@ public sealed class EssenceLoader
             {
                 foreach (var effect in trigger.Actions)
                 {
-                    SetSourceRecursive(effect, ability.Name);   // or essence.Id.ToString()
+                    effect.SourceName = ability.Name;   // or essence.Id.ToString()
                 }
             }
         }
 
         MarkAbility(essence.Passive);
         MarkAbility(essence.Active);
-    }
-
-    /// <summary>
-    /// Sets SourceId on the given effect and, if the action contains further
-    /// embedded effects, walks those recursively.
-    /// </summary>
-    private static void SetSourceRecursive(EffectDefinition effect, string sourceName)
-    {
-        effect.SourceName = sourceName;
     }
 }

@@ -44,7 +44,10 @@ public static class BasicAttackLoader
             Targeting.SingleEnemy,
             AttackType.Melee,
             DamageType.Physical)
-        { Log = "{Actor} hit {Target} with a basic attack, dealing {Amount} damage." };
+        {
+            Log = "{Actor} hit {Target} with a basic attack, dealing {Amount} damage.",
+            SourceName = equipment?.EquipmentBase.Name ?? "Unarmed Basic Attack"
+        };
 
         var abilityTrigger = new Trigger()
         {

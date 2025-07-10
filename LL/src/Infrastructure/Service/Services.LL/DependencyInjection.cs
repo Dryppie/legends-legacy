@@ -18,6 +18,7 @@ using Services.LL.CharacterActions;
 using Services.LL.Colosseum;
 using Services.LL.Combat;
 using Services.LL.Combat.CombatEngine;
+using Services.LL.Combat.Stats;
 using Services.LL.Combat.Statuses;
 using Services.LL.Entities;
 using Services.LL.Entities.Characters;
@@ -69,6 +70,7 @@ public static class DependencyInjection
         services.AddScoped<ICombatSetupService, CombatSetupService>();
         services.AddScoped<ICombatContext, CombatContext>();
         services.AddScoped<ICombatEventBus, CombatEventBus>();
+        services.AddScoped<ICombatStatsTracker, CombatStatsTracker>();
 
         services.AddScoped<ICraftingService, CraftingService>();
         services.AddScoped<ITemperingService, TemperingService>();
