@@ -22,6 +22,7 @@ public enum EventType
     DebuffExpired,
     StatusEffect,
     StatusEffectExpired,
-    Regeneration,
+    HealthRegeneration,
+    ManaRegeneration,
     Death,
 }

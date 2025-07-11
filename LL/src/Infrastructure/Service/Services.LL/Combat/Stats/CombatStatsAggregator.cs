@@ -24,7 +24,13 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
                 case EventType.Heal:
                     entity.HealingDone += item.Magnitude;
                     break;
-                    // add more global categories here
+                // add more global categories here
+                case EventType.HealthRegeneration:
+                    entity.HealthRegenerated += item.Magnitude;
+                    break;
+            case EventType.ManaRegeneration:
+                    entity.ManaRegenerated += item.Magnitude;
+                    break;
             }
 
             // ----- ability context -----------------------------------------------
@@ -78,7 +84,7 @@ public sealed class WorkEntity
 {
     public string Id { get; }
     public string Name => _firstEntityName ?? Id;
-    public int DamageDone, DamageTaken, HealingDone, HealingReceived;
+    public int DamageDone, DamageTaken, HealingDone, HealingReceived, HealthRegenerated, ManaRegenerated;
 
     private readonly Dictionary<string, WorkAbility> _abilities = new(StringComparer.Ordinal);
     private string? _firstEntityName;
@@ -97,7 +103,7 @@ public sealed class WorkEntity
             .Select(a => a.ToImmutable())
             .OrderByDescending(a => Math.Max(a.TotalDamage, a.TotalHealing))
             .ToList(),
-        DamageDone, DamageTaken, HealingDone, HealingReceived);
+        DamageDone, DamageTaken, HealingDone, HealingReceived, HealthRegenerated, ManaRegenerated);
 }
 
 public sealed class WorkAbility

@@ -99,20 +99,6 @@ public class CombatContext : ICombatContext
             Outcome = outcome,
             Duration = CurrentTime, // CurrentTime 10 (10 ticks) equals 1 second
             EntityStats = [.. StatsTracker.Aggregate(_eventLog)]
-
-            //StatsTracker.GetSnapshot().Select(kvp => new EntityStats
-            //{
-            //    EntityId = kvp.Key,
-            //    Abilities = kvp.Value.ByAbility.Select(abilityKvp => new AbilityStats
-            //    {
-            //        Name = abilityKvp.Key,
-            //        TotalDamage = abilityKvp.Value.TotalDamage,
-            //        TotalHealing = abilityKvp.Value.TotalHealing,
-            //        Hits = abilityKvp.Value.Hits,
-            //        Crits = abilityKvp.Value.Crits,
-            //    }).ToList()
-            //})
-            //.ToList()
         };
     }
 
@@ -337,7 +323,10 @@ public class CombatContext : ICombatContext
         if (entity.CombatAttributes[AttributeType.Health] > entity.CombatAttributes[AttributeType.MaxHealth]) entity.CombatAttributes[AttributeType.Health] = entity.CombatAttributes[AttributeType.MaxHealth];
         if (entity.CombatAttributes[AttributeType.Mana] > entity.CombatAttributes[AttributeType.MaxMana]) entity.CombatAttributes[AttributeType.Mana] = entity.CombatAttributes[AttributeType.MaxMana];
 
-        var combatEvent = CombatEvent(entity, entity, EventType.Regeneration, 0, $"{entity.Name} regenerated {entity.CombatAttributes[AttributeType.HealthRegeneration]} health and {entity.CombatAttributes[AttributeType.ManaRegeneration]} mana.");
+        // Log regeneration seperately so the aggregator can keep track of it
+        var combatHealthEvent = CombatEvent(entity, entity, EventType.HealthRegeneration, (int)entity.CombatAttributes[AttributeType.HealthRegeneration], $"{entity.Name} regenerated {entity.CombatAttributes[AttributeType.HealthRegeneration]} health.");
+        var combatManaEvent = CombatEvent(entity, entity, EventType.ManaRegeneration, (int)entity.CombatAttributes[AttributeType.ManaRegeneration], $"{entity.Name} regenerated {entity.CombatAttributes[AttributeType.ManaRegeneration]} mana.");
+
         var combatEntity = new SimpleCombatEntity()
         {
             Id = entity.Id,
@@ -350,7 +339,8 @@ public class CombatContext : ICombatContext
 
         if (combatEntity.Health < 0) combatEntity.Health = 0;
 
-        combatEvent.CombatEntity = combatEntity;
+        combatHealthEvent.CombatEntity = combatEntity;
+        combatManaEvent.CombatEntity = combatEntity;
     }
 
     private static void PerformHealing(CombatEntity entity, List<CombatEntity> targets)
