@@ -1,10 +1,11 @@
 ﻿namespace Domain.Models.Combat;
 public sealed class AbilityStats
 {
-    public int TotalDamage { get; private set; }
-    public int TotalHealing { get; private set; }
-    public int Hits { get; private set; }
-    public int Crits { get; private set; }
+    public string Name { get; set; } = string.Empty;
+    public int TotalDamage { get; set; }
+    public int TotalHealing { get; set; }
+    public int Hits { get; set; }
+    public int Crits { get; set; }
 
     public double AvgDamage => Hits == 0 ? 0 : (double)TotalDamage / Hits;
     public double AvgHealing => Hits == 0 ? 0 : (double)TotalHealing / Hits;

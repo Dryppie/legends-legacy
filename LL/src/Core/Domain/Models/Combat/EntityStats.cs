@@ -1,16 +1,7 @@
 ﻿namespace Domain.Models.Combat;
-public sealed class EntityStats
+public class EntityStats
 {
-    private readonly Dictionary<string, AbilityStats> _byAbility = new();
-    public IReadOnlyDictionary<string, AbilityStats> ByAbility => _byAbility;
-
-    public void Apply(CombatLogEntry entry)
-    {
-        if (!_byAbility.TryGetValue(entry.SourceName, out var stats))
-        {
-            stats = new AbilityStats();
-            _byAbility[entry.SourceName] = stats;
-        }
-        stats.Apply(entry);
-    }
+    public string EntityId { get; set; } = string.Empty;
+    public string EntityName { get; set; } = string.Empty; // Optional, but helpful for UI
+    public List<AbilityStats> Abilities { get; set; } = [];
 }

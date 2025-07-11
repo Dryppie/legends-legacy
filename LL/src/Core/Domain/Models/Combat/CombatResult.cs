@@ -6,7 +6,7 @@ public class CombatResult
     public List<SimpleCombatEntity> PlayerTeam { get; set; } = [];
     public List<SimpleCombatEntity> EnemyTeam { get; set; } = [];
     public List<CombatLogItem> EventLog { get; set; } = [];
-    public IReadOnlyDictionary<string, EntityStats> EntityStats { get; set; } = new Dictionary<string, EntityStats>();
+    public List<EntityStats> EntityStats { get; set; } = [];
     public BattleOutcome Outcome { get; set; }
     public List<InventoryItem> Loot { get; set; } = [];
     public int ExperienceGained { get; set; }
