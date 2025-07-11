@@ -288,7 +288,8 @@ export class CombatComponent implements OnInit {
         const statusEffectExpired = true;
         this.handleStatusEffectEvent(event, statusEffectExpired);
         break;
-      case EventType.Regeneration:
+      case EventType.HealthRegeneration:
+      case EventType.ManaRegeneration:
         this.handleRegeneration(event);
         break;
       case EventType.Death:

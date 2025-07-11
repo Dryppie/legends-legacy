@@ -21,6 +21,8 @@ export interface EntityStats {
   damageTaken: number;
   healingDone: number;
   healingReceived: number;
+  healthRegenerated: number;
+  manaRegenerated: number;
 }
 
 export interface AbilityStats {

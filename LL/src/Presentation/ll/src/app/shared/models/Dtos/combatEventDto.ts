@@ -24,7 +24,8 @@ export enum EventType {
   DebuffExpired = 'DebuffExpired',
   StatusEffect = 'StatusEffect', // Dryp is stunned
   StatusEffectExpired = 'StatusEffectExpired', // Dryp is no longer stunned // Is not logged in chat. Maybe something visual instead?
-  Regeneration = 'Regeneration', // Natural regeneration every x seconds
+  HealthRegeneration = 'HealthRegeneration',
+  ManaRegeneration = 'ManaRegeneration',
   Death = 'Death',
 }
 

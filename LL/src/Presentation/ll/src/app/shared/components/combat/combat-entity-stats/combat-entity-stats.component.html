@@ -55,11 +55,21 @@
                 {{ stats.healingReceived | number }}
               </div>
             </div>
+            <div class="flex flex-col gap-1">
+              <div>
+                <span class="text-neutral-400">Health Regenerated:</span>
+                {{ stats.healthRegenerated | number }}
+              </div>
+              <div>
+                <span class="text-neutral-400">Mana Regenerated:</span>
+                {{ stats.manaRegenerated | number }}
+              </div>
+            </div>
           </div>
         </div>
-        <table class="w-full text-left text-xs">
+        <table class="w-full text-left text-sm">
           <thead>
-            <tr>
+            <tr class="text-primary">
               <th>Ability</th>
               <th>Damage</th>
               <th>Healing</th>
