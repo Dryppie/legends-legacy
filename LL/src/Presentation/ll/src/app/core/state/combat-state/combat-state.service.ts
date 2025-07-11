@@ -144,6 +144,12 @@ export class CombatStateService {
     state.update((current) => ({ ...current, ...patch }));
   }
 
+  resetCombatStateForNextBattle(type: BattleType) {
+    this.lastEventsLength[type] = 0;
+    this.setCombatOutcome(type, null);
+    this.setCombatResult(type, null);
+  }
+
   resetCombatState(type: BattleType) {
     this.lastEventsLength[type] = 0;
     this.ensureState(type).set(structuredClone(this.defaultState));

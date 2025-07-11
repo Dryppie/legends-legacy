@@ -29,16 +29,17 @@ export class CombatService {
   }
 
   clearAllCombat() {
-    this.clearCurrentCombat();
+    this.clearCurrentCombat(BattleType.IdleCombat);
   }
 
-  clearCurrentCombat() {
-    this.combatStateService.resetCombatState(BattleType.IdleCombat);
+  clearCurrentCombat(type: BattleType) {
+    this.combatStateService.resetCombatState(type);
   }
 
   startColosseumMatchSimulation(combatResult: CombatResultDto): void {
     if (!combatResult) return;
     combatResult.battleType = BattleType.Colosseum;
+    this.clearCurrentCombat(combatResult.battleType);
     this.combatStateService.setCombatActive(combatResult.battleType, true);
 
     this.simulateFight(combatResult);
@@ -48,7 +49,9 @@ export class CombatService {
     const combatResult = characterAction.combatSession?.combatResult;
     if (!combatResult) return;
     combatResult.battleType = BattleType.IdleCombat;
-    this.clearCurrentCombat();
+    this.combatStateService.resetCombatStateForNextBattle(
+      combatResult.battleType,
+    );
 
     this.combatStateService.setNextCombatIn(
       combatResult.battleType,
@@ -149,6 +152,6 @@ export class CombatService {
   }
 
   handleLogout() {
-    this.clearCurrentCombat();
+    this.clearCurrentCombat(BattleType.IdleCombat);
   }
 }

@@ -15,16 +15,22 @@ export interface CombatResultDto {
 
 export interface EntityStats {
   entityId: string;
+  entityName: string;
   abilities: AbilityStats[];
+  damageDone: number;
+  damageTaken: number;
+  healingDone: number;
+  healingReceived: number;
 }
 
 export interface AbilityStats {
-  // Define this based on your backend structure
-  name: number;
-  hits: number;
+  name: string;
   totalDamage: number;
   totalHealing: number;
-  // Add more fields as needed
+  hits: number;
+  crits: number;
+  summons: number;
+  stuns: number;
 }
 
 export interface SimpleCombatEntityDto {

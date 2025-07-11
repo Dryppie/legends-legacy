@@ -3,7 +3,6 @@ import {
   effect,
   EventEmitter,
   Input,
-  OnDestroy,
   OnInit,
   Output,
 } from '@angular/core';
@@ -85,21 +84,22 @@ export class CombatComponent implements OnInit {
     });
 
     effect(() => {
-      this.playerCharacters = this.combatStateService.getPlayerCharacters(
+      const players = this.combatStateService.getPlayerCharacters(
         this.battleType,
       )();
+      if (players) this.playerCharacters = players;
     });
 
     effect(() => {
-      this.enemyCharacters = this.combatStateService.getEnemyCharacters(
+      const enemies = this.combatStateService.getEnemyCharacters(
         this.battleType,
       )();
+      if (enemies) this.enemyCharacters = enemies;
     });
 
     effect(() => {
-      this.entityStats = this.combatStateService.getEntityStats(
-        this.battleType,
-      )();
+      const stats = this.combatStateService.getEntityStats(this.battleType)();
+      if (stats) this.entityStats = stats;
     });
 
     /** Handle combat event stream */

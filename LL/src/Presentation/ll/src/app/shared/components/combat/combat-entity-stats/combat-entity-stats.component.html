@@ -1,62 +1,79 @@
 <div
-  class="w-full rounded-lg border border-zinc-700 bg-zinc-900 p-4 text-white"
+  class="flex h-full flex-col overflow-hidden rounded-md bg-black/40 p-4 text-white"
 >
-  <div class="grid grid-cols-1 gap-4">
-    <div>
-      <div class="grid grid-cols-2 gap-4">
-        <div class="flex flex-wrap items-center gap-2">
-          <div
-            *ngFor="let entity of playerTeam"
-            [ngClass]="{
-              'bg-primary/30 hover:bg-primary/40':
-                selectedEntityId === entity.id,
-            }"
-            class="flex items-center gap-1 rounded border border-zinc-300/30 px-2 py-1 text-sm text-neutral-300 hover:bg-zinc-300/30"
-          >
-            <button (click)="selectEntity(entity.id)">
-              {{ entity.name }}
-            </button>
-          </div>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-2">
-          <div
-            *ngFor="let entity of enemyTeam"
-            [ngClass]="{
-              'bg-primary/30 hover:bg-primary/40':
-                selectedEntityId === entity.id,
-            }"
-            class="flex items-center gap-1 rounded border border-zinc-300/30 px-2 py-1 text-sm text-neutral-300 hover:bg-zinc-300/30"
-          >
-            <button (click)="selectEntity(entity.id)">
-              {{ entity.name }}
-            </button>
-          </div>
+  <div class="flex h-full flex-col gap-2">
+    <div class="grid grid-cols-2 gap-2">
+      <div class="flex flex-wrap items-center gap-2">
+        <div
+          *ngFor="let entity of playerTeam"
+          [ngClass]="{
+            'bg-primary/30 hover:bg-primary/40': selectedEntityId === entity.id,
+          }"
+          class="flex items-center gap-1 rounded border border-zinc-300/30 px-2 py-1 text-sm text-neutral-300 hover:bg-zinc-300/30"
+        >
+          <button (click)="selectEntity(entity.id)">
+            {{ entity.name }}
+          </button>
         </div>
       </div>
-      <ng-container *ngIf="selectedStats as stats">
-        <div class="rounded p-2">
-          <h3 class="text-lg font-semibold">
-            Stats for {{ selectedEntityName }}
-          </h3>
-          <table class="w-full text-left text-xs">
-            <thead>
-              <tr>
-                <th>Ability</th>
-                <th>Damage</th>
-                <th>Healing</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let ability of stats.abilities">
-                <td>{{ ability.name }}</td>
-                <td>{{ ability.totalDamage | number }}</td>
-                <td>{{ ability.totalHealing | number }}</td>
-              </tr>
-            </tbody>
-          </table>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <div
+          *ngFor="let entity of enemyTeam"
+          [ngClass]="{
+            'bg-primary/30 hover:bg-primary/40': selectedEntityId === entity.id,
+          }"
+          class="flex items-center gap-1 rounded border border-zinc-300/30 px-2 py-1 text-sm text-neutral-300 hover:bg-zinc-300/30"
+        >
+          <button (click)="selectEntity(entity.id)">
+            {{ entity.name }}
+          </button>
         </div>
-      </ng-container>
+      </div>
     </div>
+    <ng-container *ngIf="selectedStats as stats">
+      <div class="flex flex-col gap-2 overflow-y-auto rounded p-2">
+        <div class="text-sm text-white">
+          <div class="flex flex-wrap gap-2">
+            <div class="flex flex-col gap-1">
+              <div>
+                <span class="text-neutral-400">Damage Done:</span>
+                {{ stats.damageDone | number }}
+              </div>
+              <div>
+                <span class="text-neutral-400">Damage Taken:</span>
+                {{ stats.damageTaken | number }}
+              </div>
+            </div>
+            <div class="flex flex-col gap-1">
+              <div>
+                <span class="text-neutral-400">Healing Done:</span>
+                {{ stats.healingDone | number }}
+              </div>
+              <div>
+                <span class="text-neutral-400">Healing Received:</span>
+                {{ stats.healingReceived | number }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <table class="w-full text-left text-xs">
+          <thead>
+            <tr>
+              <th>Ability</th>
+              <th>Damage</th>
+              <th>Healing</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let ability of stats.abilities">
+              <td>{{ ability.name }}</td>
+              <td>{{ ability.totalDamage | number }}</td>
+              <td>{{ ability.totalHealing | number }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </ng-container>
   </div>
 </div>
