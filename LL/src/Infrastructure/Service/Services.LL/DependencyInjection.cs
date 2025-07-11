@@ -70,7 +70,7 @@ public static class DependencyInjection
         services.AddScoped<ICombatSetupService, CombatSetupService>();
         services.AddScoped<ICombatContext, CombatContext>();
         services.AddScoped<ICombatEventBus, CombatEventBus>();
-        services.AddScoped<ICombatStatsTracker, CombatStatsTracker>();
+        services.AddScoped<ICombatStatsAggregator, CombatStatsAggregator>();
 
         services.AddScoped<ICraftingService, CraftingService>();
         services.AddScoped<ITemperingService, TemperingService>();

@@ -15,7 +15,7 @@ public class CombatContext : ICombatContext
     public ICombatEffectManager EffectManager { get; set; }
     public ICombatInteractionManager InteractionManager { get; set; }
     public IStatusDefinitionService StatusDefinitionService { get; set; }
-    public ICombatStatsTracker StatsTracker { get; set; }
+    public ICombatStatsAggregator StatsTracker { get; set; }
     public ICombatEventBus EventBus { get; set; }
     private TriggerEngine _triggerEngine;
 
@@ -24,7 +24,7 @@ public class CombatContext : ICombatContext
     private const int TimeStep = 1; // Time step in milliseconds
     public int CurrentTime { get; private set; } = 0;
 
-    public CombatContext(ICombatEventBus eventBus, IStatusDefinitionService statusDefinitionService, ICombatStatsTracker statsTracker)
+    public CombatContext(ICombatEventBus eventBus, IStatusDefinitionService statusDefinitionService, ICombatStatsAggregator statsTracker)
     {
         EventBus = new CombatEventBus();
         StatusDefinitionService = statusDefinitionService;
@@ -448,13 +448,6 @@ public class CombatContext : ICombatContext
             Magnitude = context.Magnitude,
             CombatEntity = combatEntity
         };
-
-        StatsTracker.AddLogEntry(new CombatLogEntry(
-            context.Source.Id,
-            context.SourceName,
-            context.EventType,
-            context.Magnitude,
-            false));
 
         _eventLog.Add(logEntry);
     }
