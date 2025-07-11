@@ -20,14 +20,13 @@
       <div class="flex flex-wrap items-center gap-2">
         <div
           *ngFor="let entity of enemyTeam"
+          (click)="selectEntity(entity.id)"
           [ngClass]="{
             'bg-primary/30 hover:bg-primary/40': selectedEntityId === entity.id,
           }"
-          class="flex items-center gap-1 rounded border border-zinc-300/30 px-2 py-1 text-sm text-neutral-300 hover:bg-zinc-300/30"
+          class="flex items-center gap-1 rounded border border-zinc-300/30 px-2 py-1 text-sm text-neutral-300 hover:cursor-pointer hover:bg-zinc-300/30"
         >
-          <button (click)="selectEntity(entity.id)">
-            {{ entity.name }}
-          </button>
+          {{ entity.name }}
         </div>
       </div>
     </div>
