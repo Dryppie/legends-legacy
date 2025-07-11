@@ -98,19 +98,21 @@ public class CombatContext : ICombatContext
             EventLog = [.. _eventLog],
             Outcome = outcome,
             Duration = CurrentTime, // CurrentTime 10 (10 ticks) equals 1 second
-            EntityStats = StatsTracker.GetSnapshot().Select(kvp => new EntityStats
-            {
-                EntityId = kvp.Key,
-                Abilities = kvp.Value.ByAbility.Select(abilityKvp => new AbilityStats
-                {
-                    Name = abilityKvp.Key,
-                    TotalDamage = abilityKvp.Value.TotalDamage,
-                    TotalHealing = abilityKvp.Value.TotalHealing,
-                    Hits = abilityKvp.Value.Hits,
-                    Crits = abilityKvp.Value.Crits,
-                }).ToList()
-            })
-            .ToList()
+            EntityStats = [.. StatsTracker.Aggregate(_eventLog)]
+
+            //StatsTracker.GetSnapshot().Select(kvp => new EntityStats
+            //{
+            //    EntityId = kvp.Key,
+            //    Abilities = kvp.Value.ByAbility.Select(abilityKvp => new AbilityStats
+            //    {
+            //        Name = abilityKvp.Key,
+            //        TotalDamage = abilityKvp.Value.TotalDamage,
+            //        TotalHealing = abilityKvp.Value.TotalHealing,
+            //        Hits = abilityKvp.Value.Hits,
+            //        Crits = abilityKvp.Value.Crits,
+            //    }).ToList()
+            //})
+            //.ToList()
         };
     }
 
@@ -437,13 +439,13 @@ public class CombatContext : ICombatContext
     {
         var logEntry = new CombatLogItem
         {
+            Source = context.SourceName,
             Timestamp = CurrentTime,
             ActorId = context.Source.Id,
             TargetId = context.Target.Id,
             EventType = context.EventType,
             Details = context.Details,
             Magnitude = context.Magnitude,
-            //Attribute = context.Attribute,
             CombatEntity = combatEntity
         };
 
