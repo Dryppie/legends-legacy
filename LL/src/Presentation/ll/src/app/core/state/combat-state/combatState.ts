@@ -19,5 +19,5 @@ export interface CombatState {
   combatOutcome: BattleOutcome | null;
   nextCombat: Date | null;
   isCombatActive: boolean;
-  entityStats: Record<string, EntityStats>;
+  entityStats: EntityStats[];
 }

@@ -28,7 +28,7 @@ export class CombatStateService {
     combatOutcome: null,
     nextCombat: null,
     isCombatActive: false,
-    entityStats: {},
+    entityStats: [],
   };
 
   private readonly stateMap = new Map<
@@ -91,7 +91,7 @@ export class CombatStateService {
     return (this.lastEventsLength[type] = length);
   }
 
-  setEntityStats(type: BattleType, entityStats: Record<string, EntityStats>) {
+  setEntityStats(type: BattleType, entityStats: EntityStats[]) {
     this.patchState(type, { entityStats });
   }
 

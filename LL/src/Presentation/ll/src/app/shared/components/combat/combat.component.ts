@@ -13,6 +13,7 @@ import { CombatEvent, EventType } from '../../models/Dtos/combatEventDto';
 import { NgFor, NgIf, NgStyle } from '@angular/common';
 import {
   BattleOutcome,
+  EntityStats,
   SimpleCombatEntityDto,
 } from '../../models/Dtos/combatResultDto';
 import { Subscription } from 'rxjs';
@@ -24,6 +25,7 @@ import { CombatLogComponent } from './combat-log/combat-log.component';
 import { BattleType } from '../../../core/state/combat-state/combatState';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { CombatEntityStatsComponent } from './combat-entity-stats/combat-entity-stats.component';
 
 @Component({
   selector: 'app-combat',
@@ -37,11 +39,13 @@ import { toSignal } from '@angular/core/rxjs-interop';
     CountdownComponent,
     MiniButtonComponent,
     CombatLogComponent,
+    CombatEntityStatsComponent,
   ],
   templateUrl: './combat.component.html',
 })
 export class CombatComponent implements OnInit {
   combatEvents: CombatEvent[] = [];
+  entityStats: EntityStats[] = [];
   private lastEventsLength = 0;
   @Input() battleType: BattleType = BattleType.IdleCombat;
   @Output() skipBattle = new EventEmitter<void>();
@@ -67,12 +71,15 @@ export class CombatComponent implements OnInit {
     this.currentAction = this.characterActionService.currentAction;
 
     const isLoadingSig = this.characterActionService.loadingCombat;
+
     effect(() => {
       this.isLoading = isLoadingSig();
     });
+
     const isCombatActiveSig = toSignal(this.gameService.combatActive$, {
       initialValue: false,
     });
+
     effect(() => {
       this.displayCombat = isCombatActiveSig();
     });
@@ -81,7 +88,16 @@ export class CombatComponent implements OnInit {
       this.playerCharacters = this.combatStateService.getPlayerCharacters(
         this.battleType,
       )();
+    });
+
+    effect(() => {
       this.enemyCharacters = this.combatStateService.getEnemyCharacters(
+        this.battleType,
+      )();
+    });
+
+    effect(() => {
+      this.entityStats = this.combatStateService.getEntityStats(
         this.battleType,
       )();
     });
