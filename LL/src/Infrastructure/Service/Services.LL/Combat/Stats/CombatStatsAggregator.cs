@@ -38,11 +38,15 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
             switch (item.EventType)
             {
                 case EventType.Damage:
+                case EventType.DamageOverTime:
+                case EventType.DamageCrit:
                     ability.TotalDamage += item.Magnitude;
                     ability.Hits++;
                     break;
 
                 case EventType.Heal:
+                case EventType.HealOverTime:
+                case EventType.HealCrit:
                     ability.TotalHealing += item.Magnitude;
                     ability.Hits++;
                     break;
@@ -65,9 +69,9 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
             if (item.TargetId is { Length: > 0 })
             {
                 var target = entityMap.GetOrAdd(item.TargetId, static id => new WorkEntity(id));
-                if (item.EventType == EventType.Damage)
+                if (item.EventType == EventType.Damage || item.EventType == EventType.DamageOverTime || item.EventType == EventType.DamageCrit)
                     target.DamageTaken += item.Magnitude;
-                else if (item.EventType == EventType.Heal)
+                else if (item.EventType == EventType.Heal || item.EventType == EventType.HealOverTime || item.EventType == EventType.HealCrit)
                     target.HealingReceived += item.Magnitude;
             }
         }
