@@ -436,7 +436,7 @@ public class CombatContext : ICombatContext
         };
 
         StatsTracker.AddLogEntry(new CombatLogEntry(
-            context.Source.OriginalId,
+            context.Source.Id,
             context.SourceName,
             context.EventType,
             context.Magnitude,

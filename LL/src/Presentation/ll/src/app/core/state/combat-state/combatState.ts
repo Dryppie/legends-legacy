@@ -2,6 +2,7 @@ import { CombatEvent } from '../../../shared/models/Dtos/combatEventDto';
 import {
   BattleOutcome,
   CombatResultDto,
+  EntityStats,
   SimpleCombatEntityDto,
 } from '../../../shared/models/Dtos/combatResultDto';
 
@@ -18,4 +19,5 @@ export interface CombatState {
   combatOutcome: BattleOutcome | null;
   nextCombat: Date | null;
   isCombatActive: boolean;
+  entityStats: Record<string, EntityStats>;
 }

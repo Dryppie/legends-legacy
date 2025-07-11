@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 namespace Services.LL.Combat.Stats;
 public sealed class CombatStatsTracker : ICombatStatsTracker
 {
-    private readonly ConcurrentDictionary<Guid, EntityStats> _entities = new();
+    private readonly ConcurrentDictionary<string, EntityStats> _entities = new();
 
     public void AddLogEntry(CombatLogEntry entry)
     {
@@ -13,7 +13,7 @@ public sealed class CombatStatsTracker : ICombatStatsTracker
         stats.Apply(entry);
     }
 
-    public IReadOnlyDictionary<Guid, EntityStats> GetSnapshot()
+    public IReadOnlyDictionary<string, EntityStats> GetSnapshot()
     {
         // Clone current values
         var snapshot = _entities.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);

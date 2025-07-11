@@ -8,6 +8,7 @@ import {
 import {
   BattleOutcome,
   CombatResultDto,
+  EntityStats,
   SimpleCombatEntityDto,
 } from '../../../shared/models/Dtos/combatResultDto';
 import { CombatEvent } from '../../../shared/models/Dtos/combatEventDto';
@@ -27,6 +28,7 @@ export class CombatStateService {
     combatOutcome: null,
     nextCombat: null,
     isCombatActive: false,
+    entityStats: {},
   };
 
   private readonly stateMap = new Map<
@@ -89,6 +91,10 @@ export class CombatStateService {
     return (this.lastEventsLength[type] = length);
   }
 
+  setEntityStats(type: BattleType, entityStats: Record<string, EntityStats>) {
+    this.patchState(type, { entityStats });
+  }
+
   getLastEventsLength(type: BattleType): number {
     return this.lastEventsLength[type] || 0;
   }
@@ -123,6 +129,10 @@ export class CombatStateService {
 
   getIsCombatActive(type: BattleType) {
     return computed(() => this.ensureState(type)().isCombatActive);
+  }
+
+  getEntityStats(type: BattleType) {
+    return computed(() => this.ensureState(type)().entityStats);
   }
 
   // ----------------------

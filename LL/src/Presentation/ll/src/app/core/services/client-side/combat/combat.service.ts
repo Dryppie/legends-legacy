@@ -63,7 +63,6 @@ export class CombatService {
   simulateFight(combatResult: CombatResultDto) {
     const type = combatResult.battleType;
     const combatAction = combatResult;
-
     this.combatStateService.setPlayerCharacters(type, combatResult.playerTeam);
     this.combatStateService.setEnemyCharacters(type, combatResult.enemyTeam);
 
@@ -79,6 +78,7 @@ export class CombatService {
     });
 
     this.combatStateService.setCombatResult(type, combatAction);
+    this.combatStateService.setEntityStats(type, combatAction.entityStats);
 
     const combatDurationMs = combatAction.duration * 100;
     const remainingDuration = combatStartTime + combatDurationMs + 3000 - now;

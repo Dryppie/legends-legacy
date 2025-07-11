@@ -14,7 +14,6 @@ export class CombatActionHandler {
 
   handle(action: CharacterActionDto): void {
     if (!action.combatSession) return;
-    console.log(action.combatSession.combatResult);
     this.combat.startCombatSimulation(action);
     this.summary.loadCombatSince(action.combatSession);
     const summary = action.combatSession.combatSummary;

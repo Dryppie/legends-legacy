@@ -10,6 +10,19 @@ export interface CombatResultDto {
   outcome: BattleOutcome;
   experienceGained: number;
   battleType: BattleType;
+  entityStats: Record<string, EntityStats>;
+}
+
+export interface EntityStats {
+  byAbility: Record<string, AbilityStats>; // assuming similar structure to C#
+}
+
+export interface AbilityStats {
+  // Define this based on your backend structure
+  hits: number;
+  totalDamage: number;
+  totalHealing: number;
+  // Add more fields as needed
 }
 
 export interface SimpleCombatEntityDto {
