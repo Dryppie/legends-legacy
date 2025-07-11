@@ -25,7 +25,7 @@ public static class BasicAttackLoader
         if (equipment != null)
         {
             magnitude = 5;
-            scalingAttribute = equipment.EquipmentBase.AttributeModifiers.Where(am => am.AttributeType != AttributeType.MaxHealth).First().AttributeType;
+            scalingAttribute = equipment.EquipmentBase.ScalingAttribute;
             scalingAmount = 0.1f;
             //magnitude = equipment.EquipmentBase.Magnitude;
             //scalingAttribute = equipment.EquipmentBase.ScalingAttribute;
