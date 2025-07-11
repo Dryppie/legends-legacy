@@ -47,74 +47,19 @@
   </div>
   <!-- INVENTORY ESSENCES LIST -->
   <div class="flex h-full w-full flex-col space-y-2 overflow-y-auto md:order-1">
-    <ng-container
-      *ngIf="filteredEssences() as inventoryEssences; else noEssences"
+    <app-selectable-list-filter
+      [items]="inventoryEssences()"
+      [filterOptions]="essenceFilters"
+      (select)="selectEssence($event)"
     >
-      <h2 class="flex text-primary">Essences in your inventory</h2>
-      <div class="mb-4 flex flex-wrap items-center gap-2">
-        <!-- Toggle buttons -->
-        <button
-          class="flex items-center justify-between gap-1 whitespace-nowrap text-nowrap rounded border border-zinc-300/30 px-2 py-1 text-sm text-neutral-300 hover:bg-zinc-300/30"
-          [ngClass]="{
-            'bg-primary/30 hover:bg-primary/40': filterMode() === 'all',
-          }"
-          (click)="filterMode.set('all')"
-        >
-          All
-        </button>
-
-        <button
-          class="flex items-center justify-between gap-1 whitespace-nowrap text-nowrap rounded border border-zinc-300/30 px-2 py-1 text-sm text-neutral-300 hover:bg-zinc-300/30"
-          [ngClass]="{
-            'bg-primary/30 hover:bg-primary/40':
-              filterMode() === 'already absorbed',
-          }"
-          (click)="filterMode.set('already absorbed')"
-        >
-          Already absorbed
-        </button>
-
-        <button
-          class="flex items-center justify-between gap-1 whitespace-nowrap text-nowrap rounded border border-zinc-300/30 px-2 py-1 text-sm text-neutral-300 hover:bg-zinc-300/30"
-          [ngClass]="{
-            'bg-primary/30 hover:bg-primary/40':
-              filterMode() === 'not absorbed',
-          }"
-          (click)="filterMode.set('not absorbed')"
-        >
-          Not absorbed
-        </button>
-      </div>
-      <div
-        *ngFor="let inventoryItem of inventoryEssences"
-        class="cursor-pointer rounded-lg border p-3 hover:border-primary/60 hover:bg-zinc-300/30"
-        (click)="selectEssence(inventoryItem)"
-        [class.border-primary]="
-          selectedEssence()?.id === asEssence(inventoryItem).id
-        "
-        [ngClass]="{
-          'bg-primary/10':
-            selectedEssence()?.id === asEssence(inventoryItem).id,
-          'border-primary/20':
-            selectedEssence()?.id !== asEssence(inventoryItem).id,
-        }"
-      >
+      <!-- How *one* essence row looks -->
+      <ng-template let-invItem>
         <div class="flex justify-between font-semibold text-white">
-          <div>
-            {{ inventoryItem.itemInstance.itemBase.name }}
-          </div>
-          <div>x{{ inventoryItem.quantity }}</div>
+          <div>{{ invItem.itemInstance.itemBase.essence.name }}</div>
+          <div>x{{ invItem.quantity }}</div>
         </div>
-        <!-- <div class="text-gray-400 text-sm">
-          Lv {{ essence.levelRequirement }}
-        </div> -->
-      </div>
-    </ng-container>
-    <ng-template #noEssences>
-      <p class="mt-4 text-center italic text-neutral-400">
-        You have no essences to absorb.
-      </p>
-    </ng-template>
+      </ng-template>
+    </app-selectable-list-filter>
   </div>
 </div>
 

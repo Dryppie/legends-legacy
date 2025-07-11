@@ -1,34 +1,28 @@
-import {
-  Component,
-  computed,
-  effect,
-  Input,
-  Signal,
-  signal,
-} from '@angular/core';
+import { Component, computed, effect, signal } from '@angular/core';
 import { EssenceStateService } from '../../../../../core/services/api/essences/essence-state.service';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import { Essence } from '../../../../../shared/models/essence';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { EssenceItem } from '../../../../../shared/models/item';
-import { NgFor, NgIf, NgClass } from '@angular/common';
+import { NgIf } from '@angular/common';
 import { RegularButtonComponent } from '../../../../../shared/components/buttons/regular-button/regular-button.component';
 import { EssenceDetailsComponent } from '../../../../../shared/components/essences/essence-details/essence-details.component';
 import { ItemType } from '../../../../../shared/models/enums/itemType';
 import { EssenceSlot } from '../../../../../shared/models/essenceSlot';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FilterOption } from '../../../../../shared/components/list-filters/list-filter/filter-option';
+import { SelectableListFilterComponent } from '../../../../../shared/components/list-filters/selectable-list-filter/selectable-list-filter.component';
 
 @Component({
   selector: 'app-essences-absorb',
   standalone: true,
   imports: [
-    NgFor,
     NgIf,
-    NgClass,
     ReactiveFormsModule,
     FormsModule,
     RegularButtonComponent,
     EssenceDetailsComponent,
+    SelectableListFilterComponent,
   ],
   templateUrl: './essences-absorb.component.html',
 })
@@ -61,16 +55,50 @@ export class EssencesAbsorbComponent {
       : null;
   });
 
+  private readonly absorbedNames = computed(
+    () =>
+      new Set(
+        this.absorbedEssence()
+          .map((s) => s.occupiedEssence?.name)
+          .filter(Boolean), // drop undefined
+      ),
+  );
+
+  /** Filter predicates packaged for a generic filter component. */
+  readonly essenceFilters: FilterOption<InventoryItem>[] = [
+    {
+      label: 'All',
+      predicate: () => true,
+    },
+    {
+      label: 'Already absorbed',
+      predicate: (inv) =>
+        this.absorbedNames().has(
+          (inv.itemInstance.itemBase as EssenceItem).essence.name,
+        ),
+    },
+    {
+      label: 'Not absorbed',
+      predicate: (inv) =>
+        !this.absorbedNames().has(
+          (inv.itemInstance.itemBase as EssenceItem).essence.name,
+        ),
+    },
+  ];
+
   readonly filteredEssences = computed<InventoryItem[]>(() => {
     const mode = this.filterMode();
-    const min = this.minLevel();
-    const max = this.maxLevel();
 
-    return this.inventoryEssences().filter((essence) => {
-      /* craftability gate (if requested) */
-      const absorbed = this.absorbedEssence()
-        .map((s) => s.occupiedEssence?.name)
-        .includes((essence.itemInstance.itemBase as EssenceItem).essence.name);
+    // Pre-compute once
+    const absorbedNames = new Set(
+      this.absorbedEssence().map((s) => s.occupiedEssence?.name),
+    );
+
+    return this.inventoryEssences().filter((inv) => {
+      const item = inv.itemInstance.itemBase as EssenceItem;
+      const absorbed = absorbedNames.has(item.essence.name);
+
+      /* absorbed gate */
       if (mode === 'already absorbed') return absorbed;
       if (mode === 'not absorbed') return !absorbed;
       return true; // mode === 'all'
