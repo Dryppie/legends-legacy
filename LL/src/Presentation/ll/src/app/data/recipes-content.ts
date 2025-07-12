@@ -6246,7 +6246,23 @@ export const RECIPES_CONTENT = [
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
       "equipmentType": EquipmentType.Head,
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.PhysicalDefense,
+          "amount": 30,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.MagicalDefense,
+          "amount": 30,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.MaxHealth,
+          "amount": 100,
+          "modifierType": ModifierType.Flat
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6298,7 +6314,23 @@ export const RECIPES_CONTENT = [
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
       "equipmentType": EquipmentType.Chest,
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.PhysicalDefense,
+          "amount": 30,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.MagicalDefense,
+          "amount": 30,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.MaxHealth,
+          "amount": 100,
+          "modifierType": ModifierType.Flat
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6350,7 +6382,23 @@ export const RECIPES_CONTENT = [
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
       "equipmentType": EquipmentType.Legs,
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.PhysicalDefense,
+          "amount": 30,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.MagicalDefense,
+          "amount": 30,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.MaxHealth,
+          "amount": 100,
+          "modifierType": ModifierType.Flat
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6402,7 +6450,23 @@ export const RECIPES_CONTENT = [
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
       "equipmentType": EquipmentType.Head,
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.PhysicalDefense,
+          "amount": 20,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.MaxHealth,
+          "amount": 50,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.AttackPower,
+          "amount": 20,
+          "modifierType": ModifierType.Flat
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6454,7 +6518,23 @@ export const RECIPES_CONTENT = [
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
       "equipmentType": EquipmentType.Chest,
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.PhysicalDefense,
+          "amount": 20,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.MaxHealth,
+          "amount": 50,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.AttackPower,
+          "amount": 20,
+          "modifierType": ModifierType.Flat
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6506,7 +6586,23 @@ export const RECIPES_CONTENT = [
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
       "equipmentType": EquipmentType.Legs,
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.PhysicalDefense,
+          "amount": 20,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.MaxHealth,
+          "amount": 50,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.AttackPower,
+          "amount": 20,
+          "modifierType": ModifierType.Flat
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6558,7 +6654,23 @@ export const RECIPES_CONTENT = [
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
       "equipmentType": EquipmentType.Head,
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.PhysicalDefense,
+          "amount": 10,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.MaxHealth,
+          "amount": 50,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.AttackPower,
+          "amount": 30,
+          "modifierType": ModifierType.Flat
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6610,7 +6722,23 @@ export const RECIPES_CONTENT = [
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
       "equipmentType": EquipmentType.Chest,
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.PhysicalDefense,
+          "amount": 10,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.MaxHealth,
+          "amount": 50,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.AttackPower,
+          "amount": 30,
+          "modifierType": ModifierType.Flat
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6662,7 +6790,23 @@ export const RECIPES_CONTENT = [
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
       "equipmentType": EquipmentType.Legs,
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.PhysicalDefense,
+          "amount": 10,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.MaxHealth,
+          "amount": 50,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.AttackPower,
+          "amount": 30,
+          "modifierType": ModifierType.Flat
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6714,7 +6858,23 @@ export const RECIPES_CONTENT = [
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
       "equipmentType": EquipmentType.Head,
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.MagicalDefense,
+          "amount": 10,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.MaxHealth,
+          "amount": 50,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.SpellPower,
+          "amount": 30,
+          "modifierType": ModifierType.Flat
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6766,7 +6926,23 @@ export const RECIPES_CONTENT = [
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
       "equipmentType": EquipmentType.Chest,
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.MagicalDefense,
+          "amount": 10,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.MaxHealth,
+          "amount": 50,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.SpellPower,
+          "amount": 30,
+          "modifierType": ModifierType.Flat
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6818,7 +6994,23 @@ export const RECIPES_CONTENT = [
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
       "equipmentType": EquipmentType.Legs,
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": AttributeType.MagicalDefense,
+          "amount": 10,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.MaxHealth,
+          "amount": 50,
+          "modifierType": ModifierType.Flat
+        },
+        {
+          "attributeType": AttributeType.SpellPower,
+          "amount": 30,
+          "modifierType": ModifierType.Flat
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
