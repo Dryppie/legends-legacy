@@ -6238,7 +6238,23 @@
       "itemType": "Equipment",
       "rarity": "Common",
       "equipmentType": "Head",
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": "PhysicalDefense",
+          "amount": 30,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "MagicalDefense",
+          "amount": 30,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "MaxHealth",
+          "amount": 100,
+          "modifierType": "Flat"
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6290,7 +6306,23 @@
       "itemType": "Equipment",
       "rarity": "Common",
       "equipmentType": "Chest",
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": "PhysicalDefense",
+          "amount": 30,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "MagicalDefense",
+          "amount": 30,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "MaxHealth",
+          "amount": 100,
+          "modifierType": "Flat"
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6342,7 +6374,23 @@
       "itemType": "Equipment",
       "rarity": "Common",
       "equipmentType": "Legs",
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": "PhysicalDefense",
+          "amount": 30,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "MagicalDefense",
+          "amount": 30,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "MaxHealth",
+          "amount": 100,
+          "modifierType": "Flat"
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6394,7 +6442,23 @@
       "itemType": "Equipment",
       "rarity": "Common",
       "equipmentType": "Head",
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": "PhysicalDefense",
+          "amount": 20,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "MaxHealth",
+          "amount": 50,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "AttackPower",
+          "amount": 20,
+          "modifierType": "Flat"
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6446,7 +6510,23 @@
       "itemType": "Equipment",
       "rarity": "Common",
       "equipmentType": "Chest",
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": "PhysicalDefense",
+          "amount": 20,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "MaxHealth",
+          "amount": 50,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "AttackPower",
+          "amount": 20,
+          "modifierType": "Flat"
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6498,7 +6578,23 @@
       "itemType": "Equipment",
       "rarity": "Common",
       "equipmentType": "Legs",
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": "PhysicalDefense",
+          "amount": 20,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "MaxHealth",
+          "amount": 50,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "AttackPower",
+          "amount": 20,
+          "modifierType": "Flat"
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6550,7 +6646,23 @@
       "itemType": "Equipment",
       "rarity": "Common",
       "equipmentType": "Head",
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": "PhysicalDefense",
+          "amount": 10,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "MaxHealth",
+          "amount": 50,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "AttackPower",
+          "amount": 30,
+          "modifierType": "Flat"
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6602,7 +6714,23 @@
       "itemType": "Equipment",
       "rarity": "Common",
       "equipmentType": "Chest",
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": "PhysicalDefense",
+          "amount": 10,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "MaxHealth",
+          "amount": 50,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "AttackPower",
+          "amount": 30,
+          "modifierType": "Flat"
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6654,7 +6782,23 @@
       "itemType": "Equipment",
       "rarity": "Common",
       "equipmentType": "Legs",
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": "PhysicalDefense",
+          "amount": 10,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "MaxHealth",
+          "amount": 50,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "AttackPower",
+          "amount": 30,
+          "modifierType": "Flat"
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6706,7 +6850,23 @@
       "itemType": "Equipment",
       "rarity": "Common",
       "equipmentType": "Head",
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": "MagicalDefense",
+          "amount": 10,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "MaxHealth",
+          "amount": 50,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "SpellPower",
+          "amount": 30,
+          "modifierType": "Flat"
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6758,7 +6918,23 @@
       "itemType": "Equipment",
       "rarity": "Common",
       "equipmentType": "Chest",
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": "MagicalDefense",
+          "amount": 10,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "MaxHealth",
+          "amount": 50,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "SpellPower",
+          "amount": 30,
+          "modifierType": "Flat"
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
@@ -6810,7 +6986,23 @@
       "itemType": "Equipment",
       "rarity": "Common",
       "equipmentType": "Legs",
-      "attributeModifiers": [],
+      "attributeModifiers": [
+        {
+          "attributeType": "MagicalDefense",
+          "amount": 10,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "MaxHealth",
+          "amount": 50,
+          "modifierType": "Flat"
+        },
+        {
+          "attributeType": "SpellPower",
+          "amount": 30,
+          "modifierType": "Flat"
+        }
+      ],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
