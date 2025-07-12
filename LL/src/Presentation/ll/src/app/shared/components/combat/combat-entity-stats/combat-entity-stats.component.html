@@ -2,6 +2,7 @@
   class="flex h-full flex-col overflow-hidden rounded-md bg-black/40 p-4 text-white"
 >
   <div class="flex h-full flex-col gap-2">
+    <!-- Player and Enemy team -->
     <div class="grid grid-cols-2 gap-2">
       <div class="flex flex-wrap items-center gap-2">
         <div
@@ -30,58 +31,72 @@
         </div>
       </div>
     </div>
+
     <ng-container *ngIf="selectedStats as stats">
       <div class="flex flex-col gap-2 overflow-y-auto rounded p-2">
-        <div class="text-sm text-white">
-          <div class="flex flex-wrap gap-2">
-            <div class="flex flex-col gap-1">
-              <div>
-                <span class="text-neutral-400">Damage Done:</span>
-                {{ stats.damageDone | number }}
-              </div>
-              <div>
-                <span class="text-neutral-400">Damage Taken:</span>
-                {{ stats.damageTaken | number }}
-              </div>
+        <div class="flex flex-wrap gap-2 text-sm text-white">
+          <div class="flex flex-col gap-1">
+            <div class="text-primary">
+              <span>Damage Done:</span>
+              <span class="brightness-150">
+                {{ stats.damageDone | number }}</span
+              >
             </div>
-            <div class="flex flex-col gap-1">
-              <div>
-                <span class="text-neutral-400">Healing Done:</span>
-                {{ stats.healingDone | number }}
-              </div>
-              <div>
-                <span class="text-neutral-400">Healing Received:</span>
-                {{ stats.healingReceived | number }}
-              </div>
+            <div class="text-primary">
+              <span>Damage Taken:</span>
+              <span class="brightness-150">
+                {{ stats.damageTaken | number }}</span
+              >
             </div>
-            <div class="flex flex-col gap-1">
-              <div>
-                <span class="text-neutral-400">Health Regenerated:</span>
-                {{ stats.healthRegenerated | number }}
-              </div>
-              <div>
-                <span class="text-neutral-400">Mana Regenerated:</span>
-                {{ stats.manaRegenerated | number }}
-              </div>
+          </div>
+          <div class="flex flex-col gap-1">
+            <div class="text-primary">
+              <span>Healing Done:</span>
+              <span class="brightness-150">
+                {{ stats.healingDone | number }}</span
+              >
+            </div>
+            <div class="text-primary">
+              <span>Healing Received:</span>
+              <span class="brightness-150">
+                {{ stats.healingReceived | number }}</span
+              >
+            </div>
+          </div>
+          <div class="flex flex-col gap-1">
+            <div class="text-primary">
+              <span>Health Regenerated:</span>
+              <span class="brightness-150">
+                {{ stats.healthRegenerated | number }}</span
+              >
+            </div>
+            <div class="text-primary">
+              <span>Mana Regenerated:</span>
+              <span class="brightness-150">
+                {{ stats.manaRegenerated | number }}</span
+              >
             </div>
           </div>
         </div>
-        <table class="w-full text-left text-sm">
-          <thead>
-            <tr class="text-primary">
-              <th>Ability</th>
-              <th>Damage</th>
-              <th>Healing</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let ability of stats.abilities">
-              <td>{{ ability.name }}</td>
-              <td>{{ ability.totalDamage | number }}</td>
-              <td>{{ ability.totalHealing | number }}</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="text-left text-sm">
+          <div class="grid grid-cols-4 p-1 text-primary">
+            <div class="col-start-1 col-end-3">Ability</div>
+            <div>Damage</div>
+            <div>Healing</div>
+          </div>
+          <div class="rounded border border-primary/30">
+            <ng-container *ngFor="let ability of stats.abilities">
+              <div
+                *ngIf="ability.name"
+                class="grid grid-cols-4 p-1 odd:bg-zinc-300/5"
+              >
+                <div class="col-start-1 col-end-3">{{ ability.name }}</div>
+                <div>{{ ability.totalDamage | number }}</div>
+                <div>{{ ability.totalHealing | number }}</div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
       </div>
     </ng-container>
   </div>
