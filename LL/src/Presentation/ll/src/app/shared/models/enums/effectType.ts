@@ -1,7 +1,9 @@
-export enum EffectType {
-  Damage = 'Damage',
-  Healing = 'Healing',
-  ModifyAttribute = 'ModifyAttribute',
-  SummonEffect = 'SummonEffect',
-  StatusEffect = 'StatusEffect',
+export enum EffectTag {
+  None = 'None',
+  Slashing = 'Slashing',
+  Blunt = 'Blunt',
+  Piercing = 'Piercing',
+  Arrows = 'Arrows',
+  Spells = 'Spells',
+  SummonExpiration = 'SummonExpiration',
 }
