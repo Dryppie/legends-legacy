@@ -1,18 +1,18 @@
-<section *ngIf="filtered().length; else none">
-  <!-- Buttons -->
-  <div class="mb-4 flex flex-wrap items-center gap-2">
-    <button
-      *ngFor="let opt of filterOptions()"
-      (click)="setActive(opt)"
-      [ngClass]="{
-        'bg-primary/30 hover:bg-primary/40': active() === opt,
-      }"
-      class="flex items-center gap-1 rounded border border-zinc-300/30 px-2 py-1 text-sm text-neutral-300 hover:bg-zinc-300/30"
-    >
-      {{ opt.label }}
-    </button>
-  </div>
+<!-- Buttons -->
+<div class="mb-4 flex flex-wrap items-center gap-2">
+  <button
+    *ngFor="let opt of filterOptions()"
+    (click)="setActive(opt)"
+    [ngClass]="{
+      'bg-primary/30 hover:bg-primary/40': active() === opt,
+    }"
+    class="flex items-center gap-1 rounded border border-zinc-300/30 px-2 py-1 text-sm text-neutral-300 hover:bg-zinc-300/30"
+  >
+    {{ opt.label }}
+  </button>
+</div>
 
+<section *ngIf="filtered().length; else none">
   <!-- List -->
   <div *ngFor="let item of filtered()" (click)="onPick(item)">
     <!-- Projection slot; see usage example -->
