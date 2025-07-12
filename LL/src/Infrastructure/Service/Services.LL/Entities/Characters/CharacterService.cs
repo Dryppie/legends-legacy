@@ -47,8 +47,8 @@ public class CharacterService : ICharacterService
         AttributeCalculator.CalculateBaseAttributes(character);
         foreach (var essence in character.EssenceSlots.Where(es => es.OccupiedEssence != null).Select(es => es.OccupiedEssence!))
         {
-            essence.Active.Description = _essenceDescriptionService.BuildAbilityDescription(essence.Active, character.BaseCombatAttributes);
-            essence.Passive.Description = _essenceDescriptionService.BuildAbilityDescription(essence.Passive, character.BaseCombatAttributes);
+            _essenceDescriptionService.BuildAbilityDescription(essence.Active, character.BaseCombatAttributes);
+            _essenceDescriptionService.BuildAbilityDescription(essence.Passive, character.BaseCombatAttributes);
         }
         return character;
     }

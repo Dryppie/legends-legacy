@@ -1,10 +1,11 @@
-﻿using System.Net;
-using Domain.Interfaces.Combat;
+﻿using Domain.Interfaces.Combat;
 using Domain.Models.Abilities;
 using Domain.Models.Abilities.Effects;
 using Domain.Models.Abilities.Effects.Actions;
 using Domain.Models.Attributes;
+using Domain.Models.Damages;
 using Services.LL.Interfaces;
+using System.Net;
 
 namespace Services.LL.Essences;
 public enum TooltipKind { Damage, Heal, Modify }
@@ -18,6 +19,11 @@ public record TooltipValue(
     string BonusValue,      //  "15"
     TooltipKind Kind);      //  Damage / Heal …
 
+public record TagBuckets(
+    HashSet<AttackType> Attack,
+    HashSet<DamageType> Damage,
+    HashSet<EffectTag> Effect);
+
 public class EssenceDescriptionService : IEssenceDescriptionService
 {
     private const float MAGNITUDE_RANGE = 0.2f;
@@ -28,17 +34,16 @@ public class EssenceDescriptionService : IEssenceDescriptionService
         _statusService = statusService;
     }
 
-    public string BuildAbilityDescription(
+    public void BuildAbilityDescription(
         AbilityDefinition ability,
-        IReadOnlyDictionary<AttributeType, float> attributes)
-        => BuildAbilityDescription(
-               ability,
-               attributes.Select(kvp => new EntityAttribute
-               {
-                   AttributeType = kvp.Key,
-                   Value = kvp.Value
-               }).ToList(),
-               new HashSet<string>());
+        IReadOnlyDictionary<AttributeType, float> attributes) => BuildAbilityDescription(
+                   ability,
+                   attributes.Select(kvp => new EntityAttribute
+                   {
+                       AttributeType = kvp.Key,
+                       Value = kvp.Value
+                   }).ToList(),
+                   new HashSet<string>());
 
     /// <summary>
     /// Generates a final description string from the ability's description template and effects.
@@ -47,17 +52,19 @@ public class EssenceDescriptionService : IEssenceDescriptionService
     /// <param name="ability">The ability definition containing a Description and Effects.</param>
     /// <param name="attributes">A dictionary of relevant stats (e.g., Strength, Dex) for scaling calculations.</param>
     /// <returns>The final string with placeholders replaced by computed values.</returns>
-    private string BuildAbilityDescription(
+    private void BuildAbilityDescription(
         AbilityDefinition ability,
         List<EntityAttribute> attributes,
         HashSet<string> visitedStatuses)
     {
+        var tags = new TagBuckets([], [], []);
+
         // Fallback if there's no description
         string template = ability.Description ?? string.Empty;
 
         // If no effects, just return the raw description
         if (ability.Triggers == null || ability.Triggers.Count == 0)
-            return template;
+            return;
 
         // We’ll track counters per effect type. 
         // E.g. first damage effect -> {damage1}, second -> {damage2}, etc.
@@ -73,10 +80,14 @@ public class EssenceDescriptionService : IEssenceDescriptionService
         foreach (var effect in ability.Triggers.SelectMany(t => t.Actions))
             HandleEffect(effect, placeholders, attributes,
                          ref damageIndex, ref healIndex, ref modifyIndex,
-                         visitedStatuses);
+                         visitedStatuses, tags);
+
+        ability.AttackTypes = [.. tags.Attack.Where(a => !a.Equals(AttackType.None))];
+        ability.DamageTypes = [.. tags.Damage.Where(d => !d.Equals(DamageType.None))];
+        ability.EffectTags =  [.. tags.Effect.Where(e => !e.Equals(EffectTag.None))];
 
         // Finally, replace all placeholders in the template
-        return ReplacePlaceholders(template, placeholders);
+        ability.Description = ReplacePlaceholders(template, placeholders);
     }
 
     private void HandleEffect(
@@ -84,8 +95,15 @@ public class EssenceDescriptionService : IEssenceDescriptionService
         Dictionary<string, TooltipValue> placeholders,
         List<EntityAttribute> attributes,
         ref int damageIndex, ref int healIndex, ref int modifyIndex,
-        HashSet<string> visitedStatuses)
+        HashSet<string> visitedStatuses,
+        TagBuckets tags)
     {
+
+        tags.Attack.Add(effect.AttackType);
+        tags.Damage.Add(effect.DamageType);
+        foreach (var tag in effect.EffectTags)
+            tags.Effect.Add(tag);
+
         switch (effect.Action)
         {
             case DamageAction dmg:
@@ -105,7 +123,7 @@ public class EssenceDescriptionService : IEssenceDescriptionService
             case ApplyStatusAction apply:
                 ExpandStatus(apply.StatusId, placeholders, attributes,
                              ref damageIndex, ref healIndex, ref modifyIndex,
-                             visitedStatuses);
+                             visitedStatuses, tags);
                 break;
         }
     }
@@ -115,7 +133,8 @@ public class EssenceDescriptionService : IEssenceDescriptionService
     Dictionary<string, TooltipValue> placeholders,
     List<EntityAttribute> attributes,
     ref int damageIndex, ref int healIndex, ref int modifyIndex,
-    HashSet<string> visitedStatuses)
+    HashSet<string> visitedStatuses,
+    TagBuckets tags)
     {
         // Avoid infinite recursion
         if (!visitedStatuses.Add(statusId))
@@ -127,46 +146,7 @@ public class EssenceDescriptionService : IEssenceDescriptionService
         foreach (var nestedEffect in status.Triggers.SelectMany(t => t.Actions))
             HandleEffect(nestedEffect, placeholders, attributes,
                          ref damageIndex, ref healIndex, ref modifyIndex,
-                         visitedStatuses);
-    }
-
-    /// <summary>
-    /// Example of handling a nested effect by re-using the same indexing logic.
-    /// </summary>
-    private static void HandleNestedEffect(
-        EffectDefinition nestedEffect,
-        Dictionary<string, TooltipValue> placeholders,
-        List<EntityAttribute> stats,
-        ref int damageIndex,
-        ref int healIndex,
-        ref int modifyIndex)
-    {
-        var action = nestedEffect.Action;
-
-        switch (action)
-        {
-            case DamageAction dmg:
-                damageIndex++;
-                placeholders[$"{{damage{damageIndex}}}"] =
-                    BuildTooltipValue(dmg.Magnitude, dmg.ScalingAttribute, dmg.ScalingMultiplier, stats, TooltipKind.Damage);
-                break;
-
-            case ResourceRestoreAction heal:
-                healIndex++;
-                placeholders[$"{{heal{healIndex}}}"] =
-                    BuildTooltipValue(heal.Magnitude, heal.ScalingAttribute, heal.ScalingMultiplier, stats, TooltipKind.Heal);
-                break;
-
-            //case ApplyStatusAction deeper when deeper.Effects != null:
-            //    foreach (var n in deeper.Effects)
-            //        HandleNestedEffect(n, placeholders, stats,
-            //                           ref damageIndex, ref healIndex, ref modifyIndex);
-            //    break;
-
-            default:
-                // If your template doesn't need them, skip.
-                break;
-        }
+                         visitedStatuses, tags);
     }
 
     /// <summary>

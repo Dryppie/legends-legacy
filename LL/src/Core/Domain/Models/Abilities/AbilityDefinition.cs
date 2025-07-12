@@ -4,6 +4,7 @@ using Domain.Models.Abilities.Effects.Conditions;
 using Domain.Models.Abilities.Effects.Usages;
 using Domain.Models.Abilities.ResourceCosts;
 using Domain.Models.Abilities.Triggers;
+using Domain.Models.Damages;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Models.Abilities;
@@ -31,6 +32,10 @@ public class AbilityDefinition
     public List<Trigger> Triggers { get; set; } = [];
     // If it's a summon ability, don't say who the ability is used on.
     public string ActivationLog => Triggers.All(e => e.Actions.All(a => a.Action is SummonAction)) ? "{Actor} used {Ability}." :  "{Actor} used {Ability} on {Target}.";
+    // For the frontend only
+    public IReadOnlyCollection<AttackType> AttackTypes { get; set; } = [];
+    public IReadOnlyCollection<DamageType> DamageTypes { get; set; } = [];
+    public IReadOnlyCollection<EffectTag> EffectTags { get; set; } = [];
 
     public AbilityDefinition Clone()
     {

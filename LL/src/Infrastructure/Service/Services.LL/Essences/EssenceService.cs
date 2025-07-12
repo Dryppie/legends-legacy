@@ -31,8 +31,8 @@ public class EssenceService : IEssenceService
 
         foreach (var slot in essenceSlots.Where(es => es.OccupiedEssence != null))
         {
-            slot.OccupiedEssence!.Active.Description = _essenceDescriptionService.BuildAbilityDescription(slot.OccupiedEssence.Active, character.BaseCombatAttributes);
-            slot.OccupiedEssence!.Passive.Description = _essenceDescriptionService.BuildAbilityDescription(slot.OccupiedEssence.Passive, character.BaseCombatAttributes);
+            _essenceDescriptionService.BuildAbilityDescription(slot.OccupiedEssence.Active, character.BaseCombatAttributes);
+            _essenceDescriptionService.BuildAbilityDescription(slot.OccupiedEssence.Passive, character.BaseCombatAttributes);
         }
         return essenceSlots;
     }
