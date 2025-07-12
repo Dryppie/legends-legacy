@@ -1,5 +1,5 @@
 <div
-  class="flex h-full flex-col overflow-hidden rounded-md bg-black/40 p-4 text-white"
+  class="flex h-full flex-col overflow-hidden rounded-md bg-black/40 p-2 text-white"
 >
   <div class="flex h-full flex-col gap-2">
     <!-- Player and Enemy team -->
@@ -33,7 +33,7 @@
     </div>
 
     <ng-container *ngIf="selectedStats as stats">
-      <div class="flex flex-col gap-2 overflow-y-auto rounded p-2">
+      <div class="flex flex-col gap-2 overflow-y-auto rounded">
         <div class="flex flex-wrap gap-2 text-sm text-white">
           <div class="flex flex-col gap-1">
             <div class="text-primary">
@@ -79,7 +79,7 @@
           </div>
         </div>
         <div class="text-left text-sm">
-          <div class="grid grid-cols-4 p-1 text-primary">
+          <div class="grid grid-cols-4 py-1 text-primary">
             <div class="col-start-1 col-end-3">Ability</div>
             <div>Damage</div>
             <div>Healing</div>
