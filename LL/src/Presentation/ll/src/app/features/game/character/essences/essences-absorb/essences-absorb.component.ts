@@ -125,7 +125,6 @@ export class EssencesAbsorbComponent {
   }
 
   selectEssence(inventoryItem: InventoryItem): void {
-    console.log(inventoryItem.itemInstance);
     this.selectedItemInstanceId.set(inventoryItem.itemInstance.id);
   }
 
