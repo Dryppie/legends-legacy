@@ -3485,19 +3485,19 @@
     "equipmentType": "Head",
     "attributeModifiers": [
       {
-        "id": "5fb2c91d-d374-40b2-b000-a3eb65411124",
+        "id": "3d832b10-4c1b-46bf-9e50-c9f7eb473d22",
         "attributeType": "PhysicalDefense",
         "amount": 20,
         "modifierType": "Flat"
       },
       {
-        "id": "6ed4103e-552a-49f6-babf-2001f6c94ca9",
+        "id": "8c7ca536-5cb3-4b78-9e4b-6ad28b3f5f47",
         "attributeType": "MaxHealth",
         "amount": 50,
         "modifierType": "Flat"
       },
       {
-        "id": "6f450b38-be55-4a46-89e2-161ba9d4b1fe",
+        "id": "30d89880-288e-441d-ba1e-28af9c06eecf",
         "attributeType": "AttackPower",
         "amount": 20,
         "modifierType": "Flat"
@@ -3518,19 +3518,19 @@
     "equipmentType": "Chest",
     "attributeModifiers": [
       {
-        "id": "5fb2c91d-d374-40b2-b000-a3eb65411124",
+        "id": "1e87a243-ecde-4cfe-bf59-7207fc8b822f",
         "attributeType": "PhysicalDefense",
         "amount": 20,
         "modifierType": "Flat"
       },
       {
-        "id": "6ed4103e-552a-49f6-babf-2001f6c94ca9",
+        "id": "fd647ce7-c40e-4080-8f81-078c5ce02c22",
         "attributeType": "MaxHealth",
         "amount": 50,
         "modifierType": "Flat"
       },
       {
-        "id": "6f450b38-be55-4a46-89e2-161ba9d4b1fe",
+        "id": "756f18c2-0025-4e35-b8d1-bdaf7c30e49a",
         "attributeType": "AttackPower",
         "amount": 20,
         "modifierType": "Flat"
@@ -3551,19 +3551,19 @@
     "equipmentType": "Legs",
     "attributeModifiers": [
       {
-        "id": "5fb2c91d-d374-40b2-b000-a3eb65411124",
+        "id": "0dc31466-211c-4581-b76b-7ff3b5999469",
         "attributeType": "PhysicalDefense",
         "amount": 20,
         "modifierType": "Flat"
       },
       {
-        "id": "6ed4103e-552a-49f6-babf-2001f6c94ca9",
+        "id": "ba867c53-a3cc-4c5b-90c7-6909f5951be3",
         "attributeType": "MaxHealth",
         "amount": 50,
         "modifierType": "Flat"
       },
       {
-        "id": "6f450b38-be55-4a46-89e2-161ba9d4b1fe",
+        "id": "0d410568-a2e4-4668-a0f4-18a0fe744bbf",
         "attributeType": "AttackPower",
         "amount": 20,
         "modifierType": "Flat"
@@ -3584,19 +3584,19 @@
     "equipmentType": "Head",
     "attributeModifiers": [
       {
-        "id": "2044490a-52c1-4953-a439-fd596f98eff0",
+        "id": "1fc58844-c138-4f27-8075-de482d406bb6",
         "attributeType": "PhysicalDefense",
         "amount": 10,
         "modifierType": "Flat"
       },
       {
-        "id": "d82fe812-b719-4b35-afbf-cf49383f16d0",
+        "id": "5c9338df-6c35-4949-b00e-9d5328f03a00",
         "attributeType": "MaxHealth",
         "amount": 50,
         "modifierType": "Flat"
       },
       {
-        "id": "e292fb3c-05f6-4d7f-98bc-f66afc4533e7",
+        "id": "3eaae3cc-38f5-49fa-a2e7-27ae5a45a94c",
         "attributeType": "AttackPower",
         "amount": 30,
         "modifierType": "Flat"
@@ -3617,19 +3617,19 @@
     "equipmentType": "Chest",
     "attributeModifiers": [
       {
-        "id": "2044490a-52c1-4953-a439-fd596f98eff0",
+        "id": "db53ac47-ed67-4a3a-be12-c8b6d9aa14f6",
         "attributeType": "PhysicalDefense",
         "amount": 10,
         "modifierType": "Flat"
       },
       {
-        "id": "d82fe812-b719-4b35-afbf-cf49383f16d0",
+        "id": "2dc49c95-25d1-417d-9fd7-eec8e59f889d",
         "attributeType": "MaxHealth",
         "amount": 50,
         "modifierType": "Flat"
       },
       {
-        "id": "e292fb3c-05f6-4d7f-98bc-f66afc4533e7",
+        "id": "cfa80b41-dbac-4fa1-b0dd-e0643266fff2",
         "attributeType": "AttackPower",
         "amount": 30,
         "modifierType": "Flat"
@@ -3650,19 +3650,19 @@
     "equipmentType": "Legs",
     "attributeModifiers": [
       {
-        "id": "2044490a-52c1-4953-a439-fd596f98eff0",
+        "id": "72d3d796-6a10-4fbf-9dd1-6fdcf39c63dc",
         "attributeType": "PhysicalDefense",
         "amount": 10,
         "modifierType": "Flat"
       },
       {
-        "id": "d82fe812-b719-4b35-afbf-cf49383f16d0",
+        "id": "278ae0f4-7752-4d04-872d-ed17ec66b35f",
         "attributeType": "MaxHealth",
         "amount": 50,
         "modifierType": "Flat"
       },
       {
-        "id": "e292fb3c-05f6-4d7f-98bc-f66afc4533e7",
+        "id": "cde903ec-458c-45dd-964e-89f9a57729ba",
         "attributeType": "AttackPower",
         "amount": 30,
         "modifierType": "Flat"
