@@ -74,6 +74,9 @@
             />
             <span class="text-xs text-neutral-400">Cinders</span>
           </div>
+          <span>
+            Total: {{ (priceCtrl.value ?? 0) * (qtyCtrl.value ?? 0) | number }}
+          </span>
 
           <!-- Submit -->
           <app-regular-button
