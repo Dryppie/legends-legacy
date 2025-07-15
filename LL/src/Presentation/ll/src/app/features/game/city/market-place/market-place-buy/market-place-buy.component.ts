@@ -1,4 +1,5 @@
 import {
+  DecimalPipe,
   NgClass,
   NgFor,
   NgIf,
@@ -56,6 +57,7 @@ import { AttributeModifier } from '../../../../../shared/models/Dtos/attributesD
     NgSwitchCase,
     NgSwitchDefault,
     ItemComponent,
+    DecimalPipe,
   ],
   templateUrl: './market-place-buy.component.html',
 })

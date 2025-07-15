@@ -95,13 +95,14 @@
         Unit price: {{ sel.unitPrice | numberFormat }} Cinders
       </p>
       <p class="text-sm text-neutral-300">Quantity: {{ sel.quantity }}</p>
-      <ng-container *ngIf="selectedListingAsEquipment() as equipment"> 
+      <ng-container *ngIf="selectedListingAsEquipment() as equipment">
         <div *ngFor="let e of equipment">
-          <p class="text-sm text-neutral-400">
-            Currently equipped: 
-          </p>
+          <p class="text-sm text-neutral-400">Currently equipped:</p>
           <app-item [item]="e.itemInstance"></app-item>
-          <div class="text-sm text-neutral-400" *ngFor="let mod of getAttributeModifiers(e)">
+          <div
+            class="text-sm text-neutral-400"
+            *ngFor="let mod of getAttributeModifiers(e)"
+          >
             {{ mod.attributeType }}: + {{ mod.amount }}
           </div>
         </div>
@@ -127,6 +128,8 @@
           class="no-spinner w-24 rounded border border-neutral-700 bg-transparent px-2 py-1 text-right focus:outline-none focus:ring-amber-400"
         />
       </div>
+
+      <span> Total: {{ sel.unitPrice * (qtyCtrl.value ?? 0) | number }} </span>
       <app-regular-button
         class="w-full"
         text="Buy item"
