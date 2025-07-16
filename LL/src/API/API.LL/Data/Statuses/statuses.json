@@ -1,5 +1,98 @@
 [
   {
+    "Id": "poison",
+    "Name": "Poisoned",
+    "Description": "Takes poison damage over time.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "Damage",
+              "Amount": 2
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 60
+            },
+            "Interval": {
+              "Type": "Interval",
+              "Interval": 20
+            },
+            "Targeting": "Self",
+            "AttackType": "DamageOverTime",
+            "DamageType": "Poison",
+            "EffectTags": [],
+            "Log": "{Target} takes {Amount} poison damage."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "bleed",
+    "Name": "Bleed",
+    "Description": "Takes bleed damage over time.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "Damage",
+              "Amount": 2
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 60
+            },
+            "Interval": {
+              "Type": "Interval",
+              "Interval": 20
+            },
+            "Targeting": "Self",
+            "AttackType": "DamageOverTime",
+            "DamageType": "Bleed",
+            "EffectTags": [],
+            "Log": "{Target} takes {Amount} bleed damage."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "burn",
+    "Name": "Burn",
+    "Description": "Takes burn damage over time.",
+    "Triggers": [
+      {
+        "Event": "OnStatusAppliedIfThis",
+        "Actions": [
+          {
+            "Action": {
+              "Type": "Damage",
+              "Amount": 2
+            },
+            "Duration": {
+              "Type": "TimedDuration",
+              "Duration": 60
+            },
+            "Interval": {
+              "Type": "Interval",
+              "Interval": 20
+            },
+            "Targeting": "Self",
+            "AttackType": "DamageOverTime",
+            "DamageType": "Burn",
+            "EffectTags": [],
+            "Log": "{Target} takes {Amount} burn damage."
+          }
+        ]
+      }
+    ]
+  },
+  {
     "Id": "sneakAttackBleed",
     "Name": "Sneak Attack Bleed",
     "Description": "Takes initial physical damage and bleeds over 10 seconds.",
