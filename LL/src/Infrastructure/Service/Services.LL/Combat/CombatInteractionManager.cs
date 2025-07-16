@@ -205,7 +205,7 @@ public class CombatInteractionManager : ICombatInteractionManager
         if (!target.IsAlive)
         {
             // TODO: Fix setting the ability name to the effect context
-            _combatContext.LogEffectExecution(new EffectContext("", source, target, attackType, [], $"{target.Name} was killed by {source.Name}") { EventType = EventType.Death });
+            _combatContext.LogEffectExecution(new EffectContext("", source, target, attackType, DamageType.None, [], $"{target.Name} was killed by {source.Name}") { EventType = EventType.Death });
 
             _combatContext.EventBus.Publish(new CombatEvent
             {
