@@ -1,10 +1,13 @@
 <div
   class="grid w-full grid-cols-4 gap-2 p-2 hover:cursor-pointer hover:bg-neutral-600/50"
 >
-  <app-item
-    class="col-start-1 col-end-3"
-    [item]="listing.itemInstance"
-  ></app-item>
+  <div class="col-start-1 col-end-3 flex gap-1">
+    <app-item [item]="listing.itemInstance"></app-item>
+    <ng-container
+      *ngIf="characterState.currentCharacterId() === listing.sellerId"
+      >(Yours)</ng-container
+    >
+  </div>
   <div>
     <div class="rounded-full pl-1 text-white">x{{ listing.quantity }}</div>
   </div>

@@ -19,8 +19,7 @@ export class MarketplaceStateService {
   private readonly myCharacterId!: Signal<string | null>;
 
   readonly listings = computed(() => {
-    const myId = this.myCharacterId(); // ← read the value
-    return this._listings().filter((l) => l.sellerId !== myId);
+    return this._listings();
   });
   readonly myListings = computed(() =>
     this._listings().filter(

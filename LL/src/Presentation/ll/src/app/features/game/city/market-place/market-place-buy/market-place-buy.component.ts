@@ -40,6 +40,7 @@ import { getSlotTypeFromEquipmentType } from '../../../../../shared/utils/equipm
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { EquipmentType } from '../../../../../shared/models/enums/equipmentType';
 import { AttributeModifier } from '../../../../../shared/models/Dtos/attributesDto';
+import { CharacterStateService } from '../../../../../core/services/api/character/character-state.service';
 
 @Component({
   selector: 'app-market-place-buy',
@@ -147,6 +148,7 @@ export class MarketPlaceBuyComponent implements OnInit {
     private readonly marketplaceState: MarketplaceStateService,
     private readonly inventoryState: InventoryStateService,
     private readonly equipmentState: EquipmentStateService,
+    public readonly characterState: CharacterStateService,
   ) {
     this.inventoryState.load();
     this.equipmentState.load();
