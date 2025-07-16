@@ -10,12 +10,14 @@ public class EffectContext
     public CombatEntity Source { get; set; }
     public CombatEntity Target { get; set; }
     public AttackType AttackType { get; set; } = AttackType.None;
+    public DamageType DamageType { get; set; } = DamageType.None;
     public List<EffectModification> EffectModifications { get; set; } = [];
     public string Details { get; set; } = string.Empty;
     public EffectContext(string sourceName,
                          CombatEntity source,
                          CombatEntity target,
                          AttackType attackType,
+                         DamageType damageType,
                          List<EffectModification> effectModifications,
                          string details)
     {
@@ -23,6 +25,7 @@ public class EffectContext
         Source = source;
         Target = target;
         AttackType = attackType;
+        DamageType = damageType;
         EffectModifications = effectModifications;
         Details = details;
     }

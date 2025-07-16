@@ -56,7 +56,7 @@ public class DamageAction : IEffectAction
         }
 
         //// Damage opponent will receive
-        var damageResult = combatContext.InteractionManager.CalculateDamageBreakdown(effect.Target, damageAmount, attackOutcome, DamageType.Physical);
+        var damageResult = combatContext.InteractionManager.CalculateDamageBreakdown(effect.Target, damageAmount, attackOutcome, effect.DamageType);
 
         effect.AttackOutcome = attackOutcome;
         effect.Magnitude = damageResult.HealthDamage; // Only set HealthDamage, as that's what we'll use to deduct from Health. TotalDamage is only for the Log

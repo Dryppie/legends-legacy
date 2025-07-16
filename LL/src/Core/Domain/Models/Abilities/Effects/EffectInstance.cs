@@ -41,7 +41,7 @@ public class EffectInstance
         if (Definition.Chance == 100 || Random.Shared.Next(1, 101) <= Definition.Chance)
         {
             // TODO: Apply EffectModifications properly. This might have to be checked during DamageCalculation and HealCalculation, and not here
-            var effectContext = new EffectContext(Definition.SourceName, Source, Target, Definition.AttackType, Definition.EffectModifications, Definition.Log);
+            var effectContext = CreateEffectContext();
             Definition.Action?.Execute(effectContext, combatContext);
             HasTriggered = true;
         }
@@ -55,8 +55,13 @@ public class EffectInstance
         //if (Definition.Chance == 100 || Random.Shared.Next(1, 101) <= Definition.Chance)
         //{
         //}
-        var effectContext = new EffectContext(Definition.SourceName, Source, Target, Definition.AttackType, Definition.EffectModifications, Definition.Log);
+        EffectContext effectContext = CreateEffectContext();
         Definition.Action?.OnExpireExecute(effectContext, combatContext);
+    }
+
+    private EffectContext CreateEffectContext()
+    {
+        return new EffectContext(Definition.SourceName, Source, Target, Definition.AttackType, Definition.DamageType, Definition.EffectModifications, Definition.Log);
     }
 
     public bool IsActive()
