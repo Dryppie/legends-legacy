@@ -4,6 +4,7 @@ import { TabComponent } from '../../../../shared/components/tabs/tab/tab.compone
 import { MarketPlaceBuyComponent } from './market-place-buy/market-place-buy.component';
 import { MarketPlaceSellComponent } from './market-place-sell/market-place-sell.component';
 import { TabsComponent } from '../../../../shared/components/tabs/tabs.component';
+import { MarketPlaceGenericComponent } from '../../../../shared/components/market-place/market-place-generic/market-place-generic.component';
 
 @Component({
   selector: 'app-market-place',
@@ -15,6 +16,7 @@ import { TabsComponent } from '../../../../shared/components/tabs/tabs.component
     MarketPlaceSellComponent,
     TabsComponent,
     TabComponent,
+    MarketPlaceGenericComponent,
   ],
   templateUrl: './market-place.component.html',
 })
