@@ -23,6 +23,7 @@ export class SettingsComponent {
   disableLoginLink: boolean = false;
 
   showNameModal = false;
+  showBindEmailModal = false;
   newCharacterName = '';
 
   readonly currentCharacter;
@@ -51,7 +52,7 @@ export class SettingsComponent {
   }
 
   convertToRegistered() {
-    this.setPanel('convertAccount');
+    this.showBindEmailModal = true;
   }
 
   editName() {
@@ -69,6 +70,10 @@ export class SettingsComponent {
         // Optionally update local state
         this.character!.name = this.newCharacterName;
       });
+  }
+
+  closeEmailModal() {
+    this.showBindEmailModal = false;
   }
 
   closeNameModal() {

@@ -115,13 +115,19 @@
             </div>
           </div>
           <!-- Show this button if the user is NOT a registered user -->
-          <button
-            *ngIf="userInfo && !userInfo.isRegisteredUser"
-            class="flex items-center gap-2 rounded-md bg-[#2a2a2a] px-4 py-2 text-white transition hover:bg-[#383838]"
-            (click)="convertToRegistered()"
+          <ng-container
+            *ngIf="userInfo && !userInfo.isRegisteredUser; else boundEmail"
           >
-            🔐 Convert Guest to Registered Account
-          </button>
+            <button
+              class="flex items-center gap-2 rounded-md bg-[#2a2a2a] px-4 py-2 text-white transition hover:bg-[#383838]"
+              (click)="convertToRegistered()"
+            >
+              🔐 Bind email
+            </button>
+          </ng-container>
+          <ng-template #boundEmail
+            >Account is already bound to an email</ng-template
+          >
           <button
             class="flex items-center gap-2 rounded-md bg-[#2a2a2a] px-4 py-2 text-white transition hover:bg-[#383838]"
             (click)="logout()"
@@ -151,18 +157,6 @@
           <h3 class="mb-4 text-xl font-semibold">Change Email / Password</h3>
           <p>Form coming soon...</p>
         </div>
-        <div *ngSwitchCase="'convertAccount'">
-          <div class="flex max-h-full flex-1 flex-col overflow-hidden">
-            <app-signup
-              [convertAccount]="true"
-              [prefilledUsername]="character.name"
-              [disableLoginLink]="true"
-              [headerText1]="'Register your account'"
-              [headerText2]="'and continue your legend!'"
-            >
-            </app-signup>
-          </div>
-        </div>
       </ng-container>
     </div>
   </main>
@@ -185,6 +179,30 @@
     <div class="flex justify-end gap-2">
       <app-regular-button (click)="closeNameModal()">Cancel</app-regular-button>
       <app-regular-button (click)="submitNameChange()">Save</app-regular-button>
+    </div>
+  </div>
+</div>
+
+<div
+  *ngIf="showBindEmailModal"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+>
+  <div
+    class="h-full w-full bg-texture p-12 text-primary shadow-lg"
+    (click)="$event.stopPropagation()"
+  >
+    <app-signup
+      [convertAccount]="true"
+      [prefilledUsername]="character?.name ?? ''"
+      [disableLoginLink]="true"
+      [headerText1]="'Register your account'"
+      [headerText2]="'and continue your legend!'"
+    >
+    </app-signup>
+    <div class="flex justify-end gap-2">
+      <app-regular-button (click)="closeEmailModal()"
+        >Cancel</app-regular-button
+      >
     </div>
   </div>
 </div>
