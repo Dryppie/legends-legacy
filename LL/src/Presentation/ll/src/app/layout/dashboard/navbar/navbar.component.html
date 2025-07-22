@@ -48,12 +48,16 @@
       </div>
       <div class="flex w-full items-end sm:ml-4 sm:items-start">
         <div class="flex w-full flex-col">
-          <div
-            *ngIf="onlinePlayers"
-            class="hidden justify-end pr-4 text-white sm:flex"
+          <ng-container *ngIf="onlinePlayers; else justYou">
+            <div class="hidden justify-end pr-4 text-white sm:flex">
+              {{ onlinePlayers }} Online
+            </div>
+          </ng-container>
+          <ng-template #justYou
+            ><div class="hidden justify-end pr-4 text-white sm:flex">
+              1 Online
+            </div></ng-template
           >
-            {{ onlinePlayers }} Online
-          </div>
           <!-- <div
             class="flex items-center hidden justify-between bg-transparent p-4 text-[#6D6D6D] sm:hidden"
             (click)="toggleList()"
