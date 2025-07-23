@@ -1,5 +1,19 @@
 <div class="flex h-full flex-col items-center space-y-2 pr-4 sm:pr-6">
-  <app-market-place-generic></app-market-place-generic>
+  <app-market-place-filter
+    (itemTypeChanged)="onItemTypeChanged($event)"
+  ></app-market-place-filter>
+
+  <ng-container [ngSwitch]="selectedItemType()">
+    <app-market-place-generic
+      *ngSwitchCase="ItemType.Consumable"
+    ></app-market-place-generic>
+    <app-market-place-generic
+      *ngSwitchCase="ItemType.Material"
+    ></app-market-place-generic>
+    <!-- <app-market-place-essence *ngSwitchCase="ItemType.Essence"></app-market-place-essence>
+  <app-market-place-equipment *ngSwitchCase="ItemType.Equipment"></app-market-place-equipment> -->
+  </ng-container>
+
   <div class="flex w-full flex-col sm:gap-4">
     <app-banner
       image="market-place"
