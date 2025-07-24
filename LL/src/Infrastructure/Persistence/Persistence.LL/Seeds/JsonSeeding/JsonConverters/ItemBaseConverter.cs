@@ -21,7 +21,7 @@ public sealed class ItemBaseConverter : JsonConverter<ItemBase>
         Type concreteType = discriminator switch
         {
             "Equipment" => typeof(EquipmentBase),
-            "Material" => typeof(ItemBase),
+            "Resource" => typeof(ItemBase),
             "Consumable" => typeof(ItemBase),
             _ => throw new JsonException($"Unknown itemType \"{discriminator}\".")
         };

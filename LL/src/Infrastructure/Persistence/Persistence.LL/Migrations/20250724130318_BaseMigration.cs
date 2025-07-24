@@ -207,7 +207,8 @@ namespace Persistence.LL.Migrations
                     Potential = table.Column<int>(type: "integer", nullable: true),
                     ItemXp = table.Column<int>(type: "integer", nullable: true),
                     IsMasterpiece = table.Column<bool>(type: "boolean", nullable: true),
-                    IsLevelingItem = table.Column<bool>(type: "boolean", nullable: true)
+                    IsLevelingItem = table.Column<bool>(type: "boolean", nullable: true),
+                    Quality = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {

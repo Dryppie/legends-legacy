@@ -472,7 +472,7 @@ namespace Persistence.LL.Migrations
 
                     b.ToTable("ItemInstances");
 
-                    b.HasDiscriminator<int>("ItemType").HasValue(2);
+                    b.HasDiscriminator<int>("ItemType").HasValue(4);
 
                     b.UseTphMappingStrategy();
                 });
@@ -1003,6 +1003,16 @@ namespace Persistence.LL.Migrations
                     b.HasBaseType("Domain.Models.Items.ItemInstance");
 
                     b.HasDiscriminator().HasValue(3);
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Resources.ResourceInstance", b =>
+                {
+                    b.HasBaseType("Domain.Models.Items.ItemInstance");
+
+                    b.Property<int>("Quality")
+                        .HasColumnType("integer");
+
+                    b.HasDiscriminator().HasValue(2);
                 });
 
             modelBuilder.Entity("Domain.Models.LootTables.LootTable", b =>

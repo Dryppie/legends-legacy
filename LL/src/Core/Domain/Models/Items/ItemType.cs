@@ -3,7 +3,7 @@ public enum ItemType
 {
     Equipment,
     Consumable,
-    Material,
+    Resource,
     Essence,
     Misc
 }

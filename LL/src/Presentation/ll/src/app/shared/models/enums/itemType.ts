@@ -1,6 +1,6 @@
 export enum ItemType {
   Equipment = 'Equipment',
   Consumable = 'Consumable',
-  Material = 'Material',
+  Resource = 'Resource',
   Essence = 'Essence',
 }

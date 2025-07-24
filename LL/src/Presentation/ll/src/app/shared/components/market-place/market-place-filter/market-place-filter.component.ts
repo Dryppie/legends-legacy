@@ -10,7 +10,7 @@ import { ItemType } from '../../../models/enums/itemType';
 })
 export class MarketPlaceFilterComponent {
   readonly itemTypes = [
-    ItemType.Material,
+    ItemType.Resource,
     ItemType.Consumable,
     ItemType.Equipment,
     ItemType.Essence,

@@ -16,6 +16,7 @@ using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
+using Domain.Models.Items.Resources;
 using Domain.Models.LootTables;
 using Domain.Models.MarketPlaces;
 using Domain.Models.Professions;
@@ -70,13 +71,14 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
 
         modelBuilder.Entity<ItemBase>()
             .HasDiscriminator<ItemType>("ItemType")
-            .HasValue<ItemBase>(ItemType.Material)
+            .HasValue<ItemBase>(ItemType.Resource)
             .HasValue<EquipmentBase>(ItemType.Equipment)
             .HasValue<EssenceItemBase>(ItemType.Essence);
 
         modelBuilder.Entity<ItemInstance>()
             .HasDiscriminator<ItemType>("ItemType")
-            .HasValue<ItemInstance>(ItemType.Material)
+            .HasValue<ItemInstance>(ItemType.Misc)
+            .HasValue<ResourceInstance>(ItemType.Resource)
             .HasValue<EquipmentInstance>(ItemType.Equipment)
             .HasValue<EssenceItemInstance>(ItemType.Essence);
 

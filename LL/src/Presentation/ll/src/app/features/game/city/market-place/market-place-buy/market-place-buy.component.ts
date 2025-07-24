@@ -280,7 +280,7 @@ export class MarketPlaceBuyComponent implements OnInit {
   readonly selectedListingAsMaterial = computed(() => {
     const listing = this.selectedListing();
     if (!listing) return null;
-    if (listing.itemInstance.itemBase.itemType === ItemType.Material) {
+    if (listing.itemInstance.itemBase.itemType === ItemType.Resource) {
       const items: InventoryItem[] = [];
 
       const listingBaseId = listing.itemInstance.itemBase.id;
