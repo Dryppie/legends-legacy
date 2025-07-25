@@ -1,18 +1,30 @@
 import { Component, Input } from '@angular/core';
-import { EquipmentInstance, ItemInstance } from '../../models/item';
-import { NgClass } from '@angular/common';
+import {
+  EquipmentInstance,
+  ItemInstance,
+  ResourceInstance,
+} from '../../models/item';
+import { NgClass, NgIf } from '@angular/common';
 import { Rarity } from '../../models/enums/rarity';
 
 @Component({
   selector: 'app-item',
   standalone: true,
-  imports: [NgClass],
+  imports: [NgClass, NgIf],
   templateUrl: './item.component.html',
 })
 export class ItemComponent {
   @Input() item!: ItemInstance;
   itemHovered: boolean = false;
   tooltipPosition = {};
+
+  get isResource(): boolean {
+    return 'quality' in this.item;
+  }
+
+  asResource() {
+    return this.item as ResourceInstance;
+  }
 
   get rarityClasses() {
     let rarity = Rarity.Common;

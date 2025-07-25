@@ -1,3 +1,4 @@
-<div [ngClass]="rarityClasses">
+<div class="flex gap-[5px]" [ngClass]="rarityClasses">
   {{ item.itemBase.name }}
+  <div *ngIf="isResource">[{{ asResource().quality }}]</div>
 </div>

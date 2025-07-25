@@ -4,7 +4,7 @@ import { computed, effect, Injectable, signal } from '@angular/core';
 import { InventoryService } from './inventory.service';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { GameEventService } from '../../real-time/game-event.service';
-import { EssenceItem } from '../../../../shared/models/item';
+import { EssenceItem, ResourceInstance } from '../../../../shared/models/item';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryStateService {
@@ -72,12 +72,26 @@ export class InventoryStateService {
       .subscribe({
         next: (dto) => {
           const sorted = dto.inventoryItems
-            .slice() // defensive copy (optional)
-            .sort((a, b) =>
-              a.itemInstance.itemBase.itemType.localeCompare(
-                b.itemInstance.itemBase.itemType,
-              ),
-            );
+            .slice() // defensive copy
+            .sort((a, b) => {
+              const typeA = a.itemInstance.itemBase.itemType;
+              const typeB = b.itemInstance.itemBase.itemType;
+
+              // First: sort by itemType
+              const typeCompare = typeA.localeCompare(typeB);
+              if (typeCompare !== 0) return typeCompare;
+
+              // Second: if type is "Resource", sort by quality descending
+              if (typeA === ItemType.Resource) {
+                const qualityA =
+                  (a.itemInstance as ResourceInstance).quality ?? 0;
+                const qualityB =
+                  (b.itemInstance as ResourceInstance).quality ?? 0;
+                return qualityB - qualityA; // higher quality first
+              }
+
+              return 0; // for non-resources with same type
+            });
 
           this._items.set(sorted);
         },
