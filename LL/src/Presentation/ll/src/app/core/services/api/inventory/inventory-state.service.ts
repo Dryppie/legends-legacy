@@ -188,11 +188,27 @@ export class InventoryStateService {
 
   addOrIncrement(item: InventoryItem): void {
     const items = this._items();
-    const index = items.findIndex(
-      (i) =>
-        i.itemInstance.itemBase.stackable &&
-        i.itemInstance.itemBase.id === item.itemInstance.itemBase.id,
-    );
+    const baseId = item.itemInstance.itemBase.id;
+    const isStackable = item.itemInstance.itemBase.stackable;
+    const isResource = item.itemInstance.itemBase.itemType === 'Resource'; // Adjust if you use an enum
+
+    const index = items.findIndex((i) => {
+      const sameBase = i.itemInstance.itemBase.id === baseId;
+      const bothStackable = i.itemInstance.itemBase.stackable && isStackable;
+
+      if (!bothStackable || !sameBase) return false;
+
+      if (isResource) {
+        // Match quality for resources
+        return (
+          (i.itemInstance as ResourceInstance).quality ===
+          (item.itemInstance as ResourceInstance).quality
+        );
+      }
+
+      return true;
+    });
+
     if (index !== -1) {
       const updated = [...items];
       updated[index] = {
