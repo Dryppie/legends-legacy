@@ -153,18 +153,40 @@ function getProfessionSidebar(): Tab[] {
     {
       label: 'Daily',
       items: [
-        {
-          id: 'gathering',
-          route: ['/game', 'professions', 'gathering'],
-          icon: 'professions/woodcutting',
-          title: 'Gathering',
-        },
         // {
-        //   id: 'woodcutting',
-        //   route: ['/game', 'professions', 'gathering', 'woodcutting'],
-        //   icon: 'professions/woodcutting',
-        //   title: 'Woodcutting',
+        //   id: 'fishing',
+        //   route: 'professions',
+        //   icon: 'path/to/dynamic-quest-icon.png',
+        //   title: 'Fishing',
+        //   description: 'LV 0/100',
+        //   rewards: [
+        //     { icon: 'path/to/fire-icon.png', amount: 5 },
+        //     { icon: 'path/to/coin-icon.png', amount: 3 },
+        //   ],
         // },
+        // {
+        //   id: '2',
+        //   route: 'professions/foraging',
+        //   icon: 'path/to/dynamic-quest-icon.png',
+        //   title: 'Foraging',
+        //   description: '1',
+        //   rewards: [
+        //     { icon: 'path/to/fire-icon.png', amount: 4 },
+        //     { icon: 'path/to/coin-icon.png', amount: 2 },
+        //   ],
+        // },
+        {
+          id: 'mining',
+          route: ['/game', 'professions', 'gathering', 'mining'],
+          icon: 'professions/mining',
+          title: 'Mining',
+        },
+        {
+          id: 'woodcutting',
+          route: ['/game', 'professions', 'gathering', 'woodcutting'],
+          icon: 'professions/woodcutting',
+          title: 'Woodcutting',
+        },
         {
           id: 'armorforging',
           route: ['/game', 'professions', 'crafting', 'armorforging'],
