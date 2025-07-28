@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-market-place-resources',
@@ -6,4 +6,6 @@ import { Component } from '@angular/core';
   imports: [],
   templateUrl: './market-place-resources.component.html',
 })
-export class MarketPlaceResourcesComponent {}
+export class MarketPlaceResourcesComponent {
+  @Input() resource: string = '';
+}

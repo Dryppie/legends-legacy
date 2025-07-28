@@ -3,7 +3,7 @@ import { GuildStateService } from '../../../../../../core/services/api/guild/gui
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { BuildingUpgradeView } from '../../../../../../shared/models/guilds/buildings/buildingUpgradeView';
 import { NumberFormatPipe } from '../../../../../../shared/pipes/number-format/number-format.pipe';
-import { RegularButtonComponent } from '../../../../../../shared/components/buttons/regular-button/regular-button.component';
+import { RegularButtonComponent } from '../../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { HumanizeEnumPipe } from '../../../../../../shared/pipes/enums/humanize-enum.pipe';
 import { CharacterStateService } from '../../../../../../core/services/api/character/character-state.service';
 import { GuildRole } from '../../../../../../shared/models/Dtos/guild/guildRole';

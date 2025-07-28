@@ -5,7 +5,7 @@ import { Essence } from '../../../../../shared/models/essence';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { EssenceItem } from '../../../../../shared/models/item';
 import { NgIf } from '@angular/common';
-import { RegularButtonComponent } from '../../../../../shared/components/buttons/regular-button/regular-button.component';
+import { RegularButtonComponent } from '../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { EssenceDetailsComponent } from '../../../../../shared/components/essences/essence-details/essence-details.component';
 import { ItemType } from '../../../../../shared/models/enums/itemType';
 import { EssenceSlot } from '../../../../../shared/models/essenceSlot';

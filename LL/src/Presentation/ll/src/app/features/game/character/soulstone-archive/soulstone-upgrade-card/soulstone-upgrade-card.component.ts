@@ -3,7 +3,7 @@ import { SoulstoneUpgradeView } from '../../../../../shared/models/soulstones/so
 import { CommonModule } from '@angular/common';
 import { CharacterDto } from '../../../../../shared/models/Dtos/characterDto';
 import { SoulstoneUpgradeStateService } from '../../../../../core/services/api/soulstone-upgrade/soulstone-upgrade.state.service';
-import { RegularButtonComponent } from '../../../../../shared/components/buttons/regular-button/regular-button.component';
+import { RegularButtonComponent } from '../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 
 @Component({
   selector: 'app-soulstone-upgrade-card',

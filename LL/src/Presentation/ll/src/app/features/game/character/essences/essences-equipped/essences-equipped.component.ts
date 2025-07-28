@@ -2,7 +2,7 @@ import { NgFor, NgIf, NgClass } from '@angular/common';
 import { Component, computed, Input, Signal, signal } from '@angular/core';
 import { EssenceStateService } from '../../../../../core/services/api/essences/essence-state.service';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
-import { RegularButtonComponent } from '../../../../../shared/components/buttons/regular-button/regular-button.component';
+import { RegularButtonComponent } from '../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import {
   EssenceSlot,
   SlotState,

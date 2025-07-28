@@ -1,5 +1,5 @@
 import { Component, effect, Input, OnInit } from '@angular/core';
-import { MiniButtonComponent } from '../../mini-button/mini-button.component';
+import { MiniButtonComponent } from '../../custom-components/buttons/mini-button/mini-button.component';
 import { CharacterActionDto } from '../../../models/Dtos/characterActionDto';
 import { Subscription } from 'rxjs';
 import { NgIf } from '@angular/common';

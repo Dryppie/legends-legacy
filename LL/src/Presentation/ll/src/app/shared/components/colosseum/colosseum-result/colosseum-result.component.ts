@@ -1,6 +1,6 @@
 import { NgClass } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { RegularButtonComponent } from '../../buttons/regular-button/regular-button.component';
+import { RegularButtonComponent } from '../../custom-components/buttons/regular-button/regular-button.component';
 
 @Component({
   selector: 'app-colosseum-result',

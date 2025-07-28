@@ -15,7 +15,7 @@ import { AuthService } from '../../../../core/services/api/auth/auth.service';
 import { emailValidator } from '../../../../shared/validators/email-validator';
 import { passwordValidator } from '../../../../shared/validators/password-validator';
 import { passwordMatchValidator } from '../../../../shared/validators/password-match-validator';
-import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { ButtonComponent } from '../../../../shared/components/custom-components/buttons/button/button.component';
 import { environment } from '../../../../../environments/environment';
 
 @Component({

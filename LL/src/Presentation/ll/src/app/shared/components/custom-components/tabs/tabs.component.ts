@@ -6,8 +6,8 @@ import {
   QueryList,
   signal,
 } from '@angular/core';
-import { TabComponent } from './tab/tab.component';
 import { NgClass, NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
+import { TabComponent } from './tab/tab.component';
 
 @Component({
   selector: 'app-tabs',

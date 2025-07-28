@@ -14,7 +14,7 @@ import { GuildRole } from '../../../../../../shared/models/Dtos/guild/guildRole'
 import { FormsModule } from '@angular/forms';
 import { GuildMember } from '../../../../../../shared/models/Dtos/guild/guildMember';
 import { GuildService } from '../../../../../../core/services/api/guild/guild.service';
-import { RegularButtonComponent } from '../../../../../../shared/components/buttons/regular-button/regular-button.component';
+import { RegularButtonComponent } from '../../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { GuildStateService } from '../../../../../../core/services/api/guild/guild-state.service';
 
 @Component({

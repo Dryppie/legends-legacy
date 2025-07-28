@@ -15,15 +15,15 @@ import {
 import { map } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { ProfessionsService } from '../../../../core/services/api/professions/professions.service';
-import { TabComponent } from '../../../../shared/components/tabs/tab/tab.component';
+import { TabComponent } from '../../../../shared/components/custom-components/tabs/tab/tab.component';
 import { RegularCraftingComponent } from './regular-crafting/regular-crafting.component';
 import { TemperingComponent } from './tempering/tempering.component';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { Equipment } from '../../../../shared/models/item';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { InventoryStateService } from '../../../../core/services/api/inventory/inventory-state.service';
-import { TabsComponent } from '../../../../shared/components/tabs/tabs.component';
 import { EquipmentType } from '../../../../shared/models/enums/equipmentType';
+import { TabsComponent } from '../../../../shared/components/custom-components/tabs/tabs.component';
 
 @Component({
   selector: 'app-crafting',

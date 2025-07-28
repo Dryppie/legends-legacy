@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { BannerComponent } from '../../../../shared/components/banner/banner.component';
 import { LeaderboardStateService } from '../../../../core/services/api/leaderboard/leaderboard-state.service';
-import { FilterTabsComponent } from '../../../../shared/components/tabs/filter-tabs/filter-tabs.component';
+import { FilterTabsComponent } from '../../../../shared/components/custom-components/tabs/filter-tabs/filter-tabs.component';
 import {
   LeaderboardColumn,
   LeaderboardEntry,
 } from '../../../../shared/models/Dtos/leaderboard/leaderboardEntry';
 import { Tab } from '../../../../shared/models/sidebar-item';
-import { RegularButtonComponent } from '../../../../shared/components/buttons/regular-button/regular-button.component';
+import { RegularButtonComponent } from '../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { LeaderboardComponent } from '../../../../shared/components/generic-leaderboard/generic-leaderboard.component';
 import { COLUMNS_BY_TAB } from '../../../../shared/models/Dtos/leaderboard/leaderboard.config';
 

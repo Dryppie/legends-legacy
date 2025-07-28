@@ -19,7 +19,7 @@ import { Subscription } from 'rxjs';
 import { CountdownComponent } from '../countdown/countdown.component';
 import { GameService } from '../../../core/services/client-side/game/game.service';
 import { CombatStateService } from '../../../core/state/combat-state/combat-state.service';
-import { MiniButtonComponent } from '../mini-button/mini-button.component';
+import { MiniButtonComponent } from '../custom-components/buttons/mini-button/mini-button.component';
 import { CombatLogComponent } from './combat-log/combat-log.component';
 import { BattleType } from '../../../core/state/combat-state/combatState';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';

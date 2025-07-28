@@ -1,9 +1,9 @@
-<div class="flex h-full flex-col items-center space-y-2 pr-4 sm:pr-6">
+<div class="flex h-full flex-col space-y-2 pr-4 sm:pr-6">
   <app-market-place-filter
     (itemTypeChanged)="onItemTypeChanged($event)"
   ></app-market-place-filter>
 
-  <ng-container [ngSwitch]="selectedItemType()">
+  <ng-container [ngSwitch]="selectedItemType().itemType">
     <app-market-place-generic
       *ngSwitchCase="ItemType.Consumable"
     ></app-market-place-generic>

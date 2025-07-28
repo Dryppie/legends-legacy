@@ -1,6 +1,6 @@
 import { Component, effect, OnInit } from '@angular/core';
 import { BannerComponent } from '../../../../shared/components/banner/banner.component';
-import { TabComponent } from '../../../../shared/components/tabs/tab/tab.component';
+import { TabComponent } from '../../../../shared/components/custom-components/tabs/tab/tab.component';
 import { ColosseumService } from '../../../../core/services/api/colosseum/colosseum.service';
 import { NgIf } from '@angular/common';
 import { CombatComponent } from '../../../../shared/components/combat/combat.component';
@@ -13,11 +13,11 @@ import { RecordOfBattleComponent } from './record-of-battle/record-of-battle.com
 import { TournamentGroundsComponent } from './tournament-grounds/tournament-grounds.component';
 import { ColosseumMatchResult } from '../../../../shared/models/Dtos/colosseum/colosseumMatchResult';
 import { ArenaTicketStatus } from '../../../../shared/models/Dtos/colosseum/arenaTicketStatus';
-import { TabsComponent } from '../../../../shared/components/tabs/tabs.component';
 import { ArenaOpponentPreview } from '../../../../shared/models/Dtos/colosseum/arenaOpponentPreview';
 import { EventBusService } from '../../../../core/services/client-side/event-bus/event-bus.service';
 import { ColosseumResultComponent } from '../../../../shared/components/colosseum/colosseum-result/colosseum-result.component';
 import { LeaderboardEntry } from '../../../../shared/models/Dtos/leaderboard/leaderboardEntry';
+import { TabsComponent } from '../../../../shared/components/custom-components/tabs/tabs.component';
 
 @Component({
   selector: 'app-colosseum',

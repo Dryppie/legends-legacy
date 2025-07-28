@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { NgIf } from '@angular/common';
 import { SoulstoneUpgradeCardComponent } from './soulstone-upgrade-card/soulstone-upgrade-card.component';
-import { RegularButtonComponent } from '../../../../shared/components/buttons/regular-button/regular-button.component';
+import { RegularButtonComponent } from '../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
 import { SoulstoneUpgradeStateService } from '../../../../core/services/api/soulstone-upgrade/soulstone-upgrade.state.service';
 

@@ -5,7 +5,7 @@ import { Recipe } from '../../../../../shared/models/profession';
 import { CraftingService } from '../../../../../core/services/api/crafting/crafting.service';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import { CharacterProfession } from '../../../../../shared/models/Dtos/characterProfession';
-import { RegularButtonComponent } from '../../../../../shared/components/buttons/regular-button/regular-button.component';
+import { RegularButtonComponent } from '../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
 import { EquipmentDisplayComponent } from '../../../../../shared/components/equipment/equipment-display/equipment-display.component';
 

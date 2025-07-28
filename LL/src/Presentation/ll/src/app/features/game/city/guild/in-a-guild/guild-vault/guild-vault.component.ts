@@ -3,7 +3,7 @@ import { GuildStateService } from '../../../../../../core/services/api/guild/gui
 import { NgFor, NgIf } from '@angular/common';
 import { GuildResourceType } from '../../../../../../shared/models/Dtos/guild/guildResourceType';
 import { HumanizeEnumPipe } from '../../../../../../shared/pipes/enums/humanize-enum.pipe';
-import { RegularButtonComponent } from '../../../../../../shared/components/buttons/regular-button/regular-button.component';
+import { RegularButtonComponent } from '../../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { InventoryStateService } from '../../../../../../core/services/api/inventory/inventory-state.service';
 import { CharacterStateService } from '../../../../../../core/services/api/character/character-state.service';
 import { NumberFormatPipe } from '../../../../../../shared/pipes/number-format/number-format.pipe';

@@ -10,7 +10,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { RegularButtonComponent } from '../../../../../shared/components/buttons/regular-button/regular-button.component';
+import { RegularButtonComponent } from '../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import {
   EquipmentInstance,
   EssenceItem,
@@ -18,7 +18,7 @@ import {
 import { MarketplaceStateService } from '../../../../../core/services/api/market-place/market-place-state.service';
 import { MarketPlaceListing } from '../../../../../shared/models/Dtos/market-place/market-place-listing';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
-import { FilterTabsComponent } from '../../../../../shared/components/tabs/filter-tabs/filter-tabs.component';
+import { FilterTabsComponent } from '../../../../../shared/components/custom-components/tabs/filter-tabs/filter-tabs.component';
 import { EquipmentTypePipe } from '../../../../../shared/pipes/equipment/equipment-type-format/equipment-type.pipe';
 import { ItemComponent } from '../../../../../shared/components/item/item.component';
 

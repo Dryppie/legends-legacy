@@ -1,6 +1,6 @@
 import { Component, effect, Input, OnInit } from '@angular/core';
 import { Area } from '../../../models/Dtos/regionDto';
-import { MiniButtonComponent } from '../../mini-button/mini-button.component';
+import { MiniButtonComponent } from '../../custom-components/buttons/mini-button/mini-button.component';
 import {
   CharacterActionDto,
   StartCombatActionRequest,

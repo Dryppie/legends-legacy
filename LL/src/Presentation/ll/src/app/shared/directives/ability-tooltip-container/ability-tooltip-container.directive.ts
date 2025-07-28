@@ -4,9 +4,9 @@ import { Overlay, OverlayRef } from '@angular/cdk/overlay';
 import { ComponentPortal } from '@angular/cdk/portal';
 import { fromEvent, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { EssenceAbilityData } from '../../components/tooltips/ability-tooltip/essenceAbilityData';
-import { AbilityTooltipComponent } from '../../components/tooltips/ability-tooltip/ability-tooltip.component';
-import { ESSENCE_ABILITY_DATA } from '../../components/tooltips/ability-tooltip/essence-ability-data.token';
+import { EssenceAbilityData } from '../../components/custom-components/tooltips/ability-tooltip/essenceAbilityData';
+import { AbilityTooltipComponent } from '../../components/custom-components/tooltips/ability-tooltip/ability-tooltip.component';
+import { ESSENCE_ABILITY_DATA } from '../../components/custom-components/tooltips/ability-tooltip/essence-ability-data.token';
 
 @Directive({
   selector: '[abilityTooltipContainer]',

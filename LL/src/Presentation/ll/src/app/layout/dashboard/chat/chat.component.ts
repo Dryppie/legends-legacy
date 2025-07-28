@@ -21,7 +21,7 @@ import {
   TitleCasePipe,
 } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RegularButtonComponent } from '../../../shared/components/buttons/regular-button/regular-button.component';
+import { RegularButtonComponent } from '../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { StickyScrollDirective } from '../../../shared/directives/sticky-scroll/sticky-scroll.directive';
 import { GuildStateService } from '../../../core/services/api/guild/guild-state.service';
 import { CharacterStateService } from '../../../core/services/api/character/character-state.service';

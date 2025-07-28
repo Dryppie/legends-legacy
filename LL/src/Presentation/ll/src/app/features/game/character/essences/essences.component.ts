@@ -1,13 +1,13 @@
 import { Component, computed } from '@angular/core';
 import { EssenceStateService } from '../../../../core/services/api/essences/essence-state.service';
 import { InventoryStateService } from '../../../../core/services/api/inventory/inventory-state.service';
-import { TabComponent } from '../../../../shared/components/tabs/tab/tab.component';
-import { TabsComponent } from '../../../../shared/components/tabs/tabs.component';
+import { TabComponent } from '../../../../shared/components/custom-components/tabs/tab/tab.component';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { EssencesEquippedComponent } from './essences-equipped/essences-equipped.component';
 import { EssencesAbsorbComponent } from './essences-absorb/essences-absorb.component';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { SlotState } from '../../../../shared/models/essenceSlot';
+import { TabsComponent } from '../../../../shared/components/custom-components/tabs/tabs.component';
 
 @Component({
   selector: 'app-essences',

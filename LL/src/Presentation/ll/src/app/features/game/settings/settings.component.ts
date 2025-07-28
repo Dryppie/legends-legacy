@@ -7,7 +7,7 @@ import { SignupComponent } from '../../public/landing/signup/signup.component';
 import { GoogleAuthService } from '../../../core/services/api/auth/google-auth.service';
 import { CharacterService } from '../../../core/services/api/character/character.service';
 import { FormsModule } from '@angular/forms';
-import { RegularButtonComponent } from '../../../shared/components/buttons/regular-button/regular-button.component';
+import { RegularButtonComponent } from '../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { GuildStateService } from '../../../core/services/api/guild/guild-state.service';
 
 @Component({

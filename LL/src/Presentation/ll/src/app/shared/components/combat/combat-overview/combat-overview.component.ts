@@ -10,7 +10,7 @@ import { CombatOverviewItemComponent } from './combat-overview-item/combat-overv
 import { CombatEvent, EventType } from '../../../models/Dtos/combatEventDto';
 import { StickyScrollDirective } from '../../../directives/sticky-scroll/sticky-scroll.directive';
 import { ModalService } from '../../../../core/services/client-side/modal/modal.service';
-import { RegularButtonComponent } from '../../buttons/regular-button/regular-button.component';
+import { RegularButtonComponent } from '../../custom-components/buttons/regular-button/regular-button.component';
 import { BattleType } from '../../../../core/state/combat-state/combatState';
 
 @Component({

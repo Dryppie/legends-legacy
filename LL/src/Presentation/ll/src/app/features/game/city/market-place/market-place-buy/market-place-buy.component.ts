@@ -14,7 +14,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { RegularButtonComponent } from '../../../../../shared/components/buttons/regular-button/regular-button.component';
+import { RegularButtonComponent } from '../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { MarketPlaceListing } from '../../../../../shared/models/Dtos/market-place/market-place-listing';
 import { MarketplaceStateService } from '../../../../../core/services/api/market-place/market-place-state.service';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';

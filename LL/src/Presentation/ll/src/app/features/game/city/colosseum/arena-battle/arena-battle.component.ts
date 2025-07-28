@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { ArenaTicketStatus } from '../../../../../shared/models/Dtos/colosseum/arenaTicketStatus';
 import { ColosseumService } from '../../../../../core/services/api/colosseum/colosseum.service';
-import { RegularButtonComponent } from '../../../../../shared/components/buttons/regular-button/regular-button.component';
+import { RegularButtonComponent } from '../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { ArenaOpponentPreview } from '../../../../../shared/models/Dtos/colosseum/arenaOpponentPreview';
 
 @Component({

@@ -14,7 +14,7 @@ import {
 import { AuthService } from '../../../../core/services/api/auth/auth.service';
 import { emailValidator } from '../../../../shared/validators/email-validator';
 import { passwordValidator } from '../../../../shared/validators/password-validator';
-import { ButtonComponent } from '../../../../shared/components/button/button.component';
+import { ButtonComponent } from '../../../../shared/components/custom-components/buttons/button/button.component';
 import { environment } from '../../../../../environments/environment';
 import { GoogleAuthService } from '../../../../core/services/api/auth/google-auth.service';
 
