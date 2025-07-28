@@ -17,11 +17,11 @@
 <!-- Dropdown ------------------------------------------------------------->
 <ul
   *ngIf="open()"
-  class="absolute z-10 mt-1 min-w-[8rem] rounded border border-zinc-300/30 bg-zinc-800 p-1 shadow-lg"
+  class="absolute z-10 mt-1 min-w-[8rem] rounded border border-zinc-300/30 bg-texture shadow-lg"
 >
   <li
     *ngFor="let sub of subOptions"
-    class="cursor-pointer whitespace-nowrap rounded px-2 py-1 text-sm text-neutral-300 hover:bg-primary/20"
+    class="cursor-pointer whitespace-nowrap px-2 py-1 text-sm text-neutral-300 hover:bg-primary/20"
     (click)="onSubOptionClick(sub)"
   >
     {{ sub }}
