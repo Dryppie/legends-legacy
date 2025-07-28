@@ -7,11 +7,15 @@
     <app-market-place-generic
       *ngSwitchCase="ItemType.Consumable"
     ></app-market-place-generic>
-    <app-market-place-generic
+    <app-market-place-resources
       *ngSwitchCase="ItemType.Resource"
-    ></app-market-place-generic>
-    <!-- <app-market-place-essence *ngSwitchCase="ItemType.Essence"></app-market-place-essence>
-  <app-market-place-equipment *ngSwitchCase="ItemType.Equipment"></app-market-place-equipment> -->
+    ></app-market-place-resources>
+    <app-market-place-essences
+      *ngSwitchCase="ItemType.Essence"
+    ></app-market-place-essences>
+    <app-market-place-equipment
+      *ngSwitchCase="ItemType.Equipment"
+    ></app-market-place-equipment>
   </ng-container>
 
   <div class="flex w-full flex-col sm:gap-4">
