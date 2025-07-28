@@ -14,6 +14,7 @@ import { MarketPlaceResourcesComponent } from '../../../../shared/components/mar
 import { MarketPlaceEssencesComponent } from '../../../../shared/components/market-place/market-place-pages/market-place-essences/market-place-essences.component';
 import { MarketPlaceEquipmentComponent } from '../../../../shared/components/market-place/market-place-pages/market-place-equipment/market-place-equipment.component';
 import { TabsComponent } from '../../../../shared/components/custom-components/tabs/tabs.component';
+import { DropdownSelection } from '../../../../shared/components/custom-components/dropdown/dropdown.component';
 
 @Component({
   selector: 'app-market-place',
@@ -37,12 +38,12 @@ import { TabsComponent } from '../../../../shared/components/custom-components/t
 })
 export class MarketPlaceComponent {
   readonly ItemType = ItemType;
-  readonly selectedItemType = signal<ItemTypeSelection>({
-    itemType: ItemType.Resource,
-    subcategory: '',
+  readonly selectedItemType = signal<DropdownSelection<ItemType>>({
+    main: ItemType.Resource,
+    sub: '',
   });
 
-  onItemTypeChanged(type: ItemTypeSelection) {
+  onItemTypeChanged(type: DropdownSelection<ItemType>) {
     this.selectedItemType.set(type);
   }
 }

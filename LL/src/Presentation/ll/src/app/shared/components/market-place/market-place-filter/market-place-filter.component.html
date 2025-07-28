@@ -1,13 +1,11 @@
 <div class="mb-4 flex flex-wrap items-center gap-2">
   <!-- Toggle buttons -->
-  <button
+  <app-dropdown
     *ngFor="let type of itemTypes"
-    class="flex items-center justify-between gap-1 whitespace-nowrap text-nowrap rounded border border-zinc-300/30 px-2 py-1 text-sm text-neutral-300 hover:bg-zinc-300/30"
-    [ngClass]="{
-      'bg-primary/30 hover:bg-primary/40': selectedItemType() === type,
-    }"
-    (click)="setSelectedType(type)"
-  >
-    {{ type }}
-  </button>
+    [value]="type"
+    [label]="type"
+    [subOptions]="itemTypeSubcategories[type]"
+    [selected]="selectedItemType() === type"
+    (selection)="onSelection($event)"
+  />
 </div>

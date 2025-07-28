@@ -8,12 +8,12 @@ import {
 } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ToastComponent } from './shared/components/toast/toast.component';
-import { ToastService } from './core/services/client-side/toast/toast.service';
 import { ModalContainerComponent } from './shared/components/modal-container/modal-container.component';
 import { AuthService } from './core/services/api/auth/auth.service';
 import { SessionSummaryPopupComponent } from './shared/components/session-summary-popup/session-summary-popup.component';
 import { GoogleAuthService } from './core/services/api/auth/google-auth.service';
 import { CharacterActionsStateService } from './core/services/api/character-actions/character-actions.state.service';
+import { ToastService } from './core/services/client-side/components/toast/toast.service';
 
 @Component({
   selector: 'app-root',

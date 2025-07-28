@@ -7,5 +7,5 @@ import { Component, Input } from '@angular/core';
   templateUrl: './market-place-resources.component.html',
 })
 export class MarketPlaceResourcesComponent {
-  @Input() resource: string = '';
+  @Input() resource: string | null = '';
 }

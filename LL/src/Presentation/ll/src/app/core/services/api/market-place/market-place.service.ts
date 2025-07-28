@@ -4,7 +4,7 @@ import { MarketPlaceListing } from '../../../../shared/models/Dtos/market-place/
 import { ApiService } from '../api.service';
 import { CreateMarketPlaceListingRequest } from '../../../../shared/models/requestDtos/market-place/create-market-place-listing-request';
 import { BuyoutMarketPlaceListingRequest } from '../../../../shared/models/requestDtos/market-place/buyout-market.place-listing-request';
-import { ToastService } from '../../client-side/toast/toast.service';
+import { ToastService } from '../../client-side/components/toast/toast.service';
 
 @Injectable({
   providedIn: 'root',

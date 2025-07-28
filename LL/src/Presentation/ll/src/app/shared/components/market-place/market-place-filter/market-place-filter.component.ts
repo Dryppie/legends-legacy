@@ -1,6 +1,10 @@
-import { NgClass, NgFor } from '@angular/common';
+import { NgFor } from '@angular/common';
 import { Component, EventEmitter, Output, signal } from '@angular/core';
 import { ItemType } from '../../../models/enums/itemType';
+import {
+  DropdownComponent,
+  DropdownSelection,
+} from '../../custom-components/dropdown/dropdown.component';
 
 export interface ItemTypeSelection {
   itemType: ItemType;
@@ -10,7 +14,7 @@ export interface ItemTypeSelection {
 @Component({
   selector: 'app-market-place-filter',
   standalone: true,
-  imports: [NgClass, NgFor],
+  imports: [NgFor, DropdownComponent],
   templateUrl: './market-place-filter.component.html',
 })
 export class MarketPlaceFilterComponent {
@@ -22,9 +26,11 @@ export class MarketPlaceFilterComponent {
   ];
 
   readonly selectedItemType = signal<ItemType>(ItemType.Resource);
-  readonly selectedSubcategory = signal<string | null>(null);
+  readonly selectedSubCategory = signal<string | null>(null);
 
-  @Output() readonly itemTypeChanged = new EventEmitter<ItemTypeSelection>();
+  @Output() readonly itemTypeChanged = new EventEmitter<
+    DropdownSelection<ItemType>
+  >();
 
   readonly itemTypeSubcategories: Record<ItemType, string[]> = {
     [ItemType.Resource]: ['Wood', 'Ore'],
@@ -33,30 +39,9 @@ export class MarketPlaceFilterComponent {
     [ItemType.Essence]: [],
   };
 
-  setSelectedType(type: ItemType) {
-    this.selectedItemType.set(type);
-
-    const subcategories = this.itemTypeSubcategories[type];
-    const defaultSub = subcategories.length > 0 ? subcategories[0] : null;
-    this.selectedSubcategory.set(defaultSub);
-
-    if (type === ItemType.Equipment || type === ItemType.Essence) {
-      this.itemTypeChanged.emit({
-        itemType: type,
-        subcategory: defaultSub,
-      });
-    }
-  }
-
-  setSelectedSubcategory(sub: string) {
-    this.selectedSubcategory.set(sub);
-    this.itemTypeChanged.emit({
-      itemType: this.selectedItemType(),
-      subcategory: sub,
-    });
-  }
-
-  get subcategories(): string[] {
-    return this.itemTypeSubcategories[this.selectedItemType()];
+  onSelection(sel: DropdownSelection<ItemType>): void {
+    this.selectedItemType.set(sel.main);
+    this.selectedSubCategory.set(sel.sub);
+    this.itemTypeChanged.emit(sel);
   }
 }

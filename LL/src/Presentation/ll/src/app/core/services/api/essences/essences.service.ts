@@ -3,8 +3,8 @@ import { ApiService } from '../../api/api.service';
 import { Essence } from '../../../../shared/models/essence';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, switchMap, tap } from 'rxjs/operators';
-import { ToastService } from '../../client-side/toast/toast.service';
 import { EssenceSlot } from '../../../../shared/models/essenceSlot';
+import { ToastService } from '../../client-side/components/toast/toast.service';
 
 @Injectable({
   providedIn: 'root',

@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from '../api.service';
 import { BehaviorSubject, catchError, map, Observable, throwError } from 'rxjs';
-import { ToastService } from '../../client-side/toast/toast.service';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { CraftingQueueItem } from '../../../../shared/models/profession';
+import { ToastService } from '../../client-side/components/toast/toast.service';
 
 @Injectable({
   providedIn: 'root',

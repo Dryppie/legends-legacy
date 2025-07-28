@@ -3,12 +3,13 @@
     (itemTypeChanged)="onItemTypeChanged($event)"
   ></app-market-place-filter>
 
-  <ng-container [ngSwitch]="selectedItemType().itemType">
+  <ng-container [ngSwitch]="selectedItemType().main">
     <app-market-place-generic
       *ngSwitchCase="ItemType.Consumable"
     ></app-market-place-generic>
     <app-market-place-resources
       *ngSwitchCase="ItemType.Resource"
+      [resource]="selectedItemType().sub"
     ></app-market-place-resources>
     <app-market-place-essences
       *ngSwitchCase="ItemType.Essence"

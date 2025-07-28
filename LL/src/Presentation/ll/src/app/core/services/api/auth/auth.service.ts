@@ -18,8 +18,8 @@ import { ApiService } from '../api.service';
 
 import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 import { EventBusService } from '../../client-side/event-bus/event-bus.service';
-import { ToastService } from '../../client-side/toast/toast.service';
 import { UserInfoDto } from '../../../../shared/models/Dtos/userInfoDto';
+import { ToastService } from '../../client-side/components/toast/toast.service';
 
 @Injectable({
   providedIn: 'root',
