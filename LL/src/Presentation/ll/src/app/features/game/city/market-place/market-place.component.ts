@@ -15,6 +15,7 @@ import { MarketPlaceEssencesComponent } from '../../../../shared/components/mark
 import { MarketPlaceEquipmentComponent } from '../../../../shared/components/market-place/market-place-pages/market-place-equipment/market-place-equipment.component';
 import { TabsComponent } from '../../../../shared/components/custom-components/tabs/tabs.component';
 import { DropdownSelection } from '../../../../shared/components/custom-components/dropdown/dropdown.component';
+import { MarketplaceStateService } from '../../../../core/services/api/market-place/market-place-state.service';
 
 @Component({
   selector: 'app-market-place',
@@ -42,6 +43,8 @@ export class MarketPlaceComponent {
     main: ItemType.Resource,
     sub: '',
   });
+
+  constructor(readonly marketplaceState: MarketplaceStateService) {}
 
   onItemTypeChanged(type: DropdownSelection<ItemType>) {
     this.selectedItemType.set(type);

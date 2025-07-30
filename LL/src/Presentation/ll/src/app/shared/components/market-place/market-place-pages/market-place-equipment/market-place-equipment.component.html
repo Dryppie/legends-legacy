@@ -1,1 +1,29 @@
-<p>market-place-equipment works!</p>
+<ng-container *ngIf="equipmentListings() as equipmentListings">
+  <div *ngFor="let el of equipmentListings" class="group relative">
+    <div
+      class="grid w-full grid-cols-5 gap-2 p-2 text-white hover:cursor-pointer hover:bg-neutral-600/50"
+    >
+      <div class="col-start-1 col-end-3 flex gap-1">
+        <app-item [item]="el.itemInstance"></app-item>
+        <!-- <ng-container
+      *ngIf="characterState.currentCharacterId() === el.sellerId"
+      >(Yours)</ng-container
+    > -->
+      </div>
+      <div>
+        <div class="rounded-full pl-1 text-white">x{{ el.quantity }}</div>
+      </div>
+
+      <!-- Price (aligned right) -->
+      <div class="ml-auto flex items-center gap-1">
+        <div>{{ el.unitPrice | numberFormat }}</div>
+      </div>
+      <div class="ml-auto">
+        {{ el.sellerId }}
+      </div>
+    </div>
+    <div
+      class="absolute top-0 z-10 hidden place-self-center rounded border border-light_gray bg-texture p-2 text-sm text-white shadow group-hover:block sm:w-56"
+    ></div>
+  </div>
+</ng-container>

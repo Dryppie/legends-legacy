@@ -1,9 +1,27 @@
-import { Component } from '@angular/core';
+import { NgFor, NgIf } from '@angular/common';
+import { Component, Input, Signal } from '@angular/core';
+import { MarketPlaceListing } from '../../../../models/Dtos/market-place/market-place-listing';
+import { ItemComponent } from '../../../item/item.component';
+import { NumberFormatPipe } from '../../../../pipes/number-format/number-format.pipe';
+import { EssenceDetailsComponent } from '../../../essences/essence-details/essence-details.component';
+import { EssenceItem } from '../../../../models/item';
 
 @Component({
   selector: 'app-market-place-essences',
   standalone: true,
-  imports: [],
+  imports: [
+    NgFor,
+    NgIf,
+    ItemComponent,
+    NumberFormatPipe,
+    EssenceDetailsComponent,
+  ],
   templateUrl: './market-place-essences.component.html',
 })
-export class MarketPlaceEssencesComponent {}
+export class MarketPlaceEssencesComponent {
+  @Input() essenceListings!: Signal<MarketPlaceListing[]>;
+
+  itemAsEssence(listing: MarketPlaceListing) {
+    return (listing.itemInstance.itemBase as EssenceItem).essence;
+  }
+}
