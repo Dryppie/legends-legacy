@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { InventoryItem } from '../../models/inventoryItem';
-import { ItemComponent } from '../item/item.component';
 import { NgIf } from '@angular/common';
 import { ModalService } from '../../../core/services/client-side/modal/modal.service';
 import { ItemType } from '../../models/enums/itemType';
 import { Equipment, EquipmentInstance, EssenceItem } from '../../models/item';
 import { EquipmentType } from '../../models/enums/equipmentType';
+import { ItemComponent } from '../item/item.component';
 
 @Component({
   selector: 'app-inventory-item',

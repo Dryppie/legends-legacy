@@ -1,5 +1,5 @@
 <ng-container *ngIf="essenceListings() as essenceListings">
-  <div *ngFor="let el of essenceListings" class="group relative">
+  <div *ngFor="let el of essenceListings">
     <div
       class="grid w-full grid-cols-5 gap-2 p-2 text-white hover:cursor-pointer hover:bg-neutral-600/50"
     >
@@ -22,11 +22,6 @@
       <div class="ml-auto">
         {{ el.sellerId }}
       </div>
-    </div>
-    <div
-      class="absolute top-0 z-10 hidden place-self-center rounded border border-light_gray bg-texture p-2 text-sm text-white shadow group-hover:block sm:w-56"
-    >
-      <app-essence-details [essence]="itemAsEssence(el)"></app-essence-details>
     </div>
   </div>
 </ng-container>

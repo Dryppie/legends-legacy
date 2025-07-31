@@ -1,16 +1,19 @@
 import { Component, Input } from '@angular/core';
 import {
   EquipmentInstance,
+  EssenceItem,
   ItemInstance,
   ResourceInstance,
 } from '../../models/item';
 import { NgClass, NgIf } from '@angular/common';
 import { Rarity } from '../../models/enums/rarity';
+import { EssenceDetailsComponent } from '../essences/essence-details/essence-details.component';
+import { EquipmentDisplayComponent } from '../equipment/equipment-display/equipment-display.component';
 
 @Component({
   selector: 'app-item',
   standalone: true,
-  imports: [NgClass, NgIf],
+  imports: [NgClass, NgIf, EssenceDetailsComponent, EquipmentDisplayComponent],
   templateUrl: './item.component.html',
 })
 export class ItemComponent {
@@ -20,6 +23,22 @@ export class ItemComponent {
 
   get isResource(): boolean {
     return 'quality' in this.item;
+  }
+
+  get isEssence(): boolean {
+    return 'essence' in this.item.itemBase;
+  }
+
+  get isEquipment(): boolean {
+    return 'equipmentBase' in this.item;
+  }
+
+  itemAsEssence(item: ItemInstance) {
+    return (item.itemBase as EssenceItem).essence;
+  }
+
+  itemAsEquipment(item: ItemInstance) {
+    return item as EquipmentInstance;
   }
 
   asResource() {
