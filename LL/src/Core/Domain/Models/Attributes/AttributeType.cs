@@ -5,9 +5,9 @@ public enum AttributeType
     MaxHealth,
     Health,
     HealthRegeneration,
-    MaxMana,
+    MaxMana, // Mana doesn't scale infinitely with equipment, as it'll make ability cost redundant
     Mana,
-    ManaRegeneration,
+    ManaRegeneration, // Mana Regeneration doesn't scale infinitely with equipment, as it'll make ability cost redundant
     RecoveryRate,
     Barrier, // Can't be more than 2x Health
 

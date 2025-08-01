@@ -9,6 +9,7 @@ import { NgClass, NgIf } from '@angular/common';
 import { Rarity } from '../../models/enums/rarity';
 import { EssenceDetailsComponent } from '../essences/essence-details/essence-details.component';
 import { EquipmentDisplayComponent } from '../equipment/equipment-display/equipment-display.component';
+import { ItemType } from '../../models/enums/itemType';
 
 @Component({
   selector: 'app-item',
@@ -22,15 +23,15 @@ export class ItemComponent {
   tooltipPosition = {};
 
   get isResource(): boolean {
-    return 'quality' in this.item;
+    return this.item.itemBase.itemType === ItemType.Resource;
   }
 
   get isEssence(): boolean {
-    return 'essence' in this.item.itemBase;
+    return this.item.itemBase.itemType === ItemType.Essence;
   }
 
   get isEquipment(): boolean {
-    return 'equipmentBase' in this.item;
+    return this.item.itemBase.itemType === ItemType.Equipment;
   }
 
   itemAsEssence(item: ItemInstance) {

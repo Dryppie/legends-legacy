@@ -48,15 +48,19 @@ public class MarketPlaceRepository : IMarketPlaceRepository
 
     public async Task<MarketPlaceListing?> CreateMarketPlaceListingAsync(Guid characterId, MarketPlaceListing marketPlaceListing, CancellationToken cancellationToken)
     {
+        var character = await _dbContext.Characters.FindAsync([characterId], cancellationToken);
+        
+        if (character == null) return null;
+
         var listingCount = await _dbContext.MarketPlaceListings
             .Where(mpl => mpl.SellerId.Equals(characterId))
             .CountAsync(cancellationToken);
 
-        if (listingCount >= 10)
-            return null;
+        if (listingCount >= 10) return null;
 
         // Set seller ID to ensure it's linked to the correct character
-        marketPlaceListing.SellerId = characterId;
+        marketPlaceListing.SellerId = character.Id;
+        marketPlaceListing.SellerName = character.Name;
 
         // Add the new listing
         await _dbContext.MarketPlaceListings.AddAsync(marketPlaceListing, cancellationToken);

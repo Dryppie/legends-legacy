@@ -5,6 +5,7 @@ public class MarketPlaceListing
 {
     public Guid Id { get; set; }
     public Guid SellerId { get; set; }
+    public string SellerName { get; set; } = string.Empty;
     public Guid ItemInstanceId { get; set; }
     public ItemInstance ItemInstance { get; set; } = null!;
     public int Quantity { get; set; }
