@@ -14,6 +14,7 @@ import { interval, Subscription } from 'rxjs';
 import { PlayerService } from '../../../core/services/api/players/player.service';
 import { NumberFormatPipe } from '../../../shared/pipes/number-format/number-format.pipe';
 import { ShortNumberPipe } from '../../../shared/pipes/number-format/short-number.pipe';
+import { TourService } from '../../../core/services/client-side/tutorial-tour/tour.service';
 
 @Component({
   selector: 'app-navbar',
@@ -34,11 +35,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
   showList = false;
   activeLabel = 'Character';
   navButtons = [
-    { link: '/game/character', label: 'Character' },
-    { link: '/game/city', label: 'City' },
-    { link: '/game/professions', label: 'Professions' },
-    { link: '/game/world', label: 'World' },
-    { link: '/game/settings', label: 'Settings' },
+    { link: '/game/character', label: 'Character', dataTour: '' },
+    { link: '/game/city', label: 'City', dataTour: '' },
+    { link: '/game/professions', label: 'Professions', dataTour: '' },
+    { link: '/game/world', label: 'World', dataTour: 'navigate-to-world' },
+    { link: '/game/settings', label: 'Settings', dataTour: '' },
   ];
 
   useShortFormat = false;
@@ -51,8 +52,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private readonly playerService: PlayerService,
+    private tour: TourService,
   ) {
     this.currentCharacter = this.authService.currentCharacter;
+    this.tour.start('combat');
   }
 
   ngOnInit(): void {

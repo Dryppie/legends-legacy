@@ -1,0 +1,23 @@
+[
+  {
+    "element": "[data-tour=navigate-to-world]",
+    "title": "1. Select World",
+    "description": "Navigate here to fight.",
+    "position": "bottom",
+    "navigateTo": "/game/world/shenic"
+  },
+  {
+    "element": "[data-tour=start-combat]",
+    "title": "2. Watch quality",
+    "description": "The **Potential** cap is shown here. Each temper rolls up to that value.",
+    "position": "left",
+    "navigateTo": "/game/world"
+  },
+  {
+    "element": "[data-tour=temper-btn]",
+    "title": "3. Temper",
+    "description": "Click _Temper_ to consume ingots, gain XP, and try for a higher quality.",
+    "position": "left",
+    "navigateTo": "/game/"
+  }
+]

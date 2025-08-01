@@ -1,73 +1,112 @@
+// shared/help/tour.service.ts
 import { Injectable } from '@angular/core';
-import Shepherd from 'shepherd.js';
+import { Router } from '@angular/router';
+import { Driver, driver, DriveStep, Side } from 'driver.js';
 
 export interface TourStepJSON {
-  id: string;
-  text: string | string[];
+  element: string; // CSS selector
   title?: string;
-  attachTo: {
-    element: string;
-    on:
-      | 'top'
-      | 'top-start'
-      | 'top-end'
-      | 'bottom'
-      | 'bottom-start'
-      | 'bottom-end'
-      | 'left'
-      | 'left-start'
-      | 'left-end'
-      | 'right'
-      | 'right-start'
-      | 'right-end'
-      | 'auto'
-      | 'auto-start'
-      | 'auto-end';
-  };
+  description: string;
+  position?: Side; // 'left' | 'right' | …
+  navigateTo: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class TourService {
-  /** Run a tour whose JSON lives at assets/help/tours/<pageId>.json */
+  private currentStepIndex = 0;
+  private steps: TourStepJSON[] = [];
+  private drv: Driver | null = null;
+
+  constructor(private router: Router) {}
+
   async start(pageId: string) {
-    // ⬐ 1. Load the JSON
-    const steps = await fetch(`assets/help/tours/${pageId}.json`).then((r) =>
-      r.ok ? r.json() : [],
+    if (localStorage.getItem(`tour:${pageId}`) === 'done') return;
+
+    this.steps = await fetch(`/assets/help/tours/${pageId}.json`)
+      .then((r) => (r.ok ? r.json() : []))
+      .catch(() => []);
+
+    if (!this.steps.length) return;
+
+    this.drv = driver({
+      animate: true,
+      showProgress: true,
+      nextBtnText: 'Next',
+      prevBtnText: 'Back',
+      doneBtnText: 'Finish',
+      stagePadding: 4,
+    });
+
+    this.drv.setConfig({
+      onNextClick: () => this.handleNextClick(),
+    });
+
+    this.drv.setSteps(
+      this.steps.map<DriveStep>((s) => ({
+        element: s.element,
+        popover: {
+          title: s.title,
+          description: s.description,
+          side: s.position ?? 'bottom',
+          align: 'center',
+        },
+      })),
     );
 
-    if (!steps.length) return; // nothing to do
+    this.drv.drive();
+  }
 
-    // ⬐ 2. Build a Shepherd tour instance
-    const tour = new Shepherd.Tour({
-      useModalOverlay: true,
-      defaultStepOptions: {
-        scrollTo: true,
-        canClickTarget: false,
-        classes: 'shadow-xl bg-slate-800 text-white max-w-sm',
-      },
+  private async handleNextClick() {
+    const step = this.steps[this.currentStepIndex];
+    const nextStep = this.steps[this.currentStepIndex + 1];
+
+    this.currentStepIndex++;
+
+    if (step?.navigateTo && nextStep) {
+      this.drv?.destroy(); // stop current tour
+      await this.router.navigateByUrl(step.navigateTo);
+
+      // Wait for the next route and DOM to render before restarting
+      setTimeout(() => {
+        this.startTourFrom(this.currentStepIndex);
+      }, 500); // adjust delay if necessary
+    }
+  }
+
+  private startTourFrom(index: number) {
+    const valid = this.steps
+      .slice(index)
+      .filter((s) => document.querySelector(s.element));
+
+    if (!valid.length) return;
+
+    this.currentStepIndex = index;
+
+    this.drv = driver({
+      animate: true,
+      showProgress: true,
+      nextBtnText: 'Next',
+      prevBtnText: 'Back',
+      doneBtnText: 'Finish',
+      stagePadding: 4,
     });
 
-    // ⬐ 3. Add steps (skip those whose elements aren’t in DOM)
-    steps.forEach((s: TourStepJSON) => {
-      if (!document.querySelector(s.attachTo.element)) return;
-      tour.addStep({
-        ...s,
-        buttons: [
-          {
-            text: 'Back',
-            action: tour.back,
-            secondary: true,
-          },
-          {
-            text: 'Next',
-            action: tour.next,
-          },
-        ],
-      });
+    this.drv.setConfig({
+      onNextClick: () => this.handleNextClick(),
     });
 
-    // ⬐ 4. Persist completion so it doesn’t annoy veterans
-    tour.on('complete', () => localStorage.setItem(`tour:${pageId}`, 'done'));
-    if (localStorage.getItem(`tour:${pageId}`) !== 'done') tour.start();
+    this.drv.setSteps(
+      valid.map<DriveStep>((s) => ({
+        element: s.element,
+        popover: {
+          title: s.title,
+          description: s.description,
+          side: s.position ?? 'bottom',
+          align: 'center',
+        },
+      })),
+    );
+
+    this.drv.drive();
   }
 }

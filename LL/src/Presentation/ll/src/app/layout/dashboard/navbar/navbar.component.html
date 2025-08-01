@@ -73,6 +73,7 @@
               *ngFor="let button of navButtons"
               [link]="button.link"
               [label]="button.label"
+              [attr.data-tour]="button.dataTour"
               (click)="toggleList()"
               (itemTapped)="activeNavbar(button.label)"
             ></app-navbutton>
