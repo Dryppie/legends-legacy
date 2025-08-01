@@ -26,7 +26,6 @@
     "@microsoft/signalr": "^8.0.7",
     "@microsoft/signalr-protocol-msgpack": "^8.0.7",
     "rxjs": "~7.8.0",
-    "shepherd.js": "^14.5.1",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.3"
   },
