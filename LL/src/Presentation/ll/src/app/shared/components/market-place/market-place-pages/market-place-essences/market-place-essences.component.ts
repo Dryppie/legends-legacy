@@ -3,8 +3,8 @@ import { Component, Input, Signal } from '@angular/core';
 import { MarketPlaceListing } from '../../../../models/Dtos/market-place/market-place-listing';
 import { ItemComponent } from '../../../item/item.component';
 import { NumberFormatPipe } from '../../../../pipes/number-format/number-format.pipe';
-import { EssenceDetailsComponent } from '../../../essences/essence-details/essence-details.component';
 import { EssenceItem } from '../../../../models/item';
+import { RegularButtonComponent } from '../../../custom-components/buttons/regular-button/regular-button.component';
 
 @Component({
   selector: 'app-market-place-essences',
@@ -14,7 +14,7 @@ import { EssenceItem } from '../../../../models/item';
     NgIf,
     ItemComponent,
     NumberFormatPipe,
-    EssenceDetailsComponent,
+    RegularButtonComponent,
   ],
   templateUrl: './market-place-essences.component.html',
 })

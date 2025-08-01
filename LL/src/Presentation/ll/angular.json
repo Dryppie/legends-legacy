@@ -25,7 +25,10 @@
                 "input": "src/assets"
               }
             ],
-            "styles": ["src/styles.css"],
+            "styles": [
+              "src/styles.css",
+              "node_modules/shepherd.js/dist/css/shepherd.css"
+            ],
             "scripts": []
           },
           "configurations": {
@@ -79,7 +82,10 @@
                 "input": "src/assets"
               }
             ],
-            "styles": ["src/styles.css"],
+            "styles": [
+              "src/styles.css",
+              "node_modules/shepherd.js/dist/css/shepherd.css"
+            ],
             "scripts": []
           }
         },
