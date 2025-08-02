@@ -167,7 +167,10 @@
   <div
     class="flex max-h-full min-h-24 w-full flex-col space-y-2 overflow-y-auto md:order-1"
   >
-    <ng-container *ngIf="filteredInventory().length; else noItemsToTemper">
+    <ng-container
+      *ngIf="filteredInventory().length; else noItemsToTemper"
+      data-tour="first-tempering"
+    >
       <h2 class="flex text-primary">Items to temper</h2>
       <ng-container *ngIf="filteredInventory() as inventory">
         <div

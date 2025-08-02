@@ -1,4 +1,8 @@
-<div *ngIf="panes.length > 1" class="flex justify-around">
+<div
+  *ngIf="panes.length > 1"
+  class="flex justify-around"
+  data-tour="tabs-navigation"
+>
   <span
     *ngFor="let pane of panes; let i = index"
     class="flex-1 border-b border-light_gray py-2 text-center font-semibold text-light_gray hover:cursor-pointer hover:border-primary focus:outline-none"

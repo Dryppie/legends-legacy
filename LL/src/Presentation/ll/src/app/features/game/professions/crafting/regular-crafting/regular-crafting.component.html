@@ -4,7 +4,10 @@
   <!-- ITEM DESCRIPTION -->
   <div class="flex w-full flex-col space-y-2 md:order-2">
     <!-- ITEM DESCRIPTION -->
-    <div class="rounded-lg border border-light_gray bg-texture p-4">
+    <div
+      class="rounded-lg border border-light_gray bg-texture p-4"
+      data-tour="selected-recipe"
+    >
       <h2 class="text-primary">Item Description</h2>
       <ng-container *ngIf="selectedRecipe() as selectedRecipe; else noRecipe">
         <app-equipment-display [item]="selectedRecipe.item">
@@ -141,6 +144,7 @@
     <!-- RECIPES LIST -->
     <div
       class="flex h-full w-full flex-col space-y-2 overflow-y-auto md:order-1"
+      data-tour="crafting-introduction"
     >
       <ng-container *ngIf="filteredRecipes().length; else noRecipes">
         <div

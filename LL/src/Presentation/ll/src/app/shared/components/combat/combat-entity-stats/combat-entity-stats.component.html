@@ -19,6 +19,7 @@
 
       <div class="flex flex-wrap items-center gap-2">
         <div
+          data-tour="enemy-combat-stats"
           *ngFor="let entity of enemyTeam"
           (click)="selectEntity(entity.id)"
           [ngClass]="{
@@ -32,7 +33,10 @@
     </div>
 
     <ng-container *ngIf="selectedStats as stats">
-      <div class="flex flex-col gap-2 overflow-y-auto rounded">
+      <div
+        class="flex flex-col gap-2 overflow-y-auto rounded"
+        data-tour="your-combat-stats"
+      >
         <div class="flex flex-wrap gap-2 text-sm text-white">
           <div class="flex flex-col gap-1">
             <div class="text-primary">

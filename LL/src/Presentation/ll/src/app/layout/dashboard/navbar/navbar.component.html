@@ -67,13 +67,12 @@
             <h3 class="cursor-pointer pl-2 text-primary">{{ activeLabel }}</h3>
           </div> -->
           <div
-            class="z-10 flex w-full flex-row justify-between text-nowrap border-t bg-texture text-[#a1a1a1] sm:items-center sm:justify-end sm:space-x-6 sm:rounded-md sm:border sm:border-none sm:bg-none sm:p-2"
+            class="z-10 flex w-full flex-row justify-between text-nowrap border-t bg-texture text-[#a1a1a1] sm:w-auto sm:items-center sm:justify-end sm:space-x-6 sm:rounded-md sm:border sm:border-none sm:bg-none sm:p-2"
           >
             <app-navbutton
               *ngFor="let button of navButtons"
               [link]="button.link"
               [label]="button.label"
-              [attr.data-tour]="button.dataTour"
               (click)="toggleList()"
               (itemTapped)="activeNavbar(button.label)"
             ></app-navbutton>

@@ -25,6 +25,7 @@ import { BattleType } from '../../../core/state/combat-state/combatState';
 import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CombatEntityStatsComponent } from './combat-entity-stats/combat-entity-stats.component';
+import { TourService } from '../../../core/services/client-side/tutorial-tour/tour.service';
 
 @Component({
   selector: 'app-combat',
@@ -66,6 +67,7 @@ export class CombatComponent implements OnInit {
     private readonly characterActionService: CharacterActionsStateService,
     private readonly gameService: GameService,
     public readonly combatStateService: CombatStateService,
+    private readonly tour: TourService,
   ) {
     this.currentAction = this.characterActionService.currentAction;
 
@@ -457,5 +459,24 @@ export class CombatComponent implements OnInit {
     setTimeout(() => {
       this.flavorTextVisible = true;
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.waitForTourElements().then(() => {
+      this.tour.start('combat');
+    });
+  }
+
+  private async waitForTourElements(): Promise<void> {
+    const maxAttempts = 20;
+    const delay = 10; // ms
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const allExist = !!this.entityStats.length;
+      if (allExist) return;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+
+    console.warn('Tour elements not found after waiting.');
   }
 }

@@ -8,6 +8,7 @@ import { CharacterProfession } from '../../../../../shared/models/Dtos/character
 import { RegularButtonComponent } from '../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
 import { EquipmentDisplayComponent } from '../../../../../shared/components/equipment/equipment-display/equipment-display.component';
+import { TourService } from '../../../../../core/services/client-side/tutorial-tour/tour.service';
 
 function hasQuantity(
   inv: InventoryItem[],
@@ -58,7 +59,9 @@ export class RegularCraftingComponent {
   private readonly selectedRecipeId = signal<string | null>(null);
   readonly selectedRecipe = computed<Recipe | null>(() => {
     const id = this.selectedRecipeId();
-    return id ? (this.recipes().find((r) => r.id === id) ?? null) : null;
+    return id
+      ? (this.recipes().find((r) => r.id === id) ?? null)
+      : this.recipes()[0];
   });
   readonly canCraftSelected = computed<boolean>(() => {
     const recipe = this.selectedRecipe();
@@ -91,7 +94,10 @@ export class RegularCraftingComponent {
   constructor(
     private readonly inventoryState: InventoryStateService,
     private readonly craftingService: CraftingService,
-  ) {}
+    private readonly tour: TourService,
+  ) {
+    this.tour.start('crafting');
+  }
 
   meetsLevelRequirement(recipe: Recipe): boolean {
     return this.characterProfession.level >= recipe.levelRequirement;

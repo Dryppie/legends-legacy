@@ -7,6 +7,7 @@ import { HelpOverlayService } from './help-overlay.service';
   standalone: true,
   template: `
     <button
+      data-tour="page-helper"
       class="z-50 h-8 w-8 rounded-full border-b border-l border-primary bg-texture text-xl text-white shadow-lg transition-transform hover:scale-[1.1] hover:bg-slate-700 sm:fixed sm:bottom-6 sm:left-6 sm:h-12 sm:w-12 sm:border-b-0 sm:border-l-0 sm:border-r sm:border-t"
       (click)="open()"
     >

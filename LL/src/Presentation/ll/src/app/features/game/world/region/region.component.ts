@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Region } from '../../../../shared/models/Dtos/regionDto';
 import { RegionService } from '../../../../core/services/client-side/region/region.service';
 import { CombatAreaCardComponent } from '../../../../shared/components/combat/combat-area-card/combat-area-card.component';
+import { TourService } from '../../../../core/services/client-side/tutorial-tour/tour.service';
 
 @Component({
   selector: 'app-region',
@@ -18,7 +19,10 @@ export class RegionComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private regionService: RegionService,
-  ) {}
+    private tour: TourService,
+  ) {
+    this.tour.start('world-page');
+  }
 
   ngOnInit(): void {
     this.setColumnCount();

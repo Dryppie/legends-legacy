@@ -29,6 +29,7 @@ import { CharacterActionType } from '../../../../../shared/models/enums/characte
 import { CharacterActionsStateService } from '../../../../../core/services/api/character-actions/character-actions.state.service';
 import { ItemComponent } from '../../../../../shared/components/item/item.component';
 import { EquipmentDisplayComponent } from '../../../../../shared/components/equipment/equipment-display/equipment-display.component';
+import { TourService } from '../../../../../core/services/client-side/tutorial-tour/tour.service';
 
 @Component({
   selector: 'app-tempering',
@@ -93,6 +94,7 @@ export class TemperingComponent implements OnInit {
     private readonly inventoryState: InventoryStateService,
     private readonly characterActionService: CharacterActionsStateService,
     private readonly craftingService: CraftingService,
+    private readonly tour: TourService,
   ) {
     this.craftingQueue = toSignal(this.craftingService.craftingQueue$, {
       initialValue: [] as CraftingQueueItem[],
@@ -148,6 +150,8 @@ export class TemperingComponent implements OnInit {
 
       queueMicrotask(() => this.isPerformingOtherAction.set(false));
     });
+
+    this.tour.start('tempering');
   }
 
   ngOnInit(): void {}

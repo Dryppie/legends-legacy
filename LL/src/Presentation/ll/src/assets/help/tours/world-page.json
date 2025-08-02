@@ -1,0 +1,20 @@
+[
+  {
+    "element": "[data-tour=areas-introduction]",
+    "title": "1. Areas.",
+    "description": "Select an area to start fighting. You gain access to new areas as your level increases.",
+    "position": "bottom"
+  },
+  {
+    "element": "[data-tour=dungeons-introduction]",
+    "title": "2. Dungeons",
+    "description": "Dungeons are done alone or with NPCs, and require an item to enter.",
+    "position": "bottom"
+  },
+  {
+    "element": "[data-tour=raids-introduction]",
+    "title": "3. Raids",
+    "description": "These are the available raids in this region. Raids are done with a guild.",
+    "position": "bottom"
+  }
+]

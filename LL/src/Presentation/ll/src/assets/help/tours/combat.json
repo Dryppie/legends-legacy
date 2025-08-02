@@ -1,23 +1,20 @@
 [
   {
-    "element": "[data-tour=navigate-to-world]",
-    "title": "1. Select World",
-    "description": "Navigate here to fight.",
-    "position": "bottom",
-    "navigateTo": "/game/world/shenic"
+    "element": "[data-tour=your-combat-stats]",
+    "title": "1. Combat overview.",
+    "description": "Here you'll find an overview of statistics from the battle. Damage done by your weapon and abilities, healing done, etc.",
+    "position": "bottom"
   },
   {
-    "element": "[data-tour=start-combat]",
-    "title": "2. Watch quality",
-    "description": "The **Potential** cap is shown here. Each temper rolls up to that value.",
-    "position": "left",
-    "navigateTo": "/game/world"
+    "element": "[data-tour=enemy-combat-stats]",
+    "title": "2. Enemy statistics",
+    "description": "Click here to see the enemy statistics.",
+    "position": "bottom"
   },
   {
-    "element": "[data-tour=temper-btn]",
-    "title": "3. Temper",
-    "description": "Click _Temper_ to consume ingots, gain XP, and try for a higher quality.",
-    "position": "left",
-    "navigateTo": "/game/"
+    "element": "[data-tour=current-combat-summary]",
+    "title": "3. Combat session",
+    "description": "See how many wins and losses you have this session, as well as exp gained.",
+    "position": "bottom"
   }
 ]

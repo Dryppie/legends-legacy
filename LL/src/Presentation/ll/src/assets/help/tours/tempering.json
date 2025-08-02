@@ -1,0 +1,26 @@
+[
+  {
+    "element": "[data-tour=first-tempering]",
+    "title": "1. First tempering",
+    "description": "These are items you can temper.",
+    "position": "bottom"
+  },
+  {
+    "element": "[data-tour=selected-item]",
+    "title": "2. Selected item",
+    "description": "This is the currently selected item.",
+    "position": "bottom"
+  },
+  {
+    "element": "[data-tour=potential]",
+    "title": "3. Potential",
+    "description": "Potential determines how many tempering actions you can perform on an action. 1 Potential is 1 action.",
+    "position": "bottom"
+  },
+  {
+    "element": "[data-tour=tempering-queue]",
+    "title": "4. Tempering queue",
+    "description": "Here you will find your ongoing tempering queue.",
+    "position": "bottom"
+  }
+]
