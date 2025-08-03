@@ -9,13 +9,14 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.LL.Controllers.V1;
 public class EquipmentController : BaseController
 {
+    public record EquipEquipmentRequestDto(string EquipmentItemId, EquipmentSlotType slotType);
     [HttpGet]
     public async Task<ActionResult<List<EquipmentSlotDto>>> Get() =>
         await Mediator.Send(new GetMyEquipmentQuery(CurrentCharacterGuid));
 
     [HttpPost("Equip")]
-    public async Task<ActionResult<Response<bool>>> Equip([FromBody] string equipmentItemId) =>
-        await Mediator.Send(new EquipEquipmentCommand(CurrentCharacterGuid, equipmentItemId));
+    public async Task<ActionResult<Response<bool>>> Equip([FromBody] EquipEquipmentRequestDto equipmentRequestDto) =>
+        await Mediator.Send(new EquipEquipmentCommand(CurrentCharacterGuid, equipmentRequestDto.EquipmentItemId, equipmentRequestDto.slotType));
 
     [HttpPost("Unequip")]
     public async Task<ActionResult<Response<bool>>> Unequip([FromBody] EquipmentSlotType slotType) =>

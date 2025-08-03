@@ -88,7 +88,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         return true;
     }
 
-    public async Task<bool> EquipEquipmentAsync(Guid entityId, Guid equipmentId, CancellationToken cancellationToken)
+    public async Task<bool> EquipEquipmentAsync(Guid entityId, Guid equipmentId, EquipmentSlotType slotType, CancellationToken cancellationToken)
     {
         // Include all equipped items, and all items from inventory
         var character = await _context.Characters
@@ -124,10 +124,11 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
             return false;
         }
         var equipmentInstance = (EquipmentInstance)inventoryItem.ItemInstance;
-        return await EquipEquipmentAsync(character, inventory, equipmentInstance, inventoryItem, cancellationToken);
+        return await EquipEquipmentAsync(character, inventory, equipmentInstance, inventoryItem, slotType, cancellationToken);
     }
 
-    private async Task<bool> EquipEquipmentAsync(Character character, Inventory inventory, EquipmentInstance equipmentInstance, InventoryItem inventoryItem, CancellationToken cancellationToken)
+    private async Task<bool> EquipEquipmentAsync(Character character, Inventory inventory, EquipmentInstance equipmentInstance,
+        InventoryItem inventoryItem, EquipmentSlotType slotType, CancellationToken cancellationToken)
     {
         var equipmentBase = equipmentInstance.EquipmentBase;
 
@@ -147,11 +148,8 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                         UnequipSlotAsync(offHand, inventory);
 
                     UnequipSlotAsync(mainHand, inventory);
-
-                    mainHand.EquipmentInstanceId = equipmentInstance.Id;
-                    offHand.EquipmentInstanceId = equipmentInstance.Id;
-                    mainHand.EquipmentInstance = equipmentInstance;
-                    offHand.EquipmentInstance = equipmentInstance;
+                    Equip(equipmentInstance, mainHand);
+                    Equip(equipmentInstance, offHand);
                     break;
                 }
 
@@ -166,13 +164,11 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                     // Prioritize empty hand; fall back to replacing OffHand if needed
                     if (mainHand.EquipmentInstance is null)
                     {
-                        mainHand.EquipmentInstanceId = equipmentInstance.Id;
-                        mainHand.EquipmentInstance = equipmentInstance;
+                        Equip(equipmentInstance, mainHand);
                     }
                     else if (offHand.EquipmentInstance is null)
                     {
-                        offHand.EquipmentInstanceId = equipmentInstance.Id;
-                        offHand.EquipmentInstance = equipmentInstance;
+                        Equip(equipmentInstance, offHand);
                     }
                     else
                     {
@@ -182,9 +178,16 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                             offHand.EquipmentInstance = null;
                         }
                         // Fall back to replacing mainhand if both are occupied
-                        UnequipSlotAsync(mainHand, inventory);
-                        mainHand.EquipmentInstanceId = equipmentInstance.Id;
-                        mainHand.EquipmentInstance = equipmentInstance;
+                        if (slotType == EquipmentSlotType.OffHand)
+                        {
+                            UnequipSlotAsync(offHand, inventory);
+                            Equip(equipmentInstance, offHand);
+                        }
+                        else
+                        {
+                            UnequipSlotAsync(mainHand, inventory);
+                            Equip(equipmentInstance, mainHand);
+                        }
                     }
 
                     break;
@@ -207,15 +210,14 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                     }
 
                     UnequipSlotAsync(offHand, inventory);
-                    offHand.EquipmentInstanceId = equipmentInstance.Id;
-                    offHand.EquipmentInstance = equipmentInstance;
+                    Equip(equipmentInstance, offHand);
                     break;
                 }
 
             default:
                 {
                     // Armor, relic, etc.
-                    var slotType = equipmentBase.EquipmentType switch
+                    var equipmentSlotType = equipmentBase.EquipmentType switch
                     {
                         EquipmentType.Head => EquipmentSlotType.Head,
                         EquipmentType.Chest => EquipmentSlotType.Chest,
@@ -225,13 +227,13 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                         EquipmentType.Ring => EquipmentSlotType.Ring,
                         _ => throw new ArgumentOutOfRangeException(nameof(equipmentBase.EquipmentType), "Unsupported equipment type for armor or relic.")
                     };
-                    var slot = GetSlot(character, slotType);
+                    var slot = GetSlot(character, equipmentSlotType);
 
                     if (slot == null)
                         return false;
 
                     UnequipSlotAsync(slot, inventory);
-                    slot.EquipmentInstanceId = equipmentInstance.Id;
+                    Equip(equipmentInstance, slot);
                     break;
                 }
         }
@@ -240,6 +242,12 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
 
         await _context.SaveChangesAsync(cancellationToken);
         return true;
+    }
+
+    private static void Equip(EquipmentInstance equipmentInstance, EquipmentSlot mainHand)
+    {
+        mainHand.EquipmentInstanceId = equipmentInstance.Id;
+        mainHand.EquipmentInstance = equipmentInstance;
     }
 
     private static EquipmentSlot? GetSlot(Character character, EquipmentSlotType slotType) =>
