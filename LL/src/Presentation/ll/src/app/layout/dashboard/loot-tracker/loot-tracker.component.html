@@ -1,0 +1,20 @@
+<div
+  class="flex h-full max-h-52 flex-col overflow-hidden bg-texture text-white"
+>
+  <div class="p-2 hover:cursor-pointer" (click)="toggle()">
+    Loot Tracker {{ expanded() ? "▼" : "▲" }}
+  </div>
+
+  <div
+    *ngIf="expanded()"
+    class="overflow-y-auto border-t border-primary px-2 pt-2"
+  >
+    <div *ngFor="let entry of entries">
+      <ul>
+        <li *ngFor="let item of entry.items">
+          + {{ item.amount }}x {{ item.name }}
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

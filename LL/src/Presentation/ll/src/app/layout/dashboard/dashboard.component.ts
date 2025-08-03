@@ -7,6 +7,7 @@ import { Observable } from 'rxjs';
 import { GameService } from '../../core/services/client-side/game/game.service';
 import { CombatComponent } from '../../shared/components/combat/combat.component';
 import { ChatComponent } from './chat/chat.component';
+import { LootTrackerComponent } from './loot-tracker/loot-tracker.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -19,6 +20,7 @@ import { ChatComponent } from './chat/chat.component';
     AsyncPipe,
     CombatComponent,
     ChatComponent,
+    LootTrackerComponent,
   ],
   templateUrl: './dashboard.component.html',
 })
