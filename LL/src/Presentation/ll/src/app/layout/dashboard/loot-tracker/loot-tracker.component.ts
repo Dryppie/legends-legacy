@@ -19,7 +19,6 @@ export class LootTrackerComponent {
     private readonly eventService: GameEventService,
     private readonly storage: LocalStorageService,
   ) {
-    // Example data
     this.expanded.set(this.storage.get<boolean>('lootTrackerExpanded') ?? true);
 
     effect(
