@@ -12,7 +12,9 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
     public int? Potential { get; set; } = null;
     public EquipmentBase EquipmentBase { get; set; } = null!;
     public int ItemXp { get; set; } = 0;
-    public List<ItemAttributeModifier> AttributeModifiers { get; set; } = [];
+    public IReadOnlyCollection<ItemAttributeModifier> BaseModifiers { get; set; } = [];
+    public List<InstanceAttributeModifier> InstanceModifiers { get; set; } = [];
+    public List<AttributeModifierBase> AttributeModifiers { get; set; } = [];
     public void Mapping(Profile profile)
     {
         profile.CreateMap<EquipmentInstance, EquipmentInstanceDto>();

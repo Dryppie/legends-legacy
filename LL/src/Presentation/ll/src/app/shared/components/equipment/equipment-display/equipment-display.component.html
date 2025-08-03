@@ -1,6 +1,6 @@
 <!-- equipment-display.component.html -->
 <div class="flex flex-col gap-2">
-  <h2>{{ data.name }}</h2>
+  <h2 [ngClass]="rarityClasses">{{ data.name }}</h2>
 
   <span class="text-zinc-300">
     {{ data.equipmentType }} – {{ data.rarity }}
@@ -32,14 +32,38 @@
   </ng-container>
 
   <!-- Attributes -->
-  <div *ngIf="data.attributeModifiers?.length">
-    <div class="mb-1">Attributes:</div>
-    <ul class="ml-5 list-disc text-sm">
-      <li *ngFor="let attr of data.attributeModifiers">
-        {{ attr.amount > 0 ? "+" : "" }}{{ attr.amount }}
-        {{ attr.attributeType | attributeTypeFormat }}
-      </li>
-    </ul>
+  <div *ngIf="data.baseModifiers?.length">
+    <div class="text-sm">
+      <div
+        *ngFor="let attr of data.baseModifiers"
+        class="flex w-full justify-between"
+      >
+        <span>
+          {{ attr.attributeType | attributeTypeFormat }}
+        </span>
+        <span>
+          {{ attr.amount > 0 ? "+" : "" }}{{ attr.amount
+          }}<span *ngIf="attr.modifierType !== modifierType.Flat">%</span></span
+        >
+      </div>
+    </div>
+  </div>
+  <div *ngIf="data.instanceModifiers?.length" class="flex flex-col gap-2">
+    <div class="border-t border-primary/30"></div>
+    <div class="text-sm">
+      <div
+        *ngFor="let attr of data.instanceModifiers"
+        class="flex w-full justify-between"
+      >
+        <span>
+          {{ attr.attributeType | attributeTypeFormat }}
+        </span>
+        <span>
+          {{ attr.amount > 0 ? "+" : "" }}{{ attr.amount
+          }}<span *ngIf="attr.modifierType !== modifierType.Flat">%</span></span
+        >
+      </div>
+    </div>
   </div>
 
   <!-- Instance-only -->

@@ -113,7 +113,7 @@ public class TemperingService : ITemperingService
         {
             eq.ItemXp -= XpPerTier;
             eq.Rarity = eq.Rarity + 1;        // next tier
-            //ApplyTierPackage(eq);              // stats / sockets / visuals / etc.
+            ApplyTierPackage(eq);              // stats / sockets / visuals / etc.
         }
     }
 
@@ -122,10 +122,9 @@ public class TemperingService : ITemperingService
         var tierPackage = _packageProvider.GetPackage(eq.Rarity);
         if (tierPackage == null) return;
         // Apply the tier package modifiers to the equipment instance
-        foreach (var modifier in tierPackage.AttributeModifiers)
-        {
-            //eq.InstanceModifiers.Add(modifier);
-        }
+        tierPackage.AttributeModifier.ItemInstanceId = eq.Id;
+        tierPackage.AttributeModifier.ItemInstance = eq;
+        eq.InstanceModifiers.Add(tierPackage.AttributeModifier);
     }
 
 

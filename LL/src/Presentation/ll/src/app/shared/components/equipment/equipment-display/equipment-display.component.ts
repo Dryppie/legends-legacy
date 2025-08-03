@@ -1,4 +1,4 @@
-import { DecimalPipe, NgFor, NgIf } from '@angular/common';
+import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { AttributeTypeFormatPipe } from '../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import {
@@ -7,16 +7,18 @@ import {
   mapInstanceToDisplay,
 } from '../equipment-display';
 import { Equipment, EquipmentInstance } from '../../../models/item';
+import { ModifierType } from '../../../models/Dtos/attributesDto';
+import { Rarity } from '../../../models/enums/rarity';
 
 @Component({
   selector: 'app-equipment-display',
   standalone: true,
-  imports: [NgIf, NgFor, AttributeTypeFormatPipe, DecimalPipe],
+  imports: [NgIf, NgFor, NgClass, AttributeTypeFormatPipe, DecimalPipe],
   templateUrl: './equipment-display.component.html',
 })
 export class EquipmentDisplayComponent {
   @Input({ required: true }) item!: Equipment | EquipmentInstance;
-
+  modifierType = ModifierType;
   /** The view-model the template binds to */
   data!: EquipmentDisplay;
 
@@ -24,6 +26,29 @@ export class EquipmentDisplayComponent {
     this.data = isInstance(this.item)
       ? mapInstanceToDisplay(this.item)
       : mapEquipmentToDisplay(this.item);
+  }
+
+  get rarityClasses() {
+    const rarity = this.item.rarity;
+
+    switch (rarity) {
+      case Rarity.Common:
+        return 'text-slate-200';
+      case Rarity.Uncommon:
+        return 'text-emerald-600';
+      case Rarity.Rare:
+        return 'text-blue-600';
+      case Rarity.Epic:
+        return 'text-fuchsia-600';
+      case Rarity.Unique:
+        return 'text-yellow-400';
+      case Rarity.Legendary:
+        return 'text-orange-600';
+      case Rarity.Legacy:
+        return 'text-rose-700';
+      default:
+        return 'text-light_gray';
+    }
   }
 }
 

@@ -10,7 +10,8 @@ export interface EquipmentDisplay {
   rarity: Rarity;
   equipmentType: EquipmentType;
   description?: string;
-  attributeModifiers: AttributeModifier[];
+  baseModifiers?: AttributeModifier[];
+  instanceModifiers: AttributeModifier[];
 
   // Weapon only
   magnitude?: number;
@@ -29,7 +30,7 @@ export function mapEquipmentToDisplay(e: Equipment): EquipmentDisplay {
     rarity: e.rarity,
     equipmentType: e.equipmentType,
     description: e.description,
-    attributeModifiers: e.attributeModifiers,
+    instanceModifiers: e.attributeModifiers,
 
     magnitude: e.magnitude,
     magnitudeRange: e.magnitudeRange,
@@ -48,9 +49,8 @@ export function mapInstanceToDisplay(
     rarity: inst.rarity ?? base.rarity,
     equipmentType: base.equipmentType,
     description: base.description,
-    attributeModifiers: inst.attributeModifiers.length
-      ? inst.attributeModifiers
-      : base.attributeModifiers,
+    baseModifiers: inst.baseModifiers,
+    instanceModifiers: inst.instanceModifiers,
 
     magnitude: base.magnitude,
     magnitudeRange: base.magnitudeRange,

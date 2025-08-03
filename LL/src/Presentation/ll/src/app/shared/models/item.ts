@@ -15,6 +15,8 @@ export interface EquipmentInstance extends ItemInstance {
   equipmentBase: Equipment;
   potential?: number;
   itemXp: number;
+  baseModifiers: AttributeModifier[];
+  instanceModifiers: AttributeModifier[];
   attributeModifiers: AttributeModifier[];
 }
 

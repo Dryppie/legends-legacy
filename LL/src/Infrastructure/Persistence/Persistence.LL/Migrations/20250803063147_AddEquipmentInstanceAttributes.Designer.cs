@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Persistence.LL;
@@ -12,9 +13,11 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    partial class LLDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250803063147_AddEquipmentInstanceAttributes")]
+    partial class AddEquipmentInstanceAttributes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,36 +55,6 @@ namespace Persistence.LL.Migrations
                     b.ToTable("EntityAttributes");
                 });
 
-            modelBuilder.Entity("Domain.Models.Attributes.Modifiers.InstanceAttributeModifier", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<float>("Amount")
-                        .HasColumnType("real");
-
-                    b.Property<int>("AttributeType")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid?>("EquipmentInstanceId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("ItemInstanceId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("ModifierType")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EquipmentInstanceId");
-
-                    b.HasIndex("ItemInstanceId");
-
-                    b.ToTable("InstanceAttributeModifier");
-                });
-
             modelBuilder.Entity("Domain.Models.Attributes.Modifiers.ItemAttributeModifier", b =>
                 {
                     b.Property<Guid>("Id")
@@ -97,6 +70,9 @@ namespace Persistence.LL.Migrations
                     b.Property<string>("EquipmentBaseId")
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("EquipmentInstanceId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("ItemBaseId")
                         .IsRequired()
                         .HasColumnType("text");
@@ -107,6 +83,8 @@ namespace Persistence.LL.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("EquipmentBaseId");
+
+                    b.HasIndex("EquipmentInstanceId");
 
                     b.HasIndex("ItemBaseId");
 
@@ -1078,26 +1056,15 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Domain.Models.Attributes.Modifiers.InstanceAttributeModifier", b =>
-                {
-                    b.HasOne("Domain.Models.Items.Equipments.EquipmentInstance", null)
-                        .WithMany("InstanceModifiers")
-                        .HasForeignKey("EquipmentInstanceId");
-
-                    b.HasOne("Domain.Models.Items.ItemInstance", "ItemInstance")
-                        .WithMany()
-                        .HasForeignKey("ItemInstanceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ItemInstance");
-                });
-
             modelBuilder.Entity("Domain.Models.Attributes.Modifiers.ItemAttributeModifier", b =>
                 {
                     b.HasOne("Domain.Models.Items.Equipments.EquipmentBase", null)
                         .WithMany("AttributeModifiers")
                         .HasForeignKey("EquipmentBaseId");
+
+                    b.HasOne("Domain.Models.Items.Equipments.EquipmentInstance", null)
+                        .WithMany("InstanceModifiers")
+                        .HasForeignKey("EquipmentInstanceId");
 
                     b.HasOne("Domain.Models.Items.ItemBase", "ItemBase")
                         .WithMany()

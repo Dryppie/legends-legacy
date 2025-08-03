@@ -34,19 +34,10 @@ public class InMemoryTierPackageProvider : ITierPackageProvider
         var attr = Pick([.. EquipmentAttributeRules.Rules.Keys]);
         var rule = EquipmentAttributeRules.Rules[attr];
 
-        // Scale if requested
-        var (min, max) = rule.ScalesWithItemLevel
-            ? (rule.Min * itemLevel, rule.Max * itemLevel)
-            : (rule.Min, rule.Max);
+        var amount = Next(rule.Min, rule.Max);
 
-        // Safety: clamp max to soft-cap if present and not scaling
-        if (!rule.ScalesWithItemLevel && rule.SoftCap is { } cap)
-            max = Math.Min(max, cap);
-
-        var amount = Next(min, max);
-
-        var mod = new ItemAttributeModifier(attr, amount, rule.ModType);
-        return new TierPackage(rarity, [mod]);
+        var mod = new InstanceAttributeModifier(attr, amount, rule.ModType);
+        return new TierPackage(rarity, mod);
     }
 
     // -----------------------------------------------------------------------

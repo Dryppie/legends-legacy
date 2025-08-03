@@ -19,6 +19,8 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
     {
         var equipmentList = await _context.EquipmentSlots
             .Include(es => es.EquipmentInstance)
+                .ThenInclude(ei => ei.InstanceModifiers)
+            .Include(es => es.EquipmentInstance)
                 .ThenInclude(ei => ei.ItemBase)
                     .ThenInclude(eb => (eb as EquipmentBase).AttributeModifiers)
             .Where(es => es.EntityId.Equals(entityId))

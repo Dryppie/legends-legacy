@@ -31,6 +31,8 @@ public class InventoryRepository : IInventoryRepository
                 .ThenInclude(ii => ii.ItemInstance)
                     .ThenInclude(ii => ii.ItemBase)
                         .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
+            .Include(i => i.InventoryItems)
+                .ThenInclude(ii => (ii.ItemInstance as EquipmentInstance).InstanceModifiers)
             .FirstOrDefaultAsync(i => i.CharacterId == characterId, cancellationToken); // Assuming CharacterId is the foreign key
 
         NotFoundException.ThrowIfNull(inventory, nameof(inventory), characterId);
@@ -257,6 +259,15 @@ public class InventoryRepository : IInventoryRepository
             ItemInstance = itemInstance,
             Quantity = 1
         };
+
+        if (itemInstance is EquipmentInstance eq)
+        {
+            foreach (var mod in eq.InstanceModifiers)
+            {
+                if (_context.GetEntry(mod).State == EntityState.Detached)
+                    _context.GetEntry(mod).State = EntityState.Added;
+            }
+        }
 
         await _context.InventoryItems.AddAsync(itemToAdd, cancellationToken);
         return true;

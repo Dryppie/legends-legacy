@@ -84,6 +84,9 @@ public class CharacterRepository : ICharacterRepository
             .Include(c => c.BaseAttributes)
             .Include(c => c.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)
+                    .ThenInclude(ei => ei.InstanceModifiers)
+            .Include(c => c.EquipmentSlots)
+                .ThenInclude(es => es.EquipmentInstance)
                     .ThenInclude(ei => ei.ItemBase)
                         .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
             .FirstOrDefaultAsync(c => c.Id.Equals(characterId), cancellationToken);

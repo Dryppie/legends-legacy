@@ -11,36 +11,50 @@ public static class EquipmentAttributeRules
         Rules = new Dictionary<AttributeType, Rule>
         {
             // ===== VITALITY ====================================================
-            [AttributeType.MaxHealth] = FlatScaling(min: 50, max: 500, scales: true),
-            [AttributeType.HealthRegeneration] = FlatScaling(min: 1, max: 15, scales: true),
-            [AttributeType.Barrier] = FlatScaling(min: 25, max: 250, scales: true),
+            [AttributeType.MaxHealth] = Percent(min: 4, max: 15),
+            [AttributeType.MaxMana] = Percent(min: 5, max: 20),
+            [AttributeType.HealthRegeneration] = Percent(min: 4, max: 15),
 
             // ===== OFFENSE =====================================================
-            [AttributeType.AttackPower] = FlatScaling(min: 5, max: 50, scales: true),
-            [AttributeType.SpellPower] = FlatScaling(min: 5, max: 50, scales: true),
-            [AttributeType.AttackSpeed] = PercentCapped(min: 1, max: 3, softCap: 20),
-            [AttributeType.CritChance] = PercentCapped(min: 1, max: 2, softCap: 50),
-            [AttributeType.CritDamage] = PercentScaling(min: 2, max: 10, scales: true),
+            [AttributeType.AttackPower] = Percent(min: 4, max: 15),
+            [AttributeType.SpellPower] = Percent(min: 4, max: 15),
+            [AttributeType.CritChance] = Percent(min: 1, max: 10),
+            [AttributeType.CritDamage] = Percent(min: 10, max: 50),
+            [AttributeType.MultiStrike] = Percent(min: 2, max: 15),
+            [AttributeType.MultiCast] = Percent(min: 2, max: 12),
+            [AttributeType.ArmorPenetration] = Percent(min: 2, max: 8),
+            [AttributeType.ManaPenetration] = Percent(min: 2, max: 8),
 
-            // … keep going for every enum value …
+            // ===== DEFENSE =====================================================
+            [AttributeType.PhysicalDefense] = Percent(min: 2, max: 10),
+            [AttributeType.MagicalDefense] = Percent(min: 2, max: 10),
+            [AttributeType.DamageReduction] = Percent(min: 2, max: 10),
+            [AttributeType.CritDamageReduction] = Percent(min: 2, max: 8),
+            [AttributeType.CrowdControlResistance] = Percent(min: 2, max: 15),
+            [AttributeType.Parry] = Percent(min: 1, max: 3),
+
+            // ===== CONTROL & UTILITY =====================================================
+            [AttributeType.Threat] = Flat(min: 2, max: 10),
+            [AttributeType.CooldownReduction] = Percent(min: 1, max: 5),
+
+            // ===== RESISTANCES =====================================================
+            [AttributeType.FireResistance] = Percent(min: 2, max: 10),
+            [AttributeType.WaterResistance] = Percent(min: 2, max: 10),
+            [AttributeType.EarthResistance] = Percent(min: 2, max: 10),
+            [AttributeType.AirResistance] = Percent(min: 2, max: 10),
         };
     }
 
     // -------- convenience factories ----------------------------------------
-    private static Rule FlatScaling(int min, int max, bool scales) =>
-        new(min, max, ModifierType.Flat, scales, SoftCap: null);
+    private static Rule Flat(int min, int max) =>
+        new(min, max, ModifierType.Flat);
 
-    private static Rule PercentScaling(int min, int max, bool scales) =>
-        new(min, max, ModifierType.Additive, scales, SoftCap: null);
-
-    private static Rule PercentCapped(int min, int max, int softCap) =>
-        new(min, max, ModifierType.Additive, ScalesWithItemLevel: false, softCap);
+    private static Rule Percent(int min, int max) =>
+        new(min, max, ModifierType.Additive);
 }
 
 public sealed record Rule(
     int Min,                           // inclusive
     int Max,                           // inclusive
-    ModifierType ModType,
-    bool ScalesWithItemLevel,
-    int? SoftCap                       // null ⇒ no cap
+    ModifierType ModType
 );
