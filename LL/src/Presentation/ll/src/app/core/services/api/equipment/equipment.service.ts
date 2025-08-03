@@ -17,21 +17,30 @@ export class EquipmentService {
     return this.apiService.get('equipment').pipe();
   }
 
-  public equipEquipment(equipment: EquipmentInstance) {
-    return this.apiService.post('equipment/equip', equipment.id).subscribe({
-      next: () => {
-        // this.characterManager.updateEquipment(equipment);
-        // this.inventoryState.removeItem(equipment.id);
-        // this.toastService.showToast(
-        //   'Essence equipped successfully!',
-        //   'success',
-        //   true,
-        // );
-      },
-      error: (error) => {
-        console.error('Failed to equip essence: ', error);
-      },
-    });
+  public equipEquipment(
+    equipment: EquipmentInstance,
+    slotType: EquipmentSlotType,
+  ) {
+    const equipmentRequestDto = {
+      equipmentItemId: equipment.id,
+      slotType: slotType,
+    };
+    return this.apiService
+      .post('equipment/equip', equipmentRequestDto)
+      .subscribe({
+        next: () => {
+          // this.characterManager.updateEquipment(equipment);
+          // this.inventoryState.removeItem(equipment.id);
+          // this.toastService.showToast(
+          //   'Essence equipped successfully!',
+          //   'success',
+          //   true,
+          // );
+        },
+        error: (error) => {
+          console.error('Failed to equip essence: ', error);
+        },
+      });
   }
 
   unequipEquipment(slotType: EquipmentSlotType) {

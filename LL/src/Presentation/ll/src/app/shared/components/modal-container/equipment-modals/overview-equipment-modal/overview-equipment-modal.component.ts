@@ -50,7 +50,10 @@ export class OverviewEquipmentModalComponent implements OnInit {
   }
 
   onEquip(): void {
-    this.equipmentState.equip(this.selectedEquipmentInstance);
+    this.equipmentState.equip(
+      this.selectedEquipmentInstance,
+      this.equipmentSlotType,
+    );
 
     this.onClose();
   }

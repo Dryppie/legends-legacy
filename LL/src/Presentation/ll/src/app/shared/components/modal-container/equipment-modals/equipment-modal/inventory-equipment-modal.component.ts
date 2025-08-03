@@ -4,6 +4,7 @@ import { Equipment, EquipmentInstance } from '../../../../models/item';
 import { AttributeTypeFormatPipe } from '../../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { EquipmentStateService } from '../../../../../core/services/api/equipment/equipment-state.service';
 import { EquipmentTypePipe } from '../../../../pipes/equipment/equipment-type-format/equipment-type.pipe';
+import { EquipmentSlotType } from '../../../../models/Dtos/equipment-slots/equipmentSlot';
 
 @Component({
   selector: 'app-inventory-equipment-modal',
@@ -13,6 +14,7 @@ import { EquipmentTypePipe } from '../../../../pipes/equipment/equipment-type-fo
 })
 export class InventoryEquipmentModalComponent implements OnInit {
   @Input() equipmentInstance!: EquipmentInstance;
+  @Input() slotType!: EquipmentSlotType;
   equipment!: Equipment;
   @Output() close = new EventEmitter<void>();
 
@@ -23,7 +25,7 @@ export class InventoryEquipmentModalComponent implements OnInit {
   }
 
   onEquip(): void {
-    this.equipmentState.equip(this.equipmentInstance);
+    this.equipmentState.equip(this.equipmentInstance, this.slotType);
     this.onClose();
   }
 

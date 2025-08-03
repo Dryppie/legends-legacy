@@ -54,11 +54,14 @@ export class EquipmentStateService {
     );
   }
 
-  equip(equipmentInstance: EquipmentInstance): void {
+  equip(
+    equipmentInstance: EquipmentInstance,
+    slotType: EquipmentSlotType,
+  ): void {
     const equipmentBase = equipmentInstance.itemBase as Equipment;
     const equipmentType = equipmentBase.equipmentType;
 
-    this.equipmentService.equipEquipment(equipmentInstance);
+    this.equipmentService.equipEquipment(equipmentInstance, slotType);
     this.inventoryState.removeItem(equipmentInstance.id);
 
     const current = this._equipmentSlots();
@@ -118,14 +121,28 @@ export class EquipmentStateService {
           unequip(main);
           off.equipmentInstance = undefined;
         }
-
-        if (!main.equipmentInstance) {
-          main.equipmentInstance = equipmentInstance;
-        } else if (!off.equipmentInstance) {
-          off.equipmentInstance = equipmentInstance;
+        if (!slotType) {
+          if (!main.equipmentInstance) {
+            main.equipmentInstance = equipmentInstance;
+          } else if (!off.equipmentInstance) {
+            off.equipmentInstance = equipmentInstance;
+          } else {
+            if (slotType === EquipmentSlotType.OffHand) {
+              unequip(off);
+              off.equipmentInstance = equipmentInstance;
+            } else {
+              unequip(main);
+              main.equipmentInstance = equipmentInstance;
+            }
+          }
         } else {
-          unequip(main);
-          main.equipmentInstance = equipmentInstance;
+          if (slotType === EquipmentSlotType.OffHand) {
+            unequip(off);
+            off.equipmentInstance = equipmentInstance;
+          } else {
+            unequip(main);
+            main.equipmentInstance = equipmentInstance;
+          }
         }
         break;
       }

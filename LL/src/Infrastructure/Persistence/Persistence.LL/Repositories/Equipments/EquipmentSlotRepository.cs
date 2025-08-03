@@ -88,7 +88,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         return true;
     }
 
-    public async Task<bool> EquipEquipmentAsync(Guid entityId, Guid equipmentId, EquipmentSlotType slotType, CancellationToken cancellationToken)
+    public async Task<bool> EquipEquipmentAsync(Guid entityId, Guid equipmentId, EquipmentSlotType? slotType, CancellationToken cancellationToken)
     {
         // Include all equipped items, and all items from inventory
         var character = await _context.Characters
@@ -128,7 +128,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
     }
 
     private async Task<bool> EquipEquipmentAsync(Character character, Inventory inventory, EquipmentInstance equipmentInstance,
-        InventoryItem inventoryItem, EquipmentSlotType slotType, CancellationToken cancellationToken)
+        InventoryItem inventoryItem, EquipmentSlotType? slotType, CancellationToken cancellationToken)
     {
         var equipmentBase = equipmentInstance.EquipmentBase;
 
@@ -162,18 +162,33 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                         return false;
 
                     // Prioritize empty hand; fall back to replacing OffHand if needed
-                    if (mainHand.EquipmentInstance is null)
+                    if (slotType == null)
                     {
-                        Equip(equipmentInstance, mainHand);
-                    }
-                    else if (offHand.EquipmentInstance is null)
-                    {
-                        Equip(equipmentInstance, offHand);
-                    }
-                    else
-                    {
-                        if (mainHand.EquipmentInstance.EquipmentBase.EquipmentType == EquipmentType.TwoHanded)
+                        if (mainHand.EquipmentInstance is null)
                         {
+                            Equip(equipmentInstance, mainHand);
+                        }
+                        else if (offHand.EquipmentInstance is null)
+                        {
+                            Equip(equipmentInstance, offHand);
+                        }
+                        else
+                        {
+                            if (mainHand.EquipmentInstance.EquipmentBase.EquipmentType == EquipmentType.TwoHanded)
+                            {
+                                offHand.EquipmentInstanceId = null;
+                                offHand.EquipmentInstance = null;
+                            }
+                            // Fall back to replacing mainhand if both are occupied
+                            UnequipSlotAsync(mainHand, inventory);
+                            Equip(equipmentInstance, mainHand);
+                        }
+                    }
+                    else // if slotType is specified, replace that specific slot
+                    {
+                        if (mainHand.EquipmentInstance?.EquipmentBase.EquipmentType == EquipmentType.TwoHanded)
+                        {
+                            UnequipSlotAsync(mainHand, inventory);
                             offHand.EquipmentInstanceId = null;
                             offHand.EquipmentInstance = null;
                         }

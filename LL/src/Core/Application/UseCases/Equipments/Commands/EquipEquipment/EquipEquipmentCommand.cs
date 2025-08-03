@@ -5,7 +5,7 @@ using Domain.Models.Items.Equipments.Slots;
 using MediatR;
 
 namespace Application.UseCases.Equipments.Commands.EquipEquipment;
-public record EquipEquipmentCommand(Guid EntityId, string EquipmentId, EquipmentSlotType SlotType) : IRequest<Response<bool>>;
+public record EquipEquipmentCommand(Guid EntityId, string EquipmentId, EquipmentSlotType? SlotType) : IRequest<Response<bool>>;
 public class EquipEquipmentCommandHandler : IRequestHandler<EquipEquipmentCommand, Response<bool>>
 {
     private readonly IEquipmentSlotService _equipmentService;
