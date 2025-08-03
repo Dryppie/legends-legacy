@@ -1,33 +1,32 @@
 import { NgFor, NgIf } from '@angular/common';
-import { Component, signal } from '@angular/core';
-
-export interface LootTrackerEntry {
-  items: { name: string; amount: number }[];
-}
+import { Component, effect, signal } from '@angular/core';
+import { GameEventService } from '../../../core/services/real-time/game-event.service';
+import { InventoryItem } from '../../../shared/models/inventoryItem';
+import { ItemComponent } from '../../../shared/components/item/item.component';
 
 @Component({
   selector: 'app-loot-tracker',
   standalone: true,
-  imports: [NgIf, NgFor],
+  imports: [NgIf, NgFor, ItemComponent],
   templateUrl: './loot-tracker.component.html',
 })
 export class LootTrackerComponent {
-  entries: LootTrackerEntry[] = [];
+  entries: InventoryItem[] = [];
   expanded = signal(true);
 
-  constructor() {
+  constructor(private readonly eventService: GameEventService) {
     // Example data
-    this.entries = [
-      {
-        items: [
-          { name: "Goblin's Essence", amount: 1 },
-          { name: "Large Rat's Essence", amount: 1 },
-        ],
+    effect(
+      () => {
+        const loot = this.eventService.event.LootReceivedMsg();
+        if (loot) {
+          loot.payload.forEach((item) => {
+            this.entries.push(item);
+          });
+        }
       },
-      {
-        items: [{ name: 'Soulstones', amount: 2 }],
-      },
-    ];
+      { allowSignalWrites: true },
+    );
   }
 
   toggle() {

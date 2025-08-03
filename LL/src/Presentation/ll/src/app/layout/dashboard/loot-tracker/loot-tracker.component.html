@@ -9,12 +9,16 @@
     *ngIf="expanded()"
     class="overflow-y-auto border-t border-primary px-2 pt-2"
   >
-    <div *ngFor="let entry of entries">
-      <ul>
-        <li *ngFor="let item of entry.items">
-          + {{ item.amount }}x {{ item.name }}
-        </li>
-      </ul>
-    </div>
+    <ng-container *ngIf="entries.length > 0; else emptyState">
+      <div *ngFor="let entry of entries">
+        <div class="flex gap-1">
+          <div>{{ entry.quantity }}</div>
+          <app-item [item]="entry.itemInstance"></app-item>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #emptyState>
+      <div class="text-center italic text-zinc-300">No loot received yet.</div>
+    </ng-template>
   </div>
 </div>
