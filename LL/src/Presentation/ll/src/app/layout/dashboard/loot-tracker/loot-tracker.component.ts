@@ -3,6 +3,7 @@ import { Component, effect, signal } from '@angular/core';
 import { GameEventService } from '../../../core/services/real-time/game-event.service';
 import { InventoryItem } from '../../../shared/models/inventoryItem';
 import { ItemComponent } from '../../../shared/components/item/item.component';
+import { LocalStorageService } from '../../../core/services/client-side/local-storage/local-storage.service';
 
 @Component({
   selector: 'app-loot-tracker',
@@ -14,8 +15,13 @@ export class LootTrackerComponent {
   entries: InventoryItem[] = [];
   expanded = signal(true);
 
-  constructor(private readonly eventService: GameEventService) {
+  constructor(
+    private readonly eventService: GameEventService,
+    private readonly storage: LocalStorageService,
+  ) {
     // Example data
+    this.expanded.set(this.storage.get<boolean>('lootTrackerExpanded') ?? true);
+
     effect(
       () => {
         const loot = this.eventService.event.LootReceivedMsg();
@@ -31,5 +37,6 @@ export class LootTrackerComponent {
 
   toggle() {
     this.expanded.update((v) => !v);
+    this.storage.set('lootTrackerExpanded', this.expanded());
   }
 }
