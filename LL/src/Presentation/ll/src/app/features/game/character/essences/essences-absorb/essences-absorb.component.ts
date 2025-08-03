@@ -30,15 +30,6 @@ export class EssencesAbsorbComponent {
   showModal = false;
   shatterAmount: number = 0;
 
-  /** all | craftable | uncraftable */
-  readonly filterMode = signal<'all' | 'already absorbed' | 'not absorbed'>(
-    'all',
-  );
-  /** minimum level (inclusive) */
-  readonly minLevel = signal<number>(1);
-  /** maximum level (inclusive, null ⇒ no upper limit) */
-  readonly maxLevel = signal<number | null>(null);
-
   readonly inventoryEssences = signal<InventoryItem[]>([]);
   readonly absorbedEssence = signal<EssenceSlot[]>([]);
 
@@ -85,25 +76,6 @@ export class EssencesAbsorbComponent {
         ),
     },
   ];
-
-  readonly filteredEssences = computed<InventoryItem[]>(() => {
-    const mode = this.filterMode();
-
-    // Pre-compute once
-    const absorbedNames = new Set(
-      this.absorbedEssence().map((s) => s.occupiedEssence?.name),
-    );
-
-    return this.inventoryEssences().filter((inv) => {
-      const item = inv.itemInstance.itemBase as EssenceItem;
-      const absorbed = absorbedNames.has(item.essence.name);
-
-      /* absorbed gate */
-      if (mode === 'already absorbed') return absorbed;
-      if (mode === 'not absorbed') return !absorbed;
-      return true; // mode === 'all'
-    });
-  });
 
   constructor(
     private essenceState: EssenceStateService,

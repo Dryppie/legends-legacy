@@ -5,14 +5,14 @@
     icon="character/essences"
   ></app-default-header>
   <app-tabs class="flex h-full w-full flex-col overflow-hidden">
-    <app-tab label="Inventory essences">
-      <app-essences-absorb class="h-full overflow-hidden"></app-essences-absorb>
-    </app-tab>
     <app-tab label="Absorbed essences">
       <app-essences-equipped
         [essenceSlots]="essenceSlots"
         class="h-full overflow-hidden"
       ></app-essences-equipped>
+    </app-tab>
+    <app-tab label="Inventory essences">
+      <app-essences-absorb class="h-full overflow-hidden"></app-essences-absorb>
     </app-tab>
   </app-tabs>
 </div>

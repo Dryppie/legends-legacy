@@ -4,6 +4,7 @@ import {
   ContentChild,
   effect,
   EventEmitter,
+  Input,
   input,
   Output,
   signal,
@@ -11,6 +12,7 @@ import {
 } from '@angular/core';
 import { FilterOption } from '../list-filter/filter-option';
 import { NgClass, NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
+import { LocalStorageService } from '../../../../core/services/client-side/local-storage/local-storage.service';
 
 @Component({
   selector: 'app-selectable-list-filter',
@@ -19,6 +21,8 @@ import { NgClass, NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
   templateUrl: './selectable-list-filter.component.html',
 })
 export class SelectableListFilterComponent<T> {
+  @Input() storageKey?: string;
+
   /** Raw data to filter. */
   items = input.required<T[]>();
   selected: T | null = null;
@@ -35,12 +39,25 @@ export class SelectableListFilterComponent<T> {
   /** Which filter is active? */
   active = signal<FilterOption<T> | null>(null);
 
-  constructor() {
+  constructor(private readonly storage: LocalStorageService) {
     effect(
       () => {
         const filters = this.filterOptions();
-        // Only set if not already active and there's at least one option
-        if (!this.active() && filters.length > 0) {
+
+        if (filters.length === 0) return;
+
+        const key = this.storageKey;
+        if (key) {
+          const saved = this.storage.get<string>(key);
+          const match = filters.find((f) => f.label === saved);
+          if (match) {
+            this.active.set(match);
+            return;
+          }
+        }
+
+        // Fallback: use the first one
+        if (!this.active()) {
           this.active.set(filters[0]);
         }
       },
@@ -51,6 +68,11 @@ export class SelectableListFilterComponent<T> {
   /** Switch active filter. */
   setActive(opt: FilterOption<T>) {
     this.active.set(opt);
+    const current = this.active();
+    const key = this.storageKey;
+    if (current && key) {
+      this.storage.set(key, current.label);
+    }
   }
 
   /** Currently visible items. */

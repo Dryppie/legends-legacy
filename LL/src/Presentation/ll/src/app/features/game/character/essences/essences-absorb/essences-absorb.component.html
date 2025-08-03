@@ -48,6 +48,7 @@
   <!-- INVENTORY ESSENCES LIST -->
   <div class="flex h-full w-full flex-col space-y-2 overflow-y-auto md:order-1">
     <app-selectable-list-filter
+      [storageKey]="'essences-absorb'"
       [items]="inventoryEssences()"
       [filterOptions]="essenceFilters"
       (select)="selectEssence($event)"
