@@ -1,19 +1,22 @@
 // shared/help/tour.service.ts
 import { Injectable } from '@angular/core';
-import { driver, DriveStep, Side } from 'driver.js';
+import { Alignment, driver, DriveStep, Side } from 'driver.js';
+import { LocalStorageService } from '../local-storage/local-storage.service';
 
 export interface TourStepJSON {
   element: string; // CSS selector
   title?: string;
   description: string;
   position?: Side; // 'left' | 'right' | …
+  alignment?: Alignment;
 }
 
 @Injectable({ providedIn: 'root' })
 export class TourService {
+  constructor(private readonly storage: LocalStorageService) {}
   /** Kick off a tour whose JSON lives at /assets/help/tours/<pageId>.json */
   async start(pageId: string) {
-    if (localStorage.getItem(`tour:${pageId}`) === 'done') return;
+    if (this.storage.get(`tour:${pageId}`) === 'done') return;
 
     const steps: TourStepJSON[] = await fetch(
       `/assets/help/tours/${pageId}.json`,
@@ -26,11 +29,16 @@ export class TourService {
       animate: true,
       smoothScroll: true,
       showProgress: true,
+      allowClose: false,
       nextBtnText: 'Next',
       prevBtnText: 'Back',
       doneBtnText: 'Finish',
       stagePadding: 4,
       popoverClass: 'driverjs-theme',
+      onDestroyStarted: () => {
+        drv.destroy();
+        this.storage.set(`tour:${pageId}`, 'done');
+      },
     });
 
     drv.setSteps(
@@ -40,12 +48,10 @@ export class TourService {
           title: s.title,
           description: s.description,
           side: s.position ?? 'bottom',
-          align: 'center',
+          align: s.alignment ?? 'center',
         },
       })),
     );
-
-    // drv.on('destroy', () => localStorage.setItem(`tour:${pageId}`, 'done'));
 
     drv.drive();
   }
