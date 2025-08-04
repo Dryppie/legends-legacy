@@ -24,17 +24,17 @@
       Cooldown:
       {{ essence.active.cooldown | ticksToSeconds }} seconds
     </p>
-    <span class="flex" *ngIf="essence.active.attackTypes.length">
+    <span class="flex" *ngIf="essence.active.attackTypes?.length">
       [<ng-container *ngFor="let tag of essence.active.attackTypes">
         <span class="pr-1 first:hidden">, </span>{{ tag }}</ng-container
       >]
     </span>
-    <span class="flex" *ngIf="essence.active.damageTypes.length">
+    <span class="flex" *ngIf="essence.active.damageTypes?.length">
       [<ng-container *ngFor="let tag of essence.active.damageTypes">
         <span class="pr-1 first:hidden">, </span>{{ tag }}</ng-container
       >]
     </span>
-    <span class="flex" *ngIf="essence.active.effectTags.length">
+    <span class="flex" *ngIf="essence.active.effectTags?.length">
       [<ng-container *ngFor="let tag of essence.active.effectTags">
         <span class="pr-1 first:hidden">, </span>{{ tag }}</ng-container
       >]
@@ -45,17 +45,17 @@
     <app-essence-description
       [description]="essence.passive.description"
     ></app-essence-description>
-    <span class="flex" *ngIf="essence.passive.attackTypes.length">
+    <span class="flex" *ngIf="essence.passive.attackTypes?.length">
       [<ng-container *ngFor="let tag of essence.passive.attackTypes">
         <span class="pr-1 first:hidden">, </span>{{ tag }}</ng-container
       >]
     </span>
-    <span class="flex" *ngIf="essence.passive.damageTypes.length">
+    <span class="flex" *ngIf="essence.passive.damageTypes?.length">
       [<ng-container *ngFor="let tag of essence.passive.damageTypes">
         <span class="pr-1 first:hidden">, </span>{{ tag }}</ng-container
       >]
     </span>
-    <span class="flex" *ngIf="essence.passive.effectTags.length">
+    <span class="flex" *ngIf="essence.passive.effectTags?.length">
       [<ng-container *ngFor="let tag of essence.passive.effectTags">
         <span class="pr-1 first:hidden">, </span>{{ tag }}</ng-container
       >]

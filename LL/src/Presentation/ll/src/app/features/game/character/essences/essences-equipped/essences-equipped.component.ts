@@ -8,6 +8,7 @@ import {
   SlotState,
 } from '../../../../../shared/models/essenceSlot';
 import { EssenceDetailsComponent } from '../../../../../shared/components/essences/essence-details/essence-details.component';
+import { TourService } from '../../../../../core/services/client-side/tutorial-tour/tour.service';
 
 @Component({
   selector: 'app-essences-equipped',
@@ -57,7 +58,10 @@ export class EssencesEquippedComponent {
   constructor(
     private essenceState: EssenceStateService,
     private inventoryState: InventoryStateService,
-  ) {}
+    private readonly tour: TourService,
+  ) {
+    this.tour.start('character-essences');
+  }
 
   selectEssence(essenceSlot: EssenceSlot): void {
     this.selectedEssenceSlotId.set(essenceSlot.id);

@@ -33,18 +33,19 @@
           </div>
         </ng-container>
         <ng-template #emptySlot>
-          <div class="italic">This is an empty essence slot.</div>
+          <div class="pb-3 italic">This is an empty essence slot.</div>
         </ng-template>
       </ng-container>
       <ng-template #noSlotSelected>
-        <div class="text-gray-500 pb-3 italic">
-          Select an essence slot to view details.
-        </div>
+        <div class="pb-3 italic">Select an essence slot to view details.</div>
       </ng-template>
     </div>
   </div>
   <!-- INVENTORY ESSENCES LIST -->
-  <div class="flex h-full w-full flex-col space-y-2 overflow-y-auto md:order-1">
+  <div
+    class="flex h-full w-full flex-col space-y-2 overflow-y-auto md:order-1"
+    data-tour="absorbed-essences"
+  >
     <ng-container *ngIf="activeSlots().length; else noEssences">
       <h2 class="flex text-primary">Active absorbed essences</h2>
       <div
