@@ -33,7 +33,10 @@
       class="grid grid-cols-4 items-center border-b border-light_gray p-2"
       *ngFor="let o of opponents"
     >
-      <div class="break-words pr-2 sm:truncate">{{ o.name }}</div>
+      <app-character-tag
+        [characterId]="o.characterId"
+        [characterName]="o.name"
+      ></app-character-tag>
       <div>{{ o.level }}</div>
       <div>{{ o.opponentRating }}</div>
       <div class="justify-self-end">

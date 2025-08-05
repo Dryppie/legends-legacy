@@ -4,11 +4,18 @@ import { ArenaTicketStatus } from '../../../../../shared/models/Dtos/colosseum/a
 import { ColosseumService } from '../../../../../core/services/api/colosseum/colosseum.service';
 import { RegularButtonComponent } from '../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { ArenaOpponentPreview } from '../../../../../shared/models/Dtos/colosseum/arenaOpponentPreview';
+import { CharacterTagComponent } from '../../../../../character-tag/character-tag.component';
 
 @Component({
   selector: 'app-arena-battle',
   standalone: true,
-  imports: [NgFor, NgIf, NgClass, RegularButtonComponent],
+  imports: [
+    NgFor,
+    NgIf,
+    NgClass,
+    RegularButtonComponent,
+    CharacterTagComponent,
+  ],
   templateUrl: './arena-battle.component.html',
 })
 export class ArenaBattleComponent implements OnInit {
