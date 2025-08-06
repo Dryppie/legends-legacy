@@ -16,11 +16,19 @@ import { GuildMember } from '../../../../../../shared/models/Dtos/guild/guildMem
 import { GuildService } from '../../../../../../core/services/api/guild/guild.service';
 import { RegularButtonComponent } from '../../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { GuildStateService } from '../../../../../../core/services/api/guild/guild-state.service';
+import { CharacterTagComponent } from '../../../../../../shared/components/character/character-tag/character-tag.component';
 
 @Component({
   selector: 'app-guild-info',
   standalone: true,
-  imports: [NgFor, NgIf, NgClass, FormsModule, RegularButtonComponent],
+  imports: [
+    NgFor,
+    NgIf,
+    NgClass,
+    FormsModule,
+    RegularButtonComponent,
+    CharacterTagComponent,
+  ],
   templateUrl: './guild-info.component.html',
 })
 export class GuildInfoComponent implements OnInit {

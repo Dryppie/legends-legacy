@@ -8,8 +8,8 @@ import { ClickPopoverComponent } from '../../custom-components/click-popover/cli
   templateUrl: './character-tag.component.html',
 })
 export class CharacterTagComponent {
-  @Input() characterId!: string;
-  @Input() characterName!: string;
+  @Input() id!: string;
+  @Input() name!: string;
 
   isMenuOpen = false;
 

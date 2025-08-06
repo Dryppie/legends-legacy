@@ -34,8 +34,8 @@
       *ngFor="let o of opponents"
     >
       <app-character-tag
-        [characterId]="o.characterId"
-        [characterName]="o.name"
+        [id]="o.characterId"
+        [name]="o.name"
       ></app-character-tag>
       <div>{{ o.level }}</div>
       <div>{{ o.opponentRating }}</div>

@@ -52,6 +52,10 @@
             member.characterId === character.characterId,
         }"
       >
+        <app-character-tag
+          [id]="member.characterId"
+          [name]="member.name"
+        ></app-character-tag>
         <div class="break-words pr-2">
           {{ member.name }}
         </div>

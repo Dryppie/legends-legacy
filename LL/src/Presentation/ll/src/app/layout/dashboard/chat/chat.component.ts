@@ -25,6 +25,7 @@ import { RegularButtonComponent } from '../../../shared/components/custom-compon
 import { StickyScrollDirective } from '../../../shared/directives/sticky-scroll/sticky-scroll.directive';
 import { GuildStateService } from '../../../core/services/api/guild/guild-state.service';
 import { CharacterStateService } from '../../../core/services/api/character/character-state.service';
+import { CharacterTagComponent } from '../../../shared/components/character/character-tag/character-tag.component';
 
 interface ChatRoom {
   label: string;
@@ -45,6 +46,7 @@ interface ChatRoom {
     StickyScrollDirective,
     DatePipe,
     SlicePipe,
+    CharacterTagComponent,
   ],
   templateUrl: './chat.component.html',
 })

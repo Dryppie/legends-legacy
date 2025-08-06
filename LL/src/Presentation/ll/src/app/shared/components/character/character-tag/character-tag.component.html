@@ -1,9 +1,9 @@
 <app-click-popover [template]="actionsTpl">
-  <span class="character-name">{{ characterName }}</span>
+  <span class="character-name">{{ name }}</span>
 </app-click-popover>
 
 <ng-template #actionsTpl>
-  <div class="flex flex-col gap-2">
+  <div class="flex flex-col gap-2 p-1">
     <div class="hover:cursor-pointer" (click)="onViewProfile()">
       View Profile
     </div>

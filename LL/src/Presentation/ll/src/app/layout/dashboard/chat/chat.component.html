@@ -42,28 +42,34 @@
                     *ngIf="m.senderId === characterId(); else incomingWhisper"
                   >
                     To
-                    {{
-                      m.targetCharacterName!.length > 36
-                        ? (m.targetCharacterName | slice: 0 : 36) + ".."
-                        : m.targetCharacterName
-                    }}:
+                    <div class="flex">
+                      <app-character-tag
+                        [id]="m.targetCharacterId ?? ''"
+                        [name]="m.targetCharacterName ?? ''"
+                      ></app-character-tag
+                      >:
+                    </div>
                   </ng-container>
                   <ng-template #incomingWhisper>
                     From
-                    {{
-                      m.senderName.length > 36
-                        ? (m.senderName | slice: 0 : 36) + ".."
-                        : m.senderName
-                    }}:
+                    <div class="flex">
+                      <app-character-tag
+                        [id]="m.senderId"
+                        [name]="m.senderName"
+                      ></app-character-tag
+                      >:
+                    </div>
                   </ng-template>
                 </ng-container>
                 <ng-template #normalSender>
-                  {{
-                    m.senderName.length > 36
-                      ? (m.senderName | slice: 0 : 36) + ".."
-                      : m.senderName
-                  }}:</ng-template
-                >
+                  <div class="flex">
+                    <app-character-tag
+                      [id]="m.senderId"
+                      [name]="m.senderName"
+                    ></app-character-tag
+                    >:
+                  </div>
+                </ng-template>
               </span>
             </div>
             <div class="break-words text-sm">
