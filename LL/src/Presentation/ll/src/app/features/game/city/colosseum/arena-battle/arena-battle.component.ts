@@ -4,7 +4,7 @@ import { ArenaTicketStatus } from '../../../../../shared/models/Dtos/colosseum/a
 import { ColosseumService } from '../../../../../core/services/api/colosseum/colosseum.service';
 import { RegularButtonComponent } from '../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { ArenaOpponentPreview } from '../../../../../shared/models/Dtos/colosseum/arenaOpponentPreview';
-import { CharacterTagComponent } from '../../../../../character-tag/character-tag.component';
+import { CharacterTagComponent } from '../../../../../shared/components/character/character-tag/character-tag.component';
 
 @Component({
   selector: 'app-arena-battle',

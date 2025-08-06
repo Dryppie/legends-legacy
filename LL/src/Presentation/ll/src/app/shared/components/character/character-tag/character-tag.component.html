@@ -1,0 +1,12 @@
+<app-click-popover [template]="actionsTpl">
+  <span class="character-name">{{ characterName }}</span>
+</app-click-popover>
+
+<ng-template #actionsTpl>
+  <div class="flex flex-col gap-2">
+    <div class="hover:cursor-pointer" (click)="onViewProfile()">
+      View Profile
+    </div>
+    <div class="hover:cursor-pointer" (click)="onWhisper()">Whisper</div>
+  </div>
+</ng-template>
