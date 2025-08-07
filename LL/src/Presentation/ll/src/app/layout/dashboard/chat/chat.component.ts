@@ -12,14 +12,7 @@ import {
   ChatService,
 } from '../../../core/services/ll-chat/chat-service/chat.service';
 import { Subscription } from 'rxjs';
-import {
-  DatePipe,
-  NgClass,
-  NgFor,
-  NgIf,
-  SlicePipe,
-  TitleCasePipe,
-} from '@angular/common';
+import { DatePipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RegularButtonComponent } from '../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { StickyScrollDirective } from '../../../shared/directives/sticky-scroll/sticky-scroll.directive';
@@ -45,7 +38,6 @@ interface ChatRoom {
     RegularButtonComponent,
     StickyScrollDirective,
     DatePipe,
-    SlicePipe,
     CharacterTagComponent,
   ],
   templateUrl: './chat.component.html',
