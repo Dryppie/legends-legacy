@@ -20,11 +20,6 @@ import { AsyncPipe, NgIf } from '@angular/common';
   templateUrl: './character-overview.component.html',
 })
 export class CharacterOverviewComponent {
-  showItemInfo = false;
-  itemName = '';
-  itemDescription = '';
-  itemImage = '';
-
   readonly character$!: Observable<CharacterOverviewDto>;
 
   constructor(private characterService: CharacterService) {
