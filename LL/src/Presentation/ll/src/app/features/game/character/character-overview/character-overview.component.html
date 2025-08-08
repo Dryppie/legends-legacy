@@ -1,4 +1,20 @@
 <div class="flex h-full flex-col gap-4 overflow-hidden pb-4 text-white sm:pb-0">
+  <div class="flex items-center gap-2">
+    <input
+      type="text"
+      [(ngModel)]="searchValue"
+      (keydown)="onEnter($event)"
+      class="bg-gray-800 placeholder-gray-400 w-full rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+      placeholder="Search character by name or ID..."
+    />
+    <button
+      (click)="onSearch()"
+      class="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+    >
+      Search
+    </button>
+  </div>
+
   <app-default-header
     *ngIf="character$ | async as CharacterOverview"
     class="flex-none"
