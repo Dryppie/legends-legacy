@@ -7,6 +7,7 @@ import { CharacterAttributesComponent } from '../../../../shared/components/char
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { EquippedEssencesComponent } from '../../../../shared/components/essences/equipped-essences/equipped-essences.component';
 import { CharacterOverviewDto } from '../../../../shared/models/Dtos/characterDto';
+import { RegularButtonComponent } from '../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 
 @Component({
   selector: 'app-character-overview',
@@ -18,6 +19,7 @@ import { CharacterOverviewDto } from '../../../../shared/models/Dtos/characterDt
     AsyncPipe,
     NgIf,
     FormsModule,
+    RegularButtonComponent,
   ],
   templateUrl: './character-overview.component.html',
 })
