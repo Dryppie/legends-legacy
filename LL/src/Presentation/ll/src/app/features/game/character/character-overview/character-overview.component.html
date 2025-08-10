@@ -4,7 +4,7 @@
       type="text"
       [(ngModel)]="searchValue"
       (keydown)="onEnter($event)"
-      class="placeholder-gray-400 w-full rounded-lg border border-light_gray/30 bg-transparent px-4 py-2 text-white focus:border-light_gray"
+      class="placeholder-gray-400 w-full rounded-lg border border-zinc-300/30 bg-transparent px-4 py-2 text-base text-white focus:border-zinc-300/80"
       placeholder="Search character by name..."
     />
     <app-regular-button
@@ -13,21 +13,21 @@
     ></app-regular-button>
   </div>
 
-  <app-default-header
+  <!-- <app-default-header
     *ngIf="character$ | async as CharacterOverview"
     class="flex-none"
     title="Character Overview"
     icon="character/achievements"
-  ></app-default-header>
+  ></app-default-header> -->
   <div class="flex flex-col gap-4 overflow-y-auto pr-4 sm:pr-6 lg:flex-row">
     <app-character-attributes
-      *ngIf="character$ | async as CharacterOverview"
+      *ngIf="character() as CharacterOverview"
       class="flex w-full"
       [attributes]="CharacterOverview.baseCombatAttributes"
     ></app-character-attributes>
     <app-equipped-essences
       class="flex h-full"
-      *ngIf="character$ | async as CharacterOverview"
+      *ngIf="character() as CharacterOverview"
       [essenceSlots]="CharacterOverview?.essenceSlots ?? []"
     ></app-equipped-essences>
   </div>

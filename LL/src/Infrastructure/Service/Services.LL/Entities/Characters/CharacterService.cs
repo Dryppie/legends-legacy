@@ -53,6 +53,20 @@ public class CharacterService : ICharacterService
         return character;
     }
 
+    public async Task<Character?> GetCharacterOverviewByNameAsync(string characterName, CancellationToken cancellationToken)
+    {
+        var character = await _characterRepository.GetCharacterOverviewByCharacterNameAsync(characterName, cancellationToken);
+        if (character == null) return null;
+
+        AttributeCalculator.CalculateBaseAttributes(character);
+        foreach (var essence in character.EssenceSlots.Where(es => es.OccupiedEssence != null).Select(es => es.OccupiedEssence!))
+        {
+            _essenceDescriptionService.BuildAbilityDescription(essence.Active, character.BaseCombatAttributes);
+            _essenceDescriptionService.BuildAbilityDescription(essence.Passive, character.BaseCombatAttributes);
+        }
+        return character;
+    }
+
     public async Task<Character?> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _characterRepository.GetBaseCharacterByIdAsync(characterId, cancellationToken);
 
@@ -67,4 +81,5 @@ public class CharacterService : ICharacterService
 
     public async Task SaveChangesAsync(CancellationToken cancellationToken) =>
         await _characterRepository.SaveChangesAsync(cancellationToken);
+
 }

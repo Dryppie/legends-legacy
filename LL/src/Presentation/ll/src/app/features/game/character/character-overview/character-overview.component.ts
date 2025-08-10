@@ -1,7 +1,7 @@
-import { AsyncPipe, NgIf } from '@angular/common';
-import { Component, EventEmitter, Output } from '@angular/core';
+import { NgIf } from '@angular/common';
+import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { catchError, EMPTY, take } from 'rxjs';
 import { CharacterService } from '../../../../core/services/api/character/character.service';
 import { CharacterAttributesComponent } from '../../../../shared/components/character/character-attributes/character-attributes.component';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
@@ -16,7 +16,6 @@ import { RegularButtonComponent } from '../../../../shared/components/custom-com
     DefaultHeaderComponent,
     EquippedEssencesComponent,
     CharacterAttributesComponent,
-    AsyncPipe,
     NgIf,
     FormsModule,
     RegularButtonComponent,
@@ -24,22 +23,30 @@ import { RegularButtonComponent } from '../../../../shared/components/custom-com
   templateUrl: './character-overview.component.html',
 })
 export class CharacterOverviewComponent {
-  readonly character$!: Observable<CharacterOverviewDto>;
-
-  searchValue = '';
-
-  @Output() search = new EventEmitter<string>();
+  searchValue = signal('');
+  character = signal<CharacterOverviewDto | null>(null);
 
   constructor(private characterService: CharacterService) {
-    // `characterService` is already injected → safe to use here
-    this.character$ = this.characterService.characterOverview$;
+    this.characterService.characterOverview$
+      .pipe(take(1))
+      .subscribe((c) => this.character.set(c));
   }
 
   onSearch() {
-    const trimmed = this.searchValue.trim();
-    if (trimmed) {
-      this.search.emit(trimmed);
-    }
+    const trimmed = this.searchValue().trim();
+    if (!trimmed) return;
+
+    this.characterService
+      .searchCharacter(trimmed)
+      .pipe(
+        catchError((err) => {
+          console.error(err.message);
+          return EMPTY;
+        }),
+      )
+      .subscribe((character) => {
+        this.character.set(character);
+      });
   }
 
   onEnter(event: KeyboardEvent) {

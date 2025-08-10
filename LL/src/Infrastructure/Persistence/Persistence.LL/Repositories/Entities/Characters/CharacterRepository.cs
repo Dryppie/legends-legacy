@@ -8,6 +8,7 @@ using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL.Seeds.Helpers;
+using System.Xml.Linq;
 
 namespace Persistence.LL.Repositories.Entities.Characters;
 public class CharacterRepository : ICharacterRepository
@@ -90,6 +91,31 @@ public class CharacterRepository : ICharacterRepository
                     .ThenInclude(ei => ei.ItemBase)
                         .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
             .FirstOrDefaultAsync(c => c.Id.Equals(characterId), cancellationToken);
+
+        if (character == null) return character;
+
+        foreach (var essenceSlot in character.EssenceSlots.Where(es => es.OccupiedEssence != null))
+        {
+            EssenceLoader.Instance.LoadAbilitiesForEssence(essenceSlot.OccupiedEssence!);
+        }
+
+        return character;
+    }
+
+    public async Task<Character?> GetCharacterOverviewByCharacterNameAsync(string characterName, CancellationToken cancellationToken)
+    {
+        var character = await _context.Characters
+            .Include(c => c.EssenceSlots)
+                .ThenInclude(es => es.OccupiedEssence)
+            .Include(c => c.BaseAttributes)
+            .Include(c => c.EquipmentSlots)
+                .ThenInclude(es => es.EquipmentInstance)
+                    .ThenInclude(ei => ei.InstanceModifiers)
+            .Include(c => c.EquipmentSlots)
+                .ThenInclude(es => es.EquipmentInstance)
+                    .ThenInclude(ei => ei.ItemBase)
+                        .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
+            .FirstOrDefaultAsync(c => c.Name.ToLower() == characterName.ToLower(), cancellationToken);
 
         if (character == null) return character;
 

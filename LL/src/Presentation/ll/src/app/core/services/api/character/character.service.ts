@@ -68,6 +68,26 @@ export class CharacterService {
     return this.authService.currentCharacter;
   }
 
+  searchCharacter(name: string): Observable<CharacterOverviewDto> {
+    const params = new HttpParams().set('name', name);
+    return this.api.get('Character/Search', params).pipe(
+      map((characterOverview) => {
+        return characterOverview;
+      }),
+      catchError(() => {
+        // this.toastService.showToast(
+        //   'Login Failed',
+        //   'Wrong email or password',
+        //   'error',
+        //   't',
+        // );
+        return throwError(
+          () => new Error('No character with this name exists'),
+        );
+      }),
+    );
+  }
+
   resolveCharacterIdByName(name: string): Observable<string> {
     const params = new HttpParams().set('name', name);
     return this.api.get('Character/resolveName', params).pipe(
