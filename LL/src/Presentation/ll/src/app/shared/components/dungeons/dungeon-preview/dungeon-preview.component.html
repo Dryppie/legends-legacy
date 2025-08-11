@@ -1,0 +1,127 @@
+<div class="flex w-full flex-col gap-4">
+  <!-- Hero banner -->
+  <div class="border-primary-gradient rounded-md p-[1px]">
+    <div class="overflow-hidden rounded-md bg-[#0f0f0f]">
+      <div class="relative h-56 md:h-64">
+        <img
+          [src]="data.heroImage"
+          [alt]="data.title"
+          class="absolute inset-0 h-full w-full object-cover"
+        />
+        <div class="relative h-full w-full bg-black/35"></div>
+      </div>
+      <div class="px-5 py-4 text-white">
+        <h2 class="font-serif text-3xl font-semibold md:text-4xl">
+          {{ data.title }}
+        </h2>
+        <p class="mt-2 max-w-3xl opacity-80">{{ data.lore }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info blocks -->
+  <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+    <div class="rounded-md border border-[#3b2f1a] bg-[#121212] p-4 text-white">
+      <div class="text-[11px] uppercase opacity-70">Requirements</div>
+      <div class="mt-2 flex flex-wrap items-center gap-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xs uppercase opacity-80">Required Lv.</span>
+          <span class="text-base font-semibold tabular-nums">{{
+            data.requiredLevel
+          }}</span>
+        </div>
+
+        <ng-container *ngIf="data.keyItem as key">
+          <div class="h-4 w-px bg-white/15"></div>
+          <div class="flex items-center gap-2">
+            <!-- <img
+              [src]="key.icon"
+              [alt]="key.name"
+              class="h-5 w-5 object-contain"
+            /> -->
+            <span class="text-xs">{{ key.name }}</span>
+            <span class="text-xs tabular-nums"
+              >({{ key.have }}/{{ key.need }})</span
+            >
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="data.dailyEntries as d">
+          <div class="h-4 w-px bg-white/15"></div>
+          <div class="text-xs">
+            Daily entries:
+            <span class="font-semibold tabular-nums">{{ d }}</span>
+          </div>
+        </ng-container>
+      </div>
+
+      <div class="mt-4 flex flex-wrap gap-6 text-sm opacity-80">
+        <div *ngIf="data.roomsRange">
+          Rooms: {{ data.roomsRange[0] }}–{{ data.roomsRange[1] }}
+        </div>
+        <div *ngIf="data.estMinutes">
+          Duration: {{ data.estMinutes[0] }}–{{ data.estMinutes[1] }} min idle
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="rounded-md border border-[#3b2f1a] bg-[#121212] p-4 text-white md:col-span-2"
+    >
+      <div class="text-[11px] uppercase opacity-70">Difficulty</div>
+      <div class="mt-2 flex gap-2">
+        <button
+          class="rounded-md border px-4 py-2 text-sm"
+          [class.border-amber-400]="difficulty() === 'Normal'"
+          [class.opacity-40]="!data.unlockedDifficulties.includes('Normal')"
+          (click)="selectDifficulty('Normal')"
+        >
+          Normal
+        </button>
+        <button
+          class="rounded-md border px-4 py-2 text-sm"
+          [class.border-amber-400]="difficulty() === 'Heroic'"
+          [class.opacity-40]="!data.unlockedDifficulties.includes('Heroic')"
+          (click)="selectDifficulty('Heroic')"
+        >
+          Heroic
+        </button>
+        <button
+          class="rounded-md border px-4 py-2 text-sm"
+          [class.border-amber-400]="difficulty() === 'Mythic'"
+          [class.opacity-40]="!data.unlockedDifficulties.includes('Mythic')"
+          (click)="selectDifficulty('Mythic')"
+        >
+          Mythic
+        </button>
+      </div>
+
+      <div class="mt-6 text-[11px] uppercase opacity-70">Rewards</div>
+      <div class="mt-2 grid grid-cols-4 gap-3 sm:grid-cols-6">
+        <div
+          *ngFor="let r of data.rewards"
+          class="rounded-md border border-white/10 bg-[#1a1a1a] p-2 text-center"
+        >
+          <!-- <img
+            [src]="r.icon"
+            [alt]="r.name"
+            class="mx-auto h-10 w-10 object-contain"
+          /> -->
+          <div class="mt-1 text-[10px] opacity-80">{{ r.name }}</div>
+        </div>
+      </div>
+
+      <div class="mt-6 flex items-center justify-end gap-2">
+        <app-regular-button
+          text="Back"
+          (click)="$event.stopPropagation(); back()"
+        ></app-regular-button>
+        <app-regular-button
+          class="w-40"
+          [text]="'Enter ' + difficulty()"
+          fullWidth
+        ></app-regular-button>
+      </div>
+    </div>
+  </div>
+</div>

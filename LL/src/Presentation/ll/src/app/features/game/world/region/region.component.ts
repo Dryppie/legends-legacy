@@ -5,11 +5,23 @@ import { Region } from '../../../../shared/models/Dtos/regionDto';
 import { RegionService } from '../../../../core/services/client-side/region/region.service';
 import { CombatAreaCardComponent } from '../../../../shared/components/combat/combat-area-card/combat-area-card.component';
 import { TourService } from '../../../../core/services/client-side/tutorial-tour/tour.service';
+import { TabsComponent } from '../../../../shared/components/custom-components/tabs/tabs.component';
+import { TabComponent } from '../../../../shared/components/custom-components/tabs/tab/tab.component';
+import { RaidsComponent } from './raids/raids.component';
+import { DungeonsComponent } from './dungeons/dungeons.component';
 
 @Component({
   selector: 'app-region',
   standalone: true,
-  imports: [NgIf, NgFor, CombatAreaCardComponent],
+  imports: [
+    NgIf,
+    NgFor,
+    CombatAreaCardComponent,
+    TabsComponent,
+    TabComponent,
+    RaidsComponent,
+    DungeonsComponent,
+  ],
   templateUrl: './region.component.html',
 })
 export class RegionComponent implements OnInit {

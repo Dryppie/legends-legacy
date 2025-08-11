@@ -1,0 +1,58 @@
+<!-- OUTER: thick gold ring -->
+<div class="border-primary-gradient relative w-full rounded-md p-[1px]">
+  <!-- INNER: thin gold hairline -->
+  <div class="relative rounded-md bg-[#0f0f0f]">
+    <div class="relative h-64 overflow-hidden rounded-md 2xl:h-80">
+      <!-- BG image -->
+      <img
+        [src]="image"
+        [alt]="title"
+        class="absolute inset-0 h-full w-full object-cover"
+      />
+
+      <!-- CONTENT -->
+      <div
+        class="relative flex h-full flex-col items-start justify-between p-5 text-white"
+      >
+        <div class="flex flex-col pt-1">
+          <div class="font-serif text-[11px] uppercase opacity-80">
+            Dungeon {{ number }}
+          </div>
+          <h2
+            class="primary-gradient font-serif text-3xl font-semibold leading-tight drop-shadow-sm"
+          >
+            {{ title }}
+          </h2>
+          <img
+            src="core/Divider.svg"
+            alt="Logo"
+            class="w-52 self-center object-contain"
+          />
+        </div>
+        <div class="flex h-full w-full flex-col">
+          <div class="mt-auto max-w-72 font-serif opacity-80">
+            The goblins are deep within the mines, guarding ancient relics
+          </div>
+          <div
+            class="mt-auto flex w-full items-center justify-between gap-3 pb-1"
+          >
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] uppercase tracking-[0.2em] opacity-80"
+                >Required Lv.</span
+              >
+              <span class="text-[15px] font-semibold tabular-nums">{{
+                requiredValue
+              }}</span>
+            </div>
+            <app-regular-button
+              class="w-44"
+              fullWidth
+              text="ENTER"
+              (pressed)="onEnter()"
+            ></app-regular-button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

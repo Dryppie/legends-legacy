@@ -60,6 +60,10 @@
     background-clip: text;
   }
 
+  .border-primary-gradient {
+    @apply bg-gradient-to-b from-[#feefd0] to-[#fcd587];
+  }
+
   .border-gradient {
     background: linear-gradient(
       to right,
