@@ -1,5 +1,8 @@
 <!-- OUTER: thick gold ring -->
-<div class="border-primary-gradient relative w-full rounded-md p-[1px]">
+<div
+  *ngIf="!showPreview()"
+  class="border-primary-gradient relative w-full rounded-md p-[1px]"
+>
   <!-- INNER: thin gold hairline -->
   <div class="relative rounded-md bg-[#0f0f0f]">
     <div class="relative h-64 overflow-hidden rounded-md 2xl:h-80">
@@ -48,11 +51,18 @@
               class="w-44"
               fullWidth
               text="ENTER"
-              (pressed)="onEnter()"
+              (pressed)="openPreview()"
             ></app-regular-button>
           </div>
         </div>
       </div>
     </div>
   </div>
+</div>
+
+<div *ngIf="showPreview()" class="overflow-y-auto">
+  <app-dungeon-preview
+    [data]="previewData"
+    (backEvent)="closePreview()"
+  ></app-dungeon-preview>
 </div>

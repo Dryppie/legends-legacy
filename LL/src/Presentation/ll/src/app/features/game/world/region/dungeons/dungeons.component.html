@@ -1,24 +1,17 @@
-<div
-  *ngIf="!showPreview()"
-  class="flex w-full flex-col gap-2 pt-4"
-  data-tour="dungeons-introduction"
->
-  <div class="">
-    <app-dungeon-card
-      number="1"
-      title="Goblin Mines"
-      image="entities/optimized/hobgoblin.webp"
-      requiredLabel=""
-      requiredIcon=""
-      requiredValue="5"
-      (enter)="openPreview()"
-    ></app-dungeon-card>
+<div class="flex h-full flex-col overflow-hidden">
+  <div
+    class="flex w-full flex-col gap-2 overflow-auto pt-4"
+    data-tour="dungeons-introduction"
+  >
+    <div class="">
+      <app-dungeon-card
+        number="1"
+        title="Goblin Mines"
+        image="entities/optimized/hobgoblin.webp"
+        requiredLabel=""
+        requiredIcon=""
+        requiredValue="5"
+      ></app-dungeon-card>
+    </div>
   </div>
-</div>
-
-<div *ngIf="showPreview()" class="pt-4">
-  <app-dungeon-preview
-    [data]="previewData"
-    (backEvent)="closePreview()"
-  ></app-dungeon-preview>
 </div>
