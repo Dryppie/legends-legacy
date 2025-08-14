@@ -157,12 +157,7 @@
             *ngFor="let r of previewData.rewards"
             class="rounded-md border border-white/10 bg-[#1a1a1a] p-2 text-center"
           >
-            <!-- <img
-            [src]="r.icon"
-            [alt]="r.name"
-            class="mx-auto h-10 w-10 object-contain"
-          /> -->
-            <div class="text-[10px] opacity-80">{{ r.name }}</div>
+            <app-item [item]="r"></app-item>
           </div>
         </div>
 

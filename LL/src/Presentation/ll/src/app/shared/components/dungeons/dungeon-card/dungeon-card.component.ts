@@ -1,6 +1,10 @@
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { RegularButtonComponent } from '../../custom-components/buttons/regular-button/regular-button.component';
 import { NgClass, NgFor, NgIf } from '@angular/common';
+import { ItemInstance } from '../../../models/item';
+import { Rarity } from '../../../models/enums/rarity';
+import { ItemType } from '../../../models/enums/itemType';
+import { ItemComponent } from '../../item/item.component';
 
 export type DungeonDifficulty = 'Normal' | 'Heroic' | 'Mythic';
 
@@ -14,14 +18,14 @@ export interface DungeonPreviewData {
   keyItem?: { icon: string; name: string; have: number; need: number };
   roomsRange?: [number, number]; // e.g., [5,8]
   estMinutes?: [number, number]; // e.g., [3,5]
-  rewards: { icon: string; name: string }[];
+  rewards: ItemInstance[];
   unlockedDifficulties: DungeonDifficulty[]; // which are available
 }
 
 @Component({
   selector: 'app-dungeon-card',
   standalone: true,
-  imports: [NgIf, NgFor, NgClass, RegularButtonComponent],
+  imports: [NgIf, NgFor, NgClass, RegularButtonComponent, ItemComponent],
   templateUrl: './dungeon-card.component.html',
 })
 export class DungeonCardComponent {
@@ -53,10 +57,17 @@ export class DungeonCardComponent {
     estMinutes: [3, 5],
     unlockedDifficulties: ['Normal', 'Heroic'], // only Normal unlocked in this example
     rewards: [
-      { icon: '/assets/icons/sword.svg', name: 'Goblin Cleaver' },
-      { icon: '/assets/icons/gem-green.svg', name: 'Viridian Shard' },
-      { icon: '/assets/icons/scroll.svg', name: 'Rune Scroll' },
-      { icon: '/assets/icons/essence-purple.svg', name: 'Goblin Essence' },
+      {
+        id: 'goblin-helmet',
+        itemBase: {
+          id: 'goblin-helmet',
+          name: 'Goblin Helmet',
+          rarity: Rarity.Common,
+          description: 'A sturdy helmet made from goblin metal.',
+          itemType: ItemType.Consumable,
+          stackable: false,
+        },
+      },
     ],
   };
 
