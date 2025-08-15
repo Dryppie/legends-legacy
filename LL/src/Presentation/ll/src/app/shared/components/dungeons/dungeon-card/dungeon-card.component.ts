@@ -6,7 +6,11 @@ import { Rarity } from '../../../models/enums/rarity';
 import { ItemType } from '../../../models/enums/itemType';
 import { ItemComponent } from '../../item/item.component';
 
-export type DungeonDifficulty = 'Normal' | 'Heroic' | 'Mythic';
+export enum DungeonDifficulty {
+  Normal = 'Normal',
+  Heroic = 'Heroic',
+  Mythic = 'Mythic',
+}
 
 export interface DungeonPreviewData {
   id: string;
@@ -39,6 +43,8 @@ export class DungeonCardComponent {
   @Input() height = 176;
   @Input() cornerSize = 32;
 
+  dungeonDifficulty = DungeonDifficulty;
+
   // In a real app, fetch this by id. Hard-coded example for Goblin Mines:
   previewData: DungeonPreviewData = {
     id: 'goblin-mines',
@@ -55,7 +61,7 @@ export class DungeonCardComponent {
     },
     roomsRange: [5, 8],
     estMinutes: [3, 5],
-    unlockedDifficulties: ['Normal', 'Heroic'], // only Normal unlocked in this example
+    unlockedDifficulties: [DungeonDifficulty.Normal, DungeonDifficulty.Heroic], // only Normal unlocked in this example
     rewards: [
       {
         id: 'goblin-helmet',
@@ -82,7 +88,7 @@ export class DungeonCardComponent {
 
   @Output() backEvent = new EventEmitter<void>();
 
-  difficulty = signal<DungeonDifficulty>('Normal');
+  difficulty = signal<DungeonDifficulty>(DungeonDifficulty.Normal);
 
   selectDifficulty(d: DungeonDifficulty) {
     if (this.previewData.unlockedDifficulties.includes(d))

@@ -117,9 +117,11 @@
               'bg-primary/10': difficulty() === 'Normal',
               'border-primary/20': difficulty() !== 'Normal',
               'hover:cursor-default, pointer-events-none opacity-40':
-                !previewData.unlockedDifficulties.includes('Normal'),
+                !previewData.unlockedDifficulties.includes(
+                  dungeonDifficulty.Normal
+                ),
             }"
-            (click)="selectDifficulty('Normal')"
+            (click)="selectDifficulty(dungeonDifficulty.Normal)"
           >
             Normal
           </div>
@@ -130,9 +132,11 @@
               'bg-primary/10': difficulty() === 'Heroic',
               'border-primary/20': difficulty() !== 'Heroic',
               'hover:cursor-default, pointer-events-none opacity-40':
-                !previewData.unlockedDifficulties.includes('Heroic'),
+                !previewData.unlockedDifficulties.includes(
+                  dungeonDifficulty.Heroic
+                ),
             }"
-            (click)="selectDifficulty('Heroic')"
+            (click)="selectDifficulty(dungeonDifficulty.Heroic)"
           >
             Heroic
           </div>
@@ -143,9 +147,11 @@
               'bg-primary/10': difficulty() === 'Mythic',
               'border-primary/20': difficulty() !== 'Mythic',
               'hover:cursor-default, pointer-events-none opacity-40':
-                !previewData.unlockedDifficulties.includes('Mythic'),
+                !previewData.unlockedDifficulties.includes(
+                  dungeonDifficulty.Mythic
+                ),
             }"
-            (click)="selectDifficulty('Mythic')"
+            (click)="selectDifficulty(dungeonDifficulty.Mythic)"
           >
             Mythic
           </div>
