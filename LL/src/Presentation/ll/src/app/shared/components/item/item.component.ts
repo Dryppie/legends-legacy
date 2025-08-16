@@ -10,11 +10,18 @@ import { Rarity } from '../../models/enums/rarity';
 import { EssenceDetailsComponent } from '../essences/essence-details/essence-details.component';
 import { EquipmentDisplayComponent } from '../equipment/equipment-display/equipment-display.component';
 import { ItemType } from '../../models/enums/itemType';
+import { HoverPopoverComponent } from '../custom-components/popovers/hover-popover/hover-popover.component';
 
 @Component({
   selector: 'app-item',
   standalone: true,
-  imports: [NgClass, NgIf, EssenceDetailsComponent, EquipmentDisplayComponent],
+  imports: [
+    NgClass,
+    NgIf,
+    EssenceDetailsComponent,
+    EquipmentDisplayComponent,
+    HoverPopoverComponent,
+  ],
   templateUrl: './item.component.html',
 })
 export class ItemComponent {

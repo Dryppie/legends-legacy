@@ -1,15 +1,13 @@
-<div class="group relative flex gap-[5px]" [ngClass]="rarityClasses">
-  {{ item.itemBase.name }}
-  <div *ngIf="isResource">[{{ asResource().quality }}]</div>
-
-  <div
-    class="absolute top-0 z-10 hidden place-self-center rounded border border-light_gray bg-texture p-2 text-sm text-white shadow group-hover:block sm:w-56"
-  >
-    <app-essence-details
-      *ngIf="isEssence"
-      [essence]="itemAsEssence(item)"
-    ></app-essence-details>
-    <app-equipment-display *ngIf="isEquipment" [item]="itemAsEquipment(item)">
-    </app-equipment-display>
+<app-hover-popover [template]="itemDetailsTpl">
+  <div class="flex gap-[5px]" [ngClass]="rarityClasses">
+    {{ item.itemBase.name }}
+    <div *ngIf="isResource">[{{ asResource().quality }}]</div>
   </div>
-</div>
+</app-hover-popover>
+
+<ng-template #itemDetailsTpl>
+  <app-essence-details *ngIf="isEssence" [essence]="itemAsEssence(item)">
+  </app-essence-details>
+  <app-equipment-display *ngIf="isEquipment" [item]="itemAsEquipment(item)">
+  </app-equipment-display>
+</ng-template>
