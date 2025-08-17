@@ -52,14 +52,16 @@ export class HoverPopoverComponent implements AfterViewInit, OnDestroy {
 
   private onMouseEnter = () => {
     clearTimeout(this.hideTimeout);
-    if (!this.popoverEl) {
-      this.createPopover();
-    }
+    this.hideTimeout = setTimeout(() => {
+      if (!this.popoverEl) {
+        this.createPopover();
+      }
+    }, 100);
   };
 
   private onMouseLeave = () => {
     // Small delay so you can move cursor into the popover
-    this.hideTimeout = setTimeout(() => this.destroyPopover(), 0);
+    this.hideTimeout = setTimeout(() => this.destroyPopover(), 100);
   };
 
   private createPopover(): void {
