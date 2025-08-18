@@ -12,6 +12,12 @@ export enum DungeonDifficulty {
   Mythic = 'Mythic',
 }
 
+export interface DungeonKeyItem {
+  name: string;
+  have: number;
+  need: number;
+}
+
 export interface DungeonPreviewData {
   id: string;
   title: string;
@@ -19,7 +25,7 @@ export interface DungeonPreviewData {
   lore: string;
   requiredLevel: number;
   dailyEntries?: number; // optional; show if present
-  keyItem?: { icon: string; name: string; have: number; need: number };
+  keyItem?: DungeonKeyItem;
   roomsRange?: [number, number]; // e.g., [5,8]
   estMinutes?: [number, number]; // e.g., [3,5]
   rewards: ItemInstance[];
@@ -54,7 +60,6 @@ export class DungeonCardComponent {
     requiredLevel: 5,
     dailyEntries: 1,
     keyItem: {
-      icon: '/assets/icons/key-goblin.svg',
       name: 'Goblin Key',
       have: 0,
       need: 1,
