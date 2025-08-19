@@ -51,7 +51,6 @@ export class DungeonCardComponent {
 
   dungeonDifficulty = DungeonDifficulty;
 
-  // In a real app, fetch this by id. Hard-coded example for Goblin Mines:
   previewData: DungeonPreviewData = {
     id: 'goblin-mines',
     title: 'Goblin Mines',
