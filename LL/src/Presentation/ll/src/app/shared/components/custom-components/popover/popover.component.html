@@ -1,0 +1,28 @@
+<span
+  class="relative inline-block"
+  #origin
+  [attr.aria-haspopup]="true"
+  [attr.aria-expanded]="overlayRef ? 'true' : 'false'"
+  (click)="onOriginClick($event)"
+  (mouseenter)="onOriginEnter()"
+  (mouseleave)="onOriginLeave()"
+>
+  <ng-content></ng-content>
+</span>
+
+<ng-template #content>
+  <div
+    class="relative"
+    [ngClass]="popoverClass"
+    (mouseenter)="onPanelEnter()"
+    (mouseleave)="onPanelLeave()"
+  >
+    <ng-container *ngTemplateOutlet="template"></ng-container>
+
+    <div
+      *ngIf="hasArrow"
+      class="popover-arrow"
+      [ngClass]="currentPlacement"
+    ></div>
+  </div>
+</ng-template>

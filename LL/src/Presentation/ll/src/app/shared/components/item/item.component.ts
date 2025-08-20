@@ -10,7 +10,7 @@ import { Rarity } from '../../models/enums/rarity';
 import { EssenceDetailsComponent } from '../essences/essence-details/essence-details.component';
 import { EquipmentDisplayComponent } from '../equipment/equipment-display/equipment-display.component';
 import { ItemType } from '../../models/enums/itemType';
-import { HoverPopoverComponent } from '../custom-components/popovers/hover-popover/hover-popover.component';
+import { PopoverComponent } from '../custom-components/popover/popover.component';
 
 @Component({
   selector: 'app-item',
@@ -20,7 +20,7 @@ import { HoverPopoverComponent } from '../custom-components/popovers/hover-popov
     NgIf,
     EssenceDetailsComponent,
     EquipmentDisplayComponent,
-    HoverPopoverComponent,
+    PopoverComponent,
   ],
   templateUrl: './item.component.html',
 })

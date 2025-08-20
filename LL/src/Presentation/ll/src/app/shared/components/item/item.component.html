@@ -1,13 +1,17 @@
-<app-hover-popover [template]="itemDetailsTpl">
+<app-popover [template]="hoverTpl" trigger="hover">
   <div class="flex gap-[5px]" [ngClass]="rarityClasses">
     {{ item.itemBase.name }}
     <div *ngIf="isResource">[{{ asResource().quality }}]</div>
   </div>
-</app-hover-popover>
+</app-popover>
 
-<ng-template #itemDetailsTpl>
-  <app-essence-details *ngIf="isEssence" [essence]="itemAsEssence(item)">
-  </app-essence-details>
-  <app-equipment-display *ngIf="isEquipment" [item]="itemAsEquipment(item)">
-  </app-equipment-display>
+<ng-template #hoverTpl>
+  <app-essence-details
+    *ngIf="isEssence"
+    [essence]="itemAsEssence(item)"
+  ></app-essence-details>
+  <app-equipment-display
+    *ngIf="isEquipment"
+    [item]="itemAsEquipment(item)"
+  ></app-equipment-display>
 </ng-template>
