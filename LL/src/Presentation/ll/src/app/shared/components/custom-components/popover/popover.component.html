@@ -16,13 +16,14 @@
     [ngClass]="popoverClass"
     (mouseenter)="onPanelEnter()"
     (mouseleave)="onPanelLeave()"
+    role="dialog"
   >
     <ng-container *ngTemplateOutlet="template"></ng-container>
 
     <div
       *ngIf="hasArrow"
       class="popover-arrow"
-      [ngClass]="currentPlacement"
+      [ngClass]="placement$ | async"
     ></div>
   </div>
 </ng-template>
