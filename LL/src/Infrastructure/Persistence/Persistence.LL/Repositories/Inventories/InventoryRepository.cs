@@ -1,13 +1,10 @@
 ﻿using Application.Common.Interfaces;
 using Common.Exceptions;
 using Common.Helpers.Essences;
-using Domain.Models.Entities.Characters;
-using Domain.Models.Essences;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.EssenceItems;
-using Domain.Models.Items.Resources;
 using Domain.Models.MarketPlaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -50,50 +47,38 @@ public class InventoryRepository : IInventoryRepository
 
     public async Task AddItemsToInventory(Guid characterId, List<InventoryItem> items, CancellationToken cancellationToken)
     {
-        // Group stackable items by both ItemBaseId and Quality
+        // Separate stackable and non-stackable items
         var stackableGroups = items
             .Where(i => i.ItemInstance.ItemBase.Stackable)
-            .GroupBy(i => new
+            .GroupBy(i => i.ItemInstance.ItemBaseId)
+            .ToDictionary(g => g.Key, g => new
             {
-                i.ItemInstance.ItemBaseId,
-                Quality = (i.ItemInstance as ResourceInstance)?.Quality ?? 0
-            })
-            .ToDictionary(
-                g => g.Key,
-                g => new
-                {
-                    TotalQuantity = g.Sum(x => x.Quantity),
-                    RepresentativeItem = g.First()
-                });
+                TotalQuantity = g.Sum(x => x.Quantity),
+                RepresentativeItem = g.First() // Used if we need to add a new instance
+            });
 
         var nonStackableLoot = items
-            .Where(i => !i.ItemInstance.ItemBase.Stackable)
+            .Where(item => !item.ItemInstance.ItemBase.Stackable)
             .ToList();
 
-        var stackableKeys = stackableGroups.Keys.ToList();
+        var stackableBaseIds = stackableGroups.Keys.ToList();
 
-        // Fetch existing items matching base ID and quality
+        // Load existing inventory entries for stackables
         var existingStackables = await _context.InventoryItems
             .Include(ii => ii.ItemInstance)
                 .ThenInclude(ii => ii.ItemBase)
-            .Where(ii => ii.InventoryId == characterId &&
-                         stackableKeys.Select(k => k.ItemBaseId).Contains(ii.ItemInstance.ItemBaseId))
+            .Where(ii => ii.InventoryId == characterId && stackableBaseIds.Contains(ii.ItemInstance.ItemBaseId))
             .ToListAsync(cancellationToken);
 
-        foreach (var (key, group) in stackableGroups)
+        foreach (var (itemBaseId, group) in stackableGroups)
         {
-            var matchingExisting = existingStackables.FirstOrDefault(i =>
-                i.ItemInstance.ItemBaseId == key.ItemBaseId &&
-                (i.ItemInstance as ResourceInstance)?.Quality == key.Quality
-            ) ?? _context.InventoryItems.Local.FirstOrDefault(i =>
-                i.InventoryId == characterId &&
-                i.ItemInstance.ItemBaseId == key.ItemBaseId &&
-                (i.ItemInstance as ResourceInstance)?.Quality == key.Quality
-            );
+            var existing = existingStackables.FirstOrDefault(i => i.ItemInstance.ItemBaseId == itemBaseId) ??
+                       _context.InventoryItems.Local
+                           .FirstOrDefault(i => i.InventoryId == characterId && i.ItemInstance.ItemBaseId == itemBaseId);
 
-            if (matchingExisting != null)
+            if (existing != null)
             {
-                matchingExisting.Quantity += group.TotalQuantity;
+                existing.Quantity += group.TotalQuantity;
             }
             else
             {
@@ -122,7 +107,6 @@ public class InventoryRepository : IInventoryRepository
 
         await _context.SaveChangesAsync(cancellationToken);
     }
-
 
     public async Task AddItemToInventoryFromMarketPlace(Guid characterId, InventoryItem item, CancellationToken cancellationToken)
     {

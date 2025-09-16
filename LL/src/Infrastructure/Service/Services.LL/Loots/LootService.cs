@@ -5,7 +5,6 @@ using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.EssenceItems;
-using Domain.Models.Items.Resources;
 using Domain.Models.LootTables;
 
 namespace Services.LL.Loots;
@@ -181,7 +180,6 @@ public class LootService : ILootService
         {
             ItemType.Equipment => new EquipmentInstance() { Id = Guid.NewGuid(), ItemBaseId = item.Id, ItemBase = item },
             ItemType.Essence => new EssenceItemInstance() { Id = Guid.NewGuid(), ItemBaseId = item.Id, ItemBase = item },
-            ItemType.Resource => new ResourceInstance() { Id = Guid.NewGuid(), ItemBaseId = item.Id, ItemBase = item },
             _ => new ItemInstance() { Id = Guid.NewGuid(), ItemBaseId = item.Id, ItemBase = item },
         };
         return new InventoryItem()

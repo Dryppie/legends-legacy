@@ -1039,16 +1039,6 @@ namespace Persistence.LL.Migrations
                     b.HasDiscriminator().HasValue(3);
                 });
 
-            modelBuilder.Entity("Domain.Models.Items.Resources.ResourceInstance", b =>
-                {
-                    b.HasBaseType("Domain.Models.Items.ItemInstance");
-
-                    b.Property<int>("Quality")
-                        .HasColumnType("integer");
-
-                    b.HasDiscriminator().HasValue(2);
-                });
-
             modelBuilder.Entity("Domain.Models.LootTables.LootTable", b =>
                 {
                     b.HasBaseType("Domain.Models.LootTables.LootTableEntry");

@@ -2,14 +2,11 @@
 using Application.Interfaces.Services.LL.Professions;
 using Application.UseCases.Inventories.Events;
 using Application.UseCases.Soulstones.Events;
-using Domain.Helpers.Constants;
 using Domain.Models.Bonuses;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
-using Domain.Models.Essences;
 using Domain.Models.Inventories;
-using Domain.Models.Items.Resources;
 using Domain.Models.Professions;
 using MediatR;
 using Services.LL.Extensions;
@@ -81,29 +78,6 @@ public class GatheringService : IGatheringService
                 gatheringSummary.TotalExperience++;
         }
 
-        var gatheringSession = new GatheringSession()
-        {
-            From = startedAt,
-            To = now,
-            GatheringSummary = gatheringSummary,
-        };
-
-        var professions = await _professionService.GetProfessionsAsync(characterAction.CharacterId, cancellationToken);
-        var profession = professions.FirstOrDefault(p => p.ProfessionType.Equals(gatheringSummary.ProfessionType));
-
-        if (profession == null) return gatheringSession;
-
-        foreach (var drop in totalLoot)
-        {
-            if (drop.ItemInstance is ResourceInstance resource)
-            {
-                resource.Quality = CalculateResourceQuality(
-                    profession.Level,
-                    rng
-                );
-            }
-        }
-
         // This is made purely to display the loot in the frontend
         gatheringSummary.Loot = totalLoot
             .GroupBy(ii => ii.ItemInstance.ItemBaseId)
@@ -114,28 +88,18 @@ public class GatheringService : IGatheringService
             })
             .ToList();
 
-        gatheringSummary.TotalSoulstones = await ProcessSoulstoneDrops(characterAction.CharacterId, actionsToPerform,
-            soulstoneDropRate, soulstoneDoubleDropChance, cancellationToken);
+
+        gatheringSummary.TotalSoulstones = await ProcessSoulstoneDrops(characterAction.CharacterId, actionsToPerform, soulstoneDropRate, soulstoneDoubleDropChance, cancellationToken);
         await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
-        await UpdateCharacterProfessionsAsync(characterAction.CharacterId, gatheringSummary, profession, cancellationToken);
+        await UpdateCharacterProfessionsAsync(characterAction.CharacterId, gatheringSummary, cancellationToken);
 
-        gatheringSession.GatheringSummary = gatheringSummary;
+        var gatheringSession = new GatheringSession()
+        {
+            From = startedAt,
+            To = now,
+            GatheringSummary = gatheringSummary,
+        };
         return gatheringSession;
-    }
-
-    private int CalculateResourceQuality(int gatheringLevel, Random rng)
-    {
-        int baseQuality = ((gatheringLevel - 1) / 5 + 1) * 5;
-
-        // Tool bonus
-
-        // Essence bonuses
-
-        // 5% yield roll
-        if (rng.NextDouble() <= 0.05)
-            baseQuality = (int)Math.Ceiling(baseQuality * 1.2 / 5.0) * 5;
-
-        return baseQuality;
     }
 
     private async Task<int> ProcessSoulstoneDrops(Guid characterId, int actionsToPerform, double dropRate, double doubleDropChance, CancellationToken cancellationToken)
@@ -148,10 +112,14 @@ public class GatheringService : IGatheringService
         return soulstonesEarned;
     }
 
-    private async Task UpdateCharacterProfessionsAsync(Guid characterId, GatheringSummary gatheringSummary, Profession profession, CancellationToken cancellationToken)
+    private async Task UpdateCharacterProfessionsAsync(Guid characterId, GatheringSummary gatheringSummary, CancellationToken cancellationToken)
     {
         if (gatheringSummary.TotalExperience == 0) return;
 
+        var professions = await _professionService.GetProfessionsAsync(characterId, cancellationToken);
+        var profession = professions.FirstOrDefault(p => p.ProfessionType.Equals(gatheringSummary.ProfessionType));
+
+        if (profession == null) return;
         profession.Experience += gatheringSummary.TotalExperience;
 
         await _levelingService.UpdateProfessionLevel(profession, cancellationToken);

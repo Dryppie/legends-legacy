@@ -207,8 +207,7 @@ namespace Persistence.LL.Migrations
                     Potential = table.Column<int>(type: "integer", nullable: true),
                     ItemXp = table.Column<int>(type: "integer", nullable: true),
                     IsMasterpiece = table.Column<bool>(type: "boolean", nullable: true),
-                    IsLevelingItem = table.Column<bool>(type: "boolean", nullable: true),
-                    Quality = table.Column<int>(type: "integer", nullable: true)
+                    IsLevelingItem = table.Column<bool>(type: "boolean", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -272,11 +271,39 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "InstanceAttributeModifier",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ItemInstanceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    EquipmentInstanceId = table.Column<Guid>(type: "uuid", nullable: true),
+                    AttributeType = table.Column<int>(type: "integer", nullable: false),
+                    Amount = table.Column<float>(type: "real", nullable: false),
+                    ModifierType = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_InstanceAttributeModifier", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_InstanceAttributeModifier_ItemInstances_EquipmentInstanceId",
+                        column: x => x.EquipmentInstanceId,
+                        principalTable: "ItemInstances",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_InstanceAttributeModifier_ItemInstances_ItemInstanceId",
+                        column: x => x.ItemInstanceId,
+                        principalTable: "ItemInstances",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MarketPlaceListings",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     SellerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    SellerName = table.Column<string>(type: "text", nullable: false),
                     ItemInstanceId = table.Column<Guid>(type: "uuid", nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false),
                     UnitPrice = table.Column<long>(type: "bigint", nullable: false),
@@ -896,6 +923,16 @@ namespace Persistence.LL.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_InstanceAttributeModifier_EquipmentInstanceId",
+                table: "InstanceAttributeModifier",
+                column: "EquipmentInstanceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_InstanceAttributeModifier_ItemInstanceId",
+                table: "InstanceAttributeModifier",
+                column: "ItemInstanceId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_InventoryItems_ItemInstanceId",
                 table: "InventoryItems",
                 column: "ItemInstanceId");
@@ -1008,6 +1045,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "GuildResource");
+
+            migrationBuilder.DropTable(
+                name: "InstanceAttributeModifier");
 
             migrationBuilder.DropTable(
                 name: "InventoryItems");

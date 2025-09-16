@@ -13,8 +13,8 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20250803095053_AddEquipmentInstanceAttributesNew")]
-    partial class AddEquipmentInstanceAttributesNew
+    [Migration("20250916042230_BaseMigration")]
+    partial class BaseMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1040,16 +1040,6 @@ namespace Persistence.LL.Migrations
                     b.HasBaseType("Domain.Models.Items.ItemInstance");
 
                     b.HasDiscriminator().HasValue(3);
-                });
-
-            modelBuilder.Entity("Domain.Models.Items.Resources.ResourceInstance", b =>
-                {
-                    b.HasBaseType("Domain.Models.Items.ItemInstance");
-
-                    b.Property<int>("Quality")
-                        .HasColumnType("integer");
-
-                    b.HasDiscriminator().HasValue(2);
                 });
 
             modelBuilder.Entity("Domain.Models.LootTables.LootTable", b =>
