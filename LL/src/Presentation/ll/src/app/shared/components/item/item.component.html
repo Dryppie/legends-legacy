@@ -1,7 +1,6 @@
 <app-popover [template]="hoverTpl" trigger="hover">
-  <div class="flex gap-[5px]" [ngClass]="rarityClasses">
+  <div class="flex" [ngClass]="rarityClasses">
     {{ item.itemBase.name }}
-    <div *ngIf="isResource">[{{ asResource().quality }}]</div>
   </div>
 </app-popover>
 

@@ -4,7 +4,7 @@ import { computed, effect, Injectable, signal } from '@angular/core';
 import { InventoryService } from './inventory.service';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { GameEventService } from '../../real-time/game-event.service';
-import { EssenceItem, ResourceInstance } from '../../../../shared/models/item';
+import { EssenceItem } from '../../../../shared/models/item';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryStateService {
@@ -72,26 +72,12 @@ export class InventoryStateService {
       .subscribe({
         next: (dto) => {
           const sorted = dto.inventoryItems
-            .slice() // defensive copy
-            .sort((a, b) => {
-              const typeA = a.itemInstance.itemBase.itemType;
-              const typeB = b.itemInstance.itemBase.itemType;
-
-              // First: sort by itemType
-              const typeCompare = typeA.localeCompare(typeB);
-              if (typeCompare !== 0) return typeCompare;
-
-              // Second: if type is "Resource", sort by quality descending
-              if (typeA === ItemType.Resource) {
-                const qualityA =
-                  (a.itemInstance as ResourceInstance).quality ?? 0;
-                const qualityB =
-                  (b.itemInstance as ResourceInstance).quality ?? 0;
-                return qualityB - qualityA; // higher quality first
-              }
-
-              return 0; // for non-resources with same type
-            });
+            .slice() // defensive copy (optional)
+            .sort((a, b) =>
+              a.itemInstance.itemBase.itemType.localeCompare(
+                b.itemInstance.itemBase.itemType,
+              ),
+            );
 
           this._items.set(sorted);
         },
@@ -188,27 +174,11 @@ export class InventoryStateService {
 
   addOrIncrement(item: InventoryItem): void {
     const items = this._items();
-    const baseId = item.itemInstance.itemBase.id;
-    const isStackable = item.itemInstance.itemBase.stackable;
-    const isResource = item.itemInstance.itemBase.itemType === 'Resource'; // Adjust if you use an enum
-
-    const index = items.findIndex((i) => {
-      const sameBase = i.itemInstance.itemBase.id === baseId;
-      const bothStackable = i.itemInstance.itemBase.stackable && isStackable;
-
-      if (!bothStackable || !sameBase) return false;
-
-      if (isResource) {
-        // Match quality for resources
-        return (
-          (i.itemInstance as ResourceInstance).quality ===
-          (item.itemInstance as ResourceInstance).quality
-        );
-      }
-
-      return true;
-    });
-
+    const index = items.findIndex(
+      (i) =>
+        i.itemInstance.itemBase.stackable &&
+        i.itemInstance.itemBase.id === item.itemInstance.itemBase.id,
+    );
     if (index !== -1) {
       const updated = [...items];
       updated[index] = {

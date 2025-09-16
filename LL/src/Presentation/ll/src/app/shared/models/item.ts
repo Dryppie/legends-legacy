@@ -20,10 +20,6 @@ export interface EquipmentInstance extends ItemInstance {
   attributeModifiers: AttributeModifier[];
 }
 
-export interface ResourceInstance extends ItemInstance {
-  quality: number;
-}
-
 export interface ItemBase {
   id: string;
   name: string;

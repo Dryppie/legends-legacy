@@ -3,7 +3,6 @@ import {
   EquipmentInstance,
   EssenceItem,
   ItemInstance,
-  ResourceInstance,
 } from '../../models/item';
 import { NgClass, NgIf } from '@angular/common';
 import { Rarity } from '../../models/enums/rarity';
@@ -29,10 +28,6 @@ export class ItemComponent {
   itemHovered: boolean = false;
   tooltipPosition = {};
 
-  get isResource(): boolean {
-    return this.item.itemBase.itemType === ItemType.Resource;
-  }
-
   get isEssence(): boolean {
     return this.item.itemBase.itemType === ItemType.Essence;
   }
@@ -47,10 +42,6 @@ export class ItemComponent {
 
   itemAsEquipment(item: ItemInstance) {
     return item as EquipmentInstance;
-  }
-
-  asResource() {
-    return this.item as ResourceInstance;
   }
 
   get rarityClasses() {
