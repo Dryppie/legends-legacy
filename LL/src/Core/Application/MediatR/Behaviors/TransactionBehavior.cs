@@ -1,4 +1,5 @@
-﻿using Application.MediatR.Markers;
+﻿using Application.MediatR.Attributes;
+using Application.MediatR.Markers;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -23,11 +24,12 @@ public sealed class TransactionBehavior<TRequest, TResponse>
         RequestHandlerDelegate<TResponse> next,
         CancellationToken ct)
     {
-        // Only wrap commands
-        if (request is not ICommand<TResponse>)
+        // Only wrap ICommand<>, unless explicitly opted out
+        var isCommand = request is ICommandBase;
+        var isOptOut = request.GetType().IsDefined(typeof(NonTransactionalAttribute), inherit: true);
+        if (!isCommand || isOptOut)
             return await next();
 
-        // If someone already opened a tx, just run inside it and avoid creating a new one
         if (_db.Database.CurrentTransaction is not null)
         {
             var resp = await next();
@@ -36,7 +38,6 @@ public sealed class TransactionBehavior<TRequest, TResponse>
             return resp;
         }
 
-        // IMPORTANT: everything that touches the DB must be inside the strategy delegate
         var strategy = _db.Database.CreateExecutionStrategy();
 
         return await strategy.ExecuteAsync(async () =>
@@ -50,22 +51,16 @@ public sealed class TransactionBehavior<TRequest, TResponse>
                     await _db.SaveChangesAsync(ct);
 
                 await tx.CommitAsync(ct);
-
-                // Optionally: dispatch domain/integration events AFTER commit (Outbox publisher)
-                // await _outboxPublisher.FlushAsync(ct);
-
                 return response;
             }
             catch (Exception ex)
             {
                 try { await tx.RollbackAsync(ct); }
-                catch (Exception rbEx)
-                {
-                    _logger.LogError(rbEx, "Rollback failed.");
-                }
-                _logger.LogError(ex, "Command {Command} failed; transaction rolled back.", typeof(TRequest).Name);
+                catch (Exception rbEx) { _logger.LogError(rbEx, "Rollback failed."); }
+                _logger.LogError(ex, "Command {Command} failed; tx rolled back.", typeof(TRequest).Name);
                 throw;
             }
         });
     }
 }
+
