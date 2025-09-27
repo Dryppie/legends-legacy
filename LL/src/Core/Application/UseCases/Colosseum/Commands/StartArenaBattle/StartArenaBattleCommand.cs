@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces.Services.LL.Colosseum;
+using Application.MediatR.Markers;
 using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 using Application.UseCases.Colosseum.Events;
 using AutoMapper;
@@ -6,7 +7,7 @@ using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Colosseum.Commands.StartArenaBattle;
-public record StartArenaBattleCommand(Guid CharacterId, string EnemyId) : IRequest<Response<CombatResultDto>>;
+public record StartArenaBattleCommand(Guid CharacterId, string EnemyId) : ICommand<Response<CombatResultDto>>;
 public class StartArenaBattleCommandHandler : IRequestHandler<StartArenaBattleCommand, Response<CombatResultDto>>
 {
     private readonly IColosseumService _colosseumService;

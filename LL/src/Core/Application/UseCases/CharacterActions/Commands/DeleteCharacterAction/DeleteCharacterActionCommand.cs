@@ -1,9 +1,10 @@
 ﻿using Application.Interfaces.Services.LL.CharacterActions;
+using Application.MediatR.Markers;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.CharacterActions.Commands.DeleteCharacterAction;
-public record DeleteCharacterActionCommand(Guid CharacterId) : IRequest<Response<bool>>;
+public record DeleteCharacterActionCommand(Guid CharacterId) : ICommand<Response<bool>>;
 
 public class DeleteCharacterActionCommandHandler : IRequestHandler<DeleteCharacterActionCommand, Response<bool>>
 {

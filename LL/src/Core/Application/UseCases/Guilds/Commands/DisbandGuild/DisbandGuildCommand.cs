@@ -1,9 +1,10 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Guilds.Commands.DisbandGuild;
-public record DisbandGuildCommand(Guid CharacterId) : IRequest<Response<bool>>;
+public record DisbandGuildCommand(Guid CharacterId) : ICommand<Response<bool>>;
 public class DisbandGuildCommandHandler : IRequestHandler<DisbandGuildCommand, Response<bool>>
 {
     private readonly IGuildService _guildService;

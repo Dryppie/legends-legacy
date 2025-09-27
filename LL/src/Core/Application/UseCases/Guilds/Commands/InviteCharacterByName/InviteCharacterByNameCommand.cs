@@ -1,10 +1,11 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Application.UseCases.Guilds.Dtos.Requests;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Guilds.Commands.InviteCharacterByName;
-public record InviteCharacterByNameCommand(Guid CurrentCharacterId, InviteToGuildDto Invite) : IRequest<Response<bool>>;
+public record InviteCharacterByNameCommand(Guid CurrentCharacterId, InviteToGuildDto Invite) : ICommand<Response<bool>>;
 public class InviteCharacterByNameCommandHandler : IRequestHandler<InviteCharacterByNameCommand, Response<bool>>
 {
     private readonly IGuildService _guildService;

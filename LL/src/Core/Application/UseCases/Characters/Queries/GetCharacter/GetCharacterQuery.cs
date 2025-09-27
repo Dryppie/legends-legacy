@@ -1,11 +1,12 @@
 ﻿using Application.Interfaces.Services.LL.Entities;
+using Application.MediatR.Markers;
 using Application.UseCases.Characters.Dtos;
 using AutoMapper;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Characters.Queries.GetCharacter;
-public record GetCharacterQuery(Guid UserId) : IRequest<Response<CharacterDto>>;
+public record GetCharacterQuery(Guid UserId) : IQuery<Response<CharacterDto>>;
 public class GetCharacterQueryHandler : IRequestHandler<GetCharacterQuery, Response<CharacterDto>>
 {
     private readonly ICharacterService _characterService;

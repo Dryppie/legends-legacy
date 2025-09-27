@@ -1,10 +1,11 @@
 ﻿using Application.Interfaces.Services.LL.Colosseum;
+using Application.MediatR.Markers;
 using Application.UseCases.Colosseum.Dtos;
 using AutoMapper;
 using MediatR;
 
 namespace Application.UseCases.Colosseum.Queries.GetArenaTickets;
-public record GetArenaTicketsQuery(Guid CharacterId) : IRequest<ArenaTicketStatusDto>;
+public record GetArenaTicketsQuery(Guid CharacterId) : IQuery<ArenaTicketStatusDto>;
 
 public class GetArenaTicketsQueryHandler : IRequestHandler<GetArenaTicketsQuery, ArenaTicketStatusDto>
 {

@@ -1,4 +1,5 @@
 ﻿using Application.Authorization.Interfaces;
+using Application.MediatR.Markers;
 using Common.Primitives;
 using MediatR;
 
@@ -7,7 +8,7 @@ namespace Application.UseCases.Authorization.Queries.ValidateToken;
 /// Validate whether a token is valid
 /// </summary>
 /// <param name="Token"></param>
-public record ValidateTokenQuery(string Token) : IRequest<Response<bool>>;
+public record ValidateTokenQuery(string Token) : IQuery<Response<bool>>;
 
 public class ValidateTokenQueryHandler : IRequestHandler<ValidateTokenQuery, Response<bool>>
 {

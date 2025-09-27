@@ -1,10 +1,11 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Common.Primitives;
 using Domain.Models.Guilds;
 using MediatR;
 
 namespace Application.UseCases.Guilds.Commands.DonateToGuild;
-public record DonateToGuildCommand(Guid CharacterId, Dictionary<GuildResourceType, int> Donations) : IRequest<Response<bool>>;
+public record DonateToGuildCommand(Guid CharacterId, Dictionary<GuildResourceType, int> Donations) : ICommand<Response<bool>>;
 public class DonateToGuildCommandHandler : IRequestHandler<DonateToGuildCommand, Response<bool>>
 {
     private readonly IGuildService _guildService;

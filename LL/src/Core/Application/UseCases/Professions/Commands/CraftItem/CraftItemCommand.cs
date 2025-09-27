@@ -1,11 +1,12 @@
 ﻿using Application.Interfaces.Services.LL.Professions;
+using Application.MediatR.Markers;
 using Application.UseCases.Inventories.Dtos;
 using AutoMapper;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Professions.Commands.CraftItem;
-public record CraftItemCommand(Guid CharacterId, string RecipeId) : IRequest<Response<InventoryItemDto>>;
+public record CraftItemCommand(Guid CharacterId, string RecipeId) : ICommand<Response<InventoryItemDto>>;
 public class CraftItemCommandHandler : IRequestHandler<CraftItemCommand, Response<InventoryItemDto>>
 {
     private readonly ICraftingService _craftingService;

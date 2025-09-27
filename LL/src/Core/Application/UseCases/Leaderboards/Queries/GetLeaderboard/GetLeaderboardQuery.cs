@@ -1,11 +1,12 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Application.UseCases.Leaderboards.Dtos;
 using AutoMapper;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Leaderboards.Queries.GetLeaderboard;
-public record GetLeaderboardQuery(Guid CharacterId) : IRequest<Response<LeaderboardDto>>;
+public record GetLeaderboardQuery(Guid CharacterId) : IQuery<Response<LeaderboardDto>>;
 
 public class GetLeaderboardQueryHandler : IRequestHandler<GetLeaderboardQuery, Response<LeaderboardDto>>
 {

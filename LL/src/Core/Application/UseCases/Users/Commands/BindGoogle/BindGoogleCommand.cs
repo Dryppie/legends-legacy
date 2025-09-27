@@ -1,10 +1,10 @@
 ﻿using Application.Authorization.Interfaces;
+using Application.MediatR.Markers;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Users.Commands.BindGoogle;
-public record BindGoogleCommand(Guid UserId, string IdToken)
-           : IRequest<Response<Unit>>;
+public record BindGoogleCommand(Guid UserId, string IdToken) : ICommand<Response<Unit>>;
 
 public class BindGoogleCommandHandler
     : IRequestHandler<BindGoogleCommand, Response<Unit>>

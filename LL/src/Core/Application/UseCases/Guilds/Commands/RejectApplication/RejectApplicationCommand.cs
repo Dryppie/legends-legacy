@@ -1,9 +1,10 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Guilds.Commands.RejectApplication;
-public record RejectApplicationCommand(Guid CharacterId, string ApplicationCharacterId) : IRequest<Response<bool>>;
+public record RejectApplicationCommand(Guid CharacterId, string ApplicationCharacterId) : ICommand<Response<bool>>;
 public class RejectApplicationCommandHandler : IRequestHandler<RejectApplicationCommand, Response<bool>>
 {
     private readonly IGuildService _guildService;

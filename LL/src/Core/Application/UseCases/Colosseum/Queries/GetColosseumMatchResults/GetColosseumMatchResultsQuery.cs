@@ -1,10 +1,11 @@
 ﻿using Application.Interfaces.Services.LL.Colosseum;
+using Application.MediatR.Markers;
 using Application.UseCases.Colosseum.Dtos;
 using AutoMapper;
 using MediatR;
 
 namespace Application.UseCases.Colosseum.Queries.GetColosseumMatchResults;
-public record GetColosseumMatchResultsQuery(Guid CharacterId) : IRequest<List<ColosseumMatchResultDto>>;
+public record GetColosseumMatchResultsQuery(Guid CharacterId) : IQuery<List<ColosseumMatchResultDto>>;
 public class GetColosseumMatchResultsQueryHandler : IRequestHandler<GetColosseumMatchResultsQuery, List<ColosseumMatchResultDto>>
 {
 

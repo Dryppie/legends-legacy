@@ -1,9 +1,10 @@
 ﻿using Application.Interfaces.Services.LL.Professions;
+using Application.MediatR.Markers;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Professions.Commands.RemoveCraftingQueueItem;
-public record RemoveCraftingQueueItemCommand(Guid CharacterId, string QueueItemId) : IRequest<Response<bool>>;
+public record RemoveCraftingQueueItemCommand(Guid CharacterId, string QueueItemId) : ICommand<Response<bool>>;
 public class RemoveCraftingQueueItemCommandHandler : IRequestHandler<RemoveCraftingQueueItemCommand, Response<bool>>
 {
     private readonly ICraftingService _craftingService;

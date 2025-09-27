@@ -1,10 +1,11 @@
 ﻿using Application.Interfaces.Services.LL.CharacterActions;
+using Application.MediatR.Markers;
 using Common.Primitives;
 using Domain.Models.Professions.Crafting;
 using MediatR;
 
 namespace Application.UseCases.CharacterActions.Commands.StartCraftingAction;
-public record StartCraftingActionCommand(Guid CharacterId, string QueueId, string ItemInstanceId) : IRequest<Response<bool>>; 
+public record StartCraftingActionCommand(Guid CharacterId, string QueueId, string ItemInstanceId) : ICommand<Response<bool>>; 
 public class StartCraftingActionCommandHandler : IRequestHandler<StartCraftingActionCommand, Response<bool>>
 {
     private readonly ICharacterActionService _characterActionService;

@@ -1,9 +1,10 @@
 ﻿using Application.Interfaces.Services.LL.Essences;
+using Application.MediatR.Markers;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Essences.Commands.DeleteEquippedEssence;
-public record DeleteEquippedEssenceCommand(Guid CharacterId, string EssenceId) : IRequest<Response<bool>>;
+public record DeleteEquippedEssenceCommand(Guid CharacterId, string EssenceId) : ICommand<Response<bool>>;
 
 public class DeleteEquippedEssenceCommandHandler : IRequestHandler<DeleteEquippedEssenceCommand, Response<bool>>
 {

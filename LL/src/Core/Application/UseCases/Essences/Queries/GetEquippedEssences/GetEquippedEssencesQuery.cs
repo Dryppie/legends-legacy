@@ -1,10 +1,11 @@
 ﻿using Application.Interfaces.Services.LL.Essences;
+using Application.MediatR.Markers;
 using Application.UseCases.Essences.Dtos;
 using AutoMapper;
 using MediatR;
 
 namespace Application.UseCases.Essences.Queries.GetEquippedEssences;
-public record GetEquippedEssencesQuery(Guid CharacterId) : IRequest<List<EssenceSlotDto>>;
+public record GetEquippedEssencesQuery(Guid CharacterId) : IQuery<List<EssenceSlotDto>>;
 
 public class GetEquippedEssencesQueryHandler : IRequestHandler<GetEquippedEssencesQuery, List<EssenceSlotDto>>
 {

@@ -1,10 +1,11 @@
 ﻿using Application.Interfaces.Services.LL.CharacterActions;
+using Application.MediatR.Markers;
 using Common.Primitives;
 using Domain.Models.CharacterActions;
 using MediatR;
 
 namespace Application.UseCases.CharacterActions.Commands.StartCombatAction;
-public record StartCombatActionCommand(Guid CharacterId, string AreaId) : IRequest<Response<bool>>;
+public record StartCombatActionCommand(Guid CharacterId, string AreaId) : ICommand<Response<bool>>;
 public class StartCombatActionCommandHandler : IRequestHandler<StartCombatActionCommand, Response<bool>>
 {
     private readonly ICharacterActionService _characterActionService;

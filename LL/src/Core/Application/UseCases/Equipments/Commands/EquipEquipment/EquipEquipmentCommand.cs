@@ -1,11 +1,12 @@
 ﻿using Application.Interfaces.Services.LL.Items;
+using Application.MediatR.Markers;
 using AutoMapper;
 using Common.Primitives;
 using Domain.Models.Items.Equipments.Slots;
 using MediatR;
 
 namespace Application.UseCases.Equipments.Commands.EquipEquipment;
-public record EquipEquipmentCommand(Guid EntityId, string EquipmentId, EquipmentSlotType? SlotType) : IRequest<Response<bool>>;
+public record EquipEquipmentCommand(Guid EntityId, string EquipmentId, EquipmentSlotType? SlotType) : ICommand<Response<bool>>;
 public class EquipEquipmentCommandHandler : IRequestHandler<EquipEquipmentCommand, Response<bool>>
 {
     private readonly IEquipmentSlotService _equipmentService;

@@ -1,10 +1,11 @@
 ﻿using Application.Interfaces.Services.LL.Items;
+using Application.MediatR.Markers;
 using Application.UseCases.Equipments.Dtos;
 using AutoMapper;
 using MediatR;
 
 namespace Application.UseCases.Equipments.Queries.GetMyEquipment;
-public record GetMyEquipmentQuery(Guid EntityId) : IRequest<List<EquipmentSlotDto>>;
+public record GetMyEquipmentQuery(Guid EntityId) : IQuery<List<EquipmentSlotDto>>;
 
 public class GetEquipmentQueryHandler : IRequestHandler<GetMyEquipmentQuery, List<EquipmentSlotDto>>
 {

@@ -1,9 +1,10 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Guilds.Commands.LeaveGuild;
-public record LeaveGuildCommand(Guid CharacterId) : IRequest<Response<bool>>;
+public record LeaveGuildCommand(Guid CharacterId) : ICommand<Response<bool>>;
 public class LeaveGuildCommandHandler : IRequestHandler<LeaveGuildCommand, Response<bool>>
 {
     private readonly IGuildService _guildService;

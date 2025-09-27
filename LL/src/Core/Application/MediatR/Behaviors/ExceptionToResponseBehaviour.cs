@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Application.Behaviors;
+namespace Application.MediatR.Behaviors;
 public sealed class ExceptionToResponseBehaviour<TRequest, TResponse> :
     IPipelineBehavior<TRequest, TResponse>
     where TRequest : notnull

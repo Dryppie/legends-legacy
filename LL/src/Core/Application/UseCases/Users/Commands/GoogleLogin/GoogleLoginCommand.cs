@@ -1,12 +1,13 @@
 ﻿using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL.Entities;
+using Application.MediatR.Markers;
 using Application.UseCases.Users.Events;
 using Common.Authorization.Security;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Users.Commands.GoogleLogin;
-public record GoogleLoginCommand(string IdToken) : IRequest<Response<Tokens>>;
+public record GoogleLoginCommand(string IdToken) : ICommand<Response<Tokens>>;
 
 public class GoogleLoginCommandHandler : IRequestHandler<GoogleLoginCommand, Response<Tokens>>
 {

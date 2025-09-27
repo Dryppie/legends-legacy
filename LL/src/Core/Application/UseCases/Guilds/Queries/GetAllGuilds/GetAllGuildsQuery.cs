@@ -1,10 +1,11 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Application.UseCases.Guilds.Dtos.Responses;
 using AutoMapper;
 using MediatR;
 
 namespace Application.UseCases.Guilds.Queries.GetAllGuilds;
-public record GetAllGuildsQuery() : IRequest<List<GuildSimpleDto>>;
+public record GetAllGuildsQuery() : IQuery<List<GuildSimpleDto>>;
 
 public class GetAllGuildsQueryHandler : IRequestHandler<GetAllGuildsQuery, List<GuildSimpleDto>>
 {

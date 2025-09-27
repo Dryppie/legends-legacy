@@ -1,8 +1,9 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using MediatR;
 
 namespace Application.UseCases.Players.Queries.GetOnlinePlayerCount;
-public record GetOnlinePlayerCountQuery() : IRequest<int>;
+public record GetOnlinePlayerCountQuery() : IQuery<int>;
 public class GetOnlinePlayerCountQueryHandler : IRequestHandler<GetOnlinePlayerCountQuery, int>
 {
     private readonly IPlayerService _playerService;

@@ -1,10 +1,11 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Application.UseCases.Users.Events;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Users.Commands.Register;
-public record RegisterCommand(string Username, string Email, string Password) : IRequest<Response<Unit>>;
+public record RegisterCommand(string Username, string Email, string Password) : ICommand<Response<Unit>>;
 public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Response<Unit>>
 {
     private readonly IUserService _userService;

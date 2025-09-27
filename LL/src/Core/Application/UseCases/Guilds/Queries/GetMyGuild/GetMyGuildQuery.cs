@@ -1,10 +1,11 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Application.UseCases.Guilds.Dtos.Responses;
 using AutoMapper;
 using MediatR;
 
 namespace Application.UseCases.Guilds.Queries.GetMyGuild;
-public record GetMyGuildQuery(Guid CharacterId) : IRequest<GuildDto?>;
+public record GetMyGuildQuery(Guid CharacterId) : IQuery<GuildDto?>;
 public class GetMyGuildQueryHandler : IRequestHandler<GetMyGuildQuery, GuildDto?>
 {
     private readonly IGuildService _guildService;

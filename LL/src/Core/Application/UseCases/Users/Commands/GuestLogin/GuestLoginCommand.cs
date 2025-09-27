@@ -1,13 +1,14 @@
 ﻿using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
+using Application.MediatR.Markers;
 using Application.UseCases.Users.Events;
 using Common.Authorization.Security;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Users.Commands.GuestLogin;
-public record GuestLoginCommand() : IRequest<Response<Tokens>>;
+public record GuestLoginCommand() : ICommand<Response<Tokens>>;
 public class GuestLoginCommandHandler : IRequestHandler<GuestLoginCommand, Response<Tokens>>
 {
     private readonly IUserService _userService;

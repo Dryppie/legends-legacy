@@ -1,10 +1,11 @@
 ﻿using Application.Interfaces.Services.LL.CharacterActions;
+using Application.MediatR.Markers;
 using Common.Primitives;
 using Domain.Models.CharacterActions;
 using MediatR;
 
 namespace Application.UseCases.CharacterActions.Commands.StartGatheringAction;
-public record StartGatheringActionCommand(Guid CharacterId, string GatheringNodeId) : IRequest<Response<bool>>;
+public record StartGatheringActionCommand(Guid CharacterId, string GatheringNodeId) : ICommand<Response<bool>>;
 public class StartGatheringActionCommandHandler : IRequestHandler<StartGatheringActionCommand, Response<bool>>
 {
     private readonly ICharacterActionService _characterActionService;

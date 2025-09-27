@@ -1,10 +1,11 @@
 ﻿using Application.Interfaces.Services.LL.Colosseum;
+using Application.MediatR.Markers;
 using Application.UseCases.Colosseum.Dtos;
 using AutoMapper;
 using MediatR;
 
 namespace Application.UseCases.Colosseum.Queries.GetArenaOpponents;
-public record GetArenaOpponentsQuery(Guid CharacterId) : IRequest<List<ArenaOpponentPreviewDto>>;
+public record GetArenaOpponentsQuery(Guid CharacterId) : IQuery<List<ArenaOpponentPreviewDto>>;
 public class GetArenaOpponentsQueryHandler : IRequestHandler<GetArenaOpponentsQuery, List<ArenaOpponentPreviewDto>>
 {
 

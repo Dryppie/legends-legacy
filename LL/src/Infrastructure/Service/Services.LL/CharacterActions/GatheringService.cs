@@ -7,7 +7,6 @@ using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Inventories;
-using Domain.Models.Professions;
 using MediatR;
 using Services.LL.Extensions;
 using Services.LL.Interfaces;

@@ -1,10 +1,11 @@
 ﻿
 using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.MarketPlaces.Commands.CancelMarketPlaceListing;
-public record CancelMarketPlaceListingCommand(Guid CharacterId, string ListingId) : IRequest<Response<bool>>;
+public record CancelMarketPlaceListingCommand(Guid CharacterId, string ListingId) : ICommand<Response<bool>>;
 public class CancelMarketPlaceListingCommandHandler : IRequestHandler<CancelMarketPlaceListingCommand, Response<bool>>
 {
     private readonly IMarketPlaceService _marketPlaceService;

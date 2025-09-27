@@ -1,9 +1,10 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Guilds.Commands.CreateGuild;
-public record CreateGuildCommand(Guid CharacterId, string Name) : IRequest<Response<bool>>;
+public record CreateGuildCommand(Guid CharacterId, string Name) : ICommand<Response<bool>>;
 
 public record CreateGuildCommandHandler : IRequestHandler<CreateGuildCommand, Response<bool>>
 {

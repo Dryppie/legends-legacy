@@ -1,11 +1,12 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Application.UseCases.Inventories.Dtos;
 using AutoMapper;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Inventories.Commands.ShatterEssence;
-public record ShatterEssenceCommand(Guid CharacterId, string EssenceId, int Amount) : IRequest<Response<InventoryItemDto>>;
+public record ShatterEssenceCommand(Guid CharacterId, string EssenceId, int Amount) : ICommand<Response<InventoryItemDto>>;
 public class ShatterEssenceCommandHandler : IRequestHandler<ShatterEssenceCommand, Response<InventoryItemDto>>
 {
     private readonly IInventoryService _inventoryService;

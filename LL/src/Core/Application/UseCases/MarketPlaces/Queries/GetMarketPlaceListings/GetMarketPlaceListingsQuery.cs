@@ -1,11 +1,12 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Application.UseCases.MarketPlaces.Dtos.Responses;
 using AutoMapper;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.MarketPlaces.Queries.GetMarketPlaceListings;
-public record GetMarketPlaceListingsQuery() : IRequest<Response<List<MarketPlaceListingDto>>>;
+public record GetMarketPlaceListingsQuery() : IQuery<Response<List<MarketPlaceListingDto>>>;
 public class GetMarketPlaceListingsQueryHandler : IRequestHandler<GetMarketPlaceListingsQuery, Response<List<MarketPlaceListingDto>>>
 {
     private readonly IMarketPlaceService _marketPlaceService;

@@ -1,13 +1,14 @@
 ﻿using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
+using Application.MediatR.Markers;
 using Application.UseCases.Users.Events;
 using Common.Authorization.Security;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Users.Commands.ConvertGuestToUser;
-public record ConvertGuestToUserCommand(Guid UserId, string Username, string Email, string Password) : IRequest<Response<Tokens>>;
+public record ConvertGuestToUserCommand(Guid UserId, string Username, string Email, string Password) : ICommand<Response<Tokens>>;
 
 public class ConvertGuestToUserCommandHandler : IRequestHandler<ConvertGuestToUserCommand, Response<Tokens>>
 {

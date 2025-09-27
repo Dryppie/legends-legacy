@@ -1,9 +1,10 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Guilds.Commands.UpgradeGuildBuilding;
-public record UpgradeGuildBuildingCommand(Guid CharacterId, string BuildingId) : IRequest<Response<bool>>;
+public record UpgradeGuildBuildingCommand(Guid CharacterId, string BuildingId) : ICommand<Response<bool>>;
 public class UpgradeGuildBuildingCommandHandler : IRequestHandler<UpgradeGuildBuildingCommand, Response<bool>>
 {
     private readonly IGuildBuildingUpgradeService _upgradeService;

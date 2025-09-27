@@ -1,11 +1,12 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Application.UseCases.Inventories.Dtos;
 using AutoMapper;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Inventories.Commands.ScrapEquipments;
-public record ScrapEquipmentsCommand(Guid CharacterId, List<string> ItemIds) : IRequest<Response<InventoryItemDto>>;
+public record ScrapEquipmentsCommand(Guid CharacterId, List<string> ItemIds) : ICommand<Response<InventoryItemDto>>;
 public class ScrapEquipmentsCommandHandler : IRequestHandler<ScrapEquipmentsCommand, Response<InventoryItemDto>>
 {
     private readonly IInventoryService _inventoryService;

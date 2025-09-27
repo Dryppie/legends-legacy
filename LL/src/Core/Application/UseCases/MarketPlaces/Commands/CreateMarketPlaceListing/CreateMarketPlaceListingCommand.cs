@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Application.UseCases.MarketPlaces.Dtos.Requests;
 using Application.UseCases.MarketPlaces.Dtos.Responses;
 using AutoMapper;
@@ -7,7 +8,7 @@ using Domain.Models.MarketPlaces;
 using MediatR;
 
 namespace Application.UseCases.MarketPlaces.Commands.CreateMarketPlaceListing;
-public record CreateMarketPlaceListingCommand(Guid CharacterId, CreateMarketPlaceListingRequest Listing) : IRequest<Response<MarketPlaceListingDto>>;
+public record CreateMarketPlaceListingCommand(Guid CharacterId, CreateMarketPlaceListingRequest Listing) : ICommand<Response<MarketPlaceListingDto>>;
 public class CreateMarketPlaceListingCommandHandler : IRequestHandler<CreateMarketPlaceListingCommand, Response<MarketPlaceListingDto>>
 {
     private readonly IMarketPlaceService _marketPlaceService;

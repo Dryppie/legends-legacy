@@ -1,10 +1,11 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Common.Primitives;
 using Domain.Models.Guilds.Buildings;
 using MediatR;
 
 namespace Application.UseCases.Guilds.Queries.GetGuildUpgrades;
-public record GetGuildUpgradesQuery(Guid CharacterId) : IRequest<Response<List<BuildingUpgradeView>>>;
+public record GetGuildUpgradesQuery(Guid CharacterId) : IQuery<Response<List<BuildingUpgradeView>>>;
 public class GetGuildUpgradesQueryHandler : IRequestHandler<GetGuildUpgradesQuery, Response<List<BuildingUpgradeView>>>
 {
     private readonly IGuildBuildingUpgradeService _upgradeService;

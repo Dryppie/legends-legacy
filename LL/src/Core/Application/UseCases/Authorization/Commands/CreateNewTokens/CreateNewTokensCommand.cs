@@ -1,4 +1,5 @@
 ﻿using Application.Authorization.Interfaces;
+using Application.MediatR.Markers;
 using Common.Authorization.Security;
 using Common.Primitives;
 using MediatR;
@@ -8,7 +9,7 @@ namespace Application.UseCases.Authorization.Commands.CreateNewTokens;
 /// Generate new tokens
 /// </summary>
 /// <param name="Token"></param>
-public record CreateNewTokensCommand(string RefreshToken) : IRequest<Response<Tokens>>;
+public record CreateNewTokensCommand(string RefreshToken) : ICommand<Response<Tokens>>;
 
 public class CreateNewTokensCommandHandler : IRequestHandler<CreateNewTokensCommand, Response<Tokens>>
 {

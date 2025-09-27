@@ -1,5 +1,5 @@
-﻿using Application.Behaviors;
-using Application.Common.Mappings;
+﻿using Application.Common.Mappings;
+using Application.MediatR.Behaviors;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 

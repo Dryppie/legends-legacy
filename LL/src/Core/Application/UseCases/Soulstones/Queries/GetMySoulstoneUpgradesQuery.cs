@@ -1,10 +1,11 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Common.Primitives;
 using Domain.Models.Soulstones.UpgradeDefinition;
 using MediatR;
 
 namespace Application.UseCases.Soulstones.Queries;
-public record GetMySoulstoneUpgradesQuery(Guid CharacterId) : IRequest<Response<List<SoulstoneUpgradeView>>>;
+public record GetMySoulstoneUpgradesQuery(Guid CharacterId) : IQuery<Response<List<SoulstoneUpgradeView>>>;
 public class GetMySoulstoneUpgradesQueryHandler : IRequestHandler<GetMySoulstoneUpgradesQuery, Response<List<SoulstoneUpgradeView>>>
 {
     private readonly ISoulstoneUpgradeService _soulstoneUpgradeService;

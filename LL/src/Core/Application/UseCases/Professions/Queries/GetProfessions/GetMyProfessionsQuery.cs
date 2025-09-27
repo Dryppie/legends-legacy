@@ -1,11 +1,12 @@
 ﻿using Application.Interfaces.Services.LL.Professions;
+using Application.MediatR.Markers;
 using Application.UseCases.Professions.Dtos;
 using AutoMapper;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Professions.Queries.GetProfessions;
-public record GetMyProfessionsQuery(Guid CharacterId) : IRequest<Response<List<ProfessionDto>>>;
+public record GetMyProfessionsQuery(Guid CharacterId) : IQuery<Response<List<ProfessionDto>>>;
 public class GetMyProfessionsQueryHandler : IRequestHandler<GetMyProfessionsQuery, Response<List<ProfessionDto>>>
 {
     private readonly IProfessionService _professionService;

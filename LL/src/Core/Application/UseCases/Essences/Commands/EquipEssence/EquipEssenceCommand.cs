@@ -1,9 +1,10 @@
 ﻿using Application.Interfaces.Services.LL.Essences;
+using Application.MediatR.Markers;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Essences.Commands.EquipEssence;
-public record EquipEssenceCommand(Guid CharacterId, string EssenceItemId) : IRequest<Response<bool>>;
+public record EquipEssenceCommand(Guid CharacterId, string EssenceItemId) : ICommand<Response<bool>>;
 
 public class EquipEssenceCommandHandler : IRequestHandler<EquipEssenceCommand, Response<bool>>
 {

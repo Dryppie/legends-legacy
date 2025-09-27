@@ -1,11 +1,12 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Application.UseCases.Inventories.Dtos;
 using AutoMapper;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Inventories.Queries.GetInventoryById;
-public record GetInventoryByIdQuery(Guid CharacterId) : IRequest<Response<InventoryDto>>;
+public record GetInventoryByIdQuery(Guid CharacterId) : IQuery<Response<InventoryDto>>;
 
 public class GetInventoryByIdQueryHandler : IRequestHandler<GetInventoryByIdQuery, Response<InventoryDto>>
 {

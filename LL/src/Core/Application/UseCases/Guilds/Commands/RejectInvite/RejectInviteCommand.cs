@@ -1,9 +1,10 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Guilds.Commands.RejectInvite;
-public record RejectInviteCommand(Guid CharacterId, string GuildId) : IRequest<Response<bool>>;
+public record RejectInviteCommand(Guid CharacterId, string GuildId) : ICommand<Response<bool>>;
 public class RejectInviteCommandHandler : IRequestHandler<RejectInviteCommand, Response<bool>>
 {
     private readonly IGuildService _guildService;

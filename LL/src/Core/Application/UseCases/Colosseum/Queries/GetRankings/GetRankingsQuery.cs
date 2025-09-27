@@ -1,12 +1,11 @@
 ﻿using Application.Interfaces.Services.LL.Colosseum;
-using Application.UseCases.Colosseum.Dtos;
+using Application.MediatR.Markers;
 using Application.UseCases.Leaderboards.Dtos;
 using AutoMapper;
-using Domain.Models.Leaderboards;
 using MediatR;
 
 namespace Application.UseCases.Colosseum.Queries.GetRankings;
-public record GetRankingsQuery(Guid CharacterId) : IRequest<List<LeaderboardEntryDto>>;
+public record GetRankingsQuery(Guid CharacterId) : IQuery<List<LeaderboardEntryDto>>;
 public class GetRankingsQueryHandler : IRequestHandler<GetRankingsQuery, List<LeaderboardEntryDto>>
 {
 

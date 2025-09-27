@@ -1,11 +1,12 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Application.UseCases.Users.Dtos;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Users.Queries.GetUserInfo;
 
-public record GetUserInfoQuery(Guid UserId) : IRequest<Response<UserInfoDto>>;
+public record GetUserInfoQuery(Guid UserId) : IQuery<Response<UserInfoDto>>;
 
 public class GetUserInfoQueryHandler : IRequestHandler<GetUserInfoQuery, Response<UserInfoDto>>
 {

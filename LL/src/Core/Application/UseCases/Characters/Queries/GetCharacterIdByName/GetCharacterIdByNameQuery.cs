@@ -1,9 +1,10 @@
 ﻿using Application.Interfaces.Services.LL.Entities;
+using Application.MediatR.Markers;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Characters.Queries.GetCharacterIdByName;
-public record GetCharacterIdByNameQuery(string Name) : IRequest<Response<Guid?>>;
+public record GetCharacterIdByNameQuery(string Name) : IQuery<Response<Guid?>>;
 public class GetCharacterIdByNameQueryHandler : IRequestHandler<GetCharacterIdByNameQuery, Response<Guid?>>
 {
     private readonly ICharacterService _characterService;

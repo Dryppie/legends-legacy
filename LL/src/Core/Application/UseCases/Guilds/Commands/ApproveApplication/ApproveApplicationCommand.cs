@@ -1,9 +1,10 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Guilds.Commands.ApproveApplication;
-public record ApproveApplicationCommand(Guid CharacterId, string ApplicationCharacterId) : IRequest<Response<bool>>;
+public record ApproveApplicationCommand(Guid CharacterId, string ApplicationCharacterId) : ICommand<Response<bool>>;
 public class ApproveApplicationCommandHandler : IRequestHandler<ApproveApplicationCommand, Response<bool>>
 {
     private readonly IGuildService _guildService;

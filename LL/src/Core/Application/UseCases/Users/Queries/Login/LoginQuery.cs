@@ -1,12 +1,13 @@
 ﻿using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
+using Application.MediatR.Markers;
 using Common.Authorization.Security;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Users.Queries.Login;
-public record LoginQuery(string Email, string Password) : IRequest<Response<Tokens>>;
+public record LoginQuery(string Email, string Password) : IQuery<Response<Tokens>>;
 public class LoginQueryHandler : IRequestHandler<LoginQuery, Response<Tokens>>
 {
     private readonly IUserService _userService;

@@ -1,12 +1,13 @@
 ﻿using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Entities;
+using Application.MediatR.Markers;
 using Common.Authorization.Security;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Users.Commands.RenameCharacter;
-public record RenameCharacterCommand(Guid UserId, string NewName) : IRequest<Response<Tokens>>;
+public record RenameCharacterCommand(Guid UserId, string NewName) : ICommand<Response<Tokens>>;
 public class RenameCharacterCommandHandler : IRequestHandler<RenameCharacterCommand, Response<Tokens>>
 {
     private readonly ICharacterService _characterService;

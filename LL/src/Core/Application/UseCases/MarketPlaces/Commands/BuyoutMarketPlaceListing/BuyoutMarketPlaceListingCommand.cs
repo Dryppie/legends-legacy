@@ -1,10 +1,11 @@
 ﻿using Application.Interfaces.Services.LL;
+using Application.MediatR.Markers;
 using Application.UseCases.MarketPlaces.Dtos.Requests;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.MarketPlaces.Commands.BuyoutMarketPlaceListing;
-public record BuyoutMarketPlaceListingCommand(Guid CharacterId, BuyoutMarketPlaceListingRequest Buyout) : IRequest<Response<bool>>;
+public record BuyoutMarketPlaceListingCommand(Guid CharacterId, BuyoutMarketPlaceListingRequest Buyout) : ICommand<Response<bool>>;
 public class BuyoutMarketPlaceListingCommandHandler : IRequestHandler<BuyoutMarketPlaceListingCommand, Response<bool>>
 {
     private readonly IMarketPlaceService _marketPlaceService;
