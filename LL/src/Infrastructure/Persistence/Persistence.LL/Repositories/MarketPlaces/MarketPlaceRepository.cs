@@ -64,7 +64,6 @@ public class MarketPlaceRepository : IMarketPlaceRepository
 
         // Add the new listing
         await _dbContext.MarketPlaceListings.AddAsync(marketPlaceListing, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
 
         return marketPlaceListing;
     }
@@ -80,10 +79,5 @@ public class MarketPlaceRepository : IMarketPlaceRepository
     public void RemoveListingAsync(MarketPlaceListing listing)
     {
         _dbContext.MarketPlaceListings.Remove(listing);
-    }
-
-    public async Task SaveChangesAsync(CancellationToken cancellationToken)
-    {
-        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 }

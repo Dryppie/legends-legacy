@@ -11,9 +11,9 @@ public class AttributeService : IAttributeService
         _attributesRepository = attributesRepository;
     }
 
-    public async Task<IEnumerable<EntityAttribute>> CreateAttributesForNewCharacterAsync(Guid characterId, CancellationToken cancellationToken)
+    public IEnumerable<EntityAttribute> CreateAttributesForNewCharacter(Guid characterId)
     {
-        return await _attributesRepository.CreateAttributesForNewCharacterAsync(characterId, cancellationToken);
+        return _attributesRepository.CreateAttributesForNewCharacter(characterId);
     }
 
     public async Task<List<EntityAttribute>> GetAttributesByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken)

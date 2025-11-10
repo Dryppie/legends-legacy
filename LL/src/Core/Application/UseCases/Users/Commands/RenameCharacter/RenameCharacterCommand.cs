@@ -30,7 +30,7 @@ public class RenameCharacterCommandHandler : IRequestHandler<RenameCharacterComm
 
         if (character == null) return Response<Tokens>.Fail("Failed to rename character.");
 
-        var result = await _userService.UpdateUserInfo(request.UserId, user, cancellationToken);
+        var result = _userService.UpdateUserInfo(user);
         if (!result) return Response<Tokens>.Fail("Failed to rename character.");
 
         var tokens = await _jwtGenerator.IssueTokens(user, character);

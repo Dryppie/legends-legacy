@@ -4,5 +4,5 @@ public interface IProfessionRepository
 {
     Task<int> GetProfessionLevelAsync(Guid characterId, ProfessionType professionType, CancellationToken cancellationToken);
     Task<List<Profession>> GetProfessionsAsync(Guid characterId, CancellationToken cancellationToken);
-    Task UpdateProfessionLevelsAsync(List<Profession> professions, CancellationToken cancellationToken);
+    void UpdateProfessionLevels(List<Profession> professions);
 }

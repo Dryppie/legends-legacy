@@ -24,6 +24,5 @@ public class ValidateTokenQueryHandler : IRequestHandler<ValidateTokenQuery, Res
         return await _jwtGenerator.ValidateAccessToken(request.Token)
             ? Response<bool>.Success(true)
             : Response<bool>.Fail("Failed token validation");
-
     }
 }

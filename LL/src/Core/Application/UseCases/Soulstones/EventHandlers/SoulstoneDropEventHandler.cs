@@ -21,6 +21,5 @@ public class SoulstoneDropEventHandler : INotificationHandler<SoulstoneDropEvent
         if (character == null) return;
 
         character.Soulstones += notification.SoulstonesEarned;
-        await _characterService.SaveChangesAsync(cancellationToken);
     }
 }

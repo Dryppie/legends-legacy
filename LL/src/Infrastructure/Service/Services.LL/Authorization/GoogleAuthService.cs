@@ -41,12 +41,12 @@ public sealed class GoogleAuthService : IGoogleAuthService
             if (user == null) return null;
         }
 
-        await _externals.AddAsync(new ExternalLogin
+        _externals.Add(new ExternalLogin
         {
             UserId = user.Id,
             Provider = AuthProvider.Google,
             ProviderUserId = googleId
-        }, cancellationToken);
+        });
 
         return new GoogleLoginResult(user, isNew);
     }
@@ -59,12 +59,12 @@ public sealed class GoogleAuthService : IGoogleAuthService
         if (await _externals.FindAsync(AuthProvider.Google, payload.Subject, cancellationToken) is not null)
             return false;
 
-        await _externals.AddAsync(new ExternalLogin
+        _externals.Add(new ExternalLogin
         {
             UserId = userId,
             Provider = AuthProvider.Google,
             ProviderUserId = payload.Subject
-        }, cancellationToken);
+        });
         return true;
     }
 }

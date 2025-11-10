@@ -58,7 +58,6 @@ public class SoulstoneUpgradeService : ISoulstoneUpgradeService
         else
             entry.Level++;
 
-        await _characterService.SaveChangesAsync(cancellationToken);
         return true;
     }
 
@@ -93,7 +92,6 @@ public class SoulstoneUpgradeService : ISoulstoneUpgradeService
         character.CharacterSoulstoneUpgrades.Clear(); // Remove all upgrades
         character.Soulstones += totalRefund;         // Refund total cost
 
-        await _characterService.SaveChangesAsync(cancellationToken);
         return true;
     }
 }

@@ -28,6 +28,7 @@ using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
 
@@ -47,6 +48,18 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
 
     public EntityEntry<TEntity> GetEntry<TEntity>(TEntity entity) where TEntity : class
         => Entry(entity);
+
+    public IExecutionStrategy CreateExecutionStrategy()
+        => Database.CreateExecutionStrategy();
+
+    public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken ct = default)
+        => Database.BeginTransactionAsync(ct);
+
+    public IDbContextTransaction? CurrentTransaction
+        => Database.CurrentTransaction;
+
+    public bool HasChanges
+        => ChangeTracker.HasChanges();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

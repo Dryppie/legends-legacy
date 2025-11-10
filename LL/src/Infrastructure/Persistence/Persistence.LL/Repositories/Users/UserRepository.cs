@@ -23,7 +23,6 @@ public class UserRepository : IUserRepository
         if (await _context.Users.AnyAsync(u => u.Username.ToLower() == user.Username.ToLower(), cancellationToken)) return false;
 
         _context.Users.Add(user);
-        await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
 
@@ -41,8 +40,6 @@ public class UserRepository : IUserRepository
             IsNameEdited = user.IsNameEdited,
         };
     }
-
-    public async Task SaveChangesAsync(CancellationToken cancellationToken) => await _context.SaveChangesAsync(cancellationToken);
 
     public async Task<AppUser?> GetUserById(Guid userId, CancellationToken cancellationToken)
     {

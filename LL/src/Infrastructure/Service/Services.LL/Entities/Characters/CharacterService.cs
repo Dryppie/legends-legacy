@@ -78,8 +78,4 @@ public class CharacterService : ICharacterService
 
     public async Task<Guid?> GetCharacterIdByNameAsync(string name, CancellationToken cancellationToken) =>
         await _characterRepository.GetCharacterIdByNameAsync(name, cancellationToken);
-
-    public async Task SaveChangesAsync(CancellationToken cancellationToken) =>
-        await _characterRepository.SaveChangesAsync(cancellationToken);
-
 }

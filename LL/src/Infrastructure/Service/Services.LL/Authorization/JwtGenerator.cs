@@ -88,7 +88,7 @@ public class JwtGenerator : IJwtGenerator
             ExpiresUtc = now.Add(_refreshLifespan).UtcDateTime
         };
 
-        await _repo.AddAsync(refreshEntity, CancellationToken.None);
+        _repo.Add(refreshEntity);
 
         return new Tokens(access, refresh, expiresAt.ToUnixTimeSeconds());
     }
@@ -114,7 +114,6 @@ public class JwtGenerator : IJwtGenerator
         var newTokens = await IssueTokens(user, character);
         // store the hash of the *new* refresh token inside the old one (`ReplacedBy`) – optional
         record.ReplacedBy = _hasher.Hash(newTokens.RefreshToken);
-        await _repo.SaveChangesAsync(cancellationToken);
 
         return newTokens;
     }

@@ -15,6 +15,6 @@ public class CharacterCreatedEventHandler : INotificationHandler<CharacterCreate
 
     public async Task Handle(CharacterCreatedEvent notification, CancellationToken cancellationToken)
     {
-        await _attributesService.CreateAttributesForNewCharacterAsync(notification.CharacterId, cancellationToken);
+        _attributesService.CreateAttributesForNewCharacter(notification.CharacterId);
     }
 }

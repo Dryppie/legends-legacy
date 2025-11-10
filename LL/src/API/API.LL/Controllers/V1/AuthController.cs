@@ -5,11 +5,11 @@ using Application.UseCases.Users.Commands.BindGoogle;
 using Application.UseCases.Users.Commands.ConvertGuestToUser;
 using Application.UseCases.Users.Commands.GoogleLogin;
 using Application.UseCases.Users.Commands.GuestLogin;
+using Application.UseCases.Users.Commands.Login;
 using Application.UseCases.Users.Commands.Register;
 using Application.UseCases.Users.Commands.RenameCharacter;
 using Application.UseCases.Users.Dtos;
 using Application.UseCases.Users.Queries.GetUserInfo;
-using Application.UseCases.Users.Queries.Login;
 using Common.Authorization.Security;
 using Common.Exceptions;
 using Common.Primitives;
@@ -38,7 +38,7 @@ public class AuthController : BaseController
     [ProducesResponseType(typeof(Response<Tokens>), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<Response<Tokens>>> Login([FromBody] UserLoginDto input)
     {
-        var result = await Mediator.Send(new LoginQuery(input.Email, input.Password));
+        var result = await Mediator.Send(new LoginCommand(input.Email, input.Password));
         if (result.Data is null) return BadRequest(result);
 
         SetAuthCookies(result.Data);
@@ -134,22 +134,6 @@ public class AuthController : BaseController
                 "The refresh token is expired, revoked, malformed, or otherwise invalid.");
             return Unauthorized();
         }
-    }
-
-    /// <summary>
-    /// Validates a jwt access token
-    /// </summary>
-    [HttpPost("validateToken")]
-    [AllowAnonymous]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<Response<bool>>> ValidateToken([FromBody] string token)
-    {
-        if (string.IsNullOrWhiteSpace(token)) return BadRequest();
-
-        return await Mediator.Send(new ValidateTokenQuery(token));
-
     }
 
     [HttpGet("getUserInfo")]

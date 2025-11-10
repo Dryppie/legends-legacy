@@ -43,5 +43,4 @@ public interface ICharacterService
     Task<Character?> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken);
     Task<Character?> GetCharacterWithSoulstoneUpgradesAsync(Guid characterId, CancellationToken cancellationToken);
     Task<Guid?> GetCharacterIdByNameAsync(string name, CancellationToken cancellationToken);
-    Task SaveChangesAsync(CancellationToken cancellationToken);
 }

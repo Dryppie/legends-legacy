@@ -14,16 +14,13 @@ public class AttributeRepository : IAttributeRepository
     }
 
     // inheritdoc />
-    public async Task<IEnumerable<EntityAttribute>> CreateAttributesForNewCharacterAsync(Guid characterId, CancellationToken cancellationToken)
+    public IEnumerable<EntityAttribute> CreateAttributesForNewCharacter(Guid characterId)
     {
         // Create EntityAttribute for each fetched Attribute
         var characterAttributes = EntityBaseAttributeHelper.CreateEntityAttributes(characterId);
 
         // Add them to the DbContext
         _context.EntityAttributes.AddRange(characterAttributes);
-
-        // Save changes to the database
-        await _context.SaveChangesAsync(cancellationToken);
 
         return characterAttributes;
     }

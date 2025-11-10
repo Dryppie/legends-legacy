@@ -97,7 +97,7 @@ public class CharacterActionService : ICharacterActionService
             characterAction.UpdatedAt = originalNow;
         }
 
-        await _characterActionRepository.UpdateCharacterActionAsync(characterAction, cancellationToken);
+        _characterActionRepository.UpdateCharacterAction(characterAction);
 
         return characterAction;
     }

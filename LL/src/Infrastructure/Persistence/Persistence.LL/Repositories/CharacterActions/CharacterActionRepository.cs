@@ -25,7 +25,6 @@ public class CharacterActionRepository : ICharacterActionRepository
         {
             characterAction.IsDeleted = false; // Ensure it's not marked as deleted on creation
             await _context.CharacterActions.AddAsync(characterAction, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
             return true;
         }
 
@@ -51,8 +50,6 @@ public class CharacterActionRepository : ICharacterActionRepository
         }
 
         _context.CharacterActions.Update(existingAction);
-
-        await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
 
@@ -64,7 +61,6 @@ public class CharacterActionRepository : ICharacterActionRepository
         characterAction.IsDeleted = true;
         characterAction.ActionDetails = null;
         _context.CharacterActions.Update(characterAction);
-        await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
 
@@ -83,10 +79,9 @@ public class CharacterActionRepository : ICharacterActionRepository
         return characterAction;
     }
 
-    public async Task UpdateCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken)
+    public void UpdateCharacterAction(CharacterAction characterAction)
     {
         _context.CharacterActions.Update(characterAction);
-        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<CharacterAction?> GetCraftingActionAsync(Guid characterId, CancellationToken cancellationToken)
@@ -142,7 +137,6 @@ public class CharacterActionRepository : ICharacterActionRepository
                 },
             };
             await _context.CharacterActions.AddAsync(action, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
             return true;
         }
 
@@ -170,7 +164,6 @@ public class CharacterActionRepository : ICharacterActionRepository
             _context.CraftingQueueItems.Add(craftingQueueItem);
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
 

@@ -123,7 +123,7 @@ public class GatheringService : IGatheringService
 
         await _levelingService.UpdateProfessionLevel(profession, cancellationToken);
 
-        await _professionService.UpdateProfessionLevelAsync([profession], cancellationToken);
+        _professionService.UpdateProfessionLevel([profession]);
     }
 
     private async Task ProcessLootAsync(Guid characterId, List<InventoryItem> loot, CancellationToken cancellationToken)

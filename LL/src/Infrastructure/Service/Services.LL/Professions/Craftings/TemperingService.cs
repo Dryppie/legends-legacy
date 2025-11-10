@@ -123,7 +123,7 @@ public class TemperingService : ITemperingService
         if (tierPackage == null) return;
         // Apply the tier package modifiers to the equipment instance
         tierPackage.AttributeModifier.ItemInstanceId = eq.Id;
-        tierPackage.AttributeModifier.ItemInstance = eq;
+        tierPackage.AttributeModifier.ItemInstance = null;
         eq.InstanceModifiers.Add(tierPackage.AttributeModifier);
     }
 

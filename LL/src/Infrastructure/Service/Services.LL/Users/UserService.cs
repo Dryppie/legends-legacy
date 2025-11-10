@@ -59,8 +59,6 @@ public sealed class UserService : IUserService
                      _hasher.HashPassword(null!, password));
         user.IsGuest = false;
 
-        await _userRepository.SaveChangesAsync(cancellationToken);
-
         return user;
     }
 
@@ -103,10 +101,9 @@ public sealed class UserService : IUserService
         return $"{prefix}{animal}{suffix}_{random.Next(1000, 9999)}";
     }
 
-    public async Task<bool> UpdateUserInfo(Guid userId, AppUser user, CancellationToken cancellationToken)
+    public bool UpdateUserInfo(AppUser user)
     {
         user.IsNameEdited = true;
-        await _userRepository.SaveChangesAsync(cancellationToken);
         return true;
     }
 

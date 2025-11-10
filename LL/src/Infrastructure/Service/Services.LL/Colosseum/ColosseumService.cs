@@ -34,7 +34,7 @@ public class ColosseumService : IColosseumService
 
         if (arenaTicketStatus.CurrentTickets < 1) throw new Exception();
         arenaTicketStatus.CurrentTickets--;
-        await _colosseumRepository.UpdateArenaTicketStatusAsync(arenaTicketStatus, cancellationToken);
+        _colosseumRepository.UpdateArenaTicketStatus(arenaTicketStatus);
 
         var playerTeam = await _entityService.GetEntitiesByIdsForCombatAsync([characterId], cancellationToken);
         if (playerTeam.Count == 0) return null;
@@ -162,7 +162,7 @@ public class ColosseumService : IColosseumService
             // Update LastTicketUpdate based on restored tickets. Even if capped, a new ticket might still restore in..  17 minutes
             arenaTicketStatus.LastTicketUpdate = arenaTicketStatus.LastTicketUpdate.AddHours(ticketsToRestore * restoreInterval.TotalHours);
 
-            await _colosseumRepository.UpdateArenaTicketStatusAsync(arenaTicketStatus, cancellationToken);
+            _colosseumRepository.UpdateArenaTicketStatus(arenaTicketStatus);
         }
 
         return arenaTicketStatus;

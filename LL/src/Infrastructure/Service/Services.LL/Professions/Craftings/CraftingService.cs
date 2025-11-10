@@ -190,7 +190,7 @@ public class CraftingService : ICraftingService
         }
 
 
-        await _professionService.UpdateProfessionLevelAsync(professionsToUpdate, cancellationToken);
+        _professionService.UpdateProfessionLevel(professionsToUpdate);
     }
 
     public async Task<bool> RemoveCraftingQueueItemsAsync(Guid characterId, List<Guid> queueItemIds, CancellationToken cancellationToken)
@@ -205,9 +205,6 @@ public class CraftingService : ICraftingService
         var itemAdded = await _inventoryService.AddItemInstanceBackToInventory(characterId, equipmentInstance, cancellationToken);
         if (itemAdded) anyItemAdded = true;
     }
-
-    if (anyItemAdded)
-        await _craftingRepository.SaveChangesAsync(cancellationToken);
 
     return anyItemAdded;
 }

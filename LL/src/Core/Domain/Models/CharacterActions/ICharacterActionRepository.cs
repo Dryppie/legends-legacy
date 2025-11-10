@@ -22,7 +22,7 @@ public interface ICharacterActionRepository
     /// </summary>
     /// <param name="characterId"></param>
     /// <returns></returns>
-    public Task UpdateCharacterActionAsync(CharacterAction characterAction, CancellationToken cancellationToken);
+    public void UpdateCharacterAction(CharacterAction characterAction);
 
     /// <summary>
     /// Delete a character's current action

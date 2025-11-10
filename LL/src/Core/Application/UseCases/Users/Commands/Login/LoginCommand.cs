@@ -6,22 +6,22 @@ using Common.Authorization.Security;
 using Common.Primitives;
 using MediatR;
 
-namespace Application.UseCases.Users.Queries.Login;
-public record LoginQuery(string Email, string Password) : IQuery<Response<Tokens>>;
-public class LoginQueryHandler : IRequestHandler<LoginQuery, Response<Tokens>>
+namespace Application.UseCases.Users.Commands.Login;
+public record LoginCommand(string Email, string Password) : ICommand<Response<Tokens>>;
+public class LoginCommandHandler : IRequestHandler<LoginCommand, Response<Tokens>>
 {
     private readonly IUserService _userService;
     private readonly IJwtGenerator _jwtGenerator;
     private readonly ICharacterService _characterService;
 
-    public LoginQueryHandler(IUserService userService, IJwtGenerator jwtGenerator, ICharacterService characterService)
+    public LoginCommandHandler(IUserService userService, IJwtGenerator jwtGenerator, ICharacterService characterService)
     {
         _userService = userService;
         _jwtGenerator = jwtGenerator;
         _characterService = characterService;
     }
 
-    public async Task<Response<Tokens>> Handle(LoginQuery request, CancellationToken cancellationToken)
+    public async Task<Response<Tokens>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         var user = await _userService.ValidateCredentialsAsync(request.Email, request.Password, cancellationToken);
         if (user == null) return Response<Tokens>.Fail("Login error. Check your credentials.");

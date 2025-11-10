@@ -60,7 +60,6 @@ public class MarketPlaceService : IMarketPlaceService
         if (listing.Quantity == 0)
             _marketPlaceRepository.RemoveListingAsync(listing);
 
-        await _marketPlaceRepository.SaveChangesAsync(cancellationToken);
         return true;
     }
 
@@ -80,7 +79,6 @@ public class MarketPlaceService : IMarketPlaceService
         await _inventoryService.AddItemToInventoryFromMarketPlace(characterId, inventoryItem, cancellationToken);
         _marketPlaceRepository.RemoveListingAsync(listing);
 
-        await _marketPlaceRepository.SaveChangesAsync(cancellationToken);
         return true;
     }
 }

@@ -24,6 +24,7 @@ using Domain.Models.Soulstones;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Application.Common.Interfaces;
 public interface IDbContext
@@ -97,4 +98,9 @@ public interface IDbContext
     /// Exposes EF Core's Entry method to allow property state manipulation.
     /// </summary>
     EntityEntry<TEntity> GetEntry<TEntity>(TEntity entity) where TEntity : class;
+
+    IExecutionStrategy CreateExecutionStrategy();
+    Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken ct = default);
+    IDbContextTransaction? CurrentTransaction { get; }
+    bool HasChanges { get; }
 }

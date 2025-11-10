@@ -30,7 +30,6 @@ public class GuildRepository : IGuildRepository
         };
 
         _context.Guilds.Add(newGuild);
-        await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
 
@@ -58,7 +57,6 @@ public class GuildRepository : IGuildRepository
         if (member == null) return false;
 
         _context.GuildMembers.Remove(member);
-        await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
 
@@ -74,7 +72,6 @@ public class GuildRepository : IGuildRepository
         _context.GuildMembers.RemoveRange(guild.Members);
         _context.GuildInvites.RemoveRange(guild.Invites);
         _context.Guilds.Remove(guild);
-        await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
 
@@ -99,7 +96,6 @@ public class GuildRepository : IGuildRepository
             CharacterId = invitedCharacterId,
             IsInvite = true,
         });
-        await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
 
@@ -125,7 +121,6 @@ public class GuildRepository : IGuildRepository
             CharacterId = invitedCharacter.Id,
             IsInvite = true,
         });
-        await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
 
@@ -156,7 +151,6 @@ public class GuildRepository : IGuildRepository
             CharacterId = characterId,
             IsInvite = false, // This means its an application to the guild, not an invitation from the guild
         });
-        await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
 
@@ -207,7 +201,6 @@ public class GuildRepository : IGuildRepository
             .ToListAsync(cancellationToken);
         _context.GuildInvites.RemoveRange(allInvites);
 
-        await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
 
@@ -219,7 +212,6 @@ public class GuildRepository : IGuildRepository
         if (invite == null) return false;
 
         _context.GuildInvites.Remove(invite);
-        await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
 
@@ -229,6 +221,4 @@ public class GuildRepository : IGuildRepository
             .Include(g => g.Resources)
             .Include(g => g.GuildBuildingUpgrades)
             .FirstOrDefaultAsync(g => g.Members.Select(gm => gm.CharacterId).Contains(characterId), cancellationToken);
-
-    public async Task SaveChangesAsync(CancellationToken cancellationToken) => await _context.SaveChangesAsync(cancellationToken);
 }

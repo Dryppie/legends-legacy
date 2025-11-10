@@ -63,9 +63,7 @@ public class EssenceRepository : IEssenceRepository
             _context.InventoryItems.Remove(inventoryItem);
         }
 
-        // 6) Save changes and return status
-        var changes = await _context.SaveChangesAsync(cancellationToken);
-        return changes > 0;
+        return true;
     }
 
     public async Task<bool> DeleteEquippedEssence(Guid characterId, Guid essenceId, CancellationToken cancellationToken)
@@ -79,13 +77,7 @@ public class EssenceRepository : IEssenceRepository
 
         character.EssenceSlots.First(es => es.OccupiedEssence != null && es.OccupiedEssence.Id.Equals(essenceId)).OccupiedEssence = null;
 
-        //NotFoundException.ThrowIfNull(essenceSlotToEmpty, nameof(essenceSlotToEmpty), essenceId);
-
-        //var removed = character.EssenceSlots.Remove(essenceToDelete);
-
-        await _context.SaveChangesAsync(cancellationToken);
-
-        return true; // Return true if it was successfully removed
+        return true;
     }
 
     public async Task<List<EssenceSlot>> GetEquippedEssences(Guid characterId, CancellationToken cancellationToken)

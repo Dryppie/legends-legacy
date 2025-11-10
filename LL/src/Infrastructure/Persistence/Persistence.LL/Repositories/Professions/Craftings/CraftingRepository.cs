@@ -34,9 +34,4 @@ public class CraftingRepository : ICraftingRepository
         }
         return queueItem?.EquipmentInstance;
     }
-
-    public async Task SaveChangesAsync(CancellationToken cancellationToken)
-    {
-        await _dbContext.SaveChangesAsync(cancellationToken);
-    }
 }

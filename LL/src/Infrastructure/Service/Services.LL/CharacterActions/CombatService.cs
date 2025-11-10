@@ -204,6 +204,6 @@ public class CombatService : ICombatService
 
             await _levelingService.UpdateCharacterLevel(character, cancellationToken);
         }
-        await _entityService.UpdateEntities(playerCharacters, cancellationToken);
+        _entityService.UpdateEntities(playerCharacters);
     }
 }

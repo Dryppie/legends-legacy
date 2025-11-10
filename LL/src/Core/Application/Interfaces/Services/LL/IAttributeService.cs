@@ -8,7 +8,7 @@ public interface IAttributeService
     /// </summary>
     /// <param name="characterId"></param>
     /// <returns></returns>
-    public Task<IEnumerable<EntityAttribute>> CreateAttributesForNewCharacterAsync(Guid characterId, CancellationToken cancellationToken);
+    public IEnumerable<EntityAttribute> CreateAttributesForNewCharacter(Guid characterId);
 
     /// <summary>
     /// Get Attributes by Character Id

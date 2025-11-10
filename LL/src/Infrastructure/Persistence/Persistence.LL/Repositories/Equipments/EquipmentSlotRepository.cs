@@ -84,7 +84,6 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
             AddItemToInventory(character.Inventory, equipmentInstance.Id);
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
 
@@ -255,7 +254,6 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
 
         _context.InventoryItems.Remove(inventoryItem);
 
-        await _context.SaveChangesAsync(cancellationToken);
         return true;
     }
 

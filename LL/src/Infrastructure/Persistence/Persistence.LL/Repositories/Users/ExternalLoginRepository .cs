@@ -13,9 +13,8 @@ public sealed class ExternalLoginRepository : IExternalLoginRepository
             .Include(l => l.User)
             .SingleOrDefaultAsync(l => l.Provider == p && l.ProviderUserId == id, cancellationToken);
 
-    public async Task AddAsync(ExternalLogin login, CancellationToken cancellationToken)
+    public void Add(ExternalLogin login)
     {
         _context.ExternalLogins.Add(login);
-        await _context.SaveChangesAsync(cancellationToken);
     }
 }

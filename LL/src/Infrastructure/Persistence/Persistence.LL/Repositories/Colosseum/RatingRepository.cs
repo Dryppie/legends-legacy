@@ -30,7 +30,5 @@ public class RatingRepository : IRatingRepository
         NotFoundException.ThrowIfNull(character, nameof(character), characterId);
 
         character.ArenaRating = newA;
-
-        await _context.SaveChangesAsync(cancellationToken);
     }
 }

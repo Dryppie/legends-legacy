@@ -7,5 +7,4 @@ public interface IMarketPlaceRepository
     Task<bool> CancelMarketPlaceListingAsync(Guid characterId, Guid listingId, CancellationToken cancellationToken);
     Task<MarketPlaceListing?> GetListingAsync(Guid listingId, CancellationToken cancellationToken);
     void RemoveListingAsync(MarketPlaceListing listing);
-    Task SaveChangesAsync(CancellationToken cancellationToken);
 }

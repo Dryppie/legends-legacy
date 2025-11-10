@@ -90,10 +90,6 @@ public class GuildService : IGuildService
         await _guildRepository.RejectGuildInviteAsync(characterId, guildId, cancellationToken);
     #endregion
 
-
-    public async Task SaveChangesAsync(CancellationToken cancellationToken) =>
-        await _guildRepository.SaveChangesAsync(cancellationToken);
-
     public async Task<bool> DonateToGuildAsync(Guid characterId, Dictionary<GuildResourceType, int> donations, CancellationToken cancellationToken)
     {
         var guild = await _guildRepository.GetMyGuildAsync(characterId, cancellationToken);
@@ -153,7 +149,6 @@ public class GuildService : IGuildService
                 resource.Amount += amount;
         }
 
-        await _guildRepository.SaveChangesAsync(cancellationToken);
         return true;
     }
 }

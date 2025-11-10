@@ -8,7 +8,6 @@ using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL.Seeds.Helpers;
-using System.Xml.Linq;
 
 namespace Persistence.LL.Repositories.Entities.Characters;
 public class CharacterRepository : ICharacterRepository
@@ -47,7 +46,6 @@ public class CharacterRepository : ICharacterRepository
         SeedEquipmentSlots(character);
         await _context.Characters.AddAsync(character, cancellationToken);
 
-        await _context.SaveChangesAsync(cancellationToken);
         return character;
     }
 
@@ -170,7 +168,6 @@ public class CharacterRepository : ICharacterRepository
 
         character.Name = username;
 
-        await _context.SaveChangesAsync(cancellationToken);
         return character;
     }
 
@@ -187,10 +184,5 @@ public class CharacterRepository : ICharacterRepository
             .Where(c => c.Name.ToLower() == name.ToLower())
             .Select(c => c.Id)
             .FirstOrDefaultAsync(cancellationToken);
-    }
-
-    public async Task SaveChangesAsync(CancellationToken cancellationToken)
-    {
-        await _context.SaveChangesAsync(cancellationToken);
     }
 }

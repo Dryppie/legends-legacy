@@ -13,10 +13,9 @@ public sealed class RefreshTokenRepository : IRefreshTokenRepository
         _hasher = hasher;
     }
 
-    public async Task AddAsync(RefreshToken token, CancellationToken cancellationToken)
+    public void Add(RefreshToken token)
     {
         _context.RefreshTokens.Add(token);
-        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<RefreshToken?> FindAsync(string plaintext, CancellationToken cancellationToken)
@@ -26,6 +25,4 @@ public sealed class RefreshTokenRepository : IRefreshTokenRepository
         return await _context.RefreshTokens
                         .SingleOrDefaultAsync(t => t.TokenHash == hash, cancellationToken);
     }
-
-    public async Task SaveChangesAsync(CancellationToken cancellationToken) => await _context.SaveChangesAsync(cancellationToken);
 }

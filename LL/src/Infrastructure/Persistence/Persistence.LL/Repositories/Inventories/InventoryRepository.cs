@@ -104,8 +104,6 @@ public class InventoryRepository : IInventoryRepository
             await _context.ItemInstances.AddAsync(item.ItemInstance, cancellationToken);
             await _context.InventoryItems.AddAsync(item, cancellationToken);
         }
-
-        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task AddItemToInventoryFromMarketPlace(Guid characterId, InventoryItem item, CancellationToken cancellationToken)
@@ -152,7 +150,6 @@ public class InventoryRepository : IInventoryRepository
         };
 
         await _context.Inventories.AddAsync(inventory, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<bool> TryRemoveCraftingMaterialsAsync(Guid characterId, Dictionary<string, int> requiredByItemId, CancellationToken cancellationToken)
@@ -240,7 +237,7 @@ public class InventoryRepository : IInventoryRepository
         {
             InventoryId = characterId,
             ItemInstanceId = itemInstance.Id,
-            ItemInstance = itemInstance,
+            //ItemInstance = itemInstance,
             Quantity = 1
         };
 
@@ -324,7 +321,6 @@ public class InventoryRepository : IInventoryRepository
             _context.InventoryItems.Add(soulDust);
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
         return soulDust;
     }
 
@@ -390,7 +386,6 @@ public class InventoryRepository : IInventoryRepository
             _context.InventoryItems.Add(temperedScrap);
         }
 
-        await _context.SaveChangesAsync(cancellationToken);
         return temperedScrap;
     }
 }

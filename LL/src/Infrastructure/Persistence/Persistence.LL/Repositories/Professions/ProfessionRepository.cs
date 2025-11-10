@@ -25,9 +25,8 @@ public class ProfessionRepository : IProfessionRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task UpdateProfessionLevelsAsync(List<Profession> professions, CancellationToken cancellationToken)
+    public void UpdateProfessionLevels(List<Profession> professions)
     {
         _context.Professions.UpdateRange(professions);
-        await _context.SaveChangesAsync(cancellationToken);
     }
 }

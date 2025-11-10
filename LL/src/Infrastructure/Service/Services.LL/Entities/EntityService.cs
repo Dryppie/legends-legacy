@@ -16,9 +16,9 @@ public class EntityService : IEntityService
         return await _entityRepository.GetEntitiesByIdsForCombatAsync(entityIds, cancellationToken);
     }
 
-    public async Task UpdateEntities(List<Entity> playerCharacters, CancellationToken cancellationToken)
+    public void UpdateEntities(List<Entity> playerCharacters)
     {
-        await _entityRepository.UpdateEntities(playerCharacters, cancellationToken);
+        _entityRepository.UpdateEntities(playerCharacters);
     }
 
 }

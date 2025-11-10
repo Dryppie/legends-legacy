@@ -26,8 +26,8 @@ public class ProfessionService : IProfessionService
         return professions;
     }
 
-    public async Task UpdateProfessionLevelAsync(List<Profession> professions, CancellationToken cancellationToken)
+    public void UpdateProfessionLevel(List<Profession> professions)
     {
-        await _professionRepository.UpdateProfessionLevelsAsync(professions, cancellationToken);
+        _professionRepository.UpdateProfessionLevels(professions);
     }
 }

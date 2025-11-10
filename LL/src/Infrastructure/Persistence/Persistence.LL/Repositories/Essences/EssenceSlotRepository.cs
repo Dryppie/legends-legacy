@@ -61,7 +61,6 @@ public class EssenceSlotRepository : IEssenceSlotRepository
             essenceSlot.OccupiedEssence = null;
             essenceSlot.EssenceId = Guid.Empty;
 
-            await _context.SaveChangesAsync(cancellationToken);
             return true;
         }
         else if (essenceSlot.SlotState == SlotState.Reserved)
@@ -85,7 +84,6 @@ public class EssenceSlotRepository : IEssenceSlotRepository
             essenceSlot.OccupiedEssence = null;
             essenceSlot.EssenceId = Guid.Empty;
 
-            await _context.SaveChangesAsync(cancellationToken);
             return true;
         }
 
@@ -136,7 +134,5 @@ public class EssenceSlotRepository : IEssenceSlotRepository
         };
 
         await _context.EssenceSlots.AddAsync(newEssenceSlot, cancellationToken);
-
-        await _context.SaveChangesAsync(cancellationToken);
     }
 }

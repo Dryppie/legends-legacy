@@ -8,5 +8,5 @@ public interface IColosseumRepository
     Task<List<Character>> GetRankings(Guid characterId, CancellationToken cancellationToken);
     Task SaveArenaMatchResult(ColosseumMatchResult arenaMatchResult, CancellationToken cancellationToken);
     Task<ArenaTicketStatus> GetArenaTicketStatusAsync(Guid characterId, CancellationToken cancellationToken);
-    Task UpdateArenaTicketStatusAsync(ArenaTicketStatus arenaTicketStatus, CancellationToken cancellationToken);
+    void UpdateArenaTicketStatus(ArenaTicketStatus arenaTicketStatus);
 }

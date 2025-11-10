@@ -47,22 +47,3 @@ public class InMemoryTierPackageProvider : ITierPackageProvider
     private AttributeType Pick(AttributeType[] src) =>
         src[_rnd.Next(src.Length)];
 }
-
-public static class AttributeLists
-{
-    public static readonly AttributeType[] PrimaryAttributes =
-    {
-        //AttributeType.Constitution,
-        //AttributeType.Endurance,
-        //AttributeType.Willpower,
-        //AttributeType.Strength,
-        //AttributeType.FightingSpirit,
-        //AttributeType.Dexterity,
-        //AttributeType.Agility,
-        //AttributeType.Intelligence,
-        //AttributeType.Wisdom,
-        //AttributeType.Instinct,
-        //AttributeType.Perception,
-        //AttributeType.Luck
-    };
-}

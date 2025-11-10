@@ -56,7 +56,6 @@ public class ColosseumRepository : IColosseumRepository
     public async Task SaveArenaMatchResult(ColosseumMatchResult arenaMatchResult, CancellationToken cancellationToken)
     {
         await _context.ColosseumMatches.AddAsync(arenaMatchResult, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
     }
 
     public async Task<ArenaTicketStatus> GetArenaTicketStatusAsync(Guid characterId, CancellationToken cancellationToken)
@@ -81,12 +80,10 @@ public class ColosseumRepository : IColosseumRepository
     private async Task CreateArenaTicketStatusAsync(ArenaTicketStatus arenaTicketStatus, CancellationToken cancellationToken)
     {
         await _context.ArenaTicketStatus.AddAsync(arenaTicketStatus, cancellationToken);
-        await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task UpdateArenaTicketStatusAsync(ArenaTicketStatus arenaTicketStatus, CancellationToken cancellationToken)
+    public void UpdateArenaTicketStatus(ArenaTicketStatus arenaTicketStatus)
     {
         _context.ArenaTicketStatus.Update(arenaTicketStatus);
-        await _context.SaveChangesAsync(cancellationToken);
     }
 }

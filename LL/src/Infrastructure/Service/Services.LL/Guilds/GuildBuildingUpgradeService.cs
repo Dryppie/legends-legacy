@@ -64,7 +64,6 @@ public class GuildBuildingUpgradeService : IGuildBuildingUpgradeService
             upgrade.Level++;
         }
 
-        await _guildService.SaveChangesAsync(cancellationToken);
         return true;
     }
 
