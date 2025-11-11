@@ -5,8 +5,10 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace Persistence.LL.Configurations.Items;
 public class EquipmentBaseConfiguration : ItemBaseConfiguration, IEntityTypeConfiguration<EquipmentBase>
 {
-    public void Configure(EntityTypeBuilder<EquipmentBase> builder)
+    public void Configure(EntityTypeBuilder<EquipmentBase> b)
     {
-        //builder.OwnsMany(eb => eb.AttributeModifiers);
+        b.HasMany(e => e.AttributeModifiers)
+         .WithOne()
+         .HasForeignKey(m => m.ItemBaseId);
     }
 }

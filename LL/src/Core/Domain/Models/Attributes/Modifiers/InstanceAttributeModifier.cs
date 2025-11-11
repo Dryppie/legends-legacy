@@ -7,7 +7,7 @@ public class InstanceAttributeModifier(
     float amount,
     ModifierType modifierType = ModifierType.Flat) : AttributeModifierBase(attributeType, amount, modifierType)
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid Id { get; set; }
     [JsonIgnore]
     public Guid ItemInstanceId { get; set; }
     [JsonIgnore]

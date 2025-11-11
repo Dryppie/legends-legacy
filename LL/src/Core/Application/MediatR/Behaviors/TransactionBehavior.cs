@@ -65,23 +65,7 @@ public sealed class TransactionBehavior<TRequest, TResponse>
                 var response = await next();
 
                 if (_db.HasChanges)
-                {
-                    try
-                    {
-                        await _db.SaveChangesAsync(ct);
-                    }
-                    catch (DbUpdateConcurrencyException ex)
-                    {
-                        foreach (var e in ex.Entries)
-                        {
-                            _logger.LogError("Concurrency on {Entity} with key {KeyValues}",
-                                e.Metadata.Name,
-                                string.Join(",", e.Properties.Where(p => p.Metadata.IsPrimaryKey())
-                                                             .Select(p => p.CurrentValue)));
-                        }
-                        throw;
-                    }
-                }
+                    await _db.SaveChangesAsync(ct);
 
                 await tx.CommitAsync(ct);
                 return response;

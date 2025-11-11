@@ -64,9 +64,6 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("AttributeType")
                         .HasColumnType("integer");
 
-                    b.Property<Guid?>("EquipmentInstanceId")
-                        .HasColumnType("uuid");
-
                     b.Property<Guid>("ItemInstanceId")
                         .HasColumnType("uuid");
 
@@ -74,8 +71,6 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("EquipmentInstanceId");
 
                     b.HasIndex("ItemInstanceId");
 
@@ -94,9 +89,6 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("AttributeType")
                         .HasColumnType("integer");
 
-                    b.Property<string>("EquipmentBaseId")
-                        .HasColumnType("text");
-
                     b.Property<string>("ItemBaseId")
                         .IsRequired()
                         .HasColumnType("text");
@@ -105,8 +97,6 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("EquipmentBaseId");
 
                     b.HasIndex("ItemBaseId");
 
@@ -1072,7 +1062,9 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasOne("Domain.Models.Items.Equipments.EquipmentInstance", null)
                         .WithMany("InstanceModifiers")
-                        .HasForeignKey("EquipmentInstanceId");
+                        .HasForeignKey("ItemInstanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Domain.Models.Items.ItemInstance", "ItemInstance")
                         .WithMany()
@@ -1087,7 +1079,9 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasOne("Domain.Models.Items.Equipments.EquipmentBase", null)
                         .WithMany("AttributeModifiers")
-                        .HasForeignKey("EquipmentBaseId");
+                        .HasForeignKey("ItemBaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Domain.Models.Items.ItemBase", "ItemBase")
                         .WithMany()

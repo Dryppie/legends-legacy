@@ -175,7 +175,6 @@ namespace Persistence.LL.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     ItemBaseId = table.Column<string>(type: "text", nullable: false),
-                    EquipmentBaseId = table.Column<string>(type: "text", nullable: true),
                     AttributeType = table.Column<int>(type: "integer", nullable: false),
                     Amount = table.Column<float>(type: "real", nullable: false),
                     ModifierType = table.Column<int>(type: "integer", nullable: false)
@@ -183,11 +182,6 @@ namespace Persistence.LL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ItemAttributeModifier", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ItemAttributeModifier_ItemBases_EquipmentBaseId",
-                        column: x => x.EquipmentBaseId,
-                        principalTable: "ItemBases",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_ItemAttributeModifier_ItemBases_ItemBaseId",
                         column: x => x.ItemBaseId,
@@ -276,7 +270,6 @@ namespace Persistence.LL.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     ItemInstanceId = table.Column<Guid>(type: "uuid", nullable: false),
-                    EquipmentInstanceId = table.Column<Guid>(type: "uuid", nullable: true),
                     AttributeType = table.Column<int>(type: "integer", nullable: false),
                     Amount = table.Column<float>(type: "real", nullable: false),
                     ModifierType = table.Column<int>(type: "integer", nullable: false)
@@ -284,11 +277,6 @@ namespace Persistence.LL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_InstanceAttributeModifier", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_InstanceAttributeModifier_ItemInstances_EquipmentInstanceId",
-                        column: x => x.EquipmentInstanceId,
-                        principalTable: "ItemInstances",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_InstanceAttributeModifier_ItemInstances_ItemInstanceId",
                         column: x => x.ItemInstanceId,
@@ -923,11 +911,6 @@ namespace Persistence.LL.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_InstanceAttributeModifier_EquipmentInstanceId",
-                table: "InstanceAttributeModifier",
-                column: "EquipmentInstanceId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_InstanceAttributeModifier_ItemInstanceId",
                 table: "InstanceAttributeModifier",
                 column: "ItemInstanceId");
@@ -936,11 +919,6 @@ namespace Persistence.LL.Migrations
                 name: "IX_InventoryItems_ItemInstanceId",
                 table: "InventoryItems",
                 column: "ItemInstanceId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ItemAttributeModifier_EquipmentBaseId",
-                table: "ItemAttributeModifier",
-                column: "EquipmentBaseId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ItemAttributeModifier_ItemBaseId",
