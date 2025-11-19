@@ -9,5 +9,6 @@ public enum EquipmentType
     Ring,
     OneHanded,
     TwoHanded,
-    OffHand
+    OffHand,
+    Tool
 }

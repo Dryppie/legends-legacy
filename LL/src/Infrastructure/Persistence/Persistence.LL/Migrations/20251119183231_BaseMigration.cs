@@ -85,6 +85,7 @@ namespace Persistence.LL.Migrations
                     AttackSpeed = table.Column<int>(type: "integer", nullable: true),
                     Magnitude = table.Column<int>(type: "integer", nullable: true),
                     MagnitudeRange = table.Column<int>(type: "integer", nullable: true),
+                    GatheringType = table.Column<int>(type: "integer", nullable: true),
                     ScalingAttribute = table.Column<int>(type: "integer", nullable: true),
                     ScalingAmount = table.Column<float>(type: "real", nullable: true),
                     EssenceId = table.Column<Guid>(type: "uuid", nullable: true)
@@ -304,6 +305,34 @@ namespace Persistence.LL.Migrations
                         name: "FK_MarketPlaceListings_ItemInstances_ItemInstanceId",
                         column: x => x.ItemInstanceId,
                         principalTable: "ItemInstances",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AreaGatheringNode",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    AreaId = table.Column<string>(type: "text", nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    LevelRequirement = table.Column<int>(type: "integer", nullable: true),
+                    ProcChance = table.Column<float>(type: "real", nullable: false),
+                    LootTableId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AreaGatheringNode", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AreaGatheringNode_Areas_AreaId",
+                        column: x => x.AreaId,
+                        principalTable: "Areas",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AreaGatheringNode_LootTableEntry_LootTableId",
+                        column: x => x.LootTableId,
+                        principalTable: "LootTableEntry",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -834,6 +863,16 @@ namespace Persistence.LL.Migrations
                 column: "CreatureId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AreaGatheringNode_AreaId",
+                table: "AreaGatheringNode",
+                column: "AreaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AreaGatheringNode_LootTableId",
+                table: "AreaGatheringNode",
+                column: "LootTableId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Areas_RegionId",
                 table: "Areas",
                 column: "RegionId");
@@ -984,6 +1023,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "AreaCreature");
+
+            migrationBuilder.DropTable(
+                name: "AreaGatheringNode");
 
             migrationBuilder.DropTable(
                 name: "ArenaTicketStatus");

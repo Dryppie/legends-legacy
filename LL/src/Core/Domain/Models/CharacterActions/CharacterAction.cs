@@ -13,7 +13,7 @@ public class CharacterAction
     {
         CombatActionDetails => CharacterActionType.Combat,
         CraftingActionDetails => CharacterActionType.Crafting,
-        GatheringActionDetails => CharacterActionType.Gathering,
+        //GatheringActionDetails => CharacterActionType.Gathering,
         _ => CharacterActionType.Idle
     };
 

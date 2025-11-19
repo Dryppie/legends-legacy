@@ -13,7 +13,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20251111200133_BaseMigration")]
+    [Migration("20251119183231_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -729,6 +729,36 @@ namespace Persistence.LL.Migrations
                     b.ToTable("AreaCreature");
                 });
 
+            modelBuilder.Entity("Domain.Models.Regions.Areas.AreaGatheringNode", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("AreaId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("LevelRequirement")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("LootTableId")
+                        .HasColumnType("uuid");
+
+                    b.Property<float>("ProcChance")
+                        .HasColumnType("real");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AreaId");
+
+                    b.HasIndex("LootTableId");
+
+                    b.ToTable("AreaGatheringNode");
+                });
+
             modelBuilder.Entity("Domain.Models.Regions.Region", b =>
                 {
                     b.Property<int>("Id")
@@ -974,6 +1004,9 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("EquipmentType")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("GatheringType")
                         .HasColumnType("integer");
 
                     b.Property<int>("Magnitude")
@@ -1386,6 +1419,25 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Domain.Models.Regions.Areas.AreaGatheringNode", b =>
+                {
+                    b.HasOne("Domain.Models.Regions.Areas.Area", "Area")
+                        .WithMany("GatheringNodes")
+                        .HasForeignKey("AreaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.LootTables.LootTable", "LootTable")
+                        .WithMany()
+                        .HasForeignKey("LootTableId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Area");
+
+                    b.Navigation("LootTable");
+                });
+
             modelBuilder.Entity("Domain.Models.Soulstones.CharacterSoulstoneUpgrade", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Characters.Character", "Character")
@@ -1535,6 +1587,8 @@ namespace Persistence.LL.Migrations
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>
                 {
                     b.Navigation("Creatures");
+
+                    b.Navigation("GatheringNodes");
                 });
 
             modelBuilder.Entity("Domain.Models.Regions.Region", b =>

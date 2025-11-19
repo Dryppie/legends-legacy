@@ -14,6 +14,10 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
+using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Slots;
+using Domain.Models.Professions.Gathering.GatheringNodes;
+using Domain.Models.Regions.Areas;
 using MediatR;
 using Services.LL.Extensions;
 using Services.LL.Interfaces;
@@ -29,8 +33,9 @@ public class CombatService : ICombatService
     private readonly IPublisher _publisher;
     private readonly ICombatContext _combatContext;
     private readonly IBonusService _bonusService;
+    private readonly IGatheringService _gatheringService;
 
-    public CombatService(IEntityService es, ICombatSetupService cps, ILevelingService lvlS, ILootService ls, ISpawningService ss, IPublisher p, ICombatContext cc, IBonusService bs)
+    public CombatService(IEntityService es, ICombatSetupService cps, ILevelingService lvlS, ILootService ls, ISpawningService ss, IPublisher p, ICombatContext cc, IBonusService bs, IGatheringService gs)
     {
         _entityService = es;
         _combatSetupService = cps;
@@ -40,6 +45,7 @@ public class CombatService : ICombatService
         _publisher = p;
         _combatContext = cc;
         _bonusService = bs;
+        _gatheringService = gs;
     }
 
     public async Task<CombatSession> PerformIdleCombatAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
@@ -123,6 +129,18 @@ public class CombatService : ICombatService
             AddToCombatSummary(combatSummary, lastCombatResult);
         }
 
+        // 🔹 NEW: try gathering after each win
+        if (combatSummary.Wins > 0)
+        {
+            var gatheringResult = await _gatheringService.PerformGatheringAsync(
+                characterAction.CharacterId,
+                GetGatheringNodeForCharacterTool(characterAction.CharacterId, playerCharacters, combatAction.Area),
+                combatSummary.Wins,
+                cancellationToken);
+
+            if (gatheringResult.GatheringSummary?.Loot.Count > 0)
+                totalLoot.AddRange(gatheringResult.GatheringSummary.Loot);
+        }
 
         // Create CombatEntities to keep track of simple data over each entity, such as id, health, mana
         lastCombatResult.PlayerTeam = _combatSetupService.CreateSimpleCombatEntities(combatPlayerEntities);
@@ -147,6 +165,23 @@ public class CombatService : ICombatService
         await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
 
         return combatSession;
+    }
+
+    private static AreaGatheringNode? GetGatheringNodeForCharacterTool(Guid characterId, List<Entity> playerTeam, Area area)
+    {
+        var character = playerTeam.FirstOrDefault(c => c.Id.Equals(characterId));
+        if (character == null) return null;
+
+        var equippedTool = character.EquipmentSlots.SingleOrDefault(es => es.EquipmentSlotType.Equals(EquipmentSlotType.Tool))?.EquipmentInstance;
+        if (equippedTool == null) return null;
+
+        var toolBase = equippedTool.EquipmentBase;
+
+        if (toolBase.EquipmentType != EquipmentType.Tool || toolBase.GatheringType == null) return null;
+
+        var skill = toolBase.GatheringType.Value;
+
+        return area.GatheringNodes.SingleOrDefault(gn => gn.Type.Equals(skill));
     }
 
     private async Task<int> ProcessSoulstoneDrops(Guid characterId, int durationInSeconds, double dropRate, double doubleDropChance, CancellationToken cancellationToken)

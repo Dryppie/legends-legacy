@@ -9,4 +9,8 @@ public class Area
     /// Chance of spawning n. of creatures 
     /// </summary>
     public List<float> SpawnProbabilities { get; set; } = [];
+    /// <summary>
+    /// Gathering nodes available in this area (0..1 per GatheringSkill).
+    /// </summary>
+    public ICollection<AreaGatheringNode> GatheringNodes { get; set; } = [];
 }

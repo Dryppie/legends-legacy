@@ -8,5 +8,6 @@ public enum EquipmentSlotType
     Legs,
     Ring,
     MainHand,
-    OffHand
+    OffHand,
+    Tool
 }

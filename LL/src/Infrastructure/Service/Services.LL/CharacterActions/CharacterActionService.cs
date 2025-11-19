@@ -74,9 +74,9 @@ public class CharacterActionService : ICharacterActionService
 
         switch (characterAction.CharacterActionType)
         {
-            case CharacterActionType.Gathering:
-                characterAction.GatheringSession = await HandleGatheringActionAsync(characterAction, now, cancellationToken);
-                break;
+            //case CharacterActionType.Gathering:
+            //    characterAction.GatheringSession = await HandleGatheringActionAsync(characterAction, now, cancellationToken);
+            //    break;
 
             case CharacterActionType.Combat:
                 characterAction.CombatSession = await HandleCombatActionAsync(characterAction, now, cancellationToken);
@@ -102,14 +102,14 @@ public class CharacterActionService : ICharacterActionService
         return characterAction;
     }
 
-    private async Task<GatheringSession?> HandleGatheringActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
-    {
-        int actionsToPerform = characterAction.UpdatedAt.NumberOfXSecondsIntervals(now, 6);
+    //private async Task<GatheringSession?> HandleGatheringActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
+    //{
+    //    int actionsToPerform = characterAction.UpdatedAt.NumberOfXSecondsIntervals(now, 6);
 
-        if (actionsToPerform == 0) return null;
+    //    if (actionsToPerform == 0) return null;
 
-        return await _gatheringService.PerformGatheringAsync(characterAction, actionsToPerform, cancellationToken);
-    }
+    //    return await _gatheringService.PerformGatheringAsync(characterAction, actionsToPerform, cancellationToken);
+    //}
 
     private async Task<CombatSession> HandleCombatActionAsync(CharacterAction characterAction, DateTimeOffset now, CancellationToken cancellationToken)
     {

@@ -3,10 +3,11 @@ using Application.Interfaces.Services.LL.Professions;
 using Application.UseCases.Inventories.Events;
 using Application.UseCases.Soulstones.Events;
 using Domain.Models.Bonuses;
-using Domain.Models.CharacterActions;
-using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Inventories;
+using Domain.Models.Professions;
+using Domain.Models.Professions.Gathering.GatheringNodes;
+using Domain.Models.Regions.Areas;
 using MediatR;
 using Services.LL.Extensions;
 using Services.LL.Interfaces;
@@ -32,24 +33,31 @@ public class GatheringService : IGatheringService
         _bonusService = bs;
     }
 
-    public async Task<GatheringSession> PerformGatheringAsync(CharacterAction characterAction, int actionsToPerform, CancellationToken cancellationToken)
+    public async Task<GatheringSession> PerformGatheringAsync(Guid characterId, AreaGatheringNode? areaGatheringNode, int actionsToPerform, CancellationToken cancellationToken)
     {
+        var gatheringSession = new GatheringSession();
+        if (areaGatheringNode == null) return gatheringSession;
         var now = DateTimeOffset.UtcNow;
         var rng = Random.Shared;
-        var startedAt = characterAction.UpdatedAt;
+        //var startedAt = areaGatheringNode.UpdatedAt;
 
-        characterAction.UpdatedAt += TimeSpan.FromSeconds(6 * actionsToPerform);
-        var actionDetails = (characterAction.ActionDetails as GatheringActionDetails)!;
+        //characterAction.UpdatedAt += TimeSpan.FromSeconds(6 * actionsToPerform);
+        //var actionDetails = (areaGatheringNode.ActionDetails as GatheringActionDetails)!;
 
         // Find the kind of gathering the player does, check their levels, proceed to generate loot
         var totalLoot = new List<InventoryItem>();
-        var lootTable = await _lootTableService.GetLootTableByIdAsync(actionDetails.LootTableId, cancellationToken);
+        var lootTable = await _lootTableService.GetLootTableByIdAsync(areaGatheringNode.LootTable.Id, cancellationToken);
         var gatheringSummary = new GatheringSummary()
         {
-            ProfessionType = actionDetails.ProfessionType,
+            ProfessionType = areaGatheringNode.Type switch {
+            GatheringType.Woodcutting => ProfessionType.Woodcutting,
+            GatheringType.Mining => ProfessionType.Mining,
+            //GatheringType.Fishing => ProfessionType.Fishing,
+            _ => ProfessionType.None,
+            },
         };
 
-        var factors = await _bonusService.GetAggregatedAsync(characterAction.CharacterId, now, cancellationToken);
+        var factors = await _bonusService.GetAggregatedAsync(characterId, now, cancellationToken);
 
         // Find other necessary data to generate loot
         // World buffs, personal buffs, and so on
@@ -88,16 +96,12 @@ public class GatheringService : IGatheringService
             .ToList();
 
 
-        gatheringSummary.TotalSoulstones = await ProcessSoulstoneDrops(characterAction.CharacterId, actionsToPerform, soulstoneDropRate, soulstoneDoubleDropChance, cancellationToken);
-        await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
-        await UpdateCharacterProfessionsAsync(characterAction.CharacterId, gatheringSummary, cancellationToken);
+        //gatheringSummary.TotalSoulstones = await ProcessSoulstoneDrops(characterAction.CharacterId, actionsToPerform, soulstoneDropRate, soulstoneDoubleDropChance, cancellationToken);
+        //await ProcessLootAsync(characterAction.CharacterId, totalLoot, cancellationToken);
+        await UpdateCharacterProfessionsAsync(characterId, gatheringSummary, cancellationToken);
 
-        var gatheringSession = new GatheringSession()
-        {
-            From = startedAt,
-            To = now,
-            GatheringSummary = gatheringSummary,
-        };
+        gatheringSession.GatheringSummary = gatheringSummary;
+
         return gatheringSession;
     }
 

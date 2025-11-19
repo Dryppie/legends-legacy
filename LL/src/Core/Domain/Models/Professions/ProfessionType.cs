@@ -1,6 +1,8 @@
 ﻿namespace Domain.Models.Professions;
 public enum ProfessionType
 {
+    None,
+
     // Crafting
     ArmorForging,
     JewelryCrafting,
