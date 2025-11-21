@@ -95,6 +95,11 @@ export class EquipmentOverviewComponent implements OnInit {
         iconPath: 'empty_offhand',
         equipmentSlotType: EquipmentSlotType.OffHand,
       },
+      {
+        id: '',
+        iconPath: 'empty_tool',
+        equipmentSlotType: EquipmentSlotType.Tool,
+      },
     ];
   }
 }

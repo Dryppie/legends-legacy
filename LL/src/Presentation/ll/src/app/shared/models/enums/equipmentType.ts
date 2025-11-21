@@ -8,4 +8,5 @@ export enum EquipmentType {
   TwoHanded = 'TwoHanded',
   OneHanded = 'OneHanded',
   OffHand = 'OffHand',
+  Tool = 'Tool',
 }
