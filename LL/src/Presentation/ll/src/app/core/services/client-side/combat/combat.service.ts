@@ -84,7 +84,8 @@ export class CombatService {
     this.combatStateService.setEntityStats(type, combatAction.entityStats);
 
     const combatDurationMs = combatAction.duration * 100;
-    const remainingDuration = combatStartTime + combatDurationMs + 3000 - now;
+    const remainingDuration =
+      combatStartTime + 10000 /* combatDurationMs + 3000 */ - now;
 
     const onComplete = (finalResult: CombatResultDto) => {
       // Defensive: skip execution if combat was deactivated

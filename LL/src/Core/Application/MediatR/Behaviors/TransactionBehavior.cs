@@ -4,7 +4,6 @@ using Application.MediatR.Markers;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Threading;
 
 namespace Application.MediatR.Behaviors;
 public sealed class TransactionBehavior<TRequest, TResponse>

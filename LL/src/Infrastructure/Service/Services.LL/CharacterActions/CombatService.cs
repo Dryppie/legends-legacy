@@ -95,12 +95,12 @@ public class CombatService : ICombatService
             lastCombatResult = _combatContext.InstantiateAndRunCombat(combatPlayerEntities, selectedCombatEnemyEntities);
 
             // StartedAt is 2 second after the action is initialized, so as to have a 'combat starting' screen
-            lastCombatResult.StartedAt = characterAction.UpdatedAt.AddSeconds(2);
+            lastCombatResult.StartedAt = characterAction.UpdatedAt;
 
             // Update the UpdatedAt timestamp based on combat duration
             // And add 5 seconds to have a delay of 2 seconds before and 3 (5-2) seconds after the fight
             // To display the victory/defeat screen before a new fight is initialized
-            characterAction.UpdatedAt += TimeSpan.FromSeconds(lastCombatResult.Duration * 0.1 + 5);
+            characterAction.UpdatedAt += TimeSpan.FromSeconds(10); // TimeSpan.FromSeconds(lastCombatResult.Duration * 0.1 + 5);
 
             // Reset entities when combat is over
             // Also process loot, since it's fight that should have already happened

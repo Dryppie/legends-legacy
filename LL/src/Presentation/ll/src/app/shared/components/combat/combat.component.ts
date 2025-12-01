@@ -105,16 +105,16 @@ export class CombatComponent implements OnInit {
     });
 
     /** Handle combat event stream */
-    effect(() => {
-      const allEvents = this.combatStateService.getCombatEvents(
-        this.battleType,
-      )();
-      const previousLength = this.lastEventsLength;
-      const newEvents = allEvents.slice(previousLength);
-      this.lastEventsLength = allEvents.length;
+    // effect(() => {
+    //   const allEvents = this.combatStateService.getCombatEvents(
+    //     this.battleType,
+    //   )();
+    //   const previousLength = this.lastEventsLength;
+    //   const newEvents = allEvents.slice(previousLength);
+    //   this.lastEventsLength = allEvents.length;
 
-      newEvents.forEach((event) => this.handleCombatEvent(event));
-    });
+    //   newEvents.forEach((event) => this.handleCombatEvent(event));
+    // });
 
     /** Handle next combat tick */
     effect(() => {
