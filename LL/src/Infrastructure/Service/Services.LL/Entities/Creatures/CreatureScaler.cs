@@ -35,7 +35,7 @@ public class CreatureScaler : ICreatureScaler
 
         foreach (var kvp in MonsterBaseStats.Baseline)
         {
-            creature.BaseAttributesDict[kvp.Key] = kvp.Value;
+            creature.BaseAttributesDict[kvp.Key] = (int)kvp.Value;
         }
     }
 
@@ -132,7 +132,7 @@ public class CreatureScaler : ICreatureScaler
                     break;
             }
 
-            creature.BaseAttributesDict[type] = scaled;
+            creature.BaseAttributesDict[type] = (int)scaled;
         }
     }
 
@@ -287,7 +287,7 @@ public class CreatureScaler : ICreatureScaler
             if (o.Additive.HasValue)
                 val += o.Additive.Value;
 
-            creature.BaseAttributesDict[o.AttributeType] = val;
+            creature.BaseAttributesDict[o.AttributeType] = (int)val;
         }
     }
 
@@ -336,6 +336,6 @@ public class CreatureScaler : ICreatureScaler
         if (!c.BaseAttributesDict.TryGetValue(type, out var value))
             return;
 
-        c.BaseAttributesDict[type] = value * factor;
+        c.BaseAttributesDict[type] = (int)(value * factor);
     }
 }

@@ -9,10 +9,10 @@ public sealed class EncounterDefinition
 
     public string Name { get; init; } = default!;
     public int DifficultyRating { get; init; }            // arbitrary scale for balancing
-    public IReadOnlyList<string> MonsterIds { get; init; } = Array.Empty<string>();
+    public List<string> MonsterIds { get; init; } = [];
 
     // Optional: per-encounter modifiers (e.g. “boss reflects crits”)
-    public IReadOnlyList<DungeonModifierDefinition> Modifiers { get; init; } = Array.Empty<DungeonModifierDefinition>();
+    public List<DungeonModifierDefinition> Modifiers { get; init; } = [];
 
-    public LootTableDefinition Loot { get; init; } = new();
+    //public LootTableDefinition Loot { get; init; } = new();
 }

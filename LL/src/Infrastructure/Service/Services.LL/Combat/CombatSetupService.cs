@@ -36,14 +36,15 @@ public class CombatSetupService : ICombatSetupService
             if (entity is Creature creature)
             {
                 _creatureScaler.ApplyScaling(creature, area);
-                creature.BaseAttributes = creature.BaseAttributesDict
+                var combatEntity = new CombatEntity(creature)
+                {
+                    BaseAttributes = [.. creature.BaseAttributesDict
                     .Select(kv => new EntityAttribute
                     {
                         AttributeType = kv.Key,
                         Value = kv.Value
-                    })
-                    .ToList();
-                var combatEntity = new CombatEntity(creature);
+                    })]
+                };
                 combatEntities.Add(combatEntity);
             }
         }

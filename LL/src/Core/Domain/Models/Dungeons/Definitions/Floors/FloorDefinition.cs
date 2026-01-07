@@ -1,4 +1,6 @@
-﻿namespace Domain.Models.Dungeons.Definitions.Floors;
+﻿using Domain.Models.Dungeons.Definitions.Modifiers;
+
+namespace Domain.Models.Dungeons.Definitions.Floors;
 
 public sealed class FloorDefinition
 {
@@ -10,5 +12,5 @@ public sealed class FloorDefinition
     public int MaxEncounters { get; init; }
 
     // Optional: additional modifiers that start on entering this floor
-    public IReadOnlyList<DungeonModifierDefinition> Modifiers { get; init; } = Array.Empty<DungeonModifierDefinition>();
+    public List<DungeonModifierDefinition> Modifiers { get; init; } = [];
 }

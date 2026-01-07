@@ -11,6 +11,8 @@ public class Creature : Entity
     public DamageProfile DamageProfile { get; set; } = DamageProfile.Hybrid;
     public DefenseProfile DefenseProfile { get; set; } = DefenseProfile.Balanced;
     [NotMapped]
+    public new List<EntityAttribute> BaseAttributes { get; set; } = [];
+    [NotMapped]
     public Dictionary<AttributeType, float> BaseAttributesDict { get; set; } = [];
     public Guid LootTableId { get; set; }
     public LootTable LootTable { get; set; } = null!;
