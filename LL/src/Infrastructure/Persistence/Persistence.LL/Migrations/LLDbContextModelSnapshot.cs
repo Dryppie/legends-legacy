@@ -208,6 +208,31 @@ namespace Persistence.LL.Migrations
                     b.ToTable("ColosseumMatches");
                 });
 
+            modelBuilder.Entity("Domain.Models.Entities.Creatures.Templates.StatOverride", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<float?>("Additive")
+                        .HasColumnType("real");
+
+                    b.Property<int>("AttributeType")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("CreatureId")
+                        .HasColumnType("uuid");
+
+                    b.Property<float?>("Multiplier")
+                        .HasColumnType("real");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatureId");
+
+                    b.ToTable("StatOverride");
+                });
+
             modelBuilder.Entity("Domain.Models.Entities.Entity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -687,6 +712,9 @@ namespace Persistence.LL.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("text");
 
+                    b.Property<int>("DifficultyTier")
+                        .HasColumnType("integer");
+
                     b.Property<int>("LevelRequirement")
                         .HasColumnType("integer");
 
@@ -975,11 +1003,26 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Entities.Entity");
 
+                    b.Property<int>("Archetype")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("BaseLevel")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DamageProfile")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DefenseProfile")
+                        .HasColumnType("integer");
+
                     b.Property<int>("ExperienceReward")
                         .HasColumnType("integer");
 
                     b.Property<Guid>("LootTableId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("Tier")
+                        .HasColumnType("integer");
 
                     b.HasIndex("LootTableId");
 
@@ -1163,6 +1206,13 @@ namespace Persistence.LL.Migrations
                         .HasForeignKey("CharacterBId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.Creatures.Templates.StatOverride", b =>
+                {
+                    b.HasOne("Domain.Models.Entities.Creatures.Creature", null)
+                        .WithMany("StatOverrides")
+                        .HasForeignKey("CreatureId");
                 });
 
             modelBuilder.Entity("Domain.Models.Essences.EssenceSlots.EssenceSlot", b =>
@@ -1622,6 +1672,11 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
 
                     b.Navigation("Professions");
+                });
+
+            modelBuilder.Entity("Domain.Models.Entities.Creatures.Creature", b =>
+                {
+                    b.Navigation("StatOverrides");
                 });
 
             modelBuilder.Entity("Domain.Models.Items.Equipments.EquipmentBase", b =>

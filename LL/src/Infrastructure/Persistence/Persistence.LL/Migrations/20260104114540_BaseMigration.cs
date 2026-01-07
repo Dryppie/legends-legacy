@@ -108,6 +108,7 @@ namespace Persistence.LL.Migrations
                     Id = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     LevelRequirement = table.Column<int>(type: "integer", nullable: false),
+                    DifficultyTier = table.Column<int>(type: "integer", nullable: false),
                     SpawnProbabilities = table.Column<List<float>>(type: "real[]", nullable: false),
                     RegionId = table.Column<int>(type: "integer", nullable: true)
                 },
@@ -351,7 +352,12 @@ namespace Persistence.LL.Migrations
                     Cinders = table.Column<long>(type: "bigint", nullable: true),
                     Soulstones = table.Column<long>(type: "bigint", nullable: true),
                     ArenaRating = table.Column<int>(type: "integer", nullable: true),
+                    Archetype = table.Column<int>(type: "integer", nullable: true),
+                    DamageProfile = table.Column<int>(type: "integer", nullable: true),
+                    DefenseProfile = table.Column<int>(type: "integer", nullable: true),
                     LootTableId = table.Column<Guid>(type: "uuid", nullable: true),
+                    BaseLevel = table.Column<int>(type: "integer", nullable: true),
+                    Tier = table.Column<int>(type: "integer", nullable: true),
                     ExperienceReward = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
@@ -661,6 +667,26 @@ namespace Persistence.LL.Migrations
                         principalTable: "Entities",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "StatOverride",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    AttributeType = table.Column<int>(type: "integer", nullable: false),
+                    Multiplier = table.Column<float>(type: "real", nullable: true),
+                    Additive = table.Column<float>(type: "real", nullable: true),
+                    CreatureId = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StatOverride", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_StatOverride_Entities_CreatureId",
+                        column: x => x.CreatureId,
+                        principalTable: "Entities",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -1013,6 +1039,11 @@ namespace Persistence.LL.Migrations
                 name: "IX_RefreshTokens_TokenHash",
                 table: "RefreshTokens",
                 column: "TokenHash");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StatOverride_CreatureId",
+                table: "StatOverride",
+                column: "CreatureId");
         }
 
         /// <inheritdoc />
@@ -1086,6 +1117,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "RefreshTokens");
+
+            migrationBuilder.DropTable(
+                name: "StatOverride");
 
             migrationBuilder.DropTable(
                 name: "ActionDetails");

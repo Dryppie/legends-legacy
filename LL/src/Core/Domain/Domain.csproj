@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Models\Dungeons\Definitions\NewFolder\" />
     <Folder Include="Models\Items\Equipments\EquipmentBehaviors\" />
     <Folder Include="Models\Masteries\" />
     <Folder Include="Models\Regions\Dungeons\" />

@@ -41,8 +41,8 @@ public class ColosseumService : IColosseumService
         var enemyTeam = await _entityService.GetEntitiesByIdsForCombatAsync([enemyId], cancellationToken);
         if (enemyTeam.Count == 0) return null;
 
-        var combatPlayerEntities = _combatSetupService.CreateCombatEntities(playerTeam);
-        var combatEnemyEntities = _combatSetupService.CreateCombatEntities(enemyTeam);
+        var combatPlayerEntities = _combatSetupService.CreatePlayerCombatEntities(playerTeam);
+        var combatEnemyEntities = _combatSetupService.CreatePlayerCombatEntities(enemyTeam);
         await _combatSetupService.PrepareEntitiesForCombat([.. combatPlayerEntities, .. combatEnemyEntities]);
 
         var combatResult = _combatContext.InstantiateAndRunCombat(combatPlayerEntities, combatEnemyEntities);

@@ -58,6 +58,7 @@ public static class DependencyInjection
         services.AddScoped<ICharacterActionService, CharacterActionService>();
         services.AddScoped<IActionDetailsService, ActionDetailsService>();
         services.AddScoped<ICreatureService, CreatureService>();
+        services.AddScoped<ICreatureScaler, CreatureScaler>();
 
         services.AddScoped<IBonusService, BonusService>();
         services.AddScoped<IBonusProvider, SoulstoneBonusProvider>();

@@ -3,11 +3,34 @@ using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
 using Domain.Models.Entities;
-using Domain.Models.Items.Equipments;
 
 namespace Domain.Components.Attributes;
 public static class AttributeCalculator
 {
+    /// <summary>
+    /// This is used on Creatures
+    /// </summary>
+    /// <param name="entity"></param>
+    public static void InitializeCombatAttributesFromBase(CombatEntity entity)
+    {
+        entity.CombatAttributes.Clear();
+
+        foreach (var (attributeType, baseValue) in entity.BaseCombatAttributes)
+        {
+            var calculatedValue = GetCombatAttributeValue(entity, attributeType, baseValue);
+
+            // Apply MaxHealth/MaxMana syncing rules
+            MaxHealthOrMaxMana(entity, attributeType, calculatedValue);
+
+            if (!entity.CombatAttributes.TryAdd(attributeType, calculatedValue))
+            {
+                entity.CombatAttributes[attributeType] = calculatedValue;
+            }
+
+            HealthOrMana(entity, attributeType);
+        }
+    }
+
     /// <summary>
     /// This is used to get an overview of the entity's attributes after applying equipment, essences, etc.
     /// </summary>
@@ -40,7 +63,7 @@ public static class AttributeCalculator
         entity.BaseCombatAttributes[AttributeType.Mana] = entity.BaseCombatAttributes[AttributeType.MaxMana];
     }
 
-    // Calculates all combat attributes for a given entity
+    // Calculates all combat attributes for a given entity - used to initialize players before combat
     public static void CalculateBaseCombatAttributes(CombatEntity entity)
     {
         entity.BaseCombatAttributes.Clear();
@@ -74,7 +97,7 @@ public static class AttributeCalculator
         {
             var calculatedValue = GetCombatAttributeValue(entity, attributeType, attributeValue);
 
-            entity.CombatAttributes.TryAdd(attributeType, attributeValue);
+            entity.CombatAttributes.TryAdd(attributeType, calculatedValue);
         }
     }
 

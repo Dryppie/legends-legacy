@@ -16,7 +16,6 @@ using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
-using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Regions.Areas;
 using MediatR;
 using Services.LL.Extensions;
@@ -71,8 +70,8 @@ public class CombatService : ICombatService
         var playerCharacters = await GetEntitiesAsync([.. combatAction.CharacterTeam], cancellationToken);
         var allEnemyCharacters = await GetEntitiesAsync([.. combatAction.Area.Creatures.Select(c => c.CreatureId)], cancellationToken);
 
-        var combatPlayerEntities = _combatSetupService.CreateCombatEntities(playerCharacters);
-        var allCombatEnemyEntities = _combatSetupService.CreateCombatEntities(allEnemyCharacters);
+        var combatPlayerEntities = _combatSetupService.CreatePlayerCombatEntities(playerCharacters);
+        var allCombatEnemyEntities = _combatSetupService.CreateCreatureCombatEntities(allEnemyCharacters, combatAction.Area);
         var creatureKills = new Dictionary<Guid, int>();
         var baseCinderValues = new Dictionary<Guid, int>();
         foreach (var creature in allEnemyCharacters.OfType<Creature>())
@@ -82,6 +81,7 @@ public class CombatService : ICombatService
         }
         // Prepare entities for combat
         await _combatSetupService.PrepareEntitiesForCombat([.. combatPlayerEntities, .. allCombatEnemyEntities]);
+
 
         while (characterAction.UpdatedAt < now)
         {

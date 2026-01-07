@@ -12,6 +12,7 @@ import { CombatEvent, EventType } from '../../models/Dtos/combatEventDto';
 import { NgFor, NgIf, NgStyle } from '@angular/common';
 import {
   BattleOutcome,
+  CombatResultDto,
   EntityStats,
   SimpleCombatEntityDto,
 } from '../../models/Dtos/combatResultDto';
@@ -105,16 +106,16 @@ export class CombatComponent implements OnInit {
     });
 
     /** Handle combat event stream */
-    // effect(() => {
-    //   const allEvents = this.combatStateService.getCombatEvents(
-    //     this.battleType,
-    //   )();
-    //   const previousLength = this.lastEventsLength;
-    //   const newEvents = allEvents.slice(previousLength);
-    //   this.lastEventsLength = allEvents.length;
+    effect(() => {
+      const allEvents = this.combatStateService.getCombatEvents(
+        this.battleType,
+      )();
+      const previousLength = this.lastEventsLength;
+      const newEvents = allEvents.slice(previousLength);
+      this.lastEventsLength = allEvents.length;
 
-    //   newEvents.forEach((event) => this.handleCombatEvent(event));
-    // });
+      newEvents.forEach((event) => this.handleCombatEvent(event));
+    });
 
     /** Handle next combat tick */
     effect(() => {
@@ -127,8 +128,11 @@ export class CombatComponent implements OnInit {
     effect(() => {
       const result = this.combatStateService.getCombatResult(this.battleType)();
       if (result) {
+        console.log('testing result');
         this.displayCombat = true;
         this.setupCombat();
+
+        this.syncCharactersFromResult(result);
       }
     });
 
@@ -146,6 +150,14 @@ export class CombatComponent implements OnInit {
         }, 3000);
       }
     });
+  }
+
+  private syncCharactersFromResult(result: CombatResultDto) {
+    // Update all player team members
+    result.playerTeam.forEach((entity) => this.updateCharacter(entity));
+
+    // Update all enemy team members
+    result.enemyTeam.forEach((entity) => this.updateCharacter(entity));
   }
 
   ngOnInit(): void {
@@ -476,7 +488,5 @@ export class CombatComponent implements OnInit {
       if (allExist) return;
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
-
-    console.warn('Tour elements not found after waiting.');
   }
 }

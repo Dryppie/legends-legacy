@@ -1,6 +1,7 @@
 ﻿using Domain.Helpers;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Creatures;
+using Domain.Models.Entities.Creatures.Templates.Enums;
 using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Items;
@@ -1222,9 +1223,9 @@ public static class SeedCreatures
         var lumoRuinsCreatures = new List<Creature>
         {
             new() { Id = goblinId, Name = "Goblin", ImagePath = "goblin", LootTableId = goblinLootTable.Id, EssenceSlots = [goblinEssenceSlot], ExperienceReward = 4 },
-            new() { Id = goblinWarriorId, Name = "Goblin Warrior", ImagePath = "goblin_warrior", LootTableId = goblinWarriorLootTable.Id, EssenceSlots = [goblinWarriorEssenceSlot], ExperienceReward = 6 },
-            new() { Id = goblinArcherId, Name = "Goblin Archer", ImagePath = "goblin_archer", LootTableId = goblinArcherLootTable.Id, EssenceSlots = [goblinArcherEssenceSlot], ExperienceReward = 5 },
-            new() { Id = largeRatId, Name = "Large Rat", ImagePath = "large_rat", LootTableId = largeRatLootTable.Id, EssenceSlots = [largeRatEssenceSlot], ExperienceReward = 5 }
+            new() { Id = goblinWarriorId, Name = "Goblin Warrior", ImagePath = "goblin_warrior", LootTableId = goblinWarriorLootTable.Id, EssenceSlots = [goblinWarriorEssenceSlot], ExperienceReward = 6, Archetype = CreatureArchetype.Bruiser },
+            new() { Id = goblinArcherId, Name = "Goblin Archer", ImagePath = "goblin_archer", LootTableId = goblinArcherLootTable.Id, EssenceSlots = [goblinArcherEssenceSlot], ExperienceReward = 5, Archetype = CreatureArchetype.DPS },
+            new() { Id = largeRatId, Name = "Large Rat", ImagePath = "large_rat", LootTableId = largeRatLootTable.Id, EssenceSlots = [largeRatEssenceSlot], ExperienceReward = 5, Archetype = CreatureArchetype.Tank }
         };
 
         var bloodGroveCreatures = new List<Creature>
@@ -1354,41 +1355,41 @@ public static class SeedCreatures
             new AreaCreature() { AreaId = forgottenRuinsAreaId, CreatureId = skeletonWarriorId, WeightedSpawnRate = 0.15f },
         };
 
-        // Create attributes
-        var attributes = new List<EntityAttribute>();
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(goblinId, -0.5f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(goblinWarriorId, -0.1f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(goblinArcherId, -0.2f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(largeRatId, -0.7f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(flameImpId, 0.3f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(frostImpId, 0.6f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(shadowImpId, 0.4f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(vampireBatId, 0.9f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(blueSlimeId, 1.5f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(brownSlimeId, 1.2f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(greenSlimeId, 1.1f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(rainbowSlimeId, 1.4f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(redSlimeId, 1.3f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(transparentSlimeId, 1.4f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(enchantedFairyId, 1.6f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(gladePantherId, 1.8f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(illusionFoxId, 1.8f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(nightshadeBlossomId, 2f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(pixieId, 1.4f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(hobgoblinId, 4f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(mossLizardId, 2.1f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(spiderId, 1.9f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(treantSaplingId, 2f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(venomousSnakeId, 1.9f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(viperId, 1.7f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(feralGhoulId, 2.4f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(plagueGhoulId, 2.3f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(ravenousGhoulId, 2.7f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(skeletonArcherId, 2.8f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(skeletonMageId, 2.9f));
-        attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(skeletonWarriorId, 2.6f));
+        //// Create attributes
+        //var attributes = new List<EntityAttribute>();
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(goblinId, -0.5f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(goblinWarriorId, -0.1f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(goblinArcherId, -0.2f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(largeRatId, -0.7f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(flameImpId, 0.3f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(frostImpId, 0.6f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(shadowImpId, 0.4f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(vampireBatId, 0.9f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(blueSlimeId, 1.5f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(brownSlimeId, 1.2f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(greenSlimeId, 1.1f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(rainbowSlimeId, 1.4f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(redSlimeId, 1.3f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(transparentSlimeId, 1.4f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(enchantedFairyId, 1.6f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(gladePantherId, 1.8f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(illusionFoxId, 1.8f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(nightshadeBlossomId, 2f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(pixieId, 1.4f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(hobgoblinId, 4f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(mossLizardId, 2.1f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(spiderId, 1.9f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(treantSaplingId, 2f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(venomousSnakeId, 1.9f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(viperId, 1.7f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(feralGhoulId, 2.4f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(plagueGhoulId, 2.3f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(ravenousGhoulId, 2.7f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(skeletonArcherId, 2.8f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(skeletonMageId, 2.9f));
+        //attributes.AddRange(EntityBaseAttributeHelper.CreateEntityAttributesWithIncrease(skeletonWarriorId, 2.6f));
 
-        await context.EntityAttributes.AddRangeAsync(attributes);
+        //await context.EntityAttributes.AddRangeAsync(attributes);
 
         if (!context.Regions.Any())
         {
