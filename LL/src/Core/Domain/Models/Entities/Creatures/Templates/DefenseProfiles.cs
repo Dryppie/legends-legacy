@@ -13,14 +13,14 @@ public static class DefenseProfiles
     {
         Type = DefenseProfile.PhysicalTank,
         PhysicalDefenseBias = 1.5f,
-        MagicalDefenseBias = 0.9f,
+        MagicalDefenseBias = 0.5f,
         ResistBias = 1.0f
     };
 
     public static readonly DefenseProfileConfig MagicalTank = new()
     {
         Type = DefenseProfile.MagicalTank,
-        PhysicalDefenseBias = 0.9f,
+        PhysicalDefenseBias = 0.5f,
         MagicalDefenseBias = 1.5f,
         ResistBias = 1.2f
     };

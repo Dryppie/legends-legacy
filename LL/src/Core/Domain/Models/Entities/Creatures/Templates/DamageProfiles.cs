@@ -7,7 +7,7 @@ public static class DamageProfiles
     public static readonly DamageProfileConfig Physical = new()
     {
         Type = DamageProfile.Physical,
-        PhysicalBias = 1.4f,
+        PhysicalBias = 1.2f,
         MagicalBias = 0.3f,
         CritBias = 1.0f,
         PenBias = 1.2f,
@@ -17,7 +17,7 @@ public static class DamageProfiles
     {
         Type = DamageProfile.Magical,
         PhysicalBias = 0.3f,
-        MagicalBias = 1.4f,
+        MagicalBias = 1.2f,
         CritBias = 1.0f,
         PenBias = 1.2f,
     };
