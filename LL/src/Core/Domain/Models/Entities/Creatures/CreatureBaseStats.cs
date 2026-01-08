@@ -17,7 +17,7 @@ public static class MonsterBaseStats
 
     public const float BaseAttackPower = 10f;
     public const float BaseSpellPower = 10f;
-    public const float BaseAttackSpeed = 1.0f; // your internal unit
+    public const float BaseAttackSpeed = 10.0f; // your internal unit
     public const float BaseAccuracy = 0.90f;
     public const float BaseCritChance = 0.05f;
     public const float BaseCritDamage = 1.5f;

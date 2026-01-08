@@ -8,9 +8,9 @@ public static class Archetypes
     {
         Archetype = CreatureArchetype.Tank,
         HealthMultiplier = 1.6f,
-        DamageMultiplier = 0.8f,
+        DamageMultiplier = 0.6f,
         DefenseMultiplier = 1.4f,
-        SpeedMultiplier = 0.9f
+        SpeedMultiplier = 0.8f
     };
 
     public static readonly ArchetypeProfile Bruiser = new()

@@ -1,6 +1,4 @@
-﻿using Domain.Helpers;
-using Domain.Models.Attributes;
-using Domain.Models.Entities.Creatures;
+﻿using Domain.Models.Entities.Creatures;
 using Domain.Models.Entities.Creatures.Templates.Enums;
 using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
@@ -1401,12 +1399,13 @@ public static class SeedCreatures
                     Name = "Lumo Ruins",
                     LevelRequirement = 1,
                     Creatures = lumoRuinsAreaCreatures,
-                    SpawnProbabilities = new List<float>
-                    {
+                    SpawnProbabilities =
+                    [
                         0.969f,
                         0.03f,
                         0.001f,
-                    }
+                    ],
+                    DifficultyTier = 1,
                 },
                 new Area
                 {
@@ -1414,12 +1413,13 @@ public static class SeedCreatures
                     Name = "Blood Grove",
                     LevelRequirement = 5,
                     Creatures = bloodGroveAreaCreatures,
-                    SpawnProbabilities = new List<float>
-                    {
+                    SpawnProbabilities =
+                    [
                         0.03f,
                         0.969f,
                         0.001f,
-                    }
+                    ],
+                    DifficultyTier = 2,
                 },
                 new Area
                 {
@@ -1427,12 +1427,13 @@ public static class SeedCreatures
                     Name = "Crystal Creek",
                     LevelRequirement = 10,
                     Creatures = crystalCreekAreaCreatures,
-                    SpawnProbabilities = new List<float>
-                    {
+                    SpawnProbabilities =
+                    [
                         0.03f,
                         0.969f,
                         0.001f,
-                    }
+                    ],
+                    DifficultyTier = 3,
                 },
                 new Area
                 {
@@ -1440,12 +1441,13 @@ public static class SeedCreatures
                     Name = "Twilight Clearing",
                     LevelRequirement = 15,
                     Creatures = twilightClearingAreaCreatures,
-                    SpawnProbabilities = new List<float>
-                    {
+                    SpawnProbabilities =
+                    [
                         0.03f,
                         0.969f,
                         0.001f,
-                    }
+                    ],
+                    DifficultyTier = 4,
                 },
                 new Area
                 {
@@ -1453,10 +1455,11 @@ public static class SeedCreatures
                     Name = "Goblin Mines",
                     LevelRequirement = 20,
                     Creatures = goblinMinesAreaCreatures,
-                    SpawnProbabilities = new List<float>
-                    {
+                    SpawnProbabilities =
+                    [
                         1f,
-                    }
+                    ],
+                    DifficultyTier = 5,
                 },
                 new Area
                 {
@@ -1464,12 +1467,13 @@ public static class SeedCreatures
                     Name = "Oak Thicket",
                     LevelRequirement = 25,
                     Creatures = oakThicketAreaCreatures,
-                    SpawnProbabilities = new List<float>
-                    {
+                    SpawnProbabilities =
+                    [
                         0.03f,
                         0.969f,
                         0.001f,
-                    }
+                    ],
+                    DifficultyTier = 6,
                 },
                 new Area
                 {
@@ -1477,12 +1481,13 @@ public static class SeedCreatures
                     Name = "Forgotten Ruins",
                     LevelRequirement = 30,
                     Creatures = forgottenRuinsAreaCreatures,
-                    SpawnProbabilities = new List<float>
-                    {
+                    SpawnProbabilities =
+                    [
                         0.03f,
                         0.969f,
                         0.001f,
-                    }
+                    ],
+                    DifficultyTier = 7,
                 }
             };
 

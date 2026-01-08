@@ -71,7 +71,7 @@ public class CreatureScaler : ICreatureScaler
                     break;
 
                 case AttributeType.AttackSpeed:
-                    scaled = (float)(baseValue * (1.0 + MonsterScalingConstants.AttackSpeedPerTier * D));
+                    scaled = (float)(baseValue);
                     break;
 
                 case AttributeType.Accuracy:
