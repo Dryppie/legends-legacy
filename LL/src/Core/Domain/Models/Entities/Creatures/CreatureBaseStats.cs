@@ -26,8 +26,8 @@ public static class MonsterBaseStats
     public const float BaseArmorPenetration = 0.0f;
     public const float BaseManaPenetration = 0.0f;
 
-    public const float BasePhysicalDefense = 5f;
-    public const float BaseMagicalDefense = 5f;
+    public const float BasePhysicalDefense = 10f;
+    public const float BaseMagicalDefense = 10f;
     public const float BaseDamageReduction = 0.0f;
     public const float BaseCritDamageRed = 0.0f;
     public const float BaseCcResistance = 0.0f;
