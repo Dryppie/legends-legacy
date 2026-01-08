@@ -10,7 +10,7 @@ public static class Archetypes
         HealthMultiplier = 1.6f,
         DamageMultiplier = 0.6f,
         DefenseMultiplier = 1.4f,
-        SpeedMultiplier = 0.8f
+        SpeedMultiplier = 1.0f
     };
 
     public static readonly ArchetypeProfile Bruiser = new()
@@ -28,7 +28,7 @@ public static class Archetypes
         HealthMultiplier = 0.7f,
         DamageMultiplier = 1.5f,
         DefenseMultiplier = 0.8f,
-        SpeedMultiplier = 1.1f
+        SpeedMultiplier = 1.0f
     };
 
     public static readonly ArchetypeProfile Support = new()
