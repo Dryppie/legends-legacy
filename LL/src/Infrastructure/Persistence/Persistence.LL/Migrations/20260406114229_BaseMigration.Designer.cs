@@ -13,7 +13,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20260108164718_BaseMigration")]
+    [Migration("20260406114229_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -21,7 +21,7 @@ namespace Persistence.LL.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.11")
+                .HasAnnotation("ProductVersion", "10.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -67,6 +67,9 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("AttributeType")
                         .HasColumnType("integer");
 
+                    b.Property<Guid?>("EquipmentSnapshotId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("ItemInstanceId")
                         .HasColumnType("uuid");
 
@@ -74,6 +77,8 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EquipmentSnapshotId");
 
                     b.HasIndex("ItemInstanceId");
 
@@ -209,6 +214,71 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("CharacterBId");
 
                     b.ToTable("ColosseumMatches");
+                });
+
+            modelBuilder.Entity("Domain.Models.Dungeons.Runs.DungeonRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CurrentRoomIndex")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DungeonDefinitionId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Seed")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DungeonRuns");
+                });
+
+            modelBuilder.Entity("Domain.Models.Dungeons.Runs.RoomInstance", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("DungeonRunId")
+                        .HasColumnType("uuid");
+
+                    b.PrimitiveCollection<List<string>>("EncounterIds")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<int?>("EventOutcome")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RoomIndex")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DungeonRunId");
+
+                    b.ToTable("RoomInstance");
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Creatures.Templates.StatOverride", b =>
@@ -728,7 +798,7 @@ namespace Persistence.LL.Migrations
                     b.Property<int?>("RegionId")
                         .HasColumnType("integer");
 
-                    b.Property<List<float>>("SpawnProbabilities")
+                    b.PrimitiveCollection<List<float>>("SpawnProbabilities")
                         .IsRequired()
                         .HasColumnType("real[]");
 
@@ -802,6 +872,88 @@ namespace Persistence.LL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Regions");
+                });
+
+            modelBuilder.Entity("Domain.Models.Snapshots.CharacterSnapshot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.PrimitiveCollection<List<Guid>>("ActiveEssenceIds")
+                        .IsRequired()
+                        .HasColumnType("uuid[]");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CharacterSnapshots");
+                });
+
+            modelBuilder.Entity("Domain.Models.Snapshots.EntityAttributeSnapshot", b =>
+                {
+                    b.Property<Guid>("CharacterSnapshotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AttributeType")
+                        .HasColumnType("integer");
+
+                    b.Property<float>("Value")
+                        .HasColumnType("real");
+
+                    b.HasKey("CharacterSnapshotId", "AttributeType");
+
+                    b.ToTable("EntityAttributeSnapshot");
+                });
+
+            modelBuilder.Entity("Domain.Models.Snapshots.EquipmentSnapshot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("CharacterSnapshotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EquipmentInstanceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsLevelingItem")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsMasterpiece")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("ItemBaseId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ItemXp")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("Potential")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Rarity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Slot")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterSnapshotId");
+
+                    b.ToTable("EquipmentSnapshot");
                 });
 
             modelBuilder.Entity("Domain.Models.Soulstones.CharacterSoulstoneUpgrade", b =>
@@ -943,7 +1095,7 @@ namespace Persistence.LL.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<List<Guid>>("CharacterTeam")
+                    b.PrimitiveCollection<List<Guid>>("CharacterTeam")
                         .IsRequired()
                         .HasColumnType("uuid[]");
 
@@ -1139,6 +1291,10 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.Attributes.Modifiers.InstanceAttributeModifier", b =>
                 {
+                    b.HasOne("Domain.Models.Snapshots.EquipmentSnapshot", null)
+                        .WithMany("InstanceModifiers")
+                        .HasForeignKey("EquipmentSnapshotId");
+
                     b.HasOne("Domain.Models.Items.Equipments.EquipmentInstance", null)
                         .WithMany("InstanceModifiers")
                         .HasForeignKey("ItemInstanceId")
@@ -1209,6 +1365,13 @@ namespace Persistence.LL.Migrations
                         .HasForeignKey("CharacterBId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Dungeons.Runs.RoomInstance", b =>
+                {
+                    b.HasOne("Domain.Models.Dungeons.Runs.DungeonRun", null)
+                        .WithMany("Rooms")
+                        .HasForeignKey("DungeonRunId");
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Creatures.Templates.StatOverride", b =>
@@ -1488,6 +1651,22 @@ namespace Persistence.LL.Migrations
                     b.Navigation("LootTable");
                 });
 
+            modelBuilder.Entity("Domain.Models.Snapshots.EntityAttributeSnapshot", b =>
+                {
+                    b.HasOne("Domain.Models.Snapshots.CharacterSnapshot", null)
+                        .WithMany("BaseAttributes")
+                        .HasForeignKey("CharacterSnapshotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Snapshots.EquipmentSnapshot", b =>
+                {
+                    b.HasOne("Domain.Models.Snapshots.CharacterSnapshot", null)
+                        .WithMany("Equipment")
+                        .HasForeignKey("CharacterSnapshotId");
+                });
+
             modelBuilder.Entity("Domain.Models.Soulstones.CharacterSoulstoneUpgrade", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Characters.Character", "Character")
@@ -1588,6 +1767,11 @@ namespace Persistence.LL.Migrations
                     b.Navigation("ActionDetails");
                 });
 
+            modelBuilder.Entity("Domain.Models.Dungeons.Runs.DungeonRun", b =>
+                {
+                    b.Navigation("Rooms");
+                });
+
             modelBuilder.Entity("Domain.Models.Entities.Entity", b =>
                 {
                     b.Navigation("BaseAttributes");
@@ -1644,6 +1828,18 @@ namespace Persistence.LL.Migrations
             modelBuilder.Entity("Domain.Models.Regions.Region", b =>
                 {
                     b.Navigation("Areas");
+                });
+
+            modelBuilder.Entity("Domain.Models.Snapshots.CharacterSnapshot", b =>
+                {
+                    b.Navigation("BaseAttributes");
+
+                    b.Navigation("Equipment");
+                });
+
+            modelBuilder.Entity("Domain.Models.Snapshots.EquipmentSnapshot", b =>
+                {
+                    b.Navigation("InstanceModifiers");
                 });
 
             modelBuilder.Entity("Domain.Models.Users.AppUser", b =>

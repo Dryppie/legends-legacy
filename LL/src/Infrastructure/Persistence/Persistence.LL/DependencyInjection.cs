@@ -2,6 +2,7 @@
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.Colosseum;
+using Domain.Models.Dungeons.Runs;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
@@ -20,6 +21,7 @@ using Domain.Models.Professions.Crafting;
 using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
+using Domain.Models.Snapshots;
 using Domain.Models.Soulstones;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
@@ -28,6 +30,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Persistence.LL.Repositories.Attributes;
 using Persistence.LL.Repositories.CharacterActions;
 using Persistence.LL.Repositories.Colosseum;
+using Persistence.LL.Repositories.Dungeons;
 using Persistence.LL.Repositories.Entities;
 using Persistence.LL.Repositories.Entities.Characters;
 using Persistence.LL.Repositories.Entities.Creatures;
@@ -43,6 +46,7 @@ using Persistence.LL.Repositories.Professions.Craftings;
 using Persistence.LL.Repositories.Professions.Gatherings;
 using Persistence.LL.Repositories.Regions;
 using Persistence.LL.Repositories.Regions.Areas;
+using Persistence.LL.Repositories.Snapshots;
 using Persistence.LL.Repositories.Soulstones;
 using Persistence.LL.Repositories.Users;
 
@@ -74,6 +78,8 @@ public static class DependencyInjection
         services.AddScoped<IColosseumRepository, ColosseumRepository>();
         services.AddScoped<IRatingRepository, RatingRepository>();
 
+        services.AddScoped<IDungeonRunRepository, DungeonRunRepository>();
+
         services.AddScoped<IEntityRepository, EntityRepository>();
         services.AddScoped<IEquipmentSlotRepository, EquipmentSlotRepository>();
 
@@ -101,6 +107,9 @@ public static class DependencyInjection
         services.AddScoped<IPlayerRepository, PlayerRepository>();
 
         services.AddScoped<ISoulstoneUpgradeRepository, SoulstoneUpgradeRepository>();
+
+        // Snapshots
+        services.AddScoped<ICharacterSnapshotRepository, CharacterSnapshotRepository>();
 
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();

@@ -15,7 +15,7 @@ public static class DependencyInjection
             cfg.AddOpenBehavior(typeof(TransactionBehavior<,>));
         });
 
-        services.AddAutoMapper(Assembly.GetExecutingAssembly());
+        services.AddAutoMapper(cfg => { }, Assembly.GetExecutingAssembly());
         services.AddTransient<DomainToClientMapper>();
 
         return services;

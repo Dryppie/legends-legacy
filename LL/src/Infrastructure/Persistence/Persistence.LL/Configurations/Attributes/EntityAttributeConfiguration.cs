@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Persistence.LL.Configurations;
+namespace Persistence.LL.Configurations.Attributes;
 public class EntityAttributeConfiguration : IEntityTypeConfiguration<EntityAttribute>
 {
     public void Configure(EntityTypeBuilder<EntityAttribute> builder)

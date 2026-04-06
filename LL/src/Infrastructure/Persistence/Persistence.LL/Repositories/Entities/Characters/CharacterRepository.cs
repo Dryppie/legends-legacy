@@ -4,9 +4,9 @@ using Common.Helpers.Essences;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences.EssenceSlots;
-using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Microsoft.EntityFrameworkCore;
+using Persistence.LL.QueryProfiles;
 using Persistence.LL.Seeds.Helpers;
 
 namespace Persistence.LL.Repositories.Entities.Characters;
@@ -78,16 +78,8 @@ public class CharacterRepository : ICharacterRepository
     public async Task<Character?> GetCharacterOverviewByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var character = await _context.Characters
-            .Include(c => c.EssenceSlots)
-                .ThenInclude(es => es.OccupiedEssence)
-            .Include(c => c.BaseAttributes)
-            .Include(c => c.EquipmentSlots)
-                .ThenInclude(es => es.EquipmentInstance)
-                    .ThenInclude(ei => ei.InstanceModifiers)
-            .Include(c => c.EquipmentSlots)
-                .ThenInclude(es => es.EquipmentInstance)
-                    .ThenInclude(ei => ei.ItemBase)
-                        .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
+            .AsNoTracking()
+            .EntireCharacter()
             .FirstOrDefaultAsync(c => c.Id.Equals(characterId), cancellationToken);
 
         if (character == null) return character;
@@ -103,16 +95,8 @@ public class CharacterRepository : ICharacterRepository
     public async Task<Character?> GetCharacterOverviewByCharacterNameAsync(string characterName, CancellationToken cancellationToken)
     {
         var character = await _context.Characters
-            .Include(c => c.EssenceSlots)
-                .ThenInclude(es => es.OccupiedEssence)
-            .Include(c => c.BaseAttributes)
-            .Include(c => c.EquipmentSlots)
-                .ThenInclude(es => es.EquipmentInstance)
-                    .ThenInclude(ei => ei.InstanceModifiers)
-            .Include(c => c.EquipmentSlots)
-                .ThenInclude(es => es.EquipmentInstance)
-                    .ThenInclude(ei => ei.ItemBase)
-                        .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
+            .AsNoTracking()
+            .EntireCharacter()
             .FirstOrDefaultAsync(c => c.Name.ToLower() == characterName.ToLower(), cancellationToken);
 
         if (character == null) return character;
@@ -146,7 +130,7 @@ public class CharacterRepository : ICharacterRepository
     public async Task<Character> GetBaseCharacterByIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var character = await _context.Characters
-            .FirstOrDefaultAsync(c => c.Id.Equals(characterId));
+            .FirstOrDefaultAsync(c => c.Id.Equals(characterId), cancellationToken);
         NotFoundException.ThrowIfNull(character, nameof(Character), characterId);
 
         return character;
@@ -159,7 +143,7 @@ public class CharacterRepository : ICharacterRepository
             .AnyAsync(c => c.Name == username && c.UserId != userId, cancellationToken);
 
         if (nameTaken)
-            return null; // or throw a custom exception if you prefer
+            return null;
 
         var character = await _context.Characters
             .FirstOrDefaultAsync(c => c.UserId == userId, cancellationToken);

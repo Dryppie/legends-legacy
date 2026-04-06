@@ -42,7 +42,7 @@ builder.Services.AddSignalR();
 builder.Services.AddPersistence(config);
 builder.Services.AddRepositories();
 builder.Services.AddApplication();
-builder.Services.AddServices();
+builder.Services.AddServices(config, builder.Environment.ContentRootPath);
 builder.Services.AddRealTime();
 builder.Services.AddAdminDashboardServices();
 builder.Services.AddCommonServices();

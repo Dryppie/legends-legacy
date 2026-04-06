@@ -4,6 +4,7 @@ using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Colosseum;
+using Domain.Models.Dungeons.Runs;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
@@ -23,6 +24,7 @@ using Domain.Models.Professions.Crafting;
 using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
+using Domain.Models.Snapshots;
 using Domain.Models.Soulstones;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
@@ -144,6 +146,8 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<EssenceSlot> EssenceSlots => Set<EssenceSlot>();
     public DbSet<EssenceItemBase> EssenceItems => Set<EssenceItemBase>();
 
+    public DbSet<DungeonRun> DungeonRuns => Set<DungeonRun>();
+
     // Effects
 
     //public DbSet<Modifier> Modifiers => Set<Modifier>();
@@ -195,6 +199,9 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<Recipe> Recipes => Set<Recipe>();
 
     public DbSet<Region> Regions => Set<Region>();
+
+    // Snapshots
+    public DbSet<CharacterSnapshot> CharacterSnapshots => Set<CharacterSnapshot>();
 
     public DbSet<AppUser> Users => Set<AppUser>();
     public DbSet<ExternalLogin> ExternalLogins => Set<ExternalLogin>();

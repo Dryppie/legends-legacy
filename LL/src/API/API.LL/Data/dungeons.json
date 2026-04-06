@@ -1,0 +1,119 @@
+[
+  {
+    "id": "goblin_mines",
+    "name": "Goblin Mines",
+    "sigilItemId": "sigil_goblin_mines",
+    "hasCheckpoint": true,
+    "minRooms": 5,
+    "maxRooms": 7,
+    "rooms": [
+      {
+        "type": "Combat",
+        "weight": 1.0,
+        "encounterIds": [
+          "goblin",
+          "goblin_archer",
+          "goblin_warrior",
+          "goblin_shaman"
+        ]
+      },
+      {
+        "type": "Boss",
+        "weight": 1.0,
+        "encounterIds": [
+          "hobgoblin"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "forgotten_catacombs",
+    "name": "Forgotten Catacombs",
+    "sigilItemId": "sigil_forgotten_catacombs",
+    "hasCheckpoint": true,
+    "minRooms": 6,
+    "maxRooms": 8,
+    "rooms": [
+      {
+        "type": "Combat",
+        "weight": 1.0,
+        "encounterIds": [
+          "skeleton"
+        ]
+      },
+      {
+        "type": "Combat",
+        "weight": 0.8,
+        "encounterIds": [
+          "poisonous_rat"
+        ]
+      },
+      {
+        "type": "Combat",
+        "weight": 0.8,
+        "encounterIds": [
+          "cave_bat"
+        ]
+      },
+      {
+        "type": "Combat",
+        "weight": 0.6,
+        "encounterIds": [
+          "giant_bat"
+        ]
+      },
+      {
+        "type": "Boss",
+        "weight": 1.0,
+        "encounterIds": [
+          "necroshade_wraith"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "hives_abyss",
+    "name": "The Hive’s Abyss",
+    "sigilItemId": "sigil_hives_abyss",
+    "hasCheckpoint": true,
+    "minRooms": 7,
+    "maxRooms": 9,
+    "rooms": [
+      {
+        "type": "Combat",
+        "weight": 1.0,
+        "encounterIds": [
+          "ant_worker"
+        ]
+      },
+      {
+        "type": "Combat",
+        "weight": 0.9,
+        "encounterIds": [
+          "fire_ant"
+        ]
+      },
+      {
+        "type": "MiniBoss",
+        "weight": 1.0,
+        "encounterIds": [
+          "queens_guard_ant"
+        ]
+      },
+      {
+        "type": "Boss",
+        "weight": 0.92,
+        "encounterIds": [
+          "ant_queen"
+        ]
+      },
+      {
+        "type": "Boss",
+        "weight": 0.08,
+        "encounterIds": [
+          "ant_king"
+        ]
+      }
+    ]
+  }
+]

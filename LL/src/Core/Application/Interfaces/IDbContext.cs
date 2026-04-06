@@ -3,6 +3,7 @@ using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Colosseum;
+using Domain.Models.Dungeons.Runs;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
@@ -20,6 +21,7 @@ using Domain.Models.Professions.Crafting;
 using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
+using Domain.Models.Snapshots;
 using Domain.Models.Soulstones;
 using Domain.Models.Users;
 using Microsoft.EntityFrameworkCore;
@@ -45,6 +47,9 @@ public interface IDbContext
     DbSet<Essence> Essences { get; }
     DbSet<EssenceSlot> EssenceSlots { get; }
     DbSet<EssenceItemBase> EssenceItems { get; }
+
+    DbSet<DungeonRun> DungeonRuns { get; }
+
     // Effects
     //DbSet<Modifier> Modifiers { get; }
 
@@ -78,6 +83,11 @@ public interface IDbContext
     //DbSet<TownBuilding> TownBuildings { get; }
     DbSet<Recipe> Recipes { get; }
     DbSet<Region> Regions { get; }
+
+    // Snapshots
+
+    DbSet<CharacterSnapshot> CharacterSnapshots { get; }
+
     DbSet<AppUser> Users { get; }
     DbSet<ExternalLogin> ExternalLogins { get; }
     DbSet<RefreshToken> RefreshTokens { get; }

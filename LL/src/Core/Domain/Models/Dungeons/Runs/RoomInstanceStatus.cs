@@ -1,6 +1,6 @@
 ﻿namespace Domain.Models.Dungeons.Runs;
 
-public enum FloorProgressStatus
+public enum RoomInstanceStatus
 {
     Pending = 1,
     Active = 2,
