@@ -1,174 +1,216 @@
-<!-- OUTER: thick gold ring -->
-<div class="border-primary-gradient relative w-full rounded-md p-[1px]">
-  <!-- INNER: thin gold hairline -->
+<!-- COLLAPSED CARD -->
+<ng-container *ngIf="!showPreview(); else previewTemplate">
   <div
-    class="relative flex w-full flex-col overflow-hidden rounded-md bg-[#0f0f0f] xl:flex-row"
+    class="border-primary-gradient relative w-full rounded-md p-[1px] hover:cursor-pointer"
+    (click)="togglePreview()"
   >
-    <div
-      class="relative min-h-40 w-full overflow-hidden rounded-t-md border-b border-primary/30 sm:min-h-56 xl:rounded-r-none xl:border-b-0 xl:border-r"
-    >
-      <!-- BG image -->
+    <div class="relative overflow-hidden rounded-md bg-[#0f0f0f]">
       <img
         [src]="previewData.heroImage"
         [alt]="previewData.title"
-        class="absolute inset-0 h-full w-full object-cover"
+        class="absolute inset-0 h-full w-full object-cover opacity-70"
       />
 
-      <!-- CONTENT -->
       <div
-        class="relative flex h-full min-h-40 flex-col items-start justify-between p-5 text-white sm:min-h-56"
+        class="relative flex items-end justify-between p-4 text-white"
+        [style.min-height.px]="height"
       >
-        <div class="flex flex-col pt-1">
-          <div class="font-serif text-[11px] uppercase opacity-80">Dungeon</div>
-          <h2
-            class="primary-gradient font-serif text-3xl font-semibold leading-tight drop-shadow-sm"
-          >
+        <div>
+          <div class="font-serif text-xs uppercase opacity-70">
+            Dungeon {{ previewData.number }}
+          </div>
+          <div class="font-serif text-2xl font-semibold">
             {{ previewData.title }}
-          </h2>
-          <img
-            src="core/Divider.svg"
-            alt="Logo"
-            class="w-52 self-center object-contain"
-          />
-        </div>
-        <div class="flex h-full w-full flex-col">
-          <div class="mt-auto hidden max-w-72 font-serif opacity-80 xl:block">
-            The goblins are deep within the mines, guarding ancient relics
           </div>
-          <div
-            class="mt-auto flex w-full items-center justify-between gap-3 pb-1"
-          >
-            <div class="flex items-center gap-2">
-              <span class="text-[10px] uppercase tracking-[0.2em] opacity-80"
-                >Required Lv.</span
-              >
-              <span class="text-[15px] font-semibold tabular-nums">{{
-                previewData.requiredLevel
-              }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div
-      class="flex w-full flex-col bg-texture sm:flex-row xl:w-3/5 xl:flex-col"
-    >
-      <div
-        class="w-full border-b border-primary/30 p-4 text-white sm:border-b-0 sm:border-r xl:border-b xl:border-r-0"
-      >
-        <div class="text-[11px] uppercase opacity-70">Requirements</div>
-        <div class="mt-2 flex flex-wrap items-center gap-3">
-          <ng-container *ngIf="previewData.keyItem as key">
-            <div class="flex items-center gap-2">
-              <!-- <img
-              [src]="key.icon"
-              [alt]="key.name"
-              class="h-5 w-5 object-contain"
-            /> -->
-              <span class="text-xs">{{ key.name }}</span>
-              <span class="text-xs tabular-nums"
-                >({{ key.have }}/{{ key.need }})</span
-              >
-            </div>
-          </ng-container>
 
-          <ng-container *ngIf="previewData.dailyEntries as d">
-            <div class="h-4 w-px bg-white/15"></div>
-            <div class="text-xs">
-              Daily entries:
-              <span class="font-semibold tabular-nums">{{ d }}</span>
-            </div>
-          </ng-container>
-        </div>
-
-        <div class="mt-4 flex flex-wrap gap-6 text-sm opacity-80">
-          <div *ngIf="previewData.roomsRange">
-            Rooms: {{ previewData.roomsRange[0] }}–{{
-              previewData.roomsRange[1]
-            }}
+          <div class="mt-2 flex items-center gap-2 text-sm opacity-90">
+            <span class="text-[10px] uppercase tracking-[0.2em] opacity-80">
+              Required Lv.
+            </span>
+            <span class="text-[15px] font-semibold tabular-nums">
+              {{ previewData.requiredLevel }}
+            </span>
           </div>
-          <div *ngIf="previewData.estMinutes">
-            Duration: {{ previewData.estMinutes[0] }}–{{
-              previewData.estMinutes[1]
-            }}
-            min idle
-          </div>
-        </div>
-        <div class="mt-auto max-w-72 pt-4 font-serif opacity-80 xl:hidden">
-          The goblins are deep within the mines, guarding ancient relics
-        </div>
-      </div>
-      <!-- Info blocks -->
-      <div class="w-full border-primary p-4 text-white md:col-span-2">
-        <div class="text-[11px] uppercase opacity-70">Difficulty</div>
-        <div class="mt-2 flex gap-2">
-          <div
-            class="rounded-md border px-4 py-2 text-sm hover:cursor-pointer"
-            [class.border-primary]="difficulty() === 'Normal'"
-            [ngClass]="{
-              'bg-primary/10': difficulty() === 'Normal',
-              'border-primary/20': difficulty() !== 'Normal',
-              'hover:cursor-default, pointer-events-none opacity-40':
-                !previewData.unlockedDifficulties.includes(
-                  dungeonDifficulty.Normal
-                ),
-            }"
-            (click)="selectDifficulty(dungeonDifficulty.Normal)"
-          >
-            Normal
-          </div>
-          <div
-            class="rounded-md border px-4 py-2 text-sm hover:cursor-pointer"
-            [class.border-primary]="difficulty() === 'Heroic'"
-            [ngClass]="{
-              'bg-primary/10': difficulty() === 'Heroic',
-              'border-primary/20': difficulty() !== 'Heroic',
-              'hover:cursor-default, pointer-events-none opacity-40':
-                !previewData.unlockedDifficulties.includes(
-                  dungeonDifficulty.Heroic
-                ),
-            }"
-            (click)="selectDifficulty(dungeonDifficulty.Heroic)"
-          >
-            Heroic
-          </div>
-          <div
-            class="rounded-md border px-4 py-2 text-sm hover:cursor-pointer"
-            [class.border-primary]="difficulty() === 'Mythic'"
-            [ngClass]="{
-              'bg-primary/10': difficulty() === 'Mythic',
-              'border-primary/20': difficulty() !== 'Mythic',
-              'hover:cursor-default, pointer-events-none opacity-40':
-                !previewData.unlockedDifficulties.includes(
-                  dungeonDifficulty.Mythic
-                ),
-            }"
-            (click)="selectDifficulty(dungeonDifficulty.Mythic)"
-          >
-            Mythic
-          </div>
-        </div>
-
-        <div class="mt-6 text-[11px] uppercase opacity-70">Rewards</div>
-        <div class="mt-2 flex flex-wrap gap-2">
-          <div
-            *ngFor="let r of previewData.rewards"
-            class="rounded-md border border-white/10 bg-[#1a1a1a] p-2 text-center"
-          >
-            <app-item [item]="r"></app-item>
-          </div>
-        </div>
-
-        <div class="mt-6 flex items-center justify-end gap-2">
-          <app-regular-button
-            class="w-40"
-            [text]="'Enter ' + difficulty()"
-            fullWidth
-          ></app-regular-button>
         </div>
       </div>
     </div>
   </div>
-</div>
+</ng-container>
 
-<div class="flex w-full flex-col gap-4"></div>
+<!-- PREVIEW -->
+<ng-template #previewTemplate>
+  <div
+    class="border-primary-gradient relative w-full rounded-md p-[1px] hover:cursor-pointer"
+    (click)="togglePreview()"
+  >
+    <div
+      class="relative flex w-full flex-col overflow-hidden rounded-md bg-[#0f0f0f] xl:flex-row"
+    >
+      <div
+        class="relative min-h-40 w-full overflow-hidden rounded-t-md border-b border-primary/30 sm:min-h-56 xl:rounded-r-none xl:border-b-0 xl:border-r"
+      >
+        <img
+          [src]="previewData.heroImage"
+          [alt]="previewData.title"
+          class="absolute inset-0 h-full w-full object-cover"
+        />
+
+        <div
+          class="relative flex h-full min-h-40 flex-col items-start justify-between p-5 text-white sm:min-h-56"
+        >
+          <div class="flex w-full items-start justify-between gap-4">
+            <div class="flex flex-col pt-1">
+              <div class="font-serif text-[11px] uppercase opacity-80">
+                Dungeon
+              </div>
+              <h2
+                class="primary-gradient font-serif text-3xl font-semibold leading-tight drop-shadow-sm"
+              >
+                {{ previewData.title }}
+              </h2>
+              <img
+                src="core/Divider.svg"
+                alt="Logo"
+                class="w-52 self-center object-contain"
+              />
+            </div>
+          </div>
+
+          <div class="flex h-full w-full flex-col">
+            <div class="mt-auto hidden max-w-72 font-serif opacity-80 xl:block">
+              {{ previewData.lore }}
+            </div>
+
+            <div
+              class="mt-auto flex w-full items-center justify-between gap-3 pb-1"
+            >
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] uppercase tracking-[0.2em] opacity-80">
+                  Required Lv.
+                </span>
+                <span class="text-[15px] font-semibold tabular-nums">
+                  {{ previewData.requiredLevel }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="flex w-full flex-col bg-texture hover:cursor-default sm:flex-row xl:w-3/5 xl:flex-col"
+        (click)="$event.stopPropagation()"
+      >
+        <div
+          class="w-full border-b border-primary/30 p-4 text-white sm:border-b-0 sm:border-r xl:border-b xl:border-r-0"
+        >
+          <div class="text-[11px] uppercase opacity-70">Requirements</div>
+
+          <div class="mt-2 flex flex-wrap items-center gap-3">
+            <ng-container *ngIf="previewData.keyItem as key">
+              <div class="flex items-center gap-2">
+                <span class="text-xs">{{ key.name }}</span>
+                <span class="text-xs tabular-nums">
+                  ({{ key.have }}/{{ key.need }})
+                </span>
+              </div>
+            </ng-container>
+
+            <!-- <ng-container *ngIf="previewData.dailyEntries as d">
+              <div class="h-4 w-px bg-white/15"></div>
+              <div class="text-xs">
+                Daily entries:
+                <span class="font-semibold tabular-nums">{{ d }}</span>
+              </div>
+            </ng-container> -->
+          </div>
+
+          <div class="mt-4 flex flex-wrap gap-6 text-sm opacity-80">
+            <div *ngIf="previewData.roomsRange">
+              Rooms: {{ previewData.roomsRange[0] }}–{{
+                previewData.roomsRange[1]
+              }}
+            </div>
+          </div>
+
+          <div class="mt-auto max-w-72 pt-4 font-serif opacity-80 xl:hidden">
+            {{ previewData.lore }}
+          </div>
+        </div>
+
+        <div class="w-full border-primary p-4 text-white md:col-span-2">
+          <div class="text-[11px] uppercase opacity-70">Difficulty</div>
+
+          <div class="mt-2 flex gap-2">
+            <div
+              class="rounded-md border px-4 py-2 text-sm hover:cursor-pointer"
+              [class.border-primary]="difficulty() === dungeonDifficulty.Normal"
+              [ngClass]="{
+                'bg-primary/10': difficulty() === dungeonDifficulty.Normal,
+                'border-primary/20': difficulty() !== dungeonDifficulty.Normal,
+                'pointer-events-none opacity-40':
+                  !previewData.unlockedDifficulties.includes(
+                    dungeonDifficulty.Normal
+                  ),
+              }"
+              (click)="selectDifficulty(dungeonDifficulty.Normal)"
+            >
+              Normal
+            </div>
+
+            <div
+              class="rounded-md border px-4 py-2 text-sm hover:cursor-pointer"
+              [class.border-primary]="difficulty() === dungeonDifficulty.Heroic"
+              [ngClass]="{
+                'bg-primary/10': difficulty() === dungeonDifficulty.Heroic,
+                'border-primary/20': difficulty() !== dungeonDifficulty.Heroic,
+                'pointer-events-none opacity-40':
+                  !previewData.unlockedDifficulties.includes(
+                    dungeonDifficulty.Heroic
+                  ),
+              }"
+              (click)="selectDifficulty(dungeonDifficulty.Heroic)"
+            >
+              Heroic
+            </div>
+
+            <div
+              class="rounded-md border px-4 py-2 text-sm hover:cursor-pointer"
+              [class.border-primary]="difficulty() === dungeonDifficulty.Mythic"
+              [ngClass]="{
+                'bg-primary/10': difficulty() === dungeonDifficulty.Mythic,
+                'border-primary/20': difficulty() !== dungeonDifficulty.Mythic,
+                'pointer-events-none opacity-40':
+                  !previewData.unlockedDifficulties.includes(
+                    dungeonDifficulty.Mythic
+                  ),
+              }"
+              (click)="selectDifficulty(dungeonDifficulty.Mythic)"
+            >
+              Mythic
+            </div>
+          </div>
+
+          <div class="mt-6 text-[11px] uppercase opacity-70">Rewards</div>
+          <div class="mt-2 flex flex-wrap gap-2">
+            <div
+              *ngFor="let r of previewData.rewards"
+              class="rounded-md border border-white/10 bg-[#1a1a1a] p-2 text-center"
+            >
+              <app-item [item]="r"></app-item>
+            </div>
+          </div>
+
+          <div class="mt-6 flex items-center justify-end gap-2">
+            <app-regular-button
+              class="w-40"
+              [text]="'Enter ' + difficulty()"
+              (pressed)="startDungeon()"
+              fullWidth
+            ></app-regular-button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>

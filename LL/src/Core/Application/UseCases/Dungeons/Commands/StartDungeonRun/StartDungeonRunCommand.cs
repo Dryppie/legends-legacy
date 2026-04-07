@@ -2,12 +2,13 @@
 using Application.MediatR.Markers;
 using AutoMapper;
 using Common.Primitives;
+using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Runs;
 using MediatR;
 
 namespace Application.UseCases.Dungeons.Commands.StartDungeonRun;
 
-public record StartDungeonRunCommand(Guid CharacterId, string DungeonId) : ICommand<Response<DungeonRun>>;
+public record StartDungeonRunCommand(Guid CharacterId, string DungeonId, DungeonTier DungeonTier) : ICommand<Response<DungeonRun>>;
 
 public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunCommand, Response<DungeonRun>>
 {
@@ -21,8 +22,6 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
 
     public async Task<Response<DungeonRun>> Handle(StartDungeonRunCommand request, CancellationToken cancellationToken)
     {
-        // Implementation to start a dungeon run goes here.
-
         var dungeon = await _dungeonRunService.StartRunAsync(request.CharacterId, request.DungeonId, cancellationToken);
         
         return Response<DungeonRun>.Success(dungeon);

@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
+using Common.Helpers.Essences;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
 using Domain.Models.Essences.EssenceSlots;
@@ -28,6 +29,11 @@ public class EssenceService : IEssenceService
 
         var character = await _characterService.GetMyCharacterOverviewAsync(characterId, cancellationToken); // Called to calculate correct description for abilities (X-Y damage / heal)
         if (character == null) return [];
+
+        foreach (var essenceSlot in essenceSlots.Where(es => es.OccupiedEssence != null))
+        {
+            EssenceLoader.Instance.LoadAbilitiesForEssence(essenceSlot.OccupiedEssence!);
+        }
 
         foreach (var slot in essenceSlots.Where(es => es.OccupiedEssence != null))
         {

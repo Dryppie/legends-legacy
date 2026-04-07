@@ -128,7 +128,6 @@ export class CombatComponent implements OnInit {
     effect(() => {
       const result = this.combatStateService.getCombatResult(this.battleType)();
       if (result) {
-        console.log('testing result');
         this.displayCombat = true;
         this.setupCombat();
 
