@@ -1,13 +1,13 @@
-export interface Tab {
-  label: string; // Label of the tab (e.g., Daily, Weekly, Gathering, etc.)
-  items: any[]; // List of items for this tab
+export interface SidebarSection {
+  id: string;
+  label: string;
+  items: Tab[];
 }
 
-export interface SidebarItem {
+export interface Tab {
   id: string;
   route: string[];
   icon: string;
   title: string;
-  description: string;
-  rewards?: { icon: string; amount: number }[];
+  description?: string;
 }

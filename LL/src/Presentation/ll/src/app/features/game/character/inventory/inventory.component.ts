@@ -1,6 +1,6 @@
 import { NgFor, NgIf } from '@angular/common';
 import { Component, computed, OnInit } from '@angular/core';
-import { Tab } from '../../../../shared/models/sidebar-item';
+import { SidebarSection, Tab } from '../../../../shared/models/sidebar-item';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { EquipmentOverviewComponent } from '../../../../shared/components/equipment-overview/equipment-overview.component';
@@ -32,20 +32,24 @@ import { HelpTooltipDirective } from '../../../../shared/help/help-tooltip.direc
   templateUrl: './inventory.component.html',
 })
 export class InventoryComponent implements OnInit {
-  tabs: Tab[] = [
+  tabs: SidebarSection[] = [
     {
+      id: 'all',
       label: 'All',
       items: [],
     },
     {
+      id: 'equipment',
       label: 'Equipment',
       items: [],
     },
     {
+      id: 'resources',
       label: 'Resources',
       items: [],
     },
     {
+      id: 'essences',
       label: 'Essences',
       items: [],
     },

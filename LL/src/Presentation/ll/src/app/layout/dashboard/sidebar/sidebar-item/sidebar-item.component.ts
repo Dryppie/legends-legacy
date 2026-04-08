@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { SidebarItem } from '../../../../shared/models/sidebar-item';
+import { Tab } from '../../../../shared/models/sidebar-item';
 import { ProfessionIconComponent } from '../../../../shared/components/professions/profession-icon/profession-icon.component';
 
 @Component({
@@ -9,6 +9,6 @@ import { ProfessionIconComponent } from '../../../../shared/components/professio
   templateUrl: './sidebar-item.component.html',
 })
 export class SidebarItemComponent {
-  @Input() item!: SidebarItem;
+  @Input() item!: Tab;
   @Input() isActive = false;
 }

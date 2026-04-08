@@ -6,7 +6,7 @@ import {
   LeaderboardColumn,
   LeaderboardEntry,
 } from '../../../../shared/models/Dtos/leaderboard/leaderboardEntry';
-import { Tab } from '../../../../shared/models/sidebar-item';
+import { SidebarSection, Tab } from '../../../../shared/models/sidebar-item';
 import { RegularButtonComponent } from '../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { LeaderboardComponent } from '../../../../shared/components/generic-leaderboard/generic-leaderboard.component';
 import { COLUMNS_BY_TAB } from '../../../../shared/models/Dtos/leaderboard/leaderboard.config';
@@ -25,36 +25,44 @@ import { COLUMNS_BY_TAB } from '../../../../shared/models/Dtos/leaderboard/leade
 export class TavernComponent {
   constructor(public state: LeaderboardStateService) {}
 
-  tabs: Tab[] = [
+  tabs: SidebarSection[] = [
     {
+      id: 'total-level',
       label: 'Total level',
       items: [],
     },
     {
+      id: 'combat',
       label: 'Combat',
       items: [],
     },
     {
+      id: 'wealth',
       label: 'Wealth',
       items: [],
     },
     {
+      id: 'mining',
       label: 'Mining',
       items: [],
     },
     {
+      id: 'woodcutting',
       label: 'Woodcutting',
       items: [],
     },
     {
+      id: 'armorforging',
       label: 'Armorforging',
       items: [],
     },
     {
+      id: 'jewelrycrafting',
       label: 'Jewelrycrafting',
       items: [],
     },
     {
+      id: 'weaponsmithing',
       label: 'Weaponsmithing',
       items: [],
     },

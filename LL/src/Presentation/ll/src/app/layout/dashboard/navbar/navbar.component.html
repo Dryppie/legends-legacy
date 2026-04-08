@@ -1,21 +1,23 @@
-<div class="flex sm:h-24" *ngIf="currentCharacter() as currentCharacter">
-  <app-character-badge
+<div class="flex sm:h-8" *ngIf="currentCharacter() as currentCharacter">
+  <!-- <app-character-badge
     class="z-10 -mr-12 hidden sm:block"
     [level]="currentCharacter?.level"
     [currentExperience]="currentCharacter?.experience"
     [maxExperience]="currentCharacter?.experienceUntilNextLevel"
-  ></app-character-badge>
+  ></app-character-badge> -->
   <div
-    class="border-gradient relative flex w-full items-center rounded-r-md sm:h-24 sm:py-[1px]"
+    class="border-gradient relative flex w-full items-center rounded-md sm:h-8 sm:pb-[1px]"
   >
-    <div class="flex h-full w-full bg-texture bg-auto sm:rounded-r-md sm:pl-12">
-      <div class="hidden flex-col justify-center pl-4 sm:flex sm:space-y-2">
+    <div
+      class="flex h-full w-full items-center justify-between bg-texture bg-auto sm:rounded-md"
+    >
+      <div class="hidden items-center gap-2 pl-4 sm:flex">
         <h2
-          class="max-w-[5ch] truncate text-white sm:max-w-[8ch] lg:max-w-none"
+          class="max-w-[5ch] truncate text-primary sm:max-w-[8ch] lg:max-w-none"
         >
-          {{ currentCharacter.name }}
+          {{ currentCharacter.name }} - Lv. {{ currentCharacter.level }}
         </h2>
-        <div class="hidden sm:flex">
+        <div class="hidden gap-2 sm:flex">
           <div
             class="flex h-6 min-w-20 items-center justify-between space-x-2 rounded-full bg-[#121216CC]"
             (click)="toggleFormat()"
@@ -46,19 +48,8 @@
           </div>
         </div>
       </div>
-      <div class="flex w-full items-end sm:ml-4 sm:items-start">
-        <div class="flex w-full flex-col">
-          <ng-container *ngIf="onlinePlayers; else justYou">
-            <div class="hidden justify-end pr-4 text-white sm:flex">
-              {{ onlinePlayers }} Online
-            </div>
-          </ng-container>
-          <ng-template #justYou
-            ><div class="hidden justify-end pr-4 text-white sm:flex">
-              1 Online
-            </div></ng-template
-          >
-          <!-- <div
+      <div class="flex place-items-center gap-2">
+        <!-- <div
             class="flex items-center hidden justify-between bg-transparent p-4 text-[#6D6D6D] sm:hidden"
             (click)="toggleList()"
             *ngIf="!showList"
@@ -66,18 +57,27 @@
             <img src="core/button/Hamburger.png" class="cursor-pointer" />
             <h3 class="cursor-pointer pl-2 text-primary">{{ activeLabel }}</h3>
           </div> -->
-          <div
-            class="z-10 flex w-full flex-row justify-between text-nowrap border-t bg-texture text-[#a1a1a1] sm:w-auto sm:items-center sm:justify-end sm:space-x-6 sm:rounded-md sm:border sm:border-none sm:bg-none sm:p-2"
-          >
-            <app-navbutton
-              *ngFor="let button of navButtons"
-              [link]="button.link"
-              [label]="button.label"
-              (click)="toggleList()"
-              (itemTapped)="activeNavbar(button.label)"
-            ></app-navbutton>
-          </div>
+        <div
+          class="z-10 flex text-nowrap border-t bg-texture text-[#a1a1a1] sm:w-auto sm:items-center sm:space-x-2 sm:border-none sm:bg-none"
+        >
+          <app-navbutton
+            *ngFor="let button of navButtons"
+            [link]="button.link"
+            [label]="button.label"
+            (click)="toggleList()"
+            (itemTapped)="activeNavbar(button.label)"
+          ></app-navbutton>
         </div>
+        <ng-container *ngIf="onlinePlayers; else justYou">
+          <div class="hidden justify-end pr-2 text-sm text-white sm:flex">
+            {{ onlinePlayers }} Online
+          </div>
+        </ng-container>
+        <ng-template #justYou
+          ><div class="hidden justify-end pr-2 text-sm text-white sm:flex">
+            1 Online
+          </div></ng-template
+        >
       </div>
     </div>
   </div>

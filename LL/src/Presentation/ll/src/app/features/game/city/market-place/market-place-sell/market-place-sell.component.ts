@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, effect, OnInit, signal } from '@angular/core';
-import { Tab } from '../../../../../shared/models/sidebar-item';
+import { SidebarSection, Tab } from '../../../../../shared/models/sidebar-item';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { MarketPlaceInventoryItemComponent } from '../../../../../shared/components/market-place/market-place-inventory-item/market-place-inventory-item.component';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
@@ -177,20 +177,24 @@ export class MarketPlaceSellComponent implements OnInit {
     });
   }
 
-  tabs: Tab[] = [
+  tabs: SidebarSection[] = [
     {
+      id: 'all',
       label: 'All',
       items: [],
     },
     {
+      id: 'equipment',
       label: 'Equipment',
       items: [],
     },
     {
+      id: 'resources',
       label: 'Resources',
       items: [],
     },
     {
+      id: 'essences',
       label: 'Essences',
       items: [],
     },

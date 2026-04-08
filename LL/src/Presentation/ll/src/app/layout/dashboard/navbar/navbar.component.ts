@@ -1,5 +1,6 @@
 import {
   Component,
+  effect,
   EventEmitter,
   Input,
   OnDestroy,
@@ -14,7 +15,13 @@ import { interval, Subscription } from 'rxjs';
 import { PlayerService } from '../../../core/services/api/players/player.service';
 import { NumberFormatPipe } from '../../../shared/pipes/number-format/number-format.pipe';
 import { ShortNumberPipe } from '../../../shared/pipes/number-format/short-number.pipe';
-import { TourService } from '../../../core/services/client-side/tutorial-tour/tour.service';
+import { CharacterActionsStateService } from '../../../core/services/api/character-actions/character-actions.state.service';
+import { Router } from '@angular/router';
+import { GameService } from '../../../core/services/client-side/game/game.service';
+import { CharacterActionType } from '../../../shared/models/enums/characterActionType';
+import { Equipment } from '../../../shared/models/item';
+import { EquipmentType } from '../../../shared/models/enums/equipmentType';
+import { CurrentActionComponent } from '../../../shared/components/current-action/current-action.component';
 
 @Component({
   selector: 'app-navbar',
@@ -26,6 +33,7 @@ import { TourService } from '../../../core/services/client-side/tutorial-tour/to
     NgFor,
     NumberFormatPipe,
     ShortNumberPipe,
+    CurrentActionComponent,
   ],
   templateUrl: './navbar.component.html',
 })
@@ -35,12 +43,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
   showList = false;
   activeLabel = 'Character';
   navButtons = [
-    { link: '/game/character', label: 'Character' },
-    { link: '/game/city', label: 'City' },
-    { link: '/game/professions', label: 'Professions' },
-    { link: '/game/world', label: 'World' },
+    // { link: '/game/character', label: 'Character' },
+    // { link: '/game/city', label: 'City' },
+    // { link: '/game/professions', label: 'Professions' },
+    { link: '/game/city/tavern', label: 'Leaderboard' },
     { link: '/game/settings', label: 'Settings' },
   ];
+
+  displayCurrentAction = false;
 
   useShortFormat = false;
 
@@ -52,8 +62,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private readonly playerService: PlayerService,
+    private readonly state: CharacterActionsStateService,
+    private readonly gameService: GameService,
+    private readonly router: Router,
   ) {
     this.currentCharacter = this.authService.currentCharacter;
+
+    effect(() => {
+      this.displayCurrentAction = this.state.displayCurrentAction();
+    });
   }
 
   ngOnInit(): void {
@@ -92,6 +109,61 @@ export class NavbarComponent implements OnInit, OnDestroy {
   activeNavbar(activeLabel: string) {
     this.activeLabel = activeLabel;
     this.itemTapped.emit();
+  }
+
+  navigateToAction(): void {
+    const action = this.state.currentAction();
+    if (!action) return;
+
+    const actionType = action.characterActionType;
+    const now = Date.now();
+    const updatedAt = new Date(action.updatedAt ?? 0).getTime();
+
+    if (updatedAt > now) {
+      this.gameService.showCombat();
+      return;
+    }
+
+    let route: string[] = [];
+
+    if (actionType === CharacterActionType.Gathering) {
+      route = [
+        'game',
+        'professions',
+        'gathering',
+        action.gatheringActionDetails!.professionType.toLowerCase(),
+      ];
+    } else {
+      const equipmentType = (
+        action.craftingActionDetails?.craftingQueueItems[0].equipmentInstance
+          .itemBase as Equipment
+      ).equipmentType;
+
+      switch (equipmentType) {
+        case EquipmentType.Head:
+        case EquipmentType.Chest:
+        case EquipmentType.Legs:
+          route = ['game', 'professions', 'crafting', 'armorforging'];
+          break;
+
+        case EquipmentType.TwoHanded:
+        case EquipmentType.OneHanded:
+        case EquipmentType.OffHand:
+          route = ['game', 'professions', 'crafting', 'weaponsmithing'];
+          break;
+
+        case EquipmentType.Relic:
+        case EquipmentType.Necklace:
+        case EquipmentType.Ring:
+          route = ['game', 'professions', 'crafting', 'jewelrycrafting'];
+          break;
+
+        default:
+          return;
+      }
+    }
+
+    this.router.navigate(route);
   }
 
   logout() {

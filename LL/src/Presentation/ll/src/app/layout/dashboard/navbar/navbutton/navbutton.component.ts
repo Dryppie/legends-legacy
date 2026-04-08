@@ -12,15 +12,7 @@ import { NgClass } from '@angular/common';
 export class NavbuttonComponent {
   @Input() link: string = '';
   @Input() label: string = '';
-  @Output() itemTapped = new EventEmitter<void>();
 
   inactiveIcon = 'icons/InactivePlus.svg';
   activeIcon = 'icons/ActivePlus.svg';
-
-  constructor(private sidebarService: SidebarService) {}
-
-  updateSidebar() {
-    this.sidebarService.updateContent(this.link.toLowerCase()); // update based on the label or link
-    this.itemTapped.emit();
-  }
 }
