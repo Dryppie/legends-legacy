@@ -1,5 +1,6 @@
 ﻿using Application.Common.Interfaces;
 using Domain.Models.Dungeons.Runs;
+using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Dungeons;
 
@@ -20,7 +21,7 @@ public class DungeonRunRepository : IDungeonRunRepository
 
     public async Task<DungeonRun?> GetDungeonRunAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        return await _context.DungeonRuns.FindAsync([characterId], cancellationToken);
+        return await _context.DungeonRuns.FirstOrDefaultAsync(x => x.CharacterId.Equals(characterId), cancellationToken);
     }
 
     public Task<bool> UpdateDungeonRunAsync(DungeonRun dungeonRun, CancellationToken cancellationToken)

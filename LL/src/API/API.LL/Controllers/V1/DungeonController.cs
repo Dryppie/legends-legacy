@@ -1,4 +1,5 @@
 ﻿using Application.UseCases.Dungeons.Commands.StartDungeonRun;
+using Application.UseCases.Dungeons.Queries.GetDungeonRun;
 using Common.Primitives;
 using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Runs;
@@ -14,4 +15,8 @@ public class DungeonController : BaseController
     [HttpPost("StartDungeon")]
     public async Task<ActionResult<Response<DungeonRun>>> StartDungeon([FromBody] StartDungeonRequest startDungeonRequest) =>
         await Mediator.Send(new StartDungeonRunCommand(CurrentCharacterGuid, startDungeonRequest.DungeonId, startDungeonRequest.DungeonTier));
+
+    [HttpGet("GetActiveDungeon")]
+    public async Task<ActionResult<DungeonRun?>> GetActiveDungeon() =>
+        await Mediator.Send(new GetDungeonRunQuery(CurrentCharacterGuid));
 }

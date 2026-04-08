@@ -32,13 +32,13 @@ export interface ActiveDungeonRun {
 export class DungeonService {
   constructor(private readonly api: ApiService) {}
 
-  getAvailableDungeons(): Observable<DungeonPreviewData[]> {
-    return this.api.get('dungeon/getAvailableDungeons').pipe(
-      catchError(() => {
-        return throwError(() => new Error('Failed to get available dungeons'));
-      }),
-    );
-  }
+  // getAvailableDungeons(): Observable<DungeonPreviewData[]> {
+  //   return this.api.get('dungeon/getAvailableDungeons').pipe(
+  //     catchError(() => {
+  //       return throwError(() => new Error('Failed to get available dungeons'));
+  //     }),
+  //   );
+  // }
 
   getActiveDungeon(): Observable<ActiveDungeonRun | null> {
     return this.api.get('dungeon/getActiveDungeon').pipe(

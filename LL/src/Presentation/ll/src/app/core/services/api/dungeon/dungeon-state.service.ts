@@ -37,22 +37,23 @@ export class DungeonStateService {
       .subscribe({
         next: (activeDungeon) => {
           this._activeDungeon.set(activeDungeon);
-          this.loadAvailableDungeons();
+          console.log(activeDungeon);
+          // this.loadAvailableDungeons();
         },
         error: (e) => {
           this._error.set(e.message ?? 'Failed to refresh dungeon data');
-          this.loadAvailableDungeons();
+          // this.loadAvailableDungeons();
         },
       });
   }
 
-  loadAvailableDungeons(): void {
-    this.service.getAvailableDungeons().subscribe({
-      next: (dungeons) => this._dungeons.set(dungeons),
-      error: (e) =>
-        this._error.set(e.message ?? 'Failed to load available dungeons'),
-    });
-  }
+  // loadAvailableDungeons(): void {
+  //   this.service.getAvailableDungeons().subscribe({
+  //     next: (dungeons) => this._dungeons.set(dungeons),
+  //     error: (e) =>
+  //       this._error.set(e.message ?? 'Failed to load available dungeons'),
+  //   });
+  // }
 
   startDungeon(dungeonId: string, difficulty: DungeonDifficulty): void {
     this._loading.set(true);
@@ -95,7 +96,7 @@ export class DungeonStateService {
       .subscribe({
         next: () => {
           this._activeDungeon.set(null);
-          this.loadAvailableDungeons();
+          // this.loadAvailableDungeons();
         },
         error: (e) => this._error.set(e.message ?? 'Failed to leave dungeon'),
       });
@@ -111,7 +112,7 @@ export class DungeonStateService {
       .subscribe({
         next: () => {
           this._activeDungeon.set(null);
-          this.loadAvailableDungeons();
+          // this.loadAvailableDungeons();
         },
         error: (e) =>
           this._error.set(e.message ?? 'Failed to claim dungeon rewards'),

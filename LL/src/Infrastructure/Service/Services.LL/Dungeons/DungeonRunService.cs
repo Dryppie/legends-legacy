@@ -43,6 +43,11 @@ public sealed class DungeonRunService : IDungeonRunService
         //_globalBlessingPool = globalBlessingPool;
     }
 
+    public async Task<DungeonRun?> GetDungeonRunAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        return await _dungeonRuns.GetDungeonRunAsync(characterId, cancellationToken);
+    }
+
     public async Task<DungeonRun> StartRunAsync(Guid characterId, string dungeonDefinitionId, CancellationToken ct)
     {
         // Seed: use cryptographic RNG or server-side monotonic; keep it server-owned.
