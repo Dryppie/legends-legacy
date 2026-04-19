@@ -1,0 +1,51 @@
+<ng-container *ngIf="hasActiveDungeon()">
+  <div
+    routerLink="world/dungeon"
+    class="mt-2 rounded-md border border-primary/25 bg-black/30 px-3 py-2 shadow-sm"
+  >
+    <div class="flex items-start gap-3">
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center gap-2">
+          <span
+            class="inline-flex rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary"
+          >
+            {{ statusLabel() }}
+          </span>
+
+          <span
+            *ngIf="loading()"
+            class="text-[10px] uppercase tracking-wide text-secondary"
+          >
+            Updating...
+          </span>
+        </div>
+
+        <div class="mt-1 truncate text-sm font-semibold text-primary">
+          {{ dungeonTitle() }}
+        </div>
+
+        <div class="mt-0.5 flex items-center gap-1 text-xs text-secondary">
+          <span>{{ progressText() }}</span>
+          <span>•</span>
+          <span>{{ roomTypeLabel() }}</span>
+        </div>
+
+        <div
+          class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-white/5"
+          aria-hidden="true"
+        >
+          <div
+            class="h-full bg-primary transition-all duration-300"
+            [style.width.%]="progressPercent()"
+          ></div>
+        </div>
+      </div>
+
+      <div
+        class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-sm text-primary"
+      >
+        {{ roomIcon() }}
+      </div>
+    </div>
+  </div>
+</ng-container>

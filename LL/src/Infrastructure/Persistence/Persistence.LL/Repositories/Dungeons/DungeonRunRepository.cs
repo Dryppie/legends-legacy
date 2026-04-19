@@ -19,9 +19,18 @@ public class DungeonRunRepository : IDungeonRunRepository
         return true;
     }
 
-    public async Task<DungeonRun?> GetDungeonRunAsync(Guid characterId, CancellationToken cancellationToken)
+    public async Task<DungeonRun?> GetDungeonRunByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        return await _context.DungeonRuns.FirstOrDefaultAsync(x => x.CharacterId.Equals(characterId), cancellationToken);
+        return await _context.DungeonRuns
+            .Include(x => x.Rooms.OrderBy(r => r.RoomIndex))
+            .FirstOrDefaultAsync(x => x.CharacterId.Equals(characterId), cancellationToken);
+    }
+
+    public async Task<DungeonRun?> GetDungeonRunByDungeonIdAsync(Guid dungeonId, CancellationToken cancellationToken)
+    {
+        return await _context.DungeonRuns
+             .Include(x => x.Rooms.OrderBy(r => r.RoomIndex))
+             .FirstOrDefaultAsync(x => x.Id.Equals(dungeonId), cancellationToken);
     }
 
     public Task<bool> UpdateDungeonRunAsync(DungeonRun dungeonRun, CancellationToken cancellationToken)

@@ -1,6 +1,10 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { finalize } from 'rxjs/operators';
-import { ActiveDungeonRun, DungeonService } from './dungeon.service';
+import {
+  DungeonRun,
+  DungeonService,
+  ExecuteDungeonActionRequest,
+} from './dungeon.service';
 import { DungeonPreviewData } from '../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
 import { DungeonDifficulty } from '../../../../shared/models/enums/dungeonDifficulty';
 
@@ -10,7 +14,7 @@ import { DungeonDifficulty } from '../../../../shared/models/enums/dungeonDiffic
 export class DungeonStateService {
   /* ─────────── writable signals ─────────── */
   private readonly _dungeons = signal<DungeonPreviewData[]>([]);
-  private readonly _activeDungeon = signal<ActiveDungeonRun | null>(null);
+  private readonly _activeDungeon = signal<DungeonRun | null>(null);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
 
@@ -70,36 +74,46 @@ export class DungeonStateService {
       });
   }
 
-  progressDungeon(): void {
+  executeAction(actionId: string, payload?: unknown): void {
+    const run = this._activeDungeon();
+    if (!run?.id) {
+      this._error.set('No active dungeon run found');
+      return;
+    }
+
     this._loading.set(true);
     this._error.set(null);
 
     this.service
-      .progressDungeon()
+      .executeDungeonAction(run.id, { actionId, payload })
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (run) => {
-          this._activeDungeon.set(run);
+        next: (updatedRun) => {
+          this._activeDungeon.set(updatedRun);
         },
         error: (e) =>
-          this._error.set(e.message ?? 'Failed to progress dungeon'),
+          this._error.set(e.message ?? 'Failed to execute dungeon action'),
       });
   }
 
-  leaveDungeon(): void {
-    this._loading.set(true);
-    this._error.set(null);
+  fight(): void {
+    this.executeAction('fight');
+  }
 
-    this.service
-      .leaveDungeon()
-      .pipe(finalize(() => this._loading.set(false)))
-      .subscribe({
-        next: () => {
-          this._activeDungeon.set(null);
-          // this.loadAvailableDungeons();
-        },
-        error: (e) => this._error.set(e.message ?? 'Failed to leave dungeon'),
-      });
+  continueAtCheckpoint(): void {
+    this.executeAction('continue');
+  }
+
+  withdraw(): void {
+    this.executeAction('withdraw');
+  }
+
+  leaveDungeon(): void {
+    this.executeAction('leave');
+  }
+
+  chooseEventAction(actionId: string, payload?: unknown): void {
+    this.executeAction(actionId, payload);
   }
 
   claimDungeonRewards(): void {
@@ -120,7 +134,7 @@ export class DungeonStateService {
   }
 
   /* ─────────── optional optimistic helpers ─────────── */
-  setActiveDungeon(run: ActiveDungeonRun | null): void {
+  setActiveDungeon(run: DungeonRun | null): void {
     this._activeDungeon.set(run);
   }
 

@@ -1,29 +1,65 @@
 import { Injectable } from '@angular/core';
 import { Observable, catchError, throwError } from 'rxjs';
 import { ApiService } from '../api.service';
-import { DungeonPreviewData } from '../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
-import { DungeonDifficulty } from '../../../../shared/models/enums/dungeonDifficulty';
 import { StartDungeonRequest } from '../../../../shared/models/requestDtos/dungeons/startDungeonRequest';
 
-export interface ActiveDungeonRoom {
-  index: number;
-  type: string;
-  title?: string;
-  description?: string;
-  completed: boolean;
+export enum DungeonRunStatus {
+  Active = 'Active',
+  Completed = 'Completed',
+  Failed = 'Failed',
+  Withdrawn = 'Withdrawn',
 }
 
-export interface ActiveDungeonRun {
-  runId: string;
-  dungeonId: string;
-  dungeonTitle: string;
-  difficulty: DungeonDifficulty;
+export enum RoomType {
+  Unknown = 'Unknown',
+  Combat = 'Combat',
+  MiniBoss = 'MiniBoss',
+  Boss = 'Boss',
+  Event = 'Event',
+  Treasure = 'Treasure',
+  Shrine = 'Shrine',
+  Trap = 'Trap',
+  Checkpoint = 'Checkpoint',
+}
+
+export enum RoomInstanceStatus {
+  Pending = 'Pending',
+  InProgress = 'InProgress',
+  Completed = 'Completed',
+  Failed = 'Failed',
+  Skipped = 'Skipped',
+}
+
+export enum EventOutcomeType {
+  Treasure = 'Treasure',
+  Shrine = 'Shrine',
+  Trap = 'Trap',
+}
+
+export interface RoomInstance {
+  id: string;
+  roomIndex: number;
+  type: RoomType;
+  status: RoomInstanceStatus;
+  encounterIds: string[];
+  eventOutcome?: EventOutcomeType | null;
+}
+
+export interface DungeonRun {
+  id: string;
+  characterId: string;
+  dungeonDefinitionName: string;
+  seed: number;
+  status: DungeonRunStatus;
   currentRoomIndex: number;
-  totalRooms: number;
-  rooms: ActiveDungeonRoom[];
-  canClaimReward: boolean;
-  canLeave: boolean;
-  isCompleted: boolean;
+  rooms: RoomInstance[];
+  createdAt: string;
+  completedAt?: string | null;
+}
+
+export interface ExecuteDungeonActionRequest {
+  actionId: string;
+  payload?: unknown;
 }
 
 @Injectable({
@@ -40,7 +76,7 @@ export class DungeonService {
   //   );
   // }
 
-  getActiveDungeon(): Observable<ActiveDungeonRun | null> {
+  getActiveDungeon(): Observable<DungeonRun | null> {
     return this.api.get('dungeon/getActiveDungeon').pipe(
       catchError(() => {
         return throwError(() => new Error('Failed to get active dungeon'));
@@ -48,7 +84,7 @@ export class DungeonService {
     );
   }
 
-  startDungeon(request: StartDungeonRequest): Observable<ActiveDungeonRun> {
+  startDungeon(request: StartDungeonRequest): Observable<DungeonRun> {
     return this.api.post('dungeon/startDungeon', request).pipe(
       catchError(() => {
         return throwError(() => new Error('Failed to start dungeon'));
@@ -56,8 +92,11 @@ export class DungeonService {
     );
   }
 
-  progressDungeon(): Observable<ActiveDungeonRun> {
-    return this.api.post('dungeon/progressDungeon').pipe(
+  executeDungeonAction(
+    runId: string,
+    request: ExecuteDungeonActionRequest,
+  ): Observable<DungeonRun> {
+    return this.api.post(`dungeon/executeAction/${runId}`, request).pipe(
       catchError(() => {
         return throwError(() => new Error('Failed to progress dungeon'));
       }),

@@ -31,6 +31,7 @@ public sealed class DungeonRunFactory
             Id = Guid.NewGuid(),
             CharacterId = characterId,
             DungeonDefinitionId = dungeonDefinitionId,
+            DungeonDefinitionName = dungeon.Name,
             Seed = seed,
             Status = DungeonRunStatus.Active,
             CurrentRoomIndex = 0,

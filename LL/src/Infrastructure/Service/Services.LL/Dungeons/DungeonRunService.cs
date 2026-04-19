@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Entities;
+using Domain.Helpers.Constants;
 using Domain.Interfaces.Combat;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
@@ -45,11 +46,14 @@ public sealed class DungeonRunService : IDungeonRunService
 
     public async Task<DungeonRun?> GetDungeonRunAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        return await _dungeonRuns.GetDungeonRunAsync(characterId, cancellationToken);
+        return await _dungeonRuns.GetDungeonRunByCharacterIdAsync(characterId, cancellationToken);
     }
 
-    public async Task<DungeonRun> StartRunAsync(Guid characterId, string dungeonDefinitionId, CancellationToken ct)
+    public async Task<DungeonRun?> StartRunAsync(Guid characterId, string dungeonDefinitionId, CancellationToken ct)
     {
+        var currentRun = await _dungeonRuns.GetDungeonRunByCharacterIdAsync(characterId, ct);
+        if (currentRun != null) return null;
+
         // Seed: use cryptographic RNG or server-side monotonic; keep it server-owned.
         var seed = Random.Shared.Next(int.MinValue, int.MaxValue);
 
@@ -59,73 +63,198 @@ public sealed class DungeonRunService : IDungeonRunService
         return run;
     }
 
-    public async Task<DungeonRun?> TickRunAsync(Guid runId, CancellationToken ct)
+    public async Task<DungeonRun?> ExecuteAction(Guid runId, string actionId, object? payload, CancellationToken ct)
     {
-        var run = await _dungeonRuns.GetDungeonRunAsync(runId, ct);
+        var run = await _dungeonRuns.GetDungeonRunByDungeonIdAsync(runId, ct);
         if (run == null) return null;
-        if (run.Status != DungeonRunStatus.Active) return run;
 
-        //var dungeon = await _dungeons.GetDungeonAsync(run.DungeonDefinitionId, ct);
+        if (run.Status != DungeonRunStatus.Active)
+            return run;
+
         var snapshot = await _characterSnapshots.GetSnapshotByCharacterIdAsync(run.CharacterId, ct);
         if (snapshot == null) return null;
 
-        //var rng = new DeterministicRng(run.Seed);
-
-        // IMPORTANT: advance RNG consumption to current position deterministically.
-        // Simple approach: burn RNG based on progression counters. Better approach: persist RNG state.
-        // I strongly recommend persisting RNG state for absolute stability:
-        //   run.Seed = rng.GetState() each tick after consuming.
-        // For now, we’ll persist RNG state at the end of Tick.
-
         var room = GetCurrentRoom(run);
-
-        // If we landed on a checkpoint: stop (player decision needed).
-        if (room.Type == RoomType.Checkpoint)
-        {
-            room.Status = RoomInstanceStatus.Active;
-            await _dungeonRuns.UpdateDungeonRunAsync(run, ct);
+        if (room == null)
             return run;
+
+        if (room.Status == RoomInstanceStatus.Completed)
+            return run;
+
+        actionId = actionId?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(actionId))
+            throw new InvalidOperationException("ActionId is required.");
+
+        switch (room.Type)
+        {
+            case RoomType.Combat:
+            case RoomType.MiniBoss:
+            case RoomType.Boss:
+                await ExecuteCombatRoomAction(run, snapshot, room, actionId, payload, ct);
+                break;
+
+            case RoomType.Event:
+                await ExecuteEventRoomAction(run, snapshot, room, actionId, payload, ct);
+                break;
+
+            case RoomType.Checkpoint:
+                await ExecuteCheckpointRoomAction(run, room, actionId, payload, ct);
+                break;
+
+            default:
+                throw new InvalidOperationException($"Unsupported room type: {room.Type}");
         }
 
-        // Ensure floor modifiers applied on entry (only once).
-        //ApplyFloorEntryModifiersIfNeeded(run, dungeon, floor);
+        return run;
+    }
 
-        //switch (room.Type)
+    private async Task ExecuteCombatRoomAction(DungeonRun run, CharacterSnapshot snapshot, RoomInstance room, string actionId, object? payload, CancellationToken ct)
+    {
+        switch (actionId.ToLowerInvariant())
+        {
+            case "fight":
+                await ResolveCombatRoom(run, snapshot, room, ct);
+                break;
+
+            case "leave":
+                AbandonRun(run);
+                break;
+
+            default:
+                throw new InvalidOperationException(
+                    $"Action '{actionId}' is not valid for room type '{room.Type}'.");
+        }
+    }
+
+    private async Task ExecuteCheckpointRoomAction(DungeonRun run, RoomInstance room, string actionId, object? payload, CancellationToken ct)
+    {
+        room.Status = RoomInstanceStatus.Active;
+
+        switch (actionId.ToLowerInvariant())
+        {
+            case "continue":
+                CompleteRoom(run, room);
+                MoveToNextRoom(run);
+                break;
+
+            case "withdraw":
+                //CompleteRunWithCheckpointRewards(run);
+                break;
+
+            case "leave":
+                AbandonRun(run);
+                break;
+
+            default:
+                throw new InvalidOperationException(
+                    $"Action '{actionId}' is not valid for room type '{room.Type}'.");
+        }
+
+        await Task.CompletedTask;
+    }
+
+    private async Task ExecuteEventRoomAction(DungeonRun run, CharacterSnapshot snapshot, RoomInstance room, string actionId, object? payload, CancellationToken ct)
+    {
+        switch (actionId.ToLowerInvariant())
+        {
+            case DungeonActionConstants.EventInspect:
+                await ResolveEventChoice(run, snapshot, room, DungeonActionConstants.EventInspect, ct);
+                break;
+
+            case DungeonActionConstants.EventAccept:
+                await ResolveEventChoice(run, snapshot, room, DungeonActionConstants.EventAccept, ct);
+                break;
+
+            case DungeonActionConstants.EventIgnore:
+                await ResolveEventChoice(run, snapshot, room, DungeonActionConstants.EventIgnore, ct);
+                break;
+
+            case DungeonActionConstants.Leave:
+                AbandonRun(run);
+                break;
+
+            default:
+                throw new InvalidOperationException(
+                    $"Action '{actionId}' is not valid for room type '{room.Type}'.");
+        }
+    }
+
+    private async Task ResolveCombatRoom(DungeonRun run, CharacterSnapshot snapshot, RoomInstance room, CancellationToken ct)
+    {
+        room.Status = RoomInstanceStatus.Active;
+
+        //var encounterIds = room.EncounterIds?.ToList() ?? [];
+        //if (encounterIds.Count == 0)
+        //    throw new InvalidOperationException("Combat room has no encounters.");
+
+        //var entities = await _entityService.CreateEntitiesAsync(encounterIds, ct);
+        //if (entities == null || entities.Count == 0)
+        //    throw new InvalidOperationException("Failed to create combat entities.");
+
+        //var result = await _combat.ExecuteAsync(snapshot, entities, ct);
+
+        //if (result.PlayerWon)
         //{
-        //    //case RoomType.Entrance:
-        //    //    // Auto-advance entrance.
-        //    //    CompleteRoom(run, room);
-        //    //    MoveToNextFloor(run);
-        //    //    break;
+        //    ApplyCombatRewards(run, room, result);
+        //    CompleteRoom(run, room);
+        //    MoveToNextRoom(run);
+        //}
+        //else
+        //{
+        //    ApplyFailureOutcome(run, room, result);
+        //    run.Status = DungeonRunStatus.Failed;
+        //    room.Status = RoomInstanceStatus.Completed;
+        //}
+    }
 
-        //    case RoomType.Event:
-        //        await ResolveEventFloor(run, dungeon, snapshot, room, rng, ct);
+    private async Task ResolveEventChoice(DungeonRun run, CharacterSnapshot snapshot, RoomInstance room, string optionId, CancellationToken ct)
+    {
+        room.Status = RoomInstanceStatus.Active;
+
+        // Replace this with real event resolution logic.
+        // Example:
+        // - treasure -> loot
+        // - shrine -> buff
+        // - trap -> damage
+        // - mystery -> weighted random outcome
+
+        //switch (optionId)
+        //{
+        //    case DungeonActionConstants.EventInspect:
+        //        ApplyEventInspectOutcome(run, room);
         //        break;
 
-        //    case RoomType.Combat:
-        //        await ResolveCombatFloor(run, snapshot, room, rng, ct);
+        //    case DungeonActionConstants.EventAccept:
+        //        ApplyEventAcceptOutcome(run, room);
         //        break;
 
-        //    case RoomType.MiniBoss:
-        //        await ResolveMiniBossFloor(run, dungeon, snapshot, room, rng, ct);
-        //        break;
-
-        //    case RoomType.Boss:
-        //        await ResolveBossFloor(run, dungeon, snapshot, room, rng, ct);
+        //    case DungeonActionConstants.EventIgnore:
+        //        ApplyEventIgnoreOutcome(run, room);
         //        break;
 
         //    default:
-        //        throw new InvalidOperationException($"Unsupported floor type: {room.Type}");
+        //        throw new InvalidOperationException($"Unknown event option '{optionId}'.");
         //}
 
-        // Persist RNG state forward (critical for deterministic progression across ticks).
-        //run.Seed = rng.GetState();
+        CompleteRoom(run, room);
+        MoveToNextRoom(run);
 
-        // Expire modifiers if needed
-        //ExpireModifiers(run);
+        await Task.CompletedTask;
+    }
 
-        await _dungeonRuns.UpdateDungeonRunAsync(run, ct);
-        return run;
+    private void MoveToNextRoom(DungeonRun run)
+    {
+        run.CurrentRoomIndex++;
+
+        if (run.Rooms == null || run.CurrentRoomIndex >= run.Rooms.Count)
+        {
+            run.Status = DungeonRunStatus.Completed;
+        }
+    }
+
+    private void AbandonRun(DungeonRun run)
+    {
+        run.Status = DungeonRunStatus.Failed;
     }
 
     //public async Task<DungeonRun> WithdrawAsync(Guid runId, CancellationToken ct)

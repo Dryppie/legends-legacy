@@ -1,0 +1,149 @@
+<div class="flex h-full w-full flex-col gap-4 overflow-hidden">
+  <!-- Header -->
+
+  <!-- Content -->
+  <div class="grid min-h-0 flex-1 gap-4 xl:grid-cols-[1fr_minmax(0,2fr)_1fr]">
+    <!-- Run info -->
+    <div class="rounded border border-primary/20 bg-black/20 p-4">
+      <h1 class="pb-3 text-center text-2xl font-bold text-primary">
+        {{ dungeonTitle() }}
+      </h1>
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-secondary">Status</span>
+          <span class="text-primary">{{ dungeonStatus() }}</span>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <span class="text-secondary">Remaining</span>
+          <span class="text-primary">{{ remainingRooms() }}</span>
+        </div>
+
+        <div class="mb-2 flex items-center justify-between text-sm">
+          <span class="text-secondary">Progress</span>
+          <span class="text-primary"
+            >{{ currentRoomNumber() }}/{{ totalRooms() }}</span
+          >
+        </div>
+
+        <div
+          class="h-3 overflow-hidden rounded-full border border-primary/20 bg-white/5"
+        >
+          <div
+            class="h-full bg-primary transition-all duration-300"
+            [style.width.%]="progressPercent()"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Current room -->
+    <div
+      class="flex flex-col gap-4 rounded border border-primary/20 bg-black/20 p-6 text-center"
+    >
+      <div class="flex justify-center">
+        <div class="rounded border border-primary/20 bg-black/20 p-2">
+          <div class="flex gap-2 overflow-x-auto">
+            <div
+              *ngFor="
+                let room of activeDungeon()?.rooms;
+                let i = index;
+                trackBy: trackByIndex
+              "
+              class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-primary"
+              [ngClass]="getRoomStateClasses(i)"
+            >
+              {{ getRoomIcon(room.type) }}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-3xl text-primary"
+      >
+        {{ getRoomIcon(currentRoom()?.type) }}
+      </div>
+
+      <div class="text-sm uppercase tracking-wide text-secondary">
+        Current Room
+      </div>
+      <h2 class="text-3xl font-bold text-primary">
+        {{ getRoomTypeLabel(currentRoom()?.type) }}
+      </h2>
+      <p class="text-secondary">
+        Room {{ currentRoomNumber() }} of {{ totalRooms() }}
+      </p>
+      <p class="italic text-secondary">{{ getCurrentStepText() }}</p>
+
+      <div
+        *ngIf="currentRoom()?.encounterIds?.length"
+        class="mx-auto max-w-xl rounded border border-white/10 bg-black/20 p-4 text-left"
+      >
+        <div class="mb-2 text-sm uppercase tracking-wide text-secondary">
+          Encounters
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <span
+            *ngFor="let encounterId of currentRoom()?.encounterIds"
+            class="rounded border border-primary/20 bg-primary/5 px-2 py-1 text-sm text-primary"
+          >
+            {{ formatEncounterName(encounterId) }}
+          </span>
+        </div>
+      </div>
+      <div class="flex items-center justify-center gap-3">
+        <app-regular-button
+          *ngIf="primaryActionLabel()"
+          [text]="primaryActionLabel()!"
+          [disabled]="!canExecutePrimaryAction()"
+          (click)="executePrimaryAction()"
+        />
+
+        <app-regular-button
+          *ngIf="isCheckpointRoom() && canLeave()"
+          variant="danger"
+          text="Leave Dungeon"
+          [disabled]="!canLeave()"
+          (click)="leaveDungeon()"
+        />
+      </div>
+    </div>
+
+    <!-- Upcoming -->
+    <div class="rounded border border-primary/20 bg-black/20 p-4">
+      <div class="mb-3 text-sm uppercase tracking-wide text-secondary">
+        Upcoming Rooms
+      </div>
+
+      <div class="space-y-2">
+        <div
+          *ngFor="
+            let room of upcomingRooms().slice(0, 5);
+            let i = index;
+            trackBy: trackByIndex
+          "
+          class="flex items-center justify-between rounded border border-white/10 bg-black/20 px-3 py-3"
+          [ngClass]="i === 0 ? 'border-primary/30 bg-primary/5' : ''"
+        >
+          <div class="flex items-center gap-3">
+            <span class="text-primary">{{ getRoomIcon(room.type) }}</span>
+            <div>
+              <div class="text-primary">{{ getRoomTypeLabel(room.type) }}</div>
+              <div *ngIf="i === 0" class="text-xs text-secondary">
+                Next room
+              </div>
+            </div>
+          </div>
+
+          <span class="text-xs text-secondary"
+            >#{{ currentRoomNumber() + i + 1 }}</span
+          >
+        </div>
+
+        <p *ngIf="!upcomingRooms().length" class="text-secondary">
+          No upcoming rooms.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

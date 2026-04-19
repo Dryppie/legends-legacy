@@ -235,6 +235,10 @@ namespace Persistence.LL.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("DungeonDefinitionName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("Seed")
                         .HasColumnType("integer");
 

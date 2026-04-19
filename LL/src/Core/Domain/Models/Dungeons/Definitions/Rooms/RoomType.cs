@@ -2,6 +2,7 @@
 
 public enum RoomType
 {
+    Unknown = 0,
     Combat = 1,
     Event = 2,
     MiniBoss = 3,

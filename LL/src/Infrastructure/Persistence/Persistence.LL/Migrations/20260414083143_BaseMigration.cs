@@ -47,6 +47,7 @@ namespace Persistence.LL.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
                     DungeonDefinitionId = table.Column<string>(type: "text", nullable: false),
+                    DungeonDefinitionName = table.Column<string>(type: "text", nullable: false),
                     Seed = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     CurrentRoomIndex = table.Column<int>(type: "integer", nullable: false),

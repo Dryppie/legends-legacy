@@ -1,22 +1,34 @@
-﻿using Application.UseCases.Dungeons.Commands.StartDungeonRun;
+﻿using Application.UseCases.Dungeons.Commands.ExecuteDungeonAction;
+using Application.UseCases.Dungeons.Commands.StartDungeonRun;
+using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Dungeons.Queries.GetDungeonRun;
 using Common.Primitives;
 using Domain.Models.Dungeons.Definitions;
-using Domain.Models.Dungeons.Runs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace API.LL.Controllers.V1;
 
 [Authorize]
 public class DungeonController : BaseController
 {
+    [HttpGet("GetActiveDungeon")]
+    public async Task<ActionResult<DungeonRunDto?>> GetActiveDungeon() =>
+        await Mediator.Send(new GetDungeonRunQuery(CurrentCharacterGuid));
+
     public record StartDungeonRequest(string DungeonId, DungeonTier DungeonTier);
     [HttpPost("StartDungeon")]
-    public async Task<ActionResult<Response<DungeonRun>>> StartDungeon([FromBody] StartDungeonRequest startDungeonRequest) =>
+    public async Task<ActionResult<Response<DungeonRunDto>>> StartDungeon([FromBody] StartDungeonRequest startDungeonRequest) =>
         await Mediator.Send(new StartDungeonRunCommand(CurrentCharacterGuid, startDungeonRequest.DungeonId, startDungeonRequest.DungeonTier));
 
-    [HttpGet("GetActiveDungeon")]
-    public async Task<ActionResult<DungeonRun?>> GetActiveDungeon() =>
-        await Mediator.Send(new GetDungeonRunQuery(CurrentCharacterGuid));
+    public class ExecuteDungeonActionRequest
+    {
+        public string ActionId { get; set; } = string.Empty;
+        public JsonElement? Payload { get; set; }
+    }
+
+    [HttpPost("ExecuteAction/{runId}")]
+    public async Task<ActionResult<Response<DungeonRunDto>>> ExecuteAction(Guid runId, ExecuteDungeonActionRequest request) =>
+        await Mediator.Send(new ExecuteDungeonActionCommand(runId, request.ActionId, request.Payload));
 }

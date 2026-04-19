@@ -21,6 +21,7 @@ import { ShortNumberPipe } from '../../../shared/pipes/number-format/short-numbe
 import { NumberFormatPipe } from '../../../shared/pipes/number-format/number-format.pipe';
 import { CharacterStateService } from '../../../core/services/api/character/character-state.service';
 import { SidebarSection } from '../../../shared/models/sidebar-item';
+import { CurrentDungeonComponent } from '../../../shared/components/current-dungeon/current-dungeon.component';
 
 @Component({
   selector: 'app-sidebar',
@@ -33,6 +34,7 @@ import { SidebarSection } from '../../../shared/models/sidebar-item';
     CurrentActionComponent,
     ShortNumberPipe,
     NumberFormatPipe,
+    CurrentDungeonComponent,
   ],
   templateUrl: './sidebar.component.html',
 })

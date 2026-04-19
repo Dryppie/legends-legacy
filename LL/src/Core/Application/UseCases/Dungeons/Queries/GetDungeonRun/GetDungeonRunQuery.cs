@@ -1,12 +1,12 @@
 ﻿using Application.Interfaces.Services.LL.Dungeons;
 using Application.MediatR.Markers;
+using Application.UseCases.Dungeons.Dtos;
 using AutoMapper;
-using Domain.Models.Dungeons.Runs;
 using MediatR;
 
 namespace Application.UseCases.Dungeons.Queries.GetDungeonRun;
-public record GetDungeonRunQuery(Guid CharacterId) : IQuery<DungeonRun?>;
-public class GetDungeonRunQueryHandler : IRequestHandler<GetDungeonRunQuery, DungeonRun?>
+public record GetDungeonRunQuery(Guid CharacterId) : IQuery<DungeonRunDto?>;
+public class GetDungeonRunQueryHandler : IRequestHandler<GetDungeonRunQuery, DungeonRunDto?>
 {
     private readonly IDungeonRunService _dungeonRunService;
     private readonly IMapper _mapper;
@@ -17,10 +17,12 @@ public class GetDungeonRunQueryHandler : IRequestHandler<GetDungeonRunQuery, Dun
         _mapper = mapper;
     }
 
-    public async Task<DungeonRun?> Handle(GetDungeonRunQuery request, CancellationToken cancellationToken)
+    public async Task<DungeonRunDto?> Handle(GetDungeonRunQuery request, CancellationToken cancellationToken)
     {
-        var dungeonRun = await _dungeonRunService.GetDungeonRunAsync(request.CharacterId, cancellationToken);
+        var dungeon = await _dungeonRunService.GetDungeonRunAsync(request.CharacterId, cancellationToken);
+        if (dungeon == null) { return null; }
 
-        return _mapper.Map<DungeonRun>(dungeonRun);
+        var result = _mapper.Map<DungeonRunDto>(dungeon);
+        return result;
     }
 }

@@ -6,6 +6,7 @@ public sealed class DungeonRun
     public Guid CharacterId { get; set; }
 
     public string DungeonDefinitionId { get; set; } = string.Empty;
+    public string DungeonDefinitionName { get; set; } = string.Empty;
 
     // Deterministic RNG for the run (so you can reproduce and prevent exploits).
     public int Seed { get; set; }

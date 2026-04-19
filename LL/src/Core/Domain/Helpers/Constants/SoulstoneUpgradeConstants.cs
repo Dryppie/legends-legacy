@@ -1,5 +1,5 @@
 ﻿namespace Domain.Helpers.Constants;
-public static class SoulstoneUpgradeContants
+public static class SoulstoneUpgradeConstants
 {
     // Combat
     public const string CombatEssenceDropRate = "CombatEssenceDropRate";

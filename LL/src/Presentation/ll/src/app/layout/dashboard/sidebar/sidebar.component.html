@@ -36,11 +36,14 @@
         </div>
       </div>
 
-      <app-current-action
-        *ngIf="displayCurrentAction"
-        class="w-full"
-        (click)="navigateToAction(); toggleSidebar()"
-      ></app-current-action>
+      <div class="flex flex-col">
+        <app-current-action
+          *ngIf="displayCurrentAction"
+          class="w-full"
+          (click)="navigateToAction(); toggleSidebar()"
+        ></app-current-action>
+        <app-current-dungeon></app-current-dungeon>
+      </div>
     </div>
 
     <div
