@@ -12,5 +12,5 @@ public class SourceIsSelfFilter : ITriggerFilter
 
     public bool IsMatch(CombatEvent e) => _owner != null && e.Source != null && e.Source == _owner;
 
-    public ITriggerFilter Clone() => new SourceIsSelfFilter(_owner) { _owner = _owner?.Copy() };
+    public ITriggerFilter Clone() => new SourceIsSelfFilter(_owner) { _owner = _owner?.DeepCloneForEncounter() };
 }

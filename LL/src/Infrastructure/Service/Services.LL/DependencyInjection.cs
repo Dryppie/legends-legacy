@@ -22,6 +22,13 @@ using Services.LL.CharacterActions;
 using Services.LL.Colosseum;
 using Services.LL.Combat;
 using Services.LL.Combat.CombatEngine;
+using Services.LL.Combat.Layers.Orchestration;
+using Services.LL.Combat.Layers.Orchestration.Idle;
+using Services.LL.Combat.Layers.Resolution;
+using Services.LL.Combat.Layers.Resolution.Idle;
+using Services.LL.Combat.Layers.Rewards;
+using Services.LL.Combat.Layers.Rewards.Idle;
+using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Combat.Stats;
 using Services.LL.Combat.Statuses;
 using Services.LL.Dungeons;
@@ -31,6 +38,10 @@ using Services.LL.Entities.Creatures;
 using Services.LL.Essences;
 using Services.LL.Guilds;
 using Services.LL.Interfaces;
+using Services.LL.Interfaces.Combat.Orchestration;
+using Services.LL.Interfaces.Combat.Resolution;
+using Services.LL.Interfaces.Combat.Resolution.Idle;
+using Services.LL.Interfaces.Combat.Reward;
 using Services.LL.Inventories;
 using Services.LL.Items;
 using Services.LL.JsonDefinitions;
@@ -77,6 +88,7 @@ public static class DependencyInjection
         services.AddScoped<IColosseumService, ColosseumService>();
         services.AddScoped<IRatingService, RatingService>();
 
+        services.AddCombatDependencyInjection();
         services.AddScoped<ICombatService, CombatService>();
         services.AddScoped<ICombatSetupService, CombatSetupService>();
         services.AddScoped<ICombatContext, CombatContext>();
@@ -139,6 +151,44 @@ public static class DependencyInjection
         services.AddJsonDefinitionReader(config, contentRootPath);
 
         return services;
+    }
+
+    private static void AddCombatDependencyInjection(this IServiceCollection services)
+    {
+        // Orchestration layer
+        services.AddScoped<ICombatOrchestrationCoordinator, CombatOrchestrationCoordinator>();
+        services.AddScoped<ICombatOrchestrator, IdleCombatOrchestrator>();
+        services.AddScoped<IIdleCombatPlanner, IdleCombatPlanner>();
+
+        // Resolution layer
+        services.AddScoped<ICombatResolutionSession, IdleCombatResolutionSession>();
+        services.AddScoped<IIdleCombatResolutionSessionFactory, IdleCombatResolutionSessionFactory>();
+        services.AddScoped<ICombatEncounterResolver, DefaultCombatEncounterResolver>();
+        services.AddScoped<IEncounterEntityLoader, EncounterEntityLoader>();
+        services.AddScoped<ICombatEncounterRuntimeFactory, CombatEncounterRuntimeFactory>();
+        services.AddScoped<ICombatEngineExecutor, CombatEngineExecutor>();
+        services.AddScoped<ICombatEncounterResultFactory, CombatEncounterResultFactory>();
+        services.AddScoped<ICombatantFactory, CombatantFactory>();
+
+        // Outcome layer
+        services.AddScoped<ICinderRewardCalculator, DefaultIdleCinderRewardCalculator>();
+        services.AddScoped<ICombatOutcomeCoordinator, CombatOutcomeCoordinator>();
+        services.AddScoped<ICombatOutcomeProcessor, IdleCombatOutcomeProcessor>();
+        services.AddScoped<ICurrencyRewardWriter, CharacterCurrencyRewardWriter>();
+        services.AddScoped<IExperienceRewardWriter, CharacterExperienceRewardWriter>();
+        services.AddScoped<IIdleCombatRewardApplier, IdleCombatRewardApplier>();
+        services.AddScoped<IIdleCombatRewardCalculator, IdleCombatRewardCalculator>();
+        services.AddScoped<IIdleCombatRewardFactBuilder, IdleCombatRewardFactBuilder>();
+        services.AddScoped<IIdleCombatSessionFactory, IdleCombatSessionFactory>();
+        services.AddScoped<ILootRewardWriter, InventoryLootRewardWriter>();
+        services.AddScoped<IRandomSource, SharedRandomSource>();
+        services.AddScoped<ISoulstoneRewardCalculator, PoissonSoulstoneRewardCalculator>();
+
+        // Options
+        services.Configure<SoulstoneRewardOptions>(options =>
+        {
+            options.BaseDropRatePerSecond = 1d / 3600d;
+        });
     }
 
     private static void AddJsonDefinitionReader(this IServiceCollection services, IConfiguration config, string contentRootPath)

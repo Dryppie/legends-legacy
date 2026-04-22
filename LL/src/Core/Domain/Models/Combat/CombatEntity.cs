@@ -167,7 +167,7 @@ public class CombatEntity
         return CombatAttributes.TryGetValue(attributeType, out var attributeValue) ? (int)attributeValue : 0;
     }
 
-    public CombatEntity Copy()
+    public CombatEntity DeepCloneForEncounter()
     {
         return new CombatEntity(this);
     }
