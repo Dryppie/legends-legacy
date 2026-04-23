@@ -1,12 +1,14 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { finalize } from 'rxjs/operators';
 import {
+  DungeonActionOutcome,
   DungeonRun,
   DungeonService,
   ExecuteDungeonActionRequest,
 } from './dungeon.service';
 import { DungeonPreviewData } from '../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
 import { DungeonDifficulty } from '../../../../shared/models/enums/dungeonDifficulty';
+import { CombatSessionDto } from '../../../../shared/models/Dtos/combatResultDto';
 
 @Injectable({
   providedIn: 'root',
@@ -17,8 +19,14 @@ export class DungeonStateService {
   private readonly _activeDungeon = signal<DungeonRun | null>(null);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
+  private readonly _combatSession = signal<CombatSessionDto | null>(null);
+  private readonly _lastOutcome = signal<DungeonActionOutcome | null>(null);
+  private readonly _message = signal<string | null>(null);
 
   /* ─────────── public, read-only selectors ─────────── */
+  readonly lastOutcome = computed(() => this._lastOutcome());
+  readonly message = computed(() => this._message());
+  readonly combatSession = computed(() => this._combatSession());
   readonly dungeons = computed(() => this._dungeons());
   readonly activeDungeon = computed(() => this._activeDungeon());
   readonly loading = computed(() => this._loading());
@@ -83,13 +91,18 @@ export class DungeonStateService {
 
     this._loading.set(true);
     this._error.set(null);
+    this._message.set(null);
 
     this.service
       .executeDungeonAction(run.id, { actionId, payload })
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (updatedRun) => {
-          this._activeDungeon.set(updatedRun);
+        next: (result) => {
+          this._activeDungeon.set(result.run);
+          this._lastOutcome.set(result.outcome);
+          this._combatSession.set(result.combatSession ?? null);
+          this._message.set(result.message ?? null);
+          console.log(this.combatSession());
         },
         error: (e) =>
           this._error.set(e.message ?? 'Failed to execute dungeon action'),

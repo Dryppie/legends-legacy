@@ -1,10 +1,14 @@
 ﻿using Application.Interfaces.Services.LL.Dungeons;
-using Application.Interfaces.Services.LL.Entities;
 using Domain.Helpers.Constants;
-using Domain.Interfaces.Combat;
+using Domain.Models.CharacterActions.Sessions;
+using Domain.Models.Combat;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Snapshots;
+using Services.LL.Combat.Layers.Orchestration.Models;
+using Services.LL.Combat.Layers.Rewards.Models;
+using Services.LL.Interfaces.Combat.Orchestration;
+using Services.LL.Interfaces.Combat.Reward;
 
 namespace Services.LL.Dungeons;
 
@@ -14,8 +18,8 @@ public sealed class DungeonRunService : IDungeonRunService
     //private readonly IEncounterRepository _encounters;
     private readonly ICharacterSnapshotRepository _characterSnapshots;
     //private readonly IEncounterSelector _selector;
-    private readonly IEntityService _entityService;
-    private readonly ICombatContext _combat;
+    private readonly ICombatOrchestrationCoordinator _orchestrationCoordinator;
+    private readonly ICombatOutcomeCoordinator _outcomeCoordinator;
     private readonly DungeonRunFactory _factory;
 
     // Blessings are offered on shrine events; you’ll likely have a repository for these.
@@ -28,8 +32,8 @@ public sealed class DungeonRunService : IDungeonRunService
         //IEncounterRepository encounters,
         ICharacterSnapshotRepository characterSnapshots,
         //IEncounterSelector selector,
-        IEntityService entityService,
-        ICombatContext combat,
+        ICombatOrchestrationCoordinator orchestrationCoordinator,
+        ICombatOutcomeCoordinator outcomeCoordinator,
         DungeonRunFactory factory
         //IDungeonRunStore runStore,
         /*IReadOnlyList<Guid> globalBlessingPool*/)
@@ -38,8 +42,8 @@ public sealed class DungeonRunService : IDungeonRunService
         //_encounters = encounters;
         _characterSnapshots = characterSnapshots;
         //_selector = selector;
-        _entityService = entityService;
-        _combat = combat;
+        _orchestrationCoordinator = orchestrationCoordinator;
+        _outcomeCoordinator = outcomeCoordinator;
         _factory = factory;
         //_globalBlessingPool = globalBlessingPool;
     }
@@ -63,62 +67,64 @@ public sealed class DungeonRunService : IDungeonRunService
         return run;
     }
 
-    public async Task<DungeonRun?> ExecuteAction(Guid runId, string actionId, object? payload, CancellationToken ct)
+    public async Task<ExecuteDungeonActionResult?> ExecuteActionAsync(Guid runId, string actionId, object? payload, CancellationToken ct)
     {
         var run = await _dungeonRuns.GetDungeonRunByDungeonIdAsync(runId, ct);
-        if (run == null) return null;
+        if (run == null)
+            return null;
 
         if (run.Status != DungeonRunStatus.Active)
-            return run;
+            return null;
 
         var snapshot = await _characterSnapshots.GetSnapshotByCharacterIdAsync(run.CharacterId, ct);
-        if (snapshot == null) return null;
+        if (snapshot == null)
+            return null;
 
         var room = GetCurrentRoom(run);
         if (room == null)
-            return run;
+            return null;
 
         if (room.Status == RoomInstanceStatus.Completed)
-            return run;
+            return null;
 
         actionId = actionId?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(actionId))
-            throw new InvalidOperationException("ActionId is required.");
+            return null;
 
         switch (room.Type)
         {
             case RoomType.Combat:
             case RoomType.MiniBoss:
             case RoomType.Boss:
-                await ExecuteCombatRoomAction(run, snapshot, room, actionId, payload, ct);
-                break;
+                return await ExecuteCombatRoomAction(run, snapshot, room, actionId, payload, ct);
 
             case RoomType.Event:
-                await ExecuteEventRoomAction(run, snapshot, room, actionId, payload, ct);
-                break;
+                return await ExecuteEventRoomAction(run, snapshot, room, actionId, payload, ct);
 
             case RoomType.Checkpoint:
-                await ExecuteCheckpointRoomAction(run, room, actionId, payload, ct);
-                break;
+                return await ExecuteCheckpointRoomAction(run, room, actionId, payload, ct);
 
             default:
-                throw new InvalidOperationException($"Unsupported room type: {room.Type}");
+                return null;
         }
-
-        return run;
     }
 
-    private async Task ExecuteCombatRoomAction(DungeonRun run, CharacterSnapshot snapshot, RoomInstance room, string actionId, object? payload, CancellationToken ct)
+    private async Task<ExecuteDungeonActionResult?> ExecuteCombatRoomAction(DungeonRun run, CharacterSnapshot snapshot, RoomInstance room, string actionId, object? payload, CancellationToken ct)
     {
         switch (actionId.ToLowerInvariant())
         {
             case "fight":
-                await ResolveCombatRoom(run, snapshot, room, ct);
-                break;
+                return await ResolveCombatRoom(run, snapshot, room, ct);
 
             case "leave":
                 AbandonRun(run);
-                break;
+
+                return new ExecuteDungeonActionResult
+                {
+                    Run = run,
+                    Outcome = DungeonActionOutcome.RunAbandoned,
+                    Message = "Dungeon run abandoned."
+                };
 
             default:
                 throw new InvalidOperationException(
@@ -126,52 +132,63 @@ public sealed class DungeonRunService : IDungeonRunService
         }
     }
 
-    private async Task ExecuteCheckpointRoomAction(DungeonRun run, RoomInstance room, string actionId, object? payload, CancellationToken ct)
+    private async Task<ExecuteDungeonActionResult?> ExecuteCheckpointRoomAction(DungeonRun run, RoomInstance room, string actionId, object? payload, CancellationToken ct)
     {
-        room.Status = RoomInstanceStatus.Active;
-
         switch (actionId.ToLowerInvariant())
         {
             case "continue":
                 CompleteRoom(run, room);
                 MoveToNextRoom(run);
-                break;
 
-            case "withdraw":
-                //CompleteRunWithCheckpointRewards(run);
-                break;
+                return new ExecuteDungeonActionResult
+                {
+                    Run = run,
+                    Outcome = run.Status == DungeonRunStatus.Completed
+                        ? DungeonActionOutcome.RunCompleted
+                        : DungeonActionOutcome.CheckpointResolved
+                };
 
             case "leave":
-                AbandonRun(run);
-                break;
+            case "withdraw":
+                run.Status = DungeonRunStatus.Completed;
+                run.CompletedAt = DateTimeOffset.UtcNow;
+                room.Status = RoomInstanceStatus.Completed;
+
+                return new ExecuteDungeonActionResult
+                {
+                    Run = run,
+                    Outcome = DungeonActionOutcome.CheckpointResolved,
+                    Message = "Dungeon rewards withdrawn."
+                };
 
             default:
-                throw new InvalidOperationException(
-                    $"Action '{actionId}' is not valid for room type '{room.Type}'.");
+                return null;
         }
-
-        await Task.CompletedTask;
     }
 
-    private async Task ExecuteEventRoomAction(DungeonRun run, CharacterSnapshot snapshot, RoomInstance room, string actionId, object? payload, CancellationToken ct)
+    private async Task<ExecuteDungeonActionResult?> ExecuteEventRoomAction(DungeonRun run, CharacterSnapshot snapshot, RoomInstance room, string actionId, object? payload, CancellationToken ct)
     {
         switch (actionId.ToLowerInvariant())
         {
             case DungeonActionConstants.EventInspect:
-                await ResolveEventChoice(run, snapshot, room, DungeonActionConstants.EventInspect, ct);
-                break;
+                return await ResolveEventChoice(run, snapshot, room, DungeonActionConstants.EventInspect, ct);
 
             case DungeonActionConstants.EventAccept:
-                await ResolveEventChoice(run, snapshot, room, DungeonActionConstants.EventAccept, ct);
-                break;
+                return await ResolveEventChoice(run, snapshot, room, DungeonActionConstants.EventAccept, ct);
 
             case DungeonActionConstants.EventIgnore:
-                await ResolveEventChoice(run, snapshot, room, DungeonActionConstants.EventIgnore, ct);
-                break;
+                return await ResolveEventChoice(run, snapshot, room, DungeonActionConstants.EventIgnore, ct);
 
             case DungeonActionConstants.Leave:
                 AbandonRun(run);
-                break;
+
+                return new ExecuteDungeonActionResult
+                {
+                    Run = run,
+                    Outcome = run.Status == DungeonRunStatus.Completed
+                        ? DungeonActionOutcome.RunCompleted
+                        : DungeonActionOutcome.EventResolved
+                };
 
             default:
                 throw new InvalidOperationException(
@@ -179,35 +196,56 @@ public sealed class DungeonRunService : IDungeonRunService
         }
     }
 
-    private async Task ResolveCombatRoom(DungeonRun run, CharacterSnapshot snapshot, RoomInstance room, CancellationToken ct)
+    private async Task<ExecuteDungeonActionResult> ResolveCombatRoom(DungeonRun run, CharacterSnapshot snapshot, RoomInstance room, CancellationToken ct)
     {
         room.Status = RoomInstanceStatus.Active;
 
-        //var encounterIds = room.EncounterIds?.ToList() ?? [];
-        //if (encounterIds.Count == 0)
-        //    throw new InvalidOperationException("Combat room has no encounters.");
+        var orchestrationRequest = new DungeonCombatOrchestrationRequest(
+            DungeonRunId: run.Id,
+            CharacterId: snapshot.CharacterId,
+            CurrentRoomIndex: run.CurrentRoomIndex,
+            EnemyCreatureKeys: room.EncounterIds);
 
-        //var entities = await _entityService.CreateEntitiesAsync(encounterIds, ct);
-        //if (entities == null || entities.Count == 0)
-        //    throw new InvalidOperationException("Failed to create combat entities.");
+        var orchestrationResult = await _orchestrationCoordinator.OrchestrateAsync(
+            orchestrationRequest,
+            ct);
 
-        //var result = await _combat.ExecuteAsync(snapshot, entities, ct);
+        var outcomeRequest = new CombatOutcomeRequest(
+            orchestrationRequest,
+            orchestrationResult);
 
-        //if (result.PlayerWon)
-        //{
-        //    ApplyCombatRewards(run, room, result);
-        //    CompleteRoom(run, room);
-        //    MoveToNextRoom(run);
-        //}
-        //else
-        //{
-        //    ApplyFailureOutcome(run, room, result);
-        //    run.Status = DungeonRunStatus.Failed;
-        //    room.Status = RoomInstanceStatus.Completed;
-        //}
+        var combatSession = await _outcomeCoordinator.ApplyAsync(
+            outcomeRequest,
+            ct);
+
+        DungeonActionOutcome outcome;
+        if (combatSession.CombatResult.Outcome == BattleOutcome.Victory)
+        {
+            CompleteRoom(run, room);
+            MoveToNextRoom(run);
+            
+            outcome = run.Status == DungeonRunStatus.Completed
+                ? DungeonActionOutcome.RunCompleted
+                : DungeonActionOutcome.CombatVictory;
+        }
+        else
+        {
+            run.Status = DungeonRunStatus.Failed;
+            room.Status = RoomInstanceStatus.Completed;
+            run.CompletedAt = DateTimeOffset.UtcNow;
+
+            outcome = DungeonActionOutcome.CombatDefeat;
+        }
+
+        return new ExecuteDungeonActionResult
+        {
+            Run = run,
+            Outcome = outcome,
+            CombatSession = combatSession
+        };
     }
 
-    private async Task ResolveEventChoice(DungeonRun run, CharacterSnapshot snapshot, RoomInstance room, string optionId, CancellationToken ct)
+    private async Task<ExecuteDungeonActionResult> ResolveEventChoice(DungeonRun run, CharacterSnapshot snapshot, RoomInstance room, string optionId, CancellationToken ct)
     {
         room.Status = RoomInstanceStatus.Active;
 
@@ -239,7 +277,13 @@ public sealed class DungeonRunService : IDungeonRunService
         CompleteRoom(run, room);
         MoveToNextRoom(run);
 
-        await Task.CompletedTask;
+        return new ExecuteDungeonActionResult
+        {
+            Run = run,
+            Outcome = run.Status == DungeonRunStatus.Completed
+                        ? DungeonActionOutcome.RunCompleted
+                        : DungeonActionOutcome.EventResolved
+        };
     }
 
     private void MoveToNextRoom(DungeonRun run)

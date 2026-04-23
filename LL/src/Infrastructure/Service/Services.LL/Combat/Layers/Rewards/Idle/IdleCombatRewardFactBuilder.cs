@@ -1,8 +1,7 @@
 ﻿using Application.Interfaces.Services.LL.Entities;
 using Domain.Models.Entities.Creatures;
-using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Rewards.Models;
-using Services.LL.Interfaces.Combat.Reward;
+using Services.LL.Interfaces.Combat.Reward.Idle;
 
 namespace Services.LL.Combat.Layers.Rewards.Idle;
 
@@ -16,17 +15,10 @@ public sealed class IdleCombatRewardFactBuilder : IIdleCombatRewardFactBuilder
     }
 
     public async Task<IdleCombatRewardFacts> BuildAsync(
-        CombatOutcomeRequest request,
+        IdleCombatOutcomeContext context,
         CancellationToken cancellationToken)
     {
-        if (request.OrchestrationRequest is not IdleCombatOrchestrationRequest idleRequest)
-        {
-            throw new ArgumentException(
-                $"Expected {nameof(IdleCombatOrchestrationRequest)} but got {request.OrchestrationRequest.GetType().Name}.",
-                nameof(request));
-        }
-
-        var hostileSourceIds = request.OrchestrationResult.Encounters
+        var hostileSourceIds = context.Encounters
             .SelectMany(x => x.Plan.HostileParticipants)
             .Select(x => x.SourceEntityId)
             .Distinct()
@@ -45,7 +37,7 @@ public sealed class IdleCombatRewardFactBuilder : IIdleCombatRewardFactBuilder
                 .ToDictionary(x => x.Id);
         }
 
-        var encounterFacts = request.OrchestrationResult.Encounters
+        var encounterFacts = context.Encounters
             .Select(record =>
             {
                 var hostileIds = record.Plan.HostileParticipants
@@ -77,13 +69,13 @@ public sealed class IdleCombatRewardFactBuilder : IIdleCombatRewardFactBuilder
             .ToArray();
 
         return new IdleCombatRewardFacts(
-            CharacterId: idleRequest.CharacterId,
-            From: request.OrchestrationResult.From,
-            RequestedTo: request.OrchestrationResult.RequestedTo,
-            ProcessedUntil: request.OrchestrationResult.ProcessedUntil,
-            ProcessedDuration: request.OrchestrationResult.ProcessedUntil - request.OrchestrationResult.From,
-            Area: idleRequest.ActionDetails.Area,
-            PlayerEntityIds: idleRequest.ActionDetails.CharacterTeam.ToArray(),
+            CharacterId: context.CharacterId,
+            From: context.Details.From,
+            RequestedTo: context.Details.RequestedTo,
+            ProcessedUntil: context.Details.ProcessedUntil,
+            ProcessedDuration: context.Details.ProcessedDuration,
+            Area: context.Area,
+            PlayerEntityIds: [.. context.PlayerEntityIds],
             Encounters: encounterFacts);
     }
 }

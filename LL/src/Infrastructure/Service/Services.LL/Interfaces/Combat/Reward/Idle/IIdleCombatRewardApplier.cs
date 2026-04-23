@@ -1,6 +1,6 @@
 ﻿using Services.LL.Combat.Layers.Rewards.Models;
 
-namespace Services.LL.Interfaces.Combat.Reward;
+namespace Services.LL.Interfaces.Combat.Reward.Idle;
 
 public interface IIdleCombatRewardApplier
 {

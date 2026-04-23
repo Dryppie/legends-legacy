@@ -118,7 +118,7 @@
       <div class="space-y-2">
         <div
           *ngFor="
-            let room of upcomingRooms().slice(0, 5);
+            let room of upcomingRooms();
             let i = index;
             trackBy: trackByIndex
           "

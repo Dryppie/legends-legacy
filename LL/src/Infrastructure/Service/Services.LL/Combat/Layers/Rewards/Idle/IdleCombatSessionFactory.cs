@@ -1,16 +1,13 @@
 ﻿using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Combat;
 using Services.LL.Combat.Layers.Rewards.Models;
-using Services.LL.Interfaces.Combat.Reward;
+using Services.LL.Interfaces.Combat.Reward.Idle;
 
 namespace Services.LL.Combat.Layers.Rewards.Idle;
 
 public sealed class IdleCombatSessionFactory : IIdleCombatSessionFactory
 {
-    public CombatSession Create(
-        CombatOutcomeRequest request,
-        IdleCombatRewardFacts facts,
-        IdleCombatCalculatedOutcome outcome)
+    public CombatSession Create(IdleCombatRewardFacts facts, IdleCombatCalculatedOutcome outcome)
     {
         var lastCombatResult = facts.LastEncounter?.CombatResult ?? new CombatResult();
         var lastEncounterOutcome = outcome.LastEncounterOutcome;

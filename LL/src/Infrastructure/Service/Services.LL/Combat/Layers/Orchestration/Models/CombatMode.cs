@@ -3,7 +3,7 @@
 public enum CombatMode
 {
     Idle = 1,
-    DungeonRoom = 2,
+    Dungeon = 2,
     Raid = 3,
     Pvp = 4
 }

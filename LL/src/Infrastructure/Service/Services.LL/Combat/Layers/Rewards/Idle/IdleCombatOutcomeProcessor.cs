@@ -1,7 +1,9 @@
 ﻿using Domain.Models.CharacterActions.Sessions;
+using Services.LL.Combat.Layers.Orchestration.Idle;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Interfaces.Combat.Reward;
+using Services.LL.Interfaces.Combat.Reward.Idle;
 
 namespace Services.LL.Combat.Layers.Rewards.Idle;
 
@@ -30,10 +32,38 @@ public sealed class IdleCombatOutcomeProcessor : ICombatOutcomeProcessor
         CombatOutcomeRequest request,
         CancellationToken cancellationToken)
     {
-        var facts = await _factBuilder.BuildAsync(request, cancellationToken);
+        var context = CreateContext(request);
+
+        var facts = await _factBuilder.BuildAsync(context, cancellationToken);
         var calculatedOutcome = await _calculator.CalculateAsync(facts, cancellationToken);
         await _applier.ApplyAsync(facts, calculatedOutcome, cancellationToken);
 
-        return _sessionFactory.Create(request, facts, calculatedOutcome);
+        return _sessionFactory.Create(facts, calculatedOutcome);
+    }
+
+    private static IdleCombatOutcomeContext CreateContext(CombatOutcomeRequest request)
+    {
+        if (request.OrchestrationRequest is not IdleCombatOrchestrationRequest idleRequest)
+        {
+            throw new InvalidOperationException(
+                $"Expected {nameof(IdleCombatOrchestrationRequest)} but got {request.OrchestrationRequest.GetType().Name}.");
+        }
+
+        if (request.OrchestrationResult.Mode != CombatMode.Idle)
+        {
+            throw new InvalidOperationException(
+                $"Expected orchestration result mode '{CombatMode.Idle}' but got '{request.OrchestrationResult.Mode}'.");
+        }
+
+        if (request.OrchestrationResult.Details is not IdleCombatOrchestrationDetails idleDetails)
+        {
+            throw new InvalidOperationException(
+                $"Expected {nameof(IdleCombatOrchestrationDetails)} but got {request.OrchestrationResult.Details?.GetType().Name ?? "null"}.");
+        }
+
+        return new IdleCombatOutcomeContext(
+            idleRequest,
+            request.OrchestrationResult,
+            idleDetails);
     }
 }

@@ -53,7 +53,7 @@ public sealed class CombatantFactory : ICombatantFactory
                     .Single(),
 
             // Add concrete environment-backed implementations as these modes arrive.
-            DungeonRoomEncounterSourceContext =>
+            DungeonEncounterSourceContext =>
                 throw new NotSupportedException(
                     "Dungeon room combatant creation requires dungeon room environment data in the source context."),
 

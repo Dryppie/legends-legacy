@@ -29,6 +29,6 @@ public class DungeonController : BaseController
     }
 
     [HttpPost("ExecuteAction/{runId}")]
-    public async Task<ActionResult<Response<DungeonRunDto>>> ExecuteAction(Guid runId, ExecuteDungeonActionRequest request) =>
+    public async Task<ActionResult<Response<ExecuteDungeonActionResponseDto>>> ExecuteAction(Guid runId, ExecuteDungeonActionRequest request) =>
         await Mediator.Send(new ExecuteDungeonActionCommand(runId, request.ActionId, request.Payload));
 }

@@ -34,10 +34,12 @@ public sealed class IdleCombatOrchestrator : ICombatOrchestrator
 
         if (plan.PlannedEncounterCount == 0)
         {
-            return CombatOrchestrationResult.None(
-                CombatMode.Idle,
-                plan.From,
-                plan.RequestedTo);
+            return CombatOrchestrationResults.None(CombatMode.Idle, new IdleCombatOrchestrationDetails(
+                From: plan.From,
+                RequestedTo: plan.RequestedTo,
+                ProcessedUntil: plan.From,
+                PlannedEncounterCount: plan.PlannedEncounterCount,
+                EncounterCadence: plan.EncounterCadence));
         }
 
         var records = new List<CombatEncounterRecord>(plan.PlannedEncounterCount);
@@ -62,10 +64,12 @@ public sealed class IdleCombatOrchestrator : ICombatOrchestrator
         return new CombatOrchestrationResult(
             SessionId: Guid.NewGuid(),
             Mode: CombatMode.Idle,
-            From: plan.From,
-            RequestedTo: plan.RequestedTo,
-            ProcessedUntil: cursor,
-            PlannedEncounterCount: plan.PlannedEncounterCount,
-            Encounters: records);
+            Encounters: records,
+            Details: new IdleCombatOrchestrationDetails(
+                From: plan.From,
+                RequestedTo: plan.RequestedTo,
+                ProcessedUntil: cursor,
+                PlannedEncounterCount: plan.PlannedEncounterCount,
+                EncounterCadence: plan.EncounterCadence));
     }
 }

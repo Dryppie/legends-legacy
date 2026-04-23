@@ -23,10 +23,13 @@ using Services.LL.Colosseum;
 using Services.LL.Combat;
 using Services.LL.Combat.CombatEngine;
 using Services.LL.Combat.Layers.Orchestration;
+using Services.LL.Combat.Layers.Orchestration.Dungeon;
 using Services.LL.Combat.Layers.Orchestration.Idle;
 using Services.LL.Combat.Layers.Resolution;
+using Services.LL.Combat.Layers.Resolution.Dungeon;
 using Services.LL.Combat.Layers.Resolution.Idle;
 using Services.LL.Combat.Layers.Rewards;
+using Services.LL.Combat.Layers.Rewards.Dungeon;
 using Services.LL.Combat.Layers.Rewards.Idle;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Combat.Stats;
@@ -40,8 +43,11 @@ using Services.LL.Guilds;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Orchestration;
 using Services.LL.Interfaces.Combat.Resolution;
+using Services.LL.Interfaces.Combat.Resolution.Dungeon;
 using Services.LL.Interfaces.Combat.Resolution.Idle;
 using Services.LL.Interfaces.Combat.Reward;
+using Services.LL.Interfaces.Combat.Reward.Dungeon;
+using Services.LL.Interfaces.Combat.Reward.Idle;
 using Services.LL.Inventories;
 using Services.LL.Items;
 using Services.LL.JsonDefinitions;
@@ -158,9 +164,14 @@ public static class DependencyInjection
         // Orchestration layer
         services.AddScoped<ICombatOrchestrationCoordinator, CombatOrchestrationCoordinator>();
         services.AddScoped<ICombatOrchestrator, IdleCombatOrchestrator>();
+        services.AddScoped<ICombatOrchestrator, DungeonCombatOrchestrator>();
+        services.AddScoped<IDungeonEncounterParticipantResolver, DungeonEncounterParticipantResolver>();
+        services.AddScoped<IDungeonCombatPlanner, DungeonCombatPlanner>();
         services.AddScoped<IIdleCombatPlanner, IdleCombatPlanner>();
 
         // Resolution layer
+        services.AddScoped<ICombatResolutionSession, DungeonCombatResolutionSession>();
+        services.AddScoped<IDungeonCombatResolutionSessionFactory, DungeonCombatResolutionSessionFactory>();
         services.AddScoped<ICombatResolutionSession, IdleCombatResolutionSession>();
         services.AddScoped<IIdleCombatResolutionSessionFactory, IdleCombatResolutionSessionFactory>();
         services.AddScoped<ICombatEncounterResolver, DefaultCombatEncounterResolver>();
@@ -174,8 +185,13 @@ public static class DependencyInjection
         services.AddScoped<ICinderRewardCalculator, DefaultIdleCinderRewardCalculator>();
         services.AddScoped<ICombatOutcomeCoordinator, CombatOutcomeCoordinator>();
         services.AddScoped<ICombatOutcomeProcessor, IdleCombatOutcomeProcessor>();
+        services.AddScoped<ICombatOutcomeProcessor, DungeonCombatOutcomeProcessor>();
         services.AddScoped<ICurrencyRewardWriter, CharacterCurrencyRewardWriter>();
         services.AddScoped<IExperienceRewardWriter, CharacterExperienceRewardWriter>();
+        services.AddScoped<IDungeonCombatRewardApplier, DungeonCombatRewardApplier>();
+        services.AddScoped<IDungeonCombatRewardCalculator, DungeonCombatRewardCalculator>();
+        services.AddScoped<IDungeonCombatRewardFactBuilder, DungeonCombatRewardFactBuilder>();
+        services.AddScoped<IDungeonCombatSessionFactory, DungeonCombatSessionFactory>();
         services.AddScoped<IIdleCombatRewardApplier, IdleCombatRewardApplier>();
         services.AddScoped<IIdleCombatRewardCalculator, IdleCombatRewardCalculator>();
         services.AddScoped<IIdleCombatRewardFactBuilder, IdleCombatRewardFactBuilder>();

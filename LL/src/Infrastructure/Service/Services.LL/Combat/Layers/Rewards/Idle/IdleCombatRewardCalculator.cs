@@ -7,6 +7,7 @@ using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Extensions;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Reward;
+using Services.LL.Interfaces.Combat.Reward.Idle;
 
 namespace Services.LL.Combat.Layers.Rewards.Idle;
 

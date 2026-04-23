@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, catchError, throwError } from 'rxjs';
 import { ApiService } from '../api.service';
 import { StartDungeonRequest } from '../../../../shared/models/requestDtos/dungeons/startDungeonRequest';
+import { CombatSessionDto } from '../../../../shared/models/Dtos/combatResultDto';
 
 export enum DungeonRunStatus {
   Active = 'Active',
@@ -62,6 +63,23 @@ export interface ExecuteDungeonActionRequest {
   payload?: unknown;
 }
 
+export interface ExecuteDungeonActionResponse {
+  run: DungeonRun;
+  outcome: DungeonActionOutcome;
+  combatSession?: CombatSessionDto | null;
+  message?: string | null;
+}
+
+export enum DungeonActionOutcome {
+  None = 0,
+  CombatVictory = 1,
+  CombatDefeat = 2,
+  EventResolved = 3,
+  CheckpointResolved = 4,
+  RunAbandoned = 5,
+  RunCompleted = 6,
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -95,7 +113,7 @@ export class DungeonService {
   executeDungeonAction(
     runId: string,
     request: ExecuteDungeonActionRequest,
-  ): Observable<DungeonRun> {
+  ): Observable<ExecuteDungeonActionResponse> {
     return this.api.post(`dungeon/executeAction/${runId}`, request).pipe(
       catchError(() => {
         return throwError(() => new Error('Failed to progress dungeon'));

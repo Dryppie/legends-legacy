@@ -12,6 +12,7 @@ public class CreatureRepository : ICreatureRepository
     {
         _context = context;
     }
+
     public async Task<List<Guid>> GetCreatureIdsByArea(string areaId, CancellationToken cancellationToken)
     {
         var creatures = await _context.Areas
@@ -33,9 +34,18 @@ public class CreatureRepository : ICreatureRepository
         return creatures;
     }
 
+    public async Task<List<Guid>> GetCreaturesByKey(IReadOnlyList<string> creatureKeys, CancellationToken cancellationToken)
+    {
+        var creatures = await _context.Creatures
+            .Where(c => creatureKeys.Contains(c.ImagePath))
+            .Select(c => c.Id)
+            .ToListAsync(cancellationToken);
+
+        return creatures;
+    }
+
     public Task<Creature> UpdateCreatureAsync(CancellationToken cancellationToken)
     {
-        //TODO: Implement
         throw new NotImplementedException();
     }
 }

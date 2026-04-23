@@ -4,7 +4,7 @@ namespace Application.Interfaces.Services.LL.Dungeons;
 
 public interface IDungeonRunService
 {
-    Task<DungeonRun?> ExecuteAction(Guid runId, string actionId, object? payload, CancellationToken cancellationToken);
+    Task<ExecuteDungeonActionResult?> ExecuteActionAsync(Guid runId, string actionId, object? payload, CancellationToken cancellationToken);
     Task<DungeonRun?> GetDungeonRunAsync(Guid characterId, CancellationToken cancellationToken);
     Task<DungeonRun?> StartRunAsync(Guid characterId, string dungeonDefinitionId, CancellationToken cancellationToken);
     //Task<DungeonRun> WithdrawAsync(Guid runId, CancellationToken ct);

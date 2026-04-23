@@ -5,5 +5,6 @@ namespace Application.Interfaces.Services.AdminDashboard;
 public interface ICreatureService
 {
     Task<List<Creature>> GetCreaturesAsync(CancellationToken cancellationToken);
+    Task<List<Guid>> GetCreaturesByKey(IReadOnlyList<string> enemyCreatureKeys, CancellationToken cancellationToken);
     Task UpdateCreatureAsync(CreatureDto creatureToUpdate, CancellationToken cancellationToken);
 }
