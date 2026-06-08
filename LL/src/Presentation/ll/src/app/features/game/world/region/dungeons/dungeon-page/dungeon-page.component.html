@@ -47,6 +47,68 @@
               [style.width.%]="progressPercent()"
             ></div>
           </div>
+
+          <div
+            *ngIf="!isFailedRun() && !isRewardClaimRun()"
+            class="border-t border-white/10 pt-3"
+          >
+            <div class="mb-2 text-xs uppercase tracking-wide text-secondary">
+              Pending Rewards
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 text-left">
+              <div class="rounded border border-white/10 bg-black/20 p-2">
+                <div class="text-xs uppercase tracking-wide text-secondary">
+                  Experience
+                </div>
+                <div class="text-primary">
+                  {{ activeDungeon()?.pendingExperience ?? 0 }}
+                </div>
+              </div>
+
+              <div class="rounded border border-white/10 bg-black/20 p-2">
+                <div class="text-xs uppercase tracking-wide text-secondary">
+                  Items
+                </div>
+                <div class="text-primary">
+                  {{ pendingItemQuantity() }}
+                </div>
+              </div>
+
+              <div class="rounded border border-white/10 bg-black/20 p-2">
+                <div class="text-xs uppercase tracking-wide text-secondary">
+                  Cinders
+                </div>
+                <div class="text-primary">
+                  {{ activeDungeon()?.pendingCinders ?? 0 }}
+                </div>
+              </div>
+
+              <div class="rounded border border-white/10 bg-black/20 p-2">
+                <div class="text-xs uppercase tracking-wide text-secondary">
+                  Soulstones
+                </div>
+                <div class="text-primary">
+                  {{ activeDungeon()?.pendingSoulstones ?? 0 }}
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="pendingRewards().length" class="mt-3 space-y-2">
+              <div
+                *ngFor="let reward of pendingRewards(); trackBy: trackByIndex"
+                class="flex items-center justify-between rounded border border-primary/20 bg-primary/5 px-2 py-1 text-left text-sm"
+              >
+                <span class="min-w-0 truncate text-primary">
+                  {{ reward.name || formatEncounterName(reward.itemId) }}
+                </span>
+
+                <span class="shrink-0 pl-2 text-primary">
+                  x{{ reward.quantity }}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -362,37 +424,37 @@
           Upcoming Rooms
         </div>
 
-        <div class="space-y-2">
-          <div
-            *ngFor="
-              let room of upcomingRooms();
-              let i = index;
-              trackBy: trackByIndex
-            "
-            class="flex items-center justify-between rounded border border-white/10 bg-black/20 px-3 py-3"
-            [ngClass]="i === 0 ? 'border-primary/30 bg-primary/5' : ''"
-          >
-            <div class="flex items-center gap-3">
-              <span class="text-primary">{{ getRoomIcon(room.type) }}</span>
-              <div>
-                <div class="text-primary">
-                  {{ getRoomTypeLabel(room.type) }}
-                </div>
-                <div *ngIf="i === 0" class="text-xs text-secondary">
-                  Next room
+          <div class="space-y-2">
+            <div
+              *ngFor="
+                let room of upcomingRooms();
+                let i = index;
+                trackBy: trackByIndex
+              "
+              class="flex items-center justify-between rounded border border-white/10 bg-black/20 px-3 py-3"
+              [ngClass]="i === 0 ? 'border-primary/30 bg-primary/5' : ''"
+            >
+              <div class="flex items-center gap-3">
+                <span class="text-primary">{{ getRoomIcon(room.type) }}</span>
+                <div>
+                  <div class="text-primary">
+                    {{ getRoomTypeLabel(room.type) }}
+                  </div>
+                  <div *ngIf="i === 0" class="text-xs text-secondary">
+                    Next room
+                  </div>
                 </div>
               </div>
+
+              <span class="text-xs text-secondary">
+                #{{ currentRoomNumber() + i + 1 }}
+              </span>
             </div>
 
-            <span class="text-xs text-secondary">
-              #{{ currentRoomNumber() + i + 1 }}
-            </span>
+            <p *ngIf="!upcomingRooms().length" class="text-secondary">
+              No upcoming rooms.
+            </p>
           </div>
-
-          <p *ngIf="!upcomingRooms().length" class="text-secondary">
-            No upcoming rooms.
-          </p>
-        </div>
       </div>
     </div>
   </div>
