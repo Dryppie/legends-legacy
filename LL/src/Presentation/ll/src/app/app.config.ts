@@ -24,6 +24,7 @@ import { ColosseumPlaybackStrategy } from './core/services/client-side/combat/co
 import { AuthInterceptor } from './core/interceptors/auth-interceptor';
 import { RealTimeFacade } from './core/services/real-time/real-time-facade';
 import { TimeSyncService } from './core/services/api/time-sync/time-sync.service';
+import { DungeonPlaybackStrategy } from './core/services/client-side/combat/combat-playback/dungeon-playback-strategy';
 
 export function initializeApp(authService: AuthService) {
   return () =>
@@ -49,6 +50,7 @@ export const appConfig: ApplicationConfig = {
           levelingService,
         ),
         [BattleType.Colosseum]: new ColosseumPlaybackStrategy(),
+        [BattleType.Dungeon]: new DungeonPlaybackStrategy(),
       }),
       deps: [CombatLogService, LevelingService],
     },

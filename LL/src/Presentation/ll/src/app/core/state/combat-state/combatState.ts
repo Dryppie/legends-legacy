@@ -9,6 +9,7 @@ import {
 export enum BattleType {
   IdleCombat = 'IdleCombat',
   Colosseum = 'Colosseum',
+  Dungeon = 'Dungeon',
 }
 
 export interface CombatState {

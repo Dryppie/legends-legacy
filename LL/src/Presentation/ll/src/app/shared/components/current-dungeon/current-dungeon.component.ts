@@ -21,10 +21,17 @@ export class CurrentDungeonComponent {
   });
 
   readonly currentRoomIndex = computed(() => {
-    return this.activeDungeon()?.currentRoomIndex ?? 0;
+    const run = this.activeDungeon();
+    const total = run?.rooms?.length ?? 0;
+
+    if (!run || total <= 0) return 0;
+    return Math.min(Math.max(0, run.currentRoomIndex ?? 0), total - 1);
   });
 
   readonly currentRoomNumber = computed(() => {
+    const total = this.totalRooms();
+    if (total <= 0) return 0;
+
     return this.currentRoomIndex() + 1;
   });
 
@@ -101,6 +108,7 @@ export class CurrentDungeonComponent {
     const current = this.currentRoomNumber();
 
     if (total <= 0) return 0;
+    if (this.activeDungeon()?.status === 'Completed') return 100;
     return Math.min(100, Math.round((current / total) * 100));
   });
 }

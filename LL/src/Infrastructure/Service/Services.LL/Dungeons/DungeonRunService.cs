@@ -53,6 +53,15 @@ public sealed class DungeonRunService : IDungeonRunService
         return await _dungeonRuns.GetDungeonRunByCharacterIdAsync(characterId, cancellationToken);
     }
 
+    public async Task<bool> ClaimRewardsAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        var run = await _dungeonRuns.GetDungeonRunByCharacterIdAsync(characterId, cancellationToken);
+        if (run == null || run.Status != DungeonRunStatus.Completed)
+            return false;
+
+        return await _dungeonRuns.DeleteDungeonRunAsync(run, cancellationToken);
+    }
+
     public async Task<DungeonRun?> StartRunAsync(Guid characterId, string dungeonDefinitionId, CancellationToken ct)
     {
         var currentRun = await _dungeonRuns.GetDungeonRunByCharacterIdAsync(characterId, ct);
@@ -288,12 +297,17 @@ public sealed class DungeonRunService : IDungeonRunService
 
     private void MoveToNextRoom(DungeonRun run)
     {
-        run.CurrentRoomIndex++;
+        var nextRoomIndex = run.CurrentRoomIndex + 1;
 
-        if (run.Rooms == null || run.CurrentRoomIndex >= run.Rooms.Count)
+        if (run.Rooms == null || nextRoomIndex >= run.Rooms.Count)
         {
             run.Status = DungeonRunStatus.Completed;
+            run.CompletedAt ??= DateTimeOffset.UtcNow;
+            run.CurrentRoomIndex = Math.Max(0, (run.Rooms?.Count ?? 1) - 1);
+            return;
         }
+
+        run.CurrentRoomIndex = nextRoomIndex;
     }
 
     private void AbandonRun(DungeonRun run)

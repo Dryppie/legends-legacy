@@ -1,4 +1,5 @@
 ﻿using Application.UseCases.Dungeons.Commands.ExecuteDungeonAction;
+using Application.UseCases.Dungeons.Commands.ClaimDungeonRewards;
 using Application.UseCases.Dungeons.Commands.StartDungeonRun;
 using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Dungeons.Queries.GetDungeonRun;
@@ -31,4 +32,8 @@ public class DungeonController : BaseController
     [HttpPost("ExecuteAction/{runId}")]
     public async Task<ActionResult<Response<ExecuteDungeonActionResponseDto>>> ExecuteAction(Guid runId, ExecuteDungeonActionRequest request) =>
         await Mediator.Send(new ExecuteDungeonActionCommand(runId, request.ActionId, request.Payload));
+
+    [HttpPost("ClaimDungeonRewards")]
+    public async Task<ActionResult<Response<bool>>> ClaimDungeonRewards() =>
+        await Mediator.Send(new ClaimDungeonRewardsCommand(CurrentCharacterGuid));
 }

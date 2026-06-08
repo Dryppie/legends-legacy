@@ -36,8 +36,19 @@ export class CombatService {
     this.combatStateService.resetCombatState(type);
   }
 
+  startDungeonCombatSimulation(combatResult: CombatResultDto | null): void {
+    if (!combatResult) return;
+
+    combatResult.battleType = BattleType.Dungeon;
+    this.clearCurrentCombat(combatResult.battleType);
+    this.combatStateService.setCombatActive(combatResult.battleType, true);
+
+    this.simulateFight(combatResult);
+  }
+
   startColosseumMatchSimulation(combatResult: CombatResultDto): void {
     if (!combatResult) return;
+
     combatResult.battleType = BattleType.Colosseum;
     this.clearCurrentCombat(combatResult.battleType);
     this.combatStateService.setCombatActive(combatResult.battleType, true);
@@ -109,6 +120,30 @@ export class CombatService {
 
   skipCurrentColosseum(): void {
     const type = BattleType.Colosseum;
+
+    if (!this.combatStateService.getIsCombatActive(type)()) return;
+
+    const combatResult = this.combatStateService.getCombatResult(type)();
+    if (!combatResult) return;
+
+    // Cancel the delayed completion subscription
+    this.combatEndSubscriptions.get(type)?.unsubscribe();
+    this.combatEndSubscriptions.delete(type);
+
+    const alreadyPlayed =
+      this.combatStateService.getCombatEvents(type)().length;
+    combatResult.eventLog
+      .slice(alreadyPlayed)
+      .forEach((ev) => this.combatStateService.addCombatEvent(type, ev));
+
+    this.combatStateService.setCombatOutcome(type, combatResult.outcome);
+    this.combatStateService.setCombatActive(type, false);
+
+    this.handleCombatComplete(combatResult);
+  }
+
+  skipCurrentDungeonMatch(): void {
+    const type = BattleType.Dungeon;
 
     if (!this.combatStateService.getIsCombatActive(type)()) return;
 

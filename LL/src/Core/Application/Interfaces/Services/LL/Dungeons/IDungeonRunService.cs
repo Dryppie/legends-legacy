@@ -4,6 +4,7 @@ namespace Application.Interfaces.Services.LL.Dungeons;
 
 public interface IDungeonRunService
 {
+    Task<bool> ClaimRewardsAsync(Guid characterId, CancellationToken cancellationToken);
     Task<ExecuteDungeonActionResult?> ExecuteActionAsync(Guid runId, string actionId, object? payload, CancellationToken cancellationToken);
     Task<DungeonRun?> GetDungeonRunAsync(Guid characterId, CancellationToken cancellationToken);
     Task<DungeonRun?> StartRunAsync(Guid characterId, string dungeonDefinitionId, CancellationToken cancellationToken);

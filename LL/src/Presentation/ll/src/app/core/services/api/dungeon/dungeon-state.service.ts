@@ -4,11 +4,12 @@ import {
   DungeonActionOutcome,
   DungeonRun,
   DungeonService,
-  ExecuteDungeonActionRequest,
+  ExecuteDungeonActionResponse,
 } from './dungeon.service';
 import { DungeonPreviewData } from '../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
 import { DungeonDifficulty } from '../../../../shared/models/enums/dungeonDifficulty';
 import { CombatSessionDto } from '../../../../shared/models/Dtos/combatResultDto';
+import { CombatService } from '../../client-side/combat/combat.service';
 
 @Injectable({
   providedIn: 'root',
@@ -35,7 +36,10 @@ export class DungeonStateService {
   readonly hasActiveDungeon = computed(() => !!this._activeDungeon());
   readonly hasAvailableDungeons = computed(() => this._dungeons().length > 0);
 
-  constructor(private readonly service: DungeonService) {
+  constructor(
+    private readonly service: DungeonService,
+    private readonly combatService: CombatService,
+  ) {
     this.refresh();
   }
 
@@ -102,7 +106,8 @@ export class DungeonStateService {
           this._lastOutcome.set(result.outcome);
           this._combatSession.set(result.combatSession ?? null);
           this._message.set(result.message ?? null);
-          console.log(this.combatSession());
+
+          this.handleActionCombat(result);
         },
         error: (e) =>
           this._error.set(e.message ?? 'Failed to execute dungeon action'),
@@ -129,7 +134,7 @@ export class DungeonStateService {
     this.executeAction(actionId, payload);
   }
 
-  claimDungeonRewards(): void {
+  claimDungeonRewards(onSuccess?: () => void): void {
     this._loading.set(true);
     this._error.set(null);
 
@@ -139,6 +144,7 @@ export class DungeonStateService {
       .subscribe({
         next: () => {
           this._activeDungeon.set(null);
+          onSuccess?.();
           // this.loadAvailableDungeons();
         },
         error: (e) =>
@@ -147,6 +153,14 @@ export class DungeonStateService {
   }
 
   /* ─────────── optional optimistic helpers ─────────── */
+  private handleActionCombat(result: ExecuteDungeonActionResponse): void {
+    if (!result.combatSession?.combatResult) return;
+
+    this.combatService.startDungeonCombatSimulation(
+      result.combatSession.combatResult,
+    );
+  }
+
   setActiveDungeon(run: DungeonRun | null): void {
     this._activeDungeon.set(run);
   }
@@ -157,5 +171,9 @@ export class DungeonStateService {
 
   clearError(): void {
     this._error.set(null);
+  }
+
+  skipDungeonMatch() {
+    this.combatService.skipCurrentDungeonMatch();
   }
 }

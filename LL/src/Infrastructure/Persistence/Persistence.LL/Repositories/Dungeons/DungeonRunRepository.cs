@@ -19,6 +19,13 @@ public class DungeonRunRepository : IDungeonRunRepository
         return true;
     }
 
+    public Task<bool> DeleteDungeonRunAsync(DungeonRun dungeonRun, CancellationToken cancellationToken)
+    {
+        _context.DungeonRuns.Remove(dungeonRun);
+
+        return Task.FromResult(true);
+    }
+
     public async Task<DungeonRun?> GetDungeonRunByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
         return await _context.DungeonRuns

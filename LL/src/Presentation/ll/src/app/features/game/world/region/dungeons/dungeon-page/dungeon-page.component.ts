@@ -2,15 +2,23 @@ import { Component, computed, inject } from '@angular/core';
 import { DungeonStateService } from '../../../../../../core/services/api/dungeon/dungeon-state.service';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { RegularButtonComponent } from '../../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
+import { CombatStateService } from '../../../../../../core/state/combat-state/combat-state.service';
+import { CombatComponent } from '../../../../../../shared/components/combat/combat.component';
+import { BattleType } from '../../../../../../core/state/combat-state/combatState';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-dungeon-page',
   standalone: true,
-  imports: [NgIf, NgFor, NgClass, RegularButtonComponent],
+  imports: [NgIf, NgFor, NgClass, RegularButtonComponent, CombatComponent],
   templateUrl: './dungeon-page.component.html',
 })
 export class DungeonPageComponent {
   readonly dungeonState = inject(DungeonStateService);
+  readonly combatStateService = inject(CombatStateService);
+  private readonly router = inject(Router);
+
+  battleType = BattleType.Dungeon;
 
   readonly activeDungeon = this.dungeonState.activeDungeon;
   readonly loading = this.dungeonState.loading;
@@ -22,10 +30,17 @@ export class DungeonPageComponent {
   );
 
   readonly currentRoomZeroBasedIndex = computed(() => {
-    return this.activeDungeon()?.currentRoomIndex ?? 0;
+    const run = this.activeDungeon();
+    const total = run?.rooms?.length ?? 0;
+
+    if (!run || total <= 0) return 0;
+    return Math.min(Math.max(0, run.currentRoomIndex ?? 0), total - 1);
   });
 
   readonly currentRoomNumber = computed(() => {
+    const total = this.totalRooms();
+    if (total <= 0) return 0;
+
     return this.currentRoomZeroBasedIndex() + 1;
   });
 
@@ -46,6 +61,7 @@ export class DungeonPageComponent {
     const current = this.currentRoomNumber();
 
     if (total <= 0) return 0;
+    if (this.activeDungeon()?.status === 'Completed') return 100;
     return Math.min(100, Math.round((current / total) * 100));
   });
 
@@ -116,6 +132,8 @@ export class DungeonPageComponent {
   readonly completedRooms = computed(() => {
     const run = this.activeDungeon();
     if (!run?.rooms?.length) return [];
+    if (run.status === 'Completed') return run.rooms;
+
     const currentIndex = run.currentRoomIndex ?? 0;
     return run.rooms.slice(0, currentIndex);
   });
@@ -123,17 +141,23 @@ export class DungeonPageComponent {
   readonly upcomingRooms = computed(() => {
     const run = this.activeDungeon();
     if (!run?.rooms?.length) return [];
-    const currentIndex = run.currentRoomIndex ?? 0;
+    if (run.status === 'Completed') return [];
+
+    const currentIndex = this.currentRoomZeroBasedIndex();
     return run.rooms.slice(currentIndex + 1);
   });
 
   readonly clearedRooms = computed(() => {
     const run = this.activeDungeon();
     if (!run?.rooms?.length) return 0;
-    return Math.max(0, run.currentRoomIndex ?? 0);
+    if (run.status === 'Completed') return run.rooms.length;
+
+    return Math.max(0, this.currentRoomZeroBasedIndex());
   });
 
   readonly remainingRooms = computed(() => {
+    if (this.activeDungeon()?.status === 'Completed') return 0;
+
     const total = this.totalRooms();
     const current = this.currentRoomNumber();
     return Math.max(0, total - current);
@@ -143,13 +167,15 @@ export class DungeonPageComponent {
     const run = this.activeDungeon();
     const room = this.currentRoom();
 
-    if (!run || !room) return false;
+    if (!run) return false;
     if (this.loading()) return false;
     if (run.status === 'Failed') return false;
 
     if (run.status === 'Completed') {
       return this.canClaimRewards();
     }
+
+    if (!room) return false;
 
     return true;
   });
@@ -158,12 +184,14 @@ export class DungeonPageComponent {
     const run = this.activeDungeon();
     const room = this.currentRoom();
 
-    if (!run || !room || this.loading()) return;
+    if (!run || this.loading()) return;
 
     if (run.status === 'Completed') {
       this.claimDungeonRewards();
       return;
     }
+
+    if (!room) return;
 
     switch (room.type) {
       case 'Combat':
@@ -229,7 +257,9 @@ export class DungeonPageComponent {
 
   claimDungeonRewards(): void {
     if (!this.canClaimRewards()) return;
-    this.dungeonState.claimDungeonRewards();
+    this.dungeonState.claimDungeonRewards(() => {
+      void this.router.navigate(['/game/world/shenic']);
+    });
   }
 
   formatEncounterName(value: string | null | undefined): string {
@@ -315,5 +345,9 @@ export class DungeonPageComponent {
       default:
         return 'Exploring the dungeon';
     }
+  }
+
+  skipBattle() {
+    this.dungeonState.skipDungeonMatch();
   }
 }
