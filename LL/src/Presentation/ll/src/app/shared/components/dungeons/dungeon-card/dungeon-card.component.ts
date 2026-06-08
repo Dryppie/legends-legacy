@@ -5,6 +5,7 @@ import { ItemComponent } from '../../item/item.component';
 import { DungeonStateService } from '../../../../core/services/api/dungeon/dungeon-state.service';
 import { DungeonPreviewData } from '../../../models/Dtos/dungeons/dungeonPreviewData';
 import { DungeonDifficulty } from '../../../models/enums/dungeonDifficulty';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-dungeon-card',
@@ -24,10 +25,19 @@ export class DungeonCardComponent {
   showPreview = signal(false);
   difficulty = signal<DungeonDifficulty>(DungeonDifficulty.Normal);
 
-  constructor(private readonly dungeonState: DungeonStateService) {}
+  constructor(
+    private readonly dungeonState: DungeonStateService,
+    private readonly router: Router,
+  ) {}
 
   startDungeon() {
-    this.dungeonState.startDungeon(this.previewData.id, this.difficulty());
+    this.dungeonState.startDungeon(
+      this.previewData.id,
+      this.difficulty(),
+      () => {
+        void this.router.navigate(['/game/world/dungeon']);
+      },
+    );
   }
 
   togglePreview() {

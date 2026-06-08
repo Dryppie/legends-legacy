@@ -70,7 +70,11 @@ export class DungeonStateService {
   //   });
   // }
 
-  startDungeon(dungeonId: string, difficulty: DungeonDifficulty): void {
+  startDungeon(
+    dungeonId: string,
+    difficulty: DungeonDifficulty,
+    onSuccess?: () => void,
+  ): void {
     this._loading.set(true);
     this._error.set(null);
 
@@ -80,6 +84,7 @@ export class DungeonStateService {
       .subscribe({
         next: (run) => {
           this._activeDungeon.set(run);
+          onSuccess?.();
         },
         error: (e) => this._error.set(e.message ?? 'Failed to start dungeon'),
       });
