@@ -49,6 +49,7 @@ public interface IDbContext
     DbSet<EssenceItemBase> EssenceItems { get; }
 
     DbSet<DungeonRun> DungeonRuns { get; }
+    DbSet<RunReward> RunRewards { get; }
 
     // Effects
     //DbSet<Modifier> Modifiers { get; }

@@ -17,8 +17,8 @@ internal class DungeonCombatSessionFactory : IDungeonCombatSessionFactory
         // Keep it for now, but this is presentation glue, not core resolution data.
         if (lastEncounterOutcome is not null)
         {
-            lastCombatResult.Loot = [.. lastEncounterOutcome.Loot];
-            lastCombatResult.ExperienceGained = lastEncounterOutcome.ExperienceGained;
+            lastCombatResult.Loot = [.. outcome.TotalLoot];
+            lastCombatResult.ExperienceGained = outcome.TotalExperience;
         }
 
         var summary = new CombatSummary

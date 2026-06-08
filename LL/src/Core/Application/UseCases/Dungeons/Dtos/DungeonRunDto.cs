@@ -20,6 +20,10 @@ public class DungeonRunDto : IMapFrom<DungeonRun>
     public int TotalRooms { get; set; }
 
     public List<RoomInstanceDto> Rooms { get; set; } = [];
+    public int PendingExperience { get; set; }
+    public int PendingCinders { get; set; }
+    public int PendingSoulstones { get; set; }
+    public List<RunRewardDto> PendingRewards { get; set; } = [];
 
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? CompletedAt { get; set; }
@@ -58,5 +62,7 @@ public class DungeonRunDto : IMapFrom<DungeonRun>
                     .ToList();
             })
             );
+
+        profile.CreateMap<RunReward, RunRewardDto>();
     }
 }

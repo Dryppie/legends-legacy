@@ -11,6 +11,7 @@ using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Guilds;
 using Domain.Models.Guilds.Buildings;
 using Domain.Models.Inventories;
+using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.TierPackages;
 using Domain.Models.Leaderboards;
@@ -38,6 +39,7 @@ using Persistence.LL.Repositories.Equipments;
 using Persistence.LL.Repositories.Essences;
 using Persistence.LL.Repositories.Guilds;
 using Persistence.LL.Repositories.Inventories;
+using Persistence.LL.Repositories.Items;
 using Persistence.LL.Repositories.Leaderboards;
 using Persistence.LL.Repositories.LootTables;
 using Persistence.LL.Repositories.MarketPlaces;
@@ -95,6 +97,7 @@ public static class DependencyInjection
 
         services.AddScoped<ILootTableRepository, LootTableRepository>();
         services.AddScoped<IInventoryRepository, InventoryRepository>();
+        services.AddScoped<IItemBaseRepository, ItemBaseRepository>();
 
         services.AddScoped<IMarketPlaceRepository, MarketPlaceRepository>();
 

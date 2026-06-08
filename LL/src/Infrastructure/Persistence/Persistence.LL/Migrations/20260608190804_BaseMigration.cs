@@ -51,8 +51,12 @@ namespace Persistence.LL.Migrations
                     Seed = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     CurrentRoomIndex = table.Column<int>(type: "integer", nullable: false),
+                    PendingExperience = table.Column<int>(type: "integer", nullable: false),
+                    PendingCinders = table.Column<int>(type: "integer", nullable: false),
+                    PendingSoulstones = table.Column<int>(type: "integer", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    CompletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                    CompletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    RewardsClaimedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -169,6 +173,29 @@ namespace Persistence.LL.Migrations
                         column: x => x.DungeonRunId,
                         principalTable: "DungeonRuns",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "RunRewards",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ItemId = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    ItemType = table.Column<int>(type: "integer", nullable: false),
+                    Quantity = table.Column<int>(type: "integer", nullable: false),
+                    Source = table.Column<string>(type: "text", nullable: false),
+                    DungeonRunId = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RunRewards", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RunRewards_DungeonRuns_DungeonRunId",
+                        column: x => x.DungeonRunId,
+                        principalTable: "DungeonRuns",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -1162,6 +1189,11 @@ namespace Persistence.LL.Migrations
                 column: "DungeonRunId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_RunRewards_DungeonRunId",
+                table: "RunRewards",
+                column: "DungeonRunId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_StatOverride_CreatureId",
                 table: "StatOverride",
                 column: "CreatureId");
@@ -1244,6 +1276,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "RoomInstance");
+
+            migrationBuilder.DropTable(
+                name: "RunRewards");
 
             migrationBuilder.DropTable(
                 name: "StatOverride");

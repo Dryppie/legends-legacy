@@ -23,9 +23,12 @@ public sealed class DungeonRun
 
     //public RunFlags Flags { get; set; } = new();
 
-    // Rewards accumulated (banked on withdraw/complete; partial on fail if you choose)
-    //public List<RunReward> PendingRewards { get; set; } = [];
+    public int PendingExperience { get; set; }
+    public int PendingCinders { get; set; }
+    public int PendingSoulstones { get; set; }
+    public List<RunReward> PendingRewards { get; set; } = [];
 
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset? CompletedAt { get; set; }
+    public DateTimeOffset? RewardsClaimedAt { get; set; }
 }

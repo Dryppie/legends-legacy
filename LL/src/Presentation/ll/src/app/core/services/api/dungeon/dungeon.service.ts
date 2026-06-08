@@ -9,6 +9,8 @@ export enum DungeonRunStatus {
   Completed = 'Completed',
   Failed = 'Failed',
   Withdrawn = 'Withdrawn',
+  Abandoned = 'Abandoned',
+  RewardsClaimed = 'RewardsClaimed',
 }
 
 export enum RoomType {
@@ -54,8 +56,20 @@ export interface DungeonRun {
   status: DungeonRunStatus;
   currentRoomIndex: number;
   rooms: RoomInstance[];
+  pendingExperience: number;
+  pendingCinders: number;
+  pendingSoulstones: number;
+  pendingRewards: RunReward[];
   createdAt: string;
   completedAt?: string | null;
+}
+
+export interface RunReward {
+  itemId: string;
+  name: string;
+  itemType: string;
+  quantity: number;
+  source: string;
 }
 
 export interface ExecuteDungeonActionRequest {

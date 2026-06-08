@@ -9,6 +9,7 @@ using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Interfaces.Combat.Orchestration;
 using Services.LL.Interfaces.Combat.Reward;
+using Services.LL.Interfaces.Combat.Reward.Dungeon;
 
 namespace Services.LL.Dungeons;
 
@@ -21,6 +22,7 @@ public sealed class DungeonRunService : IDungeonRunService
     private readonly ICombatOrchestrationCoordinator _orchestrationCoordinator;
     private readonly ICombatOutcomeCoordinator _outcomeCoordinator;
     private readonly DungeonRunFactory _factory;
+    private readonly IDungeonRunRewardClaimer _rewardClaimer;
 
     // Blessings are offered on shrine events; you’ll likely have a repository for these.
     //private readonly IReadOnlyList<Guid> _globalBlessingPool;
@@ -34,7 +36,8 @@ public sealed class DungeonRunService : IDungeonRunService
         //IEncounterSelector selector,
         ICombatOrchestrationCoordinator orchestrationCoordinator,
         ICombatOutcomeCoordinator outcomeCoordinator,
-        DungeonRunFactory factory
+        DungeonRunFactory factory,
+        IDungeonRunRewardClaimer rewardClaimer
         //IDungeonRunStore runStore,
         /*IReadOnlyList<Guid> globalBlessingPool*/)
     {
@@ -45,6 +48,7 @@ public sealed class DungeonRunService : IDungeonRunService
         _orchestrationCoordinator = orchestrationCoordinator;
         _outcomeCoordinator = outcomeCoordinator;
         _factory = factory;
+        _rewardClaimer = rewardClaimer;
         //_globalBlessingPool = globalBlessingPool;
     }
 
@@ -56,8 +60,13 @@ public sealed class DungeonRunService : IDungeonRunService
     public async Task<bool> ClaimRewardsAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var run = await _dungeonRuns.GetDungeonRunByCharacterIdAsync(characterId, cancellationToken);
-        if (run == null || run.Status != DungeonRunStatus.Completed)
+        if (run == null || (run.Status != DungeonRunStatus.Completed && run.Status != DungeonRunStatus.Withdrawn))
             return false;
+
+        await _rewardClaimer.ClaimAsync(run, cancellationToken);
+
+        run.Status = DungeonRunStatus.RewardsClaimed;
+        run.RewardsClaimedAt = DateTimeOffset.UtcNow;
 
         return await _dungeonRuns.DeleteDungeonRunAsync(run, cancellationToken);
     }
@@ -168,7 +177,7 @@ public sealed class DungeonRunService : IDungeonRunService
 
             case "leave":
             case "withdraw":
-                run.Status = DungeonRunStatus.Completed;
+                run.Status = DungeonRunStatus.Withdrawn;
                 run.CompletedAt = DateTimeOffset.UtcNow;
                 room.Status = RoomInstanceStatus.Completed;
 

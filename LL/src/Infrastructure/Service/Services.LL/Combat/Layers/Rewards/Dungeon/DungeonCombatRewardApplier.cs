@@ -1,23 +1,15 @@
-﻿using Services.LL.Combat.Layers.Rewards.Models;
-using Services.LL.Interfaces.Combat.Reward;
+using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Interfaces.Combat.Reward.Dungeon;
 
 namespace Services.LL.Combat.Layers.Rewards.Dungeon;
 
 internal class DungeonCombatRewardApplier : IDungeonCombatRewardApplier
 {
-    private readonly IExperienceRewardWriter _experienceWriter;
-    private readonly ILootRewardWriter _lootWriter;
-    private readonly ICurrencyRewardWriter _currencyWriter;
+    private readonly IDungeonPendingRewardWriter _pendingRewardWriter;
 
-    public DungeonCombatRewardApplier(
-        IExperienceRewardWriter experienceWriter,
-        ILootRewardWriter lootWriter,
-        ICurrencyRewardWriter currencyWriter)
+    public DungeonCombatRewardApplier(IDungeonPendingRewardWriter pendingRewardWriter)
     {
-        _experienceWriter = experienceWriter;
-        _lootWriter = lootWriter;
-        _currencyWriter = currencyWriter;
+        _pendingRewardWriter = pendingRewardWriter;
     }
 
     public async Task ApplyAsync(
@@ -25,29 +17,17 @@ internal class DungeonCombatRewardApplier : IDungeonCombatRewardApplier
         DungeonCombatCalculatedOutcome outcome,
         CancellationToken cancellationToken)
     {
-        if (outcome.TotalExperience > 0)
+        if (outcome.TotalExperience <= 0 &&
+            outcome.TotalCinders <= 0 &&
+            outcome.TotalSoulstones <= 0 &&
+            outcome.TotalLoot.Count <= 0)
         {
-            await _experienceWriter.AddSplitExperienceAsync(
-                facts.PlayerEntityIds,
-                outcome.TotalExperience,
-                cancellationToken);
+            return;
         }
 
-        if (outcome.TotalLoot.Count > 0)
-        {
-            await _lootWriter.AddLootAsync(
-                facts.CharacterId,
-                outcome.TotalLoot,
-                cancellationToken);
-        }
-
-        if (outcome.TotalCinders > 0 || outcome.TotalSoulstones > 0)
-        {
-            await _currencyWriter.AddAsync(
-                facts.CharacterId,
-                outcome.TotalCinders,
-                outcome.TotalSoulstones,
-                cancellationToken);
-        }
+        await _pendingRewardWriter.AddAsync(
+            facts,
+            outcome,
+            cancellationToken);
     }
 }

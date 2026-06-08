@@ -62,6 +62,10 @@ export class DungeonPageComponent {
 
     if (total <= 0) return 0;
     if (this.activeDungeon()?.status === 'Completed') return 100;
+    if (this.activeDungeon()?.status === 'Withdrawn') {
+      return Math.min(100, Math.round((current / total) * 100));
+    }
+
     return Math.min(100, Math.round((current / total) * 100));
   });
 
@@ -93,7 +97,8 @@ export class DungeonPageComponent {
 
     if (!run || !room || this.loading()) return null;
 
-    if (run.status === 'Completed') return 'Claim Rewards';
+    if (run.status === 'Completed' || run.status === 'Withdrawn')
+      return 'Claim Rewards';
     if (run.status === 'Failed') return null;
 
     switch (room.type) {
@@ -118,7 +123,7 @@ export class DungeonPageComponent {
     if (!run) return false;
     if (this.loading()) return false;
 
-    return run.status !== 'Completed';
+    return run.status !== 'Completed' && run.status !== 'Withdrawn';
   });
 
   readonly canClaimRewards = computed(() => {
@@ -126,17 +131,35 @@ export class DungeonPageComponent {
     if (!run) return false;
     if (this.loading()) return false;
 
-    return run.status === 'Completed';
+    return run.status === 'Completed' || run.status === 'Withdrawn';
   });
 
   readonly isFailedRun = computed(() => {
     return this.activeDungeon()?.status === 'Failed';
   });
 
+  readonly isRewardClaimRun = computed(() => {
+    const status = this.activeDungeon()?.status;
+    return status === 'Completed' || status === 'Withdrawn';
+  });
+
+  readonly rewardSummaryTitle = computed(() => {
+    return this.activeDungeon()?.status === 'Withdrawn'
+      ? 'Rewards Secured'
+      : 'Dungeon Complete';
+  });
+
+  readonly pendingRewards = computed(() => {
+    return this.activeDungeon()?.pendingRewards ?? [];
+  });
+
   readonly completedRooms = computed(() => {
     const run = this.activeDungeon();
     if (!run?.rooms?.length) return [];
     if (run.status === 'Completed') return run.rooms;
+    if (run.status === 'Withdrawn') {
+      return run.rooms.slice(0, run.currentRoomIndex + 1);
+    }
 
     const currentIndex = run.currentRoomIndex ?? 0;
     return run.rooms.slice(0, currentIndex);
@@ -146,6 +169,7 @@ export class DungeonPageComponent {
     const run = this.activeDungeon();
     if (!run?.rooms?.length) return [];
     if (run.status === 'Completed') return [];
+    if (run.status === 'Withdrawn') return [];
 
     const currentIndex = this.currentRoomZeroBasedIndex();
     return run.rooms.slice(currentIndex + 1);
@@ -155,6 +179,9 @@ export class DungeonPageComponent {
     const run = this.activeDungeon();
     if (!run?.rooms?.length) return 0;
     if (run.status === 'Completed') return run.rooms.length;
+    if (run.status === 'Withdrawn') {
+      return Math.min(run.rooms.length, run.currentRoomIndex + 1);
+    }
 
     return Math.max(0, this.currentRoomZeroBasedIndex());
   });
@@ -171,7 +198,7 @@ export class DungeonPageComponent {
   });
 
   readonly remainingRooms = computed(() => {
-    if (this.activeDungeon()?.status === 'Completed') return 0;
+    if (this.isRewardClaimRun()) return 0;
 
     const total = this.totalRooms();
     const current = this.currentRoomNumber();
@@ -186,7 +213,7 @@ export class DungeonPageComponent {
     if (this.loading()) return false;
     if (run.status === 'Failed') return false;
 
-    if (run.status === 'Completed') {
+    if (run.status === 'Completed' || run.status === 'Withdrawn') {
       return this.canClaimRewards();
     }
 
@@ -201,7 +228,7 @@ export class DungeonPageComponent {
 
     if (!run || this.loading()) return;
 
-    if (run.status === 'Completed') {
+    if (run.status === 'Completed' || run.status === 'Withdrawn') {
       this.claimDungeonRewards();
       return;
     }
@@ -290,6 +317,15 @@ export class DungeonPageComponent {
     if (!value) return 'Unknown';
     return value
       .replace(/_/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
+  formatRewardSource(value: string | null | undefined): string {
+    if (!value) return 'Unknown source';
+
+    return value
+      .replace(/:/g, ' ')
+      .replace(/-/g, ' ')
       .replace(/\b\w/g, (char) => char.toUpperCase());
   }
 

@@ -4,8 +4,10 @@ namespace Domain.Models.Dungeons.Runs;
 
 public sealed class RunReward
 {
-    public string ItemId { get; set; } = default!;
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string ItemId { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
     public ItemType ItemType { get; set; }
     public int Quantity { get; set; }
-    public string Source { get; set; } = default!; // e.g. "floor:3", "boss", "treasure"
+    public string Source { get; set; } = string.Empty; // e.g. "room:3", "boss", "treasure"
 }

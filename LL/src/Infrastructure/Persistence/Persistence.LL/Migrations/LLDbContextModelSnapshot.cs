@@ -239,6 +239,18 @@ namespace Persistence.LL.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("PendingCinders")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PendingExperience")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("PendingSoulstones")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("RewardsClaimedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<int>("Seed")
                         .HasColumnType("integer");
 
@@ -280,6 +292,40 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("DungeonRunId");
 
                     b.ToTable("RoomInstance");
+                });
+
+            modelBuilder.Entity("Domain.Models.Dungeons.Runs.RunReward", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("DungeonRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ItemId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ItemType")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DungeonRunId");
+
+                    b.ToTable("RunRewards");
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Creatures.Templates.StatOverride", b =>
@@ -1375,6 +1421,14 @@ namespace Persistence.LL.Migrations
                         .HasForeignKey("DungeonRunId");
                 });
 
+            modelBuilder.Entity("Domain.Models.Dungeons.Runs.RunReward", b =>
+                {
+                    b.HasOne("Domain.Models.Dungeons.Runs.DungeonRun", null)
+                        .WithMany("PendingRewards")
+                        .HasForeignKey("DungeonRunId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("Domain.Models.Entities.Creatures.Templates.StatOverride", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Creatures.Creature", null)
@@ -1770,6 +1824,8 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.Dungeons.Runs.DungeonRun", b =>
                 {
+                    b.Navigation("PendingRewards");
+
                     b.Navigation("Rooms");
                 });
 

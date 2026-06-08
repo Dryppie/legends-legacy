@@ -188,9 +188,11 @@ public static class DependencyInjection
         services.AddScoped<ICombatOutcomeProcessor, DungeonCombatOutcomeProcessor>();
         services.AddScoped<ICurrencyRewardWriter, CharacterCurrencyRewardWriter>();
         services.AddScoped<IExperienceRewardWriter, CharacterExperienceRewardWriter>();
+        services.AddScoped<IDungeonPendingRewardWriter, DungeonPendingRewardWriter>();
         services.AddScoped<IDungeonCombatRewardApplier, DungeonCombatRewardApplier>();
         services.AddScoped<IDungeonCombatRewardCalculator, DungeonCombatRewardCalculator>();
         services.AddScoped<IDungeonCombatRewardFactBuilder, DungeonCombatRewardFactBuilder>();
+        services.AddScoped<IDungeonRunRewardClaimer, DungeonRunRewardClaimer>();
         services.AddScoped<IDungeonCombatSessionFactory, DungeonCombatSessionFactory>();
         services.AddScoped<IIdleCombatRewardApplier, IdleCombatRewardApplier>();
         services.AddScoped<IIdleCombatRewardCalculator, IdleCombatRewardCalculator>();

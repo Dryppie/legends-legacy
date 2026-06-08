@@ -67,7 +67,9 @@ public class DungeonCombatRewardFactBuilder : IDungeonCombatRewardFactBuilder
             .ToArray();
 
         return new DungeonCombatRewardFacts(
+            DungeonRunId: context.DungeonRunId,
             CharacterId: context.CharacterId,
+            CurrentRoomIndex: context.OrchestrationRequest.CurrentRoomIndex,
             PlayerEntityIds: [.. context.PlayerEntityIds],
             Encounters: encounterFacts);
     }
