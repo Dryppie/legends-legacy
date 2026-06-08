@@ -53,7 +53,6 @@ export class DungeonStateService {
       .subscribe({
         next: (activeDungeon) => {
           this._activeDungeon.set(activeDungeon);
-          console.log(activeDungeon);
           // this.loadAvailableDungeons();
         },
         error: (e) => {
@@ -149,6 +148,24 @@ export class DungeonStateService {
         },
         error: (e) =>
           this._error.set(e.message ?? 'Failed to claim dungeon rewards'),
+      });
+  }
+
+  dismissFailedDungeonRun(onSuccess?: () => void): void {
+    this._loading.set(true);
+    this._error.set(null);
+
+    this.service
+      .dismissFailedDungeonRun()
+      .pipe(finalize(() => this._loading.set(false)))
+      .subscribe({
+        next: () => {
+          this._activeDungeon.set(null);
+          onSuccess?.();
+          // this.loadAvailableDungeons();
+        },
+        error: (e) =>
+          this._error.set(e.message ?? 'Failed to leave failed dungeon'),
       });
   }
 

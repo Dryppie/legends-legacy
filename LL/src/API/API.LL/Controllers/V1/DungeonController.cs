@@ -1,5 +1,6 @@
-﻿using Application.UseCases.Dungeons.Commands.ExecuteDungeonAction;
 using Application.UseCases.Dungeons.Commands.ClaimDungeonRewards;
+using Application.UseCases.Dungeons.Commands.DismissFailedDungeonRun;
+using Application.UseCases.Dungeons.Commands.ExecuteDungeonAction;
 using Application.UseCases.Dungeons.Commands.StartDungeonRun;
 using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Dungeons.Queries.GetDungeonRun;
@@ -36,4 +37,8 @@ public class DungeonController : BaseController
     [HttpPost("ClaimDungeonRewards")]
     public async Task<ActionResult<Response<bool>>> ClaimDungeonRewards() =>
         await Mediator.Send(new ClaimDungeonRewardsCommand(CurrentCharacterGuid));
+
+    [HttpPost("DismissFailedDungeonRun")]
+    public async Task<ActionResult<Response<bool>>> DismissFailedDungeonRun() =>
+        await Mediator.Send(new DismissFailedDungeonRunCommand(CurrentCharacterGuid));
 }

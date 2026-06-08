@@ -62,6 +62,15 @@ public sealed class DungeonRunService : IDungeonRunService
         return await _dungeonRuns.DeleteDungeonRunAsync(run, cancellationToken);
     }
 
+    public async Task<bool> DismissFailedRunAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        var run = await _dungeonRuns.GetDungeonRunByCharacterIdAsync(characterId, cancellationToken);
+        if (run == null || run.Status != DungeonRunStatus.Failed)
+            return false;
+
+        return await _dungeonRuns.DeleteDungeonRunAsync(run, cancellationToken);
+    }
+
     public async Task<DungeonRun?> StartRunAsync(Guid characterId, string dungeonDefinitionId, CancellationToken ct)
     {
         var currentRun = await _dungeonRuns.GetDungeonRunByCharacterIdAsync(characterId, ct);

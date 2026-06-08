@@ -39,7 +39,7 @@ export enum EventOutcomeType {
 
 export interface RoomInstance {
   id: string;
-  roomIndex: number;
+  index: number;
   type: RoomType;
   status: RoomInstanceStatus;
   encounterIds: string[];
@@ -133,6 +133,14 @@ export class DungeonService {
     return this.api.post('dungeon/claimDungeonRewards').pipe(
       catchError(() => {
         return throwError(() => new Error('Failed to claim dungeon rewards'));
+      }),
+    );
+  }
+
+  dismissFailedDungeonRun(): Observable<void> {
+    return this.api.post('dungeon/dismissFailedDungeonRun').pipe(
+      catchError(() => {
+        return throwError(() => new Error('Failed to leave failed dungeon'));
       }),
     );
   }

@@ -129,6 +129,10 @@ export class DungeonPageComponent {
     return run.status === 'Completed';
   });
 
+  readonly isFailedRun = computed(() => {
+    return this.activeDungeon()?.status === 'Failed';
+  });
+
   readonly completedRooms = computed(() => {
     const run = this.activeDungeon();
     if (!run?.rooms?.length) return [];
@@ -153,6 +157,17 @@ export class DungeonPageComponent {
     if (run.status === 'Completed') return run.rooms.length;
 
     return Math.max(0, this.currentRoomZeroBasedIndex());
+  });
+
+  readonly failedRoom = computed(() => {
+    const run = this.activeDungeon();
+    if (run?.status !== 'Failed' || !run.rooms?.length) return null;
+
+    return run.rooms[this.currentRoomZeroBasedIndex()] ?? null;
+  });
+
+  readonly defeatedEncounters = computed(() => {
+    return this.completedRooms().flatMap((room) => room.encounterIds ?? []);
   });
 
   readonly remainingRooms = computed(() => {
@@ -253,6 +268,15 @@ export class DungeonPageComponent {
   leaveDungeon(): void {
     if (!this.canLeave()) return;
     this.dungeonState.leaveDungeon();
+  }
+
+  dismissFailedDungeonRun(): void {
+    const run = this.activeDungeon();
+    if (!run || run.status !== 'Failed' || this.loading()) return;
+
+    this.dungeonState.dismissFailedDungeonRun(() => {
+      void this.router.navigate(['/game/world/shenic']);
+    });
   }
 
   claimDungeonRewards(): void {
