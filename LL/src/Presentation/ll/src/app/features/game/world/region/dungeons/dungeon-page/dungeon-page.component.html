@@ -382,6 +382,11 @@
 
           <p class="italic text-secondary">{{ getCurrentStepText() }}</p>
 
+          <p *ngIf="isCheckpointRoom()" class="mx-auto max-w-lg text-secondary">
+            Withdrawing ends the run and keeps your pending rewards ready to
+            claim.
+          </p>
+
           <div
             *ngIf="currentRoom()?.encounterIds?.length"
             class="mx-auto max-w-xl rounded border border-white/10 bg-black/20 p-4 text-left"
@@ -410,10 +415,10 @@
 
             <app-regular-button
               *ngIf="isCheckpointRoom() && canLeave()"
-              variant="danger"
-              text="Leave Dungeon"
+              variant="secondary"
+              text="Withdraw"
               [disabled]="!canLeave()"
-              (click)="leaveDungeon()"
+              (click)="withdrawAtCheckpoint()"
             />
           </div>
         </ng-template>
@@ -424,37 +429,37 @@
           Upcoming Rooms
         </div>
 
-          <div class="space-y-2">
-            <div
-              *ngFor="
-                let room of upcomingRooms();
-                let i = index;
-                trackBy: trackByIndex
-              "
-              class="flex items-center justify-between rounded border border-white/10 bg-black/20 px-3 py-3"
-              [ngClass]="i === 0 ? 'border-primary/30 bg-primary/5' : ''"
-            >
-              <div class="flex items-center gap-3">
-                <span class="text-primary">{{ getRoomIcon(room.type) }}</span>
-                <div>
-                  <div class="text-primary">
-                    {{ getRoomTypeLabel(room.type) }}
-                  </div>
-                  <div *ngIf="i === 0" class="text-xs text-secondary">
-                    Next room
-                  </div>
+        <div class="space-y-2">
+          <div
+            *ngFor="
+              let room of upcomingRooms();
+              let i = index;
+              trackBy: trackByIndex
+            "
+            class="flex items-center justify-between rounded border border-white/10 bg-black/20 px-3 py-3"
+            [ngClass]="i === 0 ? 'border-primary/30 bg-primary/5' : ''"
+          >
+            <div class="flex items-center gap-3">
+              <span class="text-primary">{{ getRoomIcon(room.type) }}</span>
+              <div>
+                <div class="text-primary">
+                  {{ getRoomTypeLabel(room.type) }}
+                </div>
+                <div *ngIf="i === 0" class="text-xs text-secondary">
+                  Next room
                 </div>
               </div>
-
-              <span class="text-xs text-secondary">
-                #{{ currentRoomNumber() + i + 1 }}
-              </span>
             </div>
 
-            <p *ngIf="!upcomingRooms().length" class="text-secondary">
-              No upcoming rooms.
-            </p>
+            <span class="text-xs text-secondary">
+              #{{ currentRoomNumber() + i + 1 }}
+            </span>
           </div>
+
+          <p *ngIf="!upcomingRooms().length" class="text-secondary">
+            No upcoming rooms.
+          </p>
+        </div>
       </div>
     </div>
   </div>

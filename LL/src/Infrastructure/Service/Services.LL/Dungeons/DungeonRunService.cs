@@ -1,6 +1,5 @@
 ﻿using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Helpers.Constants;
-using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Combat;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
@@ -185,7 +184,7 @@ public sealed class DungeonRunService : IDungeonRunService
                 {
                     Run = run,
                     Outcome = DungeonActionOutcome.CheckpointResolved,
-                    Message = "Dungeon rewards withdrawn."
+                    Message = "Dungeon rewards secured."
                 };
 
             default:
