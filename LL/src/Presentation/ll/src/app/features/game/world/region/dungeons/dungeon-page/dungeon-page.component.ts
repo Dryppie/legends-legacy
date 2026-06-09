@@ -153,13 +153,6 @@ export class DungeonPageComponent {
     return this.activeDungeon()?.pendingRewards ?? [];
   });
 
-  readonly pendingItemQuantity = computed(() => {
-    return this.pendingRewards().reduce(
-      (total, reward) => total + (reward.quantity ?? 0),
-      0,
-    );
-  });
-
   readonly completedRooms = computed(() => {
     const run = this.activeDungeon();
     if (!run?.rooms?.length) return [];
