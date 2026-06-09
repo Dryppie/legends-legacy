@@ -22,6 +22,7 @@ public sealed class DungeonRunService : IDungeonRunService
     private readonly ICombatOutcomeCoordinator _outcomeCoordinator;
     private readonly DungeonRunFactory _factory;
     private readonly IDungeonRunRewardClaimer _rewardClaimer;
+    private readonly IDungeonCompletionRewardApplier _completionRewardApplier;
 
     // Blessings are offered on shrine events; you’ll likely have a repository for these.
     //private readonly IReadOnlyList<Guid> _globalBlessingPool;
@@ -36,7 +37,8 @@ public sealed class DungeonRunService : IDungeonRunService
         ICombatOrchestrationCoordinator orchestrationCoordinator,
         ICombatOutcomeCoordinator outcomeCoordinator,
         DungeonRunFactory factory,
-        IDungeonRunRewardClaimer rewardClaimer
+        IDungeonRunRewardClaimer rewardClaimer,
+        IDungeonCompletionRewardApplier completionRewardApplier
         //IDungeonRunStore runStore,
         /*IReadOnlyList<Guid> globalBlessingPool*/)
     {
@@ -48,6 +50,7 @@ public sealed class DungeonRunService : IDungeonRunService
         _outcomeCoordinator = outcomeCoordinator;
         _factory = factory;
         _rewardClaimer = rewardClaimer;
+        _completionRewardApplier = completionRewardApplier;
         //_globalBlessingPool = globalBlessingPool;
     }
 
@@ -165,6 +168,7 @@ public sealed class DungeonRunService : IDungeonRunService
             case "continue":
                 CompleteRoom(run, room);
                 MoveToNextRoom(run);
+                await ApplyCompletionRewardsIfNeeded(run, ct);
 
                 return new ExecuteDungeonActionResult
                 {
@@ -249,6 +253,7 @@ public sealed class DungeonRunService : IDungeonRunService
         {
             CompleteRoom(run, room);
             MoveToNextRoom(run);
+            await ApplyCompletionRewardsIfNeeded(run, ct);
             
             outcome = run.Status == DungeonRunStatus.Completed
                 ? DungeonActionOutcome.RunCompleted
@@ -302,6 +307,7 @@ public sealed class DungeonRunService : IDungeonRunService
 
         CompleteRoom(run, room);
         MoveToNextRoom(run);
+        await ApplyCompletionRewardsIfNeeded(run, ct);
 
         return new ExecuteDungeonActionResult
         {
@@ -325,6 +331,16 @@ public sealed class DungeonRunService : IDungeonRunService
         }
 
         run.CurrentRoomIndex = nextRoomIndex;
+    }
+
+    private async Task ApplyCompletionRewardsIfNeeded(DungeonRun run, CancellationToken cancellationToken)
+    {
+        if (run.Status != DungeonRunStatus.Completed)
+        {
+            return;
+        }
+
+        await _completionRewardApplier.ApplyAsync(run, cancellationToken);
     }
 
     private void AbandonRun(DungeonRun run)

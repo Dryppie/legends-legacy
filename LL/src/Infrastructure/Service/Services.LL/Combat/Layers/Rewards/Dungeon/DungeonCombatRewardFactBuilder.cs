@@ -1,17 +1,27 @@
-﻿using Application.Interfaces.Services.LL.Entities;
+using Application.Interfaces.Services.LL.Entities;
+using Domain.Models.Dungeons.Runs;
 using Domain.Models.Entities.Creatures;
+using Domain.Models.Items;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Interfaces.Combat.Reward.Dungeon;
+using Services.LL.JsonDefinitions;
 
 namespace Services.LL.Combat.Layers.Rewards.Dungeon;
 
 public class DungeonCombatRewardFactBuilder : IDungeonCombatRewardFactBuilder
 {
     private readonly IEntityService _entityService;
+    private readonly IDungeonRunRepository _dungeonRuns;
+    private readonly IDungeonDefinitions _dungeonDefinitions;
 
-    public DungeonCombatRewardFactBuilder(IEntityService entityService)
+    public DungeonCombatRewardFactBuilder(
+        IEntityService entityService,
+        IDungeonRunRepository dungeonRuns,
+        IDungeonDefinitions dungeonDefinitions)
     {
         _entityService = entityService;
+        _dungeonRuns = dungeonRuns;
+        _dungeonDefinitions = dungeonDefinitions;
     }
 
     public async Task<DungeonCombatRewardFacts> BuildAsync(
@@ -50,7 +60,7 @@ public class DungeonCombatRewardFactBuilder : IDungeonCombatRewardFactBuilder
                         if (!hostileCreaturesById.TryGetValue(id, out var creature))
                         {
                             throw new InvalidOperationException(
-                                $"Hostile creature '{id}' could not be loaded for idle reward calculation.");
+                                $"Hostile creature '{id}' could not be loaded for dungeon reward calculation.");
                         }
 
                         return creature;
@@ -66,10 +76,19 @@ public class DungeonCombatRewardFactBuilder : IDungeonCombatRewardFactBuilder
             })
             .ToArray();
 
+        var run = await _dungeonRuns.GetDungeonRunByDungeonIdAsync(
+            context.DungeonRunId,
+            cancellationToken);
+
+        var monsterLootModifiers = run is null
+            ? new Dictionary<ItemType, double>()
+            : _dungeonDefinitions.GetByKey(run.DungeonDefinitionId).MonsterLootModifiers;
+
         return new DungeonCombatRewardFacts(
             DungeonRunId: context.DungeonRunId,
             CharacterId: context.CharacterId,
             CurrentRoomIndex: context.OrchestrationRequest.CurrentRoomIndex,
+            MonsterLootModifiers: monsterLootModifiers,
             PlayerEntityIds: [.. context.PlayerEntityIds],
             Encounters: encounterFacts);
     }

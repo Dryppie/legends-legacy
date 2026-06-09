@@ -8,6 +8,7 @@ using Domain.Models.Entities.Creatures;
 namespace Services.AdminDashboard.JsonReaders;
 public class CreatureJsonReader
 {
+    private static readonly object FileLock = new();
     public List<Creature> AllCreatures { get; set; } = [];
     private readonly string _filePath;
 
@@ -16,7 +17,11 @@ public class CreatureJsonReader
         var currentDirectory = Directory.GetCurrentDirectory();
         var apiDirectory = Directory.GetParent(currentDirectory)!.FullName;
         _filePath = Path.Combine(apiDirectory, "API.LL", "Data", "creatures.json");
-        string json = File.ReadAllText(_filePath);
+        string json;
+        lock (FileLock)
+        {
+            json = ReadAllTextShared(_filePath);
+        }
 
         AllCreatures = JsonSerializer.Deserialize<List<Creature>>(json, new JsonSerializerOptions()
         {
@@ -24,9 +29,11 @@ public class CreatureJsonReader
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             Converters = { new SafeEnumConverter<AttributeType>(), new JsonStringEnumConverter() }
         })!;
-        ValidateAndFixCreatureAttributes(AllCreatures);
 
-        OverWriteJSON();
+        if (ValidateAndFixCreatureAttributes(AllCreatures))
+        {
+            OverWriteJSON();
+        }
     }
     public List<Creature> GetCreaturesFromJson()
     {
@@ -35,26 +42,48 @@ public class CreatureJsonReader
 
     public void UpdateCreatureFromCreature(CreatureDto creatureToUpdate)
     {
-
-        var index = AllCreatures.FindIndex(c => c.Id == creatureToUpdate.Id);
-        if (index != -1)
+        lock (FileLock)
         {
-            creatureToUpdate.UpdateProperties(AllCreatures[index]);
-        }
+            var index = AllCreatures.FindIndex(c => c.Id == creatureToUpdate.Id);
+            if (index != -1)
+            {
+                creatureToUpdate.UpdateProperties(AllCreatures[index]);
+            }
 
-        OverWriteJSON();
+            OverWriteJSONUnsafe();
+        }
     }
 
     private void OverWriteJSON()
     {
+        lock (FileLock)
+        {
+            OverWriteJSONUnsafe();
+        }
+    }
+
+    private void OverWriteJSONUnsafe()
+    {
         var options = new JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             Converters = { new JsonStringEnumConverter() }
         };
-        File.WriteAllText(_filePath, JsonSerializer.Serialize(AllCreatures, options));
+        var json = JsonSerializer.Serialize(AllCreatures, options);
+        var tempPath = $"{_filePath}.{Guid.NewGuid():N}.tmp";
+
+        File.WriteAllText(tempPath, json);
+        File.Move(tempPath, _filePath, overwrite: true);
     }
 
-    private void ValidateAndFixCreatureAttributes(List<Creature> creatures)
+    private static string ReadAllTextShared(string filePath)
     {
+        using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+        using var reader = new StreamReader(stream);
+        return reader.ReadToEnd();
+    }
+
+    private bool ValidateAndFixCreatureAttributes(List<Creature> creatures)
+    {
+        var changed = false;
         var validAttributes = Enum.GetValues(typeof(AttributeType)).Cast<AttributeType>().ToList();
 
         foreach (var creature in creatures)
@@ -69,9 +98,12 @@ public class CreatureJsonReader
                         AttributeType = attribute,
                         Value = 0
                     });
+                    changed = true;
                 }
 
             }
         }
+
+        return changed;
     }
 }

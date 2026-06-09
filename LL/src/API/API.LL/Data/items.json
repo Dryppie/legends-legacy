@@ -1,5 +1,19 @@
 [
   {
+    "id": "advancement_stone",
+    "name": "Advancement Stone",
+    "description": "A dungeon reward used for future character and gear advancement.",
+    "itemType": "Resource",
+    "rarity": "Uncommon",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
     "id": "soul_dust",
     "name": "Soul Dust",
     "description": "A material gotten by disolving Essences.",

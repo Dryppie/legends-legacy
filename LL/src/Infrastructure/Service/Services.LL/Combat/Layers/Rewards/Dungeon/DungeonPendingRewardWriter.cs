@@ -1,4 +1,5 @@
 using Domain.Models.Dungeons.Runs;
+using Domain.Models.Inventories;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Interfaces.Combat.Reward.Dungeon;
 
@@ -31,38 +32,67 @@ public sealed class DungeonPendingRewardWriter : IDungeonPendingRewardWriter
         run.PendingCinders += outcome.TotalCinders;
         run.PendingSoulstones += outcome.TotalSoulstones;
 
-        AddPendingLoot(run, facts, outcome);
+        await AddPendingLoot(
+            run,
+            outcome.TotalLoot,
+            $"room:{facts.CurrentRoomIndex + 1}",
+            cancellationToken);
     }
 
-    private static void AddPendingLoot(
-        DungeonRun run,
-        DungeonCombatRewardFacts facts,
-        DungeonCombatCalculatedOutcome outcome)
+    public async Task AddLootAsync(
+        Guid dungeonRunId,
+        IReadOnlyList<InventoryItem> loot,
+        string source,
+        CancellationToken cancellationToken)
     {
-        var source = $"room:{facts.CurrentRoomIndex + 1}";
-
-        foreach (var loot in outcome.TotalLoot)
+        if (loot.Count == 0)
         {
-            var itemBase = loot.ItemInstance.ItemBase;
+            return;
+        }
+
+        var run = await _dungeonRuns.GetDungeonRunByDungeonIdAsync(
+            dungeonRunId,
+            cancellationToken);
+
+        if (run is null)
+        {
+            return;
+        }
+
+        await AddPendingLoot(run, loot, source, cancellationToken);
+    }
+
+    private async Task AddPendingLoot(
+        DungeonRun run,
+        IReadOnlyList<InventoryItem> loot,
+        string source,
+        CancellationToken cancellationToken)
+    {
+        foreach (var item in loot)
+        {
+            var itemBase = item.ItemInstance.ItemBase;
             var pendingReward = run.PendingRewards.FirstOrDefault(x =>
                 x.ItemId == itemBase.Id &&
                 x.Source == source);
 
             if (pendingReward is null)
             {
-                run.PendingRewards.Add(new RunReward
+                await _dungeonRuns.AddPendingRewardAsync(
+                    run,
+                    new RunReward
                 {
                     ItemId = itemBase.Id,
                     Name = itemBase.Name,
                     ItemType = itemBase.ItemType,
-                    Quantity = loot.Quantity,
+                    Quantity = item.Quantity,
                     Source = source
-                });
+                    },
+                    cancellationToken);
 
                 continue;
             }
 
-            pendingReward.Quantity += loot.Quantity;
+            pendingReward.Quantity += item.Quantity;
         }
     }
 }

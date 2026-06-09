@@ -32,7 +32,7 @@ public class DungeonController : BaseController
 
     [HttpPost("ExecuteAction/{runId}")]
     public async Task<ActionResult<Response<ExecuteDungeonActionResponseDto>>> ExecuteAction(Guid runId, ExecuteDungeonActionRequest request) =>
-        await Mediator.Send(new ExecuteDungeonActionCommand(runId, request.ActionId, request.Payload));
+        await Mediator.Send(new ExecuteDungeonActionCommand(CurrentCharacterGuid, runId, request.ActionId, request.Payload));
 
     [HttpPost("ClaimDungeonRewards")]
     public async Task<ActionResult<Response<bool>>> ClaimDungeonRewards() =>

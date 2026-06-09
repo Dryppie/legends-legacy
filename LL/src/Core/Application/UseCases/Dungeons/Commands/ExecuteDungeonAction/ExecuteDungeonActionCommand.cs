@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Application.UseCases.Dungeons.Commands.ExecuteDungeonAction;
 
-public record ExecuteDungeonActionCommand(Guid RunId, string ActionId, object? Payload) : ICommand<Response<ExecuteDungeonActionResponseDto>>;
+public record ExecuteDungeonActionCommand(Guid CharacterId, Guid RunId, string ActionId, object? Payload) : ICommand<Response<ExecuteDungeonActionResponseDto>>;
 public class ExecuteDungeonActionCommandHandler : IRequestHandler<ExecuteDungeonActionCommand, Response<ExecuteDungeonActionResponseDto>>
 {
     private readonly IDungeonRunService _dungeonRunService;

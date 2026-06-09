@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Application.Common.Interfaces;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.LootTables;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL.Seeds.JsonSeeding.Dtos.Recipes;
 using Persistence.LL.Seeds.JsonSeeding.JsonConverters;
@@ -18,6 +19,7 @@ public static class DbJsonSeeder
         var opt = new JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase, Converters = { new JsonStringEnumConverter(), new ItemBaseConverter() } };
         await SeedBaseItems(ctx, opt);
         await SeedRecipes(ctx, opt);
+        await SeedDungeonLootTables(ctx);
         await ctx.SaveChangesAsync(CancellationToken.None);
     }
 
@@ -70,5 +72,62 @@ public static class DbJsonSeeder
                 ctx.GetEntry(existing).CurrentValues.SetValues(recipe); // Update existing, but not materials
             }
         }
+    }
+
+    private static async Task SeedDungeonLootTables(IDbContext ctx)
+    {
+        await AddLootTableIfMissing(
+            ctx,
+            lootTableId: Guid.Parse("10000000-0000-0000-0000-000000000001"),
+            entries:
+            [
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0001-000000000001"),
+                    itemId: "advancement_stone",
+                    weight: 35)
+            ]);
+
+        await AddLootTableIfMissing(
+            ctx,
+            lootTableId: Guid.Parse("10000000-0000-0000-0000-000000000101"),
+            entries:
+            [
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0101-000000000001"),
+                    itemId: "stoneguard_ring",
+                    weight: 10),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0101-000000000002"),
+                    itemId: "advancement_stone",
+                    weight: 25)
+            ]);
+    }
+
+    private static async Task AddLootTableIfMissing(
+        IDbContext ctx,
+        Guid lootTableId,
+        IReadOnlyCollection<LootTableEntry> entries)
+    {
+        var existing = await ctx.LootTables.FirstOrDefaultAsync(x => x.Id == lootTableId);
+        if (existing is not null)
+        {
+            return;
+        }
+
+        ctx.LootTables.Add(new LootTable
+        {
+            Id = lootTableId,
+            Entries = [.. entries]
+        });
+    }
+
+    private static LootTableItem CreateLootTableItem(Guid id, string itemId, float weight)
+    {
+        return new LootTableItem
+        {
+            Id = id,
+            ItemId = itemId,
+            Weight = weight
+        };
     }
 }

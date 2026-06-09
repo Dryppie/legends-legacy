@@ -3,6 +3,12 @@
     "id": "goblin_mines",
     "name": "Goblin Mines",
     "sigilItemId": "sigil_goblin_mines",
+    "tier": 1,
+    "completionLootTableId": "10000000-0000-0000-0000-000000000101",
+    "tierLootTableId": "10000000-0000-0000-0000-000000000001",
+    "monsterLootModifiers": {
+      "Essence": 25
+    },
     "hasCheckpoint": true,
     "minRooms": 5,
     "maxRooms": 7,
@@ -30,6 +36,11 @@
     "id": "forgotten_catacombs",
     "name": "Forgotten Catacombs",
     "sigilItemId": "sigil_forgotten_catacombs",
+    "tier": 1,
+    "tierLootTableId": "10000000-0000-0000-0000-000000000001",
+    "monsterLootModifiers": {
+      "Essence": 15
+    },
     "hasCheckpoint": true,
     "minRooms": 6,
     "maxRooms": 8,
@@ -75,6 +86,11 @@
     "id": "hives_abyss",
     "name": "The Hive’s Abyss",
     "sigilItemId": "sigil_hives_abyss",
+    "tier": 1,
+    "tierLootTableId": "10000000-0000-0000-0000-000000000001",
+    "monsterLootModifiers": {
+      "Essence": 15
+    },
     "hasCheckpoint": true,
     "minRooms": 7,
     "maxRooms": 9,

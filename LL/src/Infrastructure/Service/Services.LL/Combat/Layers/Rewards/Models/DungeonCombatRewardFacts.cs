@@ -1,9 +1,12 @@
-﻿namespace Services.LL.Combat.Layers.Rewards.Models;
+using Domain.Models.Items;
+
+namespace Services.LL.Combat.Layers.Rewards.Models;
 
 public sealed record DungeonCombatRewardFacts(
     Guid DungeonRunId,
     Guid CharacterId,
     int CurrentRoomIndex,
+    IReadOnlyDictionary<ItemType, double> MonsterLootModifiers,
     IReadOnlyList<Guid> PlayerEntityIds,
     IReadOnlyList<DungeonEncounterRewardFacts> Encounters)
 {

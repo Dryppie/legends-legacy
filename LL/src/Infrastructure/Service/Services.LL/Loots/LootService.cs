@@ -102,6 +102,17 @@ public class LootService : ILootService
         return GetRandomLoot(lootTable, ctx);
     }
 
+    public List<InventoryItem> GenerateDungeonLoot(LootTable lootTable, Dictionary<ItemType, double>? multipliers = null)
+    {
+        var ctx = new LootContext
+        {
+            Source = LootSource.Combat,
+            TypeMultipliers = multipliers ?? []
+        };
+
+        return GetRandomLoot(lootTable, ctx);
+    }
+
     public List<InventoryItem> GenerateIdleCombatLootAsync(List<Entity> entities, Dictionary<ItemType, double> multipliers)
     {
         var ctx = new LootContext

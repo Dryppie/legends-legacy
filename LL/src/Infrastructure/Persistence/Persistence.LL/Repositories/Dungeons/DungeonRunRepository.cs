@@ -26,6 +26,17 @@ public class DungeonRunRepository : IDungeonRunRepository
         return Task.FromResult(true);
     }
 
+    public Task<bool> AddPendingRewardAsync(
+        DungeonRun dungeonRun,
+        RunReward reward,
+        CancellationToken cancellationToken)
+    {
+        dungeonRun.PendingRewards.Add(reward);
+        _context.RunRewards.Add(reward);
+
+        return Task.FromResult(true);
+    }
+
     public async Task<DungeonRun?> GetDungeonRunByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken)
     {
         return await _context.DungeonRuns

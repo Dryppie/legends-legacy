@@ -62,10 +62,7 @@ internal class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculator
             {
                 loot = _lootService.GenerateIdleCombatLootAsync(
                     encounter.HostileCreatures.Cast<Entity>().ToList(),
-                    new Dictionary<ItemType, double>
-                    {
-                        { ItemType.Essence, essenceDropRate }
-                    });
+                    BuildMonsterLootModifiers(facts.MonsterLootModifiers, essenceDropRate));
 
                 experience = encounter.HostileCreatures.Sum(x => x.ExperienceReward);
 
@@ -101,5 +98,18 @@ internal class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculator
             TotalSoulstones: totalSoulstones,
             TotalLoot: totalLoot,
             EncounterOutcomes: encounterOutcomes);
+    }
+
+    private static Dictionary<ItemType, double> BuildMonsterLootModifiers(
+        IReadOnlyDictionary<ItemType, double> dungeonModifiers,
+        double essenceDropRate)
+    {
+        var modifiers = dungeonModifiers.ToDictionary(x => x.Key, x => x.Value);
+
+        modifiers[ItemType.Essence] = modifiers.TryGetValue(ItemType.Essence, out var dungeonEssenceModifier)
+            ? dungeonEssenceModifier + essenceDropRate
+            : essenceDropRate;
+
+        return modifiers;
     }
 }
