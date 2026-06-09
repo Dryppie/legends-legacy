@@ -6,10 +6,11 @@ public static class LootTableQueryExtensions
 {
     public static IQueryable<LootTable> IncludeAllEntries(this IQueryable<LootTable> query)
     {
-        var test = query
+        return query
+            .Include(lt => lt.Entries)
+                .ThenInclude(lte => (lte as LootTableItem).Item)
             .Include(lt => lt.Entries)
                 .ThenInclude(lt => (lt as LootTable).Entries)
                 .ThenInclude(lte => (lte as LootTableItem).Item);
-        return test;
     }
 }

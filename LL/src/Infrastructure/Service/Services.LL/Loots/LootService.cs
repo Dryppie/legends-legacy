@@ -112,7 +112,14 @@ public class LootService : ILootService
 
         var total = new List<InventoryItem>();
         foreach (var creature in entities.OfType<Creature>())
+        {
+            if (creature.LootTable?.Entries is null || creature.LootTable.Entries.Count == 0)
+            {
+                continue;
+            }
+
             total.AddRange(GetRandomLoot(creature.LootTable, ctx));
+        }
 
         return total;
     }
@@ -129,6 +136,11 @@ public class LootService : ILootService
 
             if (selectedEntry is LootTableItem lootTableItem)
             {
+                if (lootTableItem.Item is null)
+                {
+                    continue;
+                }
+
                 generatedLoot.Add(ConvertItemIntoInventoryItem(lootTableItem.Item));
             }
             else if (selectedEntry is LootTable table)
@@ -147,7 +159,9 @@ public class LootService : ILootService
             {
                 double mult = 0.0;
 
-                if (e is LootTableItem li && ctx.TypeMultipliers.TryGetValue(li.Item.ItemType, out var m))
+                if (e is LootTableItem li
+                    && li.Item is not null
+                    && ctx.TypeMultipliers.TryGetValue(li.Item.ItemType, out var m))
                     mult = m;
 
                 return (Entry: e, Weight: e.Weight * (1 + (mult / 100)));
