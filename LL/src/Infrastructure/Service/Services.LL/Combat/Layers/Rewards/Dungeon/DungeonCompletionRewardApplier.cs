@@ -1,8 +1,8 @@
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.LootTables;
 using Services.LL.Interfaces.Combat.Reward.Dungeon;
-using Services.LL.JsonDefinitions;
 
 namespace Services.LL.Combat.Layers.Rewards.Dungeon;
 

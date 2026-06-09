@@ -1,10 +1,10 @@
 using Application.Interfaces.Services.LL.Entities;
+using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Items;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Interfaces.Combat.Reward.Dungeon;
-using Services.LL.JsonDefinitions;
 
 namespace Services.LL.Combat.Layers.Rewards.Dungeon;
 

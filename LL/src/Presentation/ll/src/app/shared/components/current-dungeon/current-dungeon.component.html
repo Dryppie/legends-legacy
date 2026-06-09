@@ -44,7 +44,9 @@
       <div
         class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-sm text-primary"
       >
-        {{ roomIcon() }}
+        <app-dungeon-room-icon
+          [type]="currentRoom()?.type"
+        ></app-dungeon-room-icon>
       </div>
     </div>
   </div>

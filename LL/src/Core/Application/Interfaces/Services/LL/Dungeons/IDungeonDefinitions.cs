@@ -1,10 +1,9 @@
-﻿using Domain.Models.Dungeons;
+using Domain.Models.Dungeons;
 
-namespace Services.LL.JsonDefinitions;
+namespace Application.Interfaces.Services.LL.Dungeons;
 
 public interface IDungeonDefinitions
 {
     DungeonDefinition GetByKey(string key);
     IReadOnlyList<DungeonDefinition> GetAll();
 }
-

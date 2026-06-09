@@ -95,11 +95,7 @@ public static class DbJsonSeeder
                 CreateLootTableItem(
                     id: Guid.Parse("10000000-0000-0000-0101-000000000001"),
                     itemId: "stoneguard_ring",
-                    weight: 10),
-                CreateLootTableItem(
-                    id: Guid.Parse("10000000-0000-0000-0101-000000000002"),
-                    itemId: "advancement_stone",
-                    weight: 25)
+                    weight: 10)
             ]);
     }
 
@@ -108,9 +104,13 @@ public static class DbJsonSeeder
         Guid lootTableId,
         IReadOnlyCollection<LootTableEntry> entries)
     {
-        var existing = await ctx.LootTables.FirstOrDefaultAsync(x => x.Id == lootTableId);
+        var existing = await ctx.LootTables
+            .Include(x => x.Entries)
+            .FirstOrDefaultAsync(x => x.Id == lootTableId);
+
         if (existing is not null)
         {
+            SyncLootTableEntries(ctx, existing, entries);
             return;
         }
 
@@ -119,6 +119,42 @@ public static class DbJsonSeeder
             Id = lootTableId,
             Entries = [.. entries]
         });
+    }
+
+    private static void SyncLootTableEntries(
+        IDbContext ctx,
+        LootTable lootTable,
+        IReadOnlyCollection<LootTableEntry> entries)
+    {
+        var desiredEntries = entries.ToDictionary(x => x.Id);
+
+        foreach (var existingEntry in lootTable.Entries.ToList())
+        {
+            if (desiredEntries.Remove(existingEntry.Id, out var desiredEntry))
+            {
+                existingEntry.Weight = desiredEntry.Weight;
+
+                if (existingEntry is LootTableItem existingItem &&
+                    desiredEntry is LootTableItem desiredItem)
+                {
+                    existingItem.ItemId = desiredItem.ItemId;
+                }
+
+                continue;
+            }
+
+            lootTable.Entries.Remove(existingEntry);
+
+            if (existingEntry is LootTableItem item)
+            {
+                ctx.LootTableItems.Remove(item);
+            }
+        }
+
+        foreach (var entry in desiredEntries.Values)
+        {
+            lootTable.Entries.Add(entry);
+        }
     }
 
     private static LootTableItem CreateLootTableItem(Guid id, string itemId, float weight)

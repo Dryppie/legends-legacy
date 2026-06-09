@@ -3,6 +3,7 @@ import { Observable, catchError, throwError } from 'rxjs';
 import { ApiService } from '../api.service';
 import { StartDungeonRequest } from '../../../../shared/models/requestDtos/dungeons/startDungeonRequest';
 import { CombatSessionDto } from '../../../../shared/models/Dtos/combatResultDto';
+import { DungeonPreviewData } from '../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
 
 export enum DungeonRunStatus {
   Active = 'Active',
@@ -100,13 +101,13 @@ export enum DungeonActionOutcome {
 export class DungeonService {
   constructor(private readonly api: ApiService) {}
 
-  // getAvailableDungeons(): Observable<DungeonPreviewData[]> {
-  //   return this.api.get('dungeon/getAvailableDungeons').pipe(
-  //     catchError(() => {
-  //       return throwError(() => new Error('Failed to get available dungeons'));
-  //     }),
-  //   );
-  // }
+  getAvailableDungeons(): Observable<DungeonPreviewData[]> {
+    return this.api.get('dungeon/getAvailableDungeons').pipe(
+      catchError(() => {
+        return throwError(() => new Error('Failed to get available dungeons'));
+      }),
+    );
+  }
 
   getActiveDungeon(): Observable<DungeonRun | null> {
     return this.api.get('dungeon/getActiveDungeon').pipe(

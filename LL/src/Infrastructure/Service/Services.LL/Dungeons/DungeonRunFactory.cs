@@ -1,9 +1,9 @@
 ﻿using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Definitions.Events;
+using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
 using Services.LL.Interfaces;
-using Services.LL.JsonDefinitions;
 
 namespace Services.LL.Dungeons;
 

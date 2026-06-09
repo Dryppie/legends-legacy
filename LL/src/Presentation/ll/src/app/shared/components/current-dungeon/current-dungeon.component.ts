@@ -2,11 +2,12 @@ import { Component, computed, inject } from '@angular/core';
 import { DungeonStateService } from '../../../core/services/api/dungeon/dungeon-state.service';
 import { NgIf } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { DungeonRoomIconComponent } from '../dungeons/dungeon-room-icon/dungeon-room-icon.component';
 
 @Component({
   selector: 'app-current-dungeon',
   standalone: true,
-  imports: [NgIf, RouterLink],
+  imports: [NgIf, RouterLink, DungeonRoomIconComponent],
   templateUrl: './current-dungeon.component.html',
 })
 export class CurrentDungeonComponent {
@@ -81,25 +82,6 @@ export class CurrentDungeonComponent {
         return 'Checkpoint';
       default:
         return 'Exploring';
-    }
-  });
-
-  readonly roomIcon = computed(() => {
-    const type = this.currentRoom()?.type;
-
-    switch (type) {
-      case 'Combat':
-        return '⚔';
-      case 'MiniBoss':
-        return '☠';
-      case 'Boss':
-        return '👑';
-      case 'Event':
-        return '?';
-      case 'Checkpoint':
-        return '⛺';
-      default:
-        return '•';
     }
   });
 

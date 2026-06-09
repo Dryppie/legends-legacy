@@ -1,5 +1,6 @@
 ﻿using Domain.Models.Dungeons;
 using Services.LL.JsonDefinitions.Reader;
+using Application.Interfaces.Services.LL.Dungeons;
 
 namespace Services.LL.JsonDefinitions;
 

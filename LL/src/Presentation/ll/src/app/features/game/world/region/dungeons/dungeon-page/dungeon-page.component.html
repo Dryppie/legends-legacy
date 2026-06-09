@@ -185,7 +185,10 @@
               >
                 <span class="flex items-center text-primary">
                   <span class="min-w-3">{{ room.index + 1 }}</span>
-                  {{ getRoomIcon(room.type) }}
+                  <app-dungeon-room-icon
+                    class="mx-2 text-base"
+                    [type]="room.type"
+                  ></app-dungeon-room-icon>
                   {{ getRoomTypeLabel(room.type) }}
                 </span>
                 <span class="text-xs text-secondary">Cleared</span>
@@ -197,7 +200,10 @@
               >
                 <span class="flex items-center text-red-100">
                   <span class="min-w-3">{{ room.index + 1 }}</span>
-                  {{ getRoomIcon(room.type) }}
+                  <app-dungeon-room-icon
+                    class="mx-2 text-base"
+                    [type]="room.type"
+                  ></app-dungeon-room-icon>
                   {{ getRoomTypeLabel(room.type) }}
                 </span>
                 <span class="text-xs text-red-200">Failed here</span>
@@ -238,13 +244,13 @@
             <div
               class="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-3xl text-primary"
             >
-              {{
-                getRoomIcon(
-                  activeDungeon()?.status === "Completed"
-                    ? "Boss"
-                    : "Checkpoint"
-                )
-              }}
+              <app-dungeon-room-icon
+                [type]="
+                  activeDungeon()?.status === 'Completed'
+                    ? 'Boss'
+                    : 'Checkpoint'
+                "
+              ></app-dungeon-room-icon>
             </div>
 
             <div class="text-sm uppercase tracking-wide text-secondary">
@@ -338,7 +344,10 @@
                 >
                   <span class="flex items-center text-primary">
                     <span class="min-w-3">{{ room.index + 1 }}</span>
-                    {{ getRoomIcon(room.type) }}
+                    <app-dungeon-room-icon
+                      class="mx-2 text-base"
+                      [type]="room.type"
+                    ></app-dungeon-room-icon>
                     {{ getRoomTypeLabel(room.type) }}
                   </span>
                   <span class="text-xs text-secondary">Cleared</span>
@@ -369,7 +378,10 @@
                   class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-primary"
                   [ngClass]="getRoomStateClasses(i)"
                 >
-                  {{ getRoomIcon(room.type) }}
+                  <app-dungeon-room-icon
+                    class="text-base"
+                    [type]="room.type"
+                  ></app-dungeon-room-icon>
                 </div>
               </div>
             </div>
@@ -378,7 +390,9 @@
           <div
             class="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-3xl text-primary"
           >
-            {{ getRoomIcon(currentRoom()?.type) }}
+            <app-dungeon-room-icon
+              [type]="currentRoom()?.type"
+            ></app-dungeon-room-icon>
           </div>
 
           <div class="text-sm uppercase tracking-wide text-secondary">
@@ -453,7 +467,10 @@
             [ngClass]="i === 0 ? 'border-primary/30 bg-primary/5' : ''"
           >
             <div class="flex items-center gap-3">
-              <span class="text-primary">{{ getRoomIcon(room.type) }}</span>
+              <app-dungeon-room-icon
+                class="text-primary"
+                [type]="room.type"
+              ></app-dungeon-room-icon>
               <div>
                 <div class="text-primary">
                   {{ getRoomTypeLabel(room.type) }}

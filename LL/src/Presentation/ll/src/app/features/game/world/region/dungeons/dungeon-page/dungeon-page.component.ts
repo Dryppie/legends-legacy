@@ -6,11 +6,19 @@ import { CombatStateService } from '../../../../../../core/state/combat-state/co
 import { CombatComponent } from '../../../../../../shared/components/combat/combat.component';
 import { BattleType } from '../../../../../../core/state/combat-state/combatState';
 import { Router } from '@angular/router';
+import { DungeonRoomIconComponent } from '../../../../../../shared/components/dungeons/dungeon-room-icon/dungeon-room-icon.component';
 
 @Component({
   selector: 'app-dungeon-page',
   standalone: true,
-  imports: [NgIf, NgFor, NgClass, RegularButtonComponent, CombatComponent],
+  imports: [
+    NgIf,
+    NgFor,
+    NgClass,
+    RegularButtonComponent,
+    CombatComponent,
+    DungeonRoomIconComponent,
+  ],
   templateUrl: './dungeon-page.component.html',
 })
 export class DungeonPageComponent {
@@ -351,25 +359,6 @@ export class DungeonPageComponent {
         return 'Checkpoint';
       default:
         return type || 'Unknown';
-    }
-  }
-
-  getRoomIcon(type: string | null | undefined): string {
-    switch (type) {
-      case 'Unknown':
-        return '•';
-      case 'Combat':
-        return '⚔';
-      case 'MiniBoss':
-        return '☠';
-      case 'Boss':
-        return '👑';
-      case 'Event':
-        return '?';
-      case 'Checkpoint':
-        return '⛺';
-      default:
-        return '•';
     }
   }
 
