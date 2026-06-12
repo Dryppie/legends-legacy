@@ -46,6 +46,8 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
         var essence = source.Essence;
         var definition = _definitions.GetById(essence.EssenceDefinitionId) ?? new EssenceDefinition { Id = essence.EssenceDefinitionId, Name = essence.EssenceDefinitionId };
         var missing = GetMissingRequirements(essence, definition).ToList();
+        var canAscend = essence.Level >= _progression.GetLevelCap(essence.AscensionTier) && essence.AscensionTier < 3;
+        var canEvolve = !essence.IsEvolved && essence.AscensionTier >= definition.Evolution.RequiredAscensionTier;
 
         return new(
             essence.Id,
@@ -59,9 +61,11 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
             essence.IsEvolved,
             essence.IsFavorite,
             source.AttunedSlot,
-            essence.Level >= _progression.GetLevelCap(essence.AscensionTier) && essence.AscensionTier < 3,
-            !essence.IsEvolved && essence.AscensionTier >= definition.Evolution.RequiredAscensionTier,
+            canAscend,
+            canEvolve,
             missing,
+            GetAscendInfo(essence, definition, canAscend),
+            GetEvolveInfo(essence, definition, canEvolve),
             GetAttributeBonuses(definition, essence).ToList(),
             MapAbility(definition.ActiveAbility, essence),
             MapAbility(definition.PassiveAbility, essence));
@@ -73,6 +77,100 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
         if (essence.AscensionTier >= 3) yield return "Maximum Ascension Tier reached.";
         if (essence.IsEvolved) yield return "Already evolved.";
         if (essence.AscensionTier < definition.Evolution.RequiredAscensionTier) yield return $"Reach Ascension Tier {definition.Evolution.RequiredAscensionTier}.";
+    }
+
+    private EssenceAscendInfoDto GetAscendInfo(PlayerEssence essence, EssenceDefinition definition, bool canAscend)
+    {
+        var nextTier = essence.AscensionTier >= 3 ? (int?)null : essence.AscensionTier + 1;
+        var currentCap = _progression.GetLevelCap(essence.AscensionTier);
+        var nextTierDefinition = nextTier is null
+            ? null
+            : definition.Ascension.Tiers.FirstOrDefault(x => x.Tier == nextTier.Value);
+        var requiredItemId = nextTierDefinition?.RequiredCoreItemId ?? (nextTier is null ? null : $"item.monster_core.tier_{nextTier}");
+        var requirements = new List<string>();
+
+        if (essence.AscensionTier >= 3)
+        {
+            requirements.Add("Already at maximum Ascension Tier.");
+        }
+        else
+        {
+            requirements.Add($"Reach Level {currentCap} in Ascension Tier {essence.AscensionTier}.");
+            requirements.Add($"Consume 1 {FormatItemName(requiredItemId)}.");
+        }
+
+        var effects = nextTier is null
+            ? new List<string> { "No further Ascension bonuses are available." }
+            : new List<string>
+            {
+                $"Raises the level cap to {_progression.GetLevelCap(nextTier.Value)}.",
+                $"Improves ability values such as damage, healing, barriers, status strength, and summons based on the ability's effect type.",
+                $"Reduces active ability cooldowns by up to {EssenceProgressionConstants.MaxActiveCooldownReduction:P0} at higher Ascension Tiers."
+            };
+
+        return new(
+            canAscend,
+            essence.AscensionTier,
+            nextTier,
+            requiredItemId,
+            FormatItemName(requiredItemId),
+            requirements,
+            effects);
+    }
+
+    private static EssenceEvolveInfoDto GetEvolveInfo(PlayerEssence essence, EssenceDefinition definition, bool canEvolve)
+    {
+        var requirements = new List<string>();
+
+        if (essence.IsEvolved)
+            requirements.Add("Already evolved.");
+        else
+            requirements.Add($"Reach Ascension Tier {definition.Evolution.RequiredAscensionTier}.");
+
+        if (!essence.IsEvolved)
+            requirements.Add($"Consume 1 {FormatItemName(definition.Evolution.RequiredCatalystItemId)}.");
+
+        var effects = new List<string>();
+        if (!string.IsNullOrWhiteSpace(definition.Evolution.Description))
+            effects.Add(definition.Evolution.Description);
+
+        if (definition.Evolution.AttributeModifierChanges.Count > 0)
+            effects.Add($"Adds {definition.Evolution.AttributeModifierChanges.Count} evolved attribute bonus changes.");
+
+        if (definition.Evolution.ActiveAbilityModifiers.Count > 0)
+            effects.Add("Enhances the active ability.");
+
+        if (definition.Evolution.PassiveAbilityModifiers.Count > 0)
+            effects.Add("Enhances the passive ability.");
+
+        if (definition.Evolution.AddsTags.Count > 0)
+            effects.Add("Adds evolved tags: " + string.Join(", ", definition.Evolution.AddsTags) + ".");
+
+        if (effects.Count == 0)
+            effects.Add("Unlocks the Essence's evolved form.");
+
+        return new(
+            canEvolve,
+            definition.Evolution.Name,
+            definition.Evolution.Description,
+            definition.Evolution.RequiredAscensionTier,
+            definition.Evolution.RequiredCatalystItemId,
+            FormatItemName(definition.Evolution.RequiredCatalystItemId),
+            requirements,
+            effects);
+    }
+
+    private static string FormatItemName(string? itemId)
+    {
+        if (string.IsNullOrWhiteSpace(itemId)) return "required item";
+
+        var parts = itemId
+            .Replace("item.", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .SelectMany(x => x.Split('_', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            .Select(x => x.Length == 0 ? x : char.ToUpperInvariant(x[0]) + x[1..]);
+
+        return string.Join(' ', parts);
     }
 
     private static IEnumerable<EssenceAttributeBonusDto> GetAttributeBonuses(EssenceDefinition definition, PlayerEssence essence)

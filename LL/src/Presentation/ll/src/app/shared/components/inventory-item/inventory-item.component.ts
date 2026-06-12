@@ -6,7 +6,7 @@ import { ItemType } from '../../models/enums/itemType';
 import { Equipment, EquipmentInstance, EssenceItem } from '../../models/item';
 import { EquipmentType } from '../../models/enums/equipmentType';
 import { ItemComponent } from '../item/item.component';
-import { EssenceCatalogViewService } from '../../../core/services/api/essences/essence-catalog-view.service';
+import { EssenceItemViewService } from '../../../core/services/api/essences/essence-item-view.service';
 
 @Component({
   selector: 'app-inventory-item',
@@ -19,10 +19,8 @@ export class InventoryItemComponent {
 
   constructor(
     private modal: ModalService,
-    private readonly essenceCatalogView: EssenceCatalogViewService,
-  ) {
-    this.essenceCatalogView.load();
-  }
+    private readonly essenceItemView: EssenceItemViewService,
+  ) {}
 
   get isEquipment(): boolean {
     return (
@@ -61,7 +59,7 @@ export class InventoryItemComponent {
         this.inventoryItem.itemInstance as EquipmentInstance,
       );
     } else if (this.isEssence) {
-      const essence = this.essenceCatalogView.asEssence(
+      const essence = this.essenceItemView.asEssence(
         this.inventoryItem.itemInstance.itemBase as EssenceItem,
       );
       this.modal.toggleEssenceModal(essence);

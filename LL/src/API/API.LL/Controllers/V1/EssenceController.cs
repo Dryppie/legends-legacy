@@ -9,7 +9,6 @@ using Application.UseCases.Essences.Commands.SaveEssenceLoadout;
 using Application.UseCases.Essences.Commands.SpendEssenceDust;
 using Application.UseCases.Essences.Dtos;
 using Application.UseCases.Essences.Queries.GetActiveEssenceLoadout;
-using Application.UseCases.Essences.Queries.GetEssenceCatalog;
 using Application.UseCases.Essences.Queries.GetEssenceLoadouts;
 using Application.UseCases.Essences.Queries.GetSoulArchive;
 using Common.Primitives;
@@ -19,10 +18,6 @@ namespace API.LL.Controllers.V1;
 
 public class EssenceController : BaseController
 {
-    [HttpGet("catalog")]
-    public async Task<ActionResult<EssenceCatalogDto>> GetCatalog() =>
-        await Mediator.Send(new GetEssenceCatalogQuery());
-
     [HttpGet("archive")]
     public async Task<ActionResult<SoulArchiveDto>> GetArchive() =>
         await Mediator.Send(new GetSoulArchiveQuery(CurrentCharacterGuid));

@@ -120,6 +120,7 @@ public static class DependencyInjection
         services.AddScoped<IEssenceProgressionService, EssenceProgressionService>();
         services.AddScoped<IEssenceSlotUnlockService, EssenceSlotUnlockService>();
         services.AddScoped<IEssenceLoadoutLimitService, EssenceLoadoutLimitService>();
+        services.AddScoped<IEssenceCombatAbilityFactory, EssenceCombatAbilityFactory>();
         services.AddScoped<IRandomProvider, SystemRandomProvider>();
         services.AddScoped<IEssenceService, EssenceSystemService>();
         services.AddScoped<IEssenceBonusProvider, EssenceSystemService>();

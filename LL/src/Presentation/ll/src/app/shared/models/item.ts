@@ -4,6 +4,7 @@ import { EquipmentType } from './enums/equipmentType';
 import { ItemType } from './enums/itemType';
 import { Rarity } from './enums/rarity';
 import { Essence } from './essence';
+import { EssenceDefinitionDto } from './essence-system';
 
 export interface ItemInstance {
   id: string;
@@ -41,37 +42,35 @@ export interface Equipment extends ItemBase {
 }
 
 export interface EssenceItem extends ItemBase {
-  essence?: Essence;
+  essence?: EssenceDefinitionDto;
   essenceDefinitionId: string;
   dismantleDustAmount: number;
 }
 
 export function essenceItemToEssence(item: EssenceItem): Essence {
-  return (
-    item.essence ?? {
-      id: item.essenceDefinitionId || item.id,
-      name: item.name,
-      active: {
-        name: 'Unbound Essence',
-        description: item.description,
-        attackTypes: [],
-        damageTypes: [],
-        effectTags: [],
-        targeting: [],
-        cooldown: 0,
-        effects: [],
-      },
-      passive: {
-        name: 'Soul Archive',
-        description: 'Absorb this item to add it to the Soul Archive.',
-        attackTypes: [],
-        damageTypes: [],
-        effectTags: [],
-        targeting: [],
-        cooldown: 0,
-        effects: [],
-      },
-      attributeModifiers: [],
-    }
-  );
+  return {
+    id: item.essenceDefinitionId || item.id,
+    name: item.name,
+    active: {
+      name: 'Unbound Essence',
+      description: item.description,
+      attackTypes: [],
+      damageTypes: [],
+      effectTags: [],
+      targeting: [],
+      cooldown: 0,
+      effects: [],
+    },
+    passive: {
+      name: 'Soul Archive',
+      description: 'Absorb this item to add it to the Soul Archive.',
+      attackTypes: [],
+      damageTypes: [],
+      effectTags: [],
+      targeting: [],
+      cooldown: 0,
+      effects: [],
+    },
+    attributeModifiers: [],
+  };
 }

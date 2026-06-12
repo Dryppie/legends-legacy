@@ -5,7 +5,7 @@ import { ItemComponent } from '../../../item/item.component';
 import { NumberFormatPipe } from '../../../../pipes/number-format/number-format.pipe';
 import { EssenceItem } from '../../../../models/item';
 import { RegularButtonComponent } from '../../../custom-components/buttons/regular-button/regular-button.component';
-import { EssenceCatalogViewService } from '../../../../../core/services/api/essences/essence-catalog-view.service';
+import { EssenceItemViewService } from '../../../../../core/services/api/essences/essence-item-view.service';
 
 @Component({
   selector: 'app-market-place-essences',
@@ -22,12 +22,10 @@ import { EssenceCatalogViewService } from '../../../../../core/services/api/esse
 export class MarketPlaceEssencesComponent {
   @Input() essenceListings!: Signal<MarketPlaceListing[]>;
 
-  constructor(private readonly essenceCatalogView: EssenceCatalogViewService) {
-    this.essenceCatalogView.load();
-  }
+  constructor(private readonly essenceItemView: EssenceItemViewService) {}
 
   itemAsEssence(listing: MarketPlaceListing) {
-    return this.essenceCatalogView.asEssence(
+    return this.essenceItemView.asEssence(
       listing.itemInstance.itemBase as EssenceItem,
     );
   }

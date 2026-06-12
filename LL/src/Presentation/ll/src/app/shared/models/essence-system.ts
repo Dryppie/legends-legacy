@@ -1,8 +1,3 @@
-export interface EssenceCatalogDto {
-  essences: EssenceDefinitionDto[];
-  tagsByCategory: Record<string, string[]>;
-}
-
 export interface EssenceDefinitionDto {
   id: string;
   sourceMonsterId: string;
@@ -89,9 +84,32 @@ export interface PlayerEssenceDto {
   canAscend: boolean;
   canEvolve: boolean;
   missingRequirements: string[];
+  ascendInfo: EssenceAscendInfoDto;
+  evolveInfo: EssenceEvolveInfoDto;
   currentAttributeBonuses: EssenceAttributeBonusDto[];
   activeAbility: EssenceAbilityDto;
   passiveAbility: EssenceAbilityDto;
+}
+
+export interface EssenceAscendInfoDto {
+  canPerform: boolean;
+  currentTier: number;
+  nextTier?: number | null;
+  requiredItemId?: string | null;
+  requiredItemName?: string | null;
+  requirements: string[];
+  effects: string[];
+}
+
+export interface EssenceEvolveInfoDto {
+  canPerform: boolean;
+  name: string;
+  description: string;
+  requiredAscensionTier: number;
+  requiredItemId: string;
+  requiredItemName: string;
+  requirements: string[];
+  effects: string[];
 }
 
 export interface EssenceLoadoutsDto {

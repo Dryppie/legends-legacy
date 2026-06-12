@@ -1,10 +1,4 @@
-using Domain.Models.Essences.Definitions;
-
 namespace Domain.Models.Essences;
-
-public sealed record EssenceCatalog(
-    IReadOnlyList<EssenceDefinition> Essences,
-    IReadOnlyDictionary<string, IReadOnlyList<string>> TagsByCategory);
 
 public sealed record SoulArchive(
     IReadOnlyList<PlayerEssenceArchiveEntry> Essences,

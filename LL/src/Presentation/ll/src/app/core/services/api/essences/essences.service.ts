@@ -3,7 +3,6 @@ import { Observable } from 'rxjs';
 import { ApiService } from '../../api/api.service';
 import {
   DismantleEssenceResultDto,
-  EssenceCatalogDto,
   EssenceLoadoutDto,
   EssenceLoadoutsDto,
   ResponseMessageDto,
@@ -17,10 +16,6 @@ import {
 })
 export class EssencesService {
   constructor(private apiService: ApiService) {}
-
-  public getCatalog(): Observable<EssenceCatalogDto> {
-    return this.apiService.get('essence/catalog');
-  }
 
   public getArchive(): Observable<SoulArchiveDto> {
     return this.apiService.get('essence/archive');

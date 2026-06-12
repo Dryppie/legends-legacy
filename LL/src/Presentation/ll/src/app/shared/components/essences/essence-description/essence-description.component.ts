@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, effect, Input, OnChanges } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
 import { AbilityTooltipContainerDirective } from '../../../directives/ability-tooltip-container/ability-tooltip-container.directive';
@@ -22,9 +22,18 @@ export class EssenceDescriptionComponent implements OnChanges {
   constructor(
     private readonly sanitizer: DomSanitizer,
     private readonly characterState: CharacterStateService,
-  ) {}
+  ) {
+    effect(() => {
+      this.characterState.overview();
+      this.refreshDescription();
+    });
+  }
 
   ngOnChanges(): void {
+    this.refreshDescription();
+  }
+
+  private refreshDescription(): void {
     this.safeDescription = this.sanitizer.bypassSecurityTrustHtml(
       this.buildDescriptionHtml(),
     );

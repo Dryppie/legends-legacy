@@ -5,7 +5,6 @@ namespace Application.Interfaces.Services.LL.Essences;
 
 public interface IEssenceService
 {
-    Task<EssenceCatalog> GetCatalogAsync(CancellationToken cancellationToken);
     Task<SoulArchive> GetSoulArchiveAsync(Guid characterId, CancellationToken cancellationToken);
     Task<EssenceLoadouts> GetLoadoutsAsync(Guid characterId, CancellationToken cancellationToken);
     Task<EssenceLoadout?> GetActiveLoadoutAsync(Guid characterId, CancellationToken cancellationToken);

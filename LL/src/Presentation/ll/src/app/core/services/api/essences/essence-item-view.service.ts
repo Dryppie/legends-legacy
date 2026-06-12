@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
   AttributeModifier,
   ModifierType,
@@ -15,51 +15,15 @@ import { Targeting } from '../../../../shared/models/enums/targeting';
 import { EssenceItem, essenceItemToEssence } from '../../../../shared/models/item';
 import {
   EssenceAbilityDto,
-  EssenceCatalogDto,
   EssenceDefinitionDto,
 } from '../../../../shared/models/essence-system';
-import { EssencesService } from './essences.service';
 
 @Injectable({ providedIn: 'root' })
-export class EssenceCatalogViewService {
-  private readonly _catalog = signal<EssenceCatalogDto | null>(null);
-  private loading = false;
-
-  constructor(private readonly essencesService: EssencesService) {}
-
-  load(): void {
-    if (this._catalog() || this.loading) return;
-
-    this.loading = true;
-    this.essencesService.getCatalog().subscribe({
-      next: (catalog) => this.setCatalog(catalog),
-      error: () => {
-        this.loading = false;
-      },
-      complete: () => {
-        this.loading = false;
-      },
-    });
-  }
-
-  setCatalog(catalog: EssenceCatalogDto): void {
-    this._catalog.set(catalog);
-    this.loading = false;
-  }
-
+export class EssenceItemViewService {
   asEssence(item: EssenceItem): Essence {
-    const definition = this.getDefinition(item.essenceDefinitionId);
-    return definition
-      ? this.mapDefinitionToEssence(definition)
+    return item.essence
+      ? this.mapDefinitionToEssence(item.essence)
       : essenceItemToEssence(item);
-  }
-
-  private getDefinition(essenceDefinitionId: string): EssenceDefinitionDto | null {
-    return (
-      this._catalog()?.essences.find(
-        (essence) => essence.id === essenceDefinitionId,
-      ) ?? null
-    );
   }
 
   private mapDefinitionToEssence(definition: EssenceDefinitionDto): Essence {

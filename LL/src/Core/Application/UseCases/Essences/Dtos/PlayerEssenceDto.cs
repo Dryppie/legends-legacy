@@ -15,6 +15,8 @@ public sealed record PlayerEssenceDto(
     bool CanAscend,
     bool CanEvolve,
     IReadOnlyList<string> MissingRequirements,
+    EssenceAscendInfoDto AscendInfo,
+    EssenceEvolveInfoDto EvolveInfo,
     IReadOnlyList<EssenceAttributeBonusDto> CurrentAttributeBonuses,
     EssenceAbilityDto ActiveAbility,
     EssenceAbilityDto PassiveAbility);

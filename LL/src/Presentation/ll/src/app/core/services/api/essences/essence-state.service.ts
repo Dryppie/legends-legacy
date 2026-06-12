@@ -2,14 +2,13 @@ import { Injectable, computed, signal } from '@angular/core';
 import { forkJoin, Observable, tap } from 'rxjs';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { EssencesService } from './essences.service';
-import { EssenceCatalogViewService } from './essence-catalog-view.service';
+import { EssenceItemViewService } from './essence-item-view.service';
 import { Essence } from '../../../../shared/models/essence';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { EssenceItem } from '../../../../shared/models/item';
 import {
   DismantleEssenceResultDto,
-  EssenceCatalogDto,
   EssenceLoadoutDto,
   EssenceLoadoutsDto,
   PlayerEssenceDto,
@@ -23,7 +22,6 @@ type EssenceView = 'archive' | 'absorb';
 @Injectable({ providedIn: 'root' })
 export class EssenceStateService {
   private readonly _activeView = signal<EssenceView>('archive');
-  private readonly _catalog = signal<EssenceCatalogDto | null>(null);
   private readonly _archive = signal<SoulArchiveDto | null>(null);
   private readonly _loadouts = signal<EssenceLoadoutsDto | null>(null);
   private readonly _selectedPlayerEssenceId = signal<string | null>(null);
@@ -35,7 +33,6 @@ export class EssenceStateService {
   private readonly _error = signal<string | null>(null);
 
   readonly activeView = computed(() => this._activeView());
-  readonly catalog = computed(() => this._catalog());
   readonly archive = computed(() => this._archive());
   readonly loadouts = computed(() => this._loadouts());
   readonly selectedLoadoutId = computed(() => this._selectedLoadoutId());
@@ -133,7 +130,7 @@ export class EssenceStateService {
   constructor(
     private readonly essencesService: EssencesService,
     private readonly inventoryState: InventoryStateService,
-    private readonly essenceCatalogView: EssenceCatalogViewService,
+    private readonly essenceItemView: EssenceItemViewService,
   ) {}
 
   setActiveView(view: EssenceView): void {
@@ -145,13 +142,10 @@ export class EssenceStateService {
     this._error.set(null);
 
     forkJoin({
-      catalog: this.essencesService.getCatalog(),
       archive: this.essencesService.getArchive(),
       loadouts: this.essencesService.getLoadouts(),
     }).subscribe({
-      next: ({ catalog, archive, loadouts }) => {
-        this._catalog.set(catalog);
-        this.essenceCatalogView.setCatalog(catalog);
+      next: ({ archive, loadouts }) => {
         this._archive.set(archive);
         this._loadouts.set(loadouts);
         this.ensureSelectedEssence(archive);
@@ -284,7 +278,7 @@ export class EssenceStateService {
 
   asEssence(inventoryItem: InventoryItem): Essence {
     const item = inventoryItem.itemInstance.itemBase as EssenceItem;
-    return this.essenceCatalogView.asEssence(item);
+    return this.essenceItemView.asEssence(item);
   }
 
   isInventoryEssenceAbsorbed(inventoryItem: InventoryItem): boolean {
