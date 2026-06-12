@@ -54,7 +54,7 @@ public static class LLDbContextExtensions
             UserId = user.Id,
             Name = "admin",
             ImagePath = "player",
-            Level = 1,
+            Level = 50,
             Cinders = 5719,
             Soulstones = 5000,
             Professions = ProfessionsSeederHelper.CreateProfessions(Guid.Parse(CHARACTER_GUID)),
@@ -103,32 +103,39 @@ public static class LLDbContextExtensions
     {
         if (!context.InventoryItems.Any())
         {
-            var goblinEssenceItemInstance = new EssenceItemInstance
+            var essenceItemBaseIds = new[]
             {
-                Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
-                ItemBaseId = "item.essence.goblin_ambusher",
-            };
-            var ratEssenceItemInstance = new EssenceItemInstance
-            {
-                Id = Guid.Parse("00000000-0000-0000-0000-000000000004"),
-                ItemBaseId = "item.essence.cave_bat",
-            };
-            var inventoryItemGoblinEssence = new InventoryItem()
-            {
-                InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-0000-0000-0000-000000000001"), // Copied directly from GoblinEssenceItem. Same ID
-                Quantity = 1
+                "item.essence.goblin_ambusher",
+                "item.essence.skeleton_guardian",
+                "item.essence.fire_ant",
+                "item.essence.cave_bat",
+                "item.essence.necroshade_wraith",
+                "item.essence.legacy.goblin",
+                "item.essence.legacy.goblin_warrior",
+                "item.essence.legacy.goblin_archer",
+                "item.essence.legacy.large_rat",
+                "item.essence.legacy.flame_imp",
             };
 
-            var inventoryItemRatEssence = new InventoryItem()
-            {
-                InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-0000-0000-0000-000000000004"), // Copied directly from LargeRatEssenceItem. Same ID
-                Quantity = 1
-            };
+            var essenceItemInstances = essenceItemBaseIds
+                .Select((itemBaseId, index) => new EssenceItemInstance
+                {
+                    Id = Guid.Parse($"00000000-0000-0000-0000-{index + 1:000000000000}"),
+                    ItemBaseId = itemBaseId,
+                })
+                .ToList();
 
-            await context.ItemInstances.AddRangeAsync(goblinEssenceItemInstance, ratEssenceItemInstance);
-            await context.InventoryItems.AddRangeAsync(inventoryItemGoblinEssence, inventoryItemRatEssence);
+            var inventoryItems = essenceItemInstances
+                .Select(instance => new InventoryItem
+                {
+                    InventoryId = Guid.Parse(CHARACTER_GUID),
+                    ItemInstanceId = instance.Id,
+                    Quantity = 1
+                })
+                .ToList();
+
+            await context.ItemInstances.AddRangeAsync(essenceItemInstances);
+            await context.InventoryItems.AddRangeAsync(inventoryItems);
         }
     }
 

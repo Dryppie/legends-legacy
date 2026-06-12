@@ -220,6 +220,61 @@
     "dismantleDustAmount": 2
   },
   {
+    "id": "item.essence.legacy.goblin",
+    "name": "Unbound Goblin's Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "stackable": true,
+    "essenceDefinitionId": "essence.legacy.goblin",
+    "isBound": false,
+    "dismantleDustAmount": 1
+  },
+  {
+    "id": "item.essence.legacy.goblin_warrior",
+    "name": "Unbound Goblin Warrior's Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "stackable": true,
+    "essenceDefinitionId": "essence.legacy.goblin_warrior",
+    "isBound": false,
+    "dismantleDustAmount": 1
+  },
+  {
+    "id": "item.essence.legacy.goblin_archer",
+    "name": "Unbound Goblin Archer's Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "stackable": true,
+    "essenceDefinitionId": "essence.legacy.goblin_archer",
+    "isBound": false,
+    "dismantleDustAmount": 1
+  },
+  {
+    "id": "item.essence.legacy.large_rat",
+    "name": "Unbound Large Rat's Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "stackable": true,
+    "essenceDefinitionId": "essence.legacy.large_rat",
+    "isBound": false,
+    "dismantleDustAmount": 1
+  },
+  {
+    "id": "item.essence.legacy.flame_imp",
+    "name": "Unbound Flame Imp's Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Uncommon",
+    "stackable": true,
+    "essenceDefinitionId": "essence.legacy.flame_imp",
+    "isBound": false,
+    "dismantleDustAmount": 1
+  },
+  {
     "id": "ore",
     "name": "Ore",
     "description": "Mining material - Ore can be found in \u0027Vein\u0027",
