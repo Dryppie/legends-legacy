@@ -1,10 +1,17 @@
 <div class="flex h-full flex-col gap-4 overflow-hidden pb-4 text-white sm:pb-0">
-  <div class="flex items-center gap-2 p-1 pr-5 sm:pr-1">
+  <app-default-header
+    class="flex-none"
+    title="Character Overview"
+    icon="character/achievements"
+  ></app-default-header>
+
+  <div class="flex flex-wrap items-center gap-2 p-1 pr-5 sm:pr-1">
     <input
       type="text"
-      [(ngModel)]="searchValue"
+      [ngModel]="searchValue()"
+      (ngModelChange)="searchValue.set($event)"
       (keydown)="onEnter($event)"
-      class="placeholder-gray-400 w-full rounded-lg border border-zinc-300/30 bg-transparent px-4 py-2 text-base text-white focus:border-zinc-300/80"
+      class="min-w-0 flex-1 rounded border border-light_gray/70 bg-black/40 px-3 py-2 text-sm text-white outline-none placeholder:text-zinc-500 focus:border-primary"
       placeholder="Search character by name..."
     />
     <app-regular-button
@@ -13,17 +20,172 @@
     ></app-regular-button>
   </div>
 
-  <!-- <app-default-header
-    *ngIf="character$ | async as CharacterOverview"
-    class="flex-none"
-    title="Character Overview"
-    icon="character/achievements"
-  ></app-default-header> -->
-  <div class="flex flex-col gap-4 overflow-y-auto pr-4 sm:pr-6 lg:flex-row">
-    <app-character-attributes
-      *ngIf="character() as CharacterOverview"
-      class="flex w-full"
-      [attributes]="CharacterOverview.baseCombatAttributes"
-    ></app-character-attributes>
+  <div
+    *ngIf="character() as characterOverview"
+    class="min-h-0 overflow-y-auto pr-2 sm:pr-4"
+  >
+    <section
+      class="rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
+    >
+      <div
+        class="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]"
+      >
+        <div>
+          <p class="text-xs font-semibold uppercase text-primary">
+            Combat Profile
+          </p>
+          <div class="mt-2 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 class="text-3xl font-semibold text-primary">
+                Level {{ characterOverview.level }}
+              </h2>
+              <p class="mt-1 text-sm text-zinc-400">
+                Primary attributes, combat stats, and active Essence loadout.
+              </p>
+            </div>
+            <div
+              class="rounded border border-primary/30 bg-primary/10 px-3 py-2 text-right"
+            >
+              <div class="text-xs uppercase text-zinc-400">Active Loadout</div>
+              <div class="text-sm font-semibold text-primary">
+                {{ characterOverview.activeEssenceLoadout?.name || "None" }}
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <article
+              *ngFor="let type of primaryAttributes"
+              class="rounded border border-light_gray/70 bg-black/30 p-3"
+            >
+              <div class="text-xs uppercase text-zinc-400">
+                {{ getAttribute(type).attributeType | attributeTypeFormat }}
+              </div>
+              <div class="mt-2 text-2xl font-semibold text-primary">
+                {{
+                  getAttribute(type).value
+                    | attributeValueFormat: getAttribute(type).attributeType
+                }}
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+          <article
+            *ngFor="let type of highlightStats"
+            class="flex items-center justify-between rounded border border-light_gray/70 bg-black/30 px-3 py-2"
+          >
+            <div>
+              <div class="text-xs uppercase text-zinc-500">
+                {{ getAttribute(type).attributeType | attributeTypeFormat }}
+              </div>
+              <div class="text-sm text-zinc-300">Key combat value</div>
+            </div>
+            <div class="text-xl font-semibold text-primary">
+              {{
+                getAttribute(type).value
+                  | attributeValueFormat: getAttribute(type).attributeType
+              }}
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <div class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <section
+        class="rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
+      >
+        <div
+          class="mb-4 flex items-center justify-between gap-3 border-b border-light_gray/70 pb-3"
+        >
+          <div>
+            <h2 class="text-primary">Attributes</h2>
+            <p class="text-xs text-zinc-400">
+              Combat values after equipment, Essence, and permanent bonuses.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid gap-3 md:grid-cols-2">
+          <article
+            *ngFor="let section of attributeSections"
+            class="rounded border border-light_gray/70 bg-black/30 p-3"
+          >
+            <h3 class="text-sm font-semibold uppercase text-primary">
+              {{ section.title }}
+            </h3>
+            <div class="mt-2 divide-y divide-light_gray/30">
+              <div
+                *ngFor="
+                  let attribute of getSectionAttributes(section.attributes)
+                "
+                class="flex items-center justify-between gap-3 py-2 text-sm"
+              >
+                <span class="text-zinc-300">
+                  {{ attribute.attributeType | attributeTypeFormat }}
+                </span>
+                <span class="font-semibold text-primary">
+                  {{
+                    attribute.value
+                      | attributeValueFormat: attribute.attributeType
+                  }}
+                </span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <aside class="grid content-start gap-4">
+        <section
+          class="rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
+        >
+          <div class="border-b border-light_gray/70 pb-3">
+            <h2 class="text-primary">Essence Loadout</h2>
+            <p class="text-xs text-zinc-400">
+              {{ filledLoadoutSlots }} / {{ totalLoadoutSlots }} slots attuned
+            </p>
+          </div>
+
+          <div
+            *ngIf="
+              characterOverview.activeEssenceLoadout?.slots?.length;
+              else noLoadout
+            "
+            class="mt-4 grid gap-2"
+          >
+            <div
+              *ngFor="let slot of characterOverview.activeEssenceLoadout?.slots"
+              class="rounded border border-light_gray/70 bg-black/30 px-3 py-2"
+            >
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs uppercase text-zinc-500">
+                  Slot {{ slot.slotIndex + 1 }}
+                </span>
+                <span
+                  class="rounded border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs text-primary"
+                  *ngIf="slot.playerEssenceId"
+                >
+                  Attuned
+                </span>
+              </div>
+              <div class="mt-1 text-sm font-semibold text-zinc-200">
+                {{ slot.essenceName || "Empty" }}
+              </div>
+            </div>
+          </div>
+
+          <ng-template #noLoadout>
+            <p
+              class="mt-3 rounded border border-light_gray/70 bg-black/30 p-3 text-sm italic text-zinc-400"
+            >
+              No active Essence loadout.
+            </p>
+          </ng-template>
+        </section>
+      </aside>
+    </div>
   </div>
 </div>
