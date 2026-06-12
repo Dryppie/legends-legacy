@@ -209,13 +209,13 @@ public sealed class EssenceSystemServiceTests
         Assert.All(abilities, x => Assert.StartsWith("essence.test", x.Definition.Id));
 
         var active = abilities.Single(x => x.Definition.Type == CombatAbilityType.Active).Definition;
-        Assert.Equal(180, active.Cooldown);
-        Assert.Equal(180, abilities.Single(x => x.Definition.Type == CombatAbilityType.Active).RemainingTimeUntilUse);
+        Assert.Equal(171, active.Cooldown);
+        Assert.Equal(171, abilities.Single(x => x.Definition.Type == CombatAbilityType.Active).RemainingTimeUntilUse);
         Assert.Equal(TriggerEvent.OnAbilityUsed, active.Triggers.Single().Event);
         Assert.IsType<AbilityIdFilter>(active.Triggers.Single().Filters.Single());
         var activeAction = Assert.IsType<CombatEffectAction>(active.Triggers.Single().Actions.Single().Action);
         Assert.Equal(CombatEffectOperation.Damage, activeAction.Operation);
-        Assert.Equal(26, activeAction.Magnitude);
+        Assert.Equal(18, activeAction.Magnitude);
 
         var passive = abilities.Single(x => x.Definition.Type == CombatAbilityType.Passive).Definition;
         Assert.Equal(0, abilities.Single(x => x.Definition.Type == CombatAbilityType.Passive).RemainingTimeUntilUse);
@@ -223,7 +223,7 @@ public sealed class EssenceSystemServiceTests
         var passiveAction = Assert.IsType<CombatEffectAction>(passive.Triggers.Single().Actions.Single().Action);
         Assert.Equal(CombatEffectOperation.ModifyAttribute, passiveAction.Operation);
         Assert.Equal(AttributeType.Power, passiveAction.Attribute);
-        Assert.Equal(8, passiveAction.Magnitude);
+        Assert.Equal(1, passiveAction.Magnitude);
     }
 
     [Fact]
@@ -257,8 +257,8 @@ public sealed class EssenceSystemServiceTests
         Assert.Equal("essence.test.active", loadout.ActiveAbilities.Single().AbilityDefinitionId);
         Assert.Equal(attunedId, loadout.ActiveAbilities.Single().SourcePlayerEssenceId);
         Assert.Equal(3, loadout.ActiveAbilities.Single().EssenceLevel);
-        Assert.Equal(180, loadout.ActiveAbilities.Single().Cooldown);
-        Assert.Equal(14, loadout.AttributeModifiers.Single().Amount);
+        Assert.Equal(171, loadout.ActiveAbilities.Single().Cooldown);
+        Assert.Equal(2.16f, loadout.AttributeModifiers.Single().Amount, 2);
     }
 
     [Fact]

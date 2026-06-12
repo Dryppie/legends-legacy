@@ -1,4 +1,5 @@
 using Domain.Models.Essences;
+using Domain.Models.AbilityDefinitions;
 using Services.LL.Essences;
 
 namespace EssenceSystem.Tests;
@@ -44,5 +45,43 @@ public sealed class EssenceProgressionServiceTests
         Assert.Equal(0, essence.CurrentXp);
         Assert.Equal(0, result.XpGained);
         Assert.True(result.ReachedTierCap);
+    }
+
+    [Fact]
+    public void Ability_value_scaling_uses_level_and_effect_specific_ascension_growth()
+    {
+        var scaled = EssenceProgressionConstants.ScaleAbilityValue(
+            baseValue: 100,
+            level: 3,
+            ascensionTier: 1,
+            effectType: AbilityEffectType.Damage);
+
+        Assert.Equal(120d, scaled);
+    }
+
+    [Fact]
+    public void Active_cooldown_scaling_reduces_cooldown_with_cap()
+    {
+        var scaled = EssenceProgressionConstants.ScaleActiveCooldownSeconds(baseCooldownSeconds: 20, ascensionTier: 3);
+
+        Assert.Equal(17d, scaled);
+    }
+
+    [Fact]
+    public void Duration_scaling_increases_soft_statuses_but_not_hard_crowd_control()
+    {
+        var poison = EssenceProgressionConstants.ScaleEffectDurationSeconds(
+            baseDurationSeconds: 10,
+            ascensionTier: 2,
+            effectType: AbilityEffectType.ApplyStatus,
+            statusId: "Poison");
+        var stun = EssenceProgressionConstants.ScaleEffectDurationSeconds(
+            baseDurationSeconds: 10,
+            ascensionTier: 2,
+            effectType: AbilityEffectType.ApplyStatus,
+            statusId: "Stunned");
+
+        Assert.Equal(11d, poison);
+        Assert.Equal(10d, stun);
     }
 }

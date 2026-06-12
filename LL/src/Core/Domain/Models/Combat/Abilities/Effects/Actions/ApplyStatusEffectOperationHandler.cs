@@ -1,4 +1,5 @@
 using Domain.Interfaces.Combat;
+using Domain.Models.Combat.Abilities.Effects.Duration;
 
 namespace Domain.Models.Combat.Abilities.Effects.Actions;
 
@@ -18,6 +19,10 @@ public sealed class ApplyStatusEffectOperationHandler : ICombatEffectOperationHa
             return;
         }
 
+        statusDefinition = statusDefinition.Clone();
+        if (action.StatusDuration > 0)
+            statusDefinition.Duration = new TimedDuration(action.StatusDuration);
+
         CombatEffectActionHelpers.SetSourceNameForStatusEffects(statusDefinition, effect.SourceName);
         effect.EventType = EventType.AbilityUse;
         effect.Details = effect.Details
@@ -26,7 +31,7 @@ public sealed class ApplyStatusEffectOperationHandler : ICombatEffectOperationHa
             .Replace("{Status}", statusDefinition.Name);
 
         combatContext.LogEffectExecution(effect, CombatEffectActionHelpers.CreateSimpleCombatEntity(effect.Source));
-        combatContext.EffectManager.AddStatus(new(statusDefinition.Clone(), effect.Source, effect.Target));
+        combatContext.EffectManager.AddStatus(new(statusDefinition, effect.Source, effect.Target));
     }
 
     public void OnExpire(CombatEffectAction action, EffectContext effect, ICombatContext combatContext)

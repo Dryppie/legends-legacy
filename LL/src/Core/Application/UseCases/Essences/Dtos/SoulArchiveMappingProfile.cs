@@ -91,8 +91,10 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
                 x.Id,
                 x.Type,
                 x.Target,
-                EssenceProgressionConstants.ScaleAbilityValue(x.Scaling.BaseValue, essence.Level),
+                EssenceProgressionConstants.ScaleAbilityValue(x.Scaling.BaseValue, essence.Level, essence.AscensionTier, x.Type),
                 x.Attribute,
                 x.Status,
-                x.DurationSeconds)).ToList());
+                x.DurationSeconds is > 0
+                    ? EssenceProgressionConstants.ScaleEffectDurationSeconds(x.DurationSeconds.Value, essence.AscensionTier, x.Type, x.Status)
+                    : x.DurationSeconds)).ToList());
 }

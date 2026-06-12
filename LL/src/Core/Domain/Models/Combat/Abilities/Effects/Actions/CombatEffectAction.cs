@@ -15,9 +15,12 @@ public sealed class CombatEffectAction : IEffectAction
     public ModifierType ModifierType { get; init; } = ModifierType.Flat;
     public bool Stackable { get; init; }
     public string? StatusId { get; init; }
+    public int StatusDuration { get; init; }
     public string? SecondaryEffectId { get; init; }
     public string? SummonId { get; init; }
     public int SummonDuration { get; init; }
+    public float SummonPowerMultiplier { get; init; } = 1;
+    public float SummonHealthMultiplier { get; init; } = 1;
     public AttributeType? ScalingAttribute { get; init; }
     public float ScalingMultiplier { get; init; }
     public float LifeStealPercentage { get; init; }

@@ -1,4 +1,6 @@
 using Domain.Interfaces.Combat;
+using Domain.Components.Attributes;
+using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities.Effects;
 using Domain.Models.Combat.Abilities.Effects.Conditions;
@@ -20,6 +22,7 @@ public sealed class SummonEffectOperationHandler : ICombatEffectOperationHandler
             throw new InvalidOperationException("Summon requires a summon id.");
 
         var summonedCreature = SummonCreatureFactory.CreateCreature(action.SummonId);
+        ScaleSummon(summonedCreature, action);
 
         if (action.SummonDuration > 0)
         {
@@ -46,5 +49,25 @@ public sealed class SummonEffectOperationHandler : ICombatEffectOperationHandler
 
     public void OnExpire(CombatEffectAction action, EffectContext effect, ICombatContext combatContext)
     {
+    }
+
+    private static void ScaleSummon(CombatEntity summon, CombatEffectAction action)
+    {
+        ScaleBaseAttribute(summon, AttributeType.Power, action.SummonPowerMultiplier);
+        ScaleBaseAttribute(summon, AttributeType.WeaponDamage, action.SummonPowerMultiplier);
+        ScaleBaseAttribute(summon, AttributeType.MaxHealth, action.SummonHealthMultiplier);
+
+        AttributeCalculator.CalculateBaseCombatAttributes(summon);
+        summon.SyncCurrentHealthToMax();
+    }
+
+    private static void ScaleBaseAttribute(CombatEntity summon, AttributeType attribute, float multiplier)
+    {
+        if (multiplier <= 0 || Math.Abs(multiplier - 1) < 0.001f) return;
+
+        var baseAttribute = summon.BaseAttributes.FirstOrDefault(x => x.AttributeType == attribute);
+        if (baseAttribute is null) return;
+
+        baseAttribute.Value *= multiplier;
     }
 }

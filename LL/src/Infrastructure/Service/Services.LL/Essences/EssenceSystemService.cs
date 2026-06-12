@@ -485,7 +485,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             Name = ability.Name,
             Description = ability.Description,
             Type = type,
-            Cooldown = SecondsToCombatTicks(ability.CooldownSeconds),
+            Cooldown = SecondsToCombatTicks(EssenceProgressionConstants.ScaleActiveCooldownSeconds(ability.CooldownSeconds, essence.AscensionTier)),
             Usage = new UnlimitedUsage(),
             Condition = BuildCondition(ability.Conditions)
         };
@@ -626,11 +626,14 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
     private EffectDefinition MapCombatEffect(AbilityDefinition ability, AbilityEffectDefinition effect, PlayerEssence essence)
     {
-        var magnitude = Scale(effect.Scaling, essence);
-        var action = BuildAction(effect, magnitude);
+        var magnitude = Scale(effect, essence);
+        var scaledDurationSeconds = effect.DurationSeconds is > 0
+            ? EssenceProgressionConstants.ScaleEffectDurationSeconds(effect.DurationSeconds.Value, essence.AscensionTier, effect.Type, effect.Status)
+            : effect.DurationSeconds;
+        var action = BuildAction(effect, magnitude, essence.AscensionTier, scaledDurationSeconds);
         var isDamage = action is CombatEffectAction { Operation: CombatEffectOperation.Damage };
-        IEffectDuration duration = effect.DurationSeconds is > 0
-            ? new TimedDuration(SecondsToCombatTicks(effect.DurationSeconds.Value))
+        IEffectDuration duration = scaledDurationSeconds is > 0
+            ? new TimedDuration(SecondsToCombatTicks(scaledDurationSeconds.Value))
             : new NoDuration();
         IEffectInterval interval = effect.IntervalSeconds is > 0
             ? new Interval(SecondsToCombatTicks(effect.IntervalSeconds.Value))
@@ -658,7 +661,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         return combatEffect;
     }
 
-    private static IEffectAction BuildAction(AbilityEffectDefinition effect, int magnitude)
+    private static IEffectAction BuildAction(AbilityEffectDefinition effect, int magnitude, int ascensionTier, double? scaledDurationSeconds)
     {
         var scalingAttribute = FirstScalingAttribute(effect);
         var scalingMultiplier = FirstScalingCoefficient(effect);
@@ -671,7 +674,14 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             AbilityEffectType.RemoveStatus => new CombatEffectAction { Operation = CombatEffectOperation.RemoveStatus, StatusId = effect.Status ?? string.Empty, Magnitude = Math.Max(1, magnitude) },
             AbilityEffectType.ModifyStatusEffect => new CombatEffectAction { Operation = CombatEffectOperation.ModifyStatusEffect, StatusId = effect.Status ?? string.Empty, Magnitude = Math.Max(1, magnitude) },
             AbilityEffectType.Cleanse => new CombatEffectAction { Operation = CombatEffectOperation.Cleanse },
-            AbilityEffectType.Summon => new CombatEffectAction { Operation = CombatEffectOperation.Summon, SummonId = effect.Status ?? effect.Attribute ?? effect.Id, SummonDuration = effect.DurationSeconds is > 0 ? SecondsToCombatTicks(effect.DurationSeconds.Value) : 0 },
+            AbilityEffectType.Summon => new CombatEffectAction
+            {
+                Operation = CombatEffectOperation.Summon,
+                SummonId = effect.Status ?? effect.Attribute ?? effect.Id,
+                SummonDuration = scaledDurationSeconds is > 0 ? SecondsToCombatTicks(scaledDurationSeconds.Value) : 0,
+                SummonPowerMultiplier = (float)EssenceProgressionConstants.GetSummonPowerMultiplier(ascensionTier),
+                SummonHealthMultiplier = (float)EssenceProgressionConstants.GetSummonHealthMultiplier(ascensionTier)
+            },
             AbilityEffectType.Taunt => new CombatEffectAction { Operation = CombatEffectOperation.ModifyAttribute, Attribute = AttributeType.Fortitude, Magnitude = magnitude, ModifierType = ModifierType.Flat },
             AbilityEffectType.ReflectDamage => new CombatEffectAction { Operation = CombatEffectOperation.Damage, Magnitude = magnitude, ScalingAttribute = scalingAttribute, ScalingMultiplier = scalingMultiplier },
             AbilityEffectType.AbsorbDamage => new CombatEffectAction { Operation = CombatEffectOperation.RestoreResource, Resource = ResourceType.Barrier, Magnitude = magnitude, ScalingAttribute = scalingAttribute, ScalingMultiplier = scalingMultiplier },
@@ -685,7 +695,12 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             AbilityEffectType.RestoreResource =>
                 new CombatEffectAction { Operation = CombatEffectOperation.ModifyAttribute, Attribute = AttributeType.Cooldown, Magnitude = magnitude, ModifierType = ModifierType.Flat },
             AbilityEffectType.ModifyAttribute => new CombatEffectAction { Operation = CombatEffectOperation.ModifyAttribute, Attribute = ParseAttribute(effect.Attribute), Magnitude = magnitude, ModifierType = ModifierType.Flat },
-            AbilityEffectType.ApplyStatus when !string.IsNullOrWhiteSpace(effect.Status) => new CombatEffectAction { Operation = CombatEffectOperation.ApplyStatus, StatusId = effect.Status },
+            AbilityEffectType.ApplyStatus when !string.IsNullOrWhiteSpace(effect.Status) => new CombatEffectAction
+            {
+                Operation = CombatEffectOperation.ApplyStatus,
+                StatusId = effect.Status,
+                StatusDuration = scaledDurationSeconds is > 0 ? SecondsToCombatTicks(scaledDurationSeconds.Value) : 0
+            },
             _ => throw new NotSupportedException($"Essence effect type '{effect.Type}' is not supported by combat mapping.")
         };
     }
@@ -831,8 +846,12 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             _ => "{Actor}'s Essence affected {Target} for {Amount}."
         };
 
-    private static int Scale(AbilityScalingFormula scaling, PlayerEssence essence) =>
-        Math.Max(0, (int)Math.Round(EssenceProgressionConstants.ScaleAbilityValue(scaling.BaseValue, essence.Level)));
+    private static int Scale(AbilityEffectDefinition effect, PlayerEssence essence) =>
+        Math.Max(0, (int)Math.Round(EssenceProgressionConstants.ScaleAbilityValue(
+            effect.Scaling.BaseValue,
+            essence.Level,
+            essence.AscensionTier,
+            effect.Type)));
 
     private static AttributeType? FirstScalingAttribute(AbilityEffectDefinition effect) =>
         effect.Scaling.AttributeScaling.FirstOrDefault()?.Attribute;
