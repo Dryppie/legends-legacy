@@ -73,8 +73,8 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
         var bonuses = definition.AttributeBonuses.Concat(essence.IsEvolved ? definition.Evolution.AttributeModifierChanges : []);
         foreach (var bonus in bonuses)
         {
-            var value = bonus.BaseValue + bonus.PerLevel * Math.Max(0, essence.Level - 1) + bonus.PerAscensionTier * essence.AscensionTier;
-            yield return new(bonus.Attribute, bonus.ModifierKind.ToString(), bonus.BaseValue, bonus.PerLevel, bonus.PerAscensionTier, value);
+            var value = EssenceProgressionConstants.ScaleAttributeBonus(bonus.BaseValue, essence.Level);
+            yield return new(bonus.Attribute, bonus.ModifierKind.ToString(), bonus.BaseValue, value);
         }
     }
 
@@ -91,7 +91,7 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
                 x.Id,
                 x.Type,
                 x.Target,
-                x.Scaling.BaseValue + x.Scaling.PerLevel * Math.Max(0, essence.Level - 1) + x.Scaling.PerAscensionTier * essence.AscensionTier,
+                EssenceProgressionConstants.ScaleAbilityValue(x.Scaling.BaseValue, essence.Level),
                 x.Attribute,
                 x.Status,
                 x.DurationSeconds)).ToList());

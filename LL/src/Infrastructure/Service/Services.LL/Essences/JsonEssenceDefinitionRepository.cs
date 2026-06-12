@@ -14,12 +14,15 @@ public sealed class JsonEssenceDefinitionRepository : IEssenceDefinitionReposito
     public JsonEssenceDefinitionRepository(IConfiguration config, string contentRootPath, JsonSerializerOptions options, IEssenceDefinitionValidator validator)
     {
         var contentRoot = config["Content:Root"] ?? "Data";
-        var path = Path.Combine(contentRootPath, contentRoot, "essences.json");
-        var json = File.ReadAllText(path);
-        var document = JsonSerializer.Deserialize<EssenceDefinitionDocument>(json, options) ?? new();
+        var essencePath = Path.Combine(contentRootPath, contentRoot, "essences.json");
+        var abilityPath = Path.Combine(contentRootPath, contentRoot, "abilities.json");
+        var essenceJson = File.ReadAllText(essencePath);
+        var abilityJson = File.ReadAllText(abilityPath);
+        var document = JsonSerializer.Deserialize<EssenceDefinitionDocument>(essenceJson, options) ?? new();
+        var abilities = JsonSerializer.Deserialize<List<AbilityDefinition>>(abilityJson, options) ?? [];
 
-        ThrowIfDuplicateAbilityIds(document.AbilityDefinitions);
-        _abilities = document.AbilityDefinitions.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+        ThrowIfDuplicateAbilityIds(abilities);
+        _abilities = abilities.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
         ResolveAbilityReferences(document.Essences);
         validator.ThrowIfInvalid(document.Essences);
         _definitions = document.Essences;
@@ -63,7 +66,6 @@ public sealed class JsonEssenceDefinitionRepository : IEssenceDefinitionReposito
 
     private sealed class EssenceDefinitionDocument
     {
-        public List<AbilityDefinition> AbilityDefinitions { get; set; } = [];
         public List<EssenceDefinition> Essences { get; set; } = [];
     }
 }

@@ -475,7 +475,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         definition.Tags.Concat(essence.IsEvolved ? definition.Evolution.AddsTags : []);
 
     private static double GetAttributeBonusValue(EssenceAttributeBonusDefinition bonus, PlayerEssence essence) =>
-        bonus.BaseValue + bonus.PerLevel * Math.Max(0, essence.Level - 1) + bonus.PerAscensionTier * essence.AscensionTier;
+        EssenceProgressionConstants.ScaleAttributeBonus(bonus.BaseValue, essence.Level);
 
     private CombatAbilityDefinition MapCombatAbility(AbilityDefinition ability, PlayerEssence essence, CombatAbilityType type)
     {
@@ -580,8 +580,6 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             {
                 var multiplier = 1 + modifier.Value;
                 effect.Scaling.BaseValue *= multiplier;
-                effect.Scaling.PerLevel *= multiplier;
-                effect.Scaling.PerAscensionTier *= multiplier;
             }
             else if (modifier.Operation.Equals("AddFlat", StringComparison.OrdinalIgnoreCase))
             {
@@ -613,8 +611,6 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             Scaling = new AbilityScalingFormula
             {
                 BaseValue = effect.Scaling.BaseValue,
-                PerLevel = effect.Scaling.PerLevel,
-                PerAscensionTier = effect.Scaling.PerAscensionTier,
                 AttributeScaling = [.. effect.Scaling.AttributeScaling.Select(x => new AbilityAttributeScalingDefinition { Attribute = x.Attribute, Coefficient = x.Coefficient })]
             }
         };
@@ -836,7 +832,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         };
 
     private static int Scale(AbilityScalingFormula scaling, PlayerEssence essence) =>
-        Math.Max(0, (int)Math.Round(scaling.BaseValue + scaling.PerLevel * Math.Max(0, essence.Level - 1) + scaling.PerAscensionTier * essence.AscensionTier));
+        Math.Max(0, (int)Math.Round(EssenceProgressionConstants.ScaleAbilityValue(scaling.BaseValue, essence.Level)));
 
     private static AttributeType? FirstScalingAttribute(AbilityEffectDefinition effect) =>
         effect.Scaling.AttributeScaling.FirstOrDefault()?.Attribute;

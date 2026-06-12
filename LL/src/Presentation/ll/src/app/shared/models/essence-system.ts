@@ -21,8 +21,6 @@ export interface EssenceAttributeBonusDto {
   attribute: string;
   modifierKind: string;
   baseValue: number;
-  perLevel: number;
-  perAscensionTier: number;
   currentValue: number;
 }
 

@@ -223,13 +223,15 @@ public sealed class EssenceDefinitionValidatorTests
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null)
         {
-            var candidate = Path.Combine(directory.FullName, "src", "API", "API.LL", "Data", "essences.json");
-            if (File.Exists(candidate))
+            var dataPath = Path.Combine(directory.FullName, "src", "API", "API.LL", "Data");
+            var essenceCandidate = Path.Combine(dataPath, "essences.json");
+            var abilityCandidate = Path.Combine(dataPath, "abilities.json");
+            if (File.Exists(essenceCandidate) && File.Exists(abilityCandidate))
                 return Path.Combine(directory.FullName, "src", "API", "API.LL");
 
             directory = directory.Parent;
         }
 
-        throw new DirectoryNotFoundException("Could not locate LL/src/API/API.LL/Data/essences.json from test output directory.");
+        throw new DirectoryNotFoundException("Could not locate LL/src/API/API.LL/Data/essences.json and abilities.json from test output directory.");
     }
 }

@@ -14,5 +14,5 @@ public sealed class EssenceAttributeBonusMappingProfile : Profile
 public sealed class EssenceAttributeBonusDefinitionConverter : ITypeConverter<EssenceAttributeBonusDefinition, EssenceAttributeBonusDto>
 {
     public EssenceAttributeBonusDto Convert(EssenceAttributeBonusDefinition source, EssenceAttributeBonusDto destination, ResolutionContext context) =>
-        new(source.Attribute, source.ModifierKind.ToString(), source.BaseValue, source.PerLevel, source.PerAscensionTier, source.BaseValue);
+        new(source.Attribute, source.ModifierKind.ToString(), source.BaseValue, source.BaseValue);
 }

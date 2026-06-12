@@ -7,6 +7,4 @@ public sealed class EssenceAttributeBonusDefinition
     public AttributeType Attribute { get; set; }
     public EssenceModifierKind ModifierKind { get; set; } = EssenceModifierKind.Flat;
     public double BaseValue { get; set; }
-    public double PerLevel { get; set; }
-    public double PerAscensionTier { get; set; }
 }

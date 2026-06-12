@@ -106,6 +106,37 @@ public sealed class AbilityCatalogRuntimeTests
         foreach (var definition in document.RootElement.GetProperty("essences").EnumerateArray())
         {
             Assert.False(definition.TryGetProperty("progressionTemplateId", out _));
+
+            foreach (var bonus in definition.GetProperty("attributeBonuses").EnumerateArray())
+                AssertNoIndividualBonusScaling(bonus);
+
+            if (definition.GetProperty("evolution").TryGetProperty("attributeModifierChanges", out var changes))
+            {
+                foreach (var bonus in changes.EnumerateArray())
+                    AssertNoIndividualBonusScaling(bonus);
+            }
+        }
+    }
+
+    [Fact]
+    public void Ability_catalog_uses_base_values_without_individual_progression_scaling()
+    {
+        var path = Path.Combine(FindApiContentRoot(), "Data", "abilities.json");
+        using var document = JsonDocument.Parse(File.ReadAllText(path), new JsonDocumentOptions
+        {
+            AllowTrailingCommas = true,
+            CommentHandling = JsonCommentHandling.Skip
+        });
+
+        foreach (var ability in document.RootElement.EnumerateArray())
+        {
+            foreach (var effect in ability.GetProperty("effects").EnumerateArray())
+            {
+                if (!effect.TryGetProperty("scaling", out var scaling)) continue;
+
+                Assert.False(scaling.TryGetProperty("perLevel", out _));
+                Assert.False(scaling.TryGetProperty("perAscensionTier", out _));
+            }
         }
     }
 
@@ -237,15 +268,8 @@ public sealed class AbilityCatalogRuntimeTests
 
     private static IReadOnlyList<AbilityDefinition> ReadAuthoredAbilityDefinitions()
     {
-        var path = Path.Combine(FindApiContentRoot(), "Data", "essences.json");
-        using var document = JsonDocument.Parse(File.ReadAllText(path), new JsonDocumentOptions
-        {
-            AllowTrailingCommas = true,
-            CommentHandling = JsonCommentHandling.Skip
-        });
-
-        var abilities = document.RootElement.GetProperty("abilityDefinitions");
-        return JsonSerializer.Deserialize<List<AbilityDefinition>>(abilities.GetRawText(), CreateJsonOptions()) ?? [];
+        var path = Path.Combine(FindApiContentRoot(), "Data", "abilities.json");
+        return JsonSerializer.Deserialize<List<AbilityDefinition>>(File.ReadAllText(path), CreateJsonOptions()) ?? [];
     }
 
     private static JsonSerializerOptions CreateJsonOptions()
@@ -351,19 +375,27 @@ public sealed class AbilityCatalogRuntimeTests
         return builder.ToString();
     }
 
+    private static void AssertNoIndividualBonusScaling(JsonElement bonus)
+    {
+        Assert.False(bonus.TryGetProperty("perLevel", out _));
+        Assert.False(bonus.TryGetProperty("perAscensionTier", out _));
+    }
+
     private static string FindApiContentRoot()
     {
         var directory = new DirectoryInfo(AppContext.BaseDirectory);
         while (directory is not null)
         {
-            var candidate = Path.Combine(directory.FullName, "src", "API", "API.LL", "Data", "essences.json");
-            if (File.Exists(candidate))
+            var dataPath = Path.Combine(directory.FullName, "src", "API", "API.LL", "Data");
+            var essenceCandidate = Path.Combine(dataPath, "essences.json");
+            var abilityCandidate = Path.Combine(dataPath, "abilities.json");
+            if (File.Exists(essenceCandidate) && File.Exists(abilityCandidate))
                 return Path.Combine(directory.FullName, "src", "API", "API.LL");
 
             directory = directory.Parent;
         }
 
-        throw new DirectoryNotFoundException("Could not locate LL/src/API/API.LL/Data/essences.json from test output directory.");
+        throw new DirectoryNotFoundException("Could not locate LL/src/API/API.LL/Data/essences.json and abilities.json from test output directory.");
     }
 
     private static readonly IReadOnlyCollection<string> CommonStatusIds =

@@ -174,8 +174,6 @@ public sealed class EssenceSystemServiceTests
         var definition = FakeDefinitionRepository.CreateDefinition("essence.percent", "monster.percent");
         definition.AttributeBonuses.Single().ModifierKind = EssenceModifierKind.Percent;
         definition.AttributeBonuses.Single().BaseValue = 15;
-        definition.AttributeBonuses.Single().PerLevel = 0;
-        definition.AttributeBonuses.Single().PerAscensionTier = 0;
         var service = CreateService(db, definitions: new SingleDefinitionRepository(definition));
 
         var modifiers = await service.GetAttunedAttributeModifiersAsync(characterId, CancellationToken.None);
@@ -703,9 +701,7 @@ public sealed class EssenceSystemServiceTests
                 new()
                 {
                     Attribute = AttributeType.Power,
-                    BaseValue = 2,
-                    PerLevel = 1,
-                    PerAscensionTier = 10
+                    BaseValue = 2
                 }
             ],
             ActiveAbility = new AbilityDefinition
@@ -715,7 +711,7 @@ public sealed class EssenceSystemServiceTests
                 Name = "Active",
                 CooldownSeconds = 18,
                 Tags = ["Effect.Ability"],
-                Effects = [new() { Id = "effect.damage.main", Type = "Damage", Scaling = new AbilityScalingFormula { BaseValue = 10, PerLevel = 2, PerAscensionTier = 3 } }]
+                Effects = [new() { Id = "effect.damage.main", Type = "Damage", Scaling = new AbilityScalingFormula { BaseValue = 10 } }]
             },
             PassiveAbility = new AbilityDefinition
             {
@@ -724,7 +720,7 @@ public sealed class EssenceSystemServiceTests
                 Name = "Passive",
                 Tags = ["Trigger.OnHit"],
                 Triggers = [new() { Type = "Trigger.OnHit" }],
-                Effects = [new() { Id = "effect.attribute.main", Type = "ModifyAttribute", Target = "Self", Attribute = "Power", Scaling = new AbilityScalingFormula { BaseValue = 1, PerLevel = 2, PerAscensionTier = 3 } }]
+                Effects = [new() { Id = "effect.attribute.main", Type = "ModifyAttribute", Target = "Self", Attribute = "Power", Scaling = new AbilityScalingFormula { BaseValue = 1 } }]
             },
             Evolution = new EssenceEvolutionDefinition
             {

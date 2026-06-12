@@ -102,7 +102,7 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
             if (!AbilityEffectType.All.Contains(effect.Type)) errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: unknown effect type '{effect.Type}'.");
             if (!AbilityTargetSelector.All.Contains(effect.Target)) errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: unknown target selector '{effect.Target}'.");
             if (!effect.Type.Equals(AbilityEffectType.ModifyAttribute, StringComparison.OrdinalIgnoreCase)
-                && (effect.Scaling.BaseValue < 0 || effect.Scaling.PerLevel < 0 || effect.Scaling.PerAscensionTier < 0))
+                && effect.Scaling.BaseValue < 0)
             {
                 errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: scaling values cannot be negative.");
             }
