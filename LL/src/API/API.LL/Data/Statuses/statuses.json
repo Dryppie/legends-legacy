@@ -9,8 +9,8 @@
         "Actions": [
           {
             "Action": {
-              "Type": "Damage",
-              "Amount": 2
+              "Amount": 2,
+              "Operation": "Damage"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -40,8 +40,8 @@
         "Actions": [
           {
             "Action": {
-              "Type": "Damage",
-              "Amount": 2
+              "Amount": 2,
+              "Operation": "Damage"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -71,8 +71,8 @@
         "Actions": [
           {
             "Action": {
-              "Type": "Damage",
-              "Amount": 2
+              "Amount": 2,
+              "Operation": "Damage"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -102,12 +102,14 @@
         "Actions": [
           {
             "Action": {
-              "Type": "Damage",
               "Amount": 5,
               "ScalingAttribute": "Power",
-              "ScalingMultiplier": 0.15
+              "ScalingMultiplier": 0.15,
+              "Operation": "Damage"
             },
-            "Duration": { "Type": "NoDuration" },
+            "Duration": {
+              "Type": "NoDuration"
+            },
             "Targeting": "Self",
             "AttackType": "Melee",
             "DamageType": "Physical",
@@ -115,8 +117,8 @@
           },
           {
             "Action": {
-              "Type": "Damage",
-              "Amount": 4
+              "Amount": 4,
+              "Operation": "Damage"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -145,8 +147,8 @@
         "Actions": [
           {
             "Action": {
-              "Type": "Damage",
-              "Amount": 2
+              "Amount": 2,
+              "Operation": "Damage"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -159,7 +161,9 @@
             "Targeting": "Self",
             "AttackType": "DamageOverTime",
             "DamageType": "Poison",
-            "EffectTags": [ "Arrows" ],
+            "EffectTags": [
+              "Arrows"
+            ],
             "Log": "{Target} takes {Amount} poison damage."
           }
         ]
@@ -176,9 +180,9 @@
         "Actions": [
           {
             "Action": {
-              "Type": "ApplyStatusEffect",
               "Status": "Frozen",
-              "Stacks": 1
+              "Stacks": 1,
+              "Operation": "ModifyStatusEffect"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -201,8 +205,8 @@
         "Actions": [
           {
             "Action": {
-              "Type": "Damage",
-              "Amount": 4
+              "Amount": 4,
+              "Operation": "Damage"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -231,8 +235,8 @@
         "Actions": [
           {
             "Action": {
-              "Type": "Damage",
-              "Amount": 3
+              "Amount": 3,
+              "Operation": "Damage"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -261,8 +265,8 @@
         "Actions": [
           {
             "Action": {
-              "Type": "Damage",
-              "Amount": 3
+              "Amount": 3,
+              "Operation": "Damage"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -291,10 +295,10 @@
         "Actions": [
           {
             "Action": {
-              "Type": "ModifyAttribute",
               "Attribute": "Power",
               "Amount": 20,
-              "ModifierType": "Flat"
+              "ModifierType": "Flat",
+              "Operation": "ModifyAttribute"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -305,10 +309,10 @@
           },
           {
             "Action": {
-              "Type": "ModifyAttribute",
               "Attribute": "Power",
               "Amount": 20,
-              "ModifierType": "Flat"
+              "ModifierType": "Flat",
+              "Operation": "ModifyAttribute"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -331,9 +335,9 @@
         "Actions": [
           {
             "Action": {
-              "Type": "ApplyStatusEffect",
               "Status": "Stunned",
-              "Stacks": 1
+              "Stacks": 1,
+              "Operation": "ModifyStatusEffect"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -344,8 +348,8 @@
           },
           {
             "Action": {
-              "Type": "Damage",
-              "Amount": 3
+              "Amount": 3,
+              "Operation": "Damage"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -374,10 +378,10 @@
         "Actions": [
           {
             "Action": {
-              "Type": "ModifyAttribute",
               "Attribute": "DodgeChance",
               "Amount": 40,
-              "ModifierType": "Flat"
+              "ModifierType": "Flat",
+              "Operation": "ModifyAttribute"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -400,9 +404,9 @@
         "Actions": [
           {
             "Action": {
-              "Type": "ApplyStatusEffect",
               "Status": "Stunned",
-              "Stacks": 1
+              "Stacks": 1,
+              "Operation": "ModifyStatusEffect"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -425,11 +429,11 @@
         "Actions": [
           {
             "Action": {
-              "Type": "ModifyAttribute",
               "Attribute": "Precision",
               "Amount": -10,
               "ModifierType": "Additive",
-              "Stackable": true
+              "Stackable": true,
+              "Operation": "ModifyAttribute"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -460,13 +464,13 @@
         "Actions": [
           {
             "Action": {
-              "Type": "Damage",
               "Amount": 8,
-              "AttackType": "None",
-              "DamageType": "Magical"
+              "Operation": "Damage"
             },
             "Targeting": "CauseOfTrigger",
-            "Log": "{Target} was hit by a Foxfire Wisp, taking {Amount} magical damage."
+            "Log": "{Target} was hit by a Foxfire Wisp, taking {Amount} magical damage.",
+            "AttackType": "None",
+            "DamageType": "Magical"
           }
         ]
       }
@@ -482,10 +486,10 @@
         "Actions": [
           {
             "Action": {
-              "Type": "ModifyAttribute",
               "Attribute": "HealthRegeneration",
               "Amount": -40,
-              "ModifierType": "Multiplicative"
+              "ModifierType": "Multiplicative",
+              "Operation": "ModifyAttribute"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -496,10 +500,10 @@
           },
           {
             "Action": {
-              "Type": "ModifyAttribute",
               "Attribute": "Spirit",
               "Amount": -40,
-              "ModifierType": "Multiplicative"
+              "ModifierType": "Multiplicative",
+              "Operation": "ModifyAttribute"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -522,22 +526,24 @@
         "Actions": [
           {
             "Action": {
-              "Type": "Damage",
               "Amount": 26,
               "ScalingAttribute": "Power",
-              "ScalingMultiplier": 0.3
+              "ScalingMultiplier": 0.3,
+              "Operation": "Damage"
             },
             "Targeting": "Self",
             "AttackType": "Melee",
             "DamageType": "Physical",
-            "EffectTags": [ "Slashing" ],
+            "EffectTags": [
+              "Slashing"
+            ],
             "Log": "{Actor} pounces on {Target}, dealing {Amount} damage."
           },
           {
             "Action": {
-              "Type": "ApplyStatusEffect",
               "Status": "Stunned",
-              "Stacks": 1
+              "Stacks": 1,
+              "Operation": "ModifyStatusEffect"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -560,8 +566,8 @@
         "Actions": [
           {
             "Action": {
-              "Type": "Damage",
-              "Amount": 4
+              "Amount": 4,
+              "Operation": "Damage"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -590,12 +596,14 @@
         "Actions": [
           {
             "Action": {
-              "Type": "Damage",
               "Amount": 23,
               "ScalingAttribute": "Power",
-              "ScalingMultiplier": 0.25
+              "ScalingMultiplier": 0.25,
+              "Operation": "Damage"
             },
-            "Duration": { "Type": "NoDuration" },
+            "Duration": {
+              "Type": "NoDuration"
+            },
             "Targeting": "Self",
             "AttackType": "Melee",
             "DamageType": "Physical",
@@ -603,8 +611,8 @@
           },
           {
             "Action": {
-              "Type": "Damage",
-              "Amount": 4
+              "Amount": 4,
+              "Operation": "Damage"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -633,8 +641,8 @@
         "Actions": [
           {
             "Action": {
-              "Type": "Damage",
-              "Amount": 5
+              "Amount": 5,
+              "Operation": "Damage"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -663,24 +671,26 @@
         "Actions": [
           {
             "Action": {
-              "Type": "Damage",
               "Amount": 31,
               "ScalingAttribute": "Power",
-              "ScalingMultiplier": 0.25
+              "ScalingMultiplier": 0.25,
+              "Operation": "Damage"
             },
             "Targeting": "Self",
             "AttackType": "Melee",
             "DamageType": "Physical",
-            "EffectTags": [ "Unarmed" ],
+            "EffectTags": [
+              "Unarmed"
+            ],
             "Log": "{Actor} slashed {Target} with draining claws for {Amount} physical damage."
           },
           {
             "Action": {
-              "Type": "ModifyAttribute",
               "Attribute": "Power",
               "Amount": -24,
               "ModifierType": "Flat",
-              "Stackable": false
+              "Stackable": false,
+              "Operation": "ModifyAttribute"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -703,8 +713,8 @@
         "Actions": [
           {
             "Action": {
-              "Type": "Damage",
-              "Amount": 5
+              "Amount": 5,
+              "Operation": "Damage"
             },
             "Duration": {
               "Type": "TimedDuration",
@@ -734,9 +744,9 @@
         "Actions": [
           {
             "Action": {
-              "Type": "ResourceRestore",
               "ResourceType": "Barrier",
-              "Amount": 25
+              "Amount": 25,
+              "Operation": "RestoreResource"
             },
             "Targeting": "Self",
             "Log": "{Actor} gains a bone shield, absorbing up to {Amount} damage."

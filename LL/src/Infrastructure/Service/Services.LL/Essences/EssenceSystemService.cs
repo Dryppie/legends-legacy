@@ -587,7 +587,15 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             Target = effect.Target,
             Attribute = effect.Attribute,
             Status = effect.Status,
+            Resource = effect.Resource,
             DurationSeconds = effect.DurationSeconds,
+            IntervalSeconds = effect.IntervalSeconds,
+            Uses = effect.Uses,
+            AttackType = effect.AttackType,
+            DamageType = effect.DamageType,
+            EffectTags = [.. effect.EffectTags],
+            Log = effect.Log,
+            LifeStealPercentage = effect.LifeStealPercentage,
             Conditions = [.. effect.Conditions.Select(CloneCondition)],
             Scaling = new AbilityScalingFormula
             {
@@ -615,20 +623,26 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         IEffectDuration duration = effect.DurationSeconds is > 0
             ? new TimedDuration(SecondsToCombatTicks(effect.DurationSeconds.Value))
             : new NoDuration();
+        IEffectInterval interval = effect.IntervalSeconds is > 0
+            ? new Interval(SecondsToCombatTicks(effect.IntervalSeconds.Value))
+            : new NoInterval();
+        IUsage usage = effect.Uses is > 0
+            ? new LimitedUsage(effect.Uses.Value)
+            : new UnlimitedUsage();
         var combatEffect = new EffectDefinition(
             action,
             duration,
             BuildCondition(effect.Conditions.Count == 0 ? ability.Conditions : effect.Conditions),
-            new NoInterval(),
-            new UnlimitedUsage(),
-            effectTags: [],
+            interval,
+            usage,
+            effectTags: ParseEffectTags(effect.EffectTags),
             effectModifications: [],
             targeting: MapTargeting(string.IsNullOrWhiteSpace(effect.Target) ? ability.Targeting : effect.Target),
-            attackType: isDamage ? AttackType.Melee : AttackType.None,
-            damageType: isDamage ? DamageType.Magical : DamageType.None,
+            attackType: ParseAttackType(effect.AttackType, isDamage ? AttackType.Melee : AttackType.None),
+            damageType: ParseDamageType(effect.DamageType, isDamage ? DamageType.Magical : DamageType.None),
             chance: BuildChance(effect.Conditions.Count == 0 ? ability.Conditions : effect.Conditions))
         {
-            Log = BuildEffectLog(effect.Type),
+            Log = string.IsNullOrWhiteSpace(effect.Log) ? BuildEffectLog(effect.Type) : effect.Log,
             SourceName = ability.Name
         };
 
@@ -642,16 +656,21 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
         return effect.Type switch
         {
-            AbilityEffectType.Damage => new CombatEffectAction { Operation = CombatEffectOperation.Damage, Magnitude = magnitude, ScalingAttribute = scalingAttribute, ScalingMultiplier = scalingMultiplier },
+            AbilityEffectType.Damage => new CombatEffectAction { Operation = CombatEffectOperation.Damage, Magnitude = magnitude, ScalingAttribute = scalingAttribute, ScalingMultiplier = scalingMultiplier, LifeStealPercentage = effect.LifeStealPercentage },
             AbilityEffectType.Heal => new CombatEffectAction { Operation = CombatEffectOperation.RestoreResource, Resource = ResourceType.Health, Magnitude = magnitude, ScalingAttribute = scalingAttribute, ScalingMultiplier = scalingMultiplier },
             AbilityEffectType.GrantBarrier => new CombatEffectAction { Operation = CombatEffectOperation.RestoreResource, Resource = ResourceType.Barrier, Magnitude = magnitude, ScalingAttribute = scalingAttribute, ScalingMultiplier = scalingMultiplier },
             AbilityEffectType.RemoveStatus => new CombatEffectAction { Operation = CombatEffectOperation.RemoveStatus, StatusId = effect.Status ?? string.Empty, Magnitude = Math.Max(1, magnitude) },
+            AbilityEffectType.ModifyStatusEffect => new CombatEffectAction { Operation = CombatEffectOperation.ModifyStatusEffect, StatusId = effect.Status ?? string.Empty, Magnitude = Math.Max(1, magnitude) },
             AbilityEffectType.Cleanse => new CombatEffectAction { Operation = CombatEffectOperation.Cleanse },
-            AbilityEffectType.Summon => new CombatEffectAction { Operation = CombatEffectOperation.Summon, SummonId = effect.Status ?? effect.Attribute ?? effect.Id, SummonDuration = Math.Max(0, (int)(effect.DurationSeconds ?? 0)) },
+            AbilityEffectType.Summon => new CombatEffectAction { Operation = CombatEffectOperation.Summon, SummonId = effect.Status ?? effect.Attribute ?? effect.Id, SummonDuration = effect.DurationSeconds is > 0 ? SecondsToCombatTicks(effect.DurationSeconds.Value) : 0 },
             AbilityEffectType.Taunt => new CombatEffectAction { Operation = CombatEffectOperation.ModifyAttribute, Attribute = AttributeType.Fortitude, Magnitude = magnitude, ModifierType = ModifierType.Flat },
             AbilityEffectType.ReflectDamage => new CombatEffectAction { Operation = CombatEffectOperation.Damage, Magnitude = magnitude, ScalingAttribute = scalingAttribute, ScalingMultiplier = scalingMultiplier },
             AbilityEffectType.AbsorbDamage => new CombatEffectAction { Operation = CombatEffectOperation.RestoreResource, Resource = ResourceType.Barrier, Magnitude = magnitude, ScalingAttribute = scalingAttribute, ScalingMultiplier = scalingMultiplier },
             AbilityEffectType.TriggerSecondaryEffect => new CombatEffectAction { Operation = CombatEffectOperation.TriggerSecondaryEffect, SecondaryEffectId = effect.Status ?? effect.Id, Magnitude = magnitude },
+            AbilityEffectType.RestoreResource when effect.Resource?.Equals(nameof(ResourceType.Health), StringComparison.OrdinalIgnoreCase) == true =>
+                new CombatEffectAction { Operation = CombatEffectOperation.RestoreResource, Resource = ResourceType.Health, Magnitude = magnitude, ScalingAttribute = scalingAttribute, ScalingMultiplier = scalingMultiplier },
+            AbilityEffectType.RestoreResource when effect.Resource?.Equals(nameof(ResourceType.Barrier), StringComparison.OrdinalIgnoreCase) == true =>
+                new CombatEffectAction { Operation = CombatEffectOperation.RestoreResource, Resource = ResourceType.Barrier, Magnitude = magnitude, ScalingAttribute = scalingAttribute, ScalingMultiplier = scalingMultiplier },
             AbilityEffectType.RestoreResource when effect.Attribute?.Equals(nameof(AttributeType.MaxHealth), StringComparison.OrdinalIgnoreCase) == true =>
                 new CombatEffectAction { Operation = CombatEffectOperation.RestoreResource, Resource = ResourceType.Health, Magnitude = magnitude, ScalingAttribute = scalingAttribute, ScalingMultiplier = scalingMultiplier },
             AbilityEffectType.RestoreResource =>
@@ -736,6 +755,13 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             AbilityTriggerType.OnAbilityUse => TriggerEvent.OnAbilityUsed,
             AbilityTriggerType.OnBasicAttack => TriggerEvent.BasicAttack,
             "OnHit" => TriggerEvent.OnAttack,
+            AbilityTriggerType.OnMeleeAttack => TriggerEvent.OnMeleeAttack,
+            AbilityTriggerType.OnRangedAttack => TriggerEvent.OnRangedAttack,
+            AbilityTriggerType.OnAttacked => TriggerEvent.OnAttacked,
+            AbilityTriggerType.OnDamaged => TriggerEvent.OnDamaged,
+            AbilityTriggerType.OnMeleeAttacked => TriggerEvent.OnMeleeAttacked,
+            AbilityTriggerType.OnRangedAttacked => TriggerEvent.OnRangedAttacked,
+            AbilityTriggerType.OnHealthChanged => TriggerEvent.OnHealthChanged,
             "OnCrit" => TriggerEvent.OnCriticalHit,
             "OnTakeDamage" => TriggerEvent.OnDamaged,
             "OnKill" => TriggerEvent.OnKill,
@@ -745,6 +771,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             AbilityTriggerType.OnInterval => TriggerEvent.OnTickInterval,
             "OnDeath" => TriggerEvent.OnDeath,
             "OnHeal" => TriggerEvent.OnHeal,
+            AbilityTriggerType.OnHealed => TriggerEvent.OnHealed,
+            AbilityTriggerType.OnLifestealHeal => TriggerEvent.OnLifestealHeal,
             _ => throw new NotSupportedException($"Essence trigger '{trigger}' is not supported by combat mapping.")
         };
     }
@@ -761,9 +789,11 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             AbilityTargetSelector.RandomAlly => CombatTargeting.SingleRandomAlly,
             AbilityTargetSelector.AllEnemies => CombatTargeting.AllEnemies,
             AbilityTargetSelector.AllAllies => CombatTargeting.AllAllies,
+            AbilityTargetSelector.EveryoneButYou => CombatTargeting.EveryoneButYou,
             AbilityTargetSelector.TwoEnemies => CombatTargeting.TwoEnemies,
             AbilityTargetSelector.TwoAllies => CombatTargeting.TwoAllies,
             AbilityTargetSelector.HighestMaxHealthAlly => CombatTargeting.AllyHighestMaxHealth,
+            AbilityTargetSelector.AllyHighestMaxHealth => CombatTargeting.AllyHighestMaxHealth,
             AbilityTargetSelector.Attacker => CombatTargeting.CauseOfTrigger,
             AbilityTargetSelector.DamageSource => CombatTargeting.CauseOfTrigger,
             AbilityTargetSelector.AbilityUser => CombatTargeting.Self,
@@ -781,6 +811,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             AbilityEffectType.RestoreResource => "{Actor}'s Essence restored {Amount} resource to {Target}.",
             AbilityEffectType.ModifyAttribute => "{Actor}'s Essence modified {Target} by {Amount}.",
             AbilityEffectType.ApplyStatus => "{Actor}'s Essence applied {Status} to {Target}.",
+            AbilityEffectType.ModifyStatusEffect => "{Actor}'s Essence applied {Amount} {Status} to {Target}.",
             AbilityEffectType.RemoveStatus => "{Actor}'s Essence removed {Status} from {Target}.",
             AbilityEffectType.Cleanse => "{Actor}'s Essence cleansed {Amount} effects from {Target}.",
             AbilityEffectType.Summon => "{Actor}'s Essence summoned {Target}.",
@@ -804,6 +835,18 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         Enum.TryParse<AttributeType>(attribute, ignoreCase: true, out var parsed)
             ? parsed
             : throw new NotSupportedException($"Essence attribute '{attribute}' is not supported by combat mapping.");
+
+    private static AttackType ParseAttackType(string? attackType, AttackType fallback) =>
+        Enum.TryParse<AttackType>(attackType, ignoreCase: true, out var parsed) ? parsed : fallback;
+
+    private static DamageType ParseDamageType(string? damageType, DamageType fallback) =>
+        Enum.TryParse<DamageType>(damageType, ignoreCase: true, out var parsed) ? parsed : fallback;
+
+    private static List<EffectTag> ParseEffectTags(IEnumerable<string> tags) =>
+        tags.Select(tag => Enum.TryParse<EffectTag>(tag, ignoreCase: true, out var parsed) ? parsed : EffectTag.None)
+            .Where(tag => tag != EffectTag.None)
+            .Distinct()
+            .ToList();
 
     private static int SecondsToCombatTicks(double seconds) => Math.Max(0, (int)Math.Round(seconds * 10));
 

@@ -11,9 +11,11 @@ public static class AbilityTargetSelector
     public const string RandomAlly = "RandomAlly";
     public const string AllEnemies = "AllEnemies";
     public const string AllAllies = "AllAllies";
+    public const string EveryoneButYou = "EveryoneButYou";
     public const string TwoEnemies = "TwoEnemies";
     public const string TwoAllies = "TwoAllies";
     public const string HighestMaxHealthAlly = "HighestMaxHealthAlly";
+    public const string AllyHighestMaxHealth = "AllyHighestMaxHealth";
     public const string Attacker = "Attacker";
     public const string DamageSource = "DamageSource";
     public const string AbilityUser = "AbilityUser";
@@ -31,9 +33,11 @@ public static class AbilityTargetSelector
         RandomAlly,
         AllEnemies,
         AllAllies,
+        EveryoneButYou,
         TwoEnemies,
         TwoAllies,
         HighestMaxHealthAlly,
+        AllyHighestMaxHealth,
         Attacker,
         DamageSource,
         AbilityUser,

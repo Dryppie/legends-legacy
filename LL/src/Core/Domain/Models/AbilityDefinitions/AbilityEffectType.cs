@@ -5,6 +5,7 @@ public static class AbilityEffectType
     public const string Damage = "Damage";
     public const string Heal = "Heal";
     public const string ApplyStatus = "ApplyStatus";
+    public const string ModifyStatusEffect = "ModifyStatusEffect";
     public const string RemoveStatus = "RemoveStatus";
     public const string Cleanse = "Cleanse";
     public const string GrantBarrier = "GrantBarrier";
@@ -21,6 +22,7 @@ public static class AbilityEffectType
         Damage,
         Heal,
         ApplyStatus,
+        ModifyStatusEffect,
         RemoveStatus,
         Cleanse,
         GrantBarrier,
