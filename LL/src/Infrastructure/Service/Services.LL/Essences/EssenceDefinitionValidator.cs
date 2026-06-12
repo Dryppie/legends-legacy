@@ -26,6 +26,7 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
             if (definition.PassiveAbility is not null && !definition.PassiveAbility.Kind.Equals(AbilityDefinitionKind.Passive, StringComparison.OrdinalIgnoreCase))
                 errors.Add($"{definition.Id}: passiveAbilityId '{definition.PassiveAbilityId}' must reference a Passive ability definition.");
             if (definition.Evolution is null || string.IsNullOrWhiteSpace(definition.Evolution.Id)) errors.Add($"{definition.Id}: exactly one evolution is required.");
+            if (definition.AttributeBonuses.Count == 0) errors.Add($"{definition.Id}: at least one attribute bonus is required.");
 
             foreach (var tag in definition.Tags.Concat(definition.ActiveAbility?.Tags ?? []).Concat(definition.PassiveAbility?.Tags ?? []).Concat(definition.Evolution?.AddsTags ?? []))
             {
