@@ -60,11 +60,25 @@ public sealed class EssenceRepository : IEssenceRepository
     public async Task AddPlayerEssenceAsync(PlayerEssence essence, CancellationToken cancellationToken) =>
         await _context.PlayerEssences.AddAsync(essence, cancellationToken);
 
-    public async Task<CreatureResonance?> GetMonsterResonanceAsync(Guid characterId, string creatureId, CancellationToken cancellationToken) =>
-        await _context.MonsterResonances.FirstOrDefaultAsync(x => x.CharacterId == characterId && x.CreatureId == creatureId, cancellationToken);
+    public async Task<CreatureResonance?> GetMonsterResonanceAsync(Guid characterId, string creatureId, CancellationToken cancellationToken)
+    {
+        var trackedResonance = _context.MonsterResonances.Local.FirstOrDefault(x =>
+            x.CharacterId == characterId &&
+            x.CreatureId == creatureId);
 
-    public async Task AddMonsterResonanceAsync(CreatureResonance resonance, CancellationToken cancellationToken) =>
-        await _context.MonsterResonances.AddAsync(resonance, cancellationToken);
+        return trackedResonance ?? await _context.MonsterResonances
+            .FirstOrDefaultAsync(x => x.CharacterId == characterId && x.CreatureId == creatureId, cancellationToken);
+    }
+
+    public async Task AddMonsterResonanceAsync(CreatureResonance resonance, CancellationToken cancellationToken)
+    {
+        var alreadyTracked = _context.MonsterResonances.Local.Any(x =>
+            x.CharacterId == resonance.CharacterId &&
+            x.CreatureId == resonance.CreatureId);
+
+        if (!alreadyTracked)
+            await _context.MonsterResonances.AddAsync(resonance, cancellationToken);
+    }
 
     public async Task<EssenceLoadout?> GetLoadoutWithSlotsAsync(Guid characterId, Guid loadoutId, CancellationToken cancellationToken) =>
         await _context.EssenceLoadouts
@@ -88,4 +102,14 @@ public sealed class EssenceRepository : IEssenceRepository
 
     public void RemoveLoadout(EssenceLoadout loadout) =>
         _context.EssenceLoadouts.Remove(loadout);
+
+    public async Task ReplaceLoadoutSlotsAsync(Guid loadoutId, IReadOnlyCollection<EssenceLoadoutSlot> slots, CancellationToken cancellationToken)
+    {
+        await _context.EssenceLoadoutSlots
+            .Where(x => x.EssenceLoadoutId == loadoutId)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        if (slots.Count > 0)
+            await _context.EssenceLoadoutSlots.AddRangeAsync(slots, cancellationToken);
+    }
 }

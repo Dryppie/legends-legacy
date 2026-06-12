@@ -23,4 +23,5 @@ public interface IEssenceRepository
     Task AddLoadoutAsync(EssenceLoadout loadout, CancellationToken cancellationToken);
     Task<EssenceLoadout?> GetLoadoutAsync(Guid characterId, Guid loadoutId, CancellationToken cancellationToken);
     void RemoveLoadout(EssenceLoadout loadout);
+    Task ReplaceLoadoutSlotsAsync(Guid loadoutId, IReadOnlyCollection<EssenceLoadoutSlot> slots, CancellationToken cancellationToken);
 }

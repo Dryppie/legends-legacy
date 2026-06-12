@@ -198,7 +198,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
         EssenceLoadout? loadout = null;
         if (request.Id.HasValue)
-            loadout = await _essences.GetLoadoutWithSlotsAsync(characterId, request.Id.Value, cancellationToken);
+            loadout = await _essences.GetLoadoutAsync(characterId, request.Id.Value, cancellationToken);
 
         if (loadout is null)
         {
@@ -210,13 +210,26 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
         loadout.Name = request.Name.Trim();
         loadout.UpdatedAt = DateTimeOffset.UtcNow;
-        loadout.Slots.Clear();
-        foreach (var slot in request.Slots.OrderBy(x => x.SlotIndex))
-        {
-            loadout.Slots.Add(new EssenceLoadoutSlot { Id = Guid.NewGuid(), EssenceLoadoutId = loadout.Id, SlotIndex = slot.SlotIndex, PlayerEssenceId = slot.PlayerEssenceId });
-        }
+        await ReplaceLoadoutSlotsAsync(loadout, normalizedSlots, cancellationToken);
 
         return loadout;
+    }
+
+    private async Task ReplaceLoadoutSlotsAsync(EssenceLoadout loadout, IReadOnlyCollection<SaveEssenceLoadoutSlotRequest> requestedSlots, CancellationToken cancellationToken)
+    {
+        var slots = requestedSlots
+            .OrderBy(x => x.SlotIndex)
+            .Select(slot => new EssenceLoadoutSlot
+            {
+                Id = Guid.NewGuid(),
+                EssenceLoadoutId = loadout.Id,
+                SlotIndex = slot.SlotIndex,
+                PlayerEssenceId = slot.PlayerEssenceId
+            })
+            .ToList();
+
+        await _essences.ReplaceLoadoutSlotsAsync(loadout.Id, slots, cancellationToken);
+        loadout.Slots = slots;
     }
 
     public async Task<EssenceOperationResult> ActivateLoadoutAsync(Guid characterId, Guid loadoutId, CancellationToken cancellationToken)
