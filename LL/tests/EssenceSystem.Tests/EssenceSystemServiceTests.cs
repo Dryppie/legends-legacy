@@ -4,6 +4,7 @@ using Domain.Components.Attributes;
 using Domain.Models.AbilityDefinitions;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
+using Domain.Models.Combat;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Combat.Abilities.Effects.Actions;
 using Domain.Models.Combat.Abilities.Effects.Conditions;
@@ -23,6 +24,7 @@ using Persistence.LL.Repositories.Essences;
 using Persistence.LL.Repositories.Inventories;
 using Persistence.LL.Repositories.Items;
 using Services.LL.Combat;
+using Services.LL.Combat.Stats;
 using Services.LL.Essences;
 using Services.LL.Interfaces;
 
@@ -305,6 +307,59 @@ public sealed class EssenceSystemServiceTests
         Assert.Equal("monster.utility_beast", entity.SourceMonsterId);
         Assert.Contains("Species.Beast", entity.Tags);
         Assert.Contains("Role.Support", entity.Tags);
+    }
+
+    [Fact]
+    public async Task PrepareEntitiesForCombat_applies_source_monster_essence_to_creatures()
+    {
+        await using var db = CreateDb();
+        var definition = FakeDefinitionRepository.CreateDefinition("essence.utility", "monster.utility_beast");
+        var essenceService = CreateService(db, definitions: new SingleDefinitionRepository(definition));
+        var service = new CombatSetupService(
+            new NoopCreatureScaler(),
+            essenceService,
+            new SingleDefinitionRepository(definition));
+        var creature = new Creature { Name = "Utility Beast", Level = 4, Tier = 4 };
+        var combatEntity = service.CreateCreatureCombatEntities([creature], new Area()).Single();
+
+        await service.PrepareEntitiesForCombat([combatEntity]);
+
+        Assert.Contains(combatEntity.Abilities, x => x.Definition.Id == "essence.utility.active" && x.Definition.Type == CombatAbilityType.Active);
+        Assert.Contains(combatEntity.Abilities, x => x.Definition.Id == "essence.utility.passive" && x.Definition.Type == CombatAbilityType.Passive);
+        Assert.Contains("Species.Beast", combatEntity.Tags);
+        var modifier = Assert.Single(combatEntity.TemporaryModifiers, x => x.AttributeType == AttributeType.Power);
+        Assert.Equal(5, modifier.Amount);
+    }
+
+    [Fact]
+    public void Combat_stats_ignores_ability_use_events_without_stat_contribution()
+    {
+        var aggregator = new CombatStatsAggregator();
+
+        var stats = aggregator.Aggregate(
+        [
+            new CombatLogItem
+            {
+                ActorId = "enemy",
+                TargetId = "player",
+                Source = "ability.essence.cave_bat.screech",
+                EventType = EventType.AbilityUse,
+                Details = "Cave Bat used Screech"
+            },
+            new CombatLogItem
+            {
+                ActorId = "enemy",
+                TargetId = "player",
+                Source = "Screech",
+                EventType = EventType.Damage,
+                Magnitude = 54
+            }
+        ]);
+
+        var enemy = stats.Single(x => x.EntityId == "enemy");
+        var ability = Assert.Single(enemy.Abilities);
+        Assert.Equal("Screech", ability.Name);
+        Assert.DoesNotContain(enemy.Abilities, x => x.Name == "ability.essence.cave_bat.screech");
     }
 
     [Fact]

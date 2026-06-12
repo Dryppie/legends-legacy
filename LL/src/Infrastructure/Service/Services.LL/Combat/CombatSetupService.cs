@@ -4,6 +4,7 @@ using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Creatures;
+using Domain.Models.Essences;
 using Domain.Models.Regions.Areas;
 using Services.LL.Interfaces;
 
@@ -51,7 +52,8 @@ public class CombatSetupService : ICombatSetupService
                     {
                         AttributeType = kv.Key,
                         Value = kv.Value
-                    })]
+                    })],
+                    Level = Math.Max(1, creature.Level > 1 ? creature.Level : creature.Tier)
                 };
                 var monsterId = GetMonsterDefinitionId(creature);
                 combatEntity.SourceMonsterId = monsterId;
@@ -83,9 +85,7 @@ public class CombatSetupService : ICombatSetupService
     {
         foreach (var entity in entities)
         {
-            var essenceLoadout = entity.HasEquippedEssenceSnapshot
-                ? _essenceCombatLoadoutResolver.Resolve(entity.OriginalId, entity.EquippedEssences)
-                : await _essenceCombatLoadoutResolver.ResolveAsync(entity.OriginalId, CancellationToken.None);
+            var essenceLoadout = await ResolveEssenceLoadoutForCombatEntityAsync(entity);
 
             foreach (var modifier in essenceLoadout.AttributeModifiers)
             {
@@ -123,4 +123,26 @@ public class CombatSetupService : ICombatSetupService
 
     private static string GetMonsterDefinitionId(Creature creature) =>
         "monster." + creature.Name.Trim().Replace("'", "", StringComparison.Ordinal).Replace(" ", "_", StringComparison.Ordinal).ToLowerInvariant();
+
+    private Task<EssenceCombatLoadout> ResolveEssenceLoadoutForCombatEntityAsync(CombatEntity entity)
+    {
+        if (entity.HasEquippedEssenceSnapshot)
+            return Task.FromResult(_essenceCombatLoadoutResolver.Resolve(entity.OriginalId, entity.EquippedEssences));
+
+        if (!string.IsNullOrWhiteSpace(entity.SourceMonsterId)
+            && _essenceDefinitions.GetByMonsterId(entity.SourceMonsterId) is { } essenceDefinition)
+        {
+            var monsterEssence = new PlayerEssence
+            {
+                Id = Guid.NewGuid(),
+                CharacterId = entity.OriginalId,
+                EssenceDefinitionId = essenceDefinition.Id,
+                Level = Math.Max(1, entity.Level)
+            };
+
+            return Task.FromResult(_essenceCombatLoadoutResolver.Resolve(entity.OriginalId, [monsterEssence]));
+        }
+
+        return _essenceCombatLoadoutResolver.ResolveAsync(entity.OriginalId, CancellationToken.None);
+    }
 }

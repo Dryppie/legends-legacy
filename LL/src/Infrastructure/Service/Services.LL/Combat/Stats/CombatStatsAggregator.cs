@@ -31,35 +31,45 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
             }
 
             // ----- ability context -----------------------------------------------
-            var ability = entity.GetOrAddAbility(item.Source); // or item.Source
             switch (item.EventType)
             {
                 case EventType.Damage:
                 case EventType.DamageOverTime:
                 case EventType.DamageCrit:
-                    ability.TotalDamage += item.Magnitude;
-                    ability.Hits++;
+                    if (string.IsNullOrWhiteSpace(item.Source))
+                        break;
+
+                    var damageAbility = entity.GetOrAddAbility(item.Source);
+                    damageAbility.TotalDamage += item.Magnitude;
+                    damageAbility.Hits++;
+                    if (item.EventType == EventType.DamageCrit)
+                        damageAbility.Crits++;
                     break;
 
                 case EventType.Heal:
                 case EventType.HealOverTime:
                 case EventType.HealCrit:
-                    ability.TotalHealing += item.Magnitude;
-                    ability.Hits++;
+                    if (string.IsNullOrWhiteSpace(item.Source))
+                        break;
+
+                    var healAbility = entity.GetOrAddAbility(item.Source);
+                    healAbility.TotalHealing += item.Magnitude;
+                    healAbility.Hits++;
+                    if (item.EventType == EventType.HealCrit)
+                        healAbility.Crits++;
                     break;
 
                 case EventType.Summon:
-                    ability.Summons++;
+                    if (string.IsNullOrWhiteSpace(item.Source))
+                        break;
+
+                    var summonAbility = entity.GetOrAddAbility(item.Source);
+                    summonAbility.Summons++;
                     break;
 
                 //case EventType.StatusEffect:
                 //    ability.Stuns++;
                 //    break;
-            }
-
-            if (item.EventType == EventType.DamageCrit || item.EventType == EventType.HealCrit)
-            {
-                ability.Crits++;
             }
 
             // ----- target-side bookkeeping ---------------------------------------
@@ -94,12 +104,12 @@ public sealed class WorkEntity
 
     public WorkAbility GetOrAddAbility(string abilityName)
     {
-        if (!_abilities.TryGetValue(abilityName, out var a))
-            _abilities[abilityName] = a = new WorkAbility(abilityName);
-        return a;
+        if (!_abilities.TryGetValue(abilityName, out var ability))
+            _abilities[abilityName] = ability = new WorkAbility(abilityName);
+        return ability;
     }
 
-        public EntityStats ToImmutable() =>
+    public EntityStats ToImmutable() =>
         new(Id, Name, _abilities.Values
             .Select(a => a.ToImmutable())
             .OrderByDescending(a => Math.Max(a.TotalDamage, a.TotalHealing))
