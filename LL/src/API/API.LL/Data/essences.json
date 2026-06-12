@@ -279,7 +279,16 @@
         "Role.Controller",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Precision",
+          "baseValue": 3
+        },
+        {
+          "attribute": "DodgeChance",
+          "baseValue": 1
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -308,7 +317,16 @@
         "Role.Controller",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 3
+        },
+        {
+          "attribute": "Armor",
+          "baseValue": 2
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -337,7 +355,16 @@
         "Role.Controller",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Precision",
+          "baseValue": 4
+        },
+        {
+          "attribute": "WeaponDamage",
+          "baseValue": 2
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -365,7 +392,16 @@
         "Role.Support",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Fortitude",
+          "baseValue": 4
+        },
+        {
+          "attribute": "MaxHealth",
+          "baseValue": 20
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -393,7 +429,16 @@
         "Role.Controller",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 3
+        },
+        {
+          "attribute": "MagicPenetration",
+          "baseValue": 2
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -421,7 +466,16 @@
         "Role.Controller",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 3
+        },
+        {
+          "attribute": "StatusResistance",
+          "baseValue": 1
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -449,7 +503,16 @@
         "Role.Support",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 3
+        },
+        {
+          "attribute": "DodgeChance",
+          "baseValue": 1
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -477,7 +540,16 @@
         "Role.Support",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 3
+        },
+        {
+          "attribute": "LifeSteal",
+          "baseValue": 1
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -505,7 +577,16 @@
         "Role.Support",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Fortitude",
+          "baseValue": 3
+        },
+        {
+          "attribute": "HealingPowerPercent",
+          "baseValue": 1
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -533,7 +614,16 @@
         "Role.Controller",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Fortitude",
+          "baseValue": 4
+        },
+        {
+          "attribute": "Armor",
+          "baseValue": 2
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -561,7 +651,16 @@
         "Role.Controller",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 3
+        },
+        {
+          "attribute": "MagicPenetration",
+          "baseValue": 2
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -589,7 +688,16 @@
         "Role.Support",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 3
+        },
+        {
+          "attribute": "Resistance",
+          "baseValue": 2
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -617,7 +725,16 @@
         "Role.Controller",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 3
+        },
+        {
+          "attribute": "DamageReduction",
+          "baseValue": 1
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -645,7 +762,16 @@
         "Role.Support",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Precision",
+          "baseValue": 3
+        },
+        {
+          "attribute": "DodgeChance",
+          "baseValue": 1
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -673,7 +799,16 @@
         "Role.Support",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 3
+        },
+        {
+          "attribute": "HealingPowerPercent",
+          "baseValue": 1
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -701,7 +836,16 @@
         "Role.Offensive",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 4
+        },
+        {
+          "attribute": "CritChance",
+          "baseValue": 1
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -729,7 +873,16 @@
         "Role.Offensive",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 4
+        },
+        {
+          "attribute": "MagicPenetration",
+          "baseValue": 2
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -757,7 +910,16 @@
         "Role.Support",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 3
+        },
+        {
+          "attribute": "HealingPowerPercent",
+          "baseValue": 1
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -785,7 +947,16 @@
         "Role.Offensive",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 4
+        },
+        {
+          "attribute": "Cooldown",
+          "baseValue": 1
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -814,7 +985,16 @@
         "Role.Support",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 4
+        },
+        {
+          "attribute": "CritChance",
+          "baseValue": 1
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -842,7 +1022,16 @@
         "Role.Controller",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 3
+        },
+        {
+          "attribute": "Precision",
+          "baseValue": 2
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -870,7 +1059,16 @@
         "Role.Controller",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 3
+        },
+        {
+          "attribute": "StatusResistance",
+          "baseValue": 1
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -898,7 +1096,16 @@
         "Role.Support",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 3
+        },
+        {
+          "attribute": "LifeSteal",
+          "baseValue": 1
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -926,7 +1133,16 @@
         "Role.Controller",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Precision",
+          "baseValue": 4
+        },
+        {
+          "attribute": "ArmorPenetration",
+          "baseValue": 2
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -954,7 +1170,16 @@
         "Role.Support",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 4
+        },
+        {
+          "attribute": "Resistance",
+          "baseValue": 2
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
@@ -982,7 +1207,16 @@
         "Role.Support",
         "Effect.Ability"
       ],
-      "attributeBonuses": [],
+      "attributeBonuses": [
+        {
+          "attribute": "Fortitude",
+          "baseValue": 4
+        },
+        {
+          "attribute": "BlockChance",
+          "baseValue": 1
+        }
+      ],
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
