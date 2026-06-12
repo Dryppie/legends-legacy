@@ -6,13 +6,6 @@ namespace Services.LL.Essences;
 
 public sealed class EssenceProgressionService : IEssenceProgressionService
 {
-    private readonly IEssenceDefinitionRepository _definitions;
-
-    public EssenceProgressionService(IEssenceDefinitionRepository definitions)
-    {
-        _definitions = definitions;
-    }
-
     public int GetLevelCap(int ascensionTier) => ascensionTier switch
     {
         <= 0 => 10,
@@ -24,10 +17,7 @@ public sealed class EssenceProgressionService : IEssenceProgressionService
     public int GetXpRequiredForNextLevel(PlayerEssence essence, EssenceDefinition definition)
     {
         if (essence.Level >= GetLevelCap(essence.AscensionTier)) return 0;
-        var templates = _definitions.GetProgressionTemplates();
-        return templates.TryGetValue(definition.ProgressionTemplateId, out var template)
-            ? template.GetXpRequiredForLevel(essence.Level)
-            : new EssenceProgressionTemplate().GetXpRequiredForLevel(essence.Level);
+        return EssenceProgressionConstants.GetXpRequiredForLevel(essence.Level);
     }
 
     public EssenceXpGrantResult GrantXp(PlayerEssence essence, EssenceDefinition definition, int requestedXp)

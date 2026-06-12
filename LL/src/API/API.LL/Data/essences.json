@@ -1,41 +1,4 @@
 {
-  "progressionTemplates": [
-    {
-      "id": "offensive",
-      "baseXpPerLevel": 100,
-      "xpGrowth": 1.18,
-      "activeScalingMultiplier": 1.08,
-      "passiveScalingMultiplier": 1.04
-    },
-    {
-      "id": "defensive",
-      "baseXpPerLevel": 105,
-      "xpGrowth": 1.16,
-      "activeScalingMultiplier": 1.02,
-      "passiveScalingMultiplier": 1.08
-    },
-    {
-      "id": "controller",
-      "baseXpPerLevel": 100,
-      "xpGrowth": 1.17,
-      "activeScalingMultiplier": 1.03,
-      "passiveScalingMultiplier": 1.05
-    },
-    {
-      "id": "support",
-      "baseXpPerLevel": 100,
-      "xpGrowth": 1.15,
-      "activeScalingMultiplier": 1.02,
-      "passiveScalingMultiplier": 1.07
-    },
-    {
-      "id": "hybrid",
-      "baseXpPerLevel": 100,
-      "xpGrowth": 1.17,
-      "activeScalingMultiplier": 1.04,
-      "passiveScalingMultiplier": 1.04
-    }
-  ],
   "abilityDefinitions": [
     {
       "id": "ability.essence.goblin_ambusher.cheap_shot",
@@ -1904,7 +1867,6 @@
       "name": "Goblin Ambusher Essence",
       "description": "The stolen cunning of a goblin that strikes hardest when the enemy is exposed.",
       "rarity": "Rare",
-      "progressionTemplateId": "offensive",
       "tags": [
         "Species.Goblinoid",
         "Species.Humanoid",
@@ -1963,7 +1925,6 @@
       "name": "Skeleton Guardian Essence",
       "description": "A brittle sentinel's oath made durable through bone and spite.",
       "rarity": "Rare",
-      "progressionTemplateId": "defensive",
       "tags": [
         "Species.Undead",
         "Role.Tank",
@@ -2026,7 +1987,6 @@
       "name": "Fire Ant Essence",
       "description": "Colony heat condensed into a biting, ember-bright instinct.",
       "rarity": "Rare",
-      "progressionTemplateId": "offensive",
       "tags": [
         "Species.Insectoid",
         "Role.Offensive",
@@ -2082,7 +2042,6 @@
       "name": "Cave Bat Essence",
       "description": "A flicker of wings and sound that turns evasion into opportunity.",
       "rarity": "Uncommon",
-      "progressionTemplateId": "controller",
       "tags": [
         "Species.Beast",
         "Species.Avian",
@@ -2140,7 +2099,6 @@
       "name": "Necroshade Wraith Essence",
       "description": "A cold whisper that lingers after death and fattens on curses.",
       "rarity": "Epic",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Undead",
         "Species.Spirit",
@@ -2198,7 +2156,6 @@
       "name": "Goblin's Essence",
       "description": "A recovered legacy essence containing Sneak Attack and Pocket Dirt.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Goblinoid",
         "Species.Humanoid",
@@ -2228,7 +2185,6 @@
       "name": "Goblin Warrior's Essence",
       "description": "A recovered legacy essence containing Raging Cleave and Reckless Assault.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Goblinoid",
         "Species.Humanoid",
@@ -2258,7 +2214,6 @@
       "name": "Goblin Archer's Essence",
       "description": "A recovered legacy essence containing Sniper's Strike and Poisoned Arrows.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Goblinoid",
         "Species.Humanoid",
@@ -2288,7 +2243,6 @@
       "name": "Large Rat's Essence",
       "description": "A recovered legacy essence containing Tail Wrap and Big.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Beast",
         "Role.Support",
@@ -2317,7 +2271,6 @@
       "name": "Flame Imp's Essence",
       "description": "A recovered legacy essence containing Firebomb Toss and Hot Aura.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Demon",
         "Role.Controller",
@@ -2346,7 +2299,6 @@
       "name": "Frost Imp's Essence",
       "description": "A recovered legacy essence containing Ice Touch and Cold Aura.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Demon",
         "Role.Controller",
@@ -2375,7 +2327,6 @@
       "name": "Shadow Imp's Essence",
       "description": "A recovered legacy essence containing Shadow Image and Shadowy Presence.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Demon",
         "Role.Support",
@@ -2404,7 +2355,6 @@
       "name": "Vampire Bat's Essence",
       "description": "A recovered legacy essence containing Bloodthirsty Fangs and Dark Vitality.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Beast",
         "Role.Support",
@@ -2433,7 +2383,6 @@
       "name": "Blue Slime's Essence",
       "description": "A recovered legacy essence containing Sweet Water and Absorptive Shell.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Slime",
         "Role.Support",
@@ -2462,7 +2411,6 @@
       "name": "Brown Slime's Essence",
       "description": "A recovered legacy essence containing Mud Armor and Earthly Fortitude.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Slime",
         "Role.Controller",
@@ -2491,7 +2439,6 @@
       "name": "Green Slime's Essence",
       "description": "A recovered legacy essence containing Acid Splash and Corrosive Ooze.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Slime",
         "Role.Controller",
@@ -2520,7 +2467,6 @@
       "name": "Rainbow Slime's Essence",
       "description": "A recovered legacy essence containing Unstable Colors and Colorful Shield.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Slime",
         "Role.Support",
@@ -2549,7 +2495,6 @@
       "name": "Red Slime's Essence",
       "description": "A recovered legacy essence containing Ignite Core and Fire Body.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Slime",
         "Role.Controller",
@@ -2578,7 +2523,6 @@
       "name": "Transparent Slime's Essence",
       "description": "A recovered legacy essence containing Transparent Engulf and Transparent Shift.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Slime",
         "Role.Support",
@@ -2607,7 +2551,6 @@
       "name": "Enchanted Fairy's Essence",
       "description": "A recovered legacy essence containing Fae's Embrace and Enchanted Charm.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Beast",
         "Role.Support",
@@ -2636,7 +2579,6 @@
       "name": "Glade Panther's Essence",
       "description": "A recovered legacy essence containing Ambush Strike and Razor Claws.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Beast",
         "Role.Offensive",
@@ -2665,7 +2607,6 @@
       "name": "Illusion Fox's Essence",
       "description": "A recovered legacy essence containing Distracting Illusion and Foxfire Wisp.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Beast",
         "Role.Offensive",
@@ -2694,7 +2635,6 @@
       "name": "Nightshade Blossom's Essence",
       "description": "A recovered legacy essence containing Necrotic Spores and Twilight Bloom.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Plant",
         "Role.Support",
@@ -2723,7 +2663,6 @@
       "name": "Pixie's Essence",
       "description": "A recovered legacy essence containing Pixie Burst and Resonant Chime.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Spirit",
         "Role.Offensive",
@@ -2752,7 +2691,6 @@
       "name": "Hobgoblin's Essence",
       "description": "A recovered legacy essence containing Frenzy and Savage Onslaught.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Goblinoid",
         "Species.Humanoid",
@@ -2782,7 +2720,6 @@
       "name": "Feral Ghoul's Essence",
       "description": "A recovered legacy essence containing Feral Pounce and Shredding Claws.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Undead",
         "Role.Controller",
@@ -2811,7 +2748,6 @@
       "name": "Plague Ghoul's Essence",
       "description": "A recovered legacy essence containing Plague Swipe and Pestilent Touch.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Undead",
         "Role.Controller",
@@ -2840,7 +2776,6 @@
       "name": "Ravenous Ghoul's Essence",
       "description": "A recovered legacy essence containing Draining Claws and Vile Feast.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Undead",
         "Role.Support",
@@ -2869,7 +2804,6 @@
       "name": "Skeleton Archer's Essence",
       "description": "A recovered legacy essence containing Bone Arrow and Piercing Arrows.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Undead",
         "Role.Controller",
@@ -2898,7 +2832,6 @@
       "name": "Skeleton Mage's Essence",
       "description": "A recovered legacy essence containing Siphon and Protective Bone Barrier.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Undead",
         "Role.Support",
@@ -2927,7 +2860,6 @@
       "name": "Skeleton Warrior's Essence",
       "description": "A recovered legacy essence containing Bone Shield and Spiked Defense.",
       "rarity": "Rare",
-      "progressionTemplateId": "hybrid",
       "tags": [
         "Species.Undead",
         "Role.Support",

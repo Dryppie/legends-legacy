@@ -8,7 +8,6 @@ public sealed record EssenceDefinitionDto(
     string Name,
     string Description,
     Rarity Rarity,
-    string ProgressionTemplateId,
     IReadOnlyDictionary<string, IReadOnlyList<string>> TagsByCategory,
     IReadOnlyList<EssenceAttributeBonusDto> AttributeBonuses,
     EssenceAbilityDto ActiveAbility,

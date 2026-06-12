@@ -93,6 +93,23 @@ public sealed class AbilityCatalogRuntimeTests
     }
 
     [Fact]
+    public void Essence_catalog_does_not_author_xp_progression_or_tier_scaling()
+    {
+        var path = Path.Combine(FindApiContentRoot(), "Data", "essences.json");
+        using var document = JsonDocument.Parse(File.ReadAllText(path), new JsonDocumentOptions
+        {
+            AllowTrailingCommas = true,
+            CommentHandling = JsonCommentHandling.Skip
+        });
+
+        Assert.False(document.RootElement.TryGetProperty("progressionTemplates", out _));
+        foreach (var definition in document.RootElement.GetProperty("essences").EnumerateArray())
+        {
+            Assert.False(definition.TryGetProperty("progressionTemplateId", out _));
+        }
+    }
+
+    [Fact]
     public void Every_authored_combat_effect_can_execute_in_a_controlled_combat_context()
     {
         var definitions = CreateDefinitionRepository();
@@ -250,7 +267,7 @@ public sealed class AbilityCatalogRuntimeTests
             inventory: null!,
             itemBases: null!,
             definitions: definitions,
-            progression: new EssenceProgressionService(definitions),
+            progression: new EssenceProgressionService(),
             slotUnlocks: new EssenceSlotUnlockService(),
             loadoutLimits: new EssenceLoadoutLimitService(),
             random: null!);

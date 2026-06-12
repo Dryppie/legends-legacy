@@ -9,7 +9,6 @@ export interface EssenceDefinitionDto {
   name: string;
   description: string;
   rarity: string;
-  progressionTemplateId: string;
   tagsByCategory: Record<string, string[]>;
   attributeBonuses: EssenceAttributeBonusDto[];
   activeAbility: EssenceAbilityDto;

@@ -20,7 +20,6 @@ public sealed class EssenceDefinitionConverter : ITypeConverter<EssenceDefinitio
             source.Name,
             source.Description,
             source.Rarity,
-            source.ProgressionTemplateId,
             GroupTags(source.Tags),
             source.AttributeBonuses.Select(x => context.Mapper.Map<EssenceAttributeBonusDto>(x)).ToList(),
             context.Mapper.Map<EssenceAbilityDto>(source.ActiveAbility),

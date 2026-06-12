@@ -12,7 +12,6 @@ public sealed class EssenceDefinition
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public Rarity Rarity { get; set; }
-    public string ProgressionTemplateId { get; set; } = "hybrid";
     public List<string> Tags { get; set; } = [];
     public List<EssenceAttributeBonusDefinition> AttributeBonuses { get; set; } = [];
     public string ActiveAbilityId { get; set; } = string.Empty;

@@ -556,7 +556,7 @@ public sealed class EssenceSystemServiceTests
             new InventoryRepository(db),
             new ItemBaseRepository(db),
             definitions,
-            new EssenceProgressionService(definitions),
+            new EssenceProgressionService(),
             new EssenceSlotUnlockService(),
             new EssenceLoadoutLimitService(),
             random ?? new QueueRandomProvider(0.99));
@@ -678,12 +678,6 @@ public sealed class EssenceSystemServiceTests
             CreateDefinition("essence.other", "monster.other")
         ];
 
-        private readonly IReadOnlyDictionary<string, EssenceProgressionTemplate> _templates =
-            new Dictionary<string, EssenceProgressionTemplate>
-            {
-                ["hybrid"] = new() { BaseXpPerLevel = 100, XpGrowth = 1 }
-            };
-
         public IReadOnlyList<EssenceDefinition> GetAll() => _definitions;
 
         public EssenceDefinition? GetById(string essenceDefinitionId) =>
@@ -691,8 +685,6 @@ public sealed class EssenceSystemServiceTests
 
         public EssenceDefinition? GetByMonsterId(string monsterId) =>
             _definitions.FirstOrDefault(x => x.SourceMonsterId.Equals(monsterId, StringComparison.OrdinalIgnoreCase));
-
-        public IReadOnlyDictionary<string, EssenceProgressionTemplate> GetProgressionTemplates() => _templates;
 
         public AbilityDefinition? GetAbilityById(string abilityId) =>
             _definitions.SelectMany(x => new[] { x.ActiveAbility, x.PassiveAbility })
@@ -755,18 +747,11 @@ public sealed class EssenceSystemServiceTests
 
     private sealed class SingleDefinitionRepository(EssenceDefinition definition) : IEssenceDefinitionRepository
     {
-        private readonly IReadOnlyDictionary<string, EssenceProgressionTemplate> _templates =
-            new Dictionary<string, EssenceProgressionTemplate>
-            {
-                ["hybrid"] = new() { BaseXpPerLevel = 100, XpGrowth = 1 }
-            };
-
         public IReadOnlyList<EssenceDefinition> GetAll() => [definition];
         public EssenceDefinition? GetById(string essenceDefinitionId) =>
             definition.Id.Equals(essenceDefinitionId, StringComparison.OrdinalIgnoreCase) ? definition : null;
         public EssenceDefinition? GetByMonsterId(string monsterId) =>
             definition.SourceMonsterId.Equals(monsterId, StringComparison.OrdinalIgnoreCase) ? definition : null;
-        public IReadOnlyDictionary<string, EssenceProgressionTemplate> GetProgressionTemplates() => _templates;
         public AbilityDefinition? GetAbilityById(string abilityId) =>
             new[] { definition.ActiveAbility, definition.PassiveAbility }
                 .FirstOrDefault(x => x.Id.Equals(abilityId, StringComparison.OrdinalIgnoreCase));
