@@ -2,13 +2,11 @@ import { Injectable, computed, signal } from '@angular/core';
 import { forkJoin, Observable, tap } from 'rxjs';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { EssencesService } from './essences.service';
+import { EssenceCatalogViewService } from './essence-catalog-view.service';
 import { Essence } from '../../../../shared/models/essence';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
-import {
-  EssenceItem,
-  essenceItemToEssence,
-} from '../../../../shared/models/item';
+import { EssenceItem } from '../../../../shared/models/item';
 import {
   DismantleEssenceResultDto,
   EssenceCatalogDto,
@@ -135,6 +133,7 @@ export class EssenceStateService {
   constructor(
     private readonly essencesService: EssencesService,
     private readonly inventoryState: InventoryStateService,
+    private readonly essenceCatalogView: EssenceCatalogViewService,
   ) {}
 
   setActiveView(view: EssenceView): void {
@@ -152,6 +151,7 @@ export class EssenceStateService {
     }).subscribe({
       next: ({ catalog, archive, loadouts }) => {
         this._catalog.set(catalog);
+        this.essenceCatalogView.setCatalog(catalog);
         this._archive.set(archive);
         this._loadouts.set(loadouts);
         this.ensureSelectedEssence(archive);
@@ -282,9 +282,8 @@ export class EssenceStateService {
   }
 
   asEssence(inventoryItem: InventoryItem): Essence {
-    return essenceItemToEssence(
-      inventoryItem.itemInstance.itemBase as EssenceItem,
-    );
+    const item = inventoryItem.itemInstance.itemBase as EssenceItem;
+    return this.essenceCatalogView.asEssence(item);
   }
 
   isInventoryEssenceAbsorbed(inventoryItem: InventoryItem): boolean {

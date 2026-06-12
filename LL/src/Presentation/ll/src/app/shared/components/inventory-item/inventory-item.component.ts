@@ -3,14 +3,10 @@ import { InventoryItem } from '../../models/inventoryItem';
 import { NgIf } from '@angular/common';
 import { ModalService } from '../../../core/services/client-side/modal/modal.service';
 import { ItemType } from '../../models/enums/itemType';
-import {
-  Equipment,
-  EquipmentInstance,
-  EssenceItem,
-  essenceItemToEssence,
-} from '../../models/item';
+import { Equipment, EquipmentInstance, EssenceItem } from '../../models/item';
 import { EquipmentType } from '../../models/enums/equipmentType';
 import { ItemComponent } from '../item/item.component';
+import { EssenceCatalogViewService } from '../../../core/services/api/essences/essence-catalog-view.service';
 
 @Component({
   selector: 'app-inventory-item',
@@ -21,7 +17,12 @@ import { ItemComponent } from '../item/item.component';
 export class InventoryItemComponent {
   @Input() inventoryItem!: InventoryItem;
 
-  constructor(private modal: ModalService) {}
+  constructor(
+    private modal: ModalService,
+    private readonly essenceCatalogView: EssenceCatalogViewService,
+  ) {
+    this.essenceCatalogView.load();
+  }
 
   get isEquipment(): boolean {
     return (
@@ -60,7 +61,7 @@ export class InventoryItemComponent {
         this.inventoryItem.itemInstance as EquipmentInstance,
       );
     } else if (this.isEssence) {
-      const essence = essenceItemToEssence(
+      const essence = this.essenceCatalogView.asEssence(
         this.inventoryItem.itemInstance.itemBase as EssenceItem,
       );
       this.modal.toggleEssenceModal(essence);

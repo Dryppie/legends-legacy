@@ -1,16 +1,12 @@
 import { Component, Input } from '@angular/core';
-import {
-  EquipmentInstance,
-  EssenceItem,
-  essenceItemToEssence,
-  ItemInstance,
-} from '../../models/item';
+import { EquipmentInstance, EssenceItem, ItemInstance } from '../../models/item';
 import { NgClass, NgIf } from '@angular/common';
 import { Rarity } from '../../models/enums/rarity';
 import { EssenceDetailsComponent } from '../essences/essence-details/essence-details.component';
 import { EquipmentDisplayComponent } from '../equipment/equipment-display/equipment-display.component';
 import { ItemType } from '../../models/enums/itemType';
 import { PopoverComponent } from '../custom-components/popover/popover.component';
+import { EssenceCatalogViewService } from '../../../core/services/api/essences/essence-catalog-view.service';
 
 @Component({
   selector: 'app-item',
@@ -29,6 +25,10 @@ export class ItemComponent {
   itemHovered: boolean = false;
   tooltipPosition = {};
 
+  constructor(private readonly essenceCatalogView: EssenceCatalogViewService) {
+    this.essenceCatalogView.load();
+  }
+
   get isEssence(): boolean {
     return this.item.itemBase.itemType === ItemType.Essence;
   }
@@ -38,7 +38,7 @@ export class ItemComponent {
   }
 
   itemAsEssence(item: ItemInstance) {
-    return essenceItemToEssence(item.itemBase as EssenceItem);
+    return this.essenceCatalogView.asEssence(item.itemBase as EssenceItem);
   }
 
   itemAsEquipment(item: ItemInstance) {
