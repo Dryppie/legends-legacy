@@ -70,7 +70,7 @@
           <button
             *ngFor="let filter of archiveFilters"
             type="button"
-            class="rounded border border-light_gray/60 px-2 py-1 text-xs text-zinc-300 transition-colors hover:border-primary hover:text-primary"
+            class="rounded border border-light_gray/60 px-2 py-1 text-xs text-light_gray transition-colors hover:border-primary hover:text-primary"
             [ngClass]="{
               'border-primary bg-primary/10 text-primary':
                 archiveFilter() === filter.value,
@@ -91,10 +91,7 @@
             [ngModel]="archiveSort()"
             (ngModelChange)="setArchiveSortValue($event)"
           >
-            <option
-              *ngFor="let sort of archiveSorts"
-              [ngValue]="sort.value"
-            >
+            <option *ngFor="let sort of archiveSorts" [ngValue]="sort.value">
               {{ sort.label }}
             </option>
           </select>
@@ -175,8 +172,8 @@
               {{ essence.name }}
             </h2>
             <p class="mt-1 text-sm text-zinc-400">
-              Level {{ essence.level }} / {{ essence.tierLevelCap }} |
-              Ascension Tier {{ essence.ascensionTier }}
+              Level {{ essence.level }} / {{ essence.tierLevelCap }} | Ascension
+              Tier {{ essence.ascensionTier }}
             </p>
           </div>
           <button
@@ -283,7 +280,9 @@
         </ul>
       </section>
 
-      <section class="rounded-lg border border-light_gray bg-texture p-3 shadow-lg">
+      <section
+        class="rounded-lg border border-light_gray bg-texture p-3 shadow-lg"
+      >
         <div class="mb-3 flex items-center justify-between gap-3">
           <div>
             <h2 class="text-primary">Loadouts</h2>
