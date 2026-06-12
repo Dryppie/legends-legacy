@@ -15,7 +15,6 @@ export enum AttributeType {
 
   DodgeChance = 'DodgeChance',
   BlockChance = 'BlockChance',
-  BlockEffectiveness = 'BlockEffectiveness',
   DamageReduction = 'DamageReduction',
 
   HealingPowerPercent = 'HealingPowerPercent',

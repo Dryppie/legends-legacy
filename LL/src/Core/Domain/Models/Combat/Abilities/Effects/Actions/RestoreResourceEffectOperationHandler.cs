@@ -14,8 +14,7 @@ public sealed class RestoreResourceEffectOperationHandler : ICombatEffectOperati
     {
         if (action.Resource == ResourceType.Barrier)
         {
-            var barrier = effect.Target.CombatAttributes.GetValueOrDefault(AttributeType.BlockEffectiveness);
-            effect.Target.CombatAttributes[AttributeType.BlockEffectiveness] = barrier + action.Magnitude;
+            effect.Target.AdjustCurrentBarrier(action.Magnitude);
             effect.AttackOutcome = AttackOutcome.Hit;
             effect.Magnitude = action.Magnitude;
             effect.EventType = EventType.RestoreBarrier;

@@ -23,7 +23,6 @@ public class CreatureScaler : ICreatureScaler
         //ApplyCreatureFactors(creature);
         //ApplyRubberBanding(creature, area, D);
         ApplyStatOverrides(creature);
-        ClampBarrier(creature);
         SyncHealth(creature);
         ClampCrits(creature);
     }
@@ -212,17 +211,6 @@ public class CreatureScaler : ICreatureScaler
 
             creature.BaseAttributesDict[o.AttributeType] = (int)val;
         }
-    }
-
-    private static void ClampBarrier(Creature creature)
-    {
-        if (!creature.BaseAttributesDict.TryGetValue(AttributeType.MaxHealth, out var hp))
-            return;
-
-        if (!creature.BaseAttributesDict.TryGetValue(AttributeType.BlockEffectiveness, out var barrier))
-            return;
-
-        creature.BaseAttributesDict[AttributeType.BlockEffectiveness] = Math.Min(barrier, hp * 2f);
     }
 
     private static void SyncHealth(Creature creature)

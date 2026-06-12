@@ -17,7 +17,7 @@ internal static class CombatEffectActionHelpers
             Name = target.Name,
             MaxHealth = target.GetAttributeValue(AttributeType.MaxHealth),
             Health = target.GetCurrentHealthValue(),
-            Barrier = target.GetAttributeValue(AttributeType.BlockEffectiveness),
+            Barrier = target.GetCurrentBarrierValue(),
             ImagePath = target.ImagePath
         };
 

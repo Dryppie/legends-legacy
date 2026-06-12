@@ -56,9 +56,9 @@
           "type": "Damage",
           "target": "CurrentTarget",
           "scaling": {
-            "baseValue": 95,
-            "perLevel": 7,
-            "perAscensionTier": 22
+            "baseValue": 18,
+            "perLevel": 1.2,
+            "perAscensionTier": 4
           }
         },
         {
@@ -128,9 +128,9 @@
           "type": "GrantBarrier",
           "target": "LowestHealthAlly",
           "scaling": {
-            "baseValue": 120,
-            "perLevel": 10,
-            "perAscensionTier": 35
+            "baseValue": 24,
+            "perLevel": 1.6,
+            "perAscensionTier": 6
           }
         },
         {
@@ -203,9 +203,9 @@
           "type": "Damage",
           "target": "CurrentTarget",
           "scaling": {
-            "baseValue": 85,
-            "perLevel": 8,
-            "perAscensionTier": 24
+            "baseValue": 16,
+            "perLevel": 1.2,
+            "perAscensionTier": 4
           }
         },
         {
@@ -276,9 +276,9 @@
           "type": "Damage",
           "target": "CurrentTarget",
           "scaling": {
-            "baseValue": 55,
-            "perLevel": 5,
-            "perAscensionTier": 15
+            "baseValue": 10,
+            "perLevel": 0.8,
+            "perAscensionTier": 3
           }
         },
         {
@@ -345,9 +345,9 @@
           "type": "Damage",
           "target": "CurrentTarget",
           "scaling": {
-            "baseValue": 70,
-            "perLevel": 9,
-            "perAscensionTier": 30
+            "baseValue": 14,
+            "perLevel": 1.2,
+            "perAscensionTier": 4
           }
         },
         {
@@ -1722,7 +1722,7 @@
       "id": "boneArrow",
       "kind": "Active",
       "name": "Bone Arrow",
-      "description": "Use part of your bone as an arrowhead, dealing 59 physical ranged damage.",
+      "description": "Use part of your bone as an arrowhead, dealing 20 physical ranged damage.",
       "cooldownSeconds": 18.0,
       "targeting": "CurrentTarget",
       "tags": [
@@ -1733,7 +1733,7 @@
           "id": "effect.1",
           "target": "CurrentTarget",
           "scaling": {
-            "baseValue": 59.0,
+            "baseValue": 20.0,
             "attributeScaling": [
               {
                 "attribute": "Power",
@@ -1789,7 +1789,7 @@
       "id": "siphon",
       "kind": "Active",
       "name": "Siphon",
-      "description": "Deal 42 magic damage to the target.",
+      "description": "Deal 16 magic damage to the target.",
       "cooldownSeconds": 19.0,
       "targeting": "CurrentTarget",
       "tags": [
@@ -1800,7 +1800,7 @@
           "id": "effect.1",
           "target": "CurrentTarget",
           "scaling": {
-            "baseValue": 42.0,
+            "baseValue": 16.0,
             "attributeScaling": [
               {
                 "attribute": "Spirit",

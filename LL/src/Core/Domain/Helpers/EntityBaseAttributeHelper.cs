@@ -38,7 +38,6 @@ public static class EntityBaseAttributeHelper
             AttributeType.Spirit => 10,
             AttributeType.MaxHealth => 100,
             AttributeType.CritDamage => 100,
-            AttributeType.BlockEffectiveness => 50,
             AttributeType.HealthRegeneration => 2,
             _ => 0
         };

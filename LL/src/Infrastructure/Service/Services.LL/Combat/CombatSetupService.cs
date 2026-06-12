@@ -114,7 +114,7 @@ public class CombatSetupService : ICombatSetupService
                 entity.Name,
                 entity.ImagePath,
                 (int)entity.BaseCombatAttributes[AttributeType.MaxHealth],
-                (int)entity.BaseCombatAttributes[AttributeType.BlockEffectiveness])
+                entity.GetCurrentBarrierValue())
             );
         }
 

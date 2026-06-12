@@ -1042,46 +1042,6 @@ namespace Persistence.LL.Migrations
                     b.ToTable("EntityAttributeSnapshot");
                 });
 
-            modelBuilder.Entity("Domain.Models.Snapshots.EquippedEssenceSnapshot", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("AscensionTier")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("CharacterSnapshotId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("CurrentXp")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("EssenceDefinitionId")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
-                    b.Property<bool>("IsEvolved")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("Level")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("PlayerEssenceId")
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("SlotIndex")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CharacterSnapshotId", "SlotIndex")
-                        .IsUnique();
-
-                    b.ToTable("EquippedEssenceSnapshots");
-                });
-
             modelBuilder.Entity("Domain.Models.Snapshots.EquipmentSnapshot", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1121,6 +1081,46 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("CharacterSnapshotId");
 
                     b.ToTable("EquipmentSnapshot");
+                });
+
+            modelBuilder.Entity("Domain.Models.Snapshots.EquippedEssenceSnapshot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AscensionTier")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("CharacterSnapshotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CurrentXp")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EssenceDefinitionId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<bool>("IsEvolved")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("PlayerEssenceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("SlotIndex")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterSnapshotId", "SlotIndex")
+                        .IsUnique();
+
+                    b.ToTable("EquippedEssenceSnapshots");
                 });
 
             modelBuilder.Entity("Domain.Models.Soulstones.CharacterSoulstoneUpgrade", b =>

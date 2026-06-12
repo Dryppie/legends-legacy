@@ -108,21 +108,22 @@ public class CombatInteractionManager : ICombatInteractionManager
         absorbedByBarrier = 0;
 
         // If no barrier, just return
-        if (!target.CombatAttributes.TryGetValue(AttributeType.BlockEffectiveness, out float barrier) || barrier <= 0)
+        var barrier = target.GetCurrentBarrierValue();
+        if (barrier <= 0)
             return incomingDamage;
 
         if (incomingDamage >= barrier)
         {
             // Barrier fully consumed
             absorbedByBarrier = barrier;
-            target.CombatAttributes[AttributeType.BlockEffectiveness] = 0;
+            target.SetCurrentBarrier(0);
             return incomingDamage - barrier;
         }
         else
         {
             // Barrier partially absorbs damage, but still remains
             absorbedByBarrier = incomingDamage;
-            target.CombatAttributes[AttributeType.BlockEffectiveness] = barrier - incomingDamage;
+            target.SetCurrentBarrier(barrier - incomingDamage);
             return 0;
         }
     }

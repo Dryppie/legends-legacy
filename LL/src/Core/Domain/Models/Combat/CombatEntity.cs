@@ -34,6 +34,7 @@ public class CombatEntity
     public int NextRecoveryIn = 500; // This defines when the character regenerates health.
     public ICollection<EntityAttribute> BaseAttributes { get; set; } = [];
     public float CurrentHealth { get; private set; }
+    public float CurrentBarrier { get; private set; }
     public bool IsAlive => CurrentHealth > 0;
     public List<EquipmentInstance> Equipment { get; set; } = [];
     public List<PlayerEssence> EquippedEssences { get; set; } = [];
@@ -146,6 +147,7 @@ public class CombatEntity
         }
 
         SetCurrentHealth(GetAttributeValue(AttributeType.MaxHealth));
+        SetCurrentBarrier(0);
 
         foreach (var ability in Abilities)
         {
@@ -179,6 +181,11 @@ public class CombatEntity
         return (int)CurrentHealth;
     }
 
+    public int GetCurrentBarrierValue()
+    {
+        return (int)CurrentBarrier;
+    }
+
     public void SetCurrentHealth(float value)
     {
         CurrentHealth = Math.Clamp(value, 0, GetAttributeValue(AttributeType.MaxHealth));
@@ -187,6 +194,16 @@ public class CombatEntity
     public void AdjustCurrentHealth(float amount)
     {
         SetCurrentHealth(CurrentHealth + amount);
+    }
+
+    public void SetCurrentBarrier(float value)
+    {
+        CurrentBarrier = Math.Max(0, value);
+    }
+
+    public void AdjustCurrentBarrier(float amount)
+    {
+        SetCurrentBarrier(CurrentBarrier + amount);
     }
 
     public void SyncCurrentHealthToMax()
@@ -237,6 +254,7 @@ public class CombatEntity
         BaseCombatAttributes = new Dictionary<AttributeType, float>(entity.BaseCombatAttributes);
         CombatAttributes = new Dictionary<AttributeType, float>(entity.CombatAttributes);
         CurrentHealth = entity.CurrentHealth;
+        CurrentBarrier = entity.CurrentBarrier;
         StatusEffects = new Dictionary<StatusEffectType, int>(entity.StatusEffects);
         Statuses = [];
         SourceMonsterId = entity.SourceMonsterId;

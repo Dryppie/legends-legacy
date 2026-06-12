@@ -206,7 +206,7 @@ namespace Persistence.LL.Migrations
                 {
                     table.PrimaryKey("PK_EquippedEssenceSnapshots", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_EquippedEssenceSnapshots_CharacterSnapshots_CharacterSna~",
+                        name: "FK_EquippedEssenceSnapshots_CharacterSnapshots_CharacterSnapsh~",
                         column: x => x.CharacterSnapshotId,
                         principalTable: "CharacterSnapshots",
                         principalColumn: "Id",
@@ -1325,10 +1325,10 @@ namespace Persistence.LL.Migrations
                 name: "EntityAttributeSnapshot");
 
             migrationBuilder.DropTable(
-                name: "EquippedEssenceSnapshots");
+                name: "EquipmentSlots");
 
             migrationBuilder.DropTable(
-                name: "EquipmentSlots");
+                name: "EquippedEssenceSnapshots");
 
             migrationBuilder.DropTable(
                 name: "EssenceLoadoutSlots");

@@ -29,7 +29,6 @@ public static class EquipmentAttributeRules
             // ===== DEFENSE =====================================================
             [AttributeType.DodgeChance] = Percent(min: 1, max: 5),
             [AttributeType.BlockChance] = Percent(min: 1, max: 5),
-            [AttributeType.BlockEffectiveness] = Percent(min: 2, max: 10),
             [AttributeType.DamageReduction] = Percent(min: 2, max: 10),
 
             // ===== RECOVERY / UTILITY / STATUS / SUMMONS ======================

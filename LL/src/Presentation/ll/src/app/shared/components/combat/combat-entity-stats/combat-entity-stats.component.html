@@ -76,8 +76,9 @@
           </div>
         </div>
         <div class="text-left text-sm">
-          <div class="grid grid-cols-4 py-1 text-primary">
+          <div class="grid grid-cols-5 py-1 text-primary">
             <div class="col-start-1 col-end-3">Ability</div>
+            <div>Uses</div>
             <div>Damage</div>
             <div>Healing</div>
           </div>
@@ -85,9 +86,10 @@
             <ng-container *ngFor="let ability of stats.abilities">
               <div
                 *ngIf="ability.name"
-                class="grid grid-cols-4 p-1 odd:bg-zinc-300/5"
+                class="grid grid-cols-5 p-1 odd:bg-zinc-300/5"
               >
                 <div class="col-start-1 col-end-3">{{ ability.name }}</div>
+                <div>{{ ability.uses | number }}</div>
                 <div>{{ ability.totalDamage | number }}</div>
                 <div>{{ ability.totalHealing | number }}</div>
               </div>

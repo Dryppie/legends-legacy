@@ -34,7 +34,6 @@ export class GroupAttributesByCategoryPipe implements PipeTransform {
 
     [AttributeType.DodgeChance]: AttributeCategory.Defensive,
     [AttributeType.BlockChance]: AttributeCategory.Defensive,
-    [AttributeType.BlockEffectiveness]: AttributeCategory.Defensive,
     [AttributeType.DamageReduction]: AttributeCategory.Defensive,
 
     [AttributeType.HealingPowerPercent]: AttributeCategory.Recovery,

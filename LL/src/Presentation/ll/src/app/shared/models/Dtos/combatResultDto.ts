@@ -28,6 +28,7 @@ export interface AbilityStats {
   name: string;
   totalDamage: number;
   totalHealing: number;
+  uses: number;
   hits: number;
   crits: number;
   summons: number;

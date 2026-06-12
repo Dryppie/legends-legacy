@@ -21,7 +21,6 @@ public static class AttributeCatalog
 
             [AttributeType.DodgeChance] = new(AttributeType.DodgeChance, "Dodge chance."),
             [AttributeType.BlockChance] = new(AttributeType.BlockChance, "Block chance."),
-            [AttributeType.BlockEffectiveness] = new(AttributeType.BlockEffectiveness, "Blocked damage effectiveness."),
             [AttributeType.DamageReduction] = new(AttributeType.DamageReduction, "General damage reduction."),
 
             [AttributeType.HealingPowerPercent] = new(AttributeType.HealingPowerPercent, "Healing output percentage."),

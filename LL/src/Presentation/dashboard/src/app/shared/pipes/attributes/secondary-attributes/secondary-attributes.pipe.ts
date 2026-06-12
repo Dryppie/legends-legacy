@@ -18,7 +18,6 @@ export class SecondaryAttributesPipe implements PipeTransform {
     AttributeType.MagicPenetration,
     AttributeType.DodgeChance,
     AttributeType.BlockChance,
-    AttributeType.BlockEffectiveness,
     AttributeType.DamageReduction,
     AttributeType.HealingPowerPercent,
     AttributeType.HealthRegeneration,

@@ -154,7 +154,7 @@ public class CombatContext : ICombatContext
                 entity.NextBasicAttackIn = 300; // TODO: Turn 300 into a Constant somewhere, as it is also stored in the Entity class
             }
 
-            entity.NextBasicAttackIn -= (int)entity.CombatAttributes[AttributeType.Precision];
+            entity.NextBasicAttackIn -= /*(int)entity.CombatAttributes[AttributeType.Precision]*/ 10;
 
             EndTick(entity);
         }
@@ -219,7 +219,7 @@ public class CombatContext : ICombatContext
             Id = actor.Id,
             MaxHealth = actor.GetAttributeValue(AttributeType.MaxHealth),
             Health = actor.GetCurrentHealthValue(),
-            Barrier = actor.GetAttributeValue(AttributeType.BlockEffectiveness)
+            Barrier = actor.GetCurrentBarrierValue()
         };
 
         // Actor has cast Ability log
@@ -239,7 +239,7 @@ public class CombatContext : ICombatContext
         // Optional: log basic info
         _eventLog.Add(new CombatLogItem
         {
-            Source = def.Id,
+            Source = def.Name,
             ActorId = actor.Id,
             Timestamp = CurrentTime,
             EventType = EventType.AbilityUse,
@@ -259,12 +259,43 @@ public class CombatContext : ICombatContext
 
     private void UseBasicAttack(CombatEntity entity)
     {
+        var basicAttackSource = GetBasicAttackSourceName(entity);
+        if (!string.IsNullOrWhiteSpace(basicAttackSource))
+        {
+            _eventLog.Add(new CombatLogItem
+            {
+                Source = basicAttackSource,
+                ActorId = entity.Id,
+                Timestamp = CurrentTime,
+                EventType = EventType.AbilityUse,
+                Details = $"{entity.Name} used {basicAttackSource}",
+                CombatEntity = new SimpleCombatEntity
+                {
+                    Id = entity.Id,
+                    MaxHealth = entity.GetAttributeValue(AttributeType.MaxHealth),
+                    Health = entity.GetCurrentHealthValue(),
+                    Barrier = entity.GetCurrentBarrierValue()
+                }
+            });
+        }
+
         EventBus.Publish(new CombatEvent
         {
             Type = TriggerEvent.BasicAttack,
             Source = entity,
             CurrentTime = CurrentTime
         });
+    }
+
+    private static string GetBasicAttackSourceName(CombatEntity entity)
+    {
+        var basicAttack = entity.Abilities
+            .SelectMany(ability => ability.Definition.Triggers)
+            .Where(trigger => trigger.Event == TriggerEvent.BasicAttack)
+            .SelectMany(trigger => trigger.Actions)
+            .FirstOrDefault(action => !string.IsNullOrWhiteSpace(action.SourceName));
+
+        return basicAttack?.SourceName ?? string.Empty;
     }
 
     private void CleanupDefeatedEntities()
@@ -318,7 +349,7 @@ public class CombatContext : ICombatContext
             Id = entity.Id,
             MaxHealth = entity.GetAttributeValue(AttributeType.MaxHealth),
             Health = entity.GetCurrentHealthValue(),
-            Barrier = entity.GetAttributeValue(AttributeType.BlockEffectiveness)
+            Barrier = entity.GetCurrentBarrierValue()
         };
 
         if (combatEntity.Health < 0) combatEntity.Health = 0;
@@ -369,7 +400,7 @@ public class CombatContext : ICombatContext
         //        Id = target.Id,
         //        MaxHealth = target.GetAttributeValue(AttributeType.MaxHealth),
         //        Health = target.GetAttributeValue(AttributeType.MaxHealth),
-        //        Barrier = target.GetAttributeValue(AttributeType.BlockEffectiveness)
+        //        Barrier = target.GetCurrentBarrierValue()
         //    };
 
         //    if (combatEntity.Health < 0) combatEntity.Health = 0;

@@ -33,6 +33,14 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
             // ----- ability context -----------------------------------------------
             switch (item.EventType)
             {
+                case EventType.AbilityUse:
+                    if (string.IsNullOrWhiteSpace(item.Source))
+                        break;
+
+                    var usedAbility = entity.GetOrAddAbility(item.Source);
+                    usedAbility.Uses++;
+                    break;
+
                 case EventType.Damage:
                 case EventType.DamageOverTime:
                 case EventType.DamageCrit:
@@ -120,9 +128,9 @@ public sealed class WorkEntity
 public sealed class WorkAbility
 {
     public string Name { get; }
-    public int TotalDamage, TotalHealing, Hits, Crits, Summons, Stuns;
+    public int TotalDamage, TotalHealing, Uses, Hits, Crits, Summons, Stuns;
 
     public WorkAbility(string name) => Name = name;
 
-    public AbilityStats ToImmutable() => new(Name, TotalDamage, TotalHealing, Hits, Crits, Summons, Stuns);
+    public AbilityStats ToImmutable() => new(Name, TotalDamage, TotalHealing, Uses, Hits, Crits, Summons, Stuns);
 }

@@ -41,11 +41,6 @@
       },
       {
         "entityId": "00000000-0000-0000-0000-000000000001",
-        "attributeType": "BlockEffectiveness",
-        "value": 0
-      },
-      {
-        "entityId": "00000000-0000-0000-0000-000000000001",
         "attributeType": "Power",
         "value": 0
       },
@@ -256,11 +251,6 @@
       {
         "entityId": "00000000-0000-0000-0000-000000000002",
         "attributeType": "Spirit",
-        "value": 0
-      },
-      {
-        "entityId": "00000000-0000-0000-0000-000000000002",
-        "attributeType": "BlockEffectiveness",
         "value": 0
       },
       {
@@ -479,11 +469,6 @@
       },
       {
         "entityId": "00000000-0000-0000-0000-000000000003",
-        "attributeType": "BlockEffectiveness",
-        "value": 0
-      },
-      {
-        "entityId": "00000000-0000-0000-0000-000000000003",
         "attributeType": "Power",
         "value": 0
       },
@@ -694,11 +679,6 @@
       {
         "entityId": "00000000-0000-0000-0000-000000000004",
         "attributeType": "Spirit",
-        "value": 0
-      },
-      {
-        "entityId": "00000000-0000-0000-0000-000000000004",
-        "attributeType": "BlockEffectiveness",
         "value": 0
       },
       {
@@ -917,11 +897,6 @@
       },
       {
         "entityId": "00000000-0000-0000-0000-000000000005",
-        "attributeType": "BlockEffectiveness",
-        "value": 0
-      },
-      {
-        "entityId": "00000000-0000-0000-0000-000000000005",
         "attributeType": "Power",
         "value": 0
       },
@@ -1132,11 +1107,6 @@
       {
         "entityId": "00000000-0000-0000-0000-000000000006",
         "attributeType": "Spirit",
-        "value": 0
-      },
-      {
-        "entityId": "00000000-0000-0000-0000-000000000006",
-        "attributeType": "BlockEffectiveness",
         "value": 0
       },
       {
@@ -1355,11 +1325,6 @@
       },
       {
         "entityId": "00000000-0000-0000-0000-000000000007",
-        "attributeType": "BlockEffectiveness",
-        "value": 0
-      },
-      {
-        "entityId": "00000000-0000-0000-0000-000000000007",
         "attributeType": "Power",
         "value": 0
       },
@@ -1570,11 +1535,6 @@
       {
         "entityId": "00000000-0000-0000-0000-000000000008",
         "attributeType": "Spirit",
-        "value": 0
-      },
-      {
-        "entityId": "00000000-0000-0000-0000-000000000008",
-        "attributeType": "BlockEffectiveness",
         "value": 0
       },
       {
@@ -1793,11 +1753,6 @@
       },
       {
         "entityId": "00000000-0000-0000-0000-000000000009",
-        "attributeType": "BlockEffectiveness",
-        "value": 0
-      },
-      {
-        "entityId": "00000000-0000-0000-0000-000000000009",
         "attributeType": "Power",
         "value": 0
       },
@@ -2008,11 +1963,6 @@
       {
         "entityId": "00000000-0000-0000-0000-000000000010",
         "attributeType": "Spirit",
-        "value": 0
-      },
-      {
-        "entityId": "00000000-0000-0000-0000-000000000010",
-        "attributeType": "BlockEffectiveness",
         "value": 0
       },
       {
@@ -2231,11 +2181,6 @@
       },
       {
         "entityId": "00000000-0000-0000-0000-000000000011",
-        "attributeType": "BlockEffectiveness",
-        "value": 0
-      },
-      {
-        "entityId": "00000000-0000-0000-0000-000000000011",
         "attributeType": "Power",
         "value": 0
       },
@@ -2446,11 +2391,6 @@
       {
         "entityId": "00000000-0000-0000-0000-000000000012",
         "attributeType": "Spirit",
-        "value": 0
-      },
-      {
-        "entityId": "00000000-0000-0000-0000-000000000012",
-        "attributeType": "BlockEffectiveness",
         "value": 0
       },
       {
@@ -2669,11 +2609,6 @@
       },
       {
         "entityId": "00000000-0000-0000-0000-000000000013",
-        "attributeType": "BlockEffectiveness",
-        "value": 0
-      },
-      {
-        "entityId": "00000000-0000-0000-0000-000000000013",
         "attributeType": "Power",
         "value": 0
       },
@@ -2884,11 +2819,6 @@
       {
         "entityId": "00000000-0000-0000-0000-000000000014",
         "attributeType": "Spirit",
-        "value": 0
-      },
-      {
-        "entityId": "00000000-0000-0000-0000-000000000014",
-        "attributeType": "BlockEffectiveness",
         "value": 0
       },
       {

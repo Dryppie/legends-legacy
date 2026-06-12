@@ -22,7 +22,6 @@ public static class MonsterBaseStats
     public const float BaseDamageReduction = 0.0f;
     public const float BaseDodgeChance = 0.0f;
     public const float BaseBlockChance = 0.0f;
-    public const float BaseBlockEffectiveness = 50.0f;
     public const float BaseHealingPowerPercent = 0.0f;
     public const float BaseLifeSteal = 0.0f;
     public const float BaseCooldown = 0.0f;
@@ -48,7 +47,6 @@ public static class MonsterBaseStats
                 { AttributeType.MagicPenetration, BaseMagicPenetration },
                 { AttributeType.DodgeChance, BaseDodgeChance },
                 { AttributeType.BlockChance, BaseBlockChance },
-                { AttributeType.BlockEffectiveness, BaseBlockEffectiveness },
                 { AttributeType.DamageReduction, BaseDamageReduction },
                 { AttributeType.HealingPowerPercent, BaseHealingPowerPercent },
                 { AttributeType.HealthRegeneration, BaseHealthRegeneration },
