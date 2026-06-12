@@ -1,4 +1,5 @@
 import { AttributeModifier } from './Dtos/attributesDto';
+import { EssenceEffectDto } from './essence-system';
 import { EffectTag } from './enums/effectType';
 import { Targeting } from './enums/targeting';
 
@@ -18,6 +19,7 @@ export interface Ability {
   effectTags: EffectTag[];
   targeting: Targeting[];
   cooldown: number;
+  effects: EssenceEffectDto[];
 }
 
 export enum AttackType {

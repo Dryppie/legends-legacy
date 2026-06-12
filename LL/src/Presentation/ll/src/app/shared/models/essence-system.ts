@@ -39,10 +39,18 @@ export interface EssenceEffectDto {
   id: string;
   type: string;
   target: string;
+  baseValue?: number;
   currentValue: number;
   attribute?: string | null;
   status?: string | null;
   durationSeconds?: number | null;
+  scaling?: EssenceEffectScalingDto[];
+  nestedEffects?: EssenceEffectDto[];
+}
+
+export interface EssenceEffectScalingDto {
+  attribute: string;
+  coefficient: number;
 }
 
 export interface EssenceEvolutionDto {

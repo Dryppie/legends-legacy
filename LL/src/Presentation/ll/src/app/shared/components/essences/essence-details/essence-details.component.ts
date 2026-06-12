@@ -3,6 +3,7 @@ import { Essence } from '../../../models/essence';
 import { EssenceDescriptionComponent } from '../essence-description/essence-description.component';
 import { TicksToSecondsPipe } from '../../../pipes/ticks-to-seconds/ticks-to-seconds.pipe';
 import { AttributeTypeFormatPipe } from '../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
+import { AttributeValueFormatPipe } from '../../../pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 
 @Component({
@@ -12,6 +13,7 @@ import { NgClass, NgFor, NgIf } from '@angular/common';
     EssenceDescriptionComponent,
     TicksToSecondsPipe,
     AttributeTypeFormatPipe,
+    AttributeValueFormatPipe,
     NgIf,
     NgFor,
     NgClass,

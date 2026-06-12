@@ -59,6 +59,7 @@ export function essenceItemToEssence(item: EssenceItem): Essence {
         effectTags: [],
         targeting: [],
         cooldown: 0,
+        effects: [],
       },
       passive: {
         name: 'Soul Archive',
@@ -68,6 +69,7 @@ export function essenceItemToEssence(item: EssenceItem): Essence {
         effectTags: [],
         targeting: [],
         cooldown: 0,
+        effects: [],
       },
       attributeModifiers: [],
     }

@@ -8,6 +8,7 @@
     <div class="font-bold">Active - {{ essence.active.name }}</div>
     <app-essence-description
       [description]="essence.active.description"
+      [effects]="essence.active.effects"
     ></app-essence-description>
     <p>
       Cooldown:
@@ -33,6 +34,7 @@
     <div class="font-bold">Passive - {{ essence.passive.name }}</div>
     <app-essence-description
       [description]="essence.passive.description"
+      [effects]="essence.passive.effects"
     ></app-essence-description>
     <span class="flex" *ngIf="essence.passive.attackTypes?.length">
       [<ng-container *ngFor="let tag of essence.passive.attackTypes">
@@ -55,7 +57,7 @@
     <div class="font-bold">Attributes:</div>
     <ul class="ml-5 list-disc text-sm">
       <li *ngFor="let attr of essence.attributeModifiers">
-        {{ attr.amount > 0 ? "+" : "" }}{{ attr.amount }}
+        {{ attr.amount | attributeValueFormat: attr.attributeType : true }}
         {{ attr.attributeType | attributeTypeFormat }}
       </li>
     </ul>

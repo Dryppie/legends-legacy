@@ -6,7 +6,6 @@ public static class EssenceProgressionConstants
 {
     public const int BaseXpPerLevel = 100;
     public const double XpGrowth = 1.18;
-    public const double AbilityValueGrowthPerLevel = 0.04;
     public const double AttributeBonusGrowthPerLevel = 0.04;
     public const double ActiveCooldownReductionPerAscensionTier = 0.05;
     public const double MaxActiveCooldownReduction = 0.15;
@@ -29,9 +28,7 @@ public static class EssenceProgressionConstants
 
     public static double ScaleAbilityValue(double baseValue, int level, int ascensionTier = 0, string? effectType = null)
     {
-        var multiplier = 1
-            + AbilityValueGrowthPerLevel * Math.Max(0, level - 1)
-            + GetTierValueGrowth(effectType) * Math.Max(0, ascensionTier);
+        var multiplier = 1 + GetTierValueGrowth(effectType) * Math.Max(0, ascensionTier);
         return baseValue * multiplier;
     }
 

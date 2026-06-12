@@ -1,33 +1,16 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Essence } from '../../../../models/essence';
-import { TicksToSecondsPipe } from '../../../../pipes/ticks-to-seconds/ticks-to-seconds.pipe';
-import { NgFor } from '@angular/common';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { AbilityTooltipContainerDirective } from '../../../../directives/ability-tooltip-container/ability-tooltip-container.directive';
+import { EssenceDetailsComponent } from '../../../essences/essence-details/essence-details.component';
 
 @Component({
   selector: 'app-essence-modal',
   standalone: true,
-  imports: [TicksToSecondsPipe, NgFor, AbilityTooltipContainerDirective],
+  imports: [EssenceDetailsComponent],
   templateUrl: './essence-modal.component.html',
 })
-export class EssenceModalComponent implements OnInit {
+export class EssenceModalComponent {
   @Input() essence!: Essence;
   @Output() close = new EventEmitter<void>();
-  safeActiveDescription!: SafeHtml;
-  safePassiveDescription!: SafeHtml;
-
-  constructor(private sanitizer: DomSanitizer) {}
-
-  ngOnInit() {
-    this.safeActiveDescription = this.sanitizer.bypassSecurityTrustHtml(
-      this.essence.active.description,
-    );
-
-    this.safePassiveDescription = this.sanitizer.bypassSecurityTrustHtml(
-      this.essence.passive.description,
-    );
-  }
 
   onClose() {
     this.close.emit();

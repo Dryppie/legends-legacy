@@ -199,9 +199,11 @@
                 Active
               </span>
             </div>
-            <p class="text-sm text-zinc-300">
-              {{ essence.activeAbility.description }}
-            </p>
+            <app-essence-description
+              class="text-sm text-zinc-300"
+              [description]="essence.activeAbility.description"
+              [effects]="essence.activeAbility.effects"
+            ></app-essence-description>
             <p class="mt-2 text-xs text-zinc-400">
               Cooldown: {{ essence.activeAbility.cooldownSeconds }}s
             </p>
@@ -219,9 +221,11 @@
                 Passive
               </span>
             </div>
-            <p class="text-sm text-zinc-300">
-              {{ essence.passiveAbility.description }}
-            </p>
+            <app-essence-description
+              class="text-sm text-zinc-300"
+              [description]="essence.passiveAbility.description"
+              [effects]="essence.passiveAbility.effects"
+            ></app-essence-description>
           </article>
         </div>
 
@@ -236,10 +240,13 @@
               class="flex items-center justify-between rounded border border-light_gray/50 px-2 py-1.5 text-sm"
               *ngFor="let bonus of essence.currentAttributeBonuses"
             >
-              <span class="text-zinc-300">{{ bonus.attribute }}</span>
-              <span class="text-primary"
-                >+{{ bonus.currentValue | number: "1.0-2" }}</span
-              >
+              <span class="text-zinc-300">
+                {{ bonus.attribute | attributeTypeFormat }}
+              </span>
+              <span class="text-primary">{{
+                bonus.currentValue
+                  | attributeValueFormat: bonus.attribute : true
+              }}</span>
             </div>
           </div>
         </div>

@@ -21,17 +21,20 @@ export class AbilityTooltipContainerDirective implements OnDestroy {
     private overlay: Overlay,
     private injector: Injector,
   ) {
-    // delegate pointer‑enter to any .dmg / .heal child
+    // delegate pointer-enter to generated ability value spans.
     this.sub.add(
       fromEvent<PointerEvent>(this.host.nativeElement, 'pointerover')
         .pipe(
           filter(
-            (ev) => (ev.target as HTMLElement).closest('.dmg, .heal') !== null,
+            (ev) =>
+              (ev.target as HTMLElement).closest('.dmg, .heal, .mod') !== null,
           ),
         )
         .subscribe((ev) =>
           this.open(
-            (ev.target as HTMLElement).closest('.dmg, .heal') as HTMLElement,
+            (ev.target as HTMLElement).closest(
+              '.dmg, .heal, .mod',
+            ) as HTMLElement,
           ),
         ),
     );
@@ -48,7 +51,7 @@ export class AbilityTooltipContainerDirective implements OnDestroy {
   private open(target: HTMLElement): void {
     /* ─── 1. Read & validate the data-* attributes ───────────────────── */
 
-    const { base, bonus, display, attr, scale, attrvalue } =
+    const { base, bonus, display, attr, scale, attrvalue, unit, range } =
       target.dataset as Record<string, string>;
 
     if (base == null || bonus == null || display == null || attrvalue == null) {
@@ -66,6 +69,8 @@ export class AbilityTooltipContainerDirective implements OnDestroy {
       total: display,
       attr: attr ?? null,
       attrValue: Number(attrvalue),
+      unit: unit ?? '',
+      hasRange: range === 'true',
     };
     /* ─── 2. Position the overlay relative to the span  ──────────────── */
 

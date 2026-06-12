@@ -4,10 +4,13 @@ import { Component, computed, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { EssenceStateService } from '../../../../core/services/api/essences/essence-state.service';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
+import { EssenceDescriptionComponent } from '../../../../shared/components/essences/essence-description/essence-description.component';
 import {
   EssenceLoadoutDto,
   PlayerEssenceDto,
 } from '../../../../shared/models/essence-system';
+import { AttributeTypeFormatPipe } from '../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
+import { AttributeValueFormatPipe } from '../../../../shared/pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 import { EssencesAbsorbComponent } from './essences-absorb/essences-absorb.component';
 
 type ArchiveFilter = 'all' | 'favorites' | 'attuned' | 'inactive';
@@ -21,6 +24,9 @@ type ArchiveSort = 'name' | 'level' | 'tier';
     ScrollingModule,
     FormsModule,
     DefaultHeaderComponent,
+    EssenceDescriptionComponent,
+    AttributeTypeFormatPipe,
+    AttributeValueFormatPipe,
     EssencesAbsorbComponent,
   ],
   templateUrl: './essences.component.html',

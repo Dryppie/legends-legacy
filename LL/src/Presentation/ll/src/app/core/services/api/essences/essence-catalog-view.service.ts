@@ -89,6 +89,7 @@ export class EssenceCatalogViewService {
       effectTags: this.filterEnumValues(tags, EffectTag),
       targeting: ability.targeting ? [ability.targeting as Targeting] : [],
       cooldown: ability.cooldownSeconds * 10,
+      effects: ability.effects ?? [],
     };
   }
 
