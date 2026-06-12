@@ -202,8 +202,9 @@ export class EssenceStateService {
       tap((response) => {
         if (!response.succeeded) return;
 
+        const nextInventoryItemId = this.getNextAbsorbableInventoryEssenceId(item);
         this.inventoryState.decrementItem(inventoryItemId, 1);
-        this._selectedInventoryItemId.set(null);
+        this._selectedInventoryItemId.set(nextInventoryItemId);
         this.refresh();
       }),
     );
@@ -333,5 +334,30 @@ export class EssenceStateService {
 
   private getEssenceDefinitionId(inventoryItem: InventoryItem): string {
     return (inventoryItem.itemInstance.itemBase as EssenceItem).essenceDefinitionId;
+  }
+
+  private getNextAbsorbableInventoryEssenceId(
+    absorbedItem: InventoryItem,
+  ): string | null {
+    const items = this.inventoryEssences();
+    const currentIndex = items.findIndex(
+      (item) => item.itemInstance.id === absorbedItem.itemInstance.id,
+    );
+    const absorbedEssenceDefinitionId = this.getEssenceDefinitionId(absorbedItem);
+
+    const orderedCandidates = [
+      ...items.slice(currentIndex + 1),
+      ...items.slice(0, Math.max(currentIndex, 0)),
+    ];
+
+    return (
+      orderedCandidates.find((item) => {
+        const essenceDefinitionId = this.getEssenceDefinitionId(item);
+        return (
+          essenceDefinitionId !== absorbedEssenceDefinitionId &&
+          !this.absorbedEssenceDefinitionIds().has(essenceDefinitionId)
+        );
+      })?.itemInstance.id ?? null
+    );
   }
 }

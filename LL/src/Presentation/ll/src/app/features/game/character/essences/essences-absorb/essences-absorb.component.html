@@ -6,15 +6,20 @@
     <!-- ESSENCE DESCRIPTION -->
     <div class="rounded-lg border border-light_gray bg-texture p-4">
       <ng-container
-        *ngIf="essenceState.selectedInventoryEssence() as selectedEssence; else noEssence"
+        *ngIf="
+          essenceState.selectedInventoryEssence() as selectedEssence;
+          else noEssence
+        "
       >
         <app-essence-details [essence]="selectedEssence"></app-essence-details>
         <div class="mt-4 flex items-center justify-between gap-2">
-          <ng-container *ngIf="!essenceState.isSelectedInventoryEssenceAbsorbed(); else essenceIsAbsorbed">
-            <app-regular-button
-              (pressed)="absorb()"
-              text="Absorb essence"
-            >
+          <ng-container
+            *ngIf="
+              !essenceState.isSelectedInventoryEssenceAbsorbed();
+              else essenceIsAbsorbed
+            "
+          >
+            <app-regular-button (pressed)="absorb()" text="Absorb essence">
             </app-regular-button>
           </ng-container>
           <ng-template #essenceIsAbsorbed>
@@ -42,6 +47,7 @@
     <app-selectable-list-filter
       [storageKey]="'essences-absorb'"
       [items]="essenceState.inventoryEssences()"
+      [selectedItem]="essenceState.selectedInventoryItem()"
       [filterOptions]="essenceFilters"
       (select)="selectEssence($event)"
     >
@@ -66,7 +72,9 @@
     (click)="$event.stopPropagation()"
   >
     <div class="mb-4">
-      <h3 class="text-primary">Shatter {{ essenceState.selectedInventoryEssence()?.name }}</h3>
+      <h3 class="text-primary">
+        Shatter {{ essenceState.selectedInventoryEssence()?.name }}
+      </h3>
       <label class="italic text-zinc-300"
         >Dismantle one Unbound Essence into Essence Dust.</label
       >
