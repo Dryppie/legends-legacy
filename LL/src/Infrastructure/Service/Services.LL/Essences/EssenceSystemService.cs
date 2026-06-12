@@ -24,7 +24,7 @@ using Domain.Models.Items.EssenceItems;
 
 namespace Services.LL.Essences;
 
-public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvider, IEssenceAbilityProvider, IEssenceResonanceService
+public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvider, IEssenceAbilityProvider, IEssenceCombatLoadoutResolver, IEssenceResonanceService
 {
     private const string EssenceDustItemId = "soul_dust";
     private readonly IEssenceRepository _essences;
@@ -261,32 +261,13 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
     public async Task<IReadOnlyList<AttributeModifierBase>> GetAttunedAttributeModifiersAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        var activeSlots = await GetActiveSlotsAsync(characterId, cancellationToken);
-        return GetAttunedAttributeModifiers(activeSlots
-            .Select(x => x.PlayerEssence)
-            .Where(x => x is not null)
-            .Cast<PlayerEssence>());
+        var loadout = await ResolveAsync(characterId, cancellationToken);
+        return loadout.AttributeModifiers;
     }
 
     public IReadOnlyList<AttributeModifierBase> GetAttunedAttributeModifiers(IEnumerable<PlayerEssence> essences)
     {
-        var result = new List<AttributeModifierBase>();
-        foreach (var essence in essences)
-        {
-            var definition = _definitions.GetById(essence.EssenceDefinitionId);
-            if (definition is null) continue;
-
-            foreach (var bonus in GetAttributeBonusDefinitions(definition, essence))
-            {
-                result.Add(new EssenceAttributeModifier(
-                    bonus.Attribute,
-                    (float)GetAttributeBonusValue(bonus, essence),
-                    bonus.ModifierKind == EssenceModifierKind.Percent
-                        ? ModifierType.Additive
-                        : ModifierType.Flat));
-            }
-        }
-        return result;
+        return Resolve(Guid.Empty, essences).AttributeModifiers;
     }
 
     public async Task<IReadOnlyList<AbilityDefinition>> GetAttunedAbilitiesAsync(Guid characterId, CancellationToken cancellationToken)
@@ -303,31 +284,79 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
     public async Task<IReadOnlyList<CombatAbilityInstance>> GetAttunedCombatAbilitiesAsync(Guid characterId, CancellationToken cancellationToken)
     {
-        var activeSlots = await GetActiveSlotsAsync(characterId, cancellationToken);
-        return GetAttunedCombatAbilities(activeSlots
-            .Select(x => x.PlayerEssence)
-            .Where(x => x is not null)
-            .Cast<PlayerEssence>());
+        var loadout = await ResolveAsync(characterId, cancellationToken);
+        return loadout.Abilities.Select(x => x.Ability).ToList();
     }
 
     public IReadOnlyList<CombatAbilityInstance> GetAttunedCombatAbilities(IEnumerable<PlayerEssence> essences)
     {
-        var abilities = new List<CombatAbilityInstance>();
+        return Resolve(Guid.Empty, essences).Abilities.Select(x => x.Ability).ToList();
+    }
+
+    public async Task<EssenceCombatLoadout> ResolveAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        var activeSlots = await GetActiveSlotsAsync(characterId, cancellationToken);
+        var equippedEssences = activeSlots
+            .Select(x => x.PlayerEssence)
+            .Where(x => x is not null)
+            .Cast<PlayerEssence>()
+            .ToList();
+
+        return Resolve(characterId, equippedEssences);
+    }
+
+    public EssenceCombatLoadout Resolve(Guid characterId, IEnumerable<PlayerEssence> equippedEssences)
+    {
+        var essences = equippedEssences.ToList();
+        var activeAbilities = new List<ResolvedCombatAbility>();
+        var passiveAbilities = new List<ResolvedCombatAbility>();
+        var attributeModifiers = new List<AttributeModifierBase>();
+        var tags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
         foreach (var essence in essences)
         {
             var definition = _definitions.GetById(essence.EssenceDefinitionId);
             if (definition is null) continue;
 
+            foreach (var tag in GetEssenceTags(definition, essence))
+                tags.Add(tag);
+
+            foreach (var bonus in GetAttributeBonusDefinitions(definition, essence))
+            {
+                attributeModifiers.Add(new EssenceAttributeModifier(
+                    bonus.Attribute,
+                    (float)GetAttributeBonusValue(bonus, essence),
+                    bonus.ModifierKind == EssenceModifierKind.Percent
+                        ? ModifierType.Additive
+                        : ModifierType.Flat));
+            }
+
             if (!string.IsNullOrWhiteSpace(definition.ActiveAbility.Id))
-                abilities.Add(CreateCombatAbilityInstance(
-                    MapCombatAbility(ApplyEvolutionModifiers(definition.ActiveAbility, definition.Evolution.ActiveAbilityModifiers, essence), essence, CombatAbilityType.Active)));
+            {
+                activeAbilities.Add(CreateResolvedCombatAbility(
+                    definition,
+                    ApplyEvolutionModifiers(definition.ActiveAbility, definition.Evolution.ActiveAbilityModifiers, essence),
+                    essence,
+                    CombatAbilityType.Active));
+            }
 
             if (!string.IsNullOrWhiteSpace(definition.PassiveAbility.Id))
-                abilities.Add(CreateCombatAbilityInstance(
-                    MapCombatAbility(ApplyEvolutionModifiers(definition.PassiveAbility, definition.Evolution.PassiveAbilityModifiers, essence), essence, CombatAbilityType.Passive)));
+            {
+                passiveAbilities.Add(CreateResolvedCombatAbility(
+                    definition,
+                    ApplyEvolutionModifiers(definition.PassiveAbility, definition.Evolution.PassiveAbilityModifiers, essence),
+                    essence,
+                    CombatAbilityType.Passive));
+            }
         }
 
-        return abilities;
+        return new EssenceCombatLoadout(
+            characterId,
+            essences,
+            activeAbilities,
+            passiveAbilities,
+            attributeModifiers,
+            tags);
     }
 
     public async Task<EssenceDropRollResult> RollMonsterEssenceDropAsync(Guid characterId, string monsterId, bool eligible, CancellationToken cancellationToken)
@@ -428,6 +457,9 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     private static IEnumerable<EssenceAttributeBonusDefinition> GetAttributeBonusDefinitions(EssenceDefinition definition, PlayerEssence essence) =>
         definition.AttributeBonuses.Concat(essence.IsEvolved ? definition.Evolution.AttributeModifierChanges : []);
 
+    private static IEnumerable<string> GetEssenceTags(EssenceDefinition definition, PlayerEssence essence) =>
+        definition.Tags.Concat(essence.IsEvolved ? definition.Evolution.AddsTags : []);
+
     private static double GetAttributeBonusValue(EssenceAttributeBonusDefinition bonus, PlayerEssence essence) =>
         bonus.BaseValue + bonus.PerLevel * Math.Max(0, essence.Level - 1) + bonus.PerAscensionTier * essence.AscensionTier;
 
@@ -472,6 +504,30 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         var instance = new CombatAbilityInstance(definition);
         if (definition.Type == CombatAbilityType.Passive) instance.RemainingTimeUntilUse = 0;
         return instance;
+    }
+
+    private ResolvedCombatAbility CreateResolvedCombatAbility(
+        EssenceDefinition definition,
+        AbilityDefinition ability,
+        PlayerEssence essence,
+        CombatAbilityType type)
+    {
+        var combatDefinition = MapCombatAbility(ability, essence, type);
+        var instance = CreateCombatAbilityInstance(combatDefinition);
+        var tags = new HashSet<string>(GetEssenceTags(definition, essence), StringComparer.OrdinalIgnoreCase);
+
+        foreach (var tag in ability.Tags)
+            tags.Add(tag);
+
+        return new ResolvedCombatAbility(
+            ability.Id,
+            essence.Id,
+            essence.EssenceDefinitionId,
+            type.ToString(),
+            essence.Level,
+            tags,
+            combatDefinition.Cooldown,
+            instance);
     }
 
     private static AbilityDefinition ApplyEvolutionModifiers(

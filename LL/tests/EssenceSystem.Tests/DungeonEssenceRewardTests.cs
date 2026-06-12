@@ -6,6 +6,7 @@ using Domain.Models.Items;
 using Domain.Models.LootTables;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
+using Persistence.LL.Repositories.Items;
 using Services.LL.Combat.Layers.Rewards.Dungeon;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Interfaces.Combat.Reward.Dungeon;
@@ -31,9 +32,9 @@ public sealed class DungeonEssenceRewardTests
         var applier = new DungeonCompletionRewardApplier(
             new SingleDungeonDefinitions(new DungeonDefinition { Id = "dungeon.tier_1", Tier = 1 }),
             new EmptyLootTableRepository(),
+            new ItemBaseRepository(db),
             new EmptyLootService(),
-            pendingRewards,
-            db);
+            pendingRewards);
 
         await applier.ApplyAsync(new() { Id = Guid.NewGuid(), DungeonDefinitionId = "dungeon.tier_1" }, CancellationToken.None);
 

@@ -12,19 +12,16 @@ namespace Services.LL.Combat;
 public class CombatSetupService : ICombatSetupService
 {
     private readonly ICreatureScaler _creatureScaler;
-    private readonly IEssenceBonusProvider _essenceBonusProvider;
-    private readonly IEssenceAbilityProvider _essenceAbilityProvider;
+    private readonly IEssenceCombatLoadoutResolver _essenceCombatLoadoutResolver;
     private readonly IEssenceDefinitionRepository _essenceDefinitions;
 
     public CombatSetupService(
         ICreatureScaler creatureScaler,
-        IEssenceBonusProvider essenceBonusProvider,
-        IEssenceAbilityProvider essenceAbilityProvider,
+        IEssenceCombatLoadoutResolver essenceCombatLoadoutResolver,
         IEssenceDefinitionRepository essenceDefinitions)
     {
         _creatureScaler = creatureScaler;
-        _essenceBonusProvider = essenceBonusProvider;
-        _essenceAbilityProvider = essenceAbilityProvider;
+        _essenceCombatLoadoutResolver = essenceCombatLoadoutResolver;
         _essenceDefinitions = essenceDefinitions;
     }
 
@@ -86,11 +83,11 @@ public class CombatSetupService : ICombatSetupService
     {
         foreach (var entity in entities)
         {
-            var essenceModifiers = entity.HasEquippedEssenceSnapshot
-                ? _essenceBonusProvider.GetAttunedAttributeModifiers(entity.EquippedEssences)
-                : await _essenceBonusProvider.GetAttunedAttributeModifiersAsync(entity.OriginalId, CancellationToken.None);
+            var essenceLoadout = entity.HasEquippedEssenceSnapshot
+                ? _essenceCombatLoadoutResolver.Resolve(entity.OriginalId, entity.EquippedEssences)
+                : await _essenceCombatLoadoutResolver.ResolveAsync(entity.OriginalId, CancellationToken.None);
 
-            foreach (var modifier in essenceModifiers)
+            foreach (var modifier in essenceLoadout.AttributeModifiers)
             {
                 if (entity.BaseAttributes.All(x => x.AttributeType != modifier.AttributeType))
                     entity.BaseAttributes.Add(new EntityAttribute { AttributeType = modifier.AttributeType, Value = 0 });
@@ -98,11 +95,10 @@ public class CombatSetupService : ICombatSetupService
                 entity.TemporaryModifiers.Add(modifier);
             }
 
-            var essenceAbilities = entity.HasEquippedEssenceSnapshot
-                ? _essenceAbilityProvider.GetAttunedCombatAbilities(entity.EquippedEssences)
-                : await _essenceAbilityProvider.GetAttunedCombatAbilitiesAsync(entity.OriginalId, CancellationToken.None);
+            foreach (var tag in essenceLoadout.Tags)
+                entity.Tags.Add(tag);
 
-            entity.Abilities.AddRange(essenceAbilities);
+            entity.Abilities.AddRange(essenceLoadout.Abilities.Select(x => x.Ability));
 
             AttributeCalculator.CalculateBaseCombatAttributes(entity);
         }

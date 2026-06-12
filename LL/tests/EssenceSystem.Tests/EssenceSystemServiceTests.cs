@@ -19,6 +19,9 @@ using Domain.Models.Items.EssenceItems;
 using Domain.Models.Regions.Areas;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL;
+using Persistence.LL.Repositories.Essences;
+using Persistence.LL.Repositories.Inventories;
+using Persistence.LL.Repositories.Items;
 using Services.LL.Combat;
 using Services.LL.Essences;
 using Services.LL.Interfaces;
@@ -72,13 +75,13 @@ public sealed class EssenceSystemServiceTests
         var service = CreateService(db);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            service.SaveLoadoutAsync(characterId, new SaveEssenceLoadoutDto(null, "Bad", [new(0, Guid.NewGuid())]), CancellationToken.None));
+            service.SaveLoadoutAsync(characterId, new SaveEssenceLoadoutRequest(null, "Bad", [new(0, Guid.NewGuid())]), CancellationToken.None));
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            service.SaveLoadoutAsync(characterId, new SaveEssenceLoadoutDto(null, "Duplicate", [new(0, absorbedId), new(1, absorbedId)]), CancellationToken.None));
+            service.SaveLoadoutAsync(characterId, new SaveEssenceLoadoutRequest(null, "Duplicate", [new(0, absorbedId), new(1, absorbedId)]), CancellationToken.None));
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            service.SaveLoadoutAsync(characterId, new SaveEssenceLoadoutDto(null, "Locked", [new(1, absorbedId)]), CancellationToken.None));
+            service.SaveLoadoutAsync(characterId, new SaveEssenceLoadoutRequest(null, "Locked", [new(1, absorbedId)]), CancellationToken.None));
     }
 
     [Fact]
@@ -100,7 +103,7 @@ public sealed class EssenceSystemServiceTests
         var service = CreateService(db);
 
         var bonuses = await service.GetAttunedAttributeModifiersAsync(characterId, CancellationToken.None);
-        await service.GrantCombatXpToEquippedEssencesAsync(characterId, 50, CancellationToken.None);
+        await service.GrantCombatXpToAttunedEssencesAsync(characterId, 50, CancellationToken.None);
 
         var attackPowerBonus = Assert.Single(bonuses, x => x.AttributeType == AttributeType.Power);
         Assert.Equal(2, attackPowerBonus.Amount);
@@ -218,6 +221,41 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
+    public async Task Resolve_combat_loadout_exposes_attuned_essence_abilities_bonuses_and_tags()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db, level: 20);
+        var attunedId = await AddPlayerEssenceAsync(db, characterId, "essence.test", level: 3);
+        await AddPlayerEssenceAsync(db, characterId, "essence.other", level: 3);
+        db.PlayerEssences.Single(x => x.Id == attunedId).AscensionTier = 1;
+        db.PlayerEssences.Single(x => x.Id == attunedId).IsEvolved = true;
+        db.EssenceLoadouts.Add(new EssenceLoadout
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            Name = "Active",
+            IsActive = true,
+            Slots = [new EssenceLoadoutSlot { Id = Guid.NewGuid(), SlotIndex = 0, PlayerEssenceId = attunedId }]
+        });
+        await db.SaveChangesAsync();
+        var service = CreateService(db);
+
+        var loadout = await service.ResolveAsync(characterId, CancellationToken.None);
+
+        Assert.Single(loadout.EquippedEssences);
+        Assert.Single(loadout.ActiveAbilities);
+        Assert.Single(loadout.PassiveAbilities);
+        Assert.Single(loadout.AttributeModifiers);
+        Assert.Contains("Species.Beast", loadout.Tags);
+        Assert.Contains("Mechanic.Execute", loadout.Tags);
+        Assert.Equal("essence.test.active", loadout.ActiveAbilities.Single().AbilityDefinitionId);
+        Assert.Equal(attunedId, loadout.ActiveAbilities.Single().SourcePlayerEssenceId);
+        Assert.Equal(3, loadout.ActiveAbilities.Single().EssenceLevel);
+        Assert.Equal(180, loadout.ActiveAbilities.Single().Cooldown);
+        Assert.Equal(14, loadout.AttributeModifiers.Single().Amount);
+    }
+
+    [Fact]
     public async Task Attuned_combat_abilities_map_reusable_effect_and_condition_primitives()
     {
         await using var db = CreateDb();
@@ -258,8 +296,7 @@ public sealed class EssenceSystemServiceTests
         definition.Tags = ["Species.Beast", "Role.Support", "Element.Physical"];
         var service = new CombatSetupService(
             new NoopCreatureScaler(),
-            new EmptyEssenceBonusProvider(),
-            new EmptyEssenceAbilityProvider(),
+            new EmptyEssenceCombatLoadoutResolver(),
             new SingleDefinitionRepository(definition));
 
         var entities = service.CreateCreatureCombatEntities([new Creature { Name = "Utility Beast" }], new Area());
@@ -268,6 +305,44 @@ public sealed class EssenceSystemServiceTests
         Assert.Equal("monster.utility_beast", entity.SourceMonsterId);
         Assert.Contains("Species.Beast", entity.Tags);
         Assert.Contains("Role.Support", entity.Tags);
+    }
+
+    [Fact]
+    public async Task PrepareEntitiesForCombat_applies_essence_loadout_to_player_combat_state()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db, level: 20);
+        var essenceId = await AddPlayerEssenceAsync(db, characterId, "essence.test", level: 2);
+        db.EssenceLoadouts.Add(new EssenceLoadout
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            Name = "Active",
+            IsActive = true,
+            Slots = [new EssenceLoadoutSlot { Id = Guid.NewGuid(), SlotIndex = 0, PlayerEssenceId = essenceId }]
+        });
+        var character = db.Characters.Single(x => x.Id == characterId);
+        character.BaseAttributes =
+        [
+            new EntityAttribute { AttributeType = AttributeType.MaxHealth, Value = 100 },
+            new EntityAttribute { AttributeType = AttributeType.Power, Value = 10 },
+            new EntityAttribute { AttributeType = AttributeType.Precision, Value = 10 },
+            new EntityAttribute { AttributeType = AttributeType.Spirit, Value = 10 }
+        ];
+        await db.SaveChangesAsync();
+        var essenceService = CreateService(db);
+        var setup = new CombatSetupService(
+            new NoopCreatureScaler(),
+            essenceService,
+            new FakeDefinitionRepository());
+        var combatEntity = setup.CreatePlayerCombatEntities([character]).Single();
+
+        await setup.PrepareEntitiesForCombat([combatEntity]);
+
+        Assert.Contains(combatEntity.Abilities, x => x.Definition.Id == "essence.test.active" && x.Definition.Type == CombatAbilityType.Active);
+        Assert.Contains(combatEntity.Abilities, x => x.Definition.Id == "essence.test.passive" && x.Definition.Type == CombatAbilityType.Passive);
+        Assert.Contains("Species.Beast", combatEntity.Tags);
+        Assert.Equal(13, combatEntity.CombatAttributes[AttributeType.Power]);
     }
 
     [Fact]
@@ -367,7 +442,9 @@ public sealed class EssenceSystemServiceTests
     {
         definitions ??= new FakeDefinitionRepository();
         return new EssenceSystemService(
-            db,
+            new EssenceRepository(db),
+            new InventoryRepository(db),
+            new ItemBaseRepository(db),
             definitions,
             new EssenceProgressionService(definitions),
             new EssenceSlotUnlockService(),
@@ -592,23 +669,13 @@ public sealed class EssenceSystemServiceTests
         }
     }
 
-    private sealed class EmptyEssenceBonusProvider : IEssenceBonusProvider
+    private sealed class EmptyEssenceCombatLoadoutResolver : IEssenceCombatLoadoutResolver
     {
-        public Task<IReadOnlyList<AttributeModifierBase>> GetAttunedAttributeModifiersAsync(Guid characterId, CancellationToken cancellationToken) =>
-            Task.FromResult<IReadOnlyList<AttributeModifierBase>>([]);
+        public Task<EssenceCombatLoadout> ResolveAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.FromResult(Resolve(characterId, []));
 
-        public IReadOnlyList<AttributeModifierBase> GetAttunedAttributeModifiers(IEnumerable<PlayerEssence> essences) => [];
-    }
-
-    private sealed class EmptyEssenceAbilityProvider : IEssenceAbilityProvider
-    {
-        public Task<IReadOnlyList<AbilityDefinition>> GetAttunedAbilitiesAsync(Guid characterId, CancellationToken cancellationToken) =>
-            Task.FromResult<IReadOnlyList<AbilityDefinition>>([]);
-
-        public Task<IReadOnlyList<CombatAbilityInstance>> GetAttunedCombatAbilitiesAsync(Guid characterId, CancellationToken cancellationToken) =>
-            Task.FromResult<IReadOnlyList<CombatAbilityInstance>>([]);
-
-        public IReadOnlyList<CombatAbilityInstance> GetAttunedCombatAbilities(IEnumerable<PlayerEssence> essences) => [];
+        public EssenceCombatLoadout Resolve(Guid characterId, IEnumerable<PlayerEssence> equippedEssences) =>
+            new(characterId, equippedEssences.ToList(), [], [], [], new HashSet<string>(StringComparer.OrdinalIgnoreCase));
     }
 
     private sealed class QueueRandomProvider(params double[] values) : IRandomProvider
