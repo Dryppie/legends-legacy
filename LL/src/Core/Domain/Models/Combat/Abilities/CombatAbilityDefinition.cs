@@ -30,7 +30,7 @@ public class CombatAbilityDefinition
     public int Cooldown { get; set; }
     public List<Trigger> Triggers { get; set; } = [];
     // If it's a summon ability, don't say who the ability is used on.
-    public string ActivationLog => Triggers.All(e => e.Actions.All(a => a.Action is SummonAction)) ? "{Actor} used {Ability}." :  "{Actor} used {Ability} on {Target}.";
+    public string ActivationLog => Triggers.All(e => e.Actions.All(a => a.Action is CombatEffectAction { Operation: CombatEffectOperation.Summon })) ? "{Actor} used {Ability}." :  "{Actor} used {Ability} on {Target}.";
     // For the frontend only
     public IReadOnlyCollection<AttackType> AttackTypes { get; set; } = [];
     public IReadOnlyCollection<DamageType> DamageTypes { get; set; } = [];

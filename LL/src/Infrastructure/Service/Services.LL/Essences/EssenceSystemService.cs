@@ -611,6 +611,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     {
         var magnitude = Scale(effect.Scaling, essence);
         var action = BuildAction(effect, magnitude);
+        var isDamage = action is CombatEffectAction { Operation: CombatEffectOperation.Damage };
         IEffectDuration duration = effect.DurationSeconds is > 0
             ? new TimedDuration(SecondsToCombatTicks(effect.DurationSeconds.Value))
             : new NoDuration();
@@ -623,8 +624,8 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             effectTags: [],
             effectModifications: [],
             targeting: MapTargeting(string.IsNullOrWhiteSpace(effect.Target) ? ability.Targeting : effect.Target),
-            attackType: action is DamageAction ? AttackType.Melee : AttackType.None,
-            damageType: action is DamageAction ? DamageType.Magical : DamageType.None,
+            attackType: isDamage ? AttackType.Melee : AttackType.None,
+            damageType: isDamage ? DamageType.Magical : DamageType.None,
             chance: BuildChance(effect.Conditions.Count == 0 ? ability.Conditions : effect.Conditions))
         {
             Log = BuildEffectLog(effect.Type),
@@ -634,37 +635,32 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         return combatEffect;
     }
 
-    private static IEffectAction BuildAction(AbilityEffectDefinition effect, int magnitude) =>
-        effect.Type switch
+    private static IEffectAction BuildAction(AbilityEffectDefinition effect, int magnitude)
+    {
+        var scalingAttribute = FirstScalingAttribute(effect);
+        var scalingMultiplier = FirstScalingCoefficient(effect);
+
+        return effect.Type switch
         {
-            AbilityEffectType.Damage => new DamageAction(magnitude, FirstScalingAttribute(effect), FirstScalingCoefficient(effect)),
-            AbilityEffectType.Heal => new ResourceRestoreAction(magnitude, ResourceType.Health, FirstScalingAttribute(effect), FirstScalingCoefficient(effect)),
-            AbilityEffectType.GrantBarrier => new ResourceRestoreAction(magnitude, ResourceType.Barrier, FirstScalingAttribute(effect), FirstScalingCoefficient(effect)),
-            AbilityEffectType.RemoveStatus => new RemoveStatusAction(effect.Status ?? string.Empty),
-            AbilityEffectType.Cleanse => new CleanseAction(),
-            AbilityEffectType.Summon => new SummonAction(effect.Status ?? effect.Attribute ?? effect.Id, Math.Max(0, (int)(effect.DurationSeconds ?? 0))),
-            AbilityEffectType.Taunt => new ModifyAttributeAction(
-                new AbilityAttributeModifier(AttributeType.Fortitude, magnitude, ModifierType.Flat),
-                stackable: false),
-            AbilityEffectType.ReflectDamage => new DamageAction(magnitude, FirstScalingAttribute(effect), FirstScalingCoefficient(effect)),
-            AbilityEffectType.AbsorbDamage => new ResourceRestoreAction(magnitude, ResourceType.Barrier, FirstScalingAttribute(effect), FirstScalingCoefficient(effect)),
-            AbilityEffectType.TriggerSecondaryEffect => new TriggerSecondaryEffectAction(effect.Status ?? effect.Id),
-            AbilityEffectType.RestoreResource when effect.Attribute?.Equals(nameof(AttributeType.Cooldown), StringComparison.OrdinalIgnoreCase) == true =>
-                new ModifyAttributeAction(
-                    new AbilityAttributeModifier(AttributeType.Cooldown, magnitude, ModifierType.Flat),
-                    stackable: false),
+            AbilityEffectType.Damage => new CombatEffectAction { Operation = CombatEffectOperation.Damage, Magnitude = magnitude, ScalingAttribute = scalingAttribute, ScalingMultiplier = scalingMultiplier },
+            AbilityEffectType.Heal => new CombatEffectAction { Operation = CombatEffectOperation.RestoreResource, Resource = ResourceType.Health, Magnitude = magnitude, ScalingAttribute = scalingAttribute, ScalingMultiplier = scalingMultiplier },
+            AbilityEffectType.GrantBarrier => new CombatEffectAction { Operation = CombatEffectOperation.RestoreResource, Resource = ResourceType.Barrier, Magnitude = magnitude, ScalingAttribute = scalingAttribute, ScalingMultiplier = scalingMultiplier },
+            AbilityEffectType.RemoveStatus => new CombatEffectAction { Operation = CombatEffectOperation.RemoveStatus, StatusId = effect.Status ?? string.Empty, Magnitude = Math.Max(1, magnitude) },
+            AbilityEffectType.Cleanse => new CombatEffectAction { Operation = CombatEffectOperation.Cleanse },
+            AbilityEffectType.Summon => new CombatEffectAction { Operation = CombatEffectOperation.Summon, SummonId = effect.Status ?? effect.Attribute ?? effect.Id, SummonDuration = Math.Max(0, (int)(effect.DurationSeconds ?? 0)) },
+            AbilityEffectType.Taunt => new CombatEffectAction { Operation = CombatEffectOperation.ModifyAttribute, Attribute = AttributeType.Fortitude, Magnitude = magnitude, ModifierType = ModifierType.Flat },
+            AbilityEffectType.ReflectDamage => new CombatEffectAction { Operation = CombatEffectOperation.Damage, Magnitude = magnitude, ScalingAttribute = scalingAttribute, ScalingMultiplier = scalingMultiplier },
+            AbilityEffectType.AbsorbDamage => new CombatEffectAction { Operation = CombatEffectOperation.RestoreResource, Resource = ResourceType.Barrier, Magnitude = magnitude, ScalingAttribute = scalingAttribute, ScalingMultiplier = scalingMultiplier },
+            AbilityEffectType.TriggerSecondaryEffect => new CombatEffectAction { Operation = CombatEffectOperation.TriggerSecondaryEffect, SecondaryEffectId = effect.Status ?? effect.Id, Magnitude = magnitude },
             AbilityEffectType.RestoreResource when effect.Attribute?.Equals(nameof(AttributeType.MaxHealth), StringComparison.OrdinalIgnoreCase) == true =>
-                new ResourceRestoreAction(magnitude, ResourceType.Health, FirstScalingAttribute(effect), FirstScalingCoefficient(effect)),
+                new CombatEffectAction { Operation = CombatEffectOperation.RestoreResource, Resource = ResourceType.Health, Magnitude = magnitude, ScalingAttribute = scalingAttribute, ScalingMultiplier = scalingMultiplier },
             AbilityEffectType.RestoreResource =>
-                new ModifyAttributeAction(
-                    new AbilityAttributeModifier(AttributeType.Cooldown, magnitude, ModifierType.Flat),
-                    stackable: false),
-            AbilityEffectType.ModifyAttribute => new ModifyAttributeAction(
-                new AbilityAttributeModifier(ParseAttribute(effect.Attribute), magnitude, ModifierType.Flat),
-                stackable: false),
-            AbilityEffectType.ApplyStatus when !string.IsNullOrWhiteSpace(effect.Status) => new ApplyStatusAction(effect.Status),
+                new CombatEffectAction { Operation = CombatEffectOperation.ModifyAttribute, Attribute = AttributeType.Cooldown, Magnitude = magnitude, ModifierType = ModifierType.Flat },
+            AbilityEffectType.ModifyAttribute => new CombatEffectAction { Operation = CombatEffectOperation.ModifyAttribute, Attribute = ParseAttribute(effect.Attribute), Magnitude = magnitude, ModifierType = ModifierType.Flat },
+            AbilityEffectType.ApplyStatus when !string.IsNullOrWhiteSpace(effect.Status) => new CombatEffectAction { Operation = CombatEffectOperation.ApplyStatus, StatusId = effect.Status },
             _ => throw new NotSupportedException($"Essence effect type '{effect.Type}' is not supported by combat mapping.")
         };
+    }
 
     private static ICondition BuildCondition(IReadOnlyCollection<AbilityConditionDefinition> conditions)
     {

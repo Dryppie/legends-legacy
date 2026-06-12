@@ -2,6 +2,7 @@ using Domain.Interfaces.Combat;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Combat.Abilities.Effects;
 using Domain.Models.Combat.Abilities.Effects.Actions;
+using Domain.Models.Combat.Abilities.ResourceCosts;
 using Domain.Models.Attributes;
 using Domain.Models.Damages;
 using Services.LL.Interfaces;
@@ -104,24 +105,26 @@ public class EssenceDescriptionService : IEssenceDescriptionService
         foreach (var tag in effect.EffectTags)
             tags.Effect.Add(tag);
 
-        switch (effect.Action)
+        if (effect.Action is not CombatEffectAction action) return;
+
+        switch (action.Operation)
         {
-            case DamageAction dmg:
+            case CombatEffectOperation.Damage:
                 damageIndex++;
                 placeholders[$"{{damage{damageIndex}}}"] =
-                    BuildTooltipValue(dmg.Magnitude, dmg.ScalingAttribute,
-                                      dmg.ScalingMultiplier, attributes, TooltipKind.Damage);
+                    BuildTooltipValue(action.Magnitude, action.ScalingAttribute,
+                                      action.ScalingMultiplier, attributes, TooltipKind.Damage);
                 break;
 
-            case ResourceRestoreAction heal:
+            case CombatEffectOperation.RestoreResource when action.Resource == ResourceType.Health:
                 healIndex++;
                 placeholders[$"{{heal{healIndex}}}"] =
-                    BuildTooltipValue(heal.Magnitude, heal.ScalingAttribute,
-                                      heal.ScalingMultiplier, attributes, TooltipKind.Heal);
+                    BuildTooltipValue(action.Magnitude, action.ScalingAttribute,
+                                      action.ScalingMultiplier, attributes, TooltipKind.Heal);
                 break;
 
-            case ApplyStatusAction apply:
-                ExpandStatus(apply.StatusId, placeholders, attributes,
+            case CombatEffectOperation.ApplyStatus when !string.IsNullOrWhiteSpace(action.StatusId):
+                ExpandStatus(action.StatusId, placeholders, attributes,
                              ref damageIndex, ref healIndex, ref modifyIndex,
                              visitedStatuses, tags);
                 break;

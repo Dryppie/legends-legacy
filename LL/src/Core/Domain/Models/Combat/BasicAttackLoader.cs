@@ -34,7 +34,13 @@ public static class BasicAttackLoader
         // Find the main hand equipment
         // Create the basic attack ability instance
         var basicAttackAction = new EffectDefinition(
-            new DamageAction(magnitude, scalingAttribute, scalingAmount),
+            new CombatEffectAction
+            {
+                Operation = CombatEffectOperation.Damage,
+                Magnitude = magnitude,
+                ScalingAttribute = scalingAttribute,
+                ScalingMultiplier = scalingAmount
+            },
             new NoDuration(),
             new NoCondition(),
             new NoInterval(),

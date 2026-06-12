@@ -215,12 +215,17 @@ public sealed class EssenceSystemServiceTests
         Assert.Equal(180, abilities.Single(x => x.Definition.Type == CombatAbilityType.Active).RemainingTimeUntilUse);
         Assert.Equal(TriggerEvent.OnAbilityUsed, active.Triggers.Single().Event);
         Assert.IsType<AbilityIdFilter>(active.Triggers.Single().Filters.Single());
-        Assert.Equal(26, Assert.IsType<DamageAction>(active.Triggers.Single().Actions.Single().Action).Magnitude);
+        var activeAction = Assert.IsType<CombatEffectAction>(active.Triggers.Single().Actions.Single().Action);
+        Assert.Equal(CombatEffectOperation.Damage, activeAction.Operation);
+        Assert.Equal(26, activeAction.Magnitude);
 
         var passive = abilities.Single(x => x.Definition.Type == CombatAbilityType.Passive).Definition;
         Assert.Equal(0, abilities.Single(x => x.Definition.Type == CombatAbilityType.Passive).RemainingTimeUntilUse);
         Assert.Equal(TriggerEvent.OnAttack, passive.Triggers.Single().Event);
-        Assert.Equal(8f, Assert.IsType<ModifyAttributeAction>(passive.Triggers.Single().Actions.Single().Action).AttributeModifier.Amount);
+        var passiveAction = Assert.IsType<CombatEffectAction>(passive.Triggers.Single().Actions.Single().Action);
+        Assert.Equal(CombatEffectOperation.ModifyAttribute, passiveAction.Operation);
+        Assert.Equal(AttributeType.Power, passiveAction.Attribute);
+        Assert.Equal(8, passiveAction.Magnitude);
     }
 
     [Fact]
@@ -279,14 +284,16 @@ public sealed class EssenceSystemServiceTests
             .Single(x => x.Definition.Type == CombatAbilityType.Active)
             .Definition;
 
-        var actions = active.Triggers.Single().Actions.Select(x => x.Action.GetType()).ToList();
-        Assert.Contains(typeof(RemoveStatusAction), actions);
-        Assert.Contains(typeof(CleanseAction), actions);
-        Assert.Contains(typeof(SummonAction), actions);
-        Assert.Contains(typeof(TriggerSecondaryEffectAction), actions);
-        Assert.Equal(2, actions.Count(x => x == typeof(ResourceRestoreAction)));
-        Assert.Equal(1, actions.Count(x => x == typeof(ModifyAttributeAction)));
-        Assert.Equal(4, actions.Count(x => x == typeof(DamageAction)));
+        var operations = active.Triggers.Single().Actions
+            .Select(x => Assert.IsType<CombatEffectAction>(x.Action).Operation)
+            .ToList();
+        Assert.Contains(CombatEffectOperation.RemoveStatus, operations);
+        Assert.Contains(CombatEffectOperation.Cleanse, operations);
+        Assert.Contains(CombatEffectOperation.Summon, operations);
+        Assert.Contains(CombatEffectOperation.TriggerSecondaryEffect, operations);
+        Assert.Equal(2, operations.Count(x => x == CombatEffectOperation.RestoreResource));
+        Assert.Equal(1, operations.Count(x => x == CombatEffectOperation.ModifyAttribute));
+        Assert.Equal(4, operations.Count(x => x == CombatEffectOperation.Damage));
         Assert.Contains(active.Triggers.Single().Actions, x => x.Condition is CombatantStatusCondition);
         Assert.Contains(active.Triggers.Single().Actions, x => x.Condition is CombatantTagCondition);
     }

@@ -1,105 +1,133 @@
 using Domain.Interfaces.Combat.Abilities;
+using Domain.Models.Attributes;
+using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat.Abilities.Effects.Actions;
 using Domain.Models.Combat.Abilities.Effects.StatusEffects;
 using Domain.Models.Combat.Abilities.ResourceCosts;
-using Domain.Models.Attributes;
-using Domain.Models.Attributes.Modifiers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Common.Utilities;
+
 public class EffectActionConverter : JsonConverter<IEffectAction>
 {
     public override IEffectAction Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        using (var jsonDoc = JsonDocument.ParseValue(ref reader))
+        using var jsonDoc = JsonDocument.ParseValue(ref reader);
+        var root = jsonDoc.RootElement;
+        var operation = ReadString(root, "Operation")
+            ?? ReadString(root, "Type")
+            ?? throw new JsonException("Effect action requires an Operation.");
+
+        return NormalizeOperation(operation) switch
         {
-            var root = jsonDoc.RootElement;
-            var actionType = root.GetProperty("Type").GetString();
-
-            switch (actionType)
+            CombatEffectOperation.ApplyStatus => new CombatEffectAction
             {
-                case "ApplyStatus":
-                    var statusId = root.GetProperty("StatusId").GetString() ?? "";
-
-                    return new ApplyStatusAction(statusId);
-
-                case "ApplyStatusEffect":
-                    var status = Enum.Parse<StatusEffectType>(root.GetProperty("Status").GetString()!);
-                    int stacks = 0;
-                    if (root.TryGetProperty("Stacks", out var stacksElement))
-                    {
-                        stacks = stacksElement.GetInt32();
-                    }
-
-                    return new ApplyStatusEffectAction(status, stacks);
-
-                case "Damage":
-                    var damageAmount = root.GetProperty("Amount").GetInt32();
-
-                    AttributeType? damageScalingAttribute = null;
-                    float damageScalingMultiplier = 0;
-
-                    if (root.TryGetProperty("ScalingAttribute", out var damageScalingAttrElement))
-                    {
-                        var damageScalingAttrStr = damageScalingAttrElement.GetString()!;
-                        damageScalingAttribute = Enum.Parse<AttributeType>(damageScalingAttrStr, ignoreCase: true);
-                    }
-
-                    if (root.TryGetProperty("ScalingMultiplier", out var damageScalingMultElement))
-                    {
-                        damageScalingMultiplier = damageScalingMultElement.GetSingle();
-                    }
-
-                    int lifesteal = 0;
-                    if (root.TryGetProperty("Lifesteal", out var lifestealElement))
-                    {
-                        lifesteal = lifestealElement.GetInt32();
-                    }
-
-                    return new DamageAction(damageAmount, damageScalingAttribute, damageScalingMultiplier, lifesteal);
-
-                case "ResourceRestore":
-                    var restoreAmount = root.GetProperty("Amount").GetInt32();
-                    var resourceType = Enum.Parse<ResourceType>(root.GetProperty("ResourceType").GetString()!);
-                    AttributeType? restoreScalingAttribute = null;
-                    float restoreScalingMultiplier = 0;
-
-                    if (root.TryGetProperty("ScalingAttribute", out var restoreScalingAttrElement))
-                    {
-                        var restoreScalingAttrStr = restoreScalingAttrElement.GetString()!;
-                        restoreScalingAttribute = Enum.Parse<AttributeType>(restoreScalingAttrStr, ignoreCase: true);
-                    }
-
-                    if (root.TryGetProperty("ScalingMultiplier", out var restoreScalingMultElement))
-                    {
-                        restoreScalingMultiplier = restoreScalingMultElement.GetSingle();
-                    }
-
-                    return new ResourceRestoreAction(restoreAmount, resourceType, restoreScalingAttribute, restoreScalingMultiplier);
-
-                case "ModifyAttribute":
-                    var attribute = Enum.Parse<AttributeType>(root.GetProperty("Attribute").GetString()!);
-                    var amount = root.GetProperty("Amount").GetInt32();
-                    var modifierType = Enum.Parse<ModifierType>(root.GetProperty("ModifierType").GetString()!);
-                    var attributeModifier = new AbilityAttributeModifier(attribute, amount, modifierType);
-                    var stackable = root.TryGetProperty("Stackable", out var stackableElement) && stackableElement.GetBoolean();
-
-                    return new ModifyAttributeAction(attributeModifier, stackable);
-
-                case "Summon":
-                    var summonId = root.GetProperty("SummonId").GetString()!;
-                    var summonDuration = root.GetProperty("SummonDuration").GetInt32();
-                    return new SummonAction(summonId, summonDuration);
-
-                default:
-                    throw new NotSupportedException($"Unsupported action type: {actionType}");
-            }
-        }
+                Operation = CombatEffectOperation.ApplyStatus,
+                StatusId = ReadString(root, "StatusId") ?? ReadString(root, "Status") ?? string.Empty
+            },
+            CombatEffectOperation.ModifyStatusEffect => new CombatEffectAction
+            {
+                Operation = CombatEffectOperation.ModifyStatusEffect,
+                StatusId = ReadStatusEffect(root),
+                Magnitude = ReadInt(root, "Magnitude", ReadInt(root, "Stacks", ReadInt(root, "Amount", 1)))
+            },
+            CombatEffectOperation.Damage => new CombatEffectAction
+            {
+                Operation = CombatEffectOperation.Damage,
+                Magnitude = ReadInt(root, "Magnitude", ReadInt(root, "Amount", 0)),
+                ScalingAttribute = ReadAttribute(root, "ScalingAttribute"),
+                ScalingMultiplier = ReadFloat(root, "ScalingMultiplier"),
+                LifeStealPercentage = ReadFloat(root, "LifeStealPercentage", ReadFloat(root, "Lifesteal"))
+            },
+            CombatEffectOperation.RestoreResource => new CombatEffectAction
+            {
+                Operation = CombatEffectOperation.RestoreResource,
+                Magnitude = ReadInt(root, "Magnitude", ReadInt(root, "Amount", 0)),
+                Resource = ReadEnum<ResourceType>(root, "Resource") ?? ReadEnum<ResourceType>(root, "ResourceType"),
+                ScalingAttribute = ReadAttribute(root, "ScalingAttribute"),
+                ScalingMultiplier = ReadFloat(root, "ScalingMultiplier")
+            },
+            CombatEffectOperation.ModifyAttribute => new CombatEffectAction
+            {
+                Operation = CombatEffectOperation.ModifyAttribute,
+                Attribute = ReadEnum<AttributeType>(root, "Attribute"),
+                Magnitude = ReadInt(root, "Magnitude", ReadInt(root, "Amount", 0)),
+                ModifierType = ReadEnum<ModifierType>(root, "ModifierType") ?? ModifierType.Flat,
+                Stackable = ReadBool(root, "Stackable")
+            },
+            CombatEffectOperation.RemoveStatus => new CombatEffectAction
+            {
+                Operation = CombatEffectOperation.RemoveStatus,
+                StatusId = ReadString(root, "StatusId") ?? ReadString(root, "Status") ?? string.Empty,
+                Magnitude = ReadInt(root, "Magnitude", ReadInt(root, "Stacks", ReadInt(root, "Amount", 1)))
+            },
+            CombatEffectOperation.Cleanse => new CombatEffectAction { Operation = CombatEffectOperation.Cleanse },
+            CombatEffectOperation.Summon => new CombatEffectAction
+            {
+                Operation = CombatEffectOperation.Summon,
+                SummonId = ReadString(root, "SummonId") ?? string.Empty,
+                SummonDuration = ReadInt(root, "SummonDuration", 0)
+            },
+            CombatEffectOperation.SelfDestruct => new CombatEffectAction { Operation = CombatEffectOperation.SelfDestruct },
+            CombatEffectOperation.TriggerSecondaryEffect => new CombatEffectAction
+            {
+                Operation = CombatEffectOperation.TriggerSecondaryEffect,
+                SecondaryEffectId = ReadString(root, "SecondaryEffectId") ?? ReadString(root, "StatusId") ?? ReadString(root, "Status"),
+                Magnitude = ReadInt(root, "Magnitude", ReadInt(root, "Amount", 0))
+            },
+            var unsupported => throw new NotSupportedException($"Unsupported effect action operation: {unsupported}")
+        };
     }
 
     public override void Write(Utf8JsonWriter writer, IEffectAction value, JsonSerializerOptions options)
     {
-        throw new NotImplementedException();
+        if (value is not CombatEffectAction action)
+            throw new NotSupportedException($"Unsupported effect action type: {value.GetType().Name}");
+
+        JsonSerializer.Serialize(writer, action, options);
     }
+
+    private static AttributeType? ReadAttribute(JsonElement root, string propertyName) =>
+        root.TryGetProperty(propertyName, out var element)
+            ? Enum.Parse<AttributeType>(element.GetString()!, ignoreCase: true)
+            : null;
+
+    private static float ReadFloat(JsonElement root, string propertyName) =>
+        root.TryGetProperty(propertyName, out var element) ? element.GetSingle() : 0;
+
+    private static float ReadFloat(JsonElement root, string propertyName, float fallback) =>
+        root.TryGetProperty(propertyName, out var element) ? element.GetSingle() : fallback;
+
+    private static int ReadInt(JsonElement root, string propertyName, int fallback) =>
+        root.TryGetProperty(propertyName, out var element) ? element.GetInt32() : fallback;
+
+    private static string? ReadString(JsonElement root, string propertyName) =>
+        root.TryGetProperty(propertyName, out var element) && element.ValueKind == JsonValueKind.String
+            ? element.GetString()
+            : null;
+
+    private static bool ReadBool(JsonElement root, string propertyName) =>
+        root.TryGetProperty(propertyName, out var element) && element.ValueKind == JsonValueKind.True;
+
+    private static T? ReadEnum<T>(JsonElement root, string propertyName) where T : struct =>
+        ReadString(root, propertyName) is { } value
+            ? Enum.Parse<T>(value, ignoreCase: true)
+            : null;
+
+    private static string ReadStatusEffect(JsonElement root)
+    {
+        var status = ReadString(root, "StatusId") ?? ReadString(root, "Status") ?? string.Empty;
+        return Enum.TryParse<StatusEffectType>(status, ignoreCase: true, out var parsed)
+            ? parsed.ToString()
+            : status;
+    }
+
+    private static string NormalizeOperation(string operation) =>
+        operation switch
+        {
+            "ResourceRestore" => CombatEffectOperation.RestoreResource,
+            "ApplyStatusEffect" => CombatEffectOperation.ModifyStatusEffect,
+            _ => operation
+        };
 }

@@ -14,19 +14,22 @@ public class EffectDefinition
     public CombatTargeting Targeting { get; }
     public int Chance { get; }
     public List<EffectModification> EffectModifications { get; } = [];
-    public EffectType EffectType => Action switch
-    {
-        ApplyStatusAction => EffectType.NestedEffect,
-        ApplyStatusEffectAction => EffectType.StatusEffect,
-        RemoveStatusAction => EffectType.StatusEffect,
-        CleanseAction => EffectType.StatusEffect,
-        TriggerSecondaryEffectAction => EffectType.NestedEffect,
-        DamageAction => EffectType.Damage,
-        ResourceRestoreAction => EffectType.Healing,
-        ModifyAttributeAction => EffectType.ModifyAttribute,
-        SummonAction => EffectType.Summon,
-        _ => throw new NotSupportedException($"Unsupported action type {Action?.GetType().Name}")
-    };
+    public EffectType EffectType => Action is CombatEffectAction action
+        ? action.Operation switch
+        {
+            CombatEffectOperation.ApplyStatus => EffectType.NestedEffect,
+            CombatEffectOperation.RemoveStatus => EffectType.StatusEffect,
+            CombatEffectOperation.ModifyStatusEffect => EffectType.StatusEffect,
+            CombatEffectOperation.Cleanse => EffectType.StatusEffect,
+            CombatEffectOperation.TriggerSecondaryEffect => EffectType.NestedEffect,
+            CombatEffectOperation.SelfDestruct => EffectType.NestedEffect,
+            CombatEffectOperation.Damage => EffectType.Damage,
+            CombatEffectOperation.RestoreResource => EffectType.Healing,
+            CombatEffectOperation.ModifyAttribute => EffectType.ModifyAttribute,
+            CombatEffectOperation.Summon => EffectType.Summon,
+            _ => throw new NotSupportedException($"Unsupported combat effect operation {action.Operation}")
+        }
+        : throw new NotSupportedException($"Unsupported action type {Action?.GetType().Name}");
     public AttackType AttackType { get; set; }
     public DamageType DamageType { get; set; }
     public List<EffectTag> EffectTags { get; set; } = [];
