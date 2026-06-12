@@ -41,6 +41,10 @@ export class AuthInterceptor implements HttpInterceptor {
       return next.handle(req);
     }
 
+    if (!this.auth.isAuthenticated()) {
+      return next.handle(req);
+    }
+
     /* 1️⃣  guarantee a fresh token before the call leaves the browser */
     return this.auth.ensureValidToken().pipe(
       switchMap(() => next.handle(req)),
@@ -72,7 +76,7 @@ export class AuthInterceptor implements HttpInterceptor {
     if (!this.refreshing401) {
       this.refreshing401 = true;
 
-      this.auth.ensureValidToken().subscribe({
+      this.auth.refreshSession().subscribe({
         next: () => {
           this.refreshing401 = false;
           this.flushQueue(); // retry queued requests

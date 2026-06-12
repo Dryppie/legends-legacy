@@ -112,6 +112,24 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
                 return Task.CompletedTask;
             },
+            OnTokenValidated = context =>
+            {
+                var isAllowAnonymous = context.HttpContext.GetEndpoint()?.Metadata.GetMetadata<IAllowAnonymous>() is not null;
+                if (isAllowAnonymous)
+                {
+                    return Task.CompletedTask;
+                }
+
+                var hasUserId = context.Principal?.FindFirstValue(ClaimTypes.UserData) is not null;
+                var hasCharacterId = context.Principal?.FindFirstValue("CharacterId") is not null;
+
+                if (!hasUserId || !hasCharacterId)
+                {
+                    context.Fail("The access token is missing required identity claims.");
+                }
+
+                return Task.CompletedTask;
+            },
             OnAuthenticationFailed = context =>
             {
                 // If value is not null the endpoint is decorated with the [AllowAnonymous] attribute

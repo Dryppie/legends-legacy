@@ -53,14 +53,14 @@ export class AuthService {
   ) {}
 
   checkAuth(): Observable<CharacterDto | null> {
-    return this.ensureValidToken().pipe(
-      switchMap(() =>
-        this.tryRefresh().pipe(
-          switchMap((ok) => (ok ? this.fetchCharacter() : of(null))),
-        ),
-      ),
+    return this.tryRefresh().pipe(
+      switchMap((expiresAt) => (expiresAt ? this.fetchCharacter() : of(null))),
       tap((ch) => {
-        if (ch) this.markAuthenticated();
+        if (ch) {
+          this.markAuthenticated();
+        } else {
+          this.markUnauthenticated();
+        }
       }),
     );
   }
@@ -259,7 +259,7 @@ export class AuthService {
 
   ensureValidToken(): Observable<number> {
     if (!this._isAuthenticated() || !this._accessExpiresAt) {
-      return of(0); // or throw error
+      return throwError(() => new Error('Not authenticated'));
     }
 
     const now = Date.now();
@@ -271,19 +271,33 @@ export class AuthService {
     }
 
     if (!this._refreshInFlight$) {
-      this._refreshInFlight$ = this.tryRefresh().pipe(
-        tap((exp) => {
-          if (exp) {
-          } else {
-            this.logout();
-          }
-        }),
-        finalize(() => (this._refreshInFlight$ = undefined)),
-        shareReplay(1),
-      );
+      this._refreshInFlight$ = this.refreshOrLogout();
     }
 
     return this._refreshInFlight$;
+  }
+
+  refreshSession(): Observable<number> {
+    if (!this._refreshInFlight$) {
+      this._refreshInFlight$ = this.refreshOrLogout();
+    }
+
+    return this._refreshInFlight$;
+  }
+
+  private refreshOrLogout(): Observable<number> {
+    return this.tryRefresh().pipe(
+      tap((exp) => {
+        if (!exp) {
+          this.logout();
+        }
+      }),
+      switchMap((exp) =>
+        exp ? of(exp) : throwError(() => new Error('Unable to refresh session')),
+      ),
+      finalize(() => (this._refreshInFlight$ = undefined)),
+      shareReplay(1),
+    );
   }
 
   private setAccessExpiry(exp: number) {
