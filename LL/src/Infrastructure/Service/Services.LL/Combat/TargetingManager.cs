@@ -12,6 +12,7 @@ public static class TargetingManager
         switch (targeting)
         {
             case CombatTargeting.SingleEnemy:
+            case CombatTargeting.SingleRandomEnemy:
                 var enemyTarget = SelectTarget(enemyTeam);
                 if (enemyTarget != null) targets.Add(enemyTarget);
                 break;
@@ -49,12 +50,23 @@ public static class TargetingManager
                 break;
 
             case CombatTargeting.SingleAlly:
+            case CombatTargeting.SingleRandomAlly:
                 var allyTarget = SelectTarget(allies);
                 if (allyTarget != null) targets.Add(allyTarget);
                 break;
 
             case CombatTargeting.AllAllies:
                 targets = allies.Where(a => a.IsAlive && !a.Id.Equals(actor.Id)).ToList();
+                break;
+
+            case CombatTargeting.SingleEnemyLowestHealth:
+                var lowestHealthEnemy = enemyTeam.Where(e => e.IsAlive).MinBy(e => e.GetCurrentHealthValue());
+                if (lowestHealthEnemy != null) targets.Add(lowestHealthEnemy);
+                break;
+
+            case CombatTargeting.SingleAllyLowestHealth:
+                var lowestHealthAlly = allies.Where(e => e.IsAlive).MinBy(e => e.GetCurrentHealthValue());
+                if (lowestHealthAlly != null) targets.Add(lowestHealthAlly);
                 break;
 
             case CombatTargeting.AllyHighestMaxHealth:
@@ -69,6 +81,12 @@ public static class TargetingManager
             case CombatTargeting.YourTeam:
                 var yourTeam = allies.Where(a => a.IsAlive).ToList();
                 targets.AddRange(yourTeam);
+                break;
+            case CombatTargeting.SummonedAllies:
+                targets.AddRange(allies.Where(a => a.IsAlive && a.IsSummoned));
+                break;
+            case CombatTargeting.NonSummonedAllies:
+                targets.AddRange(allies.Where(a => a.IsAlive && !a.IsSummoned));
                 break;
             default:
                 throw new NotSupportedException($"Targeting type '{targeting}' is not supported.");

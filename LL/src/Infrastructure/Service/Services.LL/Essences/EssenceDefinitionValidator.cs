@@ -60,9 +60,25 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
 
         if (string.IsNullOrWhiteSpace(ability.Kind)) errors.Add($"{essenceId}/{ability.Id}: ability kind is required.");
         else if (!AbilityDefinitionKind.All.Contains(ability.Kind)) errors.Add($"{essenceId}/{ability.Id}: unknown ability kind '{ability.Kind}'.");
+        if (string.IsNullOrWhiteSpace(ability.Id)) errors.Add($"{essenceId}: ability id is required.");
+        if (string.IsNullOrWhiteSpace(ability.Name)) errors.Add($"{essenceId}/{ability.Id}: ability name is required.");
 
         if (!string.IsNullOrWhiteSpace(ability.Targeting) && !AbilityTargetSelector.All.Contains(ability.Targeting))
             errors.Add($"{essenceId}/{ability.Id}: unknown target selector '{ability.Targeting}'.");
+
+        if (ability.Kind.Equals(AbilityDefinitionKind.Active, StringComparison.OrdinalIgnoreCase))
+        {
+            if (ability.CooldownSeconds <= 0) errors.Add($"{essenceId}/{ability.Id}: active ability cooldown must be greater than zero.");
+            if (string.IsNullOrWhiteSpace(ability.Targeting)) errors.Add($"{essenceId}/{ability.Id}: active ability target selector is required.");
+            if (ability.Effects.Count == 0) errors.Add($"{essenceId}/{ability.Id}: active ability requires at least one effect.");
+        }
+
+        if (ability.Kind.Equals(AbilityDefinitionKind.Passive, StringComparison.OrdinalIgnoreCase)
+            && ability.Triggers.Count == 0
+            && ability.Effects.Count == 0)
+        {
+            errors.Add($"{essenceId}/{ability.Id}: passive ability requires a trigger or permanent effect.");
+        }
 
         foreach (var trigger in ability.Triggers)
         {
@@ -85,6 +101,11 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
             if (string.IsNullOrWhiteSpace(effect.Id)) errors.Add($"{essenceId}/{ability.Id}: effect id is required.");
             if (!AbilityEffectType.All.Contains(effect.Type)) errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: unknown effect type '{effect.Type}'.");
             if (!AbilityTargetSelector.All.Contains(effect.Target)) errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: unknown target selector '{effect.Target}'.");
+            if (!effect.Type.Equals(AbilityEffectType.ModifyAttribute, StringComparison.OrdinalIgnoreCase)
+                && (effect.Scaling.BaseValue < 0 || effect.Scaling.PerLevel < 0 || effect.Scaling.PerAscensionTier < 0))
+            {
+                errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: scaling values cannot be negative.");
+            }
             if (effect.Type.Equals(AbilityEffectType.ModifyAttribute, StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(effect.Attribute))
                 errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: ModifyAttribute requires attribute.");
             if (!string.IsNullOrWhiteSpace(effect.Attribute))
@@ -122,6 +143,19 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
                     : condition.Tag.StartsWith("Species.", StringComparison.OrdinalIgnoreCase) ? condition.Tag : $"Species.{condition.Tag}";
                 if (!EssenceTagCatalog.AllTags.Contains(speciesTag))
                     errors.Add($"{essenceId}/{ownerId}: condition '{condition.Type}' requires a known species tag.");
+            }
+
+            if (condition.Type.Equals(AbilityConditionType.RandomChance, StringComparison.OrdinalIgnoreCase)
+                || condition.Type.Equals(AbilityConditionType.ChanceRoll, StringComparison.OrdinalIgnoreCase))
+            {
+                if (condition.Value is null or < 0 or > 100)
+                    errors.Add($"{essenceId}/{ownerId}: condition '{condition.Type}' requires a value from 0 to 100.");
+            }
+
+            if (condition.Type.Equals(AbilityConditionType.TargetHasStatusStacksAtLeast, StringComparison.OrdinalIgnoreCase)
+                && (string.IsNullOrWhiteSpace(condition.Status) || condition.Value is null or <= 0))
+            {
+                errors.Add($"{essenceId}/{ownerId}: condition '{condition.Type}' requires status and a positive stack value.");
             }
         }
     }

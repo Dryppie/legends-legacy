@@ -7,6 +7,7 @@ using Domain.Models.Combat.Abilities.Effects.Actions;
 using Domain.Models.Combat.Abilities.Effects.Conditions;
 using Domain.Models.Combat.Abilities.Effects.Duration;
 using Domain.Models.Combat.Abilities.Effects.Intervals;
+using Domain.Models.Combat.Abilities.Effects.StatusEffects;
 using Domain.Models.Combat.Abilities.Effects.Trigger;
 using Domain.Models.Combat.Abilities.Effects.Usages;
 using Domain.Models.Combat.Abilities.ResourceCosts;
@@ -690,18 +691,28 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
                 new CombatantHealthCondition(useSource: false, (int)Math.Round(condition.Value.Value), ComparisonType.LessThan),
             AbilityConditionType.SourceHealthBelowPercent when condition.Value is > 0 =>
                 new CombatantHealthCondition(useSource: true, (int)Math.Round(condition.Value.Value), ComparisonType.LessThan),
+            AbilityConditionType.SourceHealthAbovePercent when condition.Value is > 0 =>
+                new CombatantHealthCondition(useSource: true, (int)Math.Round(condition.Value.Value), ComparisonType.GreaterThan),
             AbilityConditionType.TargetHasStatus when !string.IsNullOrWhiteSpace(condition.Status) =>
                 new CombatantStatusCondition(useSource: false, condition.Status),
+            AbilityConditionType.TargetHasStatusStacksAtLeast when !string.IsNullOrWhiteSpace(condition.Status)
+                && condition.Value is > 0
+                && Enum.TryParse<StatusEffectType>(condition.Status, ignoreCase: true, out var statusEffect) =>
+                new CombatantStatusStacksCondition(useSource: false, statusEffect, (int)Math.Round(condition.Value.Value)),
             AbilityConditionType.SourceHasStatus when !string.IsNullOrWhiteSpace(condition.Status) =>
                 new CombatantStatusCondition(useSource: true, condition.Status),
             AbilityConditionType.RandomChance => null,
+            AbilityConditionType.ChanceRoll => null,
             AbilityConditionType.CooldownReady => null,
+            AbilityConditionType.Always => null,
             AbilityConditionType.SourceHasTag when !string.IsNullOrWhiteSpace(condition.Tag) =>
                 new CombatantTagCondition(useSource: true, condition.Tag),
             AbilityConditionType.TargetHasTag when !string.IsNullOrWhiteSpace(condition.Tag) =>
                 new CombatantTagCondition(useSource: false, condition.Tag),
             AbilityConditionType.IsSpecies when !string.IsNullOrWhiteSpace(condition.Tag) =>
                 new CombatantTagCondition(useSource: false, NormalizeSpeciesTag(condition.Tag)),
+            AbilityConditionType.SourceIsSummon =>
+                new CombatantSummonedCondition(useSource: true),
             _ => null
         };
 
@@ -710,7 +721,9 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
     private static int BuildChance(IReadOnlyCollection<AbilityConditionDefinition> conditions)
     {
-        var chance = conditions.FirstOrDefault(x => x.Type.Equals("RandomChance", StringComparison.OrdinalIgnoreCase));
+        var chance = conditions.FirstOrDefault(x =>
+            x.Type.Equals(AbilityConditionType.RandomChance, StringComparison.OrdinalIgnoreCase)
+            || x.Type.Equals(AbilityConditionType.ChanceRoll, StringComparison.OrdinalIgnoreCase));
         return chance?.Value is > 0 ? Math.Clamp((int)Math.Round(chance.Value.Value), 1, 100) : 100;
     }
 
@@ -725,11 +738,17 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             "OnCombatStart" => TriggerEvent.OnCombatStart,
             "OnAbilityUsed" => TriggerEvent.OnAbilityUsed,
             AbilityTriggerType.OnAbilityUse => TriggerEvent.OnAbilityUsed,
+            AbilityTriggerType.OnBasicAttack => TriggerEvent.BasicAttack,
             "OnHit" => TriggerEvent.OnAttack,
             "OnCrit" => TriggerEvent.OnCriticalHit,
             "OnTakeDamage" => TriggerEvent.OnDamaged,
             "OnKill" => TriggerEvent.OnKill,
             "OnDodge" => TriggerEvent.OnDodge,
+            AbilityTriggerType.OnStatusApplied => TriggerEvent.OnStatusApplied,
+            AbilityTriggerType.OnStatusExpired => TriggerEvent.OnEffectExpired,
+            AbilityTriggerType.OnInterval => TriggerEvent.OnTickInterval,
+            "OnDeath" => TriggerEvent.OnDeath,
+            "OnHeal" => TriggerEvent.OnHeal,
             _ => throw new NotSupportedException($"Essence trigger '{trigger}' is not supported by combat mapping.")
         };
     }
@@ -739,13 +758,21 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         {
             AbilityTargetSelector.Self => CombatTargeting.Self,
             AbilityTargetSelector.CurrentTarget => CombatTargeting.SingleEnemy,
-            AbilityTargetSelector.RandomEnemy => CombatTargeting.SingleEnemy,
-            AbilityTargetSelector.LowestHealthEnemy => CombatTargeting.SingleEnemy,
+            AbilityTargetSelector.RandomEnemy => CombatTargeting.SingleRandomEnemy,
+            AbilityTargetSelector.LowestHealthEnemy => CombatTargeting.SingleEnemyLowestHealth,
             AbilityTargetSelector.HighestHealthEnemy => CombatTargeting.SingleEnemy,
-            AbilityTargetSelector.LowestHealthAlly => CombatTargeting.SingleAlly,
-            AbilityTargetSelector.RandomAlly => CombatTargeting.SingleAlly,
+            AbilityTargetSelector.LowestHealthAlly => CombatTargeting.SingleAllyLowestHealth,
+            AbilityTargetSelector.RandomAlly => CombatTargeting.SingleRandomAlly,
             AbilityTargetSelector.AllEnemies => CombatTargeting.AllEnemies,
             AbilityTargetSelector.AllAllies => CombatTargeting.AllAllies,
+            AbilityTargetSelector.TwoEnemies => CombatTargeting.TwoEnemies,
+            AbilityTargetSelector.TwoAllies => CombatTargeting.TwoAllies,
+            AbilityTargetSelector.HighestMaxHealthAlly => CombatTargeting.AllyHighestMaxHealth,
+            AbilityTargetSelector.Attacker => CombatTargeting.CauseOfTrigger,
+            AbilityTargetSelector.DamageSource => CombatTargeting.CauseOfTrigger,
+            AbilityTargetSelector.AbilityUser => CombatTargeting.Self,
+            AbilityTargetSelector.SummonedAllies => CombatTargeting.SummonedAllies,
+            AbilityTargetSelector.NonSummonedAllies => CombatTargeting.NonSummonedAllies,
             _ => CombatTargeting.SingleEnemy
         };
 

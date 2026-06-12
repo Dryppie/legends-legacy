@@ -11,6 +11,14 @@ public static class AbilityTargetSelector
     public const string RandomAlly = "RandomAlly";
     public const string AllEnemies = "AllEnemies";
     public const string AllAllies = "AllAllies";
+    public const string TwoEnemies = "TwoEnemies";
+    public const string TwoAllies = "TwoAllies";
+    public const string HighestMaxHealthAlly = "HighestMaxHealthAlly";
+    public const string Attacker = "Attacker";
+    public const string DamageSource = "DamageSource";
+    public const string AbilityUser = "AbilityUser";
+    public const string SummonedAllies = "SummonedAllies";
+    public const string NonSummonedAllies = "NonSummonedAllies";
 
     public static readonly IReadOnlySet<string> All = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
@@ -22,6 +30,14 @@ public static class AbilityTargetSelector
         LowestHealthAlly,
         RandomAlly,
         AllEnemies,
-        AllAllies
+        AllAllies,
+        TwoEnemies,
+        TwoAllies,
+        HighestMaxHealthAlly,
+        Attacker,
+        DamageSource,
+        AbilityUser,
+        SummonedAllies,
+        NonSummonedAllies
     };
 }

@@ -1,7 +1,10 @@
 using Domain.Models.AbilityDefinitions;
 using Domain.Models.Essences.Definitions;
 using Domain.Models.Attributes;
+using Microsoft.Extensions.Configuration;
 using Services.LL.Essences;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using AuthoredAbilityDefinition = Domain.Models.AbilityDefinitions.AbilityDefinition;
 
 namespace EssenceSystem.Tests;
@@ -113,6 +116,58 @@ public sealed class EssenceDefinitionValidatorTests
         Assert.DoesNotContain(errors, error => error.Contains("attribute", StringComparison.OrdinalIgnoreCase));
     }
 
+    [Fact]
+    public void Validate_rejects_active_ability_without_cooldown()
+    {
+        var definition = ValidDefinition();
+        definition.ActiveAbility.CooldownSeconds = 0;
+
+        var errors = _validator.Validate([definition]);
+
+        Assert.Contains(errors, error => error.Contains("active ability cooldown", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Validate_rejects_invalid_chance_condition_values()
+    {
+        var definition = ValidDefinition();
+        definition.PassiveAbility.Conditions.Add(new AbilityConditionDefinition { Type = AbilityConditionType.ChanceRoll, Value = 150 });
+
+        var errors = _validator.Validate([definition]);
+
+        Assert.Contains(errors, error => error.Contains("requires a value from 0 to 100", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Validate_rejects_status_stack_conditions_without_status_or_stack_value()
+    {
+        var definition = ValidDefinition();
+        definition.ActiveAbility.Effects[0].Conditions.Add(new AbilityConditionDefinition { Type = AbilityConditionType.TargetHasStatusStacksAtLeast, Status = "Cold" });
+
+        var errors = _validator.Validate([definition]);
+
+        Assert.Contains(errors, error => error.Contains("requires status and a positive stack value", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Authored_essence_json_passes_definition_validation()
+    {
+        var options = new JsonSerializerOptions
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            ReadCommentHandling = JsonCommentHandling.Skip,
+            AllowTrailingCommas = true
+        };
+        options.Converters.Add(new JsonStringEnumConverter());
+        var config = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["Content:Root"] = "Data" })
+            .Build();
+
+        var repository = new JsonEssenceDefinitionRepository(config, FindApiContentRoot(), options, _validator);
+
+        Assert.NotEmpty(repository.GetAll());
+    }
+
     internal static EssenceDefinition ValidDefinition() => new()
     {
         Id = "essence.test",
@@ -124,7 +179,10 @@ public sealed class EssenceDefinitionValidatorTests
         ActiveAbility = new AuthoredAbilityDefinition
         {
             Id = "active.test",
+            Name = "Active Test",
             Kind = AbilityDefinitionKind.Active,
+            CooldownSeconds = 10,
+            Targeting = AbilityTargetSelector.CurrentTarget,
             Tags = ["Effect.Ability"],
             Effects =
             [
@@ -138,6 +196,7 @@ public sealed class EssenceDefinitionValidatorTests
         PassiveAbility = new AuthoredAbilityDefinition
         {
             Id = "passive.test",
+            Name = "Passive Test",
             Kind = AbilityDefinitionKind.Passive,
             Tags = ["Trigger.OnHit"],
             Effects =
@@ -158,4 +217,19 @@ public sealed class EssenceDefinitionValidatorTests
             AddsTags = ["Mechanic.Execute"]
         }
     };
+
+    private static string FindApiContentRoot()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            var candidate = Path.Combine(directory.FullName, "src", "API", "API.LL", "Data", "essences.json");
+            if (File.Exists(candidate))
+                return Path.Combine(directory.FullName, "src", "API", "API.LL");
+
+            directory = directory.Parent;
+        }
+
+        throw new DirectoryNotFoundException("Could not locate LL/src/API/API.LL/Data/essences.json from test output directory.");
+    }
 }

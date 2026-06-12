@@ -20,4 +20,6 @@ public enum CombatTargeting
     YourTeam,
     AllyHighestMaxHealth,
     EveryoneButYou,
+    SummonedAllies,
+    NonSummonedAllies,
 }

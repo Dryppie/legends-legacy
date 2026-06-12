@@ -24,6 +24,7 @@ using Persistence.LL.Repositories.Essences;
 using Persistence.LL.Repositories.Inventories;
 using Persistence.LL.Repositories.Items;
 using Services.LL.Combat;
+using Services.LL.Combat.CombatEngine;
 using Services.LL.Combat.Stats;
 using Services.LL.Essences;
 using Services.LL.Interfaces;
@@ -288,6 +289,53 @@ public sealed class EssenceSystemServiceTests
         Assert.Equal(4, actions.Count(x => x == typeof(DamageAction)));
         Assert.Contains(active.Triggers.Single().Actions, x => x.Condition is CombatantStatusCondition);
         Assert.Contains(active.Triggers.Single().Actions, x => x.Condition is CombatantTagCondition);
+    }
+
+    [Fact]
+    public async Task Attuned_combat_abilities_map_extended_target_selectors_and_conditions()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db, level: 20);
+        var essenceId = await AddPlayerEssenceAsync(db, characterId, "essence.extended", level: 1);
+        db.EssenceLoadouts.Add(new EssenceLoadout
+        {
+            Id = Guid.NewGuid(),
+            CharacterId = characterId,
+            Name = "Active",
+            IsActive = true,
+            Slots = [new EssenceLoadoutSlot { Id = Guid.NewGuid(), SlotIndex = 0, PlayerEssenceId = essenceId }]
+        });
+        await db.SaveChangesAsync();
+        var definition = FakeDefinitionRepository.CreateDefinition("essence.extended", "monster.extended");
+        definition.ActiveAbility.Targeting = AbilityTargetSelector.TwoEnemies;
+        definition.ActiveAbility.Effects[0].Target = AbilityTargetSelector.TwoEnemies;
+        definition.ActiveAbility.Effects[0].Conditions =
+        [
+            new() { Type = AbilityConditionType.SourceHealthAbovePercent, Value = 20 },
+            new() { Type = AbilityConditionType.ChanceRoll, Value = 25 }
+        ];
+        var service = CreateService(db, definitions: new SingleDefinitionRepository(definition));
+
+        var active = (await service.GetAttunedCombatAbilitiesAsync(characterId, CancellationToken.None))
+            .Single(x => x.Definition.Type == CombatAbilityType.Active)
+            .Definition;
+
+        var action = active.Triggers.Single().Actions.Single();
+        Assert.Equal(CombatTargeting.TwoEnemies, action.Targeting);
+        Assert.Equal(25, action.Chance);
+        Assert.IsType<CombatantHealthCondition>(action.Condition);
+    }
+
+    [Fact]
+    public void Combat_event_bus_rejects_recursive_dispatch_loops()
+    {
+        var bus = new CombatEventBus();
+        var combatEvent = new CombatEvent { Type = TriggerEvent.OnAbilityUsed };
+        bus.Subscribe(_ => bus.Publish(combatEvent));
+
+        var exception = Assert.Throws<InvalidOperationException>(() => bus.Publish(combatEvent));
+
+        Assert.Contains("maximum depth", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
