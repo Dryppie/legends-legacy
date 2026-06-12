@@ -35,6 +35,7 @@ export class EssencesComponent implements OnInit {
   readonly archiveSearch = signal('');
   readonly archiveFilter = signal<ArchiveFilter>('all');
   readonly archiveSort = signal<ArchiveSort>('name');
+  readonly upgradeDetailsOpen = signal(false);
 
   readonly archiveFilters: { label: string; value: ArchiveFilter }[] = [
     { label: 'All', value: 'all' },
@@ -137,6 +138,10 @@ export class EssencesComponent implements OnInit {
 
   public setArchiveSortValue(sort: string): void {
     this.archiveSort.set(sort as ArchiveSort);
+  }
+
+  public toggleUpgradeDetails(): void {
+    this.upgradeDetailsOpen.update((open) => !open);
   }
 
   public trackEssence(_: number, essence: PlayerEssenceDto): string {
