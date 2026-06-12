@@ -1,4 +1,4 @@
-﻿using Domain.Helpers.Constants;
+using Domain.Helpers.Constants;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Entities.Creatures.Templates;
@@ -44,93 +44,22 @@ public class CreatureScaler : ICreatureScaler
         foreach (var type in MonsterBaseStats.Baseline.Keys)
         {
             var baseValue = MonsterBaseStats.Baseline[type];
-            var scaled = baseValue;
-
-            switch (type)
+            var scaled = type switch
             {
-                // Vitality
-                case AttributeType.MaxHealth:
-                    scaled = ScaleHp(baseValue, D);
-                    break;
-
-                case AttributeType.Health:
-                    continue; // set from MaxHealth later
-
-                case AttributeType.HealthRegeneration:
-                case AttributeType.MaxMana:
-                case AttributeType.Mana:
-                case AttributeType.ManaRegeneration:
-                case AttributeType.RecoveryRate:
-                case AttributeType.Barrier:
-                    break; // no D scaling
-
-                // Offense
-                case AttributeType.AttackPower:
-                case AttributeType.SpellPower:
-                    scaled = ScaleOffense(baseValue, D);
-                    break;
-
-                case AttributeType.AttackSpeed:
-                    scaled = (float)(baseValue);
-                    break;
-
-                case AttributeType.Accuracy:
-                    scaled = (float)(baseValue * (1.0 + MonsterScalingConstants.AccuracyPerTier * D));
-                    break;
-
-                case AttributeType.CritChance:
-                    {
-                        var added = baseValue + (float)(MonsterScalingConstants.CritChancePerTier * D);
-                        scaled = Math.Min(added, MonsterScalingConstants.CritChanceCap);
-                        break;
-                    }
-
-                case AttributeType.CritDamage:
-                    {
-                        var added = baseValue + (float)(MonsterScalingConstants.CritDamagePerTier * D);
-                        scaled = Math.Min(added, MonsterScalingConstants.CritDamageCap);
-                        break;
-                    }
-
-                case AttributeType.MultiStrike:
-                case AttributeType.MultiCast:
-                    break; // role/traits only
-
-                case AttributeType.ArmorPenetration:
-                case AttributeType.ManaPenetration:
-                    scaled = (float)(baseValue * (1.0 + MonsterScalingConstants.PenPerTier * D));
-                    break;
-
-                // Defense
-                case AttributeType.PhysicalDefense:
-                case AttributeType.MagicalDefense:
-                    scaled = ScaleDefense(baseValue, D);
-                    break;
-
-                case AttributeType.DamageReduction:
-                case AttributeType.CritDamageReduction:
-                case AttributeType.CrowdControlResistance:
-                    scaled = ScaleSoftDefense(baseValue, D);
-                    break;
-
-                case AttributeType.Dodge:
-                case AttributeType.Block:
-                case AttributeType.Parry:
-                    break;
-
-                // Control & utility
-                case AttributeType.Threat:
-                case AttributeType.CooldownReduction:
-                    break;
-
-                // Resistances
-                case AttributeType.FireResistance:
-                case AttributeType.WaterResistance:
-                case AttributeType.EarthResistance:
-                case AttributeType.AirResistance:
-                    scaled = ScaleResistance(baseValue, D);
-                    break;
-            }
+                AttributeType.MaxHealth => ScaleHp(baseValue, D),
+                AttributeType.Power => ScaleOffense(baseValue, D),
+                AttributeType.Precision => (float)(baseValue * (1.0 + MonsterScalingConstants.AccuracyPerTier * D)),
+                AttributeType.CritChance => Math.Min(baseValue + (float)(MonsterScalingConstants.CritChancePerTier * D), MonsterScalingConstants.CritChanceCap),
+                AttributeType.CritDamage => Math.Min(baseValue + (float)(MonsterScalingConstants.CritDamagePerTier * D), MonsterScalingConstants.CritDamageCap),
+                AttributeType.ArmorPenetration => (float)(baseValue * (1.0 + MonsterScalingConstants.PenPerTier * D)),
+                AttributeType.MagicPenetration => (float)(baseValue * (1.0 + MonsterScalingConstants.PenPerTier * D)),
+                AttributeType.Armor => ScaleDefense(baseValue, D),
+                AttributeType.Resistance => ScaleResistance(baseValue, D),
+                AttributeType.DamageReduction => ScaleSoftDefense(baseValue, D),
+                AttributeType.CrowdControlResistance => ScaleSoftDefense(baseValue, D),
+                AttributeType.StatusResistance => ScaleSoftDefense(baseValue, D),
+                _ => baseValue
+            };
 
             creature.BaseAttributesDict[type] = (int)scaled;
         }
@@ -173,20 +102,18 @@ public class CreatureScaler : ICreatureScaler
     {
         var p = Archetypes.Get(creature.Archetype);
 
-        ScaleGroup(creature, AttributeType.MaxHealth, AttributeType.Health, p.HealthMultiplier);
-        ScaleGroup(creature, AttributeType.AttackPower, AttributeType.SpellPower, p.DamageMultiplier);
-        ScaleGroup(creature, AttributeType.PhysicalDefense, AttributeType.MagicalDefense, p.DefenseMultiplier);
-        ScaleSingle(creature, AttributeType.AttackSpeed, p.SpeedMultiplier);
+        ScaleSingle(creature, AttributeType.MaxHealth, p.HealthMultiplier);
+        ScaleSingle(creature, AttributeType.Power, p.DamageMultiplier);
+        ScaleGroup(creature, AttributeType.Armor, AttributeType.Resistance, p.DefenseMultiplier);
+        ScaleSingle(creature, AttributeType.Precision, p.SpeedMultiplier);
     }
 
     private static void ApplyDamageProfile(Creature creature)
     {
         var p = DamageProfiles.Get(creature.DamageProfile);
 
-        ScaleSingle(creature, AttributeType.AttackPower, p.PhysicalBias);
-        ScaleSingle(creature, AttributeType.SpellPower, p.MagicalBias);
-        ScaleSingle(creature, AttributeType.ArmorPenetration, p.PenBias);
-        ScaleSingle(creature, AttributeType.ManaPenetration, p.PenBias);
+        ScaleSingle(creature, AttributeType.Power, (p.PhysicalBias + p.MagicalBias) / 2f);
+        ScaleGroup(creature, AttributeType.ArmorPenetration, AttributeType.MagicPenetration, p.PenBias);
         ScaleSingle(creature, AttributeType.CritChance, p.CritBias);
         ScaleSingle(creature, AttributeType.CritDamage, p.CritBias);
     }
@@ -195,23 +122,19 @@ public class CreatureScaler : ICreatureScaler
     {
         var p = DefenseProfiles.Get(creature.DefenseProfile);
 
-        ScaleSingle(creature, AttributeType.PhysicalDefense, p.PhysicalDefenseBias);
-        ScaleSingle(creature, AttributeType.MagicalDefense, p.MagicalDefenseBias);
-
-        ScaleSingle(creature, AttributeType.FireResistance, p.ResistBias);
-        ScaleSingle(creature, AttributeType.WaterResistance, p.ResistBias);
-        ScaleSingle(creature, AttributeType.EarthResistance, p.ResistBias);
-        ScaleSingle(creature, AttributeType.AirResistance, p.ResistBias);
+        ScaleSingle(creature, AttributeType.Armor, p.PhysicalDefenseBias);
+        ScaleSingle(creature, AttributeType.Resistance, p.MagicalDefenseBias);
+        ScaleSingle(creature, AttributeType.Resistance, p.ResistBias);
     }
 
     //private static void ApplyElementProfile(Creature creature)
     //{
     //    var p = ElementProfiles.Get(creature.ElementProfileId);
 
-    //    ScaleSingle(creature, AttributeType.FireResistance, p.FireResMultiplier);
-    //    ScaleSingle(creature, AttributeType.WaterResistance, p.WaterResMultiplier);
-    //    ScaleSingle(creature, AttributeType.EarthResistance, p.EarthResMultiplier);
-    //    ScaleSingle(creature, AttributeType.AirResistance, p.AirResMultiplier);
+    //    ScaleSingle(creature, AttributeType.Resistance, p.FireResMultiplier);
+    //    ScaleSingle(creature, AttributeType.Resistance, p.WaterResMultiplier);
+    //    ScaleSingle(creature, AttributeType.Resistance, p.EarthResMultiplier);
+    //    ScaleSingle(creature, AttributeType.Resistance, p.AirResMultiplier);
     //}
 
     //private static void ApplyBossProfile(Creature creature)
@@ -221,20 +144,20 @@ public class CreatureScaler : ICreatureScaler
 
     //    var p = BossProfiles.Get(creature.BossRank);
 
-    //    ScaleGroup(creature, AttributeType.MaxHealth, AttributeType.Health, p.HealthMultiplier);
-    //    ScaleGroup(creature, AttributeType.AttackPower, AttributeType.SpellPower, p.DamageMultiplier);
-    //    ScaleGroup(creature, AttributeType.PhysicalDefense, AttributeType.MagicalDefense, p.DefenseMultiplier);
+    //    ScaleGroup(creature, AttributeType.MaxHealth, AttributeType.MaxHealth, p.HealthMultiplier);
+    //    ScaleGroup(creature, AttributeType.Power, AttributeType.Power, p.DamageMultiplier);
+    //    ScaleGroup(creature, AttributeType.Armor, AttributeType.Resistance, p.DefenseMultiplier);
 
-    //    ScaleSingle(creature, AttributeType.AttackSpeed, p.SpeedMultiplier);
-    //    ScaleSingle(creature, AttributeType.CooldownReduction, p.CdrMultiplier);
+    //    ScaleSingle(creature, AttributeType.Precision, p.SpeedMultiplier);
+    //    ScaleSingle(creature, AttributeType.Cooldown, p.CdrMultiplier);
     //}
 
     //private static void ApplyCreatureFactors(Creature creature)
     //{
-    //    ScaleGroup(creature, AttributeType.MaxHealth, AttributeType.Health, creature.HealthFactor);
-    //    ScaleGroup(creature, AttributeType.AttackPower, AttributeType.SpellPower, creature.DamageFactor);
-    //    ScaleGroup(creature, AttributeType.PhysicalDefense, AttributeType.MagicalDefense, creature.DefenseFactor);
-    //    ScaleSingle(creature, AttributeType.AttackSpeed, creature.SpeedFactor);
+    //    ScaleGroup(creature, AttributeType.MaxHealth, AttributeType.MaxHealth, creature.HealthFactor);
+    //    ScaleGroup(creature, AttributeType.Power, AttributeType.Power, creature.DamageFactor);
+    //    ScaleGroup(creature, AttributeType.Armor, AttributeType.Resistance, creature.DefenseFactor);
+    //    ScaleSingle(creature, AttributeType.Precision, creature.SpeedFactor);
     //}
 
     //private static void ApplyRubberBanding(Creature creature, Area ctx, int effectiveD)
@@ -254,9 +177,9 @@ public class CreatureScaler : ICreatureScaler
     //        {
     //            var ratio = (float)clampedD / effectiveD;
 
-    //            ScaleGroup(creature, AttributeType.MaxHealth, AttributeType.Health, ratio);
-    //            ScaleSingle(creature, AttributeType.AttackPower, ratio);
-    //            ScaleSingle(creature, AttributeType.SpellPower, ratio);
+    //            ScaleGroup(creature, AttributeType.MaxHealth, AttributeType.MaxHealth, ratio);
+    //            ScaleSingle(creature, AttributeType.Power, ratio);
+    //            ScaleSingle(creature, AttributeType.Power, ratio);
     //        }
 
     //        return;
@@ -271,7 +194,7 @@ public class CreatureScaler : ICreatureScaler
     //            weaknessFactor
     //        );
 
-    //        ScaleGroup(creature, AttributeType.MaxHealth, AttributeType.Health, hpMult);
+    //        ScaleGroup(creature, AttributeType.MaxHealth, AttributeType.MaxHealth, hpMult);
     //    }
     //}
 
@@ -296,17 +219,17 @@ public class CreatureScaler : ICreatureScaler
         if (!creature.BaseAttributesDict.TryGetValue(AttributeType.MaxHealth, out var hp))
             return;
 
-        if (!creature.BaseAttributesDict.TryGetValue(AttributeType.Barrier, out var barrier))
+        if (!creature.BaseAttributesDict.TryGetValue(AttributeType.BlockEffectiveness, out var barrier))
             return;
 
-        creature.BaseAttributesDict[AttributeType.Barrier] = Math.Min(barrier, hp * 2f);
+        creature.BaseAttributesDict[AttributeType.BlockEffectiveness] = Math.Min(barrier, hp * 2f);
     }
 
     private static void SyncHealth(Creature creature)
     {
         if (creature.BaseAttributesDict.TryGetValue(AttributeType.MaxHealth, out var maxHp))
         {
-            creature.BaseAttributesDict[AttributeType.Health] = maxHp;
+            creature.BaseAttributesDict[AttributeType.MaxHealth] = maxHp;
         }
     }
 

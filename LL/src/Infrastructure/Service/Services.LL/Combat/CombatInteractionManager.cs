@@ -1,10 +1,10 @@
-﻿using Domain.Helpers;
+using Domain.Helpers;
 using Domain.Helpers.Constants;
 using Domain.Interfaces.Combat;
-using Domain.Models.Abilities;
-using Domain.Models.Abilities.Effects;
-using Domain.Models.Abilities.Effects.EffectModifications;
-using Domain.Models.Abilities.Effects.Trigger;
+using Domain.Models.Combat.Abilities;
+using Domain.Models.Combat.Abilities.Effects;
+using Domain.Models.Combat.Abilities.Effects.EffectModifications;
+using Domain.Models.Combat.Abilities.Effects.Trigger;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Damages;
@@ -67,8 +67,8 @@ public class CombatInteractionManager : ICombatInteractionManager
         // TODO: Add damage reduction based on bleed, burn, and poison as well. (Bleed and burn physical, poison magical)
         var defenseValue = damageType switch
         {
-            DamageType.Physical => target.GetAttributeValue(AttributeType.PhysicalDefense),
-            DamageType.Magical => target.GetAttributeValue(AttributeType.MagicalDefense),
+            DamageType.Physical => target.GetAttributeValue(AttributeType.Armor),
+            DamageType.Magical => target.GetAttributeValue(AttributeType.Resistance),
             _ => 0
         };
 
@@ -86,7 +86,7 @@ public class CombatInteractionManager : ICombatInteractionManager
         bool isCrit = (outcome == AttackOutcome.Crit);
         if (isCrit)
         {
-            float critReductionMultiplier = 1 - (target.CombatAttributes[AttributeType.CritDamageReduction] / 100f);
+            float critReductionMultiplier = 1 - (target.CombatAttributes[AttributeType.DamageReduction] / 100f);
             critReductionMultiplier = Math.Clamp(critReductionMultiplier, 0, 1);
             damageAfterBarrier *= critReductionMultiplier;
         }
@@ -108,21 +108,21 @@ public class CombatInteractionManager : ICombatInteractionManager
         absorbedByBarrier = 0;
 
         // If no barrier, just return
-        if (!target.CombatAttributes.TryGetValue(AttributeType.Barrier, out float barrier) || barrier <= 0)
+        if (!target.CombatAttributes.TryGetValue(AttributeType.BlockEffectiveness, out float barrier) || barrier <= 0)
             return incomingDamage;
 
         if (incomingDamage >= barrier)
         {
             // Barrier fully consumed
             absorbedByBarrier = barrier;
-            target.CombatAttributes[AttributeType.Barrier] = 0;
+            target.CombatAttributes[AttributeType.BlockEffectiveness] = 0;
             return incomingDamage - barrier;
         }
         else
         {
             // Barrier partially absorbs damage, but still remains
             absorbedByBarrier = incomingDamage;
-            target.CombatAttributes[AttributeType.Barrier] = barrier - incomingDamage;
+            target.CombatAttributes[AttributeType.BlockEffectiveness] = barrier - incomingDamage;
             return 0;
         }
     }
@@ -140,7 +140,7 @@ public class CombatInteractionManager : ICombatInteractionManager
         //var weapon = actor.Equipment.FirstOrDefault(e => e.EquipmentBase.EquipmentType == EquipmentType.MainHand)
         //             ?? new Weapon { DamageType = DamageType.Physical };
 
-        var finalDamage = baseDamage + (actor.CombatAttributes[AttributeType.AttackPower] / 6); //TODO: Need proper calculation. Likely scaling of weapon
+        var finalDamage = baseDamage + (actor.CombatAttributes[AttributeType.Power] / 6); //TODO: Need proper calculation. Likely scaling of weapon
         finalDamage = CombatConstants.GetRandomValue(finalDamage);
 
         // Potential for more complex calculations, crit chance, etc.
@@ -149,8 +149,7 @@ public class CombatInteractionManager : ICombatInteractionManager
 
     public void ApplyDamage(CombatEntity source, CombatEntity target, int damage, AttackType attackType)
     {
-
-        target.CombatAttributes[AttributeType.Health] -= damage;
+        target.AdjustCurrentHealth(-damage);
 
         // TODO: Make sure something like "Retaliate" is only triggered based on a specific TriggerEvent. And this effect should not return that specific TriggerEvent
 
@@ -227,8 +226,8 @@ public class CombatInteractionManager : ICombatInteractionManager
     {
         var healing = context.Magnitude;
 
-        float maxHealth = context.Target.CombatAttributes[AttributeType.MaxHealth];
-        float currentHealth = context.Target.CombatAttributes[AttributeType.Health];
+        float maxHealth = context.Target.GetAttributeValue(AttributeType.MaxHealth);
+        float currentHealth = context.Target.CurrentHealth;
 
         // If overhealing occurs
         if (currentHealth + healing > maxHealth)
@@ -237,7 +236,7 @@ public class CombatInteractionManager : ICombatInteractionManager
             var actualHealing = (int)(maxHealth - currentHealth);
             // Either set Health = MaxHealth, or use 'actualHealing'
             // as that can also be used for a trigger effect (gain shield per x healing done)
-            context.Target.CombatAttributes[AttributeType.Health] += actualHealing;
+            context.Target.AdjustCurrentHealth(actualHealing);
 
             // Trigger effects for overhealing
             _combatContext.EventBus.Publish(new CombatEvent
@@ -249,7 +248,7 @@ public class CombatInteractionManager : ICombatInteractionManager
         }
         else
         {
-            context.Target.CombatAttributes[AttributeType.Health] += healing;
+            context.Target.AdjustCurrentHealth(healing);
 
             // Trigger normal healing effects
             _combatContext.EventBus.Publish(new CombatEvent

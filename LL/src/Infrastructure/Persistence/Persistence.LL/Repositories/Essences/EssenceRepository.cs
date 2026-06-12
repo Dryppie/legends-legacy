@@ -1,12 +1,11 @@
-﻿using Application.Common.Interfaces;
-using Common.Exceptions;
+using Application.Common.Interfaces;
+using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
-using Domain.Models.Essences.EssenceSlots;
-using Domain.Models.Items.EssenceItems;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Essences;
-public class EssenceRepository : IEssenceRepository
+
+public sealed class EssenceRepository : IEssenceRepository
 {
     private readonly IDbContext _context;
 
@@ -14,77 +13,79 @@ public class EssenceRepository : IEssenceRepository
     {
         _context = context;
     }
-    public async Task<bool> EquipEssence(Guid characterId, Guid essenceItemId, CancellationToken cancellationToken)
-    {
-        var character = await _context.Characters
-            .Include(c => c.EssenceSlots)
-                .ThenInclude(es => es.OccupiedEssence)
-            .Include(c => c.Inventory)
-                .ThenInclude(inv => inv.InventoryItems)
-                    .ThenInclude(ii => ii.ItemInstance)
-                        .ThenInclude(ii => ii.ItemBase)
-                            .ThenInclude(ib => (ib as EssenceItemBase).Essence)
-            .FirstOrDefaultAsync(c => c.Id == characterId, cancellationToken);
 
-        // Throw if the character does not exist
-        if (character == null) return false;
-
-        var inventoryItem = character.Inventory.InventoryItems
-            .FirstOrDefault(ii => ii.ItemInstance is EssenceItemInstance ei && ei.ItemBase is EssenceItemBase eib && eib.Essence.Id.Equals(essenceItemId));
-
-        // Throw if the item was not found
-        if (inventoryItem == null) return false;
-
-        var essenceItem = inventoryItem.ItemInstance as EssenceItemInstance;
-        if (essenceItem == null) return false;
-
-        var essence = (essenceItem.ItemBase as EssenceItemBase)!.Essence;
-        if (essence == null) return false;
-
-        if (inventoryItem.Quantity < 1) return false;
-
-        // Check if the character has already equipped this essence
-        if (character.EssenceSlots.Any(es => es.OccupiedEssence?.Id == essence.Id)) return false;
-
-        // Check if all active slots already contain an essence
-        if (character.EssenceSlots.Where(es => es.SlotState == SlotState.Active).All(es => es.OccupiedEssence != null)) return false;
-
-        // 4) Add the essence to the character's first EssenceSlot that is both Active and has no occupied Essence
-        character.EssenceSlots.Where(es => es.SlotState == SlotState.Active && es.OccupiedEssence == null).First().OccupiedEssence = essence;
-
-        // Decrease the quantity of the inventory item
-        if (inventoryItem.Quantity > 1)
-        {
-            inventoryItem.Quantity -= 1; // Reduce quantity by 1
-        }
-        else
-        {
-            // Remove the inventory item if quantity reaches 0
-            _context.InventoryItems.Remove(inventoryItem);
-        }
-
-        return true;
-    }
-
-    public async Task<bool> DeleteEquippedEssence(Guid characterId, Guid essenceId, CancellationToken cancellationToken)
-    {
-        var character = await _context.Characters
-            .Include(c => c.EssenceSlots)
-                .ThenInclude(es => es.OccupiedEssence)
-            .FirstOrDefaultAsync(c => c.Id.Equals(characterId), cancellationToken);
-
-        NotFoundException.ThrowIfNull(character, nameof(character), characterId);
-
-        character.EssenceSlots.First(es => es.OccupiedEssence != null && es.OccupiedEssence.Id.Equals(essenceId)).OccupiedEssence = null;
-
-        return true;
-    }
-
-    public async Task<List<EssenceSlot>> GetEquippedEssences(Guid characterId, CancellationToken cancellationToken)
-    {
-        return await _context.EssenceSlots
-            .Include(es => es.OccupiedEssence)
-            .Where(c => c.EntityId == characterId)
+    public async Task<List<EssenceLoadoutSlot>> GetActiveSlotsAsync(Guid characterId, CancellationToken cancellationToken) =>
+        await _context.EssenceLoadoutSlots
+            .Include(x => x.PlayerEssence)
+            .Include(x => x.EssenceLoadout)
+            .Where(x => x.EssenceLoadout.CharacterId == characterId && x.EssenceLoadout.IsActive && x.PlayerEssenceId != null)
             .ToListAsync(cancellationToken);
-    }
+
+    public async Task<Character?> GetCharacterWithEssenceLoadoutsAsync(Guid characterId, CancellationToken cancellationToken) =>
+        await _context.Characters
+            .Include(x => x.EssenceLoadouts)
+                .ThenInclude(x => x.Slots)
+                    .ThenInclude(x => x.PlayerEssence)
+            .AsSingleQuery()
+            .FirstOrDefaultAsync(x => x.Id == characterId, cancellationToken);
+
+    public async Task<EssenceLoadout?> GetActiveLoadoutAsync(Guid characterId, CancellationToken cancellationToken) =>
+        await _context.EssenceLoadouts
+            .Include(x => x.Slots)
+                .ThenInclude(x => x.PlayerEssence)
+            .FirstOrDefaultAsync(x => x.CharacterId == characterId && x.IsActive, cancellationToken);
+
+    public async Task<int> GetCharacterLevelAsync(Guid characterId, CancellationToken cancellationToken) =>
+        await _context.Characters
+            .Where(x => x.Id == characterId)
+            .Select(x => x.Level)
+            .FirstOrDefaultAsync(cancellationToken);
+
+    public async Task<List<PlayerEssence>> GetPlayerEssencesAsync(Guid characterId, CancellationToken cancellationToken) =>
+        await _context.PlayerEssences
+            .Where(x => x.CharacterId == characterId)
+            .OrderByDescending(x => x.IsFavorite)
+            .ThenBy(x => x.EssenceDefinitionId)
+            .ToListAsync(cancellationToken);
+
+    public async Task<PlayerEssence?> GetPlayerEssenceAsync(Guid characterId, Guid playerEssenceId, CancellationToken cancellationToken) =>
+        await _context.PlayerEssences.FirstOrDefaultAsync(x => x.Id == playerEssenceId && x.CharacterId == characterId, cancellationToken);
+
+    public async Task<bool> HasPlayerEssenceAsync(Guid characterId, string essenceDefinitionId, CancellationToken cancellationToken) =>
+        await _context.PlayerEssences.AnyAsync(x => x.CharacterId == characterId && x.EssenceDefinitionId == essenceDefinitionId, cancellationToken);
+
+    public async Task<int> CountOwnedPlayerEssencesAsync(Guid characterId, IReadOnlyCollection<Guid> playerEssenceIds, CancellationToken cancellationToken) =>
+        await _context.PlayerEssences.CountAsync(x => x.CharacterId == characterId && playerEssenceIds.Contains(x.Id), cancellationToken);
+
+    public async Task AddPlayerEssenceAsync(PlayerEssence essence, CancellationToken cancellationToken) =>
+        await _context.PlayerEssences.AddAsync(essence, cancellationToken);
+
+    public async Task<CreatureResonance?> GetMonsterResonanceAsync(Guid characterId, string creatureId, CancellationToken cancellationToken) =>
+        await _context.MonsterResonances.FirstOrDefaultAsync(x => x.CharacterId == characterId && x.CreatureId == creatureId, cancellationToken);
+
+    public async Task AddMonsterResonanceAsync(CreatureResonance resonance, CancellationToken cancellationToken) =>
+        await _context.MonsterResonances.AddAsync(resonance, cancellationToken);
+
+    public async Task<EssenceLoadout?> GetLoadoutWithSlotsAsync(Guid characterId, Guid loadoutId, CancellationToken cancellationToken) =>
+        await _context.EssenceLoadouts
+            .Include(x => x.Slots)
+            .FirstOrDefaultAsync(x => x.Id == loadoutId && x.CharacterId == characterId, cancellationToken);
+
+    public async Task<List<EssenceLoadout>> GetLoadoutsWithSlotsAsync(Guid characterId, CancellationToken cancellationToken) =>
+        await _context.EssenceLoadouts
+            .Include(x => x.Slots)
+            .Where(x => x.CharacterId == characterId)
+            .ToListAsync(cancellationToken);
+
+    public async Task<int> CountLoadoutsAsync(Guid characterId, CancellationToken cancellationToken) =>
+        await _context.EssenceLoadouts.CountAsync(x => x.CharacterId == characterId, cancellationToken);
+
+    public async Task AddLoadoutAsync(EssenceLoadout loadout, CancellationToken cancellationToken) =>
+        await _context.EssenceLoadouts.AddAsync(loadout, cancellationToken);
+
+    public async Task<EssenceLoadout?> GetLoadoutAsync(Guid characterId, Guid loadoutId, CancellationToken cancellationToken) =>
+        await _context.EssenceLoadouts.FirstOrDefaultAsync(x => x.Id == loadoutId && x.CharacterId == characterId, cancellationToken);
+
+    public void RemoveLoadout(EssenceLoadout loadout) =>
+        _context.EssenceLoadouts.Remove(loadout);
 }

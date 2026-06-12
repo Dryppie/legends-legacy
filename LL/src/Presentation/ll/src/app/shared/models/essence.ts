@@ -1,6 +1,5 @@
 import { AttributeModifier } from './Dtos/attributesDto';
 import { EffectTag } from './enums/effectType';
-import { ResourceType } from './enums/resourceType';
 import { Targeting } from './enums/targeting';
 
 export interface Essence {
@@ -19,12 +18,6 @@ export interface Ability {
   effectTags: EffectTag[];
   targeting: Targeting[];
   cooldown: number;
-  cost: ResourceCost;
-}
-
-export interface ResourceCost {
-  type: ResourceType;
-  amount: number;
 }
 
 export enum AttackType {

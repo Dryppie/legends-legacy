@@ -1,8 +1,8 @@
-﻿using Application.Common.Mappings;
+using Application.Common.Mappings;
+using Application.UseCases.Essences.Dtos;
 using AutoMapper;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Characters;
-using Domain.Models.Essences.EssenceSlots;
 
 namespace Application.UseCases.Characters.Dtos;
 public class CharacterOverviewDto : IMapFrom<Character>
@@ -11,7 +11,7 @@ public class CharacterOverviewDto : IMapFrom<Character>
     public int Level { get; set; }
     public List<EntityAttribute> BaseAttributes { get; set; } = [];
     public List<EntityAttribute> BaseCombatAttributes { get; set; } = [];
-    public List<EssenceSlot> EssenceSlots { get; set; } = [];
+    public EssenceLoadoutDto? ActiveEssenceLoadout { get; set; }
 
     public void Mapping(Profile profile)
     {
@@ -19,11 +19,27 @@ public class CharacterOverviewDto : IMapFrom<Character>
             .ForMember(dest => dest.BaseCombatAttributes, opt => opt.MapFrom(src =>
                 src.BaseCombatAttributes.Select(kvp => new EntityAttribute
                 {
-                    EntityId = src.Id, // Assuming your Character has an Id property
+                    EntityId = src.Id,
                     AttributeType = kvp.Key,
                     Value = kvp.Value
                 }).ToList()
+            ))
+            .ForMember(dest => dest.ActiveEssenceLoadout, opt => opt.MapFrom(src =>
+                src.EssenceLoadouts
+                    .Where(loadout => loadout.IsActive)
+                    .Select(loadout => new EssenceLoadoutDto(
+                        loadout.Id,
+                        loadout.Name,
+                        loadout.IsActive,
+                        loadout.Slots
+                            .OrderBy(slot => slot.SlotIndex)
+                            .Select(slot => new EssenceLoadoutSlotDto(
+                                slot.SlotIndex,
+                                slot.PlayerEssenceId,
+                                slot.PlayerEssence == null ? null : slot.PlayerEssence.EssenceDefinitionId,
+                                slot.PlayerEssence == null ? null : slot.PlayerEssence.EssenceDefinitionId))
+                            .ToList()))
+                    .FirstOrDefault()
             ));
     }
-
 }

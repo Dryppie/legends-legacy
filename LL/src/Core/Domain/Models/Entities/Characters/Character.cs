@@ -2,6 +2,7 @@
 using Domain.Models.Colosseum;
 using Domain.Models.Guilds;
 using Domain.Models.Inventories;
+using Domain.Models.Essences;
 using Domain.Models.Professions;
 using Domain.Models.Soulstones;
 using Domain.Models.Users;
@@ -26,6 +27,7 @@ public class Character : Entity
     public int ArenaRating { get; set; } = 1000;
     public ICollection<ColosseumMatchResult> ColosseumMatches { get; set; } = [];
     public ArenaTicketStatus ArenaTicketStatus { get; set; } = null!;
+    public ICollection<EssenceLoadout> EssenceLoadouts { get; set; } = [];
     //public Guid? GuildId { get; set; }
     public Guild? Guild { get; set; }
     public ICollection<Profession> Professions { get; set; } = [];

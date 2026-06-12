@@ -1,0 +1,62 @@
+using Application.Interfaces.Services.LL.Essences;
+using Domain.Models.Essences;
+using Domain.Models.Essences.Definitions;
+
+namespace Services.LL.Essences;
+
+public sealed class EssenceProgressionService : IEssenceProgressionService
+{
+    private readonly IEssenceDefinitionRepository _definitions;
+
+    public EssenceProgressionService(IEssenceDefinitionRepository definitions)
+    {
+        _definitions = definitions;
+    }
+
+    public int GetLevelCap(int ascensionTier) => ascensionTier switch
+    {
+        <= 0 => 10,
+        1 => 20,
+        2 => 30,
+        _ => 40
+    };
+
+    public int GetXpRequiredForNextLevel(PlayerEssence essence, EssenceDefinition definition)
+    {
+        if (essence.Level >= GetLevelCap(essence.AscensionTier)) return 0;
+        var templates = _definitions.GetProgressionTemplates();
+        return templates.TryGetValue(definition.ProgressionTemplateId, out var template)
+            ? template.GetXpRequiredForLevel(essence.Level)
+            : new EssenceProgressionTemplate().GetXpRequiredForLevel(essence.Level);
+    }
+
+    public EssenceXpGrantResult GrantXp(PlayerEssence essence, EssenceDefinition definition, int requestedXp)
+    {
+        if (requestedXp <= 0) return new(0, 0, essence.Level >= GetLevelCap(essence.AscensionTier));
+
+        var remaining = requestedXp;
+        var gained = 0;
+        var levels = 0;
+        var cap = GetLevelCap(essence.AscensionTier);
+
+        while (remaining > 0 && essence.Level < cap)
+        {
+            var required = GetXpRequiredForNextLevel(essence, definition);
+            var needed = required - essence.CurrentXp;
+            var applied = Math.Min(remaining, needed);
+            essence.CurrentXp += applied;
+            remaining -= applied;
+            gained += applied;
+
+            if (essence.CurrentXp < required) break;
+
+            essence.Level++;
+            levels++;
+            essence.CurrentXp = 0;
+        }
+
+        if (essence.Level >= cap) essence.CurrentXp = 0;
+        essence.UpdatedAt = DateTimeOffset.UtcNow;
+        return new(gained, levels, essence.Level >= cap);
+    }
+}

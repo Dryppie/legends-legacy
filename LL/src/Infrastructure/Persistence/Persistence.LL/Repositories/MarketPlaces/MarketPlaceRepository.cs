@@ -1,7 +1,5 @@
-﻿using Application.Common.Interfaces;
-using Common.Helpers.Essences;
+using Application.Common.Interfaces;
 using Domain.Models.Items.Equipments;
-using Domain.Models.Items.EssenceItems;
 using Domain.Models.MarketPlaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,18 +18,7 @@ public class MarketPlaceRepository : IMarketPlaceRepository
             .Include(mpl => mpl.ItemInstance)
                 .ThenInclude(ii => ii.ItemBase)
                     .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
-            .Include(mpl => mpl.ItemInstance)
-                .ThenInclude(ii => ii.ItemBase)
-                    .ThenInclude(ib => (ib as EssenceItemBase).Essence)
             .ToListAsync(cancellationToken);
-
-        foreach (var listing in marketPlaceListings)
-        {
-            if (listing.ItemInstance is EssenceItemInstance ei && ei.ItemBase is EssenceItemBase eib && eib.Essence != null)
-            {
-                EssenceLoader.Instance.LoadAbilitiesForEssence(eib.Essence);
-            }
-        }
 
         return marketPlaceListings;
     }

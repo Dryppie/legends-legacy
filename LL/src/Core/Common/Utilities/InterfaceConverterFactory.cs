@@ -1,4 +1,4 @@
-﻿using Domain.Interfaces.Abilities;
+using Domain.Interfaces.Combat.Abilities;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

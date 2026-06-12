@@ -1,5 +1,10 @@
 import { Component, Input } from '@angular/core';
-import { Equipment, EssenceItem, ItemInstance } from '../../../models/item';
+import {
+  Equipment,
+  EssenceItem,
+  essenceItemToEssence,
+  ItemInstance,
+} from '../../../models/item';
 import { NgClass, NgIf } from '@angular/common';
 import { Rarity } from '../../../models/enums/rarity';
 import { ItemType } from '../../../models/enums/itemType';
@@ -52,7 +57,7 @@ export class ItemTooltipComponent {
 
   openEssenceModal() {
     this.modalService.toggleEssenceModal(
-      (this.item.itemBase as EssenceItem).essence,
+      essenceItemToEssence(this.item.itemBase as EssenceItem),
     ); // Pass the essence from the Item to display all necessary info
   }
 }

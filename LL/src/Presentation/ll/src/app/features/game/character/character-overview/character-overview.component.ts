@@ -5,7 +5,6 @@ import { catchError, EMPTY, take } from 'rxjs';
 import { CharacterService } from '../../../../core/services/api/character/character.service';
 import { CharacterAttributesComponent } from '../../../../shared/components/character/character-attributes/character-attributes.component';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
-import { EquippedEssencesComponent } from '../../../../shared/components/essences/equipped-essences/equipped-essences.component';
 import { CharacterOverviewDto } from '../../../../shared/models/Dtos/characterDto';
 import { RegularButtonComponent } from '../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 
@@ -14,7 +13,6 @@ import { RegularButtonComponent } from '../../../../shared/components/custom-com
   standalone: true,
   imports: [
     DefaultHeaderComponent,
-    EquippedEssencesComponent,
     CharacterAttributesComponent,
     NgIf,
     FormsModule,

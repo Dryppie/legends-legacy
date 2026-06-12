@@ -1,8 +1,8 @@
-﻿using Domain.Interfaces.Combat;
-using Domain.Models.Abilities;
-using Domain.Models.Abilities.Effects;
-using Domain.Models.Abilities.Effects.Trigger;
-using Domain.Models.Abilities.Statuses;
+using Domain.Interfaces.Combat;
+using Domain.Models.Combat.Abilities;
+using Domain.Models.Combat.Abilities.Effects;
+using Domain.Models.Combat.Abilities.Effects.Trigger;
+using Domain.Models.Combat.Abilities.Statuses;
 
 namespace Services.LL.Combat;
 public class CombatEffectManager : ICombatEffectManager
@@ -217,7 +217,7 @@ public class CombatEffectManager : ICombatEffectManager
 
     //                var ownTeam = _entityManager.GetOwnTeam(entity);
     //                var enemyTeam = _entityManager.GetOpposingTeam(entity);
-    //                var targeting = triggerTarget.Equals(Targeting.None) ? effect.Definition.Targeting : effect.Definition.TriggerTarget;
+    //                var targeting = triggerTarget.Equals(CombatTargeting.None) ? effect.Definition.Targeting : effect.Definition.TriggerTarget;
     //                targets = TargetingManager.SelectTargets(targeting, entity, enemyTeam, ownTeam);
 
 
@@ -283,11 +283,11 @@ public class CombatEffectManager : ICombatEffectManager
 
     //        var triggerTarget = effect.Definition.TriggerTarget;
 
-    //        if (triggerTarget.Equals(Targeting.CauseOfTrigger))
+    //        if (triggerTarget.Equals(CombatTargeting.CauseOfTrigger))
     //        {
     //            targets.Add(causeOfTrigger!);
     //        }
-    //        else if (triggerTarget.Equals(Targeting.AttackedEnemy))
+    //        else if (triggerTarget.Equals(CombatTargeting.AttackedEnemy))
     //        {
     //            targets.Add(causeOfTrigger!);
     //        }
@@ -295,7 +295,7 @@ public class CombatEffectManager : ICombatEffectManager
     //        {
     //            var ownTeam = _entityManager.GetOwnTeam(effectTriggeredOn);
     //            var enemyTeam = _entityManager.GetOpposingTeam(effectTriggeredOn);
-    //            var targeting = triggerTarget.Equals(Targeting.None) ? effect.Definition.Targeting : effect.Definition.TriggerTarget;
+    //            var targeting = triggerTarget.Equals(CombatTargeting.None) ? effect.Definition.Targeting : effect.Definition.TriggerTarget;
     //            targets = TargetingManager.SelectTargets(targeting, effectTriggeredOn, enemyTeam, ownTeam);
     //        }
 

@@ -1,18 +1,193 @@
 <div class="flex h-full flex-col overflow-hidden text-white sm:gap-4">
   <app-default-header
-    [text]="numberOfAbsorbedEssence()"
-    title="Essences"
+    [text]="essenceState.archiveText()"
+    title="Soul Archive"
     icon="character/essences"
   ></app-default-header>
-  <app-tabs class="flex h-full w-full flex-col overflow-hidden">
-    <app-tab label="Absorbed essences">
-      <app-essences-equipped
-        [essenceSlots]="essenceSlots"
-        class="h-full overflow-hidden"
-      ></app-essences-equipped>
-    </app-tab>
-    <app-tab label="Inventory essences">
-      <app-essences-absorb class="h-full overflow-hidden"></app-essences-absorb>
-    </app-tab>
-  </app-tabs>
+
+  <div class="flex flex-wrap gap-2 px-3 sm:px-0">
+    <button
+      type="button"
+      class="border border-white/15 px-3 py-2 text-sm text-white/70 hover:border-amber-300/60 hover:text-white"
+      [ngClass]="{
+        'border-amber-300 bg-white/10 text-white': essenceState.activeView() === 'archive'
+      }"
+      (click)="essenceState.setActiveView('archive')"
+    >
+      Archive
+    </button>
+    <button
+      type="button"
+      class="border border-white/15 px-3 py-2 text-sm text-white/70 hover:border-amber-300/60 hover:text-white"
+      [ngClass]="{
+        'border-amber-300 bg-white/10 text-white': essenceState.activeView() === 'absorb'
+      }"
+      (click)="essenceState.setActiveView('absorb')"
+    >
+      Absorb
+    </button>
+  </div>
+
+  <app-essences-absorb
+    *ngIf="essenceState.activeView() === 'absorb'"
+    class="min-h-0 flex-1 overflow-hidden"
+  ></app-essences-absorb>
+
+  <div
+    *ngIf="essenceState.activeView() === 'archive'"
+    class="grid min-h-0 flex-1 gap-4 overflow-hidden lg:grid-cols-[360px_1fr_320px]"
+  >
+    <section class="min-h-0 overflow-y-auto border border-white/10 bg-black/20 p-3">
+      <div class="mb-3 flex items-center justify-between">
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-white/70">Archived</h2>
+        <span class="text-sm text-white/60">{{ essenceState.archive()?.essenceDust ?? 0 }} dust</span>
+      </div>
+
+      <button
+        *ngFor="let essence of essenceState.archive()?.essences ?? []"
+        type="button"
+        class="mb-2 w-full border border-white/10 bg-white/5 p-3 text-left hover:border-amber-300/60"
+        [class.border-amber-300]="essenceState.selected()?.id === essence.id"
+        (click)="selectPlayerEssence(essence)"
+      >
+        <div class="flex items-center justify-between gap-3">
+          <span class="font-medium">{{ essence.name }}</span>
+          <span class="text-xs text-white/60">L{{ essence.level }} T{{ essence.ascensionTier }}</span>
+        </div>
+        <div class="mt-2 h-1.5 bg-white/10">
+          <div
+            class="h-full bg-amber-300"
+            [style.width.%]="essence.xpRequiredForNextLevel > 0 ? (essence.currentXp / essence.xpRequiredForNextLevel) * 100 : 100"
+          ></div>
+        </div>
+        <p class="mt-2 text-xs text-white/60">
+          {{ essence.attunedSlot === null || essence.attunedSlot === undefined ? 'Inactive in archive' : 'Attuned slot ' + (essence.attunedSlot + 1) }}
+        </p>
+      </button>
+    </section>
+
+    <section class="min-h-0 overflow-y-auto border border-white/10 bg-black/20 p-4" *ngIf="essenceState.selected() as essence">
+      <div class="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-semibold">{{ essence.name }}</h2>
+          <p class="text-sm text-white/60">Level {{ essence.level }} / {{ essence.tierLevelCap }} | Ascension Tier {{ essence.ascensionTier }}</p>
+        </div>
+        <button type="button" class="border border-white/20 px-3 py-2 text-sm" (click)="favorite(essence)">
+          {{ essence.isFavorite ? 'Unfavorite' : 'Favorite' }}
+        </button>
+      </div>
+
+      <div class="mt-4 grid gap-3 md:grid-cols-2">
+        <article class="border border-white/10 p-3">
+          <h3 class="font-medium">{{ essence.activeAbility.name }}</h3>
+          <p class="mt-1 text-sm text-white/70">{{ essence.activeAbility.description }}</p>
+          <p class="mt-2 text-xs text-emerald-200/80">
+            Cooldown: {{ essence.activeAbility.cooldownSeconds }}s
+          </p>
+        </article>
+        <article class="border border-white/10 p-3">
+          <h3 class="font-medium">{{ essence.passiveAbility.name }}</h3>
+          <p class="mt-1 text-sm text-white/70">{{ essence.passiveAbility.description }}</p>
+        </article>
+      </div>
+
+      <div class="mt-4">
+        <h3 class="text-sm font-semibold uppercase tracking-wide text-white/70">Current Bonuses</h3>
+        <div class="mt-2 grid gap-2 sm:grid-cols-2">
+          <div class="border border-white/10 p-2 text-sm" *ngFor="let bonus of essence.currentAttributeBonuses">
+            {{ bonus.attribute }} +{{ bonus.currentValue | number: '1.0-2' }}
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 flex flex-wrap gap-2">
+        <button type="button" class="border border-white/20 px-3 py-2 text-sm" (click)="spendDust(essence)">Spend 1 Dust</button>
+        <button type="button" class="border border-white/20 px-3 py-2 text-sm disabled:opacity-40" [disabled]="!essence.canAscend" (click)="ascend(essence)">Ascend</button>
+        <button type="button" class="border border-white/20 px-3 py-2 text-sm disabled:opacity-40" [disabled]="!essence.canEvolve" (click)="evolve(essence)">Evolve</button>
+      </div>
+
+      <ul class="mt-4 text-sm text-white/60" *ngIf="essence.missingRequirements.length > 0">
+        <li *ngFor="let requirement of essence.missingRequirements">{{ requirement }}</li>
+      </ul>
+    </section>
+
+    <section class="min-h-0 overflow-y-auto border border-white/10 bg-black/20 p-3">
+      <div class="mb-5 border-b border-white/10 pb-4">
+        <div class="mb-3 flex items-center justify-between gap-3">
+          <div>
+            <h2 class="text-sm font-semibold uppercase tracking-wide text-white/70">Loadouts</h2>
+            <p class="text-xs text-white/50">{{ essenceState.loadouts()?.loadouts?.length ?? 0 }}/{{ essenceState.loadouts()?.limit ?? 0 }} saved | {{ essenceState.loadouts()?.unlockedSlots ?? 0 }} slots</p>
+          </div>
+          <button type="button" class="border border-white/20 px-2 py-1 text-xs" (click)="essenceState.newLoadout()">New</button>
+        </div>
+
+        <div class="mb-3 grid gap-2">
+          <button
+            *ngFor="let loadout of essenceState.loadouts()?.loadouts ?? []"
+            type="button"
+            class="border border-white/10 bg-white/5 px-3 py-2 text-left text-sm hover:border-amber-300/60"
+            [class.border-amber-300]="essenceState.selectedLoadoutId() === loadout.id"
+            (click)="selectLoadout(loadout)"
+          >
+            <div class="flex items-center justify-between gap-2">
+              <span>{{ loadout.name }}</span>
+              <span class="text-xs text-emerald-200/80" *ngIf="loadout.isActive">Active</span>
+            </div>
+          </button>
+        </div>
+
+        <label class="mb-3 block text-xs uppercase tracking-wide text-white/60">
+          Name
+          <input
+            class="mt-1 w-full border border-white/10 bg-black/30 px-2 py-1.5 text-sm text-white outline-none focus:border-amber-300/70"
+            [ngModel]="essenceState.draftLoadoutName()"
+            (ngModelChange)="essenceState.setDraftLoadoutName($event)"
+          />
+        </label>
+
+        <div class="grid gap-2">
+          <label class="block text-xs text-white/60" *ngFor="let slotIndex of essenceState.slotIndexes()">
+            Slot {{ slotIndex + 1 }}
+            <select
+              class="mt-1 w-full border border-white/10 bg-black/30 px-2 py-1.5 text-sm text-white outline-none focus:border-amber-300/70"
+              [ngModel]="essenceState.draftSlots()[slotIndex]"
+              (ngModelChange)="essenceState.setDraftSlot(slotIndex, $event)"
+            >
+              <option [ngValue]="null">Empty</option>
+              <option
+                *ngFor="let essence of essenceState.essenceOptions()"
+                [ngValue]="essence.id"
+                [disabled]="essenceState.draftSlots().includes(essence.id) && essenceState.draftSlots()[slotIndex] !== essence.id"
+              >
+                {{ essence.name }}
+              </option>
+            </select>
+          </label>
+        </div>
+
+        <p class="mt-2 text-xs text-rose-200/80" *ngIf="essenceState.hasDuplicateDraftEssences()">
+          Each Essence can only be assigned once per loadout.
+        </p>
+        <p class="mt-2 text-xs text-rose-200/80" *ngIf="!essenceState.selectedLoadoutId() && (essenceState.loadouts()?.loadouts?.length ?? 0) >= (essenceState.loadouts()?.limit ?? 0)">
+          Loadout limit reached.
+        </p>
+
+        <div class="mt-3 flex flex-wrap gap-2">
+          <button type="button" class="border border-white/20 px-3 py-2 text-sm disabled:opacity-40" [disabled]="!essenceState.canSaveDraft()" (click)="essenceState.saveDraftLoadout()">Save</button>
+          <button type="button" class="border border-white/20 px-3 py-2 text-sm disabled:opacity-40" [disabled]="!essenceState.selectedLoadoutId() || essenceState.selectedLoadout()?.isActive" (click)="essenceState.activateSelectedLoadout()">Activate</button>
+          <button type="button" class="border border-white/20 px-3 py-2 text-sm disabled:opacity-40" [disabled]="!essenceState.selectedLoadoutId()" (click)="essenceState.deleteSelectedLoadout()">Delete</button>
+        </div>
+      </div>
+
+      <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-white/70">Catalog</h2>
+      <article class="mb-3 border border-white/10 p-3" *ngFor="let definition of essenceState.catalog()?.essences ?? []">
+        <h3 class="font-medium">{{ definition.name }}</h3>
+        <p class="mt-1 text-xs text-white/60">{{ definition.description }}</p>
+        <div class="mt-2 flex flex-wrap gap-1">
+          <span class="bg-white/10 px-2 py-1 text-xs" *ngFor="let tag of definition.tagsByCategory['Species'] ?? []">{{ tag }}</span>
+          <span class="bg-white/10 px-2 py-1 text-xs" *ngFor="let tag of definition.tagsByCategory['Role'] ?? []">{{ tag }}</span>
+        </div>
+      </article>
+    </section>
+  </div>
 </div>

@@ -9,6 +9,7 @@ public class ItemBase
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public bool Stackable { get; set; } = true;
+    public bool IsBound { get; set; }
     public ItemType ItemType { get; set; }
     public Rarity Rarity { get; set; }
     [JsonIgnore]

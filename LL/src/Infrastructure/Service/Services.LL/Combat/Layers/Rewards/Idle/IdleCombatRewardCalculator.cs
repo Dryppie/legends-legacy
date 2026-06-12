@@ -1,8 +1,8 @@
-﻿using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Bonuses;
 using Domain.Models.Entities;
 using Domain.Models.Inventories;
-using Domain.Models.Items;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Extensions;
 using Services.LL.Interfaces;
@@ -18,19 +18,22 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
     private readonly ICinderRewardCalculator _cinderRewardCalculator;
     private readonly ISoulstoneRewardCalculator _soulstoneRewardCalculator;
     private readonly IRandomSource _randomSource;
+    private readonly IEssenceResonanceService _essenceResonanceService;
 
     public IdleCombatRewardCalculator(
         IBonusService bonusService,
         ILootService lootService,
         ICinderRewardCalculator cinderRewardCalculator,
         ISoulstoneRewardCalculator soulstoneRewardCalculator,
-        IRandomSource randomSource)
+        IRandomSource randomSource,
+        IEssenceResonanceService essenceResonanceService)
     {
         _bonusService = bonusService;
         _lootService = lootService;
         _cinderRewardCalculator = cinderRewardCalculator;
         _soulstoneRewardCalculator = soulstoneRewardCalculator;
         _randomSource = randomSource;
+        _essenceResonanceService = essenceResonanceService;
     }
 
     public async Task<IdleCombatCalculatedOutcome> CalculateAsync(
@@ -42,7 +45,6 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
             facts.RequestedTo,
             cancellationToken);
 
-        var essenceDropRate = factors.Get(BonusKind.CombatEssenceDropRate);
         var doubleExpChance = factors.Get(BonusKind.CombatDoubleExpChance);
         var soulstoneDropRate = factors.Get(BonusKind.SoulstoneDropRate);
         var soulstoneDoubleDropChance = factors.Get(BonusKind.SoulstoneDoubleDropChance);
@@ -62,10 +64,18 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
             {
                 loot = _lootService.GenerateIdleCombatLootAsync(
                     encounter.HostileCreatures.Cast<Entity>().ToList(),
-                    new Dictionary<ItemType, double>
-                    {
-                        { ItemType.Essence, essenceDropRate }
-                    });
+                    []);
+
+                var essenceDrops = await _essenceResonanceService.RollEssenceDropsAsync(
+                    facts.CharacterId,
+                    encounter.HostileCreatures,
+                    eligible: true,
+                    cancellationToken);
+
+                if (essenceDrops.Count > 0)
+                {
+                    loot = loot.Concat(essenceDrops).ToList();
+                }
 
                 experience = encounter.HostileCreatures.Sum(x => x.ExperienceReward);
 

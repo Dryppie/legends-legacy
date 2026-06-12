@@ -1,23 +1,22 @@
 ﻿using Application.Common.Interfaces;
 using Application.Interfaces.Services.LL;
-using Application.Interfaces.Services.LL.Entities;
 using Domain.Extensions.Guilds;
+using Domain.Models.Entities.Characters;
 using Domain.Models.Guilds;
+using Domain.Models.Inventories;
 
 namespace Services.LL.Guilds;
 public class GuildService : IGuildService
 {
     private readonly IGuildRepository _guildRepository;
-    private readonly ICharacterService _characterService;
-    private readonly IInventoryService _inventoryService;
-    private readonly IDbContext _context;
+    private readonly IInventoryRepository _inventoryRepository;
+    private readonly ICharacterRepository _characterRepository;
 
-    public GuildService(IGuildRepository guildRepository, ICharacterService characterService, IInventoryService inventoryService, IDbContext context)
+    public GuildService(IGuildRepository guildRepository, IInventoryRepository inventoryRepository, ICharacterRepository characterRepository)
     {
         _guildRepository = guildRepository;
-        _characterService = characterService;
-        _inventoryService = inventoryService;
-        _context = context;
+        _inventoryRepository = inventoryRepository;
+        _characterRepository = characterRepository;
     }
 
     #region guild
@@ -95,10 +94,10 @@ public class GuildService : IGuildService
         var guild = await _guildRepository.GetMyGuildAsync(characterId, cancellationToken);
         if (guild == null) return false;
 
-        var character = await _characterService.GetMyCharacterOverviewAsync(characterId, cancellationToken);
+        var character = await _characterRepository.GetCharacterByCharacterIdAsync(characterId, cancellationToken);
         if (character == null) return false;
 
-        var inventory = await _inventoryService.GetInventoryByIdAsync(characterId, cancellationToken);
+        var inventory = await _inventoryRepository.GetInventoryByIdAsync(characterId, cancellationToken);
         if (inventory == null) return false;
 
         foreach (var (resourceType, amount) in donations)
@@ -131,7 +130,7 @@ public class GuildService : IGuildService
 
                     if (matchingItem.Quantity == amount)
                     {
-                        _context.InventoryItems.Remove(matchingItem);
+                        _inventoryRepository.RemoveInventoryItem(matchingItem);
                     }
                     else
                     {

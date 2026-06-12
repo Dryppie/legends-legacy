@@ -25,10 +25,5 @@
       class="flex w-full"
       [attributes]="CharacterOverview.baseCombatAttributes"
     ></app-character-attributes>
-    <app-equipped-essences
-      class="flex h-full"
-      *ngIf="character() as CharacterOverview"
-      [essenceSlots]="CharacterOverview?.essenceSlots ?? []"
-    ></app-equipped-essences>
   </div>
 </div>

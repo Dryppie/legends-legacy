@@ -1,4 +1,4 @@
-﻿namespace Domain.Models.Combat;
+namespace Domain.Models.Combat;
 public enum EventType
 {
     AbilityUse,
@@ -11,7 +11,6 @@ public enum EventType
     Heal,
     HealOverTime,
     HealCrit,
-    RestoreMana,
     RestoreBarrier,
     Lifesteal,
     Summon,
@@ -23,6 +22,5 @@ public enum EventType
     StatusEffect,
     StatusEffectExpired,
     HealthRegeneration,
-    ManaRegeneration,
     Death,
 }

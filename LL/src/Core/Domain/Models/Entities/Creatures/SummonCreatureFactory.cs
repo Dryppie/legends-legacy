@@ -1,4 +1,4 @@
-﻿using Domain.Components.Attributes;
+using Domain.Components.Attributes;
 using Domain.Helpers;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
@@ -30,8 +30,8 @@ public static class SummonCreatureFactory
             summonedCombatEntity.Name = "Shadow Image";
             summonedCombatEntity.ImagePath = "shadow_image";
             var maxHealth = summonedCombatEntity.BaseAttributes.First(ba => ba.AttributeType.Equals(AttributeType.MaxHealth));
-            var health = summonedCombatEntity.BaseAttributes.First(ba => ba.AttributeType.Equals(AttributeType.Health));
-            var baseAttack = summonedCombatEntity.BaseAttributes.First(ba => ba.AttributeType.Equals(AttributeType.AttackSpeed));
+            var health = summonedCombatEntity.BaseAttributes.First(ba => ba.AttributeType.Equals(AttributeType.MaxHealth));
+            var baseAttack = summonedCombatEntity.BaseAttributes.First(ba => ba.AttributeType.Equals(AttributeType.Precision));
             maxHealth.Value = 1;
             health.Value = 1;
             baseAttack.Value = 0;

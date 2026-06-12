@@ -1,7 +1,6 @@
 ﻿using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.CharacterActions;
 using Application.Interfaces.Services.LL.Entities;
-using Common.Helpers.Essences;
 using Domain.Components.Attributes;
 using Domain.Helpers;
 using Domain.Interfaces.Combat;
@@ -47,9 +46,6 @@ public class SimulatorService : ISimulatorService
         var start = DateTimeOffset.UtcNow;
 
         var numberOfDraws = 0;
-
-        var essenceComboStats = new Dictionary<string, EssenceStat>(StringComparer.OrdinalIgnoreCase);
-        var essences = EssenceLoader.Instance.GetEssences();
 
         // Initialize combatants
         var playerCharacters = GeneratePlayerTeam(playerTeamSize, tier);
@@ -169,7 +165,6 @@ public class SimulatorService : ISimulatorService
         foreach (var entity in allEntities)
         {
             entity.Reset();
-            entity.EquippedEssences = [];
             entity.Abilities = [];
         }
     }
@@ -182,23 +177,14 @@ public class SimulatorService : ISimulatorService
         await Task.WhenAll(calculationTasks);
     }
 
-    private static async Task PickRandomAbilities(IEnumerable<CombatEntity> entities, int tier)
+    private static Task PickRandomAbilities(IEnumerable<CombatEntity> entities, int tier)
     {
-        // Load random abilities
-        var attributePickerTasks = entities.Select(entity => Task.Run(() => EssenceLoader.Instance._Simulator_PickRandomAbilityCombinations(entity, tier)));
-
-        await Task.WhenAll(attributePickerTasks);
+        return Task.CompletedTask;
     }
 
-    private static async Task PickSpecificAbility(IEnumerable<CombatEntity> entities, string essenceName = "Goblin's Essence")
+    private static Task PickSpecificAbility(IEnumerable<CombatEntity> entities, string essenceName = "Goblin's Essence")
     {
-        // Pick ability for the first entity
-        var tasks = new List<Task> { Task.Run(() => EssenceLoader.Instance._Simulator_PickSpecificAbility(entities.First(), essenceName)) };
-
-        // Pick abilities for the remaining entities
-        tasks.AddRange(entities.Skip(1).Select(entity => Task.Run(() => EssenceLoader.Instance._Simulator_PickRandomAbilityCombinations(entity))));
-
-        await Task.WhenAll(tasks);
+        return Task.CompletedTask;
     }
 
     public class EssenceStat
@@ -211,12 +197,7 @@ public class SimulatorService : ISimulatorService
 
     private static EssenceCombination GetEssenceComboKey(IEnumerable<CombatEntity> characters)
     {
-        var essenceNames = characters
-            .SelectMany(c => c.EquippedEssences.Select(e => e.Name))
-            .OrderBy(name => name, StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        return new EssenceCombination(essenceNames);
+        return new EssenceCombination([]);
     }
 
     public record EssenceCombination(IReadOnlyList<string> EssenceNames)

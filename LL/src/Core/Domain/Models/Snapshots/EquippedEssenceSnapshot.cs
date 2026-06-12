@@ -1,0 +1,44 @@
+using Domain.Models.Essences;
+
+namespace Domain.Models.Snapshots;
+
+public sealed class EquippedEssenceSnapshot
+{
+    public Guid Id { get; init; }
+    public Guid CharacterSnapshotId { get; init; }
+    public int SlotIndex { get; init; }
+    public Guid PlayerEssenceId { get; init; }
+    public string EssenceDefinitionId { get; init; } = string.Empty;
+    public int Level { get; init; }
+    public int CurrentXp { get; init; }
+    public int AscensionTier { get; init; }
+    public bool IsEvolved { get; init; }
+
+    private EquippedEssenceSnapshot() { }
+
+    public static EquippedEssenceSnapshot From(Guid characterSnapshotId, int slotIndex, PlayerEssence essence) =>
+        new()
+        {
+            Id = Guid.NewGuid(),
+            CharacterSnapshotId = characterSnapshotId,
+            SlotIndex = slotIndex,
+            PlayerEssenceId = essence.Id,
+            EssenceDefinitionId = essence.EssenceDefinitionId,
+            Level = essence.Level,
+            CurrentXp = essence.CurrentXp,
+            AscensionTier = essence.AscensionTier,
+            IsEvolved = essence.IsEvolved
+        };
+
+    public PlayerEssence ToPlayerEssence(Guid characterId) =>
+        new()
+        {
+            Id = PlayerEssenceId,
+            CharacterId = characterId,
+            EssenceDefinitionId = EssenceDefinitionId,
+            Level = Level,
+            CurrentXp = CurrentXp,
+            AscensionTier = AscensionTier,
+            IsEvolved = IsEvolved
+        };
+}

@@ -1,4 +1,4 @@
-﻿using Domain.Models.Combat;
+using Domain.Models.Combat;
 using Services.LL.Interfaces;
 using System.Collections.Concurrent;
 
@@ -27,9 +27,6 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
                 // add more global categories here
                 case EventType.HealthRegeneration:
                     entity.HealthRegenerated += item.Magnitude;
-                    break;
-            case EventType.ManaRegeneration:
-                    entity.ManaRegenerated += item.Magnitude;
                     break;
             }
 
@@ -88,7 +85,7 @@ public sealed class WorkEntity
 {
     public string Id { get; }
     public string Name => _firstEntityName ?? Id;
-    public int DamageDone, DamageTaken, HealingDone, HealingReceived, HealthRegenerated, ManaRegenerated;
+    public int DamageDone, DamageTaken, HealingDone, HealingReceived, HealthRegenerated;
 
     private readonly Dictionary<string, WorkAbility> _abilities = new(StringComparer.Ordinal);
     private string? _firstEntityName;
@@ -102,12 +99,12 @@ public sealed class WorkEntity
         return a;
     }
 
-    public EntityStats ToImmutable() =>
+        public EntityStats ToImmutable() =>
         new(Id, Name, _abilities.Values
             .Select(a => a.ToImmutable())
             .OrderByDescending(a => Math.Max(a.TotalDamage, a.TotalHealing))
             .ToList(),
-        DamageDone, DamageTaken, HealingDone, HealingReceived, HealthRegenerated, ManaRegenerated);
+        DamageDone, DamageTaken, HealingDone, HealingReceived, HealthRegenerated);
 }
 
 public sealed class WorkAbility

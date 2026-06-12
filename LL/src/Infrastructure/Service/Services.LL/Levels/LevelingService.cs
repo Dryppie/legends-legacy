@@ -1,4 +1,4 @@
-﻿using Application.UseCases.Characters.Events;
+using Application.UseCases.Characters.Events;
 using Domain.Helpers.Constants;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Characters;
@@ -28,26 +28,23 @@ public class LevelingService : ILevelingService
             // After leveling up and adjusting current experience, calculate whether there's enough experience left for more level ups
             xpRequired = EntityLevelConstants.XP_REQUIRED(character.Level);
 
-            LevelUpHealthAndMana(character);
+            LevelUpPrimaryAttributes(character);
 
             //TODO: Add Publish Event to notify listeners that listen to level ups
             await _publisher.Publish(new CharacterLevelUpEvent(character.Id, character.Level), cancellationToken);
         }
     }
 
-    private static void LevelUpHealthAndMana(Character character)
+    private static void LevelUpPrimaryAttributes(Character character)
     {
         foreach (var attr in character.BaseAttributes)
         {
-            if (attr.AttributeType == AttributeType.MaxHealth ||
-                attr.AttributeType == AttributeType.Health)
+            if (attr.AttributeType == AttributeType.Power ||
+                attr.AttributeType == AttributeType.Fortitude ||
+                attr.AttributeType == AttributeType.Precision ||
+                attr.AttributeType == AttributeType.Spirit)
             {
                 attr.Value += 2;
-            }
-            if (attr.AttributeType == AttributeType.MaxMana ||
-                attr.AttributeType == AttributeType.Mana)
-            {
-                attr.Value += 1;
             }
         }
     }

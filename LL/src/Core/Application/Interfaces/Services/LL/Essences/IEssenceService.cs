@@ -1,9 +1,23 @@
-﻿using Domain.Models.Essences.EssenceSlots;
+using Domain.Models.Attributes.Modifiers;
+using Domain.Models.Essences;
 
 namespace Application.Interfaces.Services.LL.Essences;
+
 public interface IEssenceService
 {
-    Task<bool> EquipEssence(Guid characterId, Guid essenceItemId, CancellationToken cancellationToken);
-    Task<List<EssenceSlot>> GetEquippedEssences(Guid characterId, CancellationToken cancellationToken);
-    Task<bool> DeleteEquippedEssence(Guid characterId, Guid essenceId, CancellationToken cancellationToken);
+    Task<EssenceCatalog> GetCatalogAsync(CancellationToken cancellationToken);
+    Task<SoulArchive> GetSoulArchiveAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<EssenceLoadouts> GetLoadoutsAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<EssenceLoadout?> GetActiveLoadoutAsync(Guid characterId, CancellationToken cancellationToken);
+    Task<EssenceOperationResult> AbsorbUnboundEssenceAsync(Guid characterId, Guid inventoryItemId, CancellationToken cancellationToken);
+    Task<DismantleEssenceResult> DismantleUnboundEssenceAsync(Guid characterId, Guid inventoryItemId, CancellationToken cancellationToken);
+    Task<SpendEssenceDustResult> SpendEssenceDustAsync(Guid characterId, Guid playerEssenceId, int dustAmount, CancellationToken cancellationToken);
+    Task<EssenceOperationResult> AscendEssenceAsync(Guid characterId, Guid playerEssenceId, CancellationToken cancellationToken);
+    Task<EssenceOperationResult> EvolveEssenceAsync(Guid characterId, Guid playerEssenceId, CancellationToken cancellationToken);
+    Task<EssenceLoadout> SaveLoadoutAsync(Guid characterId, SaveEssenceLoadoutRequest request, CancellationToken cancellationToken);
+    Task<EssenceOperationResult> ActivateLoadoutAsync(Guid characterId, Guid loadoutId, CancellationToken cancellationToken);
+    Task<EssenceOperationResult> DeleteLoadoutAsync(Guid characterId, Guid loadoutId, CancellationToken cancellationToken);
+    Task<EssenceOperationResult> SetFavoriteAsync(Guid characterId, Guid playerEssenceId, bool isFavorite, CancellationToken cancellationToken);
+    Task GrantCombatXpToAttunedEssencesAsync(Guid characterId, int xp, CancellationToken cancellationToken);
+    Task<IReadOnlyList<AttributeModifierBase>> GetAttunedAttributeModifiersAsync(Guid characterId, CancellationToken cancellationToken);
 }

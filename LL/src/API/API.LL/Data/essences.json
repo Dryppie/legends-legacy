@@ -1,0 +1,693 @@
+{
+  "progressionTemplates": [
+    {
+      "id": "offensive",
+      "baseXpPerLevel": 100,
+      "xpGrowth": 1.18,
+      "activeScalingMultiplier": 1.08,
+      "passiveScalingMultiplier": 1.04
+    },
+    {
+      "id": "defensive",
+      "baseXpPerLevel": 105,
+      "xpGrowth": 1.16,
+      "activeScalingMultiplier": 1.02,
+      "passiveScalingMultiplier": 1.08
+    },
+    {
+      "id": "controller",
+      "baseXpPerLevel": 100,
+      "xpGrowth": 1.17,
+      "activeScalingMultiplier": 1.03,
+      "passiveScalingMultiplier": 1.05
+    },
+    {
+      "id": "support",
+      "baseXpPerLevel": 100,
+      "xpGrowth": 1.15,
+      "activeScalingMultiplier": 1.02,
+      "passiveScalingMultiplier": 1.07
+    },
+    {
+      "id": "hybrid",
+      "baseXpPerLevel": 100,
+      "xpGrowth": 1.17,
+      "activeScalingMultiplier": 1.04,
+      "passiveScalingMultiplier": 1.04
+    }
+  ],
+  "abilityDefinitions": [
+    {
+      "id": "ability.essence.goblin_ambusher.cheap_shot",
+      "kind": "Active",
+      "name": "Cheap Shot",
+      "description": "Deals physical damage to one enemy and applies Bleed. Deals bonus damage if the target is already bleeding.",
+      "cooldownSeconds": 18,
+      "targeting": "CurrentTarget",
+      "tags": [
+        "Effect.Ability",
+        "Effect.Physical",
+        "Status.Bleed",
+        "Target.Enemy"
+      ],
+      "effects": [
+        {
+          "id": "effect.damage.main",
+          "type": "Damage",
+          "target": "CurrentTarget",
+          "scaling": {
+            "baseValue": 95,
+            "perLevel": 7,
+            "perAscensionTier": 22
+          }
+        },
+        {
+          "id": "effect.status.bleed",
+          "type": "ApplyStatus",
+          "target": "CurrentTarget",
+          "status": "Bleed",
+          "durationSeconds": 8,
+          "scaling": {
+            "baseValue": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "ability.essence.goblin_ambusher.cowards_opening",
+      "kind": "Passive",
+      "name": "Coward's Opening",
+      "description": "On first hit against a healthy enemy, gain temporary Critical Chance.",
+      "cooldownSeconds": 20,
+      "targeting": "Self",
+      "tags": [
+        "Trigger.OnHit",
+        "Resource.Cooldown"
+      ],
+      "triggers": [
+        {
+          "type": "Trigger.OnHit",
+          "internalCooldownSeconds": 20
+        }
+      ],
+      "conditions": [
+        {
+          "type": "TargetHealthBelowPercent",
+          "value": 80
+        }
+      ],
+      "effects": [
+        {
+          "id": "effect.buff.crit_chance",
+          "type": "ModifyAttribute",
+          "target": "Self",
+          "attribute": "CritChance",
+          "durationSeconds": 6,
+          "scaling": {
+            "baseValue": 3,
+            "perLevel": 0.1,
+            "perAscensionTier": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "ability.essence.skeleton_guardian.bone_bulwark",
+      "kind": "Active",
+      "name": "Bone Bulwark",
+      "description": "Grants a Barrier and temporary Block chance.",
+      "cooldownSeconds": 24,
+      "targeting": "LowestHealthAlly",
+      "tags": [
+        "Effect.Barrier",
+        "Target.LowestHealthAlly"
+      ],
+      "effects": [
+        {
+          "id": "effect.barrier.main",
+          "type": "GrantBarrier",
+          "target": "LowestHealthAlly",
+          "scaling": {
+            "baseValue": 120,
+            "perLevel": 10,
+            "perAscensionTier": 35
+          }
+        },
+        {
+          "id": "effect.buff.block",
+          "type": "ModifyAttribute",
+          "target": "LowestHealthAlly",
+          "attribute": "BlockChance",
+          "durationSeconds": 8,
+          "scaling": {
+            "baseValue": 4,
+            "perLevel": 0.15,
+            "perAscensionTier": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "ability.essence.skeleton_guardian.rattle_guard",
+      "kind": "Passive",
+      "name": "Rattle Guard",
+      "description": "On taking damage, has a chance to gain a defensive guard.",
+      "cooldownSeconds": 12,
+      "targeting": "Self",
+      "tags": [
+        "Trigger.OnTakeDamage",
+        "Defense.Guard"
+      ],
+      "triggers": [
+        {
+          "type": "Trigger.OnTakeDamage",
+          "internalCooldownSeconds": 12
+        }
+      ],
+      "conditions": [
+        {
+          "type": "RandomChance",
+          "value": 25
+        }
+      ],
+      "effects": [
+        {
+          "id": "effect.guard.defense",
+          "type": "ModifyAttribute",
+          "target": "Self",
+          "attribute": "DamageReduction",
+          "durationSeconds": 5,
+          "scaling": {
+            "baseValue": 2,
+            "perLevel": 0.08,
+            "perAscensionTier": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "ability.essence.fire_ant.burning_mandibles",
+      "kind": "Active",
+      "name": "Burning Mandibles",
+      "description": "Deals fire damage and applies Burn.",
+      "cooldownSeconds": 16,
+      "targeting": "CurrentTarget",
+      "tags": [
+        "Effect.Ability",
+        "Effect.Burn",
+        "Status.Burn"
+      ],
+      "effects": [
+        {
+          "id": "effect.damage.fire",
+          "type": "Damage",
+          "target": "CurrentTarget",
+          "scaling": {
+            "baseValue": 85,
+            "perLevel": 8,
+            "perAscensionTier": 24
+          }
+        },
+        {
+          "id": "effect.status.burn",
+          "type": "ApplyStatus",
+          "target": "CurrentTarget",
+          "status": "Burn",
+          "durationSeconds": 10,
+          "scaling": {
+            "baseValue": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "ability.essence.fire_ant.colony_heat",
+      "kind": "Passive",
+      "name": "Colony Heat",
+      "description": "On hit, has a small chance to refresh Burn duration and gain damage.",
+      "cooldownSeconds": 8,
+      "targeting": "Self",
+      "tags": [
+        "Trigger.OnHit",
+        "Status.Burn"
+      ],
+      "triggers": [
+        {
+          "type": "Trigger.OnHit",
+          "internalCooldownSeconds": 8
+        }
+      ],
+      "conditions": [
+        {
+          "type": "RandomChance",
+          "value": 15
+        }
+      ],
+      "effects": [
+        {
+          "id": "effect.buff.attack_power",
+          "type": "ModifyAttribute",
+          "target": "Self",
+          "attribute": "Power",
+          "durationSeconds": 5,
+          "scaling": {
+            "baseValue": 3,
+            "perLevel": 0.2,
+            "perAscensionTier": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "ability.essence.cave_bat.screech",
+      "kind": "Active",
+      "name": "Screech",
+      "description": "Deals low damage and disrupts the target's accuracy.",
+      "cooldownSeconds": 20,
+      "targeting": "CurrentTarget",
+      "tags": [
+        "Control.Blind",
+        "Control.Interrupt",
+        "Target.Enemy"
+      ],
+      "effects": [
+        {
+          "id": "effect.damage.sonic",
+          "type": "Damage",
+          "target": "CurrentTarget",
+          "scaling": {
+            "baseValue": 55,
+            "perLevel": 5,
+            "perAscensionTier": 15
+          }
+        },
+        {
+          "id": "effect.debuff.accuracy",
+          "type": "ModifyAttribute",
+          "target": "CurrentTarget",
+          "attribute": "Precision",
+          "durationSeconds": 6,
+          "scaling": {
+            "baseValue": -5,
+            "perLevel": -0.2,
+            "perAscensionTier": -1
+          }
+        }
+      ]
+    },
+    {
+      "id": "ability.essence.cave_bat.skittering_wings",
+      "kind": "Passive",
+      "name": "Skittering Wings",
+      "description": "On dodge, gain temporary Attack Speed.",
+      "cooldownSeconds": 10,
+      "targeting": "Self",
+      "tags": [
+        "Trigger.OnDodge",
+        "Defense.Dodge"
+      ],
+      "triggers": [
+        {
+          "type": "Trigger.OnDodge",
+          "internalCooldownSeconds": 10
+        }
+      ],
+      "effects": [
+        {
+          "id": "effect.buff.attack_speed",
+          "type": "ModifyAttribute",
+          "target": "Self",
+          "attribute": "Precision",
+          "durationSeconds": 5,
+          "scaling": {
+            "baseValue": 4,
+            "perLevel": 0.2,
+            "perAscensionTier": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "ability.essence.necroshade_wraith.wraith_hex",
+      "kind": "Active",
+      "name": "Wraith Hex",
+      "description": "Applies Curse and deals shadow damage over time.",
+      "cooldownSeconds": 26,
+      "targeting": "CurrentTarget",
+      "tags": [
+        "Status.Curse",
+        "Pattern.Periodic",
+        "Effect.Magical"
+      ],
+      "effects": [
+        {
+          "id": "effect.damage.hex",
+          "type": "Damage",
+          "target": "CurrentTarget",
+          "scaling": {
+            "baseValue": 70,
+            "perLevel": 9,
+            "perAscensionTier": 30
+          }
+        },
+        {
+          "id": "effect.status.curse",
+          "type": "ApplyStatus",
+          "target": "CurrentTarget",
+          "status": "Curse",
+          "durationSeconds": 12,
+          "scaling": {
+            "baseValue": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "ability.essence.necroshade_wraith.grave_whisper",
+      "kind": "Passive",
+      "name": "Grave Whisper",
+      "description": "On enemy death, reduce cooldowns slightly.",
+      "cooldownSeconds": 18,
+      "targeting": "Self",
+      "tags": [
+        "Trigger.OnKill",
+        "Resource.Cooldown"
+      ],
+      "triggers": [
+        {
+          "type": "Trigger.OnKill",
+          "internalCooldownSeconds": 18
+        }
+      ],
+      "effects": [
+        {
+          "id": "effect.restore.cooldown",
+          "type": "RestoreResource",
+          "target": "Self",
+          "attribute": "Cooldown",
+          "scaling": {
+            "baseValue": 3,
+            "perLevel": 0.1,
+            "perAscensionTier": 1
+          }
+        }
+      ]
+    }
+  ],
+  "essences": [
+    {
+      "id": "essence.goblin_ambusher",
+      "sourceMonsterId": "monster.goblin",
+      "name": "Goblin Ambusher Essence",
+      "description": "The stolen cunning of a goblin that strikes hardest when the enemy is exposed.",
+      "rarity": "Rare",
+      "progressionTemplateId": "offensive",
+      "tags": [
+        "Species.Goblinoid",
+        "Species.Humanoid",
+        "Role.Assassin",
+        "Range.Melee",
+        "Element.Physical",
+        "Pattern.SingleTarget",
+        "Status.Bleed",
+        "Trigger.OnCrit",
+        "Target.Enemy"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Precision",
+          "baseValue": 4,
+          "perLevel": 0.35,
+          "perAscensionTier": 1
+        },
+        {
+          "attribute": "DodgeChance",
+          "baseValue": 1,
+          "perLevel": 0.1,
+          "perAscensionTier": 0.5
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00005,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.goblin_ambusher.pack_opportunist",
+        "name": "Pack Opportunist",
+        "description": "Cheap Shot gains execute-style bonus damage against bleeding wounded enemies.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "item.evolution_catalyst.cunning",
+        "addsTags": [
+          "Mechanic.Execute"
+        ],
+        "activeAbilityModifiers": [
+          {
+            "target": "effect.damage.main",
+            "operation": "AddMultiplier",
+            "value": 0.2,
+            "condition": "TargetHasStatus.Bleed"
+          }
+        ]
+      },
+      "activeAbilityId": "ability.essence.goblin_ambusher.cheap_shot",
+      "passiveAbilityId": "ability.essence.goblin_ambusher.cowards_opening"
+    },
+    {
+      "id": "essence.skeleton_guardian",
+      "sourceMonsterId": "monster.skeleton",
+      "name": "Skeleton Guardian Essence",
+      "description": "A brittle sentinel's oath made durable through bone and spite.",
+      "rarity": "Rare",
+      "progressionTemplateId": "defensive",
+      "tags": [
+        "Species.Undead",
+        "Role.Tank",
+        "Role.Defensive",
+        "Element.Physical",
+        "Defense.Block",
+        "Defense.Guard",
+        "Defense.Barrier",
+        "Control.Taunt"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Fortitude",
+          "baseValue": 3,
+          "perLevel": 0.4,
+          "perAscensionTier": 2
+        },
+        {
+          "attribute": "Armor",
+          "baseValue": 3,
+          "perLevel": 0.5,
+          "perAscensionTier": 2
+        },
+        {
+          "attribute": "BlockChance",
+          "baseValue": 1,
+          "perLevel": 0.12,
+          "perAscensionTier": 0.75
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00005,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.skeleton_guardian.ossified_sentinel",
+        "name": "Ossified Sentinel",
+        "description": "Bone Bulwark also taunts the highest-threat enemy.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "item.evolution_catalyst.warden",
+        "addsTags": [
+          "Control.Taunt"
+        ],
+        "activeAbilityModifiers": [
+          {
+            "target": "effect.barrier.main",
+            "operation": "AddEffect",
+            "value": 1
+          }
+        ]
+      },
+      "activeAbilityId": "ability.essence.skeleton_guardian.bone_bulwark",
+      "passiveAbilityId": "ability.essence.skeleton_guardian.rattle_guard"
+    },
+    {
+      "id": "essence.fire_ant",
+      "sourceMonsterId": "monster.fire_ant",
+      "name": "Fire Ant Essence",
+      "description": "Colony heat condensed into a biting, ember-bright instinct.",
+      "rarity": "Rare",
+      "progressionTemplateId": "offensive",
+      "tags": [
+        "Species.Insectoid",
+        "Role.Offensive",
+        "Range.Melee",
+        "Element.Fire",
+        "Status.Burn",
+        "Pattern.DamageOverTime",
+        "Trigger.OnHit"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 4,
+          "perLevel": 0.8,
+          "perAscensionTier": 3
+        },
+        {
+          "attribute": "WeaponDamage",
+          "baseValue": 2,
+          "perLevel": 0.45,
+          "perAscensionTier": 2
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.0012,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00004,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.fire_ant.hiveflame_instinct",
+        "name": "Hiveflame Instinct",
+        "description": "Burning Mandibles spreads a weaker Burn to another random enemy.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "item.evolution_catalyst.flame",
+        "addsTags": [
+          "Target.RandomEnemy"
+        ],
+        "activeAbilityModifiers": [
+          {
+            "target": "effect.status.burn",
+            "operation": "AddEffect",
+            "value": 1
+          }
+        ]
+      },
+      "activeAbilityId": "ability.essence.fire_ant.burning_mandibles",
+      "passiveAbilityId": "ability.essence.fire_ant.colony_heat"
+    },
+    {
+      "id": "essence.cave_bat",
+      "sourceMonsterId": "monster.cave_bat",
+      "name": "Cave Bat Essence",
+      "description": "A flicker of wings and sound that turns evasion into opportunity.",
+      "rarity": "Uncommon",
+      "progressionTemplateId": "controller",
+      "tags": [
+        "Species.Beast",
+        "Species.Avian",
+        "Role.Controller",
+        "Range.Melee",
+        "Element.Physical",
+        "Control.Blind",
+        "Control.Interrupt",
+        "Defense.Dodge",
+        "Trigger.OnDodge"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "DodgeChance",
+          "baseValue": 2,
+          "perLevel": 0.2,
+          "perAscensionTier": 1
+        },
+        {
+          "attribute": "Precision",
+          "baseValue": 1,
+          "perLevel": 0.3,
+          "perAscensionTier": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.0015,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00004,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.cave_bat.echo_hunter",
+        "name": "Echo Hunter",
+        "description": "Screech marks the target so the next hit deals bonus damage.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.echo",
+        "addsTags": [
+          "Status.Vulnerable"
+        ],
+        "activeAbilityModifiers": [
+          {
+            "target": "effect.damage.sonic",
+            "operation": "AddEffect",
+            "value": 1
+          }
+        ]
+      },
+      "activeAbilityId": "ability.essence.cave_bat.screech",
+      "passiveAbilityId": "ability.essence.cave_bat.skittering_wings"
+    },
+    {
+      "id": "essence.necroshade_wraith",
+      "sourceMonsterId": "monster.necroshade_wraith",
+      "name": "Necroshade Wraith Essence",
+      "description": "A cold whisper that lingers after death and fattens on curses.",
+      "rarity": "Epic",
+      "progressionTemplateId": "hybrid",
+      "tags": [
+        "Species.Undead",
+        "Species.Spirit",
+        "Role.Caster",
+        "Role.Debuffer",
+        "Element.Shadow",
+        "Element.Necrotic",
+        "Status.Curse",
+        "Control.Suppression",
+        "Pattern.Periodic"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 5,
+          "perLevel": 0.9,
+          "perAscensionTier": 4
+        },
+        {
+          "attribute": "Resistance",
+          "baseValue": 3,
+          "perLevel": 0.4,
+          "perAscensionTier": 2
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.0008,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00005,
+        "maxResonanceBonus": 0.012
+      },
+      "evolution": {
+        "id": "evolution.necroshade_wraith.hollow_dominion",
+        "name": "Hollow Dominion",
+        "description": "Cursed enemies deal reduced damage and suffer more shadow damage.",
+        "requiredAscensionTier": 3,
+        "requiredCatalystItemId": "item.evolution_catalyst.hollow",
+        "addsTags": [
+          "Status.Weakened"
+        ],
+        "passiveAbilityModifiers": [
+          {
+            "target": "effect.restore.cooldown",
+            "operation": "AddEffect",
+            "value": 1
+          }
+        ]
+      },
+      "activeAbilityId": "ability.essence.necroshade_wraith.wraith_hex",
+      "passiveAbilityId": "ability.essence.necroshade_wraith.grave_whisper"
+    }
+  ]
+}

@@ -1,12 +1,23 @@
-﻿using Services.LL.Combat.Layers.Orchestration.Models;
+using Domain.Models.Snapshots;
+using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Interfaces.Combat.Orchestration;
 
 namespace Services.LL.Combat.Layers.Orchestration.Dungeon;
 
 public sealed class DungeonCombatPlanner : IDungeonCombatPlanner
 {
-    public DungeonCombatPlan CreatePlan(Guid dungeonRunId, Guid characterId, IReadOnlyList<Guid> playerEntityIds, IReadOnlyList<Guid> enemySourceEntityIds) =>
-        new(DungeonRunId: dungeonRunId, CharacterId: characterId, PlayerEntityIds: playerEntityIds, EnemySourceEntityIds: enemySourceEntityIds);
+    public DungeonCombatPlan CreatePlan(
+        Guid dungeonRunId,
+        Guid characterId,
+        CharacterSnapshot characterSnapshot,
+        IReadOnlyList<Guid> playerEntityIds,
+        IReadOnlyList<Guid> enemySourceEntityIds) =>
+        new(
+            DungeonRunId: dungeonRunId,
+            CharacterId: characterId,
+            CharacterSnapshot: characterSnapshot,
+            PlayerEntityIds: playerEntityIds,
+            EnemySourceEntityIds: enemySourceEntityIds);
 
     public CombatEncounterPlan CreateEncounterPlan(DungeonCombatPlan plan, int sequence, DateTimeOffset startsAt)
     {

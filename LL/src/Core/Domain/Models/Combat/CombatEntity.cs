@@ -1,9 +1,8 @@
-﻿using Domain.Components.Attributes;
-using Domain.Extensions;
-using Domain.Models.Abilities;
-using Domain.Models.Abilities.Effects;
-using Domain.Models.Abilities.Effects.StatusEffects;
-using Domain.Models.Abilities.Statuses;
+using Domain.Components.Attributes;
+using Domain.Models.Combat.Abilities;
+using Domain.Models.Combat.Abilities.Effects;
+using Domain.Models.Combat.Abilities.Effects.StatusEffects;
+using Domain.Models.Combat.Abilities.Statuses;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Entities;
@@ -21,9 +20,10 @@ public class CombatEntity
     public string Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string ImagePath { get; set; } = string.Empty;
-    public ICollection<Essence> EquippedEssences { get; set; } = [];
-    public List<AbilityInstance> Abilities { get; set; } = [];
+    public List<CombatAbilityInstance> Abilities { get; set; } = [];
     public List<StatusInstance> Statuses { get; set; } = [];
+    public string SourceMonsterId { get; set; } = string.Empty;
+    public HashSet<string> Tags { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
     public Dictionary<StatusEffectType, int> StatusEffects { get; } = [];
     public int NextBasicAttackIn = 300; // TODO: Turn 300 into a Constant somewhere, as it is also stored in the CombatSimulator class
@@ -31,10 +31,13 @@ public class CombatEntity
                                         // Start at 300. Whenever it is equal to or lower than 0, perform the attack.
                                         // If you increase attack speed by 100%, BasicAttackSpeed goes from 10 to 20,
                                         // and thust counting down faster to the next attack each tick
-    public int NextRecoveryIn = 500; // This defines when the character regenerates health and mana.
+    public int NextRecoveryIn = 500; // This defines when the character regenerates health.
     public ICollection<EntityAttribute> BaseAttributes { get; set; } = [];
-    public bool IsAlive => CombatAttributes.FirstOrDefault(cm => cm.Key.Equals(AttributeType.Health)).Value > 0;
+    public float CurrentHealth { get; private set; }
+    public bool IsAlive => CurrentHealth > 0;
     public List<EquipmentInstance> Equipment { get; set; } = [];
+    public List<PlayerEssence> EquippedEssences { get; set; } = [];
+    public bool HasEquippedEssenceSnapshot { get; set; }
     public Dictionary<AttributeType, float> BaseCombatAttributes { get; } = [];
     public Dictionary<AttributeType, float> CombatAttributes { get; } = [];
     public List<AttributeModifierBase> TemporaryModifiers { get; set; } = [];
@@ -51,8 +54,10 @@ public class CombatEntity
         BaseAttributes = [.. entity.BaseAttributes];
         BaseCombatAttributes = new Dictionary<AttributeType, float>(entity.BaseCombatAttributes);
         CombatAttributes = new Dictionary<AttributeType, float>(entity.CombatAttributes);
+        CurrentHealth = entity.CombatAttributes.GetValueOrDefault(
+            AttributeType.MaxHealth,
+            entity.BaseCombatAttributes.GetValueOrDefault(AttributeType.MaxHealth));
         Equipment = entity.EquipmentSlots.Where(es => es.EquipmentInstance != null).Select(es => es.EquipmentInstance!).ToList();
-        EquippedEssences = [.. entity.EssenceSlots.ActiveSlotsWithOccupiedEssences().Select(es => es.OccupiedEssence!)];
         Level = entity.Level;
         var mainHand = entity.EquipmentSlots.FirstOrDefault(es => es.EquipmentSlotType == EquipmentSlotType.MainHand);
         Abilities.Add(BasicAttackLoader.LoadBasicAttack(mainHand));
@@ -140,6 +145,8 @@ public class CombatEntity
             CombatAttributes.Add(kvp.Key, kvp.Value);
         }
 
+        SetCurrentHealth(GetAttributeValue(AttributeType.MaxHealth));
+
         foreach (var ability in Abilities)
         {
             ability.Definition.Usage.Reset();
@@ -167,6 +174,49 @@ public class CombatEntity
         return CombatAttributes.TryGetValue(attributeType, out var attributeValue) ? (int)attributeValue : 0;
     }
 
+    public int GetCurrentHealthValue()
+    {
+        return (int)CurrentHealth;
+    }
+
+    public void SetCurrentHealth(float value)
+    {
+        CurrentHealth = Math.Clamp(value, 0, GetAttributeValue(AttributeType.MaxHealth));
+    }
+
+    public void AdjustCurrentHealth(float amount)
+    {
+        SetCurrentHealth(CurrentHealth + amount);
+    }
+
+    public void SyncCurrentHealthToMax()
+    {
+        SetCurrentHealth(GetAttributeValue(AttributeType.MaxHealth));
+    }
+
+    public void SyncCurrentHealthAfterMaxHealthChange(float oldMaxHealth, float newMaxHealth)
+    {
+        if (oldMaxHealth <= 0)
+        {
+            SetCurrentHealth(newMaxHealth);
+            return;
+        }
+
+        if (CurrentHealth <= 0)
+        {
+            SetCurrentHealth(0);
+            return;
+        }
+
+        if (newMaxHealth > oldMaxHealth)
+        {
+            AdjustCurrentHealth(newMaxHealth - oldMaxHealth);
+            return;
+        }
+
+        SetCurrentHealth(CurrentHealth);
+    }
+
     public CombatEntity DeepCloneForEncounter()
     {
         return new CombatEntity(this);
@@ -178,7 +228,7 @@ public class CombatEntity
         Id = entity.Id.ToString();
         Name = entity.Name;
         ImagePath = entity.ImagePath;
-        Abilities = [.. entity.Abilities.Select(a => new AbilityInstance(a.Definition))];
+        Abilities = [.. entity.Abilities.Select(a => new CombatAbilityInstance(a.Definition))];
         NextBasicAttackIn = entity.NextBasicAttackIn;
         NextRecoveryIn = entity.NextRecoveryIn;
         Equipment = entity.Equipment.Select(e => e).ToList();
@@ -186,9 +236,13 @@ public class CombatEntity
         BaseAttributes = [.. entity.BaseAttributes];
         BaseCombatAttributes = new Dictionary<AttributeType, float>(entity.BaseCombatAttributes);
         CombatAttributes = new Dictionary<AttributeType, float>(entity.CombatAttributes);
-        EquippedEssences = [.. entity.EquippedEssences];
+        CurrentHealth = entity.CurrentHealth;
         StatusEffects = new Dictionary<StatusEffectType, int>(entity.StatusEffects);
         Statuses = [];
+        SourceMonsterId = entity.SourceMonsterId;
+        Tags = new HashSet<string>(entity.Tags, StringComparer.OrdinalIgnoreCase);
+        EquippedEssences = [.. entity.EquippedEssences];
+        HasEquippedEssenceSnapshot = entity.HasEquippedEssenceSnapshot;
         Level = entity.Level;
         IsSummoned = entity.IsSummoned;
     }

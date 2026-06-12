@@ -1,13 +1,13 @@
-﻿using Domain.Models.Abilities;
-using Domain.Models.Abilities.Effects;
-using Domain.Models.Abilities.Effects.Actions;
-using Domain.Models.Abilities.Effects.Conditions;
-using Domain.Models.Abilities.Effects.Duration;
-using Domain.Models.Abilities.Effects.Intervals;
-using Domain.Models.Abilities.Effects.Trigger;
-using Domain.Models.Abilities.Effects.Usages;
-using Domain.Models.Abilities.Triggers;
-using Domain.Models.Abilities.Triggers.TriggerFilters;
+using Domain.Models.Combat.Abilities;
+using Domain.Models.Combat.Abilities.Effects;
+using Domain.Models.Combat.Abilities.Effects.Actions;
+using Domain.Models.Combat.Abilities.Effects.Conditions;
+using Domain.Models.Combat.Abilities.Effects.Duration;
+using Domain.Models.Combat.Abilities.Effects.Intervals;
+using Domain.Models.Combat.Abilities.Effects.Trigger;
+using Domain.Models.Combat.Abilities.Effects.Usages;
+using Domain.Models.Combat.Abilities.Triggers;
+using Domain.Models.Combat.Abilities.Triggers.TriggerFilters;
 using Domain.Models.Attributes;
 using Domain.Models.Damages;
 using Domain.Models.Items.Equipments.Slots;
@@ -15,10 +15,10 @@ using Domain.Models.Items.Equipments.Slots;
 namespace Domain.Models.Combat;
 public static class BasicAttackLoader
 {
-    public static AbilityInstance LoadBasicAttack(EquipmentSlot? slot)
+    public static CombatAbilityInstance LoadBasicAttack(EquipmentSlot? slot)
     {
         var magnitude = 5;
-        var scalingAttribute = AttributeType.AttackPower;
+        var scalingAttribute = AttributeType.Power;
         var scalingAmount = 0.1f;
 
         var equipment = slot?.EquipmentInstance;
@@ -41,7 +41,7 @@ public static class BasicAttackLoader
             new UnlimitedUsage(),
             [],
             [],
-            Targeting.SingleEnemy,
+            CombatTargeting.SingleEnemy,
             AttackType.Melee,
             DamageType.Physical)
         {
@@ -56,13 +56,13 @@ public static class BasicAttackLoader
             Filters = [new SourceIsSelfFilter(null)]
         };
 
-        var abilityDefinition = new AbilityDefinition()
+        var abilityDefinition = new CombatAbilityDefinition()
         {
             Triggers = [abilityTrigger],
-            Type = AbilityType.Passive
+            Type = CombatAbilityType.Passive
         };
 
-        var basicAttackAbility = new AbilityInstance(abilityDefinition);
+        var basicAttackAbility = new CombatAbilityInstance(abilityDefinition);
 
         return basicAttackAbility;
     }

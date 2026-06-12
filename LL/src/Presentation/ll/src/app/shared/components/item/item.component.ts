@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import {
   EquipmentInstance,
   EssenceItem,
+  essenceItemToEssence,
   ItemInstance,
 } from '../../models/item';
 import { NgClass, NgIf } from '@angular/common';
@@ -37,7 +38,7 @@ export class ItemComponent {
   }
 
   itemAsEssence(item: ItemInstance) {
-    return (item.itemBase as EssenceItem).essence;
+    return essenceItemToEssence(item.itemBase as EssenceItem);
   }
 
   itemAsEquipment(item: ItemInstance) {

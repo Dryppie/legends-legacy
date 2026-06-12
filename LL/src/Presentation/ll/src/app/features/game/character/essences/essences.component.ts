@@ -1,53 +1,53 @@
-import { Component, computed } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { EssenceStateService } from '../../../../core/services/api/essences/essence-state.service';
-import { InventoryStateService } from '../../../../core/services/api/inventory/inventory-state.service';
-import { TabComponent } from '../../../../shared/components/custom-components/tabs/tab/tab.component';
-import { ItemType } from '../../../../shared/models/enums/itemType';
-import { EssencesEquippedComponent } from './essences-equipped/essences-equipped.component';
-import { EssencesAbsorbComponent } from './essences-absorb/essences-absorb.component';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
-import { SlotState } from '../../../../shared/models/essenceSlot';
-import { TabsComponent } from '../../../../shared/components/custom-components/tabs/tabs.component';
+import {
+  EssenceLoadoutDto,
+  PlayerEssenceDto,
+} from '../../../../shared/models/essence-system';
+import { EssencesAbsorbComponent } from './essences-absorb/essences-absorb.component';
 
 @Component({
   selector: 'app-essences',
   standalone: true,
   imports: [
-    TabsComponent,
-    TabComponent,
-    EssencesEquippedComponent,
-    EssencesAbsorbComponent,
+    CommonModule,
+    FormsModule,
     DefaultHeaderComponent,
+    EssencesAbsorbComponent,
   ],
   templateUrl: './essences.component.html',
 })
-export class EssencesComponent {
-  public essenceSlots = computed(() => this.essenceState.essenceSlots());
+export class EssencesComponent implements OnInit {
+  constructor(public readonly essenceState: EssenceStateService) {}
 
-  public inventoryEssences = computed(() => {
-    if (this.essenceState.loading()) return []; // keeps it from race condition display of all inventory essences if essenceSlots loads slowly
-    return this.inventoryState.items().filter(
-      (i) => i.itemInstance.itemBase.itemType === ItemType.Essence,
-      // &&
-      //   !this.essenceSlots()
-      //     .filter((es) => es.occupiedEssence !== null)
-      //     .map((es) => es.occupiedEssence?.id)
-      //     .includes((i.itemInstance.itemBase as EssenceItem).essence.id),
-    );
-  });
+  public ngOnInit(): void {
+    this.essenceState.refresh();
+  }
 
-  public numberOfAbsorbedEssence = computed(
-    () =>
-      `${
-        this.essenceSlots().filter(
-          (es) =>
-            es.occupiedEssence !== null && es.slotState === SlotState.Active,
-        ).length
-      }/${this.essenceSlots().filter((es) => es.slotState === SlotState.Active).length} essence absorbed`,
-  );
+  public selectPlayerEssence(essence: PlayerEssenceDto): void {
+    this.essenceState.selectPlayerEssence(essence);
+  }
 
-  constructor(
-    private essenceState: EssenceStateService,
-    private inventoryState: InventoryStateService,
-  ) {}
+  public favorite(essence: PlayerEssenceDto): void {
+    this.essenceState.favorite(essence);
+  }
+
+  public spendDust(essence: PlayerEssenceDto): void {
+    this.essenceState.spendDust(essence);
+  }
+
+  public ascend(essence: PlayerEssenceDto): void {
+    this.essenceState.ascend(essence);
+  }
+
+  public evolve(essence: PlayerEssenceDto): void {
+    this.essenceState.evolve(essence);
+  }
+
+  public selectLoadout(loadout: EssenceLoadoutDto): void {
+    this.essenceState.selectLoadout(loadout);
+  }
 }

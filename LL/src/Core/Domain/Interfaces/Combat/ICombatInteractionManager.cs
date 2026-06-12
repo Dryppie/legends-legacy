@@ -1,5 +1,5 @@
-﻿using Domain.Models.Abilities.Effects;
-using Domain.Models.Abilities.Effects.EffectModifications;
+using Domain.Models.Combat.Abilities.Effects;
+using Domain.Models.Combat.Abilities.Effects.EffectModifications;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Damages;

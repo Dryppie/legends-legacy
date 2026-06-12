@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from '../../api/api.service';
 import { Essence } from '../../../../shared/models/essence';
-import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { catchError, switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of } from 'rxjs';
+import { switchMap, tap } from 'rxjs/operators';
 import { ToastService } from '../../client-side/toast/toast.service';
 
 @Injectable({
@@ -26,26 +26,14 @@ export class EssencesService {
   ) {}
 
   public getEquippedEssencesAndInventoryEssences(): Observable<EquippedAndInventoryEssences> {
-    return this.apiService
-      .get('essence/GetEquippedEssencesAndInventoryEssences')
-      .pipe(
-        tap({
-          next: (essences) => {
-            this.equippedAndInventoryEssencesSubject.next({
-              equippedEssences: essences.equippedEssences,
-              inventoryEssences: essences.inventoryEssences,
-            });
-          },
-        }),
-        catchError((error) => {
-          return throwError(() => error);
-        }),
-      );
+    return of({ equippedEssences: [], inventoryEssences: [] }).pipe(
+      tap((essences) => this.equippedAndInventoryEssencesSubject.next(essences)),
+    );
   }
 
   public equipEssence(essenceId: string): void {
     this.apiService
-      .post('essence/EquipEssence', essenceId)
+      .post(`essence/items/${essenceId}/absorb`, {})
       .pipe(switchMap(() => this.getEquippedEssencesAndInventoryEssences()))
       .subscribe({
         next: () => {
@@ -63,22 +51,7 @@ export class EssencesService {
   }
 
   public deleteEquippedEssence(essenceId: string): void {
-    this.apiService
-      .post('essence/DeleteEquippedEssence', essenceId)
-      .pipe(switchMap(() => this.getEquippedEssencesAndInventoryEssences()))
-      .subscribe({
-        next: () => {
-          this.getEquippedEssencesAndInventoryEssences();
-          this.toastService.showToast(
-            'Essence removed successfully!',
-            'success',
-            true,
-          );
-        },
-        error: (error) => {
-          console.error('Failed to remove essence: ', error);
-        },
-      });
+    void essenceId;
   }
 }
 

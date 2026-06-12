@@ -1,7 +1,7 @@
-﻿using Domain.Interfaces.Combat;
-using Domain.Models.Abilities;
-using Domain.Models.Abilities.Effects;
-using Domain.Models.Abilities.Effects.Actions;
+using Domain.Interfaces.Combat;
+using Domain.Models.Combat.Abilities;
+using Domain.Models.Combat.Abilities.Effects;
+using Domain.Models.Combat.Abilities.Effects.Actions;
 using Domain.Models.Attributes;
 using Domain.Models.Damages;
 using Services.LL.Interfaces;
@@ -13,7 +13,7 @@ public enum TooltipKind { Damage, Heal, Modify }
 public record TooltipValue(
     string DisplayValue,    //  "40‑60"
     string BaseValue,       //  "20"
-    string? Attribute,      //  "AttackPower" | null
+    string? Attribute,      //  "Power" | null
     string AttributeValue,  //  "37"
     string Scale,           //  "0.15"
     string BonusValue,      //  "15"
@@ -35,7 +35,7 @@ public class EssenceDescriptionService : IEssenceDescriptionService
     }
 
     public void BuildAbilityDescription(
-        AbilityDefinition ability,
+        CombatAbilityDefinition ability,
         IReadOnlyDictionary<AttributeType, float> attributes) => BuildAbilityDescription(
                    ability,
                    attributes.Select(kvp => new EntityAttribute
@@ -53,7 +53,7 @@ public class EssenceDescriptionService : IEssenceDescriptionService
     /// <param name="attributes">A dictionary of relevant stats (e.g., Strength, Dex) for scaling calculations.</param>
     /// <returns>The final string with placeholders replaced by computed values.</returns>
     private void BuildAbilityDescription(
-        AbilityDefinition ability,
+        CombatAbilityDefinition ability,
         List<EntityAttribute> attributes,
         HashSet<string> visitedStatuses)
     {

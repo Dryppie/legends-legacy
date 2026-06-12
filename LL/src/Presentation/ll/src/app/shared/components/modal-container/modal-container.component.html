@@ -13,18 +13,6 @@
       (close)="onEssenceModalClose()"
     ></app-essence-modal>
 
-    <app-absorb-essence-modal
-      *ngIf="absorbEssence"
-      [essences]="absorbEssence"
-      (close)="onAbsorbEssenceModalClose()"
-    ></app-absorb-essence-modal>
-
-    <app-remove-essence-modal
-      *ngIf="removeEssence"
-      [essences]="removeEssence"
-      (close)="onRemoveEssenceModalClose()"
-    ></app-remove-essence-modal>
-
     <app-combat-filters-modal
       *ngIf="filterCombat"
       (close)="onEditCombatFiltersModalClose()"

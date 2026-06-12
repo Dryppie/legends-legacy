@@ -1,8 +1,8 @@
-﻿using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Bonuses;
 using Domain.Models.Entities;
 using Domain.Models.Inventories;
-using Domain.Models.Items;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Extensions;
 using Services.LL.Interfaces;
@@ -18,19 +18,22 @@ internal class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculator
     private readonly ICinderRewardCalculator _cinderRewardCalculator;
     private readonly ISoulstoneRewardCalculator _soulstoneRewardCalculator;
     private readonly IRandomSource _randomSource;
+    private readonly IEssenceResonanceService _essenceResonanceService;
 
     public DungeonCombatRewardCalculator(
         IBonusService bonusService,
         ILootService lootService,
         ICinderRewardCalculator cinderRewardCalculator,
         ISoulstoneRewardCalculator soulstoneRewardCalculator,
-        IRandomSource randomSource)
+        IRandomSource randomSource,
+        IEssenceResonanceService essenceResonanceService)
     {
         _bonusService = bonusService;
         _lootService = lootService;
         _cinderRewardCalculator = cinderRewardCalculator;
         _soulstoneRewardCalculator = soulstoneRewardCalculator;
         _randomSource = randomSource;
+        _essenceResonanceService = essenceResonanceService;
     }
 
     public async Task<DungeonCombatCalculatedOutcome> CalculateAsync(
@@ -42,10 +45,7 @@ internal class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculator
             DateTimeOffset.UtcNow,
             cancellationToken);
 
-        var essenceDropRate = factors.Get(BonusKind.CombatEssenceDropRate);
         var doubleExpChance = factors.Get(BonusKind.CombatDoubleExpChance);
-        var soulstoneDropRate = factors.Get(BonusKind.SoulstoneDropRate);
-        var soulstoneDoubleDropChance = factors.Get(BonusKind.SoulstoneDoubleDropChance);
 
         var encounterOutcomes = new List<DungeonEncounterCalculatedOutcome>(facts.Encounters.Count);
         var totalLoot = new List<InventoryItem>();
@@ -62,7 +62,18 @@ internal class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculator
             {
                 loot = _lootService.GenerateIdleCombatLootAsync(
                     encounter.HostileCreatures.Cast<Entity>().ToList(),
-                    BuildMonsterLootModifiers(facts.MonsterLootModifiers, essenceDropRate));
+                    facts.MonsterLootModifiers.ToDictionary(x => x.Key, x => x.Value));
+
+                var essenceDrops = await _essenceResonanceService.RollEssenceDropsAsync(
+                    facts.CharacterId,
+                    encounter.HostileCreatures,
+                    eligible: true,
+                    cancellationToken);
+
+                if (essenceDrops.Count > 0)
+                {
+                    loot = loot.Concat(essenceDrops).ToList();
+                }
 
                 experience = encounter.HostileCreatures.Sum(x => x.ExperienceReward);
 
@@ -86,10 +97,6 @@ internal class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculator
         }
 
         var totalSoulstones = 5;
-            //_soulstoneRewardCalculator.Calculate(
-            //durationInSeconds: (int)Math.Abs(facts.ProcessedDuration.TotalSeconds),
-            //dropRatePercent: soulstoneDropRate,
-            //doubleDropChancePercent: soulstoneDoubleDropChance);
 
         return new DungeonCombatCalculatedOutcome(
             CharacterId: facts.CharacterId,
@@ -98,18 +105,5 @@ internal class DungeonCombatRewardCalculator : IDungeonCombatRewardCalculator
             TotalSoulstones: totalSoulstones,
             TotalLoot: totalLoot,
             EncounterOutcomes: encounterOutcomes);
-    }
-
-    private static Dictionary<ItemType, double> BuildMonsterLootModifiers(
-        IReadOnlyDictionary<ItemType, double> dungeonModifiers,
-        double essenceDropRate)
-    {
-        var modifiers = dungeonModifiers.ToDictionary(x => x.Key, x => x.Value);
-
-        modifiers[ItemType.Essence] = modifiers.TryGetValue(ItemType.Essence, out var dungeonEssenceModifier)
-            ? dungeonEssenceModifier + essenceDropRate
-            : essenceDropRate;
-
-        return modifiers;
     }
 }

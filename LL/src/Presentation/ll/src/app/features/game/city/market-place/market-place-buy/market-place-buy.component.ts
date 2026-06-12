@@ -23,6 +23,7 @@ import { ItemType } from '../../../../../shared/models/enums/itemType';
 import {
   EquipmentInstance,
   EssenceItem,
+  essenceItemToEssence,
 } from '../../../../../shared/models/item';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
@@ -216,10 +217,7 @@ export class MarketPlaceBuyComponent implements OnInit {
 
       case 'Essence': {
         const es = base as EssenceItem;
-        const mods = es.essence.attributeModifiers
-          .map((m) => `• ${m.attributeType}: +${m.amount}`)
-          .join('\n');
-        return `Active:  ${es.essence.active.name}\nPassive: ${es.essence.passive.name}\n${mods}`;
+        return `${es.rarity}${es.essenceDefinitionId ? `\n${es.essenceDefinitionId}` : ''}${es.description ? `\n${es.description}` : ''}`;
       }
 
       default:

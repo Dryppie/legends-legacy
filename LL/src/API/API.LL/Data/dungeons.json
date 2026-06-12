@@ -6,7 +6,7 @@
     "tier": 1,
     "completionLootTableId": "10000000-0000-0000-0000-000000000101",
     "tierLootTableId": "10000000-0000-0000-0000-000000000001",
-    "monsterLootModifiers": {
+    "creatureLootModifiers": {
       "Essence": 25
     },
     "hasCheckpoint": true,
@@ -38,7 +38,7 @@
     "sigilItemId": "sigil_forgotten_catacombs",
     "tier": 1,
     "tierLootTableId": "10000000-0000-0000-0000-000000000001",
-    "monsterLootModifiers": {
+    "creatureLootModifiers": {
       "Essence": 15
     },
     "hasCheckpoint": true,
@@ -88,7 +88,7 @@
     "sigilItemId": "sigil_hives_abyss",
     "tier": 1,
     "tierLootTableId": "10000000-0000-0000-0000-000000000001",
-    "monsterLootModifiers": {
+    "creatureLootModifiers": {
       "Essence": 15
     },
     "hasCheckpoint": true,

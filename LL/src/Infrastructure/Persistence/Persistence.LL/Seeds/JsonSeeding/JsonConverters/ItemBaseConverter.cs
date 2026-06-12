@@ -2,6 +2,7 @@
 using System.Text.Json.Serialization;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.EssenceItems;
 
 namespace Persistence.LL.Seeds.JsonSeeding.JsonConverters;
 public sealed class ItemBaseConverter : JsonConverter<ItemBase>
@@ -21,6 +22,7 @@ public sealed class ItemBaseConverter : JsonConverter<ItemBase>
         Type concreteType = discriminator switch
         {
             "Equipment" => typeof(EquipmentBase),
+            "Essence" => typeof(EssenceItemBase),
             "Resource" => typeof(ItemBase),
             "Consumable" => typeof(ItemBase),
             _ => throw new JsonException($"Unknown itemType \"{discriminator}\".")

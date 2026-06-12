@@ -1,5 +1,4 @@
-﻿using Application.Common.Interfaces;
-using Domain.Models.Abilities;
+using Application.Common.Interfaces;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
@@ -10,7 +9,6 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Entities.NPCs;
 using Domain.Models.Essences;
-using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Guilds;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
@@ -124,8 +122,6 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
         }
     }
 
-    public DbSet<AbilityId> AbilityIds => Set<AbilityId>();
-
     //public DbSet<Achievement> Achievements => Set<Achievement>();
     public DbSet<Area> Areas => Set<Area>();
     public DbSet<EntityAttribute> EntityAttributes => Set<EntityAttribute>();
@@ -142,9 +138,11 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<Entity> Entities => Set<Entity>();
     public DbSet<EquipmentSlot> EquipmentSlots => Set<EquipmentSlot>();
 
-    public DbSet<Essence> Essences => Set<Essence>();
-    public DbSet<EssenceSlot> EssenceSlots => Set<EssenceSlot>();
     public DbSet<EssenceItemBase> EssenceItems => Set<EssenceItemBase>();
+    public DbSet<PlayerEssence> PlayerEssences => Set<PlayerEssence>();
+    public DbSet<EssenceLoadout> EssenceLoadouts => Set<EssenceLoadout>();
+    public DbSet<EssenceLoadoutSlot> EssenceLoadoutSlots => Set<EssenceLoadoutSlot>();
+    public DbSet<CreatureResonance> MonsterResonances => Set<CreatureResonance>();
 
     public DbSet<DungeonRun> DungeonRuns => Set<DungeonRun>();
     public DbSet<RunReward> RunRewards => Set<RunReward>();
@@ -161,7 +159,6 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
 
     //public DbSet<Equipment> Equipments => Set<Equipment>();
 
-    //public DbSet<Essence> Essences => Set<Essence>();
 
     public DbSet<Guild> Guilds => Set<Guild>();
     public DbSet<GuildInvite> GuildInvites => Set<GuildInvite>();
@@ -203,6 +200,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
 
     // Snapshots
     public DbSet<CharacterSnapshot> CharacterSnapshots => Set<CharacterSnapshot>();
+    public DbSet<EquippedEssenceSnapshot> EquippedEssenceSnapshots => Set<EquippedEssenceSnapshot>();
 
     public DbSet<AppUser> Users => Set<AppUser>();
     public DbSet<ExternalLogin> ExternalLogins => Set<ExternalLogin>();

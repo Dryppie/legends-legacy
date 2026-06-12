@@ -110,9 +110,21 @@ public static class DependencyInjection
         services.AddScoped<IEntityService, EntityService>();
         services.AddScoped<IEquipmentSlotService, EquipmentSlotService>();
 
-        services.AddScoped<IEssenceService, EssenceService>();
-        services.AddScoped<IEssenceDescriptionService, EssenceDescriptionService>();
-        services.AddScoped<IEssenceSlotService, EssenceSlotService>();
+        services.AddSingleton<IEssenceDefinitionValidator, EssenceDefinitionValidator>();
+        services.AddSingleton<IEssenceDefinitionRepository>(sp =>
+            new JsonEssenceDefinitionRepository(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>(),
+                sp.GetRequiredService<IEssenceDefinitionValidator>()));
+        services.AddScoped<IEssenceProgressionService, EssenceProgressionService>();
+        services.AddScoped<IEssenceSlotUnlockService, EssenceSlotUnlockService>();
+        services.AddScoped<IEssenceLoadoutLimitService, EssenceLoadoutLimitService>();
+        services.AddScoped<IRandomProvider, SystemRandomProvider>();
+        services.AddScoped<IEssenceService, EssenceSystemService>();
+        services.AddScoped<IEssenceBonusProvider, EssenceSystemService>();
+        services.AddScoped<IEssenceAbilityProvider, EssenceSystemService>();
+        services.AddScoped<IEssenceResonanceService, EssenceSystemService>();
 
         services.AddScoped<IGatheringNodeService, GatheringNodeService>();
 

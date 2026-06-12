@@ -104,7 +104,7 @@
             "Action": {
               "Type": "Damage",
               "Amount": 5,
-              "ScalingAttribute": "AttackPower",
+              "ScalingAttribute": "Power",
               "ScalingMultiplier": 0.15
             },
             "Duration": { "Type": "NoDuration" },
@@ -292,7 +292,7 @@
           {
             "Action": {
               "Type": "ModifyAttribute",
-              "Attribute": "SpellPower",
+              "Attribute": "Power",
               "Amount": 20,
               "ModifierType": "Flat"
             },
@@ -306,7 +306,7 @@
           {
             "Action": {
               "Type": "ModifyAttribute",
-              "Attribute": "AttackPower",
+              "Attribute": "Power",
               "Amount": 20,
               "ModifierType": "Flat"
             },
@@ -375,7 +375,7 @@
           {
             "Action": {
               "Type": "ModifyAttribute",
-              "Attribute": "Dodge",
+              "Attribute": "DodgeChance",
               "Amount": 40,
               "ModifierType": "Flat"
             },
@@ -426,7 +426,7 @@
           {
             "Action": {
               "Type": "ModifyAttribute",
-              "Attribute": "Accuracy",
+              "Attribute": "Precision",
               "Amount": -10,
               "ModifierType": "Additive",
               "Stackable": true
@@ -497,7 +497,7 @@
           {
             "Action": {
               "Type": "ModifyAttribute",
-              "Attribute": "ManaRegeneration",
+              "Attribute": "Spirit",
               "Amount": -40,
               "ModifierType": "Multiplicative"
             },
@@ -506,7 +506,7 @@
               "Duration": 80
             },
             "Targeting": "Self",
-            "Log": "{Target}'s mana regeneration is suppressed."
+            "Log": "{Target}'s spirit recovery is suppressed."
           }
         ]
       }
@@ -524,7 +524,7 @@
             "Action": {
               "Type": "Damage",
               "Amount": 26,
-              "ScalingAttribute": "AttackPower",
+              "ScalingAttribute": "Power",
               "ScalingMultiplier": 0.3
             },
             "Targeting": "Self",
@@ -592,7 +592,7 @@
             "Action": {
               "Type": "Damage",
               "Amount": 23,
-              "ScalingAttribute": "AttackPower",
+              "ScalingAttribute": "Power",
               "ScalingMultiplier": 0.25
             },
             "Duration": { "Type": "NoDuration" },
@@ -665,7 +665,7 @@
             "Action": {
               "Type": "Damage",
               "Amount": 31,
-              "ScalingAttribute": "AttackPower",
+              "ScalingAttribute": "Power",
               "ScalingMultiplier": 0.25
             },
             "Targeting": "Self",
@@ -677,7 +677,7 @@
           {
             "Action": {
               "Type": "ModifyAttribute",
-              "Attribute": "AttackPower",
+              "Attribute": "Power",
               "Amount": -24,
               "ModifierType": "Flat",
               "Stackable": false

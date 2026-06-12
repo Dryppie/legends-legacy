@@ -1,7 +1,7 @@
-﻿using Domain.Interfaces.Abilities;
-using Domain.Models.Abilities.Effects.Actions;
-using Domain.Models.Abilities.Effects.StatusEffects;
-using Domain.Models.Abilities.ResourceCosts;
+using Domain.Interfaces.Combat.Abilities;
+using Domain.Models.Combat.Abilities.Effects.Actions;
+using Domain.Models.Combat.Abilities.Effects.StatusEffects;
+using Domain.Models.Combat.Abilities.ResourceCosts;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using System.Text.Json;

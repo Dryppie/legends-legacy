@@ -1,5 +1,5 @@
-﻿using Domain.Helpers.Constants;
-using Domain.Models.Abilities.Effects.EffectModifications;
+using Domain.Helpers.Constants;
+using Domain.Models.Combat.Abilities.Effects.EffectModifications;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
@@ -52,7 +52,7 @@ public static class CombatFormulaCalculator
     private static bool CalculateHit(CombatEntity attacker, CombatEntity defender, int levelDifference)
     {
         float levelDifferenceModifier = levelDifference / 5 * 3.125f; // Decrease hit chance by 3.125% per level difference
-        float statDifferenceModifier = (int)((defender.CombatAttributes[AttributeType.Accuracy] - attacker.CombatAttributes[AttributeType.Dodge]) / 5f) * 1.25f;  // Increased impact from stats
+        float statDifferenceModifier = (int)((defender.CombatAttributes[AttributeType.Precision] - attacker.CombatAttributes[AttributeType.DodgeChance]) / 5f) * 1.25f;  // Increased impact from stats
                                                                                                                                                                   // 98                         - ((100-100) / 5 * 3.125) - ((20 - 20) / 5 * 1.25)
         float adjustedHitChance = CombatConstants.BASE_HIT_CHANCE + statDifferenceModifier - levelDifferenceModifier;
         adjustedHitChance = Math.Clamp(adjustedHitChance, CombatConstants.MIN_HIT_CHANCE, CombatConstants.MAX_HIT_CHANCE); // Ensure hit chance is between 10% and 100%
@@ -66,7 +66,7 @@ public static class CombatFormulaCalculator
     //    float baseDodgeChance = 5f;
     //    int deltaLevelDifference = levelDifference / 3;
     //    float dodgeChancePenaltyPer3Levels = 2f; // Decrease hit chance by 2% per level difference
-    //    float adjustedDodgeChance = baseDodgeChance + (deltaLevelDifference * dodgeChancePenaltyPer3Levels) + (defender.CombatAttributes[AttributeType.Dodge] / 10);
+    //    float adjustedDodgeChance = baseDodgeChance + (deltaLevelDifference * dodgeChancePenaltyPer3Levels) + (defender.CombatAttributes[AttributeType.DodgeChance] / 10);
     //    adjustedDodgeChance = Math.Clamp(adjustedDodgeChance, CombatConstants.MinDodgeChance, CombatConstants.MaxDodgeChance); // Ensure dodge chance is between 0% and 100%
 
     //    float roll = (float)RandomGenerator.NextDouble() * 100f;
@@ -75,7 +75,7 @@ public static class CombatFormulaCalculator
 
     private static bool IsParry(CombatEntity defender)
     {
-        var parryChance = defender.GetAttributeValue(AttributeType.Parry) * CombatConstants.BASE_PARRY_VALUE;
+        var parryChance = defender.GetAttributeValue(AttributeType.BlockChance) * CombatConstants.BASE_PARRY_VALUE;
         var adjustedParryChance = Math.Min(parryChance, CombatConstants.MAX_PARRY_CHANCE);
 
         float roll = (float)RandomGenerator.NextDouble() * 100f;
@@ -84,7 +84,7 @@ public static class CombatFormulaCalculator
 
     private static bool IsBlock(CombatEntity defender)
     {
-        var blockChance = defender.GetAttributeValue(AttributeType.Parry) * CombatConstants.BASE_BLOCK_VALUE;
+        var blockChance = defender.GetAttributeValue(AttributeType.BlockChance) * CombatConstants.BASE_BLOCK_VALUE;
         var adjustedBlockChance = Math.Min(blockChance, CombatConstants.MAX_BLOCK_CHANCE);
 
         float roll = (float)RandomGenerator.NextDouble() * 100f;
@@ -111,7 +111,7 @@ public static class CombatFormulaCalculator
     private static int CalculateDamageReceived(CombatEntity defender, float magnitude, AttackOutcome attackOutcome)
     {
         if (attackOutcome.Equals(AttackOutcome.Block)) return (int)(magnitude * 0.6f);
-        if (attackOutcome.Equals(AttackOutcome.Crit)) return (int)(magnitude * defender.CombatAttributes[AttributeType.CritDamageReduction]);
+        if (attackOutcome.Equals(AttackOutcome.Crit)) return (int)(magnitude * defender.CombatAttributes[AttributeType.DamageReduction]);
         return (int)magnitude;
     }
 

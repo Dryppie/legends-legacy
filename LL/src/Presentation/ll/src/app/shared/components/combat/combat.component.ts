@@ -177,8 +177,6 @@ export class CombatComponent implements OnInit {
         imagePath: '',
         health: 100,
         maxHealth: 100,
-        mana: 100,
-        maxMana: 100,
         barrier: 0,
       },
     ];
@@ -189,8 +187,6 @@ export class CombatComponent implements OnInit {
         imagePath: '',
         health: 100,
         maxHealth: 100,
-        mana: 100,
-        maxMana: 100,
         barrier: 0,
       },
     ];
@@ -265,9 +261,6 @@ export class CombatComponent implements OnInit {
       case EventType.HealCrit:
         this.handleHealEvent(event);
         break;
-      case EventType.RestoreMana:
-        this.handleRestoreManaEvent(event);
-        break;
       case EventType.RestoreBarrier:
         this.handleRestoreBarrierEvent(event);
         break;
@@ -302,7 +295,6 @@ export class CombatComponent implements OnInit {
         this.handleStatusEffectEvent(event, statusEffectExpired);
         break;
       case EventType.HealthRegeneration:
-      case EventType.ManaRegeneration:
         this.handleRegeneration(event);
         break;
       case EventType.Death:
@@ -322,10 +314,6 @@ export class CombatComponent implements OnInit {
   }
 
   private handleHealEvent(event: CombatEvent): void {
-    this.updateCharacter(event.combatEntity);
-  }
-
-  private handleRestoreManaEvent(event: CombatEvent): void {
     this.updateCharacter(event.combatEntity);
   }
 
@@ -386,8 +374,6 @@ export class CombatComponent implements OnInit {
     if (!character) return;
     character.health = combatEntity.health;
     character.maxHealth = combatEntity.maxHealth;
-    character.mana = combatEntity.mana;
-    character.maxMana = combatEntity.maxMana;
     character.barrier = combatEntity.barrier;
   }
 

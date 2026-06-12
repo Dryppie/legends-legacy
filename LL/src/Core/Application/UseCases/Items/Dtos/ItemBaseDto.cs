@@ -16,6 +16,7 @@ public class ItemBaseDto : IMapFrom<ItemBase>
     public string IconPath { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public bool Stackable { get; set; } = true;
+    public bool IsBound { get; set; }
     public ItemType ItemType { get; set; }
     public Rarity Rarity { get; set; }
     public void Mapping(Profile profile)
@@ -24,17 +25,4 @@ public class ItemBaseDto : IMapFrom<ItemBase>
             .Include<EssenceItemBase, EssenceItemBaseDto>()
             .Include<EquipmentBase, EquipmentBaseDto>();
     }
-
-    //public class EssenceResolver : IValueResolver<ItemBase, ItemBaseDto, EssenceDetailsDto?>
-    //{
-    //    public EssenceDetailsDto? Resolve(ItemBase source, ItemBaseDto destination, EssenceDetailsDto? destMember, ResolutionContext context)
-    //    {
-    //        if (source is EssenceItemBase essenceItem && essenceItem.Essence != null)
-    //        {
-    //            // Map the Essence entity to the EssenceDetailsDto using AutoMapper
-    //            return context.Mapper.Map<EssenceDetailsDto>(essenceItem.Essence);
-    //        }
-    //        return null;
-    //    }
-    //}
 }

@@ -1,5 +1,5 @@
-﻿using Domain.Interfaces.Combat;
-using Domain.Models.Abilities;
+using Domain.Interfaces.Combat;
+using Domain.Models.Combat.Abilities;
 
 namespace Services.LL.Combat.CombatEngine;
 public class CombatEventBus : ICombatEventBus

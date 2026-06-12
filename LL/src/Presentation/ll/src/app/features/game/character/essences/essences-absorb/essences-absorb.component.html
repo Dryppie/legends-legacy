@@ -6,29 +6,21 @@
     <!-- ESSENCE DESCRIPTION -->
     <div class="rounded-lg border border-light_gray bg-texture p-4">
       <ng-container
-        *ngIf="selectedEssence() as selectedEssence; else noEssence"
+        *ngIf="essenceState.selectedInventoryEssence() as selectedEssence; else noEssence"
       >
         <app-essence-details [essence]="selectedEssence"></app-essence-details>
         <div class="mt-4 flex items-center justify-between gap-2">
-          <ng-container
-            *ngIf="areSlotsAvailable() as canEquip; else noSlotsAvailable"
-          >
-            <ng-container *ngIf="!isEssenceAbsorbed(); else essenceIsAbsorbed">
-              <app-regular-button
-                [disabled]="!areSlotsAvailable()"
-                (pressed)="absorb()"
-                text="Absorb essence"
-              >
-              </app-regular-button>
-            </ng-container>
-            <ng-template #essenceIsAbsorbed>
-              <span class="text-rose-500">
-                This essence is already absorbed
-              </span>
-            </ng-template>
+          <ng-container *ngIf="!essenceState.isSelectedInventoryEssenceAbsorbed(); else essenceIsAbsorbed">
+            <app-regular-button
+              (pressed)="absorb()"
+              text="Absorb essence"
+            >
+            </app-regular-button>
           </ng-container>
-          <ng-template #noSlotsAvailable>
-            <span class="text-rose-500"> No essence slots available </span>
+          <ng-template #essenceIsAbsorbed>
+            <span class="text-rose-500">
+              This essence is already in your Soul Archive
+            </span>
           </ng-template>
           <app-regular-button
             (pressed)="openModal()"
@@ -49,14 +41,14 @@
   <div class="flex h-full w-full flex-col space-y-2 overflow-y-auto md:order-1">
     <app-selectable-list-filter
       [storageKey]="'essences-absorb'"
-      [items]="inventoryEssences()"
+      [items]="essenceState.inventoryEssences()"
       [filterOptions]="essenceFilters"
       (select)="selectEssence($event)"
     >
       <!-- How *one* essence row looks -->
       <ng-template let-invItem>
         <div class="flex justify-between font-semibold text-white">
-          <div>{{ invItem.itemInstance.itemBase.essence.name }}</div>
+          <div>{{ essenceState.asEssence(invItem).name }}</div>
           <div>x{{ invItem.quantity }}</div>
         </div>
       </ng-template>
@@ -74,52 +66,22 @@
     (click)="$event.stopPropagation()"
   >
     <div class="mb-4">
-      <h3 class="text-primary">Shatter {{ selectedEssence()?.name }}</h3>
+      <h3 class="text-primary">Shatter {{ essenceState.selectedInventoryEssence()?.name }}</h3>
       <label class="italic text-zinc-300"
-        >You gain 1 Soul Dust for every Essence you shatter</label
+        >Dismantle one Unbound Essence into Essence Dust.</label
       >
     </div>
 
     <div class="mb-4">
-      <label class="mb-1 block text-sm text-white">
-        Quantity to Shatter (Owned: {{ selectedEssenceQuantity() }})
-      </label>
-      <input
-        type="number"
-        min="1"
-        [max]="selectedEssenceQuantity()"
-        [(ngModel)]="shatterAmount"
-        class="no-spinner w-full rounded border border-light_gray bg-texture p-2 text-white"
-      />
-      <div class="text-gray-400 mt-2 flex justify-end gap-2 text-xs">
-        <button
-          type="button"
-          (click)="setShatterAmount(1)"
-          class="underline hover:text-white"
-        >
-          One (1)
-        </button>
-        <button
-          type="button"
-          (click)="setShatterAmount(selectedEssenceQuantity() - 1)"
-          class="underline hover:text-white"
-        >
-          All but 1 ({{ selectedEssenceQuantity() - 1 }})
-        </button>
-        <button
-          type="button"
-          (click)="setShatterAmount(selectedEssenceQuantity())"
-          class="underline hover:text-white"
-        >
-          Max ({{ selectedEssenceQuantity() }})
-        </button>
-      </div>
+      <p class="text-sm text-white">
+        Owned: {{ essenceState.selectedInventoryEssenceQuantity() }}
+      </p>
     </div>
 
     <div class="flex justify-end gap-2">
       <app-regular-button (pressed)="closeModal()">Cancel</app-regular-button>
       <app-regular-button
-        [disabled]="disableConfirmShatterButton()"
+        [disabled]="!essenceState.selectedInventoryItem()"
         (pressed)="confirmShatter()"
         >Shatter</app-regular-button
       >

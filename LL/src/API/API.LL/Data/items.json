@@ -28,6 +28,129 @@
     "scalingAmount": 0
   },
   {
+    "id": "item.monster_core.tier_1",
+    "name": "Tier 1 Monster Core",
+    "description": "An account-bound core used to ascend Essences into Tier 1.",
+    "itemType": "Resource",
+    "rarity": "Uncommon",
+    "stackable": true,
+    "isBound": true,
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.monster_core.tier_2",
+    "name": "Tier 2 Monster Core",
+    "description": "An account-bound core used to ascend Essences into Tier 2.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "stackable": true,
+    "isBound": true,
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.monster_core.tier_3",
+    "name": "Tier 3 Monster Core",
+    "description": "An account-bound core used to ascend Essences into Tier 3.",
+    "itemType": "Resource",
+    "rarity": "Epic",
+    "stackable": true,
+    "isBound": true,
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.evolution_catalyst.cunning",
+    "name": "Cunning Evolution Catalyst",
+    "description": "A catalyst used to evolve opportunistic Essences.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "stackable": true,
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.evolution_catalyst.warden",
+    "name": "Warden Evolution Catalyst",
+    "description": "A catalyst used to evolve defensive Essences.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "stackable": true,
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.evolution_catalyst.flame",
+    "name": "Flame Evolution Catalyst",
+    "description": "A catalyst used to evolve fire Essences.",
+    "itemType": "Resource",
+    "rarity": "Rare",
+    "stackable": true,
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.evolution_catalyst.echo",
+    "name": "Echo Evolution Catalyst",
+    "description": "A catalyst used to evolve evasive Essences.",
+    "itemType": "Resource",
+    "rarity": "Uncommon",
+    "stackable": true,
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.evolution_catalyst.hollow",
+    "name": "Hollow Evolution Catalyst",
+    "description": "A catalyst used to evolve spectral Essences.",
+    "itemType": "Resource",
+    "rarity": "Epic",
+    "stackable": true,
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "scalingAttribute": "MaxHealth",
+    "scalingAmount": 0
+  },
+  {
     "id": "tempered_scrap",
     "name": "Tempered Scrap",
     "description": "A material gotten by scrapping tempered equipment",
@@ -40,6 +163,61 @@
     "magnitudeRange": 0,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.goblin_ambusher",
+    "name": "Unbound Goblin Ambusher Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Rare",
+    "stackable": true,
+    "essenceDefinitionId": "essence.goblin_ambusher",
+    "isBound": false,
+    "dismantleDustAmount": 1
+  },
+  {
+    "id": "item.essence.skeleton_guardian",
+    "name": "Unbound Skeleton Guardian Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Rare",
+    "stackable": true,
+    "essenceDefinitionId": "essence.skeleton_guardian",
+    "isBound": false,
+    "dismantleDustAmount": 1
+  },
+  {
+    "id": "item.essence.fire_ant",
+    "name": "Unbound Fire Ant Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Rare",
+    "stackable": true,
+    "essenceDefinitionId": "essence.fire_ant",
+    "isBound": false,
+    "dismantleDustAmount": 1
+  },
+  {
+    "id": "item.essence.cave_bat",
+    "name": "Unbound Cave Bat Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Uncommon",
+    "stackable": true,
+    "essenceDefinitionId": "essence.cave_bat",
+    "isBound": false,
+    "dismantleDustAmount": 1
+  },
+  {
+    "id": "item.essence.necroshade_wraith",
+    "name": "Unbound Necroshade Wraith Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Epic",
+    "stackable": true,
+    "essenceDefinitionId": "essence.necroshade_wraith",
+    "isBound": false,
+    "dismantleDustAmount": 2
   },
   {
     "id": "ore",
@@ -519,7 +697,7 @@
   },
   {
     "id": "mana_dust",
-    "name": "Mana Dust",
+    "name": "Spirit Dust",
     "description": "",
     "itemType": "Resource",
     "rarity": "Unique",
@@ -1625,7 +1803,7 @@
       },
       {
         "id": "ae0a5157-2a5a-4104-accc-8378f6f43ae9",
-        "attributeType": "Threat",
+        "attributeType": "Fortitude",
         "amount": 1,
         "modifierType": "Flat"
       }
@@ -1694,7 +1872,7 @@
       },
       {
         "id": "cd653f0f-50de-470e-bb97-9bd9f4d6f114",
-        "attributeType": "Health",
+        "attributeType": "MaxHealth",
         "amount": 7,
         "modifierType": "Flat"
       }
@@ -1832,7 +2010,7 @@
       },
       {
         "id": "c2ebd804-df2b-4250-9c19-252fabff65bc",
-        "attributeType": "Mana",
+        "attributeType": "Spirit",
         "amount": 7,
         "modifierType": "Flat"
       }
@@ -1895,7 +2073,7 @@
     "attributeModifiers": [
       {
         "id": "bf899508-1166-4f21-b36b-9710202b453a",
-        "attributeType": "MaxMana",
+        "attributeType": "Spirit",
         "amount": 11,
         "modifierType": "Flat"
       }
@@ -1909,7 +2087,7 @@
   {
     "id": "leafglow_amulet",
     "name": "Leafglow Amulet",
-    "description": "A glowing amulet that grants mana regeneration and a soft green light.",
+    "description": "A glowing amulet that grants spirit recovery and a soft green light.",
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "Necklace",
@@ -2000,7 +2178,7 @@
     "attributeModifiers": [
       {
         "id": "586023dd-2bb9-4f4d-8d8b-38180ee3784e",
-        "attributeType": "PhysicalDefense",
+        "attributeType": "Armor",
         "amount": 18,
         "modifierType": "Flat"
       }
@@ -2042,7 +2220,7 @@
     "attributeModifiers": [
       {
         "id": "ba801852-8770-4e5e-aafc-21ca8dab8542",
-        "attributeType": "ManaRegeneration",
+        "attributeType": "Spirit",
         "amount": 1,
         "modifierType": "Flat"
       }
@@ -2063,7 +2241,7 @@
     "attributeModifiers": [
       {
         "id": "650b4316-2ba7-471f-9258-03fd2f6ce7b4",
-        "attributeType": "Threat",
+        "attributeType": "Fortitude",
         "amount": 3,
         "modifierType": "Flat"
       }
@@ -2276,13 +2454,13 @@
     "attributeModifiers": [
       {
         "id": "3746fe80-9dbf-485f-9206-746967783f10",
-        "attributeType": "PhysicalDefense",
+        "attributeType": "Armor",
         "amount": 15,
         "modifierType": "Flat"
       },
       {
         "id": "479426de-d5ce-4297-9a25-612008f02787",
-        "attributeType": "Block",
+        "attributeType": "BlockChance",
         "amount": 25,
         "modifierType": "Flat"
       }
@@ -2303,13 +2481,13 @@
     "attributeModifiers": [
       {
         "id": "9cb2ec79-83e9-4077-9ef5-3eebc2901da5",
-        "attributeType": "MagicalDefense",
+        "attributeType": "Resistance",
         "amount": 15,
         "modifierType": "Flat"
       },
       {
         "id": "b88d421d-711c-40f3-97c4-6a17f1f7fb7f",
-        "attributeType": "Block",
+        "attributeType": "BlockChance",
         "amount": 25,
         "modifierType": "Flat"
       }
@@ -2708,7 +2886,7 @@
       },
       {
         "id": "5f0699c9-5a90-4c89-9e19-0334f958a230",
-        "attributeType": "ManaRegeneration",
+        "attributeType": "Spirit",
         "amount": 2,
         "modifierType": "Flat"
       }
@@ -2756,7 +2934,7 @@
       },
       {
         "id": "e1e6b307-c3de-4105-8393-880c3935f291",
-        "attributeType": "MaxMana",
+        "attributeType": "Spirit",
         "amount": 25,
         "modifierType": "Flat"
       }
@@ -2770,14 +2948,14 @@
   {
     "id": "copper_core_pendant",
     "name": "Copper Core Pendant",
-    "description": "A pendant charged with latent energy from copper veins. Slightly increases maximum mana.",
+    "description": "A pendant charged with latent energy from copper veins. Slightly increases Spirit.",
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "Necklace",
     "attributeModifiers": [
       {
         "id": "b7bdcf70-4fa8-44df-9010-31c422a86811",
-        "attributeType": "MaxMana",
+        "attributeType": "Spirit",
         "amount": 38,
         "modifierType": "Flat"
       }
@@ -2791,7 +2969,7 @@
   {
     "id": "amberleaf_pendant",
     "name": "Amberleaf Pendant",
-    "description": "A leaf-shaped amber gem that pulses with nature\u2019s essence. Increases agility and grants minor mana regeneration.",
+    "description": "A leaf-shaped amber gem that pulses with nature\u2019s essence. Increases agility and grants minor spirit recovery.",
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "Necklace",
@@ -2804,7 +2982,7 @@
       },
       {
         "id": "0b79a4cb-58cc-4095-88b6-eacd20cd4ed1",
-        "attributeType": "ManaRegeneration",
+        "attributeType": "Spirit",
         "amount": 1,
         "modifierType": "Flat"
       }
@@ -2831,7 +3009,7 @@
       },
       {
         "id": "c7c2a06e-5fa2-42f5-b15e-9a5faf4ee728",
-        "attributeType": "FireResistance",
+        "attributeType": "Resistance",
         "amount": 3,
         "modifierType": "Flat"
       }
@@ -2894,7 +3072,7 @@
     "attributeModifiers": [
       {
         "id": "dd136e4e-5f27-45f1-beb0-2235ba8e21be",
-        "attributeType": "PhysicalDefense",
+        "attributeType": "Armor",
         "amount": 22,
         "modifierType": "Flat"
       },
@@ -2941,14 +3119,14 @@
   {
     "id": "living_growth_totem",
     "name": "Totem of Living Growth",
-    "description": "A totem pulsing with life, made of living amber. Grants passive mana regeneration when not moving.",
+    "description": "A totem pulsing with life, made of living amber. Grants passive spirit recovery when not moving.",
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "Relic",
     "attributeModifiers": [
       {
         "id": "fcb7a021-3b79-4b7c-b4f4-f51f8ea9c7e9",
-        "attributeType": "ManaRegeneration",
+        "attributeType": "Spirit",
         "amount": 3,
         "modifierType": "Flat"
       }
@@ -2969,7 +3147,7 @@
     "attributeModifiers": [
       {
         "id": "776aca3e-f7e8-4d94-9996-c723541eb829",
-        "attributeType": "Threat",
+        "attributeType": "Fortitude",
         "amount": 5,
         "modifierType": "Flat"
       }
@@ -3176,13 +3354,13 @@
     "attributeModifiers": [
       {
         "id": "5624a4dc-0462-4421-bbb7-1562703b7ba6",
-        "attributeType": "PhysicalDefense",
+        "attributeType": "Armor",
         "amount": 32,
         "modifierType": "Flat"
       },
       {
         "id": "b16cbf10-fe41-44cf-b634-8b4fef0b0b3a",
-        "attributeType": "Block",
+        "attributeType": "BlockChance",
         "amount": 65,
         "modifierType": "Flat"
       }
@@ -3203,13 +3381,13 @@
     "attributeModifiers": [
       {
         "id": "71a68efd-3513-4120-bbd1-39d87c2a13e9",
-        "attributeType": "MagicalDefense",
+        "attributeType": "Resistance",
         "amount": 32,
         "modifierType": "Flat"
       },
       {
         "id": "f00813dd-7b0f-4ba9-ba33-6f36f5317f97",
-        "attributeType": "Block",
+        "attributeType": "BlockChance",
         "amount": 65,
         "modifierType": "Flat"
       }
@@ -3223,7 +3401,7 @@
   {
     "id": "verdant_channeler_staff",
     "name": "Verdant Channeler Staff",
-    "description": "A staff woven from living amber and verdant ore, humming with natural mana.",
+    "description": "A staff woven from living amber and verdant ore, humming with natural spirit.",
     "itemType": "Equipment",
     "rarity": "Common",
     "equipmentType": "TwoHanded",
@@ -3257,7 +3435,7 @@
       },
       {
         "id": "18697840-57c0-4100-ac32-aad424df0695",
-        "attributeType": "ManaRegeneration",
+        "attributeType": "Spirit",
         "amount": 1,
         "modifierType": "Flat"
       }
@@ -3305,7 +3483,7 @@
       },
       {
         "id": "31c6e852-9021-4b8d-9858-72e2aca87d90",
-        "attributeType": "MaxMana",
+        "attributeType": "Spirit",
         "amount": 24,
         "modifierType": "Flat"
       }
@@ -3401,13 +3579,13 @@
     "attributeModifiers": [
       {
         "id": "d67d3f92-a0be-4547-aa9f-a5eb8367f936",
-        "attributeType": "PhysicalDefense",
+        "attributeType": "Armor",
         "amount": 30,
         "modifierType": "Flat"
       },
       {
         "id": "1b6717ef-47ad-492c-a000-9331f2164658",
-        "attributeType": "MagicalDefense",
+        "attributeType": "Resistance",
         "amount": 30,
         "modifierType": "Flat"
       },
@@ -3434,13 +3612,13 @@
     "attributeModifiers": [
       {
         "id": "d089d1ad-756c-4280-a2dd-91af1cfa8efb",
-        "attributeType": "PhysicalDefense",
+        "attributeType": "Armor",
         "amount": 30,
         "modifierType": "Flat"
       },
       {
         "id": "8f7c2296-75a5-4a3c-83f7-eec770873eb0",
-        "attributeType": "MagicalDefense",
+        "attributeType": "Resistance",
         "amount": 30,
         "modifierType": "Flat"
       },
@@ -3467,13 +3645,13 @@
     "attributeModifiers": [
       {
         "id": "e605c0a8-c0a8-4b6c-a8e2-62def125026b",
-        "attributeType": "PhysicalDefense",
+        "attributeType": "Armor",
         "amount": 30,
         "modifierType": "Flat"
       },
       {
         "id": "ef73bf86-a057-4711-9e36-4e1187eac981",
-        "attributeType": "MagicalDefense",
+        "attributeType": "Resistance",
         "amount": 30,
         "modifierType": "Flat"
       },
@@ -3500,7 +3678,7 @@
     "attributeModifiers": [
       {
         "id": "3d832b10-4c1b-46bf-9e50-c9f7eb473d22",
-        "attributeType": "PhysicalDefense",
+        "attributeType": "Armor",
         "amount": 20,
         "modifierType": "Flat"
       },
@@ -3512,7 +3690,7 @@
       },
       {
         "id": "30d89880-288e-441d-ba1e-28af9c06eecf",
-        "attributeType": "AttackPower",
+        "attributeType": "Power",
         "amount": 20,
         "modifierType": "Flat"
       }
@@ -3533,7 +3711,7 @@
     "attributeModifiers": [
       {
         "id": "1e87a243-ecde-4cfe-bf59-7207fc8b822f",
-        "attributeType": "PhysicalDefense",
+        "attributeType": "Armor",
         "amount": 20,
         "modifierType": "Flat"
       },
@@ -3545,7 +3723,7 @@
       },
       {
         "id": "756f18c2-0025-4e35-b8d1-bdaf7c30e49a",
-        "attributeType": "AttackPower",
+        "attributeType": "Power",
         "amount": 20,
         "modifierType": "Flat"
       }
@@ -3566,7 +3744,7 @@
     "attributeModifiers": [
       {
         "id": "0dc31466-211c-4581-b76b-7ff3b5999469",
-        "attributeType": "PhysicalDefense",
+        "attributeType": "Armor",
         "amount": 20,
         "modifierType": "Flat"
       },
@@ -3578,7 +3756,7 @@
       },
       {
         "id": "0d410568-a2e4-4668-a0f4-18a0fe744bbf",
-        "attributeType": "AttackPower",
+        "attributeType": "Power",
         "amount": 20,
         "modifierType": "Flat"
       }
@@ -3599,7 +3777,7 @@
     "attributeModifiers": [
       {
         "id": "1fc58844-c138-4f27-8075-de482d406bb6",
-        "attributeType": "PhysicalDefense",
+        "attributeType": "Armor",
         "amount": 10,
         "modifierType": "Flat"
       },
@@ -3611,7 +3789,7 @@
       },
       {
         "id": "3eaae3cc-38f5-49fa-a2e7-27ae5a45a94c",
-        "attributeType": "AttackPower",
+        "attributeType": "Power",
         "amount": 30,
         "modifierType": "Flat"
       }
@@ -3632,7 +3810,7 @@
     "attributeModifiers": [
       {
         "id": "db53ac47-ed67-4a3a-be12-c8b6d9aa14f6",
-        "attributeType": "PhysicalDefense",
+        "attributeType": "Armor",
         "amount": 10,
         "modifierType": "Flat"
       },
@@ -3644,7 +3822,7 @@
       },
       {
         "id": "cfa80b41-dbac-4fa1-b0dd-e0643266fff2",
-        "attributeType": "AttackPower",
+        "attributeType": "Power",
         "amount": 30,
         "modifierType": "Flat"
       }
@@ -3665,7 +3843,7 @@
     "attributeModifiers": [
       {
         "id": "72d3d796-6a10-4fbf-9dd1-6fdcf39c63dc",
-        "attributeType": "PhysicalDefense",
+        "attributeType": "Armor",
         "amount": 10,
         "modifierType": "Flat"
       },
@@ -3677,7 +3855,7 @@
       },
       {
         "id": "cde903ec-458c-45dd-964e-89f9a57729ba",
-        "attributeType": "AttackPower",
+        "attributeType": "Power",
         "amount": 30,
         "modifierType": "Flat"
       }
@@ -3698,7 +3876,7 @@
     "attributeModifiers": [
       {
         "id": "bec165bc-6b16-44ce-853f-bfe817ea1bf3",
-        "attributeType": "MagicalDefense",
+        "attributeType": "Resistance",
         "amount": 10,
         "modifierType": "Flat"
       },
@@ -3710,7 +3888,7 @@
       },
       {
         "id": "bf451731-ce47-4236-b037-13b2becdd394",
-        "attributeType": "SpellPower",
+        "attributeType": "Power",
         "amount": 30,
         "modifierType": "Flat"
       }
@@ -3731,7 +3909,7 @@
     "attributeModifiers": [
       {
         "id": "04eba557-a382-421b-86ec-89c441cdbe8a",
-        "attributeType": "MagicalDefense",
+        "attributeType": "Resistance",
         "amount": 10,
         "modifierType": "Flat"
       },
@@ -3743,7 +3921,7 @@
       },
       {
         "id": "dbbc8a25-955b-402c-989e-f99340b2dc91",
-        "attributeType": "SpellPower",
+        "attributeType": "Power",
         "amount": 30,
         "modifierType": "Flat"
       }
@@ -3764,7 +3942,7 @@
     "attributeModifiers": [
       {
         "id": "219fd7ad-10fe-436b-9035-5ce891388e84",
-        "attributeType": "MagicalDefense",
+        "attributeType": "Resistance",
         "amount": 10,
         "modifierType": "Flat"
       },
@@ -3776,7 +3954,7 @@
       },
       {
         "id": "6a82f6c7-10c8-40e6-b342-1d33a255aecd",
-        "attributeType": "SpellPower",
+        "attributeType": "Power",
         "amount": 30,
         "modifierType": "Flat"
       }
@@ -3797,7 +3975,7 @@
     "attributeModifiers": [
       {
         "id": "def82341-401b-4972-8318-65d8182701a6",
-        "attributeType": "AttackPower",
+        "attributeType": "Power",
         "amount": 10,
         "modifierType": "Additive"
       }
@@ -3818,7 +3996,7 @@
     "attributeModifiers": [
       {
         "id": "10198082-7714-4c26-be9c-8899a6485f92",
-        "attributeType": "SpellPower",
+        "attributeType": "Power",
         "amount": 10,
         "modifierType": "Additive"
       }
@@ -3860,7 +4038,7 @@
     "attributeModifiers": [
       {
         "id": "b90add3d-83ab-4b1c-aea0-6b1c91222911",
-        "attributeType": "PhysicalDefense",
+        "attributeType": "Armor",
         "amount": 10,
         "modifierType": "Additive"
       }
@@ -3881,7 +4059,7 @@
     "attributeModifiers": [
       {
         "id": "cb07d896-3054-4315-9451-d2794378b593",
-        "attributeType": "MagicalDefense",
+        "attributeType": "Resistance",
         "amount": 10,
         "modifierType": "Additive"
       }
@@ -3936,7 +4114,7 @@
   },
   {
     "id": "mana_heart",
-    "name": "Mana Heart",
+    "name": "Spirit Heart",
     "description": "",
     "itemType": "Equipment",
     "rarity": "Common",
@@ -3944,7 +4122,7 @@
     "attributeModifiers": [
       {
         "id": "b5ce08a3-5b2d-42e0-8095-71f512cbef2b",
-        "attributeType": "ManaRegeneration",
+        "attributeType": "Spirit",
         "amount": 10,
         "modifierType": "Additive"
       }
@@ -3965,7 +4143,7 @@
     "attributeModifiers": [
       {
         "id": "41284c13-07af-4ed8-b61b-f08c5e5f71f0",
-        "attributeType": "Threat",
+        "attributeType": "Fortitude",
         "amount": 10,
         "modifierType": "Additive"
       }
@@ -3987,7 +4165,7 @@
     "attackSpeed": 20,
     "magnitude": 10,
     "magnitudeRange": 20,
-    "scalingAttribute": "AttackPower",
+    "scalingAttribute": "Power",
     "scalingAmount": 1
   },
   {
@@ -4001,7 +4179,7 @@
     "attackSpeed": 20,
     "magnitude": 10,
     "magnitudeRange": 30,
-    "scalingAttribute": "AttackPower",
+    "scalingAttribute": "Power",
     "scalingAmount": 1
   },
   {
@@ -4015,7 +4193,7 @@
     "attackSpeed": 20,
     "magnitude": 10,
     "magnitudeRange": 25,
-    "scalingAttribute": "AttackPower",
+    "scalingAttribute": "Power",
     "scalingAmount": 1
   },
   {
@@ -4029,7 +4207,7 @@
     "attackSpeed": 24,
     "magnitude": 8,
     "magnitudeRange": 15,
-    "scalingAttribute": "AttackPower",
+    "scalingAttribute": "Power",
     "scalingAmount": 0.8
   },
   {
@@ -4043,7 +4221,7 @@
     "attackSpeed": 10,
     "magnitude": 15,
     "magnitudeRange": 30,
-    "scalingAttribute": "AttackPower",
+    "scalingAttribute": "Power",
     "scalingAmount": 2
   },
   {
@@ -4057,7 +4235,7 @@
     "attackSpeed": 10,
     "magnitude": 15,
     "magnitudeRange": 50,
-    "scalingAttribute": "AttackPower",
+    "scalingAttribute": "Power",
     "scalingAmount": 2
   },
   {
@@ -4071,7 +4249,7 @@
     "attackSpeed": 10,
     "magnitude": 15,
     "magnitudeRange": 40,
-    "scalingAttribute": "AttackPower",
+    "scalingAttribute": "Power",
     "scalingAmount": 2
   },
   {
@@ -4085,7 +4263,7 @@
     "attackSpeed": 12,
     "magnitude": 14,
     "magnitudeRange": 25,
-    "scalingAttribute": "AttackPower",
+    "scalingAttribute": "Power",
     "scalingAmount": 1.8
   },
   {
@@ -4098,13 +4276,13 @@
     "attributeModifiers": [
       {
         "id": "1c432e25-a7d6-41e5-aaca-6463473c5e7d",
-        "attributeType": "PhysicalDefense",
+        "attributeType": "Armor",
         "amount": 10,
         "modifierType": "Flat"
       },
       {
         "id": "274001ff-288d-4dfc-b482-2d85ba5a1ebe",
-        "attributeType": "Block",
+        "attributeType": "BlockChance",
         "amount": 50,
         "modifierType": "Flat"
       }
@@ -4116,8 +4294,8 @@
     "scalingAmount": 0
   },
   {
-    "id": "manaward",
-    "name": "Manaward",
+    "id": "Spiritward",
+    "name": "Spiritward",
     "description": "",
     "itemType": "Equipment",
     "rarity": "Common",
@@ -4125,13 +4303,13 @@
     "attributeModifiers": [
       {
         "id": "ea387086-d8b9-42da-b1f2-79dbdba22094",
-        "attributeType": "MagicalDefense",
+        "attributeType": "Resistance",
         "amount": 10,
         "modifierType": "Flat"
       },
       {
         "id": "067b7b8a-4370-45ba-9312-e7ba5a1e05f3",
-        "attributeType": "Block",
+        "attributeType": "BlockChance",
         "amount": 50,
         "modifierType": "Flat"
       }
@@ -4153,7 +4331,7 @@
     "attackSpeed": 10,
     "magnitude": 15,
     "magnitudeRange": 35,
-    "scalingAttribute": "SpellPower",
+    "scalingAttribute": "Power",
     "scalingAmount": 2
   },
   {
@@ -4166,7 +4344,7 @@
     "attributeModifiers": [
       {
         "id": "c5548c41-4d91-4f1d-981c-6238eb98222a",
-        "attributeType": "SpellPower",
+        "attributeType": "Power",
         "amount": 10,
         "modifierType": "Flat"
       }
@@ -4188,7 +4366,7 @@
     "attackSpeed": 20,
     "magnitude": 10,
     "magnitudeRange": 20,
-    "scalingAttribute": "SpellPower",
+    "scalingAttribute": "Power",
     "scalingAmount": 1
   },
   {
@@ -4202,7 +4380,7 @@
     "attackSpeed": 15,
     "magnitude": 13,
     "magnitudeRange": 25,
-    "scalingAttribute": "AttackPower",
+    "scalingAttribute": "Power",
     "scalingAmount": 1.7
   },
   {
@@ -4216,7 +4394,7 @@
     "attackSpeed": 20,
     "magnitude": 10,
     "magnitudeRange": 40,
-    "scalingAttribute": "AttackPower",
+    "scalingAttribute": "Power",
     "scalingAmount": 1.5
   },
   {
@@ -4230,7 +4408,8 @@
     "attackSpeed": 25,
     "magnitude": 12,
     "magnitudeRange": 20,
-    "scalingAttribute": "AttackPower",
+    "scalingAttribute": "Power",
     "scalingAmount": 1.3
   }
 ]
+

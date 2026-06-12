@@ -1,8 +1,8 @@
-﻿using Domain.Models.Abilities;
+using Domain.Models.Combat.Abilities;
 using Domain.Models.Attributes;
 
 namespace Services.LL.Interfaces;
 public interface IEssenceDescriptionService
 {
-    void BuildAbilityDescription(AbilityDefinition ability, IReadOnlyDictionary<AttributeType, float> attributes);
+    void BuildAbilityDescription(CombatAbilityDefinition ability, IReadOnlyDictionary<AttributeType, float> attributes);
 }

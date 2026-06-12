@@ -7,7 +7,6 @@ using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
-using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Guilds;
 using Domain.Models.Guilds.Buildings;
 using Domain.Models.Inventories;
@@ -84,9 +83,7 @@ public static class DependencyInjection
 
         services.AddScoped<IEntityRepository, EntityRepository>();
         services.AddScoped<IEquipmentSlotRepository, EquipmentSlotRepository>();
-
         services.AddScoped<IEssenceRepository, EssenceRepository>();
-        services.AddScoped<IEssenceSlotRepository, EssenceSlotRepository>();
 
         services.AddScoped<IGuildRepository, GuildRepository>();
         services.AddScoped<IGuildBuildingUpgradeRepository, GuildBuildingUpgradeRepository>();

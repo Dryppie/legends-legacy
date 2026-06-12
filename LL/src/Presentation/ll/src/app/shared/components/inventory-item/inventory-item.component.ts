@@ -3,7 +3,12 @@ import { InventoryItem } from '../../models/inventoryItem';
 import { NgIf } from '@angular/common';
 import { ModalService } from '../../../core/services/client-side/modal/modal.service';
 import { ItemType } from '../../models/enums/itemType';
-import { Equipment, EquipmentInstance, EssenceItem } from '../../models/item';
+import {
+  Equipment,
+  EquipmentInstance,
+  EssenceItem,
+  essenceItemToEssence,
+} from '../../models/item';
 import { EquipmentType } from '../../models/enums/equipmentType';
 import { ItemComponent } from '../item/item.component';
 
@@ -55,8 +60,9 @@ export class InventoryItemComponent {
         this.inventoryItem.itemInstance as EquipmentInstance,
       );
     } else if (this.isEssence) {
-      const essence = (this.inventoryItem.itemInstance.itemBase as EssenceItem)
-        .essence;
+      const essence = essenceItemToEssence(
+        this.inventoryItem.itemInstance.itemBase as EssenceItem,
+      );
       this.modal.toggleEssenceModal(essence);
     }
   }

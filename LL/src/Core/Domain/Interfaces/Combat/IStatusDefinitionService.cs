@@ -1,4 +1,4 @@
-﻿using Domain.Models.Abilities.Statuses;
+using Domain.Models.Combat.Abilities.Statuses;
 
 namespace Domain.Interfaces.Combat;
 public interface IStatusDefinitionService

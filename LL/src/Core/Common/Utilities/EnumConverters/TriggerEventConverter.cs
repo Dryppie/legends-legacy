@@ -1,4 +1,4 @@
-﻿using Domain.Models.Abilities.Effects.Trigger;
+using Domain.Models.Combat.Abilities.Effects.Trigger;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

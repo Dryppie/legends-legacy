@@ -16,8 +16,6 @@ export interface SimpleCombatEntityDto {
   imagePath: string;
   health: number;
   maxHealth: number;
-  mana: number;
-  maxMana: number;
   barrier: number;
 }
 

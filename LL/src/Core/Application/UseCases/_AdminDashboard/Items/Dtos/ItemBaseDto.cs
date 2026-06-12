@@ -1,4 +1,4 @@
-﻿using Domain.Models.Attributes;
+using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
@@ -16,6 +16,6 @@ public class ItemBaseDto
     public int AttackSpeed { get; set; } = 0;
     public int Magnitude { get; set; } = 0;
     public int MagnitudeRange { get; set; } = 0;
-    public AttributeType ScalingAttribute { get; set; } = AttributeType.AttackPower;
+    public AttributeType ScalingAttribute { get; set; } = AttributeType.Power;
     public float ScalingAmount { get; set; } = 0.0f;
 }

@@ -3,7 +3,7 @@ import { Component, Input, Signal } from '@angular/core';
 import { MarketPlaceListing } from '../../../../models/Dtos/market-place/market-place-listing';
 import { ItemComponent } from '../../../item/item.component';
 import { NumberFormatPipe } from '../../../../pipes/number-format/number-format.pipe';
-import { EssenceItem } from '../../../../models/item';
+import { EssenceItem, essenceItemToEssence } from '../../../../models/item';
 import { RegularButtonComponent } from '../../../custom-components/buttons/regular-button/regular-button.component';
 
 @Component({
@@ -22,6 +22,6 @@ export class MarketPlaceEssencesComponent {
   @Input() essenceListings!: Signal<MarketPlaceListing[]>;
 
   itemAsEssence(listing: MarketPlaceListing) {
-    return (listing.itemInstance.itemBase as EssenceItem).essence;
+    return essenceItemToEssence(listing.itemInstance.itemBase as EssenceItem);
   }
 }
