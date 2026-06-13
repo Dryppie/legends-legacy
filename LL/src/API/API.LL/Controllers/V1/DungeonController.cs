@@ -22,7 +22,7 @@ public class DungeonController : BaseController
 
     [HttpGet("GetAvailableDungeons")]
     public async Task<ActionResult<List<DungeonPreviewDto>>> GetAvailableDungeons() =>
-        await Mediator.Send(new GetAvailableDungeonsQuery());
+        await Mediator.Send(new GetAvailableDungeonsQuery(CurrentCharacterGuid));
 
     public record StartDungeonRequest(string DungeonId, DungeonTier DungeonTier);
     [HttpPost("StartDungeon")]

@@ -31,6 +31,10 @@ export class DungeonCardComponent {
   ) {}
 
   startDungeon() {
+    if (!this.selectedCanEnter()) {
+      return;
+    }
+
     const selectedDungeon = this.selectedPreviewData();
 
     this.dungeonState.startDungeon(
@@ -68,6 +72,22 @@ export class DungeonCardComponent {
       this.previewData.difficultyVariants?.[this.difficulty()] ??
       this.previewData
     );
+  }
+
+  selectedCanEnter(): boolean {
+    return this.selectedPreviewData().canEnter ?? true;
+  }
+
+  difficultyCanEnter(difficulty: DungeonDifficulty): boolean {
+    const preview =
+      this.previewData.difficultyVariants?.[difficulty] ??
+      (difficulty === this.difficulty() ? this.previewData : null);
+
+    return preview?.canEnter ?? true;
+  }
+
+  selectedMissingRequirements(): string[] {
+    return this.selectedPreviewData().missingRequirements ?? [];
   }
 
   back() {

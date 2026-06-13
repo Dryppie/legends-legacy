@@ -11,6 +11,9 @@ public sealed class DungeonPreviewDto
     public string Grade { get; set; } = string.Empty;
     public int RecommendedPowerScore { get; set; }
     public int MinimumPowerScore { get; set; }
+    public int CurrentPowerScore { get; set; }
+    public bool CanEnter { get; set; }
+    public List<string> MissingRequirements { get; set; } = [];
     public string? RequiredPreviousDungeonId { get; set; }
     public int MinRooms { get; set; }
     public int MaxRooms { get; set; }

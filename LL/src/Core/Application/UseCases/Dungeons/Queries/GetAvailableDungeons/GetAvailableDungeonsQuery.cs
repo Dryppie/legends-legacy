@@ -1,33 +1,41 @@
 using Application.MediatR.Markers;
 using Application.Interfaces.Services.LL.Dungeons;
+using Application.Interfaces.Services.LL.Entities;
 using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Items.Dtos;
 using AutoMapper;
 using Common.Exceptions;
+using Domain.Models.Dungeons.Runs;
 using Domain.Models.Items;
 using Domain.Models.LootTables;
 using MediatR;
 
 namespace Application.UseCases.Dungeons.Queries.GetAvailableDungeons;
 
-public record GetAvailableDungeonsQuery() : IQuery<List<DungeonPreviewDto>>;
+public record GetAvailableDungeonsQuery(Guid CharacterId) : IQuery<List<DungeonPreviewDto>>;
 
 public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvailableDungeonsQuery, List<DungeonPreviewDto>>
 {
     private readonly IDungeonDefinitions _dungeonDefinitions;
     private readonly ILootTableRepository _lootTables;
+    private readonly IDungeonRunRepository _dungeonRuns;
     private readonly IItemBaseRepository _itemBases;
+    private readonly ICharacterService _characters;
     private readonly IMapper _mapper;
 
     public GetAvailableDungeonsQueryHandler(
         IDungeonDefinitions dungeonDefinitions,
         ILootTableRepository lootTables,
+        IDungeonRunRepository dungeonRuns,
         IItemBaseRepository itemBases,
+        ICharacterService characters,
         IMapper mapper)
     {
         _dungeonDefinitions = dungeonDefinitions;
         _lootTables = lootTables;
+        _dungeonRuns = dungeonRuns;
         _itemBases = itemBases;
+        _characters = characters;
         _mapper = mapper;
     }
 
@@ -36,9 +44,19 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         CancellationToken cancellationToken)
     {
         var previews = new List<DungeonPreviewDto>();
+        var character = await _characters.GetMyCharacterOverviewAsync(request.CharacterId, cancellationToken);
+        var powerScore = character is null
+            ? 0
+            : Domain.Components.Attributes.PowerScoreCalculator.Calculate(character.BaseCombatAttributes, character.Level);
 
         foreach (var dungeon in _dungeonDefinitions.GetAll())
         {
+            var missingRequirements = await GetMissingRequirements(
+                request.CharacterId,
+                dungeon,
+                powerScore,
+                cancellationToken);
+
             previews.Add(new DungeonPreviewDto
             {
                 Id = dungeon.Id,
@@ -47,6 +65,9 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
                 Grade = FormatGrade(dungeon.Grade),
                 RecommendedPowerScore = dungeon.RecommendedPowerScore,
                 MinimumPowerScore = dungeon.MinimumPowerScore,
+                CurrentPowerScore = powerScore,
+                CanEnter = missingRequirements.Count == 0,
+                MissingRequirements = missingRequirements,
                 RequiredPreviousDungeonId = dungeon.RequiredPreviousDungeonId,
                 MinRooms = dungeon.MinRooms,
                 MaxRooms = dungeon.MaxRooms,
@@ -55,6 +76,31 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         }
 
         return previews;
+    }
+
+    private async Task<List<string>> GetMissingRequirements(
+        Guid characterId,
+        Domain.Models.Dungeons.DungeonDefinition dungeon,
+        int powerScore,
+        CancellationToken cancellationToken)
+    {
+        var missingRequirements = new List<string>();
+
+        if (powerScore < dungeon.MinimumPowerScore)
+        {
+            missingRequirements.Add($"Requires {dungeon.MinimumPowerScore} Power.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(dungeon.RequiredPreviousDungeonId)
+            && !await _dungeonRuns.HasCompletedDungeonAsync(
+                characterId,
+                dungeon.RequiredPreviousDungeonId,
+                cancellationToken))
+        {
+            missingRequirements.Add("Complete the previous difficulty first.");
+        }
+
+        return missingRequirements;
     }
 
     private async Task<List<DungeonPreviewRewardDto>> GetPossibleCompletionRewards(

@@ -13,6 +13,9 @@ export interface DungeonPreviewData {
   grade?: string;
   recommendedPowerScore?: number;
   minimumPowerScore?: number;
+  currentPowerScore?: number;
+  canEnter?: boolean;
+  missingRequirements?: string[];
   requiredPreviousDungeonId?: string | null;
   heroImage: string;
   lore: string;

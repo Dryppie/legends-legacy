@@ -116,6 +116,15 @@
               </div>
             </ng-container>
 
+            <div class="flex items-center gap-2 text-xs">
+              <span>Power</span>
+              <span class="tabular-nums">
+                {{ selectedPreviewData().currentPowerScore ?? 0 }}/{{
+                  selectedPreviewData().minimumPowerScore ?? 0
+                }}
+              </span>
+            </div>
+
             <!-- <ng-container *ngIf="previewData.dailyEntries as d">
               <div class="h-4 w-px bg-white/15"></div>
               <div class="text-xs">
@@ -129,6 +138,24 @@
             <div *ngIf="selectedPreviewData().roomsRange as roomsRange">
               Rooms: {{ roomsRange[0] }}–{{ roomsRange[1] }}
             </div>
+            <div *ngIf="selectedPreviewData().recommendedPowerScore">
+              Recommended Power:
+              {{ selectedPreviewData().recommendedPowerScore }}
+            </div>
+          </div>
+
+          <div
+            *ngIf="!selectedCanEnter()"
+            class="mt-4 rounded border border-zinc-600/70 bg-zinc-900/60 p-3 text-xs text-zinc-300"
+          >
+            <div class="font-semibold text-zinc-200">
+              Requirements not met
+            </div>
+            <ul class="mt-1 list-disc pl-4">
+              <li *ngFor="let requirement of selectedMissingRequirements()">
+                {{ requirement }}
+              </li>
+            </ul>
           </div>
 
           <div class="mt-auto max-w-72 pt-4 font-serif opacity-80 xl:hidden">
@@ -150,6 +177,9 @@
                   !previewData.unlockedDifficulties.includes(
                     dungeonDifficulty.Normal
                   ),
+                'opacity-50 grayscale': !difficultyCanEnter(
+                  dungeonDifficulty.Normal
+                ),
               }"
               (click)="selectDifficulty(dungeonDifficulty.Normal)"
             >
@@ -166,6 +196,9 @@
                   !previewData.unlockedDifficulties.includes(
                     dungeonDifficulty.Heroic
                   ),
+                'opacity-50 grayscale': !difficultyCanEnter(
+                  dungeonDifficulty.Heroic
+                ),
               }"
               (click)="selectDifficulty(dungeonDifficulty.Heroic)"
             >
@@ -182,6 +215,9 @@
                   !previewData.unlockedDifficulties.includes(
                     dungeonDifficulty.Mythic
                   ),
+                'opacity-50 grayscale': !difficultyCanEnter(
+                  dungeonDifficulty.Mythic
+                ),
               }"
               (click)="selectDifficulty(dungeonDifficulty.Mythic)"
             >
@@ -203,6 +239,7 @@
             <app-regular-button
               class="w-40"
               [text]="'Enter ' + difficultyLabel(difficulty())"
+              [disabled]="!selectedCanEnter()"
               (pressed)="startDungeon()"
               fullWidth
             ></app-regular-button>
