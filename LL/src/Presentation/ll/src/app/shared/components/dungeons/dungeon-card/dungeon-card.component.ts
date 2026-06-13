@@ -31,8 +31,10 @@ export class DungeonCardComponent {
   ) {}
 
   startDungeon() {
+    const selectedDungeon = this.selectedPreviewData();
+
     this.dungeonState.startDungeon(
-      this.previewData.id,
+      selectedDungeon.id,
       this.difficulty(),
       () => {
         void this.router.navigate(['/game/world/dungeon']);
@@ -48,6 +50,13 @@ export class DungeonCardComponent {
     if (this.previewData.unlockedDifficulties.includes(d)) {
       this.difficulty.set(d);
     }
+  }
+
+  selectedPreviewData(): DungeonPreviewData {
+    return (
+      this.previewData.difficultyVariants?.[this.difficulty()] ??
+      this.previewData
+    );
   }
 
   back() {

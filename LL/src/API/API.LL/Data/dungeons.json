@@ -1,12 +1,22 @@
 [
   {
     "id": "goblin_mines",
-    "name": "Goblin Mines",
+    "name": "Goblin Mines I",
     "sigilItemId": "sigil_goblin_mines",
+    "grade": "GradeI",
     "tier": 1,
+    "recommendedPowerScore": 250,
+    "minimumPowerScore": 213,
+    "entryCosts": [
+      {
+        "itemId": "sigil_goblin_mines",
+        "amount": 1,
+        "consumedOnEntry": true
+      }
+    ],
     "completionLootTableId": "10000000-0000-0000-0000-000000000101",
     "tierLootTableId": "10000000-0000-0000-0000-000000000001",
-    "creatureLootModifiers": {
+    "monsterLootModifiers": {
       "Essence": 25
     },
     "hasCheckpoint": true,
@@ -33,12 +43,112 @@
     ]
   },
   {
-    "id": "forgotten_catacombs",
-    "name": "Forgotten Catacombs",
-    "sigilItemId": "sigil_forgotten_catacombs",
-    "tier": 1,
+    "id": "goblin_mines_ii",
+    "name": "Goblin Mines II",
+    "sigilItemId": "sigil_goblin_mines",
+    "grade": "GradeII",
+    "tier": 2,
+    "recommendedPowerScore": 750,
+    "minimumPowerScore": 638,
+    "requiredPreviousDungeonId": "goblin_mines",
+    "requiredPreviousDungeonGrade": "GradeI",
+    "entryCosts": [
+      {
+        "itemId": "sigil_goblin_mines",
+        "amount": 1,
+        "consumedOnEntry": true
+      }
+    ],
+    "completionLootTableId": "10000000-0000-0000-0000-000000000101",
     "tierLootTableId": "10000000-0000-0000-0000-000000000001",
-    "creatureLootModifiers": {
+    "monsterLootModifiers": {
+      "Essence": 25
+    },
+    "hasCheckpoint": true,
+    "minRooms": 6,
+    "maxRooms": 8,
+    "rooms": [
+      {
+        "type": "Combat",
+        "weight": 1.0,
+        "encounterIds": [
+          "goblin",
+          "goblin_archer",
+          "goblin_warrior",
+          "goblin_shaman"
+        ]
+      },
+      {
+        "type": "Boss",
+        "weight": 1.0,
+        "encounterIds": [
+          "hobgoblin"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "goblin_mines_iii",
+    "name": "Goblin Mines III",
+    "sigilItemId": "sigil_goblin_mines",
+    "grade": "GradeIII",
+    "tier": 3,
+    "recommendedPowerScore": 2000,
+    "minimumPowerScore": 1700,
+    "requiredPreviousDungeonId": "goblin_mines_ii",
+    "requiredPreviousDungeonGrade": "GradeII",
+    "entryCosts": [
+      {
+        "itemId": "sigil_goblin_mines",
+        "amount": 1,
+        "consumedOnEntry": true
+      }
+    ],
+    "completionLootTableId": "10000000-0000-0000-0000-000000000101",
+    "tierLootTableId": "10000000-0000-0000-0000-000000000001",
+    "monsterLootModifiers": {
+      "Essence": 25
+    },
+    "hasCheckpoint": true,
+    "minRooms": 7,
+    "maxRooms": 9,
+    "rooms": [
+      {
+        "type": "Combat",
+        "weight": 1.0,
+        "encounterIds": [
+          "goblin",
+          "goblin_archer",
+          "goblin_warrior",
+          "goblin_shaman"
+        ]
+      },
+      {
+        "type": "Boss",
+        "weight": 1.0,
+        "encounterIds": [
+          "hobgoblin"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "forgotten_catacombs",
+    "name": "Forgotten Catacombs I",
+    "sigilItemId": "sigil_forgotten_catacombs",
+    "grade": "GradeI",
+    "tier": 1,
+    "recommendedPowerScore": 400,
+    "minimumPowerScore": 340,
+    "entryCosts": [
+      {
+        "itemId": "sigil_forgotten_catacombs",
+        "amount": 1,
+        "consumedOnEntry": true
+      }
+    ],
+    "tierLootTableId": "10000000-0000-0000-0000-000000000001",
+    "monsterLootModifiers": {
       "Essence": 15
     },
     "hasCheckpoint": true,
@@ -83,17 +193,275 @@
     ]
   },
   {
-    "id": "hives_abyss",
-    "name": "The Hive’s Abyss",
-    "sigilItemId": "sigil_hives_abyss",
-    "tier": 1,
+    "id": "forgotten_catacombs_ii",
+    "name": "Forgotten Catacombs II",
+    "sigilItemId": "sigil_forgotten_catacombs",
+    "grade": "GradeII",
+    "tier": 2,
+    "recommendedPowerScore": 1150,
+    "minimumPowerScore": 978,
+    "requiredPreviousDungeonId": "forgotten_catacombs",
+    "requiredPreviousDungeonGrade": "GradeI",
+    "entryCosts": [
+      {
+        "itemId": "sigil_forgotten_catacombs",
+        "amount": 1,
+        "consumedOnEntry": true
+      }
+    ],
     "tierLootTableId": "10000000-0000-0000-0000-000000000001",
-    "creatureLootModifiers": {
+    "monsterLootModifiers": {
       "Essence": 15
     },
     "hasCheckpoint": true,
     "minRooms": 7,
     "maxRooms": 9,
+    "rooms": [
+      {
+        "type": "Combat",
+        "weight": 1.0,
+        "encounterIds": [
+          "skeleton"
+        ]
+      },
+      {
+        "type": "Combat",
+        "weight": 0.8,
+        "encounterIds": [
+          "poisonous_rat"
+        ]
+      },
+      {
+        "type": "Combat",
+        "weight": 0.8,
+        "encounterIds": [
+          "cave_bat"
+        ]
+      },
+      {
+        "type": "Combat",
+        "weight": 0.6,
+        "encounterIds": [
+          "giant_bat"
+        ]
+      },
+      {
+        "type": "Boss",
+        "weight": 1.0,
+        "encounterIds": [
+          "necroshade_wraith"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "forgotten_catacombs_iii",
+    "name": "Forgotten Catacombs III",
+    "sigilItemId": "sigil_forgotten_catacombs",
+    "grade": "GradeIII",
+    "tier": 3,
+    "recommendedPowerScore": 3000,
+    "minimumPowerScore": 2550,
+    "requiredPreviousDungeonId": "forgotten_catacombs_ii",
+    "requiredPreviousDungeonGrade": "GradeII",
+    "entryCosts": [
+      {
+        "itemId": "sigil_forgotten_catacombs",
+        "amount": 1,
+        "consumedOnEntry": true
+      }
+    ],
+    "tierLootTableId": "10000000-0000-0000-0000-000000000001",
+    "monsterLootModifiers": {
+      "Essence": 15
+    },
+    "hasCheckpoint": true,
+    "minRooms": 8,
+    "maxRooms": 10,
+    "rooms": [
+      {
+        "type": "Combat",
+        "weight": 1.0,
+        "encounterIds": [
+          "skeleton"
+        ]
+      },
+      {
+        "type": "Combat",
+        "weight": 0.8,
+        "encounterIds": [
+          "poisonous_rat"
+        ]
+      },
+      {
+        "type": "Combat",
+        "weight": 0.8,
+        "encounterIds": [
+          "cave_bat"
+        ]
+      },
+      {
+        "type": "Combat",
+        "weight": 0.6,
+        "encounterIds": [
+          "giant_bat"
+        ]
+      },
+      {
+        "type": "Boss",
+        "weight": 1.0,
+        "encounterIds": [
+          "necroshade_wraith"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "hives_abyss",
+    "name": "The Hive's Abyss I",
+    "sigilItemId": "sigil_hives_abyss",
+    "grade": "GradeI",
+    "tier": 1,
+    "recommendedPowerScore": 650,
+    "minimumPowerScore": 553,
+    "entryCosts": [
+      {
+        "itemId": "sigil_hives_abyss",
+        "amount": 1,
+        "consumedOnEntry": true
+      }
+    ],
+    "tierLootTableId": "10000000-0000-0000-0000-000000000001",
+    "monsterLootModifiers": {
+      "Essence": 15
+    },
+    "hasCheckpoint": true,
+    "minRooms": 7,
+    "maxRooms": 9,
+    "rooms": [
+      {
+        "type": "Combat",
+        "weight": 1.0,
+        "encounterIds": [
+          "ant_worker"
+        ]
+      },
+      {
+        "type": "Combat",
+        "weight": 0.9,
+        "encounterIds": [
+          "fire_ant"
+        ]
+      },
+      {
+        "type": "MiniBoss",
+        "weight": 1.0,
+        "encounterIds": [
+          "queens_guard_ant"
+        ]
+      },
+      {
+        "type": "Boss",
+        "weight": 0.92,
+        "encounterIds": [
+          "ant_queen"
+        ]
+      },
+      {
+        "type": "Boss",
+        "weight": 0.08,
+        "encounterIds": [
+          "ant_king"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "hives_abyss_ii",
+    "name": "The Hive's Abyss II",
+    "sigilItemId": "sigil_hives_abyss",
+    "grade": "GradeII",
+    "tier": 2,
+    "recommendedPowerScore": 1800,
+    "minimumPowerScore": 1530,
+    "requiredPreviousDungeonId": "hives_abyss",
+    "requiredPreviousDungeonGrade": "GradeI",
+    "entryCosts": [
+      {
+        "itemId": "sigil_hives_abyss",
+        "amount": 1,
+        "consumedOnEntry": true
+      }
+    ],
+    "tierLootTableId": "10000000-0000-0000-0000-000000000001",
+    "monsterLootModifiers": {
+      "Essence": 15
+    },
+    "hasCheckpoint": true,
+    "minRooms": 8,
+    "maxRooms": 10,
+    "rooms": [
+      {
+        "type": "Combat",
+        "weight": 1.0,
+        "encounterIds": [
+          "ant_worker"
+        ]
+      },
+      {
+        "type": "Combat",
+        "weight": 0.9,
+        "encounterIds": [
+          "fire_ant"
+        ]
+      },
+      {
+        "type": "MiniBoss",
+        "weight": 1.0,
+        "encounterIds": [
+          "queens_guard_ant"
+        ]
+      },
+      {
+        "type": "Boss",
+        "weight": 0.92,
+        "encounterIds": [
+          "ant_queen"
+        ]
+      },
+      {
+        "type": "Boss",
+        "weight": 0.08,
+        "encounterIds": [
+          "ant_king"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "hives_abyss_iii",
+    "name": "The Hive's Abyss III",
+    "sigilItemId": "sigil_hives_abyss",
+    "grade": "GradeIII",
+    "tier": 3,
+    "recommendedPowerScore": 4800,
+    "minimumPowerScore": 4080,
+    "requiredPreviousDungeonId": "hives_abyss_ii",
+    "requiredPreviousDungeonGrade": "GradeII",
+    "entryCosts": [
+      {
+        "itemId": "sigil_hives_abyss",
+        "amount": 1,
+        "consumedOnEntry": true
+      }
+    ],
+    "tierLootTableId": "10000000-0000-0000-0000-000000000001",
+    "monsterLootModifiers": {
+      "Essence": 15
+    },
+    "hasCheckpoint": true,
+    "minRooms": 9,
+    "maxRooms": 11,
     "rooms": [
       {
         "type": "Combat",

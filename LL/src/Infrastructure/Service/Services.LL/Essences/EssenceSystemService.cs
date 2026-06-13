@@ -141,9 +141,14 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         if (essence.Level < _progression.GetLevelCap(essence.AscensionTier)) return Fail("Essence must reach the current tier level cap before ascending.");
 
         var nextTier = essence.AscensionTier + 1;
-        var definition = _definitions.GetById(essence.EssenceDefinitionId);
-        var coreItemId = definition?.Ascension.Tiers.FirstOrDefault(x => x.Tier == nextTier)?.RequiredCoreItemId ?? $"item.monster_core.tier_{nextTier}";
-        if (!await RemoveInventoryQuantityAsync(characterId, coreItemId, 1, cancellationToken)) return Fail("Required Monster Core is missing.");
+        var ascensionCounts = await GetAscensionCountsAsync(characterId, cancellationToken);
+        var cost = EssenceProgressionConstants.GetAscensionCost(
+            nextTier,
+            ascensionCounts.TierOneOrHigher,
+            ascensionCounts.TierTwoOrHigher);
+
+        if (!await RemoveInventoryQuantityAsync(characterId, cost.ItemId, cost.Amount, cancellationToken))
+            return Fail($"Requires {cost.Amount} {FormatItemName(cost.ItemId)}.");
 
         essence.AscensionTier = nextTier;
         essence.UpdatedAt = DateTimeOffset.UtcNow;
@@ -432,6 +437,15 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     private async Task<int> GetCharacterLevelAsync(Guid characterId, CancellationToken cancellationToken) =>
         await _essences.GetCharacterLevelAsync(characterId, cancellationToken);
 
+    private async Task<AscensionMilestoneCounts> GetAscensionCountsAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        var essences = await _essences.GetPlayerEssencesAsync(characterId, cancellationToken);
+        return new AscensionMilestoneCounts(
+            essences.Count(x => x.AscensionTier >= 1),
+            essences.Count(x => x.AscensionTier >= 2),
+            essences.Count(x => x.AscensionTier >= 3));
+    }
+
     private void ConsumeInventoryItem(InventoryItem inventoryItem, int quantity)
     {
         inventoryItem.Quantity -= quantity;
@@ -456,6 +470,26 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     private static EssenceOperationResult Ok(string message) => new(true, message);
     private static EssenceOperationResult Fail(string message) => new(false, message);
 
+    private static string FormatItemName(string itemId)
+    {
+        if (itemId.Equals(EssenceProgressionConstants.LesserAscensionStoneItemId, StringComparison.OrdinalIgnoreCase))
+            return "Lesser Ascension Stone";
+        if (itemId.Equals(EssenceProgressionConstants.GreaterAscensionStoneItemId, StringComparison.OrdinalIgnoreCase))
+            return "Greater Ascension Stone";
+        if (itemId.Equals(EssenceProgressionConstants.PrimalAscensionStoneItemId, StringComparison.OrdinalIgnoreCase))
+            return "Primal Ascension Stone";
+
+        var parts = itemId
+            .Replace("item.", string.Empty, StringComparison.OrdinalIgnoreCase)
+            .Split('.', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .SelectMany(x => x.Split('_', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            .Select(x => x.Length == 0 ? x : char.ToUpperInvariant(x[0]) + x[1..]);
+
+        return string.Join(' ', parts);
+    }
+
     private static string GetMonsterDefinitionId(Creature creature) =>
         "monster." + creature.Name.Trim().Replace("'", "", StringComparison.Ordinal).Replace(" ", "_", StringComparison.Ordinal).ToLowerInvariant();
+
+    private sealed record AscensionMilestoneCounts(int TierOneOrHigher, int TierTwoOrHigher, int TierThreeOrHigher);
 }

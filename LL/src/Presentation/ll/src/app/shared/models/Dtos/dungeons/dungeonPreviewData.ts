@@ -10,6 +10,10 @@ export interface DungeonPreviewData {
   id: string;
   number: number | string;
   title: string;
+  grade?: string;
+  recommendedPowerScore?: number;
+  minimumPowerScore?: number;
+  requiredPreviousDungeonId?: string | null;
   heroImage: string;
   lore: string;
   requiredLevel: number;
@@ -20,4 +24,5 @@ export interface DungeonPreviewData {
   roomsRange?: [number, number];
   rewards: DungeonPreviewReward[];
   unlockedDifficulties: DungeonDifficulty[];
+  difficultyVariants?: Partial<Record<DungeonDifficulty, DungeonPreviewData>>;
 }

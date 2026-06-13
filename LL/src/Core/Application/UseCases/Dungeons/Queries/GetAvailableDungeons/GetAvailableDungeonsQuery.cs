@@ -3,6 +3,7 @@ using Application.Interfaces.Services.LL.Dungeons;
 using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Items.Dtos;
 using AutoMapper;
+using Common.Exceptions;
 using Domain.Models.LootTables;
 using MediatR;
 
@@ -39,6 +40,10 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
                 Id = dungeon.Id,
                 Title = dungeon.Name,
                 Tier = dungeon.Tier,
+                Grade = FormatGrade(dungeon.Grade),
+                RecommendedPowerScore = dungeon.RecommendedPowerScore,
+                MinimumPowerScore = dungeon.MinimumPowerScore,
+                RequiredPreviousDungeonId = dungeon.RequiredPreviousDungeonId,
                 MinRooms = dungeon.MinRooms,
                 MaxRooms = dungeon.MaxRooms,
                 Rewards = await GetPossibleCompletionRewards(dungeon, cancellationToken)
@@ -56,20 +61,22 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
 
         if (dungeon.CompletionLootTableId.HasValue)
         {
-            var completionTable = await _lootTables.GetLootTableByIdAsync(
+            var completionTable = await TryGetLootTableAsync(
                 dungeon.CompletionLootTableId.Value,
                 cancellationToken);
 
-            rewards.AddRange(MapRewards(completionTable, "Dungeon Completion"));
+            if (completionTable is not null)
+                rewards.AddRange(MapRewards(completionTable, "Dungeon Completion"));
         }
 
         if (dungeon.TierLootTableId.HasValue)
         {
-            var tierTable = await _lootTables.GetLootTableByIdAsync(
+            var tierTable = await TryGetLootTableAsync(
                 dungeon.TierLootTableId.Value,
                 cancellationToken);
 
-            rewards.AddRange(MapRewards(tierTable, $"Tier {dungeon.Tier} Completion"));
+            if (tierTable is not null)
+                rewards.AddRange(MapRewards(tierTable, $"Tier {dungeon.Tier} Completion"));
         }
 
         return rewards
@@ -97,6 +104,26 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         }
     }
 
+    private async Task<LootTable?> TryGetLootTableAsync(Guid lootTableId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await _lootTables.GetLootTableByIdAsync(lootTableId, cancellationToken);
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
+        catch (KeyNotFoundException)
+        {
+            return null;
+        }
+        catch (NotFoundException)
+        {
+            return null;
+        }
+    }
+
     private static IEnumerable<LootTableItem> FlattenItems(LootTable lootTable)
     {
         foreach (var entry in lootTable.Entries)
@@ -116,4 +143,12 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
             }
         }
     }
+
+    private static string FormatGrade(Domain.Models.Dungeons.Definitions.DungeonGrade grade) =>
+        grade switch
+        {
+            Domain.Models.Dungeons.Definitions.DungeonGrade.GradeII => "Grade II",
+            Domain.Models.Dungeons.Definitions.DungeonGrade.GradeIII => "Grade III",
+            _ => "Grade I"
+        };
 }

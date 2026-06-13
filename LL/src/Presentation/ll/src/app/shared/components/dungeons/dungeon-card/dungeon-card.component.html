@@ -126,10 +126,8 @@
           </div>
 
           <div class="mt-4 flex flex-wrap gap-6 text-sm opacity-80">
-            <div *ngIf="previewData.roomsRange">
-              Rooms: {{ previewData.roomsRange[0] }}–{{
-                previewData.roomsRange[1]
-              }}
+            <div *ngIf="selectedPreviewData().roomsRange as roomsRange">
+              Rooms: {{ roomsRange[0] }}–{{ roomsRange[1] }}
             </div>
           </div>
 
@@ -194,7 +192,7 @@
           <div class="mt-6 text-[11px] uppercase opacity-70">Rewards</div>
           <div class="mt-2 flex flex-wrap gap-2">
             <div
-              *ngFor="let r of previewData.rewards"
+              *ngFor="let r of selectedPreviewData().rewards"
               class="rounded-md border border-white/10 bg-[#1a1a1a] p-2 text-center"
             >
               <app-item [item]="r"></app-item>

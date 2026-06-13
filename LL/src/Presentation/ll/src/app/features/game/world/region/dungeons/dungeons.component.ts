@@ -13,7 +13,7 @@ const dungeonPresentation: Record<string, Partial<DungeonPreviewData>> = {
     requiredLevel: 5,
     dailyEntries: 1,
     keyItem: {
-      name: 'Goblin Key',
+      name: 'Goblin Sigil',
       have: 0,
       need: 1,
     },
@@ -29,7 +29,7 @@ const dungeonPresentation: Record<string, Partial<DungeonPreviewData>> = {
     requiredLevel: 10,
     dailyEntries: 2,
     keyItem: {
-      name: 'Ashen Sigil',
+      name: 'Catacomb Sigil',
       have: 1,
       need: 1,
     },
@@ -42,7 +42,7 @@ const dungeonPresentation: Record<string, Partial<DungeonPreviewData>> = {
     requiredLevel: 20,
     dailyEntries: 1,
     keyItem: {
-      name: 'Rootbound Totem',
+      name: 'Hive Sigil',
       have: 0,
       need: 1,
     },
@@ -63,7 +63,8 @@ const dungeonPresentation: Record<string, Partial<DungeonPreviewData>> = {
 export class DungeonsComponent {
   dungeons = computed(() =>
     this.dungeonState.dungeons().map((dungeon, index) => {
-      const presentation = dungeonPresentation[dungeon.id] ?? {};
+      const presentation =
+        dungeonPresentation[this.getDungeonFamilyId(dungeon.id)] ?? {};
 
       return {
         ...dungeon,
@@ -84,4 +85,8 @@ export class DungeonsComponent {
   );
 
   constructor(private readonly dungeonState: DungeonStateService) {}
+
+  private getDungeonFamilyId(dungeonId: string): string {
+    return dungeonId.replace(/_(i|ii|iii)$/i, '');
+  }
 }

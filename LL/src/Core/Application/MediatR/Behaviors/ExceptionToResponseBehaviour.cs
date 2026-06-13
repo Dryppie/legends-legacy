@@ -20,7 +20,10 @@ public sealed class ExceptionToResponseBehaviour<TRequest, TResponse> :
             // We know the handler should return Response<something>
             // Build a failed instance via reflection (generic type unknown here).
             var responseType = typeof(TResponse);
-            var failMethod = responseType.GetMethod("Fail", [typeof(string)])!;
+            var failMethod = responseType.GetMethod("Fail", [typeof(string)]);
+            if (failMethod is null)
+                throw;
+
             return (TResponse)failMethod.Invoke(null, [ex.Message])!;
         }
     }
