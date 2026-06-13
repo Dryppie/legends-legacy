@@ -1,5 +1,6 @@
 using Domain.Models.AbilityDefinitions;
 using Domain.Models.Combat.Abilities;
+using Domain.Models.Combat.Abilities.Effects.Trigger;
 using Domain.Models.Combat.Abilities.Effects.Usages;
 using Domain.Models.Combat.Abilities.Triggers;
 using Domain.Models.Combat.Abilities.Triggers.TriggerFilters;

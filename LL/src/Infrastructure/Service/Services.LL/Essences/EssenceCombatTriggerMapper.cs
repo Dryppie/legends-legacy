@@ -1,4 +1,5 @@
 using Domain.Models.AbilityDefinitions;
+using Domain.Models.Combat.Abilities.Effects.Trigger;
 using Domain.Models.Combat.Abilities.Triggers;
 
 namespace Services.LL.Essences;
