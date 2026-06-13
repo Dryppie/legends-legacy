@@ -36,6 +36,9 @@ public sealed class JsonEssenceDefinitionRepository : IEssenceDefinitionReposito
 
     public IReadOnlyList<EssenceDefinition> GetAll() => _definitions;
 
+    public IReadOnlyList<AbilityDefinition> GetAllAbilities() =>
+        _abilities.Values.OrderBy(x => x.Id, StringComparer.OrdinalIgnoreCase).ToList();
+
     public EssenceDefinition? GetById(string essenceDefinitionId) =>
         _definitions.FirstOrDefault(x => x.Id.Equals(essenceDefinitionId, StringComparison.OrdinalIgnoreCase));
 

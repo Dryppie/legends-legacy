@@ -6,6 +6,24 @@ namespace Services.LL.Essences;
 
 public sealed class AbilityCatalogValidator : IAbilityCatalogValidator
 {
+    private static readonly IReadOnlySet<string> SupportedEffects = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        AbilityEffectType.Damage,
+        AbilityEffectType.Heal,
+        AbilityEffectType.ApplyStatus,
+        AbilityEffectType.ModifyStatusEffect,
+        AbilityEffectType.RemoveStatus,
+        AbilityEffectType.Cleanse,
+        AbilityEffectType.GrantBarrier,
+        AbilityEffectType.ModifyAttribute,
+        AbilityEffectType.RestoreResource,
+        AbilityEffectType.Summon,
+        AbilityEffectType.Taunt,
+        AbilityEffectType.ReflectDamage,
+        AbilityEffectType.AbsorbDamage,
+        AbilityEffectType.TriggerSecondaryEffect
+    };
+
     private static readonly IReadOnlySet<string> SupportedTriggers = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         AbilityTriggerType.OnCombatStart,
@@ -77,6 +95,17 @@ public sealed class AbilityCatalogValidator : IAbilityCatalogValidator
             throw new InvalidOperationException("Ability catalog validation failed: " + string.Join(" | ", errors));
     }
 
+    public AbilityCatalogSupportMatrix GetSupportMatrix() =>
+        new(
+            Sort(AbilityEffectType.All),
+            Sort(SupportedEffects),
+            Sort(AbilityTriggerType.All),
+            Sort(SupportedTriggers),
+            Sort(AbilityConditionType.All),
+            Sort(SupportedConditions),
+            Sort(AbilityTargetSelector.All),
+            Sort(AbilityTargetSelector.All));
+
     private static void ValidateAbility(AbilityDefinition ability, List<string> errors)
     {
         var label = string.IsNullOrWhiteSpace(ability.Id) ? "<missing id>" : ability.Id;
@@ -133,6 +162,8 @@ public sealed class AbilityCatalogValidator : IAbilityCatalogValidator
 
         if (!AbilityEffectType.All.Contains(effect.Type))
             errors.Add($"{label}: unknown effect type '{effect.Type}'.");
+        else if (!SupportedEffects.Contains(effect.Type))
+            errors.Add($"{label}: effect type '{effect.Type}' is valid content but is not supported by combat mapping.");
 
         if (!AbilityTargetSelector.All.Contains(effect.Target))
             errors.Add($"{label}: unknown target selector '{effect.Target}'.");
@@ -182,4 +213,7 @@ public sealed class AbilityCatalogValidator : IAbilityCatalogValidator
             }
         }
     }
+
+    private static IReadOnlyList<string> Sort(IEnumerable<string> values) =>
+        values.OrderBy(x => x, StringComparer.OrdinalIgnoreCase).ToList();
 }

@@ -27,14 +27,18 @@ Completed:
 - Added dungeon preview metadata for `FamilyId`, `FamilyTitle`, and `Difficulty` so the frontend can group difficulty variants without parsing ids.
 - Added creature build-profile diagnostics that report generated attributes, Combat Rating, and resolved Essence source information after archetype/area scaling.
 - Split `EssenceCombatAbilityFactory` into focused compiler, effect mapper, trigger mapper, condition mapper, and evolution modifier collaborators.
+- Added an ability catalog smoke-test helper that compiles every authored ability through the runtime factory, plus evolved Essence scenarios where evolution modifiers exist, and runs a generic combat simulation for each compiled scenario.
+- Added an executable ability support matrix through `AbilityCatalogValidator`, listing known and currently supported effects, triggers, conditions, and target selectors.
+- Added a creature build-profile diagnostic report service that checks every creature across representative area tiers and reports unresolved Essence source ids, invalid Combat Rating, and missing Max Health.
+- Added admin diagnostics queries and endpoints for ability catalog smoke-test results and creature build-profile reports.
 
 Not started:
 
 - Dungeon event room completion.
 - Reward category cleanup.
-- Ability catalog smoke-test helper.
+- Targeted ability combat simulations for specialized triggers and conditions.
 - Combat summary diagnostics for ability attempts and failed conditions.
-- Startup or admin-surfaced reporting for creature build-profile diagnostics.
+- Startup validation wiring for creature build-profile diagnostic reports.
 
 ## Current System Snapshot
 
@@ -154,9 +158,9 @@ Recommended split:
 
 **Implementation status:** done for the current runtime mapping shape. The factory now delegates to focused collaborators for compilation, effect mapping, trigger mapping, condition mapping, and evolution modifiers. Scaling remains colocated with effect mapping and `EssenceProgressionConstants`; extract it into a dedicated policy only if tier-scaling rules keep expanding.
 
-Add a validation or smoke-test harness that compiles every authored ability into runtime combat primitives. This should catch unsupported effect types, target selectors, triggers, conditions, statuses, and attributes before the player sees a runtime failure.
+Add a validation or smoke-test harness that compiles every authored ability into runtime combat primitives. **Partially done:** `IAbilityCatalogSmokeTester` compiles every authored ability through the same runtime factory combat uses, compiles evolved Essence scenarios where evolution modifiers exist, and runs a generic combat simulation for each compiled scenario. Targeted simulations for specialized trigger/condition patterns are still future work.
 
-Add support status reporting for authored primitives. If `AbilityEffectType`, `AbilityTriggerType`, or `AbilityConditionType` exposes a constant, it should be clear whether runtime mapping supports it.
+Add support status reporting for authored primitives. **Done for core primitive categories:** `AbilityCatalogValidator.GetSupportMatrix()` reports known and currently supported effect types, trigger types, condition types, and target selectors, including computed unsupported lists.
 
 ### Combat
 
@@ -194,11 +198,11 @@ Essence ability descriptions and tooltips should stay effect-driven. Avoid hand-
 
 Add a shared dungeon access policy used by both dungeon preview and dungeon start. **Done.**
 
-Add startup validators for dungeon, Essence, ability, and creature profile output. **Partially done:** dungeon and ability catalog validators are implemented; Essence validation already exists; creature profile diagnostics now exist, but automatic validation/reporting is still pending.
+Add startup validators for dungeon, Essence, ability, and creature profile output. **Partially done:** dungeon and ability catalog validators are implemented; Essence validation already exists; creature profile diagnostics/report generation and admin visibility now exist, but automatic startup validation is still pending.
 
-Add creature-to-Essence reference validation. Either validate the current name-derived convention or add an explicit creature content id/source monster id. **Partially done:** the source id convention is centralized in `CreatureEssenceSource`, and diagnostics can report whether the scaled creature resolves an Essence; automatic validation is still pending.
+Add creature-to-Essence reference validation. Either validate the current name-derived convention or add an explicit creature content id/source monster id. **Partially done:** the source id convention is centralized in `CreatureEssenceSource`, and the diagnostic report flags unresolved creature Essence source ids across representative area tiers. Automatic startup validation is still pending.
 
-Add creature build diagnostics that show archetype, area scaling, final combat attributes, Combat Rating range, and attached Essence ability source. **Done as a service/helper; pending exposure through startup validation, admin tooling, or a debug endpoint.**
+Add creature build diagnostics that show archetype, area scaling, final combat attributes, Combat Rating range, and attached Essence ability source. **Done as a service report and admin diagnostics endpoint; pending startup validation wiring.**
 
 ### Priority 2: Dungeon Feature Completion
 
@@ -219,7 +223,7 @@ Make the frontend communicate those categories without duplicate-looking rewards
 
 Split ability compilation and mapping responsibilities out of `EssenceCombatAbilityFactory`. **Done for the current runtime mapping shape.**
 
-Add an authored ability smoke-test harness that compiles all abilities.
+Add an authored ability smoke-test harness that compiles all abilities. **Partially done:** all authored abilities compile through the runtime factory, evolved modifier scenarios are checked where relevant, and generic combat simulations run. Targeted simulations for specialized trigger and condition patterns are still pending.
 
 Add a support matrix for:
 
@@ -231,7 +235,7 @@ Add a support matrix for:
 - Attribute ids.
 - Scaling behavior.
 
-The support matrix can live in docs first, then become executable validation as the system matures.
+**Partially done:** effect types, trigger types, condition types, and target selectors are executable metadata through `AbilityCatalogSupportMatrix`. Status ids, attribute ids, and scaling behavior still need richer reporting.
 
 ### Priority 4: Balance And UX
 
@@ -264,7 +268,7 @@ Use combat summaries to compare expected ability value against actual damage, he
    - Validate generated final combat attributes instead of raw JSON base attributes.
    - Report archetype, damage profile, defense profile, area scaling, final Combat Rating, and resolved Essence source id.
    - Fail clearly when a creature expected to use an Essence cannot resolve its `EssenceDefinition.SourceMonsterId`.
-   - Status: **Partially done.** The source id convention has been centralized, and `ICreatureBuildProfileDiagnostics` can report scaled creature attributes, Combat Rating, and resolved Essence source data. Automatic startup validation/reporting has not been added yet.
+   - Status: **Partially done.** The source id convention has been centralized, and `ICreatureBuildProfileDiagnostics.CreateReportAsync` reports scaled creature attributes, Combat Rating, and resolved Essence source data across representative area tiers. Admin diagnostics endpoint wiring is done; automatic startup validation has not been added yet.
 
 5. Split `EssenceCombatAbilityFactory`.
    - Keep public behavior the same.
@@ -275,6 +279,7 @@ Use combat summaries to compare expected ability value against actual damage, he
    - Compile all authored abilities.
    - Report unsupported content clearly.
    - Include representative combat simulations for common effect patterns.
+   - Status: **Partially done.** `IAbilityCatalogSmokeTester` compiles every authored ability through the runtime factory, compiles evolved modifier scenarios where relevant, and runs generic combat simulations. Targeted simulations for common specialized effect/trigger/condition patterns have not been added yet.
 
 ## Public Interfaces And Types
 
@@ -294,6 +299,8 @@ Recommended validator concepts:
 
 - `DungeonDefinitionValidator`
 - `AbilityCatalogValidator`
+- `AbilityCatalogSupportMatrix`
+- `IAbilityCatalogSmokeTester`
 - `CreatureBuildProfileDiagnostic` / `ICreatureBuildProfileDiagnostics`
 - Creature build-profile validator or surfaced diagnostic report.
 - Expanded `EssenceDefinitionValidator`
