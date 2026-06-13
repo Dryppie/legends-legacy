@@ -51,8 +51,14 @@
         Bound
       </span>
       <span
-        *ngIf="rewardSource"
+        *ngIf="rewardCategory"
         class="rounded border border-primary/30 px-2 py-0.5 text-primary"
+      >
+        {{ rewardCategory }}
+      </span>
+      <span
+        *ngIf="rewardSource"
+        class="rounded border border-white/10 px-2 py-0.5 text-zinc-300"
       >
         {{ rewardSource }}
       </span>

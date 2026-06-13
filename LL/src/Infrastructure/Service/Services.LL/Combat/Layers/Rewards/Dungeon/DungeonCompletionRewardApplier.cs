@@ -157,51 +157,12 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
             return;
         }
 
-        var grants = GetFirstCompletionGrants(dungeon);
+        var grants = DungeonRewardCatalog.GetFirstCompletionGrants(dungeon);
         await AddItemGrantsAsync(
             run.Id,
             grants,
             $"{FormatGrade(dungeon.Grade)} First Completion",
             cancellationToken);
-    }
-
-    private static IReadOnlyList<DungeonRewardGrant> GetFirstCompletionGrants(Domain.Models.Dungeons.DungeonDefinition dungeon)
-    {
-        if (dungeon.RewardTable.FirstClearRewards.Count > 0)
-        {
-            return dungeon.RewardTable.FirstClearRewards;
-        }
-
-        return dungeon.Grade switch
-        {
-            DungeonGrade.GradeII =>
-            [
-                new DungeonRewardGrant
-                {
-                    ItemId = EssenceProgressionConstants.GreaterMonsterCoreItemId,
-                    MinAmount = 12,
-                    MaxAmount = 12
-                }
-            ],
-            DungeonGrade.GradeIII =>
-            [
-                new DungeonRewardGrant
-                {
-                    ItemId = EssenceProgressionConstants.PrimalMonsterCoreItemId,
-                    MinAmount = 24,
-                    MaxAmount = 24
-                }
-            ],
-            _ =>
-            [
-                new DungeonRewardGrant
-                {
-                    ItemId = EssenceProgressionConstants.LesserMonsterCoreItemId,
-                    MinAmount = 6,
-                    MaxAmount = 6
-                }
-            ]
-        };
     }
 
     private async Task AddItemGrantsAsync(

@@ -229,9 +229,18 @@
           <div class="mt-2 flex flex-wrap gap-2">
             <div
               *ngFor="let r of selectedPreviewData().rewards"
-              class="rounded-md border border-white/10 bg-[#1a1a1a] p-2 text-center"
+              class="flex min-w-28 flex-col items-center gap-1 rounded-md border border-white/10 bg-[#1a1a1a] p-2 text-center"
             >
               <app-item [item]="r"></app-item>
+              <div class="text-[10px] uppercase text-primary">
+                {{ r.category || r.source }}
+              </div>
+              <div
+                *ngIf="r.category && r.source"
+                class="text-[10px] text-zinc-400"
+              >
+                {{ r.source }}
+              </div>
             </div>
           </div>
 

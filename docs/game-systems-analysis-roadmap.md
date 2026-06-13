@@ -31,11 +31,12 @@ Completed:
 - Added an executable ability support matrix through `AbilityCatalogValidator`, listing known and currently supported effects, triggers, conditions, and target selectors.
 - Added a creature build-profile diagnostic report service that checks every creature across representative area tiers and reports unresolved Essence source ids, invalid Combat Rating, and missing Max Health.
 - Added admin diagnostics queries and endpoints for ability catalog smoke-test results and creature build-profile reports.
+- Added explicit dungeon reward preview categories for completion loot, tier loot, recurring Monster Cores, and first-completion rewards.
+- Centralized default first-completion dungeon rewards in `DungeonRewardCatalog` so preview and reward granting use the same source.
 
 Not started:
 
 - Dungeon event room completion.
-- Reward category cleanup.
 - Targeted ability combat simulations for specialized triggers and conditions.
 - Combat summary diagnostics for ability attempts and failed conditions.
 - Startup validation wiring for creature build-profile diagnostic reports.
@@ -210,14 +211,14 @@ Implement one authoritative dungeon family/difficulty model for frontend groupin
 
 Finish dungeon event rooms or remove them from generated runs until they are real.
 
-Clarify dungeon reward categories:
+Clarify dungeon reward categories. **Done for dungeon preview and granting defaults:** rewards now carry explicit preview categories, recurring Monster Cores are shown separately from first-completion rewards, and default first-completion rewards are centralized in `DungeonRewardCatalog`.
 
 - Completion rewards.
 - Grade/tier rewards.
 - Monster Core rewards.
 - First-completion rewards.
 
-Make the frontend communicate those categories without duplicate-looking rewards.
+Make the frontend communicate those categories without duplicate-looking rewards. **Done for dungeon cards:** reward cards now show category and source labels.
 
 ### Priority 3: Ability System Scalability
 

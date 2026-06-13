@@ -4,6 +4,7 @@ import { DungeonKeyItem } from './dungeonKeyItem';
 
 export interface DungeonPreviewReward extends ItemInstance {
   source?: string;
+  category?: string;
 }
 
 export interface DungeonPreviewData {

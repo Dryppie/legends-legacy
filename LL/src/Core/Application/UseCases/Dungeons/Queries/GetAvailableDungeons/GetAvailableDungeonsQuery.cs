@@ -96,7 +96,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
                 cancellationToken);
 
             if (completionTable is not null)
-                rewards.AddRange(MapRewards(completionTable, "Dungeon Completion"));
+                rewards.AddRange(MapRewards(completionTable, "Completion Loot", "Every Completion"));
         }
 
         if (dungeon.TierLootTableId.HasValue)
@@ -106,13 +106,14 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
                 cancellationToken);
 
             if (tierTable is not null)
-                rewards.AddRange(MapRewards(tierTable, $"Tier {dungeon.Tier} Completion"));
+                rewards.AddRange(MapRewards(tierTable, "Tier Loot", $"Tier {dungeon.Tier} Completion"));
         }
 
+        rewards.AddRange(await MapMonsterCoreRewards(dungeon, cancellationToken));
         rewards.AddRange(await MapFirstCompletionRewards(dungeon, cancellationToken));
 
         return rewards
-            .GroupBy(x => x.ItemBase.Id)
+            .GroupBy(x => new { x.ItemBase.Id, x.Category })
             .Select(x =>
             {
                 var firstReward = x.First();
@@ -123,7 +124,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
             .ToList();
     }
 
-    private IEnumerable<DungeonPreviewRewardDto> MapRewards(LootTable lootTable, string source)
+    private IEnumerable<DungeonPreviewRewardDto> MapRewards(LootTable lootTable, string category, string source)
     {
         foreach (var item in FlattenItems(lootTable))
         {
@@ -131,16 +132,36 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
             {
                 Id = item.Item.Id,
                 ItemBase = _mapper.Map<ItemBaseDto>(item.Item),
+                Category = category,
                 Source = source
             };
         }
+    }
+
+    private async Task<IEnumerable<DungeonPreviewRewardDto>> MapMonsterCoreRewards(
+        Domain.Models.Dungeons.DungeonDefinition dungeon,
+        CancellationToken cancellationToken)
+    {
+        var itemIds = DungeonRewardCatalog.GetMonsterCoreRewardItemIds(dungeon.Grade);
+        var itemBases = await _itemBases.GetItemBasesByIdsAsync(itemIds, cancellationToken);
+
+        return itemIds
+            .Where(itemBases.ContainsKey)
+            .Select(itemId => new DungeonPreviewRewardDto
+            {
+                Id = itemId,
+                ItemBase = _mapper.Map<ItemBaseDto>(itemBases[itemId]),
+                Category = "Monster Cores",
+                Source = "Every Completion"
+            })
+            .ToList();
     }
 
     private async Task<IEnumerable<DungeonPreviewRewardDto>> MapFirstCompletionRewards(
         Domain.Models.Dungeons.DungeonDefinition dungeon,
         CancellationToken cancellationToken)
     {
-        var grants = dungeon.RewardTable.FirstClearRewards;
+        var grants = DungeonRewardCatalog.GetFirstCompletionGrants(dungeon);
         if (grants.Count == 0)
         {
             return [];
@@ -156,7 +177,8 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
             {
                 Id = x.ItemId,
                 ItemBase = _mapper.Map<ItemBaseDto>(itemBases[x.ItemId]),
-                Source = "First Completion"
+                Category = "First Completion",
+                Source = "Once Per Character"
             })
             .ToList();
     }

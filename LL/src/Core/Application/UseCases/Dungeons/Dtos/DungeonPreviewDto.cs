@@ -28,5 +28,6 @@ public sealed class DungeonPreviewRewardDto
 {
     public string Id { get; set; } = string.Empty;
     public ItemBaseDto ItemBase { get; set; } = null!;
+    public string Category { get; set; } = string.Empty;
     public string Source { get; set; } = string.Empty;
 }

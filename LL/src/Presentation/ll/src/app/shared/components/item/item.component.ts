@@ -45,8 +45,14 @@ export class ItemComponent {
   }
 
   get rewardSource(): string | null {
-    return 'source' in this.item && typeof this.item.source === 'string'
+    return typeof this.item.source === 'string'
       ? this.item.source
+      : null;
+  }
+
+  get rewardCategory(): string | null {
+    return typeof this.item.category === 'string'
+      ? this.item.category
       : null;
   }
 
