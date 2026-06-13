@@ -4,6 +4,7 @@ using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Items.Dtos;
 using AutoMapper;
 using Common.Exceptions;
+using Domain.Models.Items;
 using Domain.Models.LootTables;
 using MediatR;
 
@@ -15,15 +16,18 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
 {
     private readonly IDungeonDefinitions _dungeonDefinitions;
     private readonly ILootTableRepository _lootTables;
+    private readonly IItemBaseRepository _itemBases;
     private readonly IMapper _mapper;
 
     public GetAvailableDungeonsQueryHandler(
         IDungeonDefinitions dungeonDefinitions,
         ILootTableRepository lootTables,
+        IItemBaseRepository itemBases,
         IMapper mapper)
     {
         _dungeonDefinitions = dungeonDefinitions;
         _lootTables = lootTables;
+        _itemBases = itemBases;
         _mapper = mapper;
     }
 
@@ -79,6 +83,8 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
                 rewards.AddRange(MapRewards(tierTable, $"Tier {dungeon.Tier} Completion"));
         }
 
+        rewards.AddRange(await MapFirstCompletionRewards(dungeon, cancellationToken));
+
         return rewards
             .GroupBy(x => x.ItemBase.Id)
             .Select(x =>
@@ -102,6 +108,31 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
                 Source = source
             };
         }
+    }
+
+    private async Task<IEnumerable<DungeonPreviewRewardDto>> MapFirstCompletionRewards(
+        Domain.Models.Dungeons.DungeonDefinition dungeon,
+        CancellationToken cancellationToken)
+    {
+        var grants = dungeon.RewardTable.FirstClearRewards;
+        if (grants.Count == 0)
+        {
+            return [];
+        }
+
+        var itemBases = await _itemBases.GetItemBasesByIdsAsync(
+            grants.Select(x => x.ItemId).Where(x => !string.IsNullOrWhiteSpace(x)).Distinct().ToList(),
+            cancellationToken);
+
+        return grants
+            .Where(x => itemBases.ContainsKey(x.ItemId))
+            .Select(x => new DungeonPreviewRewardDto
+            {
+                Id = x.ItemId,
+                ItemBase = _mapper.Map<ItemBaseDto>(itemBases[x.ItemId]),
+                Source = "First Completion"
+            })
+            .ToList();
     }
 
     private async Task<LootTable?> TryGetLootTableAsync(Guid lootTableId, CancellationToken cancellationToken)

@@ -73,9 +73,9 @@
     "scalingAmount": 0
   },
   {
-    "id": "item.ascension_stone.lesser",
-    "name": "Lesser Ascension Stone",
-    "description": "A universal stone used to ascend Essences into Ascension Tier 1.",
+    "id": "item.monster_core.lesser",
+    "name": "Lesser Monster Core",
+    "description": "A lesser core taken from monsters and used to ascend Essences into Ascension Tier 1.",
     "itemType": "Resource",
     "rarity": "Uncommon",
     "stackable": true,
@@ -89,9 +89,9 @@
     "scalingAmount": 0
   },
   {
-    "id": "item.ascension_stone.greater",
-    "name": "Greater Ascension Stone",
-    "description": "A universal stone used to ascend Essences into Ascension Tier 2.",
+    "id": "item.monster_core.greater",
+    "name": "Greater Monster Core",
+    "description": "A greater core taken from monsters and used to ascend Essences into Ascension Tier 2.",
     "itemType": "Resource",
     "rarity": "Rare",
     "stackable": true,
@@ -105,9 +105,9 @@
     "scalingAmount": 0
   },
   {
-    "id": "item.ascension_stone.primal",
-    "name": "Primal Ascension Stone",
-    "description": "A universal stone used to ascend Essences into Ascension Tier 3.",
+    "id": "item.monster_core.primal",
+    "name": "Primal Monster Core",
+    "description": "A primal core taken from monsters and used to ascend Essences into Ascension Tier 3.",
     "itemType": "Resource",
     "rarity": "Epic",
     "stackable": true,

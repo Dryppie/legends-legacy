@@ -52,6 +52,17 @@ export class DungeonCardComponent {
     }
   }
 
+  difficultyLabel(difficulty: DungeonDifficulty): string {
+    switch (difficulty) {
+      case DungeonDifficulty.Heroic:
+        return 'Veteran';
+      case DungeonDifficulty.Mythic:
+        return 'Champion';
+      default:
+        return 'Novice';
+    }
+  }
+
   selectedPreviewData(): DungeonPreviewData {
     return (
       this.previewData.difficultyVariants?.[this.difficulty()] ??

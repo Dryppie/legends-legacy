@@ -62,31 +62,91 @@ const dungeonPresentation: Record<string, Partial<DungeonPreviewData>> = {
 })
 export class DungeonsComponent {
   dungeons = computed(() =>
-    this.dungeonState.dungeons().map((dungeon, index) => {
-      const presentation =
-        dungeonPresentation[this.getDungeonFamilyId(dungeon.id)] ?? {};
-
-      return {
-        ...dungeon,
-        ...presentation,
-        number: presentation.number ?? index + 1,
-        heroImage: presentation.heroImage ?? 'entities/optimized/hobgoblin.webp',
-        lore: presentation.lore ?? '',
-        requiredLevel: presentation.requiredLevel ?? 1,
-        roomsRange: dungeon.roomsRange ?? [
-          (dungeon as DungeonPreviewData & { minRooms?: number }).minRooms ?? 0,
-          (dungeon as DungeonPreviewData & { maxRooms?: number }).maxRooms ?? 0,
-        ],
-        unlockedDifficulties: presentation.unlockedDifficulties ?? [
-          DungeonDifficulty.Normal,
-        ],
-      } as DungeonPreviewData;
-    }),
+    this.groupDifficultyVariants(this.dungeonState.dungeons()),
   );
 
   constructor(private readonly dungeonState: DungeonStateService) {}
 
+  private groupDifficultyVariants(
+    dungeons: DungeonPreviewData[],
+  ): DungeonPreviewData[] {
+    const groups = new Map<string, DungeonPreviewData[]>();
+
+    for (const dungeon of dungeons) {
+      const familyId = this.getDungeonFamilyId(dungeon.id);
+      groups.set(familyId, [...(groups.get(familyId) ?? []), dungeon]);
+    }
+
+    return Array.from(groups.entries()).flatMap(
+      ([familyId, variants], index) => {
+        const presentation = dungeonPresentation[familyId] ?? {};
+        const variantMap = this.createVariantMap(variants);
+        const normalVariant =
+          variantMap[DungeonDifficulty.Normal] ?? variants[0] ?? null;
+        const selectedBase = normalVariant ?? variants[0];
+        if (!selectedBase) return [];
+
+        return {
+          ...selectedBase,
+          ...presentation,
+          id: normalVariant?.id ?? selectedBase.id,
+          title: this.getDungeonFamilyTitle(selectedBase.title),
+          number: presentation.number ?? index + 1,
+          heroImage:
+            presentation.heroImage ?? 'entities/optimized/hobgoblin.webp',
+          lore: presentation.lore ?? '',
+          requiredLevel: presentation.requiredLevel ?? 1,
+          roomsRange: selectedBase.roomsRange ?? [
+            (selectedBase as DungeonPreviewData & { minRooms?: number })
+              .minRooms ?? 0,
+            (selectedBase as DungeonPreviewData & { maxRooms?: number })
+              .maxRooms ?? 0,
+          ],
+          unlockedDifficulties: this.getUnlockedDifficulties(variantMap),
+          difficultyVariants: variantMap,
+        } as DungeonPreviewData;
+      },
+    );
+  }
+
+  private createVariantMap(
+    variants: DungeonPreviewData[],
+  ): Partial<Record<DungeonDifficulty, DungeonPreviewData>> {
+    return variants.reduce<Partial<Record<DungeonDifficulty, DungeonPreviewData>>>(
+      (map, dungeon) => {
+        map[this.getDifficulty(dungeon)] = dungeon;
+        return map;
+      },
+      {},
+    );
+  }
+
+  private getUnlockedDifficulties(
+    variants: Partial<Record<DungeonDifficulty, DungeonPreviewData>>,
+  ): DungeonDifficulty[] {
+    return [
+      DungeonDifficulty.Normal,
+      DungeonDifficulty.Heroic,
+      DungeonDifficulty.Mythic,
+    ].filter((difficulty) => !!variants[difficulty]);
+  }
+
+  private getDifficulty(dungeon: DungeonPreviewData): DungeonDifficulty {
+    switch (dungeon.grade) {
+      case 'Grade II':
+        return DungeonDifficulty.Heroic;
+      case 'Grade III':
+        return DungeonDifficulty.Mythic;
+      default:
+        return DungeonDifficulty.Normal;
+    }
+  }
+
   private getDungeonFamilyId(dungeonId: string): string {
     return dungeonId.replace(/_(i|ii|iii)$/i, '');
+  }
+
+  private getDungeonFamilyTitle(title: string): string {
+    return title.replace(/\s+(I|II|III)$/i, '');
   }
 }

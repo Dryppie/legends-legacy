@@ -7,16 +7,16 @@ public static class EssenceProgressionConstants
     public const int BaseXpPerLevel = 100;
     public const double XpGrowth = 1.18;
     public const int MaxEssenceLevel = 60;
-    public const string LesserAscensionStoneItemId = "item.ascension_stone.lesser";
-    public const string GreaterAscensionStoneItemId = "item.ascension_stone.greater";
-    public const string PrimalAscensionStoneItemId = "item.ascension_stone.primal";
-    public const int TierOneAscensionStoneCost = 6;
-    public const int TierTwoAscensionStoneCost = 12;
-    public const int TierThreeAscensionStoneCost = 24;
+    public const string LesserMonsterCoreItemId = "item.monster_core.lesser";
+    public const string GreaterMonsterCoreItemId = "item.monster_core.greater";
+    public const string PrimalMonsterCoreItemId = "item.monster_core.primal";
+    public const int TierOneMonsterCoreCost = 6;
+    public const int TierTwoMonsterCoreCost = 12;
+    public const int TierThreeMonsterCoreCost = 24;
     public const int TierOneCatchUpThreshold = 10;
     public const int TierTwoCatchUpThreshold = 10;
-    public const int TierOneCatchUpStoneCost = 3;
-    public const int TierTwoCatchUpStoneCost = 8;
+    public const int TierOneCatchUpMonsterCoreCost = 3;
+    public const int TierTwoCatchUpMonsterCoreCost = 8;
     public const double AttributeBonusGrowthPerLevel = 0.04;
     public const double ActiveCooldownReductionPerAscensionTier = 0.05;
     public const double MaxActiveCooldownReduction = 0.15;
@@ -52,16 +52,16 @@ public static class EssenceProgressionConstants
         return nextAscensionTier switch
         {
             1 => new(
-                LesserAscensionStoneItemId,
+                LesserMonsterCoreItemId,
                 ascendedToTierOneCount >= TierOneCatchUpThreshold
-                    ? TierOneCatchUpStoneCost
-                    : TierOneAscensionStoneCost),
+                    ? TierOneCatchUpMonsterCoreCost
+                    : TierOneMonsterCoreCost),
             2 => new(
-                GreaterAscensionStoneItemId,
+                GreaterMonsterCoreItemId,
                 ascendedToTierTwoCount >= TierTwoCatchUpThreshold
-                    ? TierTwoCatchUpStoneCost
-                    : TierTwoAscensionStoneCost),
-            3 => new(PrimalAscensionStoneItemId, TierThreeAscensionStoneCost),
+                    ? TierTwoCatchUpMonsterCoreCost
+                    : TierTwoMonsterCoreCost),
+            3 => new(PrimalMonsterCoreItemId, TierThreeMonsterCoreCost),
             _ => throw new ArgumentOutOfRangeException(nameof(nextAscensionTier), "Ascension tier must be between 1 and 3.")
         };
     }

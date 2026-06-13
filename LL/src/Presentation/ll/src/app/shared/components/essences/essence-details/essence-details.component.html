@@ -1,64 +1,112 @@
-<div class="flex flex-col gap-2">
-  <!-- Essence Name -->
-  <h2 class="text-primary">
-    {{ essence.name }}
-  </h2>
-  <!-- Description -->
-  <div class="">
-    <div class="font-bold">Active - {{ essence.active.name }}</div>
+<div class="flex min-w-72 max-w-96 flex-col gap-3">
+  <div class="flex items-start justify-between gap-3">
+    <h2 class="font-serif text-lg leading-tight text-primary">
+      {{ essence.name }}
+    </h2>
+    <span
+      class="rounded border border-primary/40 px-2 py-0.5 text-[11px] text-primary"
+    >
+      Essence
+    </span>
+  </div>
+
+  <div class="border-t border-primary/20 pt-2">
+    <div class="mb-1 flex items-center justify-between gap-3">
+      <div class="font-serif text-base text-primary">
+        {{ essence.active.name }}
+      </div>
+      <span
+        class="rounded border border-primary/40 px-2 py-0.5 text-[11px] text-primary"
+      >
+        Active
+      </span>
+    </div>
     <app-essence-description
       [description]="essence.active.description"
       [effects]="essence.active.effects"
     ></app-essence-description>
-    <p>
+    <p class="mt-1 text-xs text-zinc-400">
       Cooldown:
       {{ essence.active.cooldown | ticksToSeconds }} seconds
     </p>
-    <span class="flex" *ngIf="essence.active.attackTypes?.length">
-      [<ng-container *ngFor="let tag of essence.active.attackTypes">
-        <span class="pr-1 first:hidden">, </span>{{ tag }}</ng-container
-      >]
-    </span>
-    <span class="flex" *ngIf="essence.active.damageTypes?.length">
-      [<ng-container *ngFor="let tag of essence.active.damageTypes">
-        <span class="pr-1 first:hidden">, </span>{{ tag }}</ng-container
-      >]
-    </span>
-    <span class="flex" *ngIf="essence.active.effectTags?.length">
-      [<ng-container *ngFor="let tag of essence.active.effectTags">
-        <span class="pr-1 first:hidden">, </span>{{ tag }}</ng-container
-      >]
-    </span>
+    <div class="mt-2 flex flex-wrap gap-1 text-[11px] text-zinc-300">
+      <span
+        *ngFor="let tag of essence.active.attackTypes"
+        class="rounded border border-white/10 px-2 py-0.5"
+      >
+        {{ tag }}
+      </span>
+      <span
+        *ngFor="let tag of essence.active.damageTypes"
+        class="rounded border border-white/10 px-2 py-0.5"
+      >
+        {{ tag }}
+      </span>
+      <span
+        *ngFor="let tag of essence.active.effectTags"
+        class="rounded border border-white/10 px-2 py-0.5"
+      >
+        {{ tag }}
+      </span>
+    </div>
   </div>
-  <div class="">
-    <div class="font-bold">Passive - {{ essence.passive.name }}</div>
+
+  <div class="border-t border-primary/20 pt-2">
+    <div class="mb-1 flex items-center justify-between gap-3">
+      <div class="font-serif text-base text-primary">
+        {{ essence.passive.name }}
+      </div>
+      <span
+        class="rounded border border-white/20 px-2 py-0.5 text-[11px] text-zinc-300"
+      >
+        Passive
+      </span>
+    </div>
     <app-essence-description
       [description]="essence.passive.description"
       [effects]="essence.passive.effects"
     ></app-essence-description>
-    <span class="flex" *ngIf="essence.passive.attackTypes?.length">
-      [<ng-container *ngFor="let tag of essence.passive.attackTypes">
-        <span class="pr-1 first:hidden">, </span>{{ tag }}</ng-container
-      >]
-    </span>
-    <span class="flex" *ngIf="essence.passive.damageTypes?.length">
-      [<ng-container *ngFor="let tag of essence.passive.damageTypes">
-        <span class="pr-1 first:hidden">, </span>{{ tag }}</ng-container
-      >]
-    </span>
-    <span class="flex" *ngIf="essence.passive.effectTags?.length">
-      [<ng-container *ngFor="let tag of essence.passive.effectTags">
-        <span class="pr-1 first:hidden">, </span>{{ tag }}</ng-container
-      >]
-    </span>
+    <div class="mt-2 flex flex-wrap gap-1 text-[11px] text-zinc-300">
+      <span
+        *ngFor="let tag of essence.passive.attackTypes"
+        class="rounded border border-white/10 px-2 py-0.5"
+      >
+        {{ tag }}
+      </span>
+      <span
+        *ngFor="let tag of essence.passive.damageTypes"
+        class="rounded border border-white/10 px-2 py-0.5"
+      >
+        {{ tag }}
+      </span>
+      <span
+        *ngFor="let tag of essence.passive.effectTags"
+        class="rounded border border-white/10 px-2 py-0.5"
+      >
+        {{ tag }}
+      </span>
+    </div>
   </div>
-  <!-- Attributes -->
-  <div *ngIf="essence.attributeModifiers.length > 0">
-    <div class="font-bold">Attributes:</div>
-    <ul class="ml-5 list-disc text-sm">
+
+  <div
+    *ngIf="essence.attributeModifiers.length > 0"
+    class="border-t border-primary/20 pt-2"
+  >
+    <div class="text-[11px] uppercase tracking-[0.16em] text-secondary">
+      Attributes
+    </div>
+    <ul class="mt-2 list-none p-0 text-sm">
       <li *ngFor="let attr of essence.attributeModifiers">
-        {{ attr.amount | attributeValueFormat: attr.attributeType : true }}
-        {{ attr.attributeType | attributeTypeFormat }}
+        <div
+          class="flex justify-between gap-6 border-b border-white/5 py-1 last:border-b-0"
+        >
+          <span class="text-zinc-300">
+            {{ attr.attributeType | attributeTypeFormat }}
+          </span>
+          <span class="text-primary">
+            {{ attr.amount | attributeValueFormat: attr.attributeType : true }}
+          </span>
+        </div>
       </li>
     </ul>
   </div>

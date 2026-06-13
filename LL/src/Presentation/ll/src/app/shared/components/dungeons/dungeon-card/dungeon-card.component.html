@@ -153,7 +153,7 @@
               }"
               (click)="selectDifficulty(dungeonDifficulty.Normal)"
             >
-              Normal
+              {{ difficultyLabel(dungeonDifficulty.Normal) }}
             </div>
 
             <div
@@ -169,7 +169,7 @@
               }"
               (click)="selectDifficulty(dungeonDifficulty.Heroic)"
             >
-              Heroic
+              {{ difficultyLabel(dungeonDifficulty.Heroic) }}
             </div>
 
             <div
@@ -185,7 +185,7 @@
               }"
               (click)="selectDifficulty(dungeonDifficulty.Mythic)"
             >
-              Mythic
+              {{ difficultyLabel(dungeonDifficulty.Mythic) }}
             </div>
           </div>
 
@@ -202,7 +202,7 @@
           <div class="mt-6 flex items-center justify-end gap-2">
             <app-regular-button
               class="w-40"
-              [text]="'Enter ' + difficulty()"
+              [text]="'Enter ' + difficultyLabel(difficulty())"
               (pressed)="startDungeon()"
               fullWidth
             ></app-regular-button>

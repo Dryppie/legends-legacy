@@ -12,24 +12,24 @@ public sealed class EssenceAscensionDefinition
             Tier = 1,
             MinLevel = 11,
             MaxLevel = 30,
-            RequiredItemId = EssenceProgressionConstants.LesserAscensionStoneItemId,
-            RequiredItemAmount = EssenceProgressionConstants.TierOneAscensionStoneCost
+            RequiredItemId = EssenceProgressionConstants.LesserMonsterCoreItemId,
+            RequiredItemAmount = EssenceProgressionConstants.TierOneMonsterCoreCost
         },
         new()
         {
             Tier = 2,
             MinLevel = 31,
             MaxLevel = 60,
-            RequiredItemId = EssenceProgressionConstants.GreaterAscensionStoneItemId,
-            RequiredItemAmount = EssenceProgressionConstants.TierTwoAscensionStoneCost
+            RequiredItemId = EssenceProgressionConstants.GreaterMonsterCoreItemId,
+            RequiredItemAmount = EssenceProgressionConstants.TierTwoMonsterCoreCost
         },
         new()
         {
             Tier = 3,
             MinLevel = 60,
             MaxLevel = 60,
-            RequiredItemId = EssenceProgressionConstants.PrimalAscensionStoneItemId,
-            RequiredItemAmount = EssenceProgressionConstants.TierThreeAscensionStoneCost
+            RequiredItemId = EssenceProgressionConstants.PrimalMonsterCoreItemId,
+            RequiredItemAmount = EssenceProgressionConstants.TierThreeMonsterCoreCost
         }
     ];
 }

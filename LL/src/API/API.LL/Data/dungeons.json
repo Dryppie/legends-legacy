@@ -14,6 +14,15 @@
         "consumedOnEntry": true
       }
     ],
+    "rewardTable": {
+      "firstClearRewards": [
+        {
+          "itemId": "item.monster_core.lesser",
+          "minAmount": 6,
+          "maxAmount": 6
+        }
+      ]
+    },
     "completionLootTableId": "10000000-0000-0000-0000-000000000101",
     "tierLootTableId": "10000000-0000-0000-0000-000000000001",
     "monsterLootModifiers": {
@@ -59,6 +68,15 @@
         "consumedOnEntry": true
       }
     ],
+    "rewardTable": {
+      "firstClearRewards": [
+        {
+          "itemId": "item.monster_core.greater",
+          "minAmount": 12,
+          "maxAmount": 12
+        }
+      ]
+    },
     "completionLootTableId": "10000000-0000-0000-0000-000000000101",
     "tierLootTableId": "10000000-0000-0000-0000-000000000001",
     "monsterLootModifiers": {
@@ -104,6 +122,15 @@
         "consumedOnEntry": true
       }
     ],
+    "rewardTable": {
+      "firstClearRewards": [
+        {
+          "itemId": "item.monster_core.primal",
+          "minAmount": 24,
+          "maxAmount": 24
+        }
+      ]
+    },
     "completionLootTableId": "10000000-0000-0000-0000-000000000101",
     "tierLootTableId": "10000000-0000-0000-0000-000000000001",
     "monsterLootModifiers": {
@@ -147,6 +174,15 @@
         "consumedOnEntry": true
       }
     ],
+    "rewardTable": {
+      "firstClearRewards": [
+        {
+          "itemId": "item.monster_core.lesser",
+          "minAmount": 6,
+          "maxAmount": 6
+        }
+      ]
+    },
     "tierLootTableId": "10000000-0000-0000-0000-000000000001",
     "monsterLootModifiers": {
       "Essence": 15
@@ -209,6 +245,15 @@
         "consumedOnEntry": true
       }
     ],
+    "rewardTable": {
+      "firstClearRewards": [
+        {
+          "itemId": "item.monster_core.greater",
+          "minAmount": 12,
+          "maxAmount": 12
+        }
+      ]
+    },
     "tierLootTableId": "10000000-0000-0000-0000-000000000001",
     "monsterLootModifiers": {
       "Essence": 15
@@ -271,6 +316,15 @@
         "consumedOnEntry": true
       }
     ],
+    "rewardTable": {
+      "firstClearRewards": [
+        {
+          "itemId": "item.monster_core.primal",
+          "minAmount": 24,
+          "maxAmount": 24
+        }
+      ]
+    },
     "tierLootTableId": "10000000-0000-0000-0000-000000000001",
     "monsterLootModifiers": {
       "Essence": 15
@@ -331,6 +385,15 @@
         "consumedOnEntry": true
       }
     ],
+    "rewardTable": {
+      "firstClearRewards": [
+        {
+          "itemId": "item.monster_core.lesser",
+          "minAmount": 6,
+          "maxAmount": 6
+        }
+      ]
+    },
     "tierLootTableId": "10000000-0000-0000-0000-000000000001",
     "monsterLootModifiers": {
       "Essence": 15
@@ -393,6 +456,15 @@
         "consumedOnEntry": true
       }
     ],
+    "rewardTable": {
+      "firstClearRewards": [
+        {
+          "itemId": "item.monster_core.greater",
+          "minAmount": 12,
+          "maxAmount": 12
+        }
+      ]
+    },
     "tierLootTableId": "10000000-0000-0000-0000-000000000001",
     "monsterLootModifiers": {
       "Essence": 15
@@ -455,6 +527,15 @@
         "consumedOnEntry": true
       }
     ],
+    "rewardTable": {
+      "firstClearRewards": [
+        {
+          "itemId": "item.monster_core.primal",
+          "minAmount": 24,
+          "maxAmount": 24
+        }
+      ]
+    },
     "tierLootTableId": "10000000-0000-0000-0000-000000000001",
     "monsterLootModifiers": {
       "Essence": 15

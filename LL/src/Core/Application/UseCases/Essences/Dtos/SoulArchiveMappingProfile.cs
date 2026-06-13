@@ -163,12 +163,12 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
     private static string FormatItemName(string? itemId)
     {
         if (string.IsNullOrWhiteSpace(itemId)) return "required item";
-        if (itemId.Equals(EssenceProgressionConstants.LesserAscensionStoneItemId, StringComparison.OrdinalIgnoreCase))
-            return "Lesser Ascension Stone";
-        if (itemId.Equals(EssenceProgressionConstants.GreaterAscensionStoneItemId, StringComparison.OrdinalIgnoreCase))
-            return "Greater Ascension Stone";
-        if (itemId.Equals(EssenceProgressionConstants.PrimalAscensionStoneItemId, StringComparison.OrdinalIgnoreCase))
-            return "Primal Ascension Stone";
+        if (itemId.Equals(EssenceProgressionConstants.LesserMonsterCoreItemId, StringComparison.OrdinalIgnoreCase))
+            return "Lesser Monster Core";
+        if (itemId.Equals(EssenceProgressionConstants.GreaterMonsterCoreItemId, StringComparison.OrdinalIgnoreCase))
+            return "Greater Monster Core";
+        if (itemId.Equals(EssenceProgressionConstants.PrimalMonsterCoreItemId, StringComparison.OrdinalIgnoreCase))
+            return "Primal Monster Core";
 
         var parts = itemId
             .Replace("item.", string.Empty, StringComparison.OrdinalIgnoreCase)

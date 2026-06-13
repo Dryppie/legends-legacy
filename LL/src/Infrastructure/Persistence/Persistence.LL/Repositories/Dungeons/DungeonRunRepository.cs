@@ -53,6 +53,38 @@ public class DungeonRunRepository : IDungeonRunRepository
              .FirstOrDefaultAsync(x => x.Id.Equals(dungeonId), cancellationToken);
     }
 
+    public async Task<bool> HasCompletedDungeonAsync(Guid characterId, string dungeonDefinitionId, CancellationToken cancellationToken)
+    {
+        return await _context.DungeonCompletionRecords.AnyAsync(
+            x => x.CharacterId == characterId && x.DungeonDefinitionId == dungeonDefinitionId,
+            cancellationToken);
+    }
+
+    public async Task MarkDungeonCompletedAsync(Guid characterId, string dungeonDefinitionId, DateTimeOffset completedAt, CancellationToken cancellationToken)
+    {
+        var record = await _context.DungeonCompletionRecords.FirstOrDefaultAsync(
+            x => x.CharacterId == characterId && x.DungeonDefinitionId == dungeonDefinitionId,
+            cancellationToken);
+
+        if (record is null)
+        {
+            await _context.DungeonCompletionRecords.AddAsync(new DungeonCompletionRecord
+            {
+                Id = Guid.NewGuid(),
+                CharacterId = characterId,
+                DungeonDefinitionId = dungeonDefinitionId,
+                FirstCompletedAt = completedAt,
+                LastCompletedAt = completedAt,
+                CompletionCount = 1
+            }, cancellationToken);
+
+            return;
+        }
+
+        record.LastCompletedAt = completedAt;
+        record.CompletionCount++;
+    }
+
     public Task<bool> UpdateDungeonRunAsync(DungeonRun dungeonRun, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
