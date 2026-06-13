@@ -14,6 +14,7 @@ using Persistence.LL.Seeds;
 using RealTime.LL;
 using Services.AdminDashboard;
 using Services.LL;
+using Services.LL.Validation;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -162,6 +163,8 @@ using (var scope = app.Services.CreateScope())
     await context.Database.MigrateAsync();
     await context.SeedData(hasher);
 }
+
+await app.Services.ValidateCreatureBuildProfilesAsync();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

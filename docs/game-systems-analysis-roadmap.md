@@ -33,13 +33,13 @@ Completed:
 - Added admin diagnostics queries and endpoints for ability catalog smoke-test results and creature build-profile reports.
 - Added explicit dungeon reward preview categories for completion loot, tier loot, recurring Monster Cores, and first-completion rewards.
 - Centralized default first-completion dungeon rewards in `DungeonRewardCatalog` so preview and reward granting use the same source.
+- Added combat summary diagnostics for active ability attempts, passive trigger attempts/activations, and failed effect conditions.
+- Added startup validation wiring for generated creature build-profile diagnostics. Invalid generated Max Health or Combat Rating now fails API startup; unresolved creature-to-Essence source ids remain surfaced as diagnostic warnings until expected Essence drops are explicit.
 
 Not started:
 
 - Dungeon event room completion.
 - Targeted ability combat simulations for specialized triggers and conditions.
-- Combat summary diagnostics for ability attempts and failed conditions.
-- Startup validation wiring for creature build-profile diagnostic reports.
 
 ## Current System Snapshot
 
@@ -178,6 +178,8 @@ Add combat summary diagnostics for:
 - Failed condition counts.
 - Basic attack usage.
 
+**Partially done:** active ability attempts, passive trigger attempts, passive trigger activations, failed effect conditions, and existing basic attack usage are now aggregated into combat summaries. This still needs richer reason text if the frontend should explain exactly which authored condition failed.
+
 This will make balance debugging far easier, especially when an ability appears not to fire or a passive condition silently blocks it.
 
 Review the Combat Rating formula after generated creature profiles and item scaling are checked. Combat Rating depends on final combat stats, so validation should inspect generated creature output rather than raw creature JSON attributes.
@@ -199,11 +201,11 @@ Essence ability descriptions and tooltips should stay effect-driven. Avoid hand-
 
 Add a shared dungeon access policy used by both dungeon preview and dungeon start. **Done.**
 
-Add startup validators for dungeon, Essence, ability, and creature profile output. **Partially done:** dungeon and ability catalog validators are implemented; Essence validation already exists; creature profile diagnostics/report generation and admin visibility now exist, but automatic startup validation is still pending.
+Add startup validators for dungeon, Essence, ability, and creature profile output. **Partially done:** dungeon and ability catalog validators are implemented; Essence validation already exists; creature profile diagnostics/report generation, admin visibility, and startup fatal checks for invalid generated Max Health/Combat Rating are in place. Creature-to-Essence source mismatches are still warnings until expected drop behavior is explicit.
 
-Add creature-to-Essence reference validation. Either validate the current name-derived convention or add an explicit creature content id/source monster id. **Partially done:** the source id convention is centralized in `CreatureEssenceSource`, and the diagnostic report flags unresolved creature Essence source ids across representative area tiers. Automatic startup validation is still pending.
+Add creature-to-Essence reference validation. Either validate the current name-derived convention or add an explicit creature content id/source monster id. **Partially done:** the source id convention is centralized in `CreatureEssenceSource`, and the diagnostic report flags unresolved creature Essence source ids across representative area tiers. Those unresolved ids are intentionally warnings for now because the content does not yet declare which creatures are expected to drop/use Essences.
 
-Add creature build diagnostics that show archetype, area scaling, final combat attributes, Combat Rating range, and attached Essence ability source. **Done as a service report and admin diagnostics endpoint; pending startup validation wiring.**
+Add creature build diagnostics that show archetype, area scaling, final combat attributes, Combat Rating range, and attached Essence ability source. **Done as a service report and admin diagnostics endpoint, with startup fatal checks for invalid generated Max Health and Combat Rating.**
 
 ### Priority 2: Dungeon Feature Completion
 
@@ -244,6 +246,8 @@ Review Combat Rating weights against real dungeon outcomes.
 
 Add combat analytics for ability usage and passive trigger behavior.
 
+**Partially done:** combat summaries now expose active attempts, successful uses, passive activations, failed conditions, damage, and healing per ability.
+
 Improve dungeon preview explanations and Essence tooltip consistency.
 
 Use combat summaries to compare expected ability value against actual damage, healing, mitigation, and uptime.
@@ -269,7 +273,7 @@ Use combat summaries to compare expected ability value against actual damage, he
    - Validate generated final combat attributes instead of raw JSON base attributes.
    - Report archetype, damage profile, defense profile, area scaling, final Combat Rating, and resolved Essence source id.
    - Fail clearly when a creature expected to use an Essence cannot resolve its `EssenceDefinition.SourceMonsterId`.
-   - Status: **Partially done.** The source id convention has been centralized, and `ICreatureBuildProfileDiagnostics.CreateReportAsync` reports scaled creature attributes, Combat Rating, and resolved Essence source data across representative area tiers. Admin diagnostics endpoint wiring is done; automatic startup validation has not been added yet.
+   - Status: **Partially done.** The source id convention has been centralized, and `ICreatureBuildProfileDiagnostics.CreateReportAsync` reports scaled creature attributes, Combat Rating, and resolved Essence source data across representative area tiers. Admin diagnostics endpoint wiring is done, and startup now fails on invalid generated Max Health or Combat Rating. Unresolved Essence source ids remain warnings until expected drops are explicit.
 
 5. Split `EssenceCombatAbilityFactory`.
    - Keep public behavior the same.

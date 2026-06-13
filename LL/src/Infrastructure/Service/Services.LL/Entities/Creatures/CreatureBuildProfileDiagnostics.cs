@@ -6,6 +6,7 @@ using Domain.Models.Entities.Creatures;
 using Domain.Models.Entities.Creatures.Templates;
 using Domain.Models.Essences;
 using Domain.Models.Regions.Areas;
+using Services.LL.Interfaces;
 
 namespace Services.LL.Entities.Creatures;
 
@@ -55,6 +56,7 @@ public sealed class CreatureBuildProfileDiagnostics : ICreatureBuildProfileDiagn
         var creatures = await _creatures.GetCreaturesAsync(cancellationToken);
         var diagnostics = new List<CreatureBuildProfileDiagnostic>();
         var warnings = new List<string>();
+        var errors = new List<string>();
 
         foreach (var creature in creatures.OrderBy(x => x.Name, StringComparer.OrdinalIgnoreCase))
         {
@@ -67,10 +69,10 @@ public sealed class CreatureBuildProfileDiagnostics : ICreatureBuildProfileDiagn
                     warnings.Add($"{diagnostic.CreatureName} in {area.Name}: source '{diagnostic.SourceMonsterId}' does not resolve an Essence definition.");
 
                 if (diagnostic.CombatRating <= 0)
-                    warnings.Add($"{diagnostic.CreatureName} in {area.Name}: generated Combat Rating is {diagnostic.CombatRating}.");
+                    errors.Add($"{diagnostic.CreatureName} in {area.Name}: generated Combat Rating is {diagnostic.CombatRating}.");
 
                 if (diagnostic.FinalAttributes.GetValueOrDefault(AttributeType.MaxHealth) <= 0)
-                    warnings.Add($"{diagnostic.CreatureName} in {area.Name}: generated Max Health is missing or zero.");
+                    errors.Add($"{diagnostic.CreatureName} in {area.Name}: generated Max Health is missing or zero.");
             }
         }
 
@@ -78,7 +80,8 @@ public sealed class CreatureBuildProfileDiagnostics : ICreatureBuildProfileDiagn
             creatures.Count,
             diagnostics.Count,
             diagnostics,
-            warnings.Distinct(StringComparer.OrdinalIgnoreCase).ToList());
+            warnings.Distinct(StringComparer.OrdinalIgnoreCase).ToList(),
+            errors.Distinct(StringComparer.OrdinalIgnoreCase).ToList());
     }
 
     private static IEnumerable<Area> RepresentativeAreas()

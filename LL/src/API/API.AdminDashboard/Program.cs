@@ -4,6 +4,7 @@ using Common;
 using Persistence.LL;
 using Services.AdminDashboard;
 using Services.LL;
+using Services.LL.Validation;
 using RealTime.LL;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -42,12 +43,14 @@ builder.Services.AddSignalR();
 builder.Services.AddPersistence(config);
 builder.Services.AddRepositories();
 builder.Services.AddApplication();
-builder.Services.AddServices(config, builder.Environment.ContentRootPath);
+builder.Services.AddServices(config, apiLLPath);
 builder.Services.AddRealTime();
 builder.Services.AddAdminDashboardServices();
 builder.Services.AddCommonServices();
 
 var app = builder.Build();
+
+await app.Services.ValidateCreatureBuildProfilesAsync();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

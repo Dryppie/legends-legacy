@@ -13,7 +13,9 @@ public sealed record CreatureBuildProfileDiagnosticReport(
     int CreaturesChecked,
     int ScenariosChecked,
     IReadOnlyList<CreatureBuildProfileDiagnostic> Diagnostics,
-    IReadOnlyList<string> Warnings)
+    IReadOnlyList<string> Warnings,
+    IReadOnlyList<string> Errors)
 {
     public bool HasWarnings => Warnings.Count > 0;
+    public bool HasErrors => Errors.Count > 0;
 }
