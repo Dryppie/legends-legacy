@@ -49,7 +49,10 @@
         >
           <div class="flex gap-2 text-white">
             <div>
-              {{ attribute.amount > 0 ? "+" : "-" }}{{ attribute.amount }}
+              {{
+                attribute.amount
+                  | attributeValueFormat: attribute.attributeType : true
+              }}
             </div>
             <div>
               {{ attribute.attributeType | attributeTypeFormat }}

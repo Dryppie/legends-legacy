@@ -1,5 +1,5 @@
-﻿using Domain.Interfaces.Abilities;
-using Domain.Models.Abilities.Effects.Usages;
+using Domain.Interfaces.Combat.Abilities;
+using Domain.Models.Combat.Abilities.Effects.Usages;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

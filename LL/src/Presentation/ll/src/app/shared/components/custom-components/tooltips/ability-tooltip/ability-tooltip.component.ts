@@ -6,7 +6,7 @@ import { NgIf } from '@angular/common';
 @Component({
   selector: 'app-ability-tooltip',
   standalone: true,
-  imports: [],
+  imports: [NgIf],
   templateUrl: './ability-tooltip.component.html',
 })
 export class AbilityTooltipComponent {

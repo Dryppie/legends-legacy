@@ -1,4 +1,4 @@
-﻿using Domain.Models.Combat;
+using Domain.Models.Combat;
 using Services.LL.Interfaces;
 using System.Collections.Concurrent;
 
@@ -28,41 +28,56 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
                 case EventType.HealthRegeneration:
                     entity.HealthRegenerated += item.Magnitude;
                     break;
-            case EventType.ManaRegeneration:
-                    entity.ManaRegenerated += item.Magnitude;
-                    break;
             }
 
             // ----- ability context -----------------------------------------------
-            var ability = entity.GetOrAddAbility(item.Source); // or item.Source
             switch (item.EventType)
             {
+                case EventType.AbilityUse:
+                    if (string.IsNullOrWhiteSpace(item.Source))
+                        break;
+
+                    var usedAbility = entity.GetOrAddAbility(item.Source);
+                    usedAbility.Uses++;
+                    break;
+
                 case EventType.Damage:
                 case EventType.DamageOverTime:
                 case EventType.DamageCrit:
-                    ability.TotalDamage += item.Magnitude;
-                    ability.Hits++;
+                    if (string.IsNullOrWhiteSpace(item.Source))
+                        break;
+
+                    var damageAbility = entity.GetOrAddAbility(item.Source);
+                    damageAbility.TotalDamage += item.Magnitude;
+                    damageAbility.Hits++;
+                    if (item.EventType == EventType.DamageCrit)
+                        damageAbility.Crits++;
                     break;
 
                 case EventType.Heal:
                 case EventType.HealOverTime:
                 case EventType.HealCrit:
-                    ability.TotalHealing += item.Magnitude;
-                    ability.Hits++;
+                    if (string.IsNullOrWhiteSpace(item.Source))
+                        break;
+
+                    var healAbility = entity.GetOrAddAbility(item.Source);
+                    healAbility.TotalHealing += item.Magnitude;
+                    healAbility.Hits++;
+                    if (item.EventType == EventType.HealCrit)
+                        healAbility.Crits++;
                     break;
 
                 case EventType.Summon:
-                    ability.Summons++;
+                    if (string.IsNullOrWhiteSpace(item.Source))
+                        break;
+
+                    var summonAbility = entity.GetOrAddAbility(item.Source);
+                    summonAbility.Summons++;
                     break;
 
                 //case EventType.StatusEffect:
                 //    ability.Stuns++;
                 //    break;
-            }
-
-            if (item.EventType == EventType.DamageCrit || item.EventType == EventType.HealCrit)
-            {
-                ability.Crits++;
             }
 
             // ----- target-side bookkeeping ---------------------------------------
@@ -88,7 +103,7 @@ public sealed class WorkEntity
 {
     public string Id { get; }
     public string Name => _firstEntityName ?? Id;
-    public int DamageDone, DamageTaken, HealingDone, HealingReceived, HealthRegenerated, ManaRegenerated;
+    public int DamageDone, DamageTaken, HealingDone, HealingReceived, HealthRegenerated;
 
     private readonly Dictionary<string, WorkAbility> _abilities = new(StringComparer.Ordinal);
     private string? _firstEntityName;
@@ -97,9 +112,9 @@ public sealed class WorkEntity
 
     public WorkAbility GetOrAddAbility(string abilityName)
     {
-        if (!_abilities.TryGetValue(abilityName, out var a))
-            _abilities[abilityName] = a = new WorkAbility(abilityName);
-        return a;
+        if (!_abilities.TryGetValue(abilityName, out var ability))
+            _abilities[abilityName] = ability = new WorkAbility(abilityName);
+        return ability;
     }
 
     public EntityStats ToImmutable() =>
@@ -107,15 +122,15 @@ public sealed class WorkEntity
             .Select(a => a.ToImmutable())
             .OrderByDescending(a => Math.Max(a.TotalDamage, a.TotalHealing))
             .ToList(),
-        DamageDone, DamageTaken, HealingDone, HealingReceived, HealthRegenerated, ManaRegenerated);
+        DamageDone, DamageTaken, HealingDone, HealingReceived, HealthRegenerated);
 }
 
 public sealed class WorkAbility
 {
     public string Name { get; }
-    public int TotalDamage, TotalHealing, Hits, Crits, Summons, Stuns;
+    public int TotalDamage, TotalHealing, Uses, Hits, Crits, Summons, Stuns;
 
     public WorkAbility(string name) => Name = name;
 
-    public AbilityStats ToImmutable() => new(Name, TotalDamage, TotalHealing, Hits, Crits, Summons, Stuns);
+    public AbilityStats ToImmutable() => new(Name, TotalDamage, TotalHealing, Uses, Hits, Crits, Summons, Stuns);
 }

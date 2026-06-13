@@ -9,7 +9,12 @@ import {
   Validators,
 } from '@angular/forms';
 import { SplitCamelCasePipe } from '../../shared/pipes/attributes/split-camel-case/split-camel-case.pipe';
-import { Equipment, EssenceItem, ItemBase } from '../../shared/models/item';
+import {
+  Equipment,
+  EssenceItem,
+  essenceItemToEssence,
+  ItemBase,
+} from '../../shared/models/item';
 import { ItemType } from '../../shared/models/enums/itemType';
 import { Rarity } from '../../shared/models/enums/rarity';
 import { EquipmentType } from '../../shared/models/Dtos/equipmentSlot';
@@ -146,7 +151,7 @@ export class ItemsComponent implements OnInit {
       });
     } else if (item.itemType === 'Essence') {
       const es = item as EssenceItem;
-      this.itemForm.get('essence')!.setValue(es.essence);
+      this.itemForm.get('essence')!.setValue(essenceItemToEssence(es));
     }
   }
 

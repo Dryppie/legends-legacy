@@ -1,4 +1,4 @@
-﻿using Domain.Models.Attributes;
+using Domain.Models.Attributes;
 using Domain.Models.Entities.Creatures.Templates.Enums;
 
 namespace Domain.Models.Entities.Creatures;
@@ -14,7 +14,7 @@ public static class CreatureRoles
         SpeedMultiplier = 0.9f,
         AttributeMultipliers = new Dictionary<AttributeType, float>
         {
-            { AttributeType.Threat, 1.5f },
+            { AttributeType.Fortitude,  1.5f },
             { AttributeType.CritChance, 0.7f },
         }
     };
@@ -30,8 +30,8 @@ public static class CreatureRoles
         {
             { AttributeType.CritChance, 1.3f },
             { AttributeType.CritDamage, 1.2f },
-            { AttributeType.MultiStrike, 1.3f },
-            { AttributeType.MultiCast,  1.3f },
+            { AttributeType.Precision,  1.3f },
+            { AttributeType.Precision,  1.3f },
         }
     };
 
@@ -44,9 +44,9 @@ public static class CreatureRoles
         SpeedMultiplier = 1.0f,
         AttributeMultipliers = new Dictionary<AttributeType, float>
         {
-            { AttributeType.MaxMana,          1.4f },
-            { AttributeType.ManaRegeneration, 1.5f },
-            { AttributeType.CooldownReduction,1.2f },
+            { AttributeType.Spirit,     1.4f },
+            { AttributeType.Spirit,     1.5f },
+            { AttributeType.Cooldown,   1.2f },
         }
     };
 
@@ -59,10 +59,10 @@ public static class CreatureRoles
         SpeedMultiplier = 1.0f,
         AttributeMultipliers = new Dictionary<AttributeType, float>
         {
-            { AttributeType.FireResistance,  1.2f },
-            { AttributeType.WaterResistance, 1.2f },
-            { AttributeType.EarthResistance, 1.2f },
-            { AttributeType.AirResistance,   1.2f },
+            { AttributeType.Resistance, 1.2f },
+            { AttributeType.Resistance, 1.2f },
+            { AttributeType.Resistance, 1.2f },
+            { AttributeType.Resistance, 1.2f },
         }
     };
 

@@ -4,6 +4,7 @@ using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Regions.Areas;
+using Domain.Models.Snapshots;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces;
@@ -63,7 +64,7 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
                 $"Failed to preload idle combat source entities. Missing: {string.Join(", ", missingIds)}");
         }
 
-        var friendlyTemplates = BuildFriendlyTemplates(playerIds, sourceEntitiesById);
+        var friendlyTemplates = BuildFriendlyTemplates(playerIds, sourceEntitiesById, plan.CharacterSnapshot);
         var hostileTemplates = BuildHostileTemplates(hostileIds, sourceEntitiesById, new Area() { DifficultyTier = 1 });
 
         await _combatSetupService.PrepareEntitiesForCombat(
@@ -82,7 +83,8 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
 
     private Dictionary<Guid, CombatEntity> BuildFriendlyTemplates(
         IReadOnlyCollection<Guid> playerIds,
-        Dictionary<Guid, Entity> sourceEntitiesById)
+        Dictionary<Guid, Entity> sourceEntitiesById,
+        CharacterSnapshot snapshot)
     {
         var templates = new Dictionary<Guid, CombatEntity>();
 
@@ -97,6 +99,12 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
             var template = _combatSetupService
                 .CreatePlayerCombatEntities([character])
                 .Single();
+
+            template.EquippedEssences = snapshot.EquippedEssences
+                .OrderBy(x => x.SlotIndex)
+                .Select(x => x.ToPlayerEssence(snapshot.CharacterId))
+                .ToList();
+            template.HasEquippedEssenceSnapshot = true;
 
             templates.Add(playerId, template);
         }

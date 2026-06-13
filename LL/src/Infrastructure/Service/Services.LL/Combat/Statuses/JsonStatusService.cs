@@ -1,7 +1,7 @@
-﻿using Common.Utilities;
+using Common.Utilities;
 using Common.Utilities.EnumConverters;
 using Domain.Interfaces.Combat;
-using Domain.Models.Abilities.Statuses;
+using Domain.Models.Combat.Abilities.Statuses;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Text.Json;
@@ -22,7 +22,7 @@ public class JsonStatusService : IStatusDefinitionService, IDisposable
             new EffectModificationTypeConverter(),
             new InterfaceConverterFactory(),
             new ResourceTypeConverter(),
-            new TargetingConverter(),
+            new CombatTargetingConverter(),
             new TriggerEventConverter(),
             new JsonStringEnumConverter(),
             new TriggerFilterConverter(),

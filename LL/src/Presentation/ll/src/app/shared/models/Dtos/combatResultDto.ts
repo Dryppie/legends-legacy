@@ -22,13 +22,13 @@ export interface EntityStats {
   healingDone: number;
   healingReceived: number;
   healthRegenerated: number;
-  manaRegenerated: number;
 }
 
 export interface AbilityStats {
   name: string;
   totalDamage: number;
   totalHealing: number;
+  uses: number;
   hits: number;
   crits: number;
   summons: number;
@@ -41,8 +41,6 @@ export interface SimpleCombatEntityDto {
   imagePath: string;
   health: number;
   maxHealth: number;
-  mana: number;
-  maxMana: number;
   barrier: number;
 }
 

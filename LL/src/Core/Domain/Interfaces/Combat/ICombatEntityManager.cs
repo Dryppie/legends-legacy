@@ -1,4 +1,4 @@
-﻿using Domain.Models.Abilities;
+using Domain.Models.Combat.Abilities;
 using Domain.Models.Combat;
 
 namespace Domain.Interfaces.Combat;
@@ -53,5 +53,5 @@ public interface ICombatEntityManager
     /// <param name="actor"></param>
     /// <param name="targeting"></param>
     /// <returns></returns>
-    List<CombatEntity> SelectTargets(CombatEntity actor, Targeting targeting);
+    List<CombatEntity> SelectTargets(CombatEntity actor, CombatTargeting targeting);
 }

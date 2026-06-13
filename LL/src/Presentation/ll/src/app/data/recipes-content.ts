@@ -26,7 +26,7 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Threat,
+          "attributeType": AttributeType.Fortitude,
           "amount": 1,
           "modifierType": ModifierType.Flat
         }
@@ -283,7 +283,7 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Health,
+          "attributeType": AttributeType.MaxHealth,
           "amount": 7,
           "modifierType": ModifierType.Flat
         }
@@ -797,7 +797,7 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Mana,
+          "attributeType": AttributeType.Spirit,
           "amount": 7,
           "modifierType": ModifierType.Flat
         }
@@ -1049,7 +1049,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Necklace,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.MaxMana,
+          "attributeType": AttributeType.Spirit,
           "amount": 11,
           "modifierType": ModifierType.Flat
         }
@@ -1113,7 +1113,7 @@ export const RECIPES_CONTENT = [
     "item": {
       "id": "leafglow_amulet",
       "name": "Leafglow Amulet",
-      "description": "A glowing amulet that grants mana regeneration and a soft green light.",
+      "description": "A glowing amulet that grants spirit recovery and a soft green light.",
       "stackable": false,
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
@@ -1404,7 +1404,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Ring,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.PhysicalDefense,
+          "attributeType": AttributeType.Armor,
           "amount": 18,
           "modifierType": ModifierType.Flat
         }
@@ -1533,7 +1533,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Relic,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.ManaRegeneration,
+          "attributeType": AttributeType.Spirit,
           "amount": 1,
           "modifierType": ModifierType.Flat
         }
@@ -1591,7 +1591,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Relic,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Threat,
+          "attributeType": AttributeType.Fortitude,
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
@@ -2341,12 +2341,12 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.OffHand,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.PhysicalDefense,
+          "attributeType": AttributeType.Armor,
           "amount": 15,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Block,
+          "attributeType": AttributeType.BlockChance,
           "amount": 25,
           "modifierType": ModifierType.Flat
         }
@@ -2430,12 +2430,12 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.OffHand,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.MagicalDefense,
+          "attributeType": AttributeType.Resistance,
           "amount": 15,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Block,
+          "attributeType": AttributeType.BlockChance,
           "amount": 25,
           "modifierType": ModifierType.Flat
         }
@@ -3898,7 +3898,7 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.ManaRegeneration,
+          "attributeType": AttributeType.Spirit,
           "amount": 2,
           "modifierType": ModifierType.Flat
         }
@@ -4071,7 +4071,7 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.MaxMana,
+          "attributeType": AttributeType.Spirit,
           "amount": 25,
           "modifierType": ModifierType.Flat
         }
@@ -4148,14 +4148,14 @@ export const RECIPES_CONTENT = [
     "item": {
       "id": "copper_core_pendant",
       "name": "Copper Core Pendant",
-      "description": "A pendant charged with latent energy from copper veins. Slightly increases maximum mana.",
+      "description": "A pendant charged with latent energy from copper veins. Slightly increases Spirit.",
       "stackable": false,
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
       "equipmentType": EquipmentType.Necklace,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.MaxMana,
+          "attributeType": AttributeType.Spirit,
           "amount": 38,
           "modifierType": ModifierType.Flat
         }
@@ -4219,7 +4219,7 @@ export const RECIPES_CONTENT = [
     "item": {
       "id": "amberleaf_pendant",
       "name": "Amberleaf Pendant",
-      "description": "A leaf-shaped amber gem that pulses with nature’s essence. Increases agility and grants minor mana regeneration.",
+      "description": "A leaf-shaped amber gem that pulses with nature’s essence. Increases agility and grants minor spirit recovery.",
       "stackable": false,
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
@@ -4231,7 +4231,7 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.ManaRegeneration,
+          "attributeType": AttributeType.Spirit,
           "amount": 1,
           "modifierType": ModifierType.Flat
         }
@@ -4307,7 +4307,7 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.FireResistance,
+          "attributeType": AttributeType.Resistance,
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
@@ -4520,7 +4520,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Ring,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.PhysicalDefense,
+          "attributeType": AttributeType.Armor,
           "amount": 22,
           "modifierType": ModifierType.Flat
         },
@@ -4652,14 +4652,14 @@ export const RECIPES_CONTENT = [
     "item": {
       "id": "living_growth_totem",
       "name": "Totem of Living Growth",
-      "description": "A totem pulsing with life, made of living amber. Grants passive mana regeneration when not moving.",
+      "description": "A totem pulsing with life, made of living amber. Grants passive spirit recovery when not moving.",
       "stackable": false,
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
       "equipmentType": EquipmentType.Relic,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.ManaRegeneration,
+          "attributeType": AttributeType.Spirit,
           "amount": 3,
           "modifierType": ModifierType.Flat
         }
@@ -4717,7 +4717,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Relic,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Threat,
+          "attributeType": AttributeType.Fortitude,
           "amount": 5,
           "modifierType": ModifierType.Flat
         }
@@ -5462,12 +5462,12 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.OffHand,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.PhysicalDefense,
+          "attributeType": AttributeType.Armor,
           "amount": 32,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Block,
+          "attributeType": AttributeType.BlockChance,
           "amount": 65,
           "modifierType": ModifierType.Flat
         }
@@ -5551,12 +5551,12 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.OffHand,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.MagicalDefense,
+          "attributeType": AttributeType.Resistance,
           "amount": 32,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Block,
+          "attributeType": AttributeType.BlockChance,
           "amount": 65,
           "modifierType": ModifierType.Flat
         }
@@ -5633,7 +5633,7 @@ export const RECIPES_CONTENT = [
     "item": {
       "id": "verdant_channeler_staff",
       "name": "Verdant Channeler Staff",
-      "description": "A staff woven from living amber and verdant ore, humming with natural mana.",
+      "description": "A staff woven from living amber and verdant ore, humming with natural spirit.",
       "stackable": false,
       "itemType": ItemType.Equipment,
       "rarity": Rarity.Common,
@@ -5729,7 +5729,7 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.ManaRegeneration,
+          "attributeType": AttributeType.Spirit,
           "amount": 1,
           "modifierType": ModifierType.Flat
         }
@@ -5902,7 +5902,7 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.MaxMana,
+          "attributeType": AttributeType.Spirit,
           "amount": 24,
           "modifierType": ModifierType.Flat
         }
@@ -6248,12 +6248,12 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Head,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.PhysicalDefense,
+          "attributeType": AttributeType.Armor,
           "amount": 30,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.MagicalDefense,
+          "attributeType": AttributeType.Resistance,
           "amount": 30,
           "modifierType": ModifierType.Flat
         },
@@ -6316,12 +6316,12 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Chest,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.PhysicalDefense,
+          "attributeType": AttributeType.Armor,
           "amount": 30,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.MagicalDefense,
+          "attributeType": AttributeType.Resistance,
           "amount": 30,
           "modifierType": ModifierType.Flat
         },
@@ -6384,12 +6384,12 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Legs,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.PhysicalDefense,
+          "attributeType": AttributeType.Armor,
           "amount": 30,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.MagicalDefense,
+          "attributeType": AttributeType.Resistance,
           "amount": 30,
           "modifierType": ModifierType.Flat
         },
@@ -6452,7 +6452,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Head,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.PhysicalDefense,
+          "attributeType": AttributeType.Armor,
           "amount": 20,
           "modifierType": ModifierType.Flat
         },
@@ -6462,7 +6462,7 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.AttackPower,
+          "attributeType": AttributeType.Power,
           "amount": 20,
           "modifierType": ModifierType.Flat
         }
@@ -6520,7 +6520,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Chest,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.PhysicalDefense,
+          "attributeType": AttributeType.Armor,
           "amount": 20,
           "modifierType": ModifierType.Flat
         },
@@ -6530,7 +6530,7 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.AttackPower,
+          "attributeType": AttributeType.Power,
           "amount": 20,
           "modifierType": ModifierType.Flat
         }
@@ -6588,7 +6588,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Legs,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.PhysicalDefense,
+          "attributeType": AttributeType.Armor,
           "amount": 20,
           "modifierType": ModifierType.Flat
         },
@@ -6598,7 +6598,7 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.AttackPower,
+          "attributeType": AttributeType.Power,
           "amount": 20,
           "modifierType": ModifierType.Flat
         }
@@ -6656,7 +6656,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Head,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.PhysicalDefense,
+          "attributeType": AttributeType.Armor,
           "amount": 10,
           "modifierType": ModifierType.Flat
         },
@@ -6666,7 +6666,7 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.AttackPower,
+          "attributeType": AttributeType.Power,
           "amount": 30,
           "modifierType": ModifierType.Flat
         }
@@ -6724,7 +6724,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Chest,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.PhysicalDefense,
+          "attributeType": AttributeType.Armor,
           "amount": 10,
           "modifierType": ModifierType.Flat
         },
@@ -6734,7 +6734,7 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.AttackPower,
+          "attributeType": AttributeType.Power,
           "amount": 30,
           "modifierType": ModifierType.Flat
         }
@@ -6792,7 +6792,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Legs,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.PhysicalDefense,
+          "attributeType": AttributeType.Armor,
           "amount": 10,
           "modifierType": ModifierType.Flat
         },
@@ -6802,7 +6802,7 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.AttackPower,
+          "attributeType": AttributeType.Power,
           "amount": 30,
           "modifierType": ModifierType.Flat
         }
@@ -6860,7 +6860,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Head,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.MagicalDefense,
+          "attributeType": AttributeType.Resistance,
           "amount": 10,
           "modifierType": ModifierType.Flat
         },
@@ -6870,7 +6870,7 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.SpellPower,
+          "attributeType": AttributeType.Power,
           "amount": 30,
           "modifierType": ModifierType.Flat
         }
@@ -6928,7 +6928,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Chest,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.MagicalDefense,
+          "attributeType": AttributeType.Resistance,
           "amount": 10,
           "modifierType": ModifierType.Flat
         },
@@ -6938,7 +6938,7 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.SpellPower,
+          "attributeType": AttributeType.Power,
           "amount": 30,
           "modifierType": ModifierType.Flat
         }
@@ -6996,7 +6996,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Legs,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.MagicalDefense,
+          "attributeType": AttributeType.Resistance,
           "amount": 10,
           "modifierType": ModifierType.Flat
         },
@@ -7006,7 +7006,7 @@ export const RECIPES_CONTENT = [
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.SpellPower,
+          "attributeType": AttributeType.Power,
           "amount": 30,
           "modifierType": ModifierType.Flat
         }
@@ -7064,7 +7064,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Ring,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.AttackPower,
+          "attributeType": AttributeType.Power,
           "amount": 10,
           "modifierType": ModifierType.Additive
         }
@@ -7122,7 +7122,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Ring,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.SpellPower,
+          "attributeType": AttributeType.Power,
           "amount": 10,
           "modifierType": ModifierType.Additive
         }
@@ -7238,7 +7238,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Necklace,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.PhysicalDefense,
+          "attributeType": AttributeType.Armor,
           "amount": 10,
           "modifierType": ModifierType.Additive
         }
@@ -7296,7 +7296,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Necklace,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.MagicalDefense,
+          "attributeType": AttributeType.Resistance,
           "amount": 10,
           "modifierType": ModifierType.Additive
         }
@@ -7458,11 +7458,11 @@ export const RECIPES_CONTENT = [
   },
   {
     "id": "3e301ebf-006d-4518-94fe-a9014a532c04",
-    "name": "Mana Heart",
+    "name": "Spirit Heart",
     "itemId": "mana_heart",
     "item": {
       "id": "mana_heart",
-      "name": "Mana Heart",
+      "name": "Spirit Heart",
       "description": "",
       "stackable": false,
       "itemType": ItemType.Equipment,
@@ -7470,7 +7470,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Relic,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.ManaRegeneration,
+          "attributeType": AttributeType.Spirit,
           "amount": 10,
           "modifierType": ModifierType.Additive
         }
@@ -7528,7 +7528,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.Relic,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.Threat,
+          "attributeType": AttributeType.Fortitude,
           "amount": 10,
           "modifierType": ModifierType.Additive
         }
@@ -7588,7 +7588,7 @@ export const RECIPES_CONTENT = [
       "attackSpeed": 20,
       "magnitude": 10,
       "magnitudeRange": 20,
-      "scalingAttribute": AttributeType.AttackPower,
+      "scalingAttribute": AttributeType.Power,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -7640,7 +7640,7 @@ export const RECIPES_CONTENT = [
       "attackSpeed": 20,
       "magnitude": 10,
       "magnitudeRange": 30,
-      "scalingAttribute": AttributeType.AttackPower,
+      "scalingAttribute": AttributeType.Power,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -7692,7 +7692,7 @@ export const RECIPES_CONTENT = [
       "attackSpeed": 20,
       "magnitude": 10,
       "magnitudeRange": 25,
-      "scalingAttribute": AttributeType.AttackPower,
+      "scalingAttribute": AttributeType.Power,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -7744,7 +7744,7 @@ export const RECIPES_CONTENT = [
       "attackSpeed": 24,
       "magnitude": 8,
       "magnitudeRange": 15,
-      "scalingAttribute": AttributeType.AttackPower,
+      "scalingAttribute": AttributeType.Power,
       "scalingAmount": 0.8
     },
     "quantity": 1,
@@ -7796,7 +7796,7 @@ export const RECIPES_CONTENT = [
       "attackSpeed": 10,
       "magnitude": 15,
       "magnitudeRange": 30,
-      "scalingAttribute": AttributeType.AttackPower,
+      "scalingAttribute": AttributeType.Power,
       "scalingAmount": 2
     },
     "quantity": 1,
@@ -7848,7 +7848,7 @@ export const RECIPES_CONTENT = [
       "attackSpeed": 10,
       "magnitude": 15,
       "magnitudeRange": 50,
-      "scalingAttribute": AttributeType.AttackPower,
+      "scalingAttribute": AttributeType.Power,
       "scalingAmount": 2
     },
     "quantity": 1,
@@ -7900,7 +7900,7 @@ export const RECIPES_CONTENT = [
       "attackSpeed": 10,
       "magnitude": 15,
       "magnitudeRange": 40,
-      "scalingAttribute": AttributeType.AttackPower,
+      "scalingAttribute": AttributeType.Power,
       "scalingAmount": 2
     },
     "quantity": 1,
@@ -7952,7 +7952,7 @@ export const RECIPES_CONTENT = [
       "attackSpeed": 12,
       "magnitude": 14,
       "magnitudeRange": 25,
-      "scalingAttribute": AttributeType.AttackPower,
+      "scalingAttribute": AttributeType.Power,
       "scalingAmount": 1.8
     },
     "quantity": 1,
@@ -8002,12 +8002,12 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.OffHand,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.PhysicalDefense,
+          "attributeType": AttributeType.Armor,
           "amount": 10,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Block,
+          "attributeType": AttributeType.BlockChance,
           "amount": 50,
           "modifierType": ModifierType.Flat
         }
@@ -8053,11 +8053,11 @@ export const RECIPES_CONTENT = [
   },
   {
     "id": "fc1e6931-c552-44b9-96e9-412a2e24a1fa",
-    "name": "Manaward",
-    "itemId": "manaward",
+    "name": "Spiritward",
+    "itemId": "Spiritward",
     "item": {
-      "id": "manaward",
-      "name": "Manaward",
+      "id": "Spiritward",
+      "name": "Spiritward",
       "description": "",
       "stackable": false,
       "itemType": ItemType.Equipment,
@@ -8065,12 +8065,12 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.OffHand,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.MagicalDefense,
+          "attributeType": AttributeType.Resistance,
           "amount": 10,
           "modifierType": ModifierType.Flat
         },
         {
-          "attributeType": AttributeType.Block,
+          "attributeType": AttributeType.BlockChance,
           "amount": 50,
           "modifierType": ModifierType.Flat
         }
@@ -8130,7 +8130,7 @@ export const RECIPES_CONTENT = [
       "attackSpeed": 10,
       "magnitude": 15,
       "magnitudeRange": 35,
-      "scalingAttribute": AttributeType.SpellPower,
+      "scalingAttribute": AttributeType.Power,
       "scalingAmount": 2
     },
     "quantity": 1,
@@ -8180,7 +8180,7 @@ export const RECIPES_CONTENT = [
       "equipmentType": EquipmentType.OffHand,
       "attributeModifiers": [
         {
-          "attributeType": AttributeType.SpellPower,
+          "attributeType": AttributeType.Power,
           "amount": 10,
           "modifierType": ModifierType.Flat
         }
@@ -8240,7 +8240,7 @@ export const RECIPES_CONTENT = [
       "attackSpeed": 20,
       "magnitude": 10,
       "magnitudeRange": 20,
-      "scalingAttribute": AttributeType.SpellPower,
+      "scalingAttribute": AttributeType.Power,
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -8292,7 +8292,7 @@ export const RECIPES_CONTENT = [
       "attackSpeed": 15,
       "magnitude": 13,
       "magnitudeRange": 25,
-      "scalingAttribute": AttributeType.AttackPower,
+      "scalingAttribute": AttributeType.Power,
       "scalingAmount": 1.7
     },
     "quantity": 1,
@@ -8344,7 +8344,7 @@ export const RECIPES_CONTENT = [
       "attackSpeed": 20,
       "magnitude": 10,
       "magnitudeRange": 40,
-      "scalingAttribute": AttributeType.AttackPower,
+      "scalingAttribute": AttributeType.Power,
       "scalingAmount": 1.5
     },
     "quantity": 1,
@@ -8396,7 +8396,7 @@ export const RECIPES_CONTENT = [
       "attackSpeed": 25,
       "magnitude": 12,
       "magnitudeRange": 20,
-      "scalingAttribute": AttributeType.AttackPower,
+      "scalingAttribute": AttributeType.Power,
       "scalingAmount": 1.3
     },
     "quantity": 1,

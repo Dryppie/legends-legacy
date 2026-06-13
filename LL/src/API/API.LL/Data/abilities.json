@@ -1,1788 +1,1837 @@
 [
   {
-    "Name": "Goblin's Essence",
-    "Active": {
-      "Id": "sneakAttack",
-      "Name": "Sneak Attack",
-      "Description": "Stab the target in the back, dealing {damage1} damage, and apply 8 bleed damage over 8 seconds.",
-      "Type": "Active",
-      "Cooldown": 90,
-      "Cost": { "Type": "Mana", "Amount": 12
+    "id": "ability.essence.goblin_ambusher.cheap_shot",
+    "kind": "Active",
+    "name": "Cheap Shot",
+    "description": "Deals physical damage to one enemy and applies Bleed. Deals bonus damage if the target is already bleeding.",
+    "cooldownSeconds": 18,
+    "targeting": "CurrentTarget",
+    "tags": [
+      "Effect.Ability",
+      "Effect.Physical",
+      "Status.Bleed",
+      "Target.Enemy"
+    ],
+    "effects": [
+      {
+        "id": "effect.damage.main",
+        "type": "Damage",
+        "target": "CurrentTarget",
+        "scaling": {
+          "baseValue": 18
+        }
       },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "sneakAttack" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "sneakAttackBleed"
-              },
-              "Targeting": "SingleEnemy"
-            }
-          ]
+      {
+        "id": "effect.status.bleed",
+        "type": "ApplyStatus",
+        "target": "CurrentTarget",
+        "status": "Bleed",
+        "durationSeconds": 8,
+        "scaling": {
+          "baseValue": 1
         }
-      ]
-    },
-    "Passive": {
-      "Id": "pocketDirt",
-      "Name": "Pocket Dirt",
-      "Description": "Whenever you dodge, use the opportunity to throw dirt at the target, decreasing their accuracy by 3% for 6 seconds",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnDodge",
-          "Filters": [
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ModifyAttribute",
-                "Attribute": "Accuracy",
-                "Amount": -3,
-                "ModifierType": "Additive",
-                "Stackable": true
-              },
-              "Duration": {
-                "Type": "TimedDuration",
-                "Duration": 110
-              },
-              "Targeting": "CauseOfTrigger",
-              "AttackType": "None",
-              "DamageType": "None",
-              "EffectTags": [],
-              "Log": "{Actor} threw dirt in {Target}'s eyes. {Target}'s accuracy decreased by 3%."
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
+      }
     ]
   },
   {
-    "Name": "Goblin Warrior's Essence",
-    "Active": {
-      "Id": "ragingCleave",
-      "Name": "Raging Cleave",
-      "Description": "Swing your weapon in a wide arc, dealing {damage1} damage to two enemies.",
-      "Type": "Active",
-      "Cooldown": 120,
-      "Cost": { "Type": "Mana", "Amount": 9 },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "ragingCleave" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "Damage",
-                "Amount": 8,
-                "ScalingAttribute": "AttackPower",
-                "ScalingMultiplier": 0.2
-              },
-              "Targeting": "TwoEnemies",
-              "AttackType": "Melee",
-              "DamageType": "Physical",
-              "EffectTags": [ "Slashing" ],
-              "Log": "{Target} received {Amount} damage."
-            }
-          ]
+    "id": "ability.essence.goblin_ambusher.cowards_opening",
+    "kind": "Passive",
+    "name": "Coward's Opening",
+    "description": "On first hit against a healthy enemy, gain temporary Critical Chance.",
+    "cooldownSeconds": 20,
+    "targeting": "Self",
+    "tags": [
+      "Trigger.OnHit",
+      "Resource.Cooldown"
+    ],
+    "triggers": [
+      {
+        "type": "Trigger.OnHit",
+        "internalCooldownSeconds": 20
+      }
+    ],
+    "conditions": [
+      {
+        "type": "TargetHealthBelowPercent",
+        "value": 80
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.buff.crit_chance",
+        "type": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "CritChance",
+        "durationSeconds": 6,
+        "scaling": {
+          "baseValue": 3
         }
-      ]
-    },
-    "Passive": {
-      "Id": "recklessAssault",
-      "Name": "Reckless Assault",
-      "Description": "Increase Attack Power by 20, but decrease Physical Defense by 20",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnCombatStart",
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ModifyAttribute",
-                "Attribute": "AttackPower",
-                "Amount": 20,
-                "ModifierType": "Flat",
-                "Stackable": true
-              },
-              "Duration": {
-                "Type": "IndefiniteDuration"
-              },
-              "Targeting": "Self",
-              "Log": "{Actor}'s Attack Power is increased by 20."
-            },
-            {
-              "Action": {
-                "Type": "ModifyAttribute",
-                "Attribute": "PhysicalDefense ",
-                "Amount": -20,
-                "ModifierType": "Flat",
-                "Stackable": true
-              },
-              "Duration": {
-                "Type": "IndefiniteDuration"
-              },
-              "Targeting": "Self",
-              "Log": "{Actor}'s Physical Defense is decreased by 20."
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
+      }
     ]
   },
   {
-    "Name": "Goblin Archer's Essence",
-    "Active": {
-      "Id": "snipersStrike",
-      "Name": "Sniper's Strike",
-      "Description": "Unleash a powerful shot dealing {damage1} damage. 50% increased critical chance.",
-      "Type": "Active",
-      "Cooldown": 150,
-      "Cost": { "Type": "Mana", "Amount": 12 },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "snipersStrike" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "Damage",
-                "Amount": 15,
-                "ScalingAttribute": "AttackPower",
-                "ScalingMultiplier": 0.1
-              },
-              "EffectModifiers": [
-                {
-                  "Type": "CritChance",
-                  "Amount": 50,
-                  "ModifierType": "Flat"
-                }
-              ],
-              "Targeting": "SingleEnemy",
-              "AttackType": "Ranged",
-              "DamageType": "Physical",
-              "EffectTags": [ "Arrows" ],
-              "Log": "{Actor} landed a powerful shot on {Target}, dealing {Amount} damage."
-            }
-          ]
+    "id": "ability.essence.skeleton_guardian.bone_bulwark",
+    "kind": "Active",
+    "name": "Bone Bulwark",
+    "description": "Grants a Barrier and temporary Block chance.",
+    "cooldownSeconds": 24,
+    "targeting": "LowestHealthAlly",
+    "tags": [
+      "Effect.Barrier",
+      "Target.LowestHealthAlly"
+    ],
+    "effects": [
+      {
+        "id": "effect.barrier.main",
+        "type": "GrantBarrier",
+        "target": "LowestHealthAlly",
+        "scaling": {
+          "baseValue": 24
         }
-      ]
-    },
-    "Passive": {
-      "Id": "poisonedArrows",
-      "Name": "Poisoned Arrows",
-      "Description": "Every ranged attack has a 20% chance to apply poison, dealing 6 damage over 3 seconds.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnRangedAttack",
-          "Filters": [
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "poisonedArrowEffect"
-              },
-              "Targeting": "CauseOfTrigger",
-              "Chance": 20,
-              "Log": "{Actor} inflicted {Target} with poison from their ranged attack."
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
-    ]
-  },
-  {
-    "Name": "Large Rat's Essence",
-    "Active": {
-      "Id": "tailWrap",
-      "Name": "Tail Wrap",
-      "Description": "Apply a crushing force to the target, dealing {damage1} damage.",
-      "Type": "Active",
-      "Cooldown": 150,
-      "Cost": { "Type": "Mana", "Amount": 10 },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "tailWrap" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "Damage",
-                "Amount": 12,
-                "ScalingAttribute": "AttackPower",
-                "ScalingMultiplier": 0.2
-              },
-              "Targeting": "SingleEnemy",
-              "AttackType": "Melee",
-              "DamageType": "Physical",
-              "EffectTags": [],
-              "Log": "{Target} received {Amount} damage."
-            }
-          ]
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "big",
-      "Name": "Big",
-      "Description": "Health is increased by 50.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnCombatStart",
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ModifyAttribute",
-                "Attribute": "MaxHealth",
-                "Amount": 50,
-                "ModifierType": "Flat"
-              },
-              "Duration": {
-                "Type": "IndefiniteDuration"
-              },
-              "Targeting": "Self",
-              "Log": "{Actor}'s health is increased by 50 due to being big."
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
-    ]
-  },
-  {
-    "Name": "Flame Imp's Essence",
-    "Active": {
-      "Id": "firebombToss",
-      "Name": "Firebomb Toss",
-      "Description": "Throw a flaming sphere, dealing {damage1} damage.",
-      "Type": "Active",
-      "Cooldown": 110,
-      "Cost": { "Type": "Mana", "Amount": 7 },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "firebombToss" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "Damage",
-                "Amount": 11,
-                "ScalingAttribute": "SpellPower",
-                "ScalingMultiplier": 0.2
-              },
-              "Targeting": "SingleEnemy",
-              "AttackType": "Ranged",
-              "DamageType": "Magical",
-              "EffectTags": [],
-              "Log": "{Target} received {Amount} damage."
-            }
-          ]
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "hotAura",
-      "Name": "Hot Aura",
-      "Description": "Enemies that attack you in melee range have a 30% chance to receive 4 burn damage.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnMeleeAttacked",
-          "Filters": [
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "Damage",
-                "Amount": 4
-              },
-              "Targeting": "CauseOfTrigger",
-              "Chance": 30,
-              "AttackType": "None",
-              "DamageType": "Burn",
-              "EffectTags": [],
-              "Log": "{Target} received {Amount} burn damage after attacking {Actor}."
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
-    ]
-  },
-  {
-    "Name": "Frost Imp's Essence",
-    "Active": {
-      "Id": "iceTouch",
-      "Name": "Ice Touch",
-      "Description": "If the target has 5 stacks of Cold, apply Freeze for 4 seconds. Then remove 5 stacks of Cold.",
-      "Type": "Active",
-      "Cooldown": 150,
-      "Cost": { "Type": "Mana", "Amount": 4 },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "iceTouch" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "frostImpFreeze"
-              },
-              "Condition": {
-                "Type": "StatusEffectCondition",
-                "Status": "Cold",
-                "StacksRequired": 2,
-                "ComparisonType": "GreaterThan"
-              },
-              "Targeting": "SingleEnemy"
-            }
-          ]
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "coldAura",
-      "Name": "Cold Aura",
-      "Description": "Enemies that attack you in melee range receive a Cold status effect that does not expire.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnMeleeAttacked",
-          "Filters": [
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ApplyStatusEffect",
-                "Status": "Cold",
-                "Stacks": 1
-              },
-              "Duration": {
-                "Type": "IndefiniteDuration"
-              },
-              "Targeting": "CauseOfTrigger",
-              "Log": "{Target} has received 1 stack of Cold."
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
-    ]
-  },
-  {
-    "Name": "Shadow Imp's Essence",
-    "Active": {
-      "Id": "shadowImage",
-      "Name": "Shadow Image",
-      "Description": "Summon a shadow illusion of yourself with 1 health.",
-      "Type": "Active",
-      "Cooldown": 150,
-      "Cost": { "Type": "Mana", "Amount": 5 },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "shadowImage" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "Summon",
-                "SummonId": "shadowImage",
-                "SummonDuration": 100
-              },
-              "Targeting": "Self",
-              "Log": "{Actor} summoned a shadowy illusion of themselves."
-            }
-          ]
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "shadowyPresence",
-      "Name": "Shadowy Presence",
-      "Description": "Increase chance of dodging by 2%.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnCombatStart",
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ModifyAttribute",
-                "Attribute": "Dodge",
-                "Amount": 2,
-                "ModifierType": "Flat"
-              },
-              "Duration": {
-                "Type": "IndefiniteDuration"
-              },
-              "Targeting": "Self",
-              "Log": "{Actor} moves with an elusive shadowy presence, increasing dodge chance by 2%."
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
-    ]
-  },
-  {
-    "Name": "Vampire Bat's Essence",
-    "Active": {
-      "Id": "bloodthirstyFangs",
-      "Name": "Bloodthirsty Fangs",
-      "Description": "Deal {damage1} damage to the target, with 30% lifesteal.",
-      "Type": "Active",
-      "Cooldown": 200,
-      "Cost": { "Type": "Mana", "Amount": 6 },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "bloodthirstyFangs" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "Damage",
-                "Amount": 11,
-                "ScalingAttribute": "AttackPower",
-                "ScalingMultiplier": 0.2,
-                "Lifesteal": 30
-              },
-              "Targeting": "SingleEnemy",
-              "AttackType": "Melee",
-              "DamageType": "Physical",
-              "EffectTags": [],
-              "Log": "{Actor} bit {Target}, dealing {Amount} damage."
-            }
-          ]
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "darkVitality",
-      "Name": "Dark Vitality",
-      "Description": "Whenever you heal through lifesteal, gain an extra 4 health.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnLifestealHeal",
-          "Filters": [
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ResourceRestore",
-                "ResourceType": "Health",
-                "Amount": 4
-              },
-              "Targeting": "Self",
-              "Log": "{Actor} gained an additional {Amount} health from lifesteal."
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
-    ]
-  },
-  {
-    "Name": "Blue Slime's Essence",
-    "Active": {
-      "Id": "sweetWater",
-      "Name": "Sweet Water",
-      "Description": "Restores {heal1} Health to all allies every 2 seconds for 8 seconds.",
-      "Type": "Active",
-      "Cooldown": 240,
-      "Cost": { "Type": "Mana", "Amount": 8 },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "sweetWater" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ResourceRestore",
-                "ResourceType": "Health",
-                "Amount": 2,
-                "ScalingAttribute": "AttackPower",
-                "ScalingMultiplier": 0.2
-              },
-              "Duration": {
-                "Type": "TimedDuration",
-                "Duration": 80
-              },
-              "Interval": {
-                "Type": "Interval",
-                "Interval": 20
-              },
-              "Targeting": "AllAllies",
-              "Log": "{Target} is soothed by {Actor}'s Sweet Water, restoring {Amount} health."
-            }
-          ]
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "absorptiveShell",
-      "Name": "Absorptive Shell",
-      "Description": "Whenever you are attacked, restore 2 mana.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnAttacked",
-          "Filters": [
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ResourceRestore",
-                "ResourceType": "Mana",
-                "Amount": 2
-              },
-              "Targeting": "Self",
-              "Log": "{Actor}'s Absorptive Shell restored 2 mana."
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
-    ]
-  },
-  {
-    "Name": "Brown Slime's Essence",
-    "Active": {
-      "Id": "mudArmor",
-      "Name": "Mud Armor",
-      "Description": "Decrease all damage taken by 2% for 6.5 seconds.",
-      "Type": "Active",
-      "Cooldown": 140,
-      "Cost": { "Type": "Mana", "Amount": 6 },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "mudArmor" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ModifyAttribute",
-                "Attribute": "DamageReduction",
-                "Amount": 2,
-                "ModifierType": "Flat"
-              },
-              "Duration": {
-                "Type": "TimedDuration",
-                "Duration": 65
-              },
-              "Targeting": "Self",
-              "Log": "{Actor} is covered in thick mud, reducing all damage taken by 2%."
-            }
-          ]
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "earthlyFortitude",
-      "Name": "Earthly Fortitude",
-      "Description": "Increase Physical Defense by 15.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnCombatStart",
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ModifyAttribute",
-                "Attribute": "PhysicalDefense",
-                "Amount": 15,
-                "ModifierType": "Flat"
-              },
-              "Duration": {
-                "Type": "IndefiniteDuration"
-              },
-              "Targeting": "Self",
-              "Log": "{Actor}'s body hardens like stone, increasing Physical Defense by 15."
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
-    ]
-  },
-  {
-    "Name": "Green Slime's Essence",
-    "Active": {
-      "Id": "acidSplash",
-      "Name": "Acid Splash",
-      "Description": "Apply poison to all enemies, dealing 12 damage over 9 seconds.",
-      "Type": "Active",
-      "Cooldown": 170,
-      "Cost": { "Type": "Mana", "Amount": 7 },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "acidSplash" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "greenSlimePoison"
-              },
-              "Targeting": "AllEnemies",
-              "Log": "{Actor} splashes corrosive acid onto all enemies."
-            }
-          ]
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "corrosiveOoze",
-      "Name": "Corrosive Ooze",
-      "Description": "Whenever damaged by a melee attack, apply poison to the target, dealing 6 damage over 12 seconds.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnMeleeAttacked",
-          "Filters": [
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "corrosiveOozePoison"
-              },
-              "Targeting": "CauseOfTrigger",
-              "Log": "{Actor} was attacked and coated {Target} with corrosive ooze."
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
-    ]
-  },
-  {
-    "Name": "Rainbow Slime's Essence",
-    "Active": {
-      "Id": "unstableColors",
-      "Name": "Unstable Colors",
-      "Description": "30% chance to apply a buff to everyone on your team, increasing Attack Power and Spell Power by 20 for 10 seconds.",
-      "Type": "Active",
-      "Cooldown": 150,
-      "Cost": { "Type": "Mana", "Amount": 8 },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "unstableColors" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "unstableColorsBuff"
-              },
-              "Targeting": "AllAllies",
-              "Chance": 30,
-              "Log": "{Actor}'s colors ripple across {Target}, empowering them!"
-            }
-          ]
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "colorfulShield",
-      "Name": "Colorful Shield",
-      "Description": "Whenever you use an ability, apply 20 Barrier to the ally with the highest Max Health.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ResourceRestore",
-                "ResourceType": "Barrier",
-                "Amount": 20
-              },
-              "Targeting": "AllyHighestMaxHealth",
-              "Log": "{Actor} creates a colorful shield around {Target}, granting 20 Barrier."
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
-    ]
-  },
-  {
-    "Name": "Red Slime's Essence",
-    "Active": {
-      "Id": "igniteCore",
-      "Name": "Ignite Core",
-      "Description": "Ignite and apply a fire aura to yourself. Deal 3 burn damage to everyone but you every second. Lasts 10 seconds.",
-      "Type": "Active",
-      "Cooldown": 180,
-      "Cost": { "Type": "Mana", "Amount": 8 },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "igniteCore" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "redSlimeFireAura"
-              },
-              "Targeting": "EveryoneButYou"
-            }
-          ]
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "fireBody",
-      "Name": "Fire Body",
-      "Description": "Increase Fire Resistance by 5.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnCombatStart",
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ModifyAttribute",
-                "Attribute": "FireResistance",
-                "Amount": 5,
-                "ModifierType": "Flat"
-              },
-              "Duration": {
-                "Type": "IndefiniteDuration"
-              },
-              "Targeting": "Self",
-              "Log": "{Actor}'s body hardens against fire, increasing Fire Resistance by 5."
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
-    ]
-  },
-  {
-    "Name": "Transparent Slime's Essence",
-    "Active": {
-      "Id": "transparentEngulf",
-      "Name": "Transparent Engulf",
-      "Description": "Trap a single enemy inside your body, stunning them for 3 seconds and dealing 9 damage over time.",
-      "Type": "Active",
-      "Cooldown": 250,
-      "Cost": { "Type": "Mana", "Amount": 8 },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "transparentEngulf" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "transparentEngulfed"
-              },
-              "Targeting": "SingleEnemy",
-              "Log": "{Actor} engulfs {Target}, stunning and damaging them!"
-            }
-          ]
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "transparentShift",
-      "Name": "Transparent Shift",
-      "Description": "When below 30% health, increase dodge chance by 40% for 3 seconds. This effect can only be used once.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnHealthChanged",
-          "Filters": [
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "transparentDodgeBoost"
-              },
-              "Condition": {
-                "Type": "HealthCondition",
-                "HealthPercentage": 30,
-                "ComparisonType": "LessThan"
-              },
-              "Usage": {
-                "Type": "LimitedUsage",
-                "Uses": 1
-              },
-              "Targeting": "Self"
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
-    ]
-  },
-  {
-    "Name": "Enchanted Fairy's Essence",
-    "Active": {
-      "Id": "faesEmbrace",
-      "Name": "Fae's Embrace",
-      "Description": "Create a protective barrier around two allies, blocking up to 20 damage.",
-      "Type": "Active",
-      "Cooldown": 220,
-      "Cost": { "Type": "Mana", "Amount": 14 },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "faesEmbrace" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ResourceRestore",
-                "ResourceType": "Barrier",
-                "Amount": 20
-              },
-              "Targeting": "TwoAllies",
-              "Log": "{Target} received {Amount} barrier."
-            }
-          ]
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "enchantedCharm",
-      "Name": "Enchanted Charm",
-      "Description": "Every 18 seconds, enemies have to resist your charms, or become stunned for 6 seconds.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnCombatStart",
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "charmedStun"
-              },
-              "Duration": {
-                "Type": "IndefiniteDuration"
-              },
-              "Interval": {
-                "Type": "Interval",
-                "Interval": 180
-              },
-              "Chance": 30,
-              "Targeting": "AllEnemies"
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
-    ]
-  },
-  {
-    "Name": "Glade Panther's Essence",
-    "Active": {
-      "Id": "ambushStrike",
-      "Name": "Ambush Strike",
-      "Description": "Strike at the target, with 20% increased Crit Chance. Deal {damage1} damage.",
-      "Type": "Active",
-      "Cooldown": 200,
-      "Cost": { "Type": "Mana", "Amount": 10 },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "ambushStrike" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "Damage",
-                "Amount": 15,
-                "ScalingAttribute": "AttackPower",
-                "ScalingMultiplier": 0.2
-              },
-              "EffectModifiers": [
-                {
-                  "Type": "CritChance",
-                  "Amount": 20,
-                  "ModifierType": "Flat"
-                }
-              ],
-              "Targeting": "SingleEnemy",
-              "AttackType": "Melee",
-              "DamageType": "Physical",
-              "EffectTags": [],
-              "Log": "{Actor} swiped at {Target}, dealing {Amount} damage."
-            }
-          ]
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "razorClaws",
-      "Name": "Razor Claws",
-      "Description": "Increase Critical Damage by 15%.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnCombatStart",
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ModifyAttribute",
-                "Attribute": "CritDamage",
-                "Amount": 15,
-                "ModifierType": "Flat",
-                "Stackable": true
-              },
-              "Duration": { "Type": "IndefiniteDuration" },
-              "Targeting": "Self",
-              "Log": "{Target} has their critical damage increased by {Amount}."
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
-    ]
-  },
-  {
-    "Name": "Illusion Fox's Essence",
-    "Active": {
-      "Id": "distractingIllusion",
-      "Name": "Distracting Illusion",
-      "Description": "Create an illusion that has a chance to distract all enemies, reducing their accuracy by 10% for 5 seconds.",
-      "Type": "Active",
-      "Cooldown": 160,
-      "Cost": { "Type": "Mana", "Amount": 20 },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "distractingIllusion" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "illusionFoxAccuracyDebuff"
-              },
-              "Targeting": "AllEnemies",
-              "Chance": 35,
-              "Log": "{Target} has been distracted, reducing their accuracy."
-            }
-          ]
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "foxfireWisp",
-      "Name": "Foxfire Wisp",
-      "Description": "Every 5 seconds, gain a Foxfire Wisp. When damaged, the attacker receives 8 magical damage and a stack is removed.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnCombatStart",
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "foxfireStack"
-              },
-              "Duration": {
-                "Type": "IndefiniteDuration"
-              },
-              "Interval": {
-                "Type": "Interval",
-                "Interval": 50
-              },
-              "Targeting": "Self",
-              "Log": "A small wisp gathers around {Actor}."
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
-    ]
-  },
-  {
-    "Name": "Nightshade Blossom's Essence",
-    "Active": {
-      "Id": "necroticSpores",
-      "Name": "Necrotic Spores",
-      "Description": "Release a burst of spores that reduce the natural regeneration of all enemies by 40% for 8 seconds.",
-      "Type": "Active",
-      "Cooldown": 140,
-      "Cost": { "Type": "Mana", "Amount": 12 },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "necroticSpores" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "necroticSporeDebuff"
-              },
-              "Targeting": "AllEnemies",
-              "Log": "{Target} is afflicted by necrotic spores, weakening their regeneration."
-            }
-          ]
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "twilightBloom",
-      "Name": "Twilight Bloom",
-      "Description": "Produce a seed that blooms every 11 seconds, releasing a scent that heals your team.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnCombatStart",
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ResourceRestore",
-                "ResourceType": "Health",
-                "Amount": 29
-              },
-              "Duration": { "Type": "IndefiniteDuration" },
-              "Interval": {
-                "Type": "Interval",
-                "Interval": 110
-              },
-              "Targeting": "AllAllies",
-              "Log": "{Target} is soothed by the scent of the Twilight Bloom, restoring {Amount} health."
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
-    ]
-  },
-  {
-    "Name": "Pixie's Essence",
-    "Active": {
-      "Id": "pixieBurst",
-      "Name": "Pixie Burst",
-      "Description": "Deal {damage1} damage to all enemies.",
-      "Type": "Active",
-      "Cooldown": 80,
-      "Cost": { "Type": "Mana", "Amount": 9 },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "pixieBurst" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "Damage",
-                "Amount": 15,
-                "ScalingAttribute": "SpellPower",
-                "ScalingMultiplier": 0.3
-              },
-              "Targeting": "AllEnemies",
-              "AttackType": "Ranged",
-              "DamageType": "Magical",
-              "Log": "{Target} took {Amount} damage from {Actor}'s Pixie Burst."
-            }
-          ]
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "resonantChime",
-      "Name": "Resonant Chime",
-      "Description": "Every time you use an ability, all allies gain +1 Crit Chance.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ModifyAttribute",
-                "Attribute": "CritChance",
-                "Amount": 1,
-                "ModifierType": "Flat",
-                "Stackable": true
-              },
-              "Duration": {
-                "Type": "IndefiniteDuration"
-              },
-              "Targeting": "AllAllies",
-              "Log": "{Target}'s crit chance increased by 1."
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
-    ]
-  },
-  {
-    "Name": "Hobgoblin's Essence",
-    "Active": {
-      "Id": "frenzy",
-      "Name": "Frenzy",
-      "Description": "Increase Attack Speed by 24% and Critical Hit Chance by 25% for 10 seconds.",
-      "Type": "Active",
-      "Cooldown": 140,
-      "Cost": { "Type": "Mana", "Amount": 19 },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "frenzy" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ModifyAttribute",
-                "Attribute": "AttackSpeed",
-                "Amount": 24,
-                "ModifierType": "Additive",
-                "Stackable": true
-              },
-              "Duration": {
-                "Type": "TimedDuration",
-                "Duration": 100
-              },
-              "Targeting": "Self",
-              "Log": "{Actor}'s Attack Speed increased by 24%."
-            },
-            {
-              "Action": {
-                "Type": "ModifyAttribute",
-                "Attribute": "CritChance",
-                "Amount": 25,
-                "ModifierType": "Additive",
-                "Stackable": true
-              },
-              "Duration": {
-                "Type": "TimedDuration",
-                "Duration": 100
-              },
-              "Targeting": "Self",
-              "Log": "{Actor}'s Critical Chance increased by 25%."
-            }
-          ]
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "savageOnslaught",
-      "Name": "Savage Onslaught",
-      "Description": "Increase Attack Power by 95 the first time dropping below 80% Health.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnHealthChanged",
-          "Filters": [
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ModifyAttribute",
-                "Attribute": "AttackPower",
-                "Amount": 95,
-                "ModifierType": "Flat",
-                "Stackable": true
-              },
-              "Condition": {
-                "Type": "HealthCondition",
-                "HealthPercentage": 80,
-                "ComparisonType": "LessThan"
-              },
-              "Duration": {
-                "Type": "IndefiniteDuration"
-              },
-              "Usage": {
-                "Type": "LimitedUsage",
-                "Uses": 1
-              },
-              "Targeting": "Self",
-              "Log": "{Actor}'s Attack Power is increased by 95 due to falling below 80% health."
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
-    ]
-  },
-  {
-    "Name": "Feral Ghoul's Essence",
-    "Active": {
-      "Id": "feralPounce",
-      "Name": "Feral Pounce",
-      "Description": "Leap to a target, dealing 26 Physical Melee damage with a 30% chance to stun.",
-      "Type": "Active",
-      "Cooldown": 160,
-      "Cost": {
-        "Type": "Mana",
-        "Amount": 23
       },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "feralPounce" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "feralPounceStun"
-              },
-              "Targeting": "SingleEnemy"
-            }
-          ]
+      {
+        "id": "effect.buff.block",
+        "type": "ModifyAttribute",
+        "target": "LowestHealthAlly",
+        "attribute": "BlockChance",
+        "durationSeconds": 8,
+        "scaling": {
+          "baseValue": 4
         }
-      ]
-    },
-    "Passive": {
-      "Id": "shreddingClaws",
-      "Name": "Shredding Claws",
-      "Description": "Every Melee attack has a 7% chance to apply 16 bleed damage over 4 seconds.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnMeleeAttack",
-          "Filters": [
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "shreddingClawsBleed"
-              },
-              "Chance": 50,
-              "AttackType": "DamageOverTime",
-              "DamageType": "Bleed",
-              "Targeting": "CauseOfTrigger",
-              "Log": "{Target} is torn open by the {Actor}’s claws and begins to bleed."
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
+      }
     ]
   },
   {
-    "Name": "Plague Ghoul's Essence",
-    "Active": {
-      "Id": "plagueSwipe",
-      "Name": "Plague Swipe",
-      "Description": "Swipe at two nearby enemies, dealing {damage1} physical damage and applying 12 poison damage over 3 seconds.",
-      "Type": "Active",
-      "Cooldown": 170,
-      "Cost": {
-        "Type": "Mana",
-        "Amount": 25
-      },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "plagueSwipe" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "plagueSwipePoison"
-              },
-              "Targeting": "TwoEnemies"
-            }
-          ]
+    "id": "ability.essence.skeleton_guardian.rattle_guard",
+    "kind": "Passive",
+    "name": "Rattle Guard",
+    "description": "On taking damage, has a chance to gain a defensive guard.",
+    "cooldownSeconds": 12,
+    "targeting": "Self",
+    "tags": [
+      "Trigger.OnTakeDamage",
+      "Defense.Guard"
+    ],
+    "triggers": [
+      {
+        "type": "Trigger.OnTakeDamage",
+        "internalCooldownSeconds": 12
+      }
+    ],
+    "conditions": [
+      {
+        "type": "RandomChance",
+        "value": 25
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.guard.defense",
+        "type": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "DamageReduction",
+        "durationSeconds": 5,
+        "scaling": {
+          "baseValue": 2
         }
-      ]
-    },
-    "Passive": {
-      "Id": "pestilentTouch",
-      "Name": "Pestilent Touch",
-      "Description": "Melee attacks have a 17% chance to apply 15 poison damage over 6 seconds.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnMeleeAttack",
-          "Filters": [
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "pestilentTouchPoison"
-              },
-              "Chance": 17,
-              "Targeting": "CauseOfTrigger"
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
+      }
     ]
   },
   {
-    "Name": "Ravenous Ghoul's Essence",
-    "Active": {
-      "Id": "drainingClaws",
-      "Name": "Draining Claws",
-      "Description": "Deal 31 Physical Melee damage to a target, reducing their Attack Power by 24 for 10 seconds.",
-      "Type": "Active",
-      "Cooldown": 130,
-      "Cost": {
-        "Type": "Mana",
-        "Amount": 24
+    "id": "ability.essence.fire_ant.burning_mandibles",
+    "kind": "Active",
+    "name": "Burning Mandibles",
+    "description": "Deals fire damage and applies Burn.",
+    "cooldownSeconds": 16,
+    "targeting": "CurrentTarget",
+    "tags": [
+      "Effect.Ability",
+      "Effect.Burn",
+      "Status.Burn"
+    ],
+    "effects": [
+      {
+        "id": "effect.damage.fire",
+        "type": "Damage",
+        "target": "CurrentTarget",
+        "scaling": {
+          "baseValue": 16
+        }
       },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "drainingClaws" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "drainingClawsDebuff"
-              },
-              "Targeting": "SingleEnemy"
-            }
-          ]
+      {
+        "id": "effect.status.burn",
+        "type": "ApplyStatus",
+        "target": "CurrentTarget",
+        "status": "Burn",
+        "durationSeconds": 10,
+        "scaling": {
+          "baseValue": 1
         }
-      ]
-    },
-    "Passive": {
-      "Id": "vileFeast",
-      "Name": "Vile Feast",
-      "Description": "The first time anyone dies, eat their corpse and heal 100% of your Max Health. Can only occur once.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnDeath",
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ResourceRestore",
-                "ResourceType": "Health",
-                "Amount": 9999
-              },
-              "Usage": {
-                "Type": "LimitedUsage",
-                "Uses": 1
-              },
-              "Targeting": "Self",
-              "Log": "{Actor} is healed to full health after devouring the corpse."
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
+      }
     ]
   },
   {
-    "Name": "Skeleton Archer's Essence",
-    "Active": {
-      "Id": "boneArrow",
-      "Name": "Bone Arrow",
-      "Description": "Use part of your bone as an arrowhead, dealing 59 physical ranged damage.",
-      "Type": "Active",
-      "Cooldown": 180,
-      "Cost": {
-        "Type": "Health",
-        "Amount": 32
-      },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "boneArrow" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "Damage",
-                "Amount": 59,
-                "ScalingAttribute": "AttackPower",
-                "ScalingMultiplier": 0.20
-              },
-              "Targeting": "SingleEnemy",
-              "AttackType": "Ranged",
-              "DamageType": "Physical",
-              "EffectTags": [ "Piercing" ],
-              "Log": "{Actor} fired a bone arrow at {Target}, dealing {Amount} physical damage."
-            }
-          ]
+    "id": "ability.essence.fire_ant.colony_heat",
+    "kind": "Passive",
+    "name": "Colony Heat",
+    "description": "On hit, has a small chance to refresh Burn duration and gain damage.",
+    "cooldownSeconds": 8,
+    "targeting": "Self",
+    "tags": [
+      "Trigger.OnHit",
+      "Status.Burn"
+    ],
+    "triggers": [
+      {
+        "type": "Trigger.OnHit",
+        "internalCooldownSeconds": 8
+      }
+    ],
+    "conditions": [
+      {
+        "type": "RandomChance",
+        "value": 15
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.buff.attack_power",
+        "type": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "Power",
+        "durationSeconds": 5,
+        "scaling": {
+          "baseValue": 3
         }
-      ]
-    },
-    "Passive": {
-      "Id": "piercingArrows",
-      "Name": "Piercing Arrows",
-      "Description": "All ranged attacks have a 15% chance to apply bleed, dealing 15 damage over 9 seconds.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnRangedAttack",
-          "Filters": [
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "piercingArrowBleed"
-              },
-              "Targeting": "CauseOfTrigger",
-              "Chance": 15,
-              "Log": "{Actor}'s arrow pierced {Target}, causing them to bleed."
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
+      }
     ]
   },
   {
-    "Name": "Skeleton Mage's Essence",
-    "Active": {
-      "Id": "siphon",
-      "Name": "Siphon",
-      "Description": "Deal 42 magic damage to the target.",
-      "Type": "Active",
-      "Cooldown": 190,
-      "Cost": {
-        "Type": "Mana",
-        "Amount": 26
+    "id": "ability.essence.cave_bat.screech",
+    "kind": "Active",
+    "name": "Screech",
+    "description": "Deals low damage and disrupts the target's accuracy.",
+    "cooldownSeconds": 20,
+    "targeting": "CurrentTarget",
+    "tags": [
+      "Control.Blind",
+      "Control.Interrupt",
+      "Target.Enemy"
+    ],
+    "effects": [
+      {
+        "id": "effect.damage.sonic",
+        "type": "Damage",
+        "target": "CurrentTarget",
+        "scaling": {
+          "baseValue": 10
+        }
       },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
-            {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "siphon" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "Damage",
-                "Amount": 42,
-                "ScalingAttribute": "SpellPower",
-                "ScalingMultiplier": 0.3
-              },
-              "Targeting": "SingleEnemy",
-              "AttackType": "Ranged",
-              "DamageType": "Magical",
-              "EffectTags": [ "Magic", "Dark" ],
-              "Log": "{Actor} siphoned energy from {Target}, dealing {Amount} magic damage."
-            }
-          ]
+      {
+        "id": "effect.debuff.accuracy",
+        "type": "ModifyAttribute",
+        "target": "CurrentTarget",
+        "attribute": "Precision",
+        "durationSeconds": 6,
+        "scaling": {
+          "baseValue": -5
         }
-      ]
-    },
-    "Passive": {
-      "Id": "protectiveBoneBarrier",
-      "Name": "Protective Bone Barrier",
-      "Description": "Every 10 seconds, form a barrier around you that can absorb up to 25 damage.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnCombatStart",
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ApplyStatus",
-                "StatusId": "boneBarrierShield"
-              },
-              "Duration": { "Type": "IndefiniteDuration" },
-              "Interval": {
-                "Type": "Interval",
-                "Interval": 100
-              },
-              "Targeting": "Self"
-            }
-          ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
+      }
     ]
   },
   {
-    "Name": "Skeleton Warrior's Essence",
-    "Active": {
-      "Id": "boneShield",
-      "Name": "Bone Shield",
-      "Description": "Form a bone shield around you, reducing damage taken by 10% for 8 seconds.",
-      "Type": "Active",
-      "Cooldown": 140,
-      "Cost": {
-        "Type": "Mana",
-        "Amount": 16
+    "id": "ability.essence.cave_bat.skittering_wings",
+    "kind": "Passive",
+    "name": "Skittering Wings",
+    "description": "On dodge, gain temporary Attack Speed.",
+    "cooldownSeconds": 10,
+    "targeting": "Self",
+    "tags": [
+      "Trigger.OnDodge",
+      "Defense.Dodge"
+    ],
+    "triggers": [
+      {
+        "type": "Trigger.OnDodge",
+        "internalCooldownSeconds": 10
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.buff.attack_speed",
+        "type": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "Precision",
+        "durationSeconds": 5,
+        "scaling": {
+          "baseValue": 4
+        }
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.necroshade_wraith.wraith_hex",
+    "kind": "Active",
+    "name": "Wraith Hex",
+    "description": "Applies Curse and deals shadow damage over time.",
+    "cooldownSeconds": 26,
+    "targeting": "CurrentTarget",
+    "tags": [
+      "Status.Curse",
+      "Pattern.Periodic",
+      "Effect.Magical"
+    ],
+    "effects": [
+      {
+        "id": "effect.damage.hex",
+        "type": "Damage",
+        "target": "CurrentTarget",
+        "scaling": {
+          "baseValue": 14
+        }
       },
-      "Triggers": [
-        {
-          "Event": "OnAbilityUsed",
-          "Filters": [
+      {
+        "id": "effect.status.curse",
+        "type": "ApplyStatus",
+        "target": "CurrentTarget",
+        "status": "Curse",
+        "durationSeconds": 12,
+        "scaling": {
+          "baseValue": 1
+        }
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.necroshade_wraith.grave_whisper",
+    "kind": "Passive",
+    "name": "Grave Whisper",
+    "description": "On enemy death, reduce cooldowns slightly.",
+    "cooldownSeconds": 18,
+    "targeting": "Self",
+    "tags": [
+      "Trigger.OnKill",
+      "Resource.Cooldown"
+    ],
+    "triggers": [
+      {
+        "type": "Trigger.OnKill",
+        "internalCooldownSeconds": 18
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.restore.cooldown",
+        "type": "RestoreResource",
+        "target": "Self",
+        "attribute": "Cooldown",
+        "scaling": {
+          "baseValue": 3
+        }
+      }
+    ]
+  },
+  {
+    "id": "sneakAttack",
+    "kind": "Active",
+    "name": "Sneak Attack",
+    "description": "Stab the target in the back, dealing {damage1} damage, and apply 8 bleed damage over 8 seconds.",
+    "cooldownSeconds": 9.0,
+    "targeting": "CurrentTarget",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "CurrentTarget",
+        "scaling": {
+          "baseValue": 1
+        },
+        "type": "ApplyStatus",
+        "status": "sneakAttackBleed"
+      }
+    ]
+  },
+  {
+    "id": "pocketDirt",
+    "kind": "Passive",
+    "name": "Pocket Dirt",
+    "description": "Whenever you dodge, use the opportunity to throw dirt at the target, decreasing their accuracy by 3% for 6 seconds",
+    "cooldownSeconds": 0.0,
+    "targeting": "DamageSource",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnDodge"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "DamageSource",
+        "scaling": {
+          "baseValue": -3.0
+        },
+        "durationSeconds": 11.0,
+        "attackType": "None",
+        "damageType": "None",
+        "log": "{Actor} threw dirt in {Target}'s eyes. {Target}'s accuracy decreased by 3%.",
+        "type": "ModifyAttribute",
+        "attribute": "Precision"
+      }
+    ]
+  },
+  {
+    "id": "ragingCleave",
+    "kind": "Active",
+    "name": "Raging Cleave",
+    "description": "Swing your weapon in a wide arc, dealing {damage1} damage to two enemies.",
+    "cooldownSeconds": 12.0,
+    "targeting": "TwoEnemies",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "TwoEnemies",
+        "scaling": {
+          "baseValue": 8.0,
+          "attributeScaling": [
             {
-              "Type": "AbilityIdFilter",
-              "AllowedIds": [ "boneShield" ]
-            },
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
-            {
-              "Action": {
-                "Type": "ModifyAttribute",
-                "Attribute": "DamageReduction",
-                "Amount": 10,
-                "ModifierType": "Flat",
-                "Stackable": false
-              },
-              "Duration": {
-                "Type": "TimedDuration",
-                "Duration": 80
-              },
-              "Targeting": "Self",
-              "Log": "{Actor} summons a protective bone shield, reducing damage taken by 10%."
+              "attribute": "Power",
+              "coefficient": 0.2
             }
           ]
-        }
-      ]
-    },
-    "Passive": {
-      "Id": "spikedDefense",
-      "Name": "Spiked Defense",
-      "Description": "Whenever taking melee damage, reflect 6 damage to the attacker.",
-      "Type": "Passive",
-      "Cooldown": 0,
-      "Triggers": [
-        {
-          "Event": "OnMeleeAttacked",
-          "Filters": [
-            { "Type": "SourceIsSelfFilter" }
-          ],
-          "Actions": [
+        },
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "effectTags": [
+          "Slashing"
+        ],
+        "log": "{Target} received {Amount} damage.",
+        "type": "Damage"
+      }
+    ]
+  },
+  {
+    "id": "recklessAssault",
+    "kind": "Passive",
+    "name": "Reckless Assault",
+    "description": "Increase Attack Power by 20, but decrease Physical Defense by 20",
+    "cooldownSeconds": 0.0,
+    "targeting": "Self",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnCombatStart"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "Self",
+        "scaling": {
+          "baseValue": 20.0
+        },
+        "log": "{Actor}'s Attack Power is increased by 20.",
+        "type": "ModifyAttribute",
+        "attribute": "Power"
+      },
+      {
+        "id": "effect.2",
+        "target": "Self",
+        "scaling": {
+          "baseValue": -20.0
+        },
+        "log": "{Actor}'s Physical Defense is decreased by 20.",
+        "type": "ModifyAttribute",
+        "attribute": "Armor"
+      }
+    ]
+  },
+  {
+    "id": "snipersStrike",
+    "kind": "Active",
+    "name": "Sniper's Strike",
+    "description": "Unleash a powerful shot dealing {damage1} damage. 50% increased critical chance.",
+    "cooldownSeconds": 15.0,
+    "targeting": "CurrentTarget",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "CurrentTarget",
+        "scaling": {
+          "baseValue": 15.0,
+          "attributeScaling": [
             {
-              "Action": {
-                "Type": "Damage",
-                "Amount": 6
-              },
-              "Targeting": "CauseOfTrigger",
-              "AttackType": "None",
-              "DamageType": "Physical",
-              "EffectTags": [ "Reflect" ],
-              "Log": "{Target} is struck by {Actor}'s spiked bones for {Amount} damage."
+              "attribute": "Power",
+              "coefficient": 0.1
             }
           ]
-        }
-      ]
-    },
-    "AttributeModifiers": [
+        },
+        "attackType": "Ranged",
+        "damageType": "Physical",
+        "effectTags": [
+          "Arrows"
+        ],
+        "log": "{Actor} landed a powerful shot on {Target}, dealing {Amount} damage.",
+        "type": "Damage"
+      }
+    ]
+  },
+  {
+    "id": "poisonedArrows",
+    "kind": "Passive",
+    "name": "Poisoned Arrows",
+    "description": "Every ranged attack has a 20% chance to apply poison, dealing 6 damage over 3 seconds.",
+    "cooldownSeconds": 0.0,
+    "targeting": "DamageSource",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnRangedAttack"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "DamageSource",
+        "scaling": {
+          "baseValue": 1
+        },
+        "conditions": [
+          {
+            "type": "RandomChance",
+            "value": 20.0
+          }
+        ],
+        "log": "{Actor} inflicted {Target} with poison from their ranged attack.",
+        "type": "ApplyStatus",
+        "status": "poisonedArrowEffect"
+      }
+    ]
+  },
+  {
+    "id": "tailWrap",
+    "kind": "Active",
+    "name": "Tail Wrap",
+    "description": "Apply a crushing force to the target, dealing {damage1} damage.",
+    "cooldownSeconds": 15.0,
+    "targeting": "CurrentTarget",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "CurrentTarget",
+        "scaling": {
+          "baseValue": 12.0,
+          "attributeScaling": [
+            {
+              "attribute": "Power",
+              "coefficient": 0.2
+            }
+          ]
+        },
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "log": "{Target} received {Amount} damage.",
+        "type": "Damage"
+      }
+    ]
+  },
+  {
+    "id": "big",
+    "kind": "Passive",
+    "name": "Big",
+    "description": "Health is increased by 50.",
+    "cooldownSeconds": 0.0,
+    "targeting": "Self",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnCombatStart"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "Self",
+        "scaling": {
+          "baseValue": 50.0
+        },
+        "log": "{Actor}'s health is increased by 50 due to being big.",
+        "type": "ModifyAttribute",
+        "attribute": "MaxHealth"
+      }
+    ]
+  },
+  {
+    "id": "firebombToss",
+    "kind": "Active",
+    "name": "Firebomb Toss",
+    "description": "Throw a flaming sphere, dealing {damage1} damage.",
+    "cooldownSeconds": 11.0,
+    "targeting": "CurrentTarget",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "CurrentTarget",
+        "scaling": {
+          "baseValue": 11.0,
+          "attributeScaling": [
+            {
+              "attribute": "Spirit",
+              "coefficient": 0.2
+            }
+          ]
+        },
+        "attackType": "Ranged",
+        "damageType": "Magical",
+        "log": "{Target} received {Amount} damage.",
+        "type": "Damage"
+      }
+    ]
+  },
+  {
+    "id": "hotAura",
+    "kind": "Passive",
+    "name": "Hot Aura",
+    "description": "Enemies that attack you in melee range have a 30% chance to receive 4 burn damage.",
+    "cooldownSeconds": 0.0,
+    "targeting": "DamageSource",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnMeleeAttacked"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "DamageSource",
+        "scaling": {
+          "baseValue": 4.0
+        },
+        "conditions": [
+          {
+            "type": "RandomChance",
+            "value": 30.0
+          }
+        ],
+        "attackType": "None",
+        "damageType": "Burn",
+        "log": "{Target} received {Amount} burn damage after attacking {Actor}.",
+        "type": "Damage"
+      }
+    ]
+  },
+  {
+    "id": "iceTouch",
+    "kind": "Active",
+    "name": "Ice Touch",
+    "description": "If the target has 5 stacks of Cold, apply Freeze for 4 seconds. Then remove 5 stacks of Cold.",
+    "cooldownSeconds": 15.0,
+    "targeting": "CurrentTarget",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "CurrentTarget",
+        "scaling": {
+          "baseValue": 1
+        },
+        "conditions": [
+          {
+            "type": "TargetHasStatusStacksAtLeast",
+            "status": "Cold",
+            "value": 2.0
+          }
+        ],
+        "type": "ApplyStatus",
+        "status": "frostImpFreeze"
+      }
+    ]
+  },
+  {
+    "id": "coldAura",
+    "kind": "Passive",
+    "name": "Cold Aura",
+    "description": "Enemies that attack you in melee range receive a Cold status effect that does not expire.",
+    "cooldownSeconds": 0.0,
+    "targeting": "DamageSource",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnMeleeAttacked"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "DamageSource",
+        "scaling": {
+          "baseValue": 1.0
+        },
+        "log": "{Target} has received 1 stack of Cold.",
+        "type": "ModifyStatusEffect",
+        "status": "Cold"
+      }
+    ]
+  },
+  {
+    "id": "shadowImage",
+    "kind": "Active",
+    "name": "Shadow Image",
+    "description": "Summon a shadow illusion of yourself with 1 health.",
+    "cooldownSeconds": 15.0,
+    "targeting": "Self",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "Self",
+        "scaling": {
+          "baseValue": 1
+        },
+        "log": "{Actor} summoned a shadowy illusion of themselves.",
+        "type": "Summon",
+        "status": "shadowImage",
+        "durationSeconds": 10.0
+      }
+    ]
+  },
+  {
+    "id": "shadowyPresence",
+    "kind": "Passive",
+    "name": "Shadowy Presence",
+    "description": "Increase chance of dodging by 2%.",
+    "cooldownSeconds": 0.0,
+    "targeting": "Self",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnCombatStart"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "Self",
+        "scaling": {
+          "baseValue": 2.0
+        },
+        "log": "{Actor} moves with an elusive shadowy presence, increasing dodge chance by 2%.",
+        "type": "ModifyAttribute",
+        "attribute": "DodgeChance"
+      }
+    ]
+  },
+  {
+    "id": "bloodthirstyFangs",
+    "kind": "Active",
+    "name": "Bloodthirsty Fangs",
+    "description": "Deal {damage1} damage to the target, with 30% lifesteal.",
+    "cooldownSeconds": 20.0,
+    "targeting": "CurrentTarget",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "CurrentTarget",
+        "scaling": {
+          "baseValue": 11.0,
+          "attributeScaling": [
+            {
+              "attribute": "Power",
+              "coefficient": 0.2
+            }
+          ]
+        },
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "log": "{Actor} bit {Target}, dealing {Amount} damage.",
+        "type": "Damage",
+        "lifeStealPercentage": 30.0
+      }
+    ]
+  },
+  {
+    "id": "darkVitality",
+    "kind": "Passive",
+    "name": "Dark Vitality",
+    "description": "Whenever you heal through lifesteal, gain an extra 4 health.",
+    "cooldownSeconds": 0.0,
+    "targeting": "Self",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnLifestealHeal"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "Self",
+        "scaling": {
+          "baseValue": 4.0
+        },
+        "log": "{Actor} gained an additional {Amount} health from lifesteal.",
+        "type": "Heal",
+        "resource": "Health"
+      }
+    ]
+  },
+  {
+    "id": "sweetWater",
+    "kind": "Active",
+    "name": "Sweet Water",
+    "description": "Restores {heal1} Health to all allies every 2 seconds for 8 seconds.",
+    "cooldownSeconds": 24.0,
+    "targeting": "AllAllies",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "AllAllies",
+        "scaling": {
+          "baseValue": 2.0,
+          "attributeScaling": [
+            {
+              "attribute": "Power",
+              "coefficient": 0.2
+            }
+          ]
+        },
+        "durationSeconds": 8.0,
+        "intervalSeconds": 2.0,
+        "log": "{Target} is soothed by {Actor}'s Sweet Water, restoring {Amount} health.",
+        "type": "Heal",
+        "resource": "Health"
+      }
+    ]
+  },
+  {
+    "id": "absorptiveShell",
+    "kind": "Passive",
+    "name": "Absorptive Shell",
+    "description": "Whenever you are attacked, reduce your cooldown pressure.",
+    "cooldownSeconds": 0.0,
+    "targeting": "Self",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnAttacked"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "Self",
+        "type": "ModifyAttribute",
+        "attribute": "Cooldown",
+        "scaling": {
+          "baseValue": -2.0
+        },
+        "log": "{Actor}'s Absorptive Shell hastened their cooldown recovery."
+      }
+    ]
+  },
+  {
+    "id": "mudArmor",
+    "kind": "Active",
+    "name": "Mud Armor",
+    "description": "Decrease all damage taken by 2% for 6.5 seconds.",
+    "cooldownSeconds": 14.0,
+    "targeting": "Self",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "Self",
+        "scaling": {
+          "baseValue": 2.0
+        },
+        "durationSeconds": 6.5,
+        "log": "{Actor} is covered in thick mud, reducing all damage taken by 2%.",
+        "type": "ModifyAttribute",
+        "attribute": "DamageReduction"
+      }
+    ]
+  },
+  {
+    "id": "earthlyFortitude",
+    "kind": "Passive",
+    "name": "Earthly Fortitude",
+    "description": "Increase Physical Defense by 15.",
+    "cooldownSeconds": 0.0,
+    "targeting": "Self",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnCombatStart"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "Self",
+        "scaling": {
+          "baseValue": 15.0
+        },
+        "log": "{Actor}'s body hardens like stone, increasing Physical Defense by 15.",
+        "type": "ModifyAttribute",
+        "attribute": "Armor"
+      }
+    ]
+  },
+  {
+    "id": "acidSplash",
+    "kind": "Active",
+    "name": "Acid Splash",
+    "description": "Apply poison to all enemies, dealing 12 damage over 9 seconds.",
+    "cooldownSeconds": 17.0,
+    "targeting": "AllEnemies",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "AllEnemies",
+        "scaling": {
+          "baseValue": 1
+        },
+        "log": "{Actor} splashes corrosive acid onto all enemies.",
+        "type": "ApplyStatus",
+        "status": "greenSlimePoison"
+      }
+    ]
+  },
+  {
+    "id": "corrosiveOoze",
+    "kind": "Passive",
+    "name": "Corrosive Ooze",
+    "description": "Whenever damaged by a melee attack, apply poison to the target, dealing 6 damage over 12 seconds.",
+    "cooldownSeconds": 0.0,
+    "targeting": "DamageSource",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnMeleeAttacked"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "DamageSource",
+        "scaling": {
+          "baseValue": 1
+        },
+        "log": "{Actor} was attacked and coated {Target} with corrosive ooze.",
+        "type": "ApplyStatus",
+        "status": "corrosiveOozePoison"
+      }
+    ]
+  },
+  {
+    "id": "unstableColors",
+    "kind": "Active",
+    "name": "Unstable Colors",
+    "description": "30% chance to apply a buff to everyone on your team, increasing Attack Power and Spell Power by 20 for 10 seconds.",
+    "cooldownSeconds": 15.0,
+    "targeting": "AllAllies",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "AllAllies",
+        "scaling": {
+          "baseValue": 1
+        },
+        "conditions": [
+          {
+            "type": "RandomChance",
+            "value": 30.0
+          }
+        ],
+        "log": "{Actor}'s colors ripple across {Target}, empowering them!",
+        "type": "ApplyStatus",
+        "status": "unstableColorsBuff"
+      }
+    ]
+  },
+  {
+    "id": "colorfulShield",
+    "kind": "Passive",
+    "name": "Colorful Shield",
+    "description": "Whenever you use an ability, apply 20 Barrier to the ally with the highest Max Health.",
+    "cooldownSeconds": 0.0,
+    "targeting": "HighestMaxHealthAlly",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnAbilityUsed"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "HighestMaxHealthAlly",
+        "scaling": {
+          "baseValue": 20.0
+        },
+        "log": "{Actor} creates a colorful shield around {Target}, granting 20 Barrier.",
+        "type": "GrantBarrier",
+        "resource": "Barrier"
+      }
+    ]
+  },
+  {
+    "id": "igniteCore",
+    "kind": "Active",
+    "name": "Ignite Core",
+    "description": "Ignite and apply a fire aura to yourself. Deal 3 burn damage to everyone but you every second. Lasts 10 seconds.",
+    "cooldownSeconds": 18.0,
+    "targeting": "EveryoneButYou",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "EveryoneButYou",
+        "scaling": {
+          "baseValue": 1
+        },
+        "type": "ApplyStatus",
+        "status": "redSlimeFireAura"
+      }
+    ]
+  },
+  {
+    "id": "fireBody",
+    "kind": "Passive",
+    "name": "Fire Body",
+    "description": "Increase Fire Resistance by 5.",
+    "cooldownSeconds": 0.0,
+    "targeting": "Self",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnCombatStart"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "Self",
+        "scaling": {
+          "baseValue": 5.0
+        },
+        "log": "{Actor}'s body hardens against fire, increasing Fire Resistance by 5.",
+        "type": "ModifyAttribute",
+        "attribute": "Resistance"
+      }
+    ]
+  },
+  {
+    "id": "transparentEngulf",
+    "kind": "Active",
+    "name": "Transparent Engulf",
+    "description": "Trap a single enemy inside your body, stunning them for 3 seconds and dealing 9 damage over time.",
+    "cooldownSeconds": 25.0,
+    "targeting": "CurrentTarget",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "CurrentTarget",
+        "scaling": {
+          "baseValue": 1
+        },
+        "log": "{Actor} engulfs {Target}, stunning and damaging them!",
+        "type": "ApplyStatus",
+        "status": "transparentEngulfed"
+      }
+    ]
+  },
+  {
+    "id": "transparentShift",
+    "kind": "Passive",
+    "name": "Transparent Shift",
+    "description": "When below 30% health, increase dodge chance by 40% for 3 seconds. This effect can only be used once.",
+    "cooldownSeconds": 0.0,
+    "targeting": "Self",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnHealthChanged"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "Self",
+        "scaling": {
+          "baseValue": 1
+        },
+        "uses": 1,
+        "conditions": [
+          {
+            "type": "SourceHealthBelowPercent",
+            "value": 30.0
+          }
+        ],
+        "type": "ApplyStatus",
+        "status": "transparentDodgeBoost"
+      }
+    ]
+  },
+  {
+    "id": "faesEmbrace",
+    "kind": "Active",
+    "name": "Fae's Embrace",
+    "description": "Create a protective barrier around two allies, blocking up to 20 damage.",
+    "cooldownSeconds": 22.0,
+    "targeting": "TwoAllies",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "TwoAllies",
+        "scaling": {
+          "baseValue": 20.0
+        },
+        "log": "{Target} received {Amount} barrier.",
+        "type": "GrantBarrier",
+        "resource": "Barrier"
+      }
+    ]
+  },
+  {
+    "id": "enchantedCharm",
+    "kind": "Passive",
+    "name": "Enchanted Charm",
+    "description": "Every 18 seconds, enemies have to resist your charms, or become stunned for 6 seconds.",
+    "cooldownSeconds": 0.0,
+    "targeting": "AllEnemies",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnCombatStart"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "AllEnemies",
+        "scaling": {
+          "baseValue": 1
+        },
+        "intervalSeconds": 18.0,
+        "conditions": [
+          {
+            "type": "RandomChance",
+            "value": 30.0
+          }
+        ],
+        "type": "ApplyStatus",
+        "status": "charmedStun"
+      }
+    ]
+  },
+  {
+    "id": "ambushStrike",
+    "kind": "Active",
+    "name": "Ambush Strike",
+    "description": "Strike at the target, with 20% increased Crit Chance. Deal {damage1} damage.",
+    "cooldownSeconds": 20.0,
+    "targeting": "CurrentTarget",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "CurrentTarget",
+        "scaling": {
+          "baseValue": 15.0,
+          "attributeScaling": [
+            {
+              "attribute": "Power",
+              "coefficient": 0.2
+            }
+          ]
+        },
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "log": "{Actor} swiped at {Target}, dealing {Amount} damage.",
+        "type": "Damage"
+      }
+    ]
+  },
+  {
+    "id": "razorClaws",
+    "kind": "Passive",
+    "name": "Razor Claws",
+    "description": "Increase Critical Damage by 15%.",
+    "cooldownSeconds": 0.0,
+    "targeting": "Self",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnCombatStart"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "Self",
+        "scaling": {
+          "baseValue": 15.0
+        },
+        "log": "{Target} has their critical damage increased by {Amount}.",
+        "type": "ModifyAttribute",
+        "attribute": "CritDamage"
+      }
+    ]
+  },
+  {
+    "id": "distractingIllusion",
+    "kind": "Active",
+    "name": "Distracting Illusion",
+    "description": "Create an illusion that has a chance to distract all enemies, reducing their accuracy by 10% for 5 seconds.",
+    "cooldownSeconds": 16.0,
+    "targeting": "AllEnemies",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "AllEnemies",
+        "scaling": {
+          "baseValue": 1
+        },
+        "conditions": [
+          {
+            "type": "RandomChance",
+            "value": 35.0
+          }
+        ],
+        "log": "{Target} has been distracted, reducing their accuracy.",
+        "type": "ApplyStatus",
+        "status": "illusionFoxAccuracyDebuff"
+      }
+    ]
+  },
+  {
+    "id": "foxfireWisp",
+    "kind": "Passive",
+    "name": "Foxfire Wisp",
+    "description": "Every 5 seconds, gain a Foxfire Wisp. When damaged, the attacker receives 8 magical damage and a stack is removed.",
+    "cooldownSeconds": 0.0,
+    "targeting": "Self",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnCombatStart"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "Self",
+        "scaling": {
+          "baseValue": 1
+        },
+        "intervalSeconds": 5.0,
+        "log": "A small wisp gathers around {Actor}.",
+        "type": "ApplyStatus",
+        "status": "foxfireStack"
+      }
+    ]
+  },
+  {
+    "id": "necroticSpores",
+    "kind": "Active",
+    "name": "Necrotic Spores",
+    "description": "Release a burst of spores that reduce the natural regeneration of all enemies by 40% for 8 seconds.",
+    "cooldownSeconds": 14.0,
+    "targeting": "AllEnemies",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "AllEnemies",
+        "scaling": {
+          "baseValue": 1
+        },
+        "log": "{Target} is afflicted by necrotic spores, weakening their regeneration.",
+        "type": "ApplyStatus",
+        "status": "necroticSporeDebuff"
+      }
+    ]
+  },
+  {
+    "id": "twilightBloom",
+    "kind": "Passive",
+    "name": "Twilight Bloom",
+    "description": "Produce a seed that blooms every 11 seconds, releasing a scent that heals your team.",
+    "cooldownSeconds": 0.0,
+    "targeting": "AllAllies",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnCombatStart"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "AllAllies",
+        "scaling": {
+          "baseValue": 29.0
+        },
+        "intervalSeconds": 11.0,
+        "log": "{Target} is soothed by the scent of the Twilight Bloom, restoring {Amount} health.",
+        "type": "Heal",
+        "resource": "Health"
+      }
+    ]
+  },
+  {
+    "id": "pixieBurst",
+    "kind": "Active",
+    "name": "Pixie Burst",
+    "description": "Deal {damage1} damage to all enemies.",
+    "cooldownSeconds": 8.0,
+    "targeting": "AllEnemies",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "AllEnemies",
+        "scaling": {
+          "baseValue": 15.0,
+          "attributeScaling": [
+            {
+              "attribute": "Spirit",
+              "coefficient": 0.3
+            }
+          ]
+        },
+        "attackType": "Ranged",
+        "damageType": "Magical",
+        "log": "{Target} took {Amount} damage from {Actor}'s Pixie Burst.",
+        "type": "Damage"
+      }
+    ]
+  },
+  {
+    "id": "resonantChime",
+    "kind": "Passive",
+    "name": "Resonant Chime",
+    "description": "Every time you use an ability, all allies gain +1 Crit Chance.",
+    "cooldownSeconds": 0.0,
+    "targeting": "AllAllies",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnAbilityUsed"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "AllAllies",
+        "scaling": {
+          "baseValue": 1.0
+        },
+        "log": "{Target}'s crit chance increased by 1.",
+        "type": "ModifyAttribute",
+        "attribute": "CritChance"
+      }
+    ]
+  },
+  {
+    "id": "frenzy",
+    "kind": "Active",
+    "name": "Frenzy",
+    "description": "Increase Attack Speed by 24% and Critical Hit Chance by 25% for 10 seconds.",
+    "cooldownSeconds": 14.0,
+    "targeting": "Self",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "Self",
+        "scaling": {
+          "baseValue": -24.0
+        },
+        "durationSeconds": 10.0,
+        "log": "{Actor}'s Attack Speed increased by 24%.",
+        "type": "ModifyAttribute",
+        "attribute": "Cooldown"
+      },
+      {
+        "id": "effect.2",
+        "target": "Self",
+        "scaling": {
+          "baseValue": 25.0
+        },
+        "durationSeconds": 10.0,
+        "log": "{Actor}'s Critical Chance increased by 25%.",
+        "type": "ModifyAttribute",
+        "attribute": "CritChance"
+      }
+    ]
+  },
+  {
+    "id": "savageOnslaught",
+    "kind": "Passive",
+    "name": "Savage Onslaught",
+    "description": "Increase Attack Power by 95 the first time dropping below 80% Health.",
+    "cooldownSeconds": 0.0,
+    "targeting": "Self",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnHealthChanged"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "Self",
+        "scaling": {
+          "baseValue": 95.0
+        },
+        "uses": 1,
+        "conditions": [
+          {
+            "type": "SourceHealthBelowPercent",
+            "value": 80.0
+          }
+        ],
+        "log": "{Actor}'s Attack Power is increased by 95 due to falling below 80% health.",
+        "type": "ModifyAttribute",
+        "attribute": "Power"
+      }
+    ]
+  },
+  {
+    "id": "feralPounce",
+    "kind": "Active",
+    "name": "Feral Pounce",
+    "description": "Leap to a target, dealing 26 Physical Melee damage with a 30% chance to stun.",
+    "cooldownSeconds": 16.0,
+    "targeting": "CurrentTarget",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "CurrentTarget",
+        "scaling": {
+          "baseValue": 1
+        },
+        "type": "ApplyStatus",
+        "status": "feralPounceStun"
+      }
+    ]
+  },
+  {
+    "id": "shreddingClaws",
+    "kind": "Passive",
+    "name": "Shredding Claws",
+    "description": "Every Melee attack has a 7% chance to apply 16 bleed damage over 4 seconds.",
+    "cooldownSeconds": 0.0,
+    "targeting": "DamageSource",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnMeleeAttack"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "DamageSource",
+        "scaling": {
+          "baseValue": 1
+        },
+        "conditions": [
+          {
+            "type": "RandomChance",
+            "value": 50.0
+          }
+        ],
+        "attackType": "DamageOverTime",
+        "damageType": "Bleed",
+        "log": "{Target} is torn open by the {Actor}’s claws and begins to bleed.",
+        "type": "ApplyStatus",
+        "status": "shreddingClawsBleed"
+      }
+    ]
+  },
+  {
+    "id": "plagueSwipe",
+    "kind": "Active",
+    "name": "Plague Swipe",
+    "description": "Swipe at two nearby enemies, dealing {damage1} physical damage and applying 12 poison damage over 3 seconds.",
+    "cooldownSeconds": 17.0,
+    "targeting": "TwoEnemies",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "TwoEnemies",
+        "scaling": {
+          "baseValue": 1
+        },
+        "type": "ApplyStatus",
+        "status": "plagueSwipePoison"
+      }
+    ]
+  },
+  {
+    "id": "pestilentTouch",
+    "kind": "Passive",
+    "name": "Pestilent Touch",
+    "description": "Melee attacks have a 17% chance to apply 15 poison damage over 6 seconds.",
+    "cooldownSeconds": 0.0,
+    "targeting": "DamageSource",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnMeleeAttack"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "DamageSource",
+        "scaling": {
+          "baseValue": 1
+        },
+        "conditions": [
+          {
+            "type": "RandomChance",
+            "value": 17.0
+          }
+        ],
+        "type": "ApplyStatus",
+        "status": "pestilentTouchPoison"
+      }
+    ]
+  },
+  {
+    "id": "drainingClaws",
+    "kind": "Active",
+    "name": "Draining Claws",
+    "description": "Deal 31 Physical Melee damage to a target, reducing their Attack Power by 24 for 10 seconds.",
+    "cooldownSeconds": 13.0,
+    "targeting": "CurrentTarget",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "CurrentTarget",
+        "scaling": {
+          "baseValue": 1
+        },
+        "type": "ApplyStatus",
+        "status": "drainingClawsDebuff"
+      }
+    ]
+  },
+  {
+    "id": "vileFeast",
+    "kind": "Passive",
+    "name": "Vile Feast",
+    "description": "The first time anyone dies, eat their corpse and heal 100% of your Max Health. Can only occur once.",
+    "cooldownSeconds": 0.0,
+    "targeting": "Self",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnDeath"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "Self",
+        "scaling": {
+          "baseValue": 9999.0
+        },
+        "uses": 1,
+        "log": "{Actor} is healed to full health after devouring the corpse.",
+        "type": "Heal",
+        "resource": "Health"
+      }
+    ]
+  },
+  {
+    "id": "boneArrow",
+    "kind": "Active",
+    "name": "Bone Arrow",
+    "description": "Use part of your bone as an arrowhead, dealing 20 physical ranged damage.",
+    "cooldownSeconds": 18.0,
+    "targeting": "CurrentTarget",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "CurrentTarget",
+        "scaling": {
+          "baseValue": 20.0,
+          "attributeScaling": [
+            {
+              "attribute": "Power",
+              "coefficient": 0.2
+            }
+          ]
+        },
+        "attackType": "Ranged",
+        "damageType": "Physical",
+        "effectTags": [
+          "Piercing"
+        ],
+        "log": "{Actor} fired a bone arrow at {Target}, dealing {Amount} physical damage.",
+        "type": "Damage"
+      }
+    ]
+  },
+  {
+    "id": "piercingArrows",
+    "kind": "Passive",
+    "name": "Piercing Arrows",
+    "description": "All ranged attacks have a 15% chance to apply bleed, dealing 15 damage over 9 seconds.",
+    "cooldownSeconds": 0.0,
+    "targeting": "DamageSource",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnRangedAttack"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "DamageSource",
+        "scaling": {
+          "baseValue": 1
+        },
+        "conditions": [
+          {
+            "type": "RandomChance",
+            "value": 15.0
+          }
+        ],
+        "log": "{Actor}'s arrow pierced {Target}, causing them to bleed.",
+        "type": "ApplyStatus",
+        "status": "piercingArrowBleed"
+      }
+    ]
+  },
+  {
+    "id": "siphon",
+    "kind": "Active",
+    "name": "Siphon",
+    "description": "Deal 16 magic damage to the target.",
+    "cooldownSeconds": 19.0,
+    "targeting": "CurrentTarget",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "CurrentTarget",
+        "scaling": {
+          "baseValue": 16.0,
+          "attributeScaling": [
+            {
+              "attribute": "Spirit",
+              "coefficient": 0.3
+            }
+          ]
+        },
+        "attackType": "Ranged",
+        "damageType": "Magical",
+        "log": "{Actor} siphoned energy from {Target}, dealing {Amount} magic damage.",
+        "type": "Damage"
+      }
+    ]
+  },
+  {
+    "id": "protectiveBoneBarrier",
+    "kind": "Passive",
+    "name": "Protective Bone Barrier",
+    "description": "Every 10 seconds, form a barrier around you that can absorb up to 25 damage.",
+    "cooldownSeconds": 0.0,
+    "targeting": "Self",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnCombatStart"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "Self",
+        "scaling": {
+          "baseValue": 1
+        },
+        "intervalSeconds": 10.0,
+        "type": "ApplyStatus",
+        "status": "boneBarrierShield"
+      }
+    ]
+  },
+  {
+    "id": "boneShield",
+    "kind": "Active",
+    "name": "Bone Shield",
+    "description": "Form a bone shield around you, reducing damage taken by 10% for 8 seconds.",
+    "cooldownSeconds": 14.0,
+    "targeting": "Self",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "Self",
+        "scaling": {
+          "baseValue": 10.0
+        },
+        "durationSeconds": 8.0,
+        "log": "{Actor} summons a protective bone shield, reducing damage taken by 10%.",
+        "type": "ModifyAttribute",
+        "attribute": "DamageReduction"
+      }
+    ]
+  },
+  {
+    "id": "spikedDefense",
+    "kind": "Passive",
+    "name": "Spiked Defense",
+    "description": "Whenever taking melee damage, reflect 6 damage to the attacker.",
+    "cooldownSeconds": 0.0,
+    "targeting": "DamageSource",
+    "tags": [
+      "Effect.Ability"
+    ],
+    "triggers": [
+      {
+        "type": "OnMeleeAttacked"
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.1",
+        "target": "DamageSource",
+        "scaling": {
+          "baseValue": 6.0
+        },
+        "attackType": "None",
+        "damageType": "Physical",
+        "log": "{Target} is struck by {Actor}'s spiked bones for {Amount} damage.",
+        "type": "Damage"
+      }
     ]
   }
 ]

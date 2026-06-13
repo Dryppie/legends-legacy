@@ -18,7 +18,7 @@
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Threat",
+          "attributeType": "Fortitude",
           "amount": 1,
           "modifierType": "Flat"
         }
@@ -275,7 +275,7 @@
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Health",
+          "attributeType": "MaxHealth",
           "amount": 7,
           "modifierType": "Flat"
         }
@@ -789,7 +789,7 @@
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Mana",
+          "attributeType": "Spirit",
           "amount": 7,
           "modifierType": "Flat"
         }
@@ -1041,7 +1041,7 @@
       "equipmentType": "Necklace",
       "attributeModifiers": [
         {
-          "attributeType": "MaxMana",
+          "attributeType": "Spirit",
           "amount": 11,
           "modifierType": "Flat"
         }
@@ -1105,7 +1105,7 @@
     "item": {
       "id": "leafglow_amulet",
       "name": "Leafglow Amulet",
-      "description": "A glowing amulet that grants mana regeneration and a soft green light.",
+      "description": "A glowing amulet that grants spirit recovery and a soft green light.",
       "stackable": false,
       "itemType": "Equipment",
       "rarity": "Common",
@@ -1396,7 +1396,7 @@
       "equipmentType": "Ring",
       "attributeModifiers": [
         {
-          "attributeType": "PhysicalDefense",
+          "attributeType": "Armor",
           "amount": 18,
           "modifierType": "Flat"
         }
@@ -1525,7 +1525,7 @@
       "equipmentType": "Relic",
       "attributeModifiers": [
         {
-          "attributeType": "ManaRegeneration",
+          "attributeType": "Spirit",
           "amount": 1,
           "modifierType": "Flat"
         }
@@ -1583,7 +1583,7 @@
       "equipmentType": "Relic",
       "attributeModifiers": [
         {
-          "attributeType": "Threat",
+          "attributeType": "Fortitude",
           "amount": 3,
           "modifierType": "Flat"
         }
@@ -2333,12 +2333,12 @@
       "equipmentType": "OffHand",
       "attributeModifiers": [
         {
-          "attributeType": "PhysicalDefense",
+          "attributeType": "Armor",
           "amount": 15,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Block",
+          "attributeType": "BlockChance",
           "amount": 25,
           "modifierType": "Flat"
         }
@@ -2422,12 +2422,12 @@
       "equipmentType": "OffHand",
       "attributeModifiers": [
         {
-          "attributeType": "MagicalDefense",
+          "attributeType": "Resistance",
           "amount": 15,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Block",
+          "attributeType": "BlockChance",
           "amount": 25,
           "modifierType": "Flat"
         }
@@ -3890,7 +3890,7 @@
           "modifierType": "Flat"
         },
         {
-          "attributeType": "ManaRegeneration",
+          "attributeType": "Spirit",
           "amount": 2,
           "modifierType": "Flat"
         }
@@ -4063,7 +4063,7 @@
           "modifierType": "Flat"
         },
         {
-          "attributeType": "MaxMana",
+          "attributeType": "Spirit",
           "amount": 25,
           "modifierType": "Flat"
         }
@@ -4140,14 +4140,14 @@
     "item": {
       "id": "copper_core_pendant",
       "name": "Copper Core Pendant",
-      "description": "A pendant charged with latent energy from copper veins. Slightly increases maximum mana.",
+      "description": "A pendant charged with latent energy from copper veins. Slightly increases Spirit.",
       "stackable": false,
       "itemType": "Equipment",
       "rarity": "Common",
       "equipmentType": "Necklace",
       "attributeModifiers": [
         {
-          "attributeType": "MaxMana",
+          "attributeType": "Spirit",
           "amount": 38,
           "modifierType": "Flat"
         }
@@ -4211,7 +4211,7 @@
     "item": {
       "id": "amberleaf_pendant",
       "name": "Amberleaf Pendant",
-      "description": "A leaf-shaped amber gem that pulses with nature\u2019s essence. Increases agility and grants minor mana regeneration.",
+      "description": "A leaf-shaped amber gem that pulses with nature\u2019s essence. Increases agility and grants minor spirit recovery.",
       "stackable": false,
       "itemType": "Equipment",
       "rarity": "Common",
@@ -4223,7 +4223,7 @@
           "modifierType": "Flat"
         },
         {
-          "attributeType": "ManaRegeneration",
+          "attributeType": "Spirit",
           "amount": 1,
           "modifierType": "Flat"
         }
@@ -4299,7 +4299,7 @@
           "modifierType": "Flat"
         },
         {
-          "attributeType": "FireResistance",
+          "attributeType": "Resistance",
           "amount": 3,
           "modifierType": "Flat"
         }
@@ -4512,7 +4512,7 @@
       "equipmentType": "Ring",
       "attributeModifiers": [
         {
-          "attributeType": "PhysicalDefense",
+          "attributeType": "Armor",
           "amount": 22,
           "modifierType": "Flat"
         },
@@ -4644,14 +4644,14 @@
     "item": {
       "id": "living_growth_totem",
       "name": "Totem of Living Growth",
-      "description": "A totem pulsing with life, made of living amber. Grants passive mana regeneration when not moving.",
+      "description": "A totem pulsing with life, made of living amber. Grants passive spirit recovery when not moving.",
       "stackable": false,
       "itemType": "Equipment",
       "rarity": "Common",
       "equipmentType": "Relic",
       "attributeModifiers": [
         {
-          "attributeType": "ManaRegeneration",
+          "attributeType": "Spirit",
           "amount": 3,
           "modifierType": "Flat"
         }
@@ -4709,7 +4709,7 @@
       "equipmentType": "Relic",
       "attributeModifiers": [
         {
-          "attributeType": "Threat",
+          "attributeType": "Fortitude",
           "amount": 5,
           "modifierType": "Flat"
         }
@@ -5454,12 +5454,12 @@
       "equipmentType": "OffHand",
       "attributeModifiers": [
         {
-          "attributeType": "PhysicalDefense",
+          "attributeType": "Armor",
           "amount": 32,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Block",
+          "attributeType": "BlockChance",
           "amount": 65,
           "modifierType": "Flat"
         }
@@ -5543,12 +5543,12 @@
       "equipmentType": "OffHand",
       "attributeModifiers": [
         {
-          "attributeType": "MagicalDefense",
+          "attributeType": "Resistance",
           "amount": 32,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Block",
+          "attributeType": "BlockChance",
           "amount": 65,
           "modifierType": "Flat"
         }
@@ -5625,7 +5625,7 @@
     "item": {
       "id": "verdant_channeler_staff",
       "name": "Verdant Channeler Staff",
-      "description": "A staff woven from living amber and verdant ore, humming with natural mana.",
+      "description": "A staff woven from living amber and verdant ore, humming with natural spirit.",
       "stackable": false,
       "itemType": "Equipment",
       "rarity": "Common",
@@ -5721,7 +5721,7 @@
           "modifierType": "Flat"
         },
         {
-          "attributeType": "ManaRegeneration",
+          "attributeType": "Spirit",
           "amount": 1,
           "modifierType": "Flat"
         }
@@ -5894,7 +5894,7 @@
           "modifierType": "Flat"
         },
         {
-          "attributeType": "MaxMana",
+          "attributeType": "Spirit",
           "amount": 24,
           "modifierType": "Flat"
         }
@@ -6240,12 +6240,12 @@
       "equipmentType": "Head",
       "attributeModifiers": [
         {
-          "attributeType": "PhysicalDefense",
+          "attributeType": "Armor",
           "amount": 30,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "MagicalDefense",
+          "attributeType": "Resistance",
           "amount": 30,
           "modifierType": "Flat"
         },
@@ -6308,12 +6308,12 @@
       "equipmentType": "Chest",
       "attributeModifiers": [
         {
-          "attributeType": "PhysicalDefense",
+          "attributeType": "Armor",
           "amount": 30,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "MagicalDefense",
+          "attributeType": "Resistance",
           "amount": 30,
           "modifierType": "Flat"
         },
@@ -6376,12 +6376,12 @@
       "equipmentType": "Legs",
       "attributeModifiers": [
         {
-          "attributeType": "PhysicalDefense",
+          "attributeType": "Armor",
           "amount": 30,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "MagicalDefense",
+          "attributeType": "Resistance",
           "amount": 30,
           "modifierType": "Flat"
         },
@@ -6444,7 +6444,7 @@
       "equipmentType": "Head",
       "attributeModifiers": [
         {
-          "attributeType": "PhysicalDefense",
+          "attributeType": "Armor",
           "amount": 20,
           "modifierType": "Flat"
         },
@@ -6454,7 +6454,7 @@
           "modifierType": "Flat"
         },
         {
-          "attributeType": "AttackPower",
+          "attributeType": "Power",
           "amount": 20,
           "modifierType": "Flat"
         }
@@ -6512,7 +6512,7 @@
       "equipmentType": "Chest",
       "attributeModifiers": [
         {
-          "attributeType": "PhysicalDefense",
+          "attributeType": "Armor",
           "amount": 20,
           "modifierType": "Flat"
         },
@@ -6522,7 +6522,7 @@
           "modifierType": "Flat"
         },
         {
-          "attributeType": "AttackPower",
+          "attributeType": "Power",
           "amount": 20,
           "modifierType": "Flat"
         }
@@ -6580,7 +6580,7 @@
       "equipmentType": "Legs",
       "attributeModifiers": [
         {
-          "attributeType": "PhysicalDefense",
+          "attributeType": "Armor",
           "amount": 20,
           "modifierType": "Flat"
         },
@@ -6590,7 +6590,7 @@
           "modifierType": "Flat"
         },
         {
-          "attributeType": "AttackPower",
+          "attributeType": "Power",
           "amount": 20,
           "modifierType": "Flat"
         }
@@ -6648,7 +6648,7 @@
       "equipmentType": "Head",
       "attributeModifiers": [
         {
-          "attributeType": "PhysicalDefense",
+          "attributeType": "Armor",
           "amount": 10,
           "modifierType": "Flat"
         },
@@ -6658,7 +6658,7 @@
           "modifierType": "Flat"
         },
         {
-          "attributeType": "AttackPower",
+          "attributeType": "Power",
           "amount": 30,
           "modifierType": "Flat"
         }
@@ -6716,7 +6716,7 @@
       "equipmentType": "Chest",
       "attributeModifiers": [
         {
-          "attributeType": "PhysicalDefense",
+          "attributeType": "Armor",
           "amount": 10,
           "modifierType": "Flat"
         },
@@ -6726,7 +6726,7 @@
           "modifierType": "Flat"
         },
         {
-          "attributeType": "AttackPower",
+          "attributeType": "Power",
           "amount": 30,
           "modifierType": "Flat"
         }
@@ -6784,7 +6784,7 @@
       "equipmentType": "Legs",
       "attributeModifiers": [
         {
-          "attributeType": "PhysicalDefense",
+          "attributeType": "Armor",
           "amount": 10,
           "modifierType": "Flat"
         },
@@ -6794,7 +6794,7 @@
           "modifierType": "Flat"
         },
         {
-          "attributeType": "AttackPower",
+          "attributeType": "Power",
           "amount": 30,
           "modifierType": "Flat"
         }
@@ -6852,7 +6852,7 @@
       "equipmentType": "Head",
       "attributeModifiers": [
         {
-          "attributeType": "MagicalDefense",
+          "attributeType": "Resistance",
           "amount": 10,
           "modifierType": "Flat"
         },
@@ -6862,7 +6862,7 @@
           "modifierType": "Flat"
         },
         {
-          "attributeType": "SpellPower",
+          "attributeType": "Power",
           "amount": 30,
           "modifierType": "Flat"
         }
@@ -6920,7 +6920,7 @@
       "equipmentType": "Chest",
       "attributeModifiers": [
         {
-          "attributeType": "MagicalDefense",
+          "attributeType": "Resistance",
           "amount": 10,
           "modifierType": "Flat"
         },
@@ -6930,7 +6930,7 @@
           "modifierType": "Flat"
         },
         {
-          "attributeType": "SpellPower",
+          "attributeType": "Power",
           "amount": 30,
           "modifierType": "Flat"
         }
@@ -6988,7 +6988,7 @@
       "equipmentType": "Legs",
       "attributeModifiers": [
         {
-          "attributeType": "MagicalDefense",
+          "attributeType": "Resistance",
           "amount": 10,
           "modifierType": "Flat"
         },
@@ -6998,7 +6998,7 @@
           "modifierType": "Flat"
         },
         {
-          "attributeType": "SpellPower",
+          "attributeType": "Power",
           "amount": 30,
           "modifierType": "Flat"
         }
@@ -7056,7 +7056,7 @@
       "equipmentType": "Ring",
       "attributeModifiers": [
         {
-          "attributeType": "AttackPower",
+          "attributeType": "Power",
           "amount": 10,
           "modifierType": "Additive"
         }
@@ -7114,7 +7114,7 @@
       "equipmentType": "Ring",
       "attributeModifiers": [
         {
-          "attributeType": "SpellPower",
+          "attributeType": "Power",
           "amount": 10,
           "modifierType": "Additive"
         }
@@ -7230,7 +7230,7 @@
       "equipmentType": "Necklace",
       "attributeModifiers": [
         {
-          "attributeType": "PhysicalDefense",
+          "attributeType": "Armor",
           "amount": 10,
           "modifierType": "Additive"
         }
@@ -7288,7 +7288,7 @@
       "equipmentType": "Necklace",
       "attributeModifiers": [
         {
-          "attributeType": "MagicalDefense",
+          "attributeType": "Resistance",
           "amount": 10,
           "modifierType": "Additive"
         }
@@ -7450,11 +7450,11 @@
   },
   {
     "id": "3e301ebf-006d-4518-94fe-a9014a532c04",
-    "name": "Mana Heart",
+    "name": "Spirit Heart",
     "itemId": "mana_heart",
     "item": {
       "id": "mana_heart",
-      "name": "Mana Heart",
+      "name": "Spirit Heart",
       "description": "",
       "stackable": false,
       "itemType": "Equipment",
@@ -7462,7 +7462,7 @@
       "equipmentType": "Relic",
       "attributeModifiers": [
         {
-          "attributeType": "ManaRegeneration",
+          "attributeType": "Spirit",
           "amount": 10,
           "modifierType": "Additive"
         }
@@ -7520,7 +7520,7 @@
       "equipmentType": "Relic",
       "attributeModifiers": [
         {
-          "attributeType": "Threat",
+          "attributeType": "Fortitude",
           "amount": 10,
           "modifierType": "Additive"
         }
@@ -7580,7 +7580,7 @@
       "attackSpeed": 20,
       "magnitude": 10,
       "magnitudeRange": 20,
-      "scalingAttribute": "AttackPower",
+      "scalingAttribute": "Power",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -7632,7 +7632,7 @@
       "attackSpeed": 20,
       "magnitude": 10,
       "magnitudeRange": 30,
-      "scalingAttribute": "AttackPower",
+      "scalingAttribute": "Power",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -7684,7 +7684,7 @@
       "attackSpeed": 20,
       "magnitude": 10,
       "magnitudeRange": 25,
-      "scalingAttribute": "AttackPower",
+      "scalingAttribute": "Power",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -7736,7 +7736,7 @@
       "attackSpeed": 24,
       "magnitude": 8,
       "magnitudeRange": 15,
-      "scalingAttribute": "AttackPower",
+      "scalingAttribute": "Power",
       "scalingAmount": 0.8
     },
     "quantity": 1,
@@ -7788,7 +7788,7 @@
       "attackSpeed": 10,
       "magnitude": 15,
       "magnitudeRange": 30,
-      "scalingAttribute": "AttackPower",
+      "scalingAttribute": "Power",
       "scalingAmount": 2
     },
     "quantity": 1,
@@ -7840,7 +7840,7 @@
       "attackSpeed": 10,
       "magnitude": 15,
       "magnitudeRange": 50,
-      "scalingAttribute": "AttackPower",
+      "scalingAttribute": "Power",
       "scalingAmount": 2
     },
     "quantity": 1,
@@ -7892,7 +7892,7 @@
       "attackSpeed": 10,
       "magnitude": 15,
       "magnitudeRange": 40,
-      "scalingAttribute": "AttackPower",
+      "scalingAttribute": "Power",
       "scalingAmount": 2
     },
     "quantity": 1,
@@ -7944,7 +7944,7 @@
       "attackSpeed": 12,
       "magnitude": 14,
       "magnitudeRange": 25,
-      "scalingAttribute": "AttackPower",
+      "scalingAttribute": "Power",
       "scalingAmount": 1.8
     },
     "quantity": 1,
@@ -7994,12 +7994,12 @@
       "equipmentType": "OffHand",
       "attributeModifiers": [
         {
-          "attributeType": "PhysicalDefense",
+          "attributeType": "Armor",
           "amount": 10,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Block",
+          "attributeType": "BlockChance",
           "amount": 50,
           "modifierType": "Flat"
         }
@@ -8045,11 +8045,11 @@
   },
   {
     "id": "fc1e6931-c552-44b9-96e9-412a2e24a1fa",
-    "name": "Manaward",
-    "itemId": "manaward",
+    "name": "Spiritward",
+    "itemId": "Spiritward",
     "item": {
-      "id": "manaward",
-      "name": "Manaward",
+      "id": "Spiritward",
+      "name": "Spiritward",
       "description": "",
       "stackable": false,
       "itemType": "Equipment",
@@ -8057,12 +8057,12 @@
       "equipmentType": "OffHand",
       "attributeModifiers": [
         {
-          "attributeType": "MagicalDefense",
+          "attributeType": "Resistance",
           "amount": 10,
           "modifierType": "Flat"
         },
         {
-          "attributeType": "Block",
+          "attributeType": "BlockChance",
           "amount": 50,
           "modifierType": "Flat"
         }
@@ -8122,7 +8122,7 @@
       "attackSpeed": 10,
       "magnitude": 15,
       "magnitudeRange": 35,
-      "scalingAttribute": "SpellPower",
+      "scalingAttribute": "Power",
       "scalingAmount": 2
     },
     "quantity": 1,
@@ -8172,7 +8172,7 @@
       "equipmentType": "OffHand",
       "attributeModifiers": [
         {
-          "attributeType": "SpellPower",
+          "attributeType": "Power",
           "amount": 10,
           "modifierType": "Flat"
         }
@@ -8232,7 +8232,7 @@
       "attackSpeed": 20,
       "magnitude": 10,
       "magnitudeRange": 20,
-      "scalingAttribute": "SpellPower",
+      "scalingAttribute": "Power",
       "scalingAmount": 1
     },
     "quantity": 1,
@@ -8284,7 +8284,7 @@
       "attackSpeed": 15,
       "magnitude": 13,
       "magnitudeRange": 25,
-      "scalingAttribute": "AttackPower",
+      "scalingAttribute": "Power",
       "scalingAmount": 1.7
     },
     "quantity": 1,
@@ -8336,7 +8336,7 @@
       "attackSpeed": 20,
       "magnitude": 10,
       "magnitudeRange": 40,
-      "scalingAttribute": "AttackPower",
+      "scalingAttribute": "Power",
       "scalingAmount": 1.5
     },
     "quantity": 1,
@@ -8388,7 +8388,7 @@
       "attackSpeed": 25,
       "magnitude": 12,
       "magnitudeRange": 20,
-      "scalingAttribute": "AttackPower",
+      "scalingAttribute": "Power",
       "scalingAmount": 1.3
     },
     "quantity": 1,

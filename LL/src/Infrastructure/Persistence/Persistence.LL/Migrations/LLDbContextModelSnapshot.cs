@@ -23,19 +23,6 @@ namespace Persistence.LL.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Domain.Models.Abilities.AbilityId", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("EntityId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id", "EntityId");
-
-                    b.ToTable("AbilityIds");
-                });
-
             modelBuilder.Entity("Domain.Models.Attributes.EntityAttribute", b =>
                 {
                     b.Property<Guid>("EntityId")
@@ -382,54 +369,148 @@ namespace Persistence.LL.Migrations
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("Domain.Models.Essences.Essence", b =>
+            modelBuilder.Entity("Domain.Models.Essences.CreatureResonance", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("ActiveAbilityId")
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CreatureId")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<double>("ResonanceValue")
+                        .HasColumnType("double precision");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("CharacterId", "CreatureId")
+                        .IsUnique();
+
+                    b.ToTable("MonsterResonances");
+                });
+
+            modelBuilder.Entity("Domain.Models.Essences.EssenceLoadout", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
 
-                    b.Property<string>("PassiveAbilityId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Essences");
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("CharacterId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("EssenceLoadouts");
                 });
 
-            modelBuilder.Entity("Domain.Models.Essences.EssenceSlots.EssenceSlot", b =>
+            modelBuilder.Entity("Domain.Models.Essences.EssenceLoadoutSlot", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("EntityId")
+                    b.Property<Guid>("EssenceLoadoutId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("EssenceId")
+                    b.Property<Guid?>("PlayerEssenceId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("SlotState")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SlotType")
+                    b.Property<int>("SlotIndex")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EntityId");
+                    b.HasIndex("PlayerEssenceId");
 
-                    b.HasIndex("EssenceId");
+                    b.HasIndex("EssenceLoadoutId", "PlayerEssenceId")
+                        .IsUnique();
 
-                    b.ToTable("EssenceSlots");
+                    b.HasIndex("EssenceLoadoutId", "SlotIndex")
+                        .IsUnique();
+
+                    b.ToTable("EssenceLoadoutSlots", t =>
+                        {
+                            t.HasCheckConstraint("CK_EssenceLoadoutSlots_SlotIndex", "\"SlotIndex\" >= 0 AND \"SlotIndex\" < 10");
+                        });
+                });
+
+            modelBuilder.Entity("Domain.Models.Essences.PlayerEssence", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("AbsorbedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("AscensionTier")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CurrentXp")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EssenceDefinitionId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTimeOffset?>("EvolutionUnlockedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsEvolved")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsFavorite")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Level")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("CharacterId", "EssenceDefinitionId")
+                        .IsUnique();
+
+                    b.ToTable("PlayerEssences");
                 });
 
             modelBuilder.Entity("Domain.Models.Guilds.Guild", b =>
@@ -595,6 +676,9 @@ namespace Persistence.LL.Migrations
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsBound")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("ItemType")
                         .HasColumnType("integer");
@@ -927,10 +1011,6 @@ namespace Persistence.LL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.PrimitiveCollection<List<Guid>>("ActiveEssenceIds")
-                        .IsRequired()
-                        .HasColumnType("uuid[]");
-
                     b.Property<Guid>("CharacterId")
                         .HasColumnType("uuid");
 
@@ -1001,6 +1081,46 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("CharacterSnapshotId");
 
                     b.ToTable("EquipmentSnapshot");
+                });
+
+            modelBuilder.Entity("Domain.Models.Snapshots.EquippedEssenceSnapshot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AscensionTier")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("CharacterSnapshotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CurrentXp")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EssenceDefinitionId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<bool>("IsEvolved")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("PlayerEssenceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("SlotIndex")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterSnapshotId", "SlotIndex")
+                        .IsUnique();
+
+                    b.ToTable("EquippedEssenceSnapshots");
                 });
 
             modelBuilder.Entity("Domain.Models.Soulstones.CharacterSoulstoneUpgrade", b =>
@@ -1270,10 +1390,17 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Items.ItemBase");
 
-                    b.Property<Guid>("EssenceId")
-                        .HasColumnType("uuid");
+                    b.Property<int>("DismantleDustAmount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(1);
 
-                    b.HasIndex("EssenceId");
+                    b.Property<string>("EssenceDefinitionId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.HasIndex("EssenceDefinitionId");
 
                     b.HasDiscriminator().HasValue(3);
                 });
@@ -1436,20 +1563,31 @@ namespace Persistence.LL.Migrations
                         .HasForeignKey("CreatureId");
                 });
 
-            modelBuilder.Entity("Domain.Models.Essences.EssenceSlots.EssenceSlot", b =>
+            modelBuilder.Entity("Domain.Models.Essences.EssenceLoadout", b =>
                 {
-                    b.HasOne("Domain.Models.Entities.Entity", null)
-                        .WithMany("EssenceSlots")
-                        .HasForeignKey("EntityId")
+                    b.HasOne("Domain.Models.Entities.Characters.Character", null)
+                        .WithMany("EssenceLoadouts")
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Essences.EssenceLoadoutSlot", b =>
+                {
+                    b.HasOne("Domain.Models.Essences.EssenceLoadout", "EssenceLoadout")
+                        .WithMany("Slots")
+                        .HasForeignKey("EssenceLoadoutId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Models.Essences.Essence", "OccupiedEssence")
-                        .WithMany("EssenceSlots")
-                        .HasForeignKey("EssenceId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                    b.HasOne("Domain.Models.Essences.PlayerEssence", "PlayerEssence")
+                        .WithMany()
+                        .HasForeignKey("PlayerEssenceId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
-                    b.Navigation("OccupiedEssence");
+                    b.Navigation("EssenceLoadout");
+
+                    b.Navigation("PlayerEssence");
                 });
 
             modelBuilder.Entity("Domain.Models.Guilds.Guild", b =>
@@ -1722,6 +1860,15 @@ namespace Persistence.LL.Migrations
                         .HasForeignKey("CharacterSnapshotId");
                 });
 
+            modelBuilder.Entity("Domain.Models.Snapshots.EquippedEssenceSnapshot", b =>
+                {
+                    b.HasOne("Domain.Models.Snapshots.CharacterSnapshot", null)
+                        .WithMany("EquippedEssences")
+                        .HasForeignKey("CharacterSnapshotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Domain.Models.Soulstones.CharacterSoulstoneUpgrade", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Characters.Character", "Character")
@@ -1795,17 +1942,6 @@ namespace Persistence.LL.Migrations
                     b.Navigation("LootTable");
                 });
 
-            modelBuilder.Entity("Domain.Models.Items.EssenceItems.EssenceItemBase", b =>
-                {
-                    b.HasOne("Domain.Models.Essences.Essence", "Essence")
-                        .WithMany("EssenceItems")
-                        .HasForeignKey("EssenceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Essence");
-                });
-
             modelBuilder.Entity("Domain.Models.LootTables.LootTableItem", b =>
                 {
                     b.HasOne("Domain.Models.Items.ItemBase", "Item")
@@ -1834,15 +1970,11 @@ namespace Persistence.LL.Migrations
                     b.Navigation("BaseAttributes");
 
                     b.Navigation("EquipmentSlots");
-
-                    b.Navigation("EssenceSlots");
                 });
 
-            modelBuilder.Entity("Domain.Models.Essences.Essence", b =>
+            modelBuilder.Entity("Domain.Models.Essences.EssenceLoadout", b =>
                 {
-                    b.Navigation("EssenceItems");
-
-                    b.Navigation("EssenceSlots");
+                    b.Navigation("Slots");
                 });
 
             modelBuilder.Entity("Domain.Models.Guilds.Guild", b =>
@@ -1892,6 +2024,8 @@ namespace Persistence.LL.Migrations
                     b.Navigation("BaseAttributes");
 
                     b.Navigation("Equipment");
+
+                    b.Navigation("EquippedEssences");
                 });
 
             modelBuilder.Entity("Domain.Models.Snapshots.EquipmentSnapshot", b =>
@@ -1921,6 +2055,8 @@ namespace Persistence.LL.Migrations
                     b.Navigation("CharacterSoulstoneUpgrades");
 
                     b.Navigation("ColosseumMatches");
+
+                    b.Navigation("EssenceLoadouts");
 
                     b.Navigation("Guild");
 

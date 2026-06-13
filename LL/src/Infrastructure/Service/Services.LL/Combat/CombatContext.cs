@@ -1,10 +1,9 @@
-﻿using Domain.Interfaces.Combat;
-using Domain.Models.Abilities;
-using Domain.Models.Abilities.Effects;
-using Domain.Models.Abilities.Effects.Trigger;
-using Domain.Models.Abilities.ResourceCosts;
+using Domain.Interfaces.Combat;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
+using Domain.Models.Combat.Abilities;
+using Domain.Models.Combat.Abilities.Effects;
+using Domain.Models.Combat.Abilities.Effects.Trigger;
 using Services.LL.Combat.CombatEngine;
 using Services.LL.Interfaces;
 
@@ -137,7 +136,7 @@ public class CombatContext : ICombatContext
 
             foreach (var ability in entity.Abilities)
             {
-                if (ability.Definition.Type == AbilityType.Active &&
+                if (ability.Definition.Type == CombatAbilityType.Active &&
                     ability.RemainingTimeUntilUse <= 0 &&
                     ability.Definition.Usage.CanUse())
                 {
@@ -155,29 +154,18 @@ public class CombatContext : ICombatContext
                 entity.NextBasicAttackIn = 300; // TODO: Turn 300 into a Constant somewhere, as it is also stored in the Entity class
             }
 
-            entity.NextBasicAttackIn -= (int)entity.CombatAttributes[AttributeType.AttackSpeed];
+            entity.NextBasicAttackIn -= /*(int)entity.CombatAttributes[AttributeType.Precision]*/ 10;
 
             EndTick(entity);
         }
     }
 
-    private void UseAbility(CombatEntity actor, AbilityInstance ability)
+    private void UseAbility(CombatEntity actor, CombatAbilityInstance ability)
     {
         var def = ability.Definition;
 
-        // Put ability on cooldown even if actor is out of mana/health
+        // Put ability on cooldown even if actor is out of health.
         ability.SetCooldown();
-
-        var costType = def.Cost!.Type.Equals(ResourceType.Mana)
-            ? AttributeType.Mana
-            : AttributeType.Health;
-
-        // Determine the minimum resource value allowed after paying the cost
-        var minimumResourceAfterCost = (costType == AttributeType.Mana) ? 0 : 1;
-
-        // Check if subtracting the cost would drop below the minimum
-        if ((actor.CombatAttributes[costType] - def.Cost.Amount) < minimumResourceAfterCost)
-            return;
 
         //var targetNames = new List<string>();
         //var effectsToApply = new List<(CombatEntity target, EffectInstance effectInstance)>();
@@ -193,7 +181,7 @@ public class CombatContext : ICombatContext
         //    }
         //    // If multiple effects on the same ability has the same targeting,
         //    // the effects should be applied to the same targets
-        //    if (!targetsPerTargeting.TryGetValue(effectTemplate.Targeting, out var targets))
+        //    if (!targetsPerCombatTargeting.TryGetValue(effectTemplate.Targeting, out var targets))
         //    {
         //        targets = TargetingManager.SelectTargets(effectTemplate.Targeting, actor, opposingTeam, ownTeam);
         //        targetsPerTargeting[effectTemplate.Targeting] = targets;
@@ -224,16 +212,14 @@ public class CombatContext : ICombatContext
 
         // Deduct resource cost and usages in the end, as this should only happen if the ability
         // has actually been used and if there were any targets to use it on
-        actor.CombatAttributes[costType] -= def.Cost.Amount;
         def.Usage.ConsumeUse();
 
         var simpleCombatEntity = new SimpleCombatEntity()
         {
             Id = actor.Id,
             MaxHealth = actor.GetAttributeValue(AttributeType.MaxHealth),
-            Health = actor.GetAttributeValue(AttributeType.Health),
-            MaxMana = actor.GetAttributeValue(AttributeType.MaxMana),
-            Mana = actor.GetAttributeValue(AttributeType.Mana)
+            Health = actor.GetCurrentHealthValue(),
+            Barrier = actor.GetCurrentBarrierValue()
         };
 
         // Actor has cast Ability log
@@ -253,6 +239,7 @@ public class CombatContext : ICombatContext
         // Optional: log basic info
         _eventLog.Add(new CombatLogItem
         {
+            Source = def.Name,
             ActorId = actor.Id,
             Timestamp = CurrentTime,
             EventType = EventType.AbilityUse,
@@ -272,12 +259,43 @@ public class CombatContext : ICombatContext
 
     private void UseBasicAttack(CombatEntity entity)
     {
+        var basicAttackSource = GetBasicAttackSourceName(entity);
+        if (!string.IsNullOrWhiteSpace(basicAttackSource))
+        {
+            _eventLog.Add(new CombatLogItem
+            {
+                Source = basicAttackSource,
+                ActorId = entity.Id,
+                Timestamp = CurrentTime,
+                EventType = EventType.AbilityUse,
+                Details = $"{entity.Name} used {basicAttackSource}",
+                CombatEntity = new SimpleCombatEntity
+                {
+                    Id = entity.Id,
+                    MaxHealth = entity.GetAttributeValue(AttributeType.MaxHealth),
+                    Health = entity.GetCurrentHealthValue(),
+                    Barrier = entity.GetCurrentBarrierValue()
+                }
+            });
+        }
+
         EventBus.Publish(new CombatEvent
         {
             Type = TriggerEvent.BasicAttack,
             Source = entity,
             CurrentTime = CurrentTime
         });
+    }
+
+    private static string GetBasicAttackSourceName(CombatEntity entity)
+    {
+        var basicAttack = entity.Abilities
+            .SelectMany(ability => ability.Definition.Triggers)
+            .Where(trigger => trigger.Event == TriggerEvent.BasicAttack)
+            .SelectMany(trigger => trigger.Actions)
+            .FirstOrDefault(action => !string.IsNullOrWhiteSpace(action.SourceName));
+
+        return basicAttack?.SourceName ?? string.Empty;
     }
 
     private void CleanupDefeatedEntities()
@@ -310,37 +328,33 @@ public class CombatContext : ICombatContext
     {
         if (entity.NextRecoveryIn <= 0)
         {
-            RegenerateHealthAndMana(entity);
+            RegenerateHealth(entity);
             entity.NextRecoveryIn = 500;
         }
-        entity.NextRecoveryIn -= (int)entity.CombatAttributes[AttributeType.RecoveryRate];
+        entity.NextRecoveryIn -= (int)entity.CombatAttributes[AttributeType.Spirit];
     }
 
-    private void RegenerateHealthAndMana(CombatEntity entity)
+    private void RegenerateHealth(CombatEntity entity)
     {
-        entity.CombatAttributes[AttributeType.Health] += entity.CombatAttributes[AttributeType.HealthRegeneration];
-        entity.CombatAttributes[AttributeType.Mana] += entity.CombatAttributes[AttributeType.ManaRegeneration];
-        if (entity.CombatAttributes[AttributeType.Health] > entity.CombatAttributes[AttributeType.MaxHealth]) entity.CombatAttributes[AttributeType.Health] = entity.CombatAttributes[AttributeType.MaxHealth];
-        if (entity.CombatAttributes[AttributeType.Mana] > entity.CombatAttributes[AttributeType.MaxMana]) entity.CombatAttributes[AttributeType.Mana] = entity.CombatAttributes[AttributeType.MaxMana];
+        var healthRegenerated = entity.CombatAttributes.GetValueOrDefault(AttributeType.HealthRegeneration);
+        var previousHealth = entity.CurrentHealth;
+        entity.AdjustCurrentHealth(healthRegenerated);
+        var actualHealthRegenerated = (int)(entity.CurrentHealth - previousHealth);
 
         // Log regeneration seperately so the aggregator can keep track of it
-        var combatHealthEvent = CombatEvent(entity, entity, EventType.HealthRegeneration, (int)entity.CombatAttributes[AttributeType.HealthRegeneration], $"{entity.Name} regenerated {entity.CombatAttributes[AttributeType.HealthRegeneration]} health.");
-        var combatManaEvent = CombatEvent(entity, entity, EventType.ManaRegeneration, (int)entity.CombatAttributes[AttributeType.ManaRegeneration], $"{entity.Name} regenerated {entity.CombatAttributes[AttributeType.ManaRegeneration]} mana.");
+        var combatHealthEvent = CombatEvent(entity, entity, EventType.HealthRegeneration, actualHealthRegenerated, $"{entity.Name} regenerated {actualHealthRegenerated} health.");
 
         var combatEntity = new SimpleCombatEntity()
         {
             Id = entity.Id,
             MaxHealth = entity.GetAttributeValue(AttributeType.MaxHealth),
-            Health = entity.GetAttributeValue(AttributeType.Health),
-            MaxMana = entity.GetAttributeValue(AttributeType.MaxMana),
-            Mana = entity.GetAttributeValue(AttributeType.Mana),
-            Barrier = entity.GetAttributeValue(AttributeType.Barrier)
+            Health = entity.GetCurrentHealthValue(),
+            Barrier = entity.GetCurrentBarrierValue()
         };
 
         if (combatEntity.Health < 0) combatEntity.Health = 0;
 
         combatHealthEvent.CombatEntity = combatEntity;
-        combatManaEvent.CombatEntity = combatEntity;
     }
 
     private static void PerformHealing(CombatEntity entity, List<CombatEntity> targets)
@@ -385,10 +399,8 @@ public class CombatContext : ICombatContext
         //    {
         //        Id = target.Id,
         //        MaxHealth = target.GetAttributeValue(AttributeType.MaxHealth),
-        //        Health = target.GetAttributeValue(AttributeType.Health),
-        //        MaxMana = target.GetAttributeValue(AttributeType.MaxMana),
-        //        Mana = target.GetAttributeValue(AttributeType.Mana),
-        //        Barrier = target.GetAttributeValue(AttributeType.Barrier)
+        //        Health = target.GetAttributeValue(AttributeType.MaxHealth),
+        //        Barrier = target.GetCurrentBarrierValue()
         //    };
 
         //    if (combatEntity.Health < 0) combatEntity.Health = 0;

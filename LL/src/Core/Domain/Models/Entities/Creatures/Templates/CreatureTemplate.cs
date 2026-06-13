@@ -22,5 +22,4 @@ public sealed class CreatureTemplate
 
     public ICollection<StatOverride> StatOverrides { get; set; } = new List<StatOverride>();
 
-    public ICollection<string> AbilityIds { get; set; } = new List<string>();
 }

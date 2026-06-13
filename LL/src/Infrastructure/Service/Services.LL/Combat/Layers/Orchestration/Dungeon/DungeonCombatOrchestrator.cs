@@ -40,6 +40,7 @@ public sealed class DungeonCombatOrchestrator : ICombatOrchestrator
         var plan = _planner.CreatePlan(
             dungeonRunId: dungeonRequest.DungeonRunId,
             characterId: dungeonRequest.CharacterId,
+            characterSnapshot: dungeonRequest.CharacterSnapshot,
             playerEntityIds: [dungeonRequest.CharacterId],
             enemySourceEntityIds: resolvedParticipants);
 

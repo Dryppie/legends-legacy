@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Equipment, EquipmentInstance } from '../../../../models/item';
 import { AttributeTypeFormatPipe } from '../../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
+import { AttributeValueFormatPipe } from '../../../../pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { EquipmentSlotType } from '../../../../models/Dtos/equipment-slots/equipmentSlot';
 import { getAllowedEquipmentTypesForSlot } from '../../../../utils/equipment/equipment.utils';
@@ -11,7 +12,14 @@ import { EquipmentTypePipe } from '../../../../pipes/equipment/equipment-type-fo
 @Component({
   selector: 'app-overview-equipment-modal',
   standalone: true,
-  imports: [AttributeTypeFormatPipe, EquipmentTypePipe, NgIf, NgFor, NgClass],
+  imports: [
+    AttributeTypeFormatPipe,
+    AttributeValueFormatPipe,
+    EquipmentTypePipe,
+    NgIf,
+    NgFor,
+    NgClass,
+  ],
   templateUrl: './overview-equipment-modal.component.html',
 })
 export class OverviewEquipmentModalComponent implements OnInit {

@@ -4,7 +4,6 @@ import { computed, effect, Injectable, signal } from '@angular/core';
 import { InventoryService } from './inventory.service';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { GameEventService } from '../../real-time/game-event.service';
-import { EssenceItem } from '../../../../shared/models/item';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryStateService {
@@ -91,39 +90,21 @@ export class InventoryStateService {
       .shatterEssence(essence, shatterAmount)
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (gainedItem: InventoryItem) => {
+        next: () => {
           const items = [...this._items()];
 
-          // Remove or reduce the shattered essence
           const essenceItem = items.find(
-            (i) =>
-              isEssenceItem(i.itemInstance.itemBase) &&
-              isEssenceItem(essence.itemInstance.itemBase) &&
-              i.itemInstance.itemBase.essence.id ===
-                essence.itemInstance.itemBase.essence.id,
+            (i) => i.itemInstance.id === essence.itemInstance.id,
           );
 
           if (essenceItem) {
-            essenceItem.quantity -= shatterAmount;
+            essenceItem.quantity -= 1;
             if (essenceItem.quantity <= 0) {
               const index = items.indexOf(essenceItem);
               if (index !== -1) {
                 items.splice(index, 1);
               }
             }
-          }
-
-          // Add or update the gained item (Soul Dust)
-          const existing = items.find(
-            (i) =>
-              i.itemInstance.itemBase.id ===
-              gainedItem.itemInstance.itemBase.id,
-          );
-
-          if (existing) {
-            existing.quantity = gainedItem.quantity;
-          } else {
-            items.push(gainedItem);
           }
 
           this._items.set(items);
@@ -218,6 +199,3 @@ export class InventoryStateService {
   }
 }
 
-function isEssenceItem(item: any): item is EssenceItem {
-  return item && 'essence' in item;
-}

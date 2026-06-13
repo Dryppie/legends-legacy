@@ -1,10 +1,12 @@
-﻿using Domain.Interfaces.Combat;
-using Domain.Models.Abilities;
+using Domain.Interfaces.Combat;
+using Domain.Models.Combat.Abilities;
 
 namespace Services.LL.Combat.CombatEngine;
 public class CombatEventBus : ICombatEventBus
 {
+    private const int MaxPublishDepth = 16;
     private readonly List<Action<CombatEvent>> _subscribers = new();
+    private int _publishDepth;
 
     public void Subscribe(Action<CombatEvent> callback)
     {
@@ -13,9 +15,20 @@ public class CombatEventBus : ICombatEventBus
 
     public void Publish(CombatEvent e)
     {
-        foreach (var subscriber in _subscribers)
+        if (_publishDepth >= MaxPublishDepth)
+            throw new InvalidOperationException($"Combat event dispatch exceeded maximum depth of {MaxPublishDepth}. Check triggered effects for recursion.");
+
+        _publishDepth++;
+        try
         {
-            subscriber.Invoke(e);
+            foreach (var subscriber in _subscribers.ToList())
+            {
+                subscriber.Invoke(e);
+            }
+        }
+        finally
+        {
+            _publishDepth--;
         }
     }
 

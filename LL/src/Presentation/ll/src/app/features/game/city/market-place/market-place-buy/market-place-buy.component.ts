@@ -23,6 +23,7 @@ import { ItemType } from '../../../../../shared/models/enums/itemType';
 import {
   EquipmentInstance,
   EssenceItem,
+  essenceItemToEssence,
 } from '../../../../../shared/models/item';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
@@ -41,6 +42,14 @@ import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { EquipmentType } from '../../../../../shared/models/enums/equipmentType';
 import { AttributeModifier } from '../../../../../shared/models/Dtos/attributesDto';
 import { CharacterStateService } from '../../../../../core/services/api/character/character-state.service';
+import {
+  AttributeTypeFormatPipe,
+  formatAttributeType,
+} from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
+import {
+  AttributeValueFormatPipe,
+  formatAttributeValue,
+} from '../../../../../shared/pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 
 @Component({
   selector: 'app-market-place-buy',
@@ -59,6 +68,8 @@ import { CharacterStateService } from '../../../../../core/services/api/characte
     NgSwitchDefault,
     ItemComponent,
     DecimalPipe,
+    AttributeTypeFormatPipe,
+    AttributeValueFormatPipe,
   ],
   templateUrl: './market-place-buy.component.html',
 })
@@ -209,17 +220,17 @@ export class MarketPlaceBuyComponent implements OnInit {
       case 'Equipment': {
         const eq = instance as EquipmentInstance;
         const mods = eq.attributeModifiers
-          .map((m) => `• ${m.attributeType}: +${m.amount}`)
+          .map(
+            (m) =>
+              `• ${formatAttributeType(m.attributeType)}: ${formatAttributeValue(m.amount, m.attributeType, true)}`,
+          )
           .join('\n');
         return `Rarity: ${eq.rarity}\nType: ${new EquipmentTypePipe().transform(eq.equipmentBase.equipmentType)}\n${mods}`;
       }
 
       case 'Essence': {
         const es = base as EssenceItem;
-        const mods = es.essence.attributeModifiers
-          .map((m) => `• ${m.attributeType}: +${m.amount}`)
-          .join('\n');
-        return `Active:  ${es.essence.active.name}\nPassive: ${es.essence.passive.name}\n${mods}`;
+        return `${es.rarity}${es.essenceDefinitionId ? `\n${es.essenceDefinitionId}` : ''}${es.description ? `\n${es.description}` : ''}`;
       }
 
       default:

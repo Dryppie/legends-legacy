@@ -29,7 +29,10 @@
         class="flex gap-1"
       >
         <span class="text-white">
-          {{ attribute.amount > 0 ? "+" : "-" }}{{ attribute.amount }}
+          {{
+            attribute.amount
+              | attributeValueFormat: attribute.attributeType : true
+          }}
         </span>
         <span class="text-white">
           {{ attribute.attributeType | attributeTypeFormat }}
@@ -72,7 +75,10 @@
             class="flex gap-1"
           >
             <span class="text-white">
-              {{ attribute.amount > 0 ? "+" : "-" }}{{ attribute.amount }}
+              {{
+                attribute.amount
+                  | attributeValueFormat: attribute.attributeType : true
+              }}
             </span>
             <span class="text-white">
               {{ attribute.attributeType | attributeTypeFormat }}

@@ -1,19 +1,30 @@
 import { DecimalPipe, NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { AttributeTypeFormatPipe } from '../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
+import {
+  AttributeTypeFormatPipe,
+  isPercentAttribute,
+} from '../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
+import { AttributeValueFormatPipe } from '../../../pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 import {
   EquipmentDisplay,
   mapEquipmentToDisplay,
   mapInstanceToDisplay,
 } from '../equipment-display';
 import { Equipment, EquipmentInstance } from '../../../models/item';
-import { ModifierType } from '../../../models/Dtos/attributesDto';
+import { AttributeModifier, ModifierType } from '../../../models/Dtos/attributesDto';
 import { Rarity } from '../../../models/enums/rarity';
 
 @Component({
   selector: 'app-equipment-display',
   standalone: true,
-  imports: [NgIf, NgFor, NgClass, AttributeTypeFormatPipe, DecimalPipe],
+  imports: [
+    NgIf,
+    NgFor,
+    NgClass,
+    AttributeTypeFormatPipe,
+    AttributeValueFormatPipe,
+    DecimalPipe,
+  ],
   templateUrl: './equipment-display.component.html',
 })
 export class EquipmentDisplayComponent {
@@ -49,6 +60,13 @@ export class EquipmentDisplayComponent {
       default:
         return 'text-light_gray';
     }
+  }
+
+  shouldAppendModifierPercent(attribute: AttributeModifier): boolean {
+    return (
+      attribute.modifierType !== ModifierType.Flat &&
+      !isPercentAttribute(attribute.attributeType)
+    );
   }
 }
 

@@ -1,7 +1,7 @@
-﻿using Domain.Interfaces.Combat;
-using Domain.Models.Abilities;
-using Domain.Models.Abilities.Effects;
-using Domain.Models.Abilities.Triggers;
+using Domain.Interfaces.Combat;
+using Domain.Models.Combat.Abilities;
+using Domain.Models.Combat.Abilities.Effects;
+using Domain.Models.Combat.Abilities.Triggers;
 using Domain.Models.Combat;
 
 namespace Services.LL.Combat.CombatEngine;
@@ -30,12 +30,17 @@ public class TriggerEngine : IDisposable
             // 🔹 1. First: Process ability triggers (no mutable state)
             foreach (var ability in entity.Abilities)
             {
+                if (ability.Definition.Type == CombatAbilityType.Passive && ability.RemainingTimeUntilUse > 0)
+                    continue;
+
                 foreach (var trigger in ability.Definition.Triggers)
                 {
                     if (!ShouldTrigger(trigger, e))
                         continue;
 
                     ExecuteTriggerActions(trigger, entity, e);
+                    if (ability.Definition.Type == CombatAbilityType.Passive)
+                        ability.SetCooldown();
                 }
             }
 
@@ -67,7 +72,7 @@ public class TriggerEngine : IDisposable
     {
         foreach (var effect in trigger.Actions)
         {
-            var targets = effect.Targeting == Targeting.CauseOfTrigger
+            var targets = effect.Targeting == CombatTargeting.CauseOfTrigger
                 ? new List<CombatEntity> { e.Target! }
                 : _context.EntityManager.SelectTargets(source, effect.Targeting);
 

@@ -4,8 +4,6 @@ import { ModalService } from '../../../core/services/client-side/modal/modal.ser
 import { NgIf } from '@angular/common';
 import { Essence } from '../../models/essence';
 import { EssenceModalComponent } from './essence-modals/essence-modal/essence-modal.component';
-import { AbsorbEssenceModalComponent } from './essence-modals/absorb-essence-modal/absorb-essence-modal.component';
-import { RemoveEssenceModalComponent } from './essence-modals/remove-essence-modal/remove-essence-modal.component';
 import { CombatFiltersModalComponent } from './combat-modals/combat-filters-modal/combat-filters-modal.component';
 import { EquipmentInstance } from '../../models/item';
 import { InventoryEquipmentModalComponent } from './equipment-modals/equipment-modal/inventory-equipment-modal.component';
@@ -18,8 +16,6 @@ import { EquipmentSlotType } from '../../models/Dtos/equipment-slots/equipmentSl
   imports: [
     NgIf,
     EssenceModalComponent,
-    AbsorbEssenceModalComponent,
-    RemoveEssenceModalComponent,
     CombatFiltersModalComponent,
     InventoryEquipmentModalComponent,
     OverviewEquipmentModalComponent,
@@ -32,8 +28,6 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
   inventoryEquipment: EquipmentInstance | null = null;
   overviewEquipment: EquipmentSlotType | null = null;
   essence: Essence | null = null;
-  absorbEssence: Essence[] | null = null;
-  removeEssence: Essence[] | null = null;
   filterCombat: boolean = false;
 
   constructor(private modalService: ModalService) {}
@@ -56,16 +50,6 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
     );
 
     this.subscriptions.push(
-      this.modalService.absorbEssenceModalState$.subscribe(
-        (data: Essence[] | null) => (this.absorbEssence = data),
-      ),
-    );
-    this.subscriptions.push(
-      this.modalService.removeEssenceModalState$.subscribe(
-        (data: Essence[] | null) => (this.removeEssence = data),
-      ),
-    );
-    this.subscriptions.push(
       this.modalService.editCombatFiltersModalState$.subscribe((state) => {
         this.filterCombat = state;
       }),
@@ -83,8 +67,6 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
       !!this.inventoryEquipment ||
       !!this.overviewEquipment ||
       !!this.essence ||
-      !!this.absorbEssence ||
-      !!this.removeEssence ||
       !!this.filterCombat
     );
   }
@@ -97,8 +79,6 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
       this.onInventoryEquipmentModalClose();
       this.onOverviewEquipmentModalClose();
       this.onEssenceModalClose();
-      this.onAbsorbEssenceModalClose();
-      this.onRemoveEssenceModalClose();
       this.onEditCombatFiltersModalClose();
     }
   }
@@ -112,14 +92,6 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
 
   onEssenceModalClose() {
     this.modalService.toggleEssenceModal();
-  }
-
-  onAbsorbEssenceModalClose() {
-    this.modalService.toggleAbsorbEssenceModal();
-  }
-
-  onRemoveEssenceModalClose() {
-    this.modalService.toggleRemoveEssenceModal();
   }
 
   onEditCombatFiltersModalClose() {

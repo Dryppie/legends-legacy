@@ -1,23 +1,72 @@
-﻿using Application.UseCases.Essences.Commands.DeleteEquippedEssence;
-using Application.UseCases.Essences.Commands.EquipEssence;
+using Application.UseCases.Essences.Commands.AbsorbUnboundEssence;
+using Application.UseCases.Essences.Commands.ActivateEssenceLoadout;
+using Application.UseCases.Essences.Commands.AscendEssence;
+using Application.UseCases.Essences.Commands.DeleteEssenceLoadout;
+using Application.UseCases.Essences.Commands.DismantleUnboundEssence;
+using Application.UseCases.Essences.Commands.EvolveEssence;
+using Application.UseCases.Essences.Commands.FavoriteEssence;
+using Application.UseCases.Essences.Commands.SaveEssenceLoadout;
+using Application.UseCases.Essences.Commands.SpendEssenceDust;
 using Application.UseCases.Essences.Dtos;
-using Application.UseCases.Essences.Queries.GetEquippedEssences;
+using Application.UseCases.Essences.Queries.GetActiveEssenceLoadout;
+using Application.UseCases.Essences.Queries.GetEssenceLoadouts;
+using Application.UseCases.Essences.Queries.GetSoulArchive;
 using Common.Primitives;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.LL.Controllers.V1;
+
 public class EssenceController : BaseController
 {
+    [HttpGet("archive")]
+    public async Task<ActionResult<SoulArchiveDto>> GetArchive() =>
+        await Mediator.Send(new GetSoulArchiveQuery(CurrentCharacterGuid));
 
-    [HttpGet("GetEquippedEssences")]
-    public async Task<ActionResult<List<EssenceSlotDto>>> GetEquippedEssences() => 
-        await Mediator.Send(new GetEquippedEssencesQuery(CurrentCharacterGuid));
+    [HttpGet("loadouts")]
+    public async Task<ActionResult<EssenceLoadoutsDto>> GetLoadouts() =>
+        await Mediator.Send(new GetEssenceLoadoutsQuery(CurrentCharacterGuid));
 
-    [HttpPost("EquipEssence")]
-    public async Task<ActionResult<Response<bool>>> EquipEssence([FromBody] string essenceItemId) => 
-        await Mediator.Send(new EquipEssenceCommand(CurrentCharacterGuid, essenceItemId));
+    [HttpGet("loadouts/active")]
+    public async Task<ActionResult<EssenceLoadoutDto?>> GetActiveLoadout() =>
+        await Mediator.Send(new GetActiveEssenceLoadoutQuery(CurrentCharacterGuid));
 
-    [HttpPost("DeleteEquippedEssence")]
-    public async Task<ActionResult<Response<bool>>> DeleteEquippedEssence([FromBody] string essenceId) =>
-        await Mediator.Send(new DeleteEquippedEssenceCommand(CurrentCharacterGuid, essenceId));
+    [HttpPost("items/{inventoryItemId:guid}/absorb")]
+    public async Task<ActionResult<Response<ResponseMessageDto>>> AbsorbUnboundEssence(Guid inventoryItemId) =>
+        await Mediator.Send(new AbsorbUnboundEssenceCommand(CurrentCharacterGuid, inventoryItemId));
+
+    [HttpPost("items/{inventoryItemId:guid}/dismantle")]
+    public async Task<ActionResult<Response<DismantleEssenceResultDto>>> DismantleUnboundEssence(Guid inventoryItemId) =>
+        await Mediator.Send(new DismantleUnboundEssenceCommand(CurrentCharacterGuid, inventoryItemId));
+
+    [HttpPost("{playerEssenceId:guid}/spend-dust")]
+    public async Task<ActionResult<Response<SpendEssenceDustResultDto>>> SpendDust(Guid playerEssenceId, [FromBody] SpendEssenceDustRequestDto request) =>
+        await Mediator.Send(new SpendEssenceDustCommand(CurrentCharacterGuid, playerEssenceId, request.DustAmount));
+
+    [HttpPost("{playerEssenceId:guid}/ascend")]
+    public async Task<ActionResult<Response<ResponseMessageDto>>> Ascend(Guid playerEssenceId) =>
+        await Mediator.Send(new AscendEssenceCommand(CurrentCharacterGuid, playerEssenceId));
+
+    [HttpPost("{playerEssenceId:guid}/evolve")]
+    public async Task<ActionResult<Response<ResponseMessageDto>>> Evolve(Guid playerEssenceId) =>
+        await Mediator.Send(new EvolveEssenceCommand(CurrentCharacterGuid, playerEssenceId));
+
+    [HttpPost("{playerEssenceId:guid}/favorite")]
+    public async Task<ActionResult<Response<ResponseMessageDto>>> Favorite(Guid playerEssenceId, [FromBody] SetFavoriteEssenceRequestDto request) =>
+        await Mediator.Send(new FavoriteEssenceCommand(CurrentCharacterGuid, playerEssenceId, request.IsFavorite));
+
+    [HttpPost("loadouts")]
+    public async Task<ActionResult<Response<EssenceLoadoutDto>>> SaveLoadout([FromBody] SaveEssenceLoadoutDto request) =>
+        await Mediator.Send(new SaveEssenceLoadoutCommand(CurrentCharacterGuid, request));
+
+    [HttpPut("loadouts/{loadoutId:guid}")]
+    public async Task<ActionResult<Response<EssenceLoadoutDto>>> UpdateLoadout(Guid loadoutId, [FromBody] SaveEssenceLoadoutDto request) =>
+        await Mediator.Send(new SaveEssenceLoadoutCommand(CurrentCharacterGuid, request with { Id = loadoutId }));
+
+    [HttpPost("loadouts/{loadoutId:guid}/activate")]
+    public async Task<ActionResult<Response<ResponseMessageDto>>> ActivateLoadout(Guid loadoutId) =>
+        await Mediator.Send(new ActivateEssenceLoadoutCommand(CurrentCharacterGuid, loadoutId));
+
+    [HttpDelete("loadouts/{loadoutId:guid}")]
+    public async Task<ActionResult<Response<ResponseMessageDto>>> DeleteLoadout(Guid loadoutId) =>
+        await Mediator.Send(new DeleteEssenceLoadoutCommand(CurrentCharacterGuid, loadoutId));
 }

@@ -2,8 +2,6 @@
 using Domain.Models.Colosseum;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
-using Domain.Models.Essences;
-using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Inventories;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
@@ -56,7 +54,7 @@ public static class LLDbContextExtensions
             UserId = user.Id,
             Name = "admin",
             ImagePath = "player",
-            Level = 1,
+            Level = 50,
             Cinders = 5719,
             Soulstones = 5000,
             Professions = ProfessionsSeederHelper.CreateProfessions(Guid.Parse(CHARACTER_GUID)),
@@ -70,71 +68,6 @@ public static class LLDbContextExtensions
         var attributes = EntityBaseAttributeHelper.CreateEntityAttributes(character.Id);
         await context.EntityAttributes.AddRangeAsync(attributes);
 
-        var essences = new List<Essence>()
-        {
-            new Essence()
-            {
-                Id = Guid.NewGuid(),
-                Name = "Goblin's Essence",
-                ActiveAbilityId = "sneakAttack",
-                PassiveAbilityId = "pocketDirt"
-            },
-            new Essence()
-            {
-                Id = Guid.NewGuid(),
-                Name = "Goblin Warrior's Essence",
-                ActiveAbilityId = "ragingCleave",
-                PassiveAbilityId = "recklessAssault"
-            }
-        };
-
-        var essenceSlots = new List<EssenceSlot>()
-        {
-            new EssenceSlot()
-            {
-                Id = Guid.NewGuid(),
-                SlotState = SlotState.Active,
-                SlotType = SlotType.Standard,
-                OccupiedEssence = essences.First(),
-                EntityId = character.Id,
-            },
-            new EssenceSlot()
-            {
-                Id = Guid.NewGuid(),
-                SlotState = SlotState.Active,
-                SlotType = SlotType.Standard,
-                OccupiedEssence = essences.Last(),
-                EntityId = character.Id,
-            },
-            new EssenceSlot()
-            {
-                Id = Guid.NewGuid(),
-                SlotState = SlotState.Active,
-                SlotType = SlotType.Standard,
-                EntityId = character.Id,
-            },
-            new EssenceSlot()
-            {
-                Id = Guid.NewGuid(),
-                SlotState = SlotState.Active,
-                SlotType = SlotType.Standard,
-                EntityId = character.Id,
-            },new EssenceSlot()
-            {
-                Id = Guid.NewGuid(),
-                SlotState = SlotState.Active,
-                SlotType = SlotType.Standard,
-                EntityId = character.Id,
-            },
-            new EssenceSlot()
-            {
-                Id = Guid.NewGuid(),
-                SlotState = SlotState.Active,
-                SlotType = SlotType.Standard,
-                EntityId = character.Id,
-            },
-        };
-
         var arenaTicketStatus = new ArenaTicketStatus()
         {
             CharacterId = character.Id,
@@ -145,10 +78,8 @@ public static class LLDbContextExtensions
 
         var equipmentSlots = SeedEquipmentSlots(character);
         context.EquipmentSlots.AddRange(equipmentSlots);
-        character.EssenceSlots = essenceSlots;
         context.Characters.Add(character);
         context.Inventories.Add(inventory);
-        await context.Essences.AddRangeAsync(essences);
     }
 
     private static List<EquipmentSlot> SeedEquipmentSlots(Entity entity)
@@ -172,32 +103,39 @@ public static class LLDbContextExtensions
     {
         if (!context.InventoryItems.Any())
         {
-            var goblinEssenceItemInstance = new EssenceItemInstance
+            var essenceItemBaseIds = new[]
             {
-                Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
-                ItemBaseId = "goblinId",
-            };
-            var ratEssenceItemInstance = new EssenceItemInstance
-            {
-                Id = Guid.Parse("00000000-0000-0000-0000-000000000004"),
-                ItemBaseId = "largeRatId",
-            };
-            var inventoryItemGoblinEssence = new InventoryItem()
-            {
-                InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-0000-0000-0000-000000000001"), // Copied directly from GoblinEssenceItem. Same ID
-                Quantity = 1
+                "item.essence.goblin_ambusher",
+                "item.essence.skeleton_guardian",
+                "item.essence.fire_ant",
+                "item.essence.cave_bat",
+                "item.essence.necroshade_wraith",
+                "item.essence.legacy.goblin",
+                "item.essence.legacy.goblin_warrior",
+                "item.essence.legacy.goblin_archer",
+                "item.essence.legacy.large_rat",
+                "item.essence.legacy.flame_imp",
             };
 
-            var inventoryItemRatEssence = new InventoryItem()
-            {
-                InventoryId = Guid.Parse(CHARACTER_GUID),
-                ItemInstanceId = Guid.Parse("00000000-0000-0000-0000-000000000004"), // Copied directly from LargeRatEssenceItem. Same ID
-                Quantity = 1
-            };
+            var essenceItemInstances = essenceItemBaseIds
+                .Select((itemBaseId, index) => new EssenceItemInstance
+                {
+                    Id = Guid.Parse($"00000000-0000-0000-0000-{index + 1:000000000000}"),
+                    ItemBaseId = itemBaseId,
+                })
+                .ToList();
 
-            await context.ItemInstances.AddRangeAsync(goblinEssenceItemInstance, ratEssenceItemInstance);
-            await context.InventoryItems.AddRangeAsync(inventoryItemGoblinEssence, inventoryItemRatEssence);
+            var inventoryItems = essenceItemInstances
+                .Select(instance => new InventoryItem
+                {
+                    InventoryId = Guid.Parse(CHARACTER_GUID),
+                    ItemInstanceId = instance.Id,
+                    Quantity = 1
+                })
+                .ToList();
+
+            await context.ItemInstances.AddRangeAsync(essenceItemInstances);
+            await context.InventoryItems.AddRangeAsync(inventoryItems);
         }
     }
 

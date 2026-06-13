@@ -3,8 +3,9 @@
   "version": "0.0.0",
   "scripts": {
     "generate:content": "tsx ./scripts/generate-static-content.ts",
-    "prebuild": "npm run generate:content",
-    "prestart": "npm run generate:content",
+    "generate:version": "tsx ./scripts/write-build-version.ts",
+    "prebuild": "npm run generate:content && npm run generate:version",
+    "prestart": "npm run generate:content && npm run generate:version",
     "ng": "ng",
     "start": "ng serve --open",
     "build": "ng build",

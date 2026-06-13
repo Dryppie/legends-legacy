@@ -1,4 +1,4 @@
-﻿using Domain.Models.Abilities.Effects.EffectModifications;
+using Domain.Models.Combat.Abilities.Effects.EffectModifications;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

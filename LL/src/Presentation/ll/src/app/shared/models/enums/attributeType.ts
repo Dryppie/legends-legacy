@@ -1,43 +1,30 @@
 export enum AttributeType {
-  /* ===== VITALITY ===== */
-  MaxHealth = 'MaxHealth',
-  Health = 'Health',
-  HealthRegeneration = 'HealthRegeneration',
-  MaxMana = 'MaxMana',
-  Mana = 'Mana',
-  ManaRegeneration = 'ManaRegeneration',
-  RecoveryRate = 'RecoveryRate',
-  Barrier = 'Barrier',
+  Power = 'Power',
+  Fortitude = 'Fortitude',
+  Precision = 'Precision',
+  Spirit = 'Spirit',
 
-  /* ===== OFFENSE ===== */
-  AttackPower = 'AttackPower',
-  SpellPower = 'SpellPower',
-  AttackSpeed = 'AttackSpeed',
-  Accuracy = 'Accuracy',
+  MaxHealth = 'MaxHealth',
+  WeaponDamage = 'WeaponDamage',
+  Armor = 'Armor',
+  Resistance = 'Resistance',
   CritChance = 'CritChance',
   CritDamage = 'CritDamage',
-  MultiStrike = 'MultiStrike',
-  MultiCast = 'MultiCast',
   ArmorPenetration = 'ArmorPenetration',
-  ManaPenetration = 'ManaPenetration',
+  MagicPenetration = 'MagicPenetration',
 
-  /* ===== DEFENSE ===== */
-  PhysicalDefense = 'PhysicalDefense',
-  MagicalDefense = 'MagicalDefense',
+  DodgeChance = 'DodgeChance',
+  BlockChance = 'BlockChance',
   DamageReduction = 'DamageReduction',
-  CritDamageReduction = 'CritDamageReduction',
+
+  HealingPowerPercent = 'HealingPowerPercent',
+  HealthRegeneration = 'HealthRegeneration',
+  LifeSteal = 'LifeSteal',
+
+  Cooldown = 'Cooldown',
+  StatusResistance = 'StatusResistance',
   CrowdControlResistance = 'CrowdControlResistance',
-  Dodge = 'Dodge',
-  Block = 'Block',
-  Parry = 'Parry',
 
-  /* ===== CONTROL & UTILITY ===== */
-  Threat = 'Threat',
-  CooldownReduction = 'CooldownReduction',
-
-  /* ===== RESISTANCES ===== */
-  FireResistance = 'FireResistance',
-  WaterResistance = 'WaterResistance',
-  EarthResistance = 'EarthResistance',
-  AirResistance = 'AirResistance',
+  SummonPower = 'SummonPower',
+  SummonHealth = 'SummonHealth',
 }

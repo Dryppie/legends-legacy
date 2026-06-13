@@ -21,6 +21,8 @@ import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/numb
 import { FilterTabsComponent } from '../../../../../shared/components/custom-components/tabs/filter-tabs/filter-tabs.component';
 import { EquipmentTypePipe } from '../../../../../shared/pipes/equipment/equipment-type-format/equipment-type.pipe';
 import { ItemComponent } from '../../../../../shared/components/item/item.component';
+import { formatAttributeType } from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
+import { formatAttributeValue } from '../../../../../shared/pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 
 @Component({
   selector: 'app-market-place-sell',
@@ -109,17 +111,17 @@ export class MarketPlaceSellComponent implements OnInit {
       case 'Equipment': {
         const eq = instance as EquipmentInstance;
         const mods = eq.attributeModifiers
-          .map((m) => `• ${m.attributeType}: +${m.amount}`)
+          .map(
+            (m) =>
+              `• ${formatAttributeType(m.attributeType)}: ${formatAttributeValue(m.amount, m.attributeType, true)}`,
+          )
           .join('\n');
         return `Rarity: ${eq.rarity}\nType: ${new EquipmentTypePipe().transform(eq.equipmentBase.equipmentType)}\n${mods}`;
       }
 
       case 'Essence': {
         const es = base as EssenceItem;
-        const mods = es.essence.attributeModifiers
-          .map((m) => `• ${m.attributeType}: +${m.amount}`)
-          .join('\n');
-        return `Active:  ${es.essence.active.name}\nPassive: ${es.essence.passive.name}\n${mods}`;
+        return `${es.rarity}${es.essenceDefinitionId ? `\n${es.essenceDefinitionId}` : ''}${es.description ? `\n${es.description}` : ''}`;
       }
 
       default:

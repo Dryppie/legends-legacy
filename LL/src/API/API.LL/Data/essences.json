@@ -1,0 +1,1237 @@
+{
+  "essences": [
+    {
+      "id": "essence.goblin_ambusher",
+      "sourceMonsterId": "monster.goblin_ambusher",
+      "name": "Goblin Ambusher Essence",
+      "description": "The stolen cunning of a goblin that strikes hardest when the enemy is exposed.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Goblinoid",
+        "Species.Humanoid",
+        "Role.Assassin",
+        "Range.Melee",
+        "Element.Physical",
+        "Pattern.SingleTarget",
+        "Status.Bleed",
+        "Trigger.OnCrit",
+        "Target.Enemy"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Precision",
+          "baseValue": 4
+        },
+        {
+          "attribute": "DodgeChance",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.goblin_ambusher.pack_opportunist",
+        "name": "Pack Opportunist",
+        "description": "Cheap Shot gains execute-style bonus damage against bleeding wounded enemies.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "item.evolution_catalyst.cunning",
+        "addsTags": [
+          "Mechanic.Execute"
+        ],
+        "activeAbilityModifiers": [
+          {
+            "target": "effect.damage.main",
+            "operation": "AddMultiplier",
+            "value": 0.2,
+            "condition": "TargetHasStatus.Bleed"
+          }
+        ]
+      },
+      "activeAbilityId": "ability.essence.goblin_ambusher.cheap_shot",
+      "passiveAbilityId": "ability.essence.goblin_ambusher.cowards_opening"
+    },
+    {
+      "id": "essence.skeleton_guardian",
+      "sourceMonsterId": "monster.skeleton",
+      "name": "Skeleton Guardian Essence",
+      "description": "A brittle sentinel's oath made durable through bone and spite.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Undead",
+        "Role.Tank",
+        "Role.Defensive",
+        "Element.Physical",
+        "Defense.Block",
+        "Defense.Guard",
+        "Defense.Barrier",
+        "Control.Taunt"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Fortitude",
+          "baseValue": 3
+        },
+        {
+          "attribute": "Armor",
+          "baseValue": 3
+        },
+        {
+          "attribute": "BlockChance",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.skeleton_guardian.ossified_sentinel",
+        "name": "Ossified Sentinel",
+        "description": "Bone Bulwark also taunts the highest-threat enemy.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "item.evolution_catalyst.warden",
+        "addsTags": [
+          "Control.Taunt"
+        ],
+        "activeAbilityModifiers": [
+          {
+            "target": "effect.barrier.main",
+            "operation": "AddEffect",
+            "value": 1
+          }
+        ]
+      },
+      "activeAbilityId": "ability.essence.skeleton_guardian.bone_bulwark",
+      "passiveAbilityId": "ability.essence.skeleton_guardian.rattle_guard"
+    },
+    {
+      "id": "essence.fire_ant",
+      "sourceMonsterId": "monster.fire_ant",
+      "name": "Fire Ant Essence",
+      "description": "Colony heat condensed into a biting, ember-bright instinct.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Insectoid",
+        "Role.Offensive",
+        "Range.Melee",
+        "Element.Fire",
+        "Status.Burn",
+        "Pattern.DamageOverTime",
+        "Trigger.OnHit"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 4
+        },
+        {
+          "attribute": "WeaponDamage",
+          "baseValue": 2
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.0012,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 4E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.fire_ant.hiveflame_instinct",
+        "name": "Hiveflame Instinct",
+        "description": "Burning Mandibles spreads a weaker Burn to another random enemy.",
+        "requiredAscensionTier": 2,
+        "requiredCatalystItemId": "item.evolution_catalyst.flame",
+        "addsTags": [
+          "Target.RandomEnemy"
+        ],
+        "activeAbilityModifiers": [
+          {
+            "target": "effect.status.burn",
+            "operation": "AddEffect",
+            "value": 1
+          }
+        ]
+      },
+      "activeAbilityId": "ability.essence.fire_ant.burning_mandibles",
+      "passiveAbilityId": "ability.essence.fire_ant.colony_heat"
+    },
+    {
+      "id": "essence.cave_bat",
+      "sourceMonsterId": "monster.cave_bat",
+      "name": "Cave Bat Essence",
+      "description": "A flicker of wings and sound that turns evasion into opportunity.",
+      "rarity": "Uncommon",
+      "tags": [
+        "Species.Beast",
+        "Species.Avian",
+        "Role.Controller",
+        "Range.Melee",
+        "Element.Physical",
+        "Control.Blind",
+        "Control.Interrupt",
+        "Defense.Dodge",
+        "Trigger.OnDodge"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "DodgeChance",
+          "baseValue": 2
+        },
+        {
+          "attribute": "Precision",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.0015,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 4E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.cave_bat.echo_hunter",
+        "name": "Echo Hunter",
+        "description": "Screech marks the target so the next hit deals bonus damage.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.echo",
+        "addsTags": [
+          "Status.Vulnerable"
+        ],
+        "activeAbilityModifiers": [
+          {
+            "target": "effect.damage.sonic",
+            "operation": "AddEffect",
+            "value": 1
+          }
+        ]
+      },
+      "activeAbilityId": "ability.essence.cave_bat.screech",
+      "passiveAbilityId": "ability.essence.cave_bat.skittering_wings"
+    },
+    {
+      "id": "essence.necroshade_wraith",
+      "sourceMonsterId": "monster.necroshade_wraith",
+      "name": "Necroshade Wraith Essence",
+      "description": "A cold whisper that lingers after death and fattens on curses.",
+      "rarity": "Epic",
+      "tags": [
+        "Species.Undead",
+        "Species.Spirit",
+        "Role.Caster",
+        "Role.Debuffer",
+        "Element.Shadow",
+        "Element.Necrotic",
+        "Status.Curse",
+        "Control.Suppression",
+        "Pattern.Periodic"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 5
+        },
+        {
+          "attribute": "Resistance",
+          "baseValue": 3
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.0008,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.012
+      },
+      "evolution": {
+        "id": "evolution.necroshade_wraith.hollow_dominion",
+        "name": "Hollow Dominion",
+        "description": "Cursed enemies deal reduced damage and suffer more shadow damage.",
+        "requiredAscensionTier": 3,
+        "requiredCatalystItemId": "item.evolution_catalyst.hollow",
+        "addsTags": [
+          "Status.Weakened"
+        ],
+        "passiveAbilityModifiers": [
+          {
+            "target": "effect.restore.cooldown",
+            "operation": "AddEffect",
+            "value": 1
+          }
+        ]
+      },
+      "activeAbilityId": "ability.essence.necroshade_wraith.wraith_hex",
+      "passiveAbilityId": "ability.essence.necroshade_wraith.grave_whisper"
+    },
+    {
+      "id": "essence.legacy.goblin",
+      "sourceMonsterId": "monster.goblin",
+      "name": "Goblin's Essence",
+      "description": "A recovered legacy essence containing Sneak Attack and Pocket Dirt.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Goblinoid",
+        "Species.Humanoid",
+        "Role.Controller",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Precision",
+          "baseValue": 3
+        },
+        {
+          "attribute": "DodgeChance",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.goblin",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "sneakAttack",
+      "passiveAbilityId": "pocketDirt"
+    },
+    {
+      "id": "essence.legacy.goblin_warrior",
+      "sourceMonsterId": "monster.goblin_warrior",
+      "name": "Goblin Warrior's Essence",
+      "description": "A recovered legacy essence containing Raging Cleave and Reckless Assault.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Goblinoid",
+        "Species.Humanoid",
+        "Role.Controller",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 3
+        },
+        {
+          "attribute": "Armor",
+          "baseValue": 2
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.goblin_warrior",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ragingCleave",
+      "passiveAbilityId": "recklessAssault"
+    },
+    {
+      "id": "essence.legacy.goblin_archer",
+      "sourceMonsterId": "monster.goblin_archer",
+      "name": "Goblin Archer's Essence",
+      "description": "A recovered legacy essence containing Sniper's Strike and Poisoned Arrows.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Goblinoid",
+        "Species.Humanoid",
+        "Role.Controller",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Precision",
+          "baseValue": 4
+        },
+        {
+          "attribute": "WeaponDamage",
+          "baseValue": 2
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.goblin_archer",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "snipersStrike",
+      "passiveAbilityId": "poisonedArrows"
+    },
+    {
+      "id": "essence.legacy.large_rat",
+      "sourceMonsterId": "monster.large_rat",
+      "name": "Large Rat's Essence",
+      "description": "A recovered legacy essence containing Tail Wrap and Big.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Beast",
+        "Role.Support",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Fortitude",
+          "baseValue": 4
+        },
+        {
+          "attribute": "MaxHealth",
+          "baseValue": 20
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.large_rat",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "tailWrap",
+      "passiveAbilityId": "big"
+    },
+    {
+      "id": "essence.legacy.flame_imp",
+      "sourceMonsterId": "monster.flame_imp",
+      "name": "Flame Imp's Essence",
+      "description": "A recovered legacy essence containing Firebomb Toss and Hot Aura.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Demon",
+        "Role.Controller",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 3
+        },
+        {
+          "attribute": "MagicPenetration",
+          "baseValue": 2
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.flame_imp",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "firebombToss",
+      "passiveAbilityId": "hotAura"
+    },
+    {
+      "id": "essence.legacy.frost_imp",
+      "sourceMonsterId": "monster.frost_imp",
+      "name": "Frost Imp's Essence",
+      "description": "A recovered legacy essence containing Ice Touch and Cold Aura.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Demon",
+        "Role.Controller",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 3
+        },
+        {
+          "attribute": "StatusResistance",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.frost_imp",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "iceTouch",
+      "passiveAbilityId": "coldAura"
+    },
+    {
+      "id": "essence.legacy.shadow_imp",
+      "sourceMonsterId": "monster.shadow_imp",
+      "name": "Shadow Imp's Essence",
+      "description": "A recovered legacy essence containing Shadow Image and Shadowy Presence.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Demon",
+        "Role.Support",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 3
+        },
+        {
+          "attribute": "DodgeChance",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.shadow_imp",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "shadowImage",
+      "passiveAbilityId": "shadowyPresence"
+    },
+    {
+      "id": "essence.legacy.vampire_bat",
+      "sourceMonsterId": "monster.vampire_bat",
+      "name": "Vampire Bat's Essence",
+      "description": "A recovered legacy essence containing Bloodthirsty Fangs and Dark Vitality.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Beast",
+        "Role.Support",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 3
+        },
+        {
+          "attribute": "LifeSteal",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.vampire_bat",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "bloodthirstyFangs",
+      "passiveAbilityId": "darkVitality"
+    },
+    {
+      "id": "essence.legacy.blue_slime",
+      "sourceMonsterId": "monster.blue_slime",
+      "name": "Blue Slime's Essence",
+      "description": "A recovered legacy essence containing Sweet Water and Absorptive Shell.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Slime",
+        "Role.Support",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Fortitude",
+          "baseValue": 3
+        },
+        {
+          "attribute": "HealingPowerPercent",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.blue_slime",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "sweetWater",
+      "passiveAbilityId": "absorptiveShell"
+    },
+    {
+      "id": "essence.legacy.brown_slime",
+      "sourceMonsterId": "monster.brown_slime",
+      "name": "Brown Slime's Essence",
+      "description": "A recovered legacy essence containing Mud Armor and Earthly Fortitude.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Slime",
+        "Role.Controller",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Fortitude",
+          "baseValue": 4
+        },
+        {
+          "attribute": "Armor",
+          "baseValue": 2
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.brown_slime",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "mudArmor",
+      "passiveAbilityId": "earthlyFortitude"
+    },
+    {
+      "id": "essence.legacy.green_slime",
+      "sourceMonsterId": "monster.green_slime",
+      "name": "Green Slime's Essence",
+      "description": "A recovered legacy essence containing Acid Splash and Corrosive Ooze.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Slime",
+        "Role.Controller",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 3
+        },
+        {
+          "attribute": "MagicPenetration",
+          "baseValue": 2
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.green_slime",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "acidSplash",
+      "passiveAbilityId": "corrosiveOoze"
+    },
+    {
+      "id": "essence.legacy.rainbow_slime",
+      "sourceMonsterId": "monster.rainbow_slime",
+      "name": "Rainbow Slime's Essence",
+      "description": "A recovered legacy essence containing Unstable Colors and Colorful Shield.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Slime",
+        "Role.Support",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 3
+        },
+        {
+          "attribute": "Resistance",
+          "baseValue": 2
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.rainbow_slime",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "unstableColors",
+      "passiveAbilityId": "colorfulShield"
+    },
+    {
+      "id": "essence.legacy.red_slime",
+      "sourceMonsterId": "monster.red_slime",
+      "name": "Red Slime's Essence",
+      "description": "A recovered legacy essence containing Ignite Core and Fire Body.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Slime",
+        "Role.Controller",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 3
+        },
+        {
+          "attribute": "DamageReduction",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.red_slime",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "igniteCore",
+      "passiveAbilityId": "fireBody"
+    },
+    {
+      "id": "essence.legacy.transparent_slime",
+      "sourceMonsterId": "monster.transparent_slime",
+      "name": "Transparent Slime's Essence",
+      "description": "A recovered legacy essence containing Transparent Engulf and Transparent Shift.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Slime",
+        "Role.Support",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Precision",
+          "baseValue": 3
+        },
+        {
+          "attribute": "DodgeChance",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.transparent_slime",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "transparentEngulf",
+      "passiveAbilityId": "transparentShift"
+    },
+    {
+      "id": "essence.legacy.enchanted_fairy",
+      "sourceMonsterId": "monster.enchanted_fairy",
+      "name": "Enchanted Fairy's Essence",
+      "description": "A recovered legacy essence containing Fae's Embrace and Enchanted Charm.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Beast",
+        "Role.Support",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 3
+        },
+        {
+          "attribute": "HealingPowerPercent",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.enchanted_fairy",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "faesEmbrace",
+      "passiveAbilityId": "enchantedCharm"
+    },
+    {
+      "id": "essence.legacy.glade_panther",
+      "sourceMonsterId": "monster.glade_panther",
+      "name": "Glade Panther's Essence",
+      "description": "A recovered legacy essence containing Ambush Strike and Razor Claws.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Beast",
+        "Role.Offensive",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 4
+        },
+        {
+          "attribute": "CritChance",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.glade_panther",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ambushStrike",
+      "passiveAbilityId": "razorClaws"
+    },
+    {
+      "id": "essence.legacy.illusion_fox",
+      "sourceMonsterId": "monster.illusion_fox",
+      "name": "Illusion Fox's Essence",
+      "description": "A recovered legacy essence containing Distracting Illusion and Foxfire Wisp.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Beast",
+        "Role.Offensive",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 4
+        },
+        {
+          "attribute": "MagicPenetration",
+          "baseValue": 2
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.illusion_fox",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "distractingIllusion",
+      "passiveAbilityId": "foxfireWisp"
+    },
+    {
+      "id": "essence.legacy.nightshade_blossom",
+      "sourceMonsterId": "monster.nightshade_blossom",
+      "name": "Nightshade Blossom's Essence",
+      "description": "A recovered legacy essence containing Necrotic Spores and Twilight Bloom.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Plant",
+        "Role.Support",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 3
+        },
+        {
+          "attribute": "HealingPowerPercent",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.nightshade_blossom",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "necroticSpores",
+      "passiveAbilityId": "twilightBloom"
+    },
+    {
+      "id": "essence.legacy.pixie",
+      "sourceMonsterId": "monster.pixie",
+      "name": "Pixie's Essence",
+      "description": "A recovered legacy essence containing Pixie Burst and Resonant Chime.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Spirit",
+        "Role.Offensive",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 4
+        },
+        {
+          "attribute": "Cooldown",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.pixie",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "pixieBurst",
+      "passiveAbilityId": "resonantChime"
+    },
+    {
+      "id": "essence.legacy.hobgoblin",
+      "sourceMonsterId": "monster.hobgoblin",
+      "name": "Hobgoblin's Essence",
+      "description": "A recovered legacy essence containing Frenzy and Savage Onslaught.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Goblinoid",
+        "Species.Humanoid",
+        "Role.Support",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 4
+        },
+        {
+          "attribute": "CritChance",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.hobgoblin",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "frenzy",
+      "passiveAbilityId": "savageOnslaught"
+    },
+    {
+      "id": "essence.legacy.feral_ghoul",
+      "sourceMonsterId": "monster.feral_ghoul",
+      "name": "Feral Ghoul's Essence",
+      "description": "A recovered legacy essence containing Feral Pounce and Shredding Claws.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Undead",
+        "Role.Controller",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 3
+        },
+        {
+          "attribute": "Precision",
+          "baseValue": 2
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.feral_ghoul",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "feralPounce",
+      "passiveAbilityId": "shreddingClaws"
+    },
+    {
+      "id": "essence.legacy.plague_ghoul",
+      "sourceMonsterId": "monster.plague_ghoul",
+      "name": "Plague Ghoul's Essence",
+      "description": "A recovered legacy essence containing Plague Swipe and Pestilent Touch.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Undead",
+        "Role.Controller",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 3
+        },
+        {
+          "attribute": "StatusResistance",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.plague_ghoul",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "plagueSwipe",
+      "passiveAbilityId": "pestilentTouch"
+    },
+    {
+      "id": "essence.legacy.ravenous_ghoul",
+      "sourceMonsterId": "monster.ravenous_ghoul",
+      "name": "Ravenous Ghoul's Essence",
+      "description": "A recovered legacy essence containing Draining Claws and Vile Feast.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Undead",
+        "Role.Support",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 3
+        },
+        {
+          "attribute": "LifeSteal",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.ravenous_ghoul",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "drainingClaws",
+      "passiveAbilityId": "vileFeast"
+    },
+    {
+      "id": "essence.legacy.skeleton_archer",
+      "sourceMonsterId": "monster.skeleton_archer",
+      "name": "Skeleton Archer's Essence",
+      "description": "A recovered legacy essence containing Bone Arrow and Piercing Arrows.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Undead",
+        "Role.Controller",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Precision",
+          "baseValue": 4
+        },
+        {
+          "attribute": "ArmorPenetration",
+          "baseValue": 2
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.skeleton_archer",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "boneArrow",
+      "passiveAbilityId": "piercingArrows"
+    },
+    {
+      "id": "essence.legacy.skeleton_mage",
+      "sourceMonsterId": "monster.skeleton_mage",
+      "name": "Skeleton Mage's Essence",
+      "description": "A recovered legacy essence containing Siphon and Protective Bone Barrier.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Undead",
+        "Role.Support",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 4
+        },
+        {
+          "attribute": "Resistance",
+          "baseValue": 2
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.skeleton_mage",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "siphon",
+      "passiveAbilityId": "protectiveBoneBarrier"
+    },
+    {
+      "id": "essence.legacy.skeleton_warrior",
+      "sourceMonsterId": "monster.skeleton_warrior",
+      "name": "Skeleton Warrior's Essence",
+      "description": "A recovered legacy essence containing Bone Shield and Spiked Defense.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Undead",
+        "Role.Support",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Fortitude",
+          "baseValue": 4
+        },
+        {
+          "attribute": "BlockChance",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.skeleton_warrior",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "boneShield",
+      "passiveAbilityId": "spikedDefense"
+    }
+  ]
+}

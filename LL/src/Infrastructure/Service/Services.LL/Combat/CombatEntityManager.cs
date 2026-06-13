@@ -1,6 +1,6 @@
-﻿using Domain.Interfaces.Combat;
-using Domain.Models.Abilities;
-using Domain.Models.Abilities.Triggers.TriggerFilters;
+using Domain.Interfaces.Combat;
+using Domain.Models.Combat.Abilities;
+using Domain.Models.Combat.Abilities.Triggers.TriggerFilters;
 using Domain.Models.Combat;
 
 namespace Services.LL.Combat;
@@ -82,7 +82,7 @@ public class CombatEntityManager : ICombatEntityManager
         return playersAlive && enemiesAlive;
     }
 
-    public List<CombatEntity> SelectTargets(CombatEntity actor, Targeting targeting)
+    public List<CombatEntity> SelectTargets(CombatEntity actor, CombatTargeting targeting)
     {
         var enemyTeam = GetOpposingTeam(actor);
         var allyTeam = GetOwnTeam(actor);

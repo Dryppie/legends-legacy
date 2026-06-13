@@ -9,8 +9,9 @@ public static class CharacterQueryProfiles
     public static IQueryable<Character> EntireCharacter(this IQueryable<Character> q)
         => q
             .Include(c => c.BaseAttributes)
-            .Include(c => c.EssenceSlots)
-                .ThenInclude(es => es.OccupiedEssence)
+            .Include(c => c.EssenceLoadouts.Where(x => x.IsActive))
+                .ThenInclude(x => x.Slots)
+                    .ThenInclude(x => x.PlayerEssence)
             .Include(c => c.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)
                     .ThenInclude(ei => ei.InstanceModifiers)
@@ -22,8 +23,6 @@ public static class CharacterQueryProfiles
     public static IQueryable<Character> SnapshotReady(this IQueryable<Character> q)
         => q
             .Include(c => c.BaseAttributes)
-            .Include(c => c.EssenceSlots)
-                .ThenInclude(es => es.OccupiedEssence)
             .Include(c => c.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)
                     .ThenInclude(ei => ei.InstanceModifiers)

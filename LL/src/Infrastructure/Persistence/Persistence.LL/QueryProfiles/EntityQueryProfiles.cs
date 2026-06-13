@@ -17,9 +17,7 @@ public static class EntityQueryProfiles
             .Include(e => e.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)
                     .ThenInclude(ei => ei.ItemBase)
-                        .ThenInclude(ib => (ib as EquipmentBase)!.AttributeModifiers)
-            .Include(e => e.EssenceSlots)
-                .ThenInclude(es => es.OccupiedEssence);
+                        .ThenInclude(ib => (ib as EquipmentBase)!.AttributeModifiers);
 
     public static IQueryable<Entity> CombatReadyWithLoot(this IQueryable<Entity> q)
         => q.CombatReady()

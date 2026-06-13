@@ -1,16 +1,16 @@
-﻿using Domain.Models.Abilities;
-using Domain.Models.Abilities.Effects;
-using Domain.Models.Abilities.Effects.Conditions;
-using Domain.Models.Abilities.Effects.Intervals;
-using Domain.Models.Abilities.Effects.Duration;
-using Domain.Models.Abilities.Effects.Trigger;
-using Domain.Models.Abilities.Effects.Usages;
+using Domain.Models.Combat.Abilities;
+using Domain.Models.Combat.Abilities.Effects;
+using Domain.Models.Combat.Abilities.Effects.Conditions;
+using Domain.Models.Combat.Abilities.Effects.Intervals;
+using Domain.Models.Combat.Abilities.Effects.Duration;
+using Domain.Models.Combat.Abilities.Effects.Trigger;
+using Domain.Models.Combat.Abilities.Effects.Usages;
 using Domain.Models.Damages;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Domain.Models.Abilities.Effects.EffectModifications;
+using Domain.Models.Combat.Abilities.Effects.EffectModifications;
 using Domain.Models.Attributes.Modifiers;
-using Domain.Interfaces.Abilities;
+using Domain.Interfaces.Combat.Abilities;
 
 namespace Common.Utilities;
 public class EffectConverter : JsonConverter<EffectDefinition>
@@ -78,8 +78,8 @@ public class EffectConverter : JsonConverter<EffectDefinition>
         }
 
         var targeting = root.TryGetProperty("Targeting", out var targetingProp)
-                            ? Enum.Parse<Targeting>(targetingProp.GetString() ?? "None")
-                            : Targeting.None;
+                            ? Enum.Parse<CombatTargeting>(targetingProp.GetString() ?? "None")
+                            : CombatTargeting.None;
 
         var attackType = root.TryGetProperty("AttackType", out var attackTypeProp)
                             ? Enum.Parse<AttackType>(attackTypeProp.GetString() ?? "None")

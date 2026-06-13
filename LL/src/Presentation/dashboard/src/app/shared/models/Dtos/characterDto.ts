@@ -1,4 +1,3 @@
-import { EssenceSlot } from '../essenceSlot';
 import { AttributeDto } from './attributesDto';
 
 export interface CharacterDto {
@@ -16,5 +15,19 @@ export interface CharacterOverviewDto {
   level: number;
   baseAttributes: AttributeDto[];
   baseCombatAttributes: AttributeDto[];
-  essenceSlots: EssenceSlot[];
+  activeEssenceLoadout?: EssenceLoadoutDto | null;
+}
+
+export interface EssenceLoadoutDto {
+  id: string;
+  name: string;
+  isActive: boolean;
+  slots: EssenceLoadoutSlotDto[];
+}
+
+export interface EssenceLoadoutSlotDto {
+  slotIndex: number;
+  playerEssenceId?: string | null;
+  essenceDefinitionId?: string | null;
+  essenceName?: string | null;
 }

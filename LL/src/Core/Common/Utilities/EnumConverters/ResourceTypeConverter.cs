@@ -1,4 +1,4 @@
-﻿using Domain.Models.Abilities.ResourceCosts;
+using Domain.Models.Combat.Abilities.ResourceCosts;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -10,8 +10,9 @@ public class ResourceTypeConverter : JsonConverter<ResourceType>
         var stringValue = reader.GetString();
         return stringValue switch
         {
-            "Mana" => ResourceType.Mana,
+            "MaxHealth" => ResourceType.Health,
             "Health" => ResourceType.Health,
+            "Barrier" => ResourceType.Barrier,
             _ => throw new JsonException($"Unknown resource type: {stringValue}")
         };
     }
@@ -20,8 +21,8 @@ public class ResourceTypeConverter : JsonConverter<ResourceType>
     {
         var stringValue = value switch
         {
-            ResourceType.Mana => "Mana",
-            ResourceType.Health => "Health",
+            ResourceType.Health => "MaxHealth",
+            ResourceType.Barrier => "Barrier",
             _ => throw new JsonException($"Unknown resource type: {value}")
         };
         writer.WriteStringValue(stringValue);

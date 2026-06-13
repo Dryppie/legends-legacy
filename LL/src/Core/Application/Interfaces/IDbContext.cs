@@ -1,4 +1,3 @@
-﻿using Domain.Models.Abilities;
 using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
@@ -8,7 +7,6 @@ using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
-using Domain.Models.Essences.EssenceSlots;
 using Domain.Models.Guilds;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
@@ -31,7 +29,6 @@ using Microsoft.EntityFrameworkCore.Storage;
 namespace Application.Common.Interfaces;
 public interface IDbContext
 {
-    DbSet<AbilityId> AbilityIds { get; }
     //DbSet<Achievement> Achievements { get; }
     DbSet<Area> Areas { get; }
     DbSet<EntityAttribute> EntityAttributes { get; }
@@ -44,9 +41,11 @@ public interface IDbContext
     //DbSet<Echo> Echoes { get; }
     DbSet<Entity> Entities { get; }
     DbSet<EquipmentSlot> EquipmentSlots { get; }
-    DbSet<Essence> Essences { get; }
-    DbSet<EssenceSlot> EssenceSlots { get; }
     DbSet<EssenceItemBase> EssenceItems { get; }
+    DbSet<PlayerEssence> PlayerEssences { get; }
+    DbSet<EssenceLoadout> EssenceLoadouts { get; }
+    DbSet<EssenceLoadoutSlot> EssenceLoadoutSlots { get; }
+    DbSet<CreatureResonance> MonsterResonances { get; }
 
     DbSet<DungeonRun> DungeonRuns { get; }
     DbSet<RunReward> RunRewards { get; }
@@ -61,7 +60,6 @@ public interface IDbContext
     DbSet<GatheringNode> GatheringNodes { get; }
 
     //DbSet<Equipment> Equipments { get; }
-    //DbSet<Essence> Essences { get; }
     DbSet<Guild> Guilds { get; }
     DbSet<GuildInvite> GuildInvites { get; }
     DbSet<GuildMember> GuildMembers { get; }
@@ -88,6 +86,7 @@ public interface IDbContext
     // Snapshots
 
     DbSet<CharacterSnapshot> CharacterSnapshots { get; }
+    DbSet<EquippedEssenceSnapshot> EquippedEssenceSnapshots { get; }
 
     DbSet<AppUser> Users { get; }
     DbSet<ExternalLogin> ExternalLogins { get; }

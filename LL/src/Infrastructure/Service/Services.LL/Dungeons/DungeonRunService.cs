@@ -233,6 +233,7 @@ public sealed class DungeonRunService : IDungeonRunService
         var orchestrationRequest = new DungeonCombatOrchestrationRequest(
             DungeonRunId: run.Id,
             CharacterId: snapshot.CharacterId,
+            CharacterSnapshot: snapshot,
             CurrentRoomIndex: run.CurrentRoomIndex,
             EnemyCreatureKeys: room.EncounterIds);
 

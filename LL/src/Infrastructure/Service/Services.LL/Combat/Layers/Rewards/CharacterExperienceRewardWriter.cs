@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.Services.LL.Entities;
+using Application.Interfaces.Services.LL.Entities;
+using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Entities;
 using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Reward;
@@ -10,15 +11,18 @@ public sealed class CharacterExperienceRewardWriter : IExperienceRewardWriter
     private readonly ICharacterService _characterService;
     private readonly ILevelingService _levelingService;
     private readonly IEntityService _entityService;
+    private readonly IEssenceService _essenceSystemService;
 
     public CharacterExperienceRewardWriter(
         ICharacterService characterService,
         ILevelingService levelingService,
-        IEntityService entityService)
+        IEntityService entityService,
+        IEssenceService essenceSystemService)
     {
         _characterService = characterService;
         _levelingService = levelingService;
         _entityService = entityService;
+        _essenceSystemService = essenceSystemService;
     }
 
     public async Task AddSplitExperienceAsync(
@@ -62,6 +66,7 @@ public sealed class CharacterExperienceRewardWriter : IExperienceRewardWriter
             }
 
             character.Experience += award;
+            await _essenceSystemService.GrantCombatXpToAttunedEssencesAsync(characterId, award, cancellationToken);
 
             await _levelingService.UpdateCharacterLevel(
                 character,

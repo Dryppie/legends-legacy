@@ -5,4 +5,6 @@ export interface EssenceAbilityData {
   bonus: number;
   total: string;
   attrValue: number;
+  unit: string;
+  hasRange: boolean;
 }

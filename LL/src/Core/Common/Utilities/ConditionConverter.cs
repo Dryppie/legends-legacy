@@ -1,6 +1,6 @@
-﻿using Domain.Interfaces.Abilities;
-using Domain.Models.Abilities.Effects.Conditions;
-using Domain.Models.Abilities.Effects.StatusEffects;
+using Domain.Interfaces.Combat.Abilities;
+using Domain.Models.Combat.Abilities.Effects.Conditions;
+using Domain.Models.Combat.Abilities.Effects.StatusEffects;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

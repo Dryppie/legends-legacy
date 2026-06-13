@@ -103,7 +103,8 @@
             class="text-sm text-neutral-400"
             *ngFor="let mod of getAttributeModifiers(e)"
           >
-            {{ mod.attributeType }}: + {{ mod.amount }}
+            {{ mod.attributeType | attributeTypeFormat }}:
+            {{ mod.amount | attributeValueFormat: mod.attributeType : true }}
           </div>
         </div>
       </ng-container>

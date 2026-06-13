@@ -6,9 +6,9 @@ export enum AttributeCategory {
   Offensive = 'Offensive',
   Defensive = 'Defensive',
   Vitality = 'Vitality',
-  Resistance = 'Resistance',
+  Recovery = 'Recovery',
   Utility = 'Utility',
-  None = 'None',
+  Summons = 'Summons',
 }
 
 @Pipe({
@@ -18,47 +18,34 @@ export enum AttributeCategory {
 })
 export class GroupAttributesByCategoryPipe implements PipeTransform {
   ATTRIBUTE_CATEGORY_MAP: Record<AttributeType, AttributeCategory> = {
-    // Vitality
-    [AttributeType.Health]: AttributeCategory.Vitality,
-    [AttributeType.HealthRegeneration]: AttributeCategory.Vitality,
-    [AttributeType.Mana]: AttributeCategory.Vitality,
-    [AttributeType.ManaRegeneration]: AttributeCategory.Vitality,
-    [AttributeType.Barrier]: AttributeCategory.Vitality,
-    [AttributeType.MaxHealth]: AttributeCategory.None,
-    [AttributeType.MaxMana]: AttributeCategory.None,
-    [AttributeType.RecoveryRate]: AttributeCategory.Vitality,
+    [AttributeType.Power]: AttributeCategory.Offensive,
+    [AttributeType.Fortitude]: AttributeCategory.Vitality,
+    [AttributeType.Precision]: AttributeCategory.Offensive,
+    [AttributeType.Spirit]: AttributeCategory.Vitality,
 
-    // Offensive
-    [AttributeType.AttackPower]: AttributeCategory.Offensive,
-    [AttributeType.SpellPower]: AttributeCategory.Offensive,
+    [AttributeType.MaxHealth]: AttributeCategory.Vitality,
+    [AttributeType.WeaponDamage]: AttributeCategory.Offensive,
+    [AttributeType.Armor]: AttributeCategory.Defensive,
+    [AttributeType.Resistance]: AttributeCategory.Defensive,
     [AttributeType.CritChance]: AttributeCategory.Offensive,
     [AttributeType.CritDamage]: AttributeCategory.Offensive,
-    [AttributeType.MultiStrike]: AttributeCategory.Offensive,
-    [AttributeType.MultiCast]: AttributeCategory.Offensive,
     [AttributeType.ArmorPenetration]: AttributeCategory.Offensive,
-    [AttributeType.ManaPenetration]: AttributeCategory.Offensive,
-    [AttributeType.Accuracy]: AttributeCategory.Offensive,
-    [AttributeType.AttackSpeed]: AttributeCategory.Offensive,
+    [AttributeType.MagicPenetration]: AttributeCategory.Offensive,
 
-    // Defensive
-    [AttributeType.PhysicalDefense]: AttributeCategory.Defensive,
-    [AttributeType.MagicalDefense]: AttributeCategory.Defensive,
+    [AttributeType.DodgeChance]: AttributeCategory.Defensive,
+    [AttributeType.BlockChance]: AttributeCategory.Defensive,
     [AttributeType.DamageReduction]: AttributeCategory.Defensive,
-    [AttributeType.CritDamageReduction]: AttributeCategory.Defensive,
-    [AttributeType.Dodge]: AttributeCategory.Defensive,
-    [AttributeType.Block]: AttributeCategory.Defensive,
-    [AttributeType.Parry]: AttributeCategory.Defensive,
-    [AttributeType.CrowdControlResistance]: AttributeCategory.Defensive,
 
-    // Resistance
-    [AttributeType.FireResistance]: AttributeCategory.Resistance,
-    [AttributeType.WaterResistance]: AttributeCategory.Resistance,
-    [AttributeType.EarthResistance]: AttributeCategory.Resistance,
-    [AttributeType.AirResistance]: AttributeCategory.Resistance,
+    [AttributeType.HealingPowerPercent]: AttributeCategory.Recovery,
+    [AttributeType.HealthRegeneration]: AttributeCategory.Recovery,
+    [AttributeType.LifeSteal]: AttributeCategory.Recovery,
 
-    // Utility
-    [AttributeType.CooldownReduction]: AttributeCategory.Utility,
-    [AttributeType.Threat]: AttributeCategory.Utility,
+    [AttributeType.Cooldown]: AttributeCategory.Utility,
+    [AttributeType.StatusResistance]: AttributeCategory.Utility,
+    [AttributeType.CrowdControlResistance]: AttributeCategory.Utility,
+
+    [AttributeType.SummonPower]: AttributeCategory.Summons,
+    [AttributeType.SummonHealth]: AttributeCategory.Summons,
   };
 
   transform(values: AttributeDto[]): Record<string, AttributeDto[]> {

@@ -1,45 +1,32 @@
-﻿namespace Domain.Models.Attributes;
+namespace Domain.Models.Attributes;
 public enum AttributeType
 {
-    /* ===== VITALITY ===== */
-    MaxHealth,
-    Health,
-    HealthRegeneration,
-    MaxMana, // Mana doesn't scale infinitely with equipment, as it'll make ability cost redundant
-    Mana,
-    ManaRegeneration, // Mana Regeneration doesn't scale infinitely with equipment, as it'll make ability cost redundant
-    RecoveryRate,
-    Barrier, // Can't be more than 2x Health
+    Power = 0,
+    Fortitude = 1,
+    Precision = 2,
+    Spirit = 3,
 
-    /* ===== OFFENSE =====*/
-    AttackPower,
-    SpellPower,
-    AttackSpeed,
-    Accuracy,
-    CritChance,
-    CritDamage,
-    MultiStrike, // Chance to use Physical Attack a 2nd time
-    MultiCast, // Chance to use Magical Attack a 2nd time
-    ArmorPenetration,
-    ManaPenetration,
+    MaxHealth = 4,
+    WeaponDamage = 5,
+    Armor = 6,
+    Resistance = 7,
+    CritChance = 8,
+    CritDamage = 9,
+    ArmorPenetration = 10,
+    MagicPenetration = 11,
 
-    /* ===== DEFENSE ===== */
-    PhysicalDefense,
-    MagicalDefense,
-    DamageReduction,
-    CritDamageReduction, // Reduces damage dealt by a crit
-    CrowdControlResistance, // CC
-    Dodge,
-    Block,
-    Parry,
+    DodgeChance = 12,
+    BlockChance = 13,
+    DamageReduction = 14,
 
-    /* ===== CONTROL & UTILITY ===== */
-    Threat,
-    CooldownReduction,
+    HealingPowerPercent = 15,
+    HealthRegeneration = 16,
+    LifeSteal = 17,
 
-    /* ===== Resistances ===== */
-    FireResistance,
-    WaterResistance,
-    EarthResistance,
-    AirResistance,
+    Cooldown = 18,
+    StatusResistance = 19,
+    CrowdControlResistance = 20,
+
+    SummonPower = 21,
+    SummonHealth = 22
 }

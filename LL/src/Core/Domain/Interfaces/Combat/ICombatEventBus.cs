@@ -1,4 +1,4 @@
-﻿using Domain.Models.Abilities;
+using Domain.Models.Combat.Abilities;
 
 namespace Domain.Interfaces.Combat;
 public interface ICombatEventBus

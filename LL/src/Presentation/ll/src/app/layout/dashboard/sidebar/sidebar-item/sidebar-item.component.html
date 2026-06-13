@@ -1,5 +1,7 @@
 <div
-  class="flex h-[60px] items-center justify-center bg-cover bg-center p-3 shadow-md hover:cursor-pointer sm:justify-start sm:border-b"
+  class="group relative flex h-[52px] items-center justify-center border-l-2 bg-cover bg-center px-3 py-2 transition-colors hover:cursor-pointer hover:bg-zinc-300/5 sm:justify-start"
+  [class.border-transparent]="!isActive"
+  [class.border-primary]="isActive"
   [style.background-image]="
     isActive
       ? 'linear-gradient(to bottom, #00000095 50%, #1f150c95), url(core/Light.svg)'
@@ -7,16 +9,22 @@
   "
 >
   <div
-    class="hidden h-12 w-12 items-center justify-center rounded-full sm:flex"
+    class="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full sm:flex"
   >
     <app-profession-icon
-      class="scale-75"
+      class="scale-[0.68]"
       [image]="item.icon"
     ></app-profession-icon>
   </div>
-  <div class="flex flex-col gap-1 sm:ml-4">
-    <h3 class="text-center text-primary sm:text-start">{{ item.title }}</h3>
-    <small class="hidden text-white sm:block">{{ item.description }}</small>
+  <div class="flex min-w-0 flex-col sm:ml-3">
+    <h3
+      class="truncate text-center text-base leading-5 text-primary sm:text-start"
+    >
+      {{ item.title }}
+    </h3>
+    <small class="hidden truncate text-[11px] leading-4 text-zinc-200 sm:block">
+      {{ item.description }}
+    </small>
     <!-- Placeholder for additional content injected by child components -->
     <ng-content></ng-content>
   </div>

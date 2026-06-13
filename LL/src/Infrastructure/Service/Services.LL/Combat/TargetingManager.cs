@@ -1,26 +1,27 @@
-﻿using Domain.Models.Abilities;
+using Domain.Models.Combat.Abilities;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 
 namespace Services.LL.Combat;
 public static class TargetingManager
 {
-    public static List<CombatEntity> SelectTargets(Targeting targeting, CombatEntity actor, List<CombatEntity> enemyTeam, List<CombatEntity> allies)
+    public static List<CombatEntity> SelectTargets(CombatTargeting targeting, CombatEntity actor, List<CombatEntity> enemyTeam, List<CombatEntity> allies)
     {
         List<CombatEntity> targets = [];
 
         switch (targeting)
         {
-            case Targeting.SingleEnemy:
+            case CombatTargeting.SingleEnemy:
+            case CombatTargeting.SingleRandomEnemy:
                 var enemyTarget = SelectTarget(enemyTeam);
                 if (enemyTarget != null) targets.Add(enemyTarget);
                 break;
 
-            case Targeting.AllEnemies:
+            case CombatTargeting.AllEnemies:
                 targets = enemyTeam.Where(e => e.IsAlive).ToList();
                 break;
 
-            case Targeting.TwoEnemies:
+            case CombatTargeting.TwoEnemies:
                 if (enemyTeam.Where(e => e.IsAlive).Count() >= 2)
                 {
                     targets = enemyTeam.Where(e => e.IsAlive).Take(2).ToList();
@@ -32,7 +33,7 @@ public static class TargetingManager
                 }
                 break;
 
-            case Targeting.TwoAllies:
+            case CombatTargeting.TwoAllies:
                 if (allies.Where(e => e.IsAlive).Count() >= 2)
                 {
                     targets = allies.Where(e => e.IsAlive).Take(2).ToList();
@@ -44,31 +45,48 @@ public static class TargetingManager
                 }
                 break;
 
-            case Targeting.Self:
+            case CombatTargeting.Self:
                 targets.Add(actor);
                 break;
 
-            case Targeting.SingleAlly:
+            case CombatTargeting.SingleAlly:
+            case CombatTargeting.SingleRandomAlly:
                 var allyTarget = SelectTarget(allies);
                 if (allyTarget != null) targets.Add(allyTarget);
                 break;
 
-            case Targeting.AllAllies:
+            case CombatTargeting.AllAllies:
                 targets = allies.Where(a => a.IsAlive && !a.Id.Equals(actor.Id)).ToList();
                 break;
 
-            case Targeting.AllyHighestMaxHealth:
+            case CombatTargeting.SingleEnemyLowestHealth:
+                var lowestHealthEnemy = enemyTeam.Where(e => e.IsAlive).MinBy(e => e.GetCurrentHealthValue());
+                if (lowestHealthEnemy != null) targets.Add(lowestHealthEnemy);
+                break;
+
+            case CombatTargeting.SingleAllyLowestHealth:
+                var lowestHealthAlly = allies.Where(e => e.IsAlive).MinBy(e => e.GetCurrentHealthValue());
+                if (lowestHealthAlly != null) targets.Add(lowestHealthAlly);
+                break;
+
+            case CombatTargeting.AllyHighestMaxHealth:
                 var maxHealthAlly = allies.MaxBy(a => a.GetAttributeValue(AttributeType.MaxHealth));
                 if (maxHealthAlly != null) targets.Add(maxHealthAlly);
                 break;
-            case Targeting.EveryoneButYou:
+            case CombatTargeting.EveryoneButYou:
                 var allEnemies = enemyTeam.Where(e => e.IsAlive);
                 var allAllies = allies.Where(a => a.IsAlive && !a.Id.Equals(actor.Id)).ToList();
                 targets.AddRange([.. allEnemies, .. allAllies]);
                 break;
-            case Targeting.YourTeam:
+            case CombatTargeting.YourTeam:
                 var yourTeam = allies.Where(a => a.IsAlive).ToList();
                 targets.AddRange(yourTeam);
+                break;
+            case CombatTargeting.SummonedAllies:
+                targets.AddRange(allies.Where(a => a.IsAlive && a.IsSummoned));
+                break;
+            case CombatTargeting.NonSummonedAllies:
+                targets.AddRange(allies.Where(a => a.IsAlive && !a.IsSummoned));
                 break;
             default:
                 throw new NotSupportedException($"Targeting type '{targeting}' is not supported.");

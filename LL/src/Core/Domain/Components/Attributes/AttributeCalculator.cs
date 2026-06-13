@@ -1,4 +1,4 @@
-﻿using Domain.Extensions;
+using Domain.Extensions;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
@@ -19,48 +19,35 @@ public static class AttributeCalculator
         {
             var calculatedValue = GetCombatAttributeValue(entity, attributeType, baseValue);
 
-            // Apply MaxHealth/MaxMana syncing rules
-            MaxHealthOrMaxMana(entity, attributeType, calculatedValue);
-
             if (!entity.CombatAttributes.TryAdd(attributeType, calculatedValue))
             {
                 entity.CombatAttributes[attributeType] = calculatedValue;
             }
-
-            HealthOrMana(entity, attributeType);
         }
+
+        entity.SyncCurrentHealthToMax();
     }
 
     /// <summary>
     /// This is used to get an overview of the entity's attributes after applying equipment, essences, etc.
     /// </summary>
     /// <param name="entity"></param>
-    public static void CalculateBaseAttributes(Entity entity)
+    public static void CalculateBaseAttributes(Entity entity, IEnumerable<AttributeModifierBase>? additionalModifiers = null)
     {
         entity.BaseCombatAttributes.Clear();
 
         var baseAttributes = entity.BaseAttributes.ToDictionary(a => a.AttributeType, a => a.Value);
+        var equipmentModifiers = entity.EquipmentSlots
+            .Where(es => es.EquipmentInstance != null)
+            .SelectMany(es => es.EquipmentInstance!.AttributeModifiers)
+            .Cast<AttributeModifierBase>()
+            .ToList();
+        var modifiers = equipmentModifiers.Concat(additionalModifiers ?? []).ToList();
 
-        foreach (var (attributeType, attributeValue) in baseAttributes )
-        {
-            entity.BaseCombatAttributes.Add(attributeType, attributeValue);
-        }
+        foreach (var (attributeType, attributeValue) in CalculateProjectedAttributes(baseAttributes, modifiers))
+            entity.BaseCombatAttributes[attributeType] = attributeValue;
 
-        foreach (var attributeModifier in entity.EssenceSlots.ActiveSlotsWithOccupiedEssences().Select(es => es.OccupiedEssence).SelectMany(e => e.AttributeModifiers))
-        {
-            entity.BaseCombatAttributes[attributeModifier.AttributeType] += attributeModifier.Amount;
-        }
-
-        foreach (var equipment in entity.EquipmentSlots.Where(es => es.EquipmentInstance != null).Select(es => es.EquipmentInstance!))
-        {
-            foreach (var attributeModifier in equipment.AttributeModifiers)
-            {
-                entity.BaseCombatAttributes[attributeModifier.AttributeType] += attributeModifier.Amount;
-            }
-        }
-
-        entity.BaseCombatAttributes[AttributeType.Health] = entity.BaseCombatAttributes[AttributeType.MaxHealth];
-        entity.BaseCombatAttributes[AttributeType.Mana] = entity.BaseCombatAttributes[AttributeType.MaxMana];
+        SyncBaseResources(entity.BaseCombatAttributes);
     }
 
     // Calculates all combat attributes for a given entity - used to initialize players before combat
@@ -70,27 +57,15 @@ public static class AttributeCalculator
         entity.CombatAttributes.Clear();
         // Convert raw attributes to a dictionary for quick access
         var baseAttributes = entity.BaseAttributes.ToDictionary(a => a.AttributeType, a => a.Value);
+        var equipmentModifiers = entity.Equipment
+            .SelectMany(equipment => equipment.AttributeModifiers)
+            .Cast<AttributeModifierBase>()
+            .ToList();
 
-        foreach (var (attributeType, attributeValue) in baseAttributes)
-        {
-            entity.BaseCombatAttributes.Add(attributeType, attributeValue);
-        }
+        foreach (var (attributeType, attributeValue) in CalculateProjectedAttributes(baseAttributes, equipmentModifiers))
+            entity.BaseCombatAttributes[attributeType] = attributeValue;
 
-        foreach (var attributeModifier in entity.EquippedEssences.SelectMany(ee => ee.AttributeModifiers))
-        {
-            entity.BaseCombatAttributes[attributeModifier.AttributeType] += attributeModifier.Amount;
-        }
-
-        foreach (var equipment in entity.Equipment)
-        {
-            foreach (var attributeModifier in equipment.AttributeModifiers)
-            {
-                entity.BaseCombatAttributes[attributeModifier.AttributeType] += attributeModifier.Amount;
-            }
-        }
-
-        entity.BaseCombatAttributes[AttributeType.Health] = entity.BaseCombatAttributes[AttributeType.MaxHealth];
-        entity.BaseCombatAttributes[AttributeType.Mana] = entity.BaseCombatAttributes[AttributeType.MaxMana];
+        SyncBaseResources(entity.BaseCombatAttributes);
 
         // Iterate over each attribute of the entity, and calculate baseAttributes
         foreach (var (attributeType, attributeValue) in entity.BaseCombatAttributes)
@@ -99,6 +74,8 @@ public static class AttributeCalculator
 
             entity.CombatAttributes.TryAdd(attributeType, calculatedValue);
         }
+
+        entity.SyncCurrentHealthToMax();
     }
 
     // Recalculate a specific attribute for the entity by attribute type
@@ -107,16 +84,21 @@ public static class AttributeCalculator
         // Find the attribute in BaseAttributes or CombatAttributes
         if (!entity.BaseCombatAttributes.TryGetValue(attributeType, out var attribute)) return;
 
+        var oldMaxHealth = entity.CombatAttributes.GetValueOrDefault(AttributeType.MaxHealth);
         var calculatedValue = GetCombatAttributeValue(entity, attributeType, attribute);
 
-        MaxHealthOrMaxMana(entity, attributeType, calculatedValue);
-
         if (entity.CombatAttributes.TryAdd(attributeType, calculatedValue))
+        {
+            if (attributeType == AttributeType.MaxHealth)
+                entity.SyncCurrentHealthAfterMaxHealthChange(oldMaxHealth, calculatedValue);
+
             return;
+        }
 
         entity.CombatAttributes[attributeType] = calculatedValue;
 
-        HealthOrMana(entity, attributeType);
+        if (attributeType == AttributeType.MaxHealth)
+            entity.SyncCurrentHealthAfterMaxHealthChange(oldMaxHealth, calculatedValue);
     }
 
     private static float GetCombatAttributeValue(CombatEntity entity, AttributeType attributeType, float baseValue)
@@ -126,14 +108,17 @@ public static class AttributeCalculator
             .Where(tm => tm.AttributeType.Equals(attributeType))
             .ToList();
 
-        if (validModifiers.Count == 0) return baseValue;
+        return CalculateModifiedValue(baseValue, validModifiers);
+    }
 
+    public static float CalculateModifiedValue(float baseValue, IEnumerable<AttributeModifierBase> modifiers)
+    {
         float flatSum = 0f;
         float additiveSum = 0f;
         float multiplicativeProduct = 1f;
 
         // Iterate through each modifier once and calculate sums and product
-        foreach (var modifier in validModifiers)
+        foreach (var modifier in modifiers)
         {
             switch (modifier.ModifierType)
             {
@@ -153,96 +138,26 @@ public static class AttributeCalculator
         return Math.Max(result, 0);
     }
 
-    private static void MaxHealthOrMaxMana(CombatEntity entity, AttributeType attributeType, float calculatedValue)
+    public static Dictionary<AttributeType, float> CalculateProjectedAttributes(
+        IReadOnlyDictionary<AttributeType, float> baseAttributes,
+        IEnumerable<AttributeModifierBase> modifiers)
     {
-        switch (attributeType)
-        {
-            case AttributeType.MaxHealth:
-                {
-                    float oldMax = entity.CombatAttributes.TryGetValue(AttributeType.MaxHealth, out var oldMaxObj)
-                        ? oldMaxObj
-                        : 0;
+        var modifierList = modifiers.ToList();
+        var projected = baseAttributes.Keys
+            .Concat(modifierList.Select(x => x.AttributeType))
+            .Distinct()
+            .ToDictionary(
+                attributeType => attributeType,
+                attributeType => CalculateModifiedValue(
+                    baseAttributes.GetValueOrDefault(attributeType),
+                    modifierList.Where(x => x.AttributeType == attributeType)));
 
-                    float difference = calculatedValue - oldMax;
-
-                    if (entity.CombatAttributes.TryGetValue(AttributeType.Health, out var currentHealth))
-                    {
-                        if (difference < 0) // This is only applied to scenarios where MaxHealth is decreased
-                        {
-                            // currentHealth is higher than new MaxHealth, cap hp to new MaxHealth
-                            if (currentHealth > calculatedValue)
-                                entity.CombatAttributes[AttributeType.Health] = calculatedValue;
-
-                            break;
-                        }
-
-                        float newHealth = currentHealth + difference;
-
-                        // Clamp to [0, new MaxHealth]
-                        if (newHealth > calculatedValue) newHealth = calculatedValue;
-                        if (newHealth < 0) newHealth = 0;
-
-                        entity.CombatAttributes[AttributeType.Health] = newHealth;
-                    }
-
-                    break;
-                }
-
-            case AttributeType.MaxMana:
-                {
-                    float oldMax = entity.CombatAttributes.TryGetValue(AttributeType.MaxMana, out var oldMaxObj)
-                        ? oldMaxObj
-                        : 0;
-
-                    float difference = calculatedValue - oldMax;
-
-                    if (entity.CombatAttributes.TryGetValue(AttributeType.Mana, out var currentMana))
-                    {
-                        if (difference < 0) // This is only applied to scenarios where MaxMana is decreased
-                        {
-                            // If currentMana is higher than new MaxMana, cap mp to new MaxMana
-                            if (currentMana > calculatedValue)
-                                entity.CombatAttributes[AttributeType.Mana] = calculatedValue;
-
-                            break;
-                        }
-
-                        float newMana = currentMana + difference;
-
-                        if (newMana > calculatedValue) newMana = calculatedValue;
-                        if (newMana < 0) newMana = 0;
-
-                        entity.CombatAttributes[AttributeType.Mana] = newMana;
-                    }
-
-                    break;
-                }
-
-            default:
-                break;
-        }
+        return projected;
     }
 
-    private static void HealthOrMana(CombatEntity entity, AttributeType attribute)
+    private static void SyncBaseResources(Dictionary<AttributeType, float> attributes)
     {
-        switch (attribute)
-        {
-            case AttributeType.Health:
-                {
-                    if (entity.CombatAttributes[AttributeType.Health] > entity.CombatAttributes[AttributeType.MaxHealth])
-                        entity.CombatAttributes[AttributeType.Health] = entity.CombatAttributes[AttributeType.MaxHealth];
-                    break;
-                }
-
-            case AttributeType.Mana:
-                {
-                    if (entity.CombatAttributes[AttributeType.Mana] > entity.CombatAttributes[AttributeType.MaxMana])
-                        entity.CombatAttributes[AttributeType.Mana] = entity.CombatAttributes[AttributeType.MaxMana];
-                    break;
-                }
-
-            default:
-                break;
-        }
+        attributes[AttributeType.MaxHealth] = attributes.GetValueOrDefault(AttributeType.MaxHealth);
     }
+
 }

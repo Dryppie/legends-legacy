@@ -1,7 +1,6 @@
-﻿using Domain.Models.Essences;
-
 namespace Domain.Models.Items.EssenceItems;
 public class EssenceItemBase : ItemBase
 {
-    public Essence Essence { get; set; } = null!;
+    public string EssenceDefinitionId { get; set; } = string.Empty;
+    public int DismantleDustAmount { get; set; } = 1;
 }

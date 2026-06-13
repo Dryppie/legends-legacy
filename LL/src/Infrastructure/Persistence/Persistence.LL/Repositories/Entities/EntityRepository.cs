@@ -1,7 +1,5 @@
-﻿using Application.Common.Interfaces;
+using Application.Common.Interfaces;
 using Common.Exceptions;
-using Common.Helpers.Essences;
-using Domain.Extensions;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Items.Equipments;
@@ -9,6 +7,7 @@ using Domain.Models.LootTables;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Repositories.Entities;
+
 public class EntityRepository : IEntityRepository
 {
     private readonly IDbContext _context;
@@ -21,19 +20,15 @@ public class EntityRepository : IEntityRepository
     public void UpdateEntities(List<Entity> entities)
     {
         if (entities.Count == 0) return;
-
         _context.Entities.UpdateRange(entities);
     }
 
     public async Task<List<Entity>> GetEntitiesByIdsForCombatAsync(List<Guid> entityIds, CancellationToken cancellationToken)
     {
-        // Query only distinct IDs
         var entities = await _context.Entities
             .Include(e => e.BaseAttributes)
             .Include(e => e.EquipmentSlots)
                 .ThenInclude(es => (es.EquipmentInstance.ItemBase as EquipmentBase).AttributeModifiers)
-            .Include(e => e.EssenceSlots)
-                .ThenInclude(es => es.OccupiedEssence)
             .Include(e => (e as Creature).LootTable)
                 .ThenInclude(lt => lt.Entries)
                     .ThenInclude(lte => (lte as LootTableItem).Item)
@@ -44,7 +39,6 @@ public class EntityRepository : IEntityRepository
             .Where(e => entityIds.Contains(e.Id))
             .ToListAsync(cancellationToken);
 
-        // Check for any missing IDs
         var foundIds = entities.Select(e => e.Id).ToHashSet();
         var missingIds = entityIds.Where(id => !foundIds.Contains(id)).ToList();
         if (missingIds.Count > 0)
@@ -52,39 +46,17 @@ public class EntityRepository : IEntityRepository
             NotFoundException.ThrowIfNull(missingIds, nameof(entities), entityIds);
         }
 
-        // Build a dictionary from Id to Entity
         var entityLookup = entities.ToDictionary(e => e.Id, e => e);
-
-        // Reconstruct final list, preserving duplicates
-        var finalList = new List<Entity>(entityIds.Count);
-        foreach (var id in entityIds)
-        {
-            // Assuming none of the IDs are missing by now
-            finalList.Add(entityLookup[id]);
-        }
-
-        foreach (var entity in finalList)
-        {
-            foreach (var essenceSlot in entity.EssenceSlots.ActiveSlotsWithOccupiedEssences())
-            {
-                EssenceLoader.Instance.LoadAbilitiesForEssence(essenceSlot.OccupiedEssence!);
-            }
-        }
-
-        return finalList;
+        return entityIds.Select(id => entityLookup[id]).ToList();
     }
 
     public async Task<Entity> GetEntityByIdAsync(Guid entityId, CancellationToken cancellationToken)
     {
         var entity = await _context.Entities
             .Include(e => e.BaseAttributes)
-            .Include(e => e.EssenceSlots)
-                .ThenInclude(es => es.OccupiedEssence)
             .FirstOrDefaultAsync(e => e.Id.Equals(entityId), cancellationToken);
-        
-        NotFoundException.ThrowIfNull(entity, nameof(entity), entityId);
 
+        NotFoundException.ThrowIfNull(entity, nameof(entity), entityId);
         return entity;
     }
-
 }

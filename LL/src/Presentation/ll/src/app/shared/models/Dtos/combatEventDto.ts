@@ -1,5 +1,4 @@
 import { AttributeType } from '../enums/attributeType';
-import { ResourceType } from '../enums/resourceType';
 import { SimpleCombatEntityDto } from './combatResultDto';
 
 export enum EventType {
@@ -13,7 +12,6 @@ export enum EventType {
   Heal = 'Heal', // Dryp was healed for {Amount}
   HealOverTime = 'HealOverTime', // Dryp was healed for {Amount} // Not sure this should be logged in chat
   HealCrit = 'HealCrit', // Dryp was healed for {Amount}
-  RestoreMana = 'RestoreMana', // Dryp restored {Amount} mana
   RestoreBarrier = 'RestoreBarrier', // Dryp received {Amount} barrier
   Lifesteal = 'Lifesteal', // Dryp gained {Amount} health through lifesteal
   Summon = 'Summon', // Imp has been summoned
@@ -25,13 +23,11 @@ export enum EventType {
   StatusEffect = 'StatusEffect', // Dryp is stunned
   StatusEffectExpired = 'StatusEffectExpired', // Dryp is no longer stunned // Is not logged in chat. Maybe something visual instead?
   HealthRegeneration = 'HealthRegeneration',
-  ManaRegeneration = 'ManaRegeneration',
   Death = 'Death',
 }
 
 export interface CombatEvent {
   eventType: EventType;
-  resourceType: ResourceType;
   attribute: AttributeType;
   magnitude: number;
   actorId: string;

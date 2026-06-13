@@ -1,4 +1,4 @@
-﻿using Domain.Models.Abilities.Effects;
+using Domain.Models.Combat.Abilities.Effects;
 using Domain.Models.Combat;
 
 namespace Domain.Interfaces.Combat;

@@ -42,8 +42,8 @@
           {{ attr.attributeType | attributeTypeFormat }}
         </span>
         <span>
-          {{ attr.amount > 0 ? "+" : "" }}{{ attr.amount
-          }}<span *ngIf="attr.modifierType !== modifierType.Flat">%</span></span
+          {{ attr.amount | attributeValueFormat: attr.attributeType : true
+          }}<span *ngIf="shouldAppendModifierPercent(attr)">%</span></span
         >
       </div>
     </div>
@@ -59,8 +59,8 @@
           {{ attr.attributeType | attributeTypeFormat }}
         </span>
         <span>
-          {{ attr.amount > 0 ? "+" : "" }}{{ attr.amount
-          }}<span *ngIf="attr.modifierType !== modifierType.Flat">%</span></span
+          {{ attr.amount | attributeValueFormat: attr.attributeType : true
+          }}<span *ngIf="shouldAppendModifierPercent(attr)">%</span></span
         >
       </div>
     </div>

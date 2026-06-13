@@ -9,7 +9,7 @@ public sealed class CharacterSnapshot
 
     public ICollection<EntityAttributeSnapshot> BaseAttributes { get; init; } = [];
 
-    public List<Guid> ActiveEssenceIds { get; init; } = [];
-
     public ICollection<EquipmentSnapshot> Equipment { get; init; } = [];
+
+    public ICollection<EquippedEssenceSnapshot> EquippedEssences { get; init; } = [];
 }

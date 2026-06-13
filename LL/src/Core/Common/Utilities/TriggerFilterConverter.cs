@@ -1,5 +1,5 @@
-﻿using Domain.Interfaces.Abilities;
-using Domain.Models.Abilities.Triggers.TriggerFilters;
+using Domain.Interfaces.Combat.Abilities;
+using Domain.Models.Combat.Abilities.Triggers.TriggerFilters;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 

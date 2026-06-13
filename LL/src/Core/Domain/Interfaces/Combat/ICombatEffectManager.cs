@@ -1,6 +1,6 @@
-﻿using Domain.Models.Abilities.Effects;
-using Domain.Models.Abilities.Effects.Trigger;
-using Domain.Models.Abilities.Statuses;
+using Domain.Models.Combat.Abilities.Effects;
+using Domain.Models.Combat.Abilities.Effects.Trigger;
+using Domain.Models.Combat.Abilities.Statuses;
 using Domain.Models.Combat;
 
 namespace Domain.Interfaces.Combat;

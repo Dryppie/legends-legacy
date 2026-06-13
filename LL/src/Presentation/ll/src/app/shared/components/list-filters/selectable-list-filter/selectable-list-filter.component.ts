@@ -25,6 +25,7 @@ export class SelectableListFilterComponent<T> {
 
   /** Raw data to filter. */
   items = input.required<T[]>();
+  selectedItem = input<T | null>(null);
   selected: T | null = null;
   /** All available filters (first one will be the default). */
   filterOptions = input.required<FilterOption<T>[]>();
@@ -40,6 +41,10 @@ export class SelectableListFilterComponent<T> {
   active = signal<FilterOption<T> | null>(null);
 
   constructor(private readonly storage: LocalStorageService) {
+    effect(() => {
+      this.selected = this.selectedItem();
+    });
+
     effect(
       () => {
         const filters = this.filterOptions();

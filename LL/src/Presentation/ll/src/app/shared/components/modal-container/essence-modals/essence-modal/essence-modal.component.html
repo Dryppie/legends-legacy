@@ -1,71 +1,11 @@
 <div class="max-w-full rounded-lg border-primary bg-texture p-6 text-white">
-  <!-- Modal Header -->
-  <div class="flex w-full items-center justify-center pb-2">
-    <h2 class="text-primary">{{ essence.name }}</h2>
+  <div class="max-h-[70vh] overflow-y-auto pr-2">
+    <app-essence-details [essence]="essence"></app-essence-details>
   </div>
-  <div class="border-t border-light_gray pb-3"></div>
 
-  <div class="flex flex-row justify-between gap-2">
-    <!-- Modal Body -->
-    <div class="space-y-4">
-      <div class="flex flex-col gap-1">
-        <h3 class="font-semibold text-primary">
-          Active Ability - {{ essence.active.name }}
-        </h3>
-        <div class="flex gap-1">
-          <div class="flex flex-col gap-1">
-            <p
-              class="whitespace-pre-line"
-              [innerHTML]="safeActiveDescription"
-              abilityTooltipContainer
-            ></p>
-            <p>
-              Cost: {{ essence.active.cost.amount }}
-              {{ essence.active.cost.type }}
-            </p>
-            <p>
-              Cooldown: {{ essence.active.cooldown | ticksToSeconds }} seconds
-            </p>
-          </div>
-        </div>
-        <div></div>
-      </div>
-
-      <div class="flex flex-col gap-1">
-        <h3 class="font-semibold text-primary">
-          Passive Ability - {{ essence.passive.name }}
-        </h3>
-        <div class="flex gap-1">
-          <p
-            [innerHTML]="safePassiveDescription"
-            class="whitespace-pre-line"
-            abilityTooltipContainer
-          ></p>
-        </div>
-      </div>
-      <div>
-        <h3 class="pb-1 font-semibold text-primary">Attributes</h3>
-        <div
-          *ngFor="let attribute of essence.attributeModifiers"
-          class="text-primary"
-        >
-          <div class="flex gap-2 text-white">
-            <div>
-              {{ attribute.amount > 0 ? "+" : "" }}{{ attribute.amount }}
-            </div>
-            <div>
-              {{ attribute.attributeType }}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal Footer -->
-    <div class="flex place-items-end">
-      <button (click)="onClose()" class="rounded bg-light px-4 py-2 text-white">
-        Close
-      </button>
-    </div>
+  <div class="mt-4 flex justify-end">
+    <button (click)="onClose()" class="rounded bg-light px-4 py-2 text-white">
+      Close
+    </button>
   </div>
 </div>
