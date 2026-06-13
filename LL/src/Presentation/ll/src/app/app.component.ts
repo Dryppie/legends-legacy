@@ -14,6 +14,8 @@ import { SessionSummaryPopupComponent } from './shared/components/session-summar
 import { GoogleAuthService } from './core/services/api/auth/google-auth.service';
 import { CharacterActionsStateService } from './core/services/api/character-actions/character-actions.state.service';
 import { ToastService } from './core/services/client-side/components/toast/toast.service';
+import { AppUpdatePopupComponent } from './shared/components/app-update-popup/app-update-popup.component';
+import { AppUpdateService } from './core/services/client-side/app-update/app-update.service';
 
 @Component({
   selector: 'app-root',
@@ -23,6 +25,7 @@ import { ToastService } from './core/services/client-side/components/toast/toast
     ToastComponent,
     ModalContainerComponent,
     SessionSummaryPopupComponent,
+    AppUpdatePopupComponent,
   ],
   templateUrl: './app.component.html',
 })
@@ -39,6 +42,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     private readonly googleAuth: GoogleAuthService,
     private readonly state: CharacterActionsStateService,
     private readonly toastService: ToastService,
+    private readonly appUpdate: AppUpdateService,
   ) {
     /* ───────────────────────────────────────────────
      *  Side-effect : run when `isAuthenticated` flips
@@ -58,6 +62,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   /* ─────────────────────────────────────────────── */
   ngOnInit(): void {
     this.googleAuth.init(); // load GSI script once
+    this.appUpdate.start();
   }
 
   ngAfterViewInit(): void {
