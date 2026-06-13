@@ -1,6 +1,10 @@
 <button
-  class="flex items-center gap-1 whitespace-nowrap rounded border border-zinc-300/30 px-2 py-1 text-sm text-neutral-300 hover:bg-zinc-300/30"
-  [ngClass]="selected ? 'bg-primary/30 hover:bg-primary/40' : ''"
+  class="flex h-8 items-center gap-1 whitespace-nowrap rounded px-3 text-sm text-neutral-300 transition-colors hover:bg-zinc-600/30"
+  [ngClass]="
+    selected
+      ? 'bg-primary/30 text-primary shadow-[inset_0_0_0_1px_rgba(249,220,160,0.35)] hover:bg-primary/40'
+      : ''
+  "
   (click)="onButtonClick($event)"
 >
   {{ label }}
@@ -17,13 +21,14 @@
 <!-- Dropdown ------------------------------------------------------------->
 <ul
   *ngIf="open()"
-  class="absolute z-10 mt-1 min-w-[8rem] rounded border border-zinc-300/30 bg-texture shadow-lg"
+  class="absolute z-20 mt-1 min-w-40 rounded border border-light_gray bg-texture py-1 shadow-xl shadow-black/60"
 >
   <li
     *ngFor="let sub of subOptions"
-    class="cursor-pointer whitespace-nowrap px-2 py-1 text-sm text-neutral-300 hover:bg-primary/20"
+    class="grid cursor-pointer grid-cols-[1fr_auto] gap-6 whitespace-nowrap px-3 py-2 text-sm text-zinc-300 hover:bg-primary/20 hover:text-white"
     (click)="onSubOptionClick(sub)"
   >
-    {{ sub }}
+    <span>{{ sub }}</span>
+    <span class="text-primary">0</span>
   </li>
 </ul>

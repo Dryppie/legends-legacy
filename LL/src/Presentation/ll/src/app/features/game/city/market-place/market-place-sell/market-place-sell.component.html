@@ -1,54 +1,70 @@
 <div
-  class="flex h-full w-full flex-col gap-6 overflow-y-auto py-2 text-white 2xl:flex-row"
+  class="grid h-full min-h-0 gap-4 overflow-hidden py-3 text-white xl:grid-cols-[minmax(0,1fr)_24rem]"
 >
-  <!-- LEFT ▸ INVENTORY -->
-  <div class="order-2 flex h-full w-full flex-col 2xl:order-1">
-    <app-filter-tabs
-      [tabs]="tabLabels"
-      [activeTab]="activeTab"
-      (tabSelected)="setActiveTab($event)"
-      class="flex-none"
-    ></app-filter-tabs>
+  <section class="flex min-h-0 flex-col overflow-hidden">
+    <div class="mb-3 flex items-baseline justify-between gap-3">
+      <h2 class="text-xl uppercase text-primary">{{ inventoryTitle }}</h2>
+      <span class="text-[11px] uppercase text-zinc-400">
+        {{ filteredItems.length }} available
+      </span>
+    </div>
 
-    <div class="mb-2 flex h-full flex-col overflow-y-auto">
+    <div
+      *ngIf="!selectedItemType()"
+      class="rounded-t-md border border-light_gray bg-black/30"
+    >
+      <app-filter-tabs
+        [tabs]="tabLabels"
+        [activeTab]="activeTab"
+        (tabSelected)="setActiveTab($event)"
+        class="block px-2"
+      ></app-filter-tabs>
+    </div>
+
+    <div
+      class="min-h-0 flex-1 overflow-y-auto border-light_gray bg-black/20"
+      [ngClass]="
+        selectedItemType()
+          ? 'rounded-md border'
+          : 'rounded-b-md border-x border-b'
+      "
+    >
       <app-market-place-inventory-item
         *ngFor="let item of filteredItems; trackBy: trackByItem"
         [inventoryItem]="item"
         (click)="selectItem(item)"
         [ngClass]="{
-          'bg-zinc-300/30': item.itemInstance.id === selectedItemId,
+          'bg-primary/20 text-white': item.itemInstance.id === selectedItemId,
         }"
-        class="transition"
+        class="transition hover:bg-zinc-600/30"
       ></app-market-place-inventory-item>
+
+      <p
+        *ngIf="!filteredItems.length"
+        class="mt-10 text-center italic text-neutral-400"
+      >
+        You have no items you can sell right now.
+      </p>
     </div>
+  </section>
 
-    <p
-      *ngIf="!filteredItems.length"
-      class="mt-8 text-center italic text-neutral-400"
-    >
-      You have no items you can sell right now.
-    </p>
-  </div>
-
-  <!-- RIGHT ▸ LISTING PANEL -->
-  <div
-    class="order-1 flex h-full w-full flex-col gap-4 rounded-lg bg-black/40 p-4 backdrop-blur-sm 2xl:order-2 2xl:w-96"
+  <aside
+    class="flex min-h-0 flex-col gap-4 overflow-hidden rounded-md border border-light_gray bg-texture bg-auto p-4 shadow-lg"
   >
-    <div class="">
-      <h2 class="text-lg font-semibold">Create a Listing</h2>
-
-      <!-- Selected item preview -->
+    <div class="min-h-0">
+      <h2 class="text-xl uppercase text-primary">Sell Order</h2>
       <ng-container *ngIf="pendingItem() as p; else placeholder">
         <div class="flex flex-col gap-3">
-          <!-- Name -->
-          <app-item [item]="p.itemInstance"></app-item>
+          <div class="border-y border-primary/20 py-3">
+            <app-item [item]="p.itemInstance"></app-item>
+          </div>
 
-          <!-- Adaptive description -->
-          <p class="whitespace-pre-line text-sm text-neutral-300">
+          <p
+            class="max-h-28 overflow-y-auto whitespace-pre-line text-sm leading-relaxed text-neutral-300"
+          >
             {{ itemDescription() }}
           </p>
 
-          <!-- Quantity selector (only for stackables) -->
           <div
             *ngIf="p.itemInstance.itemBase.stackable"
             class="flex items-center gap-1"
@@ -58,30 +74,35 @@
               type="number"
               min="1"
               [max]="maxQuantity()"
-              class="no-spinner w-20 rounded border border-neutral-600 bg-transparent px-2 py-1 text-right"
+              class="no-spinner h-8 w-20 rounded border border-light_gray bg-transparent px-2 text-right text-white focus:border-primary"
               [formControl]="qtyCtrl"
             />
           </div>
 
-          <!-- Price -->
           <div class="flex items-center gap-1">
             <span class="text-sm text-neutral-300">Price:</span>
             <input
               type="number"
               min="1"
-              class="no-spinner w-32 rounded border border-neutral-600 bg-transparent px-2 py-1 text-right"
+              class="no-spinner h-8 w-32 rounded border border-light_gray bg-transparent px-2 text-right text-white focus:border-primary"
               [formControl]="priceCtrl"
             />
             <span class="text-xs text-neutral-400">Cinders</span>
           </div>
-          <span>
-            Total: {{ (priceCtrl.value ?? 0) * (qtyCtrl.value ?? 0) | number }}
-          </span>
 
-          <!-- Submit -->
+          <div
+            class="flex items-center justify-between border-t border-primary/20 pt-3"
+          >
+            <h3 class="text-primary">Total</h3>
+            <span class="text-base text-white">
+              {{ (priceCtrl.value ?? 0) * (qtyCtrl.value ?? 0) | number }}
+              Cinders
+            </span>
+          </div>
+
           <app-regular-button
             class="w-full justify-self-end"
-            text="List item"
+            text="List"
             fullWidth
             [disabled]="priceCtrl.invalid || qtyCtrl.invalid"
             (pressed)="listItem()"
@@ -90,30 +111,35 @@
       </ng-container>
 
       <ng-template #placeholder>
-        <p class="text-center italic text-neutral-400">
+        <p
+          class="mt-6 rounded border border-light_gray bg-black/30 px-6 py-5 text-center italic text-neutral-400"
+        >
           Select an item from your inventory.
         </p>
       </ng-template>
     </div>
 
-    <!-- Divider -->
-    <div class="flex flex-col gap-4 overflow-hidden">
-      <hr class="border-neutral-700" />
-      <!-- Active listings -->
-      <div class="flex w-full justify-between">
-        <h3 class="font-semibold">Your Listings</h3>
-        <label class="">{{ myListings().length }}/10</label>
+    <div
+      class="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden border-t border-primary/20 pt-4"
+    >
+      <div class="flex w-full items-center justify-between">
+        <h3 class="text-base uppercase text-primary">Your Listings</h3>
+        <label class="">{{ displayedMyListings().length }}/10</label>
       </div>
-      <div class="flex flex-col gap-3 overflow-y-auto">
-        <ng-container *ngFor="let l of myListings(); trackBy: trackByListing">
+      <div
+        class="min-h-0 overflow-y-auto rounded border border-light_gray bg-black/20"
+      >
+        <ng-container
+          *ngFor="let l of displayedMyListings(); trackBy: trackByListing"
+        >
           <div
-            class="flex items-center justify-between gap-2 rounded bg-neutral-800/70 p-2"
+            class="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-2 border-b border-light_gray/20 px-2 py-2"
           >
             <app-item [item]="l.itemInstance"></app-item>
-            <div class="flex items-center gap-1 text-sm">
+            <div class="text-sm text-zinc-200">
               <span>x{{ l.quantity | numberFormat }}</span>
             </div>
-            <div class="flex items-center gap-1 text-sm">
+            <div class="text-sm text-primary">
               <span>{{ l.unitPrice | numberFormat }}</span>
             </div>
             <div>
@@ -123,12 +149,12 @@
         </ng-container>
 
         <p
-          *ngIf="!myListings().length"
-          class="text-center italic text-neutral-400"
+          *ngIf="!displayedMyListings().length"
+          class="py-6 text-center italic text-neutral-400"
         >
           No active listings.
         </p>
       </div>
     </div>
-  </div>
+  </aside>
 </div>

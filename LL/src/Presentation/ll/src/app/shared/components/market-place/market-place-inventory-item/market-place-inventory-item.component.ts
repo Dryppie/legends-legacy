@@ -5,11 +5,12 @@ import { Equipment } from '../../../models/item';
 import { ItemType } from '../../../models/enums/itemType';
 import { ItemComponent } from '../../item/item.component';
 import { EquipmentType } from '../../../models/enums/equipmentType';
+import { NumberFormatPipe } from '../../../pipes/number-format/number-format.pipe';
 
 @Component({
   selector: 'app-market-place-inventory-item',
   standalone: true,
-  imports: [ItemComponent, NgIf],
+  imports: [ItemComponent, NgIf, NumberFormatPipe],
   templateUrl: './market-place-inventory-item.component.html',
 })
 export class MarketPlaceInventoryItemComponent {

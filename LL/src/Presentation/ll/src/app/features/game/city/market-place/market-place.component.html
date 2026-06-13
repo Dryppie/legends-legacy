@@ -1,46 +1,77 @@
-<div class="flex h-full flex-col space-y-2 pr-4 sm:pr-6">
-  <app-market-place-filter
-    (itemTypeChanged)="onItemTypeChanged($event)"
-  ></app-market-place-filter>
+<div
+  class="flex h-full min-h-0 flex-col overflow-hidden bg-auto pr-4 text-white sm:pr-6"
+>
+  <div class="relative isolate flex flex-none flex-col gap-3">
+    <div class="flex flex-wrap items-end justify-between gap-3">
+      <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <h1 class="text-2xl uppercase text-primary sm:text-3xl">Marketplace</h1>
+      </div>
 
-  <ng-container [ngSwitch]="selectedItemType().main">
-    <app-market-place-generic
-      *ngSwitchCase="ItemType.Consumable"
-    ></app-market-place-generic>
-    <app-market-place-resources
-      *ngSwitchCase="ItemType.Resource"
-      [resource]="selectedItemType().sub"
-    ></app-market-place-resources>
-    <app-market-place-essences
-      *ngSwitchCase="ItemType.Essence"
-      [essenceListings]="marketplaceState.essences"
-    ></app-market-place-essences>
-    <app-market-place-equipment
-      *ngSwitchCase="ItemType.Equipment"
-      [equipmentListings]="marketplaceState.equipment"
-    ></app-market-place-equipment>
-  </ng-container>
+      <div class="text-sm text-zinc-200">
+        You have
+        <span class="text-primary">
+          {{ characterState.currentCharacter()?.cinders ?? 0 | numberFormat }}
+        </span>
+        Cinders
+      </div>
+    </div>
 
-  <div class="flex w-full flex-col sm:gap-4">
-    <app-banner
-      image="market-place"
-      bgPosition="bg-bottom"
-      class="w-full"
-    ></app-banner>
+    <app-market-place-filter
+      (itemTypeChanged)="onItemTypeChanged($event)"
+    ></app-market-place-filter>
+
+    <div
+      class="min-h-8 rounded-t border border-light_gray bg-black/30 px-3 py-2 text-primary"
+    >
+      <ng-container [ngSwitch]="selectedItemType().main">
+        <app-market-place-generic
+          *ngSwitchCase="ItemType.Consumable"
+        ></app-market-place-generic>
+        <app-market-place-resources
+          *ngSwitchCase="ItemType.Resource"
+          [resource]="selectedItemType().sub"
+        ></app-market-place-resources>
+        <app-market-place-essences
+          *ngSwitchCase="ItemType.Essence"
+          [essenceListings]="marketplaceState.essences"
+        ></app-market-place-essences>
+        <app-market-place-equipment
+          *ngSwitchCase="ItemType.Equipment"
+          [equipmentListings]="marketplaceState.equipment"
+        ></app-market-place-equipment>
+      </ng-container>
+    </div>
   </div>
 
-  <div class="flex h-full w-full flex-col justify-between overflow-hidden">
-    <app-tabs class="flex h-full flex-col overflow-hidden">
-      <app-tab label="Buy">
-        <app-market-place-buy
-          class="h-full overflow-hidden"
-        ></app-market-place-buy>
-      </app-tab>
-      <app-tab label="Sell">
-        <app-market-place-sell
-          class="h-full overflow-hidden"
-        ></app-market-place-sell>
-      </app-tab>
-    </app-tabs>
+  <div
+    class="min-h-0 flex-1 overflow-hidden rounded-b-md border-x border-b border-light_gray bg-black/20 px-3 pb-3"
+  >
+    <app-market-place-commodity
+      *ngIf="
+        selectedItemType().main === ItemType.Resource ||
+          selectedItemType().main === ItemType.Consumable;
+        else instanceMarket
+      "
+      [itemType]="selectedItemType().main"
+      [subcategory]="selectedItemType().sub"
+      class="block h-full min-h-0 overflow-hidden"
+    ></app-market-place-commodity>
+
+    <ng-template #instanceMarket>
+      <app-tabs class="flex h-full min-h-0 flex-col overflow-hidden">
+        <app-tab label="Buy">
+          <app-market-place-buy
+            [itemType]="selectedItemType().main"
+            class="block h-full min-h-0 overflow-hidden"
+          ></app-market-place-buy>
+        </app-tab>
+        <app-tab label="Sell">
+          <app-market-place-sell
+            [itemType]="selectedItemType().main"
+            class="block h-full min-h-0 overflow-hidden"
+          ></app-market-place-sell>
+        </app-tab>
+      </app-tabs>
+    </ng-template>
   </div>
 </div>
