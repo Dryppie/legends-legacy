@@ -19,7 +19,6 @@ export interface DungeonEntryRequirement {
   name: string;
   requiredAmount: number;
   ownedAmount: number;
-  consumedOnEntry: boolean;
 }
 
 export interface DungeonPreviewData {

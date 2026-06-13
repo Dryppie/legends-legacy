@@ -9,8 +9,7 @@
     "entryCosts": [
       {
         "itemId": "sigil_goblin_mines",
-        "amount": 1,
-        "consumedOnEntry": true
+        "amount": 1
       }
     ],
     "rewardTable": {
@@ -62,8 +61,7 @@
     "entryCosts": [
       {
         "itemId": "sigil_goblin_mines",
-        "amount": 1,
-        "consumedOnEntry": true
+        "amount": 1
       }
     ],
     "rewardTable": {
@@ -115,8 +113,7 @@
     "entryCosts": [
       {
         "itemId": "sigil_goblin_mines",
-        "amount": 1,
-        "consumedOnEntry": true
+        "amount": 1
       }
     ],
     "rewardTable": {
@@ -166,8 +163,7 @@
     "entryCosts": [
       {
         "itemId": "sigil_forgotten_catacombs",
-        "amount": 1,
-        "consumedOnEntry": true
+        "amount": 1
       }
     ],
     "rewardTable": {
@@ -236,8 +232,7 @@
     "entryCosts": [
       {
         "itemId": "sigil_forgotten_catacombs",
-        "amount": 1,
-        "consumedOnEntry": true
+        "amount": 1
       }
     ],
     "rewardTable": {
@@ -306,8 +301,7 @@
     "entryCosts": [
       {
         "itemId": "sigil_forgotten_catacombs",
-        "amount": 1,
-        "consumedOnEntry": true
+        "amount": 1
       }
     ],
     "rewardTable": {
@@ -374,8 +368,7 @@
     "entryCosts": [
       {
         "itemId": "sigil_hives_abyss",
-        "amount": 1,
-        "consumedOnEntry": true
+        "amount": 1
       }
     ],
     "rewardTable": {
@@ -444,8 +437,7 @@
     "entryCosts": [
       {
         "itemId": "sigil_hives_abyss",
-        "amount": 1,
-        "consumedOnEntry": true
+        "amount": 1
       }
     ],
     "rewardTable": {
@@ -514,8 +506,7 @@
     "entryCosts": [
       {
         "itemId": "sigil_hives_abyss",
-        "amount": 1,
-        "consumedOnEntry": true
+        "amount": 1
       }
     ],
     "rewardTable": {

@@ -88,8 +88,7 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
                 cost.ItemId,
                 itemName,
                 cost.Amount,
-                owned,
-                cost.ConsumedOnEntry));
+                owned));
         }
 
         return requirements;

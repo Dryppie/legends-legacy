@@ -87,8 +87,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
                         ItemId = x.ItemId,
                         Name = x.Name,
                         RequiredAmount = x.RequiredAmount,
-                        OwnedAmount = x.OwnedAmount,
-                        ConsumedOnEntry = x.ConsumedOnEntry
+                        OwnedAmount = x.OwnedAmount
                     })
                     .ToList(),
                 RequiredPreviousDungeonId = dungeon.RequiredPreviousDungeonId,

@@ -11,5 +11,4 @@ public sealed record DungeonEntryRequirementResult(
     string ItemId,
     string Name,
     int RequiredAmount,
-    int OwnedAmount,
-    bool ConsumedOnEntry);
+    int OwnedAmount);

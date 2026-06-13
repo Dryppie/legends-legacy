@@ -139,7 +139,7 @@ public sealed class DungeonRunService : IDungeonRunService
         CancellationToken cancellationToken)
     {
         var consumedCosts = dungeonDefinition.EntryCosts
-            .Where(x => x.ConsumedOnEntry && x.Amount > 0 && !string.IsNullOrWhiteSpace(x.ItemId))
+            .Where(x => x.Amount > 0 && !string.IsNullOrWhiteSpace(x.ItemId))
             .GroupBy(x => x.ItemId, StringComparer.OrdinalIgnoreCase)
             .ToDictionary(x => x.Key, x => x.Sum(cost => cost.Amount), StringComparer.OrdinalIgnoreCase);
 

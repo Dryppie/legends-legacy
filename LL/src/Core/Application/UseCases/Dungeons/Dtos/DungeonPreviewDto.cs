@@ -39,5 +39,4 @@ public sealed class DungeonEntryRequirementDto
     public string Name { get; set; } = string.Empty;
     public int RequiredAmount { get; set; }
     public int OwnedAmount { get; set; }
-    public bool ConsumedOnEntry { get; set; }
 }
