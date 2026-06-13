@@ -35,10 +35,9 @@ Completed:
 - Centralized default first-completion dungeon rewards in `DungeonRewardCatalog` so preview and reward granting use the same source.
 - Added startup validation wiring for generated creature build-profile diagnostics. Invalid generated Max Health or Combat Rating now fails API startup; unresolved creature-to-Essence source ids remain surfaced as diagnostic warnings until expected Essence drops are explicit.
 - Implemented first-pass dungeon event rooms with rolled Extra Combat, Treasure, Shrine, and Trap outcomes. Events now support inspect, accept, and ignore actions with concrete rewards or consequences.
+- Added targeted ability smoke simulations for authored passive triggers and common condition families including health thresholds, status gates, tag/species gates, summon checks, and chance conditions.
 
-Not started:
-
-- Targeted ability combat simulations for specialized triggers and conditions.
+Not started: none from the current roadmap.
 
 ## Current System Snapshot
 
@@ -158,7 +157,7 @@ Recommended split:
 
 **Implementation status:** done for the current runtime mapping shape. The factory now delegates to focused collaborators for compilation, effect mapping, trigger mapping, condition mapping, and evolution modifiers. Scaling remains colocated with effect mapping and `EssenceProgressionConstants`; extract it into a dedicated policy only if tier-scaling rules keep expanding.
 
-Add a validation or smoke-test harness that compiles every authored ability into runtime combat primitives. **Partially done:** `IAbilityCatalogSmokeTester` compiles every authored ability through the same runtime factory combat uses, compiles evolved Essence scenarios where evolution modifiers exist, and runs a generic combat simulation for each compiled scenario. Targeted simulations for specialized trigger/condition patterns are still future work.
+Add a validation or smoke-test harness that compiles every authored ability into runtime combat primitives. **Done for current coverage:** `IAbilityCatalogSmokeTester` compiles every authored ability through the same runtime factory combat uses, compiles evolved Essence scenarios where evolution modifiers exist, runs a generic combat simulation for each compiled scenario, and adds targeted simulations for passive triggers and common condition families.
 
 Add support status reporting for authored primitives. **Done for core primitive categories:** `AbilityCatalogValidator.GetSupportMatrix()` reports known and currently supported effect types, trigger types, condition types, and target selectors, including computed unsupported lists.
 
@@ -223,7 +222,7 @@ Make the frontend communicate those categories without duplicate-looking rewards
 
 Split ability compilation and mapping responsibilities out of `EssenceCombatAbilityFactory`. **Done for the current runtime mapping shape.**
 
-Add an authored ability smoke-test harness that compiles all abilities. **Partially done:** all authored abilities compile through the runtime factory, evolved modifier scenarios are checked where relevant, and generic combat simulations run. Targeted simulations for specialized trigger and condition patterns are still pending.
+Add an authored ability smoke-test harness that compiles all abilities. **Done for current coverage:** all authored abilities compile through the runtime factory, evolved modifier scenarios are checked where relevant, generic combat simulations run, and targeted simulations cover passive triggers plus health, status, tag/species, summon, and chance condition families.
 
 Add a support matrix for:
 
@@ -279,7 +278,7 @@ Use combat summaries to compare expected ability value against actual damage, he
    - Compile all authored abilities.
    - Report unsupported content clearly.
    - Include representative combat simulations for common effect patterns.
-   - Status: **Partially done.** `IAbilityCatalogSmokeTester` compiles every authored ability through the runtime factory, compiles evolved modifier scenarios where relevant, and runs generic combat simulations. Targeted simulations for common specialized effect/trigger/condition patterns have not been added yet.
+   - Status: **Done for current coverage.** `IAbilityCatalogSmokeTester` compiles every authored ability through the runtime factory, compiles evolved modifier scenarios where relevant, runs generic combat simulations, and adds targeted simulations for passive triggers plus health, status, tag/species, summon, and chance condition families.
 
 ## Public Interfaces And Types
 

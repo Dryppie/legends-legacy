@@ -11,6 +11,7 @@ public sealed record AbilityCatalogSmokeTestReport(
     int AbilityScenariosChecked,
     int RuntimeAbilitiesCompiled,
     int CombatSimulationsRun,
+    int TargetedCombatSimulationsRun,
     IReadOnlyList<AbilityCatalogSmokeTestFailure> Failures)
 {
     public bool Passed => Failures.Count == 0;
