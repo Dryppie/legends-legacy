@@ -1,22 +1,33 @@
 <div
-  class="flex w-full items-center gap-1 p-2 hover:cursor-pointer hover:bg-neutral-600/50"
+  class="flex min-h-10 w-full min-w-0 items-center gap-3 rounded px-3 py-2 text-white transition-colors hover:cursor-pointer hover:bg-black/40"
   (click)="openModal()"
 >
-  <img
-    *ngIf="equipmentIconPath"
-    [src]="equipmentIconPath"
-    [alt]="equipmentIcon + ' slot'"
-    class="center w-4 object-contain"
-  />
-  <img
-    *ngIf="isEssence"
-    src="icons/items/essence-item.svg"
-    alt="essence item"
-    class="center w-4 object-contain"
-  />
+  <div
+    *ngIf="equipmentIconPath || isEssence"
+    class="flex h-7 w-7 flex-none items-center justify-center rounded border border-light_gray/60 bg-black/30"
+  >
+    <img
+      *ngIf="equipmentIconPath"
+      [src]="equipmentIconPath"
+      [alt]="equipmentIcon + ' slot'"
+      class="center w-4 object-contain"
+    />
+    <img
+      *ngIf="isEssence"
+      src="icons/items/essence-item.svg"
+      alt="essence item"
+      class="center w-4 object-contain"
+    />
+  </div>
 
-  <app-item [item]="inventoryItem.itemInstance"></app-item>
-  <div *ngIf="!isEquipment" class="rounded-full text-white">
+  <div class="min-w-0 flex-1">
+    <app-item [item]="inventoryItem.itemInstance"></app-item>
+  </div>
+
+  <div
+    *ngIf="!isEquipment"
+    class="flex-none rounded border border-light_gray/60 bg-black/30 px-2 py-0.5 text-xs text-secondary"
+  >
     x{{ inventoryItem.quantity }}
   </div>
 </div>

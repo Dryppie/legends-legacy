@@ -36,12 +36,25 @@ export class HelpTooltipDirective {
         .flexibleConnectedTo(this.host)
         .withPositions([
           {
-            // above, centred
+            originX: 'end',
+            originY: 'center',
+            overlayX: 'start',
+            overlayY: 'center',
+            offsetX: 10,
+          },
+          {
+            originX: 'start',
+            originY: 'center',
+            overlayX: 'end',
+            overlayY: 'center',
+            offsetX: -10,
+          },
+          {
             originX: 'center',
             originY: 'top',
             overlayX: 'center',
             overlayY: 'bottom',
-            offsetY: -8,
+            offsetY: -10,
           },
         ]),
       hasBackdrop: false,

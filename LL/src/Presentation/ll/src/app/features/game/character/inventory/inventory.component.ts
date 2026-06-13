@@ -1,6 +1,6 @@
-import { NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Component, computed, OnInit } from '@angular/core';
-import { SidebarSection, Tab } from '../../../../shared/models/sidebar-item';
+import { SidebarSection } from '../../../../shared/models/sidebar-item';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { EquipmentOverviewComponent } from '../../../../shared/components/equipment-overview/equipment-overview.component';
@@ -20,6 +20,7 @@ import { HelpTooltipDirective } from '../../../../shared/help/help-tooltip.direc
   imports: [
     NgFor,
     NgIf,
+    NgClass,
     FilterTabsComponent,
     InventoryItemComponent,
     DefaultHeaderComponent,
@@ -57,7 +58,6 @@ export class InventoryComponent implements OnInit {
   activeTab: string = '';
 
   inventoryMode: 'Scrap Mode' | 'Regular Mode' = 'Regular Mode';
-  variant: 'danger' | 'primary' = 'primary';
 
   temperedItems = computed(() => {
     return this.state
@@ -97,7 +97,7 @@ export class InventoryComponent implements OnInit {
 
   cancelScrapMode() {
     this.selectedItems = [];
-    this.switchMode();
+    this.enterBrowseMode();
   }
 
   selectAllTempered() {
@@ -118,16 +118,31 @@ export class InventoryComponent implements OnInit {
       .forEach((item) => this.selectedItems.push(item));
   }
 
+  clearSelection() {
+    this.selectedItems = [];
+  }
+
   scrapEquipment() {
     this.state.scrapEquipment(this.selectedItems.map((i) => i.itemInstance.id));
     this.selectedItems = [];
   }
 
   switchMode() {
+    if (this.isScrapMode) {
+      this.enterBrowseMode();
+    } else {
+      this.enterScrapMode();
+    }
+  }
+
+  enterBrowseMode() {
     this.selectedItems = [];
-    this.inventoryMode =
-      this.inventoryMode === 'Scrap Mode' ? 'Regular Mode' : 'Scrap Mode';
-    this.variant = this.variant === 'danger' ? 'primary' : 'danger';
+    this.inventoryMode = 'Regular Mode';
+  }
+
+  enterScrapMode() {
+    this.selectedItems = [];
+    this.inventoryMode = 'Scrap Mode';
   }
 
   selectedItemsContains(item: InventoryItem) {
@@ -141,14 +156,12 @@ export class InventoryComponent implements OnInit {
   }
 
   get filteredItems(): InventoryItem[] {
-    switch (
-      this.inventoryMode === 'Regular Mode' ? this.activeTab : 'Equipment'
-    ) {
+    switch (this.isBrowseMode ? this.activeTab : 'Equipment') {
       case 'All':
         return this.state.items();
 
       case 'Equipment':
-        return this.inventoryMode === 'Regular Mode'
+        return this.isBrowseMode
           ? this.state.equipment()
           : this.temperedItems();
 
@@ -164,8 +177,41 @@ export class InventoryComponent implements OnInit {
   }
 
   get tabLabels(): string[] {
-    return this.inventoryMode === 'Regular Mode'
+    return this.isBrowseMode
       ? this.tabs.map((tab) => tab.label)
       : ['Equipment'];
+  }
+
+  get isBrowseMode(): boolean {
+    return this.inventoryMode === 'Regular Mode';
+  }
+
+  get isScrapMode(): boolean {
+    return this.inventoryMode === 'Scrap Mode';
+  }
+
+  get selectedItemCountLabel(): string {
+    return `${this.selectedItems.length} item${this.selectedItems.length === 1 ? '' : 's'}`;
+  }
+
+  get inventoryCountLabel(): string {
+    const count = this.state.items().length;
+    return `${count} item${count === 1 ? '' : 's'}`;
+  }
+
+  get activeListTitle(): string {
+    return this.isScrapMode ? 'Tempered Equipment' : 'Inventory';
+  }
+
+  get activeListDescription(): string {
+    return this.isScrapMode
+      ? 'Only equipment with 0 potential can be turned into tempered scrap.'
+      : 'Browse everything you are carrying.';
+  }
+
+  get emptyStateText(): string {
+    return this.isScrapMode
+      ? 'No tempered equipment is ready to scrap.'
+      : 'No items in this category.';
   }
 }
