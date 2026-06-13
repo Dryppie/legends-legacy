@@ -6,6 +6,7 @@ using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Definitions.Events;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
+using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Snapshots;
 using Services.LL.Combat.Layers.Orchestration.Models;
@@ -29,6 +30,7 @@ public sealed class DungeonRunService : IDungeonRunService
     private readonly IDungeonCompletionRewardApplier _completionRewardApplier;
     private readonly IDungeonDefinitions _dungeons;
     private readonly IItemBaseRepository _itemBases;
+    private readonly IInventoryRepository _inventory;
 
     // Blessings are offered on shrine events; you’ll likely have a repository for these.
     //private readonly IReadOnlyList<Guid> _globalBlessingPool;
@@ -46,7 +48,8 @@ public sealed class DungeonRunService : IDungeonRunService
         IDungeonRunRewardClaimer rewardClaimer,
         IDungeonCompletionRewardApplier completionRewardApplier,
         IDungeonDefinitions dungeons,
-        IItemBaseRepository itemBases
+        IItemBaseRepository itemBases,
+        IInventoryRepository inventory
         //IDungeonRunStore runStore,
         /*IReadOnlyList<Guid> globalBlessingPool*/)
     {
@@ -61,12 +64,33 @@ public sealed class DungeonRunService : IDungeonRunService
         _completionRewardApplier = completionRewardApplier;
         _dungeons = dungeons;
         _itemBases = itemBases;
+        _inventory = inventory;
         //_globalBlessingPool = globalBlessingPool;
     }
 
     public async Task<DungeonRun?> GetDungeonRunAsync(Guid characterId, CancellationToken cancellationToken)
     {
         return await _dungeonRuns.GetDungeonRunByCharacterIdAsync(characterId, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<DungeonCompletionRecord>> GetCompletionRecordsAsync(
+        Guid characterId,
+        IReadOnlyCollection<string> dungeonDefinitionIds,
+        CancellationToken cancellationToken)
+    {
+        return await _dungeonRuns.GetCompletionRecordsAsync(
+            characterId,
+            dungeonDefinitionIds,
+            cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<DungeonCompletionLeaderboardEntry>> GetCompletionLeaderboardAsync(
+        IReadOnlyCollection<string> dungeonDefinitionIds,
+        CancellationToken cancellationToken)
+    {
+        return await _dungeonRuns.GetCompletionLeaderboardAsync(
+            dungeonDefinitionIds,
+            cancellationToken);
     }
 
     public async Task<bool> ClaimRewardsAsync(Guid characterId, CancellationToken cancellationToken)
@@ -97,6 +121,9 @@ public sealed class DungeonRunService : IDungeonRunService
         var currentRun = await _dungeonRuns.GetDungeonRunByCharacterIdAsync(characterId, ct);
         if (currentRun != null) return null;
 
+        var dungeonDefinition = _dungeons.GetByKey(dungeonDefinitionId);
+        await ConsumeEntryCostsAsync(characterId, dungeonDefinition, ct);
+
         // Seed: use cryptographic RNG or server-side monotonic; keep it server-owned.
         var seed = Random.Shared.Next(int.MinValue, int.MaxValue);
 
@@ -104,6 +131,32 @@ public sealed class DungeonRunService : IDungeonRunService
 
         await _dungeonRuns.CreateDungeonRunAsync(run, ct);
         return run;
+    }
+
+    private async Task ConsumeEntryCostsAsync(
+        Guid characterId,
+        DungeonDefinition dungeonDefinition,
+        CancellationToken cancellationToken)
+    {
+        var consumedCosts = dungeonDefinition.EntryCosts
+            .Where(x => x.ConsumedOnEntry && x.Amount > 0 && !string.IsNullOrWhiteSpace(x.ItemId))
+            .GroupBy(x => x.ItemId, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(x => x.Key, x => x.Sum(cost => cost.Amount), StringComparer.OrdinalIgnoreCase);
+
+        if (consumedCosts.Count == 0)
+        {
+            return;
+        }
+
+        var removed = await _inventory.TryRemoveItemsByBaseIdAsync(
+            characterId,
+            consumedCosts,
+            cancellationToken);
+
+        if (!removed)
+        {
+            throw new InvalidOperationException("Dungeon entry costs could not be consumed.");
+        }
     }
 
     public async Task<ExecuteDungeonActionResult?> ExecuteActionAsync(Guid runId, string actionId, object? payload, CancellationToken ct)

@@ -109,24 +109,59 @@
 
             <button
               type="button"
-              class="flex items-center gap-2 rounded border px-3 py-1 text-xs transition"
-              [ngClass]="'border-white/15 text-zinc-300 hover:border-primary hover:text-primary'"
+              class="rounded border border-white/15 bg-black/20 px-3 py-1.5 text-left transition hover:border-primary hover:bg-primary/10"
               (click)="openRecords()"
             >
-              <span
-                class="inline-block h-3 w-2 rounded-sm border"
-                [class.border-zinc-400]="true"
-              ></span>
-              Records
+              <span class="block text-xs font-semibold text-zinc-100">
+                Dungeon Records
+              </span>
+              <span class="block text-[10px] text-zinc-400">
+                First clears and rankings
+              </span>
             </button>
           </div>
 
+          <div
+            class="mt-3 rounded border px-3 py-2 text-sm"
+            [ngClass]="readinessClass()"
+          >
+            <div class="flex items-center justify-between gap-3">
+              <span class="text-xs font-semibold uppercase">
+                {{ readinessState() }}
+              </span>
+              <span class="text-xs tabular-nums">
+                {{ selectedPreviewData().currentCombatRating ?? 0 }} /
+                {{ selectedPreviewData().minimumCombatRating ?? 0 }} minimum
+              </span>
+            </div>
+          </div>
+
           <div class="mt-2 flex flex-wrap items-center gap-3">
-            <ng-container *ngIf="previewData.keyItem as key">
-              <div class="flex items-center gap-2">
-                <span class="text-xs">{{ key.name }}</span>
-                <span class="text-xs tabular-nums">
-                  ({{ key.have }}/{{ key.need }})
+            <ng-container
+              *ngFor="let requirement of selectedEntryRequirements()"
+            >
+              <div
+                class="flex items-center gap-2 rounded border border-white/10 bg-black/20 px-2 py-1"
+              >
+                <span class="text-xs">{{ requirement.name }}</span>
+                <span
+                  class="text-xs tabular-nums"
+                  [class.text-primary]="
+                    requirement.ownedAmount >= requirement.requiredAmount
+                  "
+                  [class.text-red-200]="
+                    requirement.ownedAmount < requirement.requiredAmount
+                  "
+                >
+                  {{ requirement.ownedAmount }}/{{
+                    requirement.requiredAmount
+                  }}
+                </span>
+                <span
+                  *ngIf="requirement.consumedOnEntry"
+                  class="text-[10px] uppercase text-zinc-500"
+                >
+                  consumed
                 </span>
               </div>
             </ng-container>
@@ -169,6 +204,18 @@
             <ul class="mt-1 list-disc pl-4">
               <li *ngFor="let requirement of selectedMissingRequirements()">
                 {{ requirement }}
+              </li>
+            </ul>
+          </div>
+
+          <div
+            *ngIf="selectedCanEnter() && selectedWarnings().length"
+            class="mt-4 rounded border border-amber-500/30 bg-amber-950/10 p-3 text-xs text-amber-100"
+          >
+            <div class="font-semibold">Risk warning</div>
+            <ul class="mt-1 list-disc pl-4">
+              <li *ngFor="let warning of selectedWarnings()">
+                {{ warning }}
               </li>
             </ul>
           </div>
@@ -240,26 +287,53 @@
             </div>
           </div>
 
-          <div class="mt-6 text-[11px] uppercase opacity-70">Rewards</div>
-          <div class="mt-2 flex flex-wrap gap-2">
-            <div
-              *ngFor="let r of selectedPreviewData().rewards"
-              class="flex min-w-28 flex-col items-center gap-1 rounded-md border border-white/10 bg-[#1a1a1a] p-2 text-center"
-            >
-              <app-item [item]="r"></app-item>
-              <div class="text-[10px] uppercase text-primary">
-                {{ r.category || r.source }}
-              </div>
-              <div
-                *ngIf="r.category && r.source"
-                class="text-[10px] text-zinc-400"
-              >
-                {{ r.source }}
+          <div
+            class="mt-6 flex items-center justify-between gap-3 border-t border-white/10 pt-4"
+          >
+            <div>
+              <div class="text-[11px] uppercase opacity-70">Rewards</div>
+              <div class="text-xs text-zinc-400">
+                {{ difficultyLabel(difficulty()) }} loot preview
               </div>
             </div>
           </div>
 
-          <div class="mt-6 flex items-center justify-end gap-2">
+          <div class="mt-3 rounded border border-white/10 bg-black/25">
+            <section
+              *ngFor="let group of selectedRewardGroups()"
+              class="border-b border-white/10 px-3 py-2 last:border-b-0"
+            >
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <div class="text-[11px] font-semibold uppercase text-primary">
+                    {{ group.title }}
+                    <span class="font-normal text-zinc-500">
+                      · {{ group.rewards.length }}
+                    </span>
+                  </div>
+
+                  <div class="mt-1 truncate text-sm text-zinc-100">
+                    <ng-container
+                      *ngFor="let reward of group.rewards; let last = last"
+                    >
+                      <app-item [item]="reward"></app-item>{{ last ? "" : ", " }}
+                    </ng-container>
+                  </div>
+                </div>
+
+                <div class="flex shrink-0 flex-col items-end gap-1">
+                  <span
+                    *ngFor="let source of rewardSources(group.rewards)"
+                    class="rounded border border-primary/20 bg-primary/5 px-2 py-0.5 text-[10px] uppercase text-zinc-300"
+                  >
+                    {{ source }}
+                  </span>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <div class="mt-6 flex justify-end">
             <app-regular-button
               class="w-40"
               [text]="'Enter ' + difficultyLabel(difficulty())"

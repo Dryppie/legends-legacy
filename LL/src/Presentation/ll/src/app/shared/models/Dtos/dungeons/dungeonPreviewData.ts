@@ -14,6 +14,14 @@ export interface DungeonRecord {
   totalClears: number;
 }
 
+export interface DungeonEntryRequirement {
+  itemId: string;
+  name: string;
+  requiredAmount: number;
+  ownedAmount: number;
+  consumedOnEntry: boolean;
+}
+
 export interface DungeonPreviewData {
   id: string;
   familyId?: string;
@@ -26,7 +34,10 @@ export interface DungeonPreviewData {
   minimumCombatRating?: number;
   currentCombatRating?: number;
   canEnter?: boolean;
+  readinessState?: string;
   missingRequirements?: string[];
+  warnings?: string[];
+  entryRequirements?: DungeonEntryRequirement[];
   requiredPreviousDungeonId?: string | null;
   heroImage: string;
   lore: string;

@@ -7,7 +7,6 @@ using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL.Professions;
-using Application.Services.Dungeons;
 using Domain.Interfaces.Combat;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Runs;
@@ -109,6 +108,7 @@ public static class DependencyInjection
         services.AddScoped<DungeonRunFactory>();
         services.AddScoped<IDungeonRunService, DungeonRunService>();
         services.AddScoped<IDungeonAccessPolicy, DungeonAccessPolicy>();
+        services.AddScoped<IDungeonPreviewRewardService, DungeonPreviewRewardService>();
 
         services.AddScoped<IEntityService, EntityService>();
         services.AddScoped<IEquipmentSlotService, EquipmentSlotService>();

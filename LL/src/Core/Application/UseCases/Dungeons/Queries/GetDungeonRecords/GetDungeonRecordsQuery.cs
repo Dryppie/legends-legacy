@@ -12,11 +12,11 @@ public record GetDungeonRecordsQuery(string FamilyId) : IQuery<DungeonRecordsDto
 public sealed class GetDungeonRecordsQueryHandler : IRequestHandler<GetDungeonRecordsQuery, DungeonRecordsDto>
 {
     private readonly IDungeonDefinitions _dungeonDefinitions;
-    private readonly IDungeonRunRepository _dungeonRuns;
+    private readonly IDungeonRunService _dungeonRuns;
 
     public GetDungeonRecordsQueryHandler(
         IDungeonDefinitions dungeonDefinitions,
-        IDungeonRunRepository dungeonRuns)
+        IDungeonRunService dungeonRuns)
     {
         _dungeonDefinitions = dungeonDefinitions;
         _dungeonRuns = dungeonRuns;

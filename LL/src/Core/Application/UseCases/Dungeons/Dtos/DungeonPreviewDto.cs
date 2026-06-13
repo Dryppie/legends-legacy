@@ -16,7 +16,10 @@ public sealed class DungeonPreviewDto
     public int MinimumCombatRating { get; set; }
     public int CurrentCombatRating { get; set; }
     public bool CanEnter { get; set; }
+    public string ReadinessState { get; set; } = string.Empty;
     public List<string> MissingRequirements { get; set; } = [];
+    public List<string> Warnings { get; set; } = [];
+    public List<DungeonEntryRequirementDto> EntryRequirements { get; set; } = [];
     public string? RequiredPreviousDungeonId { get; set; }
     public int MinRooms { get; set; }
     public int MaxRooms { get; set; }
@@ -31,4 +34,13 @@ public sealed class DungeonPreviewRewardDto
     public ItemBaseDto ItemBase { get; set; } = null!;
     public string Category { get; set; } = string.Empty;
     public string Source { get; set; } = string.Empty;
+}
+
+public sealed class DungeonEntryRequirementDto
+{
+    public string ItemId { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public int RequiredAmount { get; set; }
+    public int OwnedAmount { get; set; }
+    public bool ConsumedOnEntry { get; set; }
 }
