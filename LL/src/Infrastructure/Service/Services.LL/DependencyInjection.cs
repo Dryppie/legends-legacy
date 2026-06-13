@@ -7,6 +7,7 @@ using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL.Professions;
+using Application.Services.Dungeons;
 using Domain.Interfaces.Combat;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Runs;
@@ -86,6 +87,7 @@ public static class DependencyInjection
         services.AddScoped<IActionDetailsService, ActionDetailsService>();
         services.AddScoped<ICreatureService, CreatureService>();
         services.AddScoped<ICreatureScaler, CreatureScaler>();
+        services.AddScoped<ICreatureBuildProfileDiagnostics, CreatureBuildProfileDiagnostics>();
 
         services.AddScoped<IBonusService, BonusService>();
         services.AddScoped<IBonusProvider, SoulstoneBonusProvider>();
@@ -106,16 +108,19 @@ public static class DependencyInjection
 
         services.AddScoped<DungeonRunFactory>();
         services.AddScoped<IDungeonRunService, DungeonRunService>();
+        services.AddScoped<IDungeonAccessPolicy, DungeonAccessPolicy>();
 
         services.AddScoped<IEntityService, EntityService>();
         services.AddScoped<IEquipmentSlotService, EquipmentSlotService>();
 
         services.AddSingleton<IEssenceDefinitionValidator, EssenceDefinitionValidator>();
+        services.AddSingleton<IAbilityCatalogValidator, AbilityCatalogValidator>();
         services.AddSingleton<IEssenceDefinitionRepository>(sp =>
             new JsonEssenceDefinitionRepository(
                 config,
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>(),
+                sp.GetRequiredService<IAbilityCatalogValidator>(),
                 sp.GetRequiredService<IEssenceDefinitionValidator>()));
         services.AddScoped<IEssenceProgressionService, EssenceProgressionService>();
         services.AddScoped<IEssenceSlotUnlockService, EssenceSlotUnlockService>();
@@ -258,6 +263,7 @@ public static class DependencyInjection
         });
 
         // 3) Provider used by your domain/services (stable seam for future DB migration)
+        services.AddSingleton<IDungeonDefinitionValidator, DungeonDefinitionValidator>();
         services.AddSingleton<IDungeonDefinitions, JsonDungeonDefinitions>();
     }
 }

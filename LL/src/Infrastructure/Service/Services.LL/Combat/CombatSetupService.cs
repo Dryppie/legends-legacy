@@ -55,7 +55,7 @@ public class CombatSetupService : ICombatSetupService
                     })],
                     Level = Math.Max(1, creature.Level > 1 ? creature.Level : creature.Tier)
                 };
-                var monsterId = GetMonsterDefinitionId(creature);
+                var monsterId = CreatureEssenceSource.GetMonsterDefinitionId(creature);
                 combatEntity.SourceMonsterId = monsterId;
                 if (_essenceDefinitions.GetByMonsterId(monsterId) is { } essenceDefinition)
                     combatEntity.Tags = new HashSet<string>(essenceDefinition.Tags, StringComparer.OrdinalIgnoreCase);
@@ -120,9 +120,6 @@ public class CombatSetupService : ICombatSetupService
 
         return simpleCombatEntities;
     }
-
-    private static string GetMonsterDefinitionId(Creature creature) =>
-        "monster." + creature.Name.Trim().Replace("'", "", StringComparison.Ordinal).Replace(" ", "_", StringComparison.Ordinal).ToLowerInvariant();
 
     private Task<EssenceCombatLoadout> ResolveEssenceLoadoutForCombatEntityAsync(CombatEntity entity)
     {

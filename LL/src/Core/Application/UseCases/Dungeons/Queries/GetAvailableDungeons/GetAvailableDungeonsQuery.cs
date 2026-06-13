@@ -5,7 +5,7 @@ using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Items.Dtos;
 using AutoMapper;
 using Common.Exceptions;
-using Domain.Models.Dungeons.Runs;
+using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Items;
 using Domain.Models.LootTables;
 using MediatR;
@@ -18,7 +18,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
 {
     private readonly IDungeonDefinitions _dungeonDefinitions;
     private readonly ILootTableRepository _lootTables;
-    private readonly IDungeonRunRepository _dungeonRuns;
+    private readonly IDungeonAccessPolicy _dungeonAccess;
     private readonly IItemBaseRepository _itemBases;
     private readonly ICharacterService _characters;
     private readonly IMapper _mapper;
@@ -26,14 +26,14 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
     public GetAvailableDungeonsQueryHandler(
         IDungeonDefinitions dungeonDefinitions,
         ILootTableRepository lootTables,
-        IDungeonRunRepository dungeonRuns,
+        IDungeonAccessPolicy dungeonAccess,
         IItemBaseRepository itemBases,
         ICharacterService characters,
         IMapper mapper)
     {
         _dungeonDefinitions = dungeonDefinitions;
         _lootTables = lootTables;
-        _dungeonRuns = dungeonRuns;
+        _dungeonAccess = dungeonAccess;
         _itemBases = itemBases;
         _characters = characters;
         _mapper = mapper;
@@ -49,9 +49,11 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
             ? 0
             : Domain.Components.Attributes.CombatRatingCalculator.Calculate(character.BaseCombatAttributes, character.Level);
 
-        foreach (var dungeon in _dungeonDefinitions.GetAll())
+        foreach (var dungeon in _dungeonDefinitions.GetAll()
+                     .OrderBy(x => DungeonDefinitionIdentity.GetFamilyId(x.Id))
+                     .ThenBy(x => x.Grade))
         {
-            var missingRequirements = await GetMissingRequirements(
+            var access = await _dungeonAccess.EvaluateAsync(
                 request.CharacterId,
                 dungeon,
                 combatRating,
@@ -60,14 +62,17 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
             previews.Add(new DungeonPreviewDto
             {
                 Id = dungeon.Id,
+                FamilyId = DungeonDefinitionIdentity.GetFamilyId(dungeon.Id),
+                FamilyTitle = DungeonDefinitionIdentity.GetFamilyTitle(dungeon.Name),
                 Title = dungeon.Name,
+                Difficulty = FormatDifficulty(dungeon.Grade),
                 Tier = dungeon.Tier,
                 Grade = FormatGrade(dungeon.Grade),
                 RecommendedCombatRating = dungeon.RecommendedCombatRating,
-                MinimumCombatRating = dungeon.MinimumCombatRating,
-                CurrentCombatRating = combatRating,
-                CanEnter = missingRequirements.Count == 0,
-                MissingRequirements = missingRequirements,
+                MinimumCombatRating = access.MinimumCombatRating,
+                CurrentCombatRating = access.CurrentCombatRating,
+                CanEnter = access.CanEnter,
+                MissingRequirements = [.. access.MissingRequirements],
                 RequiredPreviousDungeonId = dungeon.RequiredPreviousDungeonId,
                 MinRooms = dungeon.MinRooms,
                 MaxRooms = dungeon.MaxRooms,
@@ -76,31 +81,6 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         }
 
         return previews;
-    }
-
-    private async Task<List<string>> GetMissingRequirements(
-        Guid characterId,
-        Domain.Models.Dungeons.DungeonDefinition dungeon,
-        int combatRating,
-        CancellationToken cancellationToken)
-    {
-        var missingRequirements = new List<string>();
-
-        if (combatRating < dungeon.MinimumCombatRating)
-        {
-            missingRequirements.Add($"Requires {dungeon.MinimumCombatRating} Combat Rating.");
-        }
-
-        if (!string.IsNullOrWhiteSpace(dungeon.RequiredPreviousDungeonId)
-            && !await _dungeonRuns.HasCompletedDungeonAsync(
-                characterId,
-                dungeon.RequiredPreviousDungeonId,
-                cancellationToken))
-        {
-            missingRequirements.Add("Complete the previous difficulty first.");
-        }
-
-        return missingRequirements;
     }
 
     private async Task<List<DungeonPreviewRewardDto>> GetPossibleCompletionRewards(
@@ -228,4 +208,13 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
             Domain.Models.Dungeons.Definitions.DungeonGrade.GradeIII => "Grade III",
             _ => "Grade I"
         };
+
+    private static string FormatDifficulty(Domain.Models.Dungeons.Definitions.DungeonGrade grade) =>
+        grade switch
+        {
+            Domain.Models.Dungeons.Definitions.DungeonGrade.GradeII => "Heroic",
+            Domain.Models.Dungeons.Definitions.DungeonGrade.GradeIII => "Mythic",
+            _ => "Normal"
+        };
+
 }

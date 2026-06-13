@@ -6,7 +6,6 @@ using AutoMapper;
 using Common.Primitives;
 using Domain.Components.Attributes;
 using Domain.Models.Dungeons.Definitions;
-using Domain.Models.Dungeons.Runs;
 using MediatR;
 
 namespace Application.UseCases.Dungeons.Commands.StartDungeonRun;
@@ -18,20 +17,20 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
     private readonly IMapper _mapper;
     private readonly IDungeonRunService _dungeonRunService;
     private readonly IDungeonDefinitions _dungeonDefinitions;
-    private readonly IDungeonRunRepository _dungeonRuns;
+    private readonly IDungeonAccessPolicy _dungeonAccess;
     private readonly ICharacterService _characters;
 
     public StartDungeonRunCommandHandler(
         IMapper mapper,
         IDungeonRunService dungeonRunService,
         IDungeonDefinitions dungeonDefinitions,
-        IDungeonRunRepository dungeonRuns,
+        IDungeonAccessPolicy dungeonAccess,
         ICharacterService characters)
     {
         _mapper = mapper;
         _dungeonRunService = dungeonRunService;
         _dungeonDefinitions = dungeonDefinitions;
-        _dungeonRuns = dungeonRuns;
+        _dungeonAccess = dungeonAccess;
         _characters = characters;
     }
 
@@ -43,17 +42,14 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
             return Response<DungeonRunDto>.Fail("Character was not found.");
 
         var combatRating = CombatRatingCalculator.Calculate(character.BaseCombatAttributes, character.Level);
-        if (combatRating < dungeonDefinition.MinimumCombatRating)
-            return Response<DungeonRunDto>.Fail($"Requires {dungeonDefinition.MinimumCombatRating} Combat Rating.");
+        var access = await _dungeonAccess.EvaluateAsync(
+            request.CharacterId,
+            dungeonDefinition,
+            combatRating,
+            cancellationToken);
 
-        if (!string.IsNullOrWhiteSpace(dungeonDefinition.RequiredPreviousDungeonId)
-            && !await _dungeonRuns.HasCompletedDungeonAsync(
-                request.CharacterId,
-                dungeonDefinition.RequiredPreviousDungeonId,
-                cancellationToken))
-        {
-            return Response<DungeonRunDto>.Fail("Complete the previous difficulty first.");
-        }
+        if (!access.CanEnter)
+            return Response<DungeonRunDto>.Fail(string.Join(" ", access.MissingRequirements));
 
         var dungeon = await _dungeonRunService.StartRunAsync(request.CharacterId, request.DungeonId, cancellationToken);
         

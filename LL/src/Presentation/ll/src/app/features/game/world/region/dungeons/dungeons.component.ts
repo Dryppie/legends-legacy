@@ -73,7 +73,7 @@ export class DungeonsComponent {
     const groups = new Map<string, DungeonPreviewData[]>();
 
     for (const dungeon of dungeons) {
-      const familyId = this.getDungeonFamilyId(dungeon.id);
+      const familyId = dungeon.familyId ?? dungeon.id;
       groups.set(familyId, [...(groups.get(familyId) ?? []), dungeon]);
     }
 
@@ -90,7 +90,9 @@ export class DungeonsComponent {
           ...selectedBase,
           ...presentation,
           id: normalVariant?.id ?? selectedBase.id,
-          title: this.getDungeonFamilyTitle(selectedBase.title),
+          familyId,
+          familyTitle: selectedBase.familyTitle ?? selectedBase.title,
+          title: selectedBase.familyTitle ?? selectedBase.title,
           number: presentation.number ?? index + 1,
           heroImage:
             presentation.heroImage ?? 'entities/optimized/hobgoblin.webp',
@@ -132,6 +134,10 @@ export class DungeonsComponent {
   }
 
   private getDifficulty(dungeon: DungeonPreviewData): DungeonDifficulty {
+    if (dungeon.difficulty) {
+      return dungeon.difficulty;
+    }
+
     switch (dungeon.grade) {
       case 'Grade II':
         return DungeonDifficulty.Heroic;
@@ -140,13 +146,5 @@ export class DungeonsComponent {
       default:
         return DungeonDifficulty.Normal;
     }
-  }
-
-  private getDungeonFamilyId(dungeonId: string): string {
-    return dungeonId.replace(/_(i|ii|iii)$/i, '');
-  }
-
-  private getDungeonFamilyTitle(title: string): string {
-    return title.replace(/\s+(I|II|III)$/i, '');
   }
 }

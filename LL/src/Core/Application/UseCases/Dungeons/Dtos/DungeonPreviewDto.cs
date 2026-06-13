@@ -6,7 +6,10 @@ namespace Application.UseCases.Dungeons.Dtos;
 public sealed class DungeonPreviewDto
 {
     public string Id { get; set; } = string.Empty;
+    public string FamilyId { get; set; } = string.Empty;
+    public string FamilyTitle { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
+    public string Difficulty { get; set; } = string.Empty;
     public int Tier { get; set; }
     public string Grade { get; set; } = string.Empty;
     public int RecommendedCombatRating { get; set; }

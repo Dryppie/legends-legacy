@@ -8,8 +8,11 @@ export interface DungeonPreviewReward extends ItemInstance {
 
 export interface DungeonPreviewData {
   id: string;
+  familyId?: string;
+  familyTitle?: string;
   number: number | string;
   title: string;
+  difficulty?: DungeonDifficulty;
   grade?: string;
   recommendedCombatRating?: number;
   minimumCombatRating?: number;

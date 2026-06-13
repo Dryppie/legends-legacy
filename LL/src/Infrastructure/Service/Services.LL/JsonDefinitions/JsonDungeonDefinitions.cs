@@ -8,8 +8,11 @@ public sealed class JsonDungeonDefinitions : IDungeonDefinitions
 {
     private readonly Dictionary<string, DungeonDefinition> _byId;
 
-    public JsonDungeonDefinitions(JsonDefinitionReader<DungeonDefinition> reader)
+    public JsonDungeonDefinitions(
+        JsonDefinitionReader<DungeonDefinition> reader,
+        IDungeonDefinitionValidator validator)
     {
+        validator.ThrowIfInvalid(reader.All);
         _byId = reader.All.ToDictionary(d => d.Id, d => d, StringComparer.OrdinalIgnoreCase);
     }
 

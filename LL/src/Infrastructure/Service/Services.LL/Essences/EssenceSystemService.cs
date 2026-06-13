@@ -383,7 +383,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
         foreach (var creature in defeatedCreatures)
         {
-            var monsterId = GetMonsterDefinitionId(creature);
+            var monsterId = CreatureEssenceSource.GetMonsterDefinitionId(creature);
             var roll = await RollMonsterEssenceDropAsync(characterId, monsterId, true, cancellationToken);
             if (!roll.Dropped || string.IsNullOrWhiteSpace(roll.EssenceDefinitionId)) continue;
 
@@ -487,9 +487,6 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
 
         return string.Join(' ', parts);
     }
-
-    private static string GetMonsterDefinitionId(Creature creature) =>
-        "monster." + creature.Name.Trim().Replace("'", "", StringComparison.Ordinal).Replace(" ", "_", StringComparison.Ordinal).ToLowerInvariant();
 
     private sealed record AscensionMilestoneCounts(int TierOneOrHigher, int TierTwoOrHigher, int TierThreeOrHigher);
 }
