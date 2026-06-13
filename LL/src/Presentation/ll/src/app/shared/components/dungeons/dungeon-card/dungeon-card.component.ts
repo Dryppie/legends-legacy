@@ -91,23 +91,6 @@ export class DungeonCardComponent {
     return this.selectedPreviewData().canEnter ?? true;
   }
 
-  readinessState(): string {
-    return this.selectedPreviewData().readinessState ?? 'Ready';
-  }
-
-  readinessClass(): string {
-    switch (this.readinessState().toLowerCase()) {
-      case 'locked':
-        return 'border-zinc-500/40 bg-zinc-900/60 text-zinc-300';
-      case 'risky':
-        return 'border-amber-500/40 bg-amber-950/20 text-amber-200';
-      case 'dominating':
-        return 'border-emerald-400/40 bg-emerald-950/20 text-emerald-200';
-      default:
-        return 'border-primary/40 bg-primary/10 text-primary';
-    }
-  }
-
   difficultyCanEnter(difficulty: DungeonDifficulty): boolean {
     const preview =
       this.previewData.difficultyVariants?.[difficulty] ??
@@ -118,10 +101,6 @@ export class DungeonCardComponent {
 
   selectedMissingRequirements(): string[] {
     return this.selectedPreviewData().missingRequirements ?? [];
-  }
-
-  selectedWarnings(): string[] {
-    return this.selectedPreviewData().warnings ?? [];
   }
 
   selectedEntryRequirements() {

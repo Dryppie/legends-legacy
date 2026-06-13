@@ -29,20 +29,10 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
         CancellationToken cancellationToken)
     {
         var missingRequirements = new List<string>();
-        var warnings = new List<string>();
         var entryRequirements = await GetEntryRequirementsAsync(
             characterId,
             dungeon,
             cancellationToken);
-
-        if (currentCombatRating < dungeon.MinimumCombatRating)
-        {
-            missingRequirements.Add($"Requires {dungeon.MinimumCombatRating} Combat Rating.");
-        }
-        else if (currentCombatRating < dungeon.RecommendedCombatRating)
-        {
-            warnings.Add($"Recommended Combat Rating: {dungeon.RecommendedCombatRating}.");
-        }
 
         if (!string.IsNullOrWhiteSpace(dungeon.RequiredPreviousDungeonId)
             && !await _dungeonRuns.HasCompletedDungeonAsync(
@@ -57,15 +47,9 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
 
         return new DungeonAccessResult(
             missingRequirements.Count == 0,
-            DetermineReadinessState(
-                missingRequirements.Count == 0,
-                currentCombatRating,
-                dungeon.RecommendedCombatRating),
             missingRequirements,
-            warnings,
             entryRequirements,
             currentCombatRating,
-            dungeon.MinimumCombatRating,
             dungeon.RecommendedCombatRating);
     }
 
@@ -122,28 +106,4 @@ public sealed class DungeonAccessPolicy : IDungeonAccessPolicy
         }
     }
 
-    private static string DetermineReadinessState(
-        bool canEnter,
-        int currentCombatRating,
-        int recommendedCombatRating)
-    {
-        if (!canEnter)
-        {
-            return "Locked";
-        }
-
-        if (recommendedCombatRating <= 0)
-        {
-            return "Ready";
-        }
-
-        if (currentCombatRating < recommendedCombatRating)
-        {
-            return "Risky";
-        }
-
-        return currentCombatRating >= recommendedCombatRating * 1.25
-            ? "Dominating"
-            : "Ready";
-    }
 }

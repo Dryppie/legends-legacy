@@ -52,11 +52,8 @@ public sealed class DungeonDefinitionValidator : IDungeonDefinitionValidator
         if (string.IsNullOrWhiteSpace(dungeon.SigilItemId))
             errors.Add($"{label}: sigilItemId is required.");
 
-        if (dungeon.MinimumCombatRating < 0)
-            errors.Add($"{label}: minimumCombatRating cannot be negative.");
-
-        if (dungeon.RecommendedCombatRating < dungeon.MinimumCombatRating)
-            errors.Add($"{label}: recommendedCombatRating must be greater than or equal to minimumCombatRating.");
+        if (dungeon.RecommendedCombatRating < 0)
+            errors.Add($"{label}: recommendedCombatRating cannot be negative.");
 
         if (dungeon.MinRooms <= 0)
             errors.Add($"{label}: minRooms must be greater than zero.");
@@ -151,8 +148,8 @@ public sealed class DungeonDefinitionValidator : IDungeonDefinitionValidator
                 var previous = ordered[i - 1];
                 var current = ordered[i];
 
-                if (current.MinimumCombatRating < previous.MinimumCombatRating)
-                    errors.Add($"{current.Id}: minimumCombatRating must not be lower than previous grade '{previous.Id}'.");
+                if (current.RecommendedCombatRating < previous.RecommendedCombatRating)
+                    errors.Add($"{current.Id}: recommendedCombatRating must not be lower than previous grade '{previous.Id}'.");
 
                 if (string.IsNullOrWhiteSpace(current.RequiredPreviousDungeonId))
                     continue;

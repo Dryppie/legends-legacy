@@ -13,12 +13,9 @@ public sealed class DungeonPreviewDto
     public int Tier { get; set; }
     public string Grade { get; set; } = string.Empty;
     public int RecommendedCombatRating { get; set; }
-    public int MinimumCombatRating { get; set; }
     public int CurrentCombatRating { get; set; }
     public bool CanEnter { get; set; }
-    public string ReadinessState { get; set; } = string.Empty;
     public List<string> MissingRequirements { get; set; } = [];
-    public List<string> Warnings { get; set; } = [];
     public List<DungeonEntryRequirementDto> EntryRequirements { get; set; } = [];
     public string? RequiredPreviousDungeonId { get; set; }
     public int MinRooms { get; set; }

@@ -78,12 +78,9 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
                 Tier = dungeon.Tier,
                 Grade = FormatGrade(dungeon.Grade),
                 RecommendedCombatRating = dungeon.RecommendedCombatRating,
-                MinimumCombatRating = access.MinimumCombatRating,
                 CurrentCombatRating = access.CurrentCombatRating,
                 CanEnter = access.CanEnter,
-                ReadinessState = access.ReadinessState,
                 MissingRequirements = [.. access.MissingRequirements],
-                Warnings = [.. access.Warnings],
                 EntryRequirements = access.EntryRequirements
                     .Select(x => new DungeonEntryRequirementDto
                     {

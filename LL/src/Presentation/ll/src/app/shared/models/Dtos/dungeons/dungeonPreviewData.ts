@@ -31,12 +31,9 @@ export interface DungeonPreviewData {
   difficulty?: DungeonDifficulty;
   grade?: string;
   recommendedCombatRating?: number;
-  minimumCombatRating?: number;
   currentCombatRating?: number;
   canEnter?: boolean;
-  readinessState?: string;
   missingRequirements?: string[];
-  warnings?: string[];
   entryRequirements?: DungeonEntryRequirement[];
   requiredPreviousDungeonId?: string | null;
   heroImage: string;

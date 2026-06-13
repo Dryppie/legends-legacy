@@ -121,22 +121,7 @@
             </button>
           </div>
 
-          <div
-            class="mt-3 rounded border px-3 py-2 text-sm"
-            [ngClass]="readinessClass()"
-          >
-            <div class="flex items-center justify-between gap-3">
-              <span class="text-xs font-semibold uppercase">
-                {{ readinessState() }}
-              </span>
-              <span class="text-xs tabular-nums">
-                {{ selectedPreviewData().currentCombatRating ?? 0 }} /
-                {{ selectedPreviewData().minimumCombatRating ?? 0 }} minimum
-              </span>
-            </div>
-          </div>
-
-          <div class="mt-2 flex flex-wrap items-center gap-3">
+          <div class="mt-3 flex flex-wrap items-center gap-2">
             <ng-container
               *ngFor="let requirement of selectedEntryRequirements()"
             >
@@ -166,31 +151,29 @@
               </div>
             </ng-container>
 
-            <div class="flex items-center gap-2 text-xs">
-              <span>Combat Rating</span>
-              <span class="tabular-nums">
+            <div class="flex items-center gap-2 rounded border border-white/10 bg-black/20 px-2 py-1 text-xs">
+              <span>Recommended Rating</span>
+              <span
+                class="tabular-nums"
+                [class.text-primary]="
+                  (selectedPreviewData().currentCombatRating ?? 0) >=
+                  (selectedPreviewData().recommendedCombatRating ?? 0)
+                "
+                [class.text-amber-200]="
+                  (selectedPreviewData().currentCombatRating ?? 0) <
+                  (selectedPreviewData().recommendedCombatRating ?? 0)
+                "
+              >
                 {{ selectedPreviewData().currentCombatRating ?? 0 }}/{{
-                  selectedPreviewData().minimumCombatRating ?? 0
+                  selectedPreviewData().recommendedCombatRating ?? 0
                 }}
               </span>
             </div>
-
-            <!-- <ng-container *ngIf="previewData.dailyEntries as d">
-              <div class="h-4 w-px bg-white/15"></div>
-              <div class="text-xs">
-                Daily entries:
-                <span class="font-semibold tabular-nums">{{ d }}</span>
-              </div>
-            </ng-container> -->
           </div>
 
           <div class="mt-4 flex flex-wrap gap-6 text-sm opacity-80">
             <div *ngIf="selectedPreviewData().roomsRange as roomsRange">
               Rooms: {{ roomsRange[0] }}–{{ roomsRange[1] }}
-            </div>
-            <div *ngIf="selectedPreviewData().recommendedCombatRating">
-              Recommended Combat Rating:
-              {{ selectedPreviewData().recommendedCombatRating }}
             </div>
           </div>
 
@@ -204,18 +187,6 @@
             <ul class="mt-1 list-disc pl-4">
               <li *ngFor="let requirement of selectedMissingRequirements()">
                 {{ requirement }}
-              </li>
-            </ul>
-          </div>
-
-          <div
-            *ngIf="selectedCanEnter() && selectedWarnings().length"
-            class="mt-4 rounded border border-amber-500/30 bg-amber-950/10 p-3 text-xs text-amber-100"
-          >
-            <div class="font-semibold">Risk warning</div>
-            <ul class="mt-1 list-disc pl-4">
-              <li *ngFor="let warning of selectedWarnings()">
-                {{ warning }}
               </li>
             </ul>
           </div>
