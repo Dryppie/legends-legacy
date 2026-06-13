@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { RegularButtonComponent } from '../../custom-components/buttons/regular-button/regular-button.component';
-import { NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { ItemComponent } from '../../item/item.component';
 import { DungeonStateService } from '../../../../core/services/api/dungeon/dungeon-state.service';
 import {
@@ -18,7 +18,7 @@ interface RewardGroup {
 @Component({
   selector: 'app-dungeon-card',
   standalone: true,
-  imports: [NgIf, NgFor, RegularButtonComponent, ItemComponent],
+  imports: [NgIf, NgFor, NgClass, RegularButtonComponent, ItemComponent],
   templateUrl: './dungeon-card.component.html',
 })
 export class DungeonCardComponent {
@@ -89,6 +89,19 @@ export class DungeonCardComponent {
 
   selectedCanEnter(): boolean {
     return this.selectedPreviewData().canEnter ?? true;
+  }
+
+  difficultyButtonClass(
+    difficulty: DungeonDifficulty,
+  ): Record<string, boolean> {
+    const selected = this.difficulty() === difficulty;
+    const unlocked = this.previewData.unlockedDifficulties.includes(difficulty);
+
+    return {
+      'border-primary bg-primary/90 text-black': selected,
+      'border-white/25 text-zinc-100': !selected,
+      'opacity-35': !unlocked,
+    };
   }
 
   selectedMissingRequirements(): string[] {

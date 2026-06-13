@@ -111,90 +111,60 @@
 
       <div class="mt-auto grid gap-3 pt-8 xl:grid-cols-[1fr_auto]">
         <div
-          class="grid gap-3 rounded-md border border-white/15 bg-black/55 p-4 backdrop-blur-sm md:grid-cols-[auto_1fr] xl:grid-cols-[auto_auto_1fr]"
+          class="grid gap-3 rounded-md border border-white/20 bg-black/50 p-4 backdrop-blur-sm md:grid-cols-[auto_1fr] xl:grid-cols-[auto_auto_1fr]"
           (click)="$event.stopPropagation()"
         >
-          <div>
-            <div class="text-[10px] uppercase tracking-[0.18em] text-zinc-400">
-              Difficulty
+          <div class="flex flex-col justify-between">
+            <div>
+              <div
+                class="text-[10px] uppercase tracking-[0.18em] text-zinc-300"
+              >
+                Difficulty
+              </div>
+              <div class="mt-2 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  class="rounded border px-4 py-2 text-sm transition"
+                  [ngClass]="difficultyButtonClass(dungeonDifficulty.Normal)"
+                  (click)="selectDifficulty(dungeonDifficulty.Normal)"
+                >
+                  {{ difficultyLabel(dungeonDifficulty.Normal) }}
+                </button>
+
+                <button
+                  type="button"
+                  class="rounded border px-4 py-2 text-sm transition"
+                  [ngClass]="difficultyButtonClass(dungeonDifficulty.Heroic)"
+                  (click)="selectDifficulty(dungeonDifficulty.Heroic)"
+                >
+                  {{ difficultyLabel(dungeonDifficulty.Heroic) }}
+                </button>
+
+                <button
+                  type="button"
+                  class="rounded border px-4 py-2 text-sm transition"
+                  [ngClass]="difficultyButtonClass(dungeonDifficulty.Mythic)"
+                  (click)="selectDifficulty(dungeonDifficulty.Mythic)"
+                >
+                  {{ difficultyLabel(dungeonDifficulty.Mythic) }}
+                </button>
+              </div>
             </div>
-            <div class="mt-2 flex flex-wrap gap-2">
-              <button
-                type="button"
-                class="rounded border px-4 py-2 text-sm transition"
-                [class.border-primary]="
-                  difficulty() === dungeonDifficulty.Normal
-                "
-                [class.bg-primary]="difficulty() === dungeonDifficulty.Normal"
-                [class.text-black]="difficulty() === dungeonDifficulty.Normal"
-                [class.border-whites]="
-                  difficulty() !== dungeonDifficulty.Normal
-                "
-                [class.text-zinc-300]="
-                  difficulty() !== dungeonDifficulty.Normal
-                "
-                [class.opacity-35]="
-                  !previewData.unlockedDifficulties.includes(
-                    dungeonDifficulty.Normal
-                  )
-                "
-                (click)="selectDifficulty(dungeonDifficulty.Normal)"
-              >
-                {{ difficultyLabel(dungeonDifficulty.Normal) }}
-              </button>
-
-              <button
-                type="button"
-                class="rounded border px-4 py-2 text-sm transition"
-                [class.border-primary]="
-                  difficulty() === dungeonDifficulty.Heroic
-                "
-                [class.bg-primary]="difficulty() === dungeonDifficulty.Heroic"
-                [class.text-black]="difficulty() === dungeonDifficulty.Heroic"
-                [class.border-whites]="
-                  difficulty() !== dungeonDifficulty.Heroic
-                "
-                [class.text-zinc-300]="
-                  difficulty() !== dungeonDifficulty.Heroic
-                "
-                [class.opacity-35]="
-                  !previewData.unlockedDifficulties.includes(
-                    dungeonDifficulty.Heroic
-                  )
-                "
-                (click)="selectDifficulty(dungeonDifficulty.Heroic)"
-              >
-                {{ difficultyLabel(dungeonDifficulty.Heroic) }}
-              </button>
-
-              <button
-                type="button"
-                class="rounded border px-4 py-2 text-sm transition"
-                [class.border-primary]="
-                  difficulty() === dungeonDifficulty.Mythic
-                "
-                [class.bg-primary]="difficulty() === dungeonDifficulty.Mythic"
-                [class.text-black]="difficulty() === dungeonDifficulty.Mythic"
-                [class.border-white]="difficulty() !== dungeonDifficulty.Mythic"
-                [class.text-zinc-300]="
-                  difficulty() !== dungeonDifficulty.Mythic
-                "
-                [class.opacity-35]="
-                  !previewData.unlockedDifficulties.includes(
-                    dungeonDifficulty.Mythic
-                  )
-                "
-                (click)="selectDifficulty(dungeonDifficulty.Mythic)"
-              >
-                {{ difficultyLabel(dungeonDifficulty.Mythic) }}
-              </button>
+            <div class="mt-4">
+              <app-regular-button
+                class="w-44"
+                [text]="'Enter ' + difficultyLabel(difficulty())"
+                [disabled]="!selectedCanEnter()"
+                (pressed)="startDungeon()"
+                fullWidth
+              ></app-regular-button>
             </div>
           </div>
 
           <div class="grid gap-2 sm:grid-cols-2 md:grid-cols-1">
-            <div class="rounded border border-white/10 bg-black/35 px-3 py-2">
+            <div class="rounded border border-white/15 bg-black/30 px-3 py-2">
               <div
-                class="text-[10px] uppercase tracking-[0.16em] text-zinc-500"
+                class="text-[10px] uppercase tracking-[0.16em] text-zinc-300"
               >
                 Entry
               </div>
@@ -203,7 +173,7 @@
                   *ngFor="let requirement of selectedEntryRequirements()"
                 >
                   <span
-                    class="rounded border border-white/10 bg-black/35 px-2 py-1 text-xs"
+                    class="rounded border border-white/15 bg-black/30 px-2 py-1 text-xs text-zinc-100"
                   >
                     {{ requirement.name }}
                     <span
@@ -224,9 +194,9 @@
               </div>
             </div>
 
-            <div class="rounded border border-white/10 bg-black/35 px-3 py-2">
+            <div class="rounded border border-white/15 bg-black/30 px-3 py-2">
               <div
-                class="text-[10px] uppercase tracking-[0.16em] text-zinc-500"
+                class="text-[10px] uppercase tracking-[0.16em] text-zinc-300"
               >
                 Rating
               </div>
@@ -252,13 +222,13 @@
           </div>
 
           <div class="min-w-0">
-            <div class="text-[10px] uppercase tracking-[0.18em] text-zinc-400">
+            <div class="text-[10px] uppercase tracking-[0.18em] text-zinc-300">
               Rewards
             </div>
             <div class="mt-2 grid gap-2 sm:grid-cols-2">
               <section
                 *ngFor="let group of selectedRewardGroups()"
-                class="min-w-0 rounded border border-white/10 bg-black/35 px-3 py-2"
+                class="min-w-0 rounded border border-white/15 bg-black/30 px-3 py-2"
               >
                 <div class="flex items-center justify-between gap-2">
                   <span
@@ -294,19 +264,6 @@
               {{ requirement }}{{ last ? "" : " " }}
             </span>
           </div>
-        </div>
-
-        <div
-          class="flex items-end justify-end rounded-md border border-white/15 bg-black/55 p-4 backdrop-blur-sm"
-          (click)="$event.stopPropagation()"
-        >
-          <app-regular-button
-            class="w-44"
-            [text]="'Enter ' + difficultyLabel(difficulty())"
-            [disabled]="!selectedCanEnter()"
-            (pressed)="startDungeon()"
-            fullWidth
-          ></app-regular-button>
         </div>
       </div>
     </div>

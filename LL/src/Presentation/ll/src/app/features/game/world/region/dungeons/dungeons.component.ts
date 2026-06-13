@@ -315,8 +315,16 @@ export class DungeonsComponent {
   }
 
   private getDifficulty(dungeon: DungeonPreviewData): DungeonDifficulty {
-    if (dungeon.difficulty) {
-      return dungeon.difficulty;
+    switch (dungeon.difficulty?.toString().toLowerCase()) {
+      case 'veteran':
+      case 'heroic':
+        return DungeonDifficulty.Heroic;
+      case 'champion':
+      case 'mythic':
+        return DungeonDifficulty.Mythic;
+      case 'novice':
+      case 'normal':
+        return DungeonDifficulty.Normal;
     }
 
     switch (dungeon.grade) {
