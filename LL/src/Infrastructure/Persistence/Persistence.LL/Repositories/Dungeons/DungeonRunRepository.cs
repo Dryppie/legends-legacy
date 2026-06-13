@@ -53,6 +53,58 @@ public class DungeonRunRepository : IDungeonRunRepository
              .FirstOrDefaultAsync(x => x.Id.Equals(dungeonId), cancellationToken);
     }
 
+    public async Task<IReadOnlyList<DungeonCompletionRecord>> GetCompletionRecordsAsync(
+        Guid characterId,
+        IReadOnlyCollection<string> dungeonDefinitionIds,
+        CancellationToken cancellationToken)
+    {
+        if (dungeonDefinitionIds.Count == 0)
+        {
+            return [];
+        }
+
+        return await _context.DungeonCompletionRecords
+            .Where(x => x.CharacterId == characterId && dungeonDefinitionIds.Contains(x.DungeonDefinitionId))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<DungeonCompletionLeaderboardEntry>> GetCompletionLeaderboardAsync(
+        IReadOnlyCollection<string> dungeonDefinitionIds,
+        CancellationToken cancellationToken)
+    {
+        if (dungeonDefinitionIds.Count == 0)
+        {
+            return [];
+        }
+
+        return await _context.DungeonCompletionRecords
+            .Where(record => dungeonDefinitionIds.Contains(record.DungeonDefinitionId))
+            .Join(
+                _context.Characters,
+                record => record.CharacterId,
+                character => character.Id,
+                (record, character) => new
+                {
+                    CharacterId = character.Id,
+                    CharacterName = character.Name,
+                    record.DungeonDefinitionId,
+                    record.FirstCompletedAt,
+                    record.LastCompletedAt,
+                    record.CompletionCount
+                })
+            .OrderBy(x => x.DungeonDefinitionId)
+            .ThenBy(x => x.FirstCompletedAt)
+            .ThenByDescending(x => x.CompletionCount)
+            .Select(x => new DungeonCompletionLeaderboardEntry(
+                x.CharacterId,
+                x.CharacterName,
+                x.DungeonDefinitionId,
+                x.FirstCompletedAt,
+                x.LastCompletedAt,
+                x.CompletionCount))
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<bool> HasCompletedDungeonAsync(Guid characterId, string dungeonDefinitionId, CancellationToken cancellationToken)
     {
         return await _context.DungeonCompletionRecords.AnyAsync(

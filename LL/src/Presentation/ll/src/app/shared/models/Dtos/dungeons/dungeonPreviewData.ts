@@ -7,6 +7,13 @@ export interface DungeonPreviewReward extends ItemInstance {
   category?: string;
 }
 
+export interface DungeonRecord {
+  hasCleared: boolean;
+  firstClearedAt?: string | null;
+  lastClearedAt?: string | null;
+  totalClears: number;
+}
+
 export interface DungeonPreviewData {
   id: string;
   familyId?: string;
@@ -29,6 +36,7 @@ export interface DungeonPreviewData {
   dailyEntries?: number;
   keyItem?: DungeonKeyItem;
   roomsRange?: [number, number];
+  record?: DungeonRecord;
   rewards: DungeonPreviewReward[];
   unlockedDifficulties: DungeonDifficulty[];
   difficultyVariants?: Partial<Record<DungeonDifficulty, DungeonPreviewData>>;

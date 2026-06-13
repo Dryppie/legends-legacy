@@ -20,6 +20,7 @@ export class DungeonCardComponent {
   @Input() cornerSize = 32;
 
   @Output() backEvent = new EventEmitter<void>();
+  @Output() recordsRequested = new EventEmitter<DungeonPreviewData>();
 
   dungeonDifficulty = DungeonDifficulty;
   showPreview = signal(false);
@@ -48,6 +49,10 @@ export class DungeonCardComponent {
 
   togglePreview() {
     this.showPreview.set(!this.showPreview());
+  }
+
+  openRecords() {
+    this.recordsRequested.emit(this.previewData);
   }
 
   selectDifficulty(d: DungeonDifficulty) {

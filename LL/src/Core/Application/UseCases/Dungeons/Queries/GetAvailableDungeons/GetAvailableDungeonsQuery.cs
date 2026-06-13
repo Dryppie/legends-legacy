@@ -6,6 +6,7 @@ using Application.UseCases.Items.Dtos;
 using AutoMapper;
 using Common.Exceptions;
 using Domain.Models.Dungeons.Definitions;
+using Domain.Models.Dungeons.Runs;
 using Domain.Models.Items;
 using Domain.Models.LootTables;
 using MediatR;
@@ -21,6 +22,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
     private readonly IDungeonAccessPolicy _dungeonAccess;
     private readonly IItemBaseRepository _itemBases;
     private readonly ICharacterService _characters;
+    private readonly IDungeonRunRepository _dungeonRuns;
     private readonly IMapper _mapper;
 
     public GetAvailableDungeonsQueryHandler(
@@ -29,6 +31,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         IDungeonAccessPolicy dungeonAccess,
         IItemBaseRepository itemBases,
         ICharacterService characters,
+        IDungeonRunRepository dungeonRuns,
         IMapper mapper)
     {
         _dungeonDefinitions = dungeonDefinitions;
@@ -36,6 +39,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         _dungeonAccess = dungeonAccess;
         _itemBases = itemBases;
         _characters = characters;
+        _dungeonRuns = dungeonRuns;
         _mapper = mapper;
     }
 
@@ -49,10 +53,21 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
             ? 0
             : Domain.Components.Attributes.CombatRatingCalculator.Calculate(character.BaseCombatAttributes, character.Level);
 
-        foreach (var dungeon in _dungeonDefinitions.GetAll()
-                     .OrderBy(x => DungeonDefinitionIdentity.GetFamilyId(x.Id))
-                     .ThenBy(x => x.Grade))
+        var dungeons = _dungeonDefinitions.GetAll()
+            .OrderBy(x => DungeonDefinitionIdentity.GetFamilyId(x.Id))
+            .ThenBy(x => x.Grade)
+            .ToList();
+        var completionRecords = await _dungeonRuns.GetCompletionRecordsAsync(
+            request.CharacterId,
+            dungeons.Select(x => x.Id).ToArray(),
+            cancellationToken);
+        var records = completionRecords.ToDictionary(
+            x => x.DungeonDefinitionId,
+            StringComparer.OrdinalIgnoreCase);
+
+        foreach (var dungeon in dungeons)
         {
+            records.TryGetValue(dungeon.Id, out var record);
             var access = await _dungeonAccess.EvaluateAsync(
                 request.CharacterId,
                 dungeon,
@@ -76,11 +91,28 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
                 RequiredPreviousDungeonId = dungeon.RequiredPreviousDungeonId,
                 MinRooms = dungeon.MinRooms,
                 MaxRooms = dungeon.MaxRooms,
+                Record = MapRecord(record),
                 Rewards = await GetPossibleCompletionRewards(dungeon, cancellationToken)
             });
         }
 
         return previews;
+    }
+
+    private static DungeonRecordDto MapRecord(DungeonCompletionRecord? record)
+    {
+        if (record is null)
+        {
+            return new DungeonRecordDto();
+        }
+
+        return new DungeonRecordDto
+        {
+            HasCleared = true,
+            FirstClearedAt = record.FirstCompletedAt,
+            LastClearedAt = record.LastCompletedAt,
+            TotalClears = record.CompletionCount
+        };
     }
 
     private async Task<List<DungeonPreviewRewardDto>> GetPossibleCompletionRewards(

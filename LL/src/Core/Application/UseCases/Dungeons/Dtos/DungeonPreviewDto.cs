@@ -21,6 +21,7 @@ public sealed class DungeonPreviewDto
     public int MinRooms { get; set; }
     public int MaxRooms { get; set; }
     public DungeonTier DungeonTier { get; set; }
+    public DungeonRecordDto Record { get; set; } = new();
     public List<DungeonPreviewRewardDto> Rewards { get; set; } = [];
 }
 

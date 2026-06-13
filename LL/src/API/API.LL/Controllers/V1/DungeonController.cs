@@ -4,6 +4,7 @@ using Application.UseCases.Dungeons.Commands.ExecuteDungeonAction;
 using Application.UseCases.Dungeons.Commands.StartDungeonRun;
 using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Dungeons.Queries.GetAvailableDungeons;
+using Application.UseCases.Dungeons.Queries.GetDungeonRecords;
 using Application.UseCases.Dungeons.Queries.GetDungeonRun;
 using Common.Primitives;
 using Domain.Models.Dungeons.Definitions;
@@ -23,6 +24,10 @@ public class DungeonController : BaseController
     [HttpGet("GetAvailableDungeons")]
     public async Task<ActionResult<List<DungeonPreviewDto>>> GetAvailableDungeons() =>
         await Mediator.Send(new GetAvailableDungeonsQuery(CurrentCharacterGuid));
+
+    [HttpGet("GetDungeonRecords/{familyId}")]
+    public async Task<ActionResult<DungeonRecordsDto>> GetDungeonRecords(string familyId) =>
+        await Mediator.Send(new GetDungeonRecordsQuery(familyId));
 
     public record StartDungeonRequest(string DungeonId, DungeonTier DungeonTier);
     [HttpPost("StartDungeon")]

@@ -104,7 +104,22 @@
         <div
           class="w-full border-b border-primary/30 p-4 text-white sm:border-b-0 sm:border-r xl:border-b xl:border-r-0"
         >
-          <div class="text-[11px] uppercase opacity-70">Requirements</div>
+          <div class="flex items-center justify-between gap-3">
+            <div class="text-[11px] uppercase opacity-70">Requirements</div>
+
+            <button
+              type="button"
+              class="flex items-center gap-2 rounded border px-3 py-1 text-xs transition"
+              [ngClass]="'border-white/15 text-zinc-300 hover:border-primary hover:text-primary'"
+              (click)="openRecords()"
+            >
+              <span
+                class="inline-block h-3 w-2 rounded-sm border"
+                [class.border-zinc-400]="true"
+              ></span>
+              Records
+            </button>
+          </div>
 
           <div class="mt-2 flex flex-wrap items-center gap-3">
             <ng-container *ngIf="previewData.keyItem as key">

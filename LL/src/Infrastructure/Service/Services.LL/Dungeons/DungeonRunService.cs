@@ -428,14 +428,14 @@ public sealed class DungeonRunService : IDungeonRunService
         if (!itemBases.TryGetValue(itemId, out var itemBase))
             return;
 
-        run.PendingRewards.Add(new RunReward
+        await _dungeonRuns.AddPendingRewardAsync(run, new RunReward
         {
             ItemId = itemBase.Id,
             Name = itemBase.Name,
             ItemType = itemBase.ItemType,
             Quantity = Math.Max(1, (int)dungeon.Grade),
             Source = $"event:treasure:room:{room.RoomIndex + 1}"
-        });
+        }, cancellationToken);
     }
 
     private static List<string> ResolveExtraCombatEncounters(DungeonRun run, DungeonDefinition dungeon, RoomInstance room)

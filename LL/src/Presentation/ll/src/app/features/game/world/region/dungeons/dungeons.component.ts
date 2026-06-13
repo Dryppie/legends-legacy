@@ -1,9 +1,17 @@
-import { Component, computed } from '@angular/core';
-import { NgFor } from '@angular/common';
+import { Component, computed, signal } from '@angular/core';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { DungeonCardComponent } from '../../../../../shared/components/dungeons/dungeon-card/dungeon-card.component';
 import { DungeonPreviewData } from '../../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
 import { DungeonDifficulty } from '../../../../../shared/models/enums/dungeonDifficulty';
 import { DungeonStateService } from '../../../../../core/services/api/dungeon/dungeon-state.service';
+import {
+  DungeonRecordEntryData,
+  DungeonRecordsData,
+  DungeonTierRecordsData,
+} from '../../../../../shared/models/Dtos/dungeons/dungeonRecordsData';
+import { finalize } from 'rxjs/operators';
+
+type DungeonLeaderboardMode = 'firstClears' | 'mostClears' | 'recentClears';
 
 const dungeonPresentation: Record<string, Partial<DungeonPreviewData>> = {
   goblin_mines: {
@@ -57,15 +65,162 @@ const dungeonPresentation: Record<string, Partial<DungeonPreviewData>> = {
 @Component({
   selector: 'app-dungeons',
   standalone: true,
-  imports: [DungeonCardComponent, NgFor],
+  imports: [DungeonCardComponent, NgFor, NgIf, NgClass],
   templateUrl: './dungeons.component.html',
 })
 export class DungeonsComponent {
+  selectedRecordsDungeon = signal<DungeonPreviewData | null>(null);
+  recordsData = signal<DungeonRecordsData | null>(null);
+  recordsLoading = signal(false);
+  recordsError = signal<string | null>(null);
+  selectedLeaderboardMode = signal<DungeonLeaderboardMode>('firstClears');
+
+  readonly leaderboardTabs: {
+    mode: DungeonLeaderboardMode;
+    label: string;
+    description: string;
+  }[] = [
+    {
+      mode: 'firstClears',
+      label: 'First Clears',
+      description: 'Earliest players to clear each difficulty.',
+    },
+    {
+      mode: 'mostClears',
+      label: 'Most Clears',
+      description: 'Players with the highest clear counts.',
+    },
+    {
+      mode: 'recentClears',
+      label: 'Recent Clears',
+      description: 'Most recent players to finish a run.',
+    },
+  ];
+
   dungeons = computed(() =>
     this.groupDifficultyVariants(this.dungeonState.dungeons()),
   );
 
   constructor(private readonly dungeonState: DungeonStateService) {}
+
+  openRecords(dungeon: DungeonPreviewData): void {
+    this.selectedRecordsDungeon.set(dungeon);
+    this.recordsData.set(null);
+    this.recordsError.set(null);
+    this.recordsLoading.set(true);
+    this.selectedLeaderboardMode.set('firstClears');
+
+    this.dungeonState
+      .getDungeonRecords(dungeon.familyId ?? dungeon.id)
+      .pipe(finalize(() => this.recordsLoading.set(false)))
+      .subscribe({
+        next: (records) => this.recordsData.set(records),
+        error: (e) =>
+          this.recordsError.set(e.message ?? 'Failed to load dungeon records'),
+      });
+  }
+
+  selectLeaderboardMode(mode: DungeonLeaderboardMode): void {
+    this.selectedLeaderboardMode.set(mode);
+  }
+
+  selectedLeaderboardDescription(): string {
+    return (
+      this.leaderboardTabs.find(
+        (tab) => tab.mode === this.selectedLeaderboardMode(),
+      )?.description ?? ''
+    );
+  }
+
+  sortedTierRecords(tier: DungeonTierRecordsData): DungeonRecordEntryData[] {
+    const records = [...tier.records];
+
+    switch (this.selectedLeaderboardMode()) {
+      case 'mostClears':
+        return records.sort((a, b) => {
+          const clears = b.totalClears - a.totalClears;
+          if (clears !== 0) return clears;
+
+          return (
+            new Date(a.firstClearedAt).getTime() -
+            new Date(b.firstClearedAt).getTime()
+          );
+        });
+
+      case 'recentClears':
+        return records.sort(
+          (a, b) =>
+            new Date(b.lastClearedAt).getTime() -
+            new Date(a.lastClearedAt).getTime(),
+        );
+
+      default:
+        return records.sort(
+          (a, b) =>
+            new Date(a.firstClearedAt).getTime() -
+            new Date(b.firstClearedAt).getTime(),
+        );
+    }
+  }
+
+  recordMetricValue(record: DungeonRecordEntryData): string {
+    switch (this.selectedLeaderboardMode()) {
+      case 'mostClears':
+        return record.totalClears.toString();
+
+      case 'recentClears':
+        return this.formatRecordDate(record.lastClearedAt);
+
+      default:
+        return this.formatRecordDate(record.firstClearedAt);
+    }
+  }
+
+  recordMetricLabel(record: DungeonRecordEntryData): string {
+    switch (this.selectedLeaderboardMode()) {
+      case 'mostClears':
+        return record.totalClears === 1 ? 'clear' : 'clears';
+
+      case 'recentClears':
+        return 'last clear';
+
+      default:
+        return 'first clear';
+    }
+  }
+
+  closeRecords(): void {
+    this.selectedRecordsDungeon.set(null);
+    this.recordsData.set(null);
+    this.recordsError.set(null);
+    this.recordsLoading.set(false);
+  }
+
+  totalRecordClears(): number {
+    return (
+      this.recordsData()?.tiers.reduce(
+        (total, tier) =>
+          total +
+          tier.records.reduce(
+            (tierTotal, record) => tierTotal + record.totalClears,
+            0,
+          ),
+        0,
+      ) ?? 0
+    );
+  }
+
+  formatRecordDate(value: string | null | undefined): string {
+    if (!value) {
+      return 'Never';
+    }
+
+    return new Intl.DateTimeFormat(undefined, {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }).format(new Date(value));
+  }
 
   private groupDifficultyVariants(
     dungeons: DungeonPreviewData[],
