@@ -7,7 +7,7 @@ The current direction for the Essence and ability systems is strong. Essences re
 The main risks are now around system safety and long-term maintainability:
 
 - Dungeon preview and dungeon start validation can drift because access requirements are checked in more than one place.
-- Dungeon events are scaffolded but not meaningfully active.
+- Dungeon events have a first functional implementation with rolled outcomes and inspect/accept/ignore actions.
 - Creature combat stats are generated from build profiles, archetypes, and area scaling rather than authored directly in creature JSON.
 - Creature-to-Essence combat behavior still depends on a name-derived monster id convention.
 - Content validation is not yet broad enough to protect a large authored catalog.
@@ -33,12 +33,11 @@ Completed:
 - Added admin diagnostics queries and endpoints for ability catalog smoke-test results and creature build-profile reports.
 - Added explicit dungeon reward preview categories for completion loot, tier loot, recurring Monster Cores, and first-completion rewards.
 - Centralized default first-completion dungeon rewards in `DungeonRewardCatalog` so preview and reward granting use the same source.
-- Added combat summary diagnostics for active ability attempts, passive trigger attempts/activations, and failed effect conditions.
 - Added startup validation wiring for generated creature build-profile diagnostics. Invalid generated Max Health or Combat Rating now fails API startup; unresolved creature-to-Essence source ids remain surfaced as diagnostic warnings until expected Essence drops are explicit.
+- Implemented first-pass dungeon event rooms with rolled Extra Combat, Treasure, Shrine, and Trap outcomes. Events now support inspect, accept, and ignore actions with concrete rewards or consequences.
 
 Not started:
 
-- Dungeon event room completion.
 - Targeted ability combat simulations for specialized triggers and conditions.
 
 ## Current System Snapshot
@@ -102,7 +101,7 @@ Keep grade-specific dungeon definitions internally for now, but introduce a stab
 
 Move dungeon access checks into a shared policy. Preview and start-run validation currently need to agree on Combat Rating and previous-difficulty requirements. A shared policy would prevent one path from allowing entry while the other rejects it.
 
-Finish dungeon event room support. `DungeonRunFactory` contains event-room scaffolding, but event weight is effectively disabled and event resolution is placeholder logic. Keeping half-active systems makes dungeon behavior harder to reason about.
+Dungeon event rooms now exist as a first functional version. Generated runs can include event rooms; each event rolls an outcome from the default event table and supports inspect, accept, and ignore actions. Treasure and shrine events grant pending rewards, trap events apply a pending-currency penalty, and extra combat events convert the event room into a combat room.
 
 Add dungeon content validation for:
 
@@ -169,16 +168,14 @@ Keep dungeon combat snapshot-based. Dungeon runs should use the character's stat
 
 Keep idle/live combat current-loadout-based. Live combat should reflect the active Essence loadout at the time combat starts.
 
-Add combat summary diagnostics for:
+Keep player-facing combat summaries lean. If deeper ability debugging becomes necessary, add it as an admin/dev diagnostic surface rather than expanding the normal player combat summary with too many columns.
 
-- Active ability attempts.
-- Active ability successful uses.
-- Passive trigger attempts.
-- Passive trigger successful activations.
+Potential diagnostic-only data:
+
+- Active ability attempts versus successful uses.
+- Passive trigger attempts versus successful activations.
 - Failed condition counts.
 - Basic attack usage.
-
-**Partially done:** active ability attempts, passive trigger attempts, passive trigger activations, failed effect conditions, and existing basic attack usage are now aggregated into combat summaries. This still needs richer reason text if the frontend should explain exactly which authored condition failed.
 
 This will make balance debugging far easier, especially when an ability appears not to fire or a passive condition silently blocks it.
 
@@ -211,7 +208,7 @@ Add creature build diagnostics that show archetype, area scaling, final combat a
 
 Implement one authoritative dungeon family/difficulty model for frontend grouping. **Done:** dungeon previews now expose family id, family title, and difficulty metadata so the frontend no longer has to infer grouping from ids or grade labels.
 
-Finish dungeon event rooms or remove them from generated runs until they are real.
+Finish dungeon event rooms or remove them from generated runs until they are real. **First implementation done:** generated dungeon runs can now include event rooms, and event rooms resolve through inspect/accept/ignore actions. Future work should replace hard-coded outcome effects with authored event definitions, richer rewards/modifiers, preview copy, and content validation.
 
 Clarify dungeon reward categories. **Done for dungeon preview and granting defaults:** rewards now carry explicit preview categories, recurring Monster Cores are shown separately from first-completion rewards, and default first-completion rewards are centralized in `DungeonRewardCatalog`.
 
@@ -244,9 +241,7 @@ Add a support matrix for:
 
 Review Combat Rating weights against real dungeon outcomes.
 
-Add combat analytics for ability usage and passive trigger behavior.
-
-**Partially done:** combat summaries now expose active attempts, successful uses, passive activations, failed conditions, damage, and healing per ability.
+Add combat analytics for ability usage and passive trigger behavior through an admin/dev diagnostic view, not the normal player summary.
 
 Improve dungeon preview explanations and Essence tooltip consistency.
 
@@ -328,7 +323,7 @@ Add tests or validation scenarios proving:
 - Creature Essence abilities resolve for every creature that should drop an Essence.
 - Dungeon combat uses snapshot Essences.
 - Idle/live combat uses current active loadout.
-- Combat summaries include basic attacks, active ability usage, passive trigger usage, and failed condition counts.
+- Combat diagnostics can report basic attacks, active ability usage, passive trigger usage, and failed condition counts without cluttering the player-facing combat summary.
 
 ## Assumptions
 

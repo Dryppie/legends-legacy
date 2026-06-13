@@ -28,14 +28,13 @@ export enum RoomType {
 
 export enum RoomInstanceStatus {
   Pending = 'Pending',
-  InProgress = 'InProgress',
+  Active = 'Active',
   Completed = 'Completed',
-  Failed = 'Failed',
-  Skipped = 'Skipped',
 }
 
 export enum EventOutcomeType {
-  Treasure = 'Treasure',
+  ExtraCombat = 'ExtraCombat',
+  TreasureRoom = 'TreasureRoom',
   Shrine = 'Shrine',
   Trap = 'Trap',
 }
