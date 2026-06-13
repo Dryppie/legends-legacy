@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { RegularButtonComponent } from '../../custom-components/buttons/regular-button/regular-button.component';
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { ItemComponent } from '../../item/item.component';
 import { DungeonStateService } from '../../../../core/services/api/dungeon/dungeon-state.service';
 import {
@@ -18,7 +18,7 @@ interface RewardGroup {
 @Component({
   selector: 'app-dungeon-card',
   standalone: true,
-  imports: [NgIf, NgFor, NgClass, RegularButtonComponent, ItemComponent],
+  imports: [NgIf, NgFor, RegularButtonComponent, ItemComponent],
   templateUrl: './dungeon-card.component.html',
 })
 export class DungeonCardComponent {
@@ -91,14 +91,6 @@ export class DungeonCardComponent {
     return this.selectedPreviewData().canEnter ?? true;
   }
 
-  difficultyCanEnter(difficulty: DungeonDifficulty): boolean {
-    const preview =
-      this.previewData.difficultyVariants?.[difficulty] ??
-      (difficulty === this.difficulty() ? this.previewData : null);
-
-    return preview?.canEnter ?? true;
-  }
-
   selectedMissingRequirements(): string[] {
     return this.selectedPreviewData().missingRequirements ?? [];
   }
@@ -123,16 +115,6 @@ export class DungeonCardComponent {
             this.rewardGroupSortValue(second.title) ||
           first.title.localeCompare(second.title),
       );
-  }
-
-  rewardSources(rewards: DungeonPreviewReward[]): string[] {
-    return Array.from(
-      new Set(
-        rewards
-          .map((reward) => reward.source)
-          .filter((source): source is string => !!source),
-      ),
-    );
   }
 
   private rewardGroupSortValue(title: string): number {
