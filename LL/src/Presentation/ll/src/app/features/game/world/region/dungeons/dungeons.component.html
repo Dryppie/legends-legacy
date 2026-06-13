@@ -108,7 +108,10 @@
                     {{ i + 1 }}.
                   </div>
                   <div class="min-w-0 truncate font-semibold text-zinc-100">
-                    {{ record.characterName }}
+                    <app-character-tag
+                      [id]="record.characterId"
+                      [name]="record.characterName"
+                    ></app-character-tag>
                   </div>
                 </div>
 

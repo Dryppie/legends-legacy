@@ -37,9 +37,11 @@ export enum ChatChannelType {
 export class ChatService {
   private hub?: HubConnection;
   private incoming$ = new Subject<ChatMessageDto>();
+  private readonly whisperDraftRequests = new Subject<string>();
   // expose an observable stream of all messages
   private readonly messageList = signal<ChatMessageDto[]>([]);
   public messages$ = toObservable(this.messageList);
+  public whisperDraftTarget$ = this.whisperDraftRequests.asObservable();
   private readonly apiBase = environment.chatApiRoot; // e.g. https://api.legends-legacy.com
 
   constructor(
@@ -121,6 +123,13 @@ export class ChatService {
     if (!targetId) return;
 
     return this.sendWhisper(targetId, targetName, body);
+  }
+
+  prepareWhisperToName(targetName: string): void {
+    const trimmed = targetName.trim();
+    if (!trimmed) return;
+
+    this.whisperDraftRequests.next(trimmed);
   }
 
   async sendWhisper(

@@ -1,7 +1,7 @@
 import { NgFor, NgIf } from '@angular/common';
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { catchError, EMPTY, take } from 'rxjs';
+import { catchError, EMPTY, skip, take } from 'rxjs';
 import { CharacterService } from '../../../../core/services/api/character/character.service';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { CharacterOverviewDto } from '../../../../shared/models/Dtos/characterDto';
@@ -10,6 +10,7 @@ import { AttributeDto } from '../../../../shared/models/Dtos/attributesDto';
 import { AttributeType } from '../../../../shared/models/enums/attributeType';
 import { AttributeTypeFormatPipe } from '../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { AttributeValueFormatPipe } from '../../../../shared/pipes/attributes/attribute-value-format/attribute-value-format.pipe';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-character-overview',
@@ -76,18 +77,42 @@ export class CharacterOverviewComponent {
     },
   ];
 
-  constructor(private characterService: CharacterService) {
-    this.characterService.characterOverview$
-      .pipe(take(1))
-      .subscribe((c) => this.character.set(c));
+  constructor(
+    private characterService: CharacterService,
+    private readonly route: ActivatedRoute,
+  ) {
+    const initialCharacterName =
+      this.route.snapshot.queryParamMap.get('characterName')?.trim();
+
+    if (initialCharacterName) {
+      this.searchValue.set(initialCharacterName);
+      this.searchCharacter(initialCharacterName);
+    } else {
+      this.loadCurrentCharacter();
+    }
+
+    this.route.queryParamMap.pipe(skip(1)).subscribe((params) => {
+      const characterName = params.get('characterName')?.trim();
+      if (!characterName) {
+        this.loadCurrentCharacter();
+        return;
+      }
+
+      this.searchValue.set(characterName);
+      this.searchCharacter(characterName);
+    });
   }
 
   onSearch() {
     const trimmed = this.searchValue().trim();
     if (!trimmed) return;
 
+    this.searchCharacter(trimmed);
+  }
+
+  private searchCharacter(characterName: string): void {
     this.characterService
-      .searchCharacter(trimmed)
+      .searchCharacter(characterName)
       .pipe(
         catchError((err) => {
           console.error(err.message);
@@ -97,6 +122,12 @@ export class CharacterOverviewComponent {
       .subscribe((character) => {
         this.character.set(character);
       });
+  }
+
+  private loadCurrentCharacter(): void {
+    this.characterService.characterOverview$
+      .pipe(take(1))
+      .subscribe((c) => this.character.set(c));
   }
 
   onEnter(event: KeyboardEvent) {

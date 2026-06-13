@@ -10,6 +10,7 @@ import {
   DungeonTierRecordsData,
 } from '../../../../../shared/models/Dtos/dungeons/dungeonRecordsData';
 import { finalize } from 'rxjs/operators';
+import { CharacterTagComponent } from '../../../../../shared/components/character/character-tag/character-tag.component';
 
 type DungeonLeaderboardMode = 'firstClears' | 'mostClears' | 'recentClears';
 
@@ -65,7 +66,7 @@ const dungeonPresentation: Record<string, Partial<DungeonPreviewData>> = {
 @Component({
   selector: 'app-dungeons',
   standalone: true,
-  imports: [DungeonCardComponent, NgFor, NgIf, NgClass],
+  imports: [DungeonCardComponent, NgFor, NgIf, NgClass, CharacterTagComponent],
   templateUrl: './dungeons.component.html',
 })
 export class DungeonsComponent {
@@ -232,8 +233,8 @@ export class DungeonsComponent {
       groups.set(familyId, [...(groups.get(familyId) ?? []), dungeon]);
     }
 
-    return Array.from(groups.entries()).flatMap(
-      ([familyId, variants], index) => {
+    return Array.from(groups.entries())
+      .flatMap(([familyId, variants], index) => {
         const presentation = dungeonPresentation[familyId] ?? {};
         const variantMap = this.createVariantMap(variants);
         const normalVariant =
@@ -262,8 +263,33 @@ export class DungeonsComponent {
           unlockedDifficulties: this.getUnlockedDifficulties(variantMap),
           difficultyVariants: variantMap,
         } as DungeonPreviewData;
-      },
-    );
+      })
+      .sort((a, b) => this.compareDungeons(a, b));
+  }
+
+  private compareDungeons(
+    first: DungeonPreviewData,
+    second: DungeonPreviewData,
+  ): number {
+    const numberSort =
+      this.getDungeonSortValue(first) - this.getDungeonSortValue(second);
+    if (numberSort !== 0) {
+      return numberSort;
+    }
+
+    const levelSort = (first.requiredLevel ?? 0) - (second.requiredLevel ?? 0);
+    if (levelSort !== 0) {
+      return levelSort;
+    }
+
+    return first.title.localeCompare(second.title);
+  }
+
+  private getDungeonSortValue(dungeon: DungeonPreviewData): number {
+    const parsedNumber = Number(dungeon.number);
+    return Number.isFinite(parsedNumber)
+      ? parsedNumber
+      : Number.MAX_SAFE_INTEGER;
   }
 
   private createVariantMap(
