@@ -11,9 +11,9 @@ export interface DungeonPreviewData {
   number: number | string;
   title: string;
   grade?: string;
-  recommendedPowerScore?: number;
-  minimumPowerScore?: number;
-  currentPowerScore?: number;
+  recommendedCombatRating?: number;
+  minimumCombatRating?: number;
+  currentCombatRating?: number;
   canEnter?: boolean;
   missingRequirements?: string[];
   requiredPreviousDungeonId?: string | null;

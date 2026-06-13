@@ -35,12 +35,6 @@ export class CharacterOverviewComponent {
     AttributeType.Precision,
     AttributeType.Spirit,
   ];
-  readonly highlightStats = [
-    AttributeType.MaxHealth,
-    AttributeType.WeaponDamage,
-    AttributeType.CritChance,
-    AttributeType.Armor,
-  ];
   readonly attributeSections: { title: string; attributes: AttributeType[] }[] = [
     {
       title: 'Offense',

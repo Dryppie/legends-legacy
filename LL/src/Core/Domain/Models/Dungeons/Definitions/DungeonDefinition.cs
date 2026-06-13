@@ -12,8 +12,8 @@ public sealed class DungeonDefinition
     public string SigilItemId { get; set; } = default!;
     public DungeonGrade Grade { get; set; } = DungeonGrade.GradeI;
     public int Tier { get; set; } = 1;
-    public int RecommendedPowerScore { get; set; }
-    public int MinimumPowerScore { get; set; }
+    public int RecommendedCombatRating { get; set; }
+    public int MinimumCombatRating { get; set; }
     public string? RequiredAreaId { get; set; }
     public string? RequiredQuestId { get; set; }
     public string? RequiredPreviousDungeonId { get; set; }

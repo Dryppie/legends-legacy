@@ -42,9 +42,9 @@ public class StartDungeonRunCommandHandler : IRequestHandler<StartDungeonRunComm
         if (character is null)
             return Response<DungeonRunDto>.Fail("Character was not found.");
 
-        var powerScore = PowerScoreCalculator.Calculate(character.BaseCombatAttributes, character.Level);
-        if (powerScore < dungeonDefinition.MinimumPowerScore)
-            return Response<DungeonRunDto>.Fail($"Requires {dungeonDefinition.MinimumPowerScore} Power.");
+        var combatRating = CombatRatingCalculator.Calculate(character.BaseCombatAttributes, character.Level);
+        if (combatRating < dungeonDefinition.MinimumCombatRating)
+            return Response<DungeonRunDto>.Fail($"Requires {dungeonDefinition.MinimumCombatRating} Combat Rating.");
 
         if (!string.IsNullOrWhiteSpace(dungeonDefinition.RequiredPreviousDungeonId)
             && !await _dungeonRuns.HasCompletedDungeonAsync(

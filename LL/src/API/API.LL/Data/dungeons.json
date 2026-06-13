@@ -5,8 +5,8 @@
     "sigilItemId": "sigil_goblin_mines",
     "grade": "GradeI",
     "tier": 1,
-    "recommendedPowerScore": 250,
-    "minimumPowerScore": 213,
+    "recommendedCombatRating": 250,
+    "minimumCombatRating": 213,
     "entryCosts": [
       {
         "itemId": "sigil_goblin_mines",
@@ -57,8 +57,8 @@
     "sigilItemId": "sigil_goblin_mines",
     "grade": "GradeII",
     "tier": 2,
-    "recommendedPowerScore": 750,
-    "minimumPowerScore": 638,
+    "recommendedCombatRating": 750,
+    "minimumCombatRating": 638,
     "requiredPreviousDungeonId": "goblin_mines",
     "requiredPreviousDungeonGrade": "GradeI",
     "entryCosts": [
@@ -111,8 +111,8 @@
     "sigilItemId": "sigil_goblin_mines",
     "grade": "GradeIII",
     "tier": 3,
-    "recommendedPowerScore": 2000,
-    "minimumPowerScore": 1700,
+    "recommendedCombatRating": 2000,
+    "minimumCombatRating": 1700,
     "requiredPreviousDungeonId": "goblin_mines_ii",
     "requiredPreviousDungeonGrade": "GradeII",
     "entryCosts": [
@@ -165,8 +165,8 @@
     "sigilItemId": "sigil_forgotten_catacombs",
     "grade": "GradeI",
     "tier": 1,
-    "recommendedPowerScore": 400,
-    "minimumPowerScore": 340,
+    "recommendedCombatRating": 400,
+    "minimumCombatRating": 340,
     "entryCosts": [
       {
         "itemId": "sigil_forgotten_catacombs",
@@ -234,8 +234,8 @@
     "sigilItemId": "sigil_forgotten_catacombs",
     "grade": "GradeII",
     "tier": 2,
-    "recommendedPowerScore": 1150,
-    "minimumPowerScore": 978,
+    "recommendedCombatRating": 1150,
+    "minimumCombatRating": 978,
     "requiredPreviousDungeonId": "forgotten_catacombs",
     "requiredPreviousDungeonGrade": "GradeI",
     "entryCosts": [
@@ -305,8 +305,8 @@
     "sigilItemId": "sigil_forgotten_catacombs",
     "grade": "GradeIII",
     "tier": 3,
-    "recommendedPowerScore": 3000,
-    "minimumPowerScore": 2550,
+    "recommendedCombatRating": 3000,
+    "minimumCombatRating": 2550,
     "requiredPreviousDungeonId": "forgotten_catacombs_ii",
     "requiredPreviousDungeonGrade": "GradeII",
     "entryCosts": [
@@ -376,8 +376,8 @@
     "sigilItemId": "sigil_hives_abyss",
     "grade": "GradeI",
     "tier": 1,
-    "recommendedPowerScore": 650,
-    "minimumPowerScore": 553,
+    "recommendedCombatRating": 650,
+    "minimumCombatRating": 553,
     "entryCosts": [
       {
         "itemId": "sigil_hives_abyss",
@@ -445,8 +445,8 @@
     "sigilItemId": "sigil_hives_abyss",
     "grade": "GradeII",
     "tier": 2,
-    "recommendedPowerScore": 1800,
-    "minimumPowerScore": 1530,
+    "recommendedCombatRating": 1800,
+    "minimumCombatRating": 1530,
     "requiredPreviousDungeonId": "hives_abyss",
     "requiredPreviousDungeonGrade": "GradeI",
     "entryCosts": [
@@ -516,8 +516,8 @@
     "sigilItemId": "sigil_hives_abyss",
     "grade": "GradeIII",
     "tier": 3,
-    "recommendedPowerScore": 4800,
-    "minimumPowerScore": 4080,
+    "recommendedCombatRating": 4800,
+    "minimumCombatRating": 4080,
     "requiredPreviousDungeonId": "hives_abyss_ii",
     "requiredPreviousDungeonGrade": "GradeII",
     "entryCosts": [

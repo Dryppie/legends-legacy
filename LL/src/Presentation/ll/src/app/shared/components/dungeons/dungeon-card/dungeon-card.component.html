@@ -117,10 +117,10 @@
             </ng-container>
 
             <div class="flex items-center gap-2 text-xs">
-              <span>Power</span>
+              <span>Combat Rating</span>
               <span class="tabular-nums">
-                {{ selectedPreviewData().currentPowerScore ?? 0 }}/{{
-                  selectedPreviewData().minimumPowerScore ?? 0
+                {{ selectedPreviewData().currentCombatRating ?? 0 }}/{{
+                  selectedPreviewData().minimumCombatRating ?? 0
                 }}
               </span>
             </div>
@@ -138,9 +138,9 @@
             <div *ngIf="selectedPreviewData().roomsRange as roomsRange">
               Rooms: {{ roomsRange[0] }}–{{ roomsRange[1] }}
             </div>
-            <div *ngIf="selectedPreviewData().recommendedPowerScore">
-              Recommended Power:
-              {{ selectedPreviewData().recommendedPowerScore }}
+            <div *ngIf="selectedPreviewData().recommendedCombatRating">
+              Recommended Combat Rating:
+              {{ selectedPreviewData().recommendedCombatRating }}
             </div>
           </div>
 

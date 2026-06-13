@@ -9,9 +9,9 @@ public sealed class DungeonPreviewDto
     public string Title { get; set; } = string.Empty;
     public int Tier { get; set; }
     public string Grade { get; set; } = string.Empty;
-    public int RecommendedPowerScore { get; set; }
-    public int MinimumPowerScore { get; set; }
-    public int CurrentPowerScore { get; set; }
+    public int RecommendedCombatRating { get; set; }
+    public int MinimumCombatRating { get; set; }
+    public int CurrentCombatRating { get; set; }
     public bool CanEnter { get; set; }
     public List<string> MissingRequirements { get; set; } = [];
     public string? RequiredPreviousDungeonId { get; set; }

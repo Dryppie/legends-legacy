@@ -45,16 +45,16 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
     {
         var previews = new List<DungeonPreviewDto>();
         var character = await _characters.GetMyCharacterOverviewAsync(request.CharacterId, cancellationToken);
-        var powerScore = character is null
+        var combatRating = character is null
             ? 0
-            : Domain.Components.Attributes.PowerScoreCalculator.Calculate(character.BaseCombatAttributes, character.Level);
+            : Domain.Components.Attributes.CombatRatingCalculator.Calculate(character.BaseCombatAttributes, character.Level);
 
         foreach (var dungeon in _dungeonDefinitions.GetAll())
         {
             var missingRequirements = await GetMissingRequirements(
                 request.CharacterId,
                 dungeon,
-                powerScore,
+                combatRating,
                 cancellationToken);
 
             previews.Add(new DungeonPreviewDto
@@ -63,9 +63,9 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
                 Title = dungeon.Name,
                 Tier = dungeon.Tier,
                 Grade = FormatGrade(dungeon.Grade),
-                RecommendedPowerScore = dungeon.RecommendedPowerScore,
-                MinimumPowerScore = dungeon.MinimumPowerScore,
-                CurrentPowerScore = powerScore,
+                RecommendedCombatRating = dungeon.RecommendedCombatRating,
+                MinimumCombatRating = dungeon.MinimumCombatRating,
+                CurrentCombatRating = combatRating,
                 CanEnter = missingRequirements.Count == 0,
                 MissingRequirements = missingRequirements,
                 RequiredPreviousDungeonId = dungeon.RequiredPreviousDungeonId,
@@ -81,14 +81,14 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
     private async Task<List<string>> GetMissingRequirements(
         Guid characterId,
         Domain.Models.Dungeons.DungeonDefinition dungeon,
-        int powerScore,
+        int combatRating,
         CancellationToken cancellationToken)
     {
         var missingRequirements = new List<string>();
 
-        if (powerScore < dungeon.MinimumPowerScore)
+        if (combatRating < dungeon.MinimumCombatRating)
         {
-            missingRequirements.Add($"Requires {dungeon.MinimumPowerScore} Power.");
+            missingRequirements.Add($"Requires {dungeon.MinimumCombatRating} Combat Rating.");
         }
 
         if (!string.IsNullOrWhiteSpace(dungeon.RequiredPreviousDungeonId)

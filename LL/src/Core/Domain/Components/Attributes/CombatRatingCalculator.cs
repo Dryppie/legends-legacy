@@ -2,7 +2,7 @@ using Domain.Models.Attributes;
 
 namespace Domain.Components.Attributes;
 
-public static class PowerScoreCalculator
+public static class CombatRatingCalculator
 {
     public static int Calculate(IReadOnlyDictionary<AttributeType, float> attributes, int characterLevel)
     {

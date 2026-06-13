@@ -14,7 +14,7 @@ export interface CharacterDto {
 
 export interface CharacterOverviewDto {
   level: number;
-  powerScore: number;
+  combatRating: number;
   baseAttributes: AttributeDto[];
   baseCombatAttributes: AttributeDto[];
   activeEssenceLoadout?: EssenceLoadoutDto | null;
