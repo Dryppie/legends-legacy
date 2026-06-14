@@ -2,6 +2,7 @@ using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Regions.Areas;
+using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Reward;
 using Services.LL.Interfaces.Combat.Reward.Idle;
 
@@ -12,6 +13,7 @@ public sealed class IdleDungeonSigilDropCalculator : IIdleDungeonSigilDropCalcul
     private readonly IDungeonDefinitions _dungeons;
     private readonly IItemBaseRepository _itemBases;
     private readonly IRandomSource _randomSource;
+    private readonly IInventoryItemFactory _inventoryItemFactory;
 
     private const int IdleActionsPerDay = 24 * 60 * 60 / 10;
     private const double TargetSigilDropsPerDay = 2d;
@@ -21,11 +23,13 @@ public sealed class IdleDungeonSigilDropCalculator : IIdleDungeonSigilDropCalcul
     public IdleDungeonSigilDropCalculator(
         IDungeonDefinitions dungeons,
         IItemBaseRepository itemBases,
-        IRandomSource randomSource)
+        IRandomSource randomSource,
+        IInventoryItemFactory inventoryItemFactory)
     {
         _dungeons = dungeons;
         _itemBases = itemBases;
         _randomSource = randomSource;
+        _inventoryItemFactory = inventoryItemFactory;
     }
 
     public async Task<IReadOnlyList<InventoryItem>> RollAsync(
@@ -61,7 +65,7 @@ public sealed class IdleDungeonSigilDropCalculator : IIdleDungeonSigilDropCalcul
                 continue;
             }
 
-            drops.Add(CreateInventoryItem(itemBase, quantity));
+            drops.Add(_inventoryItemFactory.Create(itemBase, quantity));
         }
 
         return drops;
@@ -122,23 +126,6 @@ public sealed class IdleDungeonSigilDropCalculator : IIdleDungeonSigilDropCalcul
     {
         var index = Math.Min((int)(_randomSource.NextDouble() * sigilIds.Count), sigilIds.Count - 1);
         return sigilIds[index];
-    }
-
-    private static InventoryItem CreateInventoryItem(ItemBase itemBase, int quantity)
-    {
-        var itemInstanceId = Guid.NewGuid();
-
-        return new InventoryItem
-        {
-            ItemInstanceId = itemInstanceId,
-            Quantity = quantity,
-            ItemInstance = new ItemInstance
-            {
-                Id = itemInstanceId,
-                ItemBaseId = itemBase.Id,
-                ItemBase = itemBase
-            }
-        };
     }
 
     private static string ResolveDungeonRegionId(string? requiredAreaId) =>

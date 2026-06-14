@@ -8,6 +8,7 @@ using Domain.Models.Essences.Definitions;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.EssenceItems;
+using Services.LL.Interfaces;
 
 namespace Services.LL.Essences;
 
@@ -22,6 +23,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     private readonly IEssenceSlotUnlockService _slotUnlocks;
     private readonly IEssenceLoadoutLimitService _loadoutLimits;
     private readonly IEssenceCombatAbilityFactory _combatAbilityFactory;
+    private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IRandomProvider _random;
 
     public EssenceSystemService(
@@ -33,6 +35,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         IEssenceSlotUnlockService slotUnlocks,
         IEssenceLoadoutLimitService loadoutLimits,
         IEssenceCombatAbilityFactory combatAbilityFactory,
+        IInventoryItemFactory inventoryItemFactory,
         IRandomProvider random)
     {
         _essences = essences;
@@ -43,6 +46,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         _slotUnlocks = slotUnlocks;
         _loadoutLimits = loadoutLimits;
         _combatAbilityFactory = combatAbilityFactory;
+        _inventoryItemFactory = inventoryItemFactory;
         _random = random;
     }
 
@@ -391,20 +395,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             var itemBases = await _itemBases.GetItemBasesByIdsAsync([itemBaseId], cancellationToken);
             if (!itemBases.TryGetValue(itemBaseId, out var itemBase)) continue;
 
-            var itemInstance = new EssenceItemInstance
-            {
-                Id = Guid.NewGuid(),
-                ItemBaseId = itemBase.Id,
-                ItemBase = itemBase
-            };
-
-            drops.Add(new InventoryItem
-            {
-                InventoryId = characterId,
-                ItemInstanceId = itemInstance.Id,
-                ItemInstance = itemInstance,
-                Quantity = 1
-            });
+            drops.Add(_inventoryItemFactory.Create(itemBase, 1, characterId));
         }
 
         return drops;
@@ -425,8 +416,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         if (!itemBases.TryGetValue(itemBaseId, out var itemBase))
             throw new InvalidOperationException($"Item '{itemBaseId}' does not exist.");
 
-        var instance = new ItemInstance { Id = Guid.NewGuid(), ItemBaseId = itemBase.Id, ItemBase = itemBase };
-        await _inventory.AddItemsToInventory(characterId, [new InventoryItem { InventoryId = characterId, ItemInstanceId = instance.Id, ItemInstance = instance, Quantity = quantity }], cancellationToken);
+        await _inventory.AddItemsToInventory(characterId, [_inventoryItemFactory.Create(itemBase, quantity, characterId)], cancellationToken);
     }
 
     private async Task<bool> RemoveInventoryQuantityAsync(Guid characterId, string itemBaseId, int quantity, CancellationToken cancellationToken)

@@ -4,9 +4,9 @@ using Common.Exceptions;
 using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Essences;
-using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.LootTables;
+using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Reward.Dungeon;
 
 namespace Services.LL.Combat.Layers.Rewards.Dungeon;
@@ -19,6 +19,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
     private readonly IItemBaseRepository _itemBases;
     private readonly ILootService _lootService;
     private readonly IDungeonPendingRewardWriter _pendingRewardWriter;
+    private readonly IInventoryItemFactory _inventoryItemFactory;
 
     public DungeonCompletionRewardApplier(
         IDungeonDefinitions dungeonDefinitions,
@@ -26,7 +27,8 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
         ILootTableRepository lootTables,
         IItemBaseRepository itemBases,
         ILootService lootService,
-        IDungeonPendingRewardWriter pendingRewardWriter)
+        IDungeonPendingRewardWriter pendingRewardWriter,
+        IInventoryItemFactory inventoryItemFactory)
     {
         _dungeonDefinitions = dungeonDefinitions;
         _dungeonRuns = dungeonRuns;
@@ -34,6 +36,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
         _itemBases = itemBases;
         _lootService = lootService;
         _pendingRewardWriter = pendingRewardWriter;
+        _inventoryItemFactory = inventoryItemFactory;
     }
 
     public async Task ApplyAsync(DungeonRun run, CancellationToken cancellationToken)
@@ -119,20 +122,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
         var itemBases = await _itemBases.GetItemBasesByIdsAsync(grants.Keys.ToList(), cancellationToken);
         var loot = grants
             .Where(grant => itemBases.ContainsKey(grant.Key))
-            .Select(grant =>
-            {
-                var itemBase = itemBases[grant.Key];
-                return new InventoryItem
-                {
-                    Quantity = grant.Value,
-                    ItemInstance = new ItemInstance
-                    {
-                        Id = Guid.NewGuid(),
-                        ItemBaseId = itemBase.Id,
-                        ItemBase = itemBase
-                    }
-                };
-            })
+            .SelectMany(grant => _inventoryItemFactory.CreateForQuantity(itemBases[grant.Key], grant.Value))
             .ToList();
 
         if (loot.Count == 0)
@@ -180,20 +170,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
         var itemBases = await _itemBases.GetItemBasesByIdsAsync(rolled.Keys.ToList(), cancellationToken);
         var loot = rolled
             .Where(grant => itemBases.ContainsKey(grant.Key))
-            .Select(grant =>
-            {
-                var itemBase = itemBases[grant.Key];
-                return new InventoryItem
-                {
-                    Quantity = grant.Value,
-                    ItemInstance = new ItemInstance
-                    {
-                        Id = Guid.NewGuid(),
-                        ItemBaseId = itemBase.Id,
-                        ItemBase = itemBase
-                    }
-                };
-            })
+            .SelectMany(grant => _inventoryItemFactory.CreateForQuantity(itemBases[grant.Key], grant.Value))
             .ToList();
 
         if (loot.Count == 0)

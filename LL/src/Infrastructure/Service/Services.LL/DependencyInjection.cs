@@ -147,6 +147,7 @@ public static class DependencyInjection
         services.AddScoped<ILootService, LootService>();
         services.AddScoped<ILootTableService, LootTableService>();
         services.AddScoped<IInventoryService, InventoryService>();
+        services.AddScoped<IInventoryItemFactory, InventoryItemFactory>();
 
         services.AddScoped<IMarketPlaceService, MarketPlaceService>();
 
