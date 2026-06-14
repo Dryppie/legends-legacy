@@ -7,7 +7,14 @@ import {
   NgSwitchCase,
   NgSwitchDefault,
 } from '@angular/common';
-import { Component, computed, effect, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  Input,
+  OnInit,
+  signal,
+} from '@angular/core';
 import {
   FormControl,
   FormsModule,
@@ -75,7 +82,15 @@ import {
 })
 export class MarketPlaceBuyComponent implements OnInit {
   readonly allListings = signal<MarketPlaceListing[]>([]);
+  readonly selectedItemType = signal<ItemType | null>(null);
   selectedListingId: string = '';
+
+  @Input()
+  set itemType(value: ItemType | null) {
+    this.selectedItemType.set(value);
+    this.selectedListing.set(null);
+    this.selectedListingId = '';
+  }
 
   readonly qtyCtrl = new FormControl<number>(1, {
     validators: [Validators.required, Validators.min(1)],
@@ -97,12 +112,9 @@ export class MarketPlaceBuyComponent implements OnInit {
     { initialValue: '' },
   );
 
-  readonly itemType = signal<string>('');
   readonly rarity = signal<string>('');
   readonly priceSort = signal<'' | 'asc' | 'desc'>('');
 
-  /** Dropdown data (could also come from enum/service) */
-  readonly itemTypes = ['Equipment', 'Essence', 'Material'];
   readonly rarities = [
     'Common',
     'Uncommon',
@@ -126,8 +138,7 @@ export class MarketPlaceBuyComponent implements OnInit {
       );
     }
 
-    /* 2️⃣ Category – via either dropdown or tab */
-    const itemTypeFilter = this.itemType();
+    const itemTypeFilter = this.selectedItemType();
     if (itemTypeFilter) {
       items = items.filter(
         (l) => l.itemInstance.itemBase.itemType === itemTypeFilter,
@@ -230,7 +241,7 @@ export class MarketPlaceBuyComponent implements OnInit {
 
       case 'Essence': {
         const es = base as EssenceItem;
-        return `${es.rarity}${es.essenceDefinitionId ? `\n${es.essenceDefinitionId}` : ''}${es.description ? `\n${es.description}` : ''}`;
+        return `${es.rarity}${es.description ? `\n${es.description}` : ''}`;
       }
 
       default:
@@ -347,7 +358,6 @@ export class MarketPlaceBuyComponent implements OnInit {
 
   resetFilters() {
     this.searchCtrl.reset();
-    this.itemType.set('');
     this.rarity.set('');
     this.priceSort.set('');
   }

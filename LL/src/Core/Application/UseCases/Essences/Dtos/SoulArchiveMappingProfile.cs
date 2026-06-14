@@ -83,10 +83,10 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
     {
         var nextTier = essence.AscensionTier >= 3 ? (int?)null : essence.AscensionTier + 1;
         var currentCap = _progression.GetLevelCap(essence.AscensionTier);
-        var nextTierDefinition = nextTier is null
+        var cost = nextTier is null
             ? null
-            : definition.Ascension.Tiers.FirstOrDefault(x => x.Tier == nextTier.Value);
-        var requiredItemId = nextTierDefinition?.RequiredCoreItemId ?? (nextTier is null ? null : $"item.monster_core.tier_{nextTier}");
+            : EssenceProgressionConstants.GetAscensionCost(nextTier.Value);
+        var requiredItemId = cost?.ItemId;
         var requirements = new List<string>();
 
         if (essence.AscensionTier >= 3)
@@ -96,7 +96,7 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
         else
         {
             requirements.Add($"Reach Level {currentCap} in Ascension Tier {essence.AscensionTier}.");
-            requirements.Add($"Consume 1 {FormatItemName(requiredItemId)}.");
+            requirements.Add($"Consume {cost!.Amount} {FormatItemName(requiredItemId)}.");
         }
 
         var effects = nextTier is null
@@ -163,6 +163,12 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
     private static string FormatItemName(string? itemId)
     {
         if (string.IsNullOrWhiteSpace(itemId)) return "required item";
+        if (itemId.Equals(EssenceProgressionConstants.LesserMonsterCoreItemId, StringComparison.OrdinalIgnoreCase))
+            return "Lesser Monster Core";
+        if (itemId.Equals(EssenceProgressionConstants.GreaterMonsterCoreItemId, StringComparison.OrdinalIgnoreCase))
+            return "Greater Monster Core";
+        if (itemId.Equals(EssenceProgressionConstants.PrimalMonsterCoreItemId, StringComparison.OrdinalIgnoreCase))
+            return "Primal Monster Core";
 
         var parts = itemId
             .Replace("item.", string.Empty, StringComparison.OrdinalIgnoreCase)

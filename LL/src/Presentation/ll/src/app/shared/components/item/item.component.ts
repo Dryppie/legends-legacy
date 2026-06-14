@@ -1,5 +1,10 @@
 import { Component, Input } from '@angular/core';
-import { EquipmentInstance, EssenceItem, ItemInstance } from '../../models/item';
+import {
+  Equipment,
+  EquipmentInstance,
+  EssenceItem,
+  ItemInstance,
+} from '../../models/item';
 import { NgClass, NgIf } from '@angular/common';
 import { Rarity } from '../../models/enums/rarity';
 import { EssenceDetailsComponent } from '../essences/essence-details/essence-details.component';
@@ -35,12 +40,30 @@ export class ItemComponent {
     return this.item.itemBase.itemType === ItemType.Equipment;
   }
 
+  get isGenericItem(): boolean {
+    return !this.isEssence && !this.isEquipment;
+  }
+
+  get rewardSource(): string | null {
+    return typeof this.item.source === 'string'
+      ? this.item.source
+      : null;
+  }
+
+  get rewardCategory(): string | null {
+    return typeof this.item.category === 'string'
+      ? this.item.category
+      : null;
+  }
+
   itemAsEssence(item: ItemInstance) {
     return this.essenceItemView.asEssence(item.itemBase as EssenceItem);
   }
 
-  itemAsEquipment(item: ItemInstance) {
-    return item as EquipmentInstance;
+  itemAsEquipment(item: ItemInstance): Equipment | EquipmentInstance {
+    return 'equipmentBase' in item
+      ? (item as EquipmentInstance)
+      : (item.itemBase as Equipment);
   }
 
   get rarityClasses() {

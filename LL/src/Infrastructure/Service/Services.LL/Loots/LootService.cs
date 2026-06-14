@@ -3,14 +3,19 @@ using Domain.Models.Entities;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
-using Domain.Models.Items.Equipments;
-using Domain.Models.Items.EssenceItems;
 using Domain.Models.LootTables;
+using Services.LL.Interfaces;
 
 namespace Services.LL.Loots;
 public class LootService : ILootService
 {
     private static readonly Random RandomGenerator = new();
+    private readonly IInventoryItemFactory _inventoryItemFactory;
+
+    public LootService(IInventoryItemFactory inventoryItemFactory)
+    {
+        _inventoryItemFactory = inventoryItemFactory;
+    }
 
     public int GenerateSoulstoneLoot(int seconds, double dropRate, double doubleChance)
     {
@@ -201,17 +206,6 @@ public class LootService : ILootService
 
     private InventoryItem ConvertItemIntoInventoryItem(ItemBase item)
     {
-        var itemInstance = item.ItemType switch
-        {
-            ItemType.Equipment => new EquipmentInstance() { Id = Guid.NewGuid(), ItemBaseId = item.Id, ItemBase = item },
-            ItemType.Essence => new EssenceItemInstance() { Id = Guid.NewGuid(), ItemBaseId = item.Id, ItemBase = item },
-            _ => new ItemInstance() { Id = Guid.NewGuid(), ItemBaseId = item.Id, ItemBase = item },
-        };
-        return new InventoryItem()
-        {
-            ItemInstanceId = itemInstance.Id,
-            Quantity = 1,
-            ItemInstance = itemInstance,
-        };
+        return _inventoryItemFactory.Create(item, 1);
     }
 }

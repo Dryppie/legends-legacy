@@ -19,6 +19,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
     private readonly ISoulstoneRewardCalculator _soulstoneRewardCalculator;
     private readonly IRandomSource _randomSource;
     private readonly IEssenceResonanceService _essenceResonanceService;
+    private readonly IIdleDungeonSigilDropCalculator _sigilDropCalculator;
 
     public IdleCombatRewardCalculator(
         IBonusService bonusService,
@@ -26,7 +27,8 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
         ICinderRewardCalculator cinderRewardCalculator,
         ISoulstoneRewardCalculator soulstoneRewardCalculator,
         IRandomSource randomSource,
-        IEssenceResonanceService essenceResonanceService)
+        IEssenceResonanceService essenceResonanceService,
+        IIdleDungeonSigilDropCalculator sigilDropCalculator)
     {
         _bonusService = bonusService;
         _lootService = lootService;
@@ -34,6 +36,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
         _soulstoneRewardCalculator = soulstoneRewardCalculator;
         _randomSource = randomSource;
         _essenceResonanceService = essenceResonanceService;
+        _sigilDropCalculator = sigilDropCalculator;
     }
 
     public async Task<IdleCombatCalculatedOutcome> CalculateAsync(
@@ -53,6 +56,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
         var totalLoot = new List<InventoryItem>();
         var totalExperience = 0;
         var totalCinders = 0;
+        var sigilEligibleVictories = 0;
 
         foreach (var encounter in facts.Encounters.OrderBy(x => x.Sequence))
         {
@@ -77,6 +81,8 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
                     loot = loot.Concat(essenceDrops).ToList();
                 }
 
+                sigilEligibleVictories++;
+
                 experience = encounter.HostileCreatures.Sum(x => x.ExperienceReward);
 
                 if (_randomSource.NextDouble() < (doubleExpChance / 100d))
@@ -97,6 +103,16 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
                 ExperienceGained: experience,
                 CindersGained: cinders,
                 Loot: loot));
+        }
+
+        var sigilDrops = await _sigilDropCalculator.RollAsync(
+            facts.Area,
+            sigilEligibleVictories,
+            cancellationToken);
+
+        if (sigilDrops.Count > 0)
+        {
+            totalLoot.AddRange(sigilDrops);
         }
 
         var totalSoulstones = _soulstoneRewardCalculator.Calculate(

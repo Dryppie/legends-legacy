@@ -49,6 +49,7 @@ public interface IDbContext
 
     DbSet<DungeonRun> DungeonRuns { get; }
     DbSet<RunReward> RunRewards { get; }
+    DbSet<DungeonCompletionRecord> DungeonCompletionRecords { get; }
 
     // Effects
     //DbSet<Modifier> Modifiers { get; }

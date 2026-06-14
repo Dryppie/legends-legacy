@@ -6,13 +6,8 @@ namespace Services.LL.Essences;
 
 public sealed class EssenceProgressionService : IEssenceProgressionService
 {
-    public int GetLevelCap(int ascensionTier) => ascensionTier switch
-    {
-        <= 0 => 10,
-        1 => 20,
-        2 => 30,
-        _ => 40
-    };
+    public int GetLevelCap(int ascensionTier) =>
+        EssenceProgressionConstants.GetLevelCap(ascensionTier);
 
     public int GetXpRequiredForNextLevel(PlayerEssence essence, EssenceDefinition definition)
     {

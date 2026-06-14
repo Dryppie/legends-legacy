@@ -31,6 +31,7 @@ export class DungeonPageComponent {
   readonly activeDungeon = this.dungeonState.activeDungeon;
   readonly loading = this.dungeonState.loading;
   readonly error = this.dungeonState.error;
+  readonly message = this.dungeonState.message;
   readonly hasActiveDungeon = this.dungeonState.hasActiveDungeon;
 
   readonly totalRooms = computed(
@@ -119,7 +120,7 @@ export class DungeonPageComponent {
         return 'Continue';
 
       case 'Event':
-        return 'Inspect';
+        return room.status === 'Active' ? 'Accept' : 'Inspect';
 
       default:
         return null;
@@ -288,9 +289,9 @@ export class DungeonPageComponent {
     const room = this.currentRoom();
     if (!room || room.type !== 'Event') return;
 
-    // Temporary default event action.
-    // Replace this later with actual event choices rendered in the template.
-    this.dungeonState.chooseEventAction('event.inspect');
+    this.dungeonState.chooseEventAction(
+      room.status === 'Active' ? 'event.accept' : 'event.inspect',
+    );
   }
 
   chooseEventAction(actionId: string, payload?: unknown): void {
@@ -388,11 +389,41 @@ export class DungeonPageComponent {
       case 'Boss':
         return 'The final battle stands before you';
       case 'Event':
-        return 'A strange event unfolds';
+        return this.getEventDescription(room.eventOutcome);
       case 'Checkpoint':
         return 'A brief moment of safety';
       default:
         return 'Exploring the dungeon';
+    }
+  }
+
+  getEventTitle(outcome: string | null | undefined): string {
+    switch (outcome) {
+      case 'ExtraCombat':
+        return 'Enemy Patrol';
+      case 'TreasureRoom':
+        return 'Hidden Cache';
+      case 'Shrine':
+        return 'Ancient Shrine';
+      case 'Trap':
+        return 'Suspicious Mechanism';
+      default:
+        return 'Unknown Event';
+    }
+  }
+
+  getEventDescription(outcome: string | null | undefined): string {
+    switch (outcome) {
+      case 'ExtraCombat':
+        return 'Noise in the dark suggests enemies are nearby. Accepting draws them into a fight.';
+      case 'TreasureRoom':
+        return 'A concealed cache promises extra Cinders, Soulstones, and Monster Core fragments.';
+      case 'Shrine':
+        return 'A quiet shrine offers a small pulse of experience and Soulstones.';
+      case 'Trap':
+        return 'The room is dangerous. Accepting risks some of your pending Cinders.';
+      default:
+        return 'A strange event unfolds.';
     }
   }
 

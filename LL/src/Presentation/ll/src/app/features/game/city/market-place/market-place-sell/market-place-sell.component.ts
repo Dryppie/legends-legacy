@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, effect, OnInit, signal } from '@angular/core';
-import { SidebarSection, Tab } from '../../../../../shared/models/sidebar-item';
+import {
+  Component,
+  computed,
+  effect,
+  Input,
+  OnInit,
+  signal,
+} from '@angular/core';
+import { SidebarSection } from '../../../../../shared/models/sidebar-item';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { MarketPlaceInventoryItemComponent } from '../../../../../shared/components/market-place/market-place-inventory-item/market-place-inventory-item.component';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
@@ -23,6 +30,7 @@ import { EquipmentTypePipe } from '../../../../../shared/pipes/equipment/equipme
 import { ItemComponent } from '../../../../../shared/components/item/item.component';
 import { formatAttributeType } from '../../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { formatAttributeValue } from '../../../../../shared/pipes/attributes/attribute-value-format/attribute-value-format.pipe';
+import { ItemType } from '../../../../../shared/models/enums/itemType';
 
 @Component({
   selector: 'app-market-place-sell',
@@ -41,9 +49,17 @@ import { formatAttributeValue } from '../../../../../shared/pipes/attributes/att
 })
 export class MarketPlaceSellComponent implements OnInit {
   readonly myListings = signal<MarketPlaceListing[]>([]);
+  readonly selectedItemType = signal<ItemType | null>(null);
 
   readonly pendingItem = signal<InventoryItem | null>(null);
   selectedItemId: string = '';
+
+  @Input()
+  set itemType(value: ItemType | null) {
+    this.selectedItemType.set(value);
+    this.pendingItem.set(null);
+    this.selectedItemId = '';
+  }
 
   /** Price input */
   readonly priceCtrl = new FormControl<number | null>(null, {
@@ -121,7 +137,7 @@ export class MarketPlaceSellComponent implements OnInit {
 
       case 'Essence': {
         const es = base as EssenceItem;
-        return `${es.rarity}${es.essenceDefinitionId ? `\n${es.essenceDefinitionId}` : ''}${es.description ? `\n${es.description}` : ''}`;
+        return `${es.rarity}${es.description ? `\n${es.description}` : ''}`;
       }
 
       default:
@@ -135,6 +151,14 @@ export class MarketPlaceSellComponent implements OnInit {
     if (!pi) return 1;
     return pi.itemInstance.itemBase.stackable ? pi.quantity : 1;
   };
+
+  readonly displayedMyListings = computed(() => {
+    const itemType = this.selectedItemType();
+    if (!itemType) return this.myListings();
+    return this.myListings().filter(
+      (listing) => listing.itemInstance.itemBase.itemType === itemType,
+    );
+  });
 
   selectItem(item: InventoryItem) {
     this.pendingItem.set(item);
@@ -209,6 +233,20 @@ export class MarketPlaceSellComponent implements OnInit {
   }
 
   get filteredItems(): InventoryItem[] {
+    switch (this.selectedItemType()) {
+      case ItemType.Equipment:
+        return this.inventoryState.equipment();
+
+      case ItemType.Essence:
+        return this.inventoryState.essences();
+
+      case ItemType.Resource:
+        return this.inventoryState.materials();
+
+      default:
+        break;
+    }
+
     switch (this.activeTab) {
       case 'All':
         return this.inventoryState.items();
@@ -229,6 +267,19 @@ export class MarketPlaceSellComponent implements OnInit {
 
   get tabLabels(): string[] {
     return this.tabs.map((tab) => tab.label);
+  }
+
+  get inventoryTitle(): string {
+    switch (this.selectedItemType()) {
+      case ItemType.Equipment:
+        return 'Equipment';
+
+      case ItemType.Essence:
+        return 'Essences';
+
+      default:
+        return 'Inventory';
+    }
   }
 
   trackByItem = (_: number, item: InventoryItem) => item.id;

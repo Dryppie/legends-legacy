@@ -86,6 +86,7 @@ public static class DependencyInjection
         services.AddScoped<IActionDetailsService, ActionDetailsService>();
         services.AddScoped<ICreatureService, CreatureService>();
         services.AddScoped<ICreatureScaler, CreatureScaler>();
+        services.AddScoped<ICreatureBuildProfileDiagnostics, CreatureBuildProfileDiagnostics>();
 
         services.AddScoped<IBonusService, BonusService>();
         services.AddScoped<IBonusProvider, SoulstoneBonusProvider>();
@@ -106,21 +107,26 @@ public static class DependencyInjection
 
         services.AddScoped<DungeonRunFactory>();
         services.AddScoped<IDungeonRunService, DungeonRunService>();
+        services.AddScoped<IDungeonAccessPolicy, DungeonAccessPolicy>();
+        services.AddScoped<IDungeonPreviewRewardService, DungeonPreviewRewardService>();
 
         services.AddScoped<IEntityService, EntityService>();
         services.AddScoped<IEquipmentSlotService, EquipmentSlotService>();
 
         services.AddSingleton<IEssenceDefinitionValidator, EssenceDefinitionValidator>();
+        services.AddSingleton<IAbilityCatalogValidator, AbilityCatalogValidator>();
         services.AddSingleton<IEssenceDefinitionRepository>(sp =>
             new JsonEssenceDefinitionRepository(
                 config,
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>(),
+                sp.GetRequiredService<IAbilityCatalogValidator>(),
                 sp.GetRequiredService<IEssenceDefinitionValidator>()));
         services.AddScoped<IEssenceProgressionService, EssenceProgressionService>();
         services.AddScoped<IEssenceSlotUnlockService, EssenceSlotUnlockService>();
         services.AddScoped<IEssenceLoadoutLimitService, EssenceLoadoutLimitService>();
         services.AddScoped<IEssenceCombatAbilityFactory, EssenceCombatAbilityFactory>();
+        services.AddScoped<IAbilityCatalogSmokeTester, AbilityCatalogSmokeTester>();
         services.AddScoped<IRandomProvider, SystemRandomProvider>();
         services.AddScoped<IEssenceService, EssenceSystemService>();
         services.AddScoped<IEssenceBonusProvider, EssenceSystemService>();
@@ -141,6 +147,7 @@ public static class DependencyInjection
         services.AddScoped<ILootService, LootService>();
         services.AddScoped<ILootTableService, LootTableService>();
         services.AddScoped<IInventoryService, InventoryService>();
+        services.AddScoped<IInventoryItemFactory, InventoryItemFactory>();
 
         services.AddScoped<IMarketPlaceService, MarketPlaceService>();
 
@@ -211,6 +218,7 @@ public static class DependencyInjection
         services.AddScoped<IDungeonCombatSessionFactory, DungeonCombatSessionFactory>();
         services.AddScoped<IIdleCombatRewardApplier, IdleCombatRewardApplier>();
         services.AddScoped<IIdleCombatRewardCalculator, IdleCombatRewardCalculator>();
+        services.AddScoped<IIdleDungeonSigilDropCalculator, IdleDungeonSigilDropCalculator>();
         services.AddScoped<IIdleCombatRewardFactBuilder, IdleCombatRewardFactBuilder>();
         services.AddScoped<IIdleCombatSessionFactory, IdleCombatSessionFactory>();
         services.AddScoped<ILootRewardWriter, InventoryLootRewardWriter>();
@@ -258,6 +266,7 @@ public static class DependencyInjection
         });
 
         // 3) Provider used by your domain/services (stable seam for future DB migration)
+        services.AddSingleton<IDungeonDefinitionValidator, DungeonDefinitionValidator>();
         services.AddSingleton<IDungeonDefinitions, JsonDungeonDefinitions>();
     }
 }

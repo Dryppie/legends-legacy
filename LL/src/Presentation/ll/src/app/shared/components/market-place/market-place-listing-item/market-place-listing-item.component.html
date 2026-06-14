@@ -1,20 +1,17 @@
 <div
-  class="grid w-full grid-cols-4 gap-2 p-2 hover:cursor-pointer hover:bg-neutral-600/50"
+  class="grid min-h-9 w-full grid-cols-4 items-center gap-2 border-b border-light_gray/20 px-2 py-1 text-sm hover:cursor-pointer"
 >
-  <div class="col-start-1 col-end-3 flex gap-1">
+  <div class="col-start-1 col-end-3 flex min-w-0 items-center gap-2">
     <app-item [item]="listing.itemInstance"></app-item>
     <ng-container
       *ngIf="characterState.currentCharacterId() === listing.sellerId"
-      >(Yours)</ng-container
     >
+      <span class="text-[11px] uppercase text-primary">(Yours)</span>
+    </ng-container>
   </div>
-  <div>
-    <div class="rounded-full pl-1 text-white">x{{ listing.quantity }}</div>
-  </div>
+  <div class="text-zinc-100">x{{ listing.quantity | numberFormat }}</div>
 
-  <!-- Price (aligned right) -->
-  <div class="ml-auto flex items-center gap-1">
-    <!-- <img src="icons/ui/gold.svg" alt="gold" class="h-4 w-4 object-contain" /> -->
+  <div class="ml-auto flex items-center gap-1 text-primary">
     <div>{{ listing.unitPrice | numberFormat }}</div>
   </div>
 </div>

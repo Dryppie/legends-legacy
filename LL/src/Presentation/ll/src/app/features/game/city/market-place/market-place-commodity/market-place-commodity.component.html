@@ -1,0 +1,128 @@
+<div class="flex h-full min-h-0 flex-col gap-3 py-3 text-white">
+  <div class="grid gap-4">
+    <section class="rounded-md border border-light_gray bg-black/20 p-3">
+      <ng-container *ngIf="commodities().length; else noCommodity">
+        <div class="mb-3 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 class="text-primary">{{ marketName() }}</h2>
+            <span class="text-zinc-400">
+              You have {{ ownedQuantity() | numberFormat }}
+            </span>
+          </div>
+
+          <div class="flex flex-wrap items-end gap-3">
+            <label class="flex flex-col gap-1">
+              Quantity
+              <input
+                type="number"
+                min="1"
+                [formControl]="quantityCtrl"
+                class="no-spinner h-8 w-32 rounded border border-light_gray bg-transparent px-2 text-right text-white focus:border-primary"
+              />
+            </label>
+
+            <label class="flex flex-col gap-1">
+              Unit price
+              <input
+                type="number"
+                min="1"
+                [formControl]="unitPriceCtrl"
+                class="no-spinner h-8 w-32 rounded border border-light_gray bg-transparent px-2 text-right text-white focus:border-primary"
+              />
+            </label>
+
+            <app-regular-button
+              text="Sell"
+              [disabled]="!canSell()"
+              (pressed)="sellSelectedCommodity()"
+            />
+            <app-regular-button
+              text="Buy"
+              [disabled]="!canBuy()"
+              (pressed)="buySelectedCommodity()"
+            />
+          </div>
+        </div>
+
+        <div class="text-sm text-zinc-400">
+          Total:
+          <span class="text-primary">
+            {{
+              (quantityCtrl.value ?? 0) * (unitPriceCtrl.value ?? 0)
+                | numberFormat
+            }}
+          </span>
+          Cinders
+        </div>
+
+        <p
+          *ngIf="!hasSingleCommodity()"
+          class="mt-3 text-sm italic text-neutral-400"
+        >
+          Choose a specific item from the marketplace dropdown to place an
+          order.
+        </p>
+      </ng-container>
+
+      <ng-template #noCommodity>
+        <p class="py-6 text-center italic text-neutral-400">
+          No orders or inventory match the selected market.
+        </p>
+      </ng-template>
+    </section>
+  </div>
+
+  <div class="grid min-h-0 flex-1 gap-4 overflow-hidden xl:grid-cols-2">
+    <section class="flex min-h-0 flex-col overflow-hidden">
+      <h2 class="mb-2 text-primary">Sell Orders</h2>
+      <div
+        class="grid grid-cols-2 rounded-t-md border border-light_gray bg-black/30 px-2 py-2 text-primary"
+      >
+        <label>Quantity</label>
+        <label class="justify-self-end">Unit price</label>
+      </div>
+
+      <div
+        class="min-h-0 flex-1 overflow-y-auto rounded-b-md border-x border-b border-light_gray bg-black/20"
+      >
+        <button
+          type="button"
+          *ngFor="let row of sellOrderRows(); trackBy: trackOrderRow"
+          (click)="selectSellOrder(row)"
+          class="grid w-full grid-cols-2 border-b border-light_gray/20 px-2 py-1 text-left transition hover:bg-zinc-600/30"
+          [ngClass]="{ 'bg-primary/20': row.unitPrice === selectedSellPrice() }"
+        >
+          <span>{{ row.quantity | numberFormat }}</span>
+          <span class="justify-self-end text-primary">
+            {{ row.unitPrice | numberFormat }}
+          </span>
+        </button>
+
+        <p
+          *ngIf="!sellOrderRows().length"
+          class="mt-8 text-center italic text-neutral-400"
+        >
+          No sell orders for this item.
+        </p>
+      </div>
+    </section>
+
+    <section class="flex min-h-0 flex-col overflow-hidden">
+      <h2 class="mb-2 text-primary">Buy Orders</h2>
+      <div
+        class="grid grid-cols-2 rounded-t-md border border-light_gray bg-black/30 px-2 py-2 text-primary"
+      >
+        <label>Quantity</label>
+        <label class="justify-self-end">Unit price</label>
+      </div>
+
+      <div
+        class="min-h-0 flex-1 overflow-y-auto rounded-b-md border-x border-b border-light_gray bg-black/20"
+      >
+        <p class="mt-8 text-center italic text-neutral-400">
+          Buy orders need backend support before they can persist.
+        </p>
+      </div>
+    </section>
+  </div>
+</div>

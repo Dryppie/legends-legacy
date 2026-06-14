@@ -6,6 +6,17 @@ public static class EssenceProgressionConstants
 {
     public const int BaseXpPerLevel = 100;
     public const double XpGrowth = 1.18;
+    public const int MaxEssenceLevel = 60;
+    public const string LesserMonsterCoreItemId = "item.monster_core.lesser";
+    public const string GreaterMonsterCoreItemId = "item.monster_core.greater";
+    public const string PrimalMonsterCoreItemId = "item.monster_core.primal";
+    public const int TierOneMonsterCoreCost = 6;
+    public const int TierTwoMonsterCoreCost = 12;
+    public const int TierThreeMonsterCoreCost = 24;
+    public const int TierOneCatchUpThreshold = 10;
+    public const int TierTwoCatchUpThreshold = 10;
+    public const int TierOneCatchUpMonsterCoreCost = 3;
+    public const int TierTwoCatchUpMonsterCoreCost = 8;
     public const double AttributeBonusGrowthPerLevel = 0.04;
     public const double ActiveCooldownReductionPerAscensionTier = 0.05;
     public const double MaxActiveCooldownReduction = 0.15;
@@ -22,8 +33,37 @@ public static class EssenceProgressionConstants
 
     public static int GetXpRequiredForLevel(int level)
     {
-        if (level >= 40) return 0;
+        if (level >= MaxEssenceLevel) return 0;
         return (int)Math.Ceiling(BaseXpPerLevel * Math.Pow(XpGrowth, Math.Max(0, level - 1)));
+    }
+
+    public static int GetLevelCap(int ascensionTier) => ascensionTier switch
+    {
+        <= 0 => 10,
+        1 => 30,
+        _ => 60
+    };
+
+    public static EssenceAscensionCost GetAscensionCost(
+        int nextAscensionTier,
+        int ascendedToTierOneCount = 0,
+        int ascendedToTierTwoCount = 0)
+    {
+        return nextAscensionTier switch
+        {
+            1 => new(
+                LesserMonsterCoreItemId,
+                ascendedToTierOneCount >= TierOneCatchUpThreshold
+                    ? TierOneCatchUpMonsterCoreCost
+                    : TierOneMonsterCoreCost),
+            2 => new(
+                GreaterMonsterCoreItemId,
+                ascendedToTierTwoCount >= TierTwoCatchUpThreshold
+                    ? TierTwoCatchUpMonsterCoreCost
+                    : TierTwoMonsterCoreCost),
+            3 => new(PrimalMonsterCoreItemId, TierThreeMonsterCoreCost),
+            _ => throw new ArgumentOutOfRangeException(nameof(nextAscensionTier), "Ascension tier must be between 1 and 3.")
+        };
     }
 
     public static double ScaleAbilityValue(double baseValue, int level, int ascensionTier = 0, string? effectType = null)
@@ -95,3 +135,5 @@ public static class EssenceProgressionConstants
         "Stunned"
     };
 }
+
+public sealed record EssenceAscensionCost(string ItemId, int Amount);

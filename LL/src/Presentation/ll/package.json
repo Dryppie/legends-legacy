@@ -4,11 +4,11 @@
   "scripts": {
     "generate:content": "tsx ./scripts/generate-static-content.ts",
     "generate:version": "tsx ./scripts/write-build-version.ts",
-    "prebuild": "npm run generate:content && npm run generate:version",
-    "prestart": "npm run generate:content && npm run generate:version",
+    "prestart": "npm run generate:content",
     "ng": "ng",
     "start": "ng serve --open",
-    "build": "ng build",
+    "build": "npm run generate:content && npm run generate:version && ng build",
+    "build:development": "npm run generate:content && ng build --configuration development",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },

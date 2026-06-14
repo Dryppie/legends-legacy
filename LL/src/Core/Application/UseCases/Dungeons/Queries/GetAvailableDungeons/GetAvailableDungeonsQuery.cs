@@ -1,28 +1,39 @@
 using Application.MediatR.Markers;
 using Application.Interfaces.Services.LL.Dungeons;
+using Application.Interfaces.Services.LL.Entities;
 using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Items.Dtos;
 using AutoMapper;
-using Domain.Models.LootTables;
+using Domain.Models.Dungeons.Definitions;
+using Domain.Models.Dungeons.Runs;
 using MediatR;
 
 namespace Application.UseCases.Dungeons.Queries.GetAvailableDungeons;
 
-public record GetAvailableDungeonsQuery() : IQuery<List<DungeonPreviewDto>>;
+public record GetAvailableDungeonsQuery(Guid CharacterId) : IQuery<List<DungeonPreviewDto>>;
 
 public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvailableDungeonsQuery, List<DungeonPreviewDto>>
 {
     private readonly IDungeonDefinitions _dungeonDefinitions;
-    private readonly ILootTableRepository _lootTables;
+    private readonly IDungeonAccessPolicy _dungeonAccess;
+    private readonly IDungeonPreviewRewardService _previewRewards;
+    private readonly ICharacterService _characters;
+    private readonly IDungeonRunService _dungeonRuns;
     private readonly IMapper _mapper;
 
     public GetAvailableDungeonsQueryHandler(
         IDungeonDefinitions dungeonDefinitions,
-        ILootTableRepository lootTables,
+        IDungeonAccessPolicy dungeonAccess,
+        IDungeonPreviewRewardService previewRewards,
+        ICharacterService characters,
+        IDungeonRunService dungeonRuns,
         IMapper mapper)
     {
         _dungeonDefinitions = dungeonDefinitions;
-        _lootTables = lootTables;
+        _dungeonAccess = dungeonAccess;
+        _previewRewards = previewRewards;
+        _characters = characters;
+        _dungeonRuns = dungeonRuns;
         _mapper = mapper;
     }
 
@@ -31,89 +42,114 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         CancellationToken cancellationToken)
     {
         var previews = new List<DungeonPreviewDto>();
+        var character = await _characters.GetMyCharacterOverviewAsync(request.CharacterId, cancellationToken);
+        var combatRating = character is null
+            ? 0
+            : Domain.Components.Attributes.CombatRatingCalculator.Calculate(character.BaseCombatAttributes, character.Level);
 
-        foreach (var dungeon in _dungeonDefinitions.GetAll())
+        var dungeons = _dungeonDefinitions.GetAll()
+            .OrderBy(x => DungeonDefinitionIdentity.GetFamilyId(x.Id))
+            .ThenBy(x => x.Grade)
+            .ToList();
+        var completionRecords = await _dungeonRuns.GetCompletionRecordsAsync(
+            request.CharacterId,
+            dungeons.Select(x => x.Id).ToArray(),
+            cancellationToken);
+        var records = completionRecords.ToDictionary(
+            x => x.DungeonDefinitionId,
+            StringComparer.OrdinalIgnoreCase);
+
+        foreach (var dungeon in dungeons)
         {
+            records.TryGetValue(dungeon.Id, out var record);
+            var access = await _dungeonAccess.EvaluateAsync(
+                request.CharacterId,
+                dungeon,
+                combatRating,
+                cancellationToken);
+
             previews.Add(new DungeonPreviewDto
             {
                 Id = dungeon.Id,
+                FamilyId = DungeonDefinitionIdentity.GetFamilyId(dungeon.Id),
+                FamilyTitle = DungeonDefinitionIdentity.GetFamilyTitle(dungeon.Name),
                 Title = dungeon.Name,
+                Difficulty = FormatDifficulty(dungeon.Grade),
                 Tier = dungeon.Tier,
+                Grade = FormatGrade(dungeon.Grade),
+                RecommendedCombatRating = dungeon.RecommendedCombatRating,
+                CurrentCombatRating = access.CurrentCombatRating,
+                CanEnter = access.CanEnter,
+                MissingRequirements = [.. access.MissingRequirements],
+                EntryRequirements = access.EntryRequirements
+                    .Select(x => new DungeonEntryRequirementDto
+                    {
+                        ItemId = x.ItemId,
+                        Name = x.Name,
+                        RequiredAmount = x.RequiredAmount,
+                        OwnedAmount = x.OwnedAmount
+                    })
+                    .ToList(),
+                RequiredPreviousDungeonId = dungeon.RequiredPreviousDungeonId,
                 MinRooms = dungeon.MinRooms,
                 MaxRooms = dungeon.MaxRooms,
-                Rewards = await GetPossibleCompletionRewards(dungeon, cancellationToken)
+                Record = MapRecord(record),
+                Rewards = await MapRewardsAsync(dungeon, cancellationToken)
             });
         }
 
         return previews;
     }
 
-    private async Task<List<DungeonPreviewRewardDto>> GetPossibleCompletionRewards(
+    private async Task<List<DungeonPreviewRewardDto>> MapRewardsAsync(
         Domain.Models.Dungeons.DungeonDefinition dungeon,
         CancellationToken cancellationToken)
     {
-        var rewards = new List<DungeonPreviewRewardDto>();
-
-        if (dungeon.CompletionLootTableId.HasValue)
-        {
-            var completionTable = await _lootTables.GetLootTableByIdAsync(
-                dungeon.CompletionLootTableId.Value,
-                cancellationToken);
-
-            rewards.AddRange(MapRewards(completionTable, "Dungeon Completion"));
-        }
-
-        if (dungeon.TierLootTableId.HasValue)
-        {
-            var tierTable = await _lootTables.GetLootTableByIdAsync(
-                dungeon.TierLootTableId.Value,
-                cancellationToken);
-
-            rewards.AddRange(MapRewards(tierTable, $"Tier {dungeon.Tier} Completion"));
-        }
+        var rewards = await _previewRewards.GetPossibleCompletionRewardsAsync(
+            dungeon,
+            cancellationToken);
 
         return rewards
-            .GroupBy(x => x.ItemBase.Id)
-            .Select(x =>
+            .Select(x => new DungeonPreviewRewardDto
             {
-                var firstReward = x.First();
-                firstReward.Source = string.Join(", ", x.Select(reward => reward.Source).Distinct());
-
-                return firstReward;
+                Id = x.ItemBase.Id,
+                ItemBase = _mapper.Map<ItemBaseDto>(x.ItemBase),
+                Category = x.Category,
+                Source = x.Source
             })
             .ToList();
     }
 
-    private IEnumerable<DungeonPreviewRewardDto> MapRewards(LootTable lootTable, string source)
+    private static DungeonRecordDto MapRecord(DungeonCompletionRecord? record)
     {
-        foreach (var item in FlattenItems(lootTable))
+        if (record is null)
         {
-            yield return new DungeonPreviewRewardDto
-            {
-                Id = item.Item.Id,
-                ItemBase = _mapper.Map<ItemBaseDto>(item.Item),
-                Source = source
-            };
+            return new DungeonRecordDto();
         }
+
+        return new DungeonRecordDto
+        {
+            HasCleared = true,
+            FirstClearedAt = record.FirstCompletedAt,
+            LastClearedAt = record.LastCompletedAt,
+            TotalClears = record.CompletionCount
+        };
     }
 
-    private static IEnumerable<LootTableItem> FlattenItems(LootTable lootTable)
-    {
-        foreach (var entry in lootTable.Entries)
+    private static string FormatGrade(Domain.Models.Dungeons.Definitions.DungeonGrade grade) =>
+        grade switch
         {
-            if (entry is LootTableItem { Item: not null } item)
-            {
-                yield return item;
-                continue;
-            }
+            Domain.Models.Dungeons.Definitions.DungeonGrade.GradeII => "Grade II",
+            Domain.Models.Dungeons.Definitions.DungeonGrade.GradeIII => "Grade III",
+            _ => "Grade I"
+        };
 
-            if (entry is LootTable nestedTable)
-            {
-                foreach (var nestedItem in FlattenItems(nestedTable))
-                {
-                    yield return nestedItem;
-                }
-            }
-        }
-    }
+    private static string FormatDifficulty(Domain.Models.Dungeons.Definitions.DungeonGrade grade) =>
+        grade switch
+        {
+            Domain.Models.Dungeons.Definitions.DungeonGrade.GradeII => "Veteran",
+            Domain.Models.Dungeons.Definitions.DungeonGrade.GradeIII => "Champion",
+            _ => "Novice"
+        };
+
 }

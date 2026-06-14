@@ -64,6 +64,14 @@ public class CharacterService : ICharacterService
     public async Task<Guid?> GetCharacterIdByNameAsync(string name, CancellationToken cancellationToken) =>
         await _characterRepository.GetCharacterIdByNameAsync(name, cancellationToken);
 
+    public async Task<int> GetCombatRatingAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        var character = await GetMyCharacterOverviewAsync(characterId, cancellationToken);
+        return character is null
+            ? 0
+            : CombatRatingCalculator.Calculate(character.BaseCombatAttributes, character.Level);
+    }
+
     private IReadOnlyList<Domain.Models.Attributes.Modifiers.AttributeModifierBase> GetLoadedEssenceModifiers(Character character)
     {
         var activeLoadout = character.EssenceLoadouts.FirstOrDefault(x => x.IsActive);

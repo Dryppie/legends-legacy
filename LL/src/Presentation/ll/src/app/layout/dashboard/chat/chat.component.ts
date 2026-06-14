@@ -1,10 +1,12 @@
 import {
   Component,
+  ElementRef,
   effect,
   EventEmitter,
   OnDestroy,
   OnInit,
   Output,
+  ViewChild,
 } from '@angular/core';
 import {
   ChatChannelType,
@@ -44,6 +46,7 @@ interface ChatRoom {
 })
 export class ChatComponent implements OnInit, OnDestroy {
   @Output() close = new EventEmitter<void>();
+  @ViewChild('chatInput') chatInput?: ElementRef<HTMLInputElement>;
   ChatChannelType = ChatChannelType;
   public activeChannel: {
     type: ChatChannelType;
@@ -121,6 +124,18 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.sub = this.chat.messages$.subscribe((m) => {
       this.messages = m;
     });
+    this.sub.add(
+      this.chat.whisperDraftTarget$.subscribe((targetName) => {
+        if (!targetName) return;
+
+        this.activeChannel = {
+          type: ChatChannelType.Whisper,
+          contextKey: 'whisper',
+        };
+        this.draft = `/w ${targetName} `;
+        this.focusChatInput();
+      }),
+    );
   }
 
   ngOnDestroy(): void {
@@ -159,6 +174,16 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (this.draft.length > 200) {
       this.draft = this.draft.slice(0, 200);
     }
+  }
+
+  private focusChatInput(): void {
+    setTimeout(() => {
+      const input = this.chatInput?.nativeElement;
+      if (!input) return;
+
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+    });
   }
 
   async send(): Promise<void> {

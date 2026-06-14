@@ -3,8 +3,152 @@
     class="flex w-full flex-col gap-2 overflow-auto py-4"
     data-tour="dungeons-introduction"
   >
-    <div *ngFor="let dungeon of dungeons()">
-      <app-dungeon-card [previewData]="dungeon" />
-    </div>
+    <ng-container *ngIf="selectedRecordsDungeon() as dungeon; else dungeonList">
+      <div class="rounded-md border border-primary bg-texture p-5 text-white">
+        <button
+          type="button"
+          class="rounded border border-white/15 px-3 py-2 text-sm text-zinc-200 transition hover:border-primary hover:text-primary"
+          (click)="closeRecords()"
+        >
+          Back to Dungeons
+        </button>
+
+        <div class="mt-5 flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div class="text-[11px] uppercase text-zinc-400">
+              Dungeon Records
+            </div>
+            <h2 class="primary-gradient font-serif text-3xl font-semibold">
+              {{ recordsData()?.familyTitle || dungeon.title }}
+            </h2>
+            <p class="mt-1 text-sm text-zinc-300">
+              First clears and total clears across all difficulties.
+            </p>
+          </div>
+
+          <div
+            class="rounded border border-primary/20 bg-black/30 px-3 py-2 text-right text-xs"
+          >
+            <div class="uppercase text-zinc-400">Total Clears</div>
+            <div class="text-lg font-semibold text-primary">
+              {{ totalRecordClears() }}
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-5 flex flex-wrap items-center gap-2">
+          <button
+            *ngFor="let tab of leaderboardTabs"
+            type="button"
+            class="rounded border px-3 py-2 text-sm transition"
+            [ngClass]="{
+              'border-primary bg-primary/10 text-primary':
+                selectedLeaderboardMode() === tab.mode,
+              'border-white/15 text-zinc-300':
+                selectedLeaderboardMode() !== tab.mode
+            }"
+            (click)="selectLeaderboardMode(tab.mode)"
+          >
+            {{ tab.label }}
+          </button>
+        </div>
+
+        <div class="mt-2 text-sm text-zinc-400">
+          {{ selectedLeaderboardDescription() }}
+        </div>
+
+        <div
+          *ngIf="recordsLoading()"
+          class="mt-6 rounded border border-white/10 bg-black/25 p-4 text-sm text-zinc-300"
+        >
+          Loading records...
+        </div>
+
+        <div
+          *ngIf="recordsError()"
+          class="mt-6 rounded border border-red-400/30 bg-red-950/20 p-4 text-sm text-red-100"
+        >
+          {{ recordsError() }}
+        </div>
+
+        <div
+          *ngIf="recordsData() as records"
+          class="mt-5 grid gap-4 xl:grid-cols-3"
+        >
+          <div
+            *ngFor="let tier of records.tiers"
+            class="rounded border border-white/10 bg-black/25 p-4"
+          >
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="text-[11px] uppercase text-zinc-400">
+                  {{ tier.grade }}
+                </div>
+                <h3 class="font-serif text-xl text-primary">
+                  {{ tier.difficulty }}
+                </h3>
+              </div>
+
+              <div class="text-right text-xs text-zinc-400">
+                {{ tier.records.length }}
+                {{ tier.records.length === 1 ? "player" : "players" }}
+              </div>
+            </div>
+
+            <div
+              *ngIf="tier.records.length; else noTierRecords"
+              class="mt-4 space-y-2"
+            >
+              <div
+                *ngFor="let record of sortedTierRecords(tier); let i = index"
+                class="flex items-center justify-between gap-3 rounded border border-primary/10 bg-black/25 px-3 py-2"
+              >
+                <div class="flex min-w-0 items-center gap-3">
+                  <div class="w-6 shrink-0 text-right text-sm text-primary">
+                    {{ i + 1 }}.
+                  </div>
+                  <div class="min-w-0 truncate font-semibold text-zinc-100">
+                    <app-character-tag
+                      [id]="record.characterId"
+                      [name]="record.characterName"
+                    ></app-character-tag>
+                  </div>
+                </div>
+
+                <div class="shrink-0 text-right">
+                  <div
+                    class="font-semibold text-primary"
+                    [class.text-sm]="selectedLeaderboardMode() !== 'mostClears'"
+                    [class.text-lg]="selectedLeaderboardMode() === 'mostClears'"
+                  >
+                    {{ recordMetricValue(record) }}
+                  </div>
+                  <div class="text-[10px] uppercase text-zinc-400">
+                    {{ recordMetricLabel(record) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <ng-template #noTierRecords>
+              <div
+                class="mt-4 rounded border border-white/10 bg-black/20 p-3 text-sm italic text-zinc-400"
+              >
+                No one has cleared this difficulty yet.
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #dungeonList>
+      <div *ngFor="let dungeon of dungeons()">
+        <app-dungeon-card
+          [previewData]="dungeon"
+          (recordsRequested)="openRecords($event)"
+        />
+      </div>
+    </ng-template>
   </div>
 </div>

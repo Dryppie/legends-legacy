@@ -2,6 +2,7 @@ using Application.Common.Mappings;
 using Application.Interfaces.Services.LL.Essences;
 using Application.UseCases.Essences.Dtos;
 using AutoMapper;
+using Domain.Components.Attributes;
 using Domain.Models.Attributes;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Essences;
@@ -11,6 +12,7 @@ public class CharacterOverviewDto : IMapFrom<Character>
 {
     public Guid Id { get; set; }
     public int Level { get; set; }
+    public int CombatRating { get; set; }
     public List<EntityAttribute> BaseAttributes { get; set; } = [];
     public List<EntityAttribute> BaseCombatAttributes { get; set; } = [];
     public EssenceLoadoutDto? ActiveEssenceLoadout { get; set; }
@@ -37,6 +39,7 @@ public sealed class CharacterOverviewConverter : ITypeConverter<Character, Chara
         {
             Id = source.Id,
             Level = source.Level,
+            CombatRating = CombatRatingCalculator.Calculate(source.BaseCombatAttributes, source.Level),
             BaseAttributes = source.BaseAttributes.ToList(),
             BaseCombatAttributes = source.BaseCombatAttributes.Select(kvp => new EntityAttribute
             {

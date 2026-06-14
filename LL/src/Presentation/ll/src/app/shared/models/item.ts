@@ -9,6 +9,8 @@ import { EssenceDefinitionDto } from './essence-system';
 export interface ItemInstance {
   id: string;
   itemBase: ItemBase;
+  source?: string;
+  category?: string;
 }
 
 export interface EquipmentInstance extends ItemInstance {

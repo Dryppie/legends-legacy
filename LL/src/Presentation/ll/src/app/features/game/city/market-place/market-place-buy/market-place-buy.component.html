@@ -1,32 +1,28 @@
 <div
-  class="flex h-full flex-col gap-6 overflow-y-auto py-2 text-white 2xl:flex-row"
+  class="grid h-full min-h-0 gap-4 overflow-hidden py-3 text-white xl:grid-cols-[minmax(0,1fr)_22rem]"
 >
-  <div class="order-2 flex w-full flex-col 2xl:order-1">
+  <section class="flex min-h-0 flex-col overflow-hidden">
+    <div class="mb-3 flex items-baseline justify-between gap-3">
+      <h2 class="text-xl uppercase text-primary">Buy Orders</h2>
+      <span class="text-[11px] uppercase text-zinc-400">
+        {{ filteredListings().length }} listings found
+      </span>
+    </div>
+
     <div
-      class="flex flex-wrap items-center gap-2 rounded-t-lg bg-black/40 px-2 py-2 text-sm backdrop-blur-sm"
+      class="flex flex-wrap items-center gap-2 rounded-t-md border border-light_gray bg-black/30 px-2 py-2 text-sm"
     >
       <input
         type="search"
         [formControl]="searchCtrl"
-        placeholder="Search items…"
-        class="rounded border border-zinc-300/30 bg-transparent px-2 py-[4px] focus:outline-none focus:ring-amber-400"
+        placeholder="Search items..."
+        class="h-8 min-w-40 rounded border border-light_gray bg-transparent px-2 text-xs text-white placeholder:text-zinc-500 focus:border-primary"
       />
-
-      <select
-        [ngModel]="itemType()"
-        (ngModelChange)="itemType.set($event)"
-        class="rounded border border-zinc-300/30 bg-transparent px-2 py-1"
-      >
-        <option class="bg-black" value="">All categories</option>
-        <option class="bg-black" *ngFor="let c of itemTypes" [value]="c">
-          {{ c }}
-        </option>
-      </select>
 
       <select
         [ngModel]="rarity()"
         (ngModelChange)="rarity.set($event)"
-        class="rounded border border-zinc-300/30 bg-transparent px-2 py-1"
+        class="h-8 rounded border border-light_gray bg-black/70 px-2 text-xs text-white"
       >
         <option class="bg-black" value="">Any rarity</option>
         <option class="bg-black" *ngFor="let r of rarities" [value]="r">
@@ -37,64 +33,84 @@
       <button
         type="button"
         (click)="togglePriceSort()"
-        class="flex items-center justify-between gap-1 text-nowrap rounded border border-zinc-300/30 px-2 py-1 hover:bg-zinc-300/30"
+        class="flex h-8 items-center justify-between gap-2 text-nowrap rounded border border-light_gray px-2 text-xs text-zinc-200 hover:border-primary hover:bg-zinc-600/30"
       >
         Unit price
         <ng-container [ngSwitch]="priceSort()">
-          <span *ngSwitchCase="'asc'">↑</span>
-          <span *ngSwitchCase="'desc'">↓</span>
-          <span *ngSwitchDefault class="opacity-50">↕</span>
+          <span *ngSwitchCase="'asc'" class="text-primary">Asc</span>
+          <span *ngSwitchCase="'desc'" class="text-primary">Desc</span>
+          <span *ngSwitchDefault class="text-zinc-500">Any</span>
         </ng-container>
       </button>
       <button
         type="button"
-        class="ml-auto text-rose-500 hover:underline"
+        class="ml-auto h-8 px-2 text-xs text-rose-400 hover:text-rose-300"
         (click)="resetFilters()"
       >
         Reset
       </button>
     </div>
-    <div class="grid grid-cols-4 rounded-b-md bg-black/40">
-      <div class="col-start-1 col-end-3 p-2">Name</div>
-      <div class="p-2">Quantity</div>
-      <div class="justify-self-end p-2">Cinders per unit</div>
+
+    <div
+      class="grid grid-cols-4 border-x border-b border-light_gray bg-black/30 px-2 py-2 text-primary"
+    >
+      <label class="col-start-1 col-end-3">Name</label>
+      <label>Quantity</label>
+      <label class="justify-self-end">Cinders per unit</label>
     </div>
-    <div class="flex flex-col overflow-y-auto">
+    <div
+      class="min-h-0 flex-1 overflow-y-auto rounded-b-md border-x border-b border-light_gray bg-black/20"
+    >
       <div
         *ngFor="let l of filteredListings(); trackBy: trackByListing"
         (click)="selectListing(l)"
         [ngClass]="{
-          'bg-zinc-300/30': l.id === selectedListingId,
+          'bg-primary/20 text-white': l.id === selectedListingId,
         }"
-        class="cursor-pointer transition"
+        class="cursor-pointer transition hover:bg-zinc-600/30"
       >
         <app-market-place-listing-item
           [listing]="l"
         ></app-market-place-listing-item>
       </div>
       <ng-container *ngIf="!filteredListings().length">
-        <p class="mt-8 text-center italic text-neutral-400">
+        <p class="mt-10 text-center italic text-neutral-400">
           No listings match your filters.
         </p>
       </ng-container>
     </div>
-  </div>
+  </section>
 
-  <div
-    class="order-1 flex h-fit w-full flex-shrink-0 flex-col gap-4 rounded-lg bg-black/40 p-4 backdrop-blur-sm 2xl:order-2 2xl:w-96"
+  <aside
+    class="flex min-h-0 flex-col gap-4 rounded-md border border-light_gray bg-texture bg-auto p-4 shadow-lg"
   >
     <ng-container *ngIf="selectedListing() as sel; else placeholder">
-      <app-item [item]="sel.itemInstance"></app-item>
+      <div>
+        <h2 class="text-xl uppercase text-primary">Purchase</h2>
+        <span class="text-xs text-zinc-500">Selected listing</span>
+      </div>
 
-      <!-- Adaptive description -->
-      <p class="whitespace-pre-line text-sm text-neutral-300">
+      <div class="border-y border-primary/20 py-3">
+        <app-item [item]="sel.itemInstance"></app-item>
+      </div>
+
+      <p
+        class="max-h-36 overflow-y-auto whitespace-pre-line text-sm leading-relaxed text-neutral-300"
+      >
         {{ itemDescription() }}
       </p>
 
-      <p class="text-sm text-neutral-300">
-        Unit price: {{ sel.unitPrice | numberFormat }} Cinders
-      </p>
-      <p class="text-sm text-neutral-300">Quantity: {{ sel.quantity }}</p>
+      <dl
+        class="grid grid-cols-2 gap-2 border-y border-primary/15 py-3 text-sm"
+      >
+        <dt class="text-zinc-500">Unit price</dt>
+        <dd class="text-right text-primary">
+          {{ sel.unitPrice | numberFormat }}
+        </dd>
+        <dt class="text-zinc-500">Available</dt>
+        <dd class="text-right">{{ sel.quantity | numberFormat }}</dd>
+      </dl>
+
       <ng-container *ngIf="selectedListingAsEquipment() as equipment">
         <div *ngFor="let e of equipment">
           <p class="text-sm text-neutral-400">Currently equipped:</p>
@@ -115,10 +131,10 @@
           </p>
         </div>
       </ng-container>
-      <!-- Quantity selector appears only when > 1 items are in the listing -->
+
       <div *ngIf="sel.quantity > 1" class="flex items-center gap-2">
         <label for="buyQty" class="whitespace-nowrap text-sm text-neutral-300"
-          >Buy quantity:</label
+          >Quantity</label
         >
         <input
           id="buyQty"
@@ -126,23 +142,32 @@
           min="1"
           [max]="maxQuantity()"
           [formControl]="qtyCtrl"
-          class="no-spinner w-24 rounded border border-neutral-700 bg-transparent px-2 py-1 text-right focus:outline-none focus:ring-amber-400"
+          class="no-spinner h-8 w-24 rounded border border-light_gray bg-transparent px-2 text-right text-white focus:border-primary"
         />
       </div>
 
-      <span> Total: {{ sel.unitPrice * (qtyCtrl.value ?? 0) | number }} </span>
+      <div
+        class="mt-auto flex items-center justify-between border-t border-primary/20 pt-3"
+      >
+        <h3 class="text-primary">Total</h3>
+        <span class="text-base text-white">
+          {{ sel.unitPrice * (qtyCtrl.value ?? 0) | number }} Cinders
+        </span>
+      </div>
       <app-regular-button
         class="w-full"
-        text="Buy item"
+        text="Buy"
         fullWidth
         (pressed)="buyoutListing()"
       />
     </ng-container>
 
     <ng-template #placeholder>
-      <p class="text-center italic text-neutral-400">
+      <div
+        class="m-auto rounded border border-light_gray bg-black/30 px-6 py-5 text-center italic text-neutral-400"
+      >
         Select a listing to purchase.
-      </p>
+      </div>
     </ng-template>
-  </div>
+  </aside>
 </div>

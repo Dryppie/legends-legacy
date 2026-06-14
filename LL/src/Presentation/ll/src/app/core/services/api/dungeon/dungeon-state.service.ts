@@ -7,9 +7,11 @@ import {
   ExecuteDungeonActionResponse,
 } from './dungeon.service';
 import { DungeonPreviewData } from '../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
+import { DungeonRecordsData } from '../../../../shared/models/Dtos/dungeons/dungeonRecordsData';
 import { DungeonDifficulty } from '../../../../shared/models/enums/dungeonDifficulty';
 import { CombatSessionDto } from '../../../../shared/models/Dtos/combatResultDto';
 import { CombatService } from '../../client-side/combat/combat.service';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -68,6 +70,10 @@ export class DungeonStateService {
       error: (e) =>
         this._error.set(e.message ?? 'Failed to load available dungeons'),
     });
+  }
+
+  getDungeonRecords(familyId: string): Observable<DungeonRecordsData> {
+    return this.service.getDungeonRecords(familyId);
   }
 
   startDungeon(

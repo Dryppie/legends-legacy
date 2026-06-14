@@ -146,6 +146,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
 
     public DbSet<DungeonRun> DungeonRuns => Set<DungeonRun>();
     public DbSet<RunReward> RunRewards => Set<RunReward>();
+    public DbSet<DungeonCompletionRecord> DungeonCompletionRecords => Set<DungeonCompletionRecord>();
 
     // Effects
 

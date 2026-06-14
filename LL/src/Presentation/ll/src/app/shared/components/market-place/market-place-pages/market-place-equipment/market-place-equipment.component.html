@@ -1,23 +1,7 @@
-<ng-container *ngIf="equipmentListings() as equipmentListings">
-  <div *ngFor="let el of equipmentListings">
-    <div
-      class="grid w-full grid-cols-5 items-center gap-2 border border-t-0 border-primary/30 p-2 text-white hover:cursor-pointer hover:bg-neutral-600/20"
-    >
-      <div class="col-start-1 col-end-3 flex gap-1">
-        <app-item [item]="el.itemInstance"></app-item>
-        <!-- <ng-container
-      *ngIf="characterState.currentCharacterId() === el.sellerId"
-      >(Yours)</ng-container
-    > -->
-      </div>
-      <!-- Price (aligned right) -->
-      <div class="ml-auto flex items-center gap-1">
-        <div>{{ el.unitPrice | numberFormat }}</div>
-      </div>
-      <div class="ml-auto">
-        {{ el.sellerName }}
-      </div>
-      <app-regular-button class="ml-auto" text="Buy"></app-regular-button>
-    </div>
-  </div>
-</ng-container>
+<div class="flex items-center gap-2 text-sm">
+  <h2 class="text-base uppercase text-primary">Equipment</h2>
+  <span class="text-zinc-400">/</span>
+  <span class="text-zinc-200"
+    >Weapons, armor, and relics listed by adventurers</span
+  >
+</div>

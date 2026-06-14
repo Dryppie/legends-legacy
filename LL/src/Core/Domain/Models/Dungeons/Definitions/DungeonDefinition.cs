@@ -10,7 +10,15 @@ public sealed class DungeonDefinition
     public string Id { get; set; } = default!;         // e.g. "crypt_of_thorns"
     public string Name { get; set; } = default!;
     public string SigilItemId { get; set; } = default!;
+    public DungeonGrade Grade { get; set; } = DungeonGrade.GradeI;
     public int Tier { get; set; } = 1;
+    public int RecommendedCombatRating { get; set; }
+    public string? RequiredAreaId { get; set; }
+    public string? RequiredQuestId { get; set; }
+    public string? RequiredPreviousDungeonId { get; set; }
+    public DungeonGrade? RequiredPreviousDungeonGrade { get; set; }
+    public List<DungeonEntryCost> EntryCosts { get; set; } = [];
+    public DungeonRewardTable RewardTable { get; set; } = new();
     public Guid? CompletionLootTableId { get; set; }
     public Guid? TierLootTableId { get; set; }
     public Dictionary<ItemType, double> MonsterLootModifiers { get; set; } = [];

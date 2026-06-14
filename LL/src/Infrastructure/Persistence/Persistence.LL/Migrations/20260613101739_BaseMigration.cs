@@ -28,6 +28,22 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DungeonCompletionRecords",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    DungeonDefinitionId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    FirstCompletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    LastCompletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CompletionCount = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DungeonCompletionRecords", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "DungeonRuns",
                 columns: table => new
                 {
@@ -1104,6 +1120,12 @@ namespace Persistence.LL.Migrations
                 column: "EquipmentInstanceId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DungeonCompletionRecords_CharacterId_DungeonDefinitionId",
+                table: "DungeonCompletionRecords",
+                columns: new[] { "CharacterId", "DungeonDefinitionId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Entities_LootTableId",
                 table: "Entities",
                 column: "LootTableId");
@@ -1317,6 +1339,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "CraftingQueueItems");
+
+            migrationBuilder.DropTable(
+                name: "DungeonCompletionRecords");
 
             migrationBuilder.DropTable(
                 name: "EntityAttributes");

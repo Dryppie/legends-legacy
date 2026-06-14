@@ -11,7 +11,12 @@ public sealed class JsonEssenceDefinitionRepository : IEssenceDefinitionReposito
     private readonly IReadOnlyList<EssenceDefinition> _definitions;
     private readonly IReadOnlyDictionary<string, AbilityDefinition> _abilities;
 
-    public JsonEssenceDefinitionRepository(IConfiguration config, string contentRootPath, JsonSerializerOptions options, IEssenceDefinitionValidator validator)
+    public JsonEssenceDefinitionRepository(
+        IConfiguration config,
+        string contentRootPath,
+        JsonSerializerOptions options,
+        IAbilityCatalogValidator abilityValidator,
+        IEssenceDefinitionValidator essenceValidator)
     {
         var contentRoot = config["Content:Root"] ?? "Data";
         var essencePath = Path.Combine(contentRootPath, contentRoot, "essences.json");
@@ -22,13 +27,17 @@ public sealed class JsonEssenceDefinitionRepository : IEssenceDefinitionReposito
         var abilities = JsonSerializer.Deserialize<List<AbilityDefinition>>(abilityJson, options) ?? [];
 
         ThrowIfDuplicateAbilityIds(abilities);
+        abilityValidator.ThrowIfInvalid(abilities);
         _abilities = abilities.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
         ResolveAbilityReferences(document.Essences);
-        validator.ThrowIfInvalid(document.Essences);
+        essenceValidator.ThrowIfInvalid(document.Essences);
         _definitions = document.Essences;
     }
 
     public IReadOnlyList<EssenceDefinition> GetAll() => _definitions;
+
+    public IReadOnlyList<AbilityDefinition> GetAllAbilities() =>
+        _abilities.Values.OrderBy(x => x.Id, StringComparer.OrdinalIgnoreCase).ToList();
 
     public EssenceDefinition? GetById(string essenceDefinitionId) =>
         _definitions.FirstOrDefault(x => x.Id.Equals(essenceDefinitionId, StringComparison.OrdinalIgnoreCase));

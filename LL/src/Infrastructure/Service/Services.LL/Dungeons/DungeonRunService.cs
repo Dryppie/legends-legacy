@@ -1,8 +1,13 @@
 ﻿using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Helpers.Constants;
 using Domain.Models.Combat;
+using Domain.Models.Dungeons;
+using Domain.Models.Dungeons.Definitions;
+using Domain.Models.Dungeons.Definitions.Events;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Dungeons.Runs;
+using Domain.Models.Inventories;
+using Domain.Models.Items;
 using Domain.Models.Snapshots;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Rewards.Models;
@@ -23,6 +28,9 @@ public sealed class DungeonRunService : IDungeonRunService
     private readonly DungeonRunFactory _factory;
     private readonly IDungeonRunRewardClaimer _rewardClaimer;
     private readonly IDungeonCompletionRewardApplier _completionRewardApplier;
+    private readonly IDungeonDefinitions _dungeons;
+    private readonly IItemBaseRepository _itemBases;
+    private readonly IInventoryRepository _inventory;
 
     // Blessings are offered on shrine events; you’ll likely have a repository for these.
     //private readonly IReadOnlyList<Guid> _globalBlessingPool;
@@ -38,7 +46,10 @@ public sealed class DungeonRunService : IDungeonRunService
         ICombatOutcomeCoordinator outcomeCoordinator,
         DungeonRunFactory factory,
         IDungeonRunRewardClaimer rewardClaimer,
-        IDungeonCompletionRewardApplier completionRewardApplier
+        IDungeonCompletionRewardApplier completionRewardApplier,
+        IDungeonDefinitions dungeons,
+        IItemBaseRepository itemBases,
+        IInventoryRepository inventory
         //IDungeonRunStore runStore,
         /*IReadOnlyList<Guid> globalBlessingPool*/)
     {
@@ -51,12 +62,35 @@ public sealed class DungeonRunService : IDungeonRunService
         _factory = factory;
         _rewardClaimer = rewardClaimer;
         _completionRewardApplier = completionRewardApplier;
+        _dungeons = dungeons;
+        _itemBases = itemBases;
+        _inventory = inventory;
         //_globalBlessingPool = globalBlessingPool;
     }
 
     public async Task<DungeonRun?> GetDungeonRunAsync(Guid characterId, CancellationToken cancellationToken)
     {
         return await _dungeonRuns.GetDungeonRunByCharacterIdAsync(characterId, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<DungeonCompletionRecord>> GetCompletionRecordsAsync(
+        Guid characterId,
+        IReadOnlyCollection<string> dungeonDefinitionIds,
+        CancellationToken cancellationToken)
+    {
+        return await _dungeonRuns.GetCompletionRecordsAsync(
+            characterId,
+            dungeonDefinitionIds,
+            cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<DungeonCompletionLeaderboardEntry>> GetCompletionLeaderboardAsync(
+        IReadOnlyCollection<string> dungeonDefinitionIds,
+        CancellationToken cancellationToken)
+    {
+        return await _dungeonRuns.GetCompletionLeaderboardAsync(
+            dungeonDefinitionIds,
+            cancellationToken);
     }
 
     public async Task<bool> ClaimRewardsAsync(Guid characterId, CancellationToken cancellationToken)
@@ -87,6 +121,9 @@ public sealed class DungeonRunService : IDungeonRunService
         var currentRun = await _dungeonRuns.GetDungeonRunByCharacterIdAsync(characterId, ct);
         if (currentRun != null) return null;
 
+        var dungeonDefinition = _dungeons.GetByKey(dungeonDefinitionId);
+        await ConsumeEntryCostsAsync(characterId, dungeonDefinition, ct);
+
         // Seed: use cryptographic RNG or server-side monotonic; keep it server-owned.
         var seed = Random.Shared.Next(int.MinValue, int.MaxValue);
 
@@ -96,6 +133,32 @@ public sealed class DungeonRunService : IDungeonRunService
         return run;
     }
 
+    private async Task ConsumeEntryCostsAsync(
+        Guid characterId,
+        DungeonDefinition dungeonDefinition,
+        CancellationToken cancellationToken)
+    {
+        var consumedCosts = dungeonDefinition.EntryCosts
+            .Where(x => x.Amount > 0 && !string.IsNullOrWhiteSpace(x.ItemId))
+            .GroupBy(x => x.ItemId, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(x => x.Key, x => x.Sum(cost => cost.Amount), StringComparer.OrdinalIgnoreCase);
+
+        if (consumedCosts.Count == 0)
+        {
+            return;
+        }
+
+        var removed = await _inventory.TryRemoveItemsByBaseIdAsync(
+            characterId,
+            consumedCosts,
+            cancellationToken);
+
+        if (!removed)
+        {
+            throw new InvalidOperationException("Dungeon entry costs could not be consumed.");
+        }
+    }
+
     public async Task<ExecuteDungeonActionResult?> ExecuteActionAsync(Guid runId, string actionId, object? payload, CancellationToken ct)
     {
         var run = await _dungeonRuns.GetDungeonRunByDungeonIdAsync(runId, ct);
@@ -103,10 +166,6 @@ public sealed class DungeonRunService : IDungeonRunService
             return null;
 
         if (run.Status != DungeonRunStatus.Active)
-            return null;
-
-        var snapshot = await _characterSnapshots.GetSnapshotByCharacterIdAsync(run.CharacterId, ct);
-        if (snapshot == null)
             return null;
 
         var room = GetCurrentRoom(run);
@@ -125,10 +184,14 @@ public sealed class DungeonRunService : IDungeonRunService
             case RoomType.Combat:
             case RoomType.MiniBoss:
             case RoomType.Boss:
+                var snapshot = await _characterSnapshots.GetSnapshotByCharacterIdAsync(run.CharacterId, ct);
+                if (snapshot == null)
+                    return null;
+
                 return await ExecuteCombatRoomAction(run, snapshot, room, actionId, payload, ct);
 
             case RoomType.Event:
-                return await ExecuteEventRoomAction(run, snapshot, room, actionId, payload, ct);
+                return await ExecuteEventRoomAction(run, room, actionId, ct);
 
             case RoomType.Checkpoint:
                 return await ExecuteCheckpointRoomAction(run, room, actionId, payload, ct);
@@ -196,28 +259,46 @@ public sealed class DungeonRunService : IDungeonRunService
         }
     }
 
-    private async Task<ExecuteDungeonActionResult?> ExecuteEventRoomAction(DungeonRun run, CharacterSnapshot snapshot, RoomInstance room, string actionId, object? payload, CancellationToken ct)
+    private async Task<ExecuteDungeonActionResult?> ExecuteEventRoomAction(DungeonRun run, RoomInstance room, string actionId, CancellationToken ct)
     {
+        var dungeon = _dungeons.GetByKey(run.DungeonDefinitionId);
+        room.EventOutcome ??= RollEventOutcome(run, room);
+
         switch (actionId.ToLowerInvariant())
         {
             case DungeonActionConstants.EventInspect:
-                return await ResolveEventChoice(run, snapshot, room, DungeonActionConstants.EventInspect, ct);
+                room.Status = RoomInstanceStatus.Active;
+                return new ExecuteDungeonActionResult
+                {
+                    Run = run,
+                    Outcome = DungeonActionOutcome.EventResolved,
+                    Message = GetEventInspectMessage(room.EventOutcome.Value)
+                };
 
             case DungeonActionConstants.EventAccept:
-                return await ResolveEventChoice(run, snapshot, room, DungeonActionConstants.EventAccept, ct);
+                return await AcceptEventAsync(run, dungeon, room, ct);
 
             case DungeonActionConstants.EventIgnore:
-                return await ResolveEventChoice(run, snapshot, room, DungeonActionConstants.EventIgnore, ct);
-
-            case DungeonActionConstants.Leave:
-                AbandonRun(run);
+                CompleteRoom(run, room);
+                MoveToNextRoom(run);
+                await ApplyCompletionRewardsIfNeeded(run, ct);
 
                 return new ExecuteDungeonActionResult
                 {
                     Run = run,
                     Outcome = run.Status == DungeonRunStatus.Completed
                         ? DungeonActionOutcome.RunCompleted
-                        : DungeonActionOutcome.EventResolved
+                        : DungeonActionOutcome.EventResolved,
+                    Message = "You leave the event untouched and move deeper into the dungeon."
+                };
+
+            case DungeonActionConstants.Leave:
+                AbandonRun(run);
+                return new ExecuteDungeonActionResult
+                {
+                    Run = run,
+                    Outcome = DungeonActionOutcome.RunAbandoned,
+                    Message = "Dungeon run abandoned."
                 };
 
             default:
@@ -277,46 +358,181 @@ public sealed class DungeonRunService : IDungeonRunService
         };
     }
 
-    private async Task<ExecuteDungeonActionResult> ResolveEventChoice(DungeonRun run, CharacterSnapshot snapshot, RoomInstance room, string optionId, CancellationToken ct)
+    private async Task<ExecuteDungeonActionResult> AcceptEventAsync(
+        DungeonRun run,
+        DungeonDefinition dungeon,
+        RoomInstance room,
+        CancellationToken ct)
     {
         room.Status = RoomInstanceStatus.Active;
 
-        // Replace this with real event resolution logic.
-        // Example:
-        // - treasure -> loot
-        // - shrine -> buff
-        // - trap -> damage
-        // - mystery -> weighted random outcome
-
-        //switch (optionId)
-        //{
-        //    case DungeonActionConstants.EventInspect:
-        //        ApplyEventInspectOutcome(run, room);
-        //        break;
-
-        //    case DungeonActionConstants.EventAccept:
-        //        ApplyEventAcceptOutcome(run, room);
-        //        break;
-
-        //    case DungeonActionConstants.EventIgnore:
-        //        ApplyEventIgnoreOutcome(run, room);
-        //        break;
-
-        //    default:
-        //        throw new InvalidOperationException($"Unknown event option '{optionId}'.");
-        //}
-
-        CompleteRoom(run, room);
-        MoveToNextRoom(run);
-        await ApplyCompletionRewardsIfNeeded(run, ct);
-
-        return new ExecuteDungeonActionResult
+        switch (room.EventOutcome ?? EventOutcomeType.TreasureRoom)
         {
-            Run = run,
-            Outcome = run.Status == DungeonRunStatus.Completed
+            case EventOutcomeType.ExtraCombat:
+                room.Type = RoomType.Combat;
+                room.EncounterIds = ResolveExtraCombatEncounters(run, dungeon, room);
+
+                return new ExecuteDungeonActionResult
+                {
+                    Run = run,
+                    Outcome = DungeonActionOutcome.EventResolved,
+                    Message = "The disturbance draws enemies into your path."
+                };
+
+            case EventOutcomeType.TreasureRoom:
+                await AddTreasureEventRewardsAsync(run, dungeon, room, ct);
+                CompleteRoom(run, room);
+                MoveToNextRoom(run);
+                await ApplyCompletionRewardsIfNeeded(run, ct);
+
+                return new ExecuteDungeonActionResult
+                {
+                    Run = run,
+                    Outcome = run.Status == DungeonRunStatus.Completed
                         ? DungeonActionOutcome.RunCompleted
-                        : DungeonActionOutcome.EventResolved
+                        : DungeonActionOutcome.EventResolved,
+                    Message = "You secure the hidden cache."
+                };
+
+            case EventOutcomeType.Shrine:
+                run.PendingSoulstones += Math.Max(1, dungeon.Tier);
+                run.PendingExperience += Math.Max(10, dungeon.Tier * 15);
+                CompleteRoom(run, room);
+                MoveToNextRoom(run);
+                await ApplyCompletionRewardsIfNeeded(run, ct);
+
+                return new ExecuteDungeonActionResult
+                {
+                    Run = run,
+                    Outcome = run.Status == DungeonRunStatus.Completed
+                        ? DungeonActionOutcome.RunCompleted
+                        : DungeonActionOutcome.EventResolved,
+                    Message = "The shrine answers with a quiet pulse of power."
+                };
+
+            case EventOutcomeType.Trap:
+                var lostCinders = Math.Min(run.PendingCinders, Math.Max(10, dungeon.Tier * 20));
+                run.PendingCinders -= lostCinders;
+                CompleteRoom(run, room);
+                MoveToNextRoom(run);
+                await ApplyCompletionRewardsIfNeeded(run, ct);
+
+                return new ExecuteDungeonActionResult
+                {
+                    Run = run,
+                    Outcome = run.Status == DungeonRunStatus.Completed
+                        ? DungeonActionOutcome.RunCompleted
+                        : DungeonActionOutcome.EventResolved,
+                    Message = lostCinders > 0
+                        ? $"The trap snaps shut. You lose {lostCinders} pending Cinders."
+                        : "The trap snaps shut, but you had no pending Cinders to lose."
+                };
+
+            default:
+                throw new InvalidOperationException($"Unhandled dungeon event outcome '{room.EventOutcome}'.");
+        }
+    }
+
+    private static EventOutcomeType RollEventOutcome(DungeonRun run, RoomInstance room)
+    {
+        var eventTable = new EventTableDefinition();
+        var totalWeight = eventTable.Outcomes.Sum(x => Math.Max(0, x.Weight));
+        if (totalWeight <= 0)
+            return EventOutcomeType.TreasureRoom;
+
+        var rand = new Random(CreateRoomSeed(run.Seed, room.RoomIndex, 17));
+        var roll = rand.Next(1, totalWeight + 1);
+        var accumulated = 0;
+
+        foreach (var outcome in eventTable.Outcomes)
+        {
+            accumulated += Math.Max(0, outcome.Weight);
+            if (roll <= accumulated)
+                return outcome.Type;
+        }
+
+        return eventTable.Outcomes[^1].Type;
+    }
+
+    private static string GetEventInspectMessage(EventOutcomeType outcome) =>
+        outcome switch
+        {
+            EventOutcomeType.ExtraCombat => "Tracks and echoes suggest an enemy patrol is close.",
+            EventOutcomeType.TreasureRoom => "You find the edge of a hidden cache.",
+            EventOutcomeType.Shrine => "A worn shrine hums with stored power.",
+            EventOutcomeType.Trap => "The room is tense with pressure plates and old wire.",
+            _ => "Something waits in the room."
         };
+
+    private async Task AddTreasureEventRewardsAsync(
+        DungeonRun run,
+        DungeonDefinition dungeon,
+        RoomInstance room,
+        CancellationToken cancellationToken)
+    {
+        run.PendingCinders += Math.Max(20, dungeon.Tier * 35);
+        run.PendingSoulstones += Math.Max(1, (int)dungeon.Grade);
+
+        var itemId = DungeonRewardCatalog.GetMonsterCoreRewardItemIds(dungeon.Grade).FirstOrDefault();
+        if (string.IsNullOrWhiteSpace(itemId))
+            return;
+
+        var itemBases = await _itemBases.GetItemBasesByIdsAsync([itemId], cancellationToken);
+        if (!itemBases.TryGetValue(itemId, out var itemBase))
+            return;
+
+        await _dungeonRuns.AddPendingRewardAsync(run, new RunReward
+        {
+            ItemId = itemBase.Id,
+            Name = itemBase.Name,
+            ItemType = itemBase.ItemType,
+            Quantity = Math.Max(1, (int)dungeon.Grade),
+            Source = $"event:treasure:room:{room.RoomIndex + 1}"
+        }, cancellationToken);
+    }
+
+    private static List<string> ResolveExtraCombatEncounters(DungeonRun run, DungeonDefinition dungeon, RoomInstance room)
+    {
+        var template = dungeon.Rooms
+            .Where(x => x.Type == RoomType.Combat && x.EncounterIds.Count > 0)
+            .OrderByDescending(x => x.Weight)
+            .FirstOrDefault();
+
+        if (template is null)
+            throw new InvalidOperationException($"Dungeon '{dungeon.Id}' has no combat room template for event combat.");
+
+        var pool = template.EncounterIds
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Select(x => x.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (pool.Count == 0)
+            throw new InvalidOperationException($"Dungeon '{dungeon.Id}' has no valid combat encounters for event combat.");
+
+        var rand = new Random(CreateRoomSeed(run.Seed, room.RoomIndex, 31));
+        var count = Math.Min(pool.Count, rand.Next(1, Math.Min(3, pool.Count) + 1));
+        var result = new List<string>(count);
+
+        for (var i = 0; i < count; i++)
+        {
+            var index = rand.Next(pool.Count);
+            result.Add(pool[index]);
+            pool.RemoveAt(index);
+        }
+
+        return result;
+    }
+
+    private static int CreateRoomSeed(int runSeed, int roomIndex, int salt)
+    {
+        unchecked
+        {
+            var seed = runSeed;
+            seed = (seed * 397) ^ roomIndex;
+            seed = (seed * 397) ^ salt;
+            return seed;
+        }
     }
 
     private void MoveToNextRoom(DungeonRun run)

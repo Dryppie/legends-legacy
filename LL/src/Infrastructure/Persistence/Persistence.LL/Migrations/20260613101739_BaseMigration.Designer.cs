@@ -13,7 +13,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20260612191108_BaseMigration")]
+    [Migration("20260613101739_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -201,6 +201,37 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("CharacterBId");
 
                     b.ToTable("ColosseumMatches");
+                });
+
+            modelBuilder.Entity("Domain.Models.Dungeons.Runs.DungeonCompletionRecord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CompletionCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("DungeonDefinitionId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTimeOffset>("FirstCompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("LastCompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId", "DungeonDefinitionId")
+                        .IsUnique();
+
+                    b.ToTable("DungeonCompletionRecords");
                 });
 
             modelBuilder.Entity("Domain.Models.Dungeons.Runs.DungeonRun", b =>

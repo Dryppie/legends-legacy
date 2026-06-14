@@ -4,6 +4,7 @@ import { ApiService } from '../api.service';
 import { StartDungeonRequest } from '../../../../shared/models/requestDtos/dungeons/startDungeonRequest';
 import { CombatSessionDto } from '../../../../shared/models/Dtos/combatResultDto';
 import { DungeonPreviewData } from '../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
+import { DungeonRecordsData } from '../../../../shared/models/Dtos/dungeons/dungeonRecordsData';
 
 export enum DungeonRunStatus {
   Active = 'Active',
@@ -28,14 +29,13 @@ export enum RoomType {
 
 export enum RoomInstanceStatus {
   Pending = 'Pending',
-  InProgress = 'InProgress',
+  Active = 'Active',
   Completed = 'Completed',
-  Failed = 'Failed',
-  Skipped = 'Skipped',
 }
 
 export enum EventOutcomeType {
-  Treasure = 'Treasure',
+  ExtraCombat = 'ExtraCombat',
+  TreasureRoom = 'TreasureRoom',
   Shrine = 'Shrine',
   Trap = 'Trap',
 }
@@ -105,6 +105,14 @@ export class DungeonService {
     return this.api.get('dungeon/getAvailableDungeons').pipe(
       catchError(() => {
         return throwError(() => new Error('Failed to get available dungeons'));
+      }),
+    );
+  }
+
+  getDungeonRecords(familyId: string): Observable<DungeonRecordsData> {
+    return this.api.get(`dungeon/getDungeonRecords/${familyId}`).pipe(
+      catchError(() => {
+        return throwError(() => new Error('Failed to get dungeon records'));
       }),
     );
   }

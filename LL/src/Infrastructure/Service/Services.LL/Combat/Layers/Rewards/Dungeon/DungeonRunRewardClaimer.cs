@@ -1,8 +1,7 @@
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
-using Domain.Models.Items.Equipments;
-using Domain.Models.Items.EssenceItems;
+using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Reward;
 using Services.LL.Interfaces.Combat.Reward.Dungeon;
 
@@ -14,17 +13,20 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
     private readonly ILootRewardWriter _lootWriter;
     private readonly ICurrencyRewardWriter _currencyWriter;
     private readonly IItemBaseRepository _itemBases;
+    private readonly IInventoryItemFactory _inventoryItemFactory;
 
     public DungeonRunRewardClaimer(
         IExperienceRewardWriter experienceWriter,
         ILootRewardWriter lootWriter,
         ICurrencyRewardWriter currencyWriter,
-        IItemBaseRepository itemBases)
+        IItemBaseRepository itemBases,
+        IInventoryItemFactory inventoryItemFactory)
     {
         _experienceWriter = experienceWriter;
         _lootWriter = lootWriter;
         _currencyWriter = currencyWriter;
         _itemBases = itemBases;
+        _inventoryItemFactory = inventoryItemFactory;
     }
 
     public async Task ClaimAsync(DungeonRun run, CancellationToken cancellationToken)
@@ -68,7 +70,7 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
                 continue;
             }
 
-            inventoryItems.AddRange(CreateInventoryItems(run.CharacterId, itemBase, reward.Quantity));
+            inventoryItems.AddRange(_inventoryItemFactory.CreateForQuantity(itemBase, reward.Quantity, run.CharacterId));
         }
 
         if (inventoryItems.Count > 0)
@@ -80,55 +82,4 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
         }
     }
 
-    private static IEnumerable<InventoryItem> CreateInventoryItems(Guid characterId, ItemBase itemBase, int quantity)
-    {
-        if (itemBase.Stackable)
-        {
-            yield return CreateInventoryItem(characterId, itemBase, quantity);
-            yield break;
-        }
-
-        for (var i = 0; i < quantity; i++)
-        {
-            yield return CreateInventoryItem(characterId, itemBase, 1);
-        }
-    }
-
-    private static InventoryItem CreateInventoryItem(Guid characterId, ItemBase itemBase, int quantity)
-    {
-        var itemInstance = CreateItemInstance(itemBase);
-
-        return new InventoryItem
-        {
-            InventoryId = characterId,
-            ItemInstanceId = itemInstance.Id,
-            Quantity = quantity,
-            ItemInstance = itemInstance
-        };
-    }
-
-    private static ItemInstance CreateItemInstance(ItemBase itemBase)
-    {
-        return itemBase.ItemType switch
-        {
-            ItemType.Equipment => new EquipmentInstance
-            {
-                Id = Guid.NewGuid(),
-                ItemBaseId = itemBase.Id,
-                ItemBase = itemBase
-            },
-            ItemType.Essence => new EssenceItemInstance
-            {
-                Id = Guid.NewGuid(),
-                ItemBaseId = itemBase.Id,
-                ItemBase = itemBase
-            },
-            _ => new ItemInstance
-            {
-                Id = Guid.NewGuid(),
-                ItemBaseId = itemBase.Id,
-                ItemBase = itemBase
-            }
-        };
-    }
 }

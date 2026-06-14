@@ -1,132 +1,231 @@
-<div class="flex h-full flex-col gap-4 rounded-md">
-  <!--inventory header-->
-  <div class="flex items-center justify-between">
+<div class="flex h-full min-h-0 flex-col gap-4 rounded-md">
+  <div class="flex flex-wrap items-center justify-between gap-3 pr-4">
     <app-default-header
       section="Character"
       title="Inventory"
-      text="{{ this.state.items().length }} items"
+      [text]="inventoryCountLabel"
       icon="character/inventory"
     ></app-default-header>
-    <div class="flex items-center gap-2 pr-4">
-      <span
-        class="cursor-help text-primary underline decoration-dotted"
+
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        class="flex h-8 w-8 items-center justify-center rounded border border-light_gray bg-black/40 text-primary transition-colors hover:bg-zinc-600/30"
         appHelp="scrap_mode"
-        >?</span
+        aria-label="Scrap help"
       >
-      <app-regular-button
-        [variant]="variant"
-        [text]="inventoryMode"
-        (pressed)="switchMode()"
+        ?
+      </button>
+      <div
+        class="flex rounded-md border border-light_gray bg-black/40 p-1 shadow-lg shadow-black/30"
+        aria-label="Inventory mode"
       >
-      </app-regular-button>
-    </div>
-  </div>
-  <!--inventory-->
-  <div
-    class="flex h-full flex-col justify-between gap-2 overflow-y-auto rounded-md pr-4 pt-2 sm:flex-row-reverse"
-  >
-    <div
-      *ngIf="inventoryMode === 'Regular Mode'"
-      class="flex flex-col items-center space-y-2 rounded-md bg-black/40 pt-4"
-    >
-      <h2 class="primary-gradient text-2xl">Equipment</h2>
-      <img
-        src="core/Divider.svg"
-        alt="Logo"
-        class="center w-60 object-contain"
-      />
-      <app-equipment-overview></app-equipment-overview>
-    </div>
-    <div
-      *ngIf="inventoryMode === 'Scrap Mode'"
-      class="flex w-96 flex-col items-center space-y-2 rounded-md bg-black/40 p-4"
-    >
-      <h2 class="primary-gradient text-2xl">Scrap list</h2>
-      <img
-        src="core/Divider.svg"
-        alt="Logo"
-        class="center w-60 object-contain"
-      />
-      <label class="text-center italic text-zinc-300">
-        The following items will be permanently destroyed:
-      </label>
-      <ul class="h-full w-full overflow-y-auto">
-        <li *ngFor="let item of selectedItems">
-          <app-item [item]="item.itemInstance"></app-item>
-        </li>
-      </ul>
-      <div class="w-full">
-        <label class="italic text-zinc-300"
-          >Total tempered scrap: {{ selectedItems.length }}</label
+        <button
+          type="button"
+          class="rounded px-4 py-2 text-sm transition-colors"
+          [ngClass]="{
+            'bg-primary text-black': isBrowseMode,
+            'text-secondary hover:bg-zinc-600/30': !isBrowseMode,
+          }"
+          (click)="enterBrowseMode()"
         >
-        <app-regular-button
-          fullWidth=""
-          text="Scrap items"
-          [disabled]="!selectedItems.length || state.loading()"
-          (pressed)="scrapEquipment()"
-        ></app-regular-button>
+          Browse
+        </button>
+        <button
+          type="button"
+          class="rounded px-4 py-2 text-sm transition-colors"
+          [ngClass]="{
+            'bg-primary text-black': isScrapMode,
+            'text-secondary hover:bg-zinc-600/30': !isScrapMode,
+          }"
+          (click)="enterScrapMode()"
+        >
+          Scrap
+        </button>
       </div>
     </div>
+  </div>
+
+  <div
+    class="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden pr-4 lg:grid-cols-[minmax(0,1fr)_23rem]"
+  >
     <div
-      class="flex h-full min-h-96 w-full flex-col rounded-md bg-black/40 pt-2"
+      class="flex min-h-0 flex-col overflow-hidden rounded-md border border-light_gray bg-texture shadow-lg"
     >
+      <div
+        class="flex flex-wrap items-center justify-between gap-3 border-b border-light_gray/70 px-4 py-3"
+      >
+        <div>
+          <h2 class="primary-gradient text-2xl">{{ activeListTitle }}</h2>
+          <p class="text-sm text-secondary">{{ activeListDescription }}</p>
+        </div>
+
+        <div
+          *ngIf="isScrapMode"
+          class="rounded border border-primary/50 bg-black/40 px-3 py-2 text-right"
+        >
+          <label class="uppercase text-primary">Selected</label>
+          <p class="text-sm text-white">{{ selectedItemCountLabel }}</p>
+        </div>
+      </div>
+
       <app-filter-tabs
+        *ngIf="isBrowseMode"
         [tabs]="tabLabels"
         [activeTab]="activeTab"
         (tabSelected)="setActiveTab($event)"
         class="flex-none"
       ></app-filter-tabs>
+
       <div
-        *ngIf="inventoryMode === 'Scrap Mode'"
-        class="flex w-full items-center justify-between border-b border-zinc-300/30 px-4 pt-1 text-white shadow-lg"
+        *ngIf="isScrapMode"
+        class="flex flex-wrap items-center justify-between gap-3 border-b border-light_gray/60 bg-black/30 px-4 py-3"
       >
-        <div>
-          Selected: {{ selectedItems.length }} item{{
-            selectedItems.length !== 1 ? "s" : ""
-          }}
-        </div>
-        <div class="flex items-center space-x-3">
-          <div>
+        <div class="flex flex-wrap items-center gap-2">
+          <app-regular-button
+            text="Select all tempered"
+            (pressed)="selectAllTempered()"
+          ></app-regular-button>
+
+          <div class="flex items-center rounded-md border border-light_gray">
             <select
-              class="rounded border border-zinc-500 bg-neutral-900"
+              class="h-9 rounded-l-md bg-black/60 px-3 text-sm text-white"
               [(ngModel)]="scrapRarityThreshold"
-              (change)="selectAllBelowRarity()"
             >
               <option *ngFor="let rarity of rarities" [value]="rarity">
                 {{ rarity }}
               </option>
             </select>
-            <span class="text-sm text-zinc-300"> and below</span>
+            <button
+              type="button"
+              class="h-9 border-l border-light_gray px-3 text-sm text-primary transition-colors hover:bg-zinc-600/30"
+              (click)="selectAllBelowRarity()"
+            >
+              and below
+            </button>
           </div>
         </div>
+
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            class="px-2 py-1 text-sm text-secondary transition-colors hover:text-primary"
+            (click)="clearSelection()"
+          >
+            Clear
+          </button>
+          <button
+            type="button"
+            class="px-2 py-1 text-sm text-danger transition-colors hover:text-rose-300"
+            (click)="cancelScrapMode()"
+          >
+            Cancel
+          </button>
+        </div>
       </div>
-      <div
-        class="mb-2 flex h-full flex-col justify-items-center overflow-y-auto"
-      >
+
+      <div class="min-h-0 flex-1 overflow-y-auto p-2">
+        <div
+          *ngIf="!filteredItems.length"
+          class="flex h-full min-h-60 items-center justify-center rounded border border-light_gray/40 bg-black/30 p-6 text-center text-secondary"
+        >
+          <p class="italic">{{ emptyStateText }}</p>
+        </div>
+
         <ng-container *ngFor="let inventoryItem of filteredItems">
-          <div class="flex w-full items-center gap-2">
+          <div
+            class="group mb-1 flex w-full items-center gap-2 rounded border border-transparent transition-colors"
+            [ngClass]="{
+              'border-primary/70 bg-primary/10':
+                selectedItemsContains(inventoryItem),
+              'hover:border-light_gray/70 hover:bg-black/30': isScrapMode,
+            }"
+          >
             <app-inventory-item
               class="w-full"
               [inventoryItem]="inventoryItem"
             ></app-inventory-item>
-            <ng-container *ngIf="inventoryMode === 'Scrap Mode'">
-              <div
+
+            <ng-container *ngIf="isScrapMode">
+              <button
+                type="button"
                 (click)="toggleSelectItem(inventoryItem)"
-                class="mr-2 flex cursor-pointer rounded-full border border-zinc-300/30 px-2 py-1 transition-colors hover:bg-zinc-300/30"
+                class="mr-2 min-w-20 rounded border px-3 py-1 text-sm transition-colors"
+                [ngClass]="{
+                  'border-primary bg-primary text-black':
+                    selectedItemsContains(inventoryItem),
+                  'border-light_gray text-primary hover:bg-zinc-600/30':
+                    !selectedItemsContains(inventoryItem),
+                }"
               >
-                <ng-container
-                  *ngIf="selectedItemsContains(inventoryItem); else notSelected"
-                >
-                  <span class="text-sm text-primary">Deselect</span>
-                </ng-container>
-                <ng-template #notSelected>
-                  <span class="text-sm text-primary">Select</span>
-                </ng-template>
-              </div>
+                {{
+                  selectedItemsContains(inventoryItem) ? "Selected" : "Select"
+                }}
+              </button>
             </ng-container>
           </div>
         </ng-container>
       </div>
     </div>
+
+    <aside
+      *ngIf="isBrowseMode"
+      class="min-h-0 overflow-y-auto rounded-md border border-light_gray bg-texture p-4 shadow-lg"
+    >
+      <div class="flex flex-col items-center space-y-2">
+        <h2 class="primary-gradient text-2xl">Equipped</h2>
+        <img src="core/Divider.svg" alt="" class="center w-60 object-contain" />
+        <app-equipment-overview></app-equipment-overview>
+      </div>
+    </aside>
+
+    <aside
+      *ngIf="isScrapMode"
+      class="flex min-h-0 flex-col rounded-md border border-light_gray bg-texture p-4 shadow-lg"
+    >
+      <div class="border-b border-light_gray/70 pb-3">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="primary-gradient text-2xl">Scrap Bench</h2>
+          <span class="text-primary">{{ selectedItemCountLabel }}</span>
+        </div>
+        <p class="mt-1 text-sm text-secondary">
+          Selected equipment will be permanently destroyed and converted into
+          tempered scrap.
+        </p>
+      </div>
+
+      <div class="min-h-0 flex-1 overflow-y-auto py-3">
+        <div
+          *ngIf="!selectedItems.length"
+          class="flex h-full min-h-52 items-center justify-center rounded border border-light_gray/40 bg-black/30 p-6 text-center text-secondary"
+        >
+          <p class="italic">Select tempered equipment from the list.</p>
+        </div>
+
+        <ul *ngIf="selectedItems.length" class="space-y-2">
+          <li
+            *ngFor="let item of selectedItems"
+            class="rounded border border-light_gray/60 bg-black/30 p-2"
+          >
+            <app-item [item]="item.itemInstance"></app-item>
+          </li>
+        </ul>
+      </div>
+
+      <div class="space-y-3 border-t border-light_gray/70 pt-3">
+        <div class="flex items-center justify-between">
+          <label class="uppercase text-primary">Ready to scrap</label>
+          <p class="text-lg text-white">{{ selectedItems.length }}</p>
+        </div>
+
+        <app-regular-button
+          fullWidth=""
+          variant="danger"
+          text="Scrap selected"
+          [disabled]="!selectedItems.length || state.loading()"
+          (pressed)="scrapEquipment()"
+        ></app-regular-button>
+      </div>
+    </aside>
   </div>
 </div>

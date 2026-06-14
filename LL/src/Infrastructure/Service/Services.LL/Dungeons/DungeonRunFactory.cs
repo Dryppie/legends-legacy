@@ -98,19 +98,14 @@ public sealed class DungeonRunFactory
             if (miniBossIndex.HasValue)
                 types[miniBossIndex.Value] = RoomType.MiniBoss;
         }
-        // 2) Fill remaining slots with weighted Combat/Event
-        // Tune these weights however you like.
-        // TODO: Add Dungeon Events
         const int combatWeight = 80;
-        const int eventWeight = 00;
+        const int eventWeight = 20;
 
         for (int i = 0; i < totalRooms; i++)
         {
             if (types[i] != default) continue; // already assigned (Boss/Checkpoint/MiniBoss)
 
-            types[i] = RollWeighted(rand,
-                (RoomType.Combat, combatWeight),
-                (RoomType.Event, eventWeight));
+            types[i] = RollWeighted(rand, (RoomType.Combat, combatWeight), (RoomType.Event, eventWeight));
         }
 
         // 3) Emit RoomInstance list
@@ -136,6 +131,12 @@ public sealed class DungeonRunFactory
             if (room.Type == RoomType.Checkpoint)
                 continue;
 
+            if (room.Type == RoomType.Event)
+            {
+                ResolveEventFromTemplate(room, rand);
+                continue;
+            }
+
             var template = PickRoomVariantByType(dungeon, room.Type, rand);
 
             // If you want to record which variant got chosen (highly recommended),
@@ -152,10 +153,6 @@ public sealed class DungeonRunFactory
             case RoomType.MiniBoss:
             case RoomType.Boss:
                 room.EncounterIds = ResolveEncountersFromTemplate(room.Type, template, rand);
-                break;
-
-            case RoomType.Event:
-                ResolveEventsFromTemplate(room, template, rand);
                 break;
 
             default:
@@ -226,97 +223,45 @@ public sealed class DungeonRunFactory
         return [];
     }
 
-    private static void ResolveEventsFromTemplate(RoomInstance room, RoomDefinition template, Random rand)
+    private static void ResolveEventFromTemplate(RoomInstance room, Random rand)
     {
-        if (room.Type != RoomType.Event)
-            throw new InvalidOperationException($"ResolveEventsFromTemplate called for non-event room type '{room.Type}'.");
-
-        if (template.EncounterIds is null || template.EncounterIds.Count == 0)
-            throw new InvalidOperationException("Event room template has no event ids.");
-
-        // Reset event fields (important if you ever re-hydrate or reuse instances)
-        room.EventOutcome = null;
-        //room.Treasure = null;
-        //room.Shrine = null;
-        //room.Trap = null;
-
-        // Sanitize candidates
-        var candidates = new List<string>(template.EncounterIds.Count);
-        foreach (var raw in template.EncounterIds)
+        var eventTable = new EventTableDefinition();
+        var totalWeight = eventTable.Outcomes.Sum(x => Math.Max(0, x.Weight));
+        if (totalWeight <= 0)
         {
-            if (string.IsNullOrWhiteSpace(raw)) continue;
-            candidates.Add(raw.Trim());
+            room.EventOutcome = EventOutcomeType.TreasureRoom;
+            return;
         }
 
-        if (candidates.Count == 0)
-            throw new InvalidOperationException("Event room template only contained empty event ids.");
+        var roll = rand.Next(1, totalWeight + 1);
+        var accumulated = 0;
 
-        // Pick exactly one event id for this room
-        var picked = candidates[rand.Next(candidates.Count)];
+        foreach (var outcome in eventTable.Outcomes)
+        {
+            accumulated += Math.Max(0, outcome.Weight);
+            if (roll <= accumulated)
+            {
+                room.EventOutcome = outcome.Type;
+                return;
+            }
+        }
 
-        // Expected formats:
-        // "treasure:<variant>", "shrine:<variant>", "trap:<variant>"
-        var colonIndex = picked.IndexOf(':');
-        if (colonIndex <= 0 || colonIndex == picked.Length - 1)
-            throw new InvalidOperationException(
-                $"Invalid event id '{picked}'. Expected 'treasure:<id>' or 'shrine:<id>' or 'trap:<id>'.");
-
-        var prefix = picked[..colonIndex].Trim().ToLowerInvariant();
-        var variantId = picked[(colonIndex + 1)..].Trim();
-
-        if (string.IsNullOrWhiteSpace(variantId))
-            throw new InvalidOperationException($"Invalid event id '{picked}' (empty variant id).");
-
-        //switch (prefix)
-        //{
-        //    case "treasure":
-        //        room.EventOutcome = EventOutcomeType.Treasure;
-        //        room.Treasure = new TreasureRoomInstance
-        //        {
-        //            // You’ll need a field like VariantId/TableId on this type.
-        //            // If you don't have it, add it. Otherwise this data is lost.
-        //            VariantId = variantId
-        //        };
-        //        break;
-
-        //    case "shrine":
-        //        room.EventOutcome = EventOutcomeType.Shrine;
-        //        room.Shrine = new ShrineInstance
-        //        {
-        //            VariantId = variantId
-        //        };
-        //        break;
-
-        //    case "trap":
-        //        room.EventOutcome = EventOutcomeType.Trap;
-        //        room.Trap = new TrapInstance
-        //        {
-        //            VariantId = variantId
-        //        };
-        //        break;
-
-        //    default:
-        //        throw new InvalidOperationException(
-        //            $"Unknown event type prefix '{prefix}' in event id '{picked}'. Expected treasure/shrine/trap.");
-        //}
+        room.EventOutcome = eventTable.Outcomes[^1].Type;
     }
 
     private static RoomType RollWeighted(Random rand, params (RoomType type, int weight)[] options)
     {
-        int total = 0;
-        foreach (var (type, weight) in options)
-            total += Math.Max(0, weight);
-
+        var total = options.Sum(x => Math.Max(0, x.weight));
         if (total <= 0)
             return options[0].type;
 
-        int roll = rand.Next(1, total + 1);
-        int acc = 0;
+        var roll = rand.Next(1, total + 1);
+        var accumulated = 0;
 
         foreach (var (type, weight) in options)
         {
-            acc += Math.Max(0, weight);
-            if (roll <= acc)
+            accumulated += Math.Max(0, weight);
+            if (roll <= accumulated)
                 return type;
         }
 
