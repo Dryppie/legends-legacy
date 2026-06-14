@@ -161,7 +161,7 @@ using (var scope = app.Services.CreateScope())
 
     // Migrate and Seed
     await context.Database.MigrateAsync();
-    await context.SeedData(hasher);
+    await context.SeedData(hasher, app.Environment.IsDevelopment());
 }
 
 await app.Services.ValidateCreatureBuildProfilesAsync();
