@@ -217,6 +217,7 @@ public static class DependencyInjection
         services.AddScoped<IDungeonCombatSessionFactory, DungeonCombatSessionFactory>();
         services.AddScoped<IIdleCombatRewardApplier, IdleCombatRewardApplier>();
         services.AddScoped<IIdleCombatRewardCalculator, IdleCombatRewardCalculator>();
+        services.AddScoped<IIdleDungeonSigilDropCalculator, IdleDungeonSigilDropCalculator>();
         services.AddScoped<IIdleCombatRewardFactBuilder, IdleCombatRewardFactBuilder>();
         services.AddScoped<IIdleCombatSessionFactory, IdleCombatSessionFactory>();
         services.AddScoped<ILootRewardWriter, InventoryLootRewardWriter>();
