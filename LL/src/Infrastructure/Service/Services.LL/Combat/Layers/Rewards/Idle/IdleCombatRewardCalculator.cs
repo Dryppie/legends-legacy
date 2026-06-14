@@ -2,7 +2,6 @@ using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Bonuses;
 using Domain.Models.Entities;
-using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Services.LL.Combat.Layers.Rewards.Models;
@@ -23,10 +22,23 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
     private readonly IEssenceResonanceService _essenceResonanceService;
     private readonly IItemBaseRepository _itemBases;
 
-    private const double SigilDropChancePerCreature = 0.035d;
+    private const int IdleActionsPerDay = 24 * 60 * 60 / 10;
+    private const double TargetSigilDropsPerDay = 2d;
+    private const double SigilDropChancePerIdleAction = TargetSigilDropsPerDay / IdleActionsPerDay;
     private const string GoblinMinesSigilId = "sigil_goblin_mines";
     private const string ForgottenCatacombsSigilId = "sigil_forgotten_catacombs";
     private const string HivesAbyssSigilId = "sigil_hives_abyss";
+    private const string ShenicRegionId = "region_01";
+
+    private static readonly IReadOnlyDictionary<string, string[]> RegionSigilIds = new Dictionary<string, string[]>
+    {
+        [ShenicRegionId] =
+        [
+            GoblinMinesSigilId,
+            ForgottenCatacombsSigilId,
+            HivesAbyssSigilId
+        ]
+    };
 
     public IdleCombatRewardCalculator(
         IBonusService bonusService,
@@ -63,8 +75,10 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
         var totalLoot = new List<InventoryItem>();
         var totalExperience = 0;
         var totalCinders = 0;
+        var sigilRegionId = ResolveSigilRegionId(facts.Area.Id);
+        var sigilEligibleVictories = 0;
         var sigilItemBases = await _itemBases.GetItemBasesByIdsAsync(
-            [GoblinMinesSigilId, ForgottenCatacombsSigilId, HivesAbyssSigilId],
+            RegionSigilIds.Values.SelectMany(x => x).Distinct().ToArray(),
             cancellationToken);
 
         foreach (var encounter in facts.Encounters.OrderBy(x => x.Sequence))
@@ -90,14 +104,9 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
                     loot = loot.Concat(essenceDrops).ToList();
                 }
 
-                var sigilDrops = RollSigilDrops(
-                    facts.Area.Id,
-                    encounter.HostileCreatures,
-                    sigilItemBases);
-
-                if (sigilDrops.Count > 0)
+                if (sigilRegionId is not null)
                 {
-                    loot = loot.Concat(sigilDrops).ToList();
+                    sigilEligibleVictories++;
                 }
 
                 experience = encounter.HostileCreatures.Sum(x => x.ExperienceReward);
@@ -122,6 +131,12 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
                 Loot: loot));
         }
 
+        var sigilDrops = RollSigilDrops(sigilRegionId, sigilEligibleVictories, sigilItemBases);
+        if (sigilDrops.Count > 0)
+        {
+            totalLoot.AddRange(sigilDrops);
+        }
+
         var totalSoulstones = _soulstoneRewardCalculator.Calculate(
             durationInSeconds: (int)Math.Abs(facts.ProcessedDuration.TotalSeconds),
             dropRatePercent: soulstoneDropRate,
@@ -139,35 +154,44 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
     }
 
     private IReadOnlyList<InventoryItem> RollSigilDrops(
-        string areaId,
-        IReadOnlyList<Creature> defeatedCreatures,
+        string? regionId,
+        int eligibleVictories,
         IReadOnlyDictionary<string, ItemBase> sigilItemBases)
     {
-        var sigilId = ResolveSigilId(areaId, defeatedCreatures);
-        if (sigilId is null || !sigilItemBases.TryGetValue(sigilId, out var itemBase))
+        if (regionId is null || eligibleVictories <= 0)
         {
             return [];
         }
 
-        var quantity = 0;
-        foreach (var _ in defeatedCreatures)
+        if (!RegionSigilIds.TryGetValue(regionId, out var regionSigilIds) || regionSigilIds.Length == 0)
         {
-            if (_randomSource.NextDouble() < SigilDropChancePerCreature)
+            return [];
+        }
+
+        var dropCount = SamplePoisson(eligibleVictories * SigilDropChancePerIdleAction);
+        if (dropCount <= 0)
+        {
+            return [];
+        }
+
+        var quantitiesBySigilId = new Dictionary<string, int>();
+        for (var i = 0; i < dropCount; i++)
+        {
+            var sigilId = PickRandomSigilId(regionSigilIds);
+            quantitiesBySigilId[sigilId] = quantitiesBySigilId.GetValueOrDefault(sigilId) + 1;
+        }
+
+        var sigilDrops = new List<InventoryItem>();
+
+        foreach (var (sigilId, quantity) in quantitiesBySigilId)
+        {
+            if (!sigilItemBases.TryGetValue(sigilId, out var itemBase))
             {
-                quantity++;
+                continue;
             }
-        }
 
-        if (quantity <= 0)
-        {
-            return [];
-        }
-
-        var itemInstanceId = Guid.NewGuid();
-
-        return
-        [
-            new InventoryItem
+            var itemInstanceId = Guid.NewGuid();
+            sigilDrops.Add(new InventoryItem
             {
                 ItemInstanceId = itemInstanceId,
                 Quantity = quantity,
@@ -177,46 +201,53 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
                     ItemBaseId = itemBase.Id,
                     ItemBase = itemBase
                 }
-            }
-        ];
+            });
+        }
+
+        return sigilDrops;
     }
 
-    private static string? ResolveSigilId(
-        string areaId,
-        IReadOnlyList<Creature> defeatedCreatures)
+    private int SamplePoisson(double lambda)
     {
-        return areaId switch
+        if (lambda <= 0)
         {
-            "region_01_area_01" or "region_01_area_05" => GoblinMinesSigilId,
-            "region_01_area_02" or "region_01_area_07" => ForgottenCatacombsSigilId,
-            "region_01_area_06" => HivesAbyssSigilId,
-            _ => ResolveSigilIdFromCreatures(defeatedCreatures)
-        };
+            return 0;
+        }
+
+        var drops = 0;
+        var probability = 1.0;
+        var threshold = Math.Exp(-lambda);
+
+        while (probability > threshold)
+        {
+            drops++;
+            probability *= _randomSource.NextDouble();
+        }
+
+        return drops - 1;
     }
 
-    private static string? ResolveSigilIdFromCreatures(IReadOnlyList<Creature> creatures)
+    private string PickRandomSigilId(IReadOnlyList<string> sigilIds)
     {
-        var names = creatures
-            .Select(x => x.Name)
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Select(x => x.ToLowerInvariant())
-            .ToArray();
+        var index = Math.Min((int)(_randomSource.NextDouble() * sigilIds.Count), sigilIds.Count - 1);
+        return sigilIds[index];
+    }
 
-        if (names.Any(x => x.Contains("goblin") || x.Contains("rat")))
+    private static string? ResolveSigilRegionId(string areaId)
+    {
+        const string areaMarker = "_area_";
+        var markerIndex = areaId.IndexOf(areaMarker, StringComparison.OrdinalIgnoreCase);
+        if (markerIndex <= 0)
         {
-            return GoblinMinesSigilId;
+            return null;
         }
 
-        if (names.Any(x => x.Contains("skeleton") || x.Contains("ghoul") || x.Contains("bat") || x.Contains("wraith")))
+        var regionId = areaId[..markerIndex];
+        if (!RegionSigilIds.ContainsKey(regionId))
         {
-            return ForgottenCatacombsSigilId;
+            return null;
         }
 
-        if (names.Any(x => x.Contains("ant") || x.Contains("spider") || x.Contains("snake") || x.Contains("viper") || x.Contains("lizard")))
-        {
-            return HivesAbyssSigilId;
-        }
-
-        return null;
+        return regionId;
     }
 }
