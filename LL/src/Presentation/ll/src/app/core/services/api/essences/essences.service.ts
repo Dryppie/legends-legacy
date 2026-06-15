@@ -2,13 +2,12 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../api/api.service';
 import {
-  DismantleEssenceResultDto,
   EssenceLoadoutDto,
   EssenceLoadoutsDto,
+  EssenceMutationResponseDto,
   ResponseMessageDto,
   SaveEssenceLoadoutDto,
   SoulArchiveDto,
-  SpendEssenceDustResultDto,
 } from '../../../../shared/models/essence-system';
 
 @Injectable({
@@ -29,30 +28,30 @@ export class EssencesService {
     return this.apiService.get('essence/loadouts/active');
   }
 
-  public absorb(inventoryItemId: string): Observable<ResponseMessageDto> {
+  public absorb(inventoryItemId: string): Observable<EssenceMutationResponseDto> {
     return this.apiService.post(`essence/items/${inventoryItemId}/absorb`, {});
   }
 
   public dismantle(
     inventoryItemId: string,
-  ): Observable<DismantleEssenceResultDto> {
+  ): Observable<EssenceMutationResponseDto> {
     return this.apiService.post(`essence/items/${inventoryItemId}/dismantle`, {});
   }
 
   public spendDust(
     playerEssenceId: string,
     dustAmount: number,
-  ): Observable<SpendEssenceDustResultDto> {
+  ): Observable<EssenceMutationResponseDto> {
     return this.apiService.post(`essence/${playerEssenceId}/spend-dust`, {
       dustAmount,
     });
   }
 
-  public ascend(playerEssenceId: string): Observable<ResponseMessageDto> {
+  public ascend(playerEssenceId: string): Observable<EssenceMutationResponseDto> {
     return this.apiService.post(`essence/${playerEssenceId}/ascend`, {});
   }
 
-  public evolve(playerEssenceId: string): Observable<ResponseMessageDto> {
+  public evolve(playerEssenceId: string): Observable<EssenceMutationResponseDto> {
     return this.apiService.post(`essence/${playerEssenceId}/evolve`, {});
   }
 

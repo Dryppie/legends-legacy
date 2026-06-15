@@ -8,11 +8,10 @@ import { ItemType } from '../../../../shared/models/enums/itemType';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { EssenceItem } from '../../../../shared/models/item';
 import {
-  DismantleEssenceResultDto,
   EssenceLoadoutDto,
   EssenceLoadoutsDto,
+  EssenceMutationResponseDto,
   PlayerEssenceDto,
-  ResponseMessageDto,
   SaveEssenceLoadoutSlotDto,
   SoulArchiveDto,
 } from '../../../../shared/models/essence-system';
@@ -168,15 +167,21 @@ export class EssenceStateService {
   }
 
   spendDust(essence: PlayerEssenceDto): void {
-    this.essencesService.spendDust(essence.id, 1).subscribe(() => this.refresh());
+    this.essencesService
+      .spendDust(essence.id, 1)
+      .subscribe((response) => this.applyEssenceMutation(response));
   }
 
   ascend(essence: PlayerEssenceDto): void {
-    this.essencesService.ascend(essence.id).subscribe(() => this.refresh());
+    this.essencesService
+      .ascend(essence.id)
+      .subscribe((response) => this.applyEssenceMutation(response));
   }
 
   evolve(essence: PlayerEssenceDto): void {
-    this.essencesService.evolve(essence.id).subscribe(() => this.refresh());
+    this.essencesService
+      .evolve(essence.id)
+      .subscribe((response) => this.applyEssenceMutation(response));
   }
 
   favorite(essence: PlayerEssenceDto): void {
@@ -185,7 +190,7 @@ export class EssenceStateService {
       .subscribe(() => this.refresh());
   }
 
-  absorbSelectedInventoryEssence(): Observable<ResponseMessageDto> | null {
+  absorbSelectedInventoryEssence(): Observable<EssenceMutationResponseDto> | null {
     const inventoryItemId = this._selectedInventoryItemId();
     const item = this.selectedInventoryItem();
     if (!item || !inventoryItemId || this.isInventoryEssenceAbsorbed(item)) {
@@ -196,15 +201,15 @@ export class EssenceStateService {
       tap((response) => {
         if (!response.succeeded) return;
 
-        const nextInventoryItemId = this.getNextAbsorbableInventoryEssenceId(item);
-        this.inventoryState.decrementItem(inventoryItemId, 1);
-        this._selectedInventoryItemId.set(nextInventoryItemId);
-        this.refresh();
+        this.applyEssenceMutation(response);
+        this._selectedInventoryItemId.set(
+          this.getFirstAbsorbableInventoryEssenceId(),
+        );
       }),
     );
   }
 
-  dismantleSelectedInventoryEssence(): Observable<DismantleEssenceResultDto> | null {
+  dismantleSelectedInventoryEssence(): Observable<EssenceMutationResponseDto> | null {
     const item = this.selectedInventoryItem();
     if (!item) return null;
 
@@ -212,9 +217,8 @@ export class EssenceStateService {
       tap((response) => {
         if (!response.succeeded) return;
 
-        this.inventoryState.decrementItem(item.itemInstance.id, 1);
+        this.applyEssenceMutation(response);
         this._selectedInventoryItemId.set(null);
-        this.refresh();
       }),
     );
   }
@@ -307,6 +311,12 @@ export class EssenceStateService {
     this._selectedPlayerEssenceId.set(archive.essences[0]?.id ?? null);
   }
 
+  private applyEssenceMutation(response: EssenceMutationResponseDto): void {
+    this._archive.set(response.archive);
+    this.inventoryState.setInventory(response.inventoryItems);
+    this.ensureSelectedEssence(response.archive);
+  }
+
   private ensureSelectedLoadout(loadouts: EssenceLoadoutsDto): void {
     const selectedLoadout =
       loadouts.loadouts.find((loadout) => loadout.id === this._selectedLoadoutId()) ??
@@ -330,28 +340,11 @@ export class EssenceStateService {
     return (inventoryItem.itemInstance.itemBase as EssenceItem).essenceDefinitionId;
   }
 
-  private getNextAbsorbableInventoryEssenceId(
-    absorbedItem: InventoryItem,
-  ): string | null {
-    const items = this.inventoryEssences();
-    const currentIndex = items.findIndex(
-      (item) => item.itemInstance.id === absorbedItem.itemInstance.id,
-    );
-    const absorbedEssenceDefinitionId = this.getEssenceDefinitionId(absorbedItem);
-
-    const orderedCandidates = [
-      ...items.slice(currentIndex + 1),
-      ...items.slice(0, Math.max(currentIndex, 0)),
-    ];
-
+  private getFirstAbsorbableInventoryEssenceId(): string | null {
     return (
-      orderedCandidates.find((item) => {
-        const essenceDefinitionId = this.getEssenceDefinitionId(item);
-        return (
-          essenceDefinitionId !== absorbedEssenceDefinitionId &&
-          !this.absorbedEssenceDefinitionIds().has(essenceDefinitionId)
-        );
-      })?.itemInstance.id ?? null
+      this.inventoryEssences().find(
+        (item) => !this.isInventoryEssenceAbsorbed(item),
+      )?.itemInstance.id ?? null
     );
   }
 }

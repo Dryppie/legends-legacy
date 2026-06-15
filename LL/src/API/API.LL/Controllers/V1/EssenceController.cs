@@ -31,23 +31,23 @@ public class EssenceController : BaseController
         await Mediator.Send(new GetActiveEssenceLoadoutQuery(CurrentCharacterGuid));
 
     [HttpPost("items/{inventoryItemId:guid}/absorb")]
-    public async Task<ActionResult<Response<ResponseMessageDto>>> AbsorbUnboundEssence(Guid inventoryItemId) =>
+    public async Task<ActionResult<Response<EssenceMutationResponseDto>>> AbsorbUnboundEssence(Guid inventoryItemId) =>
         await Mediator.Send(new AbsorbUnboundEssenceCommand(CurrentCharacterGuid, inventoryItemId));
 
     [HttpPost("items/{inventoryItemId:guid}/dismantle")]
-    public async Task<ActionResult<Response<DismantleEssenceResultDto>>> DismantleUnboundEssence(Guid inventoryItemId) =>
+    public async Task<ActionResult<Response<EssenceMutationResponseDto>>> DismantleUnboundEssence(Guid inventoryItemId) =>
         await Mediator.Send(new DismantleUnboundEssenceCommand(CurrentCharacterGuid, inventoryItemId));
 
     [HttpPost("{playerEssenceId:guid}/spend-dust")]
-    public async Task<ActionResult<Response<SpendEssenceDustResultDto>>> SpendDust(Guid playerEssenceId, [FromBody] SpendEssenceDustRequestDto request) =>
+    public async Task<ActionResult<Response<EssenceMutationResponseDto>>> SpendDust(Guid playerEssenceId, [FromBody] SpendEssenceDustRequestDto request) =>
         await Mediator.Send(new SpendEssenceDustCommand(CurrentCharacterGuid, playerEssenceId, request.DustAmount));
 
     [HttpPost("{playerEssenceId:guid}/ascend")]
-    public async Task<ActionResult<Response<ResponseMessageDto>>> Ascend(Guid playerEssenceId) =>
+    public async Task<ActionResult<Response<EssenceMutationResponseDto>>> Ascend(Guid playerEssenceId) =>
         await Mediator.Send(new AscendEssenceCommand(CurrentCharacterGuid, playerEssenceId));
 
     [HttpPost("{playerEssenceId:guid}/evolve")]
-    public async Task<ActionResult<Response<ResponseMessageDto>>> Evolve(Guid playerEssenceId) =>
+    public async Task<ActionResult<Response<EssenceMutationResponseDto>>> Evolve(Guid playerEssenceId) =>
         await Mediator.Send(new EvolveEssenceCommand(CurrentCharacterGuid, playerEssenceId));
 
     [HttpPost("{playerEssenceId:guid}/favorite")]

@@ -1,3 +1,5 @@
+import { InventoryItem } from './inventoryItem';
+
 export interface EssenceDefinitionDto {
   id: string;
   sourceMonsterId: string;
@@ -157,4 +159,14 @@ export interface SpendEssenceDustResultDto extends ResponseMessageDto {
   xpGained: number;
   levelsGained: number;
   reachedTierCap: boolean;
+}
+
+export interface EssenceMutationResponseDto extends ResponseMessageDto {
+  archive: SoulArchiveDto;
+  inventoryItems: InventoryItem[];
+  dustGained?: number | null;
+  dustSpent?: number | null;
+  xpGained?: number | null;
+  levelsGained?: number | null;
+  reachedTierCap?: boolean | null;
 }
