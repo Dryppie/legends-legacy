@@ -9,8 +9,13 @@
 import { Signal } from '@angular/core';
 import { LootReceivedMsg } from '../loot/loot-received';
 import { MarketListingSoldMsg } from '../market/market-listing-sold';
+import { GuildBuildingUpgradedMsg } from '../guild/guild-building-upgraded';
 
-export const gameEventNames = ['LootReceivedMsg', 'MarketListingSoldMsg'] as const;
+export const gameEventNames = [
+  'LootReceivedMsg',
+  'MarketListingSoldMsg',
+  'GuildBuildingUpgradedMsg',
+] as const;
 
 export type GameEventSignalMap = {
   [K in GameEventName]: Signal<GameEventMap[K] | null>;
@@ -20,9 +25,9 @@ export type GameEventSignalMap = {
 export interface GameEventMap {
   LootReceivedMsg: LootReceivedMsg;
   MarketListingSoldMsg: MarketListingSoldMsg;
+  GuildBuildingUpgradedMsg: GuildBuildingUpgradedMsg;
   //   SaleCompleted: SaleCompletedMsg;
   //   GuildApplication:        GuildApplicationMsg;
-  //   GuildBuildingUpgraded:   GuildBuildingUpgradedMsg;
   //   RiftOpened:    RiftOpenedMsg;
   // 💡 when you add a new C# record and regenerate the client
   // just place another line here – TypeScript will yell until you do.

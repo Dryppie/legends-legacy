@@ -28,6 +28,7 @@ export class GameEventService {
   private readonly hubUrl = `${environment.apiBaseUrl}/hub`;
   private hub?: HubConnection;
   private connectPromise?: Promise<void>;
+  private readonly guildSubscriptions = new Set<string>();
   private readonly zone = inject(NgZone);
   private readonly _connectionStatus =
     signal<GameConnectionStatus>('disconnected');
@@ -77,6 +78,7 @@ export class GameEventService {
         this._connectionStatus.set('connected');
         this._reconnectCount.update((count) => count + 1);
       });
+      void this.resubscribeAudiences();
     });
 
     this.hub.onclose((error) => {
@@ -102,13 +104,32 @@ export class GameEventService {
 
     // Character stream is automatic; subscribe to extra audiences if requested.
     if (audience) {
-      // await this.hub.invoke('SubscribeToAudience', audience);
+      await this.subscribeToAudience(audience);
     }
+  }
+
+  async subscribeToAudience(audience: AudienceDto): Promise<void> {
+    switch (audience.kind) {
+      case 'Guild':
+        await this.subscribeToGuild(audience.guildId);
+        break;
+      case 'World':
+        await this.ensureConnected();
+        await this.hub?.invoke('SubscribeToWorld');
+        break;
+    }
+  }
+
+  async subscribeToGuild(guildId: string): Promise<void> {
+    this.guildSubscriptions.add(guildId);
+    await this.ensureConnected();
+    await this.hub?.invoke('SubscribeToGuild', guildId);
   }
 
   async disconnect(): Promise<void> {
     await this.hub?.stop();
     this.hub = undefined;
+    this.guildSubscriptions.clear();
     this._connectionStatus.set('disconnected');
 
     /* reset signals to null so new components can distinguish old vs. new data */
@@ -141,6 +162,21 @@ export class GameEventService {
     const sig = this.channelsSig.get(env.event);
     if (sig) {
       this.zone.run(() => (sig as WritableSignal<unknown>).set(env.payload));
+    }
+  }
+
+  private async ensureConnected(): Promise<void> {
+    if (this.hub?.state === HubConnectionState.Connected) return;
+    await this.connect();
+  }
+
+  private async resubscribeAudiences(): Promise<void> {
+    for (const guildId of this.guildSubscriptions) {
+      try {
+        await this.hub?.invoke('SubscribeToGuild', guildId);
+      } catch (error) {
+        console.warn('Failed to resubscribe to guild realtime', error);
+      }
     }
   }
 }

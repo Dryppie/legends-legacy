@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, effect } from '@angular/core';
 import { finalize } from 'rxjs';
 import { Guild, GuildSimple } from '../../../../shared/models/Dtos/guild/guild';
 import { GuildInvite } from '../../../../shared/models/Dtos/guild/guildInvite';
@@ -6,6 +6,7 @@ import { InviteToGuild } from '../../../../shared/models/requestDtos/guilds/invi
 import { GuildService } from './guild.service';
 import { BuildingUpgradeView } from '../../../../shared/models/guilds/buildings/buildingUpgradeView';
 import { GuildResourceType } from '../../../../shared/models/Dtos/guild/guildResourceType';
+import { GameEventService } from '../../real-time/game-event.service';
 
 @Injectable({ providedIn: 'root' })
 export class GuildStateService {
@@ -27,17 +28,33 @@ export class GuildStateService {
   readonly isInGuild = computed(() => !!this._guild());
   readonly hasInvites = computed(() => this._invites().length > 0);
 
-  constructor(private readonly service: GuildService) {
+  constructor(
+    private readonly service: GuildService,
+    private readonly eventService: GameEventService,
+  ) {
     this.refresh(); // initial fetch
 
-    /* real-time updates pushed over the socket */
-    // effect(() => {
-    //   const evt = this.socket.ofType('guild:update')(); // adjust event name/payload
-    //   if (!evt) return;
+    effect(() => {
+      const guildId = this._guild()?.id;
+      if (!guildId) return;
 
-    //   if (evt.guild)   this._guild.set(evt.guild);
-    //   if (evt.invites) this._invites.set(evt.invites);
-    // });
+      void this.eventService
+        .subscribeToGuild(guildId)
+        .catch((error) =>
+          console.warn('Failed to subscribe to guild realtime', error),
+        );
+    });
+
+    effect(
+      () => {
+        const event = this.eventService.event.GuildBuildingUpgradedMsg();
+        const guildId = this._guild()?.id;
+        if (!event || !guildId || event.guildId !== guildId) return;
+
+        this.refresh();
+      },
+      { allowSignalWrites: true },
+    );
   }
 
   /* ─────────── high-level commands ─────────── */
@@ -151,37 +168,9 @@ export class GuildStateService {
       .upgradeGuildBuilding(upgrade.definition.id)
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: () => {
-          const guild = this._guild();
-
-          // Shallow clone to trigger reactivity
-          const updatedResources = [...(guild?.resources ?? [])];
-
-          for (const [resourceType, cost] of Object.entries(
-            upgrade.nextCost ?? {},
-          )) {
-            const res = updatedResources.find(
-              (r) => r.resource === resourceType,
-            );
-            if (res) {
-              res.amount -= cost;
-              if (res.amount < 0) res.amount = 0; // safety
-            }
-          }
-
-          this._guild.set({
-            ...guild!,
-            resources: updatedResources,
-          });
-
-          // Optimistically bump upgrade level
-          upgrade.level += 1;
-
-          // TODO: Recalculate `upgrade.nextCost` if needed, or set to null if max level
-          // For now, you may want to just trigger recompute logic
-          // this.refreshUpgrades(); // optional, or adjust locally too
-        },
-        error: (e) => this._error.set(e.message ?? 'Failed to disband guild'),
+        next: () => this.refresh(),
+        error: (e) =>
+          this._error.set(e.message ?? 'Failed to upgrade guild building'),
       });
   }
 
