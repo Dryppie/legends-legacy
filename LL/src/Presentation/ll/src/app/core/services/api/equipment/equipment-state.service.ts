@@ -4,20 +4,19 @@ import {
   EquipmentSlot,
   EquipmentSlotType,
 } from '../../../../shared/models/Dtos/equipment-slots/equipmentSlot';
-import { EquipmentType } from '../../../../shared/models/enums/equipmentType';
-import { Equipment, EquipmentInstance } from '../../../../shared/models/item';
-import { EquipmentService } from './equipment.service';
+import { EquipmentInstance } from '../../../../shared/models/item';
+import {
+  EquipmentChangeResponse,
+  EquipmentService,
+} from './equipment.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
-import { getSlotTypeFromEquipmentType } from '../../../../shared/utils/equipment/equipment.utils';
 
 @Injectable({ providedIn: 'root' })
 export class EquipmentStateService {
-  /* ---------- writable signals ---------- */
   private readonly _equipmentSlots = signal<EquipmentSlot[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
 
-  /* ---------- public, read-only signals ---------- */
   readonly equipmentSlots = computed(() => this._equipmentSlots());
   readonly loading = computed(() => this._loading());
   readonly error = computed(() => this._error());
@@ -32,9 +31,11 @@ export class EquipmentStateService {
     this.load();
   }
 
-  load(): void {
-    if (this._equipmentSlots().length) return; // already cached
+  load(force = false): void {
+    if (!force && this._equipmentSlots().length) return;
     this._loading.set(true);
+    this._error.set(null);
+
     this.equipmentService
       .getEquipment()
       .pipe(finalize(() => this._loading.set(false)))
@@ -58,176 +59,35 @@ export class EquipmentStateService {
     equipmentInstance: EquipmentInstance,
     slotType: EquipmentSlotType,
   ): void {
-    const equipmentBase = equipmentInstance.itemBase as Equipment;
-    const equipmentType = equipmentBase.equipmentType;
+    this._loading.set(true);
+    this._error.set(null);
 
-    this.equipmentService.equipEquipment(equipmentInstance, slotType);
-    this.inventoryState.removeItem(equipmentInstance.id);
-
-    const current = this._equipmentSlots();
-    const updated = current.map((slot) => ({ ...slot }));
-
-    const getSlot = (type: EquipmentSlotType) =>
-      updated.find((s) => s.equipmentSlotType === type);
-
-    const unequip = (slot?: EquipmentSlot) => {
-      if (slot && slot.equipmentInstance) {
-        this.inventoryState.addOrIncrement({
-          id: crypto.randomUUID(),
-          itemInstance: slot.equipmentInstance,
-          quantity: 1,
-        });
-        slot.equipmentInstance = undefined;
-      }
-    };
-
-    switch (equipmentType) {
-      case EquipmentType.TwoHanded: {
-        const main = getSlot(EquipmentSlotType.MainHand);
-        const off = getSlot(EquipmentSlotType.OffHand);
-        if (!main || !off) return;
-
-        if (
-          !main.equipmentInstance ||
-          (main.equipmentInstance.itemBase as Equipment).equipmentType !==
-            EquipmentType.TwoHanded
-        ) {
-          unequip(off);
-        }
-
-        unequip(main);
-        main.equipmentInstance = equipmentInstance;
-        off.equipmentInstance = equipmentInstance;
-        break;
-      }
-
-      case EquipmentType.OneHanded: {
-        const main = getSlot(EquipmentSlotType.MainHand);
-        const off = getSlot(EquipmentSlotType.OffHand);
-        if (!main || !off) return;
-
-        const mainType = main.equipmentInstance
-          ? (main.equipmentInstance.itemBase as Equipment).equipmentType
-          : null;
-
-        const offType = off.equipmentInstance
-          ? (off.equipmentInstance.itemBase as Equipment).equipmentType
-          : null;
-
-        if (
-          mainType === EquipmentType.TwoHanded ||
-          offType === EquipmentType.TwoHanded
-        ) {
-          unequip(main);
-          off.equipmentInstance = undefined;
-        }
-        if (!slotType) {
-          if (!main.equipmentInstance) {
-            main.equipmentInstance = equipmentInstance;
-          } else if (!off.equipmentInstance) {
-            off.equipmentInstance = equipmentInstance;
-          } else {
-            if (slotType === EquipmentSlotType.OffHand) {
-              unequip(off);
-              off.equipmentInstance = equipmentInstance;
-            } else {
-              unequip(main);
-              main.equipmentInstance = equipmentInstance;
-            }
-          }
-        } else {
-          if (slotType === EquipmentSlotType.OffHand) {
-            unequip(off);
-            off.equipmentInstance = equipmentInstance;
-          } else {
-            unequip(main);
-            main.equipmentInstance = equipmentInstance;
-          }
-        }
-        break;
-      }
-
-      case EquipmentType.OffHand: {
-        const main = getSlot(EquipmentSlotType.MainHand);
-        const off = getSlot(EquipmentSlotType.OffHand);
-        if (!main || !off) return;
-
-        const mainType = main.equipmentInstance
-          ? (main.equipmentInstance.itemBase as Equipment).equipmentType
-          : null;
-
-        const offType = off.equipmentInstance
-          ? (off.equipmentInstance.itemBase as Equipment).equipmentType
-          : null;
-
-        if (
-          mainType === EquipmentType.TwoHanded ||
-          offType === EquipmentType.TwoHanded
-        ) {
-          main.equipmentInstance = undefined;
-          unequip(off);
-        }
-
-        unequip(off);
-        off.equipmentInstance = equipmentInstance;
-        break;
-      }
-
-      default: {
-        const slotType = getSlotTypeFromEquipmentType(equipmentType);
-        const slot = getSlot(slotType);
-        if (!slot) return;
-
-        unequip(slot);
-        slot.equipmentInstance = equipmentInstance;
-        break;
-      }
-    }
-    this._equipmentSlots.set(updated);
+    this.equipmentService
+      .equipEquipment(equipmentInstance, slotType)
+      .pipe(finalize(() => this._loading.set(false)))
+      .subscribe({
+        next: (response) => this.applyEquipmentChange(response),
+        error: (err) =>
+          this._error.set(err.message ?? 'Failed to equip item.'),
+      });
   }
 
   unequip(slotType: EquipmentSlotType): void {
-    const current = this._equipmentSlots();
-    const updated = current.map((slot) => ({ ...slot }));
+    this._loading.set(true);
+    this._error.set(null);
 
-    const getSlot = (type: EquipmentSlotType) =>
-      updated.find((s) => s.equipmentSlotType === type);
+    this.equipmentService
+      .unequipEquipment(slotType)
+      .pipe(finalize(() => this._loading.set(false)))
+      .subscribe({
+        next: (response) => this.applyEquipmentChange(response),
+        error: (err) =>
+          this._error.set(err.message ?? 'Failed to unequip item.'),
+      });
+  }
 
-    const main = getSlot(EquipmentSlotType.MainHand);
-    const off = getSlot(EquipmentSlotType.OffHand);
-    const target = getSlot(slotType);
-
-    if (!target || !target.equipmentInstance) return;
-
-    const instance = target.equipmentInstance;
-
-    // Always add the unequipped item to inventory
-    this.inventoryState.addOrIncrement({
-      id: crypto.randomUUID(),
-      itemInstance: instance,
-      quantity: 1,
-    });
-
-    // If either main or off hand is TwoHanded, clear both slots
-    const mainIsTwoHanded =
-      main?.equipmentInstance?.equipmentBase.equipmentType ===
-      EquipmentType.TwoHanded;
-    const offIsTwoHanded =
-      off?.equipmentInstance?.equipmentBase.equipmentType ===
-      EquipmentType.TwoHanded;
-
-    if (
-      (slotType === EquipmentSlotType.MainHand ||
-        slotType === EquipmentSlotType.OffHand) &&
-      (mainIsTwoHanded || offIsTwoHanded)
-    ) {
-      if (main) main.equipmentInstance = undefined;
-      if (off) off.equipmentInstance = undefined;
-    } else {
-      target.equipmentInstance = undefined;
-    }
-
-    this._equipmentSlots.set(updated);
-    this.equipmentService.unequipEquipment(slotType);
+  private applyEquipmentChange(response: EquipmentChangeResponse): void {
+    this._equipmentSlots.set(response.equipmentSlots);
+    this.inventoryState.setInventory(response.inventoryItems);
   }
 }
