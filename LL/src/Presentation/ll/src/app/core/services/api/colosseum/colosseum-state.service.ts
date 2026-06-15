@@ -12,6 +12,11 @@ import { LeaderboardEntry } from '../../../../shared/models/Dtos/leaderboard/lea
 import { GameEventService } from '../../real-time/game-event.service';
 import { CharacterStateService } from '../character/character-state.service';
 import { ArenaBattleCompletedMsg } from '../../real-time/colosseum/arena-battle-completed';
+import {
+  NOTIFICATION_SURFACE,
+  NotificationService,
+  SIDEBAR_NOTIFICATION,
+} from '../../client-side/notifications/notification.service';
 
 @Injectable({ providedIn: 'root' })
 export class ColosseumStateService {
@@ -22,7 +27,6 @@ export class ColosseumStateService {
   private readonly _previousMatches = signal<ColosseumMatchResult[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
-  private readonly _notificationCount = signal(0);
   private hasLoaded = false;
   private lastArenaBattleCompletedEvent: unknown;
 
@@ -32,13 +36,19 @@ export class ColosseumStateService {
   readonly previousMatches = computed(() => this._previousMatches());
   readonly loading = computed(() => this._loading());
   readonly error = computed(() => this._error());
-  readonly notificationCount = computed(() => this._notificationCount());
+  readonly notificationCount = computed(() =>
+    this.notificationService.count(
+      NOTIFICATION_SURFACE.Sidebar,
+      SIDEBAR_NOTIFICATION.Colosseum,
+    ),
+  );
 
   constructor(
     private readonly colosseumService: ColosseumService,
     private readonly combatService: CombatService,
     private readonly eventService: GameEventService,
     private readonly characterState: CharacterStateService,
+    private readonly notificationService: NotificationService,
   ) {
     effect(
       () => {
@@ -164,7 +174,10 @@ export class ColosseumStateService {
   }
 
   markNotificationsSeen(): void {
-    this._notificationCount.set(0);
+    this.notificationService.markSeen(
+      NOTIFICATION_SURFACE.Sidebar,
+      SIDEBAR_NOTIFICATION.Colosseum,
+    );
   }
 
   private isParticipant(
@@ -191,6 +204,9 @@ export class ColosseumStateService {
   }
 
   private addNotification(): void {
-    this._notificationCount.update((count) => count + 1);
+    this.notificationService.increment(
+      NOTIFICATION_SURFACE.Sidebar,
+      SIDEBAR_NOTIFICATION.Colosseum,
+    );
   }
 }

@@ -7,6 +7,11 @@ import { GuildService } from './guild.service';
 import { BuildingUpgradeView } from '../../../../shared/models/guilds/buildings/buildingUpgradeView';
 import { GuildResourceType } from '../../../../shared/models/Dtos/guild/guildResourceType';
 import { GameEventService } from '../../real-time/game-event.service';
+import {
+  NOTIFICATION_SURFACE,
+  NotificationService,
+  SIDEBAR_NOTIFICATION,
+} from '../../client-side/notifications/notification.service';
 
 @Injectable({ providedIn: 'root' })
 export class GuildStateService {
@@ -17,8 +22,6 @@ export class GuildStateService {
   private readonly _allGuilds = signal<GuildSimple[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
-  private readonly _guildNotificationCount = signal(0);
-  private guildNotificationsSeen = false;
   private lastGuildBuildingUpgradeEvent: unknown;
   private lastGuildApplicationEvent: unknown;
   private lastGuildInviteEvent: unknown;
@@ -39,12 +42,16 @@ export class GuildStateService {
   readonly isInGuild = computed(() => !!this._guild());
   readonly hasInvites = computed(() => this._invites().length > 0);
   readonly guildNotificationCount = computed(() =>
-    this._guildNotificationCount(),
+    this.notificationService.count(
+      NOTIFICATION_SURFACE.Sidebar,
+      SIDEBAR_NOTIFICATION.Guild,
+    ),
   );
 
   constructor(
     private readonly service: GuildService,
     private readonly eventService: GameEventService,
+    private readonly notificationService: NotificationService,
   ) {
     this.refresh(); // initial fetch
 
@@ -420,19 +427,24 @@ export class GuildStateService {
   }
 
   markGuildNotificationsSeen(): void {
-    this.guildNotificationsSeen = true;
-    this._guildNotificationCount.set(0);
+    this.notificationService.markSeen(
+      NOTIFICATION_SURFACE.Sidebar,
+      SIDEBAR_NOTIFICATION.Guild,
+    );
   }
 
   private addGuildNotification(): void {
-    this.guildNotificationsSeen = false;
-    this._guildNotificationCount.update((count) => count + 1);
+    this.notificationService.increment(
+      NOTIFICATION_SURFACE.Sidebar,
+      SIDEBAR_NOTIFICATION.Guild,
+    );
   }
 
   private initializeGuildNotificationCount(count: number): void {
-    if (this.guildNotificationsSeen || this._guildNotificationCount() > 0)
-      return;
-
-    this._guildNotificationCount.set(count);
+    this.notificationService.initializeCount(
+      NOTIFICATION_SURFACE.Sidebar,
+      SIDEBAR_NOTIFICATION.Guild,
+      count,
+    );
   }
 }

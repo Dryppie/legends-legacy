@@ -22,8 +22,10 @@ import { NumberFormatPipe } from '../../../shared/pipes/number-format/number-for
 import { CharacterStateService } from '../../../core/services/api/character/character-state.service';
 import { SidebarSection } from '../../../shared/models/sidebar-item';
 import { CurrentDungeonComponent } from '../../../shared/components/current-dungeon/current-dungeon.component';
-import { GuildStateService } from '../../../core/services/api/guild/guild-state.service';
-import { ColosseumStateService } from '../../../core/services/api/colosseum/colosseum-state.service';
+import {
+  NOTIFICATION_SURFACE,
+  NotificationService,
+} from '../../../core/services/client-side/notifications/notification.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -51,16 +53,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
   useShortFormat = false;
 
   readonly currentCharacter;
-  readonly guildNotificationCount;
-  readonly colosseumNotificationCount;
 
   constructor(
     private readonly sidebarService: SidebarService,
     private readonly gameService: GameService,
     private readonly state: CharacterActionsStateService,
     private readonly characterState: CharacterStateService,
-    private readonly guildState: GuildStateService,
-    private readonly colosseumState: ColosseumStateService,
+    private readonly notificationService: NotificationService,
     private readonly router: Router,
   ) {
     effect(() => {
@@ -68,8 +67,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
     });
 
     this.currentCharacter = this.characterState.currentCharacter;
-    this.guildNotificationCount = this.guildState.guildNotificationCount;
-    this.colosseumNotificationCount = this.colosseumState.notificationCount;
   }
 
   ngOnInit(): void {
@@ -129,14 +126,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   getNotificationCount(itemId: string): number {
-    switch (itemId) {
-      case 'guild':
-        return this.guildNotificationCount();
-      case 'colosseum':
-        return this.colosseumNotificationCount();
-      default:
-        return 0;
-    }
+    return this.notificationService.count(NOTIFICATION_SURFACE.Sidebar, itemId);
   }
 
   navigateToAction(): void {
