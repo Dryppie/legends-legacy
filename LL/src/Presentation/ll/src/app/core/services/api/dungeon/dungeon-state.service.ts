@@ -6,6 +6,7 @@ import {
   DungeonRun,
   DungeonService,
   ExecuteDungeonActionResponse,
+  StartDungeonRunResponse,
 } from './dungeon.service';
 import { DungeonPreviewData } from '../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
 import { DungeonRecordsData } from '../../../../shared/models/Dtos/dungeons/dungeonRecordsData';
@@ -102,11 +103,11 @@ export class DungeonStateService {
     this._error.set(null);
 
     this.service
-      .startDungeon({ dungeonId, difficulty })
+      .startDungeon({ dungeonId, dungeonTier: difficulty })
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (run) => {
-          this._activeDungeon.set(run);
+        next: (response) => {
+          this.applyStartDungeon(response);
           onSuccess?.();
         },
         error: (e) => this._error.set(e.message ?? 'Failed to start dungeon'),
@@ -210,6 +211,14 @@ export class DungeonStateService {
     this._activeDungeon.set(response.activeRun);
     this.inventoryState.setInventory(response.inventoryItems, response.claimedLoot);
     this.characterState.updateCharacter(response.character);
+  }
+
+  private applyStartDungeon(response: StartDungeonRunResponse): void {
+    this._activeDungeon.set(response.run);
+
+    if (response.inventoryItems) {
+      this.inventoryState.setInventory(response.inventoryItems);
+    }
   }
 
   setActiveDungeon(run: DungeonRun | null): void {

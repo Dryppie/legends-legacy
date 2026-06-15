@@ -31,7 +31,7 @@ public class DungeonController : BaseController
 
     public record StartDungeonRequest(string DungeonId, DungeonTier DungeonTier);
     [HttpPost("StartDungeon")]
-    public async Task<ActionResult<Response<DungeonRunDto>>> StartDungeon([FromBody] StartDungeonRequest startDungeonRequest) =>
+    public async Task<ActionResult<Response<StartDungeonRunResponseDto>>> StartDungeon([FromBody] StartDungeonRequest startDungeonRequest) =>
         await Mediator.Send(new StartDungeonRunCommand(CurrentCharacterGuid, startDungeonRequest.DungeonId, startDungeonRequest.DungeonTier));
 
     public class ExecuteDungeonActionRequest

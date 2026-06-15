@@ -94,6 +94,11 @@ export interface ClaimDungeonRewardsResponse {
   character: CharacterDto;
 }
 
+export interface StartDungeonRunResponse {
+  run: DungeonRun;
+  inventoryItems?: InventoryItem[] | null;
+}
+
 export enum DungeonActionOutcome {
   None = 0,
   CombatVictory = 1,
@@ -134,7 +139,7 @@ export class DungeonService {
     );
   }
 
-  startDungeon(request: StartDungeonRequest): Observable<DungeonRun> {
+  startDungeon(request: StartDungeonRequest): Observable<StartDungeonRunResponse> {
     return this.api.post('dungeon/startDungeon', request).pipe(
       catchError(() => {
         return throwError(() => new Error('Failed to start dungeon'));
