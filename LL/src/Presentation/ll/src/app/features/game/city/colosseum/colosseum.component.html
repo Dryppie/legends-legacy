@@ -22,7 +22,8 @@
       <app-tab label="Arena">
         <app-arena-battle
           class="overflow-hidden"
-          [opponents]="opponents"
+          [opponents]="state.opponents()"
+          [arenaTicketStatus]="state.arenaTicketStatus()"
           (refreshOpponents)="onRefreshOpponents()"
           (challenge)="challenge($event)"
         >
@@ -39,14 +40,14 @@
       </app-tab> -->
 
       <app-tab label="Rankings">
-        <app-rankings-glory class="overflow-hidden" [rankings]="rankings">
+        <app-rankings-glory class="overflow-hidden" [rankings]="state.rankings()">
         </app-rankings-glory>
       </app-tab>
 
       <app-tab label="Record of Battles">
         <app-record-of-battle
           class="overflow-hidden"
-          [previousMatches]="previousMatches"
+          [previousMatches]="state.previousMatches()"
         >
         </app-record-of-battle>
       </app-tab>

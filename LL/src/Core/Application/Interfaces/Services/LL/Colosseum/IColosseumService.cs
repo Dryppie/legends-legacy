@@ -4,6 +4,11 @@ using Domain.Models.Entities.Characters;
 using Domain.Models.Leaderboards;
 
 namespace Application.Interfaces.Services.LL.Colosseum;
+
+public sealed record StartArenaBattleResult(
+    CombatResult CombatResult,
+    ArenaTicketStatus ArenaTicketStatus);
+
 public interface IColosseumService
 {
     Task<IReadOnlyList<ArenaOpponentPreview>> GetArenaOpponents(Guid characterId, CancellationToken cancellationToken);
@@ -27,5 +32,5 @@ public interface IColosseumService
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     Task SaveArenaMatchResult(Guid characterId, Guid enemyId, BattleOutcome outcome, ColosseumRatingResult ratingResult, CancellationToken cancellationToken);
-    Task<CombatResult?> StartArenaBattle(Guid characterId, Guid enemyId, CancellationToken cancellationToken);
+    Task<StartArenaBattleResult?> StartArenaBattle(Guid characterId, Guid enemyId, CancellationToken cancellationToken);
 }

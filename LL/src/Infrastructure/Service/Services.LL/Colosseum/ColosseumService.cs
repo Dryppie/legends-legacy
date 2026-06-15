@@ -26,13 +26,13 @@ public class ColosseumService : IColosseumService
         _ratingService = rs;
     }
 
-    public async Task<CombatResult?> StartArenaBattle(Guid characterId, Guid enemyId, CancellationToken cancellationToken)
+    public async Task<StartArenaBattleResult?> StartArenaBattle(Guid characterId, Guid enemyId, CancellationToken cancellationToken)
     {
         var now = DateTimeOffset.UtcNow;
 
-        var arenaTicketStatus = await _colosseumRepository.GetArenaTicketStatusAsync(characterId, cancellationToken);
+        var arenaTicketStatus = await GetArenaTicketStatusAsync(characterId, cancellationToken);
 
-        if (arenaTicketStatus.CurrentTickets < 1) throw new Exception();
+        if (arenaTicketStatus.CurrentTickets < 1) return null;
         arenaTicketStatus.CurrentTickets--;
         _colosseumRepository.UpdateArenaTicketStatus(arenaTicketStatus);
 
@@ -54,7 +54,7 @@ public class ColosseumService : IColosseumService
         combatResult.PlayerTeam = _combatSetupService.CreateSimpleCombatEntities(combatPlayerEntities);
         combatResult.EnemyTeam = _combatSetupService.CreateSimpleCombatEntities(combatEnemyEntities);
 
-        return combatResult;
+        return new StartArenaBattleResult(combatResult, arenaTicketStatus);
     }
 
     /// <summary>
