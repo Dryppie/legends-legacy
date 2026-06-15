@@ -9,6 +9,8 @@
 import { Signal } from '@angular/core';
 import { LootReceivedMsg } from '../loot/loot-received';
 
+export const gameEventNames = ['LootReceivedMsg'] as const;
+
 export type GameEventSignalMap = {
   [K in GameEventName]: Signal<GameEventMap[K] | null>;
 };
@@ -25,4 +27,8 @@ export interface GameEventMap {
 }
 
 /** Convenience alias you can reuse elsewhere */
-export type GameEventName = keyof GameEventMap;
+export type GameEventName = (typeof gameEventNames)[number];
+
+export function isGameEventName(name: string): name is GameEventName {
+  return gameEventNames.includes(name as GameEventName);
+}

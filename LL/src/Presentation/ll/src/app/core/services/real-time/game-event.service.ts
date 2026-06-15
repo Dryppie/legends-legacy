@@ -17,8 +17,10 @@ import {
   GameEventMap,
   GameEventName,
   GameEventSignalMap,
+  isGameEventName,
 } from './game-event/game-event.map';
 import { AudienceDto } from './audience/aducienceDto';
+import { GameEventEnvelope } from './game-event/game-event-envelope';
 
 @Injectable({ providedIn: 'root' })
 export class GameEventService {
@@ -53,7 +55,9 @@ export class GameEventService {
       .configureLogging(LogLevel.Warning)
       .build();
 
-    this.hub.on('Publish', (env) => this.dispatch(env));
+    this.hub.on('Publish', (env: GameEventEnvelope<string>) =>
+      this.dispatch(env),
+    );
 
     await this.hub.start();
 
@@ -87,7 +91,12 @@ export class GameEventService {
 
   /* -----------------  internal fan-out  ----------------- */
 
-  private dispatch(env: { event: GameEventName; payload: unknown }): void {
+  private dispatch(env: GameEventEnvelope<string>): void {
+    if (!isGameEventName(env.event)) {
+      console.warn(`Unknown game event ignored: ${env.event}`);
+      return;
+    }
+
     /* Update the signal (in the Angular zone so change detection runs). */
     const sig = this.channelsSig.get(env.event);
     if (sig) {
