@@ -1,6 +1,8 @@
-﻿using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL;
+using Application.Interfaces.WebSockets;
 using Application.MediatR.Markers;
 using Application.UseCases.Guilds.Dtos.Requests;
+using Application.WebSockets.Contracts;
 using Common.Primitives;
 using MediatR;
 
@@ -9,10 +11,14 @@ public record InviteCommand(Guid CurrentCharacterId, InviteToGuildDto Invite) : 
 public class InviteCommandHandler : IRequestHandler<InviteCommand, Response<bool>>
 {
     private readonly IGuildService _guildService;
+    private readonly IGameEventPublisher _eventPublisher;
 
-    public InviteCommandHandler(IGuildService guildService)
+    public InviteCommandHandler(
+        IGuildService guildService,
+        IGameEventPublisher eventPublisher)
     {
         _guildService = guildService;
+        _eventPublisher = eventPublisher;
     }
 
     public async Task<Response<bool>> Handle(InviteCommand request, CancellationToken cancellationToken)
@@ -21,8 +27,17 @@ public class InviteCommandHandler : IRequestHandler<InviteCommand, Response<bool
 
         if (!Guid.TryParse(request.Invite.CharacterNameOrId, out var invitedCharacterId)) return Response<bool>.Fail("Invalid character.");
 
-        return await _guildService.InviteAsync(request.CurrentCharacterId, guildId, invitedCharacterId, cancellationToken)
-            ? Response<bool>.Success(true)
-            : Response<bool>.Fail("Failed to invite character.");
+        var invited = await _guildService.InviteAsync(request.CurrentCharacterId, guildId, invitedCharacterId, cancellationToken);
+        if (!invited)
+            return Response<bool>.Fail("Failed to invite character.");
+
+        await _eventPublisher.PublishAsync(
+            new Audience.Character(invitedCharacterId),
+            new GuildInviteReceivedMsg(guildId, invitedCharacterId));
+        await _eventPublisher.PublishAsync(
+            new Audience.Guild(guildId),
+            new GuildStateChangedMsg(guildId));
+
+        return Response<bool>.Success(true);
     }
 }

@@ -17,6 +17,17 @@ export class GuildStateService {
   private readonly _allGuilds = signal<GuildSimple[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
+  private readonly _guildNotificationCount = signal(0);
+  private guildNotificationsSeen = false;
+  private lastGuildBuildingUpgradeEvent: unknown;
+  private lastGuildApplicationEvent: unknown;
+  private lastGuildInviteEvent: unknown;
+  private lastGuildInviteRejectedEvent: unknown;
+  private lastGuildApplicationRejectedEvent: unknown;
+  private lastGuildStateChangedEvent: unknown;
+  private lastGuildMembershipChangedEvent: unknown;
+  private lastGuildDisbandedEvent: unknown;
+  private lastGuildDirectoryChangedEvent: unknown;
 
   /* ─────────── public, read-only selectors ─────────── */
   readonly guild = computed(() => this._guild());
@@ -27,6 +38,9 @@ export class GuildStateService {
   readonly error = computed(() => this._error());
   readonly isInGuild = computed(() => !!this._guild());
   readonly hasInvites = computed(() => this._invites().length > 0);
+  readonly guildNotificationCount = computed(() =>
+    this._guildNotificationCount(),
+  );
 
   constructor(
     private readonly service: GuildService,
@@ -47,11 +61,138 @@ export class GuildStateService {
 
     effect(
       () => {
-        const event = this.eventService.event.GuildBuildingUpgradedMsg();
         const guildId = this._guild()?.id;
-        if (!event || !guildId || event.guildId !== guildId) return;
+        const invite = this.eventService.event.GuildInviteReceivedMsg();
+        const inviteRejected = this.eventService.event.GuildInviteRejectedMsg();
+        const applicationRejected =
+          this.eventService.event.GuildApplicationRejectedMsg();
+        const guildStateChanged =
+          this.eventService.event.GuildStateChangedMsg();
+        const membershipChanged =
+          this.eventService.event.GuildMembershipChangedMsg();
+        const guildDisbanded = this.eventService.event.GuildDisbandedMsg();
+        const directoryChanged =
+          this.eventService.event.GuildDirectoryChangedMsg();
 
-        this.refresh();
+        if (
+          directoryChanged &&
+          directoryChanged !== this.lastGuildDirectoryChangedEvent
+        ) {
+          this.lastGuildDirectoryChangedEvent = directoryChanged;
+          this.loadAllGuilds();
+        }
+
+        if (!guildId && invite && invite !== this.lastGuildInviteEvent) {
+          this.lastGuildInviteEvent = invite;
+          this.addGuildNotification();
+          this.loadMyInvites();
+          return;
+        }
+
+        if (
+          !guildId &&
+          inviteRejected &&
+          inviteRejected !== this.lastGuildInviteRejectedEvent
+        ) {
+          this.lastGuildInviteRejectedEvent = inviteRejected;
+          this.loadMyInvites();
+          return;
+        }
+
+        if (
+          !guildId &&
+          applicationRejected &&
+          applicationRejected !== this.lastGuildApplicationRejectedEvent
+        ) {
+          this.lastGuildApplicationRejectedEvent = applicationRejected;
+          this.loadMyInvites();
+          return;
+        }
+
+        if (
+          !guildId &&
+          membershipChanged &&
+          membershipChanged !== this.lastGuildMembershipChangedEvent
+        ) {
+          this.lastGuildMembershipChangedEvent = membershipChanged;
+          this.refresh();
+          return;
+        }
+
+        if (!guildId) return;
+
+        const buildingUpgrade = this.eventService.event.GuildBuildingUpgradedMsg();
+        const application = this.eventService.event.GuildApplicationMsg();
+
+        if (
+          buildingUpgrade &&
+          buildingUpgrade !== this.lastGuildBuildingUpgradeEvent &&
+          buildingUpgrade.guildId === guildId
+        ) {
+          this.lastGuildBuildingUpgradeEvent = buildingUpgrade;
+          this.refresh();
+          return;
+        }
+
+        if (
+          application &&
+          application !== this.lastGuildApplicationEvent &&
+          application.guildId === guildId
+        ) {
+          this.lastGuildApplicationEvent = application;
+          this.addGuildNotification();
+          this.refresh();
+          return;
+        }
+
+        if (
+          guildStateChanged &&
+          guildStateChanged !== this.lastGuildStateChangedEvent &&
+          guildStateChanged.guildId === guildId
+        ) {
+          this.lastGuildStateChangedEvent = guildStateChanged;
+          this.refresh();
+          return;
+        }
+
+        if (
+          membershipChanged &&
+          membershipChanged !== this.lastGuildMembershipChangedEvent &&
+          membershipChanged.guildId === guildId
+        ) {
+          this.lastGuildMembershipChangedEvent = membershipChanged;
+          this.refresh();
+          return;
+        }
+
+        if (
+          guildDisbanded &&
+          guildDisbanded !== this.lastGuildDisbandedEvent &&
+          guildDisbanded.guildId === guildId
+        ) {
+          this.lastGuildDisbandedEvent = guildDisbanded;
+          this.refresh();
+          return;
+        }
+
+        if (
+          inviteRejected &&
+          inviteRejected !== this.lastGuildInviteRejectedEvent &&
+          inviteRejected.guildId === guildId
+        ) {
+          this.lastGuildInviteRejectedEvent = inviteRejected;
+          this.refresh();
+          return;
+        }
+
+        if (
+          applicationRejected &&
+          applicationRejected !== this.lastGuildApplicationRejectedEvent &&
+          applicationRejected.guildId === guildId
+        ) {
+          this.lastGuildApplicationRejectedEvent = applicationRejected;
+          this.refresh();
+        }
       },
       { allowSignalWrites: true },
     );
@@ -70,6 +211,10 @@ export class GuildStateService {
         next: (guild) => {
           if (guild) {
             this._guild.set(guild);
+            this.initializeGuildNotificationCount(
+              guild.invites.filter((invite: GuildInvite) => !invite.isInvite)
+                .length,
+            );
             this._invites.set([]);
             this._allGuilds.set([]);
             this.loadGuildUpgrades();
@@ -185,7 +330,12 @@ export class GuildStateService {
 
   private loadMyInvites(): void {
     this.service.getMyInvites().subscribe({
-      next: (inv) => this._invites.set(inv),
+      next: (inv) => {
+        this._invites.set(inv);
+        this.initializeGuildNotificationCount(
+          inv.filter((invite: GuildInvite) => invite.isInvite).length,
+        );
+      },
       error: (e) => this._error.set(e.message ?? 'Failed to load invites'),
     });
   }
@@ -271,5 +421,22 @@ export class GuildStateService {
   }
   setAllGuilds(gs: GuildSimple[]) {
     this._allGuilds.set(gs);
+  }
+
+  markGuildNotificationsSeen(): void {
+    this.guildNotificationsSeen = true;
+    this._guildNotificationCount.set(0);
+  }
+
+  private addGuildNotification(): void {
+    this.guildNotificationsSeen = false;
+    this._guildNotificationCount.update((count) => count + 1);
+  }
+
+  private initializeGuildNotificationCount(count: number): void {
+    if (this.guildNotificationsSeen || this._guildNotificationCount() > 0)
+      return;
+
+    this._guildNotificationCount.set(count);
   }
 }

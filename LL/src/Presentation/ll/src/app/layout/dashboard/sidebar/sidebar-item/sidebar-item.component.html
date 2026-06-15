@@ -8,6 +8,12 @@
       : 'none'
   "
 >
+  <span
+    *ngIf="notificationCount > 0"
+    class="absolute right-3 top-2 h-2.5 w-2.5 rounded-full border border-black bg-primary shadow-[0_0_8px_rgba(234,179,8,0.7)]"
+    title="Pending guild activity"
+  ></span>
+
   <div
     class="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full sm:flex"
   >

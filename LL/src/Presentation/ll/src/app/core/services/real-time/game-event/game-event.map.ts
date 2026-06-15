@@ -10,11 +10,27 @@ import { Signal } from '@angular/core';
 import { LootReceivedMsg } from '../loot/loot-received';
 import { MarketListingSoldMsg } from '../market/market-listing-sold';
 import { GuildBuildingUpgradedMsg } from '../guild/guild-building-upgraded';
+import { GuildApplicationMsg } from '../guild/guild-application';
+import { GuildInviteReceivedMsg } from '../guild/guild-invite-received';
+import { GuildInviteRejectedMsg } from '../guild/guild-invite-rejected';
+import { GuildApplicationRejectedMsg } from '../guild/guild-application-rejected';
+import { GuildStateChangedMsg } from '../guild/guild-state-changed';
+import { GuildMembershipChangedMsg } from '../guild/guild-membership-changed';
+import { GuildDisbandedMsg } from '../guild/guild-disbanded';
+import { GuildDirectoryChangedMsg } from '../guild/guild-directory-changed';
 
 export const gameEventNames = [
   'LootReceivedMsg',
   'MarketListingSoldMsg',
   'GuildBuildingUpgradedMsg',
+  'GuildApplicationMsg',
+  'GuildInviteReceivedMsg',
+  'GuildInviteRejectedMsg',
+  'GuildApplicationRejectedMsg',
+  'GuildStateChangedMsg',
+  'GuildMembershipChangedMsg',
+  'GuildDisbandedMsg',
+  'GuildDirectoryChangedMsg',
 ] as const;
 
 export type GameEventSignalMap = {
@@ -26,8 +42,15 @@ export interface GameEventMap {
   LootReceivedMsg: LootReceivedMsg;
   MarketListingSoldMsg: MarketListingSoldMsg;
   GuildBuildingUpgradedMsg: GuildBuildingUpgradedMsg;
+  GuildApplicationMsg: GuildApplicationMsg;
+  GuildInviteReceivedMsg: GuildInviteReceivedMsg;
+  GuildInviteRejectedMsg: GuildInviteRejectedMsg;
+  GuildApplicationRejectedMsg: GuildApplicationRejectedMsg;
+  GuildStateChangedMsg: GuildStateChangedMsg;
+  GuildMembershipChangedMsg: GuildMembershipChangedMsg;
+  GuildDisbandedMsg: GuildDisbandedMsg;
+  GuildDirectoryChangedMsg: GuildDirectoryChangedMsg;
   //   SaleCompleted: SaleCompletedMsg;
-  //   GuildApplication:        GuildApplicationMsg;
   //   RiftOpened:    RiftOpenedMsg;
   // 💡 when you add a new C# record and regenerate the client
   // just place another line here – TypeScript will yell until you do.
