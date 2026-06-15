@@ -73,6 +73,7 @@ export class GuildStateService {
         const guildDisbanded = this.eventService.event.GuildDisbandedMsg();
         const directoryChanged =
           this.eventService.event.GuildDirectoryChangedMsg();
+        let shouldRefresh = false;
 
         if (
           directoryChanged &&
@@ -86,7 +87,6 @@ export class GuildStateService {
           this.lastGuildInviteEvent = invite;
           this.addGuildNotification();
           this.loadMyInvites();
-          return;
         }
 
         if (
@@ -96,7 +96,6 @@ export class GuildStateService {
         ) {
           this.lastGuildInviteRejectedEvent = inviteRejected;
           this.loadMyInvites();
-          return;
         }
 
         if (
@@ -106,7 +105,6 @@ export class GuildStateService {
         ) {
           this.lastGuildApplicationRejectedEvent = applicationRejected;
           this.loadMyInvites();
-          return;
         }
 
         if (
@@ -115,11 +113,13 @@ export class GuildStateService {
           membershipChanged !== this.lastGuildMembershipChangedEvent
         ) {
           this.lastGuildMembershipChangedEvent = membershipChanged;
-          this.refresh();
-          return;
+          shouldRefresh = true;
         }
 
-        if (!guildId) return;
+        if (!guildId) {
+          if (shouldRefresh) this.refresh();
+          return;
+        }
 
         const buildingUpgrade = this.eventService.event.GuildBuildingUpgradedMsg();
         const application = this.eventService.event.GuildApplicationMsg();
@@ -130,8 +130,7 @@ export class GuildStateService {
           buildingUpgrade.guildId === guildId
         ) {
           this.lastGuildBuildingUpgradeEvent = buildingUpgrade;
-          this.refresh();
-          return;
+          shouldRefresh = true;
         }
 
         if (
@@ -141,8 +140,7 @@ export class GuildStateService {
         ) {
           this.lastGuildApplicationEvent = application;
           this.addGuildNotification();
-          this.refresh();
-          return;
+          shouldRefresh = true;
         }
 
         if (
@@ -151,8 +149,7 @@ export class GuildStateService {
           guildStateChanged.guildId === guildId
         ) {
           this.lastGuildStateChangedEvent = guildStateChanged;
-          this.refresh();
-          return;
+          shouldRefresh = true;
         }
 
         if (
@@ -161,8 +158,7 @@ export class GuildStateService {
           membershipChanged.guildId === guildId
         ) {
           this.lastGuildMembershipChangedEvent = membershipChanged;
-          this.refresh();
-          return;
+          shouldRefresh = true;
         }
 
         if (
@@ -171,8 +167,7 @@ export class GuildStateService {
           guildDisbanded.guildId === guildId
         ) {
           this.lastGuildDisbandedEvent = guildDisbanded;
-          this.refresh();
-          return;
+          shouldRefresh = true;
         }
 
         if (
@@ -181,8 +176,7 @@ export class GuildStateService {
           inviteRejected.guildId === guildId
         ) {
           this.lastGuildInviteRejectedEvent = inviteRejected;
-          this.refresh();
-          return;
+          shouldRefresh = true;
         }
 
         if (
@@ -191,8 +185,10 @@ export class GuildStateService {
           applicationRejected.guildId === guildId
         ) {
           this.lastGuildApplicationRejectedEvent = applicationRejected;
-          this.refresh();
+          shouldRefresh = true;
         }
+
+        if (shouldRefresh) this.refresh();
       },
       { allowSignalWrites: true },
     );

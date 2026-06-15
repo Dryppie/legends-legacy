@@ -46,7 +46,7 @@ public class BuyoutMarketPlaceListingCommandHandler : IRequestHandler<BuyoutMark
         var remainingListing = _mapper.Map<MarketPlaceListingDto?>(result.RemainingListing);
 
         await _eventPublisher.PublishAsync(
-            new Audience.Character(result.SellerId),
+            new Audience.World(),
             new MarketListingSoldMsg(
                 result.ListingId,
                 result.SellerId,

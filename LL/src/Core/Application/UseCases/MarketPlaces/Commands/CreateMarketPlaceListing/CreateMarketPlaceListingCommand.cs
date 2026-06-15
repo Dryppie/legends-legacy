@@ -1,7 +1,9 @@
-﻿using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL;
+using Application.Interfaces.WebSockets;
 using Application.MediatR.Markers;
 using Application.UseCases.MarketPlaces.Dtos.Requests;
 using Application.UseCases.MarketPlaces.Dtos.Responses;
+using Application.WebSockets.Contracts;
 using AutoMapper;
 using Common.Primitives;
 using Domain.Models.MarketPlaces;
@@ -12,11 +14,16 @@ public record CreateMarketPlaceListingCommand(Guid CharacterId, CreateMarketPlac
 public class CreateMarketPlaceListingCommandHandler : IRequestHandler<CreateMarketPlaceListingCommand, Response<MarketPlaceListingDto>>
 {
     private readonly IMarketPlaceService _marketPlaceService;
+    private readonly IGameEventPublisher _eventPublisher;
     private readonly IMapper _mapper;
 
-    public CreateMarketPlaceListingCommandHandler(IMarketPlaceService marketPlaceService, IMapper mapper)
+    public CreateMarketPlaceListingCommandHandler(
+        IMarketPlaceService marketPlaceService,
+        IGameEventPublisher eventPublisher,
+        IMapper mapper)
     {
         _marketPlaceService = marketPlaceService;
+        _eventPublisher = eventPublisher;
         _mapper = mapper;
     }
 
@@ -35,6 +42,12 @@ public class CreateMarketPlaceListingCommandHandler : IRequestHandler<CreateMark
         var listing = await _marketPlaceService.CreateMarketPlaceListingAsync(request.CharacterId, marketPlaceListing, cancellationToken);
         if (listing == null) return Response<MarketPlaceListingDto>.Fail("Failed to create marketplace listing.");
 
-        return Response<MarketPlaceListingDto>.Success(_mapper.Map<MarketPlaceListingDto>(listing));
+        var dto = _mapper.Map<MarketPlaceListingDto>(listing);
+
+        await _eventPublisher.PublishAsync(
+            new Audience.World(),
+            new MarketListingCreatedMsg(dto));
+
+        return Response<MarketPlaceListingDto>.Success(dto);
     }
 }

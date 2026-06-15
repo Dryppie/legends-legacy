@@ -29,6 +29,9 @@ export class GameEventService {
   private hub?: HubConnection;
   private connectPromise?: Promise<void>;
   private readonly guildSubscriptions = new Set<string>();
+  private readonly activeGuildSubscriptions = new Set<string>();
+  private worldSubscriptionRequested = false;
+  private worldSubscriptionActive = false;
   private readonly zone = inject(NgZone);
   private readonly _connectionStatus =
     signal<GameConnectionStatus>('disconnected');
@@ -51,8 +54,20 @@ export class GameEventService {
   /* -------------  connection boilerplate (unchanged)  ------------- */
 
   async connect(audience?: AudienceDto): Promise<void> {
-    if (this.hub?.state === HubConnectionState.Connected) return;
-    if (this.connectPromise) return this.connectPromise;
+    if (this.hub?.state === HubConnectionState.Connected) {
+      if (audience) {
+        await this.subscribeToAudience(audience);
+      }
+      return;
+    }
+
+    if (this.connectPromise) {
+      await this.connectPromise;
+      if (audience) {
+        await this.subscribeToAudience(audience);
+      }
+      return;
+    }
 
     this.hub = new HubConnectionBuilder()
       .withUrl(this.hubUrl, { withCredentials: true })
@@ -69,11 +84,15 @@ export class GameEventService {
     );
 
     this.hub.onreconnecting((error) => {
+      this.activeGuildSubscriptions.clear();
+      this.worldSubscriptionActive = false;
       this.zone.run(() => this._connectionStatus.set('reconnecting'));
       if (error) console.warn('Game realtime reconnecting', error);
     });
 
     this.hub.onreconnected(() => {
+      this.activeGuildSubscriptions.clear();
+      this.worldSubscriptionActive = false;
       this.zone.run(() => {
         this._connectionStatus.set('connected');
         this._reconnectCount.update((count) => count + 1);
@@ -82,6 +101,8 @@ export class GameEventService {
     });
 
     this.hub.onclose((error) => {
+      this.activeGuildSubscriptions.clear();
+      this.worldSubscriptionActive = false;
       this.zone.run(() => this._connectionStatus.set('disconnected'));
       if (error) console.warn('Game realtime disconnected', error);
     });
@@ -114,8 +135,7 @@ export class GameEventService {
         await this.subscribeToGuild(audience.guildId);
         break;
       case 'World':
-        await this.ensureConnected();
-        await this.hub?.invoke('SubscribeToWorld');
+        await this.subscribeToWorld();
         break;
     }
   }
@@ -123,13 +143,19 @@ export class GameEventService {
   async subscribeToGuild(guildId: string): Promise<void> {
     this.guildSubscriptions.add(guildId);
     await this.ensureConnected();
+    if (this.activeGuildSubscriptions.has(guildId)) return;
+
     await this.hub?.invoke('SubscribeToGuild', guildId);
+    this.activeGuildSubscriptions.add(guildId);
   }
 
   async disconnect(): Promise<void> {
     await this.hub?.stop();
     this.hub = undefined;
     this.guildSubscriptions.clear();
+    this.activeGuildSubscriptions.clear();
+    this.worldSubscriptionRequested = false;
+    this.worldSubscriptionActive = false;
     this._connectionStatus.set('disconnected');
 
     /* reset signals to null so new components can distinguish old vs. new data */
@@ -159,10 +185,13 @@ export class GameEventService {
     }
 
     /* Update the signal (in the Angular zone so change detection runs). */
-    const sig = this.channelsSig.get(env.event);
-    if (sig) {
-      this.zone.run(() => (sig as WritableSignal<unknown>).set(env.payload));
+    let sig = this.channelsSig.get(env.event);
+    if (!sig) {
+      sig = signal<unknown | null>(null);
+      this.channelsSig.set(env.event, sig);
     }
+
+    this.zone.run(() => (sig as WritableSignal<unknown>).set(env.payload));
   }
 
   private async ensureConnected(): Promise<void> {
@@ -170,10 +199,27 @@ export class GameEventService {
     await this.connect();
   }
 
+  private async subscribeToWorld(): Promise<void> {
+    this.worldSubscriptionRequested = true;
+    await this.ensureConnected();
+    if (this.worldSubscriptionActive) return;
+
+    await this.hub?.invoke('SubscribeToWorld');
+    this.worldSubscriptionActive = true;
+  }
+
   private async resubscribeAudiences(): Promise<void> {
+    if (this.worldSubscriptionRequested) {
+      try {
+        await this.subscribeToWorld();
+      } catch (error) {
+        console.warn('Failed to resubscribe to world realtime', error);
+      }
+    }
+
     for (const guildId of this.guildSubscriptions) {
       try {
-        await this.hub?.invoke('SubscribeToGuild', guildId);
+        await this.subscribeToGuild(guildId);
       } catch (error) {
         console.warn('Failed to resubscribe to guild realtime', error);
       }

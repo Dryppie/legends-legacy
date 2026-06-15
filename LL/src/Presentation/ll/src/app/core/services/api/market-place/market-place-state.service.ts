@@ -22,6 +22,8 @@ import { CharacterService } from '../character/character.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { GameEventService } from '../../real-time/game-event.service';
 import { MarketListingSoldMsg } from '../../real-time/market/market-listing-sold';
+import { MarketListingCreatedMsg } from '../../real-time/market/market-listing-created';
+import { MarketListingCanceledMsg } from '../../real-time/market/market-listing-canceled';
 
 @Injectable({ providedIn: 'root' })
 export class MarketplaceStateService {
@@ -30,6 +32,9 @@ export class MarketplaceStateService {
   private readonly _error = signal<string | null>(null);
 
   private readonly myCharacterId!: Signal<string | null>;
+  private lastMarketListingSoldEvent: unknown;
+  private lastMarketListingCreatedEvent: unknown;
+  private lastMarketListingCanceledEvent: unknown;
 
   readonly listings = computed(() => {
     return this._listings();
@@ -56,8 +61,22 @@ export class MarketplaceStateService {
     effect(
       () => {
         const sale = this.eventService.event.MarketListingSoldMsg();
-        if (sale) {
+        const created = this.eventService.event.MarketListingCreatedMsg();
+        const canceled = this.eventService.event.MarketListingCanceledMsg();
+
+        if (sale && sale !== this.lastMarketListingSoldEvent) {
+          this.lastMarketListingSoldEvent = sale;
           untracked(() => this.applySellerSale(sale));
+        }
+
+        if (created && created !== this.lastMarketListingCreatedEvent) {
+          this.lastMarketListingCreatedEvent = created;
+          untracked(() => this.applyCreatedListing(created));
+        }
+
+        if (canceled && canceled !== this.lastMarketListingCanceledEvent) {
+          this.lastMarketListingCanceledEvent = canceled;
+          untracked(() => this.applyCanceledListing(canceled));
         }
       },
       { allowSignalWrites: true },
@@ -144,7 +163,7 @@ export class MarketplaceStateService {
   }
 
   addToListings(listing: MarketPlaceListing) {
-    this._listings.set([...this._listings(), listing]);
+    this.upsertListing(listing);
   }
 
   // Remove an existing listing.
@@ -181,7 +200,18 @@ export class MarketplaceStateService {
 
   private applySellerSale(sale: MarketListingSoldMsg): void {
     this.applyListingChange(sale.listingId, sale.remainingListing);
-    this.updateCurrentCharacterCinders(sale.sellerCinders);
+
+    if (sale.sellerId === this.myCharacterId()) {
+      this.updateCurrentCharacterCinders(sale.sellerCinders);
+    }
+  }
+
+  private applyCreatedListing(event: MarketListingCreatedMsg): void {
+    this.upsertListing(event.listing);
+  }
+
+  private applyCanceledListing(event: MarketListingCanceledMsg): void {
+    this.removeListing(event.listingId);
   }
 
   private applyListingChange(
@@ -213,5 +243,18 @@ export class MarketplaceStateService {
       ...character,
       cinders,
     });
+  }
+
+  private upsertListing(listing: MarketPlaceListing): void {
+    const listings = this._listings();
+    const index = listings.findIndex((current) => current.id === listing.id);
+    if (index === -1) {
+      this._listings.set([...listings, listing]);
+      return;
+    }
+
+    const updated = [...listings];
+    updated[index] = listing;
+    this._listings.set(updated);
   }
 }

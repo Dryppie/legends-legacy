@@ -3,8 +3,10 @@ import {
   computed,
   EventEmitter,
   Input,
+  OnChanges,
   OnInit,
   Output,
+  SimpleChanges,
 } from '@angular/core';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { Guild } from '../../../../../../shared/models/Dtos/guild/guild';
@@ -31,7 +33,7 @@ import { CharacterTagComponent } from '../../../../../../shared/components/chara
   ],
   templateUrl: './guild-info.component.html',
 })
-export class GuildInfoComponent implements OnInit {
+export class GuildInfoComponent implements OnInit, OnChanges {
   @Input() guild!: Guild;
   @Output() inviteEvent = new EventEmitter<string>();
   @Output() leaveEvent = new EventEmitter<void>();
@@ -66,6 +68,12 @@ export class GuildInfoComponent implements OnInit {
 
   ngOnInit(): void {
     this.sortGuildMembers();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['guild']) {
+      this.sortGuildMembers();
+    }
   }
 
   private sortGuildMembers() {

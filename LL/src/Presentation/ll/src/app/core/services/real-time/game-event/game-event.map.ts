@@ -9,6 +9,8 @@
 import { Signal } from '@angular/core';
 import { LootReceivedMsg } from '../loot/loot-received';
 import { MarketListingSoldMsg } from '../market/market-listing-sold';
+import { MarketListingCreatedMsg } from '../market/market-listing-created';
+import { MarketListingCanceledMsg } from '../market/market-listing-canceled';
 import { GuildBuildingUpgradedMsg } from '../guild/guild-building-upgraded';
 import { GuildApplicationMsg } from '../guild/guild-application';
 import { GuildInviteReceivedMsg } from '../guild/guild-invite-received';
@@ -22,6 +24,8 @@ import { GuildDirectoryChangedMsg } from '../guild/guild-directory-changed';
 export const gameEventNames = [
   'LootReceivedMsg',
   'MarketListingSoldMsg',
+  'MarketListingCreatedMsg',
+  'MarketListingCanceledMsg',
   'GuildBuildingUpgradedMsg',
   'GuildApplicationMsg',
   'GuildInviteReceivedMsg',
@@ -41,6 +45,8 @@ export type GameEventSignalMap = {
 export interface GameEventMap {
   LootReceivedMsg: LootReceivedMsg;
   MarketListingSoldMsg: MarketListingSoldMsg;
+  MarketListingCreatedMsg: MarketListingCreatedMsg;
+  MarketListingCanceledMsg: MarketListingCanceledMsg;
   GuildBuildingUpgradedMsg: GuildBuildingUpgradedMsg;
   GuildApplicationMsg: GuildApplicationMsg;
   GuildInviteReceivedMsg: GuildInviteReceivedMsg;
