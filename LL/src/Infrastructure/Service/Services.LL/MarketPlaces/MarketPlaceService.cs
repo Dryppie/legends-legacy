@@ -29,19 +29,19 @@ public class MarketPlaceService : IMarketPlaceService
         return await _marketPlaceRepository.CreateMarketPlaceListingAsync(characterId, marketPlaceListing, cancellationToken);
     }
 
-    public async Task<bool> BuyoutMarketPlaceListingAsync(Guid characterId, Guid listingId, int quantity, CancellationToken cancellationToken)
+    public async Task<BuyoutMarketPlaceListingResult?> BuyoutMarketPlaceListingAsync(Guid characterId, Guid listingId, int quantity, CancellationToken cancellationToken)
     {
         var listing = await _marketPlaceRepository.GetListingAsync(listingId, cancellationToken);
         // If listing is null,   insufficient quantity,    or buyer is trying to purchase their own listing
-        if (listing == null || listing.Quantity < quantity || listing.SellerId.Equals(characterId)) return false;
+        if (listing == null || listing.Quantity < quantity || listing.SellerId.Equals(characterId)) return null;
 
         var buyer = await _characterService.GetCharacterByCharacterIdAsync(characterId, cancellationToken);
-        if (buyer == null) return false;
+        if (buyer == null) return null;
         var seller = await _characterService.GetCharacterByCharacterIdAsync(listing.SellerId, cancellationToken);
-        if (seller == null) return false;
+        if (seller == null) return null;
 
         var totalPrice = listing.UnitPrice * quantity;
-        if (buyer.Cinders < totalPrice) return false;
+        if (buyer.Cinders < totalPrice) return null;
         
         buyer.Cinders -= totalPrice;
         seller.Cinders += totalPrice;
@@ -60,7 +60,15 @@ public class MarketPlaceService : IMarketPlaceService
         if (listing.Quantity == 0)
             _marketPlaceRepository.RemoveListingAsync(listing);
 
-        return true;
+        return new BuyoutMarketPlaceListingResult(
+            listingId,
+            listing.SellerId,
+            inventoryItem,
+            listing.Quantity > 0 ? listing : null,
+            quantity,
+            totalPrice,
+            buyer.Cinders,
+            seller.Cinders);
     }
 
     public async Task<bool> CancelMarketPlaceListingAsync(Guid characterId, Guid listingId, CancellationToken cancellationToken)

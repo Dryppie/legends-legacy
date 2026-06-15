@@ -1,7 +1,17 @@
-import { signal, computed, Injectable, Signal } from '@angular/core';
-import { finalize } from 'rxjs/operators';
+import {
+  signal,
+  computed,
+  effect,
+  Injectable,
+  Signal,
+  untracked,
+} from '@angular/core';
+import { finalize, tap } from 'rxjs/operators';
 
-import { MarketPlaceService } from './market-place.service';
+import {
+  BuyoutMarketPlaceListingResponse,
+  MarketPlaceService,
+} from './market-place.service';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { MarketPlaceListing } from '../../../../shared/models/Dtos/market-place/market-place-listing';
 import { CreateMarketPlaceListingRequest } from '../../../../shared/models/requestDtos/market-place/create-market-place-listing-request';
@@ -9,6 +19,9 @@ import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { Observable } from 'rxjs';
 import { BuyoutMarketPlaceListingRequest } from '../../../../shared/models/requestDtos/market-place/buyout-market.place-listing-request';
 import { CharacterService } from '../character/character.service';
+import { InventoryStateService } from '../inventory/inventory-state.service';
+import { GameEventService } from '../../real-time/game-event.service';
+import { MarketListingSoldMsg } from '../../real-time/market/market-listing-sold';
 
 @Injectable({ providedIn: 'root' })
 export class MarketplaceStateService {
@@ -33,9 +46,21 @@ export class MarketplaceStateService {
   constructor(
     private marketplaceService: MarketPlaceService,
     private characterService: CharacterService,
+    private inventoryState: InventoryStateService,
+    private eventService: GameEventService,
   ) {
     this.myCharacterId = computed(
       () => this.characterService.currentCharacterId(), // unwrap inside
+    );
+
+    effect(
+      () => {
+        const sale = this.eventService.event.MarketListingSoldMsg();
+        if (sale) {
+          untracked(() => this.applySellerSale(sale));
+        }
+      },
+      { allowSignalWrites: true },
     );
   }
 
@@ -78,15 +103,20 @@ export class MarketplaceStateService {
       });
   }
 
-  buyoutListing(listingId: string, quantity: number): Observable<boolean> {
+  buyoutListing(
+    listingId: string,
+    quantity: number,
+  ): Observable<BuyoutMarketPlaceListingResponse> {
     const listing: BuyoutMarketPlaceListingRequest = {
       marketPlaceListingId: listingId,
       quantity,
     };
 
-    return this.marketplaceService
-      .buyoutListing(listing)
-      .pipe((success) => success);
+    return this.marketplaceService.buyoutListing(listing).pipe(
+      tap((response) => {
+        this.applyBuyoutResponse(response);
+      }),
+    );
   }
 
   cancelListing(listingId: string): Observable<boolean> {
@@ -141,5 +171,47 @@ export class MarketplaceStateService {
       .filter((l): l is MarketPlaceListing => l !== null);
 
     this._listings.set(updated);
+  }
+
+  private applyBuyoutResponse(response: BuyoutMarketPlaceListingResponse): void {
+    this.applyListingChange(response.listingId, response.remainingListing);
+    this.inventoryState.addOrIncrement(response.purchasedItem);
+    this.updateCurrentCharacterCinders(response.buyerCinders);
+  }
+
+  private applySellerSale(sale: MarketListingSoldMsg): void {
+    this.applyListingChange(sale.listingId, sale.remainingListing);
+    this.updateCurrentCharacterCinders(sale.sellerCinders);
+  }
+
+  private applyListingChange(
+    listingId: string,
+    remainingListing: MarketPlaceListing | null,
+  ): void {
+    if (!remainingListing) {
+      this.removeListing(listingId);
+      return;
+    }
+
+    const listings = this._listings();
+    const index = listings.findIndex((listing) => listing.id === listingId);
+    if (index === -1) {
+      this._listings.set([...listings, remainingListing]);
+      return;
+    }
+
+    const updated = [...listings];
+    updated[index] = remainingListing;
+    this._listings.set(updated);
+  }
+
+  private updateCurrentCharacterCinders(cinders: number): void {
+    const character = this.characterService.currentCharacter();
+    if (!character) return;
+
+    this.characterService.updateCharacter({
+      ...character,
+      cinders,
+    });
   }
 }

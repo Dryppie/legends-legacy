@@ -19,7 +19,7 @@ public class MarketPlaceController : BaseController
         await Mediator.Send(new CreateMarketPlaceListingCommand(CurrentCharacterGuid, createMarketPlaceRequest));
 
     [HttpPost("BuyoutListing")]
-    public async Task<ActionResult<Response<bool>>> BuyoutListing([FromBody] BuyoutMarketPlaceListingRequest buyoutMarketPlaceRequest) =>
+    public async Task<ActionResult<Response<BuyoutMarketPlaceListingResponseDto>>> BuyoutListing([FromBody] BuyoutMarketPlaceListingRequest buyoutMarketPlaceRequest) =>
         await Mediator.Send(new BuyoutMarketPlaceListingCommand(CurrentCharacterGuid, buyoutMarketPlaceRequest));
 
     [HttpPost("CancelListing")]

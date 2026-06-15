@@ -8,8 +8,9 @@
 
 import { Signal } from '@angular/core';
 import { LootReceivedMsg } from '../loot/loot-received';
+import { MarketListingSoldMsg } from '../market/market-listing-sold';
 
-export const gameEventNames = ['LootReceivedMsg'] as const;
+export const gameEventNames = ['LootReceivedMsg', 'MarketListingSoldMsg'] as const;
 
 export type GameEventSignalMap = {
   [K in GameEventName]: Signal<GameEventMap[K] | null>;
@@ -18,6 +19,7 @@ export type GameEventSignalMap = {
 /** Key = discriminator string, Value = payload DTO */
 export interface GameEventMap {
   LootReceivedMsg: LootReceivedMsg;
+  MarketListingSoldMsg: MarketListingSoldMsg;
   //   SaleCompleted: SaleCompletedMsg;
   //   GuildApplication:        GuildApplicationMsg;
   //   GuildBuildingUpgraded:   GuildBuildingUpgradedMsg;

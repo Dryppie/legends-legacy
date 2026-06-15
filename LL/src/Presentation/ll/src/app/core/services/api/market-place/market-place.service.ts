@@ -5,6 +5,14 @@ import { ApiService } from '../api.service';
 import { CreateMarketPlaceListingRequest } from '../../../../shared/models/requestDtos/market-place/create-market-place-listing-request';
 import { BuyoutMarketPlaceListingRequest } from '../../../../shared/models/requestDtos/market-place/buyout-market.place-listing-request';
 import { ToastService } from '../../client-side/components/toast/toast.service';
+import { InventoryItem } from '../../../../shared/models/inventoryItem';
+
+export interface BuyoutMarketPlaceListingResponse {
+  listingId: string;
+  remainingListing: MarketPlaceListing | null;
+  purchasedItem: InventoryItem;
+  buyerCinders: number;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -41,7 +49,9 @@ export class MarketPlaceService {
     );
   }
 
-  buyoutListing(listing: BuyoutMarketPlaceListingRequest): Observable<boolean> {
+  buyoutListing(
+    listing: BuyoutMarketPlaceListingRequest,
+  ): Observable<BuyoutMarketPlaceListingResponse> {
     return this.api.post('marketplace/buyoutListing', listing).pipe(
       catchError(() => {
         return throwError(() => new Error('Failed to buy listing'));

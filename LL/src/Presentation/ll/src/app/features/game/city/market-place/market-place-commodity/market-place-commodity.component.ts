@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { concatMap, from, tap } from 'rxjs';
+import { concatMap, from } from 'rxjs';
 
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import { MarketplaceStateService } from '../../../../../core/services/api/market-place/market-place-state.service';
@@ -257,16 +257,10 @@ export class MarketPlaceCommodityComponent implements OnInit {
     from(plan)
       .pipe(
         concatMap((purchase) =>
-          this.marketplaceState
-            .buyoutListing(purchase.listing.id, purchase.quantity)
-            .pipe(
-              tap(() =>
-                this.marketplaceState.decrementListing(
-                  purchase.listing.id,
-                  purchase.quantity,
-                ),
-              ),
-            ),
+          this.marketplaceState.buyoutListing(
+            purchase.listing.id,
+            purchase.quantity,
+          ),
         ),
       )
       .subscribe({
