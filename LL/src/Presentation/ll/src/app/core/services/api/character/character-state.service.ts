@@ -6,6 +6,7 @@ import {
 } from '../../../../shared/models/Dtos/characterDto';
 import { AuthService } from '../auth/auth.service';
 import { CharacterService } from './character.service';
+import { GameEventService } from '../../real-time/game-event.service';
 
 @Injectable({ providedIn: 'root' })
 export class CharacterStateService {
@@ -13,6 +14,8 @@ export class CharacterStateService {
   private readonly _overview = signal<CharacterOverviewDto | null>(null);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
+  private lastSoulstoneDropEvent: unknown;
+  private lastCharacterLevelUpEvent: unknown;
 
   /* ─────────── public, read-only selectors ─────────── */
   /** Current character comes straight from AuthService, no copy needed */
@@ -29,6 +32,7 @@ export class CharacterStateService {
   constructor(
     private readonly service: CharacterService,
     private readonly auth: AuthService,
+    private readonly eventService: GameEventService,
   ) {
     /* load (or clear) overview whenever the selected character changes */
     effect(
@@ -39,6 +43,53 @@ export class CharacterStateService {
           return;
         }
         this.refresh(); // writes _loading, _overview
+      },
+      { allowSignalWrites: true },
+    );
+
+    effect(
+      () => {
+        const characterId = this.currentCharacterId();
+        const soulstoneDrop = this.eventService.event.SoulstoneDropMsg();
+        const levelUp = this.eventService.event.CharacterLevelUpMsg();
+
+        if (
+          characterId &&
+          soulstoneDrop &&
+          soulstoneDrop !== this.lastSoulstoneDropEvent &&
+          soulstoneDrop.characterId === characterId
+        ) {
+          this.lastSoulstoneDropEvent = soulstoneDrop;
+          this.updateCurrentCharacter({
+            soulstones: soulstoneDrop.totalSoulstones,
+          });
+        }
+
+        if (
+          characterId &&
+          levelUp &&
+          levelUp !== this.lastCharacterLevelUpEvent &&
+          levelUp.characterId === characterId
+        ) {
+          this.lastCharacterLevelUpEvent = levelUp;
+          this.updateCurrentCharacter({
+            level: levelUp.level,
+            experience: levelUp.experience,
+            experienceUntilNextLevel: levelUp.experienceUntilNextLevel,
+          });
+          this.refresh();
+        }
+      },
+      { allowSignalWrites: true },
+    );
+
+    effect(
+      () => {
+        const reconnectCount = this.eventService.reconnectCount();
+        if (reconnectCount > 0) {
+          this.auth.refreshCurrentCharacter();
+          this.refresh();
+        }
       },
       { allowSignalWrites: true },
     );
@@ -69,5 +120,15 @@ export class CharacterStateService {
   /** Forward the change to AuthService */
   updateCharacter(updated: CharacterDto): void {
     this.auth.updateCharacter(updated);
+  }
+
+  private updateCurrentCharacter(patch: Partial<CharacterDto>): void {
+    const character = this.currentCharacter();
+    if (!character) return;
+
+    this.auth.updateCharacter({
+      ...character,
+      ...patch,
+    });
   }
 }

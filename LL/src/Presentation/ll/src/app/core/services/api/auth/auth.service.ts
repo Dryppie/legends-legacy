@@ -80,6 +80,10 @@ export class AuthService {
     this._currentCharacter.set(updatedCharacter);
   }
 
+  refreshCurrentCharacter(): void {
+    this.fetchCharacter().subscribe();
+  }
+
   login(email: string, password: string): Observable<void> {
     return this.api
       .post('auth/login', { Email: email, Password: password })

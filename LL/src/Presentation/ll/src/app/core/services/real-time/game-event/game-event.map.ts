@@ -11,6 +11,8 @@ import { LootReceivedMsg } from '../loot/loot-received';
 import { MarketListingSoldMsg } from '../market/market-listing-sold';
 import { MarketListingCreatedMsg } from '../market/market-listing-created';
 import { MarketListingCanceledMsg } from '../market/market-listing-canceled';
+import { SoulstoneDropMsg } from '../character/soulstone-drop';
+import { CharacterLevelUpMsg } from '../character/character-level-up';
 import { GuildBuildingUpgradedMsg } from '../guild/guild-building-upgraded';
 import { GuildApplicationMsg } from '../guild/guild-application';
 import { GuildInviteReceivedMsg } from '../guild/guild-invite-received';
@@ -26,6 +28,8 @@ export const gameEventNames = [
   'MarketListingSoldMsg',
   'MarketListingCreatedMsg',
   'MarketListingCanceledMsg',
+  'SoulstoneDropMsg',
+  'CharacterLevelUpMsg',
   'GuildBuildingUpgradedMsg',
   'GuildApplicationMsg',
   'GuildInviteReceivedMsg',
@@ -47,6 +51,8 @@ export interface GameEventMap {
   MarketListingSoldMsg: MarketListingSoldMsg;
   MarketListingCreatedMsg: MarketListingCreatedMsg;
   MarketListingCanceledMsg: MarketListingCanceledMsg;
+  SoulstoneDropMsg: SoulstoneDropMsg;
+  CharacterLevelUpMsg: CharacterLevelUpMsg;
   GuildBuildingUpgradedMsg: GuildBuildingUpgradedMsg;
   GuildApplicationMsg: GuildApplicationMsg;
   GuildInviteReceivedMsg: GuildInviteReceivedMsg;
