@@ -10,6 +10,8 @@ import { ArenaTicketStatus } from '../../../../shared/models/Dtos/colosseum/aren
 import { ColosseumMatchResult } from '../../../../shared/models/Dtos/colosseum/colosseumMatchResult';
 import { LeaderboardEntry } from '../../../../shared/models/Dtos/leaderboard/leaderboardEntry';
 import { GameEventService } from '../../real-time/game-event.service';
+import { CharacterStateService } from '../character/character-state.service';
+import { ArenaBattleCompletedMsg } from '../../real-time/colosseum/arena-battle-completed';
 
 @Injectable({ providedIn: 'root' })
 export class ColosseumStateService {
@@ -20,7 +22,9 @@ export class ColosseumStateService {
   private readonly _previousMatches = signal<ColosseumMatchResult[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
+  private readonly _notificationCount = signal(0);
   private hasLoaded = false;
+  private lastArenaBattleCompletedEvent: unknown;
 
   readonly opponents = computed(() => this._opponents());
   readonly arenaTicketStatus = computed(() => this._arenaTicketStatus());
@@ -28,17 +32,45 @@ export class ColosseumStateService {
   readonly previousMatches = computed(() => this._previousMatches());
   readonly loading = computed(() => this._loading());
   readonly error = computed(() => this._error());
+  readonly notificationCount = computed(() => this._notificationCount());
 
   constructor(
     private readonly colosseumService: ColosseumService,
     private readonly combatService: CombatService,
     private readonly eventService: GameEventService,
+    private readonly characterState: CharacterStateService,
   ) {
     effect(
       () => {
         const reconnectCount = this.eventService.reconnectCount();
         if (reconnectCount > 0 && this.hasLoaded) {
           this.refresh();
+        }
+      },
+      { allowSignalWrites: true },
+    );
+
+    effect(
+      () => {
+        const event = this.eventService.event.ArenaBattleCompletedMsg();
+        const characterId = this.characterState.currentCharacterId();
+        if (
+          !event ||
+          event === this.lastArenaBattleCompletedEvent ||
+          !characterId ||
+          !this.isParticipant(event, characterId)
+        ) {
+          return;
+        }
+
+        this.lastArenaBattleCompletedEvent = event;
+        this.applyArenaRating(event, characterId);
+        this.addNotification();
+
+        if (this.hasLoaded) {
+          this.loadArenaOpponents();
+          this.loadColosseumRankings();
+          this.loadColosseumMatchResults();
         }
       },
       { allowSignalWrites: true },
@@ -129,5 +161,36 @@ export class ColosseumStateService {
 
   private applyTicketStatus(status: ArenaTicketStatus): void {
     this._arenaTicketStatus.set(status);
+  }
+
+  markNotificationsSeen(): void {
+    this._notificationCount.set(0);
+  }
+
+  private isParticipant(
+    event: ArenaBattleCompletedMsg,
+    characterId: string,
+  ): boolean {
+    return event.characterId === characterId || event.enemyId === characterId;
+  }
+
+  private applyArenaRating(
+    event: ArenaBattleCompletedMsg,
+    characterId: string,
+  ): void {
+    const character = this.characterState.currentCharacter();
+    if (!character) return;
+
+    this.characterState.updateCharacter({
+      ...character,
+      arenaRating:
+        event.characterId === characterId
+          ? event.characterRatingAfter
+          : event.enemyRatingAfter,
+    });
+  }
+
+  private addNotification(): void {
+    this._notificationCount.update((count) => count + 1);
   }
 }

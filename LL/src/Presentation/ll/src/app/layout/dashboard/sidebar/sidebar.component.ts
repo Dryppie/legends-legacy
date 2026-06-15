@@ -23,6 +23,7 @@ import { CharacterStateService } from '../../../core/services/api/character/char
 import { SidebarSection } from '../../../shared/models/sidebar-item';
 import { CurrentDungeonComponent } from '../../../shared/components/current-dungeon/current-dungeon.component';
 import { GuildStateService } from '../../../core/services/api/guild/guild-state.service';
+import { ColosseumStateService } from '../../../core/services/api/colosseum/colosseum-state.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -51,6 +52,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   readonly currentCharacter;
   readonly guildNotificationCount;
+  readonly colosseumNotificationCount;
 
   constructor(
     private readonly sidebarService: SidebarService,
@@ -58,6 +60,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     private readonly state: CharacterActionsStateService,
     private readonly characterState: CharacterStateService,
     private readonly guildState: GuildStateService,
+    private readonly colosseumState: ColosseumStateService,
     private readonly router: Router,
   ) {
     effect(() => {
@@ -66,6 +69,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
     this.currentCharacter = this.characterState.currentCharacter;
     this.guildNotificationCount = this.guildState.guildNotificationCount;
+    this.colosseumNotificationCount = this.colosseumState.notificationCount;
   }
 
   ngOnInit(): void {
@@ -125,7 +129,14 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   getNotificationCount(itemId: string): number {
-    return itemId === 'guild' ? this.guildNotificationCount() : 0;
+    switch (itemId) {
+      case 'guild':
+        return this.guildNotificationCount();
+      case 'colosseum':
+        return this.colosseumNotificationCount();
+      default:
+        return 0;
+    }
   }
 
   navigateToAction(): void {

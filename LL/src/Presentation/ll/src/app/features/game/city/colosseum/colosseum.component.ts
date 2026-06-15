@@ -45,6 +45,15 @@ export class ColosseumComponent implements OnInit {
   ) {
     effect(
       () => {
+        if (this.state.notificationCount() <= 0) return;
+
+        this.state.markNotificationsSeen();
+      },
+      { allowSignalWrites: true },
+    );
+
+    effect(
+      () => {
         const finished = this.eventBus.on('colosseum-combat-finished')();
         if (finished) {
           this.displayResultScreen(finished.outcome);
@@ -58,6 +67,7 @@ export class ColosseumComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.state.markNotificationsSeen();
     this.state.refresh();
   }
 
