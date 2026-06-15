@@ -1,4 +1,4 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, effect, signal } from '@angular/core';
 import { finalize } from 'rxjs/operators';
 import {
   DungeonActionOutcome,
@@ -12,6 +12,7 @@ import { DungeonDifficulty } from '../../../../shared/models/enums/dungeonDiffic
 import { CombatSessionDto } from '../../../../shared/models/Dtos/combatResultDto';
 import { CombatService } from '../../client-side/combat/combat.service';
 import { Observable } from 'rxjs';
+import { GameEventService } from '../../real-time/game-event.service';
 
 @Injectable({
   providedIn: 'root',
@@ -41,8 +42,19 @@ export class DungeonStateService {
   constructor(
     private readonly service: DungeonService,
     private readonly combatService: CombatService,
+    private readonly eventService: GameEventService,
   ) {
     this.refresh();
+
+    effect(
+      () => {
+        const reconnectCount = this.eventService.reconnectCount();
+        if (reconnectCount > 0) {
+          this.refresh();
+        }
+      },
+      { allowSignalWrites: true },
+    );
   }
 
   refresh(): void {

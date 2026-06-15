@@ -1,10 +1,10 @@
-import { Injectable, effect } from '@angular/core';
+import { Injectable, effect, signal } from '@angular/core';
 import { GameEventService } from './game-event.service';
 import { AuthService } from '../api/auth/auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class RealTimeFacade {
-  private initialized = false;
+  private readonly initialized = signal(false);
 
   constructor(
     private auth: AuthService,
@@ -12,12 +12,20 @@ export class RealTimeFacade {
   ) {
     effect(
       () => {
-        if (!this.initialized) return;
+        if (!this.initialized()) return;
 
         if (this.auth.isAuthenticated()) {
-          this.socket.connect({ kind: 'World' });
+          this.socket
+            .connect({ kind: 'World' })
+            .catch((error) =>
+              console.warn('Failed to connect game realtime', error),
+            );
         } else {
-          this.socket.disconnect();
+          this.socket
+            .disconnect()
+            .catch((error) =>
+              console.warn('Failed to disconnect game realtime', error),
+            );
         }
       },
       { allowSignalWrites: true },
@@ -25,6 +33,6 @@ export class RealTimeFacade {
   }
 
   initialize() {
-    this.initialized = true;
+    this.initialized.set(true);
   }
 }

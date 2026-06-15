@@ -46,6 +46,16 @@ export class InventoryStateService {
       },
       { allowSignalWrites: true },
     );
+
+    effect(
+      () => {
+        const reconnectCount = this.eventService.reconnectCount();
+        if (reconnectCount > 0) {
+          this.load(true);
+        }
+      },
+      { allowSignalWrites: true },
+    );
   }
 
   /* Generic selector: reuse everywhere */
@@ -62,8 +72,8 @@ export class InventoryStateService {
   readonly materials = this.byType(ItemType.Resource);
   readonly essences = this.byType(ItemType.Essence);
 
-  load(): void {
-    if (this._items().length) return; // already cached
+  load(force = false): void {
+    if (!force && this._items().length) return; // already cached
     this._loading.set(true);
     this.inventoryService
       .getInventory()

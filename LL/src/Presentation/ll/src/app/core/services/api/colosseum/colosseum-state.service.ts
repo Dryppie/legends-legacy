@@ -1,4 +1,4 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { computed, effect, Injectable, signal } from '@angular/core';
 import { finalize } from 'rxjs';
 import {
   ColosseumService,
@@ -9,6 +9,7 @@ import { ArenaOpponentPreview } from '../../../../shared/models/Dtos/colosseum/a
 import { ArenaTicketStatus } from '../../../../shared/models/Dtos/colosseum/arenaTicketStatus';
 import { ColosseumMatchResult } from '../../../../shared/models/Dtos/colosseum/colosseumMatchResult';
 import { LeaderboardEntry } from '../../../../shared/models/Dtos/leaderboard/leaderboardEntry';
+import { GameEventService } from '../../real-time/game-event.service';
 
 @Injectable({ providedIn: 'root' })
 export class ColosseumStateService {
@@ -19,6 +20,7 @@ export class ColosseumStateService {
   private readonly _previousMatches = signal<ColosseumMatchResult[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
+  private hasLoaded = false;
 
   readonly opponents = computed(() => this._opponents());
   readonly arenaTicketStatus = computed(() => this._arenaTicketStatus());
@@ -30,9 +32,21 @@ export class ColosseumStateService {
   constructor(
     private readonly colosseumService: ColosseumService,
     private readonly combatService: CombatService,
-  ) {}
+    private readonly eventService: GameEventService,
+  ) {
+    effect(
+      () => {
+        const reconnectCount = this.eventService.reconnectCount();
+        if (reconnectCount > 0 && this.hasLoaded) {
+          this.refresh();
+        }
+      },
+      { allowSignalWrites: true },
+    );
+  }
 
   refresh(): void {
+    this.hasLoaded = true;
     this.loadArenaTicketStatus();
     this.loadArenaOpponents();
     this.loadColosseumRankings();
