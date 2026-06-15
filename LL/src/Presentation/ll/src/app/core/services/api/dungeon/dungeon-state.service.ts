@@ -2,6 +2,7 @@ import { Injectable, computed, effect, signal } from '@angular/core';
 import { finalize } from 'rxjs/operators';
 import {
   DungeonActionOutcome,
+  ClaimDungeonRewardsResponse,
   DungeonRun,
   DungeonService,
   ExecuteDungeonActionResponse,
@@ -13,6 +14,8 @@ import { CombatSessionDto } from '../../../../shared/models/Dtos/combatResultDto
 import { CombatService } from '../../client-side/combat/combat.service';
 import { Observable } from 'rxjs';
 import { GameEventService } from '../../real-time/game-event.service';
+import { InventoryStateService } from '../inventory/inventory-state.service';
+import { CharacterStateService } from '../character/character-state.service';
 
 @Injectable({
   providedIn: 'root',
@@ -43,6 +46,8 @@ export class DungeonStateService {
     private readonly service: DungeonService,
     private readonly combatService: CombatService,
     private readonly eventService: GameEventService,
+    private readonly inventoryState: InventoryStateService,
+    private readonly characterState: CharacterStateService,
   ) {
     this.refresh();
 
@@ -164,8 +169,8 @@ export class DungeonStateService {
       .claimDungeonRewards()
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: () => {
-          this._activeDungeon.set(null);
+        next: (response) => {
+          this.applyClaimDungeonRewards(response);
           onSuccess?.();
           this.loadAvailableDungeons();
         },
@@ -199,6 +204,12 @@ export class DungeonStateService {
     this.combatService.startDungeonCombatSimulation(
       result.combatSession.combatResult,
     );
+  }
+
+  private applyClaimDungeonRewards(response: ClaimDungeonRewardsResponse): void {
+    this._activeDungeon.set(response.activeRun);
+    this.inventoryState.setInventory(response.inventoryItems, response.claimedLoot);
+    this.characterState.updateCharacter(response.character);
   }
 
   setActiveDungeon(run: DungeonRun | null): void {

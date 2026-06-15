@@ -29,7 +29,7 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
         _inventoryItemFactory = inventoryItemFactory;
     }
 
-    public async Task ClaimAsync(DungeonRun run, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<InventoryItem>> ClaimAsync(DungeonRun run, CancellationToken cancellationToken)
     {
         if (run.PendingExperience > 0)
         {
@@ -50,7 +50,7 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
 
         if (run.PendingRewards.Count <= 0)
         {
-            return;
+            return [];
         }
 
         var itemIds = run.PendingRewards
@@ -80,6 +80,8 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
                 inventoryItems,
                 cancellationToken);
         }
+
+        return inventoryItems;
     }
 
 }

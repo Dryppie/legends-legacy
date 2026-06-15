@@ -18,6 +18,7 @@ export class InventoryStateService {
   readonly isEmpty = computed(() => this._items().length === 0);
   readonly error = computed(() => this._error());
   private readonly _lastLoot = signal<InventoryItem[] | null>(null);
+  private readonly suppressedLootSignatures = new Set<string>();
 
   constructor(
     private inventoryService: InventoryService,
@@ -29,6 +30,11 @@ export class InventoryStateService {
       () => {
         const loot = this.eventService.event.LootReceivedMsg();
         if (loot) {
+          const signature = this.getLootSignature(loot.payload);
+          if (this.suppressedLootSignatures.delete(signature)) {
+            return;
+          }
+
           this._lastLoot.set(loot.payload);
         }
       },
@@ -80,15 +86,7 @@ export class InventoryStateService {
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
         next: (dto) => {
-          const sorted = dto.inventoryItems
-            .slice() // defensive copy (optional)
-            .sort((a, b) =>
-              a.itemInstance.itemBase.itemType.localeCompare(
-                b.itemInstance.itemBase.itemType,
-              ),
-            );
-
-          this._items.set(sorted);
+          this._items.set(this.sortItems(dto.inventoryItems));
         },
         error: (err) => this._error.set(err.message ?? 'Unknown error'),
       });
@@ -153,8 +151,12 @@ export class InventoryStateService {
       });
   }
 
-  setInventory(items: InventoryItem[]): void {
-    this._items.set(items);
+  setInventory(items: InventoryItem[], suppressNextLoot?: InventoryItem[]): void {
+    this._items.set(this.sortItems(items));
+
+    if (suppressNextLoot?.length) {
+      this.suppressNextLoot(suppressNextLoot);
+    }
   }
 
   addOrIncrementMany(itemsToAdd: InventoryItem[]): void {
@@ -206,6 +208,34 @@ export class InventoryStateService {
       (item) => item.itemInstance.id !== itemInstanceId,
     );
     this._items.set(filtered);
+  }
+
+  private suppressNextLoot(items: InventoryItem[]): void {
+    const signature = this.getLootSignature(items);
+    if (!signature) return;
+
+    this.suppressedLootSignatures.add(signature);
+    setTimeout(() => this.suppressedLootSignatures.delete(signature), 5000);
+  }
+
+  private getLootSignature(items: InventoryItem[]): string {
+    return items
+      .map(
+        (item) =>
+          `${item.itemInstance.id}:${item.itemInstance.itemBase.id}:${item.quantity}`,
+      )
+      .sort()
+      .join('|');
+  }
+
+  private sortItems(items: InventoryItem[]): InventoryItem[] {
+    return items
+      .slice()
+      .sort((a, b) =>
+        a.itemInstance.itemBase.itemType.localeCompare(
+          b.itemInstance.itemBase.itemType,
+        ),
+      );
   }
 }
 

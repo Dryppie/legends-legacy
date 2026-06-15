@@ -93,18 +93,21 @@ public sealed class DungeonRunService : IDungeonRunService
             cancellationToken);
     }
 
-    public async Task<bool> ClaimRewardsAsync(Guid characterId, CancellationToken cancellationToken)
+    public async Task<ClaimDungeonRewardsResult?> ClaimRewardsAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var run = await _dungeonRuns.GetDungeonRunByCharacterIdAsync(characterId, cancellationToken);
         if (run == null || (run.Status != DungeonRunStatus.Completed && run.Status != DungeonRunStatus.Withdrawn))
-            return false;
+            return null;
 
-        await _rewardClaimer.ClaimAsync(run, cancellationToken);
+        var claimedLoot = await _rewardClaimer.ClaimAsync(run, cancellationToken);
 
         run.Status = DungeonRunStatus.RewardsClaimed;
         run.RewardsClaimedAt = DateTimeOffset.UtcNow;
 
-        return await _dungeonRuns.DeleteDungeonRunAsync(run, cancellationToken);
+        var deleted = await _dungeonRuns.DeleteDungeonRunAsync(run, cancellationToken);
+        return deleted
+            ? new ClaimDungeonRewardsResult { ClaimedLoot = claimedLoot }
+            : null;
     }
 
     public async Task<bool> DismissFailedRunAsync(Guid characterId, CancellationToken cancellationToken)
