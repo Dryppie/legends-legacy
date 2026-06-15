@@ -196,10 +196,10 @@ if (!app.Environment.IsDevelopment())       // prod only
     app.UseHttpsRedirection();
 }
 
-app.MapHub<GameHub>("/hub");
-
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapHub<GameHub>("/hub").RequireAuthorization();
 
 if (config.GetValue("FeatureManagement:AllowAnonymous", "false") == "true")
 {

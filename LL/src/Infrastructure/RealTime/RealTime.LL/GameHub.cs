@@ -1,8 +1,11 @@
 ﻿using Application.WebSockets.Contracts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 
 namespace RealTime.LL;
+
+[Authorize]
 public sealed class GameHub : Hub<IGameClient>
 {
     public override Task OnConnectedAsync()
@@ -57,11 +60,7 @@ public static class HubCallerContextExtensions
         string? raw = ctx.User?.FindFirstValue(ClaimType);
         if (!Guid.TryParse(raw, out var id))
         {
-            var claims = ctx.User?.Claims
-                                 .Select(c => $"{c.Type}:{c.Value}")
-                                 .DefaultIfEmpty("<none>")
-                                 .Aggregate((a, b) => $"{a}, {b}");
-            throw new HubException($"CharacterId claim missing or invalid. Current claims: [{claims}]");
+            throw new HubException("CharacterId claim missing or invalid.");
         }
         return id;
     }
