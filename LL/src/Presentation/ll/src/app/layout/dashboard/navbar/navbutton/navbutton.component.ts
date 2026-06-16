@@ -11,6 +11,7 @@ import { NgClass } from '@angular/common';
 export class NavbuttonComponent {
   @Input() link: string = '';
   @Input() label: string = '';
+  @Input() icon: string = '';
   @Output() itemTapped = new EventEmitter<void>();
 
   inactiveIcon = 'icons/InactivePlus.svg';

@@ -1,5 +1,5 @@
 <div
-  class="group relative flex h-[52px] items-center justify-center border-l-2 bg-cover bg-center px-3 py-2 transition-colors hover:cursor-pointer hover:bg-zinc-300/5 sm:justify-start"
+  class="group relative flex min-h-14 items-center justify-start border-l-2 bg-cover bg-center px-4 py-2 transition-colors hover:cursor-pointer hover:bg-zinc-300/5 sm:h-[52px] sm:px-3"
   [class.border-transparent]="!isActive"
   [class.border-primary]="isActive"
   [style.background-image]="
@@ -13,21 +13,19 @@
     [count]="notificationCount"
   ></app-notification-indicator>
 
-  <div
-    class="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full sm:flex"
-  >
+  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
     <app-profession-icon
       class="scale-[0.68]"
       [image]="item.icon"
     ></app-profession-icon>
   </div>
-  <div class="flex min-w-0 flex-col sm:ml-3">
+  <div class="ml-3 flex min-w-0 flex-col">
     <h3
-      class="truncate text-center text-base leading-5 text-primary sm:text-start"
+      class="truncate text-start text-[15px] leading-5 text-primary sm:text-base"
     >
       {{ item.title }}
     </h3>
-    <small class="hidden truncate text-[11px] leading-4 text-zinc-200 sm:block">
+    <small class="truncate text-[11px] leading-4 text-zinc-300">
       {{ item.description }}
     </small>
     <!-- Placeholder for additional content injected by child components -->

@@ -67,12 +67,17 @@ export class DashboardComponent implements OnInit {
   }
 
   toggleChat(): void {
-    this.isScreenLarge
-      ? (this.isChatOpenDesktop = !this.isChatOpenDesktop)
-      : (this.isFloatingChatOpen = !this.isFloatingChatOpen);
+    if (this.isScreenLarge) {
+      this.isChatOpenDesktop = !this.isChatOpenDesktop;
+      return;
+    }
+
+    this.closeSidebar();
+    this.isFloatingChatOpen = !this.isFloatingChatOpen;
   }
 
   openSidebar() {
+    this.isFloatingChatOpen = false;
     this.isSidebarOpen = true;
   }
 

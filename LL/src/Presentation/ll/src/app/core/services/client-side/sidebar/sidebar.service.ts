@@ -35,12 +35,15 @@ export class SidebarService {
   isRouteActive(route: string[], exact = false): boolean {
     const currentUrl = this.getActiveUrl();
     const targetUrl = '/' + route.join('/');
+    const gameTargetUrl = '/game' + targetUrl;
 
     if (exact) {
-      return currentUrl === targetUrl;
+      return currentUrl === targetUrl || currentUrl === gameTargetUrl;
     }
 
-    return currentUrl.startsWith(targetUrl);
+    return (
+      currentUrl.startsWith(targetUrl) || currentUrl.startsWith(gameTargetUrl)
+    );
   }
 }
 
@@ -139,6 +142,13 @@ function getSidebarSections(): SidebarSection[] {
       label: 'Social',
       items: [
         {
+          id: 'tavern',
+          route: ['city', 'tavern'],
+          icon: 'city/temple',
+          title: 'Leaderboard',
+          description: 'Rankings and records',
+        },
+        {
           id: 'guild',
           route: ['city', 'guild'],
           icon: 'city/temple',
@@ -164,6 +174,19 @@ function getSidebarSections(): SidebarSection[] {
           icon: 'city/temple',
           title: 'Cinder Bazaar',
           description: 'List and buy items',
+        },
+      ],
+    },
+    {
+      id: 'system',
+      label: 'System',
+      items: [
+        {
+          id: 'settings',
+          route: ['settings'],
+          icon: 'settings/settings',
+          title: 'Settings',
+          description: 'Account and preferences',
         },
       ],
     },

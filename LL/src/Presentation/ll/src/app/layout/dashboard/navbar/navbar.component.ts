@@ -39,15 +39,31 @@ import { CurrentActionComponent } from '../../../shared/components/current-actio
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   @Output() itemTapped = new EventEmitter<void>();
+  @Output() chatTapped = new EventEmitter<void>();
   @Input() isScreenSmall!: boolean;
   showList = false;
   activeLabel = 'Character';
   navButtons = [
-    // { link: '/game/character', label: 'Character' },
-    // { link: '/game/city', label: 'City' },
-    // { link: '/game/professions', label: 'Professions' },
-    { link: '/game/city/tavern', label: 'Leaderboard' },
-    { link: '/game/settings', label: 'Settings' },
+    {
+      link: '/game/character/character-overview',
+      label: 'Character',
+      icon: 'icons/character/achievements.svg',
+    },
+    {
+      link: '/game/world/shenic',
+      label: 'World',
+      icon: 'icons/world/Quest.svg',
+    },
+    {
+      link: '/game/city/tavern',
+      label: 'Leaderboard',
+      icon: 'icons/ui/Leaderboard.svg',
+    },
+    {
+      link: '/game/settings',
+      label: 'Settings',
+      icon: 'icons/ui/Settings.svg',
+    },
   ];
 
   displayCurrentAction = false;

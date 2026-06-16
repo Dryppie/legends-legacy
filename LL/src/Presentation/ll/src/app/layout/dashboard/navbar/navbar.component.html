@@ -1,4 +1,4 @@
-<div class="flex h-14 sm:h-8" *ngIf="currentCharacter() as currentCharacter">
+<div class="flex h-16 sm:h-8" *ngIf="currentCharacter() as currentCharacter">
   <!-- <app-character-badge
     class="z-10 -mr-12 hidden sm:block"
     [level]="currentCharacter?.level"
@@ -58,28 +58,44 @@
             <h3 class="cursor-pointer pl-2 text-primary">{{ activeLabel }}</h3>
           </div> -->
         <div
-          class="z-10 flex w-full items-center justify-around text-nowrap border-t bg-texture text-[#a1a1a1] sm:w-auto sm:justify-start sm:space-x-2 sm:border-none sm:bg-none"
+          class="z-10 grid h-full w-full grid-cols-4 items-stretch border-t border-primary/20 bg-black/70 text-[#a1a1a1] shadow-[0_-12px_32px_rgba(0,0,0,0.35)] backdrop-blur sm:flex sm:w-auto sm:items-center sm:justify-start sm:space-x-2 sm:border-none sm:bg-transparent sm:shadow-none sm:backdrop-blur-none"
         >
           <button
             type="button"
-            class="flex min-w-16 flex-col items-center px-3 py-1 text-primary sm:hidden"
+            class="flex min-w-0 flex-col items-center justify-center gap-1 px-2 py-2 text-primary sm:hidden"
             (click)="itemTapped.emit()"
             aria-label="Open menu"
           >
-            <img
-              src="core/button/Hamburger.png"
-              class="h-4 w-4 pb-[2px]"
-              alt=""
-            />
-            <h3 class="text-[13px] font-medium">Menu</h3>
+            <img src="core/button/Hamburger.png" class="h-4 w-4" alt="" />
+            <h3 class="text-[12px] font-medium leading-none">Menu</h3>
           </button>
           <app-navbutton
-            *ngFor="let button of navButtons"
+            class="sm:hidden"
+            *ngFor="let button of navButtons.slice(0, 2)"
             [link]="button.link"
             [label]="button.label"
+            [icon]="button.icon"
             (click)="toggleList()"
             (itemTapped)="activeNavbar(button.label)"
           ></app-navbutton>
+          <app-navbutton
+            class="hidden sm:block"
+            *ngFor="let button of navButtons.slice(2, 4)"
+            [link]="button.link"
+            [label]="button.label"
+            [icon]="button.icon"
+            (click)="toggleList()"
+            (itemTapped)="activeNavbar(button.label)"
+          ></app-navbutton>
+          <button
+            type="button"
+            class="flex min-w-0 flex-col items-center justify-center gap-1 border-l border-primary/10 bg-primary/10 px-2 py-2 text-primary sm:hidden"
+            (click)="chatTapped.emit()"
+            aria-label="Open chat"
+          >
+            <img src="icons/ActivePlus.svg" class="h-4 w-4" alt="" />
+            <h3 class="text-[12px] font-medium leading-none">Chat</h3>
+          </button>
         </div>
         <ng-container *ngIf="onlinePlayers; else justYou">
           <div class="hidden justify-end pr-2 text-sm text-white sm:flex">
