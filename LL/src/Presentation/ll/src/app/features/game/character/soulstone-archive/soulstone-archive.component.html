@@ -6,13 +6,51 @@
     text="Permanent upgrades"
     icon="character/essences"
   ></app-default-header>
-  <app-regular-button
-    class="place-self-end pl-1 pr-4 sm:place-self-start"
-    variant="danger"
-    text="Reset - free"
-    (pressed)="resetSoulstoneUpgrades()"
-    [disabled]="loading()"
-  ></app-regular-button>
+
+  <section
+    class="mr-4 grid gap-3 rounded-lg border border-light_gray bg-texture p-4 shadow-lg sm:mr-6"
+  >
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h2 class="text-primary">Upgrade Archive</h2>
+        <p class="text-sm text-secondary">
+          Spend Soulstones on permanent account power.
+        </p>
+      </div>
+      <app-regular-button
+        variant="danger"
+        text="Reset - free"
+        (pressed)="resetSoulstoneUpgrades()"
+        [disabled]="loading() || totalUpgradeLevels() === 0"
+      ></app-regular-button>
+    </div>
+
+    <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+      <div
+        *ngFor="let card of summaryCards()"
+        class="rounded border border-light_gray/70 bg-black/30 px-3 py-2"
+      >
+        <div class="text-xs uppercase text-zinc-500">{{ card.label }}</div>
+        <div class="mt-1 text-2xl font-semibold text-primary">
+          {{ card.value }}
+        </div>
+      </div>
+    </div>
+
+    <p
+      *ngIf="error()"
+      class="rounded border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-200"
+    >
+      {{ error() }}
+    </p>
+    <p
+      *ngIf="lastRefund() > 0"
+      class="rounded border border-primary/40 bg-primary/10 px-3 py-2 text-sm text-primary"
+    >
+      Refunded {{ lastRefund() }} Soulstones.
+    </p>
+  </section>
+
   <div
     class="flex flex-col gap-4 overflow-y-auto pr-4 sm:pr-6"
     *ngIf="combatUpgrades()"

@@ -151,3 +151,22 @@ Essence management is powerful but dense, and the existing page already had stro
 - No changes to Essence progression rules, loadout rules, archive data, or backend APIs.
 - No redesign of the archive list, Absorb view, or Essence details layout.
 - No changes to inventory Essence rows.
+
+## Seventh Slice: Soulstones
+
+### Why This Slice Next
+
+The Soulstones page is a permanent progression surface, but it was still using a very sparse layout. This pass focused on making the upgrade economy and per-upgrade state easier to scan without changing upgrade costs, effects, reset behavior, or backend APIs.
+
+### UX Problems Addressed
+
+- Added a top summary for available Soulstones, total upgrade levels, affordable upgrades, and maxed upgrades.
+- Added visible reset feedback and error feedback.
+- Reworked upgrade cards to show description, level progress, current effect, per-level effect, next cost, and affordability state.
+- Made maxed and unaffordable upgrades clearer before the player clicks.
+
+### Out Of Scope For This Pass
+
+- No changes to Soulstone upgrade math, costs, effects, reset rules, or backend APIs.
+- No new filters, sorting, or progression categories.
+- No changes to how Soulstones are earned.
