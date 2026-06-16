@@ -95,3 +95,22 @@ Combat is the moment players watch the outcome of dungeon, idle, and arena decis
 - No changes to combat rules, result processing, event handling, or battle timing.
 - No changes to avatar rendering, entity stat calculations, or combat log internals.
 - No new combat actions or backend API changes.
+
+## Fourth Slice: Character Overview
+
+### Why This Slice Next
+
+The character overview was already in a good place, so this pass stayed restrained. The main opportunity was not to redesign the stat layout, but to make profile context and request feedback clearer when the player searches for another character.
+
+### UX Problems Addressed
+
+- Added visible loading and error states for character overview requests.
+- Made the page show whether it is displaying the current character or a searched profile.
+- Routed character searches through the URL query string so browser Back returns to the previous profile.
+- Labeled empty Essence slots as open so the loadout rail reads consistently.
+
+### Out Of Scope For This Pass
+
+- No changes to character stats, combat rating, Essence loadout data, or backend APIs.
+- No broad redesign of the overview cards or attribute sections.
+- No changes to the dedicated Essence management page.

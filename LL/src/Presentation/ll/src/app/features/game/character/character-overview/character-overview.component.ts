@@ -1,7 +1,7 @@
 import { NgFor, NgIf } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { catchError, EMPTY, skip, take } from 'rxjs';
+import { catchError, EMPTY, finalize, skip, take } from 'rxjs';
 import { CharacterService } from '../../../../core/services/api/character/character.service';
 import { DefaultHeaderComponent } from '../../../../shared/components/default-header/default-header.component';
 import { CharacterOverviewDto } from '../../../../shared/models/Dtos/characterDto';
@@ -10,7 +10,7 @@ import { AttributeDto } from '../../../../shared/models/Dtos/attributesDto';
 import { AttributeType } from '../../../../shared/models/enums/attributeType';
 import { AttributeTypeFormatPipe } from '../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { AttributeValueFormatPipe } from '../../../../shared/pipes/attributes/attribute-value-format/attribute-value-format.pipe';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-character-overview',
@@ -30,59 +30,73 @@ export class CharacterOverviewComponent {
   readonly AttributeType = AttributeType;
   searchValue = signal('');
   character = signal<CharacterOverviewDto | null>(null);
+  isLoading = signal(false);
+  errorMessage = signal('');
+  viewedCharacterName = signal('');
+  isViewingSearchResult = signal(false);
+  readonly profileLabel = computed(() => {
+    if (this.isViewingSearchResult()) {
+      return this.viewedCharacterName();
+    }
+
+    return this.characterService.currentCharacter()?.name;
+  });
   readonly primaryAttributes = [
     AttributeType.Power,
     AttributeType.Fortitude,
     AttributeType.Precision,
     AttributeType.Spirit,
   ];
-  readonly attributeSections: { title: string; attributes: AttributeType[] }[] = [
-    {
-      title: 'Offense',
-      attributes: [
-        AttributeType.WeaponDamage,
-        AttributeType.CritChance,
-        AttributeType.CritDamage,
-        AttributeType.ArmorPenetration,
-        AttributeType.MagicPenetration,
-      ],
-    },
-    {
-      title: 'Defense',
-      attributes: [
-        AttributeType.Armor,
-        AttributeType.Resistance,
-        AttributeType.DodgeChance,
-        AttributeType.BlockChance,
-        AttributeType.DamageReduction,
-      ],
-    },
-    {
-      title: 'Recovery',
-      attributes: [
-        AttributeType.HealingPowerPercent,
-        AttributeType.HealthRegeneration,
-        AttributeType.LifeSteal,
-      ],
-    },
-    {
-      title: 'Utility',
-      attributes: [
-        AttributeType.Cooldown,
-        AttributeType.StatusResistance,
-        AttributeType.CrowdControlResistance,
-        AttributeType.SummonPower,
-        AttributeType.SummonHealth,
-      ],
-    },
-  ];
+  readonly attributeSections: { title: string; attributes: AttributeType[] }[] =
+    [
+      {
+        title: 'Offense',
+        attributes: [
+          AttributeType.WeaponDamage,
+          AttributeType.CritChance,
+          AttributeType.CritDamage,
+          AttributeType.ArmorPenetration,
+          AttributeType.MagicPenetration,
+        ],
+      },
+      {
+        title: 'Defense',
+        attributes: [
+          AttributeType.Armor,
+          AttributeType.Resistance,
+          AttributeType.DodgeChance,
+          AttributeType.BlockChance,
+          AttributeType.DamageReduction,
+        ],
+      },
+      {
+        title: 'Recovery',
+        attributes: [
+          AttributeType.HealingPowerPercent,
+          AttributeType.HealthRegeneration,
+          AttributeType.LifeSteal,
+        ],
+      },
+      {
+        title: 'Utility',
+        attributes: [
+          AttributeType.Cooldown,
+          AttributeType.StatusResistance,
+          AttributeType.CrowdControlResistance,
+          AttributeType.SummonPower,
+          AttributeType.SummonHealth,
+        ],
+      },
+    ];
 
   constructor(
     private characterService: CharacterService,
     private readonly route: ActivatedRoute,
+    private readonly router: Router,
   ) {
-    const initialCharacterName =
-      this.route.snapshot.queryParamMap.get('characterName')?.trim();
+    const initialCharacterName = this.route.snapshot.queryParamMap
+      .get('characterName')
+      ?.trim();
 
     if (initialCharacterName) {
       this.searchValue.set(initialCharacterName);
@@ -105,29 +119,62 @@ export class CharacterOverviewComponent {
 
   onSearch() {
     const trimmed = this.searchValue().trim();
-    if (!trimmed) return;
+    if (!trimmed) {
+      this.navigateToCharacter(null);
+      return;
+    }
 
-    this.searchCharacter(trimmed);
+    this.navigateToCharacter(trimmed);
+  }
+
+  private navigateToCharacter(characterName: string | null): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { characterName },
+      queryParamsHandling: 'merge',
+    });
   }
 
   private searchCharacter(characterName: string): void {
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+
     this.characterService
       .searchCharacter(characterName)
       .pipe(
         catchError((err) => {
-          console.error(err.message);
+          this.errorMessage.set(err.message);
           return EMPTY;
         }),
+        finalize(() => this.isLoading.set(false)),
       )
       .subscribe((character) => {
         this.character.set(character);
+        this.viewedCharacterName.set(characterName);
+        this.isViewingSearchResult.set(true);
       });
   }
 
-  private loadCurrentCharacter(): void {
+  loadCurrentCharacter(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+
     this.characterService.characterOverview$
-      .pipe(take(1))
-      .subscribe((c) => this.character.set(c));
+      .pipe(
+        take(1),
+        catchError(() => {
+          this.errorMessage.set('Unable to load your character overview.');
+          return EMPTY;
+        }),
+        finalize(() => this.isLoading.set(false)),
+      )
+      .subscribe((c) => {
+        this.character.set(c);
+        this.viewedCharacterName.set(
+          this.characterService.currentCharacter()?.name ?? '',
+        );
+        this.isViewingSearchResult.set(false);
+      });
   }
 
   onEnter(event: KeyboardEvent) {
@@ -139,7 +186,9 @@ export class CharacterOverviewComponent {
   getAttribute(type: AttributeType): AttributeDto {
     const current = this.character();
     return (
-      current?.baseCombatAttributes.find((attr) => attr.attributeType === type) ??
+      current?.baseCombatAttributes.find(
+        (attr) => attr.attributeType === type,
+      ) ??
       current?.baseAttributes.find((attr) => attr.attributeType === type) ?? {
         attributeType: type,
         value: 0,
