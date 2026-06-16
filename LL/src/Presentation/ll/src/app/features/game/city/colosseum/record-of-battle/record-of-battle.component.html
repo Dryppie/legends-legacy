@@ -1,21 +1,11 @@
 <div class="flex h-full w-full flex-col overflow-hidden p-4 text-white">
-  <section class="grid gap-3 md:grid-cols-3">
+  <section class="grid grid-cols-2 gap-3">
     <div class="rounded-lg border border-light_gray/60 bg-black/25 p-4">
       <p class="text-xs font-semibold uppercase text-secondary">Battle Log</p>
       <p class="mt-2 text-2xl font-semibold text-primary">
         {{ previousMatches.length | numberFormat }}
       </p>
       <p class="mt-1 text-sm text-zinc-300">Recorded arena matches</p>
-    </div>
-
-    <div class="rounded-lg border border-light_gray/60 bg-black/25 p-4">
-      <p class="text-xs font-semibold uppercase text-secondary">Latest Match</p>
-      <p class="mt-2 text-2xl font-semibold text-primary">
-        {{ latestMatch ? (latestMatch.playedAt | date: "mediumDate") : "-" }}
-      </p>
-      <p class="mt-1 text-sm text-zinc-300">
-        {{ latestMatch ? resultLabel(latestMatch) : "No battles yet" }}
-      </p>
     </div>
 
     <div class="rounded-lg border border-light_gray/60 bg-black/25 p-4">
@@ -101,7 +91,7 @@
           </div>
         </div>
 
-        <div class="flex shrink-0 flex-col gap-2 sm:items-end">
+        <div class="flex shrink-0 flex-col gap-2 pl-4 sm:items-end">
           <span
             class="rounded border bg-black/30 px-3 py-1 text-sm font-semibold"
             [ngClass]="resultClass(match)"

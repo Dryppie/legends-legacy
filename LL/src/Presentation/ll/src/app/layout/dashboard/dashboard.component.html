@@ -15,11 +15,8 @@
       ></div>
 
       <nav
-        class="fixed inset-y-0 left-0 z-50 w-[min(20rem,85vw)] transform transition-transform duration-200 sm:static sm:z-auto sm:w-auto sm:translate-x-0"
-        [ngClass]="{
-          '-translate-x-full': isScreenSmall && !isSidebarOpen,
-          'translate-x-0': !isScreenSmall || isSidebarOpen,
-        }"
+        class="fixed inset-y-0 left-0 z-50 w-[min(20rem,85vw)] -translate-x-full transform transition-transform duration-200 sm:static sm:z-auto sm:w-auto sm:translate-x-0"
+        [style.transform]="isSidebarOpen ? 'translateX(0)' : null"
       >
         <app-sidebar
           (itemTapped)="closeSidebar()"

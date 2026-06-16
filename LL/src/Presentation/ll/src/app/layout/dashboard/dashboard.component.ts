@@ -2,7 +2,7 @@ import { Component, effect, HostListener, OnInit } from '@angular/core';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { Router, RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './navbar/navbar.component';
-import { AsyncPipe, NgClass, NgIf } from '@angular/common';
+import { AsyncPipe, NgIf } from '@angular/common';
 import { Observable } from 'rxjs';
 import { GameService } from '../../core/services/client-side/game/game.service';
 import { CombatComponent } from '../../shared/components/combat/combat.component';
@@ -22,7 +22,6 @@ import { EquipmentType } from '../../shared/models/enums/equipmentType';
     SidebarComponent,
     NavbarComponent,
     NgIf,
-    NgClass,
     AsyncPipe,
     CombatComponent,
     ChatComponent,
@@ -55,7 +54,7 @@ export class DashboardComponent implements OnInit {
     this.combatVisible$ = this.gameService.combatVisible$;
   }
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onResize() {
     this.checkScreenSize();
   }

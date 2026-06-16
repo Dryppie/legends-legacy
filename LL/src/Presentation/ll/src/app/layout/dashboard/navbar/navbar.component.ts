@@ -7,7 +7,6 @@ import {
   OnInit,
   Output,
 } from '@angular/core';
-import { CharacterBadgeComponent } from '../../../shared/components/character-badge/character-badge.component';
 import { NavbuttonComponent } from './navbutton/navbutton.component';
 import { NgFor, NgIf } from '@angular/common';
 import { AuthService } from '../../../core/services/api/auth/auth.service';
@@ -21,20 +20,11 @@ import { GameService } from '../../../core/services/client-side/game/game.servic
 import { CharacterActionType } from '../../../shared/models/enums/characterActionType';
 import { Equipment } from '../../../shared/models/item';
 import { EquipmentType } from '../../../shared/models/enums/equipmentType';
-import { CurrentActionComponent } from '../../../shared/components/current-action/current-action.component';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [
-    CharacterBadgeComponent,
-    NavbuttonComponent,
-    NgIf,
-    NgFor,
-    NumberFormatPipe,
-    ShortNumberPipe,
-    CurrentActionComponent,
-  ],
+  imports: [NavbuttonComponent, NgIf, NgFor, NumberFormatPipe, ShortNumberPipe],
   templateUrl: './navbar.component.html',
 })
 export class NavbarComponent implements OnInit, OnDestroy {

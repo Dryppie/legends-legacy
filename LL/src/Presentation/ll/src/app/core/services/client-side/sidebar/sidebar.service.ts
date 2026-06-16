@@ -138,16 +138,9 @@ function getSidebarSections(): SidebarSection[] {
       ],
     },
     {
-      id: 'social',
-      label: 'Social',
+      id: 'city',
+      label: 'City',
       items: [
-        {
-          id: 'tavern',
-          route: ['city', 'tavern'],
-          icon: 'city/temple',
-          title: 'Leaderboard',
-          description: 'Rankings and records',
-        },
         {
           id: 'guild',
           route: ['city', 'guild'],
@@ -162,12 +155,6 @@ function getSidebarSections(): SidebarSection[] {
           title: 'Colosseum',
           description: 'Tournaments and battles',
         },
-      ],
-    },
-    {
-      id: 'economy',
-      label: 'Economy',
-      items: [
         {
           id: 'market-place',
           route: ['city', 'market-place'],
@@ -175,8 +162,20 @@ function getSidebarSections(): SidebarSection[] {
           title: 'Cinder Bazaar',
           description: 'List and buy items',
         },
+        {
+          id: 'tavern',
+          route: ['city', 'tavern'],
+          icon: 'city/temple',
+          title: 'Leaderboard',
+          description: 'Rankings and records',
+        },
       ],
     },
+    // {
+    //   id: 'economy',
+    //   label: 'Economy',
+    //   items: [],
+    // },
     {
       id: 'system',
       label: 'System',
@@ -184,7 +183,7 @@ function getSidebarSections(): SidebarSection[] {
         {
           id: 'settings',
           route: ['settings'],
-          icon: 'settings/settings',
+          icon: 'city/temple',
           title: 'Settings',
           description: 'Account and preferences',
         },

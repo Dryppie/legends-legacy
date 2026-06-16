@@ -2,13 +2,10 @@
   <h1 class="text-primary">{{ region.name }}</h1>
 
   <app-tabs class="flex w-full flex-col overflow-hidden">
-    <app-tab label="Dungeons">
-      <app-dungeons class="overflow-hidden pt-4"></app-dungeons>
-    </app-tab>
     <app-tab label="Areas">
       <div
         *ngIf="region.areas.length > 0"
-        class="flex w-full flex-col gap-2 pt-4"
+        class="flex w-full flex-col gap-2 overflow-y-auto pt-4"
         data-tour="areas-introduction"
       >
         <div class="flex h-full w-full flex-wrap gap-4">
@@ -23,6 +20,9 @@
           </div>
         </div>
       </div>
+    </app-tab>
+    <app-tab label="Dungeons">
+      <app-dungeons class="overflow-hidden pt-4"></app-dungeons>
     </app-tab>
     <app-tab label="Raids">
       <app-raids></app-raids>
