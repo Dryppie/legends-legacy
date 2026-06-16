@@ -114,3 +114,21 @@ The character overview was already in a good place, so this pass stayed restrain
 - No changes to character stats, combat rating, Essence loadout data, or backend APIs.
 - No broad redesign of the overview cards or attribute sections.
 - No changes to the dedicated Essence management page.
+
+## Fifth Slice: Equipment List
+
+### Why This Slice Next
+
+The inventory page already works well, so this pass focused only on the equipment list inside it. The goal was to make carried gear easier to scan without changing the broader inventory browsing flow.
+
+### UX Problems Addressed
+
+- Made the Equipment tab title and helper text specific to gear instead of generic inventory.
+- Added compact equipment row metadata for slot type, rarity, and potential.
+- Kept the metadata scoped to the Equipment tab and Scrap mode so the general inventory list stays familiar.
+
+### Out Of Scope For This Pass
+
+- No changes to inventory categories, item data, equipment stats, scrap rules, or backend APIs.
+- No redesign of the equipped gear panel or equipment modals.
+- No changes to resources or Essence inventory rows.
