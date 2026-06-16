@@ -1,30 +1,46 @@
 <div
-  class="flex h-full justify-center bg-cover bg-center"
+  class="flex h-dvh min-h-0 justify-center overflow-hidden bg-cover bg-center"
   style="
     background-image: url(&quot;backgrounds/optimized/background.webp&quot;);
   "
 >
-  <div class="flex h-full w-full flex-auto flex-col">
+  <div class="flex h-full min-h-0 w-full flex-auto flex-col">
     <div
-      class="flex h-full flex-col overflow-hidden sm:order-2 sm:flex-row sm:gap-4"
+      class="flex min-h-0 flex-1 flex-col overflow-hidden sm:order-2 sm:flex-row sm:gap-4"
     >
-      <nav class="w-full sm:w-auto">
+      <div
+        *ngIf="isSidebarOpen && isScreenSmall"
+        class="fixed inset-0 z-40 bg-black/60 sm:hidden"
+        (click)="closeSidebar()"
+      ></div>
+
+      <nav
+        class="fixed inset-y-0 left-0 z-50 w-[min(20rem,85vw)] transform transition-transform duration-200 sm:static sm:z-auto sm:w-auto sm:translate-x-0"
+        [ngClass]="{
+          '-translate-x-full': isScreenSmall && !isSidebarOpen,
+          'translate-x-0': !isScreenSmall || isSidebarOpen,
+        }"
+      >
         <app-sidebar
-          (itemTapped)="toggleNav()"
-          class="flex sm:h-full"
+          (itemTapped)="closeSidebar()"
+          class="flex h-full"
         ></app-sidebar>
       </nav>
-      <div class="h-full w-full flex-col space-y-4 overflow-hidden sm:flex">
-        <div class="relative h-full w-full flex-auto overflow-hidden sm:pr-4">
+      <div
+        class="flex min-h-0 w-full flex-1 flex-col space-y-4 overflow-hidden"
+      >
+        <div class="relative min-h-0 w-full flex-1 overflow-hidden sm:pr-4">
           <div
             class="border-gradient absolute inset-0 flex w-full items-center rounded-b-none sm:rounded-t-md sm:pr-4 sm:pt-[1px] sm:opacity-95 xl:pr-0"
           >
             <div class="h-full w-full bg-texture sm:rounded-t-md"></div>
           </div>
           <main
-            class="relative flex h-full w-full flex-auto flex-col gap-2 overflow-hidden pt-4 sm:rounded-md sm:pt-6 2xl:rounded-b-none"
+            class="relative flex h-full min-h-0 w-full flex-auto flex-col gap-2 overflow-hidden pt-4 sm:rounded-md sm:pt-6 2xl:rounded-b-none"
           >
-            <div class="h-full w-full overflow-hidden pl-4 sm:pb-6 sm:pl-6">
+            <div
+              class="h-full min-h-0 w-full overflow-hidden pb-4 pl-4 sm:pb-6 sm:pl-6"
+            >
               <ng-container *ngIf="combatVisible$ | async; else mainView">
                 <app-combat></app-combat>
               </ng-container>

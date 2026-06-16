@@ -1,4 +1,4 @@
-<div class="flex sm:h-8" *ngIf="currentCharacter() as currentCharacter">
+<div class="flex h-14 sm:h-8" *ngIf="currentCharacter() as currentCharacter">
   <!-- <app-character-badge
     class="z-10 -mr-12 hidden sm:block"
     [level]="currentCharacter?.level"
@@ -9,7 +9,7 @@
     class="border-gradient relative flex w-full items-center rounded-md sm:h-8 sm:pb-[1px]"
   >
     <div
-      class="flex h-full w-full items-center justify-between bg-texture bg-auto sm:rounded-md"
+      class="flex h-full w-full items-center justify-center bg-texture bg-auto sm:justify-between sm:rounded-md"
     >
       <div class="hidden items-center gap-2 pl-4 sm:flex">
         <h2
@@ -48,7 +48,7 @@
           </div>
         </div>
       </div>
-      <div class="flex place-items-center gap-2">
+      <div class="flex w-full place-items-center gap-2 sm:w-auto">
         <!-- <div
             class="flex items-center hidden justify-between bg-transparent p-4 text-[#6D6D6D] sm:hidden"
             (click)="toggleList()"
@@ -58,8 +58,21 @@
             <h3 class="cursor-pointer pl-2 text-primary">{{ activeLabel }}</h3>
           </div> -->
         <div
-          class="z-10 flex text-nowrap border-t bg-texture text-[#a1a1a1] sm:w-auto sm:items-center sm:space-x-2 sm:border-none sm:bg-none"
+          class="z-10 flex w-full items-center justify-around text-nowrap border-t bg-texture text-[#a1a1a1] sm:w-auto sm:justify-start sm:space-x-2 sm:border-none sm:bg-none"
         >
+          <button
+            type="button"
+            class="flex min-w-16 flex-col items-center px-3 py-1 text-primary sm:hidden"
+            (click)="itemTapped.emit()"
+            aria-label="Open menu"
+          >
+            <img
+              src="core/button/Hamburger.png"
+              class="h-4 w-4 pb-[2px]"
+              alt=""
+            />
+            <h3 class="text-[13px] font-medium">Menu</h3>
+          </button>
           <app-navbutton
             *ngFor="let button of navButtons"
             [link]="button.link"

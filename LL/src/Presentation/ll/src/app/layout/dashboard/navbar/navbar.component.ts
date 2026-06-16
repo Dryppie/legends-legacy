@@ -108,7 +108,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   activeNavbar(activeLabel: string) {
     this.activeLabel = activeLabel;
-    this.itemTapped.emit();
   }
 
   navigateToAction(): void {

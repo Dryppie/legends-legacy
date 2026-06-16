@@ -1,8 +1,10 @@
 <button
+  type="button"
   routerLink="{{ link }}"
   routerLinkActive="text-primary"
   #rla="routerLinkActive"
-  class="flex"
+  class="flex min-w-16 justify-center px-3 py-1 sm:min-w-0 sm:px-0 sm:py-0"
+  (click)="itemTapped.emit()"
 >
   <div class="hidden items-center sm:flex">
     <h3>{{ label }}</h3>
