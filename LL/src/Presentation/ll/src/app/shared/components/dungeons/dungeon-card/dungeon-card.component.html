@@ -116,16 +116,25 @@
         >
           <div class="flex flex-col justify-between">
             <div>
-              <div
-                class="text-[10px] uppercase tracking-[0.18em] text-zinc-300"
-              >
-                Difficulty
+              <div class="flex items-center justify-between gap-3">
+                <div
+                  class="text-[10px] uppercase tracking-[0.18em] text-zinc-300"
+                >
+                  Difficulty
+                </div>
+                <span
+                  class="rounded border px-2 py-0.5 text-[10px] font-semibold uppercase"
+                  [ngClass]="selectedStatusClass()"
+                >
+                  {{ selectedStatusLabel() }}
+                </span>
               </div>
               <div class="mt-2 flex flex-wrap gap-2">
                 <button
                   type="button"
-                  class="rounded border px-4 py-2 text-sm transition"
+                  class="rounded border px-4 py-2 text-sm transition disabled:cursor-not-allowed"
                   [ngClass]="difficultyButtonClass(dungeonDifficulty.Normal)"
+                  [disabled]="!isDifficultyUnlocked(dungeonDifficulty.Normal)"
                   (click)="selectDifficulty(dungeonDifficulty.Normal)"
                 >
                   {{ difficultyLabel(dungeonDifficulty.Normal) }}
@@ -133,8 +142,9 @@
 
                 <button
                   type="button"
-                  class="rounded border px-4 py-2 text-sm transition"
+                  class="rounded border px-4 py-2 text-sm transition disabled:cursor-not-allowed"
                   [ngClass]="difficultyButtonClass(dungeonDifficulty.Heroic)"
+                  [disabled]="!isDifficultyUnlocked(dungeonDifficulty.Heroic)"
                   (click)="selectDifficulty(dungeonDifficulty.Heroic)"
                 >
                   {{ difficultyLabel(dungeonDifficulty.Heroic) }}
@@ -142,8 +152,9 @@
 
                 <button
                   type="button"
-                  class="rounded border px-4 py-2 text-sm transition"
+                  class="rounded border px-4 py-2 text-sm transition disabled:cursor-not-allowed"
                   [ngClass]="difficultyButtonClass(dungeonDifficulty.Mythic)"
+                  [disabled]="!isDifficultyUnlocked(dungeonDifficulty.Mythic)"
                   (click)="selectDifficulty(dungeonDifficulty.Mythic)"
                 >
                   {{ difficultyLabel(dungeonDifficulty.Mythic) }}
@@ -168,23 +179,19 @@
               >
                 Entry
               </div>
-              <div class="mt-1 flex flex-wrap gap-2">
+              <div
+                *ngIf="selectedEntryRequirements().length; else noEntryCost"
+                class="mt-1 flex flex-wrap gap-2"
+              >
                 <ng-container
                   *ngFor="let requirement of selectedEntryRequirements()"
                 >
                   <span
-                    class="rounded border border-white/15 bg-black/30 px-2 py-1 text-xs text-zinc-100"
+                    class="rounded border px-2 py-1 text-xs"
+                    [ngClass]="entryRequirementClass(requirement)"
                   >
                     {{ requirement.name }}
-                    <span
-                      class="ml-1 tabular-nums"
-                      [class.text-primary]="
-                        requirement.ownedAmount >= requirement.requiredAmount
-                      "
-                      [class.text-red-200]="
-                        requirement.ownedAmount < requirement.requiredAmount
-                      "
-                    >
+                    <span class="ml-1 tabular-nums">
                       {{ requirement.ownedAmount }}/{{
                         requirement.requiredAmount
                       }}
@@ -192,6 +199,9 @@
                   </span>
                 </ng-container>
               </div>
+              <ng-template #noEntryCost>
+                <div class="mt-1 text-xs text-zinc-400">No key required</div>
+              </ng-template>
             </div>
 
             <div class="rounded border border-white/15 bg-black/30 px-3 py-2">
@@ -203,20 +213,21 @@
               <div class="mt-1 text-sm">
                 <span
                   class="font-semibold tabular-nums"
-                  [class.text-primary]="
-                    (selectedPreviewData().currentCombatRating ?? 0) >=
-                    (selectedPreviewData().recommendedCombatRating ?? 0)
-                  "
-                  [class.text-amber-200]="
-                    (selectedPreviewData().currentCombatRating ?? 0) <
-                    (selectedPreviewData().recommendedCombatRating ?? 0)
-                  "
+                  [class.text-primary]="meetsRecommendedRating()"
+                  [class.text-amber-200]="!meetsRecommendedRating()"
                 >
                   {{ selectedPreviewData().currentCombatRating ?? 0 }}
                 </span>
                 <span class="text-zinc-500">
                   / {{ selectedPreviewData().recommendedCombatRating ?? 0 }}
                 </span>
+              </div>
+              <div
+                class="mt-1 text-[10px] uppercase"
+                [class.text-primary]="meetsRecommendedRating()"
+                [class.text-amber-200]="!meetsRecommendedRating()"
+              >
+                {{ meetsRecommendedRating() ? "Ready" : "Risky" }}
               </div>
             </div>
           </div>
@@ -255,14 +266,10 @@
             *ngIf="!selectedCanEnter()"
             class="rounded border border-red-400/30 bg-red-950/20 px-3 py-2 text-xs text-red-100 md:col-span-2 xl:col-span-3"
           >
-            <span
-              *ngFor="
-                let requirement of selectedMissingRequirements();
-                let last = last
-              "
-            >
-              {{ requirement }}{{ last ? "" : " " }}
-            </span>
+            {{
+              selectedMissingRequirements().join(" · ") ||
+                selectedStatusLabel()
+            }}
           </div>
         </div>
       </div>

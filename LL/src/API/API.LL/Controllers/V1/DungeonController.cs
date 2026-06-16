@@ -31,7 +31,7 @@ public class DungeonController : BaseController
 
     public record StartDungeonRequest(string DungeonId, DungeonTier DungeonTier);
     [HttpPost("StartDungeon")]
-    public async Task<ActionResult<Response<DungeonRunDto>>> StartDungeon([FromBody] StartDungeonRequest startDungeonRequest) =>
+    public async Task<ActionResult<Response<StartDungeonRunResponseDto>>> StartDungeon([FromBody] StartDungeonRequest startDungeonRequest) =>
         await Mediator.Send(new StartDungeonRunCommand(CurrentCharacterGuid, startDungeonRequest.DungeonId, startDungeonRequest.DungeonTier));
 
     public class ExecuteDungeonActionRequest
@@ -45,10 +45,10 @@ public class DungeonController : BaseController
         await Mediator.Send(new ExecuteDungeonActionCommand(CurrentCharacterGuid, runId, request.ActionId, request.Payload));
 
     [HttpPost("ClaimDungeonRewards")]
-    public async Task<ActionResult<Response<bool>>> ClaimDungeonRewards() =>
+    public async Task<ActionResult<Response<ClaimDungeonRewardsResponseDto>>> ClaimDungeonRewards() =>
         await Mediator.Send(new ClaimDungeonRewardsCommand(CurrentCharacterGuid));
 
     [HttpPost("DismissFailedDungeonRun")]
-    public async Task<ActionResult<Response<bool>>> DismissFailedDungeonRun() =>
+    public async Task<ActionResult<Response<DismissFailedDungeonRunResponseDto>>> DismissFailedDungeonRun() =>
         await Mediator.Send(new DismissFailedDungeonRunCommand(CurrentCharacterGuid));
 }

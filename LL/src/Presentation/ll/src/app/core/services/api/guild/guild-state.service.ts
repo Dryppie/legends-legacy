@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, effect } from '@angular/core';
 import { finalize } from 'rxjs';
 import { Guild, GuildSimple } from '../../../../shared/models/Dtos/guild/guild';
 import { GuildInvite } from '../../../../shared/models/Dtos/guild/guildInvite';
@@ -6,6 +6,53 @@ import { InviteToGuild } from '../../../../shared/models/requestDtos/guilds/invi
 import { GuildService } from './guild.service';
 import { BuildingUpgradeView } from '../../../../shared/models/guilds/buildings/buildingUpgradeView';
 import { GuildResourceType } from '../../../../shared/models/Dtos/guild/guildResourceType';
+import { GameEventService } from '../../real-time/game-event.service';
+import { AuthService } from '../auth/auth.service';
+import { InventoryStateService } from '../inventory/inventory-state.service';
+import {
+  NOTIFICATION_SURFACE,
+  NotificationService,
+  SIDEBAR_NOTIFICATION,
+} from '../../client-side/notifications/notification.service';
+import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
+import { GameEventName } from '../../real-time/game-event/game-event.map';
+
+type GuildRealtimeEventName = Extract<
+  GameEventName,
+  | 'GuildApplicationMsg'
+  | 'GuildInviteReceivedMsg'
+  | 'GuildInviteRejectedMsg'
+  | 'GuildApplicationRejectedMsg'
+  | 'GuildBuildingUpgradedMsg'
+  | 'GuildStateChangedMsg'
+  | 'GuildMembershipChangedMsg'
+  | 'GuildDisbandedMsg'
+  | 'GuildDirectoryChangedMsg'
+>;
+
+type GuildRealtimeScope = 'any' | 'member' | 'nonMember';
+
+interface GuildRealtimeContext {
+  guildId: string | null;
+  shouldRefresh: boolean;
+}
+
+type GuildRealtimePayload = { guildId?: string };
+
+interface GuildRealtimeHandler {
+  eventName: GuildRealtimeEventName;
+  key: string;
+  scope: GuildRealtimeScope;
+  matches?: (
+    payload: GuildRealtimePayload,
+    context: GuildRealtimeContext,
+  ) => boolean;
+  action?: (
+    payload: GuildRealtimePayload,
+    context: GuildRealtimeContext,
+  ) => void;
+  refresh?: boolean;
+}
 
 @Injectable({ providedIn: 'root' })
 export class GuildStateService {
@@ -16,6 +63,9 @@ export class GuildStateService {
   private readonly _allGuilds = signal<GuildSimple[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
+  private readonly eventDeduper = new GameEventDeduper();
+  private readonly guildRealtimeHandlers = this.createGuildRealtimeHandlers();
+  private hasLoaded = false;
 
   /* ─────────── public, read-only selectors ─────────── */
   readonly guild = computed(() => this._guild());
@@ -26,24 +76,194 @@ export class GuildStateService {
   readonly error = computed(() => this._error());
   readonly isInGuild = computed(() => !!this._guild());
   readonly hasInvites = computed(() => this._invites().length > 0);
+  readonly guildNotificationCount = computed(() =>
+    this.notificationService.count(
+      NOTIFICATION_SURFACE.Sidebar,
+      SIDEBAR_NOTIFICATION.Guild,
+    ),
+  );
 
-  constructor(private readonly service: GuildService) {
+  constructor(
+    private readonly service: GuildService,
+    private readonly eventService: GameEventService,
+    private readonly inventoryState: InventoryStateService,
+    private readonly auth: AuthService,
+    private readonly notificationService: NotificationService,
+  ) {
     this.refresh(); // initial fetch
 
-    /* real-time updates pushed over the socket */
-    // effect(() => {
-    //   const evt = this.socket.ofType('guild:update')(); // adjust event name/payload
-    //   if (!evt) return;
+    effect(() => {
+      const guildId = this._guild()?.id;
+      if (!guildId) return;
 
-    //   if (evt.guild)   this._guild.set(evt.guild);
-    //   if (evt.invites) this._invites.set(evt.invites);
-    // });
+      void this.eventService
+        .subscribeToGuild(guildId)
+        .catch((error) =>
+          console.warn('Failed to subscribe to guild realtime', error),
+        );
+    });
+
+    effect(
+      () => {
+        const reconnectCount = this.eventService.reconnectCount();
+        if (reconnectCount <= 0 || !this.hasLoaded) return;
+
+        this.refresh();
+      },
+      { allowSignalWrites: true },
+    );
+
+    effect(
+      () => {
+        this.handleGuildRealtimeEvents();
+      },
+      { allowSignalWrites: true },
+    );
+  }
+
+  private createGuildRealtimeHandlers(): GuildRealtimeHandler[] {
+    const inCurrentGuild = (
+      payload: GuildRealtimePayload,
+      context: GuildRealtimeContext,
+    ) => !!payload.guildId && payload.guildId === context.guildId;
+
+    return [
+      {
+        eventName: 'GuildDirectoryChangedMsg',
+        key: 'guild-directory-changed',
+        scope: 'any',
+        action: () => this.loadAllGuilds(),
+      },
+      {
+        eventName: 'GuildInviteReceivedMsg',
+        key: 'guild-invite-received',
+        scope: 'nonMember',
+        action: () => {
+          this.addGuildNotification();
+          this.loadMyInvites();
+        },
+      },
+      {
+        eventName: 'GuildInviteRejectedMsg',
+        key: 'guild-invite-rejected',
+        scope: 'nonMember',
+        action: () => this.loadMyInvites(),
+      },
+      {
+        eventName: 'GuildApplicationRejectedMsg',
+        key: 'guild-application-rejected',
+        scope: 'nonMember',
+        action: () => this.loadMyInvites(),
+      },
+      {
+        eventName: 'GuildMembershipChangedMsg',
+        key: 'guild-membership-changed',
+        scope: 'nonMember',
+        refresh: true,
+      },
+      {
+        eventName: 'GuildBuildingUpgradedMsg',
+        key: 'guild-building-upgraded',
+        scope: 'member',
+        matches: inCurrentGuild,
+        refresh: true,
+      },
+      {
+        eventName: 'GuildApplicationMsg',
+        key: 'guild-application',
+        scope: 'member',
+        matches: inCurrentGuild,
+        action: () => this.addGuildNotification(),
+        refresh: true,
+      },
+      {
+        eventName: 'GuildStateChangedMsg',
+        key: 'guild-state-changed',
+        scope: 'member',
+        matches: inCurrentGuild,
+        refresh: true,
+      },
+      {
+        eventName: 'GuildMembershipChangedMsg',
+        key: 'guild-membership-changed',
+        scope: 'member',
+        matches: inCurrentGuild,
+        refresh: true,
+      },
+      {
+        eventName: 'GuildDisbandedMsg',
+        key: 'guild-disbanded',
+        scope: 'member',
+        matches: inCurrentGuild,
+        refresh: true,
+      },
+      {
+        eventName: 'GuildInviteRejectedMsg',
+        key: 'guild-invite-rejected',
+        scope: 'member',
+        matches: inCurrentGuild,
+        refresh: true,
+      },
+      {
+        eventName: 'GuildApplicationRejectedMsg',
+        key: 'guild-application-rejected',
+        scope: 'member',
+        matches: inCurrentGuild,
+        refresh: true,
+      },
+    ];
+  }
+
+  private handleGuildRealtimeEvents(): void {
+    const context: GuildRealtimeContext = {
+      guildId: this._guild()?.id ?? null,
+      shouldRefresh: false,
+    };
+
+    for (const handler of this.guildRealtimeHandlers) {
+      this.processGuildRealtimeHandler(handler, context);
+    }
+
+    if (context.shouldRefresh) {
+      this.refresh();
+    }
+  }
+
+  private processGuildRealtimeHandler(
+    handler: GuildRealtimeHandler,
+    context: GuildRealtimeContext,
+  ): void {
+    if (!this.isGuildHandlerInScope(handler.scope, context.guildId)) return;
+
+    const envelope = this.eventService.eventEnvelope[handler.eventName]();
+    const payload = envelope?.payload as GuildRealtimePayload | undefined;
+    if (!payload) return;
+    if (handler.matches && !handler.matches(payload, context)) return;
+    if (!this.eventDeduper.shouldProcess(handler.key, envelope)) return;
+
+    handler.action?.(payload, context);
+    context.shouldRefresh ||= !!handler.refresh;
+  }
+
+  private isGuildHandlerInScope(
+    scope: GuildRealtimeScope,
+    guildId: string | null,
+  ): boolean {
+    switch (scope) {
+      case 'member':
+        return !!guildId;
+      case 'nonMember':
+        return !guildId;
+      case 'any':
+        return true;
+    }
   }
 
   /* ─────────── high-level commands ─────────── */
 
   /** Call once at login or when character changes */
   refresh(): void {
+    this.hasLoaded = true;
     this._loading.set(true);
 
     this.service
@@ -53,6 +273,10 @@ export class GuildStateService {
         next: (guild) => {
           if (guild) {
             this._guild.set(guild);
+            this.initializeGuildNotificationCount(
+              guild.invites.filter((invite: GuildInvite) => !invite.isInvite)
+                .length,
+            );
             this._invites.set([]);
             this._allGuilds.set([]);
             this.loadGuildUpgrades();
@@ -119,26 +343,9 @@ export class GuildStateService {
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
         next: () => {
-          const currentGuild = this._guild();
-          if (!currentGuild) return;
-
-          const updatedResources = [...currentGuild.resources];
-
-          for (const donation of donations) {
-            const existing = updatedResources.find(
-              (r) => r.resource === donation.type,
-            );
-            if (existing) {
-              existing.amount += donation.amount;
-            } else {
-              updatedResources.push({
-                resource: donation.type,
-                amount: donation.amount,
-              });
-            }
-          }
-
-          this._guild.set({ ...currentGuild, resources: updatedResources });
+          this.refresh();
+          this.inventoryState.load(true);
+          this.auth.refreshCurrentCharacter();
         },
         error: (e) => this._error.set(e.message ?? 'Failed to donate to guild'),
       });
@@ -151,37 +358,9 @@ export class GuildStateService {
       .upgradeGuildBuilding(upgrade.definition.id)
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: () => {
-          const guild = this._guild();
-
-          // Shallow clone to trigger reactivity
-          const updatedResources = [...(guild?.resources ?? [])];
-
-          for (const [resourceType, cost] of Object.entries(
-            upgrade.nextCost ?? {},
-          )) {
-            const res = updatedResources.find(
-              (r) => r.resource === resourceType,
-            );
-            if (res) {
-              res.amount -= cost;
-              if (res.amount < 0) res.amount = 0; // safety
-            }
-          }
-
-          this._guild.set({
-            ...guild!,
-            resources: updatedResources,
-          });
-
-          // Optimistically bump upgrade level
-          upgrade.level += 1;
-
-          // TODO: Recalculate `upgrade.nextCost` if needed, or set to null if max level
-          // For now, you may want to just trigger recompute logic
-          // this.refreshUpgrades(); // optional, or adjust locally too
-        },
-        error: (e) => this._error.set(e.message ?? 'Failed to disband guild'),
+        next: () => this.refresh(),
+        error: (e) =>
+          this._error.set(e.message ?? 'Failed to upgrade guild building'),
       });
   }
 
@@ -196,7 +375,12 @@ export class GuildStateService {
 
   private loadMyInvites(): void {
     this.service.getMyInvites().subscribe({
-      next: (inv) => this._invites.set(inv),
+      next: (inv) => {
+        this._invites.set(inv);
+        this.initializeGuildNotificationCount(
+          inv.filter((invite: GuildInvite) => invite.isInvite).length,
+        );
+      },
       error: (e) => this._error.set(e.message ?? 'Failed to load invites'),
     });
   }
@@ -210,16 +394,7 @@ export class GuildStateService {
 
   applyToGuild(guildId: string): void {
     this.service.applyToGuild(guildId).subscribe({
-      next: () => {
-        const pending: GuildInvite = {
-          guildId,
-          guildName: '',
-          characterId: '',
-          characterName: '',
-          isInvite: false,
-        };
-        this._invites.set([...this._invites(), pending]);
-      },
+      next: () => this.loadMyInvites(),
       error: (e) => this._error.set(e.message ?? 'Failed to apply to guild'),
     });
   }
@@ -245,8 +420,7 @@ export class GuildStateService {
 
   rejectInvite(guildId: string): void {
     this.service.rejectInvite(guildId).subscribe({
-      next: () =>
-        this._invites.set(this._invites().filter((i) => i.guildId !== guildId)),
+      next: () => this.loadMyInvites(),
       error: (e) => this._error.set(e.message ?? 'Failed to reject invite'),
     });
   }
@@ -261,13 +435,7 @@ export class GuildStateService {
 
   rejectApplication(characterId: string): void {
     this.service.rejectApplication(characterId).subscribe({
-      next: () => {
-        const g = this._guild();
-        if (!g) return;
-
-        g.invites = g.invites.filter((i) => i.characterId !== characterId);
-        this._guild.set({ ...g }); // trigger change
-      },
+      next: () => this.refresh(),
       error: (e) =>
         this._error.set(e.message ?? 'Failed to reject application'),
     });
@@ -282,5 +450,27 @@ export class GuildStateService {
   }
   setAllGuilds(gs: GuildSimple[]) {
     this._allGuilds.set(gs);
+  }
+
+  markGuildNotificationsSeen(): void {
+    this.notificationService.markSeen(
+      NOTIFICATION_SURFACE.Sidebar,
+      SIDEBAR_NOTIFICATION.Guild,
+    );
+  }
+
+  private addGuildNotification(): void {
+    this.notificationService.increment(
+      NOTIFICATION_SURFACE.Sidebar,
+      SIDEBAR_NOTIFICATION.Guild,
+    );
+  }
+
+  private initializeGuildNotificationCount(count: number): void {
+    this.notificationService.initializeCount(
+      NOTIFICATION_SURFACE.Sidebar,
+      SIDEBAR_NOTIFICATION.Guild,
+      count,
+    );
   }
 }

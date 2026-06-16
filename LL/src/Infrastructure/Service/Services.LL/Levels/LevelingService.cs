@@ -31,7 +31,13 @@ public class LevelingService : ILevelingService
             LevelUpPrimaryAttributes(character);
 
             //TODO: Add Publish Event to notify listeners that listen to level ups
-            await _publisher.Publish(new CharacterLevelUpEvent(character.Id, character.Level), cancellationToken);
+            await _publisher.Publish(
+                new CharacterLevelUpEvent(
+                    character.Id,
+                    character.Level,
+                    character.Experience,
+                    xpRequired),
+                cancellationToken);
         }
     }
 

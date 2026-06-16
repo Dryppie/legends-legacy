@@ -64,7 +64,7 @@ export class DungeonCardComponent {
   }
 
   selectDifficulty(d: DungeonDifficulty) {
-    if (this.previewData.unlockedDifficulties.includes(d)) {
+    if (this.isDifficultyUnlocked(d)) {
       this.difficulty.set(d);
     }
   }
@@ -91,17 +91,44 @@ export class DungeonCardComponent {
     return this.selectedPreviewData().canEnter ?? true;
   }
 
+  isDifficultyUnlocked(difficulty: DungeonDifficulty): boolean {
+    return this.previewData.unlockedDifficulties.includes(difficulty);
+  }
+
   difficultyButtonClass(
     difficulty: DungeonDifficulty,
   ): Record<string, boolean> {
     const selected = this.difficulty() === difficulty;
-    const unlocked = this.previewData.unlockedDifficulties.includes(difficulty);
+    const unlocked = this.isDifficultyUnlocked(difficulty);
 
     return {
       'border-primary bg-primary/90 text-black': selected,
-      'border-white/25 text-zinc-100': !selected,
-      'opacity-35': !unlocked,
+      'border-white/25 text-zinc-100 hover:border-primary hover:bg-primary/10':
+        !selected && unlocked,
+      'border-white/10 text-zinc-500 opacity-45': !unlocked,
     };
+  }
+
+  selectedStatusLabel(): string {
+    if (this.selectedCanEnter()) {
+      return 'Ready';
+    }
+
+    if (this.selectedMissingRequirements().length) {
+      return 'Requirements missing';
+    }
+
+    if (!this.meetsRecommendedRating()) {
+      return 'Under recommended rating';
+    }
+
+    return 'Locked';
+  }
+
+  selectedStatusClass(): string {
+    return this.selectedCanEnter()
+      ? 'border-primary/40 bg-primary/10 text-primary'
+      : 'border-red-400/30 bg-red-950/20 text-red-100';
   }
 
   selectedMissingRequirements(): string[] {
@@ -110,6 +137,22 @@ export class DungeonCardComponent {
 
   selectedEntryRequirements() {
     return this.selectedPreviewData().entryRequirements ?? [];
+  }
+
+  meetsRecommendedRating(): boolean {
+    return (
+      (this.selectedPreviewData().currentCombatRating ?? 0) >=
+      (this.selectedPreviewData().recommendedCombatRating ?? 0)
+    );
+  }
+
+  entryRequirementClass(requirement: {
+    ownedAmount: number;
+    requiredAmount: number;
+  }): string {
+    return requirement.ownedAmount >= requirement.requiredAmount
+      ? 'border-primary/30 bg-primary/10 text-primary'
+      : 'border-red-400/30 bg-red-950/20 text-red-100';
   }
 
   selectedRewardGroups(): RewardGroup[] {

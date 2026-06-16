@@ -66,6 +66,7 @@
               [item]="item"
               [routerLink]="item.route"
               [isActive]="isItemActive(item.route)"
+              [notificationCount]="getNotificationCount(item.id)"
               (click)="onNavigate()"
             >
             </app-sidebar-item>

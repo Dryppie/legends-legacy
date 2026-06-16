@@ -9,7 +9,7 @@ import {
 import { CombatAvatarComponent } from './combat-avatar/combat-avatar.component';
 import { CombatOverviewComponent } from './combat-overview/combat-overview.component';
 import { CombatEvent, EventType } from '../../models/Dtos/combatEventDto';
-import { NgFor, NgIf, NgStyle } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import {
   BattleOutcome,
   CombatResultDto,
@@ -34,9 +34,9 @@ import { TourService } from '../../../core/services/client-side/tutorial-tour/to
   imports: [
     CombatAvatarComponent,
     CombatOverviewComponent,
+    NgClass,
     NgFor,
     NgIf,
-    NgStyle,
     CountdownComponent,
     MiniButtonComponent,
     CombatLogComponent,
@@ -412,6 +412,62 @@ export class CombatComponent implements OnInit {
     } else {
       this.selectedEnemyCharacterIndex = index;
     }
+  }
+
+  battleTitle(): string {
+    if (this.isLoading) return 'Loading Battle';
+
+    if (this.battleType === BattleType.IdleCombat) {
+      const areaName = this.currentAction()?.combatActionDetails?.area?.name;
+      return areaName ? `Shenic - ${areaName}` : 'Idle Battle';
+    }
+
+    if (this.battleType === BattleType.Dungeon) return 'Dungeon Battle';
+    if (this.battleType === BattleType.Colosseum) return 'Arena Battle';
+
+    return 'Battle';
+  }
+
+  battleStatusLabel(): string {
+    if (this.outcome) return this.outcome;
+    if (this.isLoading) return 'Loading';
+    return 'In Progress';
+  }
+
+  battleStatusClass(): Record<string, boolean> {
+    return {
+      'border-emerald-400/50 bg-emerald-500/10 text-emerald-200':
+        this.outcome === BattleOutcome.Victory,
+      'border-red-400/50 bg-red-500/10 text-red-200':
+        this.outcome === BattleOutcome.Defeat,
+      'border-primary/50 bg-primary/10 text-primary':
+        this.outcome === BattleOutcome.Draw ||
+        (!this.outcome && !this.isLoading),
+      'border-light_gray/70 bg-white/5 text-zinc-200': this.isLoading,
+    };
+  }
+
+  teamSelectorClass(
+    team: 'player' | 'enemy',
+    index: number,
+  ): Record<string, boolean> {
+    const selected =
+      team === 'player'
+        ? this.selectedPlayerCharacterIndex === index
+        : this.selectedEnemyCharacterIndex === index;
+
+    return {
+      'border-primary bg-primary/15 text-primary shadow shadow-primary/15':
+        selected && team === 'player',
+      'border-red-300/80 bg-red-500/15 text-red-100 shadow shadow-red-500/15':
+        selected && team === 'enemy',
+      'border-white/15 bg-black/20 text-zinc-300 hover:border-primary/60 hover:text-white':
+        !selected,
+    };
+  }
+
+  teamMemberLabel(entity: SimpleCombatEntityDto, index: number): string {
+    return entity.name || `Unit ${index + 1}`;
   }
 
   flavorMessages: string[] = [

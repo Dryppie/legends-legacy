@@ -9,10 +9,12 @@ import { InventoryStateService } from '../../../../core/services/api/inventory/i
 import { FilterTabsComponent } from '../../../../shared/components/custom-components/tabs/filter-tabs/filter-tabs.component';
 import { RegularButtonComponent } from '../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { EquipmentInstance } from '../../../../shared/models/item';
+import { ItemType } from '../../../../shared/models/enums/itemType';
 import { Rarity } from '../../../../shared/models/enums/rarity';
 import { FormsModule } from '@angular/forms';
 import { ItemComponent } from '../../../../shared/components/item/item.component';
 import { HelpTooltipDirective } from '../../../../shared/help/help-tooltip.directive';
+import { EquipmentTypePipe } from '../../../../shared/pipes/equipment/equipment-type-format/equipment-type.pipe';
 
 @Component({
   selector: 'app-inventory',
@@ -29,6 +31,7 @@ import { HelpTooltipDirective } from '../../../../shared/help/help-tooltip.direc
     FormsModule,
     ItemComponent,
     HelpTooltipDirective,
+    EquipmentTypePipe,
   ],
   templateUrl: './inventory.component.html',
 })
@@ -151,6 +154,39 @@ export class InventoryComponent implements OnInit {
     );
   }
 
+  isEquipmentItem(item: InventoryItem): boolean {
+    return item.itemInstance.itemBase.itemType === ItemType.Equipment;
+  }
+
+  equipmentInstance(item: InventoryItem): EquipmentInstance | null {
+    return this.isEquipmentItem(item)
+      ? (item.itemInstance as EquipmentInstance)
+      : null;
+  }
+
+  equipmentRarityClass(item: InventoryItem): string {
+    const rarity = this.equipmentInstance(item)?.rarity ?? Rarity.Common;
+
+    switch (rarity) {
+      case Rarity.Common:
+        return 'border-slate-400/40 text-slate-200';
+      case Rarity.Uncommon:
+        return 'border-emerald-400/40 text-emerald-300';
+      case Rarity.Rare:
+        return 'border-blue-400/40 text-blue-300';
+      case Rarity.Epic:
+        return 'border-fuchsia-400/40 text-fuchsia-300';
+      case Rarity.Unique:
+        return 'border-yellow-400/40 text-yellow-300';
+      case Rarity.Legendary:
+        return 'border-orange-400/40 text-orange-300';
+      case Rarity.Legacy:
+        return 'border-rose-400/40 text-rose-300';
+      default:
+        return 'border-light_gray/60 text-secondary';
+    }
+  }
+
   setActiveTab(tabLabel: string) {
     this.activeTab = tabLabel;
   }
@@ -200,13 +236,11 @@ export class InventoryComponent implements OnInit {
   }
 
   get activeListTitle(): string {
-    return this.isScrapMode ? 'Tempered Equipment' : 'Inventory';
+    return 'Tempered Equipment';
   }
 
   get activeListDescription(): string {
-    return this.isScrapMode
-      ? 'Only equipment with 0 potential can be turned into tempered scrap.'
-      : 'Browse everything you are carrying.';
+    return 'Only equipment with 0 potential can be turned into tempered scrap.';
   }
 
   get emptyStateText(): string {

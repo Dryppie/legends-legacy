@@ -38,6 +38,12 @@ export class ChatService {
   private hub?: HubConnection;
   private incoming$ = new Subject<ChatMessageDto>();
   private readonly whisperDraftRequests = new Subject<string>();
+  private activeGuildId?: string;
+  private connectAndLoadPromise?: Promise<void>;
+  private unavailableUntil = 0;
+  private lastConnectionWarningAt = 0;
+  private readonly connectionWarningThrottleMs = 30_000;
+  private readonly unavailableRetryDelayMs = 30_000;
   // expose an observable stream of all messages
   private readonly messageList = signal<ChatMessageDto[]>([]);
   public messages$ = toObservable(this.messageList);
@@ -55,21 +61,41 @@ export class ChatService {
     this.incoming$.subscribe((msg) => {
       this.messageList.update((prev) => [...prev, msg]);
     });
-    effect((onCleanup) => {
-      const id = this.auth.identity(); // ← depends on username + login
-      if (!id) {
-        this.disconnect();
-        return;
-      }
+    effect(
+      () => {
+        const id = this.auth.identity(); // ← depends on username + login
+        const guildId = this.guildState.guild()?.id;
 
-      const guild = this.guildState.guild();
-      if (!guild) return;
+        if (!id || !guildId) {
+          if (this.hub || this.activeGuildId) {
+            void this.disconnect();
+          }
+          return;
+        }
 
-      this.connectAndLoad(guild.id); // or current channel from state
+        if (
+          this.activeGuildId === guildId &&
+          (this.connectAndLoadPromise ||
+            this.hub?.state === signalR.HubConnectionState.Connected ||
+            this.hub?.state === signalR.HubConnectionState.Reconnecting)
+        ) {
+          return;
+        }
 
-      /* make sure we disconnect when the effect re-runs or is destroyed */
-      onCleanup(() => this.disconnect());
-    });
+        if (this.isTemporarilyUnavailable()) return;
+
+        this.activeGuildId = guildId;
+        this.connectAndLoadPromise = this.connectAndLoad(guildId)
+          .catch((error) => {
+            this.unavailableUntil = Date.now() + this.unavailableRetryDelayMs;
+            this.handleConnectionError(error);
+          })
+          .finally(() => {
+            this.connectAndLoadPromise = undefined;
+          }); // or current channel from state
+      },
+      { allowSignalWrites: true },
+    );
   }
 
   /** Connect + load history in one call. */
@@ -174,7 +200,7 @@ export class ChatService {
 
   private async buildHubConnection(): Promise<void> {
     this.hub = new signalR.HubConnectionBuilder()
-      .withUrl(`${this.apiBase}/hub?}`, {
+      .withUrl(`${this.apiBase}/hub`, {
         withCredentials: true, // send AccessToken cookie
         // DEV ONLY – include bearer if you keep tokens outside cookies
         accessTokenFactory: () => localStorage.getItem('DevAuth') ?? '',
@@ -184,9 +210,11 @@ export class ChatService {
           Math.min(10_000, retry.previousRetryCount * 2_000),
       })
       .configureLogging(
-        environment.production
-          ? signalR.LogLevel.Warning
-          : signalR.LogLevel.Information,
+        environment.isLocal
+          ? signalR.LogLevel.None
+          : environment.production
+            ? signalR.LogLevel.Warning
+            : signalR.LogLevel.Information,
       )
       .build();
 
@@ -197,7 +225,12 @@ export class ChatService {
       this.zone.run(() => this.addMessage(msg));
     });
 
-    await this.hub.start();
+    try {
+      await this.hub.start();
+    } catch (error) {
+      this.hub = undefined;
+      throw error;
+    }
   }
 
   private async ensureConnected(): Promise<void> {
@@ -219,9 +252,25 @@ export class ChatService {
       await this.hub.stop();
     }
     this.hub = undefined;
+    this.activeGuildId = undefined;
+    this.connectAndLoadPromise = undefined;
     this.messageList.set([]);
 
     this.incoming$.complete(); // ends the old stream
     this.incoming$ = new ReplaySubject<ChatMessageDto>();
+  }
+
+  private handleConnectionError(error: unknown): void {
+    const now = Date.now();
+    if (now - this.lastConnectionWarningAt < this.connectionWarningThrottleMs) {
+      return;
+    }
+
+    this.lastConnectionWarningAt = now;
+    console.warn('Chat service unavailable; continuing without chat.', error);
+  }
+
+  private isTemporarilyUnavailable(): boolean {
+    return Date.now() < this.unavailableUntil;
   }
 }

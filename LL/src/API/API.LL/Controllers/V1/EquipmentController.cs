@@ -15,10 +15,10 @@ public class EquipmentController : BaseController
         await Mediator.Send(new GetMyEquipmentQuery(CurrentCharacterGuid));
 
     [HttpPost("Equip")]
-    public async Task<ActionResult<Response<bool>>> Equip([FromBody] EquipEquipmentRequestDto equipmentRequestDto) =>
+    public async Task<ActionResult<Response<EquipmentChangeResponseDto>>> Equip([FromBody] EquipEquipmentRequestDto equipmentRequestDto) =>
         await Mediator.Send(new EquipEquipmentCommand(CurrentCharacterGuid, equipmentRequestDto.EquipmentItemId, equipmentRequestDto.SlotType));
 
     [HttpPost("Unequip")]
-    public async Task<ActionResult<Response<bool>>> Unequip([FromBody] EquipmentSlotType slotType) =>
+    public async Task<ActionResult<Response<EquipmentChangeResponseDto>>> Unequip([FromBody] EquipmentSlotType slotType) =>
         await Mediator.Send(new UnequipEquipmentCommand(CurrentCharacterGuid, slotType));
 }

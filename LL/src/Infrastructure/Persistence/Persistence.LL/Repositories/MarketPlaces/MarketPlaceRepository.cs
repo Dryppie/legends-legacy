@@ -60,6 +60,7 @@ public class MarketPlaceRepository : IMarketPlaceRepository
         return await _dbContext.MarketPlaceListings
             .Include(mpl => mpl.ItemInstance)
                 .ThenInclude(ii => ii.ItemBase)
+                    .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
             .FirstOrDefaultAsync(mpl => mpl.Id.Equals(listingId), cancellationToken);
     }
 

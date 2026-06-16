@@ -6,8 +6,8 @@ using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Inventories.Commands.ScrapEquipments;
-public record ScrapEquipmentsCommand(Guid CharacterId, List<string> ItemIds) : ICommand<Response<InventoryItemDto>>;
-public class ScrapEquipmentsCommandHandler : IRequestHandler<ScrapEquipmentsCommand, Response<InventoryItemDto>>
+public record ScrapEquipmentsCommand(Guid CharacterId, List<string> ItemIds) : ICommand<Response<ScrapEquipmentsResponseDto>>;
+public class ScrapEquipmentsCommandHandler : IRequestHandler<ScrapEquipmentsCommand, Response<ScrapEquipmentsResponseDto>>
 {
     private readonly IInventoryService _inventoryService;
     private readonly IMapper _mapper;
@@ -18,19 +18,25 @@ public class ScrapEquipmentsCommandHandler : IRequestHandler<ScrapEquipmentsComm
         _mapper = mapper;
     }
 
-    public async Task<Response<InventoryItemDto>> Handle(ScrapEquipmentsCommand request, CancellationToken cancellationToken)
+    public async Task<Response<ScrapEquipmentsResponseDto>> Handle(ScrapEquipmentsCommand request, CancellationToken cancellationToken)
     {
         var parsedGuids = new List<Guid>();
         foreach (var id in request.ItemIds)
         {
             if (Guid.TryParse(id, out var guid)) parsedGuids.Add(guid);
-            else return Response<InventoryItemDto>.Fail($"Invalid GUID: '{id}'");
+            else return Response<ScrapEquipmentsResponseDto>.Fail($"Invalid GUID: '{id}'");
         }
 
         var inventoryItem = await _inventoryService.ScrapEquipments(request.CharacterId, parsedGuids, cancellationToken);
-        if (inventoryItem == null) return Response<InventoryItemDto>.Fail("Failed to scrap equipments.");
-        
-        var inventoryItemDto = _mapper.Map<InventoryItemDto>(inventoryItem);
-        return Response<InventoryItemDto>.Success(inventoryItemDto);
+        if (inventoryItem == null) return Response<ScrapEquipmentsResponseDto>.Fail("Failed to scrap equipments.");
+
+        var inventory = await _inventoryService.GetInventoryByIdAsync(request.CharacterId, cancellationToken);
+        if (inventory == null) return Response<ScrapEquipmentsResponseDto>.Fail("Failed to load updated inventory.");
+
+        return Response<ScrapEquipmentsResponseDto>.Success(new ScrapEquipmentsResponseDto
+        {
+            GainedItem = _mapper.Map<InventoryItemDto>(inventoryItem),
+            InventoryItems = _mapper.Map<IReadOnlyList<InventoryItemDto>>(inventory.InventoryItems)
+        });
     }
 }

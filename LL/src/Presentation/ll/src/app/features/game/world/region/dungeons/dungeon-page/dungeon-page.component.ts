@@ -158,6 +158,89 @@ export class DungeonPageComponent {
       : 'Dungeon Complete';
   });
 
+  readonly runStateDescription = computed(() => {
+    const run = this.activeDungeon();
+    if (!run) return 'No active dungeon run found.';
+
+    switch (run.status) {
+      case 'Completed':
+        return 'The dungeon is cleared. Claim your rewards to return to the world.';
+      case 'Withdrawn':
+        return 'You withdrew at a checkpoint. Your secured rewards are ready to claim.';
+      case 'Failed':
+        return 'The run has ended. Leave the dungeon to start a fresh attempt.';
+      default:
+        return 'Advance room by room. Checkpoints secure rewards.';
+    }
+  });
+
+  readonly currentRoomTitle = computed(() => {
+    const room = this.currentRoom();
+    if (!room) return 'Preparing';
+
+    if (room.type === 'Event') {
+      return this.getEventTitle(room.eventOutcome);
+    }
+
+    return this.getRoomTypeLabel(room.type);
+  });
+
+  readonly currentDecisionText = computed(() => {
+    const run = this.activeDungeon();
+    const room = this.currentRoom();
+
+    if (!run) return 'Choose a dungeon from the world map to begin.';
+    if (this.loading()) return 'Resolving your last dungeon action...';
+
+    if (run.status === 'Completed' || run.status === 'Withdrawn') {
+      return 'Claiming rewards returns them to your character and closes this run.';
+    }
+
+    if (run.status === 'Failed') {
+      return 'Leave the failed run before entering another dungeon.';
+    }
+
+    if (!room) return 'Preparing the next room.';
+
+    switch (room.type) {
+      case 'Combat':
+        return 'Start the fight to clear this room and reveal the next step.';
+      case 'MiniBoss':
+        return 'This tougher enemy blocks progress. Win to keep the run moving.';
+      case 'Boss':
+        return 'Defeat the boss to complete the dungeon and unlock the final reward claim.';
+      case 'Checkpoint':
+        return 'Continue to push deeper, or withdraw now to secure your pending rewards.';
+      case 'Event':
+        return `${this.getEventDescription(room.eventOutcome)} ${
+          room.status === 'Active'
+            ? 'Accept it, or ignore it and move on.'
+            : 'Inspect the result to continue.'
+        }`;
+      default:
+        return 'Resolve this room to continue the run.';
+    }
+  });
+
+  readonly pendingCurrencyRewards = computed(() => {
+    const run = this.activeDungeon();
+
+    return [
+      {
+        label: 'Experience',
+        value: run?.pendingExperience ?? 0,
+      },
+      {
+        label: 'Cinders',
+        value: run?.pendingCinders ?? 0,
+      },
+      {
+        label: 'Soulstones',
+        value: run?.pendingSoulstones ?? 0,
+      },
+    ];
+  });
+
   readonly pendingRewards = computed(() => {
     return this.activeDungeon()?.pendingRewards ?? [];
   });
@@ -204,14 +287,6 @@ export class DungeonPageComponent {
 
   readonly defeatedEncounters = computed(() => {
     return this.completedRooms().flatMap((room) => room.encounterIds ?? []);
-  });
-
-  readonly remainingRooms = computed(() => {
-    if (this.isRewardClaimRun()) return 0;
-
-    const total = this.totalRooms();
-    const current = this.currentRoomNumber();
-    return Math.max(0, total - current);
   });
 
   readonly canExecutePrimaryAction = computed(() => {
@@ -375,26 +450,6 @@ export class DungeonPageComponent {
     }
 
     return 'border-white/10 bg-black/20';
-  }
-
-  getCurrentStepText(): string {
-    const room = this.currentRoom();
-    if (!room) return 'Preparing the next room';
-
-    switch (room.type) {
-      case 'Combat':
-        return 'Enemies block your path';
-      case 'MiniBoss':
-        return 'A stronger foe awaits';
-      case 'Boss':
-        return 'The final battle stands before you';
-      case 'Event':
-        return this.getEventDescription(room.eventOutcome);
-      case 'Checkpoint':
-        return 'A brief moment of safety';
-      default:
-        return 'Exploring the dungeon';
-    }
   }
 
   getEventTitle(outcome: string | null | undefined): string {

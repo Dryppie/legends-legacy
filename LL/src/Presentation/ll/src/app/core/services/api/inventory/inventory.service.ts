@@ -4,6 +4,11 @@ import { catchError, map, Observable, throwError } from 'rxjs';
 import { InventoryDto } from '../../../../shared/models/Dtos/inventoryDto';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
 
+export interface ScrapEquipmentsResponse {
+  gainedItem: InventoryItem;
+  inventoryItems: InventoryItem[];
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -58,7 +63,7 @@ export class InventoryService {
     );
   }
 
-  scrapEquipment(equipmentIds: string[]) {
+  scrapEquipment(equipmentIds: string[]): Observable<ScrapEquipmentsResponse> {
     return this.apiService.post('inventory/scrap', equipmentIds).pipe(
       map((inventory) => {
         // this.toastService.showToast(

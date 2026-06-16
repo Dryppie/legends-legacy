@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { GuildStateService } from '../../../../../../core/services/api/guild/guild-state.service';
-import { NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { GuildResourceType } from '../../../../../../shared/models/Dtos/guild/guildResourceType';
 import { HumanizeEnumPipe } from '../../../../../../shared/pipes/enums/humanize-enum.pipe';
 import { RegularButtonComponent } from '../../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
@@ -14,6 +14,7 @@ import { NumberFormatPipe } from '../../../../../../shared/pipes/number-format/n
   imports: [
     NgIf,
     NgFor,
+    NgClass,
     HumanizeEnumPipe,
     RegularButtonComponent,
     NumberFormatPipe,
@@ -67,6 +68,17 @@ export class GuildVaultComponent {
     return Object.values(this.donationForm).every((amount) => amount <= 0);
   }
 
+  donationTotal(): number {
+    return Object.values(this.donationForm).reduce(
+      (total, amount) => total + amount,
+      0,
+    );
+  }
+
+  donationExceedsAvailable(type: GuildResourceType): boolean {
+    return this.donationForm[type] > this.availableAmounts[type];
+  }
+
   donate(): void {
     if (this.disabled()) return;
 
@@ -87,50 +99,6 @@ export class GuildVaultComponent {
     ) as Record<GuildResourceType, number>;
 
     this.guildState.donate(donations);
-    this.updateCurrenciesAfterDonation(donations);
-    this.updateAfterDonation(donations);
-  }
-
-  updateCurrenciesAfterDonation(
-    donations: { type: GuildResourceType; amount: number }[],
-  ) {
-    const character = this.character();
-    if (!character) return;
-    for (const donation of donations) {
-      if (donation.type === GuildResourceType.Cinders)
-        character.cinders -= donation.amount;
-      if (donation.type === GuildResourceType.Soulstones)
-        character.soulstones -= donation.amount;
-    }
-
-    this.characterState.updateCharacter({
-      ...character,
-      cinders: character.cinders,
-      soulstones: character.soulstones,
-    });
-  }
-
-  updateAfterDonation(
-    donations: { type: GuildResourceType; amount: number }[],
-  ) {
-    const items = this.items(); // signal
-    if (!items) return;
-
-    const itemTypes: GuildResourceType[] = [
-      GuildResourceType.TemperedScrap,
-      GuildResourceType.SoulDust,
-    ];
-    const updatedItems = [...items];
-
-    for (const donation of donations) {
-      if (!itemTypes.includes(donation.type)) continue;
-
-      const item = updatedItems.find(
-        (i) => i.itemInstance.itemBase.name.replace(' ', '') === donation.type,
-      );
-      if (!item) return;
-      this.inventoryState.decrementItem(item.itemInstance.id, donation.amount);
-    }
   }
 
   get availableAmounts(): Record<GuildResourceType, number> {

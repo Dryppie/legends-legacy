@@ -1,10 +1,13 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, effect, signal } from '@angular/core';
 import { finalize } from 'rxjs/operators';
 import {
   DungeonActionOutcome,
+  ClaimDungeonRewardsResponse,
+  DismissFailedDungeonRunResponse,
   DungeonRun,
   DungeonService,
   ExecuteDungeonActionResponse,
+  StartDungeonRunResponse,
 } from './dungeon.service';
 import { DungeonPreviewData } from '../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
 import { DungeonRecordsData } from '../../../../shared/models/Dtos/dungeons/dungeonRecordsData';
@@ -12,6 +15,9 @@ import { DungeonDifficulty } from '../../../../shared/models/enums/dungeonDiffic
 import { CombatSessionDto } from '../../../../shared/models/Dtos/combatResultDto';
 import { CombatService } from '../../client-side/combat/combat.service';
 import { Observable } from 'rxjs';
+import { GameEventService } from '../../real-time/game-event.service';
+import { InventoryStateService } from '../inventory/inventory-state.service';
+import { CharacterStateService } from '../character/character-state.service';
 
 @Injectable({
   providedIn: 'root',
@@ -41,8 +47,21 @@ export class DungeonStateService {
   constructor(
     private readonly service: DungeonService,
     private readonly combatService: CombatService,
+    private readonly eventService: GameEventService,
+    private readonly inventoryState: InventoryStateService,
+    private readonly characterState: CharacterStateService,
   ) {
     this.refresh();
+
+    effect(
+      () => {
+        const reconnectCount = this.eventService.reconnectCount();
+        if (reconnectCount > 0) {
+          this.refresh();
+        }
+      },
+      { allowSignalWrites: true },
+    );
   }
 
   refresh(): void {
@@ -85,11 +104,11 @@ export class DungeonStateService {
     this._error.set(null);
 
     this.service
-      .startDungeon({ dungeonId, difficulty })
+      .startDungeon({ dungeonId, dungeonTier: difficulty })
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (run) => {
-          this._activeDungeon.set(run);
+        next: (response) => {
+          this.applyStartDungeon(response);
           onSuccess?.();
         },
         error: (e) => this._error.set(e.message ?? 'Failed to start dungeon'),
@@ -152,8 +171,8 @@ export class DungeonStateService {
       .claimDungeonRewards()
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: () => {
-          this._activeDungeon.set(null);
+        next: (response) => {
+          this.applyClaimDungeonRewards(response);
           onSuccess?.();
           this.loadAvailableDungeons();
         },
@@ -170,8 +189,8 @@ export class DungeonStateService {
       .dismissFailedDungeonRun()
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: () => {
-          this._activeDungeon.set(null);
+        next: (response) => {
+          this.applyDismissFailedDungeonRun(response);
           onSuccess?.();
           this.loadAvailableDungeons();
         },
@@ -187,6 +206,26 @@ export class DungeonStateService {
     this.combatService.startDungeonCombatSimulation(
       result.combatSession.combatResult,
     );
+  }
+
+  private applyClaimDungeonRewards(response: ClaimDungeonRewardsResponse): void {
+    this._activeDungeon.set(response.activeRun);
+    this.inventoryState.setInventory(response.inventoryItems, response.claimedLoot);
+    this.characterState.updateCharacter(response.character);
+  }
+
+  private applyDismissFailedDungeonRun(
+    response: DismissFailedDungeonRunResponse,
+  ): void {
+    this._activeDungeon.set(response.activeRun);
+  }
+
+  private applyStartDungeon(response: StartDungeonRunResponse): void {
+    this._activeDungeon.set(response.run);
+
+    if (response.inventoryItems) {
+      this.inventoryState.setInventory(response.inventoryItems);
+    }
   }
 
   setActiveDungeon(run: DungeonRun | null): void {

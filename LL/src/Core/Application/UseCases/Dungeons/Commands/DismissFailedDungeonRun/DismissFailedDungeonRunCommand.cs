@@ -1,13 +1,14 @@
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.MediatR.Markers;
+using Application.UseCases.Dungeons.Dtos;
 using Common.Primitives;
 using MediatR;
 
 namespace Application.UseCases.Dungeons.Commands.DismissFailedDungeonRun;
 
-public record DismissFailedDungeonRunCommand(Guid CharacterId) : ICommand<Response<bool>>;
+public record DismissFailedDungeonRunCommand(Guid CharacterId) : ICommand<Response<DismissFailedDungeonRunResponseDto>>;
 
-public class DismissFailedDungeonRunCommandHandler : IRequestHandler<DismissFailedDungeonRunCommand, Response<bool>>
+public class DismissFailedDungeonRunCommandHandler : IRequestHandler<DismissFailedDungeonRunCommand, Response<DismissFailedDungeonRunResponseDto>>
 {
     private readonly IDungeonRunService _dungeonRunService;
 
@@ -16,12 +17,15 @@ public class DismissFailedDungeonRunCommandHandler : IRequestHandler<DismissFail
         _dungeonRunService = dungeonRunService;
     }
 
-    public async Task<Response<bool>> Handle(DismissFailedDungeonRunCommand request, CancellationToken cancellationToken)
+    public async Task<Response<DismissFailedDungeonRunResponseDto>> Handle(DismissFailedDungeonRunCommand request, CancellationToken cancellationToken)
     {
         var success = await _dungeonRunService.DismissFailedRunAsync(request.CharacterId, cancellationToken);
 
         return success
-            ? Response<bool>.Success(true)
-            : Response<bool>.Fail("No failed dungeon run found.");
+            ? Response<DismissFailedDungeonRunResponseDto>.Success(new DismissFailedDungeonRunResponseDto
+            {
+                ActiveRun = null
+            })
+            : Response<DismissFailedDungeonRunResponseDto>.Fail("No failed dungeon run found.");
     }
 }

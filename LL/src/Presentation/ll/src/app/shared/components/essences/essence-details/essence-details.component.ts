@@ -4,7 +4,7 @@ import { EssenceDescriptionComponent } from '../essence-description/essence-desc
 import { TicksToSecondsPipe } from '../../../pipes/ticks-to-seconds/ticks-to-seconds.pipe';
 import { AttributeTypeFormatPipe } from '../../../pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { AttributeValueFormatPipe } from '../../../pipes/attributes/attribute-value-format/attribute-value-format.pipe';
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-essence-details',
@@ -16,7 +16,6 @@ import { NgClass, NgFor, NgIf } from '@angular/common';
     AttributeValueFormatPipe,
     NgIf,
     NgFor,
-    NgClass,
   ],
   templateUrl: './essence-details.component.html',
 })

@@ -144,6 +144,38 @@ export class EssencesComponent implements OnInit {
     this.upgradeDetailsOpen.update((open) => !open);
   }
 
+  public selectedAttunementLabel(essence: PlayerEssenceDto): string {
+    return essence.attunedSlot === null || essence.attunedSlot === undefined
+      ? 'Inactive'
+      : `Slot ${essence.attunedSlot + 1}`;
+  }
+
+  public eligibilityClass(canPerform: boolean): string {
+    return canPerform
+      ? 'border-primary/40 bg-primary/10 text-primary'
+      : 'border-light_gray/50 bg-black/20 text-zinc-400';
+  }
+
+  public draftSlotsFilled(): number {
+    return this.essenceState.draftSlots().filter(Boolean).length;
+  }
+
+  public loadoutSaveHint(): string {
+    if (this.essenceState.canSaveDraft()) return '';
+    if (!this.essenceState.draftLoadoutName().trim()) return 'Name required.';
+    if (this.essenceState.hasDuplicateDraftEssences()) {
+      return 'Each Essence can only be assigned once.';
+    }
+    if (
+      !this.essenceState.selectedLoadoutId() &&
+      (this.essenceState.loadouts()?.loadouts?.length ?? 0) >=
+        (this.essenceState.loadouts()?.limit ?? 0)
+    ) {
+      return 'Loadout limit reached.';
+    }
+    return 'Select at least one valid change.';
+  }
+
   public trackEssence(_: number, essence: PlayerEssenceDto): string {
     return essence.id;
   }

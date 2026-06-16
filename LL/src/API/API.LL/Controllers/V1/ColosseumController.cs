@@ -1,4 +1,3 @@
-﻿using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 using Application.UseCases.Colosseum.Commands.StartArenaBattle;
 using Application.UseCases.Colosseum.Dtos;
 using Application.UseCases.Colosseum.Queries.GetArenaOpponents;
@@ -29,6 +28,6 @@ public class ColosseumController : BaseController
         await Mediator.Send(new GetColosseumMatchResultsQuery(CurrentCharacterGuid));
 
     [HttpPost("StartArenaBattle")]
-    public async Task<ActionResult<Response<CombatResultDto>>> StartArenaBattle([FromBody] string enemyId) =>
+    public async Task<ActionResult<Response<StartArenaBattleResponseDto>>> StartArenaBattle([FromBody] string enemyId) =>
         await Mediator.Send(new StartArenaBattleCommand(CurrentCharacterGuid, enemyId));
 }

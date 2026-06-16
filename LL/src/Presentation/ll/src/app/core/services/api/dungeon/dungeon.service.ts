@@ -5,6 +5,8 @@ import { StartDungeonRequest } from '../../../../shared/models/requestDtos/dunge
 import { CombatSessionDto } from '../../../../shared/models/Dtos/combatResultDto';
 import { DungeonPreviewData } from '../../../../shared/models/Dtos/dungeons/dungeonPreviewData';
 import { DungeonRecordsData } from '../../../../shared/models/Dtos/dungeons/dungeonRecordsData';
+import { InventoryItem } from '../../../../shared/models/inventoryItem';
+import { CharacterDto } from '../../../../shared/models/Dtos/characterDto';
 
 export enum DungeonRunStatus {
   Active = 'Active',
@@ -85,6 +87,22 @@ export interface ExecuteDungeonActionResponse {
   message?: string | null;
 }
 
+export interface ClaimDungeonRewardsResponse {
+  activeRun: DungeonRun | null;
+  inventoryItems: InventoryItem[];
+  claimedLoot: InventoryItem[];
+  character: CharacterDto;
+}
+
+export interface DismissFailedDungeonRunResponse {
+  activeRun: DungeonRun | null;
+}
+
+export interface StartDungeonRunResponse {
+  run: DungeonRun;
+  inventoryItems?: InventoryItem[] | null;
+}
+
 export enum DungeonActionOutcome {
   None = 0,
   CombatVictory = 1,
@@ -125,7 +143,7 @@ export class DungeonService {
     );
   }
 
-  startDungeon(request: StartDungeonRequest): Observable<DungeonRun> {
+  startDungeon(request: StartDungeonRequest): Observable<StartDungeonRunResponse> {
     return this.api.post('dungeon/startDungeon', request).pipe(
       catchError(() => {
         return throwError(() => new Error('Failed to start dungeon'));
@@ -152,7 +170,7 @@ export class DungeonService {
     );
   }
 
-  claimDungeonRewards(): Observable<void> {
+  claimDungeonRewards(): Observable<ClaimDungeonRewardsResponse> {
     return this.api.post('dungeon/claimDungeonRewards').pipe(
       catchError(() => {
         return throwError(() => new Error('Failed to claim dungeon rewards'));
@@ -160,7 +178,7 @@ export class DungeonService {
     );
   }
 
-  dismissFailedDungeonRun(): Observable<void> {
+  dismissFailedDungeonRun(): Observable<DismissFailedDungeonRunResponse> {
     return this.api.post('dungeon/dismissFailedDungeonRun').pipe(
       catchError(() => {
         return throwError(() => new Error('Failed to leave failed dungeon'));

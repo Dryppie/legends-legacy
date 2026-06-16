@@ -105,6 +105,24 @@ export class GuildBuildingsComponent {
     );
   }
 
+  selectedStatusLabel(): string {
+    if (!this.isLeader()) return 'Leader only';
+    return this.canUpgrade() ? 'Ready to upgrade' : 'Needs resources';
+  }
+
+  selectedStatusClass(): string {
+    if (!this.isLeader()) return 'border-light_gray/50 text-zinc-400';
+    return this.canUpgrade()
+      ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-200'
+      : 'border-primary/40 bg-primary/10 text-primary';
+  }
+
+  resourceRequirementClass(type: string, required: number): string {
+    return this.getGuildResourceAmount(type) >= required
+      ? 'text-emerald-200'
+      : 'text-red-200';
+  }
+
   isSelected(upgrade: BuildingUpgradeView): boolean {
     return this.selected()?.definition.id === upgrade.definition.id;
   }

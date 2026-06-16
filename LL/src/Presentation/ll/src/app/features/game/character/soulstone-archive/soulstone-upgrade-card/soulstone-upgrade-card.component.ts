@@ -33,4 +33,42 @@ export class SoulstoneUpgradeCardComponent {
   loading(): boolean {
     return this.soulstoneState.loading();
   }
+
+  currentEffect(upgrade: SoulstoneUpgradeView): string {
+    const value = upgrade.level * upgrade.definition.effect.perLevel;
+    return `${value > 0 ? '+' : ''}${value.toFixed(1)}%`;
+  }
+
+  progressPercent(upgrade: SoulstoneUpgradeView): number {
+    if (upgrade.definition.maxLevel <= 0) return 100;
+    return Math.min(100, (upgrade.level / upgrade.definition.maxLevel) * 100);
+  }
+
+  statusLabel(upgrade: SoulstoneUpgradeView): string {
+    if (upgrade.nextCost == null) return 'Maxed';
+    if (this.soulstoneState.isUpgradeLoading(upgrade.definition.id)()) {
+      return 'Upgrading';
+    }
+    return upgrade.nextCost <= (this.character?.soulstones ?? 0)
+      ? 'Upgradable'
+      : 'Need Soulstones';
+  }
+
+  statusClass(upgrade: SoulstoneUpgradeView): string {
+    if (upgrade.nextCost == null) {
+      return 'border-primary/50 bg-primary/10 text-primary';
+    }
+
+    return upgrade.nextCost <= (this.character?.soulstones ?? 0)
+      ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-200'
+      : 'border-light_gray/50 bg-black/20 text-zinc-400';
+  }
+
+  upgradeButtonText(upgrade: SoulstoneUpgradeView): string {
+    if (this.soulstoneState.isUpgradeLoading(upgrade.definition.id)()) {
+      return 'Upgrading';
+    }
+    if (upgrade.nextCost == null) return 'Maxed';
+    return 'Upgrade';
+  }
 }

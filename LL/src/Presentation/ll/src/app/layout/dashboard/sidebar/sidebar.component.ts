@@ -22,6 +22,10 @@ import { NumberFormatPipe } from '../../../shared/pipes/number-format/number-for
 import { CharacterStateService } from '../../../core/services/api/character/character-state.service';
 import { SidebarSection } from '../../../shared/models/sidebar-item';
 import { CurrentDungeonComponent } from '../../../shared/components/current-dungeon/current-dungeon.component';
+import {
+  NOTIFICATION_SURFACE,
+  NotificationService,
+} from '../../../core/services/client-side/notifications/notification.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -55,6 +59,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     private readonly gameService: GameService,
     private readonly state: CharacterActionsStateService,
     private readonly characterState: CharacterStateService,
+    private readonly notificationService: NotificationService,
     private readonly router: Router,
   ) {
     effect(() => {
@@ -118,6 +123,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   trackItem(index: number, item: { id: string }): string {
     return item.id;
+  }
+
+  getNotificationCount(itemId: string): number {
+    return this.notificationService.count(NOTIFICATION_SURFACE.Sidebar, itemId);
   }
 
   navigateToAction(): void {

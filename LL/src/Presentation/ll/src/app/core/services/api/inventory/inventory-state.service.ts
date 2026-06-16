@@ -4,6 +4,7 @@ import { computed, effect, Injectable, signal } from '@angular/core';
 import { InventoryService } from './inventory.service';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { GameEventService } from '../../real-time/game-event.service';
+import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryStateService {
@@ -18,6 +19,8 @@ export class InventoryStateService {
   readonly isEmpty = computed(() => this._items().length === 0);
   readonly error = computed(() => this._error());
   private readonly _lastLoot = signal<InventoryItem[] | null>(null);
+  private readonly suppressedLootSignatures = new Set<string>();
+  private readonly eventDeduper = new GameEventDeduper();
 
   constructor(
     private inventoryService: InventoryService,
@@ -27,8 +30,18 @@ export class InventoryStateService {
 
     effect(
       () => {
-        const loot = this.eventService.event.LootReceivedMsg();
+        const envelope = this.eventService.eventEnvelope.LootReceivedMsg();
+        const loot = envelope?.payload;
         if (loot) {
+          if (!this.eventDeduper.shouldProcess('loot-received', envelope)) {
+            return;
+          }
+
+          const signature = this.getLootSignature(loot.payload);
+          if (this.suppressedLootSignatures.delete(signature)) {
+            return;
+          }
+
           this._lastLoot.set(loot.payload);
         }
       },
@@ -43,6 +56,16 @@ export class InventoryStateService {
 
         this.addOrIncrementMany(loot);
         this._lastLoot.set(null); // Clear to prevent retriggering
+      },
+      { allowSignalWrites: true },
+    );
+
+    effect(
+      () => {
+        const reconnectCount = this.eventService.reconnectCount();
+        if (reconnectCount > 0) {
+          this.load(true);
+        }
       },
       { allowSignalWrites: true },
     );
@@ -62,23 +85,15 @@ export class InventoryStateService {
   readonly materials = this.byType(ItemType.Resource);
   readonly essences = this.byType(ItemType.Essence);
 
-  load(): void {
-    if (this._items().length) return; // already cached
+  load(force = false): void {
+    if (!force && this._items().length) return; // already cached
     this._loading.set(true);
     this.inventoryService
       .getInventory()
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
         next: (dto) => {
-          const sorted = dto.inventoryItems
-            .slice() // defensive copy (optional)
-            .sort((a, b) =>
-              a.itemInstance.itemBase.itemType.localeCompare(
-                b.itemInstance.itemBase.itemType,
-              ),
-            );
-
-          this._items.set(sorted);
+          this._items.set(this.sortItems(dto.inventoryItems));
         },
         error: (err) => this._error.set(err.message ?? 'Unknown error'),
       });
@@ -119,32 +134,41 @@ export class InventoryStateService {
       .scrapEquipment(equipmentIds)
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (gainedItem: InventoryItem) => {
-          const items = this._items().filter(
-            (i) => !equipmentIds.includes(i.itemInstance.id),
-          );
-
-          // Add or update the gained item (Soul Dust)
-          const existing = items.find(
-            (i) =>
-              i.itemInstance.itemBase.id ===
-              gainedItem.itemInstance.itemBase.id,
-          );
-
-          if (existing) {
-            existing.quantity = gainedItem.quantity;
-          } else {
-            items.push(gainedItem);
-          }
-
-          this._items.set(items);
-        },
+        next: (response) =>
+          this._items.set(this.sortItems(response.inventoryItems)),
         error: (err) => this._error.set(err.message ?? 'Unknown error'),
       });
   }
 
-  setInventory(items: InventoryItem[]): void {
-    this._items.set(items);
+  setInventory(items: InventoryItem[], suppressNextLoot?: InventoryItem[]): void {
+    this._items.set(this.sortItems(items));
+
+    if (suppressNextLoot?.length) {
+      this.suppressNextLoot(suppressNextLoot);
+    }
+  }
+
+  applyInventoryItemState(
+    itemInstanceId: string,
+    item: InventoryItem | null,
+  ): void {
+    if (!item) {
+      this.removeItem(itemInstanceId);
+      return;
+    }
+
+    const items = this._items();
+    const index = items.findIndex(
+      (current) => current.itemInstance.id === item.itemInstance.id,
+    );
+    if (index === -1) {
+      this._items.set(this.sortItems([...items, item]));
+      return;
+    }
+
+    const updated = [...items];
+    updated[index] = item;
+    this._items.set(this.sortItems(updated));
   }
 
   addOrIncrementMany(itemsToAdd: InventoryItem[]): void {
@@ -196,6 +220,34 @@ export class InventoryStateService {
       (item) => item.itemInstance.id !== itemInstanceId,
     );
     this._items.set(filtered);
+  }
+
+  private suppressNextLoot(items: InventoryItem[]): void {
+    const signature = this.getLootSignature(items);
+    if (!signature) return;
+
+    this.suppressedLootSignatures.add(signature);
+    setTimeout(() => this.suppressedLootSignatures.delete(signature), 5000);
+  }
+
+  private getLootSignature(items: InventoryItem[]): string {
+    return items
+      .map(
+        (item) =>
+          `${item.itemInstance.id}:${item.itemInstance.itemBase.id}:${item.quantity}`,
+      )
+      .sort()
+      .join('|');
+  }
+
+  private sortItems(items: InventoryItem[]): InventoryItem[] {
+    return items
+      .slice()
+      .sort((a, b) =>
+        a.itemInstance.itemBase.itemType.localeCompare(
+          b.itemInstance.itemBase.itemType,
+        ),
+      );
   }
 }
 

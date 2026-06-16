@@ -12,6 +12,8 @@ internal sealed class GameEventPublisher : IGameEventPublisher
     public Task PublishAsync(Audience audience, GameEventMsg message) =>
         Send(audience, new GameEventEnvelope
         {
+            UpdateId = Guid.NewGuid(),
+            OccurredAt = DateTimeOffset.UtcNow,
             Event = message.GetType().Name,
             Payload = message,
         });

@@ -8,7 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
-import { concatMap, from, tap } from 'rxjs';
+import { concatMap, from } from 'rxjs';
 
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import { MarketplaceStateService } from '../../../../../core/services/api/market-place/market-place-state.service';
@@ -214,14 +214,6 @@ export class MarketPlaceCommodityComponent implements OnInit {
 
     this.placingOrder.set(true);
     this.marketplaceState.createListing(item, quantity, unitPrice).subscribe({
-      next: (listing) => {
-        if (item.itemInstance.itemBase.stackable && item.quantity > quantity) {
-          this.inventoryState.decrementItem(item.itemInstance.id, quantity);
-        } else {
-          this.inventoryState.removeItem(item.itemInstance.id);
-        }
-        this.marketplaceState.addToListings(listing);
-      },
       error: (error) => {
         console.error(error);
         this.placingOrder.set(false);
@@ -257,16 +249,10 @@ export class MarketPlaceCommodityComponent implements OnInit {
     from(plan)
       .pipe(
         concatMap((purchase) =>
-          this.marketplaceState
-            .buyoutListing(purchase.listing.id, purchase.quantity)
-            .pipe(
-              tap(() =>
-                this.marketplaceState.decrementListing(
-                  purchase.listing.id,
-                  purchase.quantity,
-                ),
-              ),
-            ),
+          this.marketplaceState.buyoutListing(
+            purchase.listing.id,
+            purchase.quantity,
+          ),
         ),
       )
       .subscribe({

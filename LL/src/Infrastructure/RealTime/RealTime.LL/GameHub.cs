@@ -1,19 +1,30 @@
-﻿using Application.WebSockets.Contracts;
+using Application.Interfaces.Services.LL;
+using Application.WebSockets.Contracts;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 
 namespace RealTime.LL;
+
+[Authorize]
 public sealed class GameHub : Hub<IGameClient>
 {
+    private readonly IGuildService _guildService;
+
+    public GameHub(IGuildService guildService)
+    {
+        _guildService = guildService;
+    }
+
     public override Task OnConnectedAsync()
     {
-        Guid charId = Context.RequireCharacterId();                // guaranteed non-null
+        var charId = Context.RequireCharacterId();
         return Groups.AddToGroupAsync(Context.ConnectionId, CharacterGroup(charId));
     }
 
     public async Task SubscribeToAudience(AudienceDto dto)
     {
-        var charId = Context.RequireCharacterId();        // you already trust this
+        _ = Context.RequireCharacterId();
 
         switch (dto)
         {
@@ -21,11 +32,8 @@ public sealed class GameHub : Hub<IGameClient>
                 await Groups.AddToGroupAsync(Context.ConnectionId, "world");
                 break;
 
-            case AudienceDto.Guild g:
-                //if (!await UserIsMemberOfGuild(charId, g.GuildId))
-                //    throw new HubException("Forbidden – not a member of that guild.");
-
-                //await Groups.AddToGroupAsync(Context.ConnectionId, GuildGroup(g.GuildId));
+            case AudienceDto.Guild guild:
+                await SubscribeToGuild(guild.GuildId);
                 break;
 
             default:
@@ -33,15 +41,33 @@ public sealed class GameHub : Hub<IGameClient>
         }
     }
 
+    public Task SubscribeToWorld()
+    {
+        _ = Context.RequireCharacterId();
+        return Groups.AddToGroupAsync(Context.ConnectionId, "world");
+    }
+
+    public async Task SubscribeToGuild(Guid guildId)
+    {
+        var charId = Context.RequireCharacterId();
+        var guild = await _guildService.GetGuildWithUpgradesAsync(charId, Context.ConnectionAborted);
+
+        if (guild?.Id != guildId)
+            throw new HubException("Forbidden - not a member of that guild.");
+
+        await Groups.AddToGroupAsync(Context.ConnectionId, GuildGroup(guildId));
+    }
+
     public override Task OnDisconnectedAsync(Exception? ex)
     {
-        Guid? charId = Context.TryGetCharacterId();                // may be null
+        var charId = Context.TryGetCharacterId();
         return charId is null
             ? Task.CompletedTask
             : Groups.RemoveFromGroupAsync(Context.ConnectionId, CharacterGroup(charId.Value));
     }
 
     private static string CharacterGroup(Guid id) => $"char:{id}";
+    private static string GuildGroup(Guid id) => $"guild:{id}";
 }
 
 public static class HubCallerContextExtensions
@@ -57,11 +83,7 @@ public static class HubCallerContextExtensions
         string? raw = ctx.User?.FindFirstValue(ClaimType);
         if (!Guid.TryParse(raw, out var id))
         {
-            var claims = ctx.User?.Claims
-                                 .Select(c => $"{c.Type}:{c.Value}")
-                                 .DefaultIfEmpty("<none>")
-                                 .Aggregate((a, b) => $"{a}, {b}");
-            throw new HubException($"CharacterId claim missing or invalid. Current claims: [{claims}]");
+            throw new HubException("CharacterId claim missing or invalid.");
         }
         return id;
     }

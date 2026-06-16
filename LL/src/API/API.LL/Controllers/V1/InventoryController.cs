@@ -15,6 +15,6 @@ public class InventoryController : BaseController
         await Mediator.Send(new GetInventoryByIdQuery(CurrentCharacterGuid));
 
     [HttpPost("Scrap")]
-    public async Task<ActionResult<Response<InventoryItemDto>>> Scrap([FromBody] List<string> itemIds) =>
+    public async Task<ActionResult<Response<ScrapEquipmentsResponseDto>>> Scrap([FromBody] List<string> itemIds) =>
         await Mediator.Send(new ScrapEquipmentsCommand(CurrentCharacterGuid, itemIds));
 }

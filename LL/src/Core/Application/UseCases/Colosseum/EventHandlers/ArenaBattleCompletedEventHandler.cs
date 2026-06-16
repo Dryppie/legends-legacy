@@ -1,6 +1,8 @@
-﻿using Application.Interfaces.Services;
+using Application.Interfaces.Services;
 using Application.Interfaces.Services.LL.Colosseum;
+using Application.Interfaces.WebSockets;
 using Application.UseCases.Colosseum.Events;
+using Application.WebSockets.Contracts;
 using MediatR;
 
 namespace Application.UseCases.Colosseum.EventHandlers;
@@ -8,18 +10,35 @@ public class ArenaBattleCompletedEventHandler : INotificationHandler<ArenaBattle
 {
     private readonly IRatingService _ratingService;
     private readonly IColosseumService _colosseumService;
+    private readonly IGameEventPublisher _eventPublisher;
 
-    public ArenaBattleCompletedEventHandler(IRatingService ratingService, IColosseumService colosseumService)
+    public ArenaBattleCompletedEventHandler(
+        IRatingService ratingService,
+        IColosseumService colosseumService,
+        IGameEventPublisher eventPublisher)
     {
         _ratingService = ratingService;
         _colosseumService = colosseumService;
+        _eventPublisher = eventPublisher;
     }
 
     public async Task Handle(ArenaBattleCompletedEvent notification, CancellationToken cancellationToken)
-{
-    var ratingResult = await _ratingService.CalculateNewColosseumRatingsAsync(
-        notification.CharacterId, notification.EnemyId, notification.Outcome, cancellationToken);
+    {
+        var ratingResult = await _ratingService.CalculateNewColosseumRatingsAsync(
+            notification.CharacterId, notification.EnemyId, notification.Outcome, cancellationToken);
 
-    await _colosseumService.SaveArenaMatchResult(notification.CharacterId, notification.EnemyId, notification.Outcome, ratingResult, cancellationToken);
-}
+        await _colosseumService.SaveArenaMatchResult(notification.CharacterId, notification.EnemyId, notification.Outcome, ratingResult, cancellationToken);
+
+        var msg = new ArenaBattleCompletedMsg(
+            notification.CharacterId,
+            notification.EnemyId,
+            notification.Outcome.ToString(),
+            ratingResult.CharacterARatingBefore,
+            ratingResult.CharacterARatingAfter,
+            ratingResult.CharacterBRatingBefore,
+            ratingResult.CharacterBRatingAfter);
+
+        await _eventPublisher.PublishAsync(new Audience.Character(notification.CharacterId), msg);
+        await _eventPublisher.PublishAsync(new Audience.Character(notification.EnemyId), msg);
+    }
 }

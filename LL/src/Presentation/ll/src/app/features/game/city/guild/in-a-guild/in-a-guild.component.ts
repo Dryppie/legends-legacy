@@ -8,17 +8,23 @@ import { GuildBuildingsComponent } from './guild-buildings/guild-buildings.compo
 import { GuildVaultComponent } from './guild-vault/guild-vault.component';
 import { GuildRankingsComponent } from './guild-rankings/guild-rankings.component';
 import { TabsComponent } from '../../../../../shared/components/custom-components/tabs/tabs.component';
+import { NgFor } from '@angular/common';
+import { HumanizeEnumPipe } from '../../../../../shared/pipes/enums/humanize-enum.pipe';
+import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
 
 @Component({
   selector: 'app-in-a-guild',
   standalone: true,
   imports: [
+    NgFor,
     TabComponent,
     GuildInfoComponent,
     TabsComponent,
     GuildBuildingsComponent,
     GuildVaultComponent,
     GuildRankingsComponent,
+    HumanizeEnumPipe,
+    NumberFormatPipe,
   ],
   templateUrl: './in-a-guild.component.html',
 })
@@ -49,5 +55,9 @@ export class InAGuildComponent {
 
   approveApplication($event: string) {
     this.state.approveApplication($event);
+  }
+
+  get resourceSummary() {
+    return this.guild.resources ?? [];
   }
 }

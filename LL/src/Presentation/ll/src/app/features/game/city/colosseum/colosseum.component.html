@@ -18,11 +18,55 @@
       <app-banner image="colosseum" class="w-full"></app-banner>
     </div>
 
+    <section
+      class="grid w-full gap-3 rounded-lg border border-light_gray/70 bg-black/25 p-3 text-white md:grid-cols-[minmax(0,1.5fr)_repeat(4,minmax(0,1fr))]"
+    >
+      <div class="min-w-0">
+        <p class="text-xs font-semibold uppercase text-secondary">Colosseum</p>
+        <h2 class="truncate text-xl text-primary">Arena Circuit</h2>
+        <p class="mt-1 text-sm text-zinc-300">
+          Spend tickets, climb rating, and review recent duels.
+        </p>
+      </div>
+
+      <div class="rounded border border-light_gray/60 bg-black/20 p-3">
+        <p class="text-xs uppercase text-secondary">Tickets</p>
+        <p class="mt-1 text-lg font-semibold text-primary">
+          {{ state.arenaTicketStatus()?.currentTickets ?? 0 }} /
+          {{ state.arenaTicketStatus()?.maxTickets ?? 0 }}
+        </p>
+      </div>
+
+      <div class="rounded border border-light_gray/60 bg-black/20 p-3">
+        <p class="text-xs uppercase text-secondary">Your Rank</p>
+        <p class="mt-1 text-lg font-semibold text-primary">
+          {{ myRanking ? "#" + myRanking.rank : "-" }}
+        </p>
+      </div>
+
+      <div class="rounded border border-light_gray/60 bg-black/20 p-3">
+        <p class="text-xs uppercase text-secondary">Rating</p>
+        <p class="mt-1 text-lg font-semibold text-primary">
+          {{ myRanking ? (myRanking.level | numberFormat) : "-" }}
+        </p>
+      </div>
+
+      <div class="rounded border border-light_gray/60 bg-black/20 p-3">
+        <p class="text-xs uppercase text-secondary">Recent Record</p>
+        <p class="mt-1 text-lg font-semibold text-primary">
+          {{ recentRecord.wins }}-{{ recentRecord.losses }}-{{
+            recentRecord.draws
+          }}
+        </p>
+      </div>
+    </section>
+
     <app-tabs class="flex w-full flex-col overflow-hidden">
       <app-tab label="Arena">
         <app-arena-battle
           class="overflow-hidden"
-          [opponents]="opponents"
+          [opponents]="state.opponents()"
+          [arenaTicketStatus]="state.arenaTicketStatus()"
           (refreshOpponents)="onRefreshOpponents()"
           (challenge)="challenge($event)"
         >
@@ -39,14 +83,17 @@
       </app-tab> -->
 
       <app-tab label="Rankings">
-        <app-rankings-glory class="overflow-hidden" [rankings]="rankings">
+        <app-rankings-glory
+          class="overflow-hidden"
+          [rankings]="state.rankings()"
+        >
         </app-rankings-glory>
       </app-tab>
 
       <app-tab label="Record of Battles">
         <app-record-of-battle
           class="overflow-hidden"
-          [previousMatches]="previousMatches"
+          [previousMatches]="state.previousMatches()"
         >
         </app-record-of-battle>
       </app-tab>

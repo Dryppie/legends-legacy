@@ -1,23 +1,23 @@
 import { Component, effect, OnInit } from '@angular/core';
 import { BannerComponent } from '../../../../shared/components/banner/banner.component';
 import { TabComponent } from '../../../../shared/components/custom-components/tabs/tab/tab.component';
-import { ColosseumService } from '../../../../core/services/api/colosseum/colosseum.service';
 import { NgIf } from '@angular/common';
 import { CombatComponent } from '../../../../shared/components/combat/combat.component';
 import { BattleType } from '../../../../core/state/combat-state/combatState';
 import { CombatStateService } from '../../../../core/state/combat-state/combat-state.service';
+import { CharacterStateService } from '../../../../core/services/api/character/character-state.service';
 import { ArenaBattleComponent } from './arena-battle/arena-battle.component';
 import { ChampionsMarketComponent } from './champions-market/champions-market.component';
 import { RankingsGloryComponent } from './rankings-glory/rankings-glory.component';
 import { RecordOfBattleComponent } from './record-of-battle/record-of-battle.component';
 import { TournamentGroundsComponent } from './tournament-grounds/tournament-grounds.component';
-import { ColosseumMatchResult } from '../../../../shared/models/Dtos/colosseum/colosseumMatchResult';
-import { ArenaTicketStatus } from '../../../../shared/models/Dtos/colosseum/arenaTicketStatus';
-import { ArenaOpponentPreview } from '../../../../shared/models/Dtos/colosseum/arenaOpponentPreview';
 import { EventBusService } from '../../../../core/services/client-side/event-bus/event-bus.service';
 import { ColosseumResultComponent } from '../../../../shared/components/colosseum/colosseum-result/colosseum-result.component';
-import { LeaderboardEntry } from '../../../../shared/models/Dtos/leaderboard/leaderboardEntry';
 import { TabsComponent } from '../../../../shared/components/custom-components/tabs/tabs.component';
+import { ColosseumStateService } from '../../../../core/services/api/colosseum/colosseum-state.service';
+import { LeaderboardEntry } from '../../../../shared/models/Dtos/leaderboard/leaderboardEntry';
+import { ColosseumMatchResult } from '../../../../shared/models/Dtos/colosseum/colosseumMatchResult';
+import { NumberFormatPipe } from '../../../../shared/pipes/number-format/number-format.pipe';
 
 @Component({
   selector: 'app-colosseum',
@@ -34,38 +34,47 @@ import { TabsComponent } from '../../../../shared/components/custom-components/t
     TournamentGroundsComponent,
     TabsComponent,
     ColosseumResultComponent,
+    NumberFormatPipe,
   ],
   templateUrl: './colosseum.component.html',
 })
 export class ColosseumComponent implements OnInit {
-  allOpponents: ArenaOpponentPreview[] = [];
-  opponents: ArenaOpponentPreview[] = [];
-  arenaTicketStatus!: ArenaTicketStatus;
-
-  rankings: LeaderboardEntry[] = [];
-  previousMatches: ColosseumMatchResult[] = [];
-
   colosseumBattleResult: 'Victory' | 'Defeat' | 'Draw' | null = null;
 
   battleType = BattleType.Colosseum;
-  displayCombat = false;
+
   constructor(
     public combatStateService: CombatStateService,
-    private colosseumService: ColosseumService,
+    public readonly state: ColosseumStateService,
+    private readonly characterState: CharacterStateService,
     private eventBus: EventBusService,
   ) {
     effect(
       () => {
+        if (this.state.notificationCount() <= 0) return;
+
+        this.state.markNotificationsSeen();
+      },
+      { allowSignalWrites: true },
+    );
+
+    effect(
+      () => {
         const finished = this.eventBus.on('colosseum-combat-finished')();
         if (finished) {
-          this.displayResultScreen(finished.outcome); // Your custom logic here
+          this.displayResultScreen(finished.outcome);
           this.eventBus.clear('colosseum-combat-finished');
-          this.loadArenaOpponents();
-          this.loadColosseumMatchResults();
+          this.state.loadArenaOpponents();
+          this.state.loadColosseumMatchResults();
         }
       },
       { allowSignalWrites: true },
     );
+  }
+
+  ngOnInit(): void {
+    this.state.markNotificationsSeen();
+    this.state.refresh();
   }
 
   displayResultScreen(outcome: 'Victory' | 'Defeat' | 'Draw' | null) {
@@ -76,70 +85,51 @@ export class ColosseumComponent implements OnInit {
     this.colosseumBattleResult = null;
   }
 
-  ngOnInit(): void {
-    this.loadArenaOpponents();
-    this.loadColosseumMatchResults();
-    this.loadColosseumRankings();
-
-    this.colosseumService.getArenaTicketStatus();
-  }
-
-  private loadArenaOpponents(): void {
-    this.colosseumService.getArenaOpponents().subscribe({
-      next: (data) => {
-        this.allOpponents = data;
-        this.pickRandomOpponents();
-      },
-      error: (err) => {
-        console.error('Failed to fetch arena opponents:', err);
-      },
-    });
-  }
-
-  private loadColosseumMatchResults(): void {
-    this.colosseumService.getColosseumMatchResults().subscribe({
-      next: (data) => {
-        this.previousMatches = data.sort(
-          (a, b) =>
-            new Date(b.playedAt).getTime() - new Date(a.playedAt).getTime(),
-        );
-      },
-      error: (err) => {
-        console.error('Failed to fetch colosseum match results:', err);
-      },
-    });
-  }
-
-  private loadColosseumRankings(): void {
-    this.colosseumService.getColosseumRankings().subscribe({
-      next: (data) => {
-        this.rankings = data.sort((a, b) => a.rank - b.rank);
-      },
-      error: (err) => {
-        console.error('Failed to fetch colosseum rankings:', err);
-      },
-    });
-  }
-
   skipBattle() {
-    this.colosseumService.skipColosseumMatch();
-  }
-
-  pickRandomOpponents(): void {
-    // Shuffle a shallow copy and take the first 5
-    this.opponents = this.allOpponents
-      .map((x) => ({ ...x }))
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 5)
-      .sort((a, b) => b.opponentRating - a.opponentRating);
+    this.state.skipColosseumMatch();
   }
 
   onRefreshOpponents(): void {
-    this.pickRandomOpponents();
+    this.state.pickRandomOpponents();
   }
 
   challenge(id: string) {
-    this.colosseumService.startArenaBattle(id);
-    this.displayCombat = true;
+    this.state.startArenaBattle(id);
+  }
+
+  get myRanking(): LeaderboardEntry | undefined {
+    const id = this.characterState.currentCharacterId();
+    if (!id) return undefined;
+
+    return this.state.rankings().find((ranking) => ranking.characterId === id);
+  }
+
+  get recentRecord(): { wins: number; losses: number; draws: number } {
+    const id = this.characterState.currentCharacterId();
+    if (!id) return { wins: 0, losses: 0, draws: 0 };
+
+    return this.state.previousMatches().reduce(
+      (record, match) => {
+        if (!this.includesCurrentCharacter(match, id)) return record;
+
+        if (!match.winnerId) {
+          record.draws += 1;
+        } else if (match.winnerId === id) {
+          record.wins += 1;
+        } else {
+          record.losses += 1;
+        }
+
+        return record;
+      },
+      { wins: 0, losses: 0, draws: 0 },
+    );
+  }
+
+  private includesCurrentCharacter(
+    match: ColosseumMatchResult,
+    id: string,
+  ): boolean {
+    return match.characterAId === id || match.characterBId === id;
   }
 }

@@ -13,121 +13,85 @@
 
 <ng-template #showNonCombat>
   <div class="flex h-full w-full flex-col gap-4 overflow-hidden">
-    <div
-      class="grid min-h-0 flex-1 gap-4 overflow-y-auto xl:grid-cols-[1fr_minmax(0,2fr)_1fr]"
+    <section
+      class="mr-4 rounded border border-light_gray bg-texture p-4 text-white sm:mr-6"
     >
-      <div class="rounded border border-primary/20 bg-black/20 p-4">
-        <h1 class="pb-3 text-center text-2xl font-bold text-primary">
-          {{ dungeonTitle() }}
-        </h1>
-
-        <div class="space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="text-secondary">Status</span>
-            <span class="text-primary">{{ dungeonStatus() }}</span>
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div class="min-w-0">
+          <div class="text-xs font-semibold uppercase text-zinc-400">
+            Dungeon Run
           </div>
-
-          <div class="flex items-center justify-between">
-            <span class="text-secondary">Remaining</span>
-            <span class="text-primary">{{ remainingRooms() }}</span>
-          </div>
-
-          <div class="mb-2 flex items-center justify-between text-sm">
-            <span class="text-secondary">Progress</span>
-            <span class="text-primary">
-              {{ currentRoomNumber() }}/{{ totalRooms() }}
+          <div class="mt-1 flex min-w-0 flex-wrap items-center gap-3">
+            <h1 class="truncate text-2xl font-semibold text-primary">
+              {{ dungeonTitle() }}
+            </h1>
+            <span
+              class="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase text-primary"
+            >
+              {{ dungeonStatus() }}
             </span>
           </div>
-
-          <div
-            class="h-3 overflow-hidden rounded-full border border-primary/20 bg-white/5"
-          >
-            <div
-              class="h-full bg-primary transition-all duration-300"
-              [style.width.%]="progressPercent()"
-            ></div>
-          </div>
-
-          <div
-            *ngIf="!isFailedRun() && !isRewardClaimRun()"
-            class="border-t border-white/10 pt-3"
-          >
-            <div class="mb-2 text-xs uppercase tracking-wide text-secondary">
-              Pending Rewards
-            </div>
-
-            <div class="flex flex-wrap gap-2 text-left">
-              <div class="rounded border border-white/10 bg-black/20 p-2">
-                <div class="text-xs uppercase tracking-wide text-secondary">
-                  Experience
-                </div>
-                <div class="text-primary">
-                  {{ activeDungeon()?.pendingExperience ?? 0 }}
-                </div>
-              </div>
-
-              <div class="rounded border border-white/10 bg-black/20 p-2">
-                <div class="text-xs uppercase tracking-wide text-secondary">
-                  Cinders
-                </div>
-                <div class="text-primary">
-                  {{ activeDungeon()?.pendingCinders ?? 0 }}
-                </div>
-              </div>
-
-              <div class="rounded border border-white/10 bg-black/20 p-2">
-                <div class="text-xs uppercase tracking-wide text-secondary">
-                  Soulstones
-                </div>
-                <div class="text-primary">
-                  {{ activeDungeon()?.pendingSoulstones ?? 0 }}
-                </div>
-              </div>
-            </div>
-
-            <div class="mt-3 border-t border-white/10 pt-3">
-              <div class="mb-2 text-xs uppercase tracking-wide text-secondary">
-                Pending Items
-              </div>
-
-              <div
-                *ngIf="pendingRewards().length; else noPendingItems"
-                class="space-y-2"
-              >
-                <div
-                  *ngFor="let reward of pendingRewards(); trackBy: trackByIndex"
-                  class="rounded border border-primary/20 bg-primary/5 px-2 py-2 text-left text-sm"
-                >
-                  <div class="flex items-center justify-between gap-2">
-                    <span class="min-w-0 truncate text-primary">
-                      {{ reward.name || formatEncounterName(reward.itemId) }}
-                    </span>
-
-                    <span class="shrink-0 text-primary">
-                      x{{ reward.quantity }}
-                    </span>
-                  </div>
-
-                  <div
-                    class="mt-1 flex items-center justify-between gap-2 text-xs text-secondary"
-                  >
-                    <span>{{ reward.itemType }}</span>
-                    <span>{{ formatRewardSource(reward.source) }}</span>
-                  </div>
-                </div>
-              </div>
-
-              <ng-template #noPendingItems>
-                <p class="text-sm text-secondary">No item drops yet.</p>
-              </ng-template>
-            </div>
-          </div>
+          <p class="mt-1 max-w-3xl text-sm text-zinc-400">
+            {{ runStateDescription() }}
+          </p>
         </div>
+
+        <button
+          type="button"
+          class="rounded border border-light_gray px-3 py-2 text-sm text-zinc-200 transition hover:border-primary hover:bg-zinc-300/10 hover:text-primary disabled:opacity-40"
+          [disabled]="loading()"
+          (click)="refresh()"
+        >
+          Refresh
+        </button>
       </div>
 
+      <div class="mt-4">
+        <div class="mb-2 flex items-center justify-between text-xs">
+          <span class="uppercase text-zinc-400">Run Progress</span>
+          <span class="text-primary">
+            Room {{ currentRoomNumber() }} / {{ totalRooms() }}
+          </span>
+        </div>
+        <div
+          class="h-3 overflow-hidden rounded-full border border-primary/20 bg-white/5"
+        >
+          <div
+            class="h-full bg-primary transition-all duration-300"
+            [style.width.%]="progressPercent()"
+          ></div>
+        </div>
+      </div>
+    </section>
+
+    <div
+      *ngIf="hasActiveDungeon(); else noActiveDungeonRun"
+      class="grid min-h-0 flex-1 gap-4 overflow-hidden pr-4 xl:grid-cols-[minmax(0,1fr)_21rem] xl:pr-6"
+    >
       <div
-        class="flex flex-col gap-4 rounded border border-primary/20 bg-black/20 p-6 text-center"
+        class="order-1 flex min-h-[28rem] flex-col gap-4 overflow-y-auto rounded border border-primary/30 bg-black/30 p-5 text-center shadow-[0_0_28px_rgba(0,0,0,0.22)] xl:p-6"
       >
+        <div
+          *ngIf="loading()"
+          class="rounded border border-primary/30 bg-primary/10 px-3 py-2 text-sm text-primary"
+        >
+          Resolving dungeon action...
+        </div>
+
+        <div
+          *ngIf="error() as errorMessage"
+          class="rounded border border-red-400/30 bg-red-950/20 px-3 py-2 text-sm text-red-100"
+        >
+          {{ errorMessage }}
+        </div>
+
+        <div
+          *ngIf="message() as actionMessage"
+          class="rounded border border-primary/25 bg-black/25 px-3 py-2 text-sm text-primary"
+        >
+          {{ actionMessage }}
+        </div>
+
         <ng-container *ngIf="isFailedRun(); else nonFailedRunPanel">
           <div
             class="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-red-400/40 bg-red-950/30 text-3xl text-red-200"
@@ -147,6 +111,9 @@
             Your run ended in room {{ currentRoomNumber() }} of
             {{ totalRooms() }}. Review what you cleared, then leave the dungeon
             to start fresh.
+          </p>
+          <p class="mx-auto max-w-lg text-sm text-zinc-400">
+            {{ currentDecisionText() }}
           </p>
 
           <div
@@ -234,7 +201,7 @@
               variant="danger"
               text="Leave Dungeon"
               [disabled]="loading()"
-              (click)="dismissFailedDungeonRun()"
+              (pressed)="dismissFailedDungeonRun()"
             />
           </div>
         </ng-container>
@@ -268,30 +235,15 @@
             <div
               class="mx-auto grid w-full max-w-2xl gap-3 text-left md:grid-cols-3"
             >
-              <div class="rounded border border-white/10 bg-black/20 p-4">
+              <div
+                *ngFor="let reward of pendingCurrencyRewards()"
+                class="rounded border border-white/10 bg-black/20 p-4"
+              >
                 <div class="text-xs uppercase tracking-wide text-secondary">
-                  Experience
+                  {{ reward.label }}
                 </div>
                 <div class="mt-2 text-2xl font-bold text-primary">
-                  {{ activeDungeon()?.pendingExperience ?? 0 }}
-                </div>
-              </div>
-
-              <div class="rounded border border-white/10 bg-black/20 p-4">
-                <div class="text-xs uppercase tracking-wide text-secondary">
-                  Cinders
-                </div>
-                <div class="mt-2 text-2xl font-bold text-primary">
-                  {{ activeDungeon()?.pendingCinders ?? 0 }}
-                </div>
-              </div>
-
-              <div class="rounded border border-white/10 bg-black/20 p-4">
-                <div class="text-xs uppercase tracking-wide text-secondary">
-                  Soulstones
-                </div>
-                <div class="mt-2 text-2xl font-bold text-primary">
-                  {{ activeDungeon()?.pendingSoulstones ?? 0 }}
+                  {{ reward.value }}
                 </div>
               </div>
             </div>
@@ -359,7 +311,7 @@
               <app-regular-button
                 text="Claim Rewards"
                 [disabled]="!canClaimRewards()"
-                (click)="claimDungeonRewards()"
+                (pressed)="claimDungeonRewards()"
               />
             </div>
           </ng-container>
@@ -400,37 +352,19 @@
           </div>
 
           <h2 class="text-3xl font-bold text-primary">
-            {{ getRoomTypeLabel(currentRoom()?.type) }}
+            {{ currentRoomTitle() }}
           </h2>
 
-          <p class="text-secondary">
-            Room {{ currentRoomNumber() }} of {{ totalRooms() }}
-          </p>
-
-          <p class="italic text-secondary">{{ getCurrentStepText() }}</p>
-
           <div
-            *ngIf="isEventRoom()"
-            class="mx-auto w-full max-w-xl rounded border border-primary/20 bg-black/20 p-4 text-left"
+            class="mx-auto w-full max-w-xl rounded border border-primary/20 bg-primary/5 px-4 py-3 text-left"
           >
-            <div class="text-xs uppercase tracking-wide text-secondary">
-              Event
+            <div class="text-xs font-semibold uppercase text-primary">
+              Next Decision
             </div>
-            <h3 class="mt-1 text-xl font-semibold text-primary">
-              {{ getEventTitle(currentRoom()?.eventOutcome) }}
-            </h3>
-            <p class="mt-2 text-sm text-secondary">
-              {{ getEventDescription(currentRoom()?.eventOutcome) }}
-            </p>
-            <p *ngIf="message()" class="mt-3 text-sm text-primary">
-              {{ message() }}
+            <p class="mt-1 text-sm text-zinc-300">
+              {{ currentDecisionText() }}
             </p>
           </div>
-
-          <p *ngIf="isCheckpointRoom()" class="mx-auto max-w-lg text-secondary">
-            Withdrawing ends the run and keeps your pending rewards ready to
-            claim.
-          </p>
 
           <div
             *ngIf="currentRoom()?.encounterIds?.length"
@@ -450,12 +384,12 @@
             </div>
           </div>
 
-          <div class="flex items-center justify-center gap-3">
+          <div class="flex flex-wrap items-center justify-center gap-3">
             <app-regular-button
               *ngIf="primaryActionLabel()"
               [text]="primaryActionLabel()!"
               [disabled]="!canExecutePrimaryAction()"
-              (click)="executePrimaryAction()"
+              (pressed)="executePrimaryAction()"
             />
 
             <app-regular-button
@@ -463,7 +397,7 @@
               variant="secondary"
               text="Withdraw"
               [disabled]="!canLeave()"
-              (click)="withdrawAtCheckpoint()"
+              (pressed)="withdrawAtCheckpoint()"
             />
 
             <app-regular-button
@@ -471,52 +405,93 @@
               variant="secondary"
               text="Ignore"
               [disabled]="loading()"
-              (click)="chooseEventAction('event.ignore')"
+              (pressed)="chooseEventAction('event.ignore')"
             />
           </div>
         </ng-template>
       </div>
 
-      <div class="rounded border border-primary/20 bg-black/20 p-4">
-        <div class="mb-3 text-sm uppercase tracking-wide text-secondary">
-          Upcoming Rooms
-        </div>
+      <aside class="order-2 min-h-full">
+        <section
+          class="h-full rounded border border-light_gray bg-black/25 p-4"
+        >
+          <div class="mb-4 border-b border-light_gray/60 pb-3">
+            <div class="text-xs font-semibold uppercase text-zinc-400">
+              Run Spoils
+            </div>
+            <h2 class="mt-1 text-primary">Pending Rewards</h2>
+          </div>
+          <div *ngIf="!isFailedRun() && !isRewardClaimRun()" class="space-y-3">
+            <div class="mb-2 text-xs uppercase text-zinc-400">Currency</div>
 
-        <div class="space-y-2">
-          <div
-            *ngFor="
-              let room of upcomingRooms();
-              let i = index;
-              trackBy: trackByIndex
-            "
-            class="flex items-center justify-between rounded border border-white/10 bg-black/20 px-3 py-3"
-            [ngClass]="i === 0 ? 'border-primary/30 bg-primary/5' : ''"
-          >
-            <div class="flex items-center gap-3">
-              <app-dungeon-room-icon
-                class="text-primary"
-                [type]="room.type"
-              ></app-dungeon-room-icon>
-              <div>
-                <div class="text-primary">
-                  {{ getRoomTypeLabel(room.type) }}
+            <div class="grid gap-2 text-left">
+              <div
+                *ngFor="let reward of pendingCurrencyRewards()"
+                class="rounded border border-white/10 bg-black/25 px-3 py-2"
+              >
+                <div class="text-[10px] uppercase text-zinc-400">
+                  {{ reward.label }}
                 </div>
-                <div *ngIf="i === 0" class="text-xs text-secondary">
-                  Next room
+                <div class="text-lg font-semibold text-primary">
+                  {{ reward.value }}
                 </div>
               </div>
             </div>
 
-            <span class="text-xs text-secondary">
-              #{{ currentRoomNumber() + i + 1 }}
-            </span>
-          </div>
+            <div class="mt-3 border-t border-white/10 pt-3">
+              <div class="mb-2 text-xs uppercase text-zinc-400">Items</div>
 
-          <p *ngIf="!upcomingRooms().length" class="text-secondary">
-            No upcoming rooms.
+              <div
+                *ngIf="pendingRewards().length; else noPendingItems"
+                class="space-y-2"
+              >
+                <div
+                  *ngFor="let reward of pendingRewards(); trackBy: trackByIndex"
+                  class="rounded border border-primary/20 bg-primary/5 px-2 py-2 text-left text-sm"
+                >
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="min-w-0 truncate text-primary">
+                      {{ reward.name || formatEncounterName(reward.itemId) }}
+                    </span>
+
+                    <span class="shrink-0 text-primary">
+                      x{{ reward.quantity }}
+                    </span>
+                  </div>
+
+                  <div
+                    class="mt-1 flex items-center justify-between gap-2 text-xs text-secondary"
+                  >
+                    <span>{{ reward.itemType }}</span>
+                    <span>{{ formatRewardSource(reward.source) }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <ng-template #noPendingItems>
+                <p class="text-sm text-secondary">No item drops yet.</p>
+              </ng-template>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </div>
+
+    <ng-template #noActiveDungeonRun>
+      <div
+        class="mr-4 flex min-h-0 flex-1 items-center justify-center rounded border border-light_gray bg-black/25 p-6 text-center text-white sm:mr-6"
+      >
+        <div class="max-w-md">
+          <div class="text-xs font-semibold uppercase text-zinc-400">
+            No Active Run
+          </div>
+          <h2 class="mt-2 text-primary">Choose a dungeon to begin</h2>
+          <p class="mt-2 text-sm text-zinc-400">
+            Active dungeon decisions, pending rewards, and room progress will
+            appear here once a run has started.
           </p>
         </div>
       </div>
-    </div>
+    </ng-template>
   </div>
 </ng-template>

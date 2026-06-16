@@ -325,11 +325,13 @@ export class MarketPlaceBuyComponent implements OnInit {
 
     // 👇 Replace with your real service / API call
     this.marketplaceState.buyoutListing(sel.id, qty).subscribe({
-      next: () => {
-        this.marketplaceState.decrementListing(sel.id, qty);
-        sel.quantity -= qty;
-        if (sel.quantity > 0) this.selectListing(sel);
-        else this.selectedListing.set(null);
+      next: (response) => {
+        if (response.remainingListing) {
+          this.selectListing(response.remainingListing);
+        } else {
+          this.selectedListing.set(null);
+          this.selectedListingId = '';
+        }
       },
       error: (err) => {
         // Handle error (e.g., show toast)

@@ -1,7 +1,19 @@
-import { signal, computed, Injectable, Signal } from '@angular/core';
-import { finalize } from 'rxjs/operators';
+import {
+  signal,
+  computed,
+  effect,
+  Injectable,
+  Signal,
+  untracked,
+} from '@angular/core';
+import { finalize, tap } from 'rxjs/operators';
 
-import { MarketPlaceService } from './market-place.service';
+import {
+  BuyoutMarketPlaceListingResponse,
+  CancelMarketPlaceListingResponse,
+  CreateMarketPlaceListingResponse,
+  MarketPlaceService,
+} from './market-place.service';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { MarketPlaceListing } from '../../../../shared/models/Dtos/market-place/market-place-listing';
 import { CreateMarketPlaceListingRequest } from '../../../../shared/models/requestDtos/market-place/create-market-place-listing-request';
@@ -9,6 +21,12 @@ import { InventoryItem } from '../../../../shared/models/inventoryItem';
 import { Observable } from 'rxjs';
 import { BuyoutMarketPlaceListingRequest } from '../../../../shared/models/requestDtos/market-place/buyout-market.place-listing-request';
 import { CharacterService } from '../character/character.service';
+import { InventoryStateService } from '../inventory/inventory-state.service';
+import { GameEventService } from '../../real-time/game-event.service';
+import { MarketListingSoldMsg } from '../../real-time/market/market-listing-sold';
+import { MarketListingCreatedMsg } from '../../real-time/market/market-listing-created';
+import { MarketListingCanceledMsg } from '../../real-time/market/market-listing-canceled';
+import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
 
 @Injectable({ providedIn: 'root' })
 export class MarketplaceStateService {
@@ -17,6 +35,8 @@ export class MarketplaceStateService {
   private readonly _error = signal<string | null>(null);
 
   private readonly myCharacterId!: Signal<string | null>;
+  private readonly eventDeduper = new GameEventDeduper();
+  private hasLoaded = false;
 
   readonly listings = computed(() => {
     return this._listings();
@@ -33,9 +53,54 @@ export class MarketplaceStateService {
   constructor(
     private marketplaceService: MarketPlaceService,
     private characterService: CharacterService,
+    private inventoryState: InventoryStateService,
+    private eventService: GameEventService,
   ) {
     this.myCharacterId = computed(
       () => this.characterService.currentCharacterId(), // unwrap inside
+    );
+
+    effect(
+      () => {
+        const saleEnvelope =
+          this.eventService.eventEnvelope.MarketListingSoldMsg();
+        const createdEnvelope =
+          this.eventService.eventEnvelope.MarketListingCreatedMsg();
+        const canceledEnvelope =
+          this.eventService.eventEnvelope.MarketListingCanceledMsg();
+        const sale = saleEnvelope?.payload;
+        const created = createdEnvelope?.payload;
+        const canceled = canceledEnvelope?.payload;
+
+        if (sale && this.eventDeduper.shouldProcess('sold', saleEnvelope)) {
+          untracked(() => this.applySellerSale(sale));
+        }
+
+        if (
+          created &&
+          this.eventDeduper.shouldProcess('created', createdEnvelope)
+        ) {
+          untracked(() => this.applyCreatedListing(created));
+        }
+
+        if (
+          canceled &&
+          this.eventDeduper.shouldProcess('canceled', canceledEnvelope)
+        ) {
+          untracked(() => this.applyCanceledListing(canceled));
+        }
+      },
+      { allowSignalWrites: true },
+    );
+
+    effect(
+      () => {
+        const reconnectCount = this.eventService.reconnectCount();
+        if (reconnectCount <= 0 || !this.hasLoaded) return;
+
+        untracked(() => this.refresh());
+      },
+      { allowSignalWrites: true },
     );
   }
 
@@ -58,6 +123,7 @@ export class MarketplaceStateService {
 
   /** Force‑refresh from the backend, bypassing the in‑memory cache. */
   refresh(): void {
+    this.hasLoaded = true;
     this._loading.set(true);
     this.marketplaceService
       .getListings()
@@ -78,43 +144,46 @@ export class MarketplaceStateService {
       });
   }
 
-  buyoutListing(listingId: string, quantity: number): Observable<boolean> {
+  buyoutListing(
+    listingId: string,
+    quantity: number,
+  ): Observable<BuyoutMarketPlaceListingResponse> {
     const listing: BuyoutMarketPlaceListingRequest = {
       marketPlaceListingId: listingId,
       quantity,
     };
 
-    return this.marketplaceService
-      .buyoutListing(listing)
-      .pipe((success) => success);
+    return this.marketplaceService.buyoutListing(listing).pipe(
+      tap((response) => {
+        this.applyBuyoutResponse(response);
+      }),
+    );
   }
 
-  cancelListing(listingId: string): Observable<boolean> {
-    return this.marketplaceService.cancelListing(listingId).pipe((success) => {
-      this.removeListing(listingId);
-      return success;
-    });
+  cancelListing(listingId: string): Observable<CancelMarketPlaceListingResponse> {
+    return this.marketplaceService.cancelListing(listingId).pipe(
+      tap((response) => {
+        this.applyCancelResponse(response);
+      }),
+    );
   }
 
   createListing(
     item: InventoryItem,
     quantity: number,
     unitPrice: number,
-  ): Observable<MarketPlaceListing> {
+  ): Observable<CreateMarketPlaceListingResponse> {
     const listing: CreateMarketPlaceListingRequest = {
       itemInstanceId: item.itemInstance.id,
       quantity,
       unitPrice,
     };
 
-    // Uncomment once backend endpoint is ready
-    return this.marketplaceService
-      .createListing(listing)
-      .pipe((createdListing) => createdListing);
-  }
-
-  addToListings(listing: MarketPlaceListing) {
-    this._listings.set([...this._listings(), listing]);
+    return this.marketplaceService.createListing(listing).pipe(
+      tap((response) => {
+        this.applyCreateResponse(response);
+      }),
+    );
   }
 
   // Remove an existing listing.
@@ -142,4 +211,84 @@ export class MarketplaceStateService {
 
     this._listings.set(updated);
   }
+
+  private applyBuyoutResponse(response: BuyoutMarketPlaceListingResponse): void {
+    this.applyListingChange(response.listingId, response.remainingListing);
+    this.inventoryState.addOrIncrement(response.purchasedItem);
+    this.updateCurrentCharacterCinders(response.buyerCinders);
+  }
+
+  private applyCreateResponse(response: CreateMarketPlaceListingResponse): void {
+    this.upsertListing(response.listing);
+    this.inventoryState.applyInventoryItemState(
+      response.listedItemInstanceId,
+      response.remainingInventoryItem,
+    );
+  }
+
+  private applyCancelResponse(response: CancelMarketPlaceListingResponse): void {
+    this.removeListing(response.listingId);
+    this.inventoryState.addOrIncrement(response.returnedItem);
+  }
+
+  private applySellerSale(sale: MarketListingSoldMsg): void {
+    this.applyListingChange(sale.listingId, sale.remainingListing);
+
+    if (sale.sellerId === this.myCharacterId()) {
+      this.updateCurrentCharacterCinders(sale.sellerCinders);
+    }
+  }
+
+  private applyCreatedListing(event: MarketListingCreatedMsg): void {
+    this.upsertListing(event.listing);
+  }
+
+  private applyCanceledListing(event: MarketListingCanceledMsg): void {
+    this.removeListing(event.listingId);
+  }
+
+  private applyListingChange(
+    listingId: string,
+    remainingListing: MarketPlaceListing | null,
+  ): void {
+    if (!remainingListing) {
+      this.removeListing(listingId);
+      return;
+    }
+
+    const listings = this._listings();
+    const index = listings.findIndex((listing) => listing.id === listingId);
+    if (index === -1) {
+      this._listings.set([...listings, remainingListing]);
+      return;
+    }
+
+    const updated = [...listings];
+    updated[index] = remainingListing;
+    this._listings.set(updated);
+  }
+
+  private updateCurrentCharacterCinders(cinders: number): void {
+    const character = this.characterService.currentCharacter();
+    if (!character) return;
+
+    this.characterService.updateCharacter({
+      ...character,
+      cinders,
+    });
+  }
+
+  private upsertListing(listing: MarketPlaceListing): void {
+    const listings = this._listings();
+    const index = listings.findIndex((current) => current.id === listing.id);
+    if (index === -1) {
+      this._listings.set([...listings, listing]);
+      return;
+    }
+
+    const updated = [...listings];
+    updated[index] = listing;
+    this._listings.set(updated);
+  }
+
 }

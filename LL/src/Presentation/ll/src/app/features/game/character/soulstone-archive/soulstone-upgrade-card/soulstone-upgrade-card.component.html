@@ -1,47 +1,80 @@
-<div class="flex flex-col gap-2 pb-4">
-  <h3 class="text-primary">{{ upgradeType }} Upgrades</h3>
-  <div class="flex flex-col gap-4 sm:flex-row">
+<section class="flex flex-col gap-3 pb-4">
+  <div class="flex items-end justify-between gap-3">
+    <div>
+      <h3 class="text-primary">{{ upgradeType }} Upgrades</h3>
+      <p class="text-xs text-zinc-400">{{ upgrades.length }} paths</p>
+    </div>
+  </div>
+
+  <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
     <div
-      class="flex h-32 w-full flex-col justify-between gap-2 rounded-md border border-zinc-300/30 p-4 sm:w-80"
+      class="flex min-h-48 flex-col justify-between gap-4 rounded-md border border-zinc-300/30 bg-black/25 p-4"
       *ngFor="let view of upgrades"
     >
-      <div class="flex justify-between">
-        <div>{{ view.definition.name }}</div>
-        <div class="group relative flex sm:inline-block">
-          <button class="cursor-pointer border-none bg-transparent p-0">
-            <img src="icons/Info.svg" class="size-6" />
-          </button>
-          <div
-            class="absolute right-full top-0 hidden rounded border border-light_gray bg-texture p-2 text-sm text-white shadow group-hover:block sm:w-56"
+      <div class="flex h-full flex-col justify-between">
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <h4 class="font-semibold text-primary">
+              {{ view.definition.name }}
+            </h4>
+            <p class="mt-1 text-sm leading-relaxed text-zinc-400">
+              {{ view.definition.description }}
+            </p>
+          </div>
+          <span
+            class="shrink-0 rounded border px-2 py-0.5 text-xs"
+            [ngClass]="statusClass(view)"
           >
-            {{ view.definition.description }}
+            {{ statusLabel(view) }}
+          </span>
+        </div>
+
+        <div class="mt-4 grid gap-2 text-sm">
+          <div class="flex items-center justify-between gap-3">
+            <span class="text-zinc-400">Level</span>
+            <span class="text-primary">
+              {{ view.level }} / {{ view.definition.maxLevel }}
+            </span>
+          </div>
+          <div class="h-1.5 overflow-hidden rounded bg-zinc-900">
+            <div
+              class="h-full bg-primary"
+              [style.width.%]="progressPercent(view)"
+            ></div>
+          </div>
+          <div class="flex items-center justify-between gap-3">
+            <span class="text-zinc-400">Current</span>
+            <span class="text-primary">{{ currentEffect(view) }}</span>
+          </div>
+          <div class="flex items-center justify-between gap-3">
+            <span class="text-zinc-400">Per level</span>
+            <span class="text-primary">
+              {{ view.definition.effect.perLevel > 0 ? "+" : ""
+              }}{{ view.definition.effect.perLevel }}%
+            </span>
           </div>
         </div>
       </div>
-      <div class="flex justify-between">
-        <div class="flex flex-col justify-end gap-2">
-          <span
-            >Effect: {{ view.definition.effect.perLevel > 0 ? "+" : ""
-            }}{{ view.definition.effect.perLevel }}% per level</span
-          >
-          <span
-            >Level: {{ view.level }}/{{ view.definition.maxLevel }} ({{
-              view.definition.effect.perLevel > 0 ? "+" : ""
-            }}{{
-              (view.level * view.definition.effect.perLevel).toFixed(1)
-            }}%)</span
-          >
+
+      <div
+        class="flex items-end justify-between gap-3 border-t border-light_gray/40 pt-3"
+      >
+        <div>
+          <div class="text-xs uppercase text-zinc-500">Next cost</div>
+          <div class="text-sm text-primary">
+            {{
+              view.nextCost == null
+                ? "Max level"
+                : view.nextCost + " Soulstones"
+            }}
+          </div>
         </div>
-        <div class="flex flex-col items-end justify-end place-self-end">
-          <label> Cost {{ view.nextCost }} Soulstones</label>
-          <app-regular-button
-            (pressed)="upgrade(view)"
-            [disabled]="loading() || disablePurchase(view)"
-          >
-            Upgrade
-          </app-regular-button>
-        </div>
+        <app-regular-button
+          (pressed)="upgrade(view)"
+          [disabled]="loading() || disablePurchase(view)"
+          [text]="upgradeButtonText(view)"
+        ></app-regular-button>
       </div>
     </div>
   </div>
-</div>
+</section>
