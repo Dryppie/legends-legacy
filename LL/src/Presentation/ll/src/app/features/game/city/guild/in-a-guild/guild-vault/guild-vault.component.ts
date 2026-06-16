@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { GuildStateService } from '../../../../../../core/services/api/guild/guild-state.service';
-import { NgFor, NgIf } from '@angular/common';
+import { NgClass, NgFor, NgIf } from '@angular/common';
 import { GuildResourceType } from '../../../../../../shared/models/Dtos/guild/guildResourceType';
 import { HumanizeEnumPipe } from '../../../../../../shared/pipes/enums/humanize-enum.pipe';
 import { RegularButtonComponent } from '../../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
@@ -14,6 +14,7 @@ import { NumberFormatPipe } from '../../../../../../shared/pipes/number-format/n
   imports: [
     NgIf,
     NgFor,
+    NgClass,
     HumanizeEnumPipe,
     RegularButtonComponent,
     NumberFormatPipe,
@@ -65,6 +66,17 @@ export class GuildVaultComponent {
     }
 
     return Object.values(this.donationForm).every((amount) => amount <= 0);
+  }
+
+  donationTotal(): number {
+    return Object.values(this.donationForm).reduce(
+      (total, amount) => total + amount,
+      0,
+    );
+  }
+
+  donationExceedsAvailable(type: GuildResourceType): boolean {
+    return this.donationForm[type] > this.availableAmounts[type];
   }
 
   donate(): void {

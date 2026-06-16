@@ -3,18 +3,15 @@
   class="flex h-full w-full flex-col gap-2 pt-4 text-white"
 >
   <div
-    class="flex min-h-48 w-full justify-between rounded-lg border border-light_gray p-4"
+    class="flex flex-wrap items-start justify-between gap-4 rounded-lg border border-light_gray bg-black/20 p-4"
   >
     <div>
-      <h2 class="text-primary">
-        {{ guild.name }}
-      </h2>
-      <div>"Honor and Glory!"</div>
+      <h2 class="text-primary">Guild Actions</h2>
+      <p class="mt-1 text-sm text-zinc-400">
+        Invite new members, review applications, or manage your own membership.
+      </p>
     </div>
-    <div class="flex flex-col justify-between gap-2">
-      <span class="text-end"
-        >{{ guild.members.length }} / {{ guild.maxMembers }} members</span
-      >
+    <div class="flex flex-col items-end gap-2">
       <div *ngIf="character.role !== memberRole" class="flex flex-col gap-2">
         <app-regular-button
           [disabled]="isGuildFull()"
@@ -38,14 +35,17 @@
     </div>
   </div>
   <div class="flex h-full flex-col overflow-hidden">
-    <div class="grid grid-cols-4 gap-2 border-b border-light_gray p-2">
-      <div>Name</div>
+    <div
+      class="grid grid-cols-[minmax(0,1fr)_5rem_8rem_8rem] gap-2 border-b border-light_gray p-2 text-sm text-zinc-400"
+    >
+      <div>Member</div>
       <div>Level</div>
       <div>Role</div>
+      <div class="justify-self-end">Action</div>
     </div>
     <div class="overflow-y-auto">
       <div
-        class="grid grid-cols-4 items-center border-b border-light_gray p-2 text-white"
+        class="grid grid-cols-[minmax(0,1fr)_5rem_8rem_8rem] items-center gap-2 border-b border-light_gray p-2 text-white"
         *ngFor="let member of guildMembers"
         [ngClass]="{
           'bg-zinc-300/10 text-primary':
@@ -56,9 +56,6 @@
           [id]="member.characterId"
           [name]="member.name"
         ></app-character-tag>
-        <div class="break-words pr-2">
-          {{ member.name }}
-        </div>
         <div>{{ member.level }}</div>
         <div>{{ member.role }}</div>
         <app-regular-button
@@ -71,6 +68,12 @@
         >
           {{ member.role === leaderRole ? "Disband" : "Leave" }}
         </app-regular-button>
+        <div
+          *ngIf="member.characterId !== character.characterId"
+          class="col-start-4 justify-self-end text-xs text-zinc-500"
+        >
+          -
+        </div>
       </div>
     </div>
   </div>

@@ -170,3 +170,23 @@ The Soulstones page is a permanent progression surface, but it was still using a
 - No changes to Soulstone upgrade math, costs, effects, reset rules, or backend APIs.
 - No new filters, sorting, or progression categories.
 - No changes to how Soulstones are earned.
+
+## Eighth Slice: Guild
+
+### Why This Slice Next
+
+The Guild area spans several related workflows: guild overview, buildings, vault donations, and rankings. This pass focused on shared context and scanability across those views without changing membership, donation, building, or ranking rules.
+
+### UX Problems Addressed
+
+- Added an in-guild summary header with guild name, tag, member count, applications, and key resources.
+- Tightened the Guild tab into action context plus a cleaner member roster.
+- Added building readiness status and cost requirement coloring.
+- Split the Vault into clear guild-resource and donation panels with donation totals and over-limit feedback.
+- Added leaderboard summary cards and rank numbers to Rankings.
+
+### Out Of Scope For This Pass
+
+- No changes to guild permissions, applications, invites, donations, building upgrade rules, rankings sort rules, or backend APIs.
+- No redesign of the no-guild onboarding flow.
+- No changes to guild realtime behavior or chat.

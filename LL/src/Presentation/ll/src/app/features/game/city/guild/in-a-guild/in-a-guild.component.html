@@ -1,4 +1,44 @@
-<div class="flex h-full w-full flex-col overflow-y-auto">
+<div class="flex h-full w-full flex-col gap-4 overflow-y-auto">
+  <section
+    class="flex flex-wrap items-start justify-between gap-4 rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
+  >
+    <div>
+      <p class="text-xs font-semibold uppercase text-secondary">
+        Guild Headquarters
+      </p>
+      <h1 class="mt-1 text-2xl font-semibold text-primary">
+        {{ guild.name }}
+      </h1>
+      <p class="mt-1 text-sm text-zinc-400">
+        {{ guild.tag ? "[" + guild.tag + "]" : "No guild tag" }}
+      </p>
+    </div>
+
+    <div class="grid gap-2 text-sm sm:grid-cols-2 xl:grid-cols-4">
+      <div class="rounded border border-light_gray/70 bg-black/30 px-3 py-2">
+        <div class="text-xs uppercase text-zinc-500">Members</div>
+        <div class="mt-1 text-lg text-primary">
+          {{ guild.members.length }} / {{ guild.maxMembers }}
+        </div>
+      </div>
+      <div class="rounded border border-light_gray/70 bg-black/30 px-3 py-2">
+        <div class="text-xs uppercase text-zinc-500">Applications</div>
+        <div class="mt-1 text-lg text-primary">{{ guild.invites.length }}</div>
+      </div>
+      <div
+        *ngFor="let resource of resourceSummary.slice(0, 2)"
+        class="rounded border border-light_gray/70 bg-black/30 px-3 py-2"
+      >
+        <div class="text-xs uppercase text-zinc-500">
+          {{ resource.resource | humanize }}
+        </div>
+        <div class="mt-1 text-lg text-primary">
+          {{ resource.amount | numberFormat }}
+        </div>
+      </div>
+    </div>
+  </section>
+
   <app-tabs class="flex h-full flex-col overflow-hidden">
     <app-tab label="Guild">
       <app-guild-info

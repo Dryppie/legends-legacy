@@ -6,9 +6,22 @@
     *ngIf="selected() as selectedUpgrade"
     class="space-y-2 p-4 lg:order-2 lg:w-2/3"
   >
-    <h2 class="font-semibold text-primary">
-      {{ selectedUpgrade.definition.name }}
-    </h2>
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <p class="text-xs font-semibold uppercase text-zinc-400">
+          Selected Building
+        </p>
+        <h2 class="font-semibold text-primary">
+          {{ selectedUpgrade.definition.name }}
+        </h2>
+      </div>
+      <span
+        class="rounded border px-2 py-1 text-xs"
+        [ngClass]="selectedStatusClass()"
+      >
+        {{ selectedStatusLabel() }}
+      </span>
+    </div>
     <p>
       {{ selectedUpgrade.definition.description }}
     </p>
@@ -43,10 +56,20 @@
           class="list-inside list-disc space-y-1"
         >
           <li>
-            {{
-              cost.base + cost.increment * selectedUpgrade.level | numberFormat
-            }}
-            {{ cost.resource | humanize }}
+            <span
+              [ngClass]="
+                resourceRequirementClass(
+                  cost.resource,
+                  cost.base + cost.increment * selectedUpgrade.level
+                )
+              "
+            >
+              {{
+                cost.base + cost.increment * selectedUpgrade.level
+                  | numberFormat
+              }}
+              {{ cost.resource | humanize }}
+            </span>
             <span class="text-muted text-xs">
               ({{ getGuildResourceAmount(cost.resource) | numberFormat }})
             </span>

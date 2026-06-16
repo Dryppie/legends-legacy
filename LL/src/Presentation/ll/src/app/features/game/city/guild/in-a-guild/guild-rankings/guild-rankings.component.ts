@@ -18,4 +18,12 @@ export class GuildRankingsComponent {
       ),
     );
   }
+
+  topGuildName(): string {
+    return this.sortedGuilds()[0]?.name ?? 'None';
+  }
+
+  totalGuilds(): number {
+    return this.sortedGuilds().length;
+  }
 }
