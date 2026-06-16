@@ -43,14 +43,17 @@ export class EssenceStateService {
   readonly inventoryEssences = computed(() =>
     this.inventoryState
       .items()
-      .filter((item) => item.itemInstance.itemBase.itemType === ItemType.Essence),
+      .filter(
+        (item) => item.itemInstance.itemBase.itemType === ItemType.Essence,
+      ),
   );
 
   readonly absorbedEssenceDefinitionIds = computed(
     () =>
       new Set(
-        this._archive()?.essences.map((essence) => essence.essenceDefinitionId) ??
-          [],
+        this._archive()?.essences.map(
+          (essence) => essence.essenceDefinitionId,
+        ) ?? [],
       ),
   );
 
@@ -123,7 +126,9 @@ export class EssenceStateService {
     const selectedId = this._selectedLoadoutId();
     const canCreate = !loadouts || loadouts.loadouts.length < loadouts.limit;
 
-    return !!name && !this.hasDuplicateDraftEssences() && (!!selectedId || canCreate);
+    return (
+      !!name && !this.hasDuplicateDraftEssences() && (!!selectedId || canCreate)
+    );
   });
 
   constructor(
@@ -185,9 +190,10 @@ export class EssenceStateService {
   }
 
   favorite(essence: PlayerEssenceDto): void {
+    essence.isFavorite = !essence.isFavorite;
     this.essencesService
-      .setFavorite(essence.id, !essence.isFavorite)
-      .subscribe(() => this.refresh());
+      .setFavorite(essence.id, essence.isFavorite)
+      .subscribe();
   }
 
   absorbSelectedInventoryEssence(): Observable<EssenceMutationResponseDto> | null {
@@ -304,7 +310,10 @@ export class EssenceStateService {
 
   private ensureSelectedEssence(archive: SoulArchiveDto): void {
     const selectedId = this._selectedPlayerEssenceId();
-    if (selectedId && archive.essences.some((essence) => essence.id === selectedId)) {
+    if (
+      selectedId &&
+      archive.essences.some((essence) => essence.id === selectedId)
+    ) {
       return;
     }
 
@@ -319,7 +328,9 @@ export class EssenceStateService {
 
   private ensureSelectedLoadout(loadouts: EssenceLoadoutsDto): void {
     const selectedLoadout =
-      loadouts.loadouts.find((loadout) => loadout.id === this._selectedLoadoutId()) ??
+      loadouts.loadouts.find(
+        (loadout) => loadout.id === this._selectedLoadoutId(),
+      ) ??
       loadouts.loadouts.find((loadout) => loadout.isActive) ??
       loadouts.loadouts[0] ??
       null;
@@ -337,7 +348,8 @@ export class EssenceStateService {
   }
 
   private getEssenceDefinitionId(inventoryItem: InventoryItem): string {
-    return (inventoryItem.itemInstance.itemBase as EssenceItem).essenceDefinitionId;
+    return (inventoryItem.itemInstance.itemBase as EssenceItem)
+      .essenceDefinitionId;
   }
 
   private getFirstAbsorbableInventoryEssenceId(): string | null {

@@ -132,3 +132,22 @@ The inventory page already works well, so this pass focused only on the equipmen
 - No changes to inventory categories, item data, equipment stats, scrap rules, or backend APIs.
 - No redesign of the equipped gear panel or equipment modals.
 - No changes to resources or Essence inventory rows.
+
+## Sixth Slice: Essence Management
+
+### Why This Slice Next
+
+Essence management is powerful but dense, and the existing page already had strong archive, filter, progression, and loadout foundations. This pass focused on small state cues that help the player understand the selected Essence and draft loadout without changing the page structure.
+
+### UX Problems Addressed
+
+- Added visible loading and error feedback for Soul Archive operations.
+- Added compact selected-Essence badges for attunement, Ascend readiness, and Evolve readiness.
+- Added loadout editor context for whether the player is editing a new, active, or saved loadout.
+- Added a single draft-slot summary and save hint for loadout editing.
+
+### Out Of Scope For This Pass
+
+- No changes to Essence progression rules, loadout rules, archive data, or backend APIs.
+- No redesign of the archive list, Absorb view, or Essence details layout.
+- No changes to inventory Essence rows.
