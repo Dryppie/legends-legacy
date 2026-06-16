@@ -1,93 +1,129 @@
-<div
-  class="flex h-full w-full flex-col overflow-hidden rounded-xl p-4 text-white"
->
-  <h2 class="text-primary">Previous Battles</h2>
+<div class="flex h-full w-full flex-col overflow-hidden p-4 text-white">
+  <section class="grid gap-3 md:grid-cols-3">
+    <div class="rounded-lg border border-light_gray/60 bg-black/25 p-4">
+      <p class="text-xs font-semibold uppercase text-secondary">Battle Log</p>
+      <p class="mt-2 text-2xl font-semibold text-primary">
+        {{ previousMatches.length | numberFormat }}
+      </p>
+      <p class="mt-1 text-sm text-zinc-300">Recorded arena matches</p>
+    </div>
+
+    <div class="rounded-lg border border-light_gray/60 bg-black/25 p-4">
+      <p class="text-xs font-semibold uppercase text-secondary">Latest Match</p>
+      <p class="mt-2 text-2xl font-semibold text-primary">
+        {{ latestMatch ? (latestMatch.playedAt | date: "mediumDate") : "-" }}
+      </p>
+      <p class="mt-1 text-sm text-zinc-300">
+        {{ latestMatch ? resultLabel(latestMatch) : "No battles yet" }}
+      </p>
+    </div>
+
+    <div class="rounded-lg border border-light_gray/60 bg-black/25 p-4">
+      <p class="text-xs font-semibold uppercase text-secondary">Rating Swing</p>
+      <p
+        class="mt-2 text-2xl font-semibold"
+        [ngClass]="deltaClass(ratingSwing)"
+      >
+        {{ formatDelta(ratingSwing) }}
+      </p>
+      <p class="mt-1 text-sm text-zinc-300">Across visible records</p>
+    </div>
+  </section>
 
   <div
-    class="flex h-full flex-col overflow-hidden"
-    *ngIf="previousMatches?.length; else noMatches"
+    class="mt-4 flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto pr-1"
+    *ngIf="previousMatches.length; else noMatches"
   >
-    <div
-      class="grid grid-cols-4 items-center gap-2 border-b border-light_gray p-2"
+    <article
+      class="rounded-lg border border-light_gray/60 bg-black/25 p-4"
+      *ngFor="let match of previousMatches"
     >
-      <div>Attacker</div>
-      <div>Defender</div>
-      <div>Winner</div>
-      <div>Played At</div>
-    </div>
-    <div class="h-full overflow-y-auto">
       <div
-        class="grid grid-cols-4 items-center gap-2 overflow-y-auto border-b border-light_gray p-2"
-        *ngFor="let match of previousMatches"
+        class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"
       >
-        <div>
-          <span
-            [ngClass]="{
-              'text-emerald-400':
-                match.characterARatingAfter - match.characterARatingBefore > 0,
-              'text-rose-500':
-                match.characterARatingAfter - match.characterARatingBefore < 0,
-            }"
-          >
-            {{
-              match.characterARatingAfter - match.characterARatingBefore > 0
-                ? "+"
-                : ""
-            }}{{ match.characterARatingAfter - match.characterARatingBefore }}
-          </span>
-          <div
-            class="break-words"
-            [ngClass]="{
-              'font-bold text-primary': match.characterAId === id,
-            }"
-          >
-            {{ match.characterAName }}
+        <div class="flex min-w-0 flex-1 gap-3 md:justify-between">
+          <div class="min-w-0">
+            <p class="text-xs uppercase text-secondary">Attacker</p>
+            <app-character-tag
+              [id]="match.characterAId"
+              [name]="match.characterAName"
+            ></app-character-tag>
+            <p
+              class="mt-2 text-sm font-semibold"
+              [ngClass]="
+                deltaClass(
+                  ratingDelta(
+                    match.characterARatingBefore,
+                    match.characterARatingAfter
+                  )
+                )
+              "
+            >
+              {{
+                formatDelta(
+                  ratingDelta(
+                    match.characterARatingBefore,
+                    match.characterARatingAfter
+                  )
+                )
+              }}
+            </p>
           </div>
-        </div>
-        <div>
-          <span
-            [ngClass]="{
-              'text-emerald-400':
-                match.characterBRatingAfter - match.characterBRatingBefore > 0,
-              'text-rose-500':
-                match.characterBRatingAfter - match.characterBRatingBefore < 0,
-            }"
-          >
-            {{
-              match.characterBRatingAfter - match.characterBRatingBefore > 0
-                ? "+"
-                : ""
-            }}{{ match.characterBRatingAfter - match.characterBRatingBefore }}
-          </span>
-          <div
-            class="break-words"
-            [ngClass]="{
-              'font-bold text-primary': match.characterBId === id,
-            }"
-          >
-            {{ match.characterBName }}
-          </div>
-        </div>
-        <ng-container *ngIf="match.winnerName; else draw">
-          <div
-            class="break-words"
-            [ngClass]="{
-              'font-bold text-primary': match.winnerId === id,
-            }"
-          >
-            {{ match.winnerName
-            }}<span *ngIf="match.winnerId === id"> (You)</span>
-          </div>
-        </ng-container>
 
-        <ng-template #draw>Draw</ng-template>
-        <div>
-          {{ match.playedAt | date: "mediumDate" }}
+          <div class="self-center text-sm font-semibold text-secondary">vs</div>
+
+          <div class="min-w-0 md:text-right">
+            <p class="text-xs uppercase text-secondary">Defender</p>
+            <app-character-tag
+              [id]="match.characterBId"
+              [name]="match.characterBName"
+            ></app-character-tag>
+            <p
+              class="mt-2 text-sm font-semibold"
+              [ngClass]="
+                deltaClass(
+                  ratingDelta(
+                    match.characterBRatingBefore,
+                    match.characterBRatingAfter
+                  )
+                )
+              "
+            >
+              {{
+                formatDelta(
+                  ratingDelta(
+                    match.characterBRatingBefore,
+                    match.characterBRatingAfter
+                  )
+                )
+              }}
+            </p>
+          </div>
+        </div>
+
+        <div class="flex shrink-0 flex-col gap-2 sm:items-end">
+          <span
+            class="rounded border bg-black/30 px-3 py-1 text-sm font-semibold"
+            [ngClass]="resultClass(match)"
+          >
+            {{ resultLabel(match) }}
+          </span>
+          <span class="text-sm text-zinc-300">
+            {{ match.playedAt | date: "medium" }}
+          </span>
+          <span class="text-sm text-primary" *ngIf="match.winnerName">
+            Winner: {{ match.winnerName }}
+          </span>
         </div>
       </div>
-    </div>
+    </article>
   </div>
+
   <ng-template #noMatches>
-    <p>No previous matches.</p>
+    <div
+      class="mt-4 rounded-lg border border-light_gray/60 bg-black/25 p-5 text-sm text-zinc-300"
+    >
+      No previous matches.
+    </div>
   </ng-template>
 </div>

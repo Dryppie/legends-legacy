@@ -1,7 +1,52 @@
-<app-leaderboard
-  title="Arena"
-  [data]="rankings"
-  [columns]="columns"
-  [highlightId]="myRanking?.characterId"
->
-</app-leaderboard>
+<div class="flex h-full w-full flex-col overflow-hidden p-4 text-white">
+  <section class="grid gap-3 md:grid-cols-3">
+    <div class="rounded-lg border border-light_gray/60 bg-black/25 p-4">
+      <p class="text-xs font-semibold uppercase text-secondary">
+        Your Standing
+      </p>
+      <p class="mt-2 text-2xl font-semibold text-primary">
+        {{ myRanking ? "#" + myRanking.rank : "-" }}
+      </p>
+      <p class="mt-1 text-sm text-zinc-300">
+        {{
+          myRanking
+            ? (myRanking.level | numberFormat) + " rating"
+            : "Not ranked yet"
+        }}
+      </p>
+    </div>
+
+    <div class="rounded-lg border border-light_gray/60 bg-black/25 p-4">
+      <p class="text-xs font-semibold uppercase text-secondary">Champion</p>
+      <p class="mt-2 truncate text-2xl font-semibold text-primary">
+        {{ champion?.characterName ?? "-" }}
+      </p>
+      <p class="mt-1 text-sm text-zinc-300">
+        {{
+          champion
+            ? (champion.level | numberFormat) + " rating"
+            : "No leader yet"
+        }}
+      </p>
+    </div>
+
+    <div class="rounded-lg border border-light_gray/60 bg-black/25 p-4">
+      <p class="text-xs font-semibold uppercase text-secondary">
+        Tracked Fighters
+      </p>
+      <p class="mt-2 text-2xl font-semibold text-primary">
+        {{ trackedFighters | numberFormat }}
+      </p>
+      <p class="mt-1 text-sm text-zinc-300">Top arena entries and your row.</p>
+    </div>
+  </section>
+
+  <app-leaderboard
+    class="mt-4 min-h-0 flex-1 overflow-hidden"
+    title="Arena"
+    [data]="rankings"
+    [columns]="columns"
+    [highlightId]="myRanking?.characterId"
+  >
+  </app-leaderboard>
+</div>

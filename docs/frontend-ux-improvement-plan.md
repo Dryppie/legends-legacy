@@ -190,3 +190,23 @@ The Guild area spans several related workflows: guild overview, buildings, vault
 - No changes to guild permissions, applications, invites, donations, building upgrade rules, rankings sort rules, or backend APIs.
 - No redesign of the no-guild onboarding flow.
 - No changes to guild realtime behavior or chat.
+
+## Ninth Slice: Colosseum
+
+### Why This Slice Next
+
+The Colosseum covers three related competitive views: Arena opponent selection, arena rankings, and battle history. This pass focused on making those views feel like one competitive circuit while keeping the existing challenge, ranking, and match-result flows intact.
+
+### UX Problems Addressed
+
+- Added a shared Colosseum status strip for tickets, current rank, rating, and recent record.
+- Reworked Arena opponents from table rows into compact challenge cards with rating, level, and outcome deltas.
+- Added Rankings context for the player's standing, current champion, and tracked entries while preserving the shared leaderboard component.
+- Fixed Rankings current-player highlighting so it updates when async ranking data arrives.
+- Reworked Record of Battles into readable match cards with result state, played date, participants, and rating swings.
+
+### Out Of Scope For This Pass
+
+- No changes to arena ticket rules, opponent selection, rating math, battle simulation, or backend APIs.
+- No new ranking filters, seasons, rewards, or tournament features.
+- No changes to the Colosseum combat playback screen or result modal.
