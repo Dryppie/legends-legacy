@@ -1,17 +1,35 @@
-<aside class="border-gradient flex w-full sm:w-80 sm:rounded-tr-md">
+<aside
+  class="flex h-full w-full border-r border-primary/25 bg-black/85 shadow-2xl sm:w-80 sm:border-r-0 sm:bg-transparent sm:shadow-none"
+>
   <div
-    class="flex flex-auto flex-col overflow-hidden bg-texture bg-auto text-primary sm:mt-[1px] sm:rounded-tr-md"
+    class="flex min-h-0 flex-auto flex-col overflow-hidden bg-texture bg-auto text-primary sm:mt-[1px] sm:rounded-tr-md"
   >
-    <div class="flex flex-col p-2">
+    <div
+      class="flex h-12 items-center justify-between border-b border-primary/15 px-4 sm:hidden"
+    >
+      <h3 class="text-primary">Legend's Legacy</h3>
+      <button
+        type="button"
+        class="flex h-9 w-9 items-center justify-center rounded border border-primary/25 bg-black/30 text-xl leading-none text-primary"
+        (click)="toggleSidebar()"
+        aria-label="Close menu"
+      >
+        &times;
+      </button>
+    </div>
+
+    <div
+      class="flex flex-col gap-2 border-b border-primary/10 p-3 sm:border-b-0 sm:p-2"
+    >
       <div
         *ngIf="currentCharacter() as character"
-        class="flex gap-2 pb-1 sm:hidden"
+        class="grid grid-cols-2 gap-2 sm:hidden"
       >
         <div
-          class="flex h-6 min-w-20 items-center justify-between rounded-full bg-[#121216CC]"
+          class="flex min-h-8 min-w-0 items-center justify-center rounded border border-primary/15 bg-[#121216CC] px-2"
           (click)="toggleFormat()"
         >
-          <label class="text-nowrap pl-2 pr-3 pt-[1px] text-primary">
+          <label class="truncate text-primary">
             {{
               useShortFormat
                 ? (character.cinders | shortNumber)
@@ -22,10 +40,10 @@
         </div>
 
         <div
-          class="flex h-6 min-w-20 items-center justify-between rounded-full bg-[#121216CC]"
+          class="flex min-h-8 min-w-0 items-center justify-center rounded border border-primary/15 bg-[#121216CC] px-2"
           (click)="toggleFormat()"
         >
-          <label class="text-nowrap pl-2 pr-3 pt-[1px] text-primary">
+          <label class="truncate text-primary">
             {{
               useShortFormat
                 ? (character.soulstones | shortNumber)
@@ -39,7 +57,7 @@
       <div class="flex flex-col">
         <app-current-action
           *ngIf="displayCurrentAction"
-          class="w-full"
+          class="hidden w-full sm:block"
           (click)="navigateToAction(); toggleSidebar()"
         ></app-current-action>
         <app-current-dungeon></app-current-dungeon>
@@ -47,19 +65,21 @@
     </div>
 
     <div
-      class="flex flex-1 flex-col overflow-y-auto border-t border-gray sm:border-t-0"
+      class="flex flex-1 flex-col overflow-y-auto overscroll-contain pb-4 sm:border-t-0 sm:pb-0"
     >
       <div
         *ngFor="let section of sections; trackBy: trackSection"
-        class="border-b border-gray/70 last:border-b-0"
+        class="border-b border-primary/10 last:border-b-0"
       >
-        <div class="px-4 pt-2 text-[11px] font-semibold uppercase text-primary">
+        <div
+          class="px-4 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary/80 sm:pt-2 sm:tracking-normal"
+        >
           {{ section.label }}
         </div>
         <div class="flex flex-col">
           <div
             *ngFor="let item of section.items; trackBy: trackItem"
-            class="border-t border-gray/60 first:border-t-0"
+            class="border-t border-primary/10 first:border-t-0 sm:border-gray/60"
           >
             <app-sidebar-item
               class="w-full text-light_gray"

@@ -1,36 +1,56 @@
 <div
-  class="flex h-full justify-center bg-cover bg-center"
+  class="flex h-dvh min-h-0 justify-center overflow-hidden bg-cover bg-center"
   style="
     background-image: url(&quot;backgrounds/optimized/background.webp&quot;);
   "
 >
-  <div class="flex h-full w-full flex-auto flex-col">
+  <div class="flex h-full min-h-0 w-full flex-auto flex-col">
     <div
-      class="flex h-full flex-col overflow-hidden sm:order-2 sm:flex-row sm:gap-4"
+      class="flex min-h-0 flex-1 flex-col overflow-hidden sm:order-2 sm:flex-row sm:gap-4"
     >
-      <nav class="w-full sm:w-auto">
+      <div
+        *ngIf="isSidebarOpen && isScreenSmall"
+        class="fixed inset-0 z-40 bg-black/60 sm:hidden"
+        (click)="closeSidebar()"
+      ></div>
+
+      <nav
+        class="fixed inset-y-0 left-0 z-50 w-[min(20rem,85vw)] -translate-x-full transform transition-transform duration-200 sm:static sm:z-auto sm:w-auto sm:translate-x-0"
+        [style.transform]="isSidebarOpen ? 'translateX(0)' : null"
+      >
         <app-sidebar
-          (itemTapped)="toggleNav()"
-          class="flex sm:h-full"
+          (itemTapped)="closeSidebar()"
+          class="flex h-full"
         ></app-sidebar>
       </nav>
-      <div class="h-full w-full flex-col space-y-4 overflow-hidden sm:flex">
-        <div class="relative h-full w-full flex-auto overflow-hidden sm:pr-4">
+      <div
+        class="flex min-h-0 w-full flex-1 flex-col space-y-4 overflow-hidden"
+      >
+        <div class="relative min-h-0 w-full flex-1 overflow-hidden sm:pr-4">
           <div
             class="border-gradient absolute inset-0 flex w-full items-center rounded-b-none sm:rounded-t-md sm:pr-4 sm:pt-[1px] sm:opacity-95 xl:pr-0"
           >
             <div class="h-full w-full bg-texture sm:rounded-t-md"></div>
           </div>
           <main
-            class="relative flex h-full w-full flex-auto flex-col gap-2 overflow-hidden pt-4 sm:rounded-md sm:pt-6 2xl:rounded-b-none"
+            class="relative flex h-full min-h-0 w-full flex-auto flex-col gap-2 overflow-hidden pt-4 sm:rounded-md sm:pt-6 2xl:rounded-b-none"
           >
-            <div class="h-full w-full overflow-hidden pl-4 sm:pb-6 sm:pl-6">
-              <ng-container *ngIf="combatVisible$ | async; else mainView">
-                <app-combat></app-combat>
-              </ng-container>
-              <ng-template #mainView>
-                <router-outlet></router-outlet>
-              </ng-template>
+            <div
+              class="flex h-full min-h-0 w-full flex-col overflow-hidden pb-4 pl-4 sm:pb-6 sm:pl-6"
+            >
+              <app-current-action
+                *ngIf="displayCurrentAction"
+                class="mb-2 block shrink-0 pr-4 sm:hidden"
+                (click)="navigateToAction()"
+              ></app-current-action>
+              <div class="min-h-0 flex-1 overflow-hidden">
+                <ng-container *ngIf="combatVisible$ | async; else mainView">
+                  <app-combat></app-combat>
+                </ng-container>
+                <ng-template #mainView>
+                  <router-outlet></router-outlet>
+                </ng-template>
+              </div>
             </div>
           </main>
         </div>
@@ -45,6 +65,7 @@
     </div>
     <app-navbar
       (itemTapped)="openSidebar()"
+      (chatTapped)="toggleChat()"
       [isScreenSmall]="isScreenSmall"
       class="sm:order-1 sm:pb-2"
     ></app-navbar>
@@ -52,7 +73,7 @@
 </div>
 
 <div
-  class="fixed bottom-16 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-zinc-300/30 sm:bottom-4 xl:hidden"
+  class="fixed bottom-4 right-6 z-40 hidden h-14 w-14 items-center justify-center rounded-full bg-zinc-300/30 sm:flex xl:hidden"
 >
   <div
     (click)="toggleChat()"
@@ -65,14 +86,15 @@
       <img src="icons/ActivePlus.svg" />
     </div>
   </div>
-  <div
-    *ngIf="isFloatingChatOpen && !isScreenLarge"
-    class="fixed inset-0 z-50 flex justify-end xl:hidden"
-  >
-    <div class="absolute inset-0 bg-black/60" (click)="toggleChat()"></div>
+</div>
 
-    <div class="animate-slide-in relative h-full max-w-full">
-      <app-chat (close)="toggleChat()"></app-chat>
-    </div>
+<div
+  *ngIf="isFloatingChatOpen && !isScreenLarge"
+  class="fixed inset-0 z-50 flex justify-end xl:hidden"
+>
+  <div class="absolute inset-0 bg-black/60" (click)="toggleChat()"></div>
+
+  <div class="animate-slide-in relative h-full w-full max-w-full sm:w-96">
+    <app-chat class="block h-full w-full" (close)="toggleChat()"></app-chat>
   </div>
 </div>

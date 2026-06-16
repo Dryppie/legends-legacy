@@ -1,6 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { SidebarService } from '../../../../core/services/client-side/sidebar/sidebar.service';
 import { NgClass } from '@angular/common';
 
 @Component({
@@ -12,6 +11,8 @@ import { NgClass } from '@angular/common';
 export class NavbuttonComponent {
   @Input() link: string = '';
   @Input() label: string = '';
+  @Input() icon: string = '';
+  @Output() itemTapped = new EventEmitter<void>();
 
   inactiveIcon = 'icons/InactivePlus.svg';
   activeIcon = 'icons/ActivePlus.svg';

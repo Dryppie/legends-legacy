@@ -7,7 +7,6 @@ import {
   OnInit,
   Output,
 } from '@angular/core';
-import { CharacterBadgeComponent } from '../../../shared/components/character-badge/character-badge.component';
 import { NavbuttonComponent } from './navbutton/navbutton.component';
 import { NgFor, NgIf } from '@angular/common';
 import { AuthService } from '../../../core/services/api/auth/auth.service';
@@ -21,33 +20,40 @@ import { GameService } from '../../../core/services/client-side/game/game.servic
 import { CharacterActionType } from '../../../shared/models/enums/characterActionType';
 import { Equipment } from '../../../shared/models/item';
 import { EquipmentType } from '../../../shared/models/enums/equipmentType';
-import { CurrentActionComponent } from '../../../shared/components/current-action/current-action.component';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [
-    CharacterBadgeComponent,
-    NavbuttonComponent,
-    NgIf,
-    NgFor,
-    NumberFormatPipe,
-    ShortNumberPipe,
-    CurrentActionComponent,
-  ],
+  imports: [NavbuttonComponent, NgIf, NgFor, NumberFormatPipe, ShortNumberPipe],
   templateUrl: './navbar.component.html',
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   @Output() itemTapped = new EventEmitter<void>();
+  @Output() chatTapped = new EventEmitter<void>();
   @Input() isScreenSmall!: boolean;
   showList = false;
   activeLabel = 'Character';
   navButtons = [
-    // { link: '/game/character', label: 'Character' },
-    // { link: '/game/city', label: 'City' },
-    // { link: '/game/professions', label: 'Professions' },
-    { link: '/game/city/tavern', label: 'Leaderboard' },
-    { link: '/game/settings', label: 'Settings' },
+    {
+      link: '/game/character/character-overview',
+      label: 'Character',
+      icon: 'icons/character/achievements.svg',
+    },
+    {
+      link: '/game/world/shenic',
+      label: 'World',
+      icon: 'icons/world/Quest.svg',
+    },
+    {
+      link: '/game/city/tavern',
+      label: 'Leaderboard',
+      icon: 'icons/ui/Leaderboard.svg',
+    },
+    {
+      link: '/game/settings',
+      label: 'Settings',
+      icon: 'icons/ui/Settings.svg',
+    },
   ];
 
   displayCurrentAction = false;
@@ -108,7 +114,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   activeNavbar(activeLabel: string) {
     this.activeLabel = activeLabel;
-    this.itemTapped.emit();
   }
 
   navigateToAction(): void {

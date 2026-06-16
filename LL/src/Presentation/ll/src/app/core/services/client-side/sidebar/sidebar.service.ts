@@ -35,12 +35,15 @@ export class SidebarService {
   isRouteActive(route: string[], exact = false): boolean {
     const currentUrl = this.getActiveUrl();
     const targetUrl = '/' + route.join('/');
+    const gameTargetUrl = '/game' + targetUrl;
 
     if (exact) {
-      return currentUrl === targetUrl;
+      return currentUrl === targetUrl || currentUrl === gameTargetUrl;
     }
 
-    return currentUrl.startsWith(targetUrl);
+    return (
+      currentUrl.startsWith(targetUrl) || currentUrl.startsWith(gameTargetUrl)
+    );
   }
 }
 
@@ -135,8 +138,8 @@ function getSidebarSections(): SidebarSection[] {
       ],
     },
     {
-      id: 'social',
-      label: 'Social',
+      id: 'city',
+      label: 'City',
       items: [
         {
           id: 'guild',
@@ -152,18 +155,37 @@ function getSidebarSections(): SidebarSection[] {
           title: 'Colosseum',
           description: 'Tournaments and battles',
         },
-      ],
-    },
-    {
-      id: 'economy',
-      label: 'Economy',
-      items: [
         {
           id: 'market-place',
           route: ['city', 'market-place'],
           icon: 'city/temple',
           title: 'Cinder Bazaar',
           description: 'List and buy items',
+        },
+        {
+          id: 'tavern',
+          route: ['city', 'tavern'],
+          icon: 'city/temple',
+          title: 'Leaderboard',
+          description: 'Rankings and records',
+        },
+      ],
+    },
+    // {
+    //   id: 'economy',
+    //   label: 'Economy',
+    //   items: [],
+    // },
+    {
+      id: 'system',
+      label: 'System',
+      items: [
+        {
+          id: 'settings',
+          route: ['settings'],
+          icon: 'city/temple',
+          title: 'Settings',
+          description: 'Account and preferences',
         },
       ],
     },
