@@ -17,6 +17,7 @@ import {
   NotificationService,
   SIDEBAR_NOTIFICATION,
 } from '../../client-side/notifications/notification.service';
+import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
 
 @Injectable({ providedIn: 'root' })
 export class ColosseumStateService {
@@ -28,7 +29,7 @@ export class ColosseumStateService {
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
   private hasLoaded = false;
-  private lastArenaBattleCompletedUpdateId: string | null = null;
+  private readonly eventDeduper = new GameEventDeduper();
 
   readonly opponents = computed(() => this._opponents());
   readonly arenaTicketStatus = computed(() => this._arenaTicketStatus());
@@ -67,9 +68,9 @@ export class ColosseumStateService {
         const characterId = this.characterState.currentCharacterId();
         if (
           !event ||
-          !this.shouldProcessEvent(
+          !this.eventDeduper.shouldProcess(
+            'arena-battle-completed',
             envelope,
-            this.lastArenaBattleCompletedUpdateId,
           ) ||
           !characterId ||
           !this.isParticipant(event, characterId)
@@ -77,7 +78,6 @@ export class ColosseumStateService {
           return;
         }
 
-        this.lastArenaBattleCompletedUpdateId = this.getEventId(envelope);
         this.applyArenaRating(event, characterId);
         this.addNotification();
 
@@ -214,17 +214,4 @@ export class ColosseumStateService {
     );
   }
 
-  private shouldProcessEvent(
-    event: { updateId?: string; occurredAt?: string } | null,
-    lastUpdateId: string | null,
-  ): boolean {
-    const updateId = this.getEventId(event);
-    return !updateId || updateId !== lastUpdateId;
-  }
-
-  private getEventId(
-    event: { updateId?: string; occurredAt?: string } | null,
-  ): string | null {
-    return event?.updateId ?? event?.occurredAt ?? null;
-  }
 }

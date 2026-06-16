@@ -14,6 +14,45 @@ import {
   NotificationService,
   SIDEBAR_NOTIFICATION,
 } from '../../client-side/notifications/notification.service';
+import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
+import { GameEventName } from '../../real-time/game-event/game-event.map';
+
+type GuildRealtimeEventName = Extract<
+  GameEventName,
+  | 'GuildApplicationMsg'
+  | 'GuildInviteReceivedMsg'
+  | 'GuildInviteRejectedMsg'
+  | 'GuildApplicationRejectedMsg'
+  | 'GuildBuildingUpgradedMsg'
+  | 'GuildStateChangedMsg'
+  | 'GuildMembershipChangedMsg'
+  | 'GuildDisbandedMsg'
+  | 'GuildDirectoryChangedMsg'
+>;
+
+type GuildRealtimeScope = 'any' | 'member' | 'nonMember';
+
+interface GuildRealtimeContext {
+  guildId: string | null;
+  shouldRefresh: boolean;
+}
+
+type GuildRealtimePayload = { guildId?: string };
+
+interface GuildRealtimeHandler {
+  eventName: GuildRealtimeEventName;
+  key: string;
+  scope: GuildRealtimeScope;
+  matches?: (
+    payload: GuildRealtimePayload,
+    context: GuildRealtimeContext,
+  ) => boolean;
+  action?: (
+    payload: GuildRealtimePayload,
+    context: GuildRealtimeContext,
+  ) => void;
+  refresh?: boolean;
+}
 
 @Injectable({ providedIn: 'root' })
 export class GuildStateService {
@@ -24,15 +63,8 @@ export class GuildStateService {
   private readonly _allGuilds = signal<GuildSimple[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
-  private lastGuildBuildingUpgradeUpdateId: string | null = null;
-  private lastGuildApplicationUpdateId: string | null = null;
-  private lastGuildInviteUpdateId: string | null = null;
-  private lastGuildInviteRejectedUpdateId: string | null = null;
-  private lastGuildApplicationRejectedUpdateId: string | null = null;
-  private lastGuildStateChangedUpdateId: string | null = null;
-  private lastGuildMembershipChangedUpdateId: string | null = null;
-  private lastGuildDisbandedUpdateId: string | null = null;
-  private lastGuildDirectoryChangedUpdateId: string | null = null;
+  private readonly eventDeduper = new GameEventDeduper();
+  private readonly guildRealtimeHandlers = this.createGuildRealtimeHandlers();
   private hasLoaded = false;
 
   /* ─────────── public, read-only selectors ─────────── */
@@ -83,208 +115,148 @@ export class GuildStateService {
 
     effect(
       () => {
-        const guildId = this._guild()?.id;
-        const inviteEnvelope =
-          this.eventService.eventEnvelope.GuildInviteReceivedMsg();
-        const inviteRejectedEnvelope =
-          this.eventService.eventEnvelope.GuildInviteRejectedMsg();
-        const applicationRejectedEnvelope =
-          this.eventService.eventEnvelope.GuildApplicationRejectedMsg();
-        const guildStateChangedEnvelope =
-          this.eventService.eventEnvelope.GuildStateChangedMsg();
-        const membershipChangedEnvelope =
-          this.eventService.eventEnvelope.GuildMembershipChangedMsg();
-        const guildDisbandedEnvelope =
-          this.eventService.eventEnvelope.GuildDisbandedMsg();
-        const directoryChangedEnvelope =
-          this.eventService.eventEnvelope.GuildDirectoryChangedMsg();
-        const invite = inviteEnvelope?.payload;
-        const inviteRejected = inviteRejectedEnvelope?.payload;
-        const applicationRejected = applicationRejectedEnvelope?.payload;
-        const guildStateChanged = guildStateChangedEnvelope?.payload;
-        const membershipChanged = membershipChangedEnvelope?.payload;
-        const guildDisbanded = guildDisbandedEnvelope?.payload;
-        const directoryChanged = directoryChangedEnvelope?.payload;
-        let shouldRefresh = false;
-
-        if (
-          directoryChanged &&
-          this.shouldProcessEvent(
-            directoryChangedEnvelope,
-            this.lastGuildDirectoryChangedUpdateId,
-          )
-        ) {
-          this.lastGuildDirectoryChangedUpdateId = this.getEventId(
-            directoryChangedEnvelope,
-          );
-          this.loadAllGuilds();
-        }
-
-        if (
-          !guildId &&
-          invite &&
-          this.shouldProcessEvent(inviteEnvelope, this.lastGuildInviteUpdateId)
-        ) {
-          this.lastGuildInviteUpdateId = this.getEventId(inviteEnvelope);
-          this.addGuildNotification();
-          this.loadMyInvites();
-        }
-
-        if (
-          !guildId &&
-          inviteRejected &&
-          this.shouldProcessEvent(
-            inviteRejectedEnvelope,
-            this.lastGuildInviteRejectedUpdateId,
-          )
-        ) {
-          this.lastGuildInviteRejectedUpdateId = this.getEventId(
-            inviteRejectedEnvelope,
-          );
-          this.loadMyInvites();
-        }
-
-        if (
-          !guildId &&
-          applicationRejected &&
-          this.shouldProcessEvent(
-            applicationRejectedEnvelope,
-            this.lastGuildApplicationRejectedUpdateId,
-          )
-        ) {
-          this.lastGuildApplicationRejectedUpdateId = this.getEventId(
-            applicationRejectedEnvelope,
-          );
-          this.loadMyInvites();
-        }
-
-        if (
-          !guildId &&
-          membershipChanged &&
-          this.shouldProcessEvent(
-            membershipChangedEnvelope,
-            this.lastGuildMembershipChangedUpdateId,
-          )
-        ) {
-          this.lastGuildMembershipChangedUpdateId = this.getEventId(
-            membershipChangedEnvelope,
-          );
-          shouldRefresh = true;
-        }
-
-        if (!guildId) {
-          if (shouldRefresh) this.refresh();
-          return;
-        }
-
-        const buildingUpgradeEnvelope =
-          this.eventService.eventEnvelope.GuildBuildingUpgradedMsg();
-        const applicationEnvelope =
-          this.eventService.eventEnvelope.GuildApplicationMsg();
-        const buildingUpgrade = buildingUpgradeEnvelope?.payload;
-        const application = applicationEnvelope?.payload;
-
-        if (
-          buildingUpgrade &&
-          this.shouldProcessEvent(
-            buildingUpgradeEnvelope,
-            this.lastGuildBuildingUpgradeUpdateId,
-          ) &&
-          buildingUpgrade.guildId === guildId
-        ) {
-          this.lastGuildBuildingUpgradeUpdateId = this.getEventId(
-            buildingUpgradeEnvelope,
-          );
-          shouldRefresh = true;
-        }
-
-        if (
-          application &&
-          this.shouldProcessEvent(
-            applicationEnvelope,
-            this.lastGuildApplicationUpdateId,
-          ) &&
-          application.guildId === guildId
-        ) {
-          this.lastGuildApplicationUpdateId =
-            this.getEventId(applicationEnvelope);
-          this.addGuildNotification();
-          shouldRefresh = true;
-        }
-
-        if (
-          guildStateChanged &&
-          this.shouldProcessEvent(
-            guildStateChangedEnvelope,
-            this.lastGuildStateChangedUpdateId,
-          ) &&
-          guildStateChanged.guildId === guildId
-        ) {
-          this.lastGuildStateChangedUpdateId = this.getEventId(
-            guildStateChangedEnvelope,
-          );
-          shouldRefresh = true;
-        }
-
-        if (
-          membershipChanged &&
-          this.shouldProcessEvent(
-            membershipChangedEnvelope,
-            this.lastGuildMembershipChangedUpdateId,
-          ) &&
-          membershipChanged.guildId === guildId
-        ) {
-          this.lastGuildMembershipChangedUpdateId = this.getEventId(
-            membershipChangedEnvelope,
-          );
-          shouldRefresh = true;
-        }
-
-        if (
-          guildDisbanded &&
-          this.shouldProcessEvent(
-            guildDisbandedEnvelope,
-            this.lastGuildDisbandedUpdateId,
-          ) &&
-          guildDisbanded.guildId === guildId
-        ) {
-          this.lastGuildDisbandedUpdateId =
-            this.getEventId(guildDisbandedEnvelope);
-          shouldRefresh = true;
-        }
-
-        if (
-          inviteRejected &&
-          this.shouldProcessEvent(
-            inviteRejectedEnvelope,
-            this.lastGuildInviteRejectedUpdateId,
-          ) &&
-          inviteRejected.guildId === guildId
-        ) {
-          this.lastGuildInviteRejectedUpdateId = this.getEventId(
-            inviteRejectedEnvelope,
-          );
-          shouldRefresh = true;
-        }
-
-        if (
-          applicationRejected &&
-          this.shouldProcessEvent(
-            applicationRejectedEnvelope,
-            this.lastGuildApplicationRejectedUpdateId,
-          ) &&
-          applicationRejected.guildId === guildId
-        ) {
-          this.lastGuildApplicationRejectedUpdateId = this.getEventId(
-            applicationRejectedEnvelope,
-          );
-          shouldRefresh = true;
-        }
-
-        if (shouldRefresh) this.refresh();
+        this.handleGuildRealtimeEvents();
       },
       { allowSignalWrites: true },
     );
+  }
+
+  private createGuildRealtimeHandlers(): GuildRealtimeHandler[] {
+    const inCurrentGuild = (
+      payload: GuildRealtimePayload,
+      context: GuildRealtimeContext,
+    ) => !!payload.guildId && payload.guildId === context.guildId;
+
+    return [
+      {
+        eventName: 'GuildDirectoryChangedMsg',
+        key: 'guild-directory-changed',
+        scope: 'any',
+        action: () => this.loadAllGuilds(),
+      },
+      {
+        eventName: 'GuildInviteReceivedMsg',
+        key: 'guild-invite-received',
+        scope: 'nonMember',
+        action: () => {
+          this.addGuildNotification();
+          this.loadMyInvites();
+        },
+      },
+      {
+        eventName: 'GuildInviteRejectedMsg',
+        key: 'guild-invite-rejected',
+        scope: 'nonMember',
+        action: () => this.loadMyInvites(),
+      },
+      {
+        eventName: 'GuildApplicationRejectedMsg',
+        key: 'guild-application-rejected',
+        scope: 'nonMember',
+        action: () => this.loadMyInvites(),
+      },
+      {
+        eventName: 'GuildMembershipChangedMsg',
+        key: 'guild-membership-changed',
+        scope: 'nonMember',
+        refresh: true,
+      },
+      {
+        eventName: 'GuildBuildingUpgradedMsg',
+        key: 'guild-building-upgraded',
+        scope: 'member',
+        matches: inCurrentGuild,
+        refresh: true,
+      },
+      {
+        eventName: 'GuildApplicationMsg',
+        key: 'guild-application',
+        scope: 'member',
+        matches: inCurrentGuild,
+        action: () => this.addGuildNotification(),
+        refresh: true,
+      },
+      {
+        eventName: 'GuildStateChangedMsg',
+        key: 'guild-state-changed',
+        scope: 'member',
+        matches: inCurrentGuild,
+        refresh: true,
+      },
+      {
+        eventName: 'GuildMembershipChangedMsg',
+        key: 'guild-membership-changed',
+        scope: 'member',
+        matches: inCurrentGuild,
+        refresh: true,
+      },
+      {
+        eventName: 'GuildDisbandedMsg',
+        key: 'guild-disbanded',
+        scope: 'member',
+        matches: inCurrentGuild,
+        refresh: true,
+      },
+      {
+        eventName: 'GuildInviteRejectedMsg',
+        key: 'guild-invite-rejected',
+        scope: 'member',
+        matches: inCurrentGuild,
+        refresh: true,
+      },
+      {
+        eventName: 'GuildApplicationRejectedMsg',
+        key: 'guild-application-rejected',
+        scope: 'member',
+        matches: inCurrentGuild,
+        refresh: true,
+      },
+    ];
+  }
+
+  private handleGuildRealtimeEvents(): void {
+    const context: GuildRealtimeContext = {
+      guildId: this._guild()?.id ?? null,
+      shouldRefresh: false,
+    };
+
+    for (const handler of this.guildRealtimeHandlers) {
+      this.processGuildRealtimeHandler(handler, context);
+    }
+
+    if (context.shouldRefresh) {
+      this.refresh();
+    }
+  }
+
+  private processGuildRealtimeHandler(
+    handler: GuildRealtimeHandler,
+    context: GuildRealtimeContext,
+  ): void {
+    if (!this.isGuildHandlerInScope(handler.scope, context.guildId)) return;
+
+    const envelope = this.eventService.eventEnvelope[handler.eventName]();
+    const payload = envelope?.payload as GuildRealtimePayload | undefined;
+    if (!payload) return;
+    if (handler.matches && !handler.matches(payload, context)) return;
+    if (!this.eventDeduper.shouldProcess(handler.key, envelope)) return;
+
+    handler.action?.(payload, context);
+    context.shouldRefresh ||= !!handler.refresh;
+  }
+
+  private isGuildHandlerInScope(
+    scope: GuildRealtimeScope,
+    guildId: string | null,
+  ): boolean {
+    switch (scope) {
+      case 'member':
+        return !!guildId;
+      case 'nonMember':
+        return !guildId;
+      case 'any':
+        return true;
+    }
   }
 
   /* ─────────── high-level commands ─────────── */
@@ -500,19 +472,5 @@ export class GuildStateService {
       SIDEBAR_NOTIFICATION.Guild,
       count,
     );
-  }
-
-  private shouldProcessEvent(
-    event: { updateId?: string; occurredAt?: string } | null,
-    lastUpdateId: string | null,
-  ): boolean {
-    const updateId = this.getEventId(event);
-    return !updateId || updateId !== lastUpdateId;
-  }
-
-  private getEventId(
-    event: { updateId?: string; occurredAt?: string } | null,
-  ): string | null {
-    return event?.updateId ?? event?.occurredAt ?? null;
   }
 }

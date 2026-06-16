@@ -26,6 +26,7 @@ import { GameEventService } from '../../real-time/game-event.service';
 import { MarketListingSoldMsg } from '../../real-time/market/market-listing-sold';
 import { MarketListingCreatedMsg } from '../../real-time/market/market-listing-created';
 import { MarketListingCanceledMsg } from '../../real-time/market/market-listing-canceled';
+import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
 
 @Injectable({ providedIn: 'root' })
 export class MarketplaceStateService {
@@ -34,9 +35,7 @@ export class MarketplaceStateService {
   private readonly _error = signal<string | null>(null);
 
   private readonly myCharacterId!: Signal<string | null>;
-  private lastMarketListingSoldUpdateId: string | null = null;
-  private lastMarketListingCreatedUpdateId: string | null = null;
-  private lastMarketListingCanceledUpdateId: string | null = null;
+  private readonly eventDeduper = new GameEventDeduper();
   private hasLoaded = false;
 
   readonly listings = computed(() => {
@@ -73,38 +72,21 @@ export class MarketplaceStateService {
         const created = createdEnvelope?.payload;
         const canceled = canceledEnvelope?.payload;
 
-        if (
-          sale &&
-          this.shouldProcessEvent(
-            saleEnvelope,
-            this.lastMarketListingSoldUpdateId,
-          )
-        ) {
-          this.lastMarketListingSoldUpdateId = this.getEventId(saleEnvelope);
+        if (sale && this.eventDeduper.shouldProcess('sold', saleEnvelope)) {
           untracked(() => this.applySellerSale(sale));
         }
 
         if (
           created &&
-          this.shouldProcessEvent(
-            createdEnvelope,
-            this.lastMarketListingCreatedUpdateId,
-          )
+          this.eventDeduper.shouldProcess('created', createdEnvelope)
         ) {
-          this.lastMarketListingCreatedUpdateId =
-            this.getEventId(createdEnvelope);
           untracked(() => this.applyCreatedListing(created));
         }
 
         if (
           canceled &&
-          this.shouldProcessEvent(
-            canceledEnvelope,
-            this.lastMarketListingCanceledUpdateId,
-          )
+          this.eventDeduper.shouldProcess('canceled', canceledEnvelope)
         ) {
-          this.lastMarketListingCanceledUpdateId =
-            this.getEventId(canceledEnvelope);
           untracked(() => this.applyCanceledListing(canceled));
         }
       },
@@ -309,17 +291,4 @@ export class MarketplaceStateService {
     this._listings.set(updated);
   }
 
-  private shouldProcessEvent(
-    event: { updateId?: string; occurredAt?: string } | null,
-    lastUpdateId: string | null,
-  ): boolean {
-    const updateId = this.getEventId(event);
-    return !updateId || updateId !== lastUpdateId;
-  }
-
-  private getEventId(
-    event: { updateId?: string; occurredAt?: string } | null,
-  ): string | null {
-    return event?.updateId ?? event?.occurredAt ?? null;
-  }
 }

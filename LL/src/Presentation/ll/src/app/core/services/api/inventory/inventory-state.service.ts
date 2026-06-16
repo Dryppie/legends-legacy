@@ -4,6 +4,7 @@ import { computed, effect, Injectable, signal } from '@angular/core';
 import { InventoryService } from './inventory.service';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { GameEventService } from '../../real-time/game-event.service';
+import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryStateService {
@@ -19,7 +20,7 @@ export class InventoryStateService {
   readonly error = computed(() => this._error());
   private readonly _lastLoot = signal<InventoryItem[] | null>(null);
   private readonly suppressedLootSignatures = new Set<string>();
-  private lastLootUpdateId: string | null = null;
+  private readonly eventDeduper = new GameEventDeduper();
 
   constructor(
     private inventoryService: InventoryService,
@@ -32,12 +33,10 @@ export class InventoryStateService {
         const envelope = this.eventService.eventEnvelope.LootReceivedMsg();
         const loot = envelope?.payload;
         if (loot) {
-          const updateId = envelope?.updateId ?? envelope?.occurredAt ?? null;
-          if (updateId && updateId === this.lastLootUpdateId) {
+          if (!this.eventDeduper.shouldProcess('loot-received', envelope)) {
             return;
           }
 
-          this.lastLootUpdateId = updateId;
           const signature = this.getLootSignature(loot.payload);
           if (this.suppressedLootSignatures.delete(signature)) {
             return;

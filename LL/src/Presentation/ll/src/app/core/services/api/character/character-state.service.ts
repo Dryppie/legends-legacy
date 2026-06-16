@@ -7,6 +7,7 @@ import {
 import { AuthService } from '../auth/auth.service';
 import { CharacterService } from './character.service';
 import { GameEventService } from '../../real-time/game-event.service';
+import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
 
 @Injectable({ providedIn: 'root' })
 export class CharacterStateService {
@@ -14,8 +15,7 @@ export class CharacterStateService {
   private readonly _overview = signal<CharacterOverviewDto | null>(null);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
-  private lastSoulstoneDropUpdateId: string | null = null;
-  private lastCharacterLevelUpUpdateId: string | null = null;
+  private readonly eventDeduper = new GameEventDeduper();
 
   /* ─────────── public, read-only selectors ─────────── */
   /** Current character comes straight from AuthService, no copy needed */
@@ -60,14 +60,12 @@ export class CharacterStateService {
         if (
           characterId &&
           soulstoneDrop &&
-          this.shouldProcessEvent(
+          this.eventDeduper.shouldProcess(
+            'soulstone-drop',
             soulstoneDropEnvelope,
-            this.lastSoulstoneDropUpdateId,
           ) &&
           soulstoneDrop.characterId === characterId
         ) {
-          this.lastSoulstoneDropUpdateId =
-            this.getEventId(soulstoneDropEnvelope);
           this.updateCurrentCharacter({
             soulstones: soulstoneDrop.totalSoulstones,
           });
@@ -76,13 +74,9 @@ export class CharacterStateService {
         if (
           characterId &&
           levelUp &&
-          this.shouldProcessEvent(
-            levelUpEnvelope,
-            this.lastCharacterLevelUpUpdateId,
-          ) &&
+          this.eventDeduper.shouldProcess('level-up', levelUpEnvelope) &&
           levelUp.characterId === characterId
         ) {
-          this.lastCharacterLevelUpUpdateId = this.getEventId(levelUpEnvelope);
           this.updateCurrentCharacter({
             level: levelUp.level,
             experience: levelUp.experience,
@@ -143,17 +137,4 @@ export class CharacterStateService {
     });
   }
 
-  private shouldProcessEvent(
-    event: { updateId?: string; occurredAt?: string } | null,
-    lastUpdateId: string | null,
-  ): boolean {
-    const updateId = this.getEventId(event);
-    return !updateId || updateId !== lastUpdateId;
-  }
-
-  private getEventId(
-    event: { updateId?: string; occurredAt?: string } | null,
-  ): string | null {
-    return event?.updateId ?? event?.occurredAt ?? null;
-  }
 }
