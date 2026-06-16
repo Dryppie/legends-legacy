@@ -71,10 +71,10 @@ public class MarketPlaceService : IMarketPlaceService
             seller.Cinders);
     }
 
-    public async Task<bool> CancelMarketPlaceListingAsync(Guid characterId, Guid listingId, CancellationToken cancellationToken)
+    public async Task<InventoryItem?> CancelMarketPlaceListingAsync(Guid characterId, Guid listingId, CancellationToken cancellationToken)
     {
         var listing = await _marketPlaceRepository.GetListingAsync(listingId, cancellationToken);
-        if (listing == null) return false;
+        if (listing == null) return null;
 
         var inventoryItem = new InventoryItem()
         {
@@ -87,6 +87,6 @@ public class MarketPlaceService : IMarketPlaceService
         await _inventoryService.AddItemToInventoryFromMarketPlace(characterId, inventoryItem, cancellationToken);
         _marketPlaceRepository.RemoveListingAsync(listing);
 
-        return true;
+        return inventoryItem;
     }
 }

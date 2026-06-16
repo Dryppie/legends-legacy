@@ -214,14 +214,6 @@ export class MarketPlaceCommodityComponent implements OnInit {
 
     this.placingOrder.set(true);
     this.marketplaceState.createListing(item, quantity, unitPrice).subscribe({
-      next: (listing) => {
-        if (item.itemInstance.itemBase.stackable && item.quantity > quantity) {
-          this.inventoryState.decrementItem(item.itemInstance.id, quantity);
-        } else {
-          this.inventoryState.removeItem(item.itemInstance.id);
-        }
-        this.marketplaceState.addToListings(listing);
-      },
       error: (error) => {
         console.error(error);
         this.placingOrder.set(false);

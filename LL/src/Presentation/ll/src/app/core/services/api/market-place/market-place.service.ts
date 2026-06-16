@@ -14,6 +14,18 @@ export interface BuyoutMarketPlaceListingResponse {
   buyerCinders: number;
 }
 
+export interface CreateMarketPlaceListingResponse {
+  listing: MarketPlaceListing;
+  listedItemInstanceId: string;
+  listedQuantity: number;
+  remainingInventoryItem: InventoryItem | null;
+}
+
+export interface CancelMarketPlaceListingResponse {
+  listingId: string;
+  returnedItem: InventoryItem;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -41,7 +53,7 @@ export class MarketPlaceService {
 
   createListing(
     listing: CreateMarketPlaceListingRequest,
-  ): Observable<MarketPlaceListing> {
+  ): Observable<CreateMarketPlaceListingResponse> {
     return this.api.post('marketplace/createListing', listing).pipe(
       catchError(() => {
         return throwError(() => new Error('Failed to create listing'));
@@ -59,7 +71,7 @@ export class MarketPlaceService {
     );
   }
 
-  cancelListing(listingId: string): Observable<boolean> {
+  cancelListing(listingId: string): Observable<CancelMarketPlaceListingResponse> {
     return this.api.post('marketplace/cancelListing', listingId).pipe(
       catchError(() => {
         this.toast.showToast(

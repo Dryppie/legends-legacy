@@ -14,8 +14,8 @@ export class CharacterStateService {
   private readonly _overview = signal<CharacterOverviewDto | null>(null);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
-  private lastSoulstoneDropEvent: unknown;
-  private lastCharacterLevelUpEvent: unknown;
+  private lastSoulstoneDropUpdateId: string | null = null;
+  private lastCharacterLevelUpUpdateId: string | null = null;
 
   /* ─────────── public, read-only selectors ─────────── */
   /** Current character comes straight from AuthService, no copy needed */
@@ -50,16 +50,24 @@ export class CharacterStateService {
     effect(
       () => {
         const characterId = this.currentCharacterId();
-        const soulstoneDrop = this.eventService.event.SoulstoneDropMsg();
-        const levelUp = this.eventService.event.CharacterLevelUpMsg();
+        const soulstoneDropEnvelope =
+          this.eventService.eventEnvelope.SoulstoneDropMsg();
+        const levelUpEnvelope =
+          this.eventService.eventEnvelope.CharacterLevelUpMsg();
+        const soulstoneDrop = soulstoneDropEnvelope?.payload;
+        const levelUp = levelUpEnvelope?.payload;
 
         if (
           characterId &&
           soulstoneDrop &&
-          soulstoneDrop !== this.lastSoulstoneDropEvent &&
+          this.shouldProcessEvent(
+            soulstoneDropEnvelope,
+            this.lastSoulstoneDropUpdateId,
+          ) &&
           soulstoneDrop.characterId === characterId
         ) {
-          this.lastSoulstoneDropEvent = soulstoneDrop;
+          this.lastSoulstoneDropUpdateId =
+            this.getEventId(soulstoneDropEnvelope);
           this.updateCurrentCharacter({
             soulstones: soulstoneDrop.totalSoulstones,
           });
@@ -68,10 +76,13 @@ export class CharacterStateService {
         if (
           characterId &&
           levelUp &&
-          levelUp !== this.lastCharacterLevelUpEvent &&
+          this.shouldProcessEvent(
+            levelUpEnvelope,
+            this.lastCharacterLevelUpUpdateId,
+          ) &&
           levelUp.characterId === characterId
         ) {
-          this.lastCharacterLevelUpEvent = levelUp;
+          this.lastCharacterLevelUpUpdateId = this.getEventId(levelUpEnvelope);
           this.updateCurrentCharacter({
             level: levelUp.level,
             experience: levelUp.experience,
@@ -130,5 +141,19 @@ export class CharacterStateService {
       ...character,
       ...patch,
     });
+  }
+
+  private shouldProcessEvent(
+    event: { updateId?: string; occurredAt?: string } | null,
+    lastUpdateId: string | null,
+  ): boolean {
+    const updateId = this.getEventId(event);
+    return !updateId || updateId !== lastUpdateId;
+  }
+
+  private getEventId(
+    event: { updateId?: string; occurredAt?: string } | null,
+  ): string | null {
+    return event?.updateId ?? event?.occurredAt ?? null;
   }
 }

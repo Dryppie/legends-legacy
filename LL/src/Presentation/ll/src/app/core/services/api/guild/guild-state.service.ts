@@ -7,6 +7,8 @@ import { GuildService } from './guild.service';
 import { BuildingUpgradeView } from '../../../../shared/models/guilds/buildings/buildingUpgradeView';
 import { GuildResourceType } from '../../../../shared/models/Dtos/guild/guildResourceType';
 import { GameEventService } from '../../real-time/game-event.service';
+import { AuthService } from '../auth/auth.service';
+import { InventoryStateService } from '../inventory/inventory-state.service';
 import {
   NOTIFICATION_SURFACE,
   NotificationService,
@@ -22,15 +24,15 @@ export class GuildStateService {
   private readonly _allGuilds = signal<GuildSimple[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
-  private lastGuildBuildingUpgradeEvent: unknown;
-  private lastGuildApplicationEvent: unknown;
-  private lastGuildInviteEvent: unknown;
-  private lastGuildInviteRejectedEvent: unknown;
-  private lastGuildApplicationRejectedEvent: unknown;
-  private lastGuildStateChangedEvent: unknown;
-  private lastGuildMembershipChangedEvent: unknown;
-  private lastGuildDisbandedEvent: unknown;
-  private lastGuildDirectoryChangedEvent: unknown;
+  private lastGuildBuildingUpgradeUpdateId: string | null = null;
+  private lastGuildApplicationUpdateId: string | null = null;
+  private lastGuildInviteUpdateId: string | null = null;
+  private lastGuildInviteRejectedUpdateId: string | null = null;
+  private lastGuildApplicationRejectedUpdateId: string | null = null;
+  private lastGuildStateChangedUpdateId: string | null = null;
+  private lastGuildMembershipChangedUpdateId: string | null = null;
+  private lastGuildDisbandedUpdateId: string | null = null;
+  private lastGuildDirectoryChangedUpdateId: string | null = null;
   private hasLoaded = false;
 
   /* ─────────── public, read-only selectors ─────────── */
@@ -52,6 +54,8 @@ export class GuildStateService {
   constructor(
     private readonly service: GuildService,
     private readonly eventService: GameEventService,
+    private readonly inventoryState: InventoryStateService,
+    private readonly auth: AuthService,
     private readonly notificationService: NotificationService,
   ) {
     this.refresh(); // initial fetch
@@ -80,29 +84,48 @@ export class GuildStateService {
     effect(
       () => {
         const guildId = this._guild()?.id;
-        const invite = this.eventService.event.GuildInviteReceivedMsg();
-        const inviteRejected = this.eventService.event.GuildInviteRejectedMsg();
-        const applicationRejected =
-          this.eventService.event.GuildApplicationRejectedMsg();
-        const guildStateChanged =
-          this.eventService.event.GuildStateChangedMsg();
-        const membershipChanged =
-          this.eventService.event.GuildMembershipChangedMsg();
-        const guildDisbanded = this.eventService.event.GuildDisbandedMsg();
-        const directoryChanged =
-          this.eventService.event.GuildDirectoryChangedMsg();
+        const inviteEnvelope =
+          this.eventService.eventEnvelope.GuildInviteReceivedMsg();
+        const inviteRejectedEnvelope =
+          this.eventService.eventEnvelope.GuildInviteRejectedMsg();
+        const applicationRejectedEnvelope =
+          this.eventService.eventEnvelope.GuildApplicationRejectedMsg();
+        const guildStateChangedEnvelope =
+          this.eventService.eventEnvelope.GuildStateChangedMsg();
+        const membershipChangedEnvelope =
+          this.eventService.eventEnvelope.GuildMembershipChangedMsg();
+        const guildDisbandedEnvelope =
+          this.eventService.eventEnvelope.GuildDisbandedMsg();
+        const directoryChangedEnvelope =
+          this.eventService.eventEnvelope.GuildDirectoryChangedMsg();
+        const invite = inviteEnvelope?.payload;
+        const inviteRejected = inviteRejectedEnvelope?.payload;
+        const applicationRejected = applicationRejectedEnvelope?.payload;
+        const guildStateChanged = guildStateChangedEnvelope?.payload;
+        const membershipChanged = membershipChangedEnvelope?.payload;
+        const guildDisbanded = guildDisbandedEnvelope?.payload;
+        const directoryChanged = directoryChangedEnvelope?.payload;
         let shouldRefresh = false;
 
         if (
           directoryChanged &&
-          directoryChanged !== this.lastGuildDirectoryChangedEvent
+          this.shouldProcessEvent(
+            directoryChangedEnvelope,
+            this.lastGuildDirectoryChangedUpdateId,
+          )
         ) {
-          this.lastGuildDirectoryChangedEvent = directoryChanged;
+          this.lastGuildDirectoryChangedUpdateId = this.getEventId(
+            directoryChangedEnvelope,
+          );
           this.loadAllGuilds();
         }
 
-        if (!guildId && invite && invite !== this.lastGuildInviteEvent) {
-          this.lastGuildInviteEvent = invite;
+        if (
+          !guildId &&
+          invite &&
+          this.shouldProcessEvent(inviteEnvelope, this.lastGuildInviteUpdateId)
+        ) {
+          this.lastGuildInviteUpdateId = this.getEventId(inviteEnvelope);
           this.addGuildNotification();
           this.loadMyInvites();
         }
@@ -110,27 +133,42 @@ export class GuildStateService {
         if (
           !guildId &&
           inviteRejected &&
-          inviteRejected !== this.lastGuildInviteRejectedEvent
+          this.shouldProcessEvent(
+            inviteRejectedEnvelope,
+            this.lastGuildInviteRejectedUpdateId,
+          )
         ) {
-          this.lastGuildInviteRejectedEvent = inviteRejected;
+          this.lastGuildInviteRejectedUpdateId = this.getEventId(
+            inviteRejectedEnvelope,
+          );
           this.loadMyInvites();
         }
 
         if (
           !guildId &&
           applicationRejected &&
-          applicationRejected !== this.lastGuildApplicationRejectedEvent
+          this.shouldProcessEvent(
+            applicationRejectedEnvelope,
+            this.lastGuildApplicationRejectedUpdateId,
+          )
         ) {
-          this.lastGuildApplicationRejectedEvent = applicationRejected;
+          this.lastGuildApplicationRejectedUpdateId = this.getEventId(
+            applicationRejectedEnvelope,
+          );
           this.loadMyInvites();
         }
 
         if (
           !guildId &&
           membershipChanged &&
-          membershipChanged !== this.lastGuildMembershipChangedEvent
+          this.shouldProcessEvent(
+            membershipChangedEnvelope,
+            this.lastGuildMembershipChangedUpdateId,
+          )
         ) {
-          this.lastGuildMembershipChangedEvent = membershipChanged;
+          this.lastGuildMembershipChangedUpdateId = this.getEventId(
+            membershipChangedEnvelope,
+          );
           shouldRefresh = true;
         }
 
@@ -139,70 +177,107 @@ export class GuildStateService {
           return;
         }
 
-        const buildingUpgrade = this.eventService.event.GuildBuildingUpgradedMsg();
-        const application = this.eventService.event.GuildApplicationMsg();
+        const buildingUpgradeEnvelope =
+          this.eventService.eventEnvelope.GuildBuildingUpgradedMsg();
+        const applicationEnvelope =
+          this.eventService.eventEnvelope.GuildApplicationMsg();
+        const buildingUpgrade = buildingUpgradeEnvelope?.payload;
+        const application = applicationEnvelope?.payload;
 
         if (
           buildingUpgrade &&
-          buildingUpgrade !== this.lastGuildBuildingUpgradeEvent &&
+          this.shouldProcessEvent(
+            buildingUpgradeEnvelope,
+            this.lastGuildBuildingUpgradeUpdateId,
+          ) &&
           buildingUpgrade.guildId === guildId
         ) {
-          this.lastGuildBuildingUpgradeEvent = buildingUpgrade;
+          this.lastGuildBuildingUpgradeUpdateId = this.getEventId(
+            buildingUpgradeEnvelope,
+          );
           shouldRefresh = true;
         }
 
         if (
           application &&
-          application !== this.lastGuildApplicationEvent &&
+          this.shouldProcessEvent(
+            applicationEnvelope,
+            this.lastGuildApplicationUpdateId,
+          ) &&
           application.guildId === guildId
         ) {
-          this.lastGuildApplicationEvent = application;
+          this.lastGuildApplicationUpdateId =
+            this.getEventId(applicationEnvelope);
           this.addGuildNotification();
           shouldRefresh = true;
         }
 
         if (
           guildStateChanged &&
-          guildStateChanged !== this.lastGuildStateChangedEvent &&
+          this.shouldProcessEvent(
+            guildStateChangedEnvelope,
+            this.lastGuildStateChangedUpdateId,
+          ) &&
           guildStateChanged.guildId === guildId
         ) {
-          this.lastGuildStateChangedEvent = guildStateChanged;
+          this.lastGuildStateChangedUpdateId = this.getEventId(
+            guildStateChangedEnvelope,
+          );
           shouldRefresh = true;
         }
 
         if (
           membershipChanged &&
-          membershipChanged !== this.lastGuildMembershipChangedEvent &&
+          this.shouldProcessEvent(
+            membershipChangedEnvelope,
+            this.lastGuildMembershipChangedUpdateId,
+          ) &&
           membershipChanged.guildId === guildId
         ) {
-          this.lastGuildMembershipChangedEvent = membershipChanged;
+          this.lastGuildMembershipChangedUpdateId = this.getEventId(
+            membershipChangedEnvelope,
+          );
           shouldRefresh = true;
         }
 
         if (
           guildDisbanded &&
-          guildDisbanded !== this.lastGuildDisbandedEvent &&
+          this.shouldProcessEvent(
+            guildDisbandedEnvelope,
+            this.lastGuildDisbandedUpdateId,
+          ) &&
           guildDisbanded.guildId === guildId
         ) {
-          this.lastGuildDisbandedEvent = guildDisbanded;
+          this.lastGuildDisbandedUpdateId =
+            this.getEventId(guildDisbandedEnvelope);
           shouldRefresh = true;
         }
 
         if (
           inviteRejected &&
-          inviteRejected !== this.lastGuildInviteRejectedEvent &&
+          this.shouldProcessEvent(
+            inviteRejectedEnvelope,
+            this.lastGuildInviteRejectedUpdateId,
+          ) &&
           inviteRejected.guildId === guildId
         ) {
-          this.lastGuildInviteRejectedEvent = inviteRejected;
+          this.lastGuildInviteRejectedUpdateId = this.getEventId(
+            inviteRejectedEnvelope,
+          );
           shouldRefresh = true;
         }
 
         if (
           applicationRejected &&
-          applicationRejected !== this.lastGuildApplicationRejectedEvent &&
+          this.shouldProcessEvent(
+            applicationRejectedEnvelope,
+            this.lastGuildApplicationRejectedUpdateId,
+          ) &&
           applicationRejected.guildId === guildId
         ) {
-          this.lastGuildApplicationRejectedEvent = applicationRejected;
+          this.lastGuildApplicationRejectedUpdateId = this.getEventId(
+            applicationRejectedEnvelope,
+          );
           shouldRefresh = true;
         }
 
@@ -296,26 +371,9 @@ export class GuildStateService {
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
         next: () => {
-          const currentGuild = this._guild();
-          if (!currentGuild) return;
-
-          const updatedResources = [...currentGuild.resources];
-
-          for (const donation of donations) {
-            const existing = updatedResources.find(
-              (r) => r.resource === donation.type,
-            );
-            if (existing) {
-              existing.amount += donation.amount;
-            } else {
-              updatedResources.push({
-                resource: donation.type,
-                amount: donation.amount,
-              });
-            }
-          }
-
-          this._guild.set({ ...currentGuild, resources: updatedResources });
+          this.refresh();
+          this.inventoryState.load(true);
+          this.auth.refreshCurrentCharacter();
         },
         error: (e) => this._error.set(e.message ?? 'Failed to donate to guild'),
       });
@@ -364,16 +422,7 @@ export class GuildStateService {
 
   applyToGuild(guildId: string): void {
     this.service.applyToGuild(guildId).subscribe({
-      next: () => {
-        const pending: GuildInvite = {
-          guildId,
-          guildName: '',
-          characterId: '',
-          characterName: '',
-          isInvite: false,
-        };
-        this._invites.set([...this._invites(), pending]);
-      },
+      next: () => this.loadMyInvites(),
       error: (e) => this._error.set(e.message ?? 'Failed to apply to guild'),
     });
   }
@@ -399,8 +448,7 @@ export class GuildStateService {
 
   rejectInvite(guildId: string): void {
     this.service.rejectInvite(guildId).subscribe({
-      next: () =>
-        this._invites.set(this._invites().filter((i) => i.guildId !== guildId)),
+      next: () => this.loadMyInvites(),
       error: (e) => this._error.set(e.message ?? 'Failed to reject invite'),
     });
   }
@@ -415,13 +463,7 @@ export class GuildStateService {
 
   rejectApplication(characterId: string): void {
     this.service.rejectApplication(characterId).subscribe({
-      next: () => {
-        const g = this._guild();
-        if (!g) return;
-
-        g.invites = g.invites.filter((i) => i.characterId !== characterId);
-        this._guild.set({ ...g }); // trigger change
-      },
+      next: () => this.refresh(),
       error: (e) =>
         this._error.set(e.message ?? 'Failed to reject application'),
     });
@@ -458,5 +500,19 @@ export class GuildStateService {
       SIDEBAR_NOTIFICATION.Guild,
       count,
     );
+  }
+
+  private shouldProcessEvent(
+    event: { updateId?: string; occurredAt?: string } | null,
+    lastUpdateId: string | null,
+  ): boolean {
+    const updateId = this.getEventId(event);
+    return !updateId || updateId !== lastUpdateId;
+  }
+
+  private getEventId(
+    event: { updateId?: string; occurredAt?: string } | null,
+  ): string | null {
+    return event?.updateId ?? event?.occurredAt ?? null;
   }
 }

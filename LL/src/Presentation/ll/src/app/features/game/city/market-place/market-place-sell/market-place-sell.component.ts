@@ -175,15 +175,7 @@ export class MarketPlaceSellComponent implements OnInit {
 
     this.marketplaceState
       .createListing(item, qty, unitPrice)
-      .subscribe((listing) => {
-        // remove or decrement from inventory
-        if (item.itemInstance.itemBase.stackable && item.quantity > qty) {
-          this.inventoryState.decrementItem(item.itemInstance.id, qty);
-        } else {
-          this.inventoryState.removeItem(item.itemInstance.id);
-        }
-        this.marketplaceState.addToListings(listing);
-
+      .subscribe(() => {
         this.pendingItem.set(null);
         this.priceCtrl.reset();
         this.qtyCtrl.reset();
@@ -191,15 +183,10 @@ export class MarketPlaceSellComponent implements OnInit {
   }
 
   cancelListing(listing: MarketPlaceListing) {
-    this.marketplaceState.cancelListing(listing.id).subscribe((success) => {
-      const inventoryItem: InventoryItem = {
-        id: crypto.randomUUID(),
-        itemInstance: listing.itemInstance,
-        quantity: listing.quantity,
-      };
-      this.inventoryState.addOrIncrement(inventoryItem);
-      if (this.selectedItemId === inventoryItem.itemInstance.id)
+    this.marketplaceState.cancelListing(listing.id).subscribe((response) => {
+      if (this.selectedItemId === response.returnedItem.itemInstance.id) {
         this.selectedItemId = '';
+      }
     });
   }
 

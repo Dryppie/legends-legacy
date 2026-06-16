@@ -49,6 +49,6 @@ public class DungeonController : BaseController
         await Mediator.Send(new ClaimDungeonRewardsCommand(CurrentCharacterGuid));
 
     [HttpPost("DismissFailedDungeonRun")]
-    public async Task<ActionResult<Response<bool>>> DismissFailedDungeonRun() =>
+    public async Task<ActionResult<Response<DismissFailedDungeonRunResponseDto>>> DismissFailedDungeonRun() =>
         await Mediator.Send(new DismissFailedDungeonRunCommand(CurrentCharacterGuid));
 }

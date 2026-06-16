@@ -87,50 +87,6 @@ export class GuildVaultComponent {
     ) as Record<GuildResourceType, number>;
 
     this.guildState.donate(donations);
-    this.updateCurrenciesAfterDonation(donations);
-    this.updateAfterDonation(donations);
-  }
-
-  updateCurrenciesAfterDonation(
-    donations: { type: GuildResourceType; amount: number }[],
-  ) {
-    const character = this.character();
-    if (!character) return;
-    for (const donation of donations) {
-      if (donation.type === GuildResourceType.Cinders)
-        character.cinders -= donation.amount;
-      if (donation.type === GuildResourceType.Soulstones)
-        character.soulstones -= donation.amount;
-    }
-
-    this.characterState.updateCharacter({
-      ...character,
-      cinders: character.cinders,
-      soulstones: character.soulstones,
-    });
-  }
-
-  updateAfterDonation(
-    donations: { type: GuildResourceType; amount: number }[],
-  ) {
-    const items = this.items(); // signal
-    if (!items) return;
-
-    const itemTypes: GuildResourceType[] = [
-      GuildResourceType.TemperedScrap,
-      GuildResourceType.SoulDust,
-    ];
-    const updatedItems = [...items];
-
-    for (const donation of donations) {
-      if (!itemTypes.includes(donation.type)) continue;
-
-      const item = updatedItems.find(
-        (i) => i.itemInstance.itemBase.name.replace(' ', '') === donation.type,
-      );
-      if (!item) return;
-      this.inventoryState.decrementItem(item.itemInstance.id, donation.amount);
-    }
   }
 
   get availableAmounts(): Record<GuildResourceType, number> {

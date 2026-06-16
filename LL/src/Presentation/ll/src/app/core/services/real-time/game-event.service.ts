@@ -16,6 +16,7 @@ import {
 import {
   GameEventMap,
   GameEventName,
+  GameEventEnvelopeSignalMap,
   GameEventSignalMap,
   isGameEventName,
 } from './game-event/game-event.map';
@@ -30,6 +31,8 @@ export class GameEventService {
   private connectPromise?: Promise<void>;
   private readonly guildSubscriptions = new Set<string>();
   private readonly activeGuildSubscriptions = new Set<string>();
+  private readonly handledUpdateIds = new Set<string>();
+  private readonly handledUpdateIdQueue: string[] = [];
   private worldSubscriptionRequested = false;
   private worldSubscriptionActive = false;
   private readonly zone = inject(NgZone);
@@ -42,11 +45,18 @@ export class GameEventService {
     GameEventName,
     WritableSignal<unknown | null>
   >();
+  private readonly envelopeSig = new Map<
+    GameEventName,
+    WritableSignal<GameEventEnvelope<GameEventName> | null>
+  >();
 
   /* ------------  strongly-typed public signals  ------------ */
   event = new Proxy({} as GameEventSignalMap, {
     get: (_t, key: string) => this.onSig(key as GameEventName),
   }) as GameEventSignalMap;
+  eventEnvelope = new Proxy({} as GameEventEnvelopeSignalMap, {
+    get: (_t, key: string) => this.onEnvelopeSig(key as GameEventName),
+  }) as GameEventEnvelopeSignalMap;
   // add one line per new event, or code-gen them
   readonly connectionStatus = this._connectionStatus.asReadonly();
   readonly reconnectCount = this._reconnectCount.asReadonly();
@@ -160,6 +170,9 @@ export class GameEventService {
 
     /* reset signals to null so new components can distinguish old vs. new data */
     this.channelsSig.forEach((sig) => sig.set(null));
+    this.envelopeSig.forEach((sig) => sig.set(null));
+    this.handledUpdateIds.clear();
+    this.handledUpdateIdQueue.length = 0;
   }
 
   /* --------------------  PUBLIC API  -------------------- */
@@ -176,9 +189,29 @@ export class GameEventService {
     return sig.asReadonly();
   }
 
+  onEnvelopeSig<K extends GameEventName>(
+    name: K,
+  ): Signal<GameEventEnvelope<K> | null> {
+    let sig = this.envelopeSig.get(name) as
+      | WritableSignal<GameEventEnvelope<K> | null>
+      | undefined;
+    if (!sig) {
+      sig = signal<GameEventEnvelope<K> | null>(null);
+      this.envelopeSig.set(
+        name,
+        sig as WritableSignal<GameEventEnvelope<GameEventName> | null>,
+      );
+    }
+    return sig.asReadonly();
+  }
+
   /* -----------------  internal fan-out  ----------------- */
 
   private dispatch(env: GameEventEnvelope<string>): void {
+    if (env.updateId && this.hasHandledUpdate(env.updateId)) {
+      return;
+    }
+
     if (!isGameEventName(env.event)) {
       console.warn(`Unknown game event ignored: ${env.event}`);
       return;
@@ -191,7 +224,18 @@ export class GameEventService {
       this.channelsSig.set(env.event, sig);
     }
 
-    this.zone.run(() => (sig as WritableSignal<unknown>).set(env.payload));
+    let envelopeSignal = this.envelopeSig.get(env.event);
+    if (!envelopeSignal) {
+      envelopeSignal = signal<GameEventEnvelope<GameEventName> | null>(null);
+      this.envelopeSig.set(env.event, envelopeSignal);
+    }
+
+    this.zone.run(() => {
+      (sig as WritableSignal<unknown>).set(env.payload);
+      (
+        envelopeSignal as WritableSignal<GameEventEnvelope<GameEventName>>
+      ).set(env as GameEventEnvelope<GameEventName>);
+    });
   }
 
   private async ensureConnected(): Promise<void> {
@@ -224,5 +268,22 @@ export class GameEventService {
         console.warn('Failed to resubscribe to guild realtime', error);
       }
     }
+  }
+
+  private hasHandledUpdate(updateId: string): boolean {
+    if (this.handledUpdateIds.has(updateId)) return true;
+
+    this.handledUpdateIds.add(updateId);
+    this.handledUpdateIdQueue.push(updateId);
+
+    const maxTrackedUpdates = 500;
+    while (this.handledUpdateIdQueue.length > maxTrackedUpdates) {
+      const oldestUpdateId = this.handledUpdateIdQueue.shift();
+      if (oldestUpdateId) {
+        this.handledUpdateIds.delete(oldestUpdateId);
+      }
+    }
+
+    return false;
   }
 }

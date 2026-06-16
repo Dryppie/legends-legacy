@@ -7,6 +7,7 @@
  */
 
 import { Signal } from '@angular/core';
+import type { GameEventEnvelope } from './game-event-envelope';
 import { LootReceivedMsg } from '../loot/loot-received';
 import { MarketListingSoldMsg } from '../market/market-listing-sold';
 import { MarketListingCreatedMsg } from '../market/market-listing-created';
@@ -45,6 +46,10 @@ export const gameEventNames = [
 
 export type GameEventSignalMap = {
   [K in GameEventName]: Signal<GameEventMap[K] | null>;
+};
+
+export type GameEventEnvelopeSignalMap = {
+  [K in GameEventName]: Signal<GameEventEnvelope<K> | null>;
 };
 
 /** Key = discriminator string, Value = payload DTO */

@@ -19,6 +19,7 @@ export class InventoryStateService {
   readonly error = computed(() => this._error());
   private readonly _lastLoot = signal<InventoryItem[] | null>(null);
   private readonly suppressedLootSignatures = new Set<string>();
+  private lastLootUpdateId: string | null = null;
 
   constructor(
     private inventoryService: InventoryService,
@@ -28,8 +29,15 @@ export class InventoryStateService {
 
     effect(
       () => {
-        const loot = this.eventService.event.LootReceivedMsg();
+        const envelope = this.eventService.eventEnvelope.LootReceivedMsg();
+        const loot = envelope?.payload;
         if (loot) {
+          const updateId = envelope?.updateId ?? envelope?.occurredAt ?? null;
+          if (updateId && updateId === this.lastLootUpdateId) {
+            return;
+          }
+
+          this.lastLootUpdateId = updateId;
           const signature = this.getLootSignature(loot.payload);
           if (this.suppressedLootSignatures.delete(signature)) {
             return;
@@ -127,26 +135,8 @@ export class InventoryStateService {
       .scrapEquipment(equipmentIds)
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: (gainedItem: InventoryItem) => {
-          const items = this._items().filter(
-            (i) => !equipmentIds.includes(i.itemInstance.id),
-          );
-
-          // Add or update the gained item (Soul Dust)
-          const existing = items.find(
-            (i) =>
-              i.itemInstance.itemBase.id ===
-              gainedItem.itemInstance.itemBase.id,
-          );
-
-          if (existing) {
-            existing.quantity = gainedItem.quantity;
-          } else {
-            items.push(gainedItem);
-          }
-
-          this._items.set(items);
-        },
+        next: (response) =>
+          this._items.set(this.sortItems(response.inventoryItems)),
         error: (err) => this._error.set(err.message ?? 'Unknown error'),
       });
   }
@@ -157,6 +147,29 @@ export class InventoryStateService {
     if (suppressNextLoot?.length) {
       this.suppressNextLoot(suppressNextLoot);
     }
+  }
+
+  applyInventoryItemState(
+    itemInstanceId: string,
+    item: InventoryItem | null,
+  ): void {
+    if (!item) {
+      this.removeItem(itemInstanceId);
+      return;
+    }
+
+    const items = this._items();
+    const index = items.findIndex(
+      (current) => current.itemInstance.id === item.itemInstance.id,
+    );
+    if (index === -1) {
+      this._items.set(this.sortItems([...items, item]));
+      return;
+    }
+
+    const updated = [...items];
+    updated[index] = item;
+    this._items.set(this.sortItems(updated));
   }
 
   addOrIncrementMany(itemsToAdd: InventoryItem[]): void {

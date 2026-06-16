@@ -10,6 +10,8 @@ import { finalize, tap } from 'rxjs/operators';
 
 import {
   BuyoutMarketPlaceListingResponse,
+  CancelMarketPlaceListingResponse,
+  CreateMarketPlaceListingResponse,
   MarketPlaceService,
 } from './market-place.service';
 import { ItemType } from '../../../../shared/models/enums/itemType';
@@ -32,9 +34,9 @@ export class MarketplaceStateService {
   private readonly _error = signal<string | null>(null);
 
   private readonly myCharacterId!: Signal<string | null>;
-  private lastMarketListingSoldEvent: unknown;
-  private lastMarketListingCreatedEvent: unknown;
-  private lastMarketListingCanceledEvent: unknown;
+  private lastMarketListingSoldUpdateId: string | null = null;
+  private lastMarketListingCreatedUpdateId: string | null = null;
+  private lastMarketListingCanceledUpdateId: string | null = null;
   private hasLoaded = false;
 
   readonly listings = computed(() => {
@@ -61,22 +63,48 @@ export class MarketplaceStateService {
 
     effect(
       () => {
-        const sale = this.eventService.event.MarketListingSoldMsg();
-        const created = this.eventService.event.MarketListingCreatedMsg();
-        const canceled = this.eventService.event.MarketListingCanceledMsg();
+        const saleEnvelope =
+          this.eventService.eventEnvelope.MarketListingSoldMsg();
+        const createdEnvelope =
+          this.eventService.eventEnvelope.MarketListingCreatedMsg();
+        const canceledEnvelope =
+          this.eventService.eventEnvelope.MarketListingCanceledMsg();
+        const sale = saleEnvelope?.payload;
+        const created = createdEnvelope?.payload;
+        const canceled = canceledEnvelope?.payload;
 
-        if (sale && sale !== this.lastMarketListingSoldEvent) {
-          this.lastMarketListingSoldEvent = sale;
+        if (
+          sale &&
+          this.shouldProcessEvent(
+            saleEnvelope,
+            this.lastMarketListingSoldUpdateId,
+          )
+        ) {
+          this.lastMarketListingSoldUpdateId = this.getEventId(saleEnvelope);
           untracked(() => this.applySellerSale(sale));
         }
 
-        if (created && created !== this.lastMarketListingCreatedEvent) {
-          this.lastMarketListingCreatedEvent = created;
+        if (
+          created &&
+          this.shouldProcessEvent(
+            createdEnvelope,
+            this.lastMarketListingCreatedUpdateId,
+          )
+        ) {
+          this.lastMarketListingCreatedUpdateId =
+            this.getEventId(createdEnvelope);
           untracked(() => this.applyCreatedListing(created));
         }
 
-        if (canceled && canceled !== this.lastMarketListingCanceledEvent) {
-          this.lastMarketListingCanceledEvent = canceled;
+        if (
+          canceled &&
+          this.shouldProcessEvent(
+            canceledEnvelope,
+            this.lastMarketListingCanceledUpdateId,
+          )
+        ) {
+          this.lastMarketListingCanceledUpdateId =
+            this.getEventId(canceledEnvelope);
           untracked(() => this.applyCanceledListing(canceled));
         }
       },
@@ -150,32 +178,30 @@ export class MarketplaceStateService {
     );
   }
 
-  cancelListing(listingId: string): Observable<boolean> {
-    return this.marketplaceService.cancelListing(listingId).pipe((success) => {
-      this.removeListing(listingId);
-      return success;
-    });
+  cancelListing(listingId: string): Observable<CancelMarketPlaceListingResponse> {
+    return this.marketplaceService.cancelListing(listingId).pipe(
+      tap((response) => {
+        this.applyCancelResponse(response);
+      }),
+    );
   }
 
   createListing(
     item: InventoryItem,
     quantity: number,
     unitPrice: number,
-  ): Observable<MarketPlaceListing> {
+  ): Observable<CreateMarketPlaceListingResponse> {
     const listing: CreateMarketPlaceListingRequest = {
       itemInstanceId: item.itemInstance.id,
       quantity,
       unitPrice,
     };
 
-    // Uncomment once backend endpoint is ready
-    return this.marketplaceService
-      .createListing(listing)
-      .pipe((createdListing) => createdListing);
-  }
-
-  addToListings(listing: MarketPlaceListing) {
-    this.upsertListing(listing);
+    return this.marketplaceService.createListing(listing).pipe(
+      tap((response) => {
+        this.applyCreateResponse(response);
+      }),
+    );
   }
 
   // Remove an existing listing.
@@ -208,6 +234,19 @@ export class MarketplaceStateService {
     this.applyListingChange(response.listingId, response.remainingListing);
     this.inventoryState.addOrIncrement(response.purchasedItem);
     this.updateCurrentCharacterCinders(response.buyerCinders);
+  }
+
+  private applyCreateResponse(response: CreateMarketPlaceListingResponse): void {
+    this.upsertListing(response.listing);
+    this.inventoryState.applyInventoryItemState(
+      response.listedItemInstanceId,
+      response.remainingInventoryItem,
+    );
+  }
+
+  private applyCancelResponse(response: CancelMarketPlaceListingResponse): void {
+    this.removeListing(response.listingId);
+    this.inventoryState.addOrIncrement(response.returnedItem);
   }
 
   private applySellerSale(sale: MarketListingSoldMsg): void {
@@ -268,5 +307,19 @@ export class MarketplaceStateService {
     const updated = [...listings];
     updated[index] = listing;
     this._listings.set(updated);
+  }
+
+  private shouldProcessEvent(
+    event: { updateId?: string; occurredAt?: string } | null,
+    lastUpdateId: string | null,
+  ): boolean {
+    const updateId = this.getEventId(event);
+    return !updateId || updateId !== lastUpdateId;
+  }
+
+  private getEventId(
+    event: { updateId?: string; occurredAt?: string } | null,
+  ): string | null {
+    return event?.updateId ?? event?.occurredAt ?? null;
   }
 }

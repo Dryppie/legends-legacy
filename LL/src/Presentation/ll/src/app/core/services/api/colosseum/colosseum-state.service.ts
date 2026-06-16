@@ -28,7 +28,7 @@ export class ColosseumStateService {
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
   private hasLoaded = false;
-  private lastArenaBattleCompletedEvent: unknown;
+  private lastArenaBattleCompletedUpdateId: string | null = null;
 
   readonly opponents = computed(() => this._opponents());
   readonly arenaTicketStatus = computed(() => this._arenaTicketStatus());
@@ -62,18 +62,22 @@ export class ColosseumStateService {
 
     effect(
       () => {
-        const event = this.eventService.event.ArenaBattleCompletedMsg();
+        const envelope = this.eventService.eventEnvelope.ArenaBattleCompletedMsg();
+        const event = envelope?.payload;
         const characterId = this.characterState.currentCharacterId();
         if (
           !event ||
-          event === this.lastArenaBattleCompletedEvent ||
+          !this.shouldProcessEvent(
+            envelope,
+            this.lastArenaBattleCompletedUpdateId,
+          ) ||
           !characterId ||
           !this.isParticipant(event, characterId)
         ) {
           return;
         }
 
-        this.lastArenaBattleCompletedEvent = event;
+        this.lastArenaBattleCompletedUpdateId = this.getEventId(envelope);
         this.applyArenaRating(event, characterId);
         this.addNotification();
 
@@ -208,5 +212,19 @@ export class ColosseumStateService {
       NOTIFICATION_SURFACE.Sidebar,
       SIDEBAR_NOTIFICATION.Colosseum,
     );
+  }
+
+  private shouldProcessEvent(
+    event: { updateId?: string; occurredAt?: string } | null,
+    lastUpdateId: string | null,
+  ): boolean {
+    const updateId = this.getEventId(event);
+    return !updateId || updateId !== lastUpdateId;
+  }
+
+  private getEventId(
+    event: { updateId?: string; occurredAt?: string } | null,
+  ): string | null {
+    return event?.updateId ?? event?.occurredAt ?? null;
   }
 }

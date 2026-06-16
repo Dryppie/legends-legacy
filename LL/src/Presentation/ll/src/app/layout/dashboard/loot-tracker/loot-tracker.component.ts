@@ -14,6 +14,7 @@ import { LocalStorageService } from '../../../core/services/client-side/local-st
 export class LootTrackerComponent {
   entries: InventoryItem[] = [];
   expanded = signal(true);
+  private lastLootUpdateId: string | null = null;
 
   constructor(
     private readonly eventService: GameEventService,
@@ -23,8 +24,15 @@ export class LootTrackerComponent {
 
     effect(
       () => {
-        const loot = this.eventService.event.LootReceivedMsg();
+        const envelope = this.eventService.eventEnvelope.LootReceivedMsg();
+        const loot = envelope?.payload;
         if (loot) {
+          const updateId = envelope?.updateId ?? envelope?.occurredAt ?? null;
+          if (updateId && updateId === this.lastLootUpdateId) {
+            return;
+          }
+
+          this.lastLootUpdateId = updateId;
           loot.payload.forEach((item) => {
             this.entries.push(item);
           });

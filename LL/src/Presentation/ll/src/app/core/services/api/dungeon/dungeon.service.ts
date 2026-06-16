@@ -94,6 +94,10 @@ export interface ClaimDungeonRewardsResponse {
   character: CharacterDto;
 }
 
+export interface DismissFailedDungeonRunResponse {
+  activeRun: DungeonRun | null;
+}
+
 export interface StartDungeonRunResponse {
   run: DungeonRun;
   inventoryItems?: InventoryItem[] | null;
@@ -174,7 +178,7 @@ export class DungeonService {
     );
   }
 
-  dismissFailedDungeonRun(): Observable<void> {
+  dismissFailedDungeonRun(): Observable<DismissFailedDungeonRunResponse> {
     return this.api.post('dungeon/dismissFailedDungeonRun').pipe(
       catchError(() => {
         return throwError(() => new Error('Failed to leave failed dungeon'));

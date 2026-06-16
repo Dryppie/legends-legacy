@@ -3,6 +3,7 @@ import { finalize } from 'rxjs/operators';
 import {
   DungeonActionOutcome,
   ClaimDungeonRewardsResponse,
+  DismissFailedDungeonRunResponse,
   DungeonRun,
   DungeonService,
   ExecuteDungeonActionResponse,
@@ -188,8 +189,8 @@ export class DungeonStateService {
       .dismissFailedDungeonRun()
       .pipe(finalize(() => this._loading.set(false)))
       .subscribe({
-        next: () => {
-          this._activeDungeon.set(null);
+        next: (response) => {
+          this.applyDismissFailedDungeonRun(response);
           onSuccess?.();
           this.loadAvailableDungeons();
         },
@@ -211,6 +212,12 @@ export class DungeonStateService {
     this._activeDungeon.set(response.activeRun);
     this.inventoryState.setInventory(response.inventoryItems, response.claimedLoot);
     this.characterState.updateCharacter(response.character);
+  }
+
+  private applyDismissFailedDungeonRun(
+    response: DismissFailedDungeonRunResponse,
+  ): void {
+    this._activeDungeon.set(response.activeRun);
   }
 
   private applyStartDungeon(response: StartDungeonRunResponse): void {

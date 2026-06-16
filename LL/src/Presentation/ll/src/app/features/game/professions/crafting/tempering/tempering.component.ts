@@ -212,45 +212,26 @@ export class TemperingComponent implements OnInit {
     );
 
     this.selectedItemId.set(null);
-    this.craftingService.enqueueTempering(queueItem);
-    this.inventoryState.removeItem(equipment.id);
   }
 
   cancelCraft(queueItem: CraftingQueueItem): void {
     if (!queueItem) return;
 
-    const items = this.inventoryState.items();
-    if (!items) return;
-    this.craftingService.removeItemFromQueue(queueItem).subscribe((success) => {
-      /* TODO: might be necessary, but only if removing items from queue is deemed troublesome in the backend, causing client-side miss-match */
-    });
-    this.inventoryState.addOrIncrement({
-      id: items[0].id,
-      quantity: 1,
-      itemInstance: queueItem.equipmentInstance,
-    });
-    this.craftingService.dequeueTempering(queueItem.id);
-    if (this.craftingService.currentQueue.length === 0) {
-      this.clearCurrentAction();
-    }
-
-    this.selectedItemId.set(null);
+    this.craftingService
+      .removeItemFromQueue(queueItem)
+      .subscribe((response) => {
+        this.inventoryState.setInventory(response.inventoryItems);
+        if (this.craftingService.currentQueue.length === 0) {
+          this.clearCurrentAction();
+        }
+        this.selectedItemId.set(null);
+      });
   }
 
   cancelEntireQueue(queue: CraftingQueueItem[]) {
     if (!queue.length) return;
 
-    const items = this.inventoryState.items();
-    if (!items) return;
-
-    queue.forEach((queueItem) => {
-      this.inventoryState.addOrIncrement({
-        id: items[0].id,
-        quantity: 1,
-        itemInstance: queueItem.equipmentInstance,
-      });
-      this.craftingService.dequeueTempering(queueItem.id);
-    });
+    this.craftingService.setQueue([]);
     this.clearCurrentAction();
     this.selectedItemId.set(null);
   }
