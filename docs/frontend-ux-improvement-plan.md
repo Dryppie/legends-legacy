@@ -74,3 +74,24 @@ The dungeon list is the doorway into the active dungeon loop. Players need to qu
 - No changes to dungeon records.
 - No changes to available dungeon data, requirements, rewards, or difficulty unlock rules.
 - No redesign of the active run page.
+
+## Third Slice: Combat View
+
+### Why This Slice Next
+
+Combat is the moment players watch the outcome of dungeon, idle, and arena decisions. The component already had the core data, avatars, log, and stats, so the safest improvement was to clarify the view hierarchy and targeting affordances without changing combat flow.
+
+### UX Problems Addressed
+
+- Added one consistent battle header with battle context and current status.
+- Moved the idle combat wins/losses/XP summary into the header so it reads as session context.
+- Replaced tiny unlabeled selector squares with readable unit focus buttons.
+- Grouped player and enemy teams into clear side panels.
+- Removed the central V/S lane from active combat so the player and enemy sides remain the focus.
+- Improved the queued idle-combat state so the countdown, flavor line, and stop action read as one focused panel.
+
+### Out Of Scope For This Pass
+
+- No changes to combat rules, result processing, event handling, or battle timing.
+- No changes to avatar rendering, entity stat calculations, or combat log internals.
+- No new combat actions or backend API changes.

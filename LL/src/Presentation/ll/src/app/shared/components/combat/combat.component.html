@@ -1,29 +1,36 @@
 <div class="flex h-full w-full flex-col overflow-hidden">
   <div
     *ngIf="!displayCombat && battleType === 'IdleCombat'"
-    class="flex h-full w-full flex-col items-center justify-center text-center text-primary"
+    class="flex h-full w-full items-center justify-center px-4 text-center"
   >
-    <div class="mb-4 flex items-center justify-center">
-      <div class="text-lg font-bold">
-        You are already in combat. Next fight in:
+    <div
+      class="w-full max-w-xl rounded-lg border border-light_gray/60 bg-black/35 p-6 shadow-lg shadow-black/30"
+    >
+      <p class="text-xs font-bold uppercase tracking-normal text-secondary">
+        Combat Queued
+      </p>
+      <h2 class="mt-2 text-2xl font-bold text-primary">
+        Next Fight Begins Soon
+      </h2>
+      <div class="mt-4 text-lg font-bold text-white">
         <app-countdown [targetDate]="nextCombatIn!"></app-countdown>
       </div>
+
+      <p
+        *ngIf="flavorTextVisible"
+        class="mt-4 animate-fade-in-up italic text-secondary"
+      >
+        {{ flavorText }}
+      </p>
+
+      <app-mini-button
+        [text]="stopCombatButtonText"
+        [disabled]="isStoppingCombat"
+        [width]="'128px'"
+        (click)="initiateStoppingCombat()"
+        class="mt-6 block"
+      ></app-mini-button>
     </div>
-
-    <p
-      *ngIf="flavorTextVisible"
-      class="mt-2 animate-fade-in-up italic text-secondary"
-    >
-      {{ flavorText }}
-    </p>
-
-    <app-mini-button
-      [text]="stopCombatButtonText"
-      [disabled]="isStoppingCombat"
-      [width]="'128px'"
-      (click)="initiateStoppingCombat()"
-      class="mt-6 w-64"
-    ></app-mini-button>
   </div>
 
   <div
@@ -31,45 +38,64 @@
     class="flex h-full w-full flex-col gap-4 overflow-hidden pr-4 lg:pr-6"
   >
     <div
-      class="flex h-16 w-full flex-col items-center justify-between gap-4 lg:flex-row"
+      class="flex w-full flex-col gap-4 rounded-lg border border-light_gray/60 bg-black/30 p-4 shadow-lg shadow-black/25 xl:flex-row xl:items-center xl:justify-between"
     >
-      <div
-        *ngIf="battleType === 'IdleCombat'"
-        class="flex w-full flex-col items-center justify-center gap-1 text-white"
-      >
-        <span>Battle</span>
-        <ng-container *ngIf="isLoading; else areaDisplay">
-          <h2 class="text-primary">Loading area details...</h2>
-        </ng-container>
-        <!-- Display area details once loading is complete -->
-        <ng-template #areaDisplay>
-          <h2 *ngIf="currentAction() as currentAction" class="text-primary">
-            Shenic - {{ currentAction.combatActionDetails?.area?.name }}
-          </h2>
-        </ng-template>
+      <div>
+        <p class="text-xs font-bold uppercase tracking-normal text-secondary">
+          {{ battleType === "IdleCombat" ? "Idle Combat" : "Battle" }}
+        </p>
+        <h2 class="mt-1 text-2xl font-bold text-primary">
+          {{ battleTitle() }}
+        </h2>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <app-combat-log
+          *ngIf="battleType === 'IdleCombat'"
+          class="max-w-full"
+        ></app-combat-log>
+        <span
+          class="rounded border px-3 py-1 text-xs font-bold uppercase tracking-normal"
+          [ngClass]="battleStatusClass()"
+        >
+          {{ battleStatusLabel() }}
+        </span>
       </div>
     </div>
+
     <div
-      class="flex w-full flex-col justify-around gap-4 overflow-y-auto lg:flex-row lg:gap-0 lg:overflow-visible"
+      class="grid w-full gap-6 overflow-y-auto lg:grid-cols-2 lg:overflow-visible"
     >
-      <div class="flex items-center lg:flex-col">
-        <div class="mb-4 flex flex-col gap-2 lg:flex-row">
+      <div
+        class="flex flex-col gap-3 rounded-lg border border-light_gray/60 bg-black/15 p-3"
+      >
+        <div class="flex items-center justify-between gap-3">
+          <p class="text-xs font-bold uppercase tracking-normal text-secondary">
+            Your Side
+          </p>
+          <p class="text-xs text-zinc-400">
+            {{ playerCharacters.length }} unit{{
+              playerCharacters.length === 1 ? "" : "s"
+            }}
+          </p>
+        </div>
+
+        <div class="flex flex-wrap gap-2">
           <ng-container
             *ngFor="let character of playerCharacters; let i = index"
           >
-            <div
+            <button
+              type="button"
               (click)="focusCharacter('player', i)"
-              class="h-8 w-8 cursor-pointer rounded bg-cover"
-              [ngStyle]="{
-                'background-image': 'url(\'assets/combat/thumbnail-\')',
-                border:
-                  selectedPlayerCharacterIndex === i
-                    ? '2px solid gold'
-                    : '1px solid gray',
-              }"
-            ></div>
+              class="min-h-9 min-w-0 rounded border px-3 py-2 text-left text-xs font-bold transition"
+              [ngClass]="teamSelectorClass('player', i)"
+              [attr.aria-label]="'Focus ' + teamMemberLabel(character, i)"
+            >
+              {{ teamMemberLabel(character, i) }}
+            </button>
           </ng-container>
         </div>
+
         <app-combat-avatar
           class="w-full"
           [imagePath]="selectedPlayerCharacter.imagePath"
@@ -81,57 +107,37 @@
           [isLoading]="isLoading"
         ></app-combat-avatar>
       </div>
-      <div class="flex h-full flex-col items-center justify-between">
-        <div class="relative flex flex-col items-center justify-center">
-          <!-- Default VS image -->
-          <img
-            *ngIf="!outcome"
-            src="combat/CombatVS.svg"
-            alt="Logo"
-            class="-my-24 flex min-h-12 w-44 object-contain lg:-my-0"
-          />
 
-          <!-- Outcome image with label -->
-          <ng-container *ngIf="outcome">
-            <img
-              *ngIf="outcome"
-              src="combat/{{ outcome }}.svg"
-              alt="Logo"
-              class="w-22 -my-24 flex min-h-12 object-contain px-16 py-20 lg:-my-0"
-            />
-            <div class="-mb-4 pt-4 text-primary lg:absolute lg:bottom-4">
-              {{ outcome }}
-            </div>
-          </ng-container>
+      <div
+        class="flex flex-col gap-3 rounded-lg border border-light_gray/60 bg-black/15 p-3"
+      >
+        <div class="flex items-center justify-between gap-3">
+          <p class="text-xs font-bold uppercase tracking-normal text-secondary">
+            Enemy Side
+          </p>
+          <p class="text-xs text-zinc-400">
+            {{ enemyCharacters.length }} unit{{
+              enemyCharacters.length === 1 ? "" : "s"
+            }}
+          </p>
         </div>
 
-        <!-- Combat log for idle battles -->
-        <div
-          *ngIf="battleType === 'IdleCombat'"
-          class="mt-4 flex w-full justify-center"
-        >
-          <app-combat-log></app-combat-log>
-        </div>
-      </div>
-
-      <div class="flex items-center lg:flex-col">
-        <div class="mb-4 flex flex-col gap-2 lg:flex-row">
+        <div class="flex flex-wrap gap-2">
           <ng-container
             *ngFor="let character of enemyCharacters; let i = index"
           >
-            <div
+            <button
+              type="button"
               (click)="focusCharacter('enemy', i)"
-              class="h-8 w-8 cursor-pointer rounded bg-cover"
-              [ngStyle]="{
-                'background-image': 'url(\'assets/combat/thumbnail-\')',
-                border:
-                  selectedEnemyCharacterIndex === i
-                    ? '2px solid red'
-                    : '1px solid gray',
-              }"
-            ></div>
+              class="min-h-9 min-w-0 rounded border px-3 py-2 text-left text-xs font-bold transition"
+              [ngClass]="teamSelectorClass('enemy', i)"
+              [attr.aria-label]="'Focus ' + teamMemberLabel(character, i)"
+            >
+              {{ teamMemberLabel(character, i) }}
+            </button>
           </ng-container>
         </div>
+
         <app-combat-avatar
           class="w-full"
           [imagePath]="selectedEnemyCharacter.imagePath"
@@ -143,8 +149,23 @@
           [isLoading]="isLoading"
         ></app-combat-avatar>
       </div>
+
+      <div
+        *ngIf="outcome"
+        class="flex flex-col items-center justify-center rounded-lg bg-black/15 p-3 lg:col-span-2"
+      >
+        <img
+          src="combat/{{ outcome }}.svg"
+          [alt]="outcome"
+          class="flex min-h-12 w-40 object-contain"
+        />
+        <div class="mt-3 text-primary">
+          {{ outcome }}
+        </div>
+      </div>
     </div>
-    <div class="flex h-full w-full overflow-hidden">
+
+    <div class="flex w-full flex-1 overflow-hidden">
       <app-combat-entity-stats
         class="h-full w-full"
         [playerTeam]="playerCharacters"
