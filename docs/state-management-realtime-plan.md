@@ -2,13 +2,44 @@
 
 ## 1. Executive Summary
 
-The main game application in `LL/` already has a C#/.NET API, Angular frontend, MediatR command/query handlers, feature state services, and a small SignalR realtime layer. The primary game API maps `GameHub` at `/hub`, publishes typed hub messages through `IGameEventPublisher`, and the Angular app has a central `GameEventService` that receives a `Publish` event. The only game realtime payload currently wired end-to-end is `LootReceivedMsg`, used by inventory and the loot tracker.
+The main game application in `LL/` has a C#/.NET API, Angular frontend, MediatR command/query handlers, feature state services, and an active SignalR realtime layer. The primary game API maps `GameHub` at `/hub`, publishes typed hub messages through `IGameEventPublisher`, and the Angular app has a central `GameEventService` that receives a `Publish` event.
+
+This document was originally written before the realtime work began. Since then, several vertical slices have been implemented: Colosseum command-response cleanup, connection status and reconnect handling, marketplace listing updates, guild invite/application/state updates, character soulstone and level-up updates, arena battle completion updates, and a reusable client-side notification service with a shared notification indicator component.
 
 What is missing is a consistent game-wide rule for which channel owns each state change. REST command responses are inconsistent: dungeons already return useful updated state for start/progress actions, while Colosseum, character actions, equipment, guild, market, and several essence actions often return `bool` or message-only DTOs. The frontend then compensates by manually decrementing counters, mutating inventory/equipment/listing/guild state, polling snapshots, or refreshing after commands.
 
-Recommended direction: standardize REST command responses first, then add realtime only for out-of-band updates. SignalR should not be used to echo every REST-triggered state mutation back to the same caller. If a player starts a Colosseum battle and spends a ticket, the REST response should include the updated ticket state; the caller should not wait for a SignalR echo and should not blindly decrement locally.
+Recommended direction remains: standardize REST command responses first, then add realtime only for out-of-band updates. SignalR should not be used to echo every REST-triggered state mutation back to the same caller. If a player starts a Colosseum battle and spends a ticket, the REST response should include the updated ticket state; the caller should not wait for a SignalR echo and should not blindly decrement locally.
 
-First implementation milestone: use Colosseum as the first cleanup target. `StartArenaBattle` already spends a ticket and returns `CombatResultDto`, while the frontend currently decrements `arenaTicketStatus.currentTickets` locally. Change that vertical slice to return a command result DTO containing the combat result plus authoritative `ArenaTicketStatusDto` and any rating/match data the UI needs.
+First implementation milestone status: completed. Colosseum now has a signal-based `ColosseumStateService`, `StartArenaBattle` returns an authoritative response containing battle and ticket state, and the frontend no longer relies on local ticket decrementing for the caller state.
+
+Current highest-value realtime improvement: reconnect recovery must stay consistent across all feature stores that consume SignalR. Inventory, dungeon, character, colosseum, marketplace, and guild now refresh after `GameEventService.reconnectCount()` changes; future realtime consumers should follow the same loaded-snapshot recovery pattern.
+
+First reconnect recovery slice status: implemented. `MarketplaceStateService` now refreshes listings after reconnect once marketplace state has been loaded, and `GuildStateService` now refreshes guild/invite/directory snapshots after reconnect once guild state has been loaded.
+
+## 1.1 Progress Update Since Original Analysis
+
+| Area | Status | What changed | Remaining concern |
+|---|---|---|---|
+| Game SignalR lifecycle | Improved | `GameEventService` now exposes `connectionStatus` and `reconnectCount`, tracks requested world/guild subscriptions, and resubscribes audiences after reconnect. | Reconnect recovery still depends on each feature store deciding to refresh its own snapshot. |
+| Hub authorization and guild subscriptions | Improved | `GameHub` is `[Authorize]`, supports `SubscribeToWorld`, and authorizes `SubscribeToGuild` by checking the caller's guild before joining `guild:{guildId}`. | Group joins are now safer, but missed guild events still require REST resync after reconnect. |
+| Envelope metadata | Improved | `GameEventPublisher` now includes `UpdateId` and `OccurredAt` in the envelope. | Frontend still deduplicates most events by object reference rather than `UpdateId`; no ordering/sequence policy exists yet. |
+| Colosseum REST state | Completed | `StartArenaBattle` returns battle plus `ArenaTicketStatus`; `ColosseumStateService` owns tickets, opponents, rankings, match history, arena rating patching, and reconnect refresh. | Arena completion pushes are useful for out-of-band rating/history updates, but broader leaderboard live state is still snapshot-driven. |
+| Marketplace realtime | Partially completed | Created, cancelled, and sold listing messages are mapped end-to-end. Marketplace state applies listing changes, seller cinder updates, and reconnect snapshot recovery after the marketplace has loaded. | Several command responses still need to carry all authoritative buyer/seller state instead of relying on local mutations. |
+| Guild realtime | Partially completed | Guild application, invite, rejection, state, membership, disband, building, and directory messages are mapped end-to-end. Guild state refreshes relevant snapshots, resyncs after reconnect, and sidebar notifications are centralized. | Many commands still return `bool` rather than updated guild/member/resource state. |
+| Character progression realtime | Partially completed | Soulstone drops and level-ups now update current character state through SignalR, and character state refreshes after reconnect. | Derived stats and equipment/essence-driven character changes still rely on REST refreshes or local state mutation. |
+| Inventory realtime | Partially completed | Loot pushes update inventory and duplicate loot suppression exists when a REST result already applied the inventory state. Inventory refreshes after reconnect. | Several inventory-affecting commands still mutate locally or return partial results. |
+| Notifications | Improved | A generic `NotificationService` supports `sidebar`, `header`, and `page` surfaces; the sidebar uses generic counts; the badge design is now a shared `NotificationIndicatorComponent`. | Notifications are in-memory only and not backed by a server notification inbox/history. |
+| Component ownership | Improved | Colosseum and marketplace have stronger feature state services than the original analysis described. | Some components still perform direct state nudges after commands, especially around marketplace, equipment, and inventory-consuming flows. |
+
+## 1.2 Current Realtime State Management Gaps
+
+- Reconnect recovery is better but still not fully uniform. Inventory, dungeon, character, colosseum, marketplace, and guild now refresh after reconnect. Remaining realtime consumers should follow this pattern as they are added.
+- Event deduplication is local and ad hoc. Most stores compare event object references. The envelope now has `UpdateId`, but the frontend does not use it yet.
+- Marketplace world broadcasts update all online clients, but command responses still need to be the caller's authoritative source of buyer inventory, buyer cinders, seller cinders, and remaining listing state.
+- Guild realtime is now useful, but the client still often responds by reloading broad snapshots. This is safe but can be noisy and hides weak command contracts.
+- Equipment, essence, and several inventory commands still need better command result DTOs before adding more SignalR.
+- Character action and idle combat state remain REST-poll driven. That is acceptable while processing is request-driven, but if these become background workers they will need pushed completion/progress updates plus reconnect snapshots.
+- Notifications are client-side presentation state, not durable server state. A future news tab, notification center, or offline notification history needs a backend notification model and REST snapshot.
 
 ## 2. Current Backend Findings
 

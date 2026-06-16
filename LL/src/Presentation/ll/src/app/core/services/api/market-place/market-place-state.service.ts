@@ -35,6 +35,7 @@ export class MarketplaceStateService {
   private lastMarketListingSoldEvent: unknown;
   private lastMarketListingCreatedEvent: unknown;
   private lastMarketListingCanceledEvent: unknown;
+  private hasLoaded = false;
 
   readonly listings = computed(() => {
     return this._listings();
@@ -81,6 +82,16 @@ export class MarketplaceStateService {
       },
       { allowSignalWrites: true },
     );
+
+    effect(
+      () => {
+        const reconnectCount = this.eventService.reconnectCount();
+        if (reconnectCount <= 0 || !this.hasLoaded) return;
+
+        untracked(() => this.refresh());
+      },
+      { allowSignalWrites: true },
+    );
   }
 
   byType = (type: ItemType) =>
@@ -102,6 +113,7 @@ export class MarketplaceStateService {
 
   /** Force‑refresh from the backend, bypassing the in‑memory cache. */
   refresh(): void {
+    this.hasLoaded = true;
     this._loading.set(true);
     this.marketplaceService
       .getListings()

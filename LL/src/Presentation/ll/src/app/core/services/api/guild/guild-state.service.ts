@@ -31,6 +31,7 @@ export class GuildStateService {
   private lastGuildMembershipChangedEvent: unknown;
   private lastGuildDisbandedEvent: unknown;
   private lastGuildDirectoryChangedEvent: unknown;
+  private hasLoaded = false;
 
   /* ─────────── public, read-only selectors ─────────── */
   readonly guild = computed(() => this._guild());
@@ -65,6 +66,16 @@ export class GuildStateService {
           console.warn('Failed to subscribe to guild realtime', error),
         );
     });
+
+    effect(
+      () => {
+        const reconnectCount = this.eventService.reconnectCount();
+        if (reconnectCount <= 0 || !this.hasLoaded) return;
+
+        this.refresh();
+      },
+      { allowSignalWrites: true },
+    );
 
     effect(
       () => {
@@ -205,6 +216,7 @@ export class GuildStateService {
 
   /** Call once at login or when character changes */
   refresh(): void {
+    this.hasLoaded = true;
     this._loading.set(true);
 
     this.service
