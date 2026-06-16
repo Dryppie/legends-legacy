@@ -6,13 +6,12 @@ import {
   LeaderboardEntry,
 } from '../../../../../shared/models/Dtos/leaderboard/leaderboardEntry';
 import { ARENA_COLUMNS } from '../../../../../shared/models/Dtos/leaderboard/rows/arenaRow';
-import { NgIf } from '@angular/common';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
 
 @Component({
   selector: 'app-rankings-glory',
   standalone: true,
-  imports: [LeaderboardComponent, NgIf, NumberFormatPipe],
+  imports: [LeaderboardComponent, NumberFormatPipe],
   templateUrl: './rankings-glory.component.html',
 })
 export class RankingsGloryComponent implements OnChanges {

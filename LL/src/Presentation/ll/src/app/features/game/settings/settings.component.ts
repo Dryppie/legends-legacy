@@ -9,11 +9,18 @@ import { CharacterService } from '../../../core/services/api/character/character
 import { FormsModule } from '@angular/forms';
 import { RegularButtonComponent } from '../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { GuildStateService } from '../../../core/services/api/guild/guild-state.service';
+import { DefaultHeaderComponent } from '../../../shared/components/default-header/default-header.component';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, SignupComponent, FormsModule, RegularButtonComponent],
+  imports: [
+    CommonModule,
+    SignupComponent,
+    FormsModule,
+    RegularButtonComponent,
+    DefaultHeaderComponent,
+  ],
   templateUrl: './settings.component.html',
 })
 export class SettingsComponent {
@@ -67,8 +74,9 @@ export class SettingsComponent {
       .renameCharacter(this.newCharacterName)
       .subscribe(() => {
         this.showNameModal = false;
-        // Optionally update local state
-        this.character!.name = this.newCharacterName;
+        if (this.character) {
+          this.character.name = this.newCharacterName;
+        }
       });
   }
 
@@ -102,5 +110,50 @@ export class SettingsComponent {
 
   setPanel(panel: string) {
     this.activePanel = panel;
+  }
+
+  experiencePercent(character: CharacterDto): number {
+    if (character.experienceUntilNextLevel <= 0) return 100;
+
+    return Math.min(
+      100,
+      (character.experience / character.experienceUntilNextLevel) * 100,
+    );
+  }
+
+  accountTypeLabel(): string {
+    if (!this.userInfo) return 'Loading';
+    return this.userInfo.isRegisteredUser ? 'Registered' : 'Guest';
+  }
+
+  accountTypeClass(): string {
+    if (!this.userInfo) return 'border-light_gray/60 text-zinc-300';
+    return this.userInfo.isRegisteredUser
+      ? 'border-emerald-500/60 text-emerald-300'
+      : 'border-amber-500/60 text-amber-300';
+  }
+
+  gmailStatusLabel(): string {
+    if (!this.userInfo) return 'Loading';
+    return this.userInfo.isGmailBound ? 'Bound' : 'Not bound';
+  }
+
+  gmailStatusClass(): string {
+    if (!this.userInfo) return 'border-light_gray/60 text-zinc-300';
+    return this.userInfo.isGmailBound
+      ? 'border-emerald-500/60 text-emerald-300'
+      : 'border-light_gray/60 text-zinc-300';
+  }
+
+  emailStatusLabel(): string {
+    if (!this.userInfo) return 'Loading';
+    return this.userInfo.isRegisteredUser ? 'Bound' : 'Not bound';
+  }
+
+  emailStatusClass(): string {
+    if (!this.userInfo) return 'border-light_gray/60 text-zinc-300';
+    return this.userInfo.isRegisteredUser
+      ? 'border-emerald-500/60 text-emerald-300'
+      : 'border-amber-500/60 text-amber-300';
   }
 }

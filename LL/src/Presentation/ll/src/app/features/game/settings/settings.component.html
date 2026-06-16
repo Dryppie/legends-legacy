@@ -1,105 +1,158 @@
 <div
-  class="flex h-full w-full text-white"
+  class="flex h-full flex-col gap-4 overflow-hidden pb-4 pr-4 text-white sm:pb-0 sm:pr-6"
   *ngIf="currentCharacter() as character"
 >
-  <!-- LEFT PROFILE PANEL -->
-  <aside class="w-64 p-12">
-    <div class="flex flex-col items-center space-y-2">
-      <img
-        src="./../../../../assets/portrait/Avatar.svg"
-        alt="Avatar"
-        class="h-24 w-24 rounded-full border-2 border-yellow-500"
-      />
-      <div class="text-center">
-        <h2 class="text-xl font-semibold">{{ character.name }}</h2>
-        <p class="text-sm text-orange-300">LEVEL: {{ character.level }}</p>
-        <p class="text-sm text-orange-300">
-          XP: {{ character.experience }}/{{
-            character.experienceUntilNextLevel
-          }}
-        </p>
-        <p *ngIf="guild() as guild" class="text-gray-400 mt-2">
-          GUILD: {{ guild.name }}
-        </p>
-      </div>
-    </div>
-  </aside>
+  <app-default-header
+    class="flex-none"
+    section="Account"
+    title="Settings"
+    text="Profile, account bindings, and game links"
+    icon="character/achievements"
+  ></app-default-header>
 
-  <!-- RIGHT SETTINGS PANEL -->
-  <main class="flex gap-10 overflow-hidden p-10">
-    <!-- Settings Buttons -->
-    <div class="flex flex-col space-y-6">
-      <!-- Beta & Support -->
-      <section>
-        <h2 class="mb-4 text-lg font-bold">Beta & Support</h2>
-        <div class="space-y-2">
-          <!-- TODO: Implement later: -->
-          <!-- <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="sendFeedback()">
-            💬 Send Feedback
-          </button> -->
+  <div class="min-h-0 flex-1 overflow-y-auto pr-1">
+    <section
+      class="rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
+    >
+      <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <div class="min-w-0">
+          <p class="text-xs font-semibold uppercase text-secondary">
+            Current Character
+          </p>
+          <div class="mt-2 flex flex-wrap items-start gap-4">
+            <img
+              src="./../../../../assets/portrait/Avatar.svg"
+              alt="Character avatar"
+              class="h-20 w-20 rounded border border-primary/50 bg-black/30 p-1"
+            />
 
-          <!-- TODO: Implement later: -->
-          <!-- <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition" (click)="reportBug()">
-            🐞 Report a Bug
-          </button> -->
+            <div class="min-w-0 flex-1">
+              <h1 class="truncate text-2xl font-semibold text-primary">
+                {{ character.name }}
+              </h1>
+              <p class="mt-1 text-sm text-zinc-300">
+                Level {{ character.level }}
+                <span *ngIf="guild() as guild"> - {{ guild.name }}</span>
+              </p>
 
-          <button
-            class="rounded-md bg-[#2a2a2a] px-4 py-2 text-white transition hover:bg-[#383838]"
-            (click)="viewPatchNotes()"
-          >
-            📜Patch Notes: {{ version }}
-          </button>
-        </div>
-      </section>
-
-      <!-- Social -->
-      <section>
-        <h2 class="mb-4 text-lg font-bold">Social</h2>
-        <div class="space-y-2">
-          <a
-            href="https://discord.gg/HXN4xnJUp3"
-            target="_blank"
-            class="gap-2 rounded-md bg-[#5865F2] px-4 py-2 text-white transition hover:bg-[#4752c4]"
-          >
-            💬 Join our Discord
-          </a>
-        </div>
-      </section>
-
-      <!-- TODO: Implement -->
-      <!-- Legal & Misc -->
-      <!-- <section>
-        <h2 class="text-lg font-bold mb-4">Legal & Misc</h2>
-        <div class="space-y-2">
-          <button class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition">
-            📄 Terms of Service
-          </button>
-        </div>
-      </section> -->
-
-      <!-- Account Settings -->
-      <section>
-        <h2 class="mb-4 text-lg font-bold">Account Settings</h2>
-        <div class="space-y-2">
-          <!-- TODO: Implement -->
-          <!-- Show this button if the user is a registered user -->
-          <!-- <button *ngIf="userInfo?.isRegisteredUser"
-            class="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] hover:bg-[#383838] rounded-md text-white transition"
-            (click)="setPanel('credentials')">
-            🛠️ Change Email or Password
-          </button> -->
-          <div *ngIf="!userInfo?.isNameEdited" class="flex items-center gap-2">
-            <button
-              class="flex items-center gap-2 rounded-md bg-[#2a2a2a] px-4 py-2 text-white transition hover:bg-[#383838]"
-              (click)="!userInfo?.isNameEdited && editName()"
-              [disabled]="userInfo?.isNameEdited"
-            >
-              ✏️ Edit character name
-            </button>
+              <div class="mt-4 max-w-xl">
+                <div class="flex justify-between text-xs text-zinc-400">
+                  <span>Experience</span>
+                  <span>
+                    {{ character.experience }} /
+                    {{ character.experienceUntilNextLevel }}
+                  </span>
+                </div>
+                <div class="mt-1 h-2 overflow-hidden rounded bg-black/40">
+                  <div
+                    class="h-full rounded bg-primary"
+                    [style.width.%]="experiencePercent(character)"
+                  ></div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="flex items-center gap-2">
+        </div>
+
+        <div class="grid gap-2 text-sm sm:grid-cols-3 xl:grid-cols-1">
+          <div
+            class="rounded border border-light_gray/70 bg-black/30 px-3 py-2"
+          >
+            <div class="text-xs uppercase text-zinc-500">Account</div>
+            <div
+              class="mt-2 w-fit rounded border bg-black/30 px-2 py-0.5 font-semibold"
+              [ngClass]="accountTypeClass()"
+            >
+              {{ accountTypeLabel() }}
+            </div>
+          </div>
+
+          <div
+            class="rounded border border-light_gray/70 bg-black/30 px-3 py-2"
+          >
+            <div class="text-xs uppercase text-zinc-500">Email</div>
+            <div
+              class="mt-2 w-fit rounded border bg-black/30 px-2 py-0.5 font-semibold"
+              [ngClass]="emailStatusClass()"
+            >
+              {{ emailStatusLabel() }}
+            </div>
+          </div>
+
+          <div
+            class="rounded border border-light_gray/70 bg-black/30 px-3 py-2"
+          >
+            <div class="text-xs uppercase text-zinc-500">Gmail</div>
+            <div
+              class="mt-2 w-fit rounded border bg-black/30 px-2 py-0.5 font-semibold"
+              [ngClass]="gmailStatusClass()"
+            >
+              {{ gmailStatusLabel() }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
+      <section
+        class="rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
+      >
+        <div class="border-b border-light_gray/70 pb-3">
+          <p class="text-xs font-semibold uppercase text-secondary">
+            Account Settings
+          </p>
+          <h2 class="mt-1 text-xl text-primary">Identity and Access</h2>
+        </div>
+
+        <div class="mt-4 grid gap-3 md:grid-cols-2">
+          <article class="rounded border border-light_gray/70 bg-black/25 p-3">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h3 class="font-semibold text-white">Character Name</h3>
+                <p class="mt-1 text-sm text-zinc-400">
+                  One rename is available for this character.
+                </p>
+              </div>
+              <span
+                class="rounded border bg-black/30 px-2 py-0.5 text-xs font-semibold"
+                [ngClass]="
+                  userInfo?.isNameEdited
+                    ? 'border-light_gray/60 text-zinc-300'
+                    : 'border-emerald-500/60 text-emerald-300'
+                "
+              >
+                {{ userInfo?.isNameEdited ? "Used" : "Available" }}
+              </span>
+            </div>
+
+            <app-regular-button
+              class="mt-4 block"
+              text="Edit Name"
+              (pressed)="!userInfo?.isNameEdited && editName()"
+              [disabled]="userInfo?.isNameEdited === true"
+            ></app-regular-button>
+          </article>
+
+          <article class="rounded border border-light_gray/70 bg-black/25 p-3">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h3 class="font-semibold text-white">Gmail Binding</h3>
+                <p class="mt-1 text-sm text-zinc-400">
+                  Connect a Google account for this login.
+                </p>
+              </div>
+              <span
+                class="rounded border bg-black/30 px-2 py-0.5 text-xs font-semibold"
+                [ngClass]="gmailStatusClass()"
+              >
+                {{ gmailStatusLabel() }}
+              </span>
+            </div>
+
             <button
-              class="flex items-center gap-2 rounded-md bg-[#2a2a2a] px-4 py-2 text-white transition hover:bg-[#383838]"
+              type="button"
+              class="mt-4 inline-flex items-center gap-2 rounded-md border border-light_gray/70 bg-black/30 px-3 py-2 text-sm text-white transition hover:border-primary/70 disabled:pointer-events-none disabled:opacity-60"
               (click)="!userInfo?.isGmailBound && bindGmail()"
               [disabled]="userInfo?.isGmailBound"
             >
@@ -110,99 +163,162 @@
               />
               Bind Gmail
             </button>
-            <div *ngIf="userInfo?.isGmailBound">
-              Account is already bound to a gmail
+          </article>
+
+          <article class="rounded border border-light_gray/70 bg-black/25 p-3">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h3 class="font-semibold text-white">Email Login</h3>
+                <p class="mt-1 text-sm text-zinc-400">
+                  Register the account with an email and password.
+                </p>
+              </div>
+              <span
+                class="rounded border bg-black/30 px-2 py-0.5 text-xs font-semibold"
+                [ngClass]="emailStatusClass()"
+              >
+                {{ emailStatusLabel() }}
+              </span>
             </div>
-          </div>
-          <!-- Show this button if the user is NOT a registered user -->
-          <ng-container
-            *ngIf="userInfo && !userInfo.isRegisteredUser; else boundEmail"
-          >
-            <button
-              class="flex items-center gap-2 rounded-md bg-[#2a2a2a] px-4 py-2 text-white transition hover:bg-[#383838]"
-              (click)="convertToRegistered()"
-            >
-              🔐 Bind email
-            </button>
-          </ng-container>
-          <ng-template #boundEmail
-            >Account is already bound to an email</ng-template
-          >
-          <button
-            class="flex items-center gap-2 rounded-md bg-[#2a2a2a] px-4 py-2 text-white transition hover:bg-[#383838]"
-            (click)="logout()"
-          >
-            🚪 Logout
-          </button>
+
+            <app-regular-button
+              class="mt-4 block"
+              text="Bind Email"
+              (pressed)="convertToRegistered()"
+              [disabled]="!userInfo || userInfo.isRegisteredUser"
+            ></app-regular-button>
+          </article>
+
+          <article class="rounded border border-red-500/40 bg-red-950/20 p-3">
+            <h3 class="font-semibold text-red-200">Session</h3>
+            <p class="mt-1 text-sm text-red-100/80">
+              Leave the current session and return to login.
+            </p>
+
+            <app-regular-button
+              class="mt-4 block"
+              text="Logout"
+              variant="danger"
+              (pressed)="logout()"
+            ></app-regular-button>
+          </article>
         </div>
       </section>
-    </div>
 
-    <!-- Content Panel -->
-    <div
-      class="border-gray-700 h-full flex-1 overflow-y-auto rounded-md border bg-[#111] bg-opacity-50 p-6"
-      *ngIf="activePanel"
-    >
-      <ng-container [ngSwitch]="activePanel">
-        <div *ngSwitchCase="'patchNotes'">
-          <h3 class="mb-4 text-xl font-semibold">
-            Patch Notes for: {{ version }}
-          </h3>
-          <p>
-            Here are the latest patch notes...<br />
-            Settings page introduced.. Hooray!
+      <aside class="flex flex-col gap-4">
+        <section
+          class="rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
+        >
+          <p class="text-xs font-semibold uppercase text-secondary">
+            Beta and Support
           </p>
-        </div>
-        <div *ngSwitchCase="'changeCredentials'">
-          <h3 class="mb-4 text-xl font-semibold">Change Email / Password</h3>
-          <p>Form coming soon...</p>
-        </div>
-      </ng-container>
-    </div>
-  </main>
-</div>
-<div
-  *ngIf="showNameModal"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
->
-  <div
-    class="w-96 rounded-lg border border-light_gray bg-texture p-4 text-primary shadow-lg"
-    (click)="$event.stopPropagation()"
-  >
-    <h2>Edit character name</h2>
-    <span class="pb-2 italic text-white">You only have 1 edit</span>
-    <input
-      type="text"
-      [(ngModel)]="newCharacterName"
-      class="mb-4 w-full rounded border border-light_gray bg-texture p-2 text-white"
-    />
-    <div class="flex justify-end gap-2">
-      <app-regular-button (click)="closeNameModal()">Cancel</app-regular-button>
-      <app-regular-button (click)="submitNameChange()">Save</app-regular-button>
+          <h2 class="mt-1 text-xl text-primary">Game Links</h2>
+
+          <div class="mt-4 space-y-3">
+            <button
+              type="button"
+              class="w-full rounded border border-light_gray/70 bg-black/30 px-3 py-2 text-left text-sm text-white transition hover:border-primary/70"
+              (click)="viewPatchNotes()"
+            >
+              <span class="block font-semibold text-primary">Patch Notes</span>
+              <span class="text-zinc-400">Version {{ version }}</span>
+            </button>
+
+            <a
+              href="https://discord.gg/HXN4xnJUp3"
+              target="_blank"
+              class="block rounded border border-light_gray/70 bg-black/30 px-3 py-2 text-sm text-white transition hover:border-primary/70"
+            >
+              <span class="block font-semibold text-primary">Discord</span>
+              <span class="text-zinc-400">Community and support</span>
+            </a>
+          </div>
+        </section>
+
+        <section
+          class="rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
+          *ngIf="activePanel"
+        >
+          <ng-container [ngSwitch]="activePanel">
+            <div *ngSwitchCase="'patchNotes'">
+              <p class="text-xs font-semibold uppercase text-secondary">
+                Patch Notes
+              </p>
+              <h2 class="mt-1 text-xl text-primary">{{ version }}</h2>
+              <div
+                class="mt-4 rounded border border-light_gray/70 bg-black/25 p-3"
+              >
+                <p class="text-sm text-zinc-300">
+                  Settings page introduced. Account links and profile actions
+                  now live here.
+                </p>
+              </div>
+            </div>
+
+            <div *ngSwitchCase="'changeCredentials'">
+              <p class="text-xs font-semibold uppercase text-secondary">
+                Credentials
+              </p>
+              <h2 class="mt-1 text-xl text-primary">Change Email / Password</h2>
+              <p class="mt-4 text-sm text-zinc-300">Form coming soon.</p>
+            </div>
+          </ng-container>
+        </section>
+      </aside>
     </div>
   </div>
 </div>
 
 <div
-  *ngIf="showBindEmailModal"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+  *ngIf="showNameModal"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
 >
   <div
-    class="h-full w-full bg-texture pb-12 text-primary shadow-lg"
+    class="w-full max-w-md rounded-lg border border-light_gray bg-texture p-4 text-white shadow-lg"
+    (click)="$event.stopPropagation()"
+  >
+    <p class="text-xs font-semibold uppercase text-secondary">Character</p>
+    <h2 class="mt-1 text-xl text-primary">Edit Name</h2>
+    <p class="mt-2 text-sm text-zinc-400">You only have one edit.</p>
+
+    <input
+      type="text"
+      [(ngModel)]="newCharacterName"
+      class="mt-4 w-full rounded border border-light_gray bg-black/30 p-2 text-white outline-none focus:border-primary"
+    />
+
+    <div class="mt-4 flex justify-end gap-2">
+      <app-regular-button (pressed)="closeNameModal()">
+        Cancel
+      </app-regular-button>
+      <app-regular-button (pressed)="submitNameChange()"
+        >Save</app-regular-button
+      >
+    </div>
+  </div>
+</div>
+
+<div
+  *ngIf="showBindEmailModal && currentCharacter() as character"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+>
+  <div
+    class="h-full w-full overflow-y-auto rounded-lg border border-light_gray bg-texture pb-6 text-primary shadow-lg"
     (click)="$event.stopPropagation()"
   >
     <app-signup
       [convertAccount]="true"
-      [prefilledUsername]="character?.name ?? ''"
+      [prefilledUsername]="character.name"
       [disableLoginLink]="true"
       [headerText1]="'Register your account'"
       [headerText2]="'and continue your legend!'"
     >
     </app-signup>
-    <div class="flex justify-end gap-2">
-      <app-regular-button (click)="closeEmailModal()"
-        >Cancel</app-regular-button
-      >
+
+    <div class="flex justify-end px-6">
+      <app-regular-button (pressed)="closeEmailModal()">
+        Cancel
+      </app-regular-button>
     </div>
   </div>
 </div>
