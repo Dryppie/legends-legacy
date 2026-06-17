@@ -39,6 +39,17 @@
             {{ previewData.recommendedCombatRating ?? 0 }}
           </span>
         </div>
+        <div
+          *ngIf="previewGatheringTypes().length"
+          class="mt-3 flex flex-wrap items-center justify-end gap-1.5"
+        >
+          <span
+            *ngFor="let type of previewGatheringTypes()"
+            class="rounded border border-white/15 bg-black/45 px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-zinc-100"
+          >
+            {{ type }}
+          </span>
+        </div>
       </div>
     </div>
   </button>
@@ -61,7 +72,7 @@
     <div
       class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/90 to-transparent"
     ></div>
-    <div class="relative flex min-h-[520px] flex-col p-6 sm:p-8">
+    <div class="relative flex min-h-[620px] flex-col p-6 sm:p-8">
       <div class="flex items-start justify-between gap-4">
         <div>
           <div
@@ -104,14 +115,43 @@
       </div>
 
       <p
-        class="mt-16 max-w-sm font-serif text-base leading-7 text-zinc-100/90 sm:mt-24"
+        class="mt-14 max-w-md font-serif text-base leading-7 text-zinc-100/90 sm:mt-20"
       >
         {{ previewData.lore }}
       </p>
 
+      <div class="mt-6 grid max-w-3xl gap-2 sm:grid-cols-3">
+        <div class="rounded border border-white/15 bg-black/35 px-3 py-2">
+          <div class="text-[10px] uppercase tracking-[0.16em] text-zinc-400">
+            Rooms
+          </div>
+          <div class="mt-1 font-serif text-xl text-zinc-100">
+            {{ selectedPreviewData().minRooms ?? 0 }}-{{
+              selectedPreviewData().maxRooms ?? 0
+            }}
+          </div>
+        </div>
+        <div class="rounded border border-white/15 bg-black/35 px-3 py-2">
+          <div class="text-[10px] uppercase tracking-[0.16em] text-zinc-400">
+            Materials
+          </div>
+          <div class="mt-1 font-serif text-xl text-zinc-100">
+            {{ selectedGatheringNodes().length || "None" }}
+          </div>
+        </div>
+        <div class="rounded border border-white/15 bg-black/35 px-3 py-2">
+          <div class="text-[10px] uppercase tracking-[0.16em] text-zinc-400">
+            Clears
+          </div>
+          <div class="mt-1 font-serif text-xl text-zinc-100">
+            {{ selectedPreviewData().record?.totalClears ?? 0 }}
+          </div>
+        </div>
+      </div>
+
       <div class="mt-auto grid gap-3 pt-8 xl:grid-cols-[1fr_auto]">
         <div
-          class="grid gap-3 rounded-md border border-white/20 bg-black/50 p-4 backdrop-blur-sm md:grid-cols-[auto_1fr] xl:grid-cols-[auto_auto_1fr]"
+          class="grid gap-3 rounded-md border border-white/20 bg-black/50 p-4 backdrop-blur-sm md:grid-cols-[auto_1fr] xl:grid-cols-[auto_auto_minmax(0,1fr)]"
           (click)="$event.stopPropagation()"
         >
           <div class="flex flex-col justify-between">
@@ -232,7 +272,7 @@
             </div>
           </div>
 
-          <div class="min-w-0">
+          <div class="min-w-0 space-y-4">
             <div class="text-[10px] uppercase tracking-[0.18em] text-zinc-300">
               Rewards
             </div>
@@ -260,6 +300,65 @@
                 </div>
               </section>
             </div>
+
+            <section *ngIf="selectedGatheringNodes().length" class="min-w-0">
+              <div
+                class="text-[10px] uppercase tracking-[0.18em] text-zinc-300"
+              >
+                Gathering
+              </div>
+              <div class="mt-2 grid gap-2 lg:grid-cols-2">
+                <article
+                  *ngFor="let node of selectedGatheringNodes()"
+                  class="min-w-0 rounded border border-white/15 bg-black/30 px-3 py-2"
+                >
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                      <div
+                        class="truncate text-[11px] font-semibold uppercase text-zinc-100"
+                      >
+                        {{ node.name }}
+                      </div>
+                      <div class="mt-1 flex flex-wrap gap-1.5">
+                        <span
+                          class="rounded border px-2 py-0.5 text-[10px] uppercase"
+                          [ngClass]="gatheringTypeClass(node.type)"
+                        >
+                          {{ formatGatheringType(node.type) }}
+                        </span>
+                        <span
+                          class="rounded border border-white/15 px-2 py-0.5 text-[10px] uppercase text-zinc-300"
+                        >
+                          {{ gatheringLevelLabel(node) }}
+                        </span>
+                        <span
+                          class="rounded border border-primary/20 px-2 py-0.5 text-[10px] uppercase text-primary"
+                        >
+                          {{ gatheringChanceLabel(node) }}
+                        </span>
+                      </div>
+                    </div>
+                    <span class="shrink-0 text-[10px] text-zinc-500">
+                      {{ node.loot.length }}
+                    </span>
+                  </div>
+
+                  <div class="mt-2 space-y-1 text-sm text-zinc-100">
+                    <div
+                      *ngFor="let loot of node.loot"
+                      class="flex min-w-0 items-center justify-between gap-2"
+                    >
+                      <span class="min-w-0 truncate">
+                        <app-item [item]="loot"></app-item>
+                      </span>
+                      <span class="shrink-0 text-xs tabular-nums text-zinc-400">
+                        x{{ gatheringLootQuantityLabel(loot) }}
+                      </span>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </section>
           </div>
 
           <div

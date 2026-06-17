@@ -23,6 +23,7 @@ public sealed class DungeonPreviewDto
     public DungeonTier DungeonTier { get; set; }
     public DungeonRecordDto Record { get; set; } = new();
     public List<DungeonPreviewRewardDto> Rewards { get; set; } = [];
+    public List<DungeonGatheringNodePreviewDto> GatheringNodes { get; set; } = [];
 }
 
 public sealed class DungeonPreviewRewardDto
@@ -39,4 +40,24 @@ public sealed class DungeonEntryRequirementDto
     public string Name { get; set; } = string.Empty;
     public int RequiredAmount { get; set; }
     public int OwnedAmount { get; set; }
+}
+
+public sealed class DungeonGatheringNodePreviewDto
+{
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
+    public int? LevelRequirement { get; set; }
+    public float ProcChance { get; set; }
+    public List<DungeonGatheringLootPreviewDto> Loot { get; set; } = [];
+}
+
+public sealed class DungeonGatheringLootPreviewDto
+{
+    public string Id { get; set; } = string.Empty;
+    public string ItemId { get; set; } = string.Empty;
+    public ItemBaseDto ItemBase { get; set; } = null!;
+    public int MinQuantity { get; set; }
+    public int MaxQuantity { get; set; }
+    public bool IsRare { get; set; }
 }

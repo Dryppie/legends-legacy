@@ -4,6 +4,7 @@ import { NgClass, NgFor, NgIf } from '@angular/common';
 import { ItemComponent } from '../../item/item.component';
 import { DungeonStateService } from '../../../../core/services/api/dungeon/dungeon-state.service';
 import {
+  DungeonGatheringNodePreview,
   DungeonPreviewData,
   DungeonPreviewReward,
 } from '../../../models/Dtos/dungeons/dungeonPreviewData';
@@ -171,6 +172,61 @@ export class DungeonCardComponent {
             this.rewardGroupSortValue(second.title) ||
           first.title.localeCompare(second.title),
       );
+  }
+
+  selectedGatheringNodes(): DungeonGatheringNodePreview[] {
+    return this.selectedPreviewData().gatheringNodes ?? [];
+  }
+
+  previewGatheringTypes(): string[] {
+    return [
+      ...new Set(
+        (this.previewData.gatheringNodes ?? []).map((node) =>
+          this.formatGatheringType(node.type),
+        ),
+      ),
+    ];
+  }
+
+  gatheringChanceLabel(node: DungeonGatheringNodePreview): string {
+    return `${Math.round((node.procChance ?? 0) * 100)}%`;
+  }
+
+  gatheringLevelLabel(node: DungeonGatheringNodePreview): string {
+    return node.levelRequirement && node.levelRequirement > 0
+      ? `Lv. ${node.levelRequirement}`
+      : 'Any level';
+  }
+
+  gatheringLootQuantityLabel(
+    loot: DungeonGatheringNodePreview['loot'][number],
+  ): string {
+    return loot.minQuantity === loot.maxQuantity
+      ? `${loot.minQuantity}`
+      : `${loot.minQuantity}-${loot.maxQuantity}`;
+  }
+
+  formatGatheringType(type: string | null | undefined): string {
+    if (!type) {
+      return 'Gathering';
+    }
+
+    return type.replace(/([a-z])([A-Z])/g, '$1 $2');
+  }
+
+  gatheringTypeClass(type: string | null | undefined): string {
+    switch (type?.toLowerCase()) {
+      case 'mining':
+        return 'border-slate-300/25 bg-slate-200/10 text-slate-100';
+      case 'woodcutting':
+        return 'border-emerald-300/25 bg-emerald-400/10 text-emerald-100';
+      case 'fishing':
+        return 'border-sky-300/25 bg-sky-400/10 text-sky-100';
+      case 'skinning':
+        return 'border-amber-300/25 bg-amber-400/10 text-amber-100';
+      default:
+        return 'border-primary/25 bg-primary/10 text-primary';
+    }
   }
 
   private rewardGroupSortValue(title: string): number {

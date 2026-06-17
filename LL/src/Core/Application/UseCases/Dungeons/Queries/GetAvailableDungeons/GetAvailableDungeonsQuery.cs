@@ -5,7 +5,9 @@ using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Items.Dtos;
 using AutoMapper;
 using Domain.Models.Dungeons.Definitions;
+using Domain.Models.Dungeons.Definitions.Gathering;
 using Domain.Models.Dungeons.Runs;
+using Domain.Models.Items;
 using MediatR;
 
 namespace Application.UseCases.Dungeons.Queries.GetAvailableDungeons;
@@ -19,6 +21,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
     private readonly IDungeonPreviewRewardService _previewRewards;
     private readonly ICharacterService _characters;
     private readonly IDungeonRunService _dungeonRuns;
+    private readonly IItemBaseRepository _itemBases;
     private readonly IMapper _mapper;
 
     public GetAvailableDungeonsQueryHandler(
@@ -27,6 +30,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         IDungeonPreviewRewardService previewRewards,
         ICharacterService characters,
         IDungeonRunService dungeonRuns,
+        IItemBaseRepository itemBases,
         IMapper mapper)
     {
         _dungeonDefinitions = dungeonDefinitions;
@@ -34,6 +38,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         _previewRewards = previewRewards;
         _characters = characters;
         _dungeonRuns = dungeonRuns;
+        _itemBases = itemBases;
         _mapper = mapper;
     }
 
@@ -94,7 +99,8 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
                 MinRooms = dungeon.MinRooms,
                 MaxRooms = dungeon.MaxRooms,
                 Record = MapRecord(record),
-                Rewards = await MapRewardsAsync(dungeon, cancellationToken)
+                Rewards = await MapRewardsAsync(dungeon, cancellationToken),
+                GatheringNodes = await MapGatheringNodesAsync(dungeon, cancellationToken)
             });
         }
 
@@ -118,6 +124,56 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
                 Source = x.Source
             })
             .ToList();
+    }
+
+    private async Task<List<DungeonGatheringNodePreviewDto>> MapGatheringNodesAsync(
+        Domain.Models.Dungeons.DungeonDefinition dungeon,
+        CancellationToken cancellationToken)
+    {
+        if (dungeon.GatheringNodes.Count == 0)
+        {
+            return [];
+        }
+
+        var itemIds = dungeon.GatheringNodes
+            .SelectMany(node => node.Loot)
+            .Select(loot => loot.ItemId)
+            .Where(itemId => !string.IsNullOrWhiteSpace(itemId))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        var itemBases = await _itemBases.GetItemBasesByIdsAsync(itemIds, cancellationToken);
+
+        return dungeon.GatheringNodes
+            .Select(node => MapGatheringNode(node, itemBases))
+            .Where(node => node.Loot.Count > 0)
+            .ToList();
+    }
+
+    private DungeonGatheringNodePreviewDto MapGatheringNode(
+        DungeonGatheringNodeDefinition node,
+        IReadOnlyDictionary<string, ItemBase> itemBases)
+    {
+        return new DungeonGatheringNodePreviewDto
+        {
+            Id = node.Id,
+            Name = node.Name,
+            Type = node.Type.ToString(),
+            LevelRequirement = node.LevelRequirement,
+            ProcChance = node.ProcChance,
+            Loot = node.Loot
+                .Where(loot => itemBases.ContainsKey(loot.ItemId))
+                .Select(loot => new DungeonGatheringLootPreviewDto
+                {
+                    Id = loot.ItemId,
+                    ItemId = loot.ItemId,
+                    ItemBase = _mapper.Map<ItemBaseDto>(itemBases[loot.ItemId]),
+                    MinQuantity = loot.MinQuantity,
+                    MaxQuantity = loot.MaxQuantity,
+                    IsRare = loot.IsRare
+                })
+                .ToList()
+        };
     }
 
     private static DungeonRecordDto MapRecord(DungeonCompletionRecord? record)
