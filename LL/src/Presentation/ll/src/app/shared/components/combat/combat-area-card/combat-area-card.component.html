@@ -39,14 +39,27 @@
       ></div>
     </div>
     <div class="relative flex w-full items-end justify-between p-3 text-white">
-      <div class="flex flex-col gap-1 pb-4">
+      <div class="flex flex-col gap-1">
         <div class="flex items-center justify-between">
           <h3>{{ area.name }}</h3>
         </div>
         <small class="text-secondary"
           >Req. LV: {{ area.levelRequirement }}</small
         >
-        <div class="mt-2"></div>
+        <div class="mt-1 flex max-w-40 flex-wrap gap-1">
+          <span
+            *ngFor="let gatheringType of gatheringTypes()"
+            class="rounded border border-light_gray/50 bg-black/45 px-1.5 py-0.5 text-[0.65rem] leading-none text-primary"
+          >
+            {{ gatheringType }}
+          </span>
+          <span
+            *ngIf="gatheringTypes().length === 0"
+            class="rounded border border-light_gray/30 bg-black/30 px-1.5 py-0.5 text-[0.65rem] leading-none text-light_gray"
+          >
+            No gathering
+          </span>
+        </div>
       </div>
       <div class="-mb-2">
         <app-mini-button

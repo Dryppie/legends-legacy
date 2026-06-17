@@ -73,7 +73,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                 offHand.EquipmentInstanceId = null;
             }
 
-            AddItemToInventory(character.Inventory, equipmentInstance.Id);
+            AddItemToInventory(character.Inventory, equipmentInstance);
         }
         else
         {
@@ -81,7 +81,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
             targetSlot.EquipmentInstance = null;
             targetSlot.EquipmentInstanceId = null;
 
-            AddItemToInventory(character.Inventory, equipmentInstance.Id);
+            AddItemToInventory(character.Inventory, equipmentInstance);
         }
 
         return true;
@@ -254,6 +254,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         }
 
         _context.InventoryItems.Remove(inventoryItem);
+        inventory.InventoryItems.Remove(inventoryItem);
 
         return true;
     }
@@ -275,18 +276,25 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         var equipped = slot.EquipmentInstance;
         if (equipped is not null)
         {
-            AddItemToInventory(inventory, equipped.Id);
+            AddItemToInventory(inventory, equipped);
         }
 
         slot.EquipmentInstanceId = null;
+        slot.EquipmentInstance = null;
     }
 
-    private static void AddItemToInventory(Inventory inventory, Guid itemId)
+    private static void AddItemToInventory(Inventory inventory, EquipmentInstance item)
     {
+        if (inventory.InventoryItems.Any(inventoryItem => inventoryItem.ItemInstanceId == item.Id))
+        {
+            return;
+        }
+
         inventory.InventoryItems.Add(new InventoryItem
         {
             InventoryId = inventory.CharacterId,
-            ItemInstanceId = itemId,
+            ItemInstanceId = item.Id,
+            ItemInstance = item,
             Quantity = 1
         });
     }
