@@ -13,7 +13,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20260617091504_BaseMigration")]
+    [Migration("20260617144413_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -901,31 +901,6 @@ namespace Persistence.LL.Migrations
                     b.ToTable("Recipes");
                 });
 
-            modelBuilder.Entity("Domain.Models.Professions.Gathering.GatheringNodes.GatheringNode", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<int>("LevelRequirement")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("LootTableId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("ProfessionType")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LootTableId");
-
-                    b.ToTable("GatheringNodes");
-                });
-
             modelBuilder.Entity("Domain.Models.Professions.Profession", b =>
                 {
                     b.Property<Guid>("CharacterId")
@@ -1314,25 +1289,6 @@ namespace Persistence.LL.Migrations
                     b.HasBaseType("Domain.Models.CharacterActions.CharacterActionDetails.ActionDetails");
 
                     b.HasDiscriminator().HasValue(3);
-                });
-
-            modelBuilder.Entity("Domain.Models.CharacterActions.CharacterActionDetails.GatheringActionDetails", b =>
-                {
-                    b.HasBaseType("Domain.Models.CharacterActions.CharacterActionDetails.ActionDetails");
-
-                    b.Property<Guid>("LootTableId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("ProfessionType")
-                        .HasColumnType("integer");
-
-                    b.HasIndex("LootTableId");
-
-                    b.HasDiscriminator().HasValue(2);
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Characters.Character", b =>
@@ -1839,17 +1795,6 @@ namespace Persistence.LL.Migrations
                     b.Navigation("Item");
                 });
 
-            modelBuilder.Entity("Domain.Models.Professions.Gathering.GatheringNodes.GatheringNode", b =>
-                {
-                    b.HasOne("Domain.Models.LootTables.LootTable", "LootTable")
-                        .WithMany()
-                        .HasForeignKey("LootTableId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LootTable");
-                });
-
             modelBuilder.Entity("Domain.Models.Professions.Profession", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Characters.Character", null)
@@ -1963,17 +1908,6 @@ namespace Persistence.LL.Migrations
                         .IsRequired();
 
                     b.Navigation("Area");
-                });
-
-            modelBuilder.Entity("Domain.Models.CharacterActions.CharacterActionDetails.GatheringActionDetails", b =>
-                {
-                    b.HasOne("Domain.Models.LootTables.LootTable", "LootTable")
-                        .WithMany()
-                        .HasForeignKey("LootTableId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("LootTable");
                 });
 
             modelBuilder.Entity("Domain.Models.Entities.Characters.Character", b =>

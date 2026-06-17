@@ -101,20 +101,6 @@ function getSidebarSections(): SidebarSection[] {
       label: 'Professions',
       items: [
         {
-          id: 'mining',
-          route: ['professions', 'gathering', 'mining'],
-          icon: 'professions/mining',
-          title: 'Mining',
-          description: 'Gather ore and rare minerals',
-        },
-        {
-          id: 'woodcutting',
-          route: ['professions', 'gathering', 'woodcutting'],
-          icon: 'professions/woodcutting',
-          title: 'Woodcutting',
-          description: 'Harvest wood and natural resources',
-        },
-        {
           id: 'armorforging',
           route: ['professions', 'crafting', 'armorforging'],
           icon: 'professions/mining',

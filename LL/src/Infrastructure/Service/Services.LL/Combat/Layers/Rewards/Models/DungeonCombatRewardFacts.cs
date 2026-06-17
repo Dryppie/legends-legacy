@@ -8,6 +8,8 @@ public sealed record DungeonCombatRewardFacts(
     int CurrentRoomIndex,
     IReadOnlyDictionary<ItemType, double> MonsterLootModifiers,
     IReadOnlyList<Guid> PlayerEntityIds,
+    EquippedGatheringTool? EquippedTool,
+    IReadOnlyList<CombatGatheringNode> GatheringNodes,
     IReadOnlyList<DungeonEncounterRewardFacts> Encounters)
 {
     public DungeonEncounterRewardFacts? LastEncounter =>

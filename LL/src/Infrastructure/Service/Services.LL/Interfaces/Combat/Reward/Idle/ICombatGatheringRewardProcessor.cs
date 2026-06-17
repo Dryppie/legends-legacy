@@ -6,6 +6,6 @@ namespace Services.LL.Interfaces.Combat.Reward.Idle;
 public interface ICombatGatheringRewardProcessor
 {
     Task<IReadOnlyList<GatheringRewardResult>> ProcessAsync(
-        IdleCombatRewardFacts facts,
+        CombatGatheringRewardFacts facts,
         CancellationToken cancellationToken);
 }

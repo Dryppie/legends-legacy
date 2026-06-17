@@ -16,7 +16,6 @@ export class CurrentActionComponent implements OnInit, OnDestroy {
   currentAction: CharacterActionDto | null = null;
   private subscription: Subscription = new Subscription();
   remainingTime: string = '00:00'; // Add a property to track the remaining time
-  isGatheringAction = false;
   performingAction = '';
   duration = 0;
 
@@ -60,9 +59,6 @@ export class CurrentActionComponent implements OnInit, OnDestroy {
     switch (this.currentAction.characterActionType) {
       case CharacterActionType.Combat:
         this.performingAction = 'Engaged in Combat';
-        break;
-      case CharacterActionType.Gathering:
-        this.performingAction = 'Gathering Resources';
         break;
       case CharacterActionType.Crafting:
         this.performingAction = 'Crafting Items';

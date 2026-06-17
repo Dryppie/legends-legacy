@@ -2,7 +2,6 @@ import { Component, effect } from '@angular/core';
 import { NgIf } from '@angular/common';
 import { ProgressBarComponent } from '../../progress-bar/progress-bar.component';
 import { CharacterActionDto } from '../../../models/Dtos/characterActionDto';
-import { CharacterActionType } from '../../../models/enums/characterActionType';
 import { CharacterActionsStateService } from '../../../../core/services/api/character-actions/character-actions.state.service';
 
 @Component({
@@ -27,11 +26,7 @@ export class ProfessionActionComponent {
       }
 
       switch (action.characterActionType) {
-        case CharacterActionType.Gathering:
-          this.performingAction = `Gathering - ${action.gatheringActionDetails?.name}`;
-          break;
-
-        case CharacterActionType.Crafting:
+        case 'Crafting':
           const itemName =
             action.craftingActionDetails?.craftingQueueItems?.[0]
               ?.equipmentInstance?.itemBase?.name ?? 'Unknown Item';

@@ -119,7 +119,19 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
         }
 
         var gatheringRewards = await _gatheringRewardProcessor.ProcessAsync(
-            facts,
+            new CombatGatheringRewardFacts(
+                facts.CharacterId,
+                facts.Encounters.Count(x => x.IsVictory),
+                facts.EquippedTool,
+                facts.Area.GatheringNodes
+                    .Select(node => new CombatGatheringNode(
+                        node.Id,
+                        node.Name,
+                        node.Type,
+                        node.LevelRequirement,
+                        node.ProcChance,
+                        node.LootTable))
+                    .ToArray()),
             cancellationToken);
 
         var gatheringLoot = gatheringRewards

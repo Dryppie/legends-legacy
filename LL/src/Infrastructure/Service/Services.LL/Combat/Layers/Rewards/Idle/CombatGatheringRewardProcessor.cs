@@ -1,7 +1,11 @@
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Professions;
 using Domain.Models.Combat;
 using Domain.Models.Inventories;
+using Domain.Models.Professions;
+using Domain.Models.Professions.Gathering.GatheringNodes;
 using Services.LL.Combat.Layers.Rewards.Models;
+using Services.LL.Interfaces;
 using Services.LL.Interfaces.Combat.Reward;
 using Services.LL.Interfaces.Combat.Reward.Idle;
 
@@ -11,21 +15,27 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
 {
     private readonly ILootService _lootService;
     private readonly IRandomSource _randomSource;
+    private readonly IProfessionService _professionService;
+    private readonly ILevelingService _levelingService;
 
     public CombatGatheringRewardProcessor(
         ILootService lootService,
-        IRandomSource randomSource)
+        IRandomSource randomSource,
+        IProfessionService professionService,
+        ILevelingService levelingService)
     {
         _lootService = lootService;
         _randomSource = randomSource;
+        _professionService = professionService;
+        _levelingService = levelingService;
     }
 
     public async Task<IReadOnlyList<GatheringRewardResult>> ProcessAsync(
-        IdleCombatRewardFacts facts,
+        CombatGatheringRewardFacts facts,
         CancellationToken cancellationToken)
     {
-        var victories = facts.Encounters.Count(x => x.IsVictory);
-        if (victories <= 0 || facts.Area.GatheringNodes.Count == 0)
+        var victories = facts.Victories;
+        if (victories <= 0 || facts.GatheringNodes.Count == 0)
         {
             return [];
         }
@@ -36,8 +46,20 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
             return [];
         }
 
-        var matchingNodes = facts.Area.GatheringNodes
+        var professionType = ToProfessionType(tool.GatheringType);
+        if (professionType == ProfessionType.None)
+        {
+            return [];
+        }
+
+        var profession = await _professionService.GetOrCreateProfessionAsync(
+            facts.CharacterId,
+            professionType,
+            cancellationToken);
+
+        var matchingNodes = facts.GatheringNodes
             .Where(node => node.Type == tool.GatheringType)
+            .Where(node => node.LevelRequirement is null || node.LevelRequirement <= profession.Level)
             .Where(node => node.LootTable is { Entries.Count: > 0 })
             .ToList();
 
@@ -61,9 +83,9 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
                         ToolType = tool.GatheringType,
                         NodeId = node.Id,
                         NodeName = ResolveNodeName(node.Id, node.Name),
-                        ToolName = tool.Name,
-                        Success = false,
-                        Message = "No resources gathered."
+                    ToolName = tool.Name,
+                    Success = false,
+                    Message = "No resources gathered."
                     });
                     continue;
                 }
@@ -81,13 +103,33 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
                     NodeName = ResolveNodeName(node.Id, node.Name),
                     ToolName = tool.Name,
                     Success = gathered.Count > 0,
+                    ExperienceGained = 1,
                     ItemsGained = gathered,
                     Message = gathered.Count > 0 ? null : "No resources gathered."
                 });
             }
         }
 
+        await AwardExperienceAsync(profession, results.Sum(x => x.ExperienceGained), cancellationToken);
+
         return results;
+    }
+
+    private async Task AwardExperienceAsync(
+        Profession profession,
+        int experienceGained,
+        CancellationToken cancellationToken)
+    {
+        if (experienceGained <= 0)
+        {
+            return;
+        }
+
+        profession.Experience += experienceGained;
+
+        await _levelingService.UpdateProfessionLevel(profession, cancellationToken);
+
+        _professionService.UpdateProfessionLevel([profession]);
     }
 
     private void ApplyToolBonuses(List<InventoryItem> gathered, EquippedGatheringTool tool)
@@ -123,4 +165,13 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
 
         return nodeId.Replace('_', ' ');
     }
+
+    private static ProfessionType ToProfessionType(GatheringType gatheringType) => gatheringType switch
+    {
+        GatheringType.Mining => ProfessionType.Mining,
+        GatheringType.Woodcutting => ProfessionType.Woodcutting,
+        GatheringType.Fishing => ProfessionType.Fishing,
+        GatheringType.Skinning => ProfessionType.Skinning,
+        _ => ProfessionType.None
+    };
 }

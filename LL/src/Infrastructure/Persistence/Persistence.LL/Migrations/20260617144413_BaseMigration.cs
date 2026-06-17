@@ -535,27 +535,6 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "GatheringNodes",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "text", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    LevelRequirement = table.Column<int>(type: "integer", nullable: false),
-                    ProfessionType = table.Column<int>(type: "integer", nullable: false),
-                    LootTableId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GatheringNodes", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_GatheringNodes_LootTableEntry_LootTableId",
-                        column: x => x.LootTableId,
-                        principalTable: "LootTableEntry",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Material",
                 columns: table => new
                 {
@@ -878,10 +857,7 @@ namespace Persistence.LL.Migrations
                     CharacterActionId = table.Column<Guid>(type: "uuid", nullable: false),
                     ActionType = table.Column<int>(type: "integer", nullable: false),
                     CharacterTeam = table.Column<List<Guid>>(type: "uuid[]", nullable: true),
-                    AreaId = table.Column<string>(type: "text", nullable: true),
-                    Name = table.Column<string>(type: "text", nullable: true),
-                    ProfessionType = table.Column<int>(type: "integer", nullable: true),
-                    LootTableId = table.Column<Guid>(type: "uuid", nullable: true)
+                    AreaId = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -897,12 +873,6 @@ namespace Persistence.LL.Migrations
                         column: x => x.CharacterActionId,
                         principalTable: "CharacterActions",
                         principalColumn: "CharacterId",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ActionDetails_LootTableEntry_LootTableId",
-                        column: x => x.LootTableId,
-                        principalTable: "LootTableEntry",
-                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -1087,11 +1057,6 @@ namespace Persistence.LL.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_ActionDetails_LootTableId",
-                table: "ActionDetails",
-                column: "LootTableId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_AreaCreature_CreatureId",
                 table: "AreaCreature",
                 column: "CreatureId");
@@ -1196,11 +1161,6 @@ namespace Persistence.LL.Migrations
                 name: "IX_ExternalLogins_UserId",
                 table: "ExternalLogins",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_GatheringNodes_LootTableId",
-                table: "GatheringNodes",
-                column: "LootTableId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GuildInvites_CharacterId",
@@ -1367,9 +1327,6 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "ExternalLogins");
-
-            migrationBuilder.DropTable(
-                name: "GatheringNodes");
 
             migrationBuilder.DropTable(
                 name: "GuildBuildingUpgrade");

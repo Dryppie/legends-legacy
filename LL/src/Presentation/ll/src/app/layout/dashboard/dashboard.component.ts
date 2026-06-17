@@ -116,14 +116,7 @@ export class DashboardComponent implements OnInit {
 
     let route: string[] = [];
 
-    if (actionType === CharacterActionType.Gathering) {
-      route = [
-        'game',
-        'professions',
-        'gathering',
-        action.gatheringActionDetails!.professionType.toLowerCase(),
-      ];
-    } else {
+    if (actionType === CharacterActionType.Crafting) {
       const equipmentType = (
         action.craftingActionDetails?.craftingQueueItems[0].equipmentInstance
           .itemBase as Equipment
@@ -151,6 +144,8 @@ export class DashboardComponent implements OnInit {
         default:
           return;
       }
+    } else {
+      return;
     }
 
     this.router.navigate(route);

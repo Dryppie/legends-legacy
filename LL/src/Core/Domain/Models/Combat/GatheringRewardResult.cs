@@ -10,6 +10,7 @@ public sealed class GatheringRewardResult
     public string NodeName { get; set; } = string.Empty;
     public string ToolName { get; set; } = string.Empty;
     public bool Success { get; set; }
+    public int ExperienceGained { get; set; }
     public List<InventoryItem> ItemsGained { get; set; } = [];
     public string? Message { get; set; }
 }

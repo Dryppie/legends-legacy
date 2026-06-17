@@ -35,7 +35,6 @@ public static class LLDbContextExtensions
         if (!context.Entities.Any())
         {
             await SeedCreatures.SeedCreaturesData(context);
-            await SeedProfessions.SeedProfessionsData(context);
 #if DEBUG
             await SeedAdminData(context, hasher);
             await SeedInventoryItems(context);

@@ -14,10 +14,6 @@ export const PROFESSIONS_ROUTES: Routes = [
         pathMatch: 'full',
       },
       {
-        path: 'gathering/:id',
-        component: GatheringComponent,
-      },
-      {
         path: 'crafting/:id',
         component: CraftingComponent,
       },

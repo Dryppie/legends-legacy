@@ -4,7 +4,6 @@ import { ProgressBarComponent } from '../../progress-bar/progress-bar.component'
 import { CharacterActionDto } from '../../../models/Dtos/characterActionDto';
 import { Subscription } from 'rxjs';
 import { CharacterActionsService } from '../../../../core/services/api/character-actions/character-actions.service';
-import { CharacterActionType } from '../../../models/enums/characterActionType';
 
 @Component({
   selector: 'app-profession-action',
@@ -16,8 +15,7 @@ import { CharacterActionType } from '../../../models/enums/characterActionType';
 export class ProfessionActionComponent implements OnInit, OnDestroy {
   currentAction: CharacterActionDto | null = null;
   private subscription: Subscription = new Subscription();
-  remainingTime: string = '00:00'; // Add a property to track the remaining time
-  isGatheringAction = false;
+  remainingTime: string = '00:00';
   performingAction = '';
 
   constructor(private characterActionsService: CharacterActionsService) {}
@@ -25,17 +23,7 @@ export class ProfessionActionComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.subscription.add(
       this.characterActionsService.currentAction$.subscribe((action) => {
-        if (action?.isDeleted) {
-          this.isGatheringAction = false;
-          return;
-        }
         this.currentAction = action;
-        this.isGatheringAction =
-          this.currentAction?.characterActionType ===
-          CharacterActionType.Gathering;
-
-        if (this.isGatheringAction)
-          this.performingAction = `Cutting: ${action?.gatheringActionDetails!.name}`;
       }),
     );
   }
@@ -44,13 +32,11 @@ export class ProfessionActionComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  // Update the remaining time when received from the progress bar
   onRemainingTimeChange(time: string): void {
     this.remainingTime = time;
   }
 
   stopAction(): void {
-    this.isGatheringAction == false;
     this.characterActionsService.stopCharacterAction();
   }
 }

@@ -19,7 +19,6 @@ using Domain.Models.LootTables;
 using Domain.Models.MarketPlaces;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
-using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
@@ -96,7 +95,6 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
         modelBuilder.Entity<ActionDetails>()
             .HasDiscriminator<CharacterActionType>("ActionType")
             .HasValue<CombatActionDetails>(CharacterActionType.Combat)
-            .HasValue<GatheringActionDetails>(CharacterActionType.Gathering)
             .HasValue<CraftingActionDetails>(CharacterActionType.Crafting);
 
         modelBuilder.Entity<LootTableEntry>()
@@ -156,7 +154,6 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<CharacterAction> CharacterActions => Set<CharacterAction>();
     public DbSet<ActionDetails> ActionDetails => Set<ActionDetails>();
     public DbSet<CraftingQueueItem> CraftingQueueItems => Set<CraftingQueueItem>(); 
-    public DbSet<GatheringNode> GatheringNodes => Set<GatheringNode>();
 
     //public DbSet<Equipment> Equipments => Set<Equipment>();
 

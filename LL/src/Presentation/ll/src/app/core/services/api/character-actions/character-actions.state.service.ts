@@ -7,7 +7,6 @@ import {
 import { CharacterActionType } from '../../../../shared/models/enums/characterActionType';
 import { CombatActionHandler } from './handlers/combat-action-handler';
 import { CraftingActionHandler } from './handlers/crafting-action-handler';
-import { GatheringActionHandler } from './handlers/gathering-action-handler';
 import { CharacterActionsPollingService } from './helpers/characterActionsPollingService';
 import {
   catchError,
@@ -55,12 +54,6 @@ export class CharacterActionsStateService {
       CharacterActionType.Crafting,
   );
 
-  readonly isGatheringAction = computed(
-    () =>
-      this._currentAction()?.characterActionType ===
-      CharacterActionType.Gathering,
-  );
-
   readonly isActiveAction = computed(
     () =>
       !!this._currentAction() &&
@@ -74,7 +67,6 @@ export class CharacterActionsStateService {
     private readonly persistence: CharacterActionTypePersistenceService,
     private readonly combatHandler: CombatActionHandler,
     private readonly craftingHandler: CraftingActionHandler,
-    private readonly gatheringHandler: GatheringActionHandler,
     private readonly gameService: GameService,
     private readonly combatService: CombatService,
   ) {
@@ -94,9 +86,6 @@ export class CharacterActionsStateService {
           break;
         case CharacterActionType.Crafting:
           queueMicrotask(() => this.craftingHandler.handle(action));
-          break;
-        case CharacterActionType.Gathering:
-          queueMicrotask(() => this.gatheringHandler.handle(action));
           break;
       }
     });
@@ -138,7 +127,7 @@ export class CharacterActionsStateService {
 
   startAction(
     type: CharacterActionType,
-    payload: StartCombatActionRequest | StartCraftingActionRequest | string,
+    payload: StartCombatActionRequest | StartCraftingActionRequest,
   ): void {
     this.persistence.set(type);
     let call$: Observable<boolean>;
@@ -156,9 +145,6 @@ export class CharacterActionsStateService {
         call$ = this.actionsService.startCrafting(
           payload as StartCraftingActionRequest,
         );
-        break;
-      case CharacterActionType.Gathering:
-        call$ = this.actionsService.startGathering(payload as string);
         break;
       default:
         console.warn('Unknown action type', type);
@@ -209,7 +195,6 @@ export class CharacterActionsStateService {
       ...currentAction,
       isDeleted: true,
       craftingActionDetails: undefined,
-      gatheringActionDetails: undefined,
       combatActionDetails: undefined,
     };
     this.updateDisplay(updated);
