@@ -1,8 +1,9 @@
 import { AttributeModifier } from '../../models/Dtos/attributesDto';
 import { AttributeType } from '../../models/enums/attributeType';
 import { EquipmentType } from '../../models/enums/equipmentType';
+import { GatheringType } from '../../models/enums/gatheringType';
 import { Rarity } from '../../models/enums/rarity';
-import { Equipment, EquipmentInstance } from '../../models/item';
+import { Equipment, EquipmentInstance, ToolBonusModifier } from '../../models/item';
 
 export interface EquipmentDisplay {
   // Common
@@ -12,6 +13,8 @@ export interface EquipmentDisplay {
   description?: string;
   baseModifiers?: AttributeModifier[];
   instanceModifiers: AttributeModifier[];
+  gatheringType?: GatheringType;
+  toolBonuses: ToolBonusModifier[];
 
   // Weapon only
   magnitude?: number;
@@ -31,6 +34,8 @@ export function mapEquipmentToDisplay(e: Equipment): EquipmentDisplay {
     equipmentType: e.equipmentType,
     description: e.description,
     instanceModifiers: e.attributeModifiers,
+    gatheringType: e.gatheringType,
+    toolBonuses: e.toolBonuses ?? [],
 
     magnitude: e.magnitude,
     magnitudeRange: e.magnitudeRange,
@@ -51,6 +56,8 @@ export function mapInstanceToDisplay(
     description: base.description,
     baseModifiers: inst.baseModifiers,
     instanceModifiers: inst.instanceModifiers,
+    gatheringType: base.gatheringType,
+    toolBonuses: base.toolBonuses ?? [],
 
     magnitude: base.magnitude,
     magnitudeRange: base.magnitudeRange,

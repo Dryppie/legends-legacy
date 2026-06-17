@@ -1,4 +1,5 @@
 using Domain.Models.Inventories;
+using Domain.Models.Items;
 using Domain.Models.Professions.Gathering.GatheringNodes;
 
 namespace Domain.Models.Combat;
@@ -9,8 +10,10 @@ public sealed class GatheringRewardResult
     public string NodeId { get; set; } = string.Empty;
     public string NodeName { get; set; } = string.Empty;
     public string ToolName { get; set; } = string.Empty;
+    public Rarity ToolRarity { get; set; } = Rarity.Common;
     public bool Success { get; set; }
     public int ExperienceGained { get; set; }
     public List<InventoryItem> ItemsGained { get; set; } = [];
+    public List<string> AppliedBonusEffects { get; set; } = [];
     public string? Message { get; set; }
 }

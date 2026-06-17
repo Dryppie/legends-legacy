@@ -23,6 +23,9 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
             .Include(es => es.EquipmentInstance)
                 .ThenInclude(ei => ei.ItemBase)
                     .ThenInclude(eb => (eb as EquipmentBase).AttributeModifiers)
+            .Include(es => es.EquipmentInstance)
+                .ThenInclude(ei => ei.ItemBase)
+                    .ThenInclude(eb => (eb as EquipmentBase).ToolBonuses)
             .Where(es => es.EntityId.Equals(entityId))
             .ToListAsync(cancellationToken);
 
@@ -35,6 +38,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
             .Include(c => c.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)
                     .ThenInclude(ei => ei.ItemBase)
+                        .ThenInclude(ib => (ib as EquipmentBase).ToolBonuses)
             .Include(c => c.Inventory)
                 .ThenInclude(i => i.InventoryItems)
                     .ThenInclude(ii => ii.ItemInstance)
@@ -94,6 +98,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
             .Include(c => c.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)
                     .ThenInclude(ei => ei.ItemBase)
+                        .ThenInclude(ib => (ib as EquipmentBase).ToolBonuses)
             .Include(c => c.Inventory)
                 .ThenInclude(i => i.InventoryItems)
                     .ThenInclude(ii => ii.ItemInstance)
@@ -130,6 +135,14 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         InventoryItem inventoryItem, EquipmentSlotType? slotType, CancellationToken cancellationToken)
     {
         var equipmentBase = equipmentInstance.EquipmentBase;
+
+        if (slotType == EquipmentSlotType.Tool && equipmentBase.EquipmentType != EquipmentType.Tool)
+            return false;
+
+        if (equipmentBase.EquipmentType == EquipmentType.Tool &&
+            slotType is not null &&
+            slotType != EquipmentSlotType.Tool)
+            return false;
 
         // Equip logic based on EquipmentType
         switch (equipmentBase.EquipmentType)

@@ -1,6 +1,7 @@
 using Domain.Models.Attributes;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Tools;
 using Domain.Models.Professions.Gathering.GatheringNodes;
 
 namespace Services.AdminDashboard.Items;
@@ -14,6 +15,7 @@ public class EquipmentToJsonDto
     public Rarity Rarity { get; set; }
     public EquipmentType EquipmentType { get; set; }
     public ICollection<ItemAttributeModifierToJsonDto> AttributeModifiers { get; set; } = [];
+    public ICollection<ToolBonusModifier> ToolBonuses { get; set; } = [];
     public int AttackSpeed { get; set; } = 0;
     public int Magnitude { get; set; } = 0;
     public int MagnitudeRange { get; set; } = 0;

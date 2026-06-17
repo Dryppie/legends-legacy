@@ -4,6 +4,7 @@ using Application.Common.Interfaces;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Tools;
 using Domain.Models.LootTables;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL.Seeds.JsonSeeding.Dtos.Recipes;
@@ -32,16 +33,27 @@ public static class DbJsonSeeder
         var existingEquipmentById = await ctx.ItemBases
             .OfType<EquipmentBase>()
             .Include(x => x.AttributeModifiers)
+            .Include(x => x.ToolBonuses)
             .ToDictionaryAsync(x => x.Id);
         var existingModifiersById = existingEquipmentById.Values
             .SelectMany(equipment => equipment.AttributeModifiers)
             .ToDictionary(x => x.Id);
+        var existingToolBonusesById = existingEquipmentById.Values
+            .SelectMany(equipment => equipment.ToolBonuses)
+            .ToDictionary(x => x.Id);
         var modifierOwnersById = existingEquipmentById.Values
             .SelectMany(equipment => equipment.AttributeModifiers.Select(modifier => new { modifier.Id, Equipment = equipment }))
+            .ToDictionary(x => x.Id, x => x.Equipment);
+        var toolBonusOwnersById = existingEquipmentById.Values
+            .SelectMany(equipment => equipment.ToolBonuses.Select(bonus => new { bonus.Id, Equipment = equipment }))
             .ToDictionary(x => x.Id, x => x.Equipment);
         var desiredModifierIds = items
             .OfType<EquipmentBase>()
             .SelectMany(x => x.AttributeModifiers.Select(modifier => modifier.Id))
+            .ToHashSet();
+        var desiredToolBonusIds = items
+            .OfType<EquipmentBase>()
+            .SelectMany(x => x.ToolBonuses.Select(bonus => bonus.Id))
             .ToHashSet();
 
         foreach (var item in items)
@@ -53,12 +65,21 @@ public static class DbJsonSeeder
                     attr.ItemBaseId = item.Id;
                 }
 
+                foreach (var bonus in equipment.ToolBonuses)
+                {
+                    bonus.EquipmentBaseId = item.Id;
+                }
+
                 if (!existingEquipmentById.TryGetValue(item.Id, out var existingEquipment))
                 {
                     SyncNewEquipmentAttributeModifiers(
                         equipment,
                         existingModifiersById,
                         modifierOwnersById);
+                    SyncNewToolBonuses(
+                        equipment,
+                        existingToolBonusesById,
+                        toolBonusOwnersById);
                     ctx.ItemBases.Add(item);
                     continue;
                 }
@@ -71,6 +92,13 @@ public static class DbJsonSeeder
                     existingModifiersById,
                     modifierOwnersById,
                     desiredModifierIds);
+                SyncToolBonuses(
+                    ctx,
+                    existingEquipment,
+                    equipment.ToolBonuses,
+                    existingToolBonusesById,
+                    toolBonusOwnersById,
+                    desiredToolBonusIds);
                 continue;
             }
 
@@ -139,6 +167,96 @@ public static class DbJsonSeeder
         }
     }
 
+    private static void SyncToolBonuses(
+        IDbContext ctx,
+        EquipmentBase equipment,
+        IEnumerable<ToolBonusModifier> desiredBonuses,
+        Dictionary<Guid, ToolBonusModifier> existingBonusesById,
+        Dictionary<Guid, EquipmentBase> bonusOwnersById,
+        IReadOnlySet<Guid> desiredBonusIds)
+    {
+        var desiredById = desiredBonuses.ToDictionary(x => x.Id);
+
+        foreach (var existing in equipment.ToolBonuses.ToList())
+        {
+            if (desiredById.Remove(existing.Id, out var desired))
+            {
+                existing.BonusType = desired.BonusType;
+                existing.Amount = desired.Amount;
+                existing.ScopeId = desired.ScopeId;
+                existing.EquipmentBaseId = equipment.Id;
+                continue;
+            }
+
+            if (desiredBonusIds.Contains(existing.Id))
+                continue;
+
+            equipment.ToolBonuses.Remove(existing);
+            ctx.GetEntry(existing).State = EntityState.Deleted;
+            existingBonusesById.Remove(existing.Id);
+            bonusOwnersById.Remove(existing.Id);
+        }
+
+        foreach (var bonus in desiredById.Values)
+        {
+            UpsertToolBonus(
+                equipment,
+                bonus,
+                existingBonusesById,
+                bonusOwnersById);
+        }
+    }
+
+    private static void SyncNewToolBonuses(
+        EquipmentBase equipment,
+        Dictionary<Guid, ToolBonusModifier> existingBonusesById,
+        Dictionary<Guid, EquipmentBase> bonusOwnersById)
+    {
+        var desiredBonuses = equipment.ToolBonuses.ToList();
+        equipment.ToolBonuses.Clear();
+
+        foreach (var bonus in desiredBonuses)
+        {
+            UpsertToolBonus(
+                equipment,
+                bonus,
+                existingBonusesById,
+                bonusOwnersById);
+        }
+    }
+
+    private static void UpsertToolBonus(
+        EquipmentBase equipment,
+        ToolBonusModifier desired,
+        Dictionary<Guid, ToolBonusModifier> existingBonusesById,
+        Dictionary<Guid, EquipmentBase> bonusOwnersById)
+    {
+        if (existingBonusesById.TryGetValue(desired.Id, out var existing))
+        {
+            existing.BonusType = desired.BonusType;
+            existing.Amount = desired.Amount;
+            existing.ScopeId = desired.ScopeId;
+            existing.EquipmentBaseId = equipment.Id;
+
+            if (bonusOwnersById.TryGetValue(existing.Id, out var previousOwner) &&
+                !ReferenceEquals(previousOwner, equipment))
+            {
+                previousOwner.ToolBonuses.Remove(existing);
+            }
+
+            if (!equipment.ToolBonuses.Contains(existing))
+                equipment.ToolBonuses.Add(existing);
+
+            bonusOwnersById[existing.Id] = equipment;
+            return;
+        }
+
+        desired.EquipmentBaseId = equipment.Id;
+        equipment.ToolBonuses.Add(desired);
+        existingBonusesById[desired.Id] = desired;
+        bonusOwnersById[desired.Id] = equipment;
+    }
+
     private static void UpsertEquipmentAttributeModifier(
         EquipmentBase equipment,
         ItemAttributeModifier desired,
@@ -203,7 +321,15 @@ public static class DbJsonSeeder
                 CreateLootTableItem(
                     id: Guid.Parse("10000000-0000-0000-0001-000000000001"),
                     itemId: "advancement_stone",
-                    weight: 35)
+                    weight: 35),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0001-000000000011"),
+                    itemId: "reliable_iron_hatchet",
+                    weight: 3),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0001-000000000012"),
+                    itemId: "duplicating_skinning_knife",
+                    weight: 2)
             ]);
 
         await AddLootTableIfMissing(
@@ -214,7 +340,15 @@ public static class DbJsonSeeder
                 CreateLootTableItem(
                     id: Guid.Parse("10000000-0000-0000-0101-000000000001"),
                     itemId: "stoneguard_ring",
-                    weight: 10)
+                    weight: 10),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0101-000000000011"),
+                    itemId: "prospectors_iron_pickaxe",
+                    weight: 4),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0101-000000000012"),
+                    itemId: "opportunists_cave_fishing_rod",
+                    weight: 3)
             ]);
     }
 

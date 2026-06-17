@@ -83,6 +83,11 @@ public class CharacterActionRepository : ICharacterActionRepository
                     .ThenInclude(ci => ci.EquipmentInstance)
                         .ThenInclude(ei => ei.ItemBase)
                             .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
+            .Include(ca => ca.ActionDetails)
+                .ThenInclude(ad => (ad as CraftingActionDetails).CraftingQueueItems)
+                    .ThenInclude(ci => ci.EquipmentInstance)
+                        .ThenInclude(ei => ei.ItemBase)
+                            .ThenInclude(ib => (ib as EquipmentBase).ToolBonuses)
             .FirstOrDefaultAsync(ca => ca.CharacterId.Equals(characterId), cancellationToken);
         return characterAction;
     }
@@ -114,14 +119,21 @@ public class CharacterActionRepository : ICharacterActionRepository
                     .ThenInclude(ci => ci.EquipmentInstance)
             .FirstOrDefaultAsync(a => a.CharacterId == characterId, cancellationToken);
 
+        if (existingAction?.UpdatedAt > now)
+            return false;
+
         var inventoryItem = await _context.InventoryItems
             .Include(ii => ii.ItemInstance)
                 .ThenInclude(inventoryItem => inventoryItem.ItemBase)
             .FirstOrDefaultAsync(ii => ii.ItemInstanceId == craftingQueueItem.EquipmentInstanceId && ii.InventoryId == characterId, cancellationToken);
 
-        if (inventoryItem == null)
+        if (inventoryItem?.ItemInstance is not EquipmentInstance equipmentInstance)
             return false; // Item doesn't belong to the character or doesn't exist
-        craftingQueueItem.CraftType = (inventoryItem.ItemInstance.ItemBase as EquipmentBase)!.EquipmentType switch
+
+        if (equipmentInstance.EquipmentBase.EquipmentType == EquipmentType.Tool)
+            return false;
+
+        craftingQueueItem.CraftType = equipmentInstance.EquipmentBase.EquipmentType switch
         {
             EquipmentType.TwoHanded or EquipmentType.OneHanded or EquipmentType.OffHand => CraftType.WeaponSmithing,
             EquipmentType.Head or EquipmentType.Chest or EquipmentType.Legs => CraftType.ArmorForging,
@@ -147,10 +159,6 @@ public class CharacterActionRepository : ICharacterActionRepository
             await _context.CharacterActions.AddAsync(action, cancellationToken);
             return true;
         }
-
-        // If combat or any other action ends in the future, it is not possible to start a new action until that time has passed
-        if (existingAction.UpdatedAt > now)
-            return false;
 
         existingAction.IsDeleted = false;
 

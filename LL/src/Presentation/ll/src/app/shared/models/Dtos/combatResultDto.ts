@@ -1,5 +1,6 @@
 import { BattleType } from '../../../core/state/combat-state/combatState';
 import { GatheringType } from '../enums/gatheringType';
+import { Rarity } from '../enums/rarity';
 import { InventoryItem } from '../inventoryItem';
 import { CombatEvent } from './combatEventDto';
 
@@ -22,8 +23,10 @@ export interface GatheringRewardResult {
   nodeId: string;
   nodeName: string;
   toolName: string;
+  toolRarity: Rarity;
   success: boolean;
   itemsGained: InventoryItem[];
+  appliedBonusEffects: string[];
   message?: string;
 }
 

@@ -37,6 +37,7 @@ export interface ItemBase {
 export interface Equipment extends ItemBase {
   equipmentType: EquipmentType;
   attributeModifiers: AttributeModifier[];
+  toolBonuses?: ToolBonusModifier[];
   attackSpeed: number;
   magnitude: number;
   magnitudeRange: number;
@@ -46,6 +47,28 @@ export interface Equipment extends ItemBase {
   doubleGatherChancePercent?: number;
   scalingAttribute: AttributeType;
   scalingAmount: number;
+}
+
+export interface ToolBonusModifier {
+  id: string;
+  equipmentBaseId: string;
+  bonusType: ToolBonusType;
+  amount: number;
+  scopeId?: string;
+}
+
+export enum ToolBonusType {
+  GatheringYieldPercent = 'GatheringYieldPercent',
+  RareMaterialChancePercent = 'RareMaterialChancePercent',
+  DoubleGatherChancePercent = 'DoubleGatherChancePercent',
+  NodeSuccessChancePercent = 'NodeSuccessChancePercent',
+  SpecificNodeYieldPercent = 'SpecificNodeYieldPercent',
+  SpecificRegionYieldPercent = 'SpecificRegionYieldPercent',
+  SpecificResourceYieldPercent = 'SpecificResourceYieldPercent',
+  SpecificToolTypeYieldPercent = 'SpecificToolTypeYieldPercent',
+  BonusRollChancePercent = 'BonusRollChancePercent',
+  MinimumQuantityBonus = 'MinimumQuantityBonus',
+  MaximumQuantityBonus = 'MaximumQuantityBonus',
 }
 
 export interface EssenceItem extends ItemBase {

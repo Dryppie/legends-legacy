@@ -52,7 +52,8 @@ public sealed class InventoryItemFactory : IInventoryItemFactory
             {
                 Id = Guid.NewGuid(),
                 ItemBaseId = itemBase.Id,
-                ItemBase = itemBase
+                ItemBase = itemBase,
+                Rarity = itemBase.Rarity
             },
             ItemType.Essence => new EssenceItemInstance
             {

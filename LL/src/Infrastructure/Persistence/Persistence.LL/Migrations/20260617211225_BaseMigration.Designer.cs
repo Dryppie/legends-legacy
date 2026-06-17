@@ -13,7 +13,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20260617144413_BaseMigration")]
+    [Migration("20260617211225_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -700,6 +700,34 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("EquipmentInstanceId");
 
                     b.ToTable("EquipmentSlots");
+                });
+
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Tools.ToolBonusModifier", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<double>("Amount")
+                        .HasColumnType("double precision");
+
+                    b.Property<int>("BonusType")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("EquipmentBaseId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<string>("ScopeId")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EquipmentBaseId");
+
+                    b.ToTable("ToolBonusModifier");
                 });
 
             modelBuilder.Entity("Domain.Models.Items.ItemBase", b =>
@@ -1716,6 +1744,17 @@ namespace Persistence.LL.Migrations
                     b.Navigation("EquipmentInstance");
                 });
 
+            modelBuilder.Entity("Domain.Models.Items.Equipments.Tools.ToolBonusModifier", b =>
+                {
+                    b.HasOne("Domain.Models.Items.Equipments.EquipmentBase", "EquipmentBase")
+                        .WithMany("ToolBonuses")
+                        .HasForeignKey("EquipmentBaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("EquipmentBase");
+                });
+
             modelBuilder.Entity("Domain.Models.Items.ItemInstance", b =>
                 {
                     b.HasOne("Domain.Models.Items.ItemBase", "ItemBase")
@@ -2064,6 +2103,8 @@ namespace Persistence.LL.Migrations
             modelBuilder.Entity("Domain.Models.Items.Equipments.EquipmentBase", b =>
                 {
                     b.Navigation("AttributeModifiers");
+
+                    b.Navigation("ToolBonuses");
                 });
 
             modelBuilder.Entity("Domain.Models.Items.Equipments.EquipmentInstance", b =>

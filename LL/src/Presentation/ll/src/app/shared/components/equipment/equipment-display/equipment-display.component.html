@@ -18,6 +18,35 @@
     {{ data.description }}
   </p>
 
+  <div
+    *ngIf="data.equipmentType === equipmentType.Tool"
+    class="border-t border-primary/20 pt-2"
+  >
+    <div class="text-[11px] uppercase tracking-[0.16em] text-secondary">
+      Gathering
+    </div>
+    <div
+      *ngIf="data.gatheringType"
+      class="mt-1 flex items-center justify-between gap-4 text-sm"
+    >
+      <span>Tool Type</span>
+      <span class="text-primary">{{ data.gatheringType }}</span>
+    </div>
+    <div *ngIf="data.toolBonuses.length" class="mt-2 text-sm">
+      <div
+        *ngFor="let bonus of data.toolBonuses"
+        class="flex w-full justify-between gap-6 border-b border-white/5 py-1 last:border-b-0"
+      >
+        <span class="text-zinc-300">
+          {{ formatToolBonusType(bonus.bonusType) }}
+        </span>
+        <span class="text-primary">
+          +{{ bonus.amount | number: "1.0-2" }}
+        </span>
+      </div>
+    </div>
+  </div>
+
   <!-- Weapon-only stats -->
   <div
     *ngIf="data.magnitude && data.magnitudeRange"

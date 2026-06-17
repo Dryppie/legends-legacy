@@ -8,59 +8,7 @@
   <div class="border-t border-light_gray pb-3"></div>
 
   <div class="flex flex-row justify-between gap-2">
-    <!-- Modal Body -->
-    <div class="space-y-2">
-      <!-- <div class="flex flex-col gap-1">
-        <h3 class="font-semibold text-primary">Active Ability</h3>
-        <div class="flex gap-1">
-          <div class="flex flex-col gap-1">
-            <p>
-              {{ essence.active.description }}
-            </p>
-            <p>
-              Cost: {{ essence.active.cost }}
-              {{ essence.active.costType }}
-            </p>
-            <p>
-              Cooldown: {{ essence.active.cooldown | ticksToSeconds }} seconds
-            </p>
-          </div>
-        </div>
-        <div></div>
-      </div>
-
-      <div class="flex flex-col gap-1">
-        <h3 class="font-semibold text-primary">Passive Ability</h3>
-        <div class="flex gap-1">
-          <div>
-            {{ essence.passive.description }}
-          </div>
-        </div>
-      </div> -->
-
-      <div class="italic text-zinc-300">
-        {{ equipmentInstance.equipmentBase.equipmentType | equipmentType }}
-      </div>
-      <div>
-        <h3 class="pb-1 font-semibold text-primary">Attributes</h3>
-        <div
-          *ngFor="let attribute of equipmentInstance.attributeModifiers"
-          class="text-primary"
-        >
-          <div class="flex gap-2 text-white">
-            <div>
-              {{
-                attribute.amount
-                  | attributeValueFormat: attribute.attributeType : true
-              }}
-            </div>
-            <div>
-              {{ attribute.attributeType | attributeTypeFormat }}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <app-equipment-display [item]="equipmentInstance"></app-equipment-display>
 
     <!-- Modal Footer -->
     <div class="mt-6 flex place-items-end justify-end gap-2">

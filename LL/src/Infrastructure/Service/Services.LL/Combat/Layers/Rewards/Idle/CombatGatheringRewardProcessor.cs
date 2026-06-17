@@ -2,6 +2,7 @@ using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Professions;
 using Domain.Models.Combat;
 using Domain.Models.Inventories;
+using Domain.Models.Items.Equipments.Tools;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Gathering.GatheringNodes;
 using Services.LL.Combat.Layers.Rewards.Models;
@@ -72,7 +73,9 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
 
         foreach (var node in matchingNodes)
         {
-            var chance = Math.Clamp(node.ProcChance, 0f, 1f);
+            var nodeSuccessBonus = Math.Max(0d, tool.GetBonus(ToolBonusType.NodeSuccessChancePercent));
+            var chance = Math.Clamp(node.ProcChance + (nodeSuccessBonus / 100d), 0d, 1d);
+            var appliedBonusEffects = BuildAppliedBonusEffects(tool, node, nodeSuccessBonus);
 
             for (var i = 0; i < victories; i++)
             {
@@ -83,18 +86,28 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
                         ToolType = tool.GatheringType,
                         NodeId = node.Id,
                         NodeName = ResolveNodeName(node.Id, node.Name),
-                    ToolName = tool.Name,
-                    Success = false,
-                    Message = "No resources gathered."
+                        ToolName = tool.Name,
+                        ToolRarity = tool.Rarity,
+                        Success = false,
+                        AppliedBonusEffects = appliedBonusEffects,
+                        Message = "No resources gathered."
                     });
                     continue;
                 }
 
+                var bonusRollChance = Math.Clamp(
+                    Math.Max(0d, tool.GetBonus(ToolBonusType.BonusRollChancePercent)),
+                    0d,
+                    100d) / 100d;
+                var numberOfRolls = 1 + (bonusRollChance > 0d && _randomSource.NextDouble() < bonusRollChance ? 1 : 0);
+                var rareMaterialChance = Math.Max(0d, tool.GetBonus(ToolBonusType.RareMaterialChancePercent));
                 var gathered = _lootService.GenerateGatheringLootAsync(
                     node.LootTable,
-                    cancellationToken);
+                    cancellationToken,
+                    rareMaterialChance,
+                    numberOfRolls);
 
-                ApplyToolBonuses(gathered, tool);
+                ApplyToolBonuses(gathered, tool, node);
 
                 results.Add(new GatheringRewardResult
                 {
@@ -102,9 +115,11 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
                     NodeId = node.Id,
                     NodeName = ResolveNodeName(node.Id, node.Name),
                     ToolName = tool.Name,
+                    ToolRarity = tool.Rarity,
                     Success = gathered.Count > 0,
                     ExperienceGained = 1,
                     ItemsGained = gathered,
+                    AppliedBonusEffects = appliedBonusEffects,
                     Message = gathered.Count > 0 ? null : "No resources gathered."
                 });
             }
@@ -132,28 +147,64 @@ public sealed class CombatGatheringRewardProcessor : ICombatGatheringRewardProce
         _professionService.UpdateProfessionLevel([profession]);
     }
 
-    private void ApplyToolBonuses(List<InventoryItem> gathered, EquippedGatheringTool tool)
+    private void ApplyToolBonuses(
+        List<InventoryItem> gathered,
+        EquippedGatheringTool tool,
+        CombatGatheringNode node)
     {
         if (gathered.Count == 0)
         {
             return;
         }
 
-        var yieldMultiplier = 1d + Math.Max(0d, tool.YieldBonusPercent) / 100d;
+        var yieldBonus =
+            Math.Max(0d, tool.GetBonus(ToolBonusType.GatheringYieldPercent)) +
+            Math.Max(0d, tool.GetBonus(ToolBonusType.SpecificNodeYieldPercent, node.Id));
+        var yieldMultiplier = 1d + yieldBonus / 100d;
 
         foreach (var item in gathered)
         {
-            item.Quantity = Math.Max(1, (int)Math.Round(item.Quantity * yieldMultiplier));
+            item.Quantity = Math.Max(0, (int)Math.Round(Math.Max(0, item.Quantity) * yieldMultiplier));
         }
 
-        var doubleChance = Math.Clamp(tool.DoubleGatherChancePercent, 0d, 100d) / 100d;
+        var doubleChance = Math.Clamp(
+            Math.Max(0d, tool.GetBonus(ToolBonusType.DoubleGatherChancePercent)),
+            0d,
+            100d) / 100d;
         if (doubleChance > 0d && _randomSource.NextDouble() < doubleChance)
         {
             foreach (var item in gathered)
             {
-                item.Quantity = Math.Max(1, item.Quantity * 2);
+                item.Quantity = Math.Max(0, item.Quantity * 2);
             }
         }
+    }
+
+    private static List<string> BuildAppliedBonusEffects(
+        EquippedGatheringTool tool,
+        CombatGatheringNode node,
+        double nodeSuccessBonus)
+    {
+        var effects = new List<string>();
+
+        AddEffect(effects, ToolBonusType.GatheringYieldPercent, tool.GetBonus(ToolBonusType.GatheringYieldPercent));
+        AddEffect(effects, ToolBonusType.SpecificNodeYieldPercent, tool.GetBonus(ToolBonusType.SpecificNodeYieldPercent, node.Id));
+        AddEffect(effects, ToolBonusType.NodeSuccessChancePercent, nodeSuccessBonus);
+        AddEffect(effects, ToolBonusType.RareMaterialChancePercent, tool.GetBonus(ToolBonusType.RareMaterialChancePercent));
+        AddEffect(effects, ToolBonusType.DoubleGatherChancePercent, tool.GetBonus(ToolBonusType.DoubleGatherChancePercent));
+        AddEffect(effects, ToolBonusType.BonusRollChancePercent, tool.GetBonus(ToolBonusType.BonusRollChancePercent));
+
+        return effects;
+    }
+
+    private static void AddEffect(List<string> effects, ToolBonusType bonusType, double amount)
+    {
+        if (amount <= 0)
+        {
+            return;
+        }
+
+        effects.Add($"{bonusType}: +{amount:0.##}");
     }
 
     private static string ResolveNodeName(string nodeId, string nodeName)

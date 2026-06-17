@@ -91,19 +91,13 @@ public sealed class IdleCombatRewardFactBuilder : IIdleCombatRewardFactBuilder
 
         var tool = character.EquipmentSlots
             .FirstOrDefault(slot => slot.EquipmentSlotType == EquipmentSlotType.Tool)
-            ?.EquipmentInstance
-            ?.EquipmentBase;
+            ?.EquipmentInstance;
 
-        if (tool?.GatheringType is null)
+        if (tool?.EquipmentBase.GatheringType is null)
         {
             return null;
         }
 
-        return new EquippedGatheringTool(
-            Name: tool.Name,
-            GatheringType: tool.GatheringType.Value,
-            YieldBonusPercent: tool.YieldBonusPercent,
-            RareChanceBonusPercent: tool.RareChanceBonusPercent,
-            DoubleGatherChancePercent: tool.DoubleGatherChancePercent);
+        return EquippedGatheringTool.From(tool);
     }
 }

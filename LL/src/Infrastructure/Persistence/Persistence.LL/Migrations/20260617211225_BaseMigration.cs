@@ -376,6 +376,27 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ToolBonusModifier",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    EquipmentBaseId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    BonusType = table.Column<int>(type: "integer", nullable: false),
+                    Amount = table.Column<double>(type: "double precision", nullable: false),
+                    ScopeId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ToolBonusModifier", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ToolBonusModifier_ItemBases_EquipmentBaseId",
+                        column: x => x.EquipmentBaseId,
+                        principalTable: "ItemBases",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Areas",
                 columns: table => new
                 {
@@ -1284,6 +1305,11 @@ namespace Persistence.LL.Migrations
                 name: "IX_StatOverride_CreatureId",
                 table: "StatOverride",
                 column: "CreatureId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ToolBonusModifier_EquipmentBaseId",
+                table: "ToolBonusModifier",
+                column: "EquipmentBaseId");
         }
 
         /// <inheritdoc />
@@ -1372,6 +1398,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "StatOverride");
+
+            migrationBuilder.DropTable(
+                name: "ToolBonusModifier");
 
             migrationBuilder.DropTable(
                 name: "ActionDetails");

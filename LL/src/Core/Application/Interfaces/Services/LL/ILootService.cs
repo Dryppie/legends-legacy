@@ -21,7 +21,11 @@ public interface ILootService
     /// <param name="lootTable"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    List<InventoryItem> GenerateGatheringLootAsync(LootTable lootTable, CancellationToken cancellationToken);
+    List<InventoryItem> GenerateGatheringLootAsync(
+        LootTable lootTable,
+        CancellationToken cancellationToken,
+        double rareEntryWeightBonusPercent = 0,
+        int numberOfRolls = 1);
 
     /// <summary>
     /// Generate Idle-Combat Loot based on defeated enemies

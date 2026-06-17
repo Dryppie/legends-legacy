@@ -13,6 +13,7 @@ import {
 import { Equipment, EquipmentInstance } from '../../../models/item';
 import { AttributeModifier, ModifierType } from '../../../models/Dtos/attributesDto';
 import { Rarity } from '../../../models/enums/rarity';
+import { EquipmentType } from '../../../models/enums/equipmentType';
 
 @Component({
   selector: 'app-equipment-display',
@@ -30,6 +31,7 @@ import { Rarity } from '../../../models/enums/rarity';
 export class EquipmentDisplayComponent {
   @Input({ required: true }) item!: Equipment | EquipmentInstance;
   modifierType = ModifierType;
+  equipmentType = EquipmentType;
   /** The view-model the template binds to */
   data!: EquipmentDisplay;
 
@@ -67,6 +69,10 @@ export class EquipmentDisplayComponent {
       attribute.modifierType !== ModifierType.Flat &&
       !isPercentAttribute(attribute.attributeType)
     );
+  }
+
+  formatToolBonusType(type: string): string {
+    return type.replace(/Percent$/, ' %').replace(/([A-Z])/g, ' $1').trim();
   }
 }
 
