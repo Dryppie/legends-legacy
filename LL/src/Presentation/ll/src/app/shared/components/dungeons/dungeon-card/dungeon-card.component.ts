@@ -29,7 +29,7 @@ interface EntryRequirementPreview {
   requiredAmount: number;
 }
 
-type DungeonDetailTab = 'overview' | 'rewards' | 'gathering' | 'records';
+type DungeonDetailTab = 'rewards' | 'gathering';
 
 @Component({
   selector: 'app-dungeon-card',
@@ -54,14 +54,13 @@ export class DungeonCardComponent implements OnChanges {
   ];
 
   readonly detailTabs: { id: DungeonDetailTab; label: string }[] = [
-    { id: 'overview', label: 'Overview' },
     { id: 'rewards', label: 'Rewards' },
     { id: 'gathering', label: 'Gathering' },
   ];
 
   showPreview = signal(false);
   difficulty = signal<DungeonDifficulty>(DungeonDifficulty.Normal);
-  selectedTab = signal<DungeonDetailTab>('overview');
+  selectedTab = signal<DungeonDetailTab>('rewards');
 
   constructor(
     private readonly dungeonState: DungeonStateService,
@@ -284,6 +283,48 @@ export class DungeonCardComponent implements OnChanges {
             this.rewardGroupSortValue(second.title) ||
           first.title.localeCompare(second.title),
       );
+  }
+
+  selectedRewardSections(): RewardGroup[] {
+    const repeatableRewards: DungeonPreviewReward[] = [];
+    const firstClearRewards: DungeonPreviewReward[] = [];
+
+    for (const group of this.selectedRewardGroups()) {
+      const title = group.title.toLowerCase();
+
+      if (title === 'first completion' || title === 'first clear') {
+        firstClearRewards.push(...group.rewards);
+        continue;
+      }
+
+      repeatableRewards.push(...group.rewards);
+    }
+
+    return [
+      { title: 'Run Rewards', rewards: repeatableRewards },
+      { title: 'First Clear', rewards: firstClearRewards },
+    ].filter((section) => section.rewards.length > 0);
+  }
+
+  trackRewardGroup(_: number, group: RewardGroup): string {
+    return group.title;
+  }
+
+  trackReward(_: number, reward: DungeonPreviewReward): string {
+    return reward.id || reward.itemBase?.id || reward.itemBase?.name || '';
+  }
+
+  trackGatheringNode(_: number, node: DungeonGatheringNodePreview): string {
+    return node.id;
+  }
+
+  trackGatheringLoot(
+    _: number,
+    loot: DungeonGatheringNodePreview['loot'][number],
+  ): string {
+    return (
+      loot.id || loot.itemId || loot.itemBase?.id || loot.itemBase?.name || ''
+    );
   }
 
   selectedMainRewards(limit = 3): DungeonPreviewReward[] {
