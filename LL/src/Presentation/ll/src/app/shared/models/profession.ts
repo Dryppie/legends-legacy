@@ -1,5 +1,4 @@
 import { ProfessionType } from './Dtos/characterProfession';
-import { GatheringNode } from './Dtos/gatheringNode';
 import { ItemType } from './enums/itemType';
 import { Equipment, EquipmentInstance, ItemBase } from './item';
 
@@ -7,10 +6,6 @@ export interface Profession {
   name: string;
   iconPath: string;
   professionType: ProfessionType;
-}
-
-export interface GatheringProfession extends Profession {
-  gatheringNodes: GatheringNode[];
 }
 
 export interface CraftingProfession extends Profession {

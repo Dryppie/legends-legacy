@@ -1,11 +1,10 @@
 import { Component, Input } from '@angular/core';
 import { ProfessionIconComponent } from '../profession-icon/profession-icon.component';
-import { ProfessionActionComponent } from '../profession-action/profession-action.component';
 
 @Component({
   selector: 'app-profession-header',
   standalone: true,
-  imports: [ProfessionIconComponent, ProfessionActionComponent],
+  imports: [ProfessionIconComponent],
   templateUrl: './profession-header.component.html',
   styleUrl: './profession-header.component.css',
 })
