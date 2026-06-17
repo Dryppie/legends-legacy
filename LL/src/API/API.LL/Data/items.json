@@ -4583,9 +4583,6 @@
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Mining",
-    "yieldBonusPercent": 0,
-    "rareChanceBonusPercent": 0,
-    "doubleGatherChancePercent": 0,
     "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
@@ -4602,9 +4599,6 @@
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Woodcutting",
-    "yieldBonusPercent": 0,
-    "rareChanceBonusPercent": 0,
-    "doubleGatherChancePercent": 0,
     "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
@@ -4621,9 +4615,6 @@
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Fishing",
-    "yieldBonusPercent": 0,
-    "rareChanceBonusPercent": 0,
-    "doubleGatherChancePercent": 0,
     "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
@@ -4640,9 +4631,6 @@
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Skinning",
-    "yieldBonusPercent": 0,
-    "rareChanceBonusPercent": 0,
-    "doubleGatherChancePercent": 0,
     "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
@@ -4659,9 +4647,6 @@
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Mining",
-    "yieldBonusPercent": 0,
-    "rareChanceBonusPercent": 0,
-    "doubleGatherChancePercent": 0,
     "toolBonuses": [
       {
         "id": "20000000-0000-0000-0000-000000000001",
@@ -4691,9 +4676,6 @@
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Woodcutting",
-    "yieldBonusPercent": 0,
-    "rareChanceBonusPercent": 0,
-    "doubleGatherChancePercent": 0,
     "toolBonuses": [
       {
         "id": "20000000-0000-0000-0000-000000000003",
@@ -4723,9 +4705,6 @@
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Fishing",
-    "yieldBonusPercent": 0,
-    "rareChanceBonusPercent": 0,
-    "doubleGatherChancePercent": 0,
     "toolBonuses": [
       {
         "id": "20000000-0000-0000-0000-000000000005",
@@ -4755,9 +4734,6 @@
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Skinning",
-    "yieldBonusPercent": 0,
-    "rareChanceBonusPercent": 0,
-    "doubleGatherChancePercent": 0,
     "toolBonuses": [
       {
         "id": "20000000-0000-0000-0000-000000000007",

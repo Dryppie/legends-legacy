@@ -116,9 +116,6 @@ public class RecipeJsonReader
             Magnitude = itemDto.Magnitude,
             MagnitudeRange = itemDto.MagnitudeRange,
             GatheringType = itemDto.GatheringType,
-            YieldBonusPercent = itemDto.YieldBonusPercent,
-            RareChanceBonusPercent = itemDto.RareChanceBonusPercent,
-            DoubleGatherChancePercent = itemDto.DoubleGatherChancePercent,
             ScalingAttribute = itemDto.ScalingAttribute,
             ScalingAmount = itemDto.ScalingAmount
         };

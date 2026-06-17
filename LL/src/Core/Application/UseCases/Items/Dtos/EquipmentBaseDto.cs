@@ -12,9 +12,6 @@ public class EquipmentBaseDto : ItemBaseDto, IMapFrom<EquipmentBase>
     public ICollection<ItemAttributeModifier> AttributeModifiers { get; set; } = [];
     public ICollection<ToolBonusModifier> ToolBonuses { get; set; } = [];
     public GatheringType? GatheringType { get; set; }
-    public double YieldBonusPercent { get; set; }
-    public double RareChanceBonusPercent { get; set; }
-    public double DoubleGatherChancePercent { get; set; }
 
     public void Mapping(Profile profile)
     {

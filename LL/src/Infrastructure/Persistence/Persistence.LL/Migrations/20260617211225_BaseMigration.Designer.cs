@@ -1387,9 +1387,6 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("AttackSpeed")
                         .HasColumnType("integer");
 
-                    b.Property<double>("DoubleGatherChancePercent")
-                        .HasColumnType("double precision");
-
                     b.Property<int>("EquipmentType")
                         .HasColumnType("integer");
 
@@ -1402,17 +1399,11 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("MagnitudeRange")
                         .HasColumnType("integer");
 
-                    b.Property<double>("RareChanceBonusPercent")
-                        .HasColumnType("double precision");
-
                     b.Property<float>("ScalingAmount")
                         .HasColumnType("real");
 
                     b.Property<int>("ScalingAttribute")
                         .HasColumnType("integer");
-
-                    b.Property<double>("YieldBonusPercent")
-                        .HasColumnType("double precision");
 
                     b.HasDiscriminator().HasValue(0);
                 });

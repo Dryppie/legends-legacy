@@ -19,9 +19,6 @@ public class EquipmentBase : ItemBase
     public int Magnitude { get; set; } = 0;
     public int MagnitudeRange { get; set; }
     public GatheringType? GatheringType { get; set; }
-    public double YieldBonusPercent { get; set; }
-    public double RareChanceBonusPercent { get; set; }
-    public double DoubleGatherChancePercent { get; set; }
     public AttributeType ScalingAttribute { get; set; } = AttributeType.Power;
     public float ScalingAmount { get; set; } = 0.1f;
 }

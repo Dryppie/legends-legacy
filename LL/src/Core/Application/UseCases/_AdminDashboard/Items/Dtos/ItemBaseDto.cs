@@ -20,9 +20,6 @@ public class ItemBaseDto
     public int Magnitude { get; set; } = 0;
     public int MagnitudeRange { get; set; } = 0;
     public GatheringType? GatheringType { get; set; }
-    public double YieldBonusPercent { get; set; }
-    public double RareChanceBonusPercent { get; set; }
-    public double DoubleGatherChancePercent { get; set; }
     public AttributeType ScalingAttribute { get; set; } = AttributeType.Power;
     public float ScalingAmount { get; set; } = 0.0f;
 }

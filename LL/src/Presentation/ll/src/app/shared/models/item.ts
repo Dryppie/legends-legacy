@@ -42,9 +42,6 @@ export interface Equipment extends ItemBase {
   magnitude: number;
   magnitudeRange: number;
   gatheringType?: GatheringType;
-  yieldBonusPercent?: number;
-  rareChanceBonusPercent?: number;
-  doubleGatherChancePercent?: number;
   scalingAttribute: AttributeType;
   scalingAmount: number;
 }
