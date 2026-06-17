@@ -27,10 +27,10 @@ public sealed class EquippedGatheringTool
 
         return new EquippedGatheringTool
         {
-            Name = tool.Name,
+            Name = equipmentInstance.DisplayName,
             GatheringType = tool.GatheringType!.Value,
             Rarity = equipmentInstance.Rarity,
-            Bonuses = tool.ToolBonuses.ToList()
+            Bonuses = equipmentInstance.EffectiveToolBonuses.ToList()
         };
     }
 }

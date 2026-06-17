@@ -10,11 +10,13 @@ import { EssenceDefinitionDto } from './essence-system';
 export interface ItemInstance {
   id: string;
   itemBase: ItemBase;
+  displayName?: string;
   source?: string;
   category?: string;
 }
 
 export interface EquipmentInstance extends ItemInstance {
+  displayName: string;
   rarity: Rarity;
   equipmentBase: Equipment;
   potential?: number;
@@ -22,6 +24,8 @@ export interface EquipmentInstance extends ItemInstance {
   baseModifiers: AttributeModifier[];
   instanceModifiers: AttributeModifier[];
   attributeModifiers: AttributeModifier[];
+  toolAffixes: ToolBonusModifier[];
+  effectiveToolBonuses: ToolBonusModifier[];
 }
 
 export interface ItemBase {
@@ -48,7 +52,9 @@ export interface Equipment extends ItemBase {
 
 export interface ToolBonusModifier {
   id: string;
-  equipmentBaseId: string;
+  equipmentBaseId?: string;
+  equipmentInstanceId?: string;
+  name?: string;
   bonusType: ToolBonusType;
   amount: number;
   scopeId?: string;

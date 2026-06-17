@@ -38,7 +38,7 @@
         class="flex w-full justify-between gap-6 border-b border-white/5 py-1 last:border-b-0"
       >
         <span class="text-zinc-300">
-          {{ formatToolBonusType(bonus.bonusType) }}
+          {{ bonus.name || formatToolBonusType(bonus.bonusType) }}
         </span>
         <span class="text-primary">
           +{{ bonus.amount | number: "1.0-2" }}

@@ -377,7 +377,9 @@ namespace Persistence.LL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    EquipmentBaseId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    EquipmentBaseId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    EquipmentInstanceId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Name = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     BonusType = table.Column<int>(type: "integer", nullable: false),
                     Amount = table.Column<double>(type: "double precision", nullable: false),
                     ScopeId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true)
@@ -389,6 +391,12 @@ namespace Persistence.LL.Migrations
                         name: "FK_ToolBonusModifier_ItemBases_EquipmentBaseId",
                         column: x => x.EquipmentBaseId,
                         principalTable: "ItemBases",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ToolBonusModifier_ItemInstances_EquipmentInstanceId",
+                        column: x => x.EquipmentInstanceId,
+                        principalTable: "ItemInstances",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -1307,6 +1315,11 @@ namespace Persistence.LL.Migrations
                 name: "IX_ToolBonusModifier_EquipmentBaseId",
                 table: "ToolBonusModifier",
                 column: "EquipmentBaseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ToolBonusModifier_EquipmentInstanceId",
+                table: "ToolBonusModifier",
+                column: "EquipmentInstanceId");
         }
 
         /// <inheritdoc />

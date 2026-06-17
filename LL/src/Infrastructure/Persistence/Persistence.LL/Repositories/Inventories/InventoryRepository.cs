@@ -28,6 +28,8 @@ public class InventoryRepository : IInventoryRepository
                         .ThenInclude(ib => (ib as EquipmentBase).ToolBonuses)
             .Include(i => i.InventoryItems)
                 .ThenInclude(ii => (ii.ItemInstance as EquipmentInstance).InstanceModifiers)
+            .Include(i => i.InventoryItems)
+                .ThenInclude(ii => (ii.ItemInstance as EquipmentInstance).ToolAffixes)
             .FirstOrDefaultAsync(i => i.CharacterId == characterId, cancellationToken); // Assuming CharacterId is the foreign key
 
         NotFoundException.ThrowIfNull(inventory, nameof(inventory), characterId);
@@ -256,6 +258,12 @@ public class InventoryRepository : IInventoryRepository
             {
                 if (_context.GetEntry(mod).State == EntityState.Detached)
                     _context.GetEntry(mod).State = EntityState.Added;
+            }
+
+            foreach (var affix in eq.ToolAffixes)
+            {
+                if (_context.GetEntry(affix).State == EntityState.Detached)
+                    _context.GetEntry(affix).State = EntityState.Added;
             }
         }
 

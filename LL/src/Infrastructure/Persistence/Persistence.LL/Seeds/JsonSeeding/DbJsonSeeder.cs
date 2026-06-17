@@ -182,6 +182,7 @@ public static class DbJsonSeeder
             if (desiredById.Remove(existing.Id, out var desired))
             {
                 existing.BonusType = desired.BonusType;
+                existing.Name = desired.Name;
                 existing.Amount = desired.Amount;
                 existing.ScopeId = desired.ScopeId;
                 existing.EquipmentBaseId = equipment.Id;
@@ -234,6 +235,7 @@ public static class DbJsonSeeder
         if (existingBonusesById.TryGetValue(desired.Id, out var existing))
         {
             existing.BonusType = desired.BonusType;
+            existing.Name = desired.Name;
             existing.Amount = desired.Amount;
             existing.ScopeId = desired.ScopeId;
             existing.EquipmentBaseId = equipment.Id;
@@ -324,11 +326,11 @@ public static class DbJsonSeeder
                     weight: 35),
                 CreateLootTableItem(
                     id: Guid.Parse("10000000-0000-0000-0001-000000000011"),
-                    itemId: "reliable_iron_hatchet",
+                    itemId: "hatchet",
                     weight: 3),
                 CreateLootTableItem(
                     id: Guid.Parse("10000000-0000-0000-0001-000000000012"),
-                    itemId: "duplicating_skinning_knife",
+                    itemId: "skinning_knife",
                     weight: 2)
             ]);
 
@@ -343,11 +345,11 @@ public static class DbJsonSeeder
                     weight: 10),
                 CreateLootTableItem(
                     id: Guid.Parse("10000000-0000-0000-0101-000000000011"),
-                    itemId: "prospectors_iron_pickaxe",
+                    itemId: "pickaxe",
                     weight: 4),
                 CreateLootTableItem(
                     id: Guid.Parse("10000000-0000-0000-0101-000000000012"),
-                    itemId: "opportunists_cave_fishing_rod",
+                    itemId: "fishing_rod",
                     weight: 3)
             ]);
     }

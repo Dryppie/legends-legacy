@@ -11,15 +11,22 @@ public class ToolBonusModifierConfiguration : IEntityTypeConfiguration<ToolBonus
         b.HasKey(x => x.Id);
 
         b.Property(x => x.EquipmentBaseId)
-            .HasMaxLength(128)
-            .IsRequired();
+            .HasMaxLength(128);
 
         b.Property(x => x.ScopeId)
             .HasMaxLength(128);
 
+        b.Property(x => x.Name)
+            .HasMaxLength(64);
+
         b.HasOne(x => x.EquipmentBase)
             .WithMany(x => x.ToolBonuses)
             .HasForeignKey(x => x.EquipmentBaseId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        b.HasOne(x => x.EquipmentInstance)
+            .WithMany(x => x.ToolAffixes)
+            .HasForeignKey(x => x.EquipmentInstanceId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

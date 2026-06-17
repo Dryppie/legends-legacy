@@ -127,7 +127,8 @@
       <ng-container *ngIf="selectedListingAsMaterial() as materials">
         <div *ngFor="let m of materials">
           <p class="text-sm text-neutral-400">
-            You have x{{ m.quantity }} {{ m.itemInstance.itemBase.name }}
+            You have x{{ m.quantity }}
+            {{ m.itemInstance.displayName || m.itemInstance.itemBase.name }}
           </p>
         </div>
       </ng-container>

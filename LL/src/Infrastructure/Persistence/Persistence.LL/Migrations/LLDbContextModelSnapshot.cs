@@ -712,9 +712,15 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("EquipmentBaseId")
-                        .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
+
+                    b.Property<Guid?>("EquipmentInstanceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<string>("ScopeId")
                         .HasMaxLength(128)
@@ -723,6 +729,8 @@ namespace Persistence.LL.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("EquipmentBaseId");
+
+                    b.HasIndex("EquipmentInstanceId");
 
                     b.ToTable("ToolBonusModifier");
                 });
@@ -1737,10 +1745,16 @@ namespace Persistence.LL.Migrations
                     b.HasOne("Domain.Models.Items.Equipments.EquipmentBase", "EquipmentBase")
                         .WithMany("ToolBonuses")
                         .HasForeignKey("EquipmentBaseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Domain.Models.Items.Equipments.EquipmentInstance", "EquipmentInstance")
+                        .WithMany("ToolAffixes")
+                        .HasForeignKey("EquipmentInstanceId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("EquipmentBase");
+
+                    b.Navigation("EquipmentInstance");
                 });
 
             modelBuilder.Entity("Domain.Models.Items.ItemInstance", b =>
@@ -2098,6 +2112,8 @@ namespace Persistence.LL.Migrations
             modelBuilder.Entity("Domain.Models.Items.Equipments.EquipmentInstance", b =>
                 {
                     b.Navigation("InstanceModifiers");
+
+                    b.Navigation("ToolAffixes");
                 });
 
             modelBuilder.Entity("Domain.Models.LootTables.LootTable", b =>

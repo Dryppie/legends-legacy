@@ -50,14 +50,16 @@ export function mapInstanceToDisplay(
 ): EquipmentDisplay {
   const base = inst.equipmentBase;
   return {
-    name: base.name,
+    name: inst.displayName || base.name,
     rarity: inst.rarity ?? base.rarity,
     equipmentType: base.equipmentType,
     description: base.description,
     baseModifiers: inst.baseModifiers,
     instanceModifiers: inst.instanceModifiers,
     gatheringType: base.gatheringType,
-    toolBonuses: base.toolBonuses ?? [],
+    toolBonuses: inst.effectiveToolBonuses?.length
+      ? inst.effectiveToolBonuses
+      : [...(base.toolBonuses ?? []), ...(inst.toolAffixes ?? [])],
 
     magnitude: base.magnitude,
     magnitudeRange: base.magnitudeRange,

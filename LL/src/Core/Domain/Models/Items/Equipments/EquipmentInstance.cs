@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Models.Attributes.Modifiers;
+using Domain.Models.Items.Equipments.Tools;
 
 namespace Domain.Models.Items.Equipments;
 public class EquipmentInstance : ItemInstance
@@ -11,7 +12,11 @@ public class EquipmentInstance : ItemInstance
     public bool IsLevelingItem { get; set; } = false;
     [NotMapped]
     public EquipmentBase EquipmentBase => (EquipmentBase)ItemBase;
+
     [NotMapped]
+    public string DisplayName => EquipmentBase.EquipmentType == EquipmentType.Tool
+        ? ToolInstanceNaming.GetDisplayName(EquipmentBase.Name, Rarity)
+        : EquipmentBase.Name;
 
     public IReadOnlyCollection<ItemAttributeModifier> BaseModifiers =>
         [.. EquipmentBase.AttributeModifiers.Select(attr => new ItemAttributeModifier(attr.AttributeType, (int)Math.Ceiling(attr.Amount * Boost), attr.ModifierType))];
@@ -19,12 +24,20 @@ public class EquipmentInstance : ItemInstance
 
     /// <summary>Modifiers that were added to *this* item as it levelled up.</summary>
     public List<InstanceAttributeModifier> InstanceModifiers { get; set; } = [];
+    public List<ToolBonusModifier> ToolAffixes { get; set; } = [];
 
     [NotMapped]
     public List<AttributeModifierBase> AttributeModifiers =>
     [
         .. BaseModifiers,
         .. InstanceModifiers,
+    ];
+
+    [NotMapped]
+    public IReadOnlyList<ToolBonusModifier> EffectiveToolBonuses =>
+    [
+        .. EquipmentBase.ToolBonuses,
+        .. ToolAffixes,
     ];
 
     public float Boost => Rarity switch

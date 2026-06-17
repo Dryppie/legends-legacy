@@ -134,7 +134,9 @@ export class MarketPlaceBuyComponent implements OnInit {
     const q = this.searchTerm();
     if (q) {
       items = items.filter((l) =>
-        l.itemInstance.itemBase.name.toLowerCase().includes(q),
+        (
+          l.itemInstance.displayName ?? l.itemInstance.itemBase.name
+        ).toLowerCase().includes(q),
       );
     }
 

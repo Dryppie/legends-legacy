@@ -21,6 +21,8 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
             .Include(es => es.EquipmentInstance)
                 .ThenInclude(ei => ei.InstanceModifiers)
             .Include(es => es.EquipmentInstance)
+                .ThenInclude(ei => ei.ToolAffixes)
+            .Include(es => es.EquipmentInstance)
                 .ThenInclude(ei => ei.ItemBase)
                     .ThenInclude(eb => (eb as EquipmentBase).AttributeModifiers)
             .Include(es => es.EquipmentInstance)
@@ -35,6 +37,9 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
     public async Task<bool> UnequipEquipmentAsync(Guid entityId, EquipmentSlotType slotType, CancellationToken cancellationToken)
     {
         var character = await _context.Characters
+            .Include(c => c.EquipmentSlots)
+                .ThenInclude(es => es.EquipmentInstance)
+                    .ThenInclude(ei => ei.ToolAffixes)
             .Include(c => c.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)
                     .ThenInclude(ei => ei.ItemBase)
@@ -97,12 +102,18 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         var character = await _context.Characters
             .Include(c => c.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)
+                    .ThenInclude(ei => ei.ToolAffixes)
+            .Include(c => c.EquipmentSlots)
+                .ThenInclude(es => es.EquipmentInstance)
                     .ThenInclude(ei => ei.ItemBase)
                         .ThenInclude(ib => (ib as EquipmentBase).ToolBonuses)
             .Include(c => c.Inventory)
                 .ThenInclude(i => i.InventoryItems)
                     .ThenInclude(ii => ii.ItemInstance)
                         .ThenInclude(ii => ii.ItemBase)
+            .Include(c => c.Inventory)
+                .ThenInclude(i => i.InventoryItems)
+                    .ThenInclude(ii => (ii.ItemInstance as EquipmentInstance).ToolAffixes)
             .SingleOrDefaultAsync(c => c.Id == entityId, cancellationToken);
 
         if (character == null)

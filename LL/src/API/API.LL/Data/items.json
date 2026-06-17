@@ -4636,9 +4636,9 @@
     "scalingAmount": 0
   },
   {
-    "id": "prospectors_iron_pickaxe",
-    "name": "Prospector's Iron Pickaxe",
-    "description": "A dungeon-found mining tool with a keen eye for rare seams.",
+    "id": "pickaxe",
+    "name": "Pickaxe",
+    "description": "A mining tool.",
     "itemType": "Equipment",
     "rarity": "Uncommon",
     "equipmentType": "Tool",
@@ -4647,27 +4647,14 @@
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Mining",
-    "toolBonuses": [
-      {
-        "id": "20000000-0000-0000-0000-000000000001",
-        "equipmentBaseId": "prospectors_iron_pickaxe",
-        "bonusType": "GatheringYieldPercent",
-        "amount": 8
-      },
-      {
-        "id": "20000000-0000-0000-0000-000000000002",
-        "equipmentBaseId": "prospectors_iron_pickaxe",
-        "bonusType": "RareMaterialChancePercent",
-        "amount": 12
-      }
-    ],
+    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
   {
-    "id": "reliable_iron_hatchet",
-    "name": "Reliable Iron Hatchet",
-    "description": "A sturdy woodcutting tool favored for consistent harvests.",
+    "id": "hatchet",
+    "name": "Hatchet",
+    "description": "A woodcutting tool.",
     "itemType": "Equipment",
     "rarity": "Uncommon",
     "equipmentType": "Tool",
@@ -4676,27 +4663,14 @@
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Woodcutting",
-    "toolBonuses": [
-      {
-        "id": "20000000-0000-0000-0000-000000000003",
-        "equipmentBaseId": "reliable_iron_hatchet",
-        "bonusType": "GatheringYieldPercent",
-        "amount": 7
-      },
-      {
-        "id": "20000000-0000-0000-0000-000000000004",
-        "equipmentBaseId": "reliable_iron_hatchet",
-        "bonusType": "NodeSuccessChancePercent",
-        "amount": 5
-      }
-    ],
+    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
   {
-    "id": "opportunists_cave_fishing_rod",
-    "name": "Opportunist's Cave Fishing Rod",
-    "description": "A flexible rod that occasionally finds a second pull in dungeon waters.",
+    "id": "fishing_rod",
+    "name": "Fishing Rod",
+    "description": "A flexible rod suited to waters.",
     "itemType": "Equipment",
     "rarity": "Rare",
     "equipmentType": "Tool",
@@ -4705,27 +4679,14 @@
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Fishing",
-    "toolBonuses": [
-      {
-        "id": "20000000-0000-0000-0000-000000000005",
-        "equipmentBaseId": "opportunists_cave_fishing_rod",
-        "bonusType": "GatheringYieldPercent",
-        "amount": 10
-      },
-      {
-        "id": "20000000-0000-0000-0000-000000000006",
-        "equipmentBaseId": "opportunists_cave_fishing_rod",
-        "bonusType": "BonusRollChancePercent",
-        "amount": 6
-      }
-    ],
+    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
   {
-    "id": "duplicating_skinning_knife",
-    "name": "Duplicating Skinning Knife",
-    "description": "A precise skinning tool that sometimes preserves an extra cut.",
+    "id": "skinning_knife",
+    "name": "Skinning Knife",
+    "description": "A precise skinning tool.",
     "itemType": "Equipment",
     "rarity": "Rare",
     "equipmentType": "Tool",
@@ -4734,20 +4695,7 @@
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Skinning",
-    "toolBonuses": [
-      {
-        "id": "20000000-0000-0000-0000-000000000007",
-        "equipmentBaseId": "duplicating_skinning_knife",
-        "bonusType": "GatheringYieldPercent",
-        "amount": 9
-      },
-      {
-        "id": "20000000-0000-0000-0000-000000000008",
-        "equipmentBaseId": "duplicating_skinning_knife",
-        "bonusType": "DoubleGatherChancePercent",
-        "amount": 4
-      }
-    ],
+    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4815,4 +4763,3 @@
     "rarity": "Rare"
   }
 ]
-
