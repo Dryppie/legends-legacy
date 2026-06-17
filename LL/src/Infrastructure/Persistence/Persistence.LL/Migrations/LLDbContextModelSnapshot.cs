@@ -1004,6 +1004,10 @@ namespace Persistence.LL.Migrations
                     b.Property<Guid>("LootTableId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<float>("ProcChance")
                         .HasColumnType("real");
 
@@ -1396,6 +1400,9 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("AttackSpeed")
                         .HasColumnType("integer");
 
+                    b.Property<double>("DoubleGatherChancePercent")
+                        .HasColumnType("double precision");
+
                     b.Property<int>("EquipmentType")
                         .HasColumnType("integer");
 
@@ -1408,11 +1415,17 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("MagnitudeRange")
                         .HasColumnType("integer");
 
+                    b.Property<double>("RareChanceBonusPercent")
+                        .HasColumnType("double precision");
+
                     b.Property<float>("ScalingAmount")
                         .HasColumnType("real");
 
                     b.Property<int>("ScalingAttribute")
                         .HasColumnType("integer");
+
+                    b.Property<double>("YieldBonusPercent")
+                        .HasColumnType("double precision");
 
                     b.HasDiscriminator().HasValue(0);
                 });
@@ -1476,9 +1489,18 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.LootTables.LootTableEntry");
 
+                    b.Property<bool>("IsRare")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("ItemId")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("MaxQuantity")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MinQuantity")
+                        .HasColumnType("integer");
 
                     b.HasIndex("ItemId");
 

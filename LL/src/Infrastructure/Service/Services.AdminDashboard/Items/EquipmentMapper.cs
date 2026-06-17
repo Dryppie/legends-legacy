@@ -16,6 +16,10 @@ public static class EquipmentMapper
         AttackSpeed = r.AttackSpeed,
         Magnitude = r.Magnitude,
         MagnitudeRange = r.MagnitudeRange,
+        GatheringType = r.GatheringType,
+        YieldBonusPercent = r.YieldBonusPercent,
+        RareChanceBonusPercent = r.RareChanceBonusPercent,
+        DoubleGatherChancePercent = r.DoubleGatherChancePercent,
         ScalingAttribute = r.ScalingAttribute,
         ScalingAmount = r.ScalingAmount
     };
@@ -33,6 +37,10 @@ public static class EquipmentMapper
         AttackSpeed = dto.AttackSpeed,
         Magnitude = dto.Magnitude,
         MagnitudeRange = dto.MagnitudeRange,
+        GatheringType = dto.GatheringType,
+        YieldBonusPercent = dto.YieldBonusPercent,
+        RareChanceBonusPercent = dto.RareChanceBonusPercent,
+        DoubleGatherChancePercent = dto.DoubleGatherChancePercent,
         ScalingAttribute = dto.ScalingAttribute,
         ScalingAmount = dto.ScalingAmount,
     };

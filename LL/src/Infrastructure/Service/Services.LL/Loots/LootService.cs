@@ -157,7 +157,9 @@ public class LootService : ILootService
                     continue;
                 }
 
-                generatedLoot.Add(ConvertItemIntoInventoryItem(lootTableItem.Item));
+                generatedLoot.Add(ConvertItemIntoInventoryItem(
+                    lootTableItem.Item,
+                    RollQuantity(lootTableItem)));
             }
             else if (selectedEntry is LootTable table)
             {
@@ -204,8 +206,16 @@ public class LootService : ILootService
         return null;
     }
 
-    private InventoryItem ConvertItemIntoInventoryItem(ItemBase item)
+    private static int RollQuantity(LootTableItem item)
     {
-        return _inventoryItemFactory.Create(item, 1);
+        var min = Math.Max(1, item.MinQuantity);
+        var max = Math.Max(min, item.MaxQuantity);
+
+        return RandomGenerator.Next(min, max + 1);
+    }
+
+    private InventoryItem ConvertItemIntoInventoryItem(ItemBase item, int quantity)
+    {
+        return _inventoryItemFactory.Create(item, quantity);
     }
 }

@@ -82,6 +82,9 @@ namespace Persistence.LL.Migrations
                     Magnitude = table.Column<int>(type: "integer", nullable: true),
                     MagnitudeRange = table.Column<int>(type: "integer", nullable: true),
                     GatheringType = table.Column<int>(type: "integer", nullable: true),
+                    YieldBonusPercent = table.Column<double>(type: "double precision", nullable: true),
+                    RareChanceBonusPercent = table.Column<double>(type: "double precision", nullable: true),
+                    DoubleGatherChancePercent = table.Column<double>(type: "double precision", nullable: true),
                     ScalingAttribute = table.Column<int>(type: "integer", nullable: true),
                     ScalingAmount = table.Column<float>(type: "real", nullable: true),
                     EssenceDefinitionId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
@@ -327,7 +330,10 @@ namespace Persistence.LL.Migrations
                     Weight = table.Column<float>(type: "real", nullable: false),
                     LootTableId = table.Column<Guid>(type: "uuid", nullable: true),
                     LootTableType = table.Column<int>(type: "integer", nullable: false),
-                    ItemId = table.Column<string>(type: "text", nullable: true)
+                    ItemId = table.Column<string>(type: "text", nullable: true),
+                    MinQuantity = table.Column<int>(type: "integer", nullable: true),
+                    MaxQuantity = table.Column<int>(type: "integer", nullable: true),
+                    IsRare = table.Column<bool>(type: "boolean", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -585,6 +591,7 @@ namespace Persistence.LL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
                     AreaId = table.Column<string>(type: "text", nullable: false),
                     Type = table.Column<int>(type: "integer", nullable: false),
                     LevelRequirement = table.Column<int>(type: "integer", nullable: true),

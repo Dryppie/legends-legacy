@@ -2,6 +2,7 @@ using Domain.Models.Entities.Creatures;
 using Domain.Models.Entities.Creatures.Templates.Enums;
 using Domain.Models.Items;
 using Domain.Models.LootTables;
+using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 
@@ -612,6 +613,24 @@ public static class SeedCreatures
 
         if (!context.Regions.Any())
         {
+            var goblinMiningTable = BuildGatheringLootTable(
+                ("iron_ore", 45, 1, 4, false),
+                ("rough_stone", 35, 1, 3, false),
+                ("cracked_garnet", 5, 1, 1, true));
+
+            var goblinFishingTable = BuildGatheringLootTable(
+                ("cave_fish", 40, 1, 2, false),
+                ("murky_fish_oil", 15, 1, 1, false));
+
+            var bloodwoodTable = BuildGatheringLootTable(
+                ("bloodwood", 45, 1, 3, false),
+                ("living_bark", 15, 1, 1, false));
+
+            await context.LootTables.AddRangeAsync(
+                FlattenLootTables(goblinMiningTable)
+                    .Concat(FlattenLootTables(goblinFishingTable))
+                    .Concat(FlattenLootTables(bloodwoodTable)));
+
             var areas = new List<Area>()
             {
                 new Area
@@ -641,6 +660,18 @@ public static class SeedCreatures
                         0.001f,
                     ],
                     DifficultyTier = 2,
+                    GatheringNodes =
+                    [
+                        new AreaGatheringNode
+                        {
+                            Id = "blood_grove_bloodwood_tree",
+                            Name = "Bloodwood Tree",
+                            AreaId = bloodGroveAreaId,
+                            Type = GatheringType.Woodcutting,
+                            ProcChance = 0.40f,
+                            LootTable = bloodwoodTable
+                        }
+                    ]
                 },
                 new Area
                 {
@@ -681,6 +712,27 @@ public static class SeedCreatures
                         1f,
                     ],
                     DifficultyTier = 5,
+                    GatheringNodes =
+                    [
+                        new AreaGatheringNode
+                        {
+                            Id = "goblin_mines_cracked_iron_vein",
+                            Name = "Cracked Iron Vein",
+                            AreaId = goblinMinesAreaId,
+                            Type = GatheringType.Mining,
+                            ProcChance = 0.45f,
+                            LootTable = goblinMiningTable
+                        },
+                        new AreaGatheringNode
+                        {
+                            Id = "goblin_mines_underground_stream",
+                            Name = "Underground Stream",
+                            AreaId = goblinMinesAreaId,
+                            Type = GatheringType.Fishing,
+                            ProcChance = 0.20f,
+                            LootTable = goblinFishingTable
+                        }
+                    ]
                 },
                 new Area
                 {
@@ -723,6 +775,46 @@ public static class SeedCreatures
                 }
             };
             await context.Regions.AddRangeAsync(regions);
+        }
+    }
+
+    private static LootTable BuildGatheringLootTable(
+        params (string ItemId, int Weight, int MinQuantity, int MaxQuantity, bool IsRare)[] entries)
+    {
+        var itemTable = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Weight = entries.Sum(entry => Math.Max(0, entry.Weight)),
+            Entries = entries
+                .Select(entry => new LootTableItem
+                {
+                    Id = Guid.NewGuid(),
+                    ItemId = entry.ItemId,
+                    Weight = entry.Weight,
+                    MinQuantity = entry.MinQuantity,
+                    MaxQuantity = entry.MaxQuantity,
+                    IsRare = entry.IsRare
+                })
+                .ToList<LootTableEntry>()
+        };
+
+        return new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [itemTable]
+        };
+    }
+
+    private static IEnumerable<LootTable> FlattenLootTables(LootTable table)
+    {
+        yield return table;
+
+        foreach (var child in table.Entries.OfType<LootTable>())
+        {
+            foreach (var nested in FlattenLootTables(child))
+            {
+                yield return nested;
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 using Domain.Models.Attributes;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Professions.Gathering.GatheringNodes;
 
 namespace Services.AdminDashboard.Items;
 public class EquipmentToJsonDto
@@ -16,6 +17,10 @@ public class EquipmentToJsonDto
     public int AttackSpeed { get; set; } = 0;
     public int Magnitude { get; set; } = 0;
     public int MagnitudeRange { get; set; } = 0;
+    public GatheringType? GatheringType { get; set; }
+    public double YieldBonusPercent { get; set; }
+    public double RareChanceBonusPercent { get; set; }
+    public double DoubleGatherChancePercent { get; set; }
     public AttributeType ScalingAttribute { get; set; } = AttributeType.Power;
     public float ScalingAmount { get; set; } = 0.1f;
 }

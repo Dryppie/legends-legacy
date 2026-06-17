@@ -12,6 +12,7 @@ public class CombatResultDto : IMapFrom<CombatResult>
     public List<EntityStats> EntityStats { get; set; } = [];
     public BattleOutcome Outcome { get; set; }
     public List<InventoryItem> Loot { get; set; } = [];
+    public List<GatheringRewardResult> GatheringRewards { get; set; } = [];
     public int ExperienceGained { get; set; }
     public DateTimeOffset StartedAt { get; set; }
     public int Duration { get; set; }

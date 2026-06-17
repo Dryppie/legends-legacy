@@ -239,6 +239,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                         EquipmentType.Relic => EquipmentSlotType.Relic,
                         EquipmentType.Necklace => EquipmentSlotType.Necklace,
                         EquipmentType.Ring => EquipmentSlotType.Ring,
+                        EquipmentType.Tool => EquipmentSlotType.Tool,
                         _ => throw new ArgumentOutOfRangeException(nameof(equipmentBase.EquipmentType), "Unsupported equipment type for armor or relic.")
                     };
                     var slot = GetSlot(character, equipmentSlotType);

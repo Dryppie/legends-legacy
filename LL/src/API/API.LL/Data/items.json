@@ -4570,6 +4570,141 @@
     "magnitudeRange": 20,
     "scalingAttribute": "Power",
     "scalingAmount": 1.3
+  },
+  {
+    "id": "basic_pickaxe",
+    "name": "Basic Pickaxe",
+    "description": "A simple mining tool.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Tool",
+    "attributeModifiers": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": "Mining",
+    "yieldBonusPercent": 0,
+    "rareChanceBonusPercent": 0,
+    "doubleGatherChancePercent": 0,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "basic_hatchet",
+    "name": "Basic Hatchet",
+    "description": "A simple woodcutting tool.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Tool",
+    "attributeModifiers": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": "Woodcutting",
+    "yieldBonusPercent": 0,
+    "rareChanceBonusPercent": 0,
+    "doubleGatherChancePercent": 0,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "basic_fishing_rod",
+    "name": "Basic Fishing Rod",
+    "description": "A simple fishing tool.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Tool",
+    "attributeModifiers": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": "Fishing",
+    "yieldBonusPercent": 0,
+    "rareChanceBonusPercent": 0,
+    "doubleGatherChancePercent": 0,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "basic_skinning_knife",
+    "name": "Basic Skinning Knife",
+    "description": "A simple skinning tool.",
+    "itemType": "Equipment",
+    "rarity": "Common",
+    "equipmentType": "Tool",
+    "attributeModifiers": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": "Skinning",
+    "yieldBonusPercent": 0,
+    "rareChanceBonusPercent": 0,
+    "doubleGatherChancePercent": 0,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "rough_stone",
+    "name": "Rough Stone",
+    "description": "A rough stone chipped from combat-area gathering nodes.",
+    "itemType": "Resource",
+    "rarity": "Common"
+  },
+  {
+    "id": "cracked_garnet",
+    "name": "Cracked Garnet",
+    "description": "A flawed garnet from an unstable ore vein.",
+    "itemType": "Resource",
+    "rarity": "Rare"
+  },
+  {
+    "id": "cave_fish",
+    "name": "Cave Fish",
+    "description": "A pale fish from underground streams.",
+    "itemType": "Resource",
+    "rarity": "Common"
+  },
+  {
+    "id": "murky_fish_oil",
+    "name": "Murky Fish Oil",
+    "description": "A pungent oil rendered from cave fish.",
+    "itemType": "Resource",
+    "rarity": "Uncommon"
+  },
+  {
+    "id": "bloodwood",
+    "name": "Bloodwood",
+    "description": "Dark red timber from the Blood Grove.",
+    "itemType": "Resource",
+    "rarity": "Common"
+  },
+  {
+    "id": "living_bark",
+    "name": "Living Bark",
+    "description": "Bark that still pulses faintly with life.",
+    "itemType": "Resource",
+    "rarity": "Uncommon"
+  },
+  {
+    "id": "ant_chitin",
+    "name": "Ant Chitin",
+    "description": "Hardened chitin from hive creatures.",
+    "itemType": "Resource",
+    "rarity": "Common"
+  },
+  {
+    "id": "hive_resin",
+    "name": "Hive Resin",
+    "description": "Sticky resin harvested from hive remains.",
+    "itemType": "Resource",
+    "rarity": "Uncommon"
+  },
+  {
+    "id": "royal_chitin_fragment",
+    "name": "Royal Chitin Fragment",
+    "description": "A rare fragment of unusually dense chitin.",
+    "itemType": "Resource",
+    "rarity": "Rare"
   }
 ]
 

@@ -59,6 +59,7 @@ public sealed class DungeonCombatOrchestrator : ICombatOrchestrator
             Encounters: [record],
             Details: new DungeonCombatOrchestrationDetails(
                 DungeonRunId: plan.DungeonRunId,
-                ProgressionStatus: DungeonProgressionStatus.Active));
+                ProgressionStatus: DungeonProgressionStatus.Active),
+            SourceEntitiesById: resolutionSession.SourceEntitiesById);
     }
 }

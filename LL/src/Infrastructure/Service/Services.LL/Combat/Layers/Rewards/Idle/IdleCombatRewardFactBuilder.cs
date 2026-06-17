@@ -1,5 +1,6 @@
-﻿using Application.Interfaces.Services.LL.Entities;
+using Application.Interfaces.Services.LL.Entities;
 using Domain.Models.Entities.Creatures;
+using Domain.Models.Items.Equipments.Slots;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Interfaces.Combat.Reward.Idle;
 
@@ -76,6 +77,33 @@ public sealed class IdleCombatRewardFactBuilder : IIdleCombatRewardFactBuilder
             ProcessedDuration: context.Details.ProcessedDuration,
             Area: context.Area,
             PlayerEntityIds: [.. context.PlayerEntityIds],
+            EquippedTool: ResolveEquippedTool(context),
             Encounters: encounterFacts);
+    }
+
+    private static EquippedGatheringTool? ResolveEquippedTool(IdleCombatOutcomeContext context)
+    {
+        if (context.OrchestrationResult.SourceEntitiesById is null ||
+            !context.OrchestrationResult.SourceEntitiesById.TryGetValue(context.CharacterId, out var character))
+        {
+            return null;
+        }
+
+        var tool = character.EquipmentSlots
+            .FirstOrDefault(slot => slot.EquipmentSlotType == EquipmentSlotType.Tool)
+            ?.EquipmentInstance
+            ?.EquipmentBase;
+
+        if (tool?.GatheringType is null)
+        {
+            return null;
+        }
+
+        return new EquippedGatheringTool(
+            Name: tool.Name,
+            GatheringType: tool.GatheringType.Value,
+            YieldBonusPercent: tool.YieldBonusPercent,
+            RareChanceBonusPercent: tool.RareChanceBonusPercent,
+            DoubleGatherChancePercent: tool.DoubleGatherChancePercent);
     }
 }

@@ -1,10 +1,4 @@
-﻿using Application.UseCases.Inventories.Dtos;
-
-namespace Application.WebSockets.Contracts;
-//[MessagePack.Union(0, typeof(SaleCompletedMsg))]
-//[MessagePack.Union(1, typeof(GuildApplicationMsg))]
-//[MessagePack.Union(2, typeof(GuildBuildingUpgradedMsg))]
-//[MessagePack.Union(3, typeof(RiftOpenedMsg))]
+﻿namespace Application.WebSockets.Contracts;
 public abstract record GameEventMsg;
 
 public record SaleCompletedMsg(Guid ItemId, Guid SellerId, int Price) : GameEventMsg;

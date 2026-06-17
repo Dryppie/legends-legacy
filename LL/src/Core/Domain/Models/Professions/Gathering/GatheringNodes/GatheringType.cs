@@ -5,4 +5,5 @@ public enum GatheringType
     Fishing,
     Mining,
     Woodcutting,
+    Skinning,
 }

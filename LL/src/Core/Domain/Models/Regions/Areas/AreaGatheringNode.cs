@@ -5,6 +5,7 @@ namespace Domain.Models.Regions.Areas;
 public class AreaGatheringNode
 {
     public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
     public string AreaId { get; set; } = string.Empty;
     public Area Area { get; set; } = default!;

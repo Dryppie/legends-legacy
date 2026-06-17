@@ -1,6 +1,7 @@
 import { AttributeModifier } from './Dtos/attributesDto';
 import { AttributeType } from './enums/attributeType';
 import { EquipmentType } from './enums/equipmentType';
+import { GatheringType } from './enums/gatheringType';
 import { ItemType } from './enums/itemType';
 import { Rarity } from './enums/rarity';
 import { Essence } from './essence';
@@ -39,6 +40,10 @@ export interface Equipment extends ItemBase {
   attackSpeed: number;
   magnitude: number;
   magnitudeRange: number;
+  gatheringType?: GatheringType;
+  yieldBonusPercent?: number;
+  rareChanceBonusPercent?: number;
+  doubleGatherChancePercent?: number;
   scalingAttribute: AttributeType;
   scalingAmount: number;
 }

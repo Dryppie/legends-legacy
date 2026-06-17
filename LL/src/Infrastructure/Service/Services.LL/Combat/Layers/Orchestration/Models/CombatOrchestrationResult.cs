@@ -1,10 +1,13 @@
-﻿namespace Services.LL.Combat.Layers.Orchestration.Models;
+using Domain.Models.Entities;
+
+namespace Services.LL.Combat.Layers.Orchestration.Models;
 
 public sealed record CombatOrchestrationResult(
     Guid SessionId,
     CombatMode Mode,
     IReadOnlyList<CombatEncounterRecord> Encounters,
-    ICombatOrchestrationDetails Details)
+    ICombatOrchestrationDetails Details,
+    IReadOnlyDictionary<Guid, Entity>? SourceEntitiesById = null)
 {
     public bool HasAnyCombat => Encounters.Count > 0;
 

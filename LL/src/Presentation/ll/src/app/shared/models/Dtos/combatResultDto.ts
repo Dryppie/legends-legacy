@@ -1,4 +1,6 @@
 import { BattleType } from '../../../core/state/combat-state/combatState';
+import { GatheringType } from '../enums/gatheringType';
+import { InventoryItem } from '../inventoryItem';
 import { CombatEvent } from './combatEventDto';
 
 export interface CombatResultDto {
@@ -8,9 +10,21 @@ export interface CombatResultDto {
   eventLog: CombatEvent[];
   startedAt: Date;
   outcome: BattleOutcome;
+  loot: InventoryItem[];
+  gatheringRewards: GatheringRewardResult[];
   experienceGained: number;
   battleType: BattleType;
   entityStats: EntityStats[];
+}
+
+export interface GatheringRewardResult {
+  toolType: GatheringType;
+  nodeId: string;
+  nodeName: string;
+  toolName: string;
+  success: boolean;
+  itemsGained: InventoryItem[];
+  message?: string;
 }
 
 export interface EntityStats {

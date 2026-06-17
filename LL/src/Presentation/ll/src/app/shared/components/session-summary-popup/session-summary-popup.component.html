@@ -37,6 +37,30 @@
         </div>
       </div>
 
+      <div
+        class="mt-3 flex flex-col items-center justify-center gap-2 text-center"
+        *ngIf="combatSession.combatResult.gatheringRewards.length"
+      >
+        <div class="uppercase text-neutral-400">Gathering</div>
+        <div class="flex flex-wrap justify-center gap-2">
+          <ng-container
+            *ngFor="
+              let gathering of combatSession.combatResult.gatheringRewards
+            "
+          >
+            <div
+              class="flex min-w-16 items-center gap-2 rounded-lg p-1"
+              *ngFor="let loot of gathering.itemsGained"
+            >
+              <div class="text-emerald-300">
+                {{ loot.itemInstance.itemBase.name }}
+              </div>
+              <div class="text-neutral-400">x{{ loot.quantity }}</div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
       <button
         class="mt-2 w-full rounded-md py-2 font-medium"
         (click)="svc.dismiss()"
