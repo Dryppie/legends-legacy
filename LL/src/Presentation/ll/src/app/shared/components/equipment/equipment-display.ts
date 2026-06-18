@@ -15,6 +15,8 @@ export interface EquipmentDisplay {
   instanceModifiers: AttributeModifier[];
   gatheringType?: GatheringType;
   toolBonuses: ToolBonusModifier[];
+  toolAffixes: ToolBonusModifier[];
+  baseToolBonuses: ToolBonusModifier[];
 
   // Weapon only
   magnitude?: number;
@@ -29,13 +31,18 @@ export interface EquipmentDisplay {
 
 export function mapEquipmentToDisplay(e: Equipment): EquipmentDisplay {
   return {
-    name: e.name,
+    name:
+      e.equipmentType === EquipmentType.Tool
+        ? getToolDisplayName(e.name, e.rarity)
+        : e.name,
     rarity: e.rarity,
     equipmentType: e.equipmentType,
     description: e.description,
     instanceModifiers: e.attributeModifiers,
     gatheringType: e.gatheringType,
     toolBonuses: e.toolBonuses ?? [],
+    toolAffixes: [],
+    baseToolBonuses: e.toolBonuses ?? [],
 
     magnitude: e.magnitude,
     magnitudeRange: e.magnitudeRange,
@@ -49,6 +56,12 @@ export function mapInstanceToDisplay(
   inst: EquipmentInstance,
 ): EquipmentDisplay {
   const base = inst.equipmentBase;
+  const baseToolBonuses = base.toolBonuses ?? [];
+  const toolAffixes = inst.toolAffixes ?? [];
+  const effectiveToolBonuses = inst.effectiveToolBonuses?.length
+    ? inst.effectiveToolBonuses
+    : [...baseToolBonuses, ...toolAffixes];
+
   return {
     name: inst.displayName || base.name,
     rarity: inst.rarity ?? base.rarity,
@@ -57,9 +70,9 @@ export function mapInstanceToDisplay(
     baseModifiers: inst.baseModifiers,
     instanceModifiers: inst.instanceModifiers,
     gatheringType: base.gatheringType,
-    toolBonuses: inst.effectiveToolBonuses?.length
-      ? inst.effectiveToolBonuses
-      : [...(base.toolBonuses ?? []), ...(inst.toolAffixes ?? [])],
+    toolBonuses: effectiveToolBonuses,
+    toolAffixes,
+    baseToolBonuses,
 
     magnitude: base.magnitude,
     magnitudeRange: base.magnitudeRange,
@@ -69,4 +82,25 @@ export function mapInstanceToDisplay(
 
     potential: inst.potential,
   };
+}
+
+function getToolDisplayName(baseName: string, rarity: Rarity): string {
+  switch (rarity) {
+    case Rarity.Common:
+      return `Plain ${baseName}`;
+    case Rarity.Uncommon:
+      return `Sturdy ${baseName}`;
+    case Rarity.Rare:
+      return `Proven ${baseName}`;
+    case Rarity.Epic:
+      return `Exquisite ${baseName}`;
+    case Rarity.Unique:
+      return `Fabled ${baseName}`;
+    case Rarity.Legendary:
+      return `Mythic ${baseName}`;
+    case Rarity.Legacy:
+      return `Eternal ${baseName}`;
+    default:
+      return baseName;
+  }
 }

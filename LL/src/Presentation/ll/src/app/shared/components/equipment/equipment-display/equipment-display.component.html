@@ -4,14 +4,15 @@
       {{ data.name }}
     </h2>
     <span
-      class="rounded border border-primary/40 px-2 py-0.5 text-[11px] text-primary"
+      class="rounded border px-2 py-0.5 text-[11px]"
+      [ngClass]="rarityBadgeClasses"
     >
       {{ data.rarity }}
     </span>
   </div>
 
-  <div class="text-[11px] uppercase tracking-[0.16em] text-secondary">
-    {{ data.equipmentType }}
+  <div class="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-secondary">
+    <span>{{ data.equipmentType }}</span>
   </div>
 
   <p *ngIf="data.description" class="text-sm leading-relaxed text-zinc-300">
@@ -19,30 +20,47 @@
   </p>
 
   <div
-    *ngIf="data.equipmentType === equipmentType.Tool"
-    class="border-t border-primary/20 pt-2"
+    *ngIf="hasToolDetails"
+    class="rounded border border-primary/20 bg-black/15 p-3"
   >
-    <div class="text-[11px] uppercase tracking-[0.16em] text-secondary">
-      Gathering
+    <div class="flex items-center justify-between gap-3">
+      <div class="text-[11px] uppercase tracking-[0.16em] text-secondary">
+        Tool Affixes
+      </div>
+      <span
+        class="rounded border border-primary/30 px-2 py-0.5 text-[11px] text-primary"
+      >
+        {{ toolAffixSummary }}
+      </span>
     </div>
-    <div
-      *ngIf="data.gatheringType"
-      class="mt-1 flex items-center justify-between gap-4 text-sm"
-    >
-      <span>Tool Type</span>
-      <span class="text-primary">{{ data.gatheringType }}</span>
-    </div>
-    <div *ngIf="data.toolBonuses.length" class="mt-2 text-sm">
+
+    <div *ngIf="data.toolAffixes.length" class="mt-2 text-sm">
       <div
-        *ngFor="let bonus of data.toolBonuses"
+        *ngFor="let bonus of data.toolAffixes"
+        class="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-0.5 border-b border-white/5 py-1.5 last:border-b-0"
+      >
+        <span class="font-medium text-zinc-100">
+          {{ bonus.name || formatToolBonusType(bonus.bonusType) }}
+        </span>
+        <span class="text-primary">{{ formatToolBonusAmount(bonus) }}</span>
+        <span class="col-span-2 text-xs text-zinc-400">
+          {{ formatToolBonusType(bonus.bonusType) }}
+        </span>
+      </div>
+    </div>
+
+    <div *ngIf="data.baseToolBonuses.length" class="mt-3 text-sm">
+      <div class="mb-1 text-[11px] uppercase tracking-[0.16em] text-secondary">
+        Base Traits
+      </div>
+      <div
+        *ngFor="let bonus of data.baseToolBonuses"
         class="flex w-full justify-between gap-6 border-b border-white/5 py-1 last:border-b-0"
       >
         <span class="text-zinc-300">
           {{ bonus.name || formatToolBonusType(bonus.bonusType) }}
         </span>
-        <span class="text-primary">
-          +{{ bonus.amount | number: "1.0-2" }}
-        </span>
+        <span class="text-primary">{{ formatToolBonusAmount(bonus) }}</span>
       </div>
     </div>
   </div>

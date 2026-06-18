@@ -19,7 +19,10 @@ public class EquipmentInstance : ItemInstance
         : EquipmentBase.Name;
 
     public IReadOnlyCollection<ItemAttributeModifier> BaseModifiers =>
-        [.. EquipmentBase.AttributeModifiers.Select(attr => new ItemAttributeModifier(attr.AttributeType, (int)Math.Ceiling(attr.Amount * Boost), attr.ModifierType))];
+        EquipmentBase?.AttributeModifiers
+            .Select(attr => new ItemAttributeModifier(attr.AttributeType, (int)Math.Ceiling(attr.Amount * Boost), attr.ModifierType))
+            .ToList()
+        ?? new List<ItemAttributeModifier>(0);
 
 
     /// <summary>Modifiers that were added to *this* item as it levelled up.</summary>

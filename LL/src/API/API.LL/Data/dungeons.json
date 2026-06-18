@@ -124,8 +124,8 @@
         }
       ]
     },
-    "completionLootTableId": "10000000-0000-0000-0000-000000000101",
-    "tierLootTableId": "10000000-0000-0000-0000-000000000001",
+    "completionLootTableId": "10000000-0000-0000-0000-000000000102",
+    "tierLootTableId": "10000000-0000-0000-0000-000000000002",
     "monsterLootModifiers": {
       "Essence": 25
     },
@@ -206,8 +206,8 @@
         }
       ]
     },
-    "completionLootTableId": "10000000-0000-0000-0000-000000000101",
-    "tierLootTableId": "10000000-0000-0000-0000-000000000001",
+    "completionLootTableId": "10000000-0000-0000-0000-000000000103",
+    "tierLootTableId": "10000000-0000-0000-0000-000000000003",
     "monsterLootModifiers": {
       "Essence": 25
     },
@@ -286,6 +286,7 @@
         }
       ]
     },
+    "completionLootTableId": "10000000-0000-0000-0000-000000000201",
     "tierLootTableId": "10000000-0000-0000-0000-000000000001",
     "monsterLootModifiers": {
       "Essence": 15
@@ -355,7 +356,8 @@
         }
       ]
     },
-    "tierLootTableId": "10000000-0000-0000-0000-000000000001",
+    "completionLootTableId": "10000000-0000-0000-0000-000000000202",
+    "tierLootTableId": "10000000-0000-0000-0000-000000000002",
     "monsterLootModifiers": {
       "Essence": 15
     },
@@ -424,7 +426,8 @@
         }
       ]
     },
-    "tierLootTableId": "10000000-0000-0000-0000-000000000001",
+    "completionLootTableId": "10000000-0000-0000-0000-000000000203",
+    "tierLootTableId": "10000000-0000-0000-0000-000000000003",
     "monsterLootModifiers": {
       "Essence": 15
     },
@@ -491,6 +494,7 @@
         }
       ]
     },
+    "completionLootTableId": "10000000-0000-0000-0000-000000000301",
     "tierLootTableId": "10000000-0000-0000-0000-000000000001",
     "monsterLootModifiers": {
       "Essence": 15
@@ -560,7 +564,8 @@
         }
       ]
     },
-    "tierLootTableId": "10000000-0000-0000-0000-000000000001",
+    "completionLootTableId": "10000000-0000-0000-0000-000000000302",
+    "tierLootTableId": "10000000-0000-0000-0000-000000000002",
     "monsterLootModifiers": {
       "Essence": 15
     },
@@ -629,7 +634,8 @@
         }
       ]
     },
-    "tierLootTableId": "10000000-0000-0000-0000-000000000001",
+    "completionLootTableId": "10000000-0000-0000-0000-000000000303",
+    "tierLootTableId": "10000000-0000-0000-0000-000000000003",
     "monsterLootModifiers": {
       "Essence": 15
     },

@@ -275,27 +275,6 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ItemAttributeModifier",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ItemBaseId = table.Column<string>(type: "text", nullable: false),
-                    AttributeType = table.Column<int>(type: "integer", nullable: false),
-                    Amount = table.Column<float>(type: "real", nullable: false),
-                    ModifierType = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ItemAttributeModifier", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ItemAttributeModifier_ItemBases_ItemBaseId",
-                        column: x => x.ItemBaseId,
-                        principalTable: "ItemBases",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ItemInstances",
                 columns: table => new
                 {
@@ -368,35 +347,6 @@ namespace Persistence.LL.Migrations
                         name: "FK_Recipes_ItemBases_ItemId",
                         column: x => x.ItemId,
                         principalTable: "ItemBases",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ToolBonusModifier",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    EquipmentBaseId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
-                    EquipmentInstanceId = table.Column<Guid>(type: "uuid", nullable: true),
-                    Name = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
-                    BonusType = table.Column<int>(type: "integer", nullable: false),
-                    Amount = table.Column<double>(type: "double precision", nullable: false),
-                    ScopeId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ToolBonusModifier", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ToolBonusModifier_ItemBases_EquipmentBaseId",
-                        column: x => x.EquipmentBaseId,
-                        principalTable: "ItemBases",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ToolBonusModifier_ItemInstances_EquipmentInstanceId",
-                        column: x => x.EquipmentInstanceId,
-                        principalTable: "ItemInstances",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -499,6 +449,33 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ItemAttributeModifier",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ItemBaseId = table.Column<string>(type: "text", nullable: false),
+                    EquipmentInstanceId = table.Column<Guid>(type: "uuid", nullable: true),
+                    AttributeType = table.Column<int>(type: "integer", nullable: false),
+                    Amount = table.Column<float>(type: "real", nullable: false),
+                    ModifierType = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ItemAttributeModifier", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ItemAttributeModifier_ItemBases_ItemBaseId",
+                        column: x => x.ItemBaseId,
+                        principalTable: "ItemBases",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ItemAttributeModifier_ItemInstances_EquipmentInstanceId",
+                        column: x => x.EquipmentInstanceId,
+                        principalTable: "ItemInstances",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MarketPlaceListings",
                 columns: table => new
                 {
@@ -516,6 +493,35 @@ namespace Persistence.LL.Migrations
                     table.ForeignKey(
                         name: "FK_MarketPlaceListings_ItemInstances_ItemInstanceId",
                         column: x => x.ItemInstanceId,
+                        principalTable: "ItemInstances",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ToolBonusModifier",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    EquipmentBaseId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    EquipmentInstanceId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Name = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    BonusType = table.Column<int>(type: "integer", nullable: false),
+                    Amount = table.Column<double>(type: "double precision", nullable: false),
+                    ScopeId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ToolBonusModifier", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ToolBonusModifier_ItemBases_EquipmentBaseId",
+                        column: x => x.EquipmentBaseId,
+                        principalTable: "ItemBases",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ToolBonusModifier_ItemInstances_EquipmentInstanceId",
+                        column: x => x.EquipmentInstanceId,
                         principalTable: "ItemInstances",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -1220,6 +1226,11 @@ namespace Persistence.LL.Migrations
                 column: "ItemInstanceId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ItemAttributeModifier_EquipmentInstanceId",
+                table: "ItemAttributeModifier",
+                column: "EquipmentInstanceId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ItemAttributeModifier_ItemBaseId",
                 table: "ItemAttributeModifier",
                 column: "ItemBaseId");
@@ -1431,13 +1442,13 @@ namespace Persistence.LL.Migrations
                 name: "Inventories");
 
             migrationBuilder.DropTable(
-                name: "ItemInstances");
-
-            migrationBuilder.DropTable(
                 name: "Recipes");
 
             migrationBuilder.DropTable(
                 name: "DungeonRuns");
+
+            migrationBuilder.DropTable(
+                name: "ItemInstances");
 
             migrationBuilder.DropTable(
                 name: "Areas");

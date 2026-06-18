@@ -10,7 +10,11 @@ import {
   mapEquipmentToDisplay,
   mapInstanceToDisplay,
 } from '../equipment-display';
-import { Equipment, EquipmentInstance } from '../../../models/item';
+import {
+  Equipment,
+  EquipmentInstance,
+  ToolBonusModifier,
+} from '../../../models/item';
 import { AttributeModifier, ModifierType } from '../../../models/Dtos/attributesDto';
 import { Rarity } from '../../../models/enums/rarity';
 import { EquipmentType } from '../../../models/enums/equipmentType';
@@ -71,8 +75,59 @@ export class EquipmentDisplayComponent {
     );
   }
 
+  get rarityBadgeClasses() {
+    const rarity = this.item.rarity;
+
+    switch (rarity) {
+      case Rarity.Common:
+        return 'border-slate-300/30 bg-slate-300/10 text-slate-100';
+      case Rarity.Uncommon:
+        return 'border-emerald-400/40 bg-emerald-500/10 text-emerald-300';
+      case Rarity.Rare:
+        return 'border-blue-400/40 bg-blue-500/10 text-blue-300';
+      case Rarity.Epic:
+        return 'border-fuchsia-400/40 bg-fuchsia-500/10 text-fuchsia-300';
+      case Rarity.Unique:
+        return 'border-yellow-300/40 bg-yellow-400/10 text-yellow-200';
+      case Rarity.Legendary:
+        return 'border-orange-400/40 bg-orange-500/10 text-orange-300';
+      case Rarity.Legacy:
+        return 'border-rose-400/40 bg-rose-500/10 text-rose-300';
+      default:
+        return 'border-primary/40 text-primary';
+    }
+  }
+
+  get isTool(): boolean {
+    return this.data?.equipmentType === EquipmentType.Tool;
+  }
+
+  get hasToolDetails(): boolean {
+    return (
+      this.isTool &&
+      (this.data.toolAffixes.length > 0 || this.data.baseToolBonuses.length > 0)
+    );
+  }
+
+  get toolAffixSummary(): string {
+    const count = this.data?.toolAffixes?.length ?? 0;
+    return count === 1 ? '1 Affix' : `${count} Affixes`;
+  }
+
   formatToolBonusType(type: string): string {
-    return type.replace(/Percent$/, ' %').replace(/([A-Z])/g, ' $1').trim();
+    return type
+      .replace(/Percent$/, '')
+      .replace(/^Specific/, '')
+      .replace(/([A-Z])/g, ' $1')
+      .trim();
+  }
+
+  formatToolBonusAmount(bonus: ToolBonusModifier): string {
+    const value = new Intl.NumberFormat(undefined, {
+      maximumFractionDigits: 2,
+    }).format(bonus.amount);
+
+    return bonus.bonusType.endsWith('Percent') ? `+${value}%` : `+${value}`;
   }
 }
 

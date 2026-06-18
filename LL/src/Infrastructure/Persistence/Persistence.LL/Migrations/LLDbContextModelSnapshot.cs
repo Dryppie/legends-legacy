@@ -81,6 +81,9 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("AttributeType")
                         .HasColumnType("integer");
 
+                    b.Property<Guid?>("EquipmentInstanceId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("ItemBaseId")
                         .IsRequired()
                         .HasColumnType("text");
@@ -89,6 +92,8 @@ namespace Persistence.LL.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EquipmentInstanceId");
 
                     b.HasIndex("ItemBaseId");
 
@@ -1522,6 +1527,10 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.Attributes.Modifiers.ItemAttributeModifier", b =>
                 {
+                    b.HasOne("Domain.Models.Items.Equipments.EquipmentInstance", null)
+                        .WithMany("BaseModifiers")
+                        .HasForeignKey("EquipmentInstanceId");
+
                     b.HasOne("Domain.Models.Items.Equipments.EquipmentBase", null)
                         .WithMany("AttributeModifiers")
                         .HasForeignKey("ItemBaseId")
@@ -2111,6 +2120,8 @@ namespace Persistence.LL.Migrations
 
             modelBuilder.Entity("Domain.Models.Items.Equipments.EquipmentInstance", b =>
                 {
+                    b.Navigation("BaseModifiers");
+
                     b.Navigation("InstanceModifiers");
 
                     b.Navigation("ToolAffixes");

@@ -10,6 +10,7 @@ import { Rarity } from '../../models/enums/rarity';
 import { EssenceDetailsComponent } from '../essences/essence-details/essence-details.component';
 import { EquipmentDisplayComponent } from '../equipment/equipment-display/equipment-display.component';
 import { ItemType } from '../../models/enums/itemType';
+import { EquipmentType } from '../../models/enums/equipmentType';
 import { PopoverComponent } from '../custom-components/popover/popover.component';
 import { EssenceItemViewService } from '../../../core/services/api/essences/essence-item-view.service';
 
@@ -44,6 +45,28 @@ export class ItemComponent {
     return !this.isEssence && !this.isEquipment;
   }
 
+  get displayName(): string {
+    if (this.item.displayName) {
+      return this.item.displayName;
+    }
+
+    if (this.isTool) {
+      return this.getToolDisplayName(this.item.itemBase.name, this.rarity);
+    }
+
+    return this.item.itemBase.name;
+  }
+
+  get isTool(): boolean {
+    const base = this.item.itemBase as Equipment;
+    const instance = this.item as EquipmentInstance;
+
+    return (
+      instance.equipmentBase?.equipmentType === EquipmentType.Tool ||
+      base.equipmentType === EquipmentType.Tool
+    );
+  }
+
   get rewardSource(): string | null {
     return typeof this.item.source === 'string'
       ? this.item.source
@@ -67,16 +90,7 @@ export class ItemComponent {
   }
 
   get rarityClasses() {
-    let rarity = Rarity.Common;
-    const equipmentInstance = this.item as EquipmentInstance;
-
-    if (equipmentInstance && equipmentInstance.rarity !== undefined) {
-      rarity = equipmentInstance.rarity;
-    } else {
-      rarity = this.item.itemBase.rarity;
-    }
-
-    switch (rarity) {
+    switch (this.rarity) {
       case Rarity.Common:
         return 'text-slate-200';
       case Rarity.Uncommon:
@@ -93,6 +107,37 @@ export class ItemComponent {
         return 'text-rose-700';
       default:
         return 'text-light_gray';
+    }
+  }
+
+  private get rarity(): Rarity {
+    const equipmentInstance = this.item as EquipmentInstance;
+
+    if (equipmentInstance && equipmentInstance.rarity !== undefined) {
+      return equipmentInstance.rarity;
+    }
+
+    return this.item.itemBase.rarity;
+  }
+
+  private getToolDisplayName(baseName: string, rarity: Rarity): string {
+    switch (rarity) {
+      case Rarity.Common:
+        return `Plain ${baseName}`;
+      case Rarity.Uncommon:
+        return `Sturdy ${baseName}`;
+      case Rarity.Rare:
+        return `Proven ${baseName}`;
+      case Rarity.Epic:
+        return `Exquisite ${baseName}`;
+      case Rarity.Unique:
+        return `Fabled ${baseName}`;
+      case Rarity.Legendary:
+        return `Mythic ${baseName}`;
+      case Rarity.Legacy:
+        return `Eternal ${baseName}`;
+      default:
+        return baseName;
     }
   }
 }
