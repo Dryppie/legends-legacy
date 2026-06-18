@@ -12,6 +12,11 @@ import {
 import { AttributeTypeFormatPipe } from '../../../../shared/pipes/attributes/attribute-type-format/attribute-type-format.pipe';
 import { AttributeValueFormatPipe } from '../../../../shared/pipes/attributes/attribute-value-format/attribute-value-format.pipe';
 import { EssencesAbsorbComponent } from './essences-absorb/essences-absorb.component';
+import {
+  DropdownComponent,
+  DropdownOption,
+  DropdownSelection,
+} from '../../../../shared/components/custom-components/dropdown/dropdown.component';
 
 type ArchiveFilter = 'all' | 'favorites' | 'attuned' | 'inactive';
 type ArchiveSort = 'name' | 'level' | 'tier';
@@ -28,6 +33,7 @@ type ArchiveSort = 'name' | 'level' | 'tier';
     AttributeTypeFormatPipe,
     AttributeValueFormatPipe,
     EssencesAbsorbComponent,
+    DropdownComponent,
   ],
   templateUrl: './essences.component.html',
 })
@@ -138,6 +144,34 @@ export class EssencesComponent implements OnInit {
 
   public setArchiveSortValue(sort: string): void {
     this.archiveSort.set(sort as ArchiveSort);
+  }
+
+  public setArchiveSortSelection(selection: DropdownSelection<unknown>): void {
+    this.archiveSort.set(selection.main as ArchiveSort);
+  }
+
+  public draftSlotDropdownOptions(
+    slotIndex: number,
+  ): DropdownOption<string | null>[] {
+    const draftSlots = this.essenceState.draftSlots();
+
+    return [
+      { label: 'Empty', value: null },
+      ...this.essenceState.essenceOptions().map((essence) => ({
+        label: essence.name,
+        value: essence.id,
+        disabled:
+          draftSlots.includes(essence.id) &&
+          draftSlots[slotIndex] !== essence.id,
+      })),
+    ];
+  }
+
+  public setDraftSlotFromDropdown(
+    slotIndex: number,
+    selection: DropdownSelection<unknown>,
+  ): void {
+    this.essenceState.setDraftSlot(slotIndex, selection.main as string | null);
   }
 
   public toggleUpgradeDetails(): void {

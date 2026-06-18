@@ -17,16 +17,13 @@
         class="ll-input h-8 min-w-40 px-2 text-xs"
       />
 
-      <select
-        [ngModel]="rarity()"
-        (ngModelChange)="rarity.set($event)"
-        class="ll-select h-8 px-2 text-xs"
-      >
-        <option class="bg-black" value="">Any rarity</option>
-        <option class="bg-black" *ngFor="let r of rarities" [value]="r">
-          {{ r }}
-        </option>
-      </select>
+      <app-dropdown
+        label="Any rarity"
+        [value]="rarity()"
+        [options]="rarityOptions"
+        [selectedValue]="rarity()"
+        (selection)="setRaritySelection($event)"
+      ></app-dropdown>
 
       <button
         type="button"

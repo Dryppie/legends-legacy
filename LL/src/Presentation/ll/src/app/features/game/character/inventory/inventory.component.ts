@@ -15,6 +15,11 @@ import { FormsModule } from '@angular/forms';
 import { ItemComponent } from '../../../../shared/components/item/item.component';
 import { HelpTooltipDirective } from '../../../../shared/help/help-tooltip.directive';
 import { EquipmentTypePipe } from '../../../../shared/pipes/equipment/equipment-type-format/equipment-type.pipe';
+import {
+  DropdownComponent,
+  DropdownOption,
+  DropdownSelection,
+} from '../../../../shared/components/custom-components/dropdown/dropdown.component';
 
 @Component({
   selector: 'app-inventory',
@@ -32,6 +37,7 @@ import { EquipmentTypePipe } from '../../../../shared/pipes/equipment/equipment-
     ItemComponent,
     HelpTooltipDirective,
     EquipmentTypePipe,
+    DropdownComponent,
   ],
   templateUrl: './inventory.component.html',
 })
@@ -71,6 +77,12 @@ export class InventoryComponent implements OnInit {
   selectedItems: InventoryItem[] = [];
   scrapRarityThreshold: Rarity = Rarity.Common;
   rarities = Object.keys(Rarity);
+  rarityDropdownOptions: DropdownOption<Rarity>[] = this.rarities.map(
+    (rarity) => ({
+      label: rarity,
+      value: rarity as Rarity,
+    }),
+  );
   RARITY_ORDER: Record<Rarity, number> = {
     [Rarity.Common]: 0,
     [Rarity.Uncommon]: 1,
@@ -119,6 +131,10 @@ export class InventoryComponent implements OnInit {
         return itemRank <= thresholdRank;
       })
       .forEach((item) => this.selectedItems.push(item));
+  }
+
+  setScrapRarityThreshold(selection: DropdownSelection<unknown>) {
+    this.scrapRarityThreshold = selection.main as Rarity;
   }
 
   clearSelection() {

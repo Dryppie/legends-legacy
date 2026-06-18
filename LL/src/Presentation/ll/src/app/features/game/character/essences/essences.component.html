@@ -90,15 +90,13 @@
             Showing {{ filteredArchiveEssences().length }} /
             {{ essenceState.archive()?.essences?.length ?? 0 }}
           </p>
-          <select
-            class="ll-select px-2 py-1 text-xs"
-            [ngModel]="archiveSort()"
-            (ngModelChange)="setArchiveSortValue($event)"
-          >
-            <option *ngFor="let sort of archiveSorts" [ngValue]="sort.value">
-              {{ sort.label }}
-            </option>
-          </select>
+          <app-dropdown
+            label="Sort"
+            [value]="archiveSort()"
+            [options]="archiveSorts"
+            [selectedValue]="archiveSort()"
+            (selection)="setArchiveSortSelection($event)"
+          ></app-dropdown>
         </div>
       </div>
 
@@ -452,23 +450,14 @@
             *ngFor="let slotIndex of essenceState.slotIndexes()"
           >
             Slot {{ slotIndex + 1 }}
-            <select
-              class="ll-select mt-1 w-full px-2 py-1.5"
-              [ngModel]="essenceState.draftSlots()[slotIndex]"
-              (ngModelChange)="essenceState.setDraftSlot(slotIndex, $event)"
-            >
-              <option [ngValue]="null">Empty</option>
-              <option
-                *ngFor="let essence of essenceState.essenceOptions()"
-                [ngValue]="essence.id"
-                [disabled]="
-                  essenceState.draftSlots().includes(essence.id) &&
-                  essenceState.draftSlots()[slotIndex] !== essence.id
-                "
-              >
-                {{ essence.name }}
-              </option>
-            </select>
+            <app-dropdown
+              class="mt-1 block w-full"
+              label="Empty"
+              [value]="essenceState.draftSlots()[slotIndex]"
+              [options]="draftSlotDropdownOptions(slotIndex)"
+              [selectedValue]="essenceState.draftSlots()[slotIndex]"
+              (selection)="setDraftSlotFromDropdown(slotIndex, $event)"
+            ></app-dropdown>
           </label>
         </div>
 

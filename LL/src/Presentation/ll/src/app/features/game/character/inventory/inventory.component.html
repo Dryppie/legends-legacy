@@ -82,14 +82,13 @@
           ></app-regular-button>
 
           <div class="flex items-center rounded-md border border-light_gray">
-            <select
-              class="ll-select h-9 rounded-r-none"
-              [(ngModel)]="scrapRarityThreshold"
-            >
-              <option *ngFor="let rarity of rarities" [value]="rarity">
-                {{ rarity }}
-              </option>
-            </select>
+            <app-dropdown
+              label="Rarity"
+              [value]="scrapRarityThreshold"
+              [options]="rarityDropdownOptions"
+              [selectedValue]="scrapRarityThreshold"
+              (selection)="setScrapRarityThreshold($event)"
+            ></app-dropdown>
             <button
               type="button"
               class="ll-button h-9 rounded-l-none border-l-0"

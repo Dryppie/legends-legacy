@@ -15,11 +15,21 @@ export interface DropdownSelection<T = unknown> {
   sub: string | null; // chosen sub‑option or null when none
 }
 
+export interface DropdownOption<T = unknown> {
+  label: string;
+  value: T;
+  disabled?: boolean;
+  detail?: string;
+}
+
 @Component({
   selector: 'app-dropdown',
   standalone: true,
   imports: [NgClass, NgFor, NgIf],
   templateUrl: './dropdown.component.html',
+  host: {
+    class: 'relative inline-block',
+  },
 })
 export class DropdownComponent<T = unknown> implements OnDestroy {
   /** The item this button represents (enum, string, number – anything). */
@@ -30,6 +40,12 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
 
   /** List of sub‑options. Empty → act as a simple button. */
   @Input() subOptions: readonly string[] = [];
+
+  /** Optional selectable options. When provided, this behaves like a normal dropdown field. */
+  @Input() options: readonly DropdownOption<T>[] = [];
+
+  /** Currently selected option value for option-mode dropdowns. */
+  @Input() selectedValue: T | null = null;
 
   /** Whether the parent considers this the active/main selection. */
   @Input() selected = false;
@@ -44,6 +60,21 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
     return this.subOptions.length > 0;
   }
 
+  get hasOptions(): boolean {
+    return this.options.length > 0;
+  }
+
+  get displayLabel(): string {
+    if (!this.hasOptions) {
+      return this.label;
+    }
+
+    return (
+      this.options.find((option) => option.value === this.selectedValue)
+        ?.label ?? this.label
+    );
+  }
+
   onButtonClick(event: MouseEvent): void {
     // NOTE: do NOT stop propagation so other dropdowns can treat this as an outside click.
 
@@ -51,7 +82,7 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
     // We always do this, even if we ourselves have no sub‑options.
     this.registry.register(this);
 
-    if (!this.hasSubOptions) {
+    if (!this.hasSubOptions && !this.hasOptions) {
       // Simple button → emit immediately and clear registry (nothing remains open).
       this.registry.clear(this);
       this.selection.emit({ main: this.value, sub: null });
@@ -68,10 +99,22 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
     }
   }
 
+  onOptionClick(option: DropdownOption<T>): void {
+    if (option.disabled) return;
+
+    this.close();
+    this.registry.clear(this);
+    this.selection.emit({ main: option.value, sub: null });
+  }
+
   onSubOptionClick(sub: string): void {
     this.close();
     this.registry.clear(this);
     this.selection.emit({ main: this.value, sub });
+  }
+
+  isOptionSelected(option: DropdownOption<T>): boolean {
+    return option.value === this.selectedValue;
   }
 
   /** Public API required by the registry. */
