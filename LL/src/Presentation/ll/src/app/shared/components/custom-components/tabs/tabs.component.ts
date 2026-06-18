@@ -30,4 +30,33 @@ export class TabsComponent implements AfterContentInit {
   select(i: number) {
     this._activeIndex.set(i);
   }
+
+  onTabKeydown(event: KeyboardEvent, index: number): void {
+    const count = this.panes.length;
+    if (!count) return;
+
+    let nextIndex: number | null = null;
+
+    switch (event.key) {
+      case 'ArrowRight':
+      case 'ArrowDown':
+        nextIndex = (index + 1) % count;
+        break;
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        nextIndex = (index - 1 + count) % count;
+        break;
+      case 'Home':
+        nextIndex = 0;
+        break;
+      case 'End':
+        nextIndex = count - 1;
+        break;
+      default:
+        return;
+    }
+
+    event.preventDefault();
+    this.select(nextIndex);
+  }
 }

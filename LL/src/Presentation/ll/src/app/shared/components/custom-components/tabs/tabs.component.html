@@ -10,8 +10,10 @@
     class="ll-segmented-button flex-1"
     [ngClass]="{ 'll-segmented-button-active': activeIndex() === i }"
     [attr.aria-selected]="activeIndex() === i"
+    [attr.tabindex]="activeIndex() === i ? 0 : -1"
     role="tab"
     (click)="select(i)"
+    (keydown)="onTabKeydown($event, i)"
   >
     {{ pane.label }}
   </button>

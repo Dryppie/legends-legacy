@@ -32,6 +32,8 @@ export interface DropdownOption<T = unknown> {
   },
 })
 export class DropdownComponent<T = unknown> implements OnDestroy {
+  private static nextId = 0;
+
   /** The item this button represents (enum, string, number – anything). */
   @Input({ required: true }) value!: T;
 
@@ -53,6 +55,7 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
   @Output() readonly selection = new EventEmitter<DropdownSelection<T>>();
 
   readonly open = signal(false);
+  readonly menuId = `ll-dropdown-menu-${DropdownComponent.nextId++}`;
 
   constructor(private readonly registry: DropdownRegistryService) {}
 
@@ -111,6 +114,28 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
     this.close();
     this.registry.clear(this);
     this.selection.emit({ main: this.value, sub });
+  }
+
+  onOptionKeydown(event: KeyboardEvent, option: DropdownOption<T>): void {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+
+    event.preventDefault();
+    this.onOptionClick(option);
+  }
+
+  onSubOptionKeydown(event: KeyboardEvent, sub: string): void {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+
+    event.preventDefault();
+    this.onSubOptionClick(sub);
+  }
+
+  onDropdownKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Escape' || !this.open()) return;
+
+    event.preventDefault();
+    this.close();
+    this.registry.clear(this);
   }
 
   isOptionSelected(option: DropdownOption<T>): boolean {

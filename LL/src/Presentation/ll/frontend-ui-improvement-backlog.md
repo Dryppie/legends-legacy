@@ -107,8 +107,9 @@ These are not tied to one page, but they will reduce repetition and make future 
 
 5. **Accessibility pass**
 
-   - Missing work: focus states, modal roles/focus handling, `aria-selected` for tabs/segments, `aria-expanded` for collapsible navigation, button semantics for clickable divs, and keyboard behavior for overlays.
-   - Current state: visual consistency improved first; semantics still need a deliberate pass.
+   - Status: first pass completed. Shared dropdowns now expose stable menu/listbox ids, keyboard selection, Escape close behavior, and option states; shared tabs now support arrow/Home/End keyboard selection with active tab focus semantics; shared modal container now exposes dialog metadata.
+   - Remaining work: add full focus trapping/restoration for overlays, audit route-level icon buttons and clickable rows, and extend keyboard behavior to remaining bespoke controls such as collapsible navigation.
+   - Current state: core shared controls have baseline semantics, while page-specific interactions still need a deliberate audit.
 
 6. **Visual QA workflow**
 
