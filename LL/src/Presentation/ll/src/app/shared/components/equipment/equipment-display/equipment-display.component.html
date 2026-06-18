@@ -4,6 +4,7 @@
       {{ data.name }}
     </h2>
     <span
+      *ngIf="!useBaseName"
       class="rounded border px-2 py-0.5 text-[11px]"
       [ngClass]="rarityBadgeClasses"
     >
@@ -11,7 +12,9 @@
     </span>
   </div>
 
-  <div class="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-secondary">
+  <div
+    class="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-secondary"
+  >
     <span>{{ data.equipmentType }}</span>
   </div>
 

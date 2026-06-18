@@ -3,7 +3,11 @@ import { AttributeType } from '../../models/enums/attributeType';
 import { EquipmentType } from '../../models/enums/equipmentType';
 import { GatheringType } from '../../models/enums/gatheringType';
 import { Rarity } from '../../models/enums/rarity';
-import { Equipment, EquipmentInstance, ToolBonusModifier } from '../../models/item';
+import {
+  Equipment,
+  EquipmentInstance,
+  ToolBonusModifier,
+} from '../../models/item';
 
 export interface EquipmentDisplay {
   // Common
@@ -29,10 +33,13 @@ export interface EquipmentDisplay {
   potential?: number;
 }
 
-export function mapEquipmentToDisplay(e: Equipment): EquipmentDisplay {
+export function mapEquipmentToDisplay(
+  e: Equipment,
+  useBaseName = false,
+): EquipmentDisplay {
   return {
     name:
-      e.equipmentType === EquipmentType.Tool
+      e.equipmentType === EquipmentType.Tool && !useBaseName
         ? getToolDisplayName(e.name, e.rarity)
         : e.name,
     rarity: e.rarity,

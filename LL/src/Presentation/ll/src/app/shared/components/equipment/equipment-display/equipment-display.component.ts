@@ -15,7 +15,10 @@ import {
   EquipmentInstance,
   ToolBonusModifier,
 } from '../../../models/item';
-import { AttributeModifier, ModifierType } from '../../../models/Dtos/attributesDto';
+import {
+  AttributeModifier,
+  ModifierType,
+} from '../../../models/Dtos/attributesDto';
 import { Rarity } from '../../../models/enums/rarity';
 import { EquipmentType } from '../../../models/enums/equipmentType';
 
@@ -34,6 +37,7 @@ import { EquipmentType } from '../../../models/enums/equipmentType';
 })
 export class EquipmentDisplayComponent {
   @Input({ required: true }) item!: Equipment | EquipmentInstance;
+  @Input() useBaseName = false;
   modifierType = ModifierType;
   equipmentType = EquipmentType;
   /** The view-model the template binds to */
@@ -42,7 +46,7 @@ export class EquipmentDisplayComponent {
   ngOnChanges(): void {
     this.data = isInstance(this.item)
       ? mapInstanceToDisplay(this.item)
-      : mapEquipmentToDisplay(this.item);
+      : mapEquipmentToDisplay(this.item, this.useBaseName);
   }
 
   get rarityClasses() {

@@ -4670,7 +4670,7 @@
   {
     "id": "fishing_rod",
     "name": "Fishing Rod",
-    "description": "A precise fishing tool.",
+    "description": "A fishing tool.",
     "itemType": "Equipment",
     "rarity": "Uncommon",
     "equipmentType": "Tool",
@@ -4686,7 +4686,7 @@
   {
     "id": "skinning_knife",
     "name": "Skinning Knife",
-    "description": "A precise skinning tool.",
+    "description": "A skinning tool.",
     "itemType": "Equipment",
     "rarity": "Uncommon",
     "equipmentType": "Tool",

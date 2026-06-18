@@ -17,6 +17,9 @@ import {
 } from '../../../models/Dtos/dungeons/dungeonPreviewData';
 import { DungeonDifficulty } from '../../../models/enums/dungeonDifficulty';
 import { Router } from '@angular/router';
+import { Equipment } from '../../../models/item';
+import { EquipmentType } from '../../../models/enums/equipmentType';
+import { BaseItemComponent } from '../../base-item/base-item.component';
 
 interface RewardGroup {
   title: string;
@@ -34,7 +37,14 @@ type DungeonDetailTab = 'rewards' | 'gathering';
 @Component({
   selector: 'app-dungeon-card',
   standalone: true,
-  imports: [NgIf, NgFor, NgClass, RegularButtonComponent, ItemComponent],
+  imports: [
+    NgIf,
+    NgFor,
+    NgClass,
+    RegularButtonComponent,
+    ItemComponent,
+    BaseItemComponent,
+  ],
   templateUrl: './dungeon-card.component.html',
 })
 export class DungeonCardComponent implements OnChanges {
@@ -301,8 +311,14 @@ export class DungeonCardComponent implements OnChanges {
     }
 
     return [
-      { title: 'Run Rewards', rewards: repeatableRewards },
-      { title: 'First Clear', rewards: firstClearRewards },
+      {
+        title: 'Run Rewards',
+        rewards: this.withUniqueTools(repeatableRewards),
+      },
+      {
+        title: 'First Clear',
+        rewards: this.withUniqueTools(firstClearRewards),
+      },
     ].filter((section) => section.rewards.length > 0);
   }
 
@@ -312,6 +328,10 @@ export class DungeonCardComponent implements OnChanges {
 
   trackReward(_: number, reward: DungeonPreviewReward): string {
     return reward.id || reward.itemBase?.id || reward.itemBase?.name || '';
+  }
+
+  isToolReward(reward: DungeonPreviewReward): boolean {
+    return this.isToolItem(reward);
   }
 
   trackGatheringNode(_: number, node: DungeonGatheringNodePreview): string {
@@ -424,6 +444,40 @@ export class DungeonCardComponent implements OnChanges {
       default:
         return 99;
     }
+  }
+
+  private withUniqueTools(
+    rewards: DungeonPreviewReward[],
+  ): DungeonPreviewReward[] {
+    const seenTools = new Set<string>();
+    const toolRewards: DungeonPreviewReward[] = [];
+    const otherRewards: DungeonPreviewReward[] = [];
+
+    for (const reward of rewards) {
+      if (!this.isToolItem(reward)) {
+        otherRewards.push(reward);
+        continue;
+      }
+
+      const equipment = reward.itemBase as Equipment;
+      const key = [
+        equipment.gatheringType ?? '',
+        reward.itemBase.name.trim().toLowerCase(),
+      ].join(':');
+
+      if (seenTools.has(key)) {
+        continue;
+      }
+
+      seenTools.add(key);
+      toolRewards.push(reward);
+    }
+
+    return [...toolRewards, ...otherRewards];
+  }
+
+  private isToolItem(reward: DungeonPreviewReward): boolean {
+    return (reward.itemBase as Equipment).equipmentType === EquipmentType.Tool;
   }
 
   back() {
