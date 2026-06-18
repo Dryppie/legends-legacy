@@ -14,6 +14,7 @@
     <div
       class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/30 to-black/85"
     ></div>
+
     <div
       class="relative flex min-h-36 items-center justify-end gap-4 px-8 py-6 sm:min-h-40"
       [style.min-height.px]="height"
@@ -24,19 +25,33 @@
         >
           Dungeon {{ previewData.number }}
         </div>
+
         <h2
           class="mt-1 font-serif text-3xl font-semibold leading-tight text-primary drop-shadow sm:text-4xl"
         >
           {{ previewData.title }}
         </h2>
+
         <div class="mt-4 flex items-center justify-end gap-2">
           <span
             class="text-[10px] uppercase tracking-[0.22em] text-zinc-300/80"
           >
-            Recommended
+            Recommended Power
           </span>
           <span class="font-serif text-2xl font-semibold text-primary">
             {{ previewData.recommendedCombatRating ?? 0 }}
+          </span>
+        </div>
+
+        <div
+          *ngIf="previewGatheringTypes().length"
+          class="mt-3 flex flex-wrap items-center justify-end gap-1.5"
+        >
+          <span
+            *ngFor="let type of previewGatheringTypes()"
+            class="rounded border border-white/15 bg-black/45 px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-zinc-100"
+          >
+            {{ type }}
           </span>
         </div>
       </div>
@@ -44,7 +59,7 @@
   </button>
 </ng-container>
 
-<!-- PREVIEW -->
+<!-- EXPANDED PREVIEW -->
 <ng-template #previewTemplate>
   <div
     class="relative w-full overflow-hidden rounded-md border border-primary/80 bg-black text-white shadow-[0_0_32px_rgba(0,0,0,0.55)]"
@@ -52,227 +67,393 @@
     <img
       [src]="previewData.heroImage"
       [alt]="previewData.title"
-      class="absolute inset-0 h-full w-full object-cover"
+      class="absolute inset-0 h-full w-full object-cover opacity-75"
     />
 
     <div
-      class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/45 to-black/85"
+      class="absolute inset-0 bg-gradient-to-r from-black/95 via-black/70 to-black/90"
     ></div>
     <div
-      class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/90 to-transparent"
+      class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/95 to-transparent"
     ></div>
-    <div class="relative flex min-h-[520px] flex-col p-6 sm:p-8">
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <div
-            class="font-serif text-xs uppercase tracking-[0.18em] text-zinc-200/80"
-          >
-            Dungeon {{ previewData.number }}
+
+    <div
+      class="relative grid gap-6 p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_22rem] xl:grid-cols-[minmax(0,1fr)_24rem]"
+    >
+      <!-- MAIN CONTENT -->
+      <section class="flex min-w-0 flex-col">
+        <div class="flex h-full items-start justify-between gap-4">
+          <div class="min-w-0">
+            <div
+              class="font-serif text-xs uppercase tracking-[0.18em] text-zinc-200/80"
+            >
+              Dungeon {{ previewData.number }}
+            </div>
+
+            <h2
+              class="mt-1 font-serif text-4xl font-semibold leading-tight text-primary drop-shadow sm:text-5xl"
+            >
+              {{ previewData.title }}
+            </h2>
+
+            <img
+              src="core/Divider.svg"
+              alt=""
+              class="mt-1 w-56 object-contain"
+            />
           </div>
-          <h2
-            class="mt-1 font-serif text-4xl font-semibold leading-tight text-primary drop-shadow sm:text-5xl"
-          >
-            {{ previewData.title }}
-          </h2>
-          <img
-            src="core/Divider.svg"
-            alt="Logo"
-            class="mt-1 w-56 object-contain"
-          />
+
+          <div class="flex shrink-0 flex-col gap-2 sm:flex-row">
+            <button
+              type="button"
+              class="rounded border border-white/20 bg-black/35 px-3 py-2 text-left text-xs transition hover:border-primary hover:bg-primary/10"
+              (click)="openRecords()"
+            >
+              <span class="block font-semibold text-zinc-100">
+                Dungeon Records
+              </span>
+              <span class="block text-[10px] text-zinc-400">Rankings</span>
+            </button>
+
+            <button
+              type="button"
+              class="rounded border border-white/20 bg-black/35 px-3 py-2 text-xs text-zinc-200 transition hover:border-primary hover:bg-primary/10"
+              aria-label="Close dungeon preview"
+              (click)="togglePreview()"
+            >
+              Close
+            </button>
+          </div>
         </div>
 
-        <div class="flex shrink-0 flex-col gap-2 sm:flex-row">
-          <button
-            type="button"
-            class="rounded border border-white/20 bg-black/35 px-3 py-2 text-left text-xs transition hover:border-primary hover:bg-primary/10"
-            (click)="openRecords()"
-          >
-            <span class="block font-semibold text-zinc-100">
-              Dungeon Records
-            </span>
-            <span class="block text-[10px] text-zinc-400">Rankings</span>
-          </button>
-
-          <button
-            type="button"
-            class="rounded border border-white/20 bg-black/35 px-3 py-2 text-xs text-zinc-200 transition hover:border-primary hover:bg-primary/10"
-            (click)="togglePreview()"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-
-      <p
-        class="mt-16 max-w-sm font-serif text-base leading-7 text-zinc-100/90 sm:mt-24"
-      >
-        {{ previewData.lore }}
-      </p>
-
-      <div class="mt-auto grid gap-3 pt-8 xl:grid-cols-[1fr_auto]">
-        <div
-          class="grid gap-3 rounded-md border border-white/20 bg-black/50 p-4 backdrop-blur-sm md:grid-cols-[auto_1fr] xl:grid-cols-[auto_auto_1fr]"
-          (click)="$event.stopPropagation()"
+        <p
+          class="mt-10 max-w-2xl font-serif text-base leading-7 text-zinc-100/90"
         >
-          <div class="flex flex-col justify-between">
-            <div>
-              <div class="flex items-center justify-between gap-3">
-                <div
-                  class="text-[10px] uppercase tracking-[0.18em] text-zinc-300"
-                >
-                  Difficulty
-                </div>
-                <span
-                  class="rounded border px-2 py-0.5 text-[10px] font-semibold uppercase"
-                  [ngClass]="selectedStatusClass()"
-                >
-                  {{ selectedStatusLabel() }}
-                </span>
-              </div>
-              <div class="mt-2 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  class="rounded border px-4 py-2 text-sm transition disabled:cursor-not-allowed"
-                  [ngClass]="difficultyButtonClass(dungeonDifficulty.Normal)"
-                  [disabled]="!isDifficultyUnlocked(dungeonDifficulty.Normal)"
-                  (click)="selectDifficulty(dungeonDifficulty.Normal)"
-                >
-                  {{ difficultyLabel(dungeonDifficulty.Normal) }}
-                </button>
+          {{ previewData.lore }}
+        </p>
 
-                <button
-                  type="button"
-                  class="rounded border px-4 py-2 text-sm transition disabled:cursor-not-allowed"
-                  [ngClass]="difficultyButtonClass(dungeonDifficulty.Heroic)"
-                  [disabled]="!isDifficultyUnlocked(dungeonDifficulty.Heroic)"
-                  (click)="selectDifficulty(dungeonDifficulty.Heroic)"
-                >
-                  {{ difficultyLabel(dungeonDifficulty.Heroic) }}
-                </button>
-
-                <button
-                  type="button"
-                  class="rounded border px-4 py-2 text-sm transition disabled:cursor-not-allowed"
-                  [ngClass]="difficultyButtonClass(dungeonDifficulty.Mythic)"
-                  [disabled]="!isDifficultyUnlocked(dungeonDifficulty.Mythic)"
-                  (click)="selectDifficulty(dungeonDifficulty.Mythic)"
-                >
-                  {{ difficultyLabel(dungeonDifficulty.Mythic) }}
-                </button>
-              </div>
-            </div>
-            <div class="mt-4">
-              <app-regular-button
-                class="w-44"
-                [text]="'Enter ' + difficultyLabel(difficulty())"
-                [disabled]="!selectedCanEnter()"
-                (pressed)="startDungeon()"
-                fullWidth
-              ></app-regular-button>
-            </div>
+        <!-- COMPACT SUMMARY STRIP -->
+        <div class="mt-6 flex flex-wrap gap-2">
+          <div class="rounded border border-white/15 bg-black/35 px-3 py-2">
+            <span class="text-[10px] uppercase tracking-[0.16em] text-zinc-400">
+              Rooms
+            </span>
+            <span class="ml-2 font-serif text-lg text-zinc-100">
+              {{ selectedPreviewData().minRooms ?? 0 }}-{{
+                selectedPreviewData().maxRooms ?? 0
+              }}
+            </span>
           </div>
 
-          <div class="grid gap-2 sm:grid-cols-2 md:grid-cols-1">
-            <div class="rounded border border-white/15 bg-black/30 px-3 py-2">
+          <div class="rounded border border-white/15 bg-black/35 px-3 py-2">
+            <span class="text-[10px] uppercase tracking-[0.16em] text-zinc-400">
+              Nodes
+            </span>
+            <span class="ml-2 font-serif text-lg text-zinc-100">
+              {{ selectedGatheringNodes().length || "None" }}
+            </span>
+          </div>
+
+          <div class="rounded border border-white/15 bg-black/35 px-3 py-2">
+            <span class="text-[10px] uppercase tracking-[0.16em] text-zinc-400">
+              Clears
+            </span>
+            <span class="ml-2 font-serif text-lg text-zinc-100">
+              {{ selectedPreviewData().record?.totalClears ?? 0 }}
+            </span>
+          </div>
+        </div>
+
+        <!-- DETAILS -->
+        <div class="mt-6 flex h-full max-w-4xl flex-col">
+          <nav class="flex flex-wrap gap-2">
+            <button
+              *ngFor="let tab of detailTabs"
+              type="button"
+              class="rounded border px-4 py-2 text-xs uppercase tracking-[0.12em] transition"
+              [attr.aria-selected]="selectedTab() === tab.id"
+              [ngClass]="detailTabClass(tab.id)"
+              (click)="selectDetailTab(tab.id)"
+            >
+              {{ tab.label }}
+            </button>
+          </nav>
+
+          <div class="mt-3 min-h-40 backdrop-blur-sm">
+            <!-- REWARDS TAB -->
+            <div *ngIf="selectedTab() === 'rewards'" class="h-full">
               <div
-                class="text-[10px] uppercase tracking-[0.16em] text-zinc-300"
+                *ngIf="selectedRewardSections().length; else noRewardsListed"
+                class="grid h-full gap-3 lg:grid-cols-2"
               >
-                Entry
-              </div>
-              <div
-                *ngIf="selectedEntryRequirements().length; else noEntryCost"
-                class="mt-1 flex flex-wrap gap-2"
-              >
-                <ng-container
-                  *ngFor="let requirement of selectedEntryRequirements()"
+                <article
+                  *ngFor="
+                    let group of selectedRewardSections();
+                    trackBy: trackRewardGroup
+                  "
+                  class="min-w-0 rounded border border-white/15 bg-black/35 px-3 py-3"
                 >
-                  <span
-                    class="rounded border px-2 py-1 text-xs"
-                    [ngClass]="entryRequirementClass(requirement)"
-                  >
-                    {{ requirement.name }}
-                    <span class="ml-1 tabular-nums">
-                      {{ requirement.ownedAmount }}/{{
-                        requirement.requiredAmount
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                      <h3
+                        class="truncate text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-100"
+                      >
+                        {{ group.title }}
+                      </h3>
+
+                      <div class="mt-2 flex flex-wrap gap-1.5"></div>
+                    </div>
+
+                    <span
+                      class="rounded border px-2 py-0.5 text-[10px] uppercase"
+                      [ngClass]="
+                        group.title === 'Run Rewards'
+                          ? 'border-primary/25 bg-primary/10 text-primary'
+                          : 'border-white/15 bg-black/20 text-zinc-300'
+                      "
+                    >
+                      {{
+                        group.title === "Run Rewards" ? "Repeatable" : "Once"
                       }}
                     </span>
-                  </span>
-                </ng-container>
+                  </div>
+
+                  <div class="mt-3 space-y-1 text-sm text-zinc-100">
+                    <div
+                      *ngFor="let reward of group.rewards; trackBy: trackReward"
+                      class="flex min-w-0 items-center justify-between gap-2"
+                    >
+                      <span class="min-w-0 truncate">
+                        <span *ngIf="isToolReward(reward); else rewardItem">
+                          <app-base-item
+                            [item]="reward.itemBase"
+                            [useBaseName]="true"
+                          ></app-base-item>
+                        </span>
+                        <ng-template #rewardItem>
+                          <app-item [item]="reward"></app-item>
+                        </ng-template>
+                      </span>
+                    </div>
+                  </div>
+                </article>
               </div>
-              <ng-template #noEntryCost>
-                <div class="mt-1 text-xs text-zinc-400">No key required</div>
+
+              <ng-template #noRewardsListed>
+                <div class="text-sm text-zinc-400">No rewards listed.</div>
               </ng-template>
             </div>
 
-            <div class="rounded border border-white/15 bg-black/30 px-3 py-2">
+            <!-- GATHERING TAB -->
+            <div *ngIf="selectedTab() === 'gathering'" class="h-full">
               <div
-                class="text-[10px] uppercase tracking-[0.16em] text-zinc-300"
+                *ngIf="selectedGatheringNodes().length; else noGatheringNodes"
+                class="grid h-full gap-3 lg:grid-cols-2"
               >
-                Rating
-              </div>
-              <div class="mt-1 text-sm">
-                <span
-                  class="font-semibold tabular-nums"
-                  [class.text-primary]="meetsRecommendedRating()"
-                  [class.text-amber-200]="!meetsRecommendedRating()"
+                <article
+                  *ngFor="
+                    let node of selectedGatheringNodes();
+                    trackBy: trackGatheringNode
+                  "
+                  class="min-w-0 rounded border border-white/15 bg-black/35 px-3 py-3"
                 >
-                  {{ selectedPreviewData().currentCombatRating ?? 0 }}
-                </span>
-                <span class="text-zinc-500">
-                  / {{ selectedPreviewData().recommendedCombatRating ?? 0 }}
-                </span>
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                      <h3
+                        class="truncate text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-100"
+                      >
+                        {{ node.name }}
+                      </h3>
+
+                      <div class="mt-2 flex flex-wrap gap-1.5">
+                        <span
+                          class="rounded border px-2 py-0.5 text-[10px] uppercase"
+                          [ngClass]="gatheringTypeClass(node.type)"
+                        >
+                          {{ formatGatheringType(node.type) }}
+                        </span>
+                        <span
+                          class="rounded border border-white/15 px-2 py-0.5 text-[10px] uppercase text-zinc-300"
+                        >
+                          {{ gatheringLevelLabel(node) }}
+                        </span>
+                        <span
+                          class="rounded border border-primary/20 px-2 py-0.5 text-[10px] uppercase text-primary"
+                        >
+                          {{ gatheringChanceLabel(node) }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mt-3 space-y-1 text-sm text-zinc-100">
+                    <div
+                      *ngFor="
+                        let loot of node.loot;
+                        trackBy: trackGatheringLoot
+                      "
+                      class="flex min-w-0 items-center justify-between gap-2"
+                    >
+                      <span class="min-w-0 truncate">
+                        <app-item [item]="loot"></app-item>
+                      </span>
+                      <span class="shrink-0 text-xs tabular-nums text-zinc-400">
+                        x{{ gatheringLootQuantityLabel(loot) }}
+                      </span>
+                    </div>
+                  </div>
+                </article>
+              </div>
+
+              <ng-template #noGatheringNodes>
+                <div class="text-sm text-zinc-400">
+                  This dungeon has no gathering nodes.
+                </div>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RUN SETUP PANEL -->
+      <aside
+        class="h-fit rounded-md border border-primary/30 bg-black/70 p-4 shadow-[0_0_24px_rgba(0,0,0,0.35)] backdrop-blur-md lg:sticky lg:top-4"
+      >
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <div class="text-[10px] uppercase tracking-[0.18em] text-zinc-400">
+              Run Setup
+            </div>
+            <h3 class="mt-1 font-serif text-2xl text-primary">
+              {{ difficultyLabel(difficulty()) }}
+            </h3>
+          </div>
+
+          <span
+            class="shrink-0 rounded border px-2 py-0.5 text-[10px] font-semibold uppercase"
+            [ngClass]="selectedStatusClass()"
+          >
+            {{ selectedStatusLabel() }}
+          </span>
+        </div>
+
+        <section class="mt-5">
+          <div class="text-[10px] uppercase tracking-[0.18em] text-zinc-400">
+            Difficulty
+          </div>
+
+          <div class="mt-2 grid grid-cols-3 gap-2">
+            <button
+              *ngFor="let d of difficulties"
+              type="button"
+              class="rounded border px-2 py-2 text-xs transition disabled:cursor-not-allowed"
+              [ngClass]="difficultyButtonClass(d)"
+              [disabled]="!isDifficultyUnlocked(d)"
+              (click)="selectDifficulty(d)"
+            >
+              {{ difficultyLabel(d) }}
+            </button>
+          </div>
+        </section>
+
+        <section class="mt-4 rounded border border-white/15 bg-black/35 p-3">
+          <div class="flex items-center justify-between gap-3">
+            <div class="text-[10px] uppercase tracking-[0.18em] text-zinc-400">
+              Power Check
+            </div>
+            <span
+              class="rounded border px-2 py-0.5 text-[10px] font-semibold uppercase"
+              [ngClass]="checkStatusClass(meetsRecommendedRating())"
+            >
+              {{ meetsRecommendedRating() ? "Ready" : "Risky" }}
+            </span>
+          </div>
+
+          <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
+            <div>
+              <div
+                class="text-[10px] uppercase tracking-[0.14em] text-zinc-500"
+              >
+                Your Power
               </div>
               <div
-                class="mt-1 text-[10px] uppercase"
+                class="mt-1 font-serif text-xl tabular-nums"
                 [class.text-primary]="meetsRecommendedRating()"
                 [class.text-amber-200]="!meetsRecommendedRating()"
               >
-                {{ meetsRecommendedRating() ? "Ready" : "Risky" }}
+                {{ selectedCurrentCombatRating() }}
+              </div>
+            </div>
+
+            <div>
+              <div
+                class="text-[10px] uppercase tracking-[0.14em] text-zinc-500"
+              >
+                Recommended
+              </div>
+              <div class="mt-1 font-serif text-xl tabular-nums text-zinc-100">
+                {{ selectedRecommendedCombatRating() }}
               </div>
             </div>
           </div>
+        </section>
 
-          <div class="min-w-0">
-            <div class="text-[10px] uppercase tracking-[0.18em] text-zinc-300">
-              Rewards
+        <section class="mt-3 rounded border border-white/15 bg-black/35 p-3">
+          <div class="flex items-center justify-between gap-3">
+            <div class="text-[10px] uppercase tracking-[0.18em] text-zinc-400">
+              Entry Cost
             </div>
-            <div class="mt-2 grid gap-2 sm:grid-cols-2">
-              <section
-                *ngFor="let group of selectedRewardGroups()"
-                class="min-w-0 rounded border border-white/15 bg-black/30 px-3 py-2"
-              >
-                <div class="flex items-center justify-between gap-2">
-                  <span
-                    class="text-[11px] font-semibold uppercase text-primary"
-                  >
-                    {{ group.title }}
-                  </span>
-                  <span class="text-[10px] text-zinc-500">
-                    {{ group.rewards.length }}
-                  </span>
-                </div>
-                <div class="mt-1 truncate text-sm text-zinc-100">
-                  <ng-container
-                    *ngFor="let reward of group.rewards; let last = last"
-                  >
-                    <app-item [item]="reward"></app-item>{{ last ? "" : ", " }}
-                  </ng-container>
-                </div>
-              </section>
-            </div>
+            <span
+              class="rounded border px-2 py-0.5 text-[10px] font-semibold uppercase"
+              [ngClass]="
+                checkStatusClass(!selectedHasMissingEntryRequirements())
+              "
+            >
+              {{ selectedEntryStatusLabel() }}
+            </span>
           </div>
 
           <div
-            *ngIf="!selectedCanEnter()"
-            class="rounded border border-red-400/30 bg-red-950/20 px-3 py-2 text-xs text-red-100 md:col-span-2 xl:col-span-3"
+            *ngIf="selectedEntryRequirements().length; else noEntryCost"
+            class="mt-3 space-y-2"
           >
-            {{
-              selectedMissingRequirements().join(" · ") ||
-                selectedStatusLabel()
-            }}
+            <div
+              *ngFor="let requirement of selectedEntryRequirements()"
+              class="flex items-center justify-between gap-3 rounded border px-2 py-2 text-xs"
+              [ngClass]="entryRequirementClass(requirement)"
+            >
+              <span class="min-w-0 truncate">{{ requirement.name }}</span>
+              <span class="shrink-0 tabular-nums">
+                {{ requirement.ownedAmount }}/{{ requirement.requiredAmount }}
+              </span>
+            </div>
+          </div>
+
+          <ng-template #noEntryCost>
+            <div class="mt-3 text-sm text-zinc-400">No key required.</div>
+          </ng-template>
+        </section>
+
+        <div class="mt-4">
+          <app-regular-button
+            [text]="
+              selectedCanEnter()
+                ? 'Enter ' + difficultyLabel(difficulty())
+                : 'Cannot Enter'
+            "
+            [disabled]="!selectedCanEnter()"
+            (pressed)="startDungeon()"
+            fullWidth
+          ></app-regular-button>
+
+          <div
+            *ngIf="!selectedCanEnter()"
+            class="mt-3 rounded border border-red-400/30 bg-red-950/20 px-3 py-2 text-xs leading-5 text-red-100"
+          >
+            {{ selectedBlockingMessage() }}
           </div>
         </div>
-      </div>
+      </aside>
     </div>
   </div>
 </ng-template>

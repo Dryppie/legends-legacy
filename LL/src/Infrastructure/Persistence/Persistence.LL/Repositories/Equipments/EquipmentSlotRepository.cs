@@ -21,8 +21,13 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
             .Include(es => es.EquipmentInstance)
                 .ThenInclude(ei => ei.InstanceModifiers)
             .Include(es => es.EquipmentInstance)
+                .ThenInclude(ei => ei.ToolAffixes)
+            .Include(es => es.EquipmentInstance)
                 .ThenInclude(ei => ei.ItemBase)
                     .ThenInclude(eb => (eb as EquipmentBase).AttributeModifiers)
+            .Include(es => es.EquipmentInstance)
+                .ThenInclude(ei => ei.ItemBase)
+                    .ThenInclude(eb => (eb as EquipmentBase).ToolBonuses)
             .Where(es => es.EntityId.Equals(entityId))
             .ToListAsync(cancellationToken);
 
@@ -34,7 +39,11 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         var character = await _context.Characters
             .Include(c => c.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)
+                    .ThenInclude(ei => ei.ToolAffixes)
+            .Include(c => c.EquipmentSlots)
+                .ThenInclude(es => es.EquipmentInstance)
                     .ThenInclude(ei => ei.ItemBase)
+                        .ThenInclude(ib => (ib as EquipmentBase).ToolBonuses)
             .Include(c => c.Inventory)
                 .ThenInclude(i => i.InventoryItems)
                     .ThenInclude(ii => ii.ItemInstance)
@@ -73,7 +82,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                 offHand.EquipmentInstanceId = null;
             }
 
-            AddItemToInventory(character.Inventory, equipmentInstance.Id);
+            AddItemToInventory(character.Inventory, equipmentInstance);
         }
         else
         {
@@ -81,7 +90,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
             targetSlot.EquipmentInstance = null;
             targetSlot.EquipmentInstanceId = null;
 
-            AddItemToInventory(character.Inventory, equipmentInstance.Id);
+            AddItemToInventory(character.Inventory, equipmentInstance);
         }
 
         return true;
@@ -93,11 +102,18 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         var character = await _context.Characters
             .Include(c => c.EquipmentSlots)
                 .ThenInclude(es => es.EquipmentInstance)
+                    .ThenInclude(ei => ei.ToolAffixes)
+            .Include(c => c.EquipmentSlots)
+                .ThenInclude(es => es.EquipmentInstance)
                     .ThenInclude(ei => ei.ItemBase)
+                        .ThenInclude(ib => (ib as EquipmentBase).ToolBonuses)
             .Include(c => c.Inventory)
                 .ThenInclude(i => i.InventoryItems)
                     .ThenInclude(ii => ii.ItemInstance)
                         .ThenInclude(ii => ii.ItemBase)
+            .Include(c => c.Inventory)
+                .ThenInclude(i => i.InventoryItems)
+                    .ThenInclude(ii => (ii.ItemInstance as EquipmentInstance).ToolAffixes)
             .SingleOrDefaultAsync(c => c.Id == entityId, cancellationToken);
 
         if (character == null)
@@ -130,6 +146,14 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         InventoryItem inventoryItem, EquipmentSlotType? slotType, CancellationToken cancellationToken)
     {
         var equipmentBase = equipmentInstance.EquipmentBase;
+
+        if (slotType == EquipmentSlotType.Tool && equipmentBase.EquipmentType != EquipmentType.Tool)
+            return false;
+
+        if (equipmentBase.EquipmentType == EquipmentType.Tool &&
+            slotType is not null &&
+            slotType != EquipmentSlotType.Tool)
+            return false;
 
         // Equip logic based on EquipmentType
         switch (equipmentBase.EquipmentType)
@@ -239,6 +263,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
                         EquipmentType.Relic => EquipmentSlotType.Relic,
                         EquipmentType.Necklace => EquipmentSlotType.Necklace,
                         EquipmentType.Ring => EquipmentSlotType.Ring,
+                        EquipmentType.Tool => EquipmentSlotType.Tool,
                         _ => throw new ArgumentOutOfRangeException(nameof(equipmentBase.EquipmentType), "Unsupported equipment type for armor or relic.")
                     };
                     var slot = GetSlot(character, equipmentSlotType);
@@ -253,6 +278,7 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         }
 
         _context.InventoryItems.Remove(inventoryItem);
+        inventory.InventoryItems.Remove(inventoryItem);
 
         return true;
     }
@@ -274,18 +300,25 @@ public class EquipmentSlotRepository : IEquipmentSlotRepository
         var equipped = slot.EquipmentInstance;
         if (equipped is not null)
         {
-            AddItemToInventory(inventory, equipped.Id);
+            AddItemToInventory(inventory, equipped);
         }
 
         slot.EquipmentInstanceId = null;
+        slot.EquipmentInstance = null;
     }
 
-    private static void AddItemToInventory(Inventory inventory, Guid itemId)
+    private static void AddItemToInventory(Inventory inventory, EquipmentInstance item)
     {
+        if (inventory.InventoryItems.Any(inventoryItem => inventoryItem.ItemInstanceId == item.Id))
+        {
+            return;
+        }
+
         inventory.InventoryItems.Add(new InventoryItem
         {
             InventoryId = inventory.CharacterId,
-            ItemInstanceId = itemId,
+            ItemInstanceId = item.Id,
+            ItemInstance = item,
             Quantity = 1
         });
     }

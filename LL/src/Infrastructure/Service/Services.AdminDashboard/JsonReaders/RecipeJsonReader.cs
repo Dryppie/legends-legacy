@@ -115,6 +115,7 @@ public class RecipeJsonReader
             AttackSpeed = itemDto.AttackSpeed,
             Magnitude = itemDto.Magnitude,
             MagnitudeRange = itemDto.MagnitudeRange,
+            GatheringType = itemDto.GatheringType,
             ScalingAttribute = itemDto.ScalingAttribute,
             ScalingAmount = itemDto.ScalingAmount
         };

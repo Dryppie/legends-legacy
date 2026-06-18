@@ -1,3 +1,5 @@
+import { GatheringType } from '../enums/gatheringType';
+
 export interface Region {
   name: string;
   areas: Area[];
@@ -11,6 +13,7 @@ export interface Area {
   levelRequirement: number;
   creatures: string[];
   description: string;
+  gatheringTypes?: GatheringType[];
   // creatures: Creature[];
 }
 

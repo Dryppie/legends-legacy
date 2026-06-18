@@ -23,7 +23,13 @@ public class InventoryRepository : IInventoryRepository
                     .ThenInclude(ii => ii.ItemBase)
                         .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
             .Include(i => i.InventoryItems)
+                .ThenInclude(ii => ii.ItemInstance)
+                    .ThenInclude(ii => ii.ItemBase)
+                        .ThenInclude(ib => (ib as EquipmentBase).ToolBonuses)
+            .Include(i => i.InventoryItems)
                 .ThenInclude(ii => (ii.ItemInstance as EquipmentInstance).InstanceModifiers)
+            .Include(i => i.InventoryItems)
+                .ThenInclude(ii => (ii.ItemInstance as EquipmentInstance).ToolAffixes)
             .FirstOrDefaultAsync(i => i.CharacterId == characterId, cancellationToken); // Assuming CharacterId is the foreign key
 
         NotFoundException.ThrowIfNull(inventory, nameof(inventory), characterId);
@@ -253,6 +259,12 @@ public class InventoryRepository : IInventoryRepository
                 if (_context.GetEntry(mod).State == EntityState.Detached)
                     _context.GetEntry(mod).State = EntityState.Added;
             }
+
+            foreach (var affix in eq.ToolAffixes)
+            {
+                if (_context.GetEntry(affix).State == EntityState.Detached)
+                    _context.GetEntry(affix).State = EntityState.Added;
+            }
         }
 
         await _context.InventoryItems.AddAsync(itemToAdd, cancellationToken);
@@ -274,6 +286,12 @@ public class InventoryRepository : IInventoryRepository
 
         if (!equipmentInventoryItems.Any()) return null;
         if (parsedGuids.Count == 0 || parsedGuids.Count != equipmentInventoryItems.Count()) return null;
+        if (equipmentInventoryItems.Any(i =>
+            i.ItemInstance is EquipmentInstance equipmentInstance &&
+            equipmentInstance.EquipmentBase.EquipmentType == EquipmentType.Tool))
+        {
+            return null;
+        }
 
         // Define Tempered Scrap gain logic
         const int temperedScrapPerEquipment = 1;

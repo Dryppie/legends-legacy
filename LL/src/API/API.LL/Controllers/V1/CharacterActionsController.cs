@@ -1,7 +1,6 @@
-﻿using Application.UseCases.CharacterActions.Commands.DeleteCharacterAction;
+using Application.UseCases.CharacterActions.Commands.DeleteCharacterAction;
 using Application.UseCases.CharacterActions.Commands.StartCombatAction;
 using Application.UseCases.CharacterActions.Commands.StartCraftingAction;
-using Application.UseCases.CharacterActions.Commands.StartGatheringAction;
 using Application.UseCases.CharacterActions.Dtos.Responses;
 using Application.UseCases.CharacterActions.Queries.GetCharacterAction;
 using Common.Primitives;
@@ -27,11 +26,7 @@ public class CharacterActionsController : BaseController
     public async Task<ActionResult<Response<bool>>> StartCrafting([FromBody] StartCraftingActionRequest request) =>
         await Mediator.Send(new StartCraftingActionCommand(CurrentCharacterGuid, request.QueueId, request.ItemInstanceId));
 
-    [HttpPost("StartGathering")]
-    public async Task<ActionResult<Response<bool>>> StartGathering([FromBody] string gatheringNodeId) =>
-        await Mediator.Send(new StartGatheringActionCommand(CurrentCharacterGuid, gatheringNodeId));
-
     [HttpDelete]
-    public async Task<ActionResult<Response<bool>>> Delete() => 
+    public async Task<ActionResult<Response<bool>>> Delete() =>
         await Mediator.Send(new DeleteCharacterActionCommand(CurrentCharacterGuid));
 }

@@ -3,6 +3,7 @@ using Domain.Models.Colosseum;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Inventories;
+using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
 using Domain.Models.Users;
@@ -18,6 +19,13 @@ public static class LLDbContextExtensions
     public const string CHARACTER_GUID = "11111111-1111-1111-1111-111111111111";
     private const int LOCAL_GUEST_ACCOUNT_COUNT = 10;
     private const string LOCAL_GUEST_USERNAME_PREFIX = "SeedGuest";
+    private static readonly (Guid InstanceId, string ItemBaseId)[] AdminStarterTools =
+    [
+        (Guid.Parse("00000000-0000-0000-1000-000000000001"), "basic_pickaxe"),
+        (Guid.Parse("00000000-0000-0000-1000-000000000002"), "basic_hatchet"),
+        (Guid.Parse("00000000-0000-0000-1000-000000000003"), "basic_fishing_rod"),
+        (Guid.Parse("00000000-0000-0000-1000-000000000004"), "basic_skinning_knife"),
+    ];
 
     public static async Task SeedData(this LLDbContext context, IPasswordHasher<AppUser> hasher, bool seedLocalGuestAccounts = false)
     {
@@ -27,7 +35,6 @@ public static class LLDbContextExtensions
         if (!context.Entities.Any())
         {
             await SeedCreatures.SeedCreaturesData(context);
-            await SeedProfessions.SeedProfessionsData(context);
 #if DEBUG
             await SeedAdminData(context, hasher);
             await SeedInventoryItems(context);
@@ -35,6 +42,13 @@ public static class LLDbContextExtensions
 
             await context.SaveChangesAsync();
         }
+
+#if DEBUG
+        if (await SeedAdminStarterTools(context))
+        {
+            await context.SaveChangesAsync();
+        }
+#endif
 
         if (seedLocalGuestAccounts)
         {
@@ -233,6 +247,86 @@ public static class LLDbContextExtensions
             await context.ItemInstances.AddRangeAsync(essenceItemInstances);
             await context.InventoryItems.AddRangeAsync(inventoryItems);
         }
+    }
+
+    private static async Task<bool> SeedAdminStarterTools(LLDbContext context)
+    {
+        var adminCharacterId = Guid.Parse(CHARACTER_GUID);
+        var hasAdminInventory = await context.Inventories
+            .AnyAsync(inventory => inventory.CharacterId == adminCharacterId);
+
+        if (!hasAdminInventory)
+        {
+            return false;
+        }
+
+        var starterToolItemBaseIds = AdminStarterTools
+            .Select(tool => tool.ItemBaseId)
+            .ToArray();
+
+        var seededItemBaseIds = await context.ItemBases
+            .Where(itemBase => starterToolItemBaseIds.Contains(itemBase.Id))
+            .Select(itemBase => itemBase.Id)
+            .ToListAsync();
+
+        var missingItemBaseIds = starterToolItemBaseIds
+            .Except(seededItemBaseIds)
+            .ToArray();
+
+        if (missingItemBaseIds.Length > 0)
+        {
+            throw new InvalidOperationException(
+                $"Admin starter tool item bases were not seeded: {string.Join(", ", missingItemBaseIds)}");
+        }
+
+        var existingStarterToolItemBaseIds = await context.InventoryItems
+            .Where(inventoryItem => inventoryItem.InventoryId == adminCharacterId)
+            .Where(inventoryItem => starterToolItemBaseIds.Contains(inventoryItem.ItemInstance.ItemBaseId))
+            .Select(inventoryItem => inventoryItem.ItemInstance.ItemBaseId)
+            .ToListAsync();
+
+        var existingStarterToolItemBaseIdSet = existingStarterToolItemBaseIds.ToHashSet();
+        var missingTools = AdminStarterTools
+            .Where(tool => !existingStarterToolItemBaseIdSet.Contains(tool.ItemBaseId))
+            .ToArray();
+
+        if (missingTools.Length == 0)
+        {
+            return false;
+        }
+
+        var missingToolInstanceIds = missingTools
+            .Select(tool => tool.InstanceId)
+            .ToArray();
+
+        var existingInstanceIds = await context.ItemInstances
+            .Where(instance => missingToolInstanceIds.Contains(instance.Id))
+            .Select(instance => instance.Id)
+            .ToListAsync();
+
+        var existingInstanceIdSet = existingInstanceIds.ToHashSet();
+        var itemInstances = missingTools
+            .Where(tool => !existingInstanceIdSet.Contains(tool.InstanceId))
+            .Select(tool => new EquipmentInstance
+            {
+                Id = tool.InstanceId,
+                ItemBaseId = tool.ItemBaseId
+            })
+            .ToList();
+
+        var inventoryItems = missingTools
+            .Select(tool => new InventoryItem
+            {
+                InventoryId = adminCharacterId,
+                ItemInstanceId = tool.InstanceId,
+                Quantity = 1
+            })
+            .ToList();
+
+        await context.ItemInstances.AddRangeAsync(itemInstances);
+        await context.InventoryItems.AddRangeAsync(inventoryItems);
+
+        return true;
     }
 
 }

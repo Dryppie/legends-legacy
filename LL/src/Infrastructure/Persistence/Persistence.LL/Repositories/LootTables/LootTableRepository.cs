@@ -25,18 +25,6 @@ public class LootTableRepository : ILootTableRepository
         return lootTable;
     }
 
-    public async Task<LootTable> GetGatheringNodeLootTableAsync(string gatheringNodeId, CancellationToken cancellationToken)
-    {
-        var gatheringLootTable = await _context.GatheringNodes
-            .Where(gn => gn.Id == gatheringNodeId)
-            .Select(gn => gn.LootTable)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        NotFoundException.ThrowIfNull(gatheringLootTable, nameof(gatheringLootTable), gatheringNodeId);
-
-        return gatheringLootTable;
-    }
-
     public Task<LootTable> GetMonsterLootTableAsync(Guid monsterId, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();

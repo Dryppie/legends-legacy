@@ -97,14 +97,18 @@ public class LootService : ILootService
         return Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Cos(2.0 * Math.PI * u2);
     }
 
-    public List<InventoryItem> GenerateGatheringLootAsync(LootTable lootTable, CancellationToken cancellationToken)
+    public List<InventoryItem> GenerateGatheringLootAsync(
+        LootTable lootTable,
+        CancellationToken cancellationToken,
+        double rareEntryWeightBonusPercent = 0,
+        int numberOfRolls = 1)
     {
         var ctx = new LootContext
         {
-            Source = LootSource.Gathering
-            //  ⟹ leave multipliers empty (1×) unless you have special rules
+            Source = LootSource.Gathering,
+            RareEntryWeightBonusPercent = Math.Max(0, rareEntryWeightBonusPercent)
         };
-        return GetRandomLoot(lootTable, ctx);
+        return GetRandomLoot(lootTable, ctx, Math.Max(1, numberOfRolls));
     }
 
     public List<InventoryItem> GenerateDungeonLoot(LootTable lootTable, Dictionary<ItemType, double>? multipliers = null)
@@ -157,7 +161,9 @@ public class LootService : ILootService
                     continue;
                 }
 
-                generatedLoot.Add(ConvertItemIntoInventoryItem(lootTableItem.Item));
+                generatedLoot.Add(ConvertItemIntoInventoryItem(
+                    lootTableItem.Item,
+                    RollQuantity(lootTableItem)));
             }
             else if (selectedEntry is LootTable table)
             {
@@ -179,6 +185,12 @@ public class LootService : ILootService
                     && li.Item is not null
                     && ctx.TypeMultipliers.TryGetValue(li.Item.ItemType, out var m))
                     mult = m;
+
+                if (ctx.Source == LootSource.Gathering &&
+                    e is LootTableItem { IsRare: true })
+                {
+                    mult += Math.Max(0, ctx.RareEntryWeightBonusPercent);
+                }
 
                 return (Entry: e, Weight: e.Weight * (1 + (mult / 100)));
             })
@@ -204,8 +216,16 @@ public class LootService : ILootService
         return null;
     }
 
-    private InventoryItem ConvertItemIntoInventoryItem(ItemBase item)
+    private static int RollQuantity(LootTableItem item)
     {
-        return _inventoryItemFactory.Create(item, 1);
+        var min = Math.Max(1, item.MinQuantity);
+        var max = Math.Max(min, item.MaxQuantity);
+
+        return RandomGenerator.Next(min, max + 1);
+    }
+
+    private InventoryItem ConvertItemIntoInventoryItem(ItemBase item, int quantity)
+    {
+        return _inventoryItemFactory.Create(item, quantity);
     }
 }

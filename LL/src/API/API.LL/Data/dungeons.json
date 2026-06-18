@@ -26,6 +26,57 @@
     "monsterLootModifiers": {
       "Essence": 25
     },
+    "gatheringNodes": [
+      {
+        "id": "goblin_mines_dungeon_iron_vein",
+        "name": "Dungeon Iron Vein",
+        "type": "Mining",
+        "levelRequirement": 1,
+        "procChance": 0.35,
+        "loot": [
+          {
+            "itemId": "iron_ore",
+            "weight": 45,
+            "minQuantity": 1,
+            "maxQuantity": 3
+          },
+          {
+            "itemId": "rough_stone",
+            "weight": 35,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "cracked_garnet",
+            "weight": 5,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          }
+        ]
+      },
+      {
+        "id": "goblin_mines_dungeon_stream",
+        "name": "Subterranean Stream",
+        "type": "Fishing",
+        "levelRequirement": 1,
+        "procChance": 0.18,
+        "loot": [
+          {
+            "itemId": "cave_fish",
+            "weight": 40,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "murky_fish_oil",
+            "weight": 15,
+            "minQuantity": 1,
+            "maxQuantity": 1
+          }
+        ]
+      }
+    ],
     "hasCheckpoint": true,
     "minRooms": 5,
     "maxRooms": 7,
@@ -73,11 +124,41 @@
         }
       ]
     },
-    "completionLootTableId": "10000000-0000-0000-0000-000000000101",
-    "tierLootTableId": "10000000-0000-0000-0000-000000000001",
+    "completionLootTableId": "10000000-0000-0000-0000-000000000102",
+    "tierLootTableId": "10000000-0000-0000-0000-000000000002",
     "monsterLootModifiers": {
       "Essence": 25
     },
+    "gatheringNodes": [
+      {
+        "id": "goblin_mines_ii_dungeon_iron_vein",
+        "name": "Rich Dungeon Iron Vein",
+        "type": "Mining",
+        "levelRequirement": 1,
+        "procChance": 0.40,
+        "loot": [
+          {
+            "itemId": "iron_ore",
+            "weight": 45,
+            "minQuantity": 1,
+            "maxQuantity": 4
+          },
+          {
+            "itemId": "rough_stone",
+            "weight": 35,
+            "minQuantity": 1,
+            "maxQuantity": 3
+          },
+          {
+            "itemId": "cracked_garnet",
+            "weight": 5,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          }
+        ]
+      }
+    ],
     "hasCheckpoint": true,
     "minRooms": 6,
     "maxRooms": 8,
@@ -125,11 +206,41 @@
         }
       ]
     },
-    "completionLootTableId": "10000000-0000-0000-0000-000000000101",
-    "tierLootTableId": "10000000-0000-0000-0000-000000000001",
+    "completionLootTableId": "10000000-0000-0000-0000-000000000103",
+    "tierLootTableId": "10000000-0000-0000-0000-000000000003",
     "monsterLootModifiers": {
       "Essence": 25
     },
+    "gatheringNodes": [
+      {
+        "id": "goblin_mines_iii_dungeon_iron_vein",
+        "name": "Deep Dungeon Iron Vein",
+        "type": "Mining",
+        "levelRequirement": 1,
+        "procChance": 0.45,
+        "loot": [
+          {
+            "itemId": "iron_ore",
+            "weight": 45,
+            "minQuantity": 2,
+            "maxQuantity": 4
+          },
+          {
+            "itemId": "rough_stone",
+            "weight": 35,
+            "minQuantity": 1,
+            "maxQuantity": 3
+          },
+          {
+            "itemId": "cracked_garnet",
+            "weight": 5,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          }
+        ]
+      }
+    ],
     "hasCheckpoint": true,
     "minRooms": 7,
     "maxRooms": 9,
@@ -175,6 +286,7 @@
         }
       ]
     },
+    "completionLootTableId": "10000000-0000-0000-0000-000000000201",
     "tierLootTableId": "10000000-0000-0000-0000-000000000001",
     "monsterLootModifiers": {
       "Essence": 15
@@ -244,7 +356,8 @@
         }
       ]
     },
-    "tierLootTableId": "10000000-0000-0000-0000-000000000001",
+    "completionLootTableId": "10000000-0000-0000-0000-000000000202",
+    "tierLootTableId": "10000000-0000-0000-0000-000000000002",
     "monsterLootModifiers": {
       "Essence": 15
     },
@@ -313,7 +426,8 @@
         }
       ]
     },
-    "tierLootTableId": "10000000-0000-0000-0000-000000000001",
+    "completionLootTableId": "10000000-0000-0000-0000-000000000203",
+    "tierLootTableId": "10000000-0000-0000-0000-000000000003",
     "monsterLootModifiers": {
       "Essence": 15
     },
@@ -380,6 +494,7 @@
         }
       ]
     },
+    "completionLootTableId": "10000000-0000-0000-0000-000000000301",
     "tierLootTableId": "10000000-0000-0000-0000-000000000001",
     "monsterLootModifiers": {
       "Essence": 15
@@ -449,7 +564,8 @@
         }
       ]
     },
-    "tierLootTableId": "10000000-0000-0000-0000-000000000001",
+    "completionLootTableId": "10000000-0000-0000-0000-000000000302",
+    "tierLootTableId": "10000000-0000-0000-0000-000000000002",
     "monsterLootModifiers": {
       "Essence": 15
     },
@@ -518,7 +634,8 @@
         }
       ]
     },
-    "tierLootTableId": "10000000-0000-0000-0000-000000000001",
+    "completionLootTableId": "10000000-0000-0000-0000-000000000303",
+    "tierLootTableId": "10000000-0000-0000-0000-000000000003",
     "monsterLootModifiers": {
       "Essence": 15
     },

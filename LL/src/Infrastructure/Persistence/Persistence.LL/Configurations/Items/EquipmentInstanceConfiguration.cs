@@ -12,5 +12,10 @@ public class EquipmentInstanceConfiguration : ItemInstanceConfiguration, IEntity
          .WithOne()
          .HasForeignKey(m => m.ItemInstanceId)
          .HasPrincipalKey(e => e.Id);
+
+        b.HasMany(e => e.ToolAffixes)
+         .WithOne(x => x.EquipmentInstance)
+         .HasForeignKey(x => x.EquipmentInstanceId)
+         .HasPrincipalKey(e => e.Id);
     }
 }

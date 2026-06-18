@@ -1,4 +1,5 @@
-﻿using Domain.Models.Combat;
+using Domain.Models.Combat;
+using Domain.Models.Entities;
 using Services.LL.Combat.Layers.Orchestration.Models;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces.Combat.Resolution;
@@ -18,6 +19,8 @@ public sealed class IdleCombatResolutionSession : ICombatResolutionSession
         _engineExecutor = engineExecutor;
         _resultFactory = resultFactory;
     }
+
+    public IReadOnlyDictionary<Guid, Entity> SourceEntitiesById => Catalog.SourceEntitiesById;
 
     public async Task<CombatEncounterResolutionResult> ResolveAsync(
         CombatEncounterPlan encounterPlan,

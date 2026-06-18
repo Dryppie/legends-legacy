@@ -97,7 +97,11 @@ public sealed class DungeonEssenceRewardTests
     {
         public int GenerateSoulstoneLoot(int seconds, double dropRate, double doubleChance) => 0;
 
-        public List<InventoryItem> GenerateGatheringLootAsync(LootTable lootTable, CancellationToken cancellationToken) => [];
+        public List<InventoryItem> GenerateGatheringLootAsync(
+            LootTable lootTable,
+            CancellationToken cancellationToken,
+            double rareEntryWeightBonusPercent = 0,
+            int numberOfRolls = 1) => [];
 
         public List<InventoryItem> GenerateIdleCombatLootAsync(List<Domain.Models.Entities.Entity> enemyCharacters, Dictionary<ItemType, double> multipliers) => [];
 

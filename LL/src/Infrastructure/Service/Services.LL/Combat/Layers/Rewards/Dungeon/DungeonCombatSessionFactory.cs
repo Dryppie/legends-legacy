@@ -21,6 +21,8 @@ internal class DungeonCombatSessionFactory : IDungeonCombatSessionFactory
             lastCombatResult.ExperienceGained = outcome.TotalExperience;
         }
 
+        lastCombatResult.GatheringRewards = [.. outcome.GatheringRewards];
+
         var summary = new CombatSummary
         {
             TotalExperience = outcome.TotalExperience,

@@ -11,6 +11,30 @@ public class ProfessionService : IProfessionService
     {
         _professionRepository = professionRepository;
     }
+
+    public async Task<Profession> GetOrCreateProfessionAsync(Guid characterId, ProfessionType professionType, CancellationToken cancellationToken)
+    {
+        var profession = await _professionRepository.GetProfessionAsync(characterId, professionType, cancellationToken);
+        if (profession is not null)
+        {
+            profession.ExperienceUntilNextLevel = EntityLevelConstants.XP_REQUIRED(profession.Level);
+            return profession;
+        }
+
+        profession = new Profession
+        {
+            CharacterId = characterId,
+            ProfessionType = professionType,
+            Level = 1,
+            Experience = 0,
+            ExperienceUntilNextLevel = EntityLevelConstants.XP_REQUIRED(1)
+        };
+
+        _professionRepository.AddProfession(profession);
+
+        return profession;
+    }
+
     public async Task<int> GetProfessionLevelAsync(Guid characterId, ProfessionType professionType, CancellationToken cancellationToken)
     {
         return await _professionRepository.GetProfessionLevelAsync(characterId, professionType, cancellationToken);

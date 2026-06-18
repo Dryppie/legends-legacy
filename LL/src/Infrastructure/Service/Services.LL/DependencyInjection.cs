@@ -60,7 +60,6 @@ using Services.LL.MarketPlaces;
 using Services.LL.Players;
 using Services.LL.Professions;
 using Services.LL.Professions.Craftings;
-using Services.LL.Professions.Gatherings;
 using Services.LL.Providers;
 using Services.LL.Regions;
 using Services.LL.Regions.Areas;
@@ -133,10 +132,6 @@ public static class DependencyInjection
         services.AddScoped<IEssenceAbilityProvider, EssenceSystemService>();
         services.AddScoped<IEssenceCombatLoadoutResolver, EssenceSystemService>();
         services.AddScoped<IEssenceResonanceService, EssenceSystemService>();
-
-        services.AddScoped<IGatheringNodeService, GatheringNodeService>();
-
-        services.AddScoped<IGatheringService, GatheringService>();
 
         services.AddScoped<IGuildService, GuildService>();
         services.AddScoped<IGuildBuildingUpgradeService, GuildBuildingUpgradeService>();
@@ -218,6 +213,7 @@ public static class DependencyInjection
         services.AddScoped<IDungeonCombatSessionFactory, DungeonCombatSessionFactory>();
         services.AddScoped<IIdleCombatRewardApplier, IdleCombatRewardApplier>();
         services.AddScoped<IIdleCombatRewardCalculator, IdleCombatRewardCalculator>();
+        services.AddScoped<ICombatGatheringRewardProcessor, CombatGatheringRewardProcessor>();
         services.AddScoped<IIdleDungeonSigilDropCalculator, IdleDungeonSigilDropCalculator>();
         services.AddScoped<IIdleCombatRewardFactBuilder, IdleCombatRewardFactBuilder>();
         services.AddScoped<IIdleCombatSessionFactory, IdleCombatSessionFactory>();

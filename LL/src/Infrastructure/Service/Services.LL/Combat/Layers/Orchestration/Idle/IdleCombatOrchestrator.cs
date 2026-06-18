@@ -70,6 +70,7 @@ public sealed class IdleCombatOrchestrator : ICombatOrchestrator
                 RequestedTo: plan.RequestedTo,
                 ProcessedUntil: cursor,
                 PlannedEncounterCount: plan.PlannedEncounterCount,
-                EncounterCadence: plan.EncounterCadence));
+                EncounterCadence: plan.EncounterCadence),
+            SourceEntitiesById: resolutionSession.SourceEntitiesById);
     }
 }

@@ -11,6 +11,11 @@ public class ProfessionRepository : IProfessionRepository
         _context = context;
     }
 
+    public async Task<Profession?> GetProfessionAsync(Guid characterId, ProfessionType professionType, CancellationToken cancellationToken)
+    {
+        return await _context.Professions.FindAsync([characterId, professionType], cancellationToken);
+    }
+
     public async Task<int> GetProfessionLevelAsync(Guid characterId, ProfessionType professionType, CancellationToken cancellationToken)
     {
         var profession = await _context.Professions.FindAsync([characterId, professionType], cancellationToken);
@@ -23,6 +28,11 @@ public class ProfessionRepository : IProfessionRepository
         return await _context.Professions
             .Where(p => p.CharacterId == characterId)
             .ToListAsync(cancellationToken);
+    }
+
+    public void AddProfession(Profession profession)
+    {
+        _context.Professions.Add(profession);
     }
 
     public void UpdateProfessionLevels(List<Profession> professions)

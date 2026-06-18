@@ -11,4 +11,6 @@ public enum ProfessionType
     // Gathering
     Mining,
     Woodcutting,
+    Fishing,
+    Skinning,
 }

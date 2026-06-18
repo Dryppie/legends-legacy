@@ -16,8 +16,13 @@ public class MarketPlaceRepository : IMarketPlaceRepository
     {
         var marketPlaceListings = await _dbContext.MarketPlaceListings
             .Include(mpl => mpl.ItemInstance)
+                .ThenInclude(ii => (ii as EquipmentInstance).ToolAffixes)
+            .Include(mpl => mpl.ItemInstance)
                 .ThenInclude(ii => ii.ItemBase)
                     .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
+            .Include(mpl => mpl.ItemInstance)
+                .ThenInclude(ii => ii.ItemBase)
+                    .ThenInclude(ib => (ib as EquipmentBase).ToolBonuses)
             .ToListAsync(cancellationToken);
 
         return marketPlaceListings;
@@ -59,8 +64,13 @@ public class MarketPlaceRepository : IMarketPlaceRepository
     {
         return await _dbContext.MarketPlaceListings
             .Include(mpl => mpl.ItemInstance)
+                .ThenInclude(ii => (ii as EquipmentInstance).ToolAffixes)
+            .Include(mpl => mpl.ItemInstance)
                 .ThenInclude(ii => ii.ItemBase)
                     .ThenInclude(ib => (ib as EquipmentBase).AttributeModifiers)
+            .Include(mpl => mpl.ItemInstance)
+                .ThenInclude(ii => ii.ItemBase)
+                    .ThenInclude(ib => (ib as EquipmentBase).ToolBonuses)
             .FirstOrDefaultAsync(mpl => mpl.Id.Equals(listingId), cancellationToken);
     }
 

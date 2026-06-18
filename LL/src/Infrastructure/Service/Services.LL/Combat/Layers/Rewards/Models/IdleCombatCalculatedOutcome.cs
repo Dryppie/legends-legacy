@@ -1,4 +1,5 @@
-﻿using Domain.Models.Inventories;
+using Domain.Models.Combat;
+using Domain.Models.Inventories;
 
 namespace Services.LL.Combat.Layers.Rewards.Models;
 
@@ -10,6 +11,7 @@ public sealed record IdleCombatCalculatedOutcome(
     int TotalCinders,
     int TotalSoulstones,
     IReadOnlyList<InventoryItem> TotalLoot,
+    IReadOnlyList<GatheringRewardResult> GatheringRewards,
     IReadOnlyList<IdleEncounterCalculatedOutcome> EncounterOutcomes)
 {
     public IdleEncounterCalculatedOutcome? LastEncounterOutcome =>

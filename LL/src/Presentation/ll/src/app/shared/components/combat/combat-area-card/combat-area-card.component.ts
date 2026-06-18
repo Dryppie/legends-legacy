@@ -9,6 +9,7 @@ import { CommonModule, NgIf } from '@angular/common';
 import { CharacterService } from '../../../../core/services/api/character/character.service';
 import { CharacterActionsStateService } from '../../../../core/services/api/character-actions/character-actions.state.service';
 import { CharacterActionType } from '../../../models/enums/characterActionType';
+import { GatheringType } from '../../../models/enums/gatheringType';
 
 @Component({
   selector: 'app-combat-area-card',
@@ -60,6 +61,10 @@ export class CombatAreaCardComponent implements OnInit {
   setIsLocked(): void {
     const character = this.currentCharacter();
     this.isLocked = !character || character.level < this.area.levelRequirement;
+  }
+
+  gatheringTypes(): GatheringType[] {
+    return this.area.gatheringTypes ?? [];
   }
 
   specificCard(): void {

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ApiService } from '../../api/api.service';
 import { Observable, of } from 'rxjs';
 import { Region } from '../../../../shared/models/Dtos/regionDto';
+import { GatheringType } from '../../../../shared/models/enums/gatheringType';
 
 @Injectable({
   providedIn: 'root',
@@ -38,6 +39,7 @@ export class RegionService {
           name: 'Blood Grove',
           levelRequirement: 5,
           creatures: ['Flame Imp', 'Frost Imp', 'Shadow Imp', 'Vampire Bat'],
+          gatheringTypes: [GatheringType.Woodcutting],
           description:
             'The Blood Grove is a cursed forest where the trees bleed sap as red as blood. Twisted imps dance between the roots, feeding off the energy of the living.',
         },
@@ -75,6 +77,7 @@ export class RegionService {
           name: 'Goblin Mines',
           levelRequirement: 20,
           creatures: ['Hobgoblin'],
+          gatheringTypes: [GatheringType.Mining, GatheringType.Fishing],
           description:
             'Deep beneath the hills, the Goblin Mines echo with the clang of stolen tools. Hobgoblins rule here, digging for ancient relics they barely understand.',
         },

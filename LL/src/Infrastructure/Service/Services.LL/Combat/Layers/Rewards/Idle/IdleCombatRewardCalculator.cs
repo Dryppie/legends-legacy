@@ -20,6 +20,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
     private readonly IRandomSource _randomSource;
     private readonly IEssenceResonanceService _essenceResonanceService;
     private readonly IIdleDungeonSigilDropCalculator _sigilDropCalculator;
+    private readonly ICombatGatheringRewardProcessor _gatheringRewardProcessor;
 
     public IdleCombatRewardCalculator(
         IBonusService bonusService,
@@ -28,7 +29,8 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
         ISoulstoneRewardCalculator soulstoneRewardCalculator,
         IRandomSource randomSource,
         IEssenceResonanceService essenceResonanceService,
-        IIdleDungeonSigilDropCalculator sigilDropCalculator)
+        IIdleDungeonSigilDropCalculator sigilDropCalculator,
+        ICombatGatheringRewardProcessor gatheringRewardProcessor)
     {
         _bonusService = bonusService;
         _lootService = lootService;
@@ -37,6 +39,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
         _randomSource = randomSource;
         _essenceResonanceService = essenceResonanceService;
         _sigilDropCalculator = sigilDropCalculator;
+        _gatheringRewardProcessor = gatheringRewardProcessor;
     }
 
     public async Task<IdleCombatCalculatedOutcome> CalculateAsync(
@@ -115,6 +118,31 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
             totalLoot.AddRange(sigilDrops);
         }
 
+        var gatheringRewards = await _gatheringRewardProcessor.ProcessAsync(
+            new CombatGatheringRewardFacts(
+                facts.CharacterId,
+                facts.Encounters.Count(x => x.IsVictory),
+                facts.EquippedTool,
+                facts.Area.GatheringNodes
+                    .Select(node => new CombatGatheringNode(
+                        node.Id,
+                        node.Name,
+                        node.Type,
+                        node.LevelRequirement,
+                        node.ProcChance,
+                        node.LootTable))
+                    .ToArray()),
+            cancellationToken);
+
+        var gatheringLoot = gatheringRewards
+            .SelectMany(x => x.ItemsGained)
+            .ToList();
+
+        if (gatheringLoot.Count > 0)
+        {
+            totalLoot.AddRange(gatheringLoot);
+        }
+
         var totalSoulstones = _soulstoneRewardCalculator.Calculate(
             durationInSeconds: (int)Math.Abs(facts.ProcessedDuration.TotalSeconds),
             dropRatePercent: soulstoneDropRate,
@@ -128,6 +156,7 @@ public sealed class IdleCombatRewardCalculator : IIdleCombatRewardCalculator
             TotalCinders: totalCinders,
             TotalSoulstones: totalSoulstones,
             TotalLoot: totalLoot,
+            GatheringRewards: gatheringRewards,
             EncounterOutcomes: encounterOutcomes);
     }
 }

@@ -19,10 +19,6 @@ export class CharacterActionsService {
     return this.api.post('CharacterActions/StartCombat', data);
   }
 
-  startGathering(nodeId: string): Observable<boolean> {
-    return this.api.post('CharacterActions/StartGathering', nodeId);
-  }
-
   startCrafting(data: StartCraftingActionRequest): Observable<boolean> {
     return this.api.post('CharacterActions/StartCrafting', data);
   }

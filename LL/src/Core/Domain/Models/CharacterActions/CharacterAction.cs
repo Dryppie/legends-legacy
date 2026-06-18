@@ -13,7 +13,6 @@ public class CharacterAction
     {
         CombatActionDetails => CharacterActionType.Combat,
         CraftingActionDetails => CharacterActionType.Crafting,
-        //GatheringActionDetails => CharacterActionType.Gathering,
         _ => CharacterActionType.Idle
     };
 
@@ -25,8 +24,6 @@ public class CharacterAction
     public CombatSession? CombatSession { get; set; }
     [NotMapped]
     public TemperingSession? TemperingSession { get; set; }
-    [NotMapped]
-    public GatheringSession? GatheringSession { get; set; }
 
     public CharacterAction(Guid characterId, ActionDetails actionDetails)
     {

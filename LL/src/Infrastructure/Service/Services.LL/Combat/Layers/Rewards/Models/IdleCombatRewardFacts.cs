@@ -10,6 +10,7 @@ public sealed record IdleCombatRewardFacts(
     TimeSpan ProcessedDuration,
     Area Area,
     IReadOnlyList<Guid> PlayerEntityIds,
+    EquippedGatheringTool? EquippedTool,
     IReadOnlyList<IdleEncounterRewardFacts> Encounters)
 {
     public IdleEncounterRewardFacts? LastEncounter =>

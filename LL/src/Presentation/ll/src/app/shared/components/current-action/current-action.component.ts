@@ -13,7 +13,6 @@ import { CharacterActionsStateService } from '../../../core/services/api/charact
 export class CurrentActionComponent {
   currentAction: CharacterActionDto | null = null;
   remainingTime: string = '00:00'; // Add a property to track the remaining time
-  isGatheringAction = false;
   performingAction = '';
   duration = 0;
   readonly totalDuration;
@@ -42,36 +41,26 @@ export class CurrentActionComponent {
 
     if (!action) {
       this.performingAction = 'Idle';
-      this.isGatheringAction = false;
       return;
     }
 
     if (action.isDeleted && new Date(action.updatedAt).getTime() > Date.now()) {
       this.performingAction = 'Engaged in Combat - Stopping..';
-      this.isGatheringAction = false;
       return;
     }
 
     switch (action.characterActionType) {
       case CharacterActionType.Combat:
         this.performingAction = 'Engaged in Combat';
-        this.isGatheringAction = false;
-        break;
-      case CharacterActionType.Gathering:
-        this.performingAction = 'Gathering Resources';
-        this.isGatheringAction = true;
         break;
       case CharacterActionType.Crafting:
         this.performingAction = 'Tempering Items';
-        this.isGatheringAction = false;
         break;
       case CharacterActionType.Idle:
         this.performingAction = 'Idle';
-        this.isGatheringAction = false;
         break;
       default:
         this.performingAction = 'Idle';
-        this.isGatheringAction = false;
         break;
     }
   }

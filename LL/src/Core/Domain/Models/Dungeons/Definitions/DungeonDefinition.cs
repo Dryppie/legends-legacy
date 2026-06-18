@@ -1,5 +1,6 @@
 ﻿using Domain.Models.Dungeons.Definitions;
 using Domain.Models.Dungeons.Definitions.Encounters;
+using Domain.Models.Dungeons.Definitions.Gathering;
 using Domain.Models.Dungeons.Definitions.Rooms;
 using Domain.Models.Items;
 
@@ -22,6 +23,7 @@ public sealed class DungeonDefinition
     public Guid? CompletionLootTableId { get; set; }
     public Guid? TierLootTableId { get; set; }
     public Dictionary<ItemType, double> MonsterLootModifiers { get; set; } = [];
+    public List<DungeonGatheringNodeDefinition> GatheringNodes { get; set; } = [];
     public bool HasCheckpoint { get; set; } = true;
     public int MinRooms { get; set; }
     public int MaxRooms { get; set; }

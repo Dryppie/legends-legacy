@@ -21,6 +21,8 @@ public sealed class IdleCombatSessionFactory : IIdleCombatSessionFactory
             lastCombatResult.ExperienceGained = lastEncounterOutcome.ExperienceGained;
         }
 
+        lastCombatResult.GatheringRewards = [.. outcome.GatheringRewards];
+
         var summary = new CombatSummary
         {
             TotalExperience = outcome.TotalExperience,

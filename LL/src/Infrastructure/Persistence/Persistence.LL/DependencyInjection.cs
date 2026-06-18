@@ -18,7 +18,6 @@ using Domain.Models.LootTables;
 using Domain.Models.MarketPlaces;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
-using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
@@ -44,7 +43,6 @@ using Persistence.LL.Repositories.LootTables;
 using Persistence.LL.Repositories.MarketPlaces;
 using Persistence.LL.Repositories.Professions;
 using Persistence.LL.Repositories.Professions.Craftings;
-using Persistence.LL.Repositories.Professions.Gatherings;
 using Persistence.LL.Repositories.Regions;
 using Persistence.LL.Repositories.Regions.Areas;
 using Persistence.LL.Repositories.Snapshots;
@@ -87,8 +85,6 @@ public static class DependencyInjection
 
         services.AddScoped<IGuildRepository, GuildRepository>();
         services.AddScoped<IGuildBuildingUpgradeRepository, GuildBuildingUpgradeRepository>();
-
-        services.AddScoped<IGatheringNodeRepository, GatheringNodeRepository>();
 
         services.AddScoped<ILeaderboardRepository, LeaderboardRepository>();
 

@@ -4,6 +4,7 @@ using Application.Common.Interfaces;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Tools;
 using Domain.Models.LootTables;
 using Microsoft.EntityFrameworkCore;
 using Persistence.LL.Seeds.JsonSeeding.Dtos.Recipes;
@@ -32,16 +33,27 @@ public static class DbJsonSeeder
         var existingEquipmentById = await ctx.ItemBases
             .OfType<EquipmentBase>()
             .Include(x => x.AttributeModifiers)
+            .Include(x => x.ToolBonuses)
             .ToDictionaryAsync(x => x.Id);
         var existingModifiersById = existingEquipmentById.Values
             .SelectMany(equipment => equipment.AttributeModifiers)
             .ToDictionary(x => x.Id);
+        var existingToolBonusesById = existingEquipmentById.Values
+            .SelectMany(equipment => equipment.ToolBonuses)
+            .ToDictionary(x => x.Id);
         var modifierOwnersById = existingEquipmentById.Values
             .SelectMany(equipment => equipment.AttributeModifiers.Select(modifier => new { modifier.Id, Equipment = equipment }))
+            .ToDictionary(x => x.Id, x => x.Equipment);
+        var toolBonusOwnersById = existingEquipmentById.Values
+            .SelectMany(equipment => equipment.ToolBonuses.Select(bonus => new { bonus.Id, Equipment = equipment }))
             .ToDictionary(x => x.Id, x => x.Equipment);
         var desiredModifierIds = items
             .OfType<EquipmentBase>()
             .SelectMany(x => x.AttributeModifiers.Select(modifier => modifier.Id))
+            .ToHashSet();
+        var desiredToolBonusIds = items
+            .OfType<EquipmentBase>()
+            .SelectMany(x => x.ToolBonuses.Select(bonus => bonus.Id))
             .ToHashSet();
 
         foreach (var item in items)
@@ -53,12 +65,21 @@ public static class DbJsonSeeder
                     attr.ItemBaseId = item.Id;
                 }
 
+                foreach (var bonus in equipment.ToolBonuses)
+                {
+                    bonus.EquipmentBaseId = item.Id;
+                }
+
                 if (!existingEquipmentById.TryGetValue(item.Id, out var existingEquipment))
                 {
                     SyncNewEquipmentAttributeModifiers(
                         equipment,
                         existingModifiersById,
                         modifierOwnersById);
+                    SyncNewToolBonuses(
+                        equipment,
+                        existingToolBonusesById,
+                        toolBonusOwnersById);
                     ctx.ItemBases.Add(item);
                     continue;
                 }
@@ -71,6 +92,13 @@ public static class DbJsonSeeder
                     existingModifiersById,
                     modifierOwnersById,
                     desiredModifierIds);
+                SyncToolBonuses(
+                    ctx,
+                    existingEquipment,
+                    equipment.ToolBonuses,
+                    existingToolBonusesById,
+                    toolBonusOwnersById,
+                    desiredToolBonusIds);
                 continue;
             }
 
@@ -139,6 +167,98 @@ public static class DbJsonSeeder
         }
     }
 
+    private static void SyncToolBonuses(
+        IDbContext ctx,
+        EquipmentBase equipment,
+        IEnumerable<ToolBonusModifier> desiredBonuses,
+        Dictionary<Guid, ToolBonusModifier> existingBonusesById,
+        Dictionary<Guid, EquipmentBase> bonusOwnersById,
+        IReadOnlySet<Guid> desiredBonusIds)
+    {
+        var desiredById = desiredBonuses.ToDictionary(x => x.Id);
+
+        foreach (var existing in equipment.ToolBonuses.ToList())
+        {
+            if (desiredById.Remove(existing.Id, out var desired))
+            {
+                existing.BonusType = desired.BonusType;
+                existing.Name = desired.Name;
+                existing.Amount = desired.Amount;
+                existing.ScopeId = desired.ScopeId;
+                existing.EquipmentBaseId = equipment.Id;
+                continue;
+            }
+
+            if (desiredBonusIds.Contains(existing.Id))
+                continue;
+
+            equipment.ToolBonuses.Remove(existing);
+            ctx.GetEntry(existing).State = EntityState.Deleted;
+            existingBonusesById.Remove(existing.Id);
+            bonusOwnersById.Remove(existing.Id);
+        }
+
+        foreach (var bonus in desiredById.Values)
+        {
+            UpsertToolBonus(
+                equipment,
+                bonus,
+                existingBonusesById,
+                bonusOwnersById);
+        }
+    }
+
+    private static void SyncNewToolBonuses(
+        EquipmentBase equipment,
+        Dictionary<Guid, ToolBonusModifier> existingBonusesById,
+        Dictionary<Guid, EquipmentBase> bonusOwnersById)
+    {
+        var desiredBonuses = equipment.ToolBonuses.ToList();
+        equipment.ToolBonuses.Clear();
+
+        foreach (var bonus in desiredBonuses)
+        {
+            UpsertToolBonus(
+                equipment,
+                bonus,
+                existingBonusesById,
+                bonusOwnersById);
+        }
+    }
+
+    private static void UpsertToolBonus(
+        EquipmentBase equipment,
+        ToolBonusModifier desired,
+        Dictionary<Guid, ToolBonusModifier> existingBonusesById,
+        Dictionary<Guid, EquipmentBase> bonusOwnersById)
+    {
+        if (existingBonusesById.TryGetValue(desired.Id, out var existing))
+        {
+            existing.BonusType = desired.BonusType;
+            existing.Name = desired.Name;
+            existing.Amount = desired.Amount;
+            existing.ScopeId = desired.ScopeId;
+            existing.EquipmentBaseId = equipment.Id;
+
+            if (bonusOwnersById.TryGetValue(existing.Id, out var previousOwner) &&
+                !ReferenceEquals(previousOwner, equipment))
+            {
+                previousOwner.ToolBonuses.Remove(existing);
+            }
+
+            if (!equipment.ToolBonuses.Contains(existing))
+                equipment.ToolBonuses.Add(existing);
+
+            bonusOwnersById[existing.Id] = equipment;
+            return;
+        }
+
+        desired.EquipmentBaseId = equipment.Id;
+        equipment.ToolBonuses.Add(desired);
+        existingBonusesById[desired.Id] = desired;
+        bonusOwnersById[desired.Id] = equipment;
+    }
+
     private static void UpsertEquipmentAttributeModifier(
         EquipmentBase equipment,
         ItemAttributeModifier desired,
@@ -203,7 +323,149 @@ public static class DbJsonSeeder
                 CreateLootTableItem(
                     id: Guid.Parse("10000000-0000-0000-0001-000000000001"),
                     itemId: "advancement_stone",
-                    weight: 35)
+                    weight: 32),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0001-000000000011"),
+                    itemId: "pickaxe",
+                    weight: 5),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0001-000000000012"),
+                    itemId: "woodcutting_hatchet",
+                    weight: 5),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0001-000000000013"),
+                    itemId: "fishing_rod",
+                    weight: 4),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0001-000000000014"),
+                    itemId: "skinning_knife",
+                    weight: 4),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0001-000000000015"),
+                    itemId: "rare_pickaxe",
+                    weight: 1),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0001-000000000016"),
+                    itemId: "rare_hatchet",
+                    weight: 1)
+            ]);
+
+        await AddLootTableIfMissing(
+            ctx,
+            lootTableId: Guid.Parse("10000000-0000-0000-0000-000000000002"),
+            entries:
+            [
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0002-000000000001"),
+                    itemId: "advancement_stone",
+                    weight: 25),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0002-000000000011"),
+                    itemId: "rare_pickaxe",
+                    weight: 4),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0002-000000000012"),
+                    itemId: "rare_hatchet",
+                    weight: 4),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0002-000000000013"),
+                    itemId: "rare_fishing_rod",
+                    weight: 4),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0002-000000000014"),
+                    itemId: "rare_skinning_knife",
+                    weight: 4),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0002-000000000015"),
+                    itemId: "epic_pickaxe",
+                    weight: 1.5f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0002-000000000016"),
+                    itemId: "epic_hatchet",
+                    weight: 1.5f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0002-000000000017"),
+                    itemId: "epic_fishing_rod",
+                    weight: 1.5f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0002-000000000018"),
+                    itemId: "epic_skinning_knife",
+                    weight: 1.5f)
+            ]);
+
+        await AddLootTableIfMissing(
+            ctx,
+            lootTableId: Guid.Parse("10000000-0000-0000-0000-000000000003"),
+            entries:
+            [
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0003-000000000001"),
+                    itemId: "advancement_stone",
+                    weight: 18),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0003-000000000011"),
+                    itemId: "epic_pickaxe",
+                    weight: 4),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0003-000000000012"),
+                    itemId: "epic_hatchet",
+                    weight: 4),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0003-000000000013"),
+                    itemId: "epic_fishing_rod",
+                    weight: 4),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0003-000000000014"),
+                    itemId: "epic_skinning_knife",
+                    weight: 4),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0003-000000000015"),
+                    itemId: "unique_pickaxe",
+                    weight: 2),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0003-000000000016"),
+                    itemId: "unique_hatchet",
+                    weight: 2),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0003-000000000017"),
+                    itemId: "unique_fishing_rod",
+                    weight: 2),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0003-000000000018"),
+                    itemId: "unique_skinning_knife",
+                    weight: 2),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0003-000000000019"),
+                    itemId: "legendary_pickaxe",
+                    weight: 0.75f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0003-000000000020"),
+                    itemId: "legendary_hatchet",
+                    weight: 0.75f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0003-000000000021"),
+                    itemId: "legendary_fishing_rod",
+                    weight: 0.75f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0003-000000000022"),
+                    itemId: "legendary_skinning_knife",
+                    weight: 0.75f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0003-000000000023"),
+                    itemId: "legacy_pickaxe",
+                    weight: 0.2f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0003-000000000024"),
+                    itemId: "legacy_hatchet",
+                    weight: 0.2f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0003-000000000025"),
+                    itemId: "legacy_fishing_rod",
+                    weight: 0.2f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0003-000000000026"),
+                    itemId: "legacy_skinning_knife",
+                    weight: 0.2f)
             ]);
 
         await AddLootTableIfMissing(
@@ -214,7 +476,243 @@ public static class DbJsonSeeder
                 CreateLootTableItem(
                     id: Guid.Parse("10000000-0000-0000-0101-000000000001"),
                     itemId: "stoneguard_ring",
-                    weight: 10)
+                    weight: 10),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0101-000000000011"),
+                    itemId: "pickaxe",
+                    weight: 8),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0101-000000000012"),
+                    itemId: "fishing_rod",
+                    weight: 5),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0101-000000000013"),
+                    itemId: "rare_pickaxe",
+                    weight: 1),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0101-000000000014"),
+                    itemId: "rare_fishing_rod",
+                    weight: 0.75f)
+            ]);
+
+        await AddLootTableIfMissing(
+            ctx,
+            lootTableId: Guid.Parse("10000000-0000-0000-0000-000000000102"),
+            entries:
+            [
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0102-000000000001"),
+                    itemId: "rare_pickaxe",
+                    weight: 7),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0102-000000000002"),
+                    itemId: "rare_fishing_rod",
+                    weight: 5),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0102-000000000003"),
+                    itemId: "epic_pickaxe",
+                    weight: 2),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0102-000000000004"),
+                    itemId: "epic_fishing_rod",
+                    weight: 1.5f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0102-000000000005"),
+                    itemId: "unique_pickaxe",
+                    weight: 0.4f)
+            ]);
+
+        await AddLootTableIfMissing(
+            ctx,
+            lootTableId: Guid.Parse("10000000-0000-0000-0000-000000000103"),
+            entries:
+            [
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0103-000000000001"),
+                    itemId: "epic_pickaxe",
+                    weight: 7),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0103-000000000002"),
+                    itemId: "epic_fishing_rod",
+                    weight: 5),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0103-000000000003"),
+                    itemId: "unique_pickaxe",
+                    weight: 2.5f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0103-000000000004"),
+                    itemId: "unique_fishing_rod",
+                    weight: 1.75f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0103-000000000005"),
+                    itemId: "legendary_pickaxe",
+                    weight: 0.75f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0103-000000000006"),
+                    itemId: "legacy_pickaxe",
+                    weight: 0.2f)
+            ]);
+
+        await AddLootTableIfMissing(
+            ctx,
+            lootTableId: Guid.Parse("10000000-0000-0000-0000-000000000201"),
+            entries:
+            [
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0201-000000000001"),
+                    itemId: "skinning_knife",
+                    weight: 8),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0201-000000000002"),
+                    itemId: "fishing_rod",
+                    weight: 4),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0201-000000000003"),
+                    itemId: "rare_skinning_knife",
+                    weight: 1),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0201-000000000004"),
+                    itemId: "rare_fishing_rod",
+                    weight: 0.75f)
+            ]);
+
+        await AddLootTableIfMissing(
+            ctx,
+            lootTableId: Guid.Parse("10000000-0000-0000-0000-000000000202"),
+            entries:
+            [
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0202-000000000001"),
+                    itemId: "rare_skinning_knife",
+                    weight: 7),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0202-000000000002"),
+                    itemId: "rare_fishing_rod",
+                    weight: 4),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0202-000000000003"),
+                    itemId: "epic_skinning_knife",
+                    weight: 2),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0202-000000000004"),
+                    itemId: "epic_fishing_rod",
+                    weight: 1.25f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0202-000000000005"),
+                    itemId: "unique_skinning_knife",
+                    weight: 0.4f)
+            ]);
+
+        await AddLootTableIfMissing(
+            ctx,
+            lootTableId: Guid.Parse("10000000-0000-0000-0000-000000000203"),
+            entries:
+            [
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0203-000000000001"),
+                    itemId: "epic_skinning_knife",
+                    weight: 7),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0203-000000000002"),
+                    itemId: "epic_fishing_rod",
+                    weight: 4),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0203-000000000003"),
+                    itemId: "unique_skinning_knife",
+                    weight: 2.5f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0203-000000000004"),
+                    itemId: "unique_fishing_rod",
+                    weight: 1.5f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0203-000000000005"),
+                    itemId: "legendary_skinning_knife",
+                    weight: 0.75f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0203-000000000006"),
+                    itemId: "legacy_skinning_knife",
+                    weight: 0.2f)
+            ]);
+
+        await AddLootTableIfMissing(
+            ctx,
+            lootTableId: Guid.Parse("10000000-0000-0000-0000-000000000301"),
+            entries:
+            [
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0301-000000000001"),
+                    itemId: "woodcutting_hatchet",
+                    weight: 8),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0301-000000000002"),
+                    itemId: "skinning_knife",
+                    weight: 5),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0301-000000000003"),
+                    itemId: "rare_hatchet",
+                    weight: 1),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0301-000000000004"),
+                    itemId: "rare_skinning_knife",
+                    weight: 0.75f)
+            ]);
+
+        await AddLootTableIfMissing(
+            ctx,
+            lootTableId: Guid.Parse("10000000-0000-0000-0000-000000000302"),
+            entries:
+            [
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0302-000000000001"),
+                    itemId: "rare_hatchet",
+                    weight: 7),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0302-000000000002"),
+                    itemId: "rare_skinning_knife",
+                    weight: 5),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0302-000000000003"),
+                    itemId: "epic_hatchet",
+                    weight: 2),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0302-000000000004"),
+                    itemId: "epic_skinning_knife",
+                    weight: 1.5f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0302-000000000005"),
+                    itemId: "unique_hatchet",
+                    weight: 0.4f)
+            ]);
+
+        await AddLootTableIfMissing(
+            ctx,
+            lootTableId: Guid.Parse("10000000-0000-0000-0000-000000000303"),
+            entries:
+            [
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0303-000000000001"),
+                    itemId: "epic_hatchet",
+                    weight: 7),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0303-000000000002"),
+                    itemId: "epic_skinning_knife",
+                    weight: 5),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0303-000000000003"),
+                    itemId: "unique_hatchet",
+                    weight: 2.5f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0303-000000000004"),
+                    itemId: "unique_skinning_knife",
+                    weight: 1.75f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0303-000000000005"),
+                    itemId: "legendary_hatchet",
+                    weight: 0.75f),
+                CreateLootTableItem(
+                    id: Guid.Parse("10000000-0000-0000-0303-000000000006"),
+                    itemId: "legacy_hatchet",
+                    weight: 0.2f)
             ]);
     }
 

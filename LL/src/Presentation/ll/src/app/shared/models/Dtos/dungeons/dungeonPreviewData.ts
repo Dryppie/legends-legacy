@@ -7,6 +7,22 @@ export interface DungeonPreviewReward extends ItemInstance {
   category?: string;
 }
 
+export interface DungeonGatheringLootPreview extends ItemInstance {
+  itemId: string;
+  minQuantity: number;
+  maxQuantity: number;
+  isRare: boolean;
+}
+
+export interface DungeonGatheringNodePreview {
+  id: string;
+  name: string;
+  type: string;
+  levelRequirement?: number | null;
+  procChance: number;
+  loot: DungeonGatheringLootPreview[];
+}
+
 export interface DungeonRecord {
   hasCleared: boolean;
   firstClearedAt?: string | null;
@@ -45,6 +61,7 @@ export interface DungeonPreviewData {
   roomsRange?: [number, number];
   record?: DungeonRecord;
   rewards: DungeonPreviewReward[];
+  gatheringNodes?: DungeonGatheringNodePreview[];
   unlockedDifficulties: DungeonDifficulty[];
   difficultyVariants?: Partial<Record<DungeonDifficulty, DungeonPreviewData>>;
 }

@@ -1,7 +1,6 @@
-﻿using Application.Common.Mappings;
+using Application.Common.Mappings;
 using Application.UseCases.CharacterActions.Dtos.Responses.CombatDtos;
 using Application.UseCases.CharacterActions.Dtos.Responses.CraftingDtos;
-using Application.UseCases.CharacterActions.Dtos.Responses.GatheringDtos;
 using AutoMapper;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
@@ -15,16 +14,13 @@ public class CharacterActionDto : IMapFrom<CharacterAction>
     public bool IsDeleted { get; set; }
     public CombatSessionDto? CombatSession { get; set; }
     public TemperingSessionDto? TemperingSession { get; set; }
-    public GatheringSessionDto? GatheringSession { get; set; }
     public CombatActionDetails? CombatActionDetails { get; set; }
-    public GatheringActionDetails? GatheringActionDetails { get; set; }
     public CraftingActionDetailsDto? CraftingActionDetails { get; set; }
 
     public void Mapping(Profile profile)
     {
         profile.CreateMap<CharacterAction, CharacterActionDto>()
             .ForMember(dest => dest.CombatActionDetails, opt => opt.MapFrom<CombatActionDetailsResolver>())
-            .ForMember(dest => dest.GatheringActionDetails, opt => opt.MapFrom<GatheringActionDetailsResolver>())
             .ForMember(dest => dest.CraftingActionDetails, opt => opt.MapFrom<CraftingActionDetailsResolver>());
     }
 }
@@ -39,15 +35,6 @@ public class CombatActionDetailsResolver : IValueResolver<CharacterAction, Chara
     }
 }
 
-public class GatheringActionDetailsResolver : IValueResolver<CharacterAction, CharacterActionDto, GatheringActionDetails?>
-{
-    public GatheringActionDetails? Resolve(CharacterAction source, CharacterActionDto destination, GatheringActionDetails? destMember, ResolutionContext context)
-    {
-        return source.CharacterActionType == CharacterActionType.Gathering
-            ? context.Mapper.Map<GatheringActionDetails>(source.ActionDetails)
-            : null;
-    }
-}
 public class CraftingActionDetailsResolver : IValueResolver<CharacterAction, CharacterActionDto, CraftingActionDetailsDto?>
 {
     public CraftingActionDetailsDto? Resolve(CharacterAction source, CharacterActionDto destination, CraftingActionDetailsDto? destMember, ResolutionContext context)

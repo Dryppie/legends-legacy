@@ -1,7 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { CombatSessionDto } from '../../../../shared/models/Dtos/combatResultDto';
 import { TemperingSessionDto } from '../../../../shared/models/Dtos/temperingSessionDto';
-import { GatheringSessionDto } from '../../../../shared/models/Dtos/gatheringSessionDto';
 
 @Injectable({
   providedIn: 'root',
@@ -9,9 +8,6 @@ import { GatheringSessionDto } from '../../../../shared/models/Dtos/gatheringSes
 export class SessionSummaryService {
   readonly combatSession = signal<CombatSessionDto | null | undefined>(null);
   readonly temperingSession = signal<TemperingSessionDto | null | undefined>(
-    null,
-  );
-  readonly gatheringSession = signal<GatheringSessionDto | null | undefined>(
     null,
   );
 
@@ -27,15 +23,8 @@ export class SessionSummaryService {
     this.temperingSession.set(session);
   }
 
-  loadGatheringSince(session: GatheringSessionDto) {
-    if (!session?.gatheringSummary) return;
-    if (session.gatheringSummary.totalActions <= 10) return;
-    this.gatheringSession.set(session);
-  }
-
   dismiss() {
     this.combatSession.set(undefined);
     this.temperingSession.set(undefined);
-    this.gatheringSession.set(undefined);
   }
 }

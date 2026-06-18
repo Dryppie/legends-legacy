@@ -144,14 +144,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
     let route: string[] = [];
 
-    if (actionType === CharacterActionType.Gathering) {
-      route = [
-        'game',
-        'professions',
-        'gathering',
-        action.gatheringActionDetails!.professionType.toLowerCase(),
-      ];
-    } else {
+    if (actionType === CharacterActionType.Crafting) {
       const equipmentType = (
         action.craftingActionDetails?.craftingQueueItems[0].equipmentInstance
           .itemBase as Equipment
@@ -179,6 +172,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
         default:
           return;
       }
+    } else {
+      return;
     }
 
     this.router.navigate(route);

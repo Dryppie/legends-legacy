@@ -1,6 +1,7 @@
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
+using Domain.Models.Items.Equipments.Tools;
 using Domain.Models.Items.EssenceItems;
 using Services.LL.Interfaces;
 
@@ -48,12 +49,7 @@ public sealed class InventoryItemFactory : IInventoryItemFactory
     {
         return itemBase.ItemType switch
         {
-            ItemType.Equipment => new EquipmentInstance
-            {
-                Id = Guid.NewGuid(),
-                ItemBaseId = itemBase.Id,
-                ItemBase = itemBase
-            },
+            ItemType.Equipment => CreateEquipmentInstance((EquipmentBase)itemBase),
             ItemType.Essence => new EssenceItemInstance
             {
                 Id = Guid.NewGuid(),
@@ -67,5 +63,29 @@ public sealed class InventoryItemFactory : IInventoryItemFactory
                 ItemBase = itemBase
             }
         };
+    }
+
+    private static EquipmentInstance CreateEquipmentInstance(EquipmentBase itemBase)
+    {
+        var instance = new EquipmentInstance
+        {
+            Id = Guid.NewGuid(),
+            ItemBaseId = itemBase.Id,
+            ItemBase = itemBase,
+            Rarity = itemBase.Rarity
+        };
+
+        if (itemBase.EquipmentType == EquipmentType.Tool)
+        {
+            instance.Potential = null;
+            instance.ToolAffixes = ToolAffixGenerator.RollAffixes(instance.Rarity);
+
+            foreach (var affix in instance.ToolAffixes)
+            {
+                affix.EquipmentInstanceId = instance.Id;
+            }
+        }
+
+        return instance;
     }
 }

@@ -1,6 +1,6 @@
 <app-popover [template]="hoverTpl" trigger="hover">
   <div class="flex" [ngClass]="rarityClasses">
-    {{ item.itemBase.name }}
+    {{ displayName }}
   </div>
 </app-popover>
 
@@ -17,7 +17,7 @@
   <div *ngIf="isGenericItem" class="flex min-w-64 max-w-80 flex-col gap-3">
     <div class="flex items-start justify-between gap-3">
       <h2 class="font-serif text-lg leading-tight" [ngClass]="rarityClasses">
-        {{ item.itemBase.name }}
+        {{ displayName }}
       </h2>
       <span
         class="rounded border border-primary/40 px-2 py-0.5 text-[11px] text-primary"
