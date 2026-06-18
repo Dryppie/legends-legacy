@@ -1,16 +1,12 @@
-<aside
-  class="flex h-full w-full border-r border-primary/25 bg-black/85 shadow-2xl sm:w-80 sm:border-r-0 sm:bg-transparent sm:shadow-none"
->
-  <div
-    class="flex min-h-0 flex-auto flex-col overflow-hidden bg-texture bg-auto text-primary sm:mt-[1px] sm:rounded-tr-md"
-  >
+<aside class="ll-sidebar-shell">
+  <div class="ll-sidebar-panel bg-texture bg-auto">
     <div
       class="flex h-12 items-center justify-between border-b border-primary/15 px-4 sm:hidden"
     >
       <h3 class="text-primary">Legend's Legacy</h3>
       <button
         type="button"
-        class="flex h-9 w-9 items-center justify-center rounded border border-primary/25 bg-black/30 text-xl leading-none text-primary"
+        class="ll-button flex h-9 w-9 items-center justify-center p-0 text-xl leading-none text-primary"
         (click)="toggleSidebar()"
         aria-label="Close menu"
       >
@@ -25,33 +21,27 @@
         *ngIf="currentCharacter() as character"
         class="grid grid-cols-2 gap-2 sm:hidden"
       >
-        <div
-          class="flex min-h-8 min-w-0 items-center justify-center rounded border border-primary/15 bg-[#121216CC] px-2"
-          (click)="toggleFormat()"
-        >
-          <label class="truncate text-primary">
+        <button type="button" class="ll-currency-pill" (click)="toggleFormat()">
+          <span class="truncate text-primary">
             {{
               useShortFormat
                 ? (character.cinders | shortNumber)
                 : (character.cinders | numberFormat)
             }}
             Cinders
-          </label>
-        </div>
+          </span>
+        </button>
 
-        <div
-          class="flex min-h-8 min-w-0 items-center justify-center rounded border border-primary/15 bg-[#121216CC] px-2"
-          (click)="toggleFormat()"
-        >
-          <label class="truncate text-primary">
+        <button type="button" class="ll-currency-pill" (click)="toggleFormat()">
+          <span class="truncate text-primary">
             {{
               useShortFormat
                 ? (character.soulstones | shortNumber)
                 : (character.soulstones | numberFormat)
             }}
             Soulstones
-          </label>
-        </div>
+          </span>
+        </button>
       </div>
 
       <div class="flex flex-col">
@@ -72,7 +62,7 @@
         class="border-b border-primary/10 last:border-b-0"
       >
         <div
-          class="px-4 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary/80 sm:pt-2 sm:tracking-normal"
+          class="ll-section-label px-4 pb-1 pt-4 tracking-[0.18em] text-primary/80 sm:pt-2 sm:tracking-normal"
         >
           {{ section.label }}
         </div>

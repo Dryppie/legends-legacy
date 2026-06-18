@@ -1,11 +1,9 @@
-<div class="max-w-full rounded-lg border-primary bg-texture p-6 text-white">
+<div class="ll-modal-panel max-w-full">
   <div class="max-h-[70vh] overflow-y-auto pr-2">
     <app-essence-details [essence]="essence"></app-essence-details>
   </div>
 
   <div class="mt-4 flex justify-end">
-    <button (click)="onClose()" class="rounded bg-light px-4 py-2 text-white">
-      Close
-    </button>
+    <button type="button" (click)="onClose()" class="ll-button">Close</button>
   </div>
 </div>

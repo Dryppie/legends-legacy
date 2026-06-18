@@ -1,44 +1,69 @@
 <div
   *ngIf="sortedGuilds() as guilds"
-  class="flex h-full w-full flex-col space-y-4 overflow-y-auto p-2"
+  class="flex h-full w-full flex-col gap-4 overflow-y-auto p-2"
 >
   <ng-container *ngIf="guilds.length > 0; else noGuilds">
-    <div class="flex flex-col overflow-hidden text-white">
-      <h2 class="p-2 text-primary">Leaderboard</h2>
-      <div class="flex flex-col overflow-hidden">
-        <div
-          class="grid grid-cols-[4rem_minmax(0,1fr)_minmax(0,1fr)_6rem_6rem] items-center gap-2 border-b border-light_gray p-2 text-sm text-zinc-400"
-        >
-          <div>Rank</div>
-          <div>Name</div>
-          <div>Owner</div>
-          <div class="justify-self-end">Members</div>
-          <div class="justify-self-end">Upgrades</div>
+    <section class="ll-panel flex flex-col overflow-hidden p-4 text-white">
+      <div class="ll-header-row">
+        <div>
+          <div class="ll-eyebrow">Guild Rankings</div>
+          <h2 class="ll-heading mt-1 text-2xl">Leaderboard</h2>
         </div>
-        <div class="overflow-y-auto">
-          <div
-            class="grid grid-cols-[4rem_minmax(0,1fr)_minmax(0,1fr)_6rem_6rem] items-center justify-between gap-2 border-b border-light_gray p-2 hover:bg-zinc-300/10"
-            *ngFor="let guild of guilds; let i = index"
-          >
-            <div class="text-primary">#{{ i + 1 }}</div>
-            <div class="break-words">
-              {{ guild.name }}
+
+        <div class="flex flex-wrap gap-2">
+          <div class="ll-stat-card px-3 py-2">
+            <div class="ll-stat-label">Top Guild</div>
+            <div class="mt-1 font-semibold text-white">
+              {{ topGuildName() }}
             </div>
-            <div class="break-words">
-              {{ guild.ownerName }}
+          </div>
+          <div class="ll-stat-card px-3 py-2 text-right">
+            <div class="ll-stat-label">Guilds</div>
+            <div class="ll-stat-value mt-1 text-lg">
+              {{ totalGuilds() }}
             </div>
-            <div class="justify-self-end">
-              {{ guild.memberCount }}/{{ guild.maxMembers }}
-            </div>
-            <div class="justify-self-end">{{ guild.upgrades }}</div>
           </div>
         </div>
       </div>
-    </div>
+
+      <div class="mt-4 min-w-0 overflow-auto">
+        <div class="min-w-[42rem]">
+          <div
+            class="ll-table-header grid grid-cols-[4rem_minmax(0,1fr)_minmax(0,1fr)_6rem_6rem] items-center gap-2 rounded-t"
+          >
+            <div>Rank</div>
+            <div>Name</div>
+            <div>Owner</div>
+            <div class="justify-self-end">Members</div>
+            <div class="justify-self-end">Upgrades</div>
+          </div>
+
+          <div>
+            <div
+              class="ll-table-row grid grid-cols-[4rem_minmax(0,1fr)_minmax(0,1fr)_6rem_6rem] items-center justify-between gap-2"
+              *ngFor="let guild of guilds; let i = index"
+            >
+              <div class="font-semibold text-primary">#{{ i + 1 }}</div>
+              <div class="break-words">
+                {{ guild.name }}
+              </div>
+              <div class="break-words">
+                {{ guild.ownerName }}
+              </div>
+              <div class="justify-self-end">
+                {{ guild.memberCount }}/{{ guild.maxMembers }}
+              </div>
+              <div class="justify-self-end">{{ guild.upgrades }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </ng-container>
+
   <ng-template #noGuilds>
-    <p class="mt-4 text-center italic text-neutral-400">
+    <div class="ll-empty-state mt-4">
       No guilds exist! That's.. odd. Aren't you in one?
-    </p>
+    </div>
   </ng-template>
 </div>

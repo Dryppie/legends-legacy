@@ -1,10 +1,13 @@
 <div class="flex h-full w-full flex-col gap-4 overflow-hidden pr-4">
-  <h1 class="text-primary">{{ region.name }}</h1>
+  <section class="ll-panel p-4" *ngIf="region">
+    <div class="ll-eyebrow">Region</div>
+    <h1 class="ll-heading mt-1 text-3xl">{{ region.name }}</h1>
+  </section>
 
-  <app-tabs class="flex w-full flex-col overflow-hidden">
+  <app-tabs *ngIf="region" class="flex w-full flex-col overflow-hidden">
     <app-tab label="Areas">
       <div
-        *ngIf="region.areas.length > 0"
+        *ngIf="region.areas.length > 0; else noAreas"
         class="flex w-full flex-col gap-2 overflow-y-auto pt-4"
         data-tour="areas-introduction"
       >
@@ -20,10 +23,20 @@
           </div>
         </div>
       </div>
+
+      <ng-template #noAreas>
+        <div class="pt-4" data-tour="areas-introduction">
+          <div class="ll-empty-state">
+            No combat areas are available in this region yet.
+          </div>
+        </div>
+      </ng-template>
     </app-tab>
+
     <app-tab label="Dungeons">
       <app-dungeons class="overflow-hidden pt-4"></app-dungeons>
     </app-tab>
+
     <app-tab label="Raids">
       <app-raids></app-raids>
     </app-tab>

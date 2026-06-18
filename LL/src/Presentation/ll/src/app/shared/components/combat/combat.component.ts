@@ -436,14 +436,12 @@ export class CombatComponent implements OnInit {
 
   battleStatusClass(): Record<string, boolean> {
     return {
-      'border-emerald-400/50 bg-emerald-500/10 text-emerald-200':
-        this.outcome === BattleOutcome.Victory,
-      'border-red-400/50 bg-red-500/10 text-red-200':
-        this.outcome === BattleOutcome.Defeat,
-      'border-primary/50 bg-primary/10 text-primary':
+      'll-badge-success': this.outcome === BattleOutcome.Victory,
+      'll-badge-danger': this.outcome === BattleOutcome.Defeat,
+      'll-badge-accent':
         this.outcome === BattleOutcome.Draw ||
         (!this.outcome && !this.isLoading),
-      'border-light_gray/70 bg-white/5 text-zinc-200': this.isLoading,
+      'll-badge-muted': this.isLoading,
     };
   }
 
@@ -457,12 +455,9 @@ export class CombatComponent implements OnInit {
         : this.selectedEnemyCharacterIndex === index;
 
     return {
-      'border-primary bg-primary/15 text-primary shadow shadow-primary/15':
-        selected && team === 'player',
-      'border-red-300/80 bg-red-500/15 text-red-100 shadow shadow-red-500/15':
-        selected && team === 'enemy',
-      'border-white/15 bg-black/20 text-zinc-300 hover:border-primary/60 hover:text-white':
-        !selected,
+      'll-card-accent text-primary': selected && team === 'player',
+      'll-card-danger text-danger': selected && team === 'enemy',
+      'text-white': !selected,
     };
   }
 

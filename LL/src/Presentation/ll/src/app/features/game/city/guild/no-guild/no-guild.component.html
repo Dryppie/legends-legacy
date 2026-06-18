@@ -1,60 +1,56 @@
-<div *ngIf="guilds() as guilds" class="flex h-full w-full flex-col gap-2">
-  <div class="flex flex-col gap-2">
-    <h2 class="text-primary">Guilds</h2>
-    <div class="italic text-white">
+<div *ngIf="guilds() as guilds" class="ll-page-stack gap-3">
+  <div class="ll-page-header flex flex-col gap-2">
+    <h2 class="ll-heading">Guilds</h2>
+    <div class="ll-copy italic text-white">
       Create or join a guild, gain powerful allies, and challenge difficult
       raids.
     </div>
-  </div>
-  <div class="flex">
-    <div
-      class="rounded-md border border-light_gray p-2 text-primary hover:cursor-pointer hover:bg-zinc-300/10"
-      (click)="openModal()"
-    >
+    <button type="button" class="ll-button w-fit" (click)="openModal()">
       Create Guild
-    </div>
+    </button>
   </div>
+
   <ng-container *ngIf="guildInvites().length > 0">
-    <div class="flex flex-col py-4 text-white">
-      <h3 class="p-2">Invites</h3>
+    <div class="ll-panel flex flex-col p-3 text-white">
+      <h3 class="ll-heading p-2">Invites</h3>
       <div
         *ngFor="let invite of guildInvites()"
-        class="flex items-center justify-between border-t border-light_gray p-2 hover:bg-zinc-300/10"
+        class="ll-table-row flex items-center justify-between gap-2"
       >
         <div>
           {{ invite.guildName }}
         </div>
         <div class="flex gap-2">
-          <div
+          <button
+            type="button"
             (click)="rejectInvite(invite.guildId)"
-            class="rounded-md border border-light_gray p-2 text-primary hover:cursor-pointer hover:bg-zinc-300/10"
+            class="ll-button"
           >
             Reject
-          </div>
-          <div
+          </button>
+          <button
+            type="button"
             (click)="acceptInvite(invite.guildId)"
-            class="rounded-md border border-light_gray p-2 text-primary hover:cursor-pointer hover:bg-zinc-300/10"
+            class="ll-button"
           >
             Accept
-          </div>
+          </button>
         </div>
       </div>
     </div>
   </ng-container>
   <ng-container *ngIf="guilds.length > 0; else noGuilds">
-    <div class="flex flex-col overflow-hidden text-white">
-      <h3 class="p-2 text-primary">Guilds</h3>
+    <div class="ll-panel flex min-h-0 flex-col overflow-hidden text-white">
+      <h3 class="ll-heading p-3">Guilds</h3>
       <div class="flex flex-col overflow-hidden">
-        <div
-          class="grid grid-cols-4 items-center gap-2 border-b border-light_gray p-2"
-        >
+        <div class="ll-table-header grid grid-cols-4 items-center gap-2">
           <div>Name</div>
           <div>Owner</div>
           <div>Members</div>
         </div>
         <div class="overflow-y-auto">
           <div
-            class="grid grid-cols-4 items-center justify-between gap-2 border-b border-light_gray p-2 hover:bg-zinc-300/10"
+            class="ll-table-row grid grid-cols-4 items-center justify-between gap-2"
             *ngFor="let guild of guilds"
           >
             <div class="break-words">
@@ -65,8 +61,9 @@
             </div>
             <div>{{ guild.memberCount }}/{{ guild.maxMembers }}</div>
 
-            <div
-              class="justify-self-end rounded-md border border-light_gray p-2 text-white hover:cursor-pointer hover:bg-zinc-300/10"
+            <button
+              type="button"
+              class="ll-button justify-self-end"
               (click)="!isGuildAppliedTo(guild.id) && applyToGuild(guild.id)"
             >
               <ng-container
@@ -75,7 +72,7 @@
                 Apply
               </ng-container>
               <ng-template #appliedTemplate> Applied </ng-template>
-            </div>
+            </button>
 
             <div *ngIf="guilds.length === 0" class="text-white">
               <p>No guilds available yet. Be the first to create one!</p>
@@ -86,39 +83,25 @@
     </div>
   </ng-container>
   <ng-template #noGuilds>
-    <p class="mt-4 text-center italic text-neutral-400">
+    <p class="ll-empty-state mt-4">
       No guilds exist at the moment. Be the first and create one now!
     </p>
   </ng-template>
-  <div
-    *ngIf="showModal()"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-    (click)="closeModal()"
-  >
-    <div
-      class="w-96 rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
-      (click)="$event.stopPropagation()"
-    >
-      <h3 class="mb-4 text-primary">Create Guild</h3>
-      <input
-        type="text"
-        [(ngModel)]="guildName"
-        placeholder="Enter guild name"
-        class="mb-4 w-full rounded border border-light_gray bg-texture p-2 text-white"
-      />
+  <div *ngIf="showModal()" class="ll-modal-backdrop" (click)="closeModal()">
+    <div class="ll-modal-panel" (click)="$event.stopPropagation()">
+      <h3 class="ll-heading mb-4">Create Guild</h3>
+      <label class="ll-field mb-4">
+        <span class="ll-label">Guild name</span>
+        <input
+          type="text"
+          [(ngModel)]="guildName"
+          placeholder="Enter guild name"
+          class="ll-input w-full"
+        />
+      </label>
       <div class="flex justify-end gap-2">
-        <button
-          class="rounded border border-light_gray px-4 py-2 text-white hover:bg-zinc-600/30 hover:bg-opacity-80"
-          (click)="closeModal()"
-        >
-          Cancel
-        </button>
-        <button
-          class="rounded border border-light_gray px-4 py-2 text-white hover:bg-zinc-600/30 hover:bg-opacity-80"
-          (click)="create()"
-        >
-          Confirm
-        </button>
+        <button class="ll-button" (click)="closeModal()">Cancel</button>
+        <button class="ll-button" (click)="create()">Confirm</button>
       </div>
     </div>
   </div>

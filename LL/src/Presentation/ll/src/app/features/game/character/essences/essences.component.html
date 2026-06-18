@@ -1,4 +1,4 @@
-<div class="flex h-full flex-col overflow-hidden text-white sm:gap-4">
+<div class="ll-page-stack sm:gap-4">
   <app-default-header
     section="Character"
     [text]="essenceState.archiveText()"
@@ -9,10 +9,9 @@
   <div class="flex flex-wrap gap-2 rounded-lg">
     <button
       type="button"
-      class="rounded border border-light_gray/60 px-4 py-2 text-sm font-semibold text-light_gray transition-colors hover:border-primary hover:bg-zinc-300/10 hover:text-primary"
+      class="ll-button"
       [ngClass]="{
-        'border-primary bg-primary/10 text-primary':
-          essenceState.activeView() === 'archive',
+        'll-card-accent text-primary': essenceState.activeView() === 'archive',
       }"
       (click)="essenceState.setActiveView('archive')"
     >
@@ -20,10 +19,9 @@
     </button>
     <button
       type="button"
-      class="rounded border border-light_gray/60 px-4 py-2 text-sm font-semibold text-light_gray transition-colors hover:border-primary hover:bg-zinc-300/10 hover:text-primary"
+      class="ll-button"
       [ngClass]="{
-        'border-primary bg-primary/10 text-primary':
-          essenceState.activeView() === 'absorb',
+        'll-card-accent text-primary': essenceState.activeView() === 'absorb',
       }"
       (click)="essenceState.setActiveView('absorb')"
     >
@@ -31,17 +29,11 @@
     </button>
   </div>
 
-  <div
-    *ngIf="essenceState.error()"
-    class="rounded border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-200"
-  >
+  <div *ngIf="essenceState.error()" class="ll-state ll-state-danger">
     {{ essenceState.error() }}
   </div>
 
-  <div
-    *ngIf="essenceState.loading()"
-    class="rounded border border-light_gray/70 bg-black/30 px-3 py-2 text-sm text-zinc-300"
-  >
+  <div *ngIf="essenceState.loading()" class="ll-state ll-state-muted">
     Updating Soul Archive...
   </div>
 
@@ -55,27 +47,25 @@
     class="grid min-h-0 flex-1 gap-4 overflow-y-auto xl:grid-cols-[360px_minmax(0,1fr)] xl:overflow-hidden"
   >
     <section
-      class="flex h-[50vh] min-h-0 flex-col overflow-hidden rounded-lg border border-light_gray bg-texture p-3 shadow-lg"
+      class="ll-panel flex h-[50vh] min-h-0 flex-col overflow-hidden p-3 xl:h-full"
     >
       <div
         class="mb-3 flex items-center justify-between border-b border-light_gray/70 pb-3"
       >
         <div>
-          <h2 class="text-primary">Archived Essences</h2>
-          <p class="text-xs text-zinc-400">
+          <h2 class="ll-heading">Archived Essences</h2>
+          <p class="ll-copy">
             {{ essenceState.archive()?.essences?.length ?? 0 }} bound
           </p>
         </div>
-        <span
-          class="rounded border border-primary/30 bg-primary/10 px-2 py-1 text-sm text-primary"
-        >
+        <span class="ll-badge ll-badge-accent rounded">
           {{ essenceState.archive()?.essenceDust ?? 0 }} dust
         </span>
       </div>
 
       <div class="mb-3 grid gap-2">
         <input
-          class="w-full rounded border border-light_gray/70 bg-black/40 px-3 py-2 text-sm text-white outline-none placeholder:text-zinc-500 focus:border-primary"
+          class="ll-input w-full"
           placeholder="Search essence, ability, attribute"
           [ngModel]="archiveSearch()"
           (ngModelChange)="archiveSearch.set($event)"
@@ -85,10 +75,9 @@
           <button
             *ngFor="let filter of archiveFilters"
             type="button"
-            class="rounded border border-light_gray/60 px-2 py-1 text-xs text-light_gray transition-colors hover:border-primary hover:text-primary"
+            class="ll-button px-2 py-1 text-xs"
             [ngClass]="{
-              'border-primary bg-primary/10 text-primary':
-                archiveFilter() === filter.value,
+              'll-card-accent text-primary': archiveFilter() === filter.value,
             }"
             (click)="setArchiveFilter(filter.value)"
           >
@@ -97,19 +86,17 @@
         </div>
 
         <div class="flex items-center justify-between gap-2">
-          <p class="text-xs text-zinc-400">
+          <p class="ll-copy text-xs">
             Showing {{ filteredArchiveEssences().length }} /
             {{ essenceState.archive()?.essences?.length ?? 0 }}
           </p>
-          <select
-            class="rounded border border-light_gray/70 bg-black/40 px-2 py-1 text-xs text-white outline-none focus:border-primary"
-            [ngModel]="archiveSort()"
-            (ngModelChange)="setArchiveSortValue($event)"
-          >
-            <option *ngFor="let sort of archiveSorts" [ngValue]="sort.value">
-              {{ sort.label }}
-            </option>
-          </select>
+          <app-dropdown
+            label="Sort"
+            [value]="archiveSort()"
+            [options]="archiveSorts"
+            [selectedValue]="archiveSort()"
+            (selection)="setArchiveSortSelection($event)"
+          ></app-dropdown>
         </div>
       </div>
 
@@ -123,9 +110,9 @@
             trackBy: trackEssence
           "
           type="button"
-          class="mb-2 w-full rounded border border-light_gray/70 bg-black/30 px-3 py-2 text-left text-white transition-colors hover:border-primary hover:bg-zinc-300/10"
+          class="ll-card mb-2 w-full px-3 py-2 text-left text-white transition-colors hover:border-primary hover:bg-zinc-300/10"
           [ngClass]="{
-            'border-primary bg-primary/10 shadow-inner':
+            'll-card-accent shadow-inner':
               essenceState.selected()?.id === essence.id,
           }"
           (click)="selectPlayerEssence(essence)"
@@ -134,9 +121,7 @@
             <span class="min-w-0 truncate font-semibold text-primary">
               {{ essence.name }}
             </span>
-            <span
-              class="shrink-0 rounded border border-light_gray/50 px-2 py-0.5 text-xs text-zinc-300"
-            >
+            <span class="ll-badge shrink-0 rounded text-zinc-300">
               L{{ essence.level }} T{{ essence.ascensionTier }}
             </span>
           </div>
@@ -153,9 +138,9 @@
               }}
             </span>
           </div>
-          <div class="mt-2 h-1 overflow-hidden rounded bg-zinc-900">
+          <div class="ll-progress-track mt-2 h-1">
             <div
-              class="h-full bg-primary"
+              class="ll-progress-bar"
               [style.width.%]="
                 essence.xpRequiredForNextLevel > 0
                   ? (essence.currentXp / essence.xpRequiredForNextLevel) * 100
@@ -166,34 +151,26 @@
         </button>
       </cdk-virtual-scroll-viewport>
 
-      <p
-        class="rounded border border-light_gray/70 bg-black/30 p-3 text-center text-sm italic text-zinc-400"
-        *ngIf="filteredArchiveEssences().length === 0"
-      >
+      <p class="ll-empty-state" *ngIf="filteredArchiveEssences().length === 0">
         No archived essences match the current filters.
       </p>
     </section>
 
     <div class="grid min-h-0 gap-4 xl:overflow-y-auto">
-      <section
-        class="rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
-        *ngIf="essenceState.selected() as essence"
-      >
+      <section class="ll-panel p-4" *ngIf="essenceState.selected() as essence">
         <div
           class="flex flex-wrap items-start justify-between gap-3 border-b border-light_gray/70 pb-4"
         >
           <div>
-            <h2 class="text-2xl font-semibold text-primary">
+            <h2 class="ll-heading text-2xl">
               {{ essence.name }}
             </h2>
-            <p class="mt-1 text-sm text-zinc-400">
+            <p class="ll-copy mt-1">
               Level {{ essence.level }} / {{ essence.tierLevelCap }} | Ascension
               Tier {{ essence.ascensionTier }}
             </p>
             <div class="mt-3 flex flex-wrap gap-2 text-xs">
-              <span
-                class="rounded border border-primary/30 bg-primary/10 px-2 py-0.5 text-primary"
-              >
+              <span class="ll-badge ll-badge-accent rounded">
                 {{ selectedAttunementLabel(essence) }}
               </span>
               <span
@@ -212,28 +189,18 @@
               </span>
             </div>
           </div>
-          <button
-            type="button"
-            class="rounded border border-light_gray px-3 py-2 text-sm text-white transition-colors hover:border-primary hover:bg-zinc-300/10 hover:text-primary"
-            (click)="favorite(essence)"
-          >
+          <button type="button" class="ll-button" (click)="favorite(essence)">
             {{ essence.isFavorite ? "Unfavorite" : "Favorite" }}
           </button>
         </div>
 
         <div class="mt-4 grid gap-3 md:grid-cols-2">
-          <article
-            class="rounded-lg border border-light_gray/70 bg-black/30 p-3"
-          >
+          <article class="ll-card p-3">
             <div class="mb-2 flex items-center justify-between gap-2">
               <h3 class="font-semibold text-primary">
                 {{ essence.activeAbility.name }}
               </h3>
-              <span
-                class="rounded border border-primary/30 bg-primary/10 px-2 py-0.5 text-xs text-primary"
-              >
-                Active
-              </span>
+              <span class="ll-badge ll-badge-accent rounded"> Active </span>
             </div>
             <app-essence-description
               class="text-sm text-zinc-300"
@@ -244,18 +211,12 @@
               Cooldown: {{ essence.activeAbility.cooldownSeconds }}s
             </p>
           </article>
-          <article
-            class="rounded-lg border border-light_gray/70 bg-black/30 p-3"
-          >
+          <article class="ll-card p-3">
             <div class="mb-2 flex items-center justify-between gap-2">
               <h3 class="font-semibold text-primary">
                 {{ essence.passiveAbility.name }}
               </h3>
-              <span
-                class="rounded border border-light_gray/50 px-2 py-0.5 text-xs text-zinc-300"
-              >
-                Passive
-              </span>
+              <span class="ll-badge rounded text-zinc-300"> Passive </span>
             </div>
             <app-essence-description
               class="text-sm text-zinc-300"
@@ -265,12 +226,8 @@
           </article>
         </div>
 
-        <div
-          class="mt-4 rounded-lg border border-light_gray/70 bg-black/30 p-3"
-        >
-          <h3 class="text-sm font-semibold uppercase text-primary">
-            Current Bonuses
-          </h3>
+        <div class="ll-card mt-4 p-3">
+          <h3 class="ll-eyebrow text-primary">Current Bonuses</h3>
           <div class="mt-2 grid gap-2 sm:grid-cols-2">
             <div
               class="flex items-center justify-between rounded border border-light_gray/50 px-2 py-1.5 text-sm"
@@ -287,9 +244,7 @@
           </div>
         </div>
 
-        <section
-          class="mt-4 rounded-lg border border-light_gray/70 bg-black/30"
-        >
+        <section class="ll-card mt-4">
           <button
             type="button"
             class="flex w-full items-center justify-between gap-3 px-3 py-2 text-left transition-colors hover:bg-zinc-300/10"
@@ -297,10 +252,8 @@
             (click)="toggleUpgradeDetails()"
           >
             <div>
-              <h3 class="text-sm font-semibold uppercase text-primary">
-                Progression Details
-              </h3>
-              <p class="mt-1 text-xs text-zinc-400">
+              <h3 class="ll-eyebrow text-primary">Progression Details</h3>
+              <p class="ll-copy mt-1 text-xs">
                 Ascend and Evolve requirements and effects
               </p>
             </div>
@@ -313,15 +266,11 @@
             *ngIf="upgradeDetailsOpen()"
             class="grid gap-3 border-t border-light_gray/60 p-3 lg:grid-cols-2"
           >
-            <article
-              class="rounded-lg border border-light_gray/70 bg-black/30 p-3"
-            >
+            <article class="ll-card p-3">
               <div class="flex items-start justify-between gap-3">
                 <div>
-                  <h3 class="text-sm font-semibold uppercase text-primary">
-                    Ascend
-                  </h3>
-                  <p class="mt-1 text-xs text-zinc-400">
+                  <h3 class="ll-eyebrow text-primary">Ascend</h3>
+                  <p class="ll-copy mt-1 text-xs">
                     Tier {{ essence.ascendInfo.currentTier }}
                     <ng-container *ngIf="essence.ascendInfo.nextTier !== null">
                       to {{ essence.ascendInfo.nextTier }}
@@ -365,15 +314,11 @@
               </div>
             </article>
 
-            <article
-              class="rounded-lg border border-light_gray/70 bg-black/30 p-3"
-            >
+            <article class="ll-card p-3">
               <div class="flex items-start justify-between gap-3">
                 <div>
-                  <h3 class="text-sm font-semibold uppercase text-primary">
-                    Evolve
-                  </h3>
-                  <p class="mt-1 text-xs text-zinc-400">
+                  <h3 class="ll-eyebrow text-primary">Evolve</h3>
+                  <p class="ll-copy mt-1 text-xs">
                     {{ essence.evolveInfo.name || "Evolution" }}
                   </p>
                 </div>
@@ -417,16 +362,12 @@
         </section>
 
         <div class="mt-4 flex flex-wrap gap-2">
-          <button
-            type="button"
-            class="rounded border border-light_gray px-3 py-2 text-sm text-white transition-colors hover:border-primary hover:bg-zinc-300/10 hover:text-primary"
-            (click)="spendDust(essence)"
-          >
+          <button type="button" class="ll-button" (click)="spendDust(essence)">
             Spend 1 Dust
           </button>
           <button
             type="button"
-            class="rounded border border-light_gray px-3 py-2 text-sm text-white transition-colors hover:border-primary hover:bg-zinc-300/10 hover:text-primary disabled:opacity-40"
+            class="ll-button"
             [disabled]="!essence.canAscend"
             (click)="ascend(essence)"
           >
@@ -434,7 +375,7 @@
           </button>
           <button
             type="button"
-            class="rounded border border-light_gray px-3 py-2 text-sm text-white transition-colors hover:border-primary hover:bg-zinc-300/10 hover:text-primary disabled:opacity-40"
+            class="ll-button"
             [disabled]="!essence.canEvolve"
             (click)="evolve(essence)"
           >
@@ -443,13 +384,11 @@
         </div>
       </section>
 
-      <section
-        class="rounded-lg border border-light_gray bg-texture p-3 shadow-lg"
-      >
+      <section class="ll-panel p-3">
         <div class="mb-3 flex items-center justify-between gap-3">
           <div>
-            <h2 class="text-primary">Loadouts</h2>
-            <p class="text-xs text-zinc-400">
+            <h2 class="ll-heading">Loadouts</h2>
+            <p class="ll-copy">
               {{ essenceState.loadouts()?.loadouts?.length ?? 0 }}/{{
                 essenceState.loadouts()?.limit ?? 0
               }}
@@ -459,7 +398,7 @@
           </div>
           <button
             type="button"
-            class="rounded border border-light_gray px-2 py-1 text-xs text-white transition-colors hover:border-primary hover:bg-zinc-300/10 hover:text-primary"
+            class="ll-button px-2 py-1 text-xs"
             (click)="essenceState.newLoadout()"
           >
             New
@@ -470,7 +409,7 @@
           <button
             *ngFor="let loadout of essenceState.loadouts()?.loadouts ?? []"
             type="button"
-            class="rounded border border-light_gray/70 bg-black/30 px-3 py-2 text-left text-sm text-white transition-colors hover:border-primary hover:bg-zinc-300/10"
+            class="ll-card px-3 py-2 text-left text-sm text-white transition-colors hover:border-primary hover:bg-zinc-300/10"
             [ngClass]="{
               'border-primary bg-primary/10':
                 essenceState.selectedLoadoutId() === loadout.id,
@@ -486,17 +425,17 @@
           </button>
         </div>
 
-        <label class="mb-3 block text-xs uppercase text-zinc-400">
-          Name
+        <label class="ll-field mb-3">
+          <span class="ll-label">Name</span>
           <input
-            class="mt-1 w-full rounded border border-light_gray/70 bg-black/40 px-2 py-1.5 text-sm text-white outline-none focus:border-primary"
+            class="ll-input ll-input-compact w-full"
             [ngModel]="essenceState.draftLoadoutName()"
             (ngModelChange)="essenceState.setDraftLoadoutName($event)"
           />
         </label>
 
         <div
-          class="mb-3 flex items-center justify-between rounded border border-light_gray/60 bg-black/30 px-3 py-2 text-xs"
+          class="ll-card mb-3 flex items-center justify-between px-3 py-2 text-xs"
         >
           <span class="text-zinc-400">Draft slots</span>
           <span class="text-primary">
@@ -507,41 +446,29 @@
 
         <div class="grid gap-2">
           <label
-            class="block text-xs text-zinc-400"
+            class="ll-field"
             *ngFor="let slotIndex of essenceState.slotIndexes()"
           >
-            Slot {{ slotIndex + 1 }}
-            <select
-              class="mt-1 w-full rounded border border-light_gray/70 bg-black/40 px-2 py-1.5 text-sm text-white outline-none focus:border-primary"
-              [ngModel]="essenceState.draftSlots()[slotIndex]"
-              (ngModelChange)="essenceState.setDraftSlot(slotIndex, $event)"
-            >
-              <option [ngValue]="null">Empty</option>
-              <option
-                *ngFor="let essence of essenceState.essenceOptions()"
-                [ngValue]="essence.id"
-                [disabled]="
-                  essenceState.draftSlots().includes(essence.id) &&
-                  essenceState.draftSlots()[slotIndex] !== essence.id
-                "
-              >
-                {{ essence.name }}
-              </option>
-            </select>
+            <span class="ll-label">Slot {{ slotIndex + 1 }}</span>
+            <app-dropdown
+              class="block w-full"
+              label="Empty"
+              [value]="essenceState.draftSlots()[slotIndex]"
+              [options]="draftSlotDropdownOptions(slotIndex)"
+              [selectedValue]="essenceState.draftSlots()[slotIndex]"
+              (selection)="setDraftSlotFromDropdown(slotIndex, $event)"
+            ></app-dropdown>
           </label>
         </div>
 
-        <p
-          class="mt-2 text-xs text-zinc-400"
-          *ngIf="loadoutSaveHint() as saveHint"
-        >
+        <p class="ll-copy mt-2 text-xs" *ngIf="loadoutSaveHint() as saveHint">
           {{ saveHint }}
         </p>
 
         <div class="mt-3 flex flex-wrap gap-2">
           <button
             type="button"
-            class="rounded border border-light_gray px-3 py-2 text-sm text-white transition-colors hover:border-primary hover:bg-zinc-300/10 hover:text-primary disabled:opacity-40"
+            class="ll-button"
             [disabled]="!essenceState.canSaveDraft()"
             (click)="essenceState.saveDraftLoadout()"
           >
@@ -549,7 +476,7 @@
           </button>
           <button
             type="button"
-            class="rounded border border-light_gray px-3 py-2 text-sm text-white transition-colors hover:border-primary hover:bg-zinc-300/10 hover:text-primary disabled:opacity-40"
+            class="ll-button"
             [disabled]="
               !essenceState.selectedLoadoutId() ||
               essenceState.selectedLoadout()?.isActive
@@ -560,7 +487,7 @@
           </button>
           <button
             type="button"
-            class="rounded border border-light_gray px-3 py-2 text-sm text-white transition-colors hover:border-primary hover:bg-zinc-300/10 hover:text-primary disabled:opacity-40"
+            class="ll-button"
             [disabled]="!essenceState.selectedLoadoutId()"
             (click)="essenceState.deleteSelectedLoadout()"
           >

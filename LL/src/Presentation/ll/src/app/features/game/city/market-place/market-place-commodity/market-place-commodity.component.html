@@ -1,34 +1,34 @@
 <div class="flex h-full w-full flex-col gap-3 overflow-hidden py-3 text-white">
   <div class="grid gap-4">
-    <section class="rounded-md border border-light_gray bg-black/20 p-3">
+    <section class="ll-panel p-3">
       <ng-container *ngIf="commodities().length; else noCommodity">
         <div class="mb-3 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 class="text-primary">{{ marketName() }}</h2>
-            <span class="text-zinc-400">
+            <h2 class="ll-heading">{{ marketName() }}</h2>
+            <span class="ll-copy">
               You have {{ ownedQuantity() | numberFormat }}
             </span>
           </div>
 
           <div class="flex flex-wrap items-end gap-3">
             <div class="flex flex-wrap items-end gap-3">
-              <label class="flex flex-col gap-1">
-                Quantity
+              <label class="ll-field">
+                <span class="ll-label">Quantity</span>
                 <input
                   type="number"
                   min="1"
                   [formControl]="quantityCtrl"
-                  class="no-spinner h-8 w-32 rounded border border-light_gray bg-transparent px-2 text-right text-white focus:border-primary"
+                  class="ll-input ll-input-compact no-spinner w-32 text-right"
                 />
               </label>
 
-              <label classs="flex flex-col gap-1">
-                Unit price
+              <label class="ll-field">
+                <span class="ll-label">Unit price</span>
                 <input
                   type="number"
                   min="1"
                   [formControl]="unitPriceCtrl"
-                  class="no-spinner h-8 w-32 rounded border border-light_gray bg-transparent px-2 text-right text-white focus:border-primary"
+                  class="ll-input ll-input-compact no-spinner w-32 text-right"
                 />
               </label>
             </div>
@@ -47,7 +47,7 @@
           </div>
         </div>
 
-        <div class="text-sm text-zinc-400">
+        <div class="ll-helper">
           Total:
           <span class="text-primary">
             {{
@@ -60,7 +60,7 @@
       </ng-container>
 
       <ng-template #noCommodity>
-        <p class="py-6 text-center italic text-neutral-400">
+        <p class="ll-empty-state">
           No orders or inventory match the selected market.
         </p>
       </ng-template>
@@ -69,22 +69,18 @@
 
   <div class="flex h-full flex-1 flex-col gap-4 overflow-y-auto xl:flex-row">
     <section class="flex h-full w-full flex-col">
-      <h2 class="mb-2 text-primary">Sell Orders</h2>
-      <div
-        class="grid grid-cols-2 rounded-t-md border border-light_gray bg-black/30 px-2 py-2 text-primary"
-      >
+      <h2 class="ll-heading mb-2">Sell Orders</h2>
+      <div class="ll-table-header grid grid-cols-2 rounded-b-none">
         <label>Quantity</label>
         <label class="justify-self-end">Unit price</label>
       </div>
 
-      <div
-        class="flex-1 overflow-y-auto rounded-b-md border-x border-b border-light_gray bg-black/20"
-      >
+      <div class="ll-panel flex-1 overflow-y-auto rounded-t-none border-t-0">
         <button
           type="button"
           *ngFor="let row of sellOrderRows(); trackBy: trackOrderRow"
           (click)="selectSellOrder(row)"
-          class="grid w-full grid-cols-2 border-b border-light_gray/20 px-2 py-1 text-left transition hover:bg-zinc-600/30"
+          class="ll-table-row grid w-full grid-cols-2 text-left"
           [ngClass]="{ 'bg-primary/20': row.unitPrice === selectedSellPrice() }"
         >
           <span>{{ row.quantity | numberFormat }}</span>
@@ -93,28 +89,21 @@
           </span>
         </button>
 
-        <p
-          *ngIf="!sellOrderRows().length"
-          class="mt-8 text-center italic text-neutral-400"
-        >
+        <p *ngIf="!sellOrderRows().length" class="ll-empty-state mt-8">
           No sell orders for this item.
         </p>
       </div>
     </section>
 
     <section class="flex h-full w-full flex-col">
-      <h2 class="mb-2 text-primary">Buy Orders</h2>
-      <div
-        class="grid grid-cols-2 rounded-t-md border border-light_gray bg-black/30 px-2 py-2 text-primary"
-      >
+      <h2 class="ll-heading mb-2">Buy Orders</h2>
+      <div class="ll-table-header grid grid-cols-2 rounded-b-none">
         <label>Quantity</label>
         <label class="justify-self-end">Unit price</label>
       </div>
 
-      <div
-        class="flex-1 overflow-y-auto rounded-b-md border-x border-b border-light_gray bg-black/20"
-      >
-        <p class="mt-8 text-center italic text-neutral-400">
+      <div class="ll-panel flex-1 overflow-y-auto rounded-t-none border-t-0">
+        <p class="ll-empty-state mt-8">
           Buy orders need backend support before they can persist.
         </p>
       </div>

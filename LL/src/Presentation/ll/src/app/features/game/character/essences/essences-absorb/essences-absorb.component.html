@@ -4,7 +4,7 @@
   <!-- ESSENCE DESCRIPTION -->
   <div class="flex h-full w-full flex-col space-y-2 overflow-y-auto md:order-2">
     <!-- ESSENCE DESCRIPTION -->
-    <div class="rounded-lg border border-light_gray bg-texture p-4">
+    <div class="ll-panel p-4">
       <ng-container
         *ngIf="
           essenceState.selectedInventoryEssence() as selectedEssence;
@@ -23,7 +23,7 @@
             </app-regular-button>
           </ng-container>
           <ng-template #essenceIsAbsorbed>
-            <span class="text-rose-500">
+            <span class="ll-state ll-state-danger">
               This essence is already in your Soul Archive
             </span>
           </ng-template>
@@ -36,9 +36,7 @@
         </div>
       </ng-container>
       <ng-template #noEssence>
-        <div class="text-gray-500 italic">
-          Select an essence to view details.
-        </div>
+        <div class="ll-empty-state">Select an essence to view details.</div>
       </ng-template>
     </div>
   </div>
@@ -62,20 +60,13 @@
   </div>
 </div>
 
-<div
-  *ngIf="showModal"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-  (click)="closeModal()"
->
-  <div
-    class="w-96 rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
-    (click)="$event.stopPropagation()"
-  >
+<div *ngIf="showModal" class="ll-modal-backdrop" (click)="closeModal()">
+  <div class="ll-modal-panel" (click)="$event.stopPropagation()">
     <div class="mb-4">
-      <h3 class="text-primary">
+      <h3 class="ll-heading">
         Shatter {{ essenceState.selectedInventoryEssence()?.name }}
       </h3>
-      <label class="italic text-zinc-300"
+      <label class="ll-copy italic"
         >Dismantle one Unbound Essence into Essence Dust.</label
       >
     </div>

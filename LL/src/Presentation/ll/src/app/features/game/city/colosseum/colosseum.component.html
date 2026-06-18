@@ -11,39 +11,37 @@
   ></app-combat>
 </ng-container>
 <ng-template #showNonCombat>
-  <div
-    class="flex h-full flex-col items-center space-y-2 overflow-hidden pr-4 sm:pr-6"
-  >
+  <div class="ll-page-stack items-center pr-4 sm:pr-6">
     <div class="flex w-full flex-col sm:gap-6">
       <app-banner image="colosseum" class="w-full"></app-banner>
     </div>
 
     <section class="grid w-full grid-cols-2 gap-2 text-white md:grid-cols-4">
-      <div class="rounded border border-light_gray/60 bg-black/20 p-2">
-        <p class="text-xs uppercase text-secondary">Tickets</p>
-        <p class="mt-1 text-lg font-semibold text-primary">
+      <div class="ll-stat-card p-2">
+        <p class="ll-stat-label">Tickets</p>
+        <p class="ll-heading mt-1 text-lg">
           {{ state.arenaTicketStatus()?.currentTickets ?? 0 }} /
           {{ state.arenaTicketStatus()?.maxTickets ?? 0 }}
         </p>
       </div>
 
-      <div class="rounded border border-light_gray/60 bg-black/20 p-2">
-        <p class="text-xs uppercase text-secondary">Your Rank</p>
-        <p class="mt-1 text-lg font-semibold text-primary">
+      <div class="ll-stat-card p-2">
+        <p class="ll-stat-label">Your Rank</p>
+        <p class="ll-heading mt-1 text-lg">
           {{ myRanking ? "#" + myRanking.rank : "-" }}
         </p>
       </div>
 
-      <div class="rounded border border-light_gray/60 bg-black/20 p-2">
-        <p class="text-xs uppercase text-secondary">Rating</p>
-        <p class="mt-1 text-lg font-semibold text-primary">
+      <div class="ll-stat-card p-2">
+        <p class="ll-stat-label">Rating</p>
+        <p class="ll-heading mt-1 text-lg">
           {{ myRanking ? (myRanking.level | numberFormat) : "-" }}
         </p>
       </div>
 
-      <div class="rounded border border-light_gray/60 bg-black/20 p-2">
-        <p class="text-xs uppercase text-secondary">Recent Record</p>
-        <p class="mt-1 text-lg font-semibold text-primary">
+      <div class="ll-stat-card p-2">
+        <p class="ll-stat-label">Recent Record</p>
+        <p class="ll-heading mt-1 text-lg">
           {{ recentRecord.wins }}-{{ recentRecord.losses }}-{{
             recentRecord.draws
           }}

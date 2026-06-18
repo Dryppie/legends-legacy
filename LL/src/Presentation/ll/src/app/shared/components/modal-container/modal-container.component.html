@@ -1,10 +1,12 @@
 <div
-  class="fixed inset-0 z-50 flex max-h-full flex-col items-center justify-center overflow-hidden bg-black/70"
+  class="ll-modal-backdrop z-50 overflow-hidden"
   *ngIf="isModalOpen"
   (click)="onOverlayClick($event)"
 >
   <div
     class="max-h-full w-full overflow-hidden sm:w-2/3 lg:w-2/5"
+    role="dialog"
+    aria-modal="true"
     (click)="$event.stopPropagation()"
   >
     <app-essence-modal
@@ -27,7 +29,7 @@
       *ngIf="overviewEquipment"
       [equipmentSlotType]="overviewEquipment"
       (close)="onOverviewEquipmentModalClose()"
-      >>
+    >
     </app-overview-equipment-modal>
   </div>
 </div>

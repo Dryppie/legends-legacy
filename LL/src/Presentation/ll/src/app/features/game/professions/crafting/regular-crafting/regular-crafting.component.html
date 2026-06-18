@@ -1,19 +1,14 @@
 <div
-  class="flex h-full w-full flex-col justify-evenly gap-2 overflow-hidden overflow-y-auto px-4 pt-4 sm:px-6 md:flex-row"
+  class="grid h-full w-full grid-cols-1 gap-4 overflow-hidden overflow-y-auto px-4 pt-4 sm:px-6 md:grid-cols-[minmax(0,1fr)_minmax(20rem,26rem)]"
 >
-  <!-- ITEM DESCRIPTION -->
   <div class="flex w-full flex-col space-y-2 md:order-2">
-    <!-- ITEM DESCRIPTION -->
-    <div
-      class="rounded-lg border border-light_gray bg-texture p-4"
-      data-tour="selected-recipe"
-    >
-      <h2 class="text-primary">Item Description</h2>
+    <section class="ll-panel p-4" data-tour="selected-recipe">
+      <h2 class="ll-heading text-xl">Item Description</h2>
       <ng-container *ngIf="selectedRecipe() as selectedRecipe; else noRecipe">
         <app-equipment-display [item]="selectedRecipe.item">
         </app-equipment-display>
-        <div class="text-gray-400 mt-2 text-sm">
-          Requires:
+        <div class="ll-item-detail-section ll-copy mt-3">
+          <div class="ll-eyebrow text-primary">Requires</div>
           <ul class="ml-5 list-disc">
             <li
               *ngFor="let mat of selectedRecipe.materials"
@@ -30,9 +25,8 @@
                 }}
               </span>
 
-              <!-- Tooltip -->
               <div
-                class="absolute right-0 top-1/2 z-20 hidden w-64 -translate-y-1/2 rounded border border-light_gray bg-texture p-2 text-sm text-white shadow-lg group-hover:block"
+                class="ll-card absolute right-0 top-1/2 z-20 hidden w-64 -translate-y-1/2 p-2 text-sm text-white group-hover:block"
               >
                 {{ mat.item.description }}
               </div>
@@ -61,7 +55,7 @@
           <ng-template #levelTooLow>
             <span
               *ngIf="!meetsLevelRequirement(selectedRecipe)"
-              class="text-rose-500"
+              class="ll-state ll-state-danger"
             >
               Crafting level is too low.
             </span>
@@ -69,20 +63,18 @@
         </div>
       </ng-container>
       <ng-template #noRecipe>
-        <div class="text-gray-500 mt-2 italic">
-          Select a recipe to view details.
-        </div>
+        <div class="ll-empty-state mt-3">Select a recipe to view details.</div>
       </ng-template>
-    </div>
+    </section>
   </div>
-  <div class="flex h-full w-full flex-col">
-    <h2 class="flex text-primary">Recipes</h2>
-    <div class="mb-4 flex flex-wrap items-center gap-2">
-      <!-- Toggle buttons -->
+  <section class="flex h-full w-full flex-col overflow-hidden">
+    <h2 class="ll-heading flex text-xl">Recipes</h2>
+    <div class="ll-toolbar mb-4">
       <button
-        class="flex items-center justify-between gap-1 whitespace-nowrap text-nowrap rounded border border-zinc-300/30 px-2 py-1 text-sm text-neutral-300 hover:bg-zinc-300/30"
+        type="button"
+        class="ll-button flex items-center justify-between gap-1 whitespace-nowrap px-2 py-1"
         [ngClass]="{
-          'bg-primary/30 hover:bg-primary/40': filterMode() === 'all',
+          'll-card-accent text-primary': filterMode() === 'all',
         }"
         (click)="filterMode.set('all')"
       >
@@ -90,9 +82,10 @@
       </button>
 
       <button
-        class="flex items-center justify-between gap-1 whitespace-nowrap text-nowrap rounded border border-zinc-300/30 px-2 py-1 text-sm text-neutral-300 hover:bg-zinc-300/30"
+        type="button"
+        class="ll-button flex items-center justify-between gap-1 whitespace-nowrap px-2 py-1"
         [ngClass]="{
-          'bg-primary/30 hover:bg-primary/40': filterMode() === 'craftable',
+          'll-card-accent text-primary': filterMode() === 'craftable',
         }"
         (click)="filterMode.set('craftable')"
       >
@@ -100,35 +93,34 @@
       </button>
 
       <button
-        class="flex items-center justify-between gap-1 whitespace-nowrap text-nowrap rounded border border-zinc-300/30 px-2 py-1 text-sm text-neutral-300 hover:bg-zinc-300/30"
+        type="button"
+        class="ll-button flex items-center justify-between gap-1 whitespace-nowrap px-2 py-1"
         [ngClass]="{
-          'bg-primary/30 hover:bg-primary/40': filterMode() === 'uncraftable',
+          'll-card-accent text-primary': filterMode() === 'uncraftable',
         }"
         (click)="filterMode.set('uncraftable')"
       >
         Un-craftable
       </button>
 
-      <!-- Min / Max level -->
       <div class="flex gap-2">
-        <label class="whitespace-nowrap text-sm text-neutral-300">
+        <label class="ll-copy whitespace-nowrap">
           Min&nbsp;Lv
           <input
             type="number"
             min="1"
-            class="no-spinner w-16 rounded border border-neutral-700 bg-transparent px-2 py-1 text-right focus:outline-none focus:ring-amber-400"
+            class="ll-input no-spinner w-16 px-2 py-1 text-right"
             [value]="minLevel()"
             (input)="minLevel.set($any($event.target).valueAsNumber || 1)"
           />
         </label>
 
-        <!-- Max level -->
-        <label class="whitespace-nowrap text-sm text-neutral-300">
+        <label class="ll-copy whitespace-nowrap">
           Max&nbsp;Lv
           <input
             type="number"
             min="1"
-            class="no-spinner w-16 rounded border border-neutral-700 bg-transparent px-2 py-1 text-right focus:outline-none focus:ring-amber-400"
+            class="ll-input no-spinner w-16 px-2 py-1 text-right"
             [value]="maxLevel() ?? ''"
             (input)="
               maxLevel.set(
@@ -141,7 +133,6 @@
         </label>
       </div>
     </div>
-    <!-- RECIPES LIST -->
     <div
       class="flex h-full w-full flex-col space-y-2 overflow-y-auto md:order-1"
       data-tour="crafting-introduction"
@@ -149,25 +140,19 @@
       <ng-container *ngIf="filteredRecipes().length; else noRecipes">
         <div
           *ngFor="let recipe of filteredRecipes()"
-          class="cursor-pointer rounded-lg border p-3 hover:border-primary/60 hover:bg-zinc-300/30"
+          class="ll-card cursor-pointer p-3 transition-colors hover:border-primary"
           (click)="selectRecipe(recipe)"
-          [class.border-primary]="selectedRecipe()?.id === recipe.id"
           [ngClass]="{
-            'bg-primary/10': selectedRecipe()?.id === recipe.id,
-            'border-primary/20': selectedRecipe()?.id !== recipe.id,
+            'll-card-accent': selectedRecipe()?.id === recipe.id,
           }"
         >
           <div class="font-semibold text-white">{{ recipe.name }}</div>
-          <div class="text-gray-400 text-sm">
-            Lv {{ recipe.levelRequirement }}
-          </div>
+          <div class="ll-copy">Lv {{ recipe.levelRequirement }}</div>
         </div>
       </ng-container>
       <ng-template #noRecipes>
-        <p class="mt-4 text-center italic text-neutral-400">
-          No recipes match this filter.
-        </p>
+        <p class="ll-empty-state mt-4">No recipes match this filter.</p>
       </ng-template>
     </div>
-  </div>
+  </section>
 </div>

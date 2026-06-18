@@ -1,102 +1,89 @@
 <div
-  class="flex h-full w-full flex-col gap-2 overflow-y-auto p-4 sm:px-6 md:flex-row"
+  class="grid h-full w-full grid-cols-1 gap-4 overflow-y-auto p-4 sm:px-6 md:grid-cols-[minmax(0,1fr)_minmax(20rem,26rem)]"
 >
-  <!-- ITEM DESCRIPTION + CRAFTING QUEUE -->
   <div class="flex h-full w-full flex-col space-y-2 md:order-2">
-    <!-- ITEM DESCRIPTION -->
-    <div class="rounded-lg border border-light_gray bg-texture p-4">
-      <h2 class="text-primary">Item Description</h2>
+    <section class="ll-panel p-4">
+      <h2 class="ll-heading text-xl">Item Description</h2>
       <ng-container
         *ngIf="selectedEquipmentInstance() as equipment; else noItem"
       >
         <app-equipment-display [item]="equipment"></app-equipment-display>
         <div class="flex items-center gap-2">
           <ng-container *ngIf="isPerformingOtherAction(); else canPerform">
-            <span class="py-1 italic text-zinc-300">
+            <span class="ll-state ll-state-muted">
               Can not temper with an ongoing action
             </span>
           </ng-container>
           <ng-template #canPerform>
             <ng-container *ngIf="isQueueSelected(); else itemSelected">
-              <span class="py-1 italic text-zinc-300"> In queue </span>
+              <span class="ll-state ll-state-muted"> In queue </span>
             </ng-container>
             <ng-template #itemSelected>
               <ng-container *ngIf="canTemper(); else nothing">
                 <button
-                  class="rounded border border-light_gray px-3 py-1 text-white hover:bg-zinc-300/10"
+                  type="button"
+                  class="ll-button"
                   (click)="temper(equipment)"
                 >
                   Temper
                 </button>
               </ng-container>
               <ng-template #nothing>
-                <span class="py-1 text-rose-500"> No potential left </span>
+                <span class="ll-state ll-state-danger">
+                  No potential left
+                </span>
               </ng-template>
             </ng-template>
           </ng-template>
         </div>
       </ng-container>
       <ng-template #noItem>
-        <div class="text-gray-500 mt-2 italic">
-          Select an item to view details.
-        </div>
+        <div class="ll-empty-state mt-3">Select an item to view details.</div>
       </ng-template>
-    </div>
+    </section>
 
-    <!-- CRAFTING QUEUE -->
-    <div
-      class="max-h-40 min-h-24 overflow-y-auto rounded-lg border border-light_gray bg-texture p-4 sm:max-h-full"
+    <section
+      class="ll-panel max-h-40 min-h-24 overflow-y-auto p-4 sm:max-h-full"
     >
       <ng-container *ngIf="craftingQueue() as craftingQueue">
         <ng-container *ngIf="craftingQueue.length > 0; else emptyQueue">
-          <!-- ── CURRENTLY WORKING ON ──────────────────────────────── -->
-          <div class="text-gold flex justify-between text-lg font-semibold">
+          <div class="flex justify-between gap-3">
             <div>Working on</div>
-            <span class="place-self-end">
+            <span class="ll-badge ll-badge-accent place-self-end">
               {{ getEstimatedTime([craftingQueue[0]]) }}~
             </span>
           </div>
 
-          <!-- the first item (index 0) -->
           <div
-            class="mt-2 flex cursor-pointer justify-between rounded-lg border p-3 hover:border-primary/60 hover:bg-zinc-300/30"
+            class="ll-card mt-2 flex cursor-pointer justify-between p-3 transition-colors hover:border-primary"
             (click)="selectItem(craftingQueue[0].equipmentInstance)"
-            [class.border-primary]="
-              selectedEquipmentInstance()?.id ===
-              craftingQueue[0].equipmentInstance.id
-            "
             [ngClass]="{
-              'bg-primary/10':
+              'll-card-accent':
                 selectedEquipmentInstance()?.id ===
-                craftingQueue[0].equipmentInstance.id,
-              'border-primary/20':
-                selectedEquipmentInstance()?.id !==
                 craftingQueue[0].equipmentInstance.id,
             }"
           >
             <div class="flex flex-col">
               <app-item [item]="craftingQueue[0].equipmentInstance"></app-item>
-              <div class="text-gray-400 text-sm">
+              <div class="ll-copy">
                 {{ craftingQueue[0].equipmentInstance.potential }} Potential
               </div>
 
-              <div class="text-gray-400 text-xs">Tempering progress</div>
+              <div class="ll-eyebrow mt-2">Tempering progress</div>
               <div class="group relative flex items-center gap-2">
-                <div
-                  class="relative h-2 w-full overflow-hidden rounded bg-zinc-700"
-                >
+                <div class="ll-progress-track relative h-2 w-full">
                   <div
-                    class="absolute left-0 top-0 h-full bg-primary transition-all duration-500"
+                    class="ll-progress-bar absolute left-0 top-0"
                     [style.width.%]="
                       (craftingQueue[0].equipmentInstance.itemXp / 10) * 100
                     "
                   ></div>
                 </div>
-                <div class="text-gray-300 whitespace-nowrap text-xs">
+                <div class="whitespace-nowrap text-xs text-secondary">
                   {{ craftingQueue[0].equipmentInstance.itemXp }} / 10 EXP
                 </div>
                 <div
-                  class="absolute bottom-full left-0 mb-1 hidden w-max whitespace-nowrap rounded bg-zinc-800 px-2 py-1 text-xs text-white shadow-lg group-hover:block"
+                  class="ll-card absolute bottom-full left-0 mb-1 hidden w-max whitespace-nowrap px-2 py-1 text-xs text-white group-hover:block"
                 >
                   Upgrades to the next rarity at 10 exp.
                 </div>
@@ -104,50 +91,43 @@
             </div>
 
             <button
-              class="text-sm text-red-400 hover:underline"
+              type="button"
+              class="ll-button border-transparent px-2 py-1 text-danger hover:text-rose-300"
               (click)="cancelCraft(craftingQueue[0]); $event.stopPropagation()"
             >
               Cancel
             </button>
           </div>
 
-          <!-- ── REST OF THE QUEUE ─────────────────────────────────── -->
           <ng-container *ngIf="craftingQueue | slice: 1 as waitingQueue">
             <div *ngIf="waitingQueue.length" class="mt-4">
-              <div class="text-gold flex justify-between text-lg font-semibold">
+              <div class="flex justify-between gap-3">
                 <div>Queued</div>
-                <span class="place-self-end">
+                <span class="ll-badge ll-badge-accent place-self-end">
                   {{ getEstimatedTime(waitingQueue) }}~
                 </span>
               </div>
 
-              <!-- everything *after* the first element -->
               <div
                 *ngFor="let queueItem of waitingQueue"
-                class="mt-2 flex cursor-pointer justify-between rounded-lg border p-3 hover:border-primary/60 hover:bg-zinc-300/30"
+                class="ll-card mt-2 flex cursor-pointer justify-between p-3 transition-colors hover:border-primary"
                 (click)="selectItem(queueItem.equipmentInstance)"
-                [class.border-primary]="
-                  selectedEquipmentInstance()?.id ===
-                  queueItem.equipmentInstance.id
-                "
                 [ngClass]="{
-                  'bg-primary/10':
+                  'll-card-accent':
                     selectedEquipmentInstance()?.id ===
-                    queueItem.equipmentInstance.id,
-                  'border-primary/20':
-                    selectedEquipmentInstance()?.id !==
                     queueItem.equipmentInstance.id,
                 }"
               >
                 <div class="flex flex-col">
                   <app-item [item]="queueItem.equipmentInstance"></app-item>
-                  <div class="text-gray-400 text-sm">
+                  <div class="ll-copy">
                     {{ queueItem.equipmentInstance.potential }} Potential
                   </div>
                 </div>
 
                 <button
-                  class="text-sm text-red-400 hover:underline"
+                  type="button"
+                  class="ll-button border-transparent px-2 py-1 text-danger hover:text-rose-300"
                   (click)="cancelCraft(queueItem); $event.stopPropagation()"
                 >
                   Cancel
@@ -159,11 +139,12 @@
       </ng-container>
 
       <ng-template #emptyQueue>
-        <div class="mt-2 italic">Nothing is currently being crafted.</div>
+        <div class="ll-empty-state mt-2">
+          Nothing is currently being crafted.
+        </div>
       </ng-template>
-    </div>
+    </section>
   </div>
-  <!-- TEMPERING LIST -->
   <div
     class="flex max-h-full min-h-24 w-full flex-col space-y-2 overflow-y-auto md:order-1"
   >
@@ -171,33 +152,26 @@
       *ngIf="filteredInventory().length; else noItemsToTemper"
       data-tour="first-tempering"
     >
-      <h2 class="flex text-primary">Items to temper</h2>
+      <h2 class="ll-heading flex text-xl">Items to temper</h2>
       <ng-container *ngIf="filteredInventory() as inventory">
         <div
           *ngFor="let item of inventory"
-          class="cursor-pointer rounded-lg border p-3 hover:border-primary/60 hover:bg-zinc-300/30"
+          class="ll-card cursor-pointer p-3 transition-colors hover:border-primary"
           (click)="selectItem(item.itemInstance)"
-          [class.border-primary]="
-            selectedEquipmentInstance()?.id === item.itemInstance.id
-          "
           [ngClass]="{
-            'bg-primary/10':
+            'll-card-accent':
               selectedEquipmentInstance()?.id === item.itemInstance.id,
-            'border-primary/20':
-              selectedEquipmentInstance()?.id !== item.itemInstance.id,
           }"
         >
           <app-item [item]="item.itemInstance"></app-item>
-          <div class="text-gray-400 text-sm">
+          <div class="ll-copy">
             <!-- Lv {{ item.levelRequirement }} -->
           </div>
         </div>
       </ng-container>
     </ng-container>
     <ng-template #noItemsToTemper>
-      <p class="mt-4 text-center italic text-neutral-400">
-        You have no available items to temper.
-      </p>
+      <p class="ll-empty-state mt-4">You have no available items to temper.</p>
     </ng-template>
   </div>
 </div>

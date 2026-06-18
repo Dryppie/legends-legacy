@@ -1,7 +1,9 @@
-<div class="flex w-full justify-between px-4 py-2 text-secondary">
+<div
+  class="ll-table-row flex w-full justify-between gap-4 px-4 py-2 text-secondary"
+>
   <span class="w-4/5">{{ combatEvent.details }}</span>
   <div class="flex min-w-10 items-center justify-start">
-    <span>
+    <span class="ll-item-chip tabular-nums">
       {{ combatEvent.timestamp | ticksToSeconds }}
     </span>
   </div>

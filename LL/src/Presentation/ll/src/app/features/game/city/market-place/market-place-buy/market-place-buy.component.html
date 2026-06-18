@@ -3,37 +3,32 @@
 >
   <section class="flex min-h-0 flex-col overflow-hidden">
     <div class="mb-3 flex items-baseline justify-between gap-3">
-      <h2 class="text-xl uppercase text-primary">Buy Orders</h2>
-      <span class="text-[11px] uppercase text-zinc-400">
+      <h2 class="ll-heading text-xl uppercase">Buy Orders</h2>
+      <span class="ll-eyebrow">
         {{ filteredListings().length }} listings found
       </span>
     </div>
 
-    <div
-      class="flex flex-wrap items-center gap-2 rounded-t-md border border-light_gray bg-black/30 px-2 py-2 text-sm"
-    >
+    <div class="ll-toolbar rounded-b-none">
       <input
         type="search"
         [formControl]="searchCtrl"
         placeholder="Search items..."
-        class="h-8 min-w-40 rounded border border-light_gray bg-transparent px-2 text-xs text-white placeholder:text-zinc-500 focus:border-primary"
+        class="ll-input ll-input-compact ll-search-input"
       />
 
-      <select
-        [ngModel]="rarity()"
-        (ngModelChange)="rarity.set($event)"
-        class="h-8 rounded border border-light_gray bg-black/70 px-2 text-xs text-white"
-      >
-        <option class="bg-black" value="">Any rarity</option>
-        <option class="bg-black" *ngFor="let r of rarities" [value]="r">
-          {{ r }}
-        </option>
-      </select>
+      <app-dropdown
+        label="Any rarity"
+        [value]="rarity()"
+        [options]="rarityOptions"
+        [selectedValue]="rarity()"
+        (selection)="setRaritySelection($event)"
+      ></app-dropdown>
 
       <button
         type="button"
         (click)="togglePriceSort()"
-        class="flex h-8 items-center justify-between gap-2 text-nowrap rounded border border-light_gray px-2 text-xs text-zinc-200 hover:border-primary hover:bg-zinc-600/30"
+        class="ll-button flex h-8 items-center justify-between gap-2 text-nowrap px-2 text-xs"
       >
         Unit price
         <ng-container [ngSwitch]="priceSort()">
@@ -44,22 +39,20 @@
       </button>
       <button
         type="button"
-        class="ml-auto h-8 px-2 text-xs text-rose-400 hover:text-rose-300"
+        class="ll-button ml-auto h-8 border-transparent px-2 text-xs text-rose-400 hover:text-rose-300"
         (click)="resetFilters()"
       >
         Reset
       </button>
     </div>
 
-    <div
-      class="grid grid-cols-4 border-x border-b border-light_gray bg-black/30 px-2 py-2 text-primary"
-    >
+    <div class="ll-table-header grid grid-cols-4">
       <label class="col-start-1 col-end-3">Name</label>
       <label>Quantity</label>
       <label class="justify-self-end">Cinders per unit</label>
     </div>
     <div
-      class="min-h-0 flex-1 overflow-y-auto rounded-b-md border-x border-b border-light_gray bg-black/20"
+      class="ll-panel min-h-0 flex-1 overflow-y-auto rounded-t-none border-t-0"
     >
       <div
         *ngFor="let l of filteredListings(); trackBy: trackByListing"
@@ -81,13 +74,11 @@
     </div>
   </section>
 
-  <aside
-    class="flex min-h-0 flex-col gap-4 rounded-md border border-light_gray bg-texture bg-auto p-4 shadow-lg"
-  >
+  <aside class="ll-panel flex min-h-0 flex-col gap-4 p-4">
     <ng-container *ngIf="selectedListing() as sel; else placeholder">
       <div>
-        <h2 class="text-xl uppercase text-primary">Purchase</h2>
-        <span class="text-xs text-zinc-500">Selected listing</span>
+        <h2 class="ll-heading text-xl uppercase">Purchase</h2>
+        <span class="ll-eyebrow">Selected listing</span>
       </div>
 
       <div class="border-y border-primary/20 py-3">
@@ -134,16 +125,14 @@
       </ng-container>
 
       <div *ngIf="sel.quantity > 1" class="flex items-center gap-2">
-        <label for="buyQty" class="whitespace-nowrap text-sm text-neutral-300"
-          >Quantity</label
-        >
+        <label for="buyQty" class="ll-label whitespace-nowrap">Quantity</label>
         <input
           id="buyQty"
           type="number"
           min="1"
           [max]="maxQuantity()"
           [formControl]="qtyCtrl"
-          class="no-spinner h-8 w-24 rounded border border-light_gray bg-transparent px-2 text-right text-white focus:border-primary"
+          class="ll-input ll-input-compact no-spinner w-24 text-right"
         />
       </div>
 
@@ -164,9 +153,7 @@
     </ng-container>
 
     <ng-template #placeholder>
-      <div
-        class="m-auto rounded border border-light_gray bg-black/30 px-6 py-5 text-center italic text-neutral-400"
-      >
+      <div class="ll-empty-state m-auto px-6 py-5">
         Select a listing to purchase.
       </div>
     </ng-template>

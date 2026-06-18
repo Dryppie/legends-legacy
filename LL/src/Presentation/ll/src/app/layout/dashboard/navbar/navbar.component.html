@@ -1,12 +1,6 @@
 <div class="flex h-16 sm:h-8" *ngIf="currentCharacter() as currentCharacter">
-  <!-- <app-character-badge
-    class="z-10 -mr-12 hidden sm:block"
-    [level]="currentCharacter?.level"
-    [currentExperience]="currentCharacter?.experience"
-    [maxExperience]="currentCharacter?.experienceUntilNextLevel"
-  ></app-character-badge> -->
   <div
-    class="border-gradient relative flex w-full items-center rounded-md sm:h-8 sm:pb-[1px]"
+    class="ll-panel-strong relative flex w-full items-center rounded-none border-x-0 sm:h-8 sm:rounded-md sm:pb-[1px]"
   >
     <div
       class="flex h-full w-full items-center justify-center bg-texture bg-auto sm:justify-between sm:rounded-md"
@@ -18,56 +12,46 @@
           {{ currentCharacter.name }} - Lv. {{ currentCharacter.level }}
         </h2>
         <div class="hidden gap-2 sm:flex">
-          <div
-            class="flex h-6 min-w-20 items-center justify-between space-x-2 rounded-full bg-[#121216CC]"
+          <button
+            type="button"
+            class="ll-currency-pill h-6 min-h-0"
             (click)="toggleFormat()"
           >
-            <!-- <img src="core/currencies/Diamonds.svg" class="h-10 min-w-10" /> -->
-            <label class="text-nowrap pl-2 pr-3 pt-[1px] text-primary"
+            <span class="text-nowrap text-primary"
               >{{
                 useShortFormat
                   ? (currentCharacter.cinders | shortNumber)
                   : (currentCharacter.cinders | numberFormat)
               }}
-              Cinders</label
+              Cinders</span
             >
-          </div>
-          <div
-            class="flex h-6 min-w-20 items-center justify-between space-x-2 rounded-full bg-[#121216CC]"
+          </button>
+          <button
+            type="button"
+            class="ll-currency-pill h-6 min-h-0"
             (click)="toggleFormat()"
           >
-            <!-- <img src="core/currencies/Coins.svg" class="h-10 min-w-10" /> -->
-            <label class="text-nowrap pl-2 pr-3 pt-[1px] text-primary"
+            <span class="text-nowrap text-primary"
               >{{
                 useShortFormat
                   ? (currentCharacter.soulstones | shortNumber)
                   : (currentCharacter.soulstones | numberFormat)
               }}
-              Soulstones</label
+              Soulstones</span
             >
-          </div>
+          </button>
         </div>
       </div>
       <div class="flex w-full place-items-center gap-2 sm:w-auto">
-        <!-- <div
-            class="flex items-center hidden justify-between bg-transparent p-4 text-[#6D6D6D] sm:hidden"
-            (click)="toggleList()"
-            *ngIf="!showList"
-          >
-            <img src="core/button/Hamburger.png" class="cursor-pointer" />
-            <h3 class="cursor-pointer pl-2 text-primary">{{ activeLabel }}</h3>
-          </div> -->
-        <div
-          class="z-10 grid h-full w-full grid-cols-4 items-stretch border-t border-primary/20 bg-black/70 text-[#a1a1a1] shadow-[0_-12px_32px_rgba(0,0,0,0.35)] backdrop-blur sm:flex sm:w-auto sm:items-center sm:justify-start sm:space-x-2 sm:border-none sm:bg-transparent sm:shadow-none sm:backdrop-blur-none"
-        >
+        <div class="ll-mobile-nav z-10">
           <button
             type="button"
-            class="flex min-w-0 flex-col items-center justify-center gap-1 px-2 py-2 text-primary sm:hidden"
+            class="ll-mobile-nav-button sm:hidden"
             (click)="itemTapped.emit()"
             aria-label="Open menu"
           >
             <img src="core/button/Hamburger.png" class="h-4 w-4" alt="" />
-            <h3 class="text-[12px] font-medium leading-none">Menu</h3>
+            <span>Menu</span>
           </button>
           <app-navbutton
             class="sm:hidden"
@@ -89,12 +73,12 @@
           ></app-navbutton>
           <button
             type="button"
-            class="flex min-w-0 flex-col items-center justify-center gap-1 border-l border-primary/10 bg-primary/10 px-2 py-2 text-primary sm:hidden"
+            class="ll-mobile-nav-button border-l border-primary/10 bg-primary/10 sm:hidden"
             (click)="chatTapped.emit()"
             aria-label="Open chat"
           >
             <img src="icons/ActivePlus.svg" class="h-4 w-4" alt="" />
-            <h3 class="text-[12px] font-medium leading-none">Chat</h3>
+            <span>Chat</span>
           </button>
         </div>
         <ng-container *ngIf="onlinePlayers; else justYou">

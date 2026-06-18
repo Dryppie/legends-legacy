@@ -3,12 +3,10 @@
   description="{{ description }}"
   imageUrl="{{ icon }}"
 >
-  <div class="cursor-pointer rounded bg-gray-200 p-4 hover:bg-gray-300">
-    <div
-      class="relative flex cursor-pointer flex-col items-center justify-center rounded-lg bg-gray-700 p-2 hover:bg-gray-600"
-    >
+  <div class="ll-card p-3 transition-colors hover:border-primary">
+    <div class="flex flex-col items-center justify-center gap-2">
       <img [src]="'assets/' + icon" [alt]="name" class="mb-2 h-10 w-10" />
-      <span>{{ name }}</span>
+      <span class="ll-item-chip ll-item-chip-accent">{{ name }}</span>
     </div>
   </div>
 </app-info-box>

@@ -56,12 +56,12 @@ export class SoulstoneUpgradeCardComponent {
 
   statusClass(upgrade: SoulstoneUpgradeView): string {
     if (upgrade.nextCost == null) {
-      return 'border-primary/50 bg-primary/10 text-primary';
+      return 'll-badge-accent';
     }
 
     return upgrade.nextCost <= (this.character?.soulstones ?? 0)
-      ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-200'
-      : 'border-light_gray/50 bg-black/20 text-zinc-400';
+      ? 'll-badge-success'
+      : 'll-badge-muted';
   }
 
   upgradeButtonText(upgrade: SoulstoneUpgradeView): string {

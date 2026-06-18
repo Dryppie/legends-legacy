@@ -15,6 +15,11 @@ import { FormsModule } from '@angular/forms';
 import { ItemComponent } from '../../../../shared/components/item/item.component';
 import { HelpTooltipDirective } from '../../../../shared/help/help-tooltip.directive';
 import { EquipmentTypePipe } from '../../../../shared/pipes/equipment/equipment-type-format/equipment-type.pipe';
+import {
+  DropdownComponent,
+  DropdownOption,
+  DropdownSelection,
+} from '../../../../shared/components/custom-components/dropdown/dropdown.component';
 
 @Component({
   selector: 'app-inventory',
@@ -32,6 +37,7 @@ import { EquipmentTypePipe } from '../../../../shared/pipes/equipment/equipment-
     ItemComponent,
     HelpTooltipDirective,
     EquipmentTypePipe,
+    DropdownComponent,
   ],
   templateUrl: './inventory.component.html',
 })
@@ -71,6 +77,12 @@ export class InventoryComponent implements OnInit {
   selectedItems: InventoryItem[] = [];
   scrapRarityThreshold: Rarity = Rarity.Common;
   rarities = Object.keys(Rarity);
+  rarityDropdownOptions: DropdownOption<Rarity>[] = this.rarities.map(
+    (rarity) => ({
+      label: rarity,
+      value: rarity as Rarity,
+    }),
+  );
   RARITY_ORDER: Record<Rarity, number> = {
     [Rarity.Common]: 0,
     [Rarity.Uncommon]: 1,
@@ -121,6 +133,10 @@ export class InventoryComponent implements OnInit {
       .forEach((item) => this.selectedItems.push(item));
   }
 
+  setScrapRarityThreshold(selection: DropdownSelection<unknown>) {
+    this.scrapRarityThreshold = selection.main as Rarity;
+  }
+
   clearSelection() {
     this.selectedItems = [];
   }
@@ -169,19 +185,19 @@ export class InventoryComponent implements OnInit {
 
     switch (rarity) {
       case Rarity.Common:
-        return 'border-slate-400/40 text-slate-200';
+        return 'll-rarity-common';
       case Rarity.Uncommon:
-        return 'border-emerald-400/40 text-emerald-300';
+        return 'll-rarity-uncommon';
       case Rarity.Rare:
-        return 'border-blue-400/40 text-blue-300';
+        return 'll-rarity-rare';
       case Rarity.Epic:
-        return 'border-fuchsia-400/40 text-fuchsia-300';
+        return 'll-rarity-epic';
       case Rarity.Unique:
-        return 'border-yellow-400/40 text-yellow-300';
+        return 'll-rarity-unique';
       case Rarity.Legendary:
-        return 'border-orange-400/40 text-orange-300';
+        return 'll-rarity-legendary';
       case Rarity.Legacy:
-        return 'border-rose-400/40 text-rose-300';
+        return 'll-rarity-legacy';
       default:
         return 'border-light_gray/60 text-secondary';
     }

@@ -1,4 +1,4 @@
-<div class="flex h-full min-h-0 flex-col gap-4 rounded-md">
+<div class="ll-page-stack">
   <div class="flex flex-wrap items-center justify-between gap-3 pr-4">
     <app-default-header
       section="Character"
@@ -10,22 +10,18 @@
     <div class="flex items-center gap-2">
       <button
         type="button"
-        class="flex h-8 w-8 items-center justify-center rounded border border-light_gray bg-black/40 text-primary transition-colors hover:bg-zinc-600/30"
+        class="ll-button flex h-8 w-8 items-center justify-center p-0 text-primary"
         appHelp="scrap_mode"
         aria-label="Scrap help"
       >
         ?
       </button>
-      <div
-        class="flex rounded-md border border-light_gray bg-black/40 p-1 shadow-lg shadow-black/30"
-        aria-label="Inventory mode"
-      >
+      <div class="ll-segmented" aria-label="Inventory mode">
         <button
           type="button"
-          class="rounded px-4 py-2 text-sm transition-colors"
+          class="ll-segmented-button"
           [ngClass]="{
-            'bg-primary text-black': isBrowseMode,
-            'text-secondary hover:bg-zinc-600/30': !isBrowseMode,
+            'll-segmented-button-active': isBrowseMode,
           }"
           (click)="enterBrowseMode()"
         >
@@ -33,10 +29,9 @@
         </button>
         <button
           type="button"
-          class="rounded px-4 py-2 text-sm transition-colors"
+          class="ll-segmented-button"
           [ngClass]="{
-            'bg-primary text-black': isScrapMode,
-            'text-secondary hover:bg-zinc-600/30': !isScrapMode,
+            'll-segmented-button-active': isScrapMode,
           }"
           (click)="enterScrapMode()"
         >
@@ -49,23 +44,21 @@
   <div
     class="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-hidden pr-4 lg:grid-cols-[minmax(0,1fr)_25rem]"
   >
-    <div
-      class="flex min-h-0 flex-col overflow-hidden rounded-md border border-light_gray bg-texture shadow-lg"
-    >
+    <div class="ll-panel flex min-h-0 flex-col overflow-hidden">
       <div
         *ngIf="isScrapMode"
         class="flex flex-wrap items-center justify-between gap-3 border-b border-light_gray/70 px-4 py-3"
       >
         <div>
           <h2 class="primary-gradient text-2xl">{{ activeListTitle }}</h2>
-          <p class="text-sm text-secondary">{{ activeListDescription }}</p>
+          <p class="ll-copy">{{ activeListDescription }}</p>
         </div>
 
         <div
           *ngIf="isScrapMode"
-          class="rounded border border-primary/50 bg-black/40 px-3 py-2 text-right"
+          class="ll-card ll-card-accent px-3 py-2 text-right"
         >
-          <label class="uppercase text-primary">Selected</label>
+          <label class="ll-stat-label text-primary">Selected</label>
           <p class="text-sm text-white">{{ selectedItemCountLabel }}</p>
         </div>
       </div>
@@ -80,7 +73,7 @@
 
       <div
         *ngIf="isScrapMode"
-        class="flex flex-wrap items-center justify-between gap-3 border-b border-light_gray/60 bg-black/30 px-4 py-3"
+        class="ll-toolbar rounded-none border-x-0 border-t-0 px-4 py-3"
       >
         <div class="flex flex-wrap items-center gap-2">
           <app-regular-button
@@ -89,17 +82,16 @@
           ></app-regular-button>
 
           <div class="flex items-center rounded-md border border-light_gray">
-            <select
-              class="h-9 rounded-l-md bg-black/60 px-3 text-sm text-white"
-              [(ngModel)]="scrapRarityThreshold"
-            >
-              <option *ngFor="let rarity of rarities" [value]="rarity">
-                {{ rarity }}
-              </option>
-            </select>
+            <app-dropdown
+              label="Rarity"
+              [value]="scrapRarityThreshold"
+              [options]="rarityDropdownOptions"
+              [selectedValue]="scrapRarityThreshold"
+              (selection)="setScrapRarityThreshold($event)"
+            ></app-dropdown>
             <button
               type="button"
-              class="h-9 border-l border-light_gray px-3 text-sm text-primary transition-colors hover:bg-zinc-600/30"
+              class="ll-button h-9 rounded-l-none border-l-0"
               (click)="selectAllBelowRarity()"
             >
               and below
@@ -110,14 +102,14 @@
         <div class="flex items-center gap-2">
           <button
             type="button"
-            class="px-2 py-1 text-sm text-secondary transition-colors hover:text-primary"
+            class="ll-button border-transparent px-2 py-1"
             (click)="clearSelection()"
           >
             Clear
           </button>
           <button
             type="button"
-            class="px-2 py-1 text-sm text-danger transition-colors hover:text-rose-300"
+            class="ll-button border-transparent px-2 py-1 text-danger hover:text-rose-300"
             (click)="cancelScrapMode()"
           >
             Cancel
@@ -128,7 +120,7 @@
       <div class="min-h-0 flex-1 overflow-y-auto p-2">
         <div
           *ngIf="!filteredItems.length"
-          class="flex h-full min-h-60 items-center justify-center rounded border border-light_gray/40 bg-black/30 p-6 text-center text-secondary"
+          class="ll-empty-state h-full min-h-60"
         >
           <p class="italic">{{ emptyStateText }}</p>
         </div>
@@ -152,19 +144,17 @@
                 *ngIf="equipmentInstance(inventoryItem) as equipment"
                 class="hidden flex-none flex-wrap items-center justify-end gap-2 pr-2 text-xs sm:flex"
               >
-                <span
-                  class="rounded border border-light_gray/60 bg-black/30 px-2 py-0.5 text-secondary"
-                >
+                <span class="ll-badge rounded text-secondary">
                   {{ equipment.equipmentBase.equipmentType | equipmentType }}
                 </span>
                 <span
-                  class="rounded border bg-black/30 px-2 py-0.5"
+                  class="ll-badge rounded"
                   [ngClass]="equipmentRarityClass(inventoryItem)"
                 >
                   {{ equipment.rarity }}
                 </span>
                 <span
-                  class="rounded border px-2 py-0.5"
+                  class="ll-badge rounded"
                   [ngClass]="{
                     'border-primary/50 bg-primary/10 text-primary':
                       equipment.potential !== 0,
@@ -199,10 +189,7 @@
       </div>
     </div>
 
-    <aside
-      *ngIf="isBrowseMode"
-      class="min-h-0 overflow-y-auto rounded-md border border-light_gray bg-texture p-4 shadow-lg"
-    >
+    <aside *ngIf="isBrowseMode" class="ll-panel min-h-0 overflow-y-auto p-4">
       <div class="flex flex-col items-center space-y-2">
         <h2 class="primary-gradient text-2xl">Equipped</h2>
         <img src="core/Divider.svg" alt="" class="center w-60 object-contain" />
@@ -210,16 +197,15 @@
       </div>
     </aside>
 
-    <aside
-      *ngIf="isScrapMode"
-      class="flex min-h-0 flex-col rounded-md border border-light_gray bg-texture p-4 shadow-lg"
-    >
+    <aside *ngIf="isScrapMode" class="ll-panel flex min-h-0 flex-col p-4">
       <div class="border-b border-light_gray/70 pb-3">
         <div class="flex items-center justify-between gap-3">
           <h2 class="primary-gradient text-2xl">Scrap Bench</h2>
-          <span class="text-primary">{{ selectedItemCountLabel }}</span>
+          <span class="ll-badge ll-badge-accent">{{
+            selectedItemCountLabel
+          }}</span>
         </div>
-        <p class="mt-1 text-sm text-secondary">
+        <p class="ll-copy mt-1">
           Selected equipment will be permanently destroyed and converted into
           tempered scrap.
         </p>
@@ -228,16 +214,13 @@
       <div class="min-h-0 flex-1 overflow-y-auto py-3">
         <div
           *ngIf="!selectedItems.length"
-          class="flex h-full min-h-52 items-center justify-center rounded border border-light_gray/40 bg-black/30 p-6 text-center text-secondary"
+          class="ll-empty-state h-full min-h-52"
         >
           <p class="italic">Select tempered equipment from the list.</p>
         </div>
 
         <ul *ngIf="selectedItems.length" class="space-y-2">
-          <li
-            *ngFor="let item of selectedItems"
-            class="rounded border border-light_gray/60 bg-black/30 p-2"
-          >
+          <li *ngFor="let item of selectedItems" class="ll-card p-2">
             <app-item [item]="item.itemInstance"></app-item>
           </li>
         </ul>

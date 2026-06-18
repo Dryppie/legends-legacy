@@ -1,4 +1,4 @@
-<div class="flex h-full flex-col gap-4 overflow-hidden text-white">
+<div class="ll-page-stack">
   <app-default-header
     class="flex-none"
     section="Character"
@@ -7,15 +7,11 @@
     icon="character/essences"
   ></app-default-header>
 
-  <section
-    class="mr-4 flex flex-col gap-3 rounded-lg border border-light_gray bg-texture p-4 shadow-lg sm:mr-6"
-  >
+  <section class="ll-page-header mr-4 flex flex-col gap-3 sm:mr-6">
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h2 class="text-primary">Upgrade Archive</h2>
-        <p class="text-sm text-secondary">
-          Spend Soulstones on permanent account power.
-        </p>
+        <h2 class="ll-heading">Upgrade Archive</h2>
+        <p class="ll-copy">Spend Soulstones on permanent account power.</p>
       </div>
       <app-regular-button
         variant="danger"
@@ -26,27 +22,18 @@
     </div>
 
     <div class="grid grid-cols-2 gap-2 xl:grid-cols-4">
-      <div
-        *ngFor="let card of summaryCards()"
-        class="rounded border border-light_gray/70 bg-black/30 px-3 py-2"
-      >
-        <div class="text-xs uppercase text-zinc-500">{{ card.label }}</div>
-        <div class="mt-1 text-2xl font-semibold text-primary">
+      <div *ngFor="let card of summaryCards()" class="ll-stat-card px-3 py-2">
+        <div class="ll-stat-label">{{ card.label }}</div>
+        <div class="ll-stat-value mt-1">
           {{ card.value }}
         </div>
       </div>
     </div>
 
-    <p
-      *ngIf="error()"
-      class="rounded border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm text-red-200"
-    >
+    <p *ngIf="error()" class="ll-state ll-state-danger">
       {{ error() }}
     </p>
-    <p
-      *ngIf="lastRefund() > 0"
-      class="rounded border border-primary/40 bg-primary/10 px-3 py-2 text-sm text-primary"
-    >
+    <p *ngIf="lastRefund() > 0" class="ll-state">
       Refunded {{ lastRefund() }} Soulstones.
     </p>
   </section>

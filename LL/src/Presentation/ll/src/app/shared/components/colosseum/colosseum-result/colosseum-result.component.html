@@ -1,10 +1,12 @@
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+<div class="ll-modal-backdrop z-50">
   <div
-    class="w-[90%] max-w-md rounded-2xl border-2 bg-neutral-900 px-8 py-6 shadow-xl"
+    class="ll-modal-panel max-w-md px-8 py-6 text-center"
     [ngClass]="colorClasses"
   >
-    <h2 class="mb-4 text-center text-3xl font-bold">{{ title }}</h2>
-    <p class="mb-6 text-center text-sm">
+    <h2 class="ll-heading mb-4 text-3xl" [ngClass]="colorClasses">
+      {{ title }}
+    </h2>
+    <p class="ll-copy mb-6">
       {{
         outcome === "Victory"
           ? "You've bested your opponent in glorious combat!"

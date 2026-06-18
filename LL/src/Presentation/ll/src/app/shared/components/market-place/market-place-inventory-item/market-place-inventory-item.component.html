@@ -1,6 +1,4 @@
-<div
-  class="flex min-h-9 w-full items-center gap-2 border-b border-light_gray/20 px-2 py-1 text-sm hover:cursor-pointer hover:bg-zinc-600/30"
->
+<div class="ll-item-row min-h-9 gap-2 px-2 py-1 text-sm">
   <img
     *ngIf="equipmentIconPath"
     [src]="equipmentIconPath"
@@ -15,7 +13,7 @@
   />
 
   <app-item [item]="inventoryItem.itemInstance"></app-item>
-  <div *ngIf="!isEquipment" class="ml-auto text-zinc-100">
+  <div *ngIf="!isEquipment" class="ll-item-chip ml-auto">
     x{{ inventoryItem.quantity | numberFormat }}
   </div>
 </div>

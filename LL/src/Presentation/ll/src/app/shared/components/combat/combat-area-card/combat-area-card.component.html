@@ -1,5 +1,5 @@
 <div
-  class="relative flex h-64 w-full overflow-visible rounded-md bg-cover sm:size-64"
+  class="ll-card ll-card-borderless relative flex h-64 w-full overflow-visible bg-cover sm:size-64"
   [class.opacity-50]="isLocked"
   [class.pointer-events-none]="isLocked"
   [class.grayscale]="isLocked"
@@ -14,7 +14,7 @@
         <img src="icons/Info.svg" class="size-6" />
       </button>
       <div
-        class="absolute top-0 hidden rounded border border-light_gray bg-texture p-2 text-sm text-white shadow group-hover:block sm:w-56"
+        class="ll-card absolute top-0 hidden bg-texture p-2 text-sm text-white shadow group-hover:block sm:w-56"
         [ngClass]="{
           'ml-8': !isLastInRow,
           'right-full mr-2': isLastInRow,
@@ -41,21 +41,21 @@
     <div class="relative flex w-full items-end justify-between p-3 text-white">
       <div class="flex flex-col gap-1">
         <div class="flex items-center justify-between">
-          <h3>{{ area.name }}</h3>
+          <h3 class="ll-heading text-lg">{{ area.name }}</h3>
         </div>
-        <small class="text-secondary"
+        <small class="ll-stat-label"
           >Req. LV: {{ area.levelRequirement }}</small
         >
         <div class="mt-1 flex max-w-40 flex-wrap gap-1">
           <span
             *ngFor="let gatheringType of gatheringTypes()"
-            class="rounded border border-light_gray/50 bg-black/45 px-1.5 py-0.5 text-[0.65rem] leading-none text-primary"
+            class="ll-item-chip text-[0.65rem] text-primary"
           >
             {{ gatheringType }}
           </span>
           <span
             *ngIf="gatheringTypes().length === 0"
-            class="rounded border border-light_gray/30 bg-black/30 px-1.5 py-0.5 text-[0.65rem] leading-none text-light_gray"
+            class="ll-item-chip text-[0.65rem]"
           >
             No gathering
           </span>

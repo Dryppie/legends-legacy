@@ -1,12 +1,13 @@
 <!-- Buttons -->
-<div class="mb-4 flex flex-wrap items-center gap-2">
+<div class="ll-toolbar mb-4">
   <button
+    type="button"
     *ngFor="let opt of filterOptions()"
     (click)="setActive(opt)"
     [ngClass]="{
-      'bg-primary/30 hover:bg-primary/40': active() === opt,
+      'll-card-accent text-primary': active() === opt,
     }"
-    class="flex items-center gap-1 rounded border border-zinc-300/30 px-2 py-1 text-sm text-neutral-300 hover:bg-zinc-300/30"
+    class="ll-button flex items-center gap-1 px-2 py-1"
   >
     {{ opt.label }}
   </button>
@@ -23,7 +24,5 @@
 </section>
 
 <ng-template #none>
-  <p class="mt-4 text-center italic text-neutral-400">
-    No items match this filter.
-  </p>
+  <p class="ll-empty-state mt-4">No items match this filter.</p>
 </ng-template>

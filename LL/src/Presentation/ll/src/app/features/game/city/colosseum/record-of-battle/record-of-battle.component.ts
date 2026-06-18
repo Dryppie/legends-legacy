@@ -61,9 +61,9 @@ export class RecordOfBattleComponent {
   }
 
   deltaClass(delta: number): string {
-    if (delta > 0) return 'text-emerald-400';
-    if (delta < 0) return 'text-rose-400';
-    return 'text-zinc-200';
+    if (delta > 0) return 'll-text-success';
+    if (delta < 0) return 'll-text-danger';
+    return 'll-text-muted';
   }
 
   formatDelta(delta: number): string {
@@ -83,9 +83,9 @@ export class RecordOfBattleComponent {
   resultClass(match: ColosseumMatchResult): string {
     const label = this.resultLabel(match);
 
-    if (label === 'Victory') return 'border-emerald-500/60 text-emerald-300';
-    if (label === 'Defeat') return 'border-rose-500/60 text-rose-300';
-    if (label === 'Draw') return 'border-amber-500/60 text-amber-300';
-    return 'border-light_gray/60 text-zinc-300';
+    if (label === 'Victory') return 'll-badge-success';
+    if (label === 'Defeat') return 'll-badge-danger';
+    if (label === 'Draw') return 'll-badge-warning';
+    return 'll-badge-muted';
   }
 }

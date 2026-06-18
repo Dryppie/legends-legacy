@@ -159,10 +159,9 @@ export class DungeonCardComponent implements OnChanges {
     const unlocked = this.isDifficultyUnlocked(difficulty);
 
     return {
-      'border-primary bg-primary/90 text-black': selected,
-      'border-white/25 text-zinc-100 hover:border-primary hover:bg-primary/10':
-        !selected && unlocked,
-      'cursor-not-allowed border-white/10 text-zinc-500 opacity-45': !unlocked,
+      'll-card-accent text-primary': selected,
+      'text-white': !selected && unlocked,
+      'cursor-not-allowed opacity-45': !unlocked,
     };
   }
 
@@ -170,9 +169,8 @@ export class DungeonCardComponent implements OnChanges {
     const selected = this.selectedTab() === tab;
 
     return {
-      'border-primary bg-primary/90 text-black': selected,
-      'border-white/15 bg-black/35 text-zinc-300 hover:border-primary/60 hover:text-zinc-100':
-        !selected,
+      'll-segmented-button-active': selected,
+      'text-secondary': !selected,
     };
   }
 
@@ -193,15 +191,11 @@ export class DungeonCardComponent implements OnChanges {
   }
 
   selectedStatusClass(): string {
-    return this.selectedCanEnter()
-      ? 'border-primary/40 bg-primary/10 text-primary'
-      : 'border-red-400/30 bg-red-950/20 text-red-100';
+    return this.selectedCanEnter() ? 'll-badge-accent' : 'll-badge-danger';
   }
 
   checkStatusClass(isReady: boolean): string {
-    return isReady
-      ? 'border-primary/30 bg-primary/10 text-primary'
-      : 'border-amber-300/30 bg-amber-950/20 text-amber-100';
+    return isReady ? 'll-badge-accent' : 'll-badge-warning';
   }
 
   selectedMissingRequirements(): string[] {
@@ -273,8 +267,8 @@ export class DungeonCardComponent implements OnChanges {
 
   entryRequirementClass(requirement: EntryRequirementPreview): string {
     return requirement.ownedAmount >= requirement.requiredAmount
-      ? 'border-primary/30 bg-primary/10 text-primary'
-      : 'border-red-400/30 bg-red-950/20 text-red-100';
+      ? 'll-card-accent text-primary'
+      : 'll-list-row-danger text-danger';
   }
 
   selectedRewardGroups(): RewardGroup[] {
@@ -419,15 +413,15 @@ export class DungeonCardComponent implements OnChanges {
   gatheringTypeClass(type: string | null | undefined): string {
     switch (type?.toLowerCase()) {
       case 'mining':
-        return 'border-slate-300/25 bg-slate-200/10 text-slate-100';
+        return 'll-badge-muted';
       case 'woodcutting':
-        return 'border-emerald-300/25 bg-emerald-400/10 text-emerald-100';
+        return 'll-badge-success';
       case 'fishing':
-        return 'border-sky-300/25 bg-sky-400/10 text-sky-100';
+        return 'll-badge-info';
       case 'skinning':
-        return 'border-amber-300/25 bg-amber-400/10 text-amber-100';
+        return 'll-badge-warning';
       default:
-        return 'border-primary/25 bg-primary/10 text-primary';
+        return 'll-item-chip-accent';
     }
   }
 

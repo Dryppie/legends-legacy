@@ -20,22 +20,16 @@
       [style.min-height.px]="height"
     >
       <div class="min-w-0 text-right">
-        <div
-          class="font-serif text-xs uppercase tracking-[0.16em] text-zinc-200/80"
-        >
+        <div class="ll-eyebrow text-zinc-200/80">
           Dungeon {{ previewData.number }}
         </div>
 
-        <h2
-          class="mt-1 font-serif text-3xl font-semibold leading-tight text-primary drop-shadow sm:text-4xl"
-        >
+        <h2 class="ll-heading mt-1 text-3xl drop-shadow sm:text-4xl">
           {{ previewData.title }}
         </h2>
 
         <div class="mt-4 flex items-center justify-end gap-2">
-          <span
-            class="text-[10px] uppercase tracking-[0.22em] text-zinc-300/80"
-          >
+          <span class="ll-stat-label text-[10px] text-zinc-300/80">
             Recommended Power
           </span>
           <span class="font-serif text-2xl font-semibold text-primary">
@@ -49,7 +43,7 @@
         >
           <span
             *ngFor="let type of previewGatheringTypes()"
-            class="rounded border border-white/15 bg-black/45 px-2 py-1 text-[10px] uppercase tracking-[0.12em] text-zinc-100"
+            class="ll-item-chip"
           >
             {{ type }}
           </span>
@@ -84,15 +78,11 @@
       <section class="flex min-w-0 flex-col">
         <div class="flex h-full items-start justify-between gap-4">
           <div class="min-w-0">
-            <div
-              class="font-serif text-xs uppercase tracking-[0.18em] text-zinc-200/80"
-            >
+            <div class="ll-eyebrow text-zinc-200/80">
               Dungeon {{ previewData.number }}
             </div>
 
-            <h2
-              class="mt-1 font-serif text-4xl font-semibold leading-tight text-primary drop-shadow sm:text-5xl"
-            >
+            <h2 class="ll-heading mt-1 text-4xl drop-shadow sm:text-5xl">
               {{ previewData.title }}
             </h2>
 
@@ -106,18 +96,18 @@
           <div class="flex shrink-0 flex-col gap-2 sm:flex-row">
             <button
               type="button"
-              class="rounded border border-white/20 bg-black/35 px-3 py-2 text-left text-xs transition hover:border-primary hover:bg-primary/10"
+              class="ll-button text-left text-xs"
               (click)="openRecords()"
             >
-              <span class="block font-semibold text-zinc-100">
+              <span class="block font-semibold text-white">
                 Dungeon Records
               </span>
-              <span class="block text-[10px] text-zinc-400">Rankings</span>
+              <span class="ll-copy block text-[10px]">Rankings</span>
             </button>
 
             <button
               type="button"
-              class="rounded border border-white/20 bg-black/35 px-3 py-2 text-xs text-zinc-200 transition hover:border-primary hover:bg-primary/10"
+              class="ll-button text-xs"
               aria-label="Close dungeon preview"
               (click)="togglePreview()"
             >
@@ -127,38 +117,32 @@
         </div>
 
         <p
-          class="mt-10 max-w-2xl font-serif text-base leading-7 text-zinc-100/90"
+          class="ll-copy mt-10 max-w-2xl font-serif text-base leading-7 text-zinc-100/90"
         >
           {{ previewData.lore }}
         </p>
 
         <!-- COMPACT SUMMARY STRIP -->
         <div class="mt-6 flex flex-wrap gap-2">
-          <div class="rounded border border-white/15 bg-black/35 px-3 py-2">
-            <span class="text-[10px] uppercase tracking-[0.16em] text-zinc-400">
-              Rooms
-            </span>
-            <span class="ml-2 font-serif text-lg text-zinc-100">
+          <div class="ll-stat-card px-3 py-2">
+            <span class="ll-stat-label"> Rooms </span>
+            <span class="ml-2 font-serif text-lg text-white">
               {{ selectedPreviewData().minRooms ?? 0 }}-{{
                 selectedPreviewData().maxRooms ?? 0
               }}
             </span>
           </div>
 
-          <div class="rounded border border-white/15 bg-black/35 px-3 py-2">
-            <span class="text-[10px] uppercase tracking-[0.16em] text-zinc-400">
-              Nodes
-            </span>
-            <span class="ml-2 font-serif text-lg text-zinc-100">
+          <div class="ll-stat-card px-3 py-2">
+            <span class="ll-stat-label"> Nodes </span>
+            <span class="ml-2 font-serif text-lg text-white">
               {{ selectedGatheringNodes().length || "None" }}
             </span>
           </div>
 
-          <div class="rounded border border-white/15 bg-black/35 px-3 py-2">
-            <span class="text-[10px] uppercase tracking-[0.16em] text-zinc-400">
-              Clears
-            </span>
-            <span class="ml-2 font-serif text-lg text-zinc-100">
+          <div class="ll-stat-card px-3 py-2">
+            <span class="ll-stat-label"> Clears </span>
+            <span class="ml-2 font-serif text-lg text-white">
               {{ selectedPreviewData().record?.totalClears ?? 0 }}
             </span>
           </div>
@@ -166,11 +150,11 @@
 
         <!-- DETAILS -->
         <div class="mt-6 flex h-full max-w-4xl flex-col">
-          <nav class="flex flex-wrap gap-2">
+          <nav class="ll-segmented flex-wrap">
             <button
               *ngFor="let tab of detailTabs"
               type="button"
-              class="rounded border px-4 py-2 text-xs uppercase tracking-[0.12em] transition"
+              class="ll-segmented-button text-xs uppercase"
               [attr.aria-selected]="selectedTab() === tab.id"
               [ngClass]="detailTabClass(tab.id)"
               (click)="selectDetailTab(tab.id)"
@@ -191,13 +175,11 @@
                     let group of selectedRewardSections();
                     trackBy: trackRewardGroup
                   "
-                  class="min-w-0 rounded border border-white/15 bg-black/35 px-3 py-3"
+                  class="ll-card min-w-0 px-3 py-3"
                 >
                   <div class="flex items-start justify-between gap-2">
                     <div class="min-w-0">
-                      <h3
-                        class="truncate text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-100"
-                      >
+                      <h3 class="ll-eyebrow truncate text-white">
                         {{ group.title }}
                       </h3>
 
@@ -205,11 +187,11 @@
                     </div>
 
                     <span
-                      class="rounded border px-2 py-0.5 text-[10px] uppercase"
+                      class="ll-item-chip"
                       [ngClass]="
                         group.title === 'Run Rewards'
-                          ? 'border-primary/25 bg-primary/10 text-primary'
-                          : 'border-white/15 bg-black/20 text-zinc-300'
+                          ? 'll-item-chip-accent'
+                          : ''
                       "
                     >
                       {{
@@ -218,7 +200,7 @@
                     </span>
                   </div>
 
-                  <div class="mt-3 space-y-1 text-sm text-zinc-100">
+                  <div class="mt-3 space-y-1 text-sm text-white">
                     <div
                       *ngFor="let reward of group.rewards; trackBy: trackReward"
                       class="flex min-w-0 items-center justify-between gap-2"
@@ -240,7 +222,7 @@
               </div>
 
               <ng-template #noRewardsListed>
-                <div class="text-sm text-zinc-400">No rewards listed.</div>
+                <div class="ll-empty-state p-3 text-sm">No rewards listed.</div>
               </ng-template>
             </div>
 
@@ -255,38 +237,32 @@
                     let node of selectedGatheringNodes();
                     trackBy: trackGatheringNode
                   "
-                  class="min-w-0 rounded border border-white/15 bg-black/35 px-3 py-3"
+                  class="ll-card min-w-0 px-3 py-3"
                 >
                   <div class="flex items-start justify-between gap-2">
                     <div class="min-w-0">
-                      <h3
-                        class="truncate text-[11px] font-semibold uppercase tracking-[0.08em] text-zinc-100"
-                      >
+                      <h3 class="ll-eyebrow truncate text-white">
                         {{ node.name }}
                       </h3>
 
                       <div class="mt-2 flex flex-wrap gap-1.5">
                         <span
-                          class="rounded border px-2 py-0.5 text-[10px] uppercase"
+                          class="ll-item-chip"
                           [ngClass]="gatheringTypeClass(node.type)"
                         >
                           {{ formatGatheringType(node.type) }}
                         </span>
-                        <span
-                          class="rounded border border-white/15 px-2 py-0.5 text-[10px] uppercase text-zinc-300"
-                        >
+                        <span class="ll-item-chip">
                           {{ gatheringLevelLabel(node) }}
                         </span>
-                        <span
-                          class="rounded border border-primary/20 px-2 py-0.5 text-[10px] uppercase text-primary"
-                        >
+                        <span class="ll-item-chip ll-item-chip-accent">
                           {{ gatheringChanceLabel(node) }}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div class="mt-3 space-y-1 text-sm text-zinc-100">
+                  <div class="mt-3 space-y-1 text-sm text-white">
                     <div
                       *ngFor="
                         let loot of node.loot;
@@ -297,7 +273,7 @@
                       <span class="min-w-0 truncate">
                         <app-item [item]="loot"></app-item>
                       </span>
-                      <span class="shrink-0 text-xs tabular-nums text-zinc-400">
+                      <span class="ll-item-chip shrink-0 tabular-nums">
                         x{{ gatheringLootQuantityLabel(loot) }}
                       </span>
                     </div>
@@ -306,7 +282,7 @@
               </div>
 
               <ng-template #noGatheringNodes>
-                <div class="text-sm text-zinc-400">
+                <div class="ll-empty-state p-3 text-sm">
                   This dungeon has no gathering nodes.
                 </div>
               </ng-template>
@@ -317,20 +293,18 @@
 
       <!-- RUN SETUP PANEL -->
       <aside
-        class="h-fit rounded-md border border-primary/30 bg-black/70 p-4 shadow-[0_0_24px_rgba(0,0,0,0.35)] backdrop-blur-md lg:sticky lg:top-4"
+        class="ll-panel-strong h-fit p-4 backdrop-blur-md lg:sticky lg:top-4"
       >
         <div class="flex items-start justify-between gap-3">
           <div>
-            <div class="text-[10px] uppercase tracking-[0.18em] text-zinc-400">
-              Run Setup
-            </div>
-            <h3 class="mt-1 font-serif text-2xl text-primary">
+            <div class="ll-eyebrow">Run Setup</div>
+            <h3 class="ll-heading mt-1 text-2xl">
               {{ difficultyLabel(difficulty()) }}
             </h3>
           </div>
 
           <span
-            class="shrink-0 rounded border px-2 py-0.5 text-[10px] font-semibold uppercase"
+            class="ll-badge shrink-0 rounded"
             [ngClass]="selectedStatusClass()"
           >
             {{ selectedStatusLabel() }}
@@ -338,15 +312,13 @@
         </div>
 
         <section class="mt-5">
-          <div class="text-[10px] uppercase tracking-[0.18em] text-zinc-400">
-            Difficulty
-          </div>
+          <div class="ll-eyebrow">Difficulty</div>
 
           <div class="mt-2 grid grid-cols-3 gap-2">
             <button
               *ngFor="let d of difficulties"
               type="button"
-              class="rounded border px-2 py-2 text-xs transition disabled:cursor-not-allowed"
+              class="ll-button px-2 py-2 text-xs disabled:cursor-not-allowed"
               [ngClass]="difficultyButtonClass(d)"
               [disabled]="!isDifficultyUnlocked(d)"
               (click)="selectDifficulty(d)"
@@ -356,13 +328,11 @@
           </div>
         </section>
 
-        <section class="mt-4 rounded border border-white/15 bg-black/35 p-3">
+        <section class="ll-card mt-4 p-3">
           <div class="flex items-center justify-between gap-3">
-            <div class="text-[10px] uppercase tracking-[0.18em] text-zinc-400">
-              Power Check
-            </div>
+            <div class="ll-eyebrow">Power Check</div>
             <span
-              class="rounded border px-2 py-0.5 text-[10px] font-semibold uppercase"
+              class="ll-badge rounded"
               [ngClass]="checkStatusClass(meetsRecommendedRating())"
             >
               {{ meetsRecommendedRating() ? "Ready" : "Risky" }}
@@ -371,11 +341,7 @@
 
           <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
             <div>
-              <div
-                class="text-[10px] uppercase tracking-[0.14em] text-zinc-500"
-              >
-                Your Power
-              </div>
+              <div class="ll-stat-label">Your Power</div>
               <div
                 class="mt-1 font-serif text-xl tabular-nums"
                 [class.text-primary]="meetsRecommendedRating()"
@@ -386,25 +352,19 @@
             </div>
 
             <div>
-              <div
-                class="text-[10px] uppercase tracking-[0.14em] text-zinc-500"
-              >
-                Recommended
-              </div>
-              <div class="mt-1 font-serif text-xl tabular-nums text-zinc-100">
+              <div class="ll-stat-label">Recommended</div>
+              <div class="mt-1 font-serif text-xl tabular-nums text-white">
                 {{ selectedRecommendedCombatRating() }}
               </div>
             </div>
           </div>
         </section>
 
-        <section class="mt-3 rounded border border-white/15 bg-black/35 p-3">
+        <section class="ll-card mt-3 p-3">
           <div class="flex items-center justify-between gap-3">
-            <div class="text-[10px] uppercase tracking-[0.18em] text-zinc-400">
-              Entry Cost
-            </div>
+            <div class="ll-eyebrow">Entry Cost</div>
             <span
-              class="rounded border px-2 py-0.5 text-[10px] font-semibold uppercase"
+              class="ll-badge rounded"
               [ngClass]="
                 checkStatusClass(!selectedHasMissingEntryRequirements())
               "
@@ -419,7 +379,7 @@
           >
             <div
               *ngFor="let requirement of selectedEntryRequirements()"
-              class="flex items-center justify-between gap-3 rounded border px-2 py-2 text-xs"
+              class="ll-list-row px-2 py-2 text-xs"
               [ngClass]="entryRequirementClass(requirement)"
             >
               <span class="min-w-0 truncate">{{ requirement.name }}</span>
@@ -430,7 +390,7 @@
           </div>
 
           <ng-template #noEntryCost>
-            <div class="mt-3 text-sm text-zinc-400">No key required.</div>
+            <div class="ll-empty-state mt-3 p-3 text-sm">No key required.</div>
           </ng-template>
         </section>
 
@@ -448,7 +408,7 @@
 
           <div
             *ngIf="!selectedCanEnter()"
-            class="mt-3 rounded border border-red-400/30 bg-red-950/20 px-3 py-2 text-xs leading-5 text-red-100"
+            class="ll-state ll-state-danger mt-3 text-xs leading-5"
           >
             {{ selectedBlockingMessage() }}
           </div>

@@ -1,5 +1,5 @@
 <div
-  class="flex h-full flex-col gap-4 overflow-hidden pb-4 pr-4 text-white sm:pb-0 sm:pr-6"
+  class="ll-page-stack pb-4 pr-4 sm:pb-0 sm:pr-6"
   *ngIf="currentCharacter() as character"
 >
   <app-default-header
@@ -11,14 +11,10 @@
   ></app-default-header>
 
   <div class="min-h-0 flex-1 overflow-y-auto pr-1">
-    <section
-      class="rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
-    >
+    <section class="ll-page-header">
       <div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div class="min-w-0">
-          <p class="text-xs font-semibold uppercase text-secondary">
-            Current Character
-          </p>
+          <p class="ll-eyebrow">Current Character</p>
           <div class="mt-2 flex flex-wrap items-start gap-4">
             <img
               src="./../../../../assets/portrait/Avatar.svg"
@@ -27,25 +23,25 @@
             />
 
             <div class="min-w-0 flex-1">
-              <h1 class="truncate text-2xl font-semibold text-primary">
+              <h1 class="ll-heading truncate text-2xl">
                 {{ character.name }}
               </h1>
-              <p class="mt-1 text-sm text-zinc-300">
+              <p class="ll-copy mt-1 text-zinc-300">
                 Level {{ character.level }}
                 <span *ngIf="guild() as guild"> - {{ guild.name }}</span>
               </p>
 
               <div class="mt-4 max-w-xl">
-                <div class="flex justify-between text-xs text-zinc-400">
+                <div class="ll-copy flex justify-between text-xs">
                   <span>Experience</span>
                   <span>
                     {{ character.experience }} /
                     {{ character.experienceUntilNextLevel }}
                   </span>
                 </div>
-                <div class="mt-1 h-2 overflow-hidden rounded bg-black/40">
+                <div class="ll-progress-track mt-1 h-2">
                   <div
-                    class="h-full rounded bg-primary"
+                    class="ll-progress-bar rounded"
                     [style.width.%]="experiencePercent(character)"
                   ></div>
                 </div>
@@ -55,10 +51,8 @@
         </div>
 
         <div class="grid gap-2 text-sm sm:grid-cols-3 xl:grid-cols-1">
-          <div
-            class="rounded border border-light_gray/70 bg-black/30 px-3 py-2"
-          >
-            <div class="text-xs uppercase text-zinc-500">Account</div>
+          <div class="ll-stat-card px-3 py-2">
+            <div class="ll-stat-label">Account</div>
             <div
               class="mt-2 w-fit rounded border bg-black/30 px-2 py-0.5 font-semibold"
               [ngClass]="accountTypeClass()"
@@ -67,10 +61,8 @@
             </div>
           </div>
 
-          <div
-            class="rounded border border-light_gray/70 bg-black/30 px-3 py-2"
-          >
-            <div class="text-xs uppercase text-zinc-500">Email</div>
+          <div class="ll-stat-card px-3 py-2">
+            <div class="ll-stat-label">Email</div>
             <div
               class="mt-2 w-fit rounded border bg-black/30 px-2 py-0.5 font-semibold"
               [ngClass]="emailStatusClass()"
@@ -79,10 +71,8 @@
             </div>
           </div>
 
-          <div
-            class="rounded border border-light_gray/70 bg-black/30 px-3 py-2"
-          >
-            <div class="text-xs uppercase text-zinc-500">Gmail</div>
+          <div class="ll-stat-card px-3 py-2">
+            <div class="ll-stat-label">Gmail</div>
             <div
               class="mt-2 w-fit rounded border bg-black/30 px-2 py-0.5 font-semibold"
               [ngClass]="gmailStatusClass()"
@@ -95,31 +85,25 @@
     </section>
 
     <div class="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_24rem]">
-      <section
-        class="rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
-      >
+      <section class="ll-panel p-4">
         <div class="border-b border-light_gray/70 pb-3">
-          <p class="text-xs font-semibold uppercase text-secondary">
-            Account Settings
-          </p>
-          <h2 class="mt-1 text-xl text-primary">Identity and Access</h2>
+          <p class="ll-eyebrow">Account Settings</p>
+          <h2 class="ll-heading mt-1 text-xl">Identity and Access</h2>
         </div>
 
         <div class="mt-4 grid gap-3 md:grid-cols-2">
-          <article class="rounded border border-light_gray/70 bg-black/25 p-3">
+          <article class="ll-card p-3">
             <div class="flex items-start justify-between gap-3">
               <div>
                 <h3 class="font-semibold text-white">Character Name</h3>
-                <p class="mt-1 text-sm text-zinc-400">
+                <p class="ll-copy mt-1">
                   One rename is available for this character.
                 </p>
               </div>
               <span
-                class="rounded border bg-black/30 px-2 py-0.5 text-xs font-semibold"
+                class="ll-badge rounded"
                 [ngClass]="
-                  userInfo?.isNameEdited
-                    ? 'border-light_gray/60 text-zinc-300'
-                    : 'border-emerald-500/60 text-emerald-300'
+                  userInfo?.isNameEdited ? 'll-badge-muted' : 'll-badge-success'
                 "
               >
                 {{ userInfo?.isNameEdited ? "Used" : "Available" }}
@@ -134,25 +118,22 @@
             ></app-regular-button>
           </article>
 
-          <article class="rounded border border-light_gray/70 bg-black/25 p-3">
+          <article class="ll-card p-3">
             <div class="flex items-start justify-between gap-3">
               <div>
                 <h3 class="font-semibold text-white">Gmail Binding</h3>
-                <p class="mt-1 text-sm text-zinc-400">
+                <p class="ll-copy mt-1">
                   Connect a Google account for this login.
                 </p>
               </div>
-              <span
-                class="rounded border bg-black/30 px-2 py-0.5 text-xs font-semibold"
-                [ngClass]="gmailStatusClass()"
-              >
+              <span class="ll-badge rounded" [ngClass]="gmailStatusClass()">
                 {{ gmailStatusLabel() }}
               </span>
             </div>
 
             <button
               type="button"
-              class="mt-4 inline-flex items-center gap-2 rounded-md border border-light_gray/70 bg-black/30 px-3 py-2 text-sm text-white transition hover:border-primary/70 disabled:pointer-events-none disabled:opacity-60"
+              class="ll-button mt-4 inline-flex items-center gap-2 disabled:pointer-events-none disabled:opacity-60"
               (click)="!userInfo?.isGmailBound && bindGmail()"
               [disabled]="userInfo?.isGmailBound"
             >
@@ -165,18 +146,15 @@
             </button>
           </article>
 
-          <article class="rounded border border-light_gray/70 bg-black/25 p-3">
+          <article class="ll-card p-3">
             <div class="flex items-start justify-between gap-3">
               <div>
                 <h3 class="font-semibold text-white">Email Login</h3>
-                <p class="mt-1 text-sm text-zinc-400">
+                <p class="ll-copy mt-1">
                   Register the account with an email and password.
                 </p>
               </div>
-              <span
-                class="rounded border bg-black/30 px-2 py-0.5 text-xs font-semibold"
-                [ngClass]="emailStatusClass()"
-              >
+              <span class="ll-badge rounded" [ngClass]="emailStatusClass()">
                 {{ emailStatusLabel() }}
               </span>
             </div>
@@ -189,9 +167,9 @@
             ></app-regular-button>
           </article>
 
-          <article class="rounded border border-red-500/40 bg-red-950/20 p-3">
-            <h3 class="font-semibold text-red-200">Session</h3>
-            <p class="mt-1 text-sm text-red-100/80">
+          <article class="ll-card ll-card-danger p-3">
+            <h3 class="ll-text-danger font-semibold">Session</h3>
+            <p class="ll-copy mt-1">
               Leave the current session and return to login.
             </p>
 
@@ -206,49 +184,38 @@
       </section>
 
       <aside class="flex flex-col gap-4">
-        <section
-          class="rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
-        >
-          <p class="text-xs font-semibold uppercase text-secondary">
-            Beta and Support
-          </p>
-          <h2 class="mt-1 text-xl text-primary">Game Links</h2>
+        <section class="ll-panel p-4">
+          <p class="ll-eyebrow">Beta and Support</p>
+          <h2 class="ll-heading mt-1 text-xl">Game Links</h2>
 
           <div class="mt-4 space-y-3">
             <button
               type="button"
-              class="w-full rounded border border-light_gray/70 bg-black/30 px-3 py-2 text-left text-sm text-white transition hover:border-primary/70"
+              class="ll-card w-full px-3 py-2 text-left text-sm text-white transition hover:border-primary"
               (click)="viewPatchNotes()"
             >
               <span class="block font-semibold text-primary">Patch Notes</span>
-              <span class="text-zinc-400">Version {{ version }}</span>
+              <span class="ll-text-muted">Version {{ version }}</span>
             </button>
 
             <a
               href="https://discord.gg/HXN4xnJUp3"
               target="_blank"
-              class="block rounded border border-light_gray/70 bg-black/30 px-3 py-2 text-sm text-white transition hover:border-primary/70"
+              class="ll-card block px-3 py-2 text-sm text-white transition hover:border-primary"
             >
               <span class="block font-semibold text-primary">Discord</span>
-              <span class="text-zinc-400">Community and support</span>
+              <span class="ll-text-muted">Community and support</span>
             </a>
           </div>
         </section>
 
-        <section
-          class="rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
-          *ngIf="activePanel"
-        >
+        <section class="ll-panel p-4" *ngIf="activePanel">
           <ng-container [ngSwitch]="activePanel">
             <div *ngSwitchCase="'patchNotes'">
-              <p class="text-xs font-semibold uppercase text-secondary">
-                Patch Notes
-              </p>
-              <h2 class="mt-1 text-xl text-primary">{{ version }}</h2>
-              <div
-                class="mt-4 rounded border border-light_gray/70 bg-black/25 p-3"
-              >
-                <p class="text-sm text-zinc-300">
+              <p class="ll-eyebrow">Patch Notes</p>
+              <h2 class="ll-heading mt-1 text-xl">{{ version }}</h2>
+              <div class="ll-card mt-4 p-3">
+                <p class="ll-copy">
                   Settings page introduced. Account links and profile actions
                   now live here.
                 </p>
@@ -256,11 +223,9 @@
             </div>
 
             <div *ngSwitchCase="'changeCredentials'">
-              <p class="text-xs font-semibold uppercase text-secondary">
-                Credentials
-              </p>
-              <h2 class="mt-1 text-xl text-primary">Change Email / Password</h2>
-              <p class="mt-4 text-sm text-zinc-300">Form coming soon.</p>
+              <p class="ll-eyebrow">Credentials</p>
+              <h2 class="ll-heading mt-1 text-xl">Change Email / Password</h2>
+              <p class="ll-copy mt-4">Form coming soon.</p>
             </div>
           </ng-container>
         </section>
@@ -269,23 +234,20 @@
   </div>
 </div>
 
-<div
-  *ngIf="showNameModal"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
->
-  <div
-    class="w-full max-w-md rounded-lg border border-light_gray bg-texture p-4 text-white shadow-lg"
-    (click)="$event.stopPropagation()"
-  >
-    <p class="text-xs font-semibold uppercase text-secondary">Character</p>
-    <h2 class="mt-1 text-xl text-primary">Edit Name</h2>
-    <p class="mt-2 text-sm text-zinc-400">You only have one edit.</p>
+<div *ngIf="showNameModal" class="ll-modal-backdrop">
+  <div class="ll-modal-panel max-w-md" (click)="$event.stopPropagation()">
+    <p class="ll-eyebrow">Character</p>
+    <h2 class="ll-heading mt-1 text-xl">Edit Name</h2>
+    <p class="ll-copy mt-2">You only have one edit.</p>
 
-    <input
-      type="text"
-      [(ngModel)]="newCharacterName"
-      class="mt-4 w-full rounded border border-light_gray bg-black/30 p-2 text-white outline-none focus:border-primary"
-    />
+    <label class="ll-field mt-4">
+      <span class="ll-label">New character name</span>
+      <input
+        type="text"
+        [(ngModel)]="newCharacterName"
+        class="ll-input w-full"
+      />
+    </label>
 
     <div class="mt-4 flex justify-end gap-2">
       <app-regular-button (pressed)="closeNameModal()">
@@ -300,10 +262,10 @@
 
 <div
   *ngIf="showBindEmailModal && currentCharacter() as character"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+  class="ll-modal-backdrop"
 >
   <div
-    class="h-full w-full overflow-y-auto rounded-lg border border-light_gray bg-texture pb-6 text-primary shadow-lg"
+    class="ll-modal-panel h-full max-w-none overflow-y-auto pb-6 text-primary"
     (click)="$event.stopPropagation()"
   >
     <app-signup

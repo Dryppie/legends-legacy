@@ -1,9 +1,10 @@
 <div class="flex h-full w-full items-center justify-between">
-  <label class="min-w-24 text-nowrap text-primary"
-    >HP: <label class="text-white">{{ health }}/{{ maxHealth }}</label></label
-  >
+  <div class="ll-stat-label min-w-24 text-nowrap">
+    HP:
+    <span class="font-semibold text-white">{{ health }}/{{ maxHealth }}</span>
+  </div>
   <div
-    class="relative h-3 w-full justify-self-end overflow-hidden rounded-full bg-black p-[2px]"
+    class="relative h-3 w-full justify-self-end overflow-hidden rounded-full border border-light_gray/50 bg-black p-[2px]"
   >
     <div
       #healthBar

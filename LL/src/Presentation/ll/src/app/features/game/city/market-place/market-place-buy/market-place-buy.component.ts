@@ -57,6 +57,11 @@ import {
   AttributeValueFormatPipe,
   formatAttributeValue,
 } from '../../../../../shared/pipes/attributes/attribute-value-format/attribute-value-format.pipe';
+import {
+  DropdownComponent,
+  DropdownOption,
+  DropdownSelection,
+} from '../../../../../shared/components/custom-components/dropdown/dropdown.component';
 
 @Component({
   selector: 'app-market-place-buy',
@@ -77,6 +82,7 @@ import {
     DecimalPipe,
     AttributeTypeFormatPipe,
     AttributeValueFormatPipe,
+    DropdownComponent,
   ],
   templateUrl: './market-place-buy.component.html',
 })
@@ -124,6 +130,10 @@ export class MarketPlaceBuyComponent implements OnInit {
     'Legendary',
     'Legacy',
   ];
+  readonly rarityOptions: DropdownOption<string>[] = [
+    { label: 'Any rarity', value: '' },
+    ...this.rarities.map((rarity) => ({ label: rarity, value: rarity })),
+  ];
 
   /** Selected listing shown inside confirmation modal */
   readonly selectedListing = signal<MarketPlaceListing | null>(null);
@@ -134,9 +144,9 @@ export class MarketPlaceBuyComponent implements OnInit {
     const q = this.searchTerm();
     if (q) {
       items = items.filter((l) =>
-        (
-          l.itemInstance.displayName ?? l.itemInstance.itemBase.name
-        ).toLowerCase().includes(q),
+        (l.itemInstance.displayName ?? l.itemInstance.itemBase.name)
+          .toLowerCase()
+          .includes(q),
       );
     }
 
@@ -364,6 +374,10 @@ export class MarketPlaceBuyComponent implements OnInit {
     this.searchCtrl.reset();
     this.rarity.set('');
     this.priceSort.set('');
+  }
+
+  setRaritySelection(selection: DropdownSelection<unknown>) {
+    this.rarity.set(selection.main as string);
   }
 
   selectListing(listing: MarketPlaceListing) {

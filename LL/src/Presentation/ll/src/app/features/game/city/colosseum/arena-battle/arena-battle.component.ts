@@ -99,10 +99,10 @@ export class ArenaBattleComponent implements OnChanges, OnDestroy {
     );
   }
 
-  deltaClass(delta: number, positiveClass = 'text-emerald-400'): string {
+  deltaClass(delta: number, positiveClass = 'll-text-success'): string {
     if (delta > 0) return positiveClass;
-    if (delta < 0) return 'text-rose-400';
-    return 'text-zinc-200';
+    if (delta < 0) return 'll-text-danger';
+    return 'll-text-muted';
   }
 
   formatDelta(delta: number): string {

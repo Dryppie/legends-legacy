@@ -442,14 +442,14 @@ export class DungeonPageComponent {
     const current = this.currentRoomZeroBasedIndex();
 
     if (index < current) {
-      return 'border-primary/20 bg-primary/5 opacity-60';
+      return 'll-card-accent opacity-60';
     }
 
     if (index === current) {
-      return 'border-primary bg-primary/10 shadow-[0_0_0_1px_rgba(212,175,55,0.15)]';
+      return 'll-card-accent shadow-[0_0_0_1px_rgba(249,220,160,0.22)]';
     }
 
-    return 'border-white/10 bg-black/20';
+    return 'll-card';
   }
 
   getEventTitle(outcome: string | null | undefined): string {
