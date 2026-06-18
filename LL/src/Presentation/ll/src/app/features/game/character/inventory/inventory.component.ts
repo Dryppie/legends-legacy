@@ -185,19 +185,19 @@ export class InventoryComponent implements OnInit {
 
     switch (rarity) {
       case Rarity.Common:
-        return 'border-slate-400/40 text-slate-200';
+        return 'll-rarity-common';
       case Rarity.Uncommon:
-        return 'border-emerald-400/40 text-emerald-300';
+        return 'll-rarity-uncommon';
       case Rarity.Rare:
-        return 'border-blue-400/40 text-blue-300';
+        return 'll-rarity-rare';
       case Rarity.Epic:
-        return 'border-fuchsia-400/40 text-fuchsia-300';
+        return 'll-rarity-epic';
       case Rarity.Unique:
-        return 'border-yellow-400/40 text-yellow-300';
+        return 'll-rarity-unique';
       case Rarity.Legendary:
-        return 'border-orange-400/40 text-orange-300';
+        return 'll-rarity-legendary';
       case Rarity.Legacy:
-        return 'border-rose-400/40 text-rose-300';
+        return 'll-rarity-legacy';
       default:
         return 'border-light_gray/60 text-secondary';
     }

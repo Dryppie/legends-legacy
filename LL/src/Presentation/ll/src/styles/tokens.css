@@ -34,7 +34,19 @@
   --ll-color-danger: #ff9aa2;
   --ll-color-danger-soft: rgba(127, 29, 29, 0.24);
   --ll-color-success: #41f1b6;
+  --ll-color-success-soft: rgba(16, 185, 129, 0.14);
   --ll-color-warning: #ffbb55;
+  --ll-color-warning-soft: rgba(245, 158, 11, 0.16);
+  --ll-color-info: #8ecbff;
+  --ll-color-info-soft: rgba(14, 165, 233, 0.14);
+
+  --ll-rarity-common: #d4d4d8;
+  --ll-rarity-uncommon: #41f1b6;
+  --ll-rarity-rare: #7cb7ff;
+  --ll-rarity-epic: #e879f9;
+  --ll-rarity-unique: #facc15;
+  --ll-rarity-legendary: #fb923c;
+  --ll-rarity-legacy: #fb7185;
 
   --ll-space-1: 0.25rem;
   --ll-space-2: 0.5rem;

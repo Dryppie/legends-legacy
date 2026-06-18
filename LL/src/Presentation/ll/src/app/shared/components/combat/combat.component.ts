@@ -436,13 +436,12 @@ export class CombatComponent implements OnInit {
 
   battleStatusClass(): Record<string, boolean> {
     return {
-      'border-emerald-400/50 bg-emerald-500/10 text-emerald-200':
-        this.outcome === BattleOutcome.Victory,
+      'll-badge-success': this.outcome === BattleOutcome.Victory,
       'll-badge-danger': this.outcome === BattleOutcome.Defeat,
       'll-badge-accent':
         this.outcome === BattleOutcome.Draw ||
         (!this.outcome && !this.isLoading),
-      'text-secondary': this.isLoading,
+      'll-badge-muted': this.isLoading,
     };
   }
 

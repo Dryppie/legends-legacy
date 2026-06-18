@@ -27,9 +27,6 @@
       <div class="border-b border-light_gray/70 pb-3">
         <div class="flex items-center justify-between gap-3">
           <h2 class="ll-heading font-semibold">Donate</h2>
-          <span class="ll-badge ll-badge-accent">
-            {{ donationTotal() | numberFormat }} selected
-          </span>
         </div>
         <p class="ll-copy">
           Choose resources from your inventory to contribute to the guild vault.
@@ -47,8 +44,8 @@
             <span
               class="ll-helper"
               [ngClass]="{
-                'text-red-200': donationExceedsAvailable(type),
-                'text-secondary': !donationExceedsAvailable(type),
+                'll-resource-missing': donationExceedsAvailable(type),
+                'll-text-muted': !donationExceedsAvailable(type),
               }"
             >
               {{ formatNumber(availableAmounts[type]) }} /

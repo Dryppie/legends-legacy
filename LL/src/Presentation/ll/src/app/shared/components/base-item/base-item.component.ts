@@ -48,26 +48,26 @@ export class BaseItemComponent {
 
   get rarityClasses() {
     if (this.useBaseName) {
-      return 'text-zinc-100';
+      return 'text-white';
     }
 
     switch (this.item.rarity) {
       case Rarity.Common:
-        return 'text-slate-200';
+        return 'll-rarity-common';
       case Rarity.Uncommon:
-        return 'text-emerald-600';
+        return 'll-rarity-uncommon';
       case Rarity.Rare:
-        return 'text-blue-600';
+        return 'll-rarity-rare';
       case Rarity.Epic:
-        return 'text-fuchsia-600';
+        return 'll-rarity-epic';
       case Rarity.Unique:
-        return 'text-yellow-400';
+        return 'll-rarity-unique';
       case Rarity.Legendary:
-        return 'text-orange-600';
+        return 'll-rarity-legendary';
       case Rarity.Legacy:
-        return 'text-rose-700';
+        return 'll-rarity-legacy';
       default:
-        return 'text-light_gray';
+        return 'll-text-muted';
     }
   }
 }

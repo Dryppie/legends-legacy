@@ -195,9 +195,7 @@ export class DungeonCardComponent implements OnChanges {
   }
 
   checkStatusClass(isReady: boolean): string {
-    return isReady
-      ? 'll-badge-accent'
-      : 'border-amber-300/30 bg-amber-950/20 text-amber-100';
+    return isReady ? 'll-badge-accent' : 'll-badge-warning';
   }
 
   selectedMissingRequirements(): string[] {
@@ -415,15 +413,15 @@ export class DungeonCardComponent implements OnChanges {
   gatheringTypeClass(type: string | null | undefined): string {
     switch (type?.toLowerCase()) {
       case 'mining':
-        return 'border-slate-300/25 bg-slate-200/10 text-slate-100';
+        return 'll-badge-muted';
       case 'woodcutting':
-        return 'border-emerald-300/25 bg-emerald-400/10 text-emerald-100';
+        return 'll-badge-success';
       case 'fishing':
-        return 'border-sky-300/25 bg-sky-400/10 text-sky-100';
+        return 'll-badge-info';
       case 'skinning':
-        return 'border-amber-300/25 bg-amber-400/10 text-amber-100';
+        return 'll-badge-warning';
       default:
-        return 'border-primary/25 bg-primary/10 text-primary';
+        return 'll-item-chip-accent';
     }
   }
 

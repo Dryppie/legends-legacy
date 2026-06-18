@@ -96,8 +96,9 @@ These are not tied to one page, but they will reduce repetition and make future 
 
 3. **Rarity, quality, and status tokens**
 
-   - Missing work: define consistent tokens/classes for item rarity, resource state, success, warning, danger, info, muted, and disabled.
-   - Current state: several components still use local red/green/zinc/primary classes.
+   - Status: first pass completed. Shared success, warning, info, danger, muted, resource, and rarity classes now exist, with representative item/equipment rarity helpers, account badges, dungeon checks, combat results, soulstone/guild readiness, session summaries, and resource shortage states migrated.
+   - Remaining work: continue replacing older local red/green/zinc/primary classes in lower-traffic components and decide whether rarity should also include shared soft backgrounds for every badge context.
+   - Current state: common status and rarity language is centralized, but several presentation-only color utilities remain where they are still part of a local visual composition.
 
 4. **Responsive shell rules**
 

@@ -103,9 +103,7 @@
               <span
                 class="ll-badge rounded"
                 [ngClass]="
-                  userInfo?.isNameEdited
-                    ? 'border-light_gray/60 text-zinc-300'
-                    : 'border-emerald-500/60 text-emerald-300'
+                  userInfo?.isNameEdited ? 'll-badge-muted' : 'll-badge-success'
                 "
               >
                 {{ userInfo?.isNameEdited ? "Used" : "Available" }}
@@ -170,8 +168,8 @@
           </article>
 
           <article class="ll-card ll-card-danger p-3">
-            <h3 class="font-semibold text-red-200">Session</h3>
-            <p class="mt-1 text-sm text-red-100/80">
+            <h3 class="ll-text-danger font-semibold">Session</h3>
+            <p class="ll-copy mt-1">
               Leave the current session and return to login.
             </p>
 
@@ -197,7 +195,7 @@
               (click)="viewPatchNotes()"
             >
               <span class="block font-semibold text-primary">Patch Notes</span>
-              <span class="text-zinc-400">Version {{ version }}</span>
+              <span class="ll-text-muted">Version {{ version }}</span>
             </button>
 
             <a
@@ -206,7 +204,7 @@
               class="ll-card block px-3 py-2 text-sm text-white transition hover:border-primary"
             >
               <span class="block font-semibold text-primary">Discord</span>
-              <span class="text-zinc-400">Community and support</span>
+              <span class="ll-text-muted">Community and support</span>
             </a>
           </div>
         </section>
@@ -217,7 +215,7 @@
               <p class="ll-eyebrow">Patch Notes</p>
               <h2 class="ll-heading mt-1 text-xl">{{ version }}</h2>
               <div class="ll-card mt-4 p-3">
-                <p class="text-sm text-zinc-300">
+                <p class="ll-copy">
                   Settings page introduced. Account links and profile actions
                   now live here.
                 </p>
@@ -227,7 +225,7 @@
             <div *ngSwitchCase="'changeCredentials'">
               <p class="ll-eyebrow">Credentials</p>
               <h2 class="ll-heading mt-1 text-xl">Change Email / Password</h2>
-              <p class="mt-4 text-sm text-zinc-300">Form coming soon.</p>
+              <p class="ll-copy mt-4">Form coming soon.</p>
             </div>
           </ng-container>
         </section>

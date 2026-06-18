@@ -54,21 +54,21 @@ export class EquipmentDisplayComponent {
 
     switch (rarity) {
       case Rarity.Common:
-        return 'text-slate-200';
+        return 'll-rarity-common';
       case Rarity.Uncommon:
-        return 'text-emerald-600';
+        return 'll-rarity-uncommon';
       case Rarity.Rare:
-        return 'text-blue-600';
+        return 'll-rarity-rare';
       case Rarity.Epic:
-        return 'text-fuchsia-600';
+        return 'll-rarity-epic';
       case Rarity.Unique:
-        return 'text-yellow-400';
+        return 'll-rarity-unique';
       case Rarity.Legendary:
-        return 'text-orange-600';
+        return 'll-rarity-legendary';
       case Rarity.Legacy:
-        return 'text-rose-700';
+        return 'll-rarity-legacy';
       default:
-        return 'text-light_gray';
+        return 'll-text-muted';
     }
   }
 
@@ -84,21 +84,21 @@ export class EquipmentDisplayComponent {
 
     switch (rarity) {
       case Rarity.Common:
-        return 'border-slate-300/30 bg-slate-300/10 text-slate-100';
+        return 'll-rarity-common';
       case Rarity.Uncommon:
-        return 'border-emerald-400/40 bg-emerald-500/10 text-emerald-300';
+        return 'll-rarity-uncommon';
       case Rarity.Rare:
-        return 'border-blue-400/40 bg-blue-500/10 text-blue-300';
+        return 'll-rarity-rare';
       case Rarity.Epic:
-        return 'border-fuchsia-400/40 bg-fuchsia-500/10 text-fuchsia-300';
+        return 'll-rarity-epic';
       case Rarity.Unique:
-        return 'border-yellow-300/40 bg-yellow-400/10 text-yellow-200';
+        return 'll-rarity-unique';
       case Rarity.Legendary:
-        return 'border-orange-400/40 bg-orange-500/10 text-orange-300';
+        return 'll-rarity-legendary';
       case Rarity.Legacy:
-        return 'border-rose-400/40 bg-rose-500/10 text-rose-300';
+        return 'll-rarity-legacy';
       default:
-        return 'border-primary/40 text-primary';
+        return 'll-item-chip-accent';
     }
   }
 

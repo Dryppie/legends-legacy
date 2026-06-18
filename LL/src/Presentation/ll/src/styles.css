@@ -389,6 +389,21 @@
     background: var(--ll-color-danger-soft);
   }
 
+  .ll-card-success {
+    border-color: rgba(65, 241, 182, 0.36);
+    background: var(--ll-color-success-soft);
+  }
+
+  .ll-card-warning {
+    border-color: rgba(255, 187, 85, 0.36);
+    background: var(--ll-color-warning-soft);
+  }
+
+  .ll-card-info {
+    border-color: rgba(142, 203, 255, 0.36);
+    background: var(--ll-color-info-soft);
+  }
+
   .ll-stat-card {
     border: 1px solid var(--ll-color-border);
     border-radius: var(--ll-radius-sm);
@@ -435,6 +450,62 @@
   .ll-badge-danger {
     border-color: rgba(255, 154, 162, 0.36);
     background: var(--ll-color-danger-soft);
+    color: var(--ll-color-danger);
+  }
+
+  .ll-badge-success {
+    border-color: rgba(65, 241, 182, 0.36);
+    background: var(--ll-color-success-soft);
+    color: var(--ll-color-success);
+  }
+
+  .ll-badge-warning {
+    border-color: rgba(255, 187, 85, 0.36);
+    background: var(--ll-color-warning-soft);
+    color: var(--ll-color-warning);
+  }
+
+  .ll-badge-info {
+    border-color: rgba(142, 203, 255, 0.36);
+    background: var(--ll-color-info-soft);
+    color: var(--ll-color-info);
+  }
+
+  .ll-badge-muted {
+    border-color: var(--ll-color-border);
+    background: var(--ll-color-surface-soft);
+    color: var(--ll-color-text-muted);
+  }
+
+  .ll-text-success {
+    color: var(--ll-color-success);
+  }
+
+  .ll-text-warning {
+    color: var(--ll-color-warning);
+  }
+
+  .ll-text-danger {
+    color: var(--ll-color-danger);
+  }
+
+  .ll-text-info {
+    color: var(--ll-color-info);
+  }
+
+  .ll-text-muted {
+    color: var(--ll-color-text-muted);
+  }
+
+  .ll-text-subtle {
+    color: var(--ll-color-text-subtle);
+  }
+
+  .ll-resource-ready {
+    color: var(--ll-color-success);
+  }
+
+  .ll-resource-missing {
     color: var(--ll-color-danger);
   }
 
@@ -629,6 +700,24 @@
     color: #ffe4e6;
   }
 
+  .ll-state-success {
+    border-color: rgba(65, 241, 182, 0.36);
+    background: var(--ll-color-success-soft);
+    color: var(--ll-color-success);
+  }
+
+  .ll-state-warning {
+    border-color: rgba(255, 187, 85, 0.36);
+    background: var(--ll-color-warning-soft);
+    color: var(--ll-color-warning);
+  }
+
+  .ll-state-info {
+    border-color: rgba(142, 203, 255, 0.36);
+    background: var(--ll-color-info-soft);
+    color: var(--ll-color-info);
+  }
+
   .ll-list-row {
     display: flex;
     align-items: center;
@@ -697,6 +786,41 @@
     border-color: var(--ll-color-border-strong);
     background: var(--ll-color-primary-soft);
     color: var(--ll-color-primary);
+  }
+
+  .ll-rarity-common {
+    border-color: rgba(212, 212, 216, 0.4);
+    color: var(--ll-rarity-common);
+  }
+
+  .ll-rarity-uncommon {
+    border-color: rgba(65, 241, 182, 0.4);
+    color: var(--ll-rarity-uncommon);
+  }
+
+  .ll-rarity-rare {
+    border-color: rgba(124, 183, 255, 0.4);
+    color: var(--ll-rarity-rare);
+  }
+
+  .ll-rarity-epic {
+    border-color: rgba(232, 121, 249, 0.4);
+    color: var(--ll-rarity-epic);
+  }
+
+  .ll-rarity-unique {
+    border-color: rgba(250, 204, 21, 0.4);
+    color: var(--ll-rarity-unique);
+  }
+
+  .ll-rarity-legendary {
+    border-color: rgba(251, 146, 60, 0.4);
+    color: var(--ll-rarity-legendary);
+  }
+
+  .ll-rarity-legacy {
+    border-color: rgba(251, 113, 133, 0.4);
+    color: var(--ll-rarity-legacy);
   }
 
   .ll-item-name {

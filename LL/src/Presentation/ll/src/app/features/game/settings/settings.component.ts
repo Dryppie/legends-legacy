@@ -127,10 +127,10 @@ export class SettingsComponent {
   }
 
   accountTypeClass(): string {
-    if (!this.userInfo) return 'border-light_gray/60 text-zinc-300';
+    if (!this.userInfo) return 'll-badge-muted';
     return this.userInfo.isRegisteredUser
-      ? 'border-emerald-500/60 text-emerald-300'
-      : 'border-amber-500/60 text-amber-300';
+      ? 'll-badge-success'
+      : 'll-badge-warning';
   }
 
   gmailStatusLabel(): string {
@@ -139,10 +139,8 @@ export class SettingsComponent {
   }
 
   gmailStatusClass(): string {
-    if (!this.userInfo) return 'border-light_gray/60 text-zinc-300';
-    return this.userInfo.isGmailBound
-      ? 'border-emerald-500/60 text-emerald-300'
-      : 'border-light_gray/60 text-zinc-300';
+    if (!this.userInfo) return 'll-badge-muted';
+    return this.userInfo.isGmailBound ? 'll-badge-success' : 'll-badge-muted';
   }
 
   emailStatusLabel(): string {
@@ -151,9 +149,9 @@ export class SettingsComponent {
   }
 
   emailStatusClass(): string {
-    if (!this.userInfo) return 'border-light_gray/60 text-zinc-300';
+    if (!this.userInfo) return 'll-badge-muted';
     return this.userInfo.isRegisteredUser
-      ? 'border-emerald-500/60 text-emerald-300'
-      : 'border-amber-500/60 text-amber-300';
+      ? 'll-badge-success'
+      : 'll-badge-warning';
   }
 }

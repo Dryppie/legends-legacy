@@ -111,16 +111,14 @@ export class GuildBuildingsComponent {
   }
 
   selectedStatusClass(): string {
-    if (!this.isLeader()) return 'border-light_gray/50 text-zinc-400';
-    return this.canUpgrade()
-      ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-200'
-      : 'border-primary/40 bg-primary/10 text-primary';
+    if (!this.isLeader()) return 'll-badge-muted';
+    return this.canUpgrade() ? 'll-badge-success' : 'll-badge-accent';
   }
 
   resourceRequirementClass(type: string, required: number): string {
     return this.getGuildResourceAmount(type) >= required
-      ? 'text-emerald-200'
-      : 'text-red-200';
+      ? 'll-resource-ready'
+      : 'll-resource-missing';
   }
 
   isSelected(upgrade: BuildingUpgradeView): boolean {

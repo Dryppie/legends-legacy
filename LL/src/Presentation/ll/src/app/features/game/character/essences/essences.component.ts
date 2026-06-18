@@ -185,9 +185,7 @@ export class EssencesComponent implements OnInit {
   }
 
   public eligibilityClass(canPerform: boolean): string {
-    return canPerform
-      ? 'border-primary/40 bg-primary/10 text-primary'
-      : 'border-light_gray/50 bg-black/20 text-zinc-400';
+    return canPerform ? 'll-badge-accent' : 'll-badge-muted';
   }
 
   public draftSlotsFilled(): number {

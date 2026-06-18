@@ -28,11 +28,11 @@ export class ColosseumResultComponent {
   get colorClasses(): string {
     switch (this.outcome) {
       case 'Victory':
-        return 'text-primary border-primary/30';
+        return 'll-badge-success';
       case 'Defeat':
-        return 'text-rose-500 border-rose-500/30';
+        return 'll-badge-danger';
       case 'Draw':
-        return 'text-light_gray border-light_gray';
+        return 'll-badge-warning';
       default:
         return '';
     }

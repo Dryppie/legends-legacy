@@ -76,7 +76,7 @@
         </div>
 
         <ng-container *ngIf="isFailedRun(); else nonFailedRunPanel">
-          <div class="ll-icon-orb ll-card-danger mx-auto text-red-200">x</div>
+          <div class="ll-icon-orb ll-card-danger ll-text-danger mx-auto">x</div>
 
           <div class="ll-eyebrow">Dungeon Failed</div>
 
@@ -132,7 +132,7 @@
                 *ngIf="failedRoom() as room"
                 class="ll-list-row ll-list-row-danger"
               >
-                <span class="flex items-center text-red-100">
+                <span class="ll-text-danger flex items-center">
                   <span class="min-w-3">{{ room.index + 1 }}</span>
                   <app-dungeon-room-icon
                     class="mx-2 text-base"
@@ -140,7 +140,7 @@
                   ></app-dungeon-room-icon>
                   {{ getRoomTypeLabel(room.type) }}
                 </span>
-                <span class="text-xs text-red-200">Failed here</span>
+                <span class="ll-text-danger text-xs">Failed here</span>
               </div>
             </div>
 
