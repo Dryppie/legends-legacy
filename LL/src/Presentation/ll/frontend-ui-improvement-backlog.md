@@ -28,8 +28,10 @@ These should come next because they affect many pages at once.
    - Why it matters: many migrated pages still inherit older visual patterns through these shared components.
 
 4. **Modal, popup, and toast system**
-   - Remaining files: `src/app/shared/components/modal-container/modal-container.component.html`, `src/app/shared/components/modal-container/*`, `src/app/shared/components/app-update-popup/app-update-popup.component.html`, `src/app/shared/components/session-summary-popup/session-summary-popup.component.html`, `src/app/shared/components/custom-components/colosseum-result/colosseum-result.component.html`, `src/app/shared/components/toast/toast.component.html`.
-   - Missing work: route popups through `ll-modal-backdrop`, `ll-modal-panel`, shared state classes, consistent close/action buttons, and consistent toast styling.
+
+   - Status: first pass completed. Shared modal container, modal child panels, app update popup, session summary popups, colosseum result, and toast now use shared modal/panel/button/state primitives.
+   - Remaining files: `src/app/shared/components/modal-container/modal-container.component.html`, `src/app/shared/components/modal-container/*`, `src/app/shared/components/app-update-popup/app-update-popup.component.html`, `src/app/shared/components/session-summary-popup/session-summary-popup.component.html`, `src/app/shared/components/colosseum/colosseum-result/colosseum-result.component.html`, `src/app/shared/components/toast/toast.component.html`.
+   - Remaining work: visual QA overlay stacking, modal max-height behavior, and focus handling/trapping for keyboard users.
    - Why it matters: overlays are currently one of the fastest ways to see old and new UI styles side by side.
 
 ## Priority 2: Feature Pages
@@ -38,8 +40,9 @@ These are the highest-value remaining page-level migrations.
 
 1. **Professions, Crafting, and Tempering**
 
-   - Remaining files: `src/app/features/game/professions/crafting/regular-crafting/regular-crafting.component.html`, `src/app/features/game/professions/tempering/tempering.component.html`, plus shared profession components.
-   - Missing work: recipe cards, queues, progress bars, filters, selected-item panels, material rows, and crafting actions need shared panels, inputs, buttons, badges, and state classes.
+   - Status: first pass completed. Crafting and Tempering item detail panels, recipe filters, level inputs, recipe cards, tempering queue cards, progress bars, action buttons, and empty states now use shared UI primitives.
+   - Remaining files: `src/app/features/game/professions/crafting/regular-crafting/regular-crafting.component.html`, `src/app/features/game/professions/crafting/tempering/tempering.component.html`, plus shared profession components.
+   - Remaining work: visual QA the dense mobile layouts and continue into any shared profession header/queue components if they receive more screens.
    - Why it matters: these screens have a lot of dense operational UI and still carry many hardcoded borders, backgrounds, and text colors.
 
 2. **Dungeon list, dungeon records, and dungeon cards**
