@@ -2,12 +2,10 @@
   *ngIf="character() as character"
   class="flex h-full w-full flex-col gap-2 pt-4 text-white"
 >
-  <div
-    class="flex justify-between gap-4 rounded-lg border border-light_gray bg-black/20 p-4"
-  >
+  <div class="ll-panel flex justify-between gap-4 p-4">
     <div>
-      <h2 class="text-primary">Guild Actions</h2>
-      <p class="mt-1 text-sm text-zinc-400">
+      <h2 class="ll-heading">Guild Actions</h2>
+      <p class="ll-copy mt-1">
         Invite new members, review applications, or manage your own membership.
       </p>
     </div>
@@ -36,7 +34,7 @@
   </div>
   <div class="flex h-full flex-col overflow-hidden">
     <div
-      class="grid grid-cols-[minmax(0,1fr)_5rem_8rem_8rem] gap-2 border-b border-light_gray p-2 text-sm text-zinc-400"
+      class="ll-table-header grid grid-cols-[minmax(0,1fr)_5rem_8rem_8rem] gap-2"
     >
       <div>Member</div>
       <div>Level</div>
@@ -45,7 +43,7 @@
     </div>
     <div class="overflow-y-auto">
       <div
-        class="grid grid-cols-[minmax(0,1fr)_5rem_8rem_8rem] items-center gap-2 border-b border-light_gray p-2 text-white"
+        class="ll-table-row grid grid-cols-[minmax(0,1fr)_5rem_8rem_8rem] items-center gap-2"
         *ngFor="let member of guildMembers"
         [ngClass]="{
           'bg-zinc-300/10 text-primary':
@@ -79,21 +77,14 @@
   </div>
 </div>
 
-<div
-  *ngIf="showModal"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-  (click)="closeModal()"
->
-  <div
-    class="w-96 rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
-    (click)="$event.stopPropagation()"
-  >
-    <h3 class="mb-4 text-primary">Invite Character</h3>
+<div *ngIf="showModal" class="ll-modal-backdrop" (click)="closeModal()">
+  <div class="ll-modal-panel" (click)="$event.stopPropagation()">
+    <h3 class="ll-heading mb-4">Invite Character</h3>
     <input
       type="text"
       [(ngModel)]="inviteName"
       placeholder="Enter character name"
-      class="mb-4 w-full rounded border border-light_gray bg-texture p-2 text-white"
+      class="ll-input mb-4 w-full"
     />
     <div class="flex justify-end gap-2">
       <app-regular-button (pressed)="closeModal()"> Cancel </app-regular-button>
@@ -106,18 +97,18 @@
 
 <div
   *ngIf="showApplicationsModal"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 text-white"
+  class="ll-modal-backdrop text-white"
   (click)="closeApplicationsModal()"
 >
   <div
-    class="flex max-h-full w-96 flex-col rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
+    class="ll-modal-panel flex max-h-full flex-col"
     (click)="$event.stopPropagation()"
   >
-    <h3 class="mb-4 text-primary">Applications</h3>
+    <h3 class="ll-heading mb-4">Applications</h3>
     <div class="flex h-full flex-col overflow-y-auto">
       <ng-container *ngIf="guild.invites.length > 0; else noApplications">
         <div
-          class="flex items-center justify-between gap-2 border-t border-light_gray p-2 hover:bg-zinc-300/10"
+          class="ll-table-row flex items-center justify-between gap-2"
           *ngFor="let application of guild.invites"
         >
           <div class="truncate">{{ application.characterName }}</div>
@@ -139,7 +130,7 @@
         </div>
       </ng-container>
       <ng-template #noApplications>
-        <p class="text-center italic text-neutral-400">No applications.</p>
+        <p class="ll-empty-state">No applications.</p>
       </ng-template>
     </div>
   </div>
@@ -147,14 +138,11 @@
 
 <div
   *ngIf="showConfirmModal"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+  class="ll-modal-backdrop"
   (click)="closeConfirmModal()"
 >
-  <div
-    class="w-96 rounded-lg border border-light_gray bg-texture p-4 shadow-lg"
-    (click)="$event.stopPropagation()"
-  >
-    <h3 class="mb-4 text-primary">
+  <div class="ll-modal-panel" (click)="$event.stopPropagation()">
+    <h3 class="ll-heading mb-4">
       {{ confirmAction === "disband" ? "Disband Guild?" : "Leave Guild?" }}
     </h3>
     <p class="mb-6 text-zinc-400">

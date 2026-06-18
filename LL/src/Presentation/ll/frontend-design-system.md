@@ -31,8 +31,13 @@ Current shared classes:
 - `ll-stat-card`, `ll-stat-label`, `ll-stat-value`: compact metrics.
 - `ll-badge`, `ll-badge-accent`, `ll-badge-danger`: status pills and chips.
 - `ll-button`: base button affordance used by native buttons and reusable button components.
+- `ll-input`, `ll-select`: consistent form controls.
+- `ll-toolbar`, `ll-segmented`, `ll-segmented-button`, `ll-segmented-button-active`: filter/action bars and compact mode controls.
 - `ll-state`, `ll-state-muted`, `ll-state-danger`: loading, info, and error messages.
 - `ll-list-row`, `ll-list-row-danger`: repeated summary/reward rows.
+- `ll-table-header`, `ll-table-row`: leaderboard, guild, marketplace, and other data-row layouts.
+- `ll-empty-state`: centered empty/loading placeholders.
+- `ll-modal-backdrop`, `ll-modal-panel`: modal shell styling.
 - `ll-icon-orb`: circular feature icon container.
 - `ll-progress-track`, `ll-progress-bar`: progress display.
 

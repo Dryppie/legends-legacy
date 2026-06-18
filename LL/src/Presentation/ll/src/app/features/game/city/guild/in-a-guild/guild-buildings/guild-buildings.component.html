@@ -8,10 +8,8 @@
   >
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <p class="text-xs font-semibold uppercase text-zinc-400">
-          Selected Building
-        </p>
-        <h2 class="font-semibold text-primary">
+        <p class="ll-eyebrow">Selected Building</p>
+        <h2 class="ll-heading">
           {{ selectedUpgrade.definition.name }}
         </h2>
       </div>
@@ -22,7 +20,7 @@
         {{ selectedStatusLabel() }}
       </span>
     </div>
-    <p>
+    <p class="ll-copy">
       {{ selectedUpgrade.definition.description }}
     </p>
 
@@ -98,13 +96,13 @@
     *ngIf="upgrades() as upgrades"
     class="space-y-3 overflow-y-auto border-zinc-300/30 p-4 lg:order-1 lg:w-1/3 lg:border-r lg:border-t-0"
   >
-    <h2 class="mb-2 text-lg font-semibold text-primary">Buildings</h2>
+    <h2 class="ll-heading mb-2 text-lg">Buildings</h2>
 
     <div *ngFor="let upgrade of upgrades" class="space-y-2">
       <div
-        class="rounded-md border border-zinc-300/30 p-3 hover:cursor-pointer"
+        class="ll-card p-3 hover:cursor-pointer"
         [ngClass]="{
-          'scale-[1.02] border-primary bg-zinc-800/50':
+          'scale-[1.02] border-primary bg-primary/10':
             selected()?.definition?.id === upgrade.definition.id,
           'border-zinc-300/30 hover:bg-zinc-800/30':
             selected()?.definition?.id !== upgrade.definition.id,

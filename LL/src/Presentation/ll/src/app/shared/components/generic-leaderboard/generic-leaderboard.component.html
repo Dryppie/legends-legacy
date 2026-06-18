@@ -1,5 +1,5 @@
 <div
-  class="flex h-full w-full flex-col overflow-hidden rounded-xl p-4 text-white"
+  class="ll-panel flex h-full w-full flex-col overflow-hidden p-4 text-white"
 >
   <!-- Nothing to show -->
   <ng-container *ngIf="data?.length; else noData">
@@ -9,7 +9,7 @@
 
     <!-- === Table header ==================================== -->
     <div
-      class="grid grid-flow-col gap-2 p-2 pt-4"
+      class="ll-table-header mt-4 grid grid-flow-col gap-2"
       [ngClass]="'grid-cols-' + (columns.length + 1)"
     >
       <div>Rank</div>
@@ -24,7 +24,7 @@
     <div class="overflow-y-auto">
       <div
         *ngFor="let row of rows; trackBy: trackByRank"
-        class="grid grid-flow-col items-center gap-2 border-t border-light_gray p-2"
+        class="ll-table-row grid grid-flow-col items-center gap-2"
         [ngClass]="[
           'grid-cols-' + (columns.length + 1),
           row.characterId === highlightId ? 'font-bold text-primary' : '',
@@ -47,6 +47,6 @@
   </ng-container>
 
   <ng-template #noData>
-    <p>No rankings available.</p>
+    <p class="ll-empty-state">No rankings available.</p>
   </ng-template>
 </div>
