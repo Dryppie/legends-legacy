@@ -1,5 +1,5 @@
 <div
-  class="fixed inset-0 z-50 flex max-h-full flex-col items-center justify-center overflow-hidden bg-black/70"
+  class="ll-modal-backdrop z-50 overflow-hidden"
   *ngIf="isModalOpen"
   (click)="onOverlayClick($event)"
 >
@@ -27,7 +27,7 @@
       *ngIf="overviewEquipment"
       [equipmentSlotType]="overviewEquipment"
       (close)="onOverviewEquipmentModalClose()"
-      >>
+    >
     </app-overview-equipment-modal>
   </div>
 </div>

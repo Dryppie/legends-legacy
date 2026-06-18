@@ -733,6 +733,16 @@
     box-shadow: var(--ll-shadow-md);
   }
 
+  .ll-toast {
+    border: 1px solid var(--ll-color-border-strong);
+    border-radius: var(--ll-radius-md);
+    background: #0e0c15;
+    color: var(--ll-color-text);
+    box-shadow:
+      0 14px 32px rgba(0, 0, 0, 0.55),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  }
+
   .ll-icon-orb {
     display: flex;
     width: 5rem;

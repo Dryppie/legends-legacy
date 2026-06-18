@@ -1,39 +1,36 @@
 <ng-container *ngIf="svc.combatSession() as combatSession">
-  <!-- overlay -->
-  <div
-    class="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
-  >
-    <!-- card -->
-    <div
-      class="flex w-full max-w-md flex-col justify-center rounded-xl border border-light_gray bg-texture p-4 text-white shadow-lg"
-    >
-      <h3 class="mb-2 text-center text-primary">
-        You were gone for
-        {{ getDuration(combatSession.from, combatSession.to) }} and performed
-        <h3 class="text-white">
+  <div class="ll-modal-backdrop z-40">
+    <div class="ll-modal-panel max-w-md">
+      <div class="mb-4 text-center">
+        <h3 class="ll-heading text-xl">Combat Summary</h3>
+        <p class="ll-copy mt-1">
+          You were gone for
+          {{ getDuration(combatSession.from, combatSession.to) }} and performed
+        </p>
+        <div class="ll-stat-value mt-2 text-white">
           {{ combatSession.combatSummary.totalBattles }}
-        </h3>
-        battles.
-      </h3>
+        </div>
+        <p class="ll-copy">battles.</p>
+      </div>
 
-      <div class="flex flex-row justify-center gap-3 text-center">
-        <div class="min-w-16 rounded-lg p-1">
+      <div class="grid grid-cols-3 gap-3 text-center">
+        <div class="ll-stat-card min-w-0 p-2">
           <div class="text-emerald-300">
             {{ combatSession.combatSummary.wins }}
           </div>
-          <div class="uppercase text-neutral-400">Wins</div>
+          <div class="ll-stat-label">Wins</div>
         </div>
-        <div class="min-w-16 rounded-lg p-1">
+        <div class="ll-stat-card min-w-0 p-2">
           <div class="text-rose-500">
             {{ combatSession.combatSummary.losses }}
           </div>
-          <div class="uppercase text-neutral-400">Losses</div>
+          <div class="ll-stat-label">Losses</div>
         </div>
-        <div class="min-w-16 rounded-lg p-1">
+        <div class="ll-stat-card min-w-0 p-2">
           <div class="text-amber-400">
             {{ combatSession.combatSummary.totalExperience }}
           </div>
-          <div class="uppercase text-neutral-400">XP</div>
+          <div class="ll-stat-label">XP</div>
         </div>
       </div>
 
@@ -41,7 +38,7 @@
         class="mt-3 flex flex-col items-center justify-center gap-2 text-center"
         *ngIf="combatSession.combatResult.gatheringRewards.length"
       >
-        <div class="uppercase text-neutral-400">Gathering</div>
+        <div class="ll-eyebrow">Gathering</div>
         <div class="flex flex-wrap justify-center gap-2">
           <ng-container
             *ngFor="
@@ -49,20 +46,24 @@
             "
           >
             <div
-              class="flex min-w-16 items-center gap-2 rounded-lg p-1"
+              class="ll-card flex min-w-16 items-center gap-2 px-2 py-1"
               *ngFor="let loot of gathering.itemsGained"
             >
               <div class="text-emerald-300">
-                {{ loot.itemInstance.displayName || loot.itemInstance.itemBase.name }}
+                {{
+                  loot.itemInstance.displayName ||
+                    loot.itemInstance.itemBase.name
+                }}
               </div>
-              <div class="text-neutral-400">x{{ loot.quantity }}</div>
+              <div class="text-secondary">x{{ loot.quantity }}</div>
             </div>
           </ng-container>
         </div>
       </div>
 
       <button
-        class="mt-2 w-full rounded-md py-2 font-medium"
+        type="button"
+        class="ll-button mt-4 w-full"
         (click)="svc.dismiss()"
       >
         Dismiss
@@ -71,33 +72,30 @@
   </div>
 </ng-container>
 <ng-container *ngIf="svc.temperingSession() as temperingSession">
-  <!-- overlay -->
-  <div
-    class="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
-  >
-    <!-- card -->
-    <div
-      class="flex w-full max-w-md flex-col justify-center rounded-xl border border-light_gray bg-texture p-4 text-white shadow-lg"
-    >
-      <h3 class="mb-2 text-center text-primary">
-        You were gone for
-        {{ getDuration(temperingSession.from, temperingSession.to) }} and
-        performed
-        <h3 class="text-white">
+  <div class="ll-modal-backdrop z-40">
+    <div class="ll-modal-panel max-w-md">
+      <div class="mb-4 text-center">
+        <h3 class="ll-heading text-xl">Tempering Summary</h3>
+        <p class="ll-copy mt-1">
+          You were gone for
+          {{ getDuration(temperingSession.from, temperingSession.to) }} and
+          performed
+        </p>
+        <div class="ll-stat-value mt-2 text-white">
           {{ temperingSession.temperingSummary.totalActions }}
-        </h3>
-        tempering actions.
-      </h3>
+        </div>
+        <p class="ll-copy">tempering actions.</p>
+      </div>
 
-      <div class="flex flex-row justify-center gap-3 text-center">
-        <div class="min-w-16 rounded-lg p-1">
+      <div class="grid grid-cols-3 gap-3 text-center">
+        <div class="ll-stat-card min-w-0 p-2">
           <div class="text-emerald-300">
             {{ temperingSession.temperingSummary.totalItemsCrafted }}
           </div>
-          <div class="uppercase text-neutral-400">items tempered</div>
+          <div class="ll-stat-label">Items</div>
         </div>
         <div
-          class="min-w-16 rounded-lg p-1"
+          class="ll-stat-card min-w-0 p-2"
           *ngIf="
             temperingSession.temperingSummary.masterpieces > 0 as masterpieces
           "
@@ -105,18 +103,19 @@
           <div class="text-rose-500">
             {{ masterpieces }}
           </div>
-          <div class="uppercase text-neutral-400">Masterpieces</div>
+          <div class="ll-stat-label">Masterpieces</div>
         </div>
-        <div class="min-w-16 rounded-lg p-1">
+        <div class="ll-stat-card min-w-0 p-2">
           <div class="text-amber-400">
             {{ temperingSession.temperingSummary.totalExperience }}
           </div>
-          <div class="uppercase text-neutral-400">Total XP</div>
+          <div class="ll-stat-label">Total XP</div>
         </div>
       </div>
 
       <button
-        class="mt-2 w-full rounded-md py-2 font-medium"
+        type="button"
+        class="ll-button mt-4 w-full"
         (click)="svc.dismiss()"
       >
         Dismiss
