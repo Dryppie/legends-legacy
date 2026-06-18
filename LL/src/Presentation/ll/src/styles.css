@@ -291,14 +291,20 @@
 
   .ll-floating-panel-trigger {
     display: flex;
-    height: 3.5rem;
-    width: 3.5rem;
+    min-height: 3rem;
+    min-width: 7.5rem;
     align-items: center;
     justify-content: center;
+    gap: var(--ll-space-2);
     border: 1px solid var(--ll-color-border-strong);
-    border-radius: var(--ll-radius-full);
-    background: var(--ll-color-surface);
+    border-radius: var(--ll-radius-md);
+    background: var(--ll-color-surface-strong);
+    padding: var(--ll-space-2) var(--ll-space-3);
     color: var(--ll-color-primary);
+    font-family: var(--ll-font-display);
+    font-size: var(--ll-text-sm);
+    font-weight: var(--ll-weight-semibold);
+    line-height: var(--ll-leading-tight);
     box-shadow: var(--ll-shadow-md);
     transition:
       border-color 150ms ease,
@@ -310,6 +316,18 @@
     border-color: var(--ll-color-primary);
     background: var(--ll-color-primary-soft);
     transform: translateY(-1px);
+  }
+
+  .ll-floating-panel-trigger-icon {
+    display: inline-flex;
+    height: 1.75rem;
+    width: 1.75rem;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--ll-color-border);
+    border-radius: var(--ll-radius-full);
+    background: rgba(0, 0, 0, 0.32);
   }
 
   .ll-page-header {
