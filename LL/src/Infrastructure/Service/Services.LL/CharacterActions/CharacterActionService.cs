@@ -61,8 +61,8 @@ public class CharacterActionService : ICharacterActionService
 
         if (characterAction.ActionDetails == null) return characterAction;
 
-        var isCapped = characterAction.UpdatedAt.AddHours(16) < now;
-        if (isCapped) now = characterAction.UpdatedAt.AddHours(16);
+        var isCapped = characterAction.UpdatedAt.AddHours(24) < now;
+        if (isCapped) now = characterAction.UpdatedAt.AddHours(24);
 
         switch (characterAction.CharacterActionType)
         {

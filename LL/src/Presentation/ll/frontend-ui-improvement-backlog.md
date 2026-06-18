@@ -61,19 +61,22 @@ These are the highest-value remaining page-level migrations.
 
 4. **World and region shell**
 
+   - Status: first pass completed. Region header, tab content shell, empty area state, and empty raid state now use shared primitives.
    - Remaining files: `src/app/features/game/world/region/region.component.html`, `src/app/features/game/world/region/raids/raids.component.html`.
-   - Missing work: region page header, tab container spacing, empty raid state, and area list shell.
+   - Remaining work: visual QA area-card wrapping and tab height behavior across mobile/tablet/desktop widths.
    - Why it matters: this screen hosts areas, dungeons, and raids, so it should anchor those child views consistently.
 
 5. **Guild rankings**
 
+   - Status: first pass completed. Guild leaderboard header, summary stats, table header, rows, horizontal overflow behavior, and empty state now use shared primitives.
    - Remaining file: `src/app/features/game/city/guild/in-a-guild/guild-rankings/guild-rankings.component.html`.
-   - Missing work: migrate the local leaderboard table to `ll-table-header`, `ll-table-row`, and `ll-empty-state`.
+   - Remaining work: visual QA compact/mobile widths and confirm the ranking sort metric is still the intended design signal.
    - Why it matters: the generic leaderboard was migrated, but this guild-specific table still uses older styling.
 
 6. **Placeholder pages**
+   - Status: first pass completed. Placeholder routes now render route-safe shared panels and empty states instead of default Angular placeholder text.
    - Remaining files: `src/app/features/game/character/equipment-view/equipment-view.component.html`, `src/app/features/game/city/colosseum/champions-market/champions-market.component.html`, `src/app/features/game/city/colosseum/tournament-grounds/tournament-grounds.component.html`.
-   - Missing work: replace placeholder text with real empty-state shells or route-safe coming-soon panels.
+   - Remaining work: replace these route-safe states with real feature surfaces when the corresponding gameplay systems are designed.
    - Why it matters: placeholder text breaks the polished app feel immediately if a user reaches those routes.
 
 ## Priority 3: Design Foundation Gaps
