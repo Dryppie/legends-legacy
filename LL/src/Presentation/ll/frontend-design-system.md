@@ -24,6 +24,11 @@ Reusable UI classes live in the `@layer components` section of `src/styles.css`.
 Current shared classes:
 
 - `ll-page-stack`: full-height vertical game page layout.
+- `ll-app-frame`, `ll-game-surface`: dashboard-level app background and main content frame.
+- `ll-sidebar-shell`, `ll-sidebar-panel`, `ll-sidebar-nav-item`, `ll-sidebar-nav-item-active`: dashboard sidebar surfaces and navigation rows.
+- `ll-mobile-nav`, `ll-mobile-nav-button`, `ll-top-nav-button`: mobile bottom navigation and desktop top navigation affordances.
+- `ll-currency-pill`: compact Cinders/Soulstones currency display button.
+- `ll-screen-overlay`, `ll-floating-panel-trigger`: reusable shell overlays and floating panel toggles.
 - `ll-page-header`, `ll-header-row`: page-level title/summary area.
 - `ll-eyebrow`, `ll-heading`, `ll-copy`: consistent hierarchy and text color.
 - `ll-panel`, `ll-panel-strong`: large framed surfaces.

@@ -1,12 +1,6 @@
 <div
-  class="group relative flex min-h-14 items-center justify-start border-l-2 bg-cover bg-center px-4 py-2 transition-colors hover:cursor-pointer hover:bg-zinc-300/5 sm:h-[52px] sm:px-3"
-  [class.border-transparent]="!isActive"
-  [class.border-primary]="isActive"
-  [style.background-image]="
-    isActive
-      ? 'linear-gradient(to bottom, #00000095 50%, #1f150c95), url(core/Light.svg)'
-      : 'none'
-  "
+  class="ll-sidebar-nav-item group relative"
+  [class.ll-sidebar-nav-item-active]="isActive"
 >
   <app-notification-indicator
     class="absolute right-3 top-2"

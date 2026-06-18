@@ -1,16 +1,11 @@
-<div
-  class="flex h-dvh min-h-0 justify-center overflow-hidden bg-cover bg-center"
-  style="
-    background-image: url(&quot;backgrounds/optimized/background.webp&quot;);
-  "
->
+<div class="ll-app-frame">
   <div class="flex h-full min-h-0 w-full flex-auto flex-col">
     <div
       class="flex min-h-0 flex-1 flex-col overflow-hidden sm:order-2 sm:flex-row sm:gap-4"
     >
       <div
         *ngIf="isSidebarOpen && isScreenSmall"
-        class="fixed inset-0 z-40 bg-black/60 sm:hidden"
+        class="ll-screen-overlay z-40 sm:hidden"
         (click)="closeSidebar()"
       ></div>
 
@@ -28,10 +23,8 @@
       >
         <div class="relative min-h-0 w-full flex-1 overflow-hidden sm:pr-4">
           <div
-            class="border-gradient absolute inset-0 flex w-full items-center rounded-b-none sm:rounded-t-md sm:pr-4 sm:pt-[1px] sm:opacity-95 xl:pr-0"
-          >
-            <div class="h-full w-full bg-texture sm:rounded-t-md"></div>
-          </div>
+            class="ll-game-surface absolute inset-y-0 left-0 right-0 sm:right-4 xl:right-0"
+          ></div>
           <main
             class="relative flex h-full min-h-0 w-full flex-auto flex-col gap-2 overflow-hidden pt-4 sm:rounded-md sm:pt-6 2xl:rounded-b-none"
           >
@@ -72,29 +65,25 @@
   </div>
 </div>
 
-<div
-  class="fixed bottom-4 right-6 z-40 hidden h-14 w-14 items-center justify-center rounded-full bg-zinc-300/30 sm:flex xl:hidden"
+<button
+  type="button"
+  class="ll-floating-panel-trigger fixed bottom-4 right-6 z-40 hidden sm:flex xl:hidden"
+  (click)="toggleChat()"
+  aria-label="Toggle chat"
 >
-  <div
-    (click)="toggleChat()"
-    class="border-gradient relative flex h-full cursor-pointer items-center rounded-md p-[1px]"
-  >
-    <div
-      class="flex h-full w-28 items-center justify-between rounded-tl-md bg-texture px-4"
-    >
-      <div class="text-primary">CHAT</div>
-      <img src="icons/ActivePlus.svg" />
-    </div>
-  </div>
-</div>
+  <span class="text-xs font-semibold uppercase text-primary">Chat</span>
+  <img src="icons/ActivePlus.svg" class="ml-2 h-4 w-4" alt="" />
+</button>
 
 <div
   *ngIf="isFloatingChatOpen && !isScreenLarge"
   class="fixed inset-0 z-50 flex justify-end xl:hidden"
 >
-  <div class="absolute inset-0 bg-black/60" (click)="toggleChat()"></div>
+  <div class="ll-screen-overlay absolute inset-0" (click)="toggleChat()"></div>
 
-  <div class="animate-slide-in relative h-full w-full max-w-full sm:w-96">
+  <div
+    class="animate-slide-in ll-panel-strong relative h-full w-full max-w-full rounded-none sm:w-96"
+  >
     <app-chat class="block h-full w-full" (close)="toggleChat()"></app-chat>
   </div>
 </div>
