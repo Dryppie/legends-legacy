@@ -80,12 +80,15 @@
 <div *ngIf="showModal" class="ll-modal-backdrop" (click)="closeModal()">
   <div class="ll-modal-panel" (click)="$event.stopPropagation()">
     <h3 class="ll-heading mb-4">Invite Character</h3>
-    <input
-      type="text"
-      [(ngModel)]="inviteName"
-      placeholder="Enter character name"
-      class="ll-input mb-4 w-full"
-    />
+    <label class="ll-field mb-4">
+      <span class="ll-label">Character name</span>
+      <input
+        type="text"
+        [(ngModel)]="inviteName"
+        placeholder="Enter character name"
+        class="ll-input w-full"
+      />
+    </label>
     <div class="flex justify-end gap-2">
       <app-regular-button (pressed)="closeModal()"> Cancel </app-regular-button>
       <app-regular-button (pressed)="invite()">
@@ -145,7 +148,7 @@
     <h3 class="ll-heading mb-4">
       {{ confirmAction === "disband" ? "Disband Guild?" : "Leave Guild?" }}
     </h3>
-    <p class="mb-6 text-zinc-400">
+    <p class="ll-copy mb-6">
       Are you sure you want to
       {{
         confirmAction === "disband" ? "disband your guild" : "leave the guild"

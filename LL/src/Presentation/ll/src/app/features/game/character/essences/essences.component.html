@@ -47,7 +47,7 @@
     class="grid min-h-0 flex-1 gap-4 overflow-y-auto xl:grid-cols-[360px_minmax(0,1fr)] xl:overflow-hidden"
   >
     <section
-      class="ll-panel flex h-[50vh] min-h-0 flex-col overflow-hidden p-3"
+      class="ll-panel flex h-[50vh] min-h-0 flex-col overflow-hidden p-3 xl:h-full"
     >
       <div
         class="mb-3 flex items-center justify-between border-b border-light_gray/70 pb-3"
@@ -425,10 +425,10 @@
           </button>
         </div>
 
-        <label class="mb-3 block text-xs uppercase text-zinc-400">
-          Name
+        <label class="ll-field mb-3">
+          <span class="ll-label">Name</span>
           <input
-            class="ll-input mt-1 w-full px-2 py-1.5"
+            class="ll-input ll-input-compact w-full"
             [ngModel]="essenceState.draftLoadoutName()"
             (ngModelChange)="essenceState.setDraftLoadoutName($event)"
           />
@@ -446,12 +446,12 @@
 
         <div class="grid gap-2">
           <label
-            class="block text-xs text-zinc-400"
+            class="ll-field"
             *ngFor="let slotIndex of essenceState.slotIndexes()"
           >
-            Slot {{ slotIndex + 1 }}
+            <span class="ll-label">Slot {{ slotIndex + 1 }}</span>
             <app-dropdown
-              class="mt-1 block w-full"
+              class="block w-full"
               label="Empty"
               [value]="essenceState.draftSlots()[slotIndex]"
               [options]="draftSlotDropdownOptions(slotIndex)"

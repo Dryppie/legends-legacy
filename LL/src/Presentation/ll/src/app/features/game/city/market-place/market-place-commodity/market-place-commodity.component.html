@@ -12,23 +12,23 @@
 
           <div class="flex flex-wrap items-end gap-3">
             <div class="flex flex-wrap items-end gap-3">
-              <label class="flex flex-col gap-1">
-                Quantity
+              <label class="ll-field">
+                <span class="ll-label">Quantity</span>
                 <input
                   type="number"
                   min="1"
                   [formControl]="quantityCtrl"
-                  class="ll-input no-spinner h-8 w-32 px-2 text-right"
+                  class="ll-input ll-input-compact no-spinner w-32 text-right"
                 />
               </label>
 
-              <label class="flex flex-col gap-1">
-                Unit price
+              <label class="ll-field">
+                <span class="ll-label">Unit price</span>
                 <input
                   type="number"
                   min="1"
                   [formControl]="unitPriceCtrl"
-                  class="ll-input no-spinner h-8 w-32 px-2 text-right"
+                  class="ll-input ll-input-compact no-spinner w-32 text-right"
                 />
               </label>
             </div>
@@ -47,7 +47,7 @@
           </div>
         </div>
 
-        <div class="text-sm text-zinc-400">
+        <div class="ll-helper">
           Total:
           <span class="text-primary">
             {{

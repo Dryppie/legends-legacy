@@ -90,12 +90,15 @@
   <div *ngIf="showModal()" class="ll-modal-backdrop" (click)="closeModal()">
     <div class="ll-modal-panel" (click)="$event.stopPropagation()">
       <h3 class="ll-heading mb-4">Create Guild</h3>
-      <input
-        type="text"
-        [(ngModel)]="guildName"
-        placeholder="Enter guild name"
-        class="ll-input mb-4 w-full"
-      />
+      <label class="ll-field mb-4">
+        <span class="ll-label">Guild name</span>
+        <input
+          type="text"
+          [(ngModel)]="guildName"
+          placeholder="Enter guild name"
+          class="ll-input w-full"
+        />
+      </label>
       <div class="flex justify-end gap-2">
         <button class="ll-button" (click)="closeModal()">Cancel</button>
         <button class="ll-button" (click)="create()">Confirm</button>

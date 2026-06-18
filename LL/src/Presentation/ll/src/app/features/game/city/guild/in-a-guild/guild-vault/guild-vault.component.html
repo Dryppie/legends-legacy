@@ -40,21 +40,22 @@
           *ngFor="let type of allResourceTypes"
           class="ll-card flex items-center justify-between gap-2 p-2"
         >
-          <label class="w-28 text-primary">
+          <label class="ll-label w-28 text-primary">
             {{ type | humanize }}
           </label>
           <div class="flex items-center gap-1">
-            <label
+            <span
+              class="ll-helper"
               [ngClass]="{
                 'text-red-200': donationExceedsAvailable(type),
-                'text-zinc-400': !donationExceedsAvailable(type),
+                'text-secondary': !donationExceedsAvailable(type),
               }"
             >
               {{ formatNumber(availableAmounts[type]) }} /
-            </label>
+            </span>
             <input
               type="text"
-              class="ll-input no-spinner w-28 px-2 py-1"
+              class="ll-input ll-input-compact no-spinner w-28"
               placeholder="0"
               min="0"
               [value]="formatNumber(donationForm[type])"

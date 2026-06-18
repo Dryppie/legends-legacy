@@ -15,15 +15,11 @@
 
     <div class="flex flex-col gap-4">
       <div class="grid grid-cols-2 gap-2">
-        <label
-          *ngFor="let eventType of eventTypes"
-          class="ll-card flex items-center gap-3 px-3 py-2"
-        >
+        <label *ngFor="let eventType of eventTypes" class="ll-checkbox">
           <input
             type="checkbox"
             [checked]="selectedEventTypes.includes(eventType)"
             (change)="onToggleEventType(eventType, $event)"
-            class="form-checkbox h-4 w-4 accent-primary transition duration-150 ease-in-out"
           />
           <span>{{ eventType }}</span>
         </label>

@@ -90,8 +90,9 @@ These are not tied to one page, but they will reduce repetition and make future 
 
 2. **Form field system**
 
-   - Missing classes or components: label, helper text, validation text, input group, checkbox/toggle styling, number input, and compact search fields.
-   - Current state: `ll-input` and `ll-select` exist, but field composition is still page-specific.
+   - Status: first pass completed. Shared field, row, label, helper, validation, input group, compact input, search input, and checkbox classes now exist, with representative Marketplace, Guild, Settings, Essences, Character search, and combat filter forms migrated.
+   - Remaining work: continue migrating public auth forms and any newly discovered admin/dashboard form controls, then consider Angular wrapper components if field composition keeps repeating.
+   - Current state: `ll-input` and `ll-select` now have shared composition classes around them, but not every form in the app has been migrated yet.
 
 3. **Rarity, quality, and status tokens**
 

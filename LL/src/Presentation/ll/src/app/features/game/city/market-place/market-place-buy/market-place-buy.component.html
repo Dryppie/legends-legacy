@@ -14,7 +14,7 @@
         type="search"
         [formControl]="searchCtrl"
         placeholder="Search items..."
-        class="ll-input h-8 min-w-40 px-2 text-xs"
+        class="ll-input ll-input-compact ll-search-input"
       />
 
       <app-dropdown
@@ -125,16 +125,14 @@
       </ng-container>
 
       <div *ngIf="sel.quantity > 1" class="flex items-center gap-2">
-        <label for="buyQty" class="whitespace-nowrap text-sm text-neutral-300"
-          >Quantity</label
-        >
+        <label for="buyQty" class="ll-label whitespace-nowrap">Quantity</label>
         <input
           id="buyQty"
           type="number"
           min="1"
           [max]="maxQuantity()"
           [formControl]="qtyCtrl"
-          class="ll-input no-spinner h-8 w-24 px-2 text-right"
+          class="ll-input ll-input-compact no-spinner w-24 text-right"
         />
       </div>
 

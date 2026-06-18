@@ -242,11 +242,14 @@
     <h2 class="ll-heading mt-1 text-xl">Edit Name</h2>
     <p class="ll-copy mt-2">You only have one edit.</p>
 
-    <input
-      type="text"
-      [(ngModel)]="newCharacterName"
-      class="ll-input mt-4 w-full"
-    />
+    <label class="ll-field mt-4">
+      <span class="ll-label">New character name</span>
+      <input
+        type="text"
+        [(ngModel)]="newCharacterName"
+        class="ll-input w-full"
+      />
+    </label>
 
     <div class="mt-4 flex justify-end gap-2">
       <app-regular-button (pressed)="closeNameModal()">
