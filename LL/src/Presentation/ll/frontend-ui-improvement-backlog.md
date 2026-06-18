@@ -47,14 +47,16 @@ These are the highest-value remaining page-level migrations.
 
 2. **Dungeon list, dungeon records, and dungeon cards**
 
+   - Status: first pass completed. Dungeon records, leaderboard tabs, tier cards, loading/error states, reward cards, gathering cards, difficulty setup, power checks, entry requirements, and empty states now use shared primitives.
    - Remaining files: `src/app/features/game/world/region/dungeons/dungeons.component.html`, `src/app/shared/components/dungeons/dungeon-card/dungeon-card.component.html`.
-   - Missing work: dungeon tier cards, records tables, loading/error states, info blocks, tab buttons, rewards rows, and modal-like expanded details.
+   - Remaining work: visual QA the image-heavy dungeon card at mobile/tablet/desktop sizes and decide whether the hero-specific overlay/shadow treatment should become its own reusable media-card primitive.
    - Why it matters: the active Dungeon run page now uses the shared language, but the list/entry page still does not.
 
 3. **Combat views and combat area cards**
 
-   - Remaining files: `src/app/shared/components/combat/combat.component.html`, `src/app/shared/components/combat/combat-log/combat-log.component.html`, `src/app/shared/components/combat/combat-stats/combat-stats.component.html`, `src/app/shared/components/combat/combat-card/combat-card.component.html`, `src/app/shared/components/combat-area-card/combat-area-card.component.html`.
-   - Missing work: normalize combat panels, health/resource bars, avatar frames, logs, action states, and region area cards.
+   - Status: first pass completed. Combat queue, combat header, team panels, unit selectors, status badges, current combat summary, entity stats, combat overview rows, health bar shell, and combat area card metadata now use shared primitives.
+   - Remaining files: `src/app/shared/components/combat/combat.component.html`, `src/app/shared/components/combat/combat-log/combat-log.component.html`, `src/app/shared/components/combat/combat-log/combat-stats-card/combat-stats-card.component.html`, `src/app/shared/components/combat/combat-entity-stats/combat-entity-stats.component.html`, `src/app/shared/components/combat/combat-overview/*`, `src/app/shared/components/combat/health-bar/health-bar.component.html`, `src/app/shared/components/combat/combat-area-card/combat-area-card.component.html`.
+   - Remaining work: visual QA the image-heavy avatar/area cards, then decide whether their gradient image frames should become a reusable media-card primitive alongside dungeon cards.
    - Why it matters: combat is a core repeated experience and has many bespoke visual patterns.
 
 4. **World and region shell**

@@ -159,10 +159,9 @@ export class DungeonCardComponent implements OnChanges {
     const unlocked = this.isDifficultyUnlocked(difficulty);
 
     return {
-      'border-primary bg-primary/90 text-black': selected,
-      'border-white/25 text-zinc-100 hover:border-primary hover:bg-primary/10':
-        !selected && unlocked,
-      'cursor-not-allowed border-white/10 text-zinc-500 opacity-45': !unlocked,
+      'll-card-accent text-primary': selected,
+      'text-white': !selected && unlocked,
+      'cursor-not-allowed opacity-45': !unlocked,
     };
   }
 
@@ -170,9 +169,8 @@ export class DungeonCardComponent implements OnChanges {
     const selected = this.selectedTab() === tab;
 
     return {
-      'border-primary bg-primary/90 text-black': selected,
-      'border-white/15 bg-black/35 text-zinc-300 hover:border-primary/60 hover:text-zinc-100':
-        !selected,
+      'll-segmented-button-active': selected,
+      'text-secondary': !selected,
     };
   }
 
@@ -193,14 +191,12 @@ export class DungeonCardComponent implements OnChanges {
   }
 
   selectedStatusClass(): string {
-    return this.selectedCanEnter()
-      ? 'border-primary/40 bg-primary/10 text-primary'
-      : 'border-red-400/30 bg-red-950/20 text-red-100';
+    return this.selectedCanEnter() ? 'll-badge-accent' : 'll-badge-danger';
   }
 
   checkStatusClass(isReady: boolean): string {
     return isReady
-      ? 'border-primary/30 bg-primary/10 text-primary'
+      ? 'll-badge-accent'
       : 'border-amber-300/30 bg-amber-950/20 text-amber-100';
   }
 
@@ -273,8 +269,8 @@ export class DungeonCardComponent implements OnChanges {
 
   entryRequirementClass(requirement: EntryRequirementPreview): string {
     return requirement.ownedAmount >= requirement.requiredAmount
-      ? 'border-primary/30 bg-primary/10 text-primary'
-      : 'border-red-400/30 bg-red-950/20 text-red-100';
+      ? 'll-card-accent text-primary'
+      : 'll-list-row-danger text-danger';
   }
 
   selectedRewardGroups(): RewardGroup[] {

@@ -375,6 +375,10 @@
     background: var(--ll-color-surface-soft);
   }
 
+  .ll-card-borderless {
+    border: 0px solid var(--ll-color-border);
+  }
+
   .ll-card-accent {
     border-color: var(--ll-color-border-strong);
     background: var(--ll-color-primary-soft);

@@ -1,34 +1,34 @@
-<div
-  class="flex h-full flex-col overflow-hidden rounded-md bg-black/40 p-2 text-white"
->
+<div class="ll-panel flex h-full flex-col overflow-hidden p-3 text-white">
   <div class="flex h-full flex-col gap-2">
     <!-- Player and Enemy team -->
     <div class="grid grid-cols-2 gap-2">
       <div class="flex flex-wrap items-center gap-2">
-        <div
+        <button
+          type="button"
           *ngFor="let entity of playerTeam"
           (click)="selectEntity(entity.id)"
           [ngClass]="{
-            'bg-primary/30 hover:bg-primary/40': selectedEntityId === entity.id,
+            'll-card-accent text-primary': selectedEntityId === entity.id,
           }"
-          class="flex items-center gap-1 rounded border border-zinc-300/30 px-2 py-1 text-sm text-neutral-300 hover:cursor-pointer hover:bg-zinc-300/30"
+          class="ll-button flex items-center gap-1 px-2 py-1 text-sm"
         >
           {{ entity.name }}
-        </div>
+        </button>
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <div
+        <button
+          type="button"
           data-tour="enemy-combat-stats"
           *ngFor="let entity of enemyTeam"
           (click)="selectEntity(entity.id)"
           [ngClass]="{
-            'bg-primary/30 hover:bg-primary/40': selectedEntityId === entity.id,
+            'll-card-danger text-danger': selectedEntityId === entity.id,
           }"
-          class="flex items-center gap-1 rounded border border-zinc-300/30 px-2 py-1 text-sm text-neutral-300 hover:cursor-pointer hover:bg-zinc-300/30"
+          class="ll-button flex items-center gap-1 px-2 py-1 text-sm"
         >
           {{ entity.name }}
-        </div>
+        </button>
       </div>
     </div>
 
@@ -37,56 +37,63 @@
         class="flex flex-col gap-2 overflow-y-auto rounded"
         data-tour="your-combat-stats"
       >
-        <div class="flex flex-wrap gap-2 text-sm text-white">
-          <div class="flex flex-col gap-1">
-            <div class="text-primary">
-              <span>Damage Done:</span>
-              <span class="brightness-150">
-                {{ stats.damageDone | number }}</span
-              >
-            </div>
-            <div class="text-primary">
-              <span>Damage Taken:</span>
-              <span class="brightness-150">
-                {{ stats.damageTaken | number }}</span
-              >
-            </div>
-          </div>
-          <div class="flex flex-col gap-1">
-            <div class="text-primary">
-              <span>Healing Done:</span>
-              <span class="brightness-150">
-                {{ stats.healingDone | number }}</span
-              >
-            </div>
-            <div class="text-primary">
-              <span>Healing Received:</span>
-              <span class="brightness-150">
-                {{ stats.healingReceived | number }}</span
-              >
+        <div class="grid gap-2 text-sm text-white md:grid-cols-3">
+          <div class="ll-card p-3">
+            <div class="ll-stat-label">Damage</div>
+            <div class="mt-2 flex flex-col gap-1 text-primary">
+              <span>
+                Done:
+                <span class="font-semibold text-white">
+                  {{ stats.damageDone | number }}</span
+                >
+              </span>
+              <span>
+                Taken:
+                <span class="font-semibold text-white">
+                  {{ stats.damageTaken | number }}</span
+                >
+              </span>
             </div>
           </div>
-          <div class="flex flex-col gap-1">
-            <div class="text-primary">
-              <span>Health Regenerated:</span>
-              <span class="brightness-150">
+          <div class="ll-card p-3">
+            <div class="ll-stat-label">Healing</div>
+            <div class="mt-2 flex flex-col gap-1 text-primary">
+              <span>
+                Done:
+                <span class="font-semibold text-white">
+                  {{ stats.healingDone | number }}</span
+                >
+              </span>
+              <span>
+                Received:
+                <span class="font-semibold text-white">
+                  {{ stats.healingReceived | number }}</span
+                >
+              </span>
+            </div>
+          </div>
+          <div class="ll-card p-3">
+            <div class="ll-stat-label">Regeneration</div>
+            <div class="mt-2 text-primary">
+              Health:
+              <span class="font-semibold text-white">
                 {{ stats.healthRegenerated | number }}</span
               >
             </div>
           </div>
         </div>
         <div class="text-left text-sm">
-          <div class="grid grid-cols-5 py-1 text-primary">
+          <div class="ll-table-header grid grid-cols-5 rounded-t">
             <div class="col-start-1 col-end-3">Ability</div>
             <div>Uses</div>
             <div>Damage</div>
             <div>Healing</div>
           </div>
-          <div class="rounded border border-primary/30">
+          <div class="ll-card overflow-hidden rounded-t-none">
             <ng-container *ngFor="let ability of stats.abilities">
               <div
                 *ngIf="ability.name"
-                class="grid grid-cols-5 p-1 odd:bg-zinc-300/5"
+                class="ll-table-row grid grid-cols-5 p-1"
               >
                 <div class="col-start-1 col-end-3">{{ ability.name }}</div>
                 <div>{{ ability.uses | number }}</div>
