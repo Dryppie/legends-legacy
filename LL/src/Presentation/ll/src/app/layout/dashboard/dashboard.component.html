@@ -71,19 +71,27 @@
   (click)="toggleChat()"
   aria-label="Toggle chat"
 >
-  <span class="text-xs font-semibold uppercase text-primary">Chat</span>
-  <img src="icons/ActivePlus.svg" class="ml-2 h-4 w-4" alt="" />
+  <span>Chat</span>
+  <span class="ll-floating-panel-trigger-icon" aria-hidden="true">
+    <img src="icons/ActivePlus.svg" class="h-3.5 w-3.5" alt="" />
+  </span>
 </button>
 
 <div
   *ngIf="isFloatingChatOpen && !isScreenLarge"
-  class="fixed inset-0 z-50 flex justify-end xl:hidden"
->
-  <div class="ll-screen-overlay absolute inset-0" (click)="toggleChat()"></div>
+  class="ll-screen-overlay fixed inset-0 z-40 xl:hidden"
+  (click)="toggleChat()"
+></div>
 
-  <div
-    class="animate-slide-in ll-panel-strong relative h-full w-full max-w-full rounded-none sm:w-96"
-  >
+<aside
+  *ngIf="!isScreenLarge"
+  class="fixed inset-y-0 right-0 z-50 h-full w-[min(20rem,85vw)] transform transition-transform duration-200 sm:w-[min(24rem,85vw)] xl:hidden"
+  [class.translate-x-0]="isFloatingChatOpen"
+  [class.translate-x-full]="!isFloatingChatOpen"
+  [attr.aria-hidden]="!isFloatingChatOpen"
+  [attr.inert]="isFloatingChatOpen ? null : ''"
+>
+  <div class="ll-panel-strong relative h-full w-full max-w-full rounded-none">
     <app-chat class="block h-full w-full" (close)="toggleChat()"></app-chat>
   </div>
-</div>
+</aside>

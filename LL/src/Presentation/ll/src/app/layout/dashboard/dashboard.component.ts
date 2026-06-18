@@ -61,6 +61,7 @@ export class DashboardComponent implements OnInit {
 
   checkScreenSize() {
     const nextIsScreenSmall = window.innerWidth < 640;
+    const nextIsScreenLarge = window.innerWidth >= 1280;
 
     if (nextIsScreenSmall && !this.isScreenSmall) {
       this.isSidebarOpen = false;
@@ -71,7 +72,11 @@ export class DashboardComponent implements OnInit {
     }
 
     this.isScreenSmall = nextIsScreenSmall;
-    this.isScreenLarge = window.innerWidth >= 1280;
+    this.isScreenLarge = nextIsScreenLarge;
+
+    if (nextIsScreenLarge) {
+      this.isFloatingChatOpen = false;
+    }
   }
 
   toggleNav() {
