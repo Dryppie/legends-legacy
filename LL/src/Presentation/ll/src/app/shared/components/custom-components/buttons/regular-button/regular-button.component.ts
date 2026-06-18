@@ -33,9 +33,12 @@ export class RegularButtonComponent {
   /** Derive the Tailwind class string based on selected variant & disabled state. */
   get buttonClasses(): string {
     const palette = {
-      primary: 'border-light_gray text-primary hover:bg-zinc-600/30',
-      secondary: 'border-light_gray text-emerald-400 hover:bg-gray-200',
-      danger: 'border-light_gray text-rose-500 hover:bg-zinc-600/30',
+      primary:
+        'border-[var(--ll-color-border)] text-primary hover:text-primary',
+      secondary:
+        'border-[var(--ll-color-border)] text-emerald-300 hover:text-emerald-200',
+      danger:
+        'border-[rgba(255,154,162,0.36)] text-[var(--ll-color-danger)] hover:text-[var(--ll-color-danger)]',
     }[this.variant];
 
     const disabledStyles = 'text-zinc-300 opacity-50';
