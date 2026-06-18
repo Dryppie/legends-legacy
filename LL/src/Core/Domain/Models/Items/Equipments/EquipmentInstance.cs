@@ -21,7 +21,7 @@ public class EquipmentInstance : ItemInstance
     public IReadOnlyCollection<ItemAttributeModifier> BaseModifiers =>
         EquipmentBase?.AttributeModifiers
             .Select(attr => new ItemAttributeModifier(attr.AttributeType, (int)Math.Ceiling(attr.Amount * Boost), attr.ModifierType))
-            .ToList() 
+            .ToList()
         ?? new List<ItemAttributeModifier>(0);
 
 
