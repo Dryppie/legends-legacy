@@ -15,14 +15,16 @@ These should come next because they affect many pages at once.
 
 2. **Item, equipment, and market listing components**
 
-   - Remaining files: `src/app/shared/components/item/item.component.html`, `src/app/shared/components/item/base-item/base-item.component.html`, `src/app/shared/components/equipment/equipment-display/equipment-display.component.html`, `src/app/shared/components/market-place/market-place-inventory-item/market-place-inventory-item.component.html`, `src/app/shared/components/market-place/market-place-listing-item/market-place-listing-item.component.html`.
-   - Missing work: standardize item cards, rarity borders, stat text, stack labels, action buttons, hover states, and empty/disabled states.
+   - Status: first pass completed. Shared item row, icon, chip, tooltip/detail, section, and stat-row classes now cover inventory rows, marketplace listing rows, marketplace inventory rows, base item details, item details, equipment details, and equipment overview rows.
+   - Remaining files: `src/app/shared/components/item/item.component.html`, `src/app/shared/components/base-item/base-item.component.html`, `src/app/shared/components/equipment/equipment-display/equipment-display.component.html`, `src/app/shared/components/market-place/market-place-inventory-item/market-place-inventory-item.component.html`, `src/app/shared/components/market-place/market-place-listing-item/market-place-listing-item.component.html`.
+   - Remaining work: visual QA tooltip density and rarity contrast, then continue into market filters/pages and the equipment modal shells.
    - Why it matters: items appear across inventory, marketplace, crafting, equipment, rewards, and tooltips.
 
 3. **Tabs, filters, and segmented controls**
 
+   - Status: first pass completed. Shared tabs, filter tabs, list filters, selectable list filters, and the Marketplace filter wrapper now use shared segmented, toolbar, button, card, and empty-state primitives.
    - Remaining files: `src/app/shared/components/custom-components/tabs/tabs.component.html`, `src/app/shared/components/custom-components/tabs/filter-tabs/filter-tabs.component.html`, `src/app/shared/components/list-filters/list-filter/list-filter.component.html`, `src/app/shared/components/list-filters/selectable-list-filter/selectable-list-filter.component.html`, `src/app/shared/components/market-place/market-place-filter/market-place-filter.component.html`.
-   - Missing work: make the shared tab/filter components emit the same visual language as `ll-segmented`, `ll-toolbar`, `ll-input`, and `ll-select`.
+   - Remaining work: visual QA pages that consume these shared controls, especially dense mobile tab sets and projected selectable list rows.
    - Why it matters: many migrated pages still inherit older visual patterns through these shared components.
 
 4. **Modal, popup, and toast system**

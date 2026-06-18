@@ -1,16 +1,20 @@
 <div
   *ngIf="panes.length > 1"
-  class="flex justify-around"
+  class="ll-segmented flex w-full flex-wrap"
   data-tour="tabs-navigation"
+  role="tablist"
 >
-  <span
+  <button
+    type="button"
     *ngFor="let pane of panes; let i = index"
-    class="flex-1 border-b border-light_gray py-2 text-center font-semibold text-light_gray hover:cursor-pointer hover:border-primary focus:outline-none"
-    [ngClass]="{ 'border-primary text-primary': activeIndex() === i }"
+    class="ll-segmented-button flex-1"
+    [ngClass]="{ 'll-segmented-button-active': activeIndex() === i }"
+    [attr.aria-selected]="activeIndex() === i"
+    role="tab"
     (click)="select(i)"
   >
     {{ pane.label }}
-  </span>
+  </button>
 </div>
 
 <!-- Active pane outlet -->

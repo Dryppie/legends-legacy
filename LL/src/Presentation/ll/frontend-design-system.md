@@ -40,6 +40,8 @@ Current shared classes:
 - `ll-toolbar`, `ll-segmented`, `ll-segmented-button`, `ll-segmented-button-active`: filter/action bars and compact mode controls.
 - `ll-state`, `ll-state-muted`, `ll-state-danger`: loading, info, and error messages.
 - `ll-list-row`, `ll-list-row-danger`: repeated summary/reward rows.
+- `ll-item-row`, `ll-item-icon`, `ll-item-chip`, `ll-item-chip-accent`: compact item rows, slot icons, quantities, and ownership/status chips.
+- `ll-item-name`, `ll-item-detail`, `ll-item-detail-title`, `ll-item-meta`, `ll-item-description`, `ll-item-detail-section`, `ll-item-stat-row`: item/equipment tooltip and detail layouts.
 - `ll-table-header`, `ll-table-row`: leaderboard, guild, marketplace, and other data-row layouts.
 - `ll-empty-state`: centered empty/loading placeholders.
 - `ll-modal-backdrop`, `ll-modal-panel`: modal shell styling.

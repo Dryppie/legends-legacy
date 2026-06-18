@@ -1,8 +1,10 @@
-<div class="flex w-96 flex-col items-center justify-between rounded-md">
+<div
+  class="ll-card flex w-full max-w-96 flex-col items-center justify-between overflow-hidden"
+>
   <div
     *ngFor="let slot of slots()"
     (click)="handleSlotClick(slot)"
-    class="flex h-16 w-full cursor-pointer items-center px-4 text-white hover:cursor-pointer hover:bg-neutral-600/50"
+    class="ll-item-row h-16 rounded-none border-x-0 border-t-0 px-4"
   >
     <div class="flex min-w-12 items-center gap-2">
       <img
@@ -18,5 +20,6 @@
       *ngIf="slot.equipmentInstance"
       [item]="slot.equipmentInstance"
     ></app-item>
+    <span *ngIf="!slot.equipmentInstance" class="ll-copy text-xs"> Empty </span>
   </div>
 </div>
