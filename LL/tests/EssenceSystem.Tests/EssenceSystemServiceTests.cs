@@ -339,7 +339,7 @@ public sealed class EssenceSystemServiceTests
                 TargetId = "enemy",
                 Source = "effect.poison.dot",
                 StatsSource = "Sneak Attack",
-                EventType = EventType.Damage,
+                EventType = EventType.DamageOverTime,
                 Magnitude = 14
             }
         ]);
@@ -349,6 +349,104 @@ public sealed class EssenceSystemServiceTests
         Assert.Equal("Sneak Attack", ability.Name);
         Assert.Equal(1, ability.Uses);
         Assert.Equal(47, ability.TotalDamage);
+        Assert.Equal(47, player.DamageDone);
+
+        var enemy = stats.Single(x => x.EntityId == "enemy");
+        Assert.Equal(47, enemy.DamageTaken);
+    }
+
+    [Fact]
+    public void Combat_stats_assigns_team_metadata_and_balances_side_totals()
+    {
+        var aggregator = new CombatStatsAggregator();
+
+        var stats = aggregator.Aggregate(
+        [
+            new CombatLogItem
+            {
+                ActorId = "enemy",
+                TargetId = "player",
+                Source = "Claw",
+                EventType = EventType.Damage,
+                Magnitude = 9
+            },
+            new CombatLogItem
+            {
+                ActorId = "enemy:summon:shadow",
+                TargetId = "player",
+                Source = "Shadow Burn",
+                EventType = EventType.DamageOverTime,
+                Magnitude = 5
+            }
+        ],
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["player"] = "Friendly",
+            ["enemy"] = "Hostile",
+            ["enemy:summon:shadow"] = "Hostile"
+        });
+
+        var friendlyDamageTaken = stats
+            .Where(x => x.Team == "Friendly")
+            .Sum(x => x.DamageTaken);
+        var hostileDamageDone = stats
+            .Where(x => x.Team == "Hostile")
+            .Sum(x => x.DamageDone);
+
+        Assert.Equal(14, friendlyDamageTaken);
+        Assert.Equal(friendlyDamageTaken, hostileDamageDone);
+        Assert.Equal("Hostile", stats.Single(x => x.EntityId == "enemy:summon:shadow").Team);
+    }
+
+    [Fact]
+    public void Combat_stats_separates_self_damage_from_opponent_damage()
+    {
+        var aggregator = new CombatStatsAggregator();
+
+        var stats = aggregator.Aggregate(
+        [
+            new CombatLogItem
+            {
+                ActorId = "player",
+                TargetId = "enemy",
+                Source = "Strike",
+                EventType = EventType.Damage,
+                Magnitude = 16
+            },
+            new CombatLogItem
+            {
+                ActorId = "player",
+                TargetId = "player",
+                Source = "Recoil",
+                StatsSource = "Strike",
+                EventType = EventType.Damage,
+                Magnitude = 12
+            },
+            new CombatLogItem
+            {
+                ActorId = "enemy",
+                TargetId = "player",
+                Source = "Bite",
+                EventType = EventType.Damage,
+                Magnitude = 9
+            }
+        ],
+        new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["player"] = "Friendly",
+            ["enemy"] = "Hostile"
+        });
+
+        var player = stats.Single(x => x.EntityId == "player");
+        var enemy = stats.Single(x => x.EntityId == "enemy");
+
+        Assert.Equal(16, player.DamageDone);
+        Assert.Equal(9, player.DamageTaken);
+        Assert.Equal(12, player.SelfDamageDone);
+        Assert.Equal(12, player.SelfDamageTaken);
+        Assert.Equal(player.DamageDone, enemy.DamageTaken);
+        Assert.Equal(enemy.DamageDone, player.DamageTaken);
+        Assert.Equal(12, player.Abilities.Single(x => x.Name == "Strike").SelfDamage);
     }
 
     [Fact]

@@ -5,7 +5,7 @@
       <div class="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          *ngFor="let entity of playerTeam"
+          *ngFor="let entity of playerParticipants"
           (click)="selectEntity(entity.id)"
           [ngClass]="{
             'll-card-accent text-primary': selectedEntityId === entity.id,
@@ -20,7 +20,7 @@
         <button
           type="button"
           data-tour="enemy-combat-stats"
-          *ngFor="let entity of enemyTeam"
+          *ngFor="let entity of enemyParticipants"
           (click)="selectEntity(entity.id)"
           [ngClass]="{
             'll-card-danger text-danger': selectedEntityId === entity.id,
@@ -37,6 +37,7 @@
         class="flex flex-col gap-2 overflow-y-auto rounded"
         data-tour="your-combat-stats"
       >
+        <div class="ll-stat-label">{{ selectedEntityName }}</div>
         <div class="grid gap-2 text-sm text-white md:grid-cols-3">
           <div class="ll-card p-3">
             <div class="ll-stat-label">Damage</div>

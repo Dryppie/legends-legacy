@@ -109,6 +109,37 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Engine_stats_record_actual_health_damage_not_overkill()
+    {
+        var ability = new AbilitySpec
+        {
+            Id = "ability.overkill",
+            Kind = AbilitySpecKind.Active,
+            Name = "Overkill",
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.overkill.damage",
+                    Operation = AbilityEffectOperation.Damage,
+                    BaseValue = 20
+                }
+            ]
+        };
+        var abilities = AbilityCompiler.CompileAbilities([ability]);
+        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, abilities.Values);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, [], maxHealth: 5);
+        var engine = new FastCombatEngine(new Dictionary<string, CompiledStatus>(), new FastCombatEngineOptions(MaxTicks: 1));
+
+        var result = engine.Run([friendly], [hostile]);
+
+        var damageEvent = Assert.Single(result.EventLog, x => x.Source == "effect.overkill.damage" && x.EventType == EventType.Damage);
+        Assert.Equal(5, damageEvent.Magnitude);
+        Assert.Equal(5, result.EntityStats.Single(x => x.EntityId == "friendly").DamageDone);
+        Assert.Equal(5, result.EntityStats.Single(x => x.EntityId == "hostile").DamageTaken);
+    }
+
+    [Fact]
     public void Engine_prefers_taunting_targets_for_basic_attacks()
     {
         var taunt = new StatusSpec
@@ -292,6 +323,67 @@ public sealed class AbilitySystemTests
         Assert.Contains(result.EventLog, x => x.Source == "effect.on.health.changed" && x.EventType == EventType.RestoreBarrier);
         Assert.Contains(result.EventLog, x => x.Source == "effect.on.heal" && x.EventType == EventType.RestoreBarrier);
         Assert.Contains(result.EventLog, x => x.Source == "effect.on.lifesteal" && x.EventType == EventType.RestoreBarrier);
+    }
+
+    [Fact]
+    public void Engine_limits_melee_attacked_passives_to_the_attacked_owner()
+    {
+        var abilities = AbilityCompiler.CompileAbilities(
+            [
+                new AbilitySpec
+                {
+                    Id = "ability.melee.tap",
+                    Kind = AbilitySpecKind.Active,
+                    Name = "Melee Tap",
+                    Effects =
+                    [
+                        new()
+                        {
+                            Id = "effect.melee.tap",
+                            Operation = AbilityEffectOperation.Damage,
+                            Target = AbilityTargetSelector.CurrentTarget,
+                            BaseValue = 1,
+                            AttackType = AttackType.Melee
+                        }
+                    ]
+                },
+                new AbilitySpec
+                {
+                    Id = "ability.hot.aura",
+                    Kind = AbilitySpecKind.Passive,
+                    Name = "Hot Aura",
+                    Triggers = [new() { Event = AbilityTriggerEvent.OnMeleeAttacked }],
+                    Effects =
+                    [
+                        new()
+                        {
+                            Id = "effect.hot_aura.damage",
+                            Operation = AbilityEffectOperation.Damage,
+                            Target = AbilityTargetSelector.EventTarget,
+                            BaseValue = 4,
+                            AttackType = AttackType.None,
+                            DamageType = DamageType.Burn
+                        }
+                    ]
+                }
+            ]);
+        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, abilities.Values);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, [], maxHealth: 200);
+        var engine = new FastCombatEngine(new Dictionary<string, CompiledStatus>(), new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1));
+
+        var result = engine.Run([friendly], [hostile]);
+
+        Assert.DoesNotContain(result.EventLog, x =>
+            x.Source == "effect.hot_aura.damage"
+            && x.TargetId == "friendly");
+        Assert.Contains(result.EventLog, x =>
+            x.Source == "effect.hot_aura.damage"
+            && x.TargetId == "hostile"
+            && x.Magnitude == 4);
+
+        var friendlyStats = result.EntityStats.Single(x => x.EntityId == "friendly");
+        var hotAura = friendlyStats.Abilities.Single(x => x.Name == "Hot Aura");
+        Assert.Equal(4, hotAura.TotalDamage);
     }
 
     [Fact]
@@ -779,44 +871,52 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
-    public void Json_catalog_illusion_fox_foxfire_only_retaliates_from_attacked_combatant_stacks()
+    public void Json_catalog_illusion_fox_foxfire_only_retaliates_when_owner_is_attacked()
     {
         var provider = new JsonAbilityCatalogProvider(
             CreateConfig(),
             FindApiContentRoot(),
             CreateJsonOptions());
         var catalog = provider.GetCatalog();
+        var compiledAbilities = AbilityCompiler.CompileAbilities(
+            [catalog.AbilitiesById["ability.essence.legacy.illusion_fox.foxfire_wisp"]]);
         var compiledStatuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
 
-        var foxOwner = CreateCombatant("fox-owner", CombatTeam.Friendly, []);
+        var foxOwner = CreateCombatant("fox-owner", CombatTeam.Friendly, compiledAbilities.Values);
         var ally = CreateCombatant("ally", CombatTeam.Friendly, []);
         var attacker = CreateCombatant("attacker", CombatTeam.Hostile, []);
-        foxOwner.Statuses.Add(new RuntimeStatus(compiledStatuses["status.foxfire_stack"], foxOwner, foxOwner, 1));
-        var noProxyEngine = new FastCombatEngine(
+        var allyTargetedEngine = new FastCombatEngine(
             compiledStatuses,
-            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1));
+            new FastCombatEngineOptions(MaxTicks: 61, BasicAttackIntervalTicks: 60));
 
-        var noProxyResult = noProxyEngine.Run([ally, foxOwner], [attacker]);
+        var allyTargetedResult = allyTargetedEngine.Run([ally, foxOwner], [attacker]);
 
-        Assert.DoesNotContain(noProxyResult.EventLog, x => x.Source == "effect.foxfire.damage");
+        Assert.Contains(allyTargetedResult.EventLog, x =>
+            x.Source == "status.foxfire_stack"
+            && x.ActorId == "fox-owner"
+            && x.TargetId == "fox-owner"
+            && x.EventType == EventType.StatusEffect);
+        Assert.DoesNotContain(allyTargetedResult.EventLog, x =>
+            x.Source == "status.foxfire_stack"
+            && x.TargetId == "ally");
+        Assert.DoesNotContain(allyTargetedResult.EventLog, x => x.Source == "effect.foxfire.damage");
 
-        foxOwner = CreateCombatant("fox-owner", CombatTeam.Friendly, []);
+        foxOwner = CreateCombatant("fox-owner", CombatTeam.Friendly, compiledAbilities.Values);
         ally = CreateCombatant("ally", CombatTeam.Friendly, []);
         attacker = CreateCombatant("attacker", CombatTeam.Hostile, []);
-        ally.Statuses.Add(new RuntimeStatus(compiledStatuses["status.foxfire_stack"], ally, ally, 1));
-        var defenderStackEngine = new FastCombatEngine(
+        var ownerTargetedEngine = new FastCombatEngine(
             compiledStatuses,
-            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1));
+            new FastCombatEngineOptions(MaxTicks: 61, BasicAttackIntervalTicks: 60));
 
-        var defenderStackResult = defenderStackEngine.Run([ally, foxOwner], [attacker]);
+        var ownerTargetedResult = ownerTargetedEngine.Run([foxOwner, ally], [attacker]);
 
-        Assert.Contains(defenderStackResult.EventLog, x =>
+        Assert.Contains(ownerTargetedResult.EventLog, x =>
             x.Source == "effect.foxfire.damage"
-            && x.ActorId == "ally"
+            && x.ActorId == "fox-owner"
             && x.TargetId == "attacker"
             && x.EventType == EventType.Damage
             && x.Magnitude == 8);
-        Assert.Equal(0, ally.GetStatusStacks("status.foxfire_stack"));
+        Assert.Equal(0, foxOwner.GetStatusStacks("status.foxfire_stack"));
     }
 
     [Fact]
@@ -1123,7 +1223,7 @@ public sealed class AbilitySystemTests
                 (0, "Siphon", EventType.AbilityUse, null, 0),
                 (0, "effect.siphon.damage", EventType.Damage, "front-target", 16),
                 (0, "Ambush Strike", EventType.AbilityUse, null, 0),
-                (0, "effect.ambush.damage", EventType.Damage, "front-target", 25),
+                (0, "effect.ambush.damage", EventType.Damage, "front-target", 24),
                 (0, "effect.ambush.damage", EventType.Death, "front-target", 0),
                 (0, "effect.vile_feast.heal", EventType.Heal, "ghoul", 50)
             },
@@ -1557,7 +1657,7 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
-    public async Task Combat_engine_executor_illusion_fox_passive_retaliates_when_ally_is_attacked()
+    public async Task Combat_engine_executor_illusion_fox_passive_retaliates_when_holder_is_attacked()
     {
         var provider = new JsonAbilityCatalogProvider(
             CreateConfig(),
@@ -1575,16 +1675,16 @@ public sealed class AbilitySystemTests
             1,
             DateTimeOffset.UtcNow,
             [
-                new CombatParticipantSlot("ally-slot", allyCharacter.Id, CombatSide.Friendly),
                 new CombatParticipantSlot("fox-slot", foxCharacter.Id, CombatSide.Friendly),
+                new CombatParticipantSlot("ally-slot", allyCharacter.Id, CombatSide.Friendly),
                 new CombatParticipantSlot("hostile-slot", hostileCharacter.Id, CombatSide.Hostile)
             ],
             new IdleEncounterSourceContext(allyCharacter.Id, new Area(), TimeSpan.FromSeconds(1)));
         var runtime = new CombatEncounterRuntime(
             plan,
             [
-                new CombatRuntimeParticipant(plan.FriendlyParticipants[0], allyCharacter, allyCombatant),
-                new CombatRuntimeParticipant(plan.FriendlyParticipants[1], foxCharacter, foxCombatant)
+                new CombatRuntimeParticipant(plan.FriendlyParticipants[0], foxCharacter, foxCombatant),
+                new CombatRuntimeParticipant(plan.FriendlyParticipants[1], allyCharacter, allyCombatant)
             ],
             [new CombatRuntimeParticipant(plan.HostileParticipants.Single(), hostileCharacter, hostileCombatant)]);
         var executor = new CombatEngineExecutor(provider);
@@ -1599,7 +1699,7 @@ public sealed class AbilitySystemTests
         Assert.Contains(result.EventLog, x =>
             x.Source == "status.foxfire_stack"
             && x.ActorId == "fox-slot"
-            && x.TargetId == "ally-slot"
+            && x.TargetId == "fox-slot"
             && x.EventType == EventType.StatusEffect);
         Assert.Equal(8, foxfire.Magnitude);
         Assert.Contains(result.EventLog, x =>
@@ -1610,7 +1710,7 @@ public sealed class AbilitySystemTests
         Assert.Contains(result.EventLog, x =>
             x.Source == "Basic Attack"
             && x.ActorId == "hostile-slot"
-            && x.TargetId == "ally-slot"
+            && x.TargetId == "fox-slot"
             && x.EventType == EventType.Damage
             && x.Timestamp == foxfire.Timestamp);
     }

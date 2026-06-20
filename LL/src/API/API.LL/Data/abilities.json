@@ -1268,7 +1268,7 @@
     "id": "ability.essence.legacy.illusion_fox.foxfire_wisp",
     "kind": "Passive",
     "name": "Foxfire Wisp",
-    "description": "Periodically grants allies a retaliatory foxfire stack.",
+    "description": "Periodically gains a retaliatory foxfire stack.",
     "owningEssenceId": "essence.legacy.illusion_fox",
     "cooldownTicks": 0,
     "tags": [ "Effect.Ability", "Trigger.OnCombatStart", "Retaliation" ],
@@ -1282,7 +1282,7 @@
       {
         "id": "effect.foxfire.stack",
         "operation": "ApplyStatus",
-        "target": "AllAllies",
+        "target": "Self",
         "statusId": "status.foxfire_stack",
         "baseValue": 1,
         "durationTicks": 6000,

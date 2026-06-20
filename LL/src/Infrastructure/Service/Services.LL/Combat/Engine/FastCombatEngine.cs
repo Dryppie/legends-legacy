@@ -75,12 +75,17 @@ public sealed class FastCombatEngine
             _currentTick++;
         }
 
+        var teamsByEntityId = combatants.ToDictionary(
+            combatant => combatant.Id,
+            combatant => combatant.Team.ToString(),
+            StringComparer.OrdinalIgnoreCase);
+
         return new CombatResult
         {
             EventLog = [.. _log],
             Duration = _currentTick,
             Outcome = DetermineOutcome(combatants),
-            EntityStats = [.. new CombatStatsAggregator().Aggregate(_log)]
+            EntityStats = [.. new CombatStatsAggregator().Aggregate(_log, teamsByEntityId)]
         };
     }
 
@@ -153,6 +158,9 @@ public sealed class FastCombatEngine
                         continue;
                     }
 
+                    if (!IsSourceScopedTriggerRelevant(combatant, combatEvent))
+                        continue;
+
                     foreach (var trigger in ability.Definition.TriggersByEvent[combatEvent.Event])
                     {
                         if (!ability.CanUseTrigger(trigger) || !ConditionsPass(trigger.Conditions, combatant, combatEvent))
@@ -174,6 +182,9 @@ public sealed class FastCombatEngine
             foreach (var status in combatant.Statuses.ToList())
             {
                 if (!status.Definition.TriggersByEvent.TryGetValue(combatEvent.Event, out var triggers))
+                    continue;
+
+                if (!IsSourceScopedTriggerRelevant(status.Owner, combatEvent))
                     continue;
 
                 foreach (var trigger in triggers)
@@ -359,8 +370,10 @@ public sealed class FastCombatEngine
         var barrierBefore = target.Barrier;
         var absorbed = Math.Min(barrierBefore, reducedDamage);
         target.AdjustBarrier(-absorbed);
-        var healthDamage = Math.Max(0, reducedDamage - (int)absorbed);
-        target.AdjustHealth(-healthDamage);
+        var pendingHealthDamage = Math.Max(0, reducedDamage - (int)absorbed);
+        var healthBefore = target.Health;
+        target.AdjustHealth(-pendingHealthDamage);
+        var healthDamage = Math.Max(0, (int)Math.Round(healthBefore - target.Health));
 
         Log(source, target, sourceName, EventType.Damage, healthDamage, $"{source.Name} dealt {healthDamage} {damageType} damage to {target.Name}.", statsSource, countStatsActivation);
         Publish(new CombatEvent(AbilityTriggerEvent.OnHit, source, target, null), combatants);
@@ -661,6 +674,18 @@ public sealed class FastCombatEngine
 
     private static bool IsStatusLifecycleEvent(AbilityTriggerEvent triggerEvent) =>
         triggerEvent is AbilityTriggerEvent.OnStatusApplied or AbilityTriggerEvent.OnStatusExpired;
+
+    private static bool IsSourceScopedTriggerRelevant(RuntimeCombatant listener, CombatEvent combatEvent) =>
+        combatEvent.Event switch
+        {
+            AbilityTriggerEvent.OnMeleeAttack
+                or AbilityTriggerEvent.OnRangedAttack
+                or AbilityTriggerEvent.OnMeleeAttacked
+                or AbilityTriggerEvent.OnRangedAttacked
+                or AbilityTriggerEvent.OnDamaged
+                or AbilityTriggerEvent.OnAttacked => ReferenceEquals(combatEvent.Source, listener),
+            _ => true
+        };
 
     private IEnumerable<RuntimeCombatant> SelectTargets(
         RuntimeCombatant source,
