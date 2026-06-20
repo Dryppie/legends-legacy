@@ -1,0 +1,259 @@
+<div class="flex h-full flex-col overflow-hidden p-6 text-white">
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-3 pr-4">
+    <div>
+      <h2 class="text-2xl font-semibold text-primary">Combat Diagnostics</h2>
+      <p class="text-sm text-light_gray">Ability catalog v2 readiness</p>
+    </div>
+
+    <button
+      type="button"
+      class="rounded border border-primary px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/10 disabled:cursor-wait disabled:opacity-60"
+      [disabled]="isLoading"
+      (click)="loadReports()"
+    >
+      {{ isLoading ? 'Refreshing' : 'Refresh' }}
+    </button>
+  </div>
+
+  <div *ngIf="error" class="mb-4 rounded border border-red-400/60 bg-red-950/40 p-4 text-red-100">
+    {{ error }}
+  </div>
+
+  <div
+    *ngIf="catalogReport && coverageReport && behaviorReport"
+    class="flex min-h-0 flex-auto flex-col gap-4 overflow-hidden pr-4"
+  >
+    <section class="grid shrink-0 grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+      <div class="rounded border border-light_gray/40 bg-black/20 p-4">
+        <div class="text-sm text-light_gray">Overall</div>
+        <div class="mt-1 text-3xl font-semibold" [ngClass]="isReady ? 'text-emerald-300' : 'text-amber-300'">
+          {{ isReady ? 'Ready' : 'Review' }}
+        </div>
+        <div class="mt-1 text-sm text-light_gray">V2 replacement gates</div>
+      </div>
+
+      <div class="rounded border border-light_gray/40 bg-black/20 p-4">
+        <div class="text-sm text-light_gray">Catalog</div>
+        <div class="mt-1 text-3xl font-semibold text-primary">
+          {{ catalogReport.abilityCount }} / {{ catalogReport.statusCount }} / {{ catalogReport.summonCount }}
+        </div>
+        <div class="mt-1 text-sm" [ngClass]="catalogReport.failures.length === 0 ? 'text-emerald-300' : 'text-red-300'">
+          {{ catalogReport.failures.length === 0 ? 'Training pass' : catalogReport.failures.length + ' failures' }}
+        </div>
+      </div>
+
+      <div class="rounded border border-light_gray/40 bg-black/20 p-4">
+        <div class="text-sm text-light_gray">Essence Slots</div>
+        <div class="mt-1 text-3xl font-semibold text-primary">
+          {{ coverageReport.coveredSlotCount }} / {{ coverageReport.requiredSlotCount }}
+        </div>
+        <div class="mt-1 text-sm" [ngClass]="coverageReport.isComplete ? 'text-emerald-300' : 'text-amber-300'">
+          {{ coverageReport.isComplete ? 'Covered' : coverageReport.gaps.length + ' gaps' }}
+        </div>
+      </div>
+
+      <div class="rounded border border-light_gray/40 bg-black/20 p-4">
+        <div class="text-sm text-light_gray">Behaviors</div>
+        <div class="mt-1 text-3xl font-semibold text-primary">
+          {{ behaviorReport.passedCount }} / {{ behaviorReport.scenarioCount }}
+        </div>
+        <div class="mt-1 text-sm" [ngClass]="behaviorReport.isComplete && behaviorReport.hasFullAbilityCoverage ? 'text-emerald-300' : 'text-red-300'">
+          {{ behaviorReport.isComplete && behaviorReport.hasFullAbilityCoverage ? 'Passing' : 'Needs work' }}
+        </div>
+      </div>
+    </section>
+
+    <nav class="flex shrink-0 flex-wrap gap-2">
+      <button
+        *ngFor="let tab of tabs"
+        type="button"
+        class="rounded border px-4 py-2 text-sm font-semibold"
+        [ngClass]="activeTab === tab.id ? 'border-primary bg-primary/20 text-primary' : 'border-light_gray/40 text-light_gray hover:bg-white/5'"
+        (click)="setActiveTab(tab.id)"
+      >
+        {{ tab.label }}
+      </button>
+    </nav>
+
+    <section *ngIf="activeTab === 'catalog'" class="min-h-0 flex-auto overflow-auto rounded border border-light_gray/40 bg-black/20 p-4">
+      <div class="grid gap-3 md:grid-cols-3 xl:grid-cols-5">
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Ability Tags</div>
+          <div class="mt-1 text-2xl text-primary">{{ catalogReport.indexedAbilityTags }}</div>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Status Tags</div>
+          <div class="mt-1 text-2xl text-primary">{{ catalogReport.indexedStatusTags }}</div>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Summon Tags</div>
+          <div class="mt-1 text-2xl text-primary">{{ catalogReport.indexedSummonTags }}</div>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Trigger Events</div>
+          <div class="mt-1 text-2xl text-primary">{{ catalogReport.indexedTriggerEvents }}</div>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Training Duration</div>
+          <div class="mt-1 text-2xl text-primary">{{ catalogReport.duration }}</div>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Training Events</div>
+          <div class="mt-1 text-2xl text-primary">{{ catalogReport.eventLogCount }}</div>
+        </div>
+      </div>
+
+      <div class="mt-4 grid gap-3 md:grid-cols-4">
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Summons</div>
+          <div class="mt-1 text-2xl text-primary">{{ catalogReport.summonCount }}</div>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Timed</div>
+          <div class="mt-1 text-2xl text-primary">{{ catalogReport.timedSummonCount }}</div>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Owner/Death Only</div>
+          <div class="mt-1 text-2xl text-primary">{{ catalogReport.persistentSummonCount }}</div>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Summon Abilities</div>
+          <div class="mt-1 text-2xl text-primary">{{ catalogReport.summonAbilityReferenceCount }}</div>
+        </div>
+      </div>
+
+      <div *ngIf="catalogReport.summons.length > 0" class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div *ngFor="let summon of catalogReport.summons; trackBy: trackSummon" class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <div class="break-all font-semibold text-white">{{ summon.name }}</div>
+              <div class="mt-1 break-all text-xs text-light_gray">{{ summon.id }}</div>
+            </div>
+            <div class="shrink-0 rounded border border-primary/50 px-2 py-1 text-xs text-primary">
+              {{ summon.maxActive > 0 ? 'max ' + summon.maxActive : 'uncapped' }}
+            </div>
+          </div>
+          <div class="mt-3 text-sm" [ngClass]="summon.hasTimedDuration ? 'text-amber-200' : 'text-emerald-200'">
+            {{ summon.hasTimedDuration ? summon.durationTicks + ' ticks' : 'owner/death only' }}
+          </div>
+          <div class="mt-3 grid gap-2">
+            <code *ngFor="let abilityId of summon.abilityIds; trackBy: trackText" class="break-all rounded bg-black/30 p-2 text-xs text-primary">{{ abilityId }}</code>
+            <div *ngIf="summon.abilityIds.length === 0" class="rounded bg-black/30 p-2 text-xs text-light_gray">Basic attacks only</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div class="rounded border p-3" [ngClass]="catalogReport.directDamageObserved ? 'border-emerald-400/50 text-emerald-200' : 'border-red-400/50 text-red-200'">Direct damage</div>
+        <div class="rounded border p-3" [ngClass]="catalogReport.barrierObserved ? 'border-emerald-400/50 text-emerald-200' : 'border-red-400/50 text-red-200'">Barrier</div>
+        <div class="rounded border p-3" [ngClass]="catalogReport.damageOverTimeObserved ? 'border-emerald-400/50 text-emerald-200' : 'border-red-400/50 text-red-200'">Damage over time</div>
+        <div class="rounded border p-3" [ngClass]="catalogReport.reflectObserved ? 'border-emerald-400/50 text-emerald-200' : 'border-red-400/50 text-red-200'">Reflect</div>
+      </div>
+
+      <div *ngIf="catalogReport.failures.length > 0" class="mt-4 rounded border border-red-400/50 bg-red-950/30 p-4">
+        <h3 class="mb-2 font-semibold text-red-100">Catalog Failures</h3>
+        <ul class="list-disc space-y-1 pl-5 text-sm text-red-100">
+          <li *ngFor="let failure of catalogReport.failures; trackBy: trackText">{{ failure }}</li>
+        </ul>
+      </div>
+    </section>
+
+    <section *ngIf="activeTab === 'coverage'" class="min-h-0 flex-auto overflow-auto rounded border border-light_gray/40 bg-black/20 p-4">
+      <div class="grid gap-3 md:grid-cols-4">
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Essences</div>
+          <div class="mt-1 text-2xl text-primary">{{ coverageReport.essenceCount }}</div>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Current References</div>
+          <div class="mt-1 text-2xl text-primary">{{ coverageReport.currentReferenceCoveredSlotCount }}</div>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Runtime Failures</div>
+          <div class="mt-1 text-2xl" [ngClass]="failedLoadouts.length === 0 ? 'text-emerald-300' : 'text-red-300'">{{ failedLoadouts.length }}</div>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Unowned Abilities</div>
+          <div class="mt-1 text-2xl" [ngClass]="coverageReport.unownedAbilityIds.length === 0 ? 'text-emerald-300' : 'text-amber-300'">{{ coverageReport.unownedAbilityIds.length }}</div>
+        </div>
+      </div>
+
+      <div *ngIf="coverageReport.gaps.length > 0" class="mt-4 rounded border border-amber-300/50 bg-amber-950/30 p-4">
+        <h3 class="mb-3 font-semibold text-amber-100">Coverage Gaps</h3>
+        <div class="grid gap-2">
+          <div *ngFor="let gap of coverageReport.gaps; trackBy: trackCoverageGap" class="rounded bg-black/30 p-3 text-sm">
+            <div class="font-semibold text-amber-100">{{ gap.essenceId }} / {{ gap.slot }}</div>
+            <div class="break-all text-light_gray">{{ gap.legacyAbilityId }}</div>
+            <div class="mt-1 text-amber-100">{{ gap.reason }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="failedLoadouts.length > 0" class="mt-4 rounded border border-red-400/50 bg-red-950/30 p-4">
+        <h3 class="mb-3 font-semibold text-red-100">Runtime Loadout Failures</h3>
+        <div *ngFor="let check of failedLoadouts; trackBy: trackLoadout" class="mb-2 rounded bg-black/30 p-3 text-sm">
+          <div class="font-semibold text-red-100">{{ check.essenceId }}</div>
+          <div class="break-all text-light_gray">{{ check.failure }}</div>
+        </div>
+      </div>
+
+      <div *ngIf="coverageReport.unownedAbilityIds.length > 0" class="mt-4 rounded border border-amber-300/50 bg-amber-950/30 p-4">
+        <h3 class="mb-3 font-semibold text-amber-100">Unowned Ability Ids</h3>
+        <div class="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+          <code *ngFor="let abilityId of coverageReport.unownedAbilityIds; trackBy: trackText" class="break-all rounded bg-black/30 p-2 text-xs text-amber-100">{{ abilityId }}</code>
+        </div>
+      </div>
+    </section>
+
+    <section *ngIf="activeTab === 'behaviors'" class="min-h-0 flex-auto overflow-hidden rounded border border-light_gray/40 bg-black/20">
+      <div *ngIf="failedScenarios.length > 0" class="border-b border-red-400/50 bg-red-950/30 p-4">
+        <h3 class="mb-3 text-lg font-semibold text-red-100">Failures</h3>
+        <div class="grid gap-3">
+          <div *ngFor="let scenario of failedScenarios; trackBy: trackScenario" class="rounded border border-red-300/30 bg-black/20 p-3">
+            <div class="font-semibold text-red-100">{{ scenario.behaviorId }}</div>
+            <div class="mt-1 break-all text-sm text-light_gray">{{ scenario.abilityId }}</div>
+            <ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-red-100">
+              <li *ngFor="let failure of scenario.failures; trackBy: trackText">{{ failure }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="behaviorReport.missingAbilityIds.length > 0" class="border-b border-amber-300/50 bg-amber-950/30 p-4">
+        <h3 class="mb-3 text-lg font-semibold text-amber-100">Missing Ability Coverage</h3>
+        <div class="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+          <code *ngFor="let abilityId of behaviorReport.missingAbilityIds; trackBy: trackText" class="break-all rounded bg-black/30 p-2 text-xs text-amber-100">{{ abilityId }}</code>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-[minmax(18rem,1.4fr)_minmax(18rem,1.6fr)_7rem_6rem_6rem] border-b border-light_gray/40 bg-black/30 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-light_gray">
+        <div>Behavior</div>
+        <div>Ability</div>
+        <div>Outcome</div>
+        <div>Ticks</div>
+        <div>Events</div>
+      </div>
+
+      <div class="h-full overflow-auto">
+        <div
+          *ngFor="let scenario of sortedScenarios; trackBy: trackScenario"
+          class="grid grid-cols-[minmax(18rem,1.4fr)_minmax(18rem,1.6fr)_7rem_6rem_6rem] border-b border-light_gray/20 px-4 py-3 text-sm"
+        >
+          <div class="min-w-0 break-all font-medium" [ngClass]="scenario.passed ? 'text-white' : 'text-red-200'">
+            {{ scenario.behaviorId }}
+          </div>
+          <div class="min-w-0 break-all text-light_gray">{{ scenario.abilityId }}</div>
+          <div [ngClass]="scenario.passed ? 'text-emerald-300' : 'text-red-300'">
+            {{ scenario.passed ? 'Pass' : 'Fail' }}
+          </div>
+          <div class="text-light_gray">{{ scenario.duration }}</div>
+          <div class="text-light_gray">{{ scenario.eventCount }}</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div *ngIf="isLoading && !catalogReport" class="flex flex-auto items-center justify-center text-light_gray">
+    Loading diagnostics
+  </div>
+</div>

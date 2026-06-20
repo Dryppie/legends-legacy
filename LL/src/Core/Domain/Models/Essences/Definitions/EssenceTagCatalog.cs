@@ -18,9 +18,11 @@ public static class EssenceTagCatalog
                 "Role.Controller", "Role.Summoner", "Role.Caster", "Role.Debuffer"
             ],
             ["Range"] = ["Range.Melee", "Range.Ranged"],
-            ["Element"] = ["Element.Physical", "Element.Fire", "Element.Shadow", "Element.Necrotic"],
-            ["Pattern"] = ["Pattern.SingleTarget", "Pattern.Area", "Pattern.DamageOverTime", "Pattern.Periodic"],
-            ["Defense"] = ["Defense.Block", "Defense.Guard", "Defense.Barrier", "Defense.Dodge"],
+            ["Element"] = ["Element.Physical", "Element.Fire", "Element.Frost", "Element.Shadow", "Element.Necrotic", "Element.Magical"],
+            ["Pattern"] = ["Pattern.SingleTarget", "Pattern.MultiTarget", "Pattern.Area", "Pattern.DamageOverTime", "Pattern.Periodic", "Pattern.TimedBuff"],
+            ["Defense"] = ["Defense.Block", "Defense.Guard", "Defense.Barrier", "Defense.Dodge", "Defense.Recovery", "Defense.DamageReduction", "Defense.Armor", "Defense.Resistance"],
+            ["Offense"] = ["Offense.Critical", "Offense.Power"],
+            ["Debuff"] = ["Debuff.Precision", "Debuff.Regeneration"],
             ["Effect"] =
             [
                 "Effect.None", "Effect.BasicAttack", "Effect.Ability", "Effect.Melee", "Effect.Ranged",
@@ -28,22 +30,27 @@ public static class EssenceTagCatalog
                 "Effect.Holy", "Effect.Healing", "Effect.Summon", "Effect.Barrier", "Effect.CrowdControl"
             ],
             ["Control"] = ["Control.Stun", "Control.Freeze", "Control.Fear", "Control.Taunt", "Control.Blind", "Control.Interrupt", "Control.Suppression"],
-            ["Status"] = ["Status.Bleed", "Status.Burn", "Status.Poison", "Status.Chill", "Status.Shock", "Status.Vulnerable", "Status.Weakened", "Status.Curse"],
+            ["Status"] = ["Status.Bleed", "Status.Burn", "Status.Poison", "Status.Chill", "Status.Cold", "Status.Freeze", "Status.Shock", "Status.Vulnerable", "Status.Weakened", "Status.Curse", "Status.Reflect"],
             ["Resource"] = ["Resource.Health", "Resource.Barrier", "Resource.Cooldown"],
             ["Trigger"] =
             [
                 "Trigger.OnCombatStart", "Trigger.OnCombatEnd", "Trigger.OnHit", "Trigger.OnCrit", "Trigger.OnKill",
                 "Trigger.OnTakeDamage", "Trigger.OnDodge", "Trigger.OnBlock", "Trigger.OnBarrierBreak",
                 "Trigger.OnLowHealth", "Trigger.OnAllyLowHealth", "Trigger.OnInterval", "Trigger.OnStatusApplied",
-                "Trigger.OnStatusExpired", "Trigger.OnSummonDeath", "Trigger.OnAbilityUse", "Trigger.OnBasicAttack"
+                "Trigger.OnStatusExpired", "Trigger.OnSummonDeath", "Trigger.OnAbilityUse", "Trigger.OnAbilityUsed",
+                "Trigger.OnBasicAttack", "Trigger.OnAttacked", "Trigger.OnMeleeAttack", "Trigger.OnRangedAttack",
+                "Trigger.OnMeleeAttacked", "Trigger.OnRangedAttacked", "Trigger.OnHealthChanged", "Trigger.OnDeath",
+                "Trigger.OnLifestealHeal"
             ],
             ["Target"] =
             [
                 "Target.Self", "Target.Ally", "Target.LowestHealthAlly", "Target.Enemy", "Target.RandomEnemy",
                 "Target.LowestHealthEnemy", "Target.HighestThreatEnemy", "Target.Frontline", "Target.Backline",
-                "Target.Area", "Target.Adjacent", "Target.SummonOwner", "Target.Summon"
+                "Target.Area", "Target.Adjacent", "Target.SummonOwner", "Target.Summon", "Target.Multi",
+                "Target.AllEnemies", "Target.AllAllies", "Target.TwoAllies"
             ],
-            ["Mechanic"] = ["Mechanic.Execute"]
+            ["Mechanic"] = ["Mechanic.Execute", "Mechanic.Lifesteal"],
+            ["General"] = ["Summon", "Healing", "Retaliation"]
         };
 
     public static readonly IReadOnlySet<string> AllTags = TagsByCategory

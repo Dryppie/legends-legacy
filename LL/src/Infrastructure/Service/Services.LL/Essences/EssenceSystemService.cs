@@ -1,7 +1,6 @@
 using Application.Interfaces.Services.LL.Essences;
-using Domain.Models.AbilityDefinitions;
-using Domain.Models.Combat.Abilities;
 using Domain.Models.Attributes.Modifiers;
+using Domain.Models.Combat.Abilities.V2;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;
@@ -22,7 +21,6 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     private readonly IEssenceProgressionService _progression;
     private readonly IEssenceSlotUnlockService _slotUnlocks;
     private readonly IEssenceLoadoutLimitService _loadoutLimits;
-    private readonly IEssenceCombatAbilityFactory _combatAbilityFactory;
     private readonly IInventoryItemFactory _inventoryItemFactory;
     private readonly IRandomProvider _random;
 
@@ -34,7 +32,6 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         IEssenceProgressionService progression,
         IEssenceSlotUnlockService slotUnlocks,
         IEssenceLoadoutLimitService loadoutLimits,
-        IEssenceCombatAbilityFactory combatAbilityFactory,
         IInventoryItemFactory inventoryItemFactory,
         IRandomProvider random)
     {
@@ -45,7 +42,6 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         _progression = progression;
         _slotUnlocks = slotUnlocks;
         _loadoutLimits = loadoutLimits;
-        _combatAbilityFactory = combatAbilityFactory;
         _inventoryItemFactory = inventoryItemFactory;
         _random = random;
     }
@@ -279,7 +275,7 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
         return Resolve(Guid.Empty, essences).AttributeModifiers;
     }
 
-    public async Task<IReadOnlyList<AbilityDefinition>> GetAttunedAbilitiesAsync(Guid characterId, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<AbilitySpec>> GetAttunedAbilitiesAsync(Guid characterId, CancellationToken cancellationToken)
     {
         var activeSlots = await GetActiveSlotsAsync(characterId, cancellationToken);
         return activeSlots
@@ -291,16 +287,12 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
             .ToList();
     }
 
-    public async Task<IReadOnlyList<CombatAbilityInstance>> GetAttunedCombatAbilitiesAsync(Guid characterId, CancellationToken cancellationToken)
-    {
-        var loadout = await ResolveAsync(characterId, cancellationToken);
-        return loadout.Abilities.Select(x => x.Ability).ToList();
-    }
-
-    public IReadOnlyList<CombatAbilityInstance> GetAttunedCombatAbilities(IEnumerable<PlayerEssence> essences)
-    {
-        return Resolve(Guid.Empty, essences).Abilities.Select(x => x.Ability).ToList();
-    }
+    public IReadOnlyList<AbilitySpec> GetAttunedAbilities(IEnumerable<PlayerEssence> essences) =>
+        essences
+            .Select(x => _definitions.GetById(x.EssenceDefinitionId))
+            .Where(x => x is not null)
+            .SelectMany(x => new[] { x!.ActiveAbility, x.PassiveAbility })
+            .ToList();
 
     public async Task<EssenceCombatLoadout> ResolveAsync(Guid characterId, CancellationToken cancellationToken)
     {
@@ -317,8 +309,6 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     public EssenceCombatLoadout Resolve(Guid characterId, IEnumerable<PlayerEssence> equippedEssences)
     {
         var essences = equippedEssences.ToList();
-        var activeAbilities = new List<ResolvedCombatAbility>();
-        var passiveAbilities = new List<ResolvedCombatAbility>();
         var attributeModifiers = new List<AttributeModifierBase>();
         var tags = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -339,21 +329,11 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
                         ? ModifierType.Additive
                         : ModifierType.Flat));
             }
-
-            foreach (var ability in _combatAbilityFactory.CreateAbilities(definition, essence))
-            {
-                if (ability.AbilityKind.Equals(CombatAbilityType.Active.ToString(), StringComparison.OrdinalIgnoreCase))
-                    activeAbilities.Add(ability);
-                else
-                    passiveAbilities.Add(ability);
-            }
         }
 
         return new EssenceCombatLoadout(
             characterId,
             essences,
-            activeAbilities,
-            passiveAbilities,
             attributeModifiers,
             tags);
     }

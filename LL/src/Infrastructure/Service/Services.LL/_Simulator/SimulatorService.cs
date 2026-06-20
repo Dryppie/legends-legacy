@@ -1,27 +1,23 @@
 ﻿using Application.Interfaces.Services.LL;
-using Application.Interfaces.Services.LL.CharacterActions;
-using Application.Interfaces.Services.LL.Entities;
 using Domain.Components.Attributes;
 using Domain.Helpers;
-using Domain.Interfaces.Combat;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 using Domain.Models.Entities;
-using Services.LL.Combat;
+using Services.LL.Combat.Layers.Orchestration.Models;
+using Services.LL.Combat.Layers.Resolution.Models;
+using Services.LL.Interfaces.Combat.Resolution;
 
 namespace Services.LL._Simulator;
 public class SimulatorService : ISimulatorService
 {
-    private readonly ICombatService _combatService;
-    private readonly IEntityService _entityService;
-    private readonly ICombatContext _combatContext;
+    private readonly ICombatEngineExecutor _combatEngineExecutor;
     private bool _pickRandomEssences = true;
-    private string _essenceName;
+    private string _essenceName = string.Empty;
 
-    public SimulatorService(ICombatService combatService, ICombatContext combatContext)
+    public SimulatorService(ICombatEngineExecutor combatEngineExecutor)
     {
-        _combatService = combatService;
-        _combatContext = combatContext;
+        _combatEngineExecutor = combatEngineExecutor;
     }
 
     public async Task SimulateCombatWithOneEssence(string essenceName, int teamSize = 1)
@@ -69,7 +65,9 @@ public class SimulatorService : ISimulatorService
                 await PickSpecificAbility([.. combatEnemyEntities]);
             }
 
-            lastCombatResult = _combatContext.InstantiateAndRunCombat(combatPlayerEntities, combatEnemyEntities);
+            lastCombatResult = await _combatEngineExecutor.ExecuteAsync(
+                CreateRuntime(combatPlayerEntities, combatEnemyEntities),
+                CancellationToken.None);
             totalTime += TimeSpan.FromSeconds(lastCombatResult.Duration * 0.1);
             // Build the combination keys for the essences
             var playerCombo = GetEssenceComboKey(combatPlayerEntities);
@@ -160,12 +158,45 @@ public class SimulatorService : ISimulatorService
         return EntityBaseAttributeHelper.CreateSimulatedAttributes(tier);
     }
 
+    private static CombatEncounterRuntime CreateRuntime(
+        IReadOnlyList<CombatEntity> friendly,
+        IReadOnlyList<CombatEntity> hostile)
+    {
+        var plan = new CombatEncounterPlan(
+            Guid.NewGuid(),
+            CombatMode.Pvp,
+            Sequence: 1,
+            DateTimeOffset.UtcNow,
+            [.. friendly.Select(x => new CombatParticipantSlot(x.Id, x.OriginalId, CombatSide.Friendly)),
+                .. hostile.Select(x => new CombatParticipantSlot(x.Id, x.OriginalId, CombatSide.Hostile))],
+            new PvpEncounterSourceContext(Guid.NewGuid(), Guid.Empty, Guid.Empty));
+
+        return new CombatEncounterRuntime(
+            plan,
+            [.. friendly.Select(x => new CombatRuntimeParticipant(
+                new CombatParticipantSlot(x.Id, x.OriginalId, CombatSide.Friendly),
+                CreateSourceEntity(x),
+                x))],
+            [.. hostile.Select(x => new CombatRuntimeParticipant(
+                new CombatParticipantSlot(x.Id, x.OriginalId, CombatSide.Hostile),
+                CreateSourceEntity(x),
+                x))]);
+    }
+
+    private static Entity CreateSourceEntity(CombatEntity combatant) =>
+        new SimulatedEntity
+        {
+            Id = combatant.OriginalId,
+            Name = combatant.Name,
+            ImagePath = combatant.ImagePath,
+            Level = combatant.Level
+        };
+
     private static void ResetEntitiesForCombat(List<CombatEntity> allEntities)
     {
         foreach (var entity in allEntities)
         {
             entity.Reset();
-            entity.Abilities = [];
         }
     }
 

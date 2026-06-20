@@ -51,8 +51,8 @@
           }
         ]
       },
-      "activeAbilityId": "ability.essence.goblin_ambusher.cheap_shot",
-      "passiveAbilityId": "ability.essence.goblin_ambusher.cowards_opening"
+      "activeAbilityId": "ability.v2.essence.goblin_ambusher.cheap_shot",
+      "passiveAbilityId": "ability.v2.essence.goblin_ambusher.cowards_opening"
     },
     {
       "id": "essence.skeleton_guardian",
@@ -103,12 +103,19 @@
           {
             "target": "effect.barrier.main",
             "operation": "AddEffect",
-            "value": 1
+            "value": 1,
+            "effect": {
+              "id": "effect.status.taunt",
+              "operation": "ApplyStatus",
+              "target": "Self",
+              "statusId": "status.v2.taunt",
+              "baseValue": 1
+            }
           }
         ]
       },
-      "activeAbilityId": "ability.essence.skeleton_guardian.bone_bulwark",
-      "passiveAbilityId": "ability.essence.skeleton_guardian.rattle_guard"
+      "activeAbilityId": "ability.v2.essence.skeleton_guardian.bone_bulwark",
+      "passiveAbilityId": "ability.v2.essence.skeleton_guardian.rattle_guard"
     },
     {
       "id": "essence.fire_ant",
@@ -154,12 +161,19 @@
           {
             "target": "effect.status.burn",
             "operation": "AddEffect",
-            "value": 1
+            "value": 1,
+            "effect": {
+              "id": "effect.status.lesser_burn",
+              "operation": "ApplyStatus",
+              "target": "RandomEnemy",
+              "statusId": "status.v2.lesser_burn",
+              "baseValue": 1
+            }
           }
         ]
       },
-      "activeAbilityId": "ability.essence.fire_ant.burning_mandibles",
-      "passiveAbilityId": "ability.essence.fire_ant.colony_heat"
+      "activeAbilityId": "ability.v2.essence.fire_ant.burning_mandibles",
+      "passiveAbilityId": "ability.v2.essence.fire_ant.colony_heat"
     },
     {
       "id": "essence.cave_bat",
@@ -207,12 +221,19 @@
           {
             "target": "effect.damage.sonic",
             "operation": "AddEffect",
-            "value": 1
+            "value": 1,
+            "effect": {
+              "id": "effect.status.vulnerable_mark",
+              "operation": "ApplyStatus",
+              "target": "CurrentTarget",
+              "statusId": "status.v2.vulnerable_mark",
+              "baseValue": 1
+            }
           }
         ]
       },
-      "activeAbilityId": "ability.essence.cave_bat.screech",
-      "passiveAbilityId": "ability.essence.cave_bat.skittering_wings"
+      "activeAbilityId": "ability.v2.essence.cave_bat.screech",
+      "passiveAbilityId": "ability.v2.essence.cave_bat.skittering_wings"
     },
     {
       "id": "essence.necroshade_wraith",
@@ -260,12 +281,19 @@
           {
             "target": "effect.restore.cooldown",
             "operation": "AddEffect",
-            "value": 1
+            "value": 1,
+            "effect": {
+              "id": "effect.restore.cooldown.evolved",
+              "operation": "RestoreResource",
+              "target": "Self",
+              "resource": "Cooldown",
+              "baseValue": 1
+            }
           }
         ]
       },
-      "activeAbilityId": "ability.essence.necroshade_wraith.wraith_hex",
-      "passiveAbilityId": "ability.essence.necroshade_wraith.grave_whisper"
+      "activeAbilityId": "ability.v2.essence.necroshade_wraith.wraith_hex",
+      "passiveAbilityId": "ability.v2.essence.necroshade_wraith.grave_whisper"
     },
     {
       "id": "essence.legacy.goblin",
@@ -302,8 +330,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "sneakAttack",
-      "passiveAbilityId": "pocketDirt"
+      "activeAbilityId": "ability.v2.essence.legacy.goblin.sneak_attack",
+      "passiveAbilityId": "ability.v2.essence.legacy.goblin.pocket_dirt"
     },
     {
       "id": "essence.legacy.goblin_warrior",
@@ -340,8 +368,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "ragingCleave",
-      "passiveAbilityId": "recklessAssault"
+      "activeAbilityId": "ability.v2.essence.legacy.goblin_warrior.raging_cleave",
+      "passiveAbilityId": "ability.v2.essence.legacy.goblin_warrior.reckless_assault"
     },
     {
       "id": "essence.legacy.goblin_archer",
@@ -378,8 +406,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "snipersStrike",
-      "passiveAbilityId": "poisonedArrows"
+      "activeAbilityId": "ability.v2.essence.legacy.goblin_archer.snipers_strike",
+      "passiveAbilityId": "ability.v2.essence.legacy.goblin_archer.poisoned_arrows"
     },
     {
       "id": "essence.legacy.large_rat",
@@ -415,8 +443,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "tailWrap",
-      "passiveAbilityId": "big"
+      "activeAbilityId": "ability.v2.essence.legacy.large_rat.tail_wrap",
+      "passiveAbilityId": "ability.v2.essence.legacy.large_rat.big"
     },
     {
       "id": "essence.legacy.flame_imp",
@@ -452,8 +480,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "firebombToss",
-      "passiveAbilityId": "hotAura"
+      "activeAbilityId": "ability.v2.essence.legacy.flame_imp.firebomb_toss",
+      "passiveAbilityId": "ability.v2.essence.legacy.flame_imp.hot_aura"
     },
     {
       "id": "essence.legacy.frost_imp",
@@ -489,8 +517,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "iceTouch",
-      "passiveAbilityId": "coldAura"
+      "activeAbilityId": "ability.v2.essence.legacy.frost_imp.ice_touch",
+      "passiveAbilityId": "ability.v2.essence.legacy.frost_imp.cold_aura"
     },
     {
       "id": "essence.legacy.shadow_imp",
@@ -526,8 +554,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "shadowImage",
-      "passiveAbilityId": "shadowyPresence"
+      "activeAbilityId": "ability.v2.essence.legacy.shadow_imp.shadow_image",
+      "passiveAbilityId": "ability.v2.essence.legacy.shadow_imp.shadowy_presence"
     },
     {
       "id": "essence.legacy.vampire_bat",
@@ -563,8 +591,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "bloodthirstyFangs",
-      "passiveAbilityId": "darkVitality"
+      "activeAbilityId": "ability.v2.essence.legacy.vampire_bat.bloodthirsty_fangs",
+      "passiveAbilityId": "ability.v2.essence.legacy.vampire_bat.dark_vitality"
     },
     {
       "id": "essence.legacy.blue_slime",
@@ -600,8 +628,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "sweetWater",
-      "passiveAbilityId": "absorptiveShell"
+      "activeAbilityId": "ability.v2.essence.legacy.blue_slime.sweet_water",
+      "passiveAbilityId": "ability.v2.essence.legacy.blue_slime.absorptive_shell"
     },
     {
       "id": "essence.legacy.brown_slime",
@@ -637,8 +665,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "mudArmor",
-      "passiveAbilityId": "earthlyFortitude"
+      "activeAbilityId": "ability.v2.essence.legacy.brown_slime.mud_armor",
+      "passiveAbilityId": "ability.v2.essence.legacy.brown_slime.earthly_fortitude"
     },
     {
       "id": "essence.legacy.green_slime",
@@ -674,8 +702,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "acidSplash",
-      "passiveAbilityId": "corrosiveOoze"
+      "activeAbilityId": "ability.v2.essence.legacy.green_slime.acid_splash",
+      "passiveAbilityId": "ability.v2.essence.legacy.green_slime.corrosive_ooze"
     },
     {
       "id": "essence.legacy.rainbow_slime",
@@ -711,8 +739,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "unstableColors",
-      "passiveAbilityId": "colorfulShield"
+      "activeAbilityId": "ability.v2.essence.legacy.rainbow_slime.unstable_colors",
+      "passiveAbilityId": "ability.v2.essence.legacy.rainbow_slime.colorful_shield"
     },
     {
       "id": "essence.legacy.red_slime",
@@ -748,8 +776,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "igniteCore",
-      "passiveAbilityId": "fireBody"
+      "activeAbilityId": "ability.v2.essence.legacy.red_slime.ignite_core",
+      "passiveAbilityId": "ability.v2.essence.legacy.red_slime.fire_body"
     },
     {
       "id": "essence.legacy.transparent_slime",
@@ -785,8 +813,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "transparentEngulf",
-      "passiveAbilityId": "transparentShift"
+      "activeAbilityId": "ability.v2.essence.legacy.transparent_slime.transparent_engulf",
+      "passiveAbilityId": "ability.v2.essence.legacy.transparent_slime.transparent_shift"
     },
     {
       "id": "essence.legacy.enchanted_fairy",
@@ -822,8 +850,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "faesEmbrace",
-      "passiveAbilityId": "enchantedCharm"
+      "activeAbilityId": "ability.v2.essence.legacy.enchanted_fairy.faes_embrace",
+      "passiveAbilityId": "ability.v2.essence.legacy.enchanted_fairy.enchanted_charm"
     },
     {
       "id": "essence.legacy.glade_panther",
@@ -859,8 +887,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "ambushStrike",
-      "passiveAbilityId": "razorClaws"
+      "activeAbilityId": "ability.v2.essence.legacy.glade_panther.ambush_strike",
+      "passiveAbilityId": "ability.v2.essence.legacy.glade_panther.razor_claws"
     },
     {
       "id": "essence.legacy.illusion_fox",
@@ -896,8 +924,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "distractingIllusion",
-      "passiveAbilityId": "foxfireWisp"
+      "activeAbilityId": "ability.v2.essence.legacy.illusion_fox.distracting_illusion",
+      "passiveAbilityId": "ability.v2.essence.legacy.illusion_fox.foxfire_wisp"
     },
     {
       "id": "essence.legacy.nightshade_blossom",
@@ -933,8 +961,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "necroticSpores",
-      "passiveAbilityId": "twilightBloom"
+      "activeAbilityId": "ability.v2.essence.legacy.nightshade_blossom.necrotic_spores",
+      "passiveAbilityId": "ability.v2.essence.legacy.nightshade_blossom.twilight_bloom"
     },
     {
       "id": "essence.legacy.pixie",
@@ -970,8 +998,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "pixieBurst",
-      "passiveAbilityId": "resonantChime"
+      "activeAbilityId": "ability.v2.essence.legacy.pixie.pixie_burst",
+      "passiveAbilityId": "ability.v2.essence.legacy.pixie.resonant_chime"
     },
     {
       "id": "essence.legacy.hobgoblin",
@@ -1008,8 +1036,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "frenzy",
-      "passiveAbilityId": "savageOnslaught"
+      "activeAbilityId": "ability.v2.essence.legacy.hobgoblin.frenzy",
+      "passiveAbilityId": "ability.v2.essence.legacy.hobgoblin.savage_onslaught"
     },
     {
       "id": "essence.legacy.feral_ghoul",
@@ -1045,8 +1073,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "feralPounce",
-      "passiveAbilityId": "shreddingClaws"
+      "activeAbilityId": "ability.v2.essence.legacy.feral_ghoul.feral_pounce",
+      "passiveAbilityId": "ability.v2.essence.legacy.feral_ghoul.shredding_claws"
     },
     {
       "id": "essence.legacy.plague_ghoul",
@@ -1082,8 +1110,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "plagueSwipe",
-      "passiveAbilityId": "pestilentTouch"
+      "activeAbilityId": "ability.v2.essence.legacy.plague_ghoul.plague_swipe",
+      "passiveAbilityId": "ability.v2.essence.legacy.plague_ghoul.pestilent_touch"
     },
     {
       "id": "essence.legacy.ravenous_ghoul",
@@ -1119,8 +1147,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "drainingClaws",
-      "passiveAbilityId": "vileFeast"
+      "activeAbilityId": "ability.v2.essence.legacy.ravenous_ghoul.draining_claws",
+      "passiveAbilityId": "ability.v2.essence.legacy.ravenous_ghoul.vile_feast"
     },
     {
       "id": "essence.legacy.skeleton_archer",
@@ -1156,8 +1184,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "boneArrow",
-      "passiveAbilityId": "piercingArrows"
+      "activeAbilityId": "ability.v2.essence.legacy.skeleton_archer.bone_arrow",
+      "passiveAbilityId": "ability.v2.essence.legacy.skeleton_archer.piercing_arrows"
     },
     {
       "id": "essence.legacy.skeleton_mage",
@@ -1193,8 +1221,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "siphon",
-      "passiveAbilityId": "protectiveBoneBarrier"
+      "activeAbilityId": "ability.v2.essence.legacy.skeleton_mage.siphon",
+      "passiveAbilityId": "ability.v2.essence.legacy.skeleton_mage.protective_bone_barrier"
     },
     {
       "id": "essence.legacy.skeleton_warrior",
@@ -1230,8 +1258,8 @@
         "requiredAscensionTier": 1,
         "requiredCatalystItemId": "item.evolution_catalyst.legacy"
       },
-      "activeAbilityId": "boneShield",
-      "passiveAbilityId": "spikedDefense"
+      "activeAbilityId": "ability.v2.essence.legacy.skeleton_warrior.bone_shield",
+      "passiveAbilityId": "ability.v2.essence.legacy.skeleton_warrior.spiked_defense"
     }
   ]
 }

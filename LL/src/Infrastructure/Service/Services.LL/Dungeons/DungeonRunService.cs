@@ -788,9 +788,7 @@ public sealed class DungeonRunService : IDungeonRunService
     //        encounter.MonsterIds
     //    );
 
-    //    CombatResult result = await _combat.InstantiateAndRunCombat(request, ct);
-
-    //    if (result.Outcome != BattleOutcome.Victory)
+    //    if (outcome != BattleOutcome.Victory)
     //    {
     //        run.Status = DungeonRunStatus.Failed;
     //        run.CompletedAt = DateTimeOffset.UtcNow;

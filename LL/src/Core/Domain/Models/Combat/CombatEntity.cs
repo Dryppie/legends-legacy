@@ -1,14 +1,9 @@
 using Domain.Components.Attributes;
-using Domain.Models.Combat.Abilities;
-using Domain.Models.Combat.Abilities.Effects;
-using Domain.Models.Combat.Abilities.Effects.StatusEffects;
-using Domain.Models.Combat.Abilities.Statuses;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Entities;
 using Domain.Models.Essences;
 using Domain.Models.Items.Equipments;
-using Domain.Models.Items.Equipments.Slots;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Models.Combat;
@@ -20,12 +15,9 @@ public class CombatEntity
     public string Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string ImagePath { get; set; } = string.Empty;
-    public List<CombatAbilityInstance> Abilities { get; set; } = [];
-    public List<StatusInstance> Statuses { get; set; } = [];
     public string SourceMonsterId { get; set; } = string.Empty;
     public HashSet<string> Tags { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 
-    public Dictionary<StatusEffectType, int> StatusEffects { get; } = [];
     public int NextBasicAttackIn = 300; // TODO: Turn 300 into a Constant somewhere, as it is also stored in the CombatSimulator class
                                         // Every tick, this decrements by BaseAttackSpeed.
                                         // Start at 300. Whenever it is equal to or lower than 0, perform the attack.
@@ -51,7 +43,6 @@ public class CombatEntity
         Id = entity.Id.ToString();
         Name = entity.Name;
         ImagePath = entity.ImagePath;
-        Abilities = [.. entity.Abilities];
         BaseAttributes = [.. entity.BaseAttributes];
         BaseCombatAttributes = new Dictionary<AttributeType, float>(entity.BaseCombatAttributes);
         CombatAttributes = new Dictionary<AttributeType, float>(entity.CombatAttributes);
@@ -60,22 +51,6 @@ public class CombatEntity
             entity.BaseCombatAttributes.GetValueOrDefault(AttributeType.MaxHealth));
         Equipment = entity.EquipmentSlots.Where(es => es.EquipmentInstance != null).Select(es => es.EquipmentInstance!).ToList();
         Level = entity.Level;
-        var mainHand = entity.EquipmentSlots.FirstOrDefault(es => es.EquipmentSlotType == EquipmentSlotType.MainHand);
-        Abilities.Add(BasicAttackLoader.LoadBasicAttack(mainHand));
-    }
-
-    public void IncrementStep()
-    {
-        UpdateAbilities();
-    }
-
-    private void UpdateAbilities()
-    {
-        foreach (var ability in Abilities)
-        {
-            ability.Definition.Usage.Recharge();
-            ability.RemainingTimeUntilUse--;
-        }
     }
 
     public void ModifyAttribute(AttributeModifierBase attributeModifier, bool remove = false)
@@ -86,54 +61,6 @@ public class CombatEntity
             TemporaryModifiers.Add(attributeModifier);
 
         AttributeCalculator.CalculateCombatAttributeByType(this, attributeModifier.AttributeType);
-    }
-
-    public void ModifyStatusEffects(StatusEffectType status, int amount)
-    {
-        if (amount == 0)
-            return;
-
-        // If we already have this status in the dictionary:
-        if (StatusEffects.ContainsKey(status))
-        {
-            // Update its stack count
-            StatusEffects[status] += amount;
-
-            // If stacks drop to 0 or below, remove the status entirely
-            if (StatusEffects[status] <= 0)
-                StatusEffects.Remove(status);
-        }
-        else
-        {
-            // We only add if we have a positive amount
-            if (amount > 0)
-                StatusEffects[status] = amount;
-        }
-    }
-
-    public void ApplyStatus(StatusInstance status)
-    {
-        if (!status.Definition.IsStackable)
-        {
-            var existing = Statuses.FirstOrDefault(s => s.Definition.Id == status.Definition.Id);
-            if (existing != null)
-            {
-                // Replace or refresh (based on design)
-                Statuses.Remove(existing);
-            }
-        }
-
-        Statuses.Add(status);
-    }
-
-    public void RemoveStatus(StatusInstance status)
-    {
-        Statuses.Remove(status);
-    }
-
-    public bool CanAct()
-    {
-        return !StatusEffects.ContainsKey(StatusEffectType.Stunned) && !StatusEffects.ContainsKey(StatusEffectType.Frozen);
     }
 
     public void Reset()
@@ -149,21 +76,7 @@ public class CombatEntity
         SetCurrentHealth(GetAttributeValue(AttributeType.MaxHealth));
         SetCurrentBarrier(0);
 
-        foreach (var ability in Abilities)
-        {
-            ability.Definition.Usage.Reset();
-
-            ability.RemainingTimeUntilUse = ability.Definition.Cooldown;
-
-            foreach (var effect in ability.Definition.Triggers.SelectMany(t => t.Actions))
-            {
-                effect.Usage.Reset();
-            }
-        }
-
         TemporaryModifiers.Clear();
-        Statuses.Clear();
-        StatusEffects.Clear();
     }
 
     /// <summary>
@@ -245,7 +158,6 @@ public class CombatEntity
         Id = entity.Id.ToString();
         Name = entity.Name;
         ImagePath = entity.ImagePath;
-        Abilities = [.. entity.Abilities.Select(a => new CombatAbilityInstance(a.Definition))];
         NextBasicAttackIn = entity.NextBasicAttackIn;
         NextRecoveryIn = entity.NextRecoveryIn;
         Equipment = entity.Equipment.Select(e => e).ToList();
@@ -255,8 +167,6 @@ public class CombatEntity
         CombatAttributes = new Dictionary<AttributeType, float>(entity.CombatAttributes);
         CurrentHealth = entity.CurrentHealth;
         CurrentBarrier = entity.CurrentBarrier;
-        StatusEffects = new Dictionary<StatusEffectType, int>(entity.StatusEffects);
-        Statuses = [];
         SourceMonsterId = entity.SourceMonsterId;
         Tags = new HashSet<string>(entity.Tags, StringComparer.OrdinalIgnoreCase);
         EquippedEssences = [.. entity.EquippedEssences];

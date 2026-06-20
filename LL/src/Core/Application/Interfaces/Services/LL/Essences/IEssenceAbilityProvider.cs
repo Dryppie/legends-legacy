@@ -1,12 +1,10 @@
-using Domain.Models.AbilityDefinitions;
-using Domain.Models.Combat.Abilities;
+using Domain.Models.Combat.Abilities.V2;
 using Domain.Models.Essences;
 
 namespace Application.Interfaces.Services.LL.Essences;
 
 public interface IEssenceAbilityProvider
 {
-    Task<IReadOnlyList<AbilityDefinition>> GetAttunedAbilitiesAsync(Guid characterId, CancellationToken cancellationToken);
-    Task<IReadOnlyList<CombatAbilityInstance>> GetAttunedCombatAbilitiesAsync(Guid characterId, CancellationToken cancellationToken);
-    IReadOnlyList<CombatAbilityInstance> GetAttunedCombatAbilities(IEnumerable<PlayerEssence> essences);
+    Task<IReadOnlyList<AbilitySpec>> GetAttunedAbilitiesAsync(Guid characterId, CancellationToken cancellationToken);
+    IReadOnlyList<AbilitySpec> GetAttunedAbilities(IEnumerable<PlayerEssence> essences);
 }

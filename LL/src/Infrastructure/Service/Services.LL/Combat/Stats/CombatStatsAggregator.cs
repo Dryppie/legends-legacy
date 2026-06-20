@@ -14,6 +14,12 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
         {
             // ----- entity context ------------------------------------------------
             var entity = entityMap.GetOrAdd(item.ActorId, static id => new WorkEntity(id));
+            var statsSource = string.IsNullOrWhiteSpace(item.StatsSource) ? item.Source : item.StatsSource;
+            if (!string.IsNullOrWhiteSpace(statsSource)
+                && (item.EventType == EventType.AbilityUse || item.CountsAsActivation))
+            {
+                entity.GetOrAddAbility(statsSource).Uses++;
+            }
 
             // ----- high-level stats ----------------------------------------------
             switch (item.EventType)
@@ -34,20 +40,15 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
             switch (item.EventType)
             {
                 case EventType.AbilityUse:
-                    if (string.IsNullOrWhiteSpace(item.Source))
-                        break;
-
-                    var usedAbility = entity.GetOrAddAbility(item.Source);
-                    usedAbility.Uses++;
                     break;
 
                 case EventType.Damage:
                 case EventType.DamageOverTime:
                 case EventType.DamageCrit:
-                    if (string.IsNullOrWhiteSpace(item.Source))
+                    if (string.IsNullOrWhiteSpace(statsSource))
                         break;
 
-                    var damageAbility = entity.GetOrAddAbility(item.Source);
+                    var damageAbility = entity.GetOrAddAbility(statsSource);
                     damageAbility.TotalDamage += item.Magnitude;
                     damageAbility.Hits++;
                     if (item.EventType == EventType.DamageCrit)
@@ -57,10 +58,10 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
                 case EventType.Heal:
                 case EventType.HealOverTime:
                 case EventType.HealCrit:
-                    if (string.IsNullOrWhiteSpace(item.Source))
+                    if (string.IsNullOrWhiteSpace(statsSource))
                         break;
 
-                    var healAbility = entity.GetOrAddAbility(item.Source);
+                    var healAbility = entity.GetOrAddAbility(statsSource);
                     healAbility.TotalHealing += item.Magnitude;
                     healAbility.Hits++;
                     if (item.EventType == EventType.HealCrit)
@@ -68,10 +69,10 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
                     break;
 
                 case EventType.Summon:
-                    if (string.IsNullOrWhiteSpace(item.Source))
+                    if (string.IsNullOrWhiteSpace(statsSource))
                         break;
 
-                    var summonAbility = entity.GetOrAddAbility(item.Source);
+                    var summonAbility = entity.GetOrAddAbility(statsSource);
                     summonAbility.Summons++;
                     break;
 

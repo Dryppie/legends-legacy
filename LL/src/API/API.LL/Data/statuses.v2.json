@@ -1,0 +1,767 @@
+[
+  {
+    "id": "status.v2.training.burn",
+    "name": "Training Burn",
+    "description": "Deals repeated burn damage for a short duration.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 5,
+    "durationTicks": 24,
+    "tags": [ "Status.Burn", "Pattern.Periodic" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.burn.dot" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.burn.dot",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 3,
+        "durationTicks": 12,
+        "intervalTicks": 4,
+        "attackType": "DamageOverTime",
+        "damageType": "Burn"
+      }
+    ]
+  },
+  {
+    "id": "status.v2.training.reflect",
+    "name": "Training Reflect",
+    "description": "Reflects a small amount of damage to attackers.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 80,
+    "tags": [ "Status.Reflect" ],
+    "triggers": [
+      {
+        "event": "OnDamaged",
+        "effectIds": [ "effect.reflect.damage" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.reflect.damage",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 5,
+        "attackType": "None",
+        "damageType": "Physical"
+      }
+    ]
+  },
+  {
+    "id": "status.v2.bleed",
+    "name": "Bleed",
+    "description": "Deals bleed damage over time.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 5,
+    "durationTicks": 80,
+    "tags": [ "Status.Bleed", "Pattern.Periodic" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.bleed.dot" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.bleed.dot",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 2,
+        "durationTicks": 80,
+        "intervalTicks": 20,
+        "attackType": "DamageOverTime",
+        "damageType": "Bleed"
+      }
+    ]
+  },
+  {
+    "id": "status.v2.burn",
+    "name": "Burn",
+    "description": "Deals burn damage over time.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 5,
+    "durationTicks": 100,
+    "tags": [ "Status.Burn", "Pattern.Periodic" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.burn.dot" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.burn.dot",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 2,
+        "durationTicks": 60,
+        "intervalTicks": 20,
+        "attackType": "DamageOverTime",
+        "damageType": "Burn"
+      }
+    ]
+  },
+  {
+    "id": "status.v2.curse",
+    "name": "Curse",
+    "description": "Deals magical curse damage over time.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 5,
+    "durationTicks": 120,
+    "tags": [ "Status.Curse", "Pattern.Periodic" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.curse.dot" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.curse.dot",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 2,
+        "durationTicks": 120,
+        "intervalTicks": 20,
+        "attackType": "DamageOverTime",
+        "damageType": "Magical"
+      }
+    ]
+  },
+  {
+    "id": "status.v2.taunt",
+    "name": "Taunt",
+    "description": "Marks the combatant as taunting.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 80,
+    "tags": [ "Control.Taunt" ]
+  },
+  {
+    "id": "status.v2.lesser_burn",
+    "name": "Lesser Burn",
+    "description": "Deals light burn damage over time.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 3,
+    "durationTicks": 80,
+    "tags": [ "Status.Burn", "Pattern.Periodic" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.lesser_burn.dot" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.lesser_burn.dot",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 1,
+        "durationTicks": 80,
+        "intervalTicks": 20,
+        "attackType": "DamageOverTime",
+        "damageType": "Burn"
+      }
+    ]
+  },
+  {
+    "id": "status.v2.vulnerable_mark",
+    "name": "Vulnerable Mark",
+    "description": "The next hit against this target deals bonus physical damage.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 60,
+    "tags": [ "Status.Vulnerable" ],
+    "triggers": [
+      {
+        "event": "OnDamaged",
+        "effectIds": [ "effect.vulnerable_mark.damage" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.vulnerable_mark.damage",
+        "operation": "Damage",
+        "target": "EventSource",
+        "baseValue": 5,
+        "uses": 1,
+        "damageType": "Physical"
+      }
+    ]
+  },
+  {
+    "id": "status.v2.sneak_attack_bleed",
+    "name": "Sneak Attack Bleed",
+    "description": "Takes initial physical damage and bleeds over time.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 5,
+    "durationTicks": 80,
+    "tags": [ "Status.Bleed", "Pattern.Periodic" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.initial.damage", "effect.bleed.dot" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.initial.damage",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 5,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.15,
+        "attackType": "Melee",
+        "damageType": "Physical"
+      },
+      {
+        "id": "effect.bleed.dot",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 4,
+        "durationTicks": 80,
+        "intervalTicks": 40,
+        "attackType": "DamageOverTime",
+        "damageType": "Bleed"
+      }
+    ]
+  },
+  {
+    "id": "status.v2.poisoned_arrow",
+    "name": "Poisoned Arrow",
+    "description": "Takes poison damage over time.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 5,
+    "durationTicks": 30,
+    "tags": [ "Status.Poison", "Pattern.Periodic", "Arrows" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.poison.dot" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.poison.dot",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 2,
+        "durationTicks": 30,
+        "intervalTicks": 10,
+        "attackType": "DamageOverTime",
+        "damageType": "Poison"
+      }
+    ]
+  },
+  {
+    "id": "status.v2.cold",
+    "name": "Cold",
+    "description": "Persistent cold stacks used by frost abilities.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 5,
+    "durationTicks": 0,
+    "tags": [ "Status.Cold", "Element.Frost" ],
+    "triggers": [],
+    "effects": []
+  },
+  {
+    "id": "status.v2.frost_imp.freeze",
+    "name": "Freeze",
+    "description": "Short frost control marker.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 40,
+    "tags": [ "Status.Freeze", "Element.Frost", "Control.Freeze" ],
+    "triggers": [],
+    "effects": []
+  },
+  {
+    "id": "status.v2.shadow_image",
+    "name": "Shadow Image",
+    "description": "Short-lived shadow image marker.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 100,
+    "tags": [ "Status.Summon", "Element.Shadow" ],
+    "triggers": [],
+    "effects": []
+  },
+  {
+    "id": "status.v2.green_slime.poison",
+    "name": "Green Slime Poison",
+    "description": "Deals poison damage over 9 seconds.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 5,
+    "durationTicks": 90,
+    "tags": [ "Status.Poison", "Pattern.Periodic" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.green_slime_poison.dot" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.green_slime_poison.dot",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 4,
+        "durationTicks": 90,
+        "intervalTicks": 30,
+        "attackType": "DamageOverTime",
+        "damageType": "Poison"
+      }
+    ]
+  },
+  {
+    "id": "status.v2.corrosive_ooze.poison",
+    "name": "Corrosive Ooze Poison",
+    "description": "Deals poison damage over 12 seconds.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 5,
+    "durationTicks": 120,
+    "tags": [ "Status.Poison", "Pattern.Periodic" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.corrosive_ooze_poison.dot" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.corrosive_ooze_poison.dot",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 2,
+        "durationTicks": 120,
+        "intervalTicks": 40,
+        "attackType": "DamageOverTime",
+        "damageType": "Poison"
+      }
+    ]
+  },
+  {
+    "id": "status.v2.unstable_colors.buff",
+    "name": "Unstable Colors",
+    "description": "Increases power twice for a short duration.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 100,
+    "tags": [ "Status.Buff", "Pattern.TimedBuff" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.unstable_colors.power_one", "effect.unstable_colors.power_two" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.unstable_colors.power_one",
+        "operation": "ModifyAttribute",
+        "target": "EventTarget",
+        "attribute": "Power",
+        "baseValue": 20,
+        "durationTicks": 100
+      },
+      {
+        "id": "effect.unstable_colors.power_two",
+        "operation": "ModifyAttribute",
+        "target": "EventTarget",
+        "attribute": "Power",
+        "baseValue": 20,
+        "durationTicks": 100
+      }
+    ]
+  },
+  {
+    "id": "status.v2.red_slime.fire_aura",
+    "name": "Fire Aura",
+    "description": "Deals burn damage every second for 10 seconds.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 100,
+    "tags": [ "Status.Burn", "Element.Fire", "Pattern.Periodic" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.fire_aura.dot" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.fire_aura.dot",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 3,
+        "durationTicks": 100,
+        "intervalTicks": 10,
+        "attackType": "DamageOverTime",
+        "damageType": "Burn"
+      }
+    ]
+  },
+  {
+    "id": "status.v2.transparent_engulfed",
+    "name": "Engulfed",
+    "description": "Stunned and taking physical damage over time.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 30,
+    "tags": [ "Control.Stun", "Pattern.Periodic" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.engulf.damage" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.engulf.damage",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 3,
+        "durationTicks": 30,
+        "intervalTicks": 10,
+        "attackType": "DamageOverTime",
+        "damageType": "Physical"
+      }
+    ]
+  },
+  {
+    "id": "status.v2.transparent_dodge_boost",
+    "name": "Evasive Shift",
+    "description": "Dodge chance increased for a short duration.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 30,
+    "tags": [ "Status.Buff", "Defense.Dodge", "Pattern.TimedBuff" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.transparent_dodge_boost.dodge" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.transparent_dodge_boost.dodge",
+        "operation": "ModifyAttribute",
+        "target": "EventTarget",
+        "attribute": "DodgeChance",
+        "baseValue": 40,
+        "durationTicks": 30
+      }
+    ]
+  },
+  {
+    "id": "status.v2.charmed_stun",
+    "name": "Charmed",
+    "description": "Stunned by charm.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 50,
+    "tags": [ "Control.Stun", "Status.Charm" ],
+    "triggers": [],
+    "effects": []
+  },
+  {
+    "id": "status.v2.illusion_fox.accuracy_debuff",
+    "name": "Distracted",
+    "description": "Precision reduced by illusion.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 5,
+    "durationTicks": 50,
+    "tags": [ "Status.Debuff", "Debuff.Precision", "Pattern.TimedDebuff" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.accuracy_debuff.precision" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.accuracy_debuff.precision",
+        "operation": "ModifyAttribute",
+        "target": "EventTarget",
+        "attribute": "Precision",
+        "baseValue": -10,
+        "durationTicks": 50
+      }
+    ]
+  },
+  {
+    "id": "status.v2.foxfire_stack",
+    "name": "Foxfire Stack",
+    "description": "Retaliates when attacked and consumes a stack.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 5,
+    "durationTicks": 0,
+    "tags": [ "Status.Stack", "Retaliation", "Element.Magical" ],
+    "triggers": [
+      {
+        "event": "OnAttacked",
+        "effectIds": [ "effect.foxfire.damage", "effect.foxfire.consume" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.foxfire.damage",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 8,
+        "attackType": "None",
+        "damageType": "Magical",
+        "conditions": [
+          {
+            "type": "StatusStacksAtLeast",
+            "subject": "EventSource",
+            "statusId": "status.v2.foxfire_stack",
+            "value": 1
+          }
+        ]
+      },
+      {
+        "id": "effect.foxfire.consume",
+        "operation": "ModifyStatusStacks",
+        "target": "EventSource",
+        "statusId": "status.v2.foxfire_stack",
+        "baseValue": -1,
+        "conditions": [
+          {
+            "type": "StatusStacksAtLeast",
+            "subject": "EventSource",
+            "statusId": "status.v2.foxfire_stack",
+            "value": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "status.v2.necrotic_spore_debuff",
+    "name": "Necrotic Spores",
+    "description": "Suppresses health regeneration and spirit for a short duration.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 80,
+    "tags": [ "Status.Debuff", "Debuff.Regeneration", "Pattern.TimedDebuff" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.necrotic_spores.health_regen", "effect.necrotic_spores.spirit" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.necrotic_spores.health_regen",
+        "operation": "ModifyAttribute",
+        "target": "EventTarget",
+        "attribute": "HealthRegeneration",
+        "baseValue": -40,
+        "durationTicks": 80
+      },
+      {
+        "id": "effect.necrotic_spores.spirit",
+        "operation": "ModifyAttribute",
+        "target": "EventTarget",
+        "attribute": "Spirit",
+        "baseValue": -40,
+        "durationTicks": 80
+      }
+    ]
+  },
+  {
+    "id": "status.v2.feral_pounce_impact",
+    "name": "Feral Pounce Impact",
+    "description": "Takes pounce damage.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 1,
+    "tags": [ "Range.Melee" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.feral_pounce.damage" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.feral_pounce.damage",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 26,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.3,
+        "attackType": "Melee",
+        "damageType": "Physical"
+      }
+    ]
+  },
+  {
+    "id": "status.v2.feral_pounce_stunned",
+    "name": "Stunned",
+    "description": "Stunned by impact.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 30,
+    "tags": [ "Control.Stun" ],
+    "triggers": [],
+    "effects": []
+  },
+  {
+    "id": "status.v2.shredding_claws_bleed",
+    "name": "Shredding Claws Bleed",
+    "description": "Takes bleed damage over 4 seconds.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 5,
+    "durationTicks": 40,
+    "tags": [ "Status.Bleed", "Pattern.Periodic" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.shredding_claws_bleed.dot" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.shredding_claws_bleed.dot",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 4,
+        "durationTicks": 40,
+        "intervalTicks": 10,
+        "attackType": "DamageOverTime",
+        "damageType": "Bleed"
+      }
+    ]
+  },
+  {
+    "id": "status.v2.plague_swipe_poison",
+    "name": "Plague Swipe Poison",
+    "description": "Takes plague swipe impact damage and a short damage over time effect.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 30,
+    "tags": [ "Status.Bleed", "Pattern.Periodic" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.plague_swipe.damage", "effect.plague_swipe.dot" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.plague_swipe.damage",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 23,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.25,
+        "attackType": "Melee",
+        "damageType": "Physical"
+      },
+      {
+        "id": "effect.plague_swipe.dot",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 4,
+        "durationTicks": 30,
+        "intervalTicks": 10,
+        "attackType": "DamageOverTime",
+        "damageType": "Bleed"
+      }
+    ]
+  },
+  {
+    "id": "status.v2.pestilent_touch_poison",
+    "name": "Pestilent Touch Poison",
+    "description": "Takes poison damage over time.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 60,
+    "tags": [ "Status.Poison", "Pattern.Periodic" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.pestilent_touch_poison.dot" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.pestilent_touch_poison.dot",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 5,
+        "durationTicks": 60,
+        "intervalTicks": 20,
+        "attackType": "DamageOverTime",
+        "damageType": "Poison"
+      }
+    ]
+  },
+  {
+    "id": "status.v2.draining_claws_debuff",
+    "name": "Sapped Attack Power",
+    "description": "Takes draining claw damage and loses power.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 100,
+    "tags": [ "Status.Weakened", "Pattern.TimedDebuff" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.draining_claws.damage", "effect.draining_claws.power" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.draining_claws.damage",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 31,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.25,
+        "attackType": "Melee",
+        "damageType": "Physical"
+      },
+      {
+        "id": "effect.draining_claws.power",
+        "operation": "ModifyAttribute",
+        "target": "EventTarget",
+        "attribute": "Power",
+        "baseValue": -24,
+        "durationTicks": 100
+      }
+    ]
+  },
+  {
+    "id": "status.v2.piercing_arrow_bleed",
+    "name": "Pierced Bleed",
+    "description": "Takes bleed damage from a pierced wound.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 90,
+    "tags": [ "Status.Bleed", "Pattern.Periodic" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.piercing_arrow_bleed.dot" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.piercing_arrow_bleed.dot",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 5,
+        "durationTicks": 90,
+        "intervalTicks": 30,
+        "attackType": "DamageOverTime",
+        "damageType": "Bleed"
+      }
+    ]
+  }
+]

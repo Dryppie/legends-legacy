@@ -1,15 +1,10 @@
 using Application.Interfaces.Services.LL.Essences;
 using Application.UseCases.Essences.Dtos;
 using Domain.Components.Attributes;
-using Domain.Models.AbilityDefinitions;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
-using Domain.Models.Combat.Abilities;
-using Domain.Models.Combat.Abilities.Effects.Actions;
-using Domain.Models.Combat.Abilities.Effects.Conditions;
-using Domain.Models.Combat.Abilities.Effects.Trigger;
-using Domain.Models.Combat.Abilities.Triggers.TriggerFilters;
+using Domain.Models.Combat.Abilities.V2;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
@@ -24,9 +19,9 @@ using Persistence.LL.Repositories.Essences;
 using Persistence.LL.Repositories.Inventories;
 using Persistence.LL.Repositories.Items;
 using Services.LL.Combat;
-using Services.LL.Combat.CombatEngine;
 using Services.LL.Combat.Stats;
 using Services.LL.Essences;
+using Services.LL.Inventories;
 using Services.LL.Interfaces;
 
 namespace EssenceSystem.Tests;
@@ -184,14 +179,12 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
-    public async Task Attuned_essences_generate_scaled_combat_abilities_for_active_loadout_only()
+    public async Task Attuned_essences_return_v2_ability_specs_for_active_loadout_only()
     {
         await using var db = CreateDb();
         var characterId = await SeedCharacterAndInventoryAsync(db, level: 20);
         var attunedId = await AddPlayerEssenceAsync(db, characterId, "essence.test", level: 3);
         await AddPlayerEssenceAsync(db, characterId, "essence.other", level: 3);
-        db.PlayerEssences.Single(x => x.Id == attunedId).AscensionTier = 1;
-        db.PlayerEssences.Single(x => x.Id == attunedId).IsEvolved = true;
         db.EssenceLoadouts.Add(new EssenceLoadout
         {
             Id = Guid.NewGuid(),
@@ -203,27 +196,12 @@ public sealed class EssenceSystemServiceTests
         await db.SaveChangesAsync();
         var service = CreateService(db);
 
-        var abilities = await service.GetAttunedCombatAbilitiesAsync(characterId, CancellationToken.None);
+        var abilities = await service.GetAttunedAbilitiesAsync(characterId, CancellationToken.None);
 
         Assert.Equal(2, abilities.Count);
-        Assert.All(abilities, x => Assert.StartsWith("essence.test", x.Definition.Id));
-
-        var active = abilities.Single(x => x.Definition.Type == CombatAbilityType.Active).Definition;
-        Assert.Equal(171, active.Cooldown);
-        Assert.Equal(171, abilities.Single(x => x.Definition.Type == CombatAbilityType.Active).RemainingTimeUntilUse);
-        Assert.Equal(TriggerEvent.OnAbilityUsed, active.Triggers.Single().Event);
-        Assert.IsType<AbilityIdFilter>(active.Triggers.Single().Filters.Single());
-        var activeAction = Assert.IsType<CombatEffectAction>(active.Triggers.Single().Actions.Single().Action);
-        Assert.Equal(CombatEffectOperation.Damage, activeAction.Operation);
-        Assert.Equal(18, activeAction.Magnitude);
-
-        var passive = abilities.Single(x => x.Definition.Type == CombatAbilityType.Passive).Definition;
-        Assert.Equal(0, abilities.Single(x => x.Definition.Type == CombatAbilityType.Passive).RemainingTimeUntilUse);
-        Assert.Equal(TriggerEvent.OnAttack, passive.Triggers.Single().Event);
-        var passiveAction = Assert.IsType<CombatEffectAction>(passive.Triggers.Single().Actions.Single().Action);
-        Assert.Equal(CombatEffectOperation.ModifyAttribute, passiveAction.Operation);
-        Assert.Equal(AttributeType.Power, passiveAction.Attribute);
-        Assert.Equal(1, passiveAction.Magnitude);
+        Assert.All(abilities, x => Assert.StartsWith("essence.test", x.Id));
+        Assert.Contains(abilities, x => x.Kind == AbilitySpecKind.Active && x.CooldownTicks == 180);
+        Assert.Contains(abilities, x => x.Kind == AbilitySpecKind.Passive && x.Triggers.Single().Event == AbilityTriggerEvent.OnHit);
     }
 
     [Fact]
@@ -249,98 +227,10 @@ public sealed class EssenceSystemServiceTests
         var loadout = await service.ResolveAsync(characterId, CancellationToken.None);
 
         Assert.Single(loadout.EquippedEssences);
-        Assert.Single(loadout.ActiveAbilities);
-        Assert.Single(loadout.PassiveAbilities);
         Assert.Single(loadout.AttributeModifiers);
         Assert.Contains("Species.Beast", loadout.Tags);
         Assert.Contains("Mechanic.Execute", loadout.Tags);
-        Assert.Equal("essence.test.active", loadout.ActiveAbilities.Single().AbilityDefinitionId);
-        Assert.Equal(attunedId, loadout.ActiveAbilities.Single().SourcePlayerEssenceId);
-        Assert.Equal(3, loadout.ActiveAbilities.Single().EssenceLevel);
-        Assert.Equal(171, loadout.ActiveAbilities.Single().Cooldown);
         Assert.Equal(2.16f, loadout.AttributeModifiers.Single().Amount, 2);
-    }
-
-    [Fact]
-    public async Task Attuned_combat_abilities_map_reusable_effect_and_condition_primitives()
-    {
-        await using var db = CreateDb();
-        var characterId = await SeedCharacterAndInventoryAsync(db, level: 20);
-        var essenceId = await AddPlayerEssenceAsync(db, characterId, "essence.utility", level: 1);
-        db.EssenceLoadouts.Add(new EssenceLoadout
-        {
-            Id = Guid.NewGuid(),
-            CharacterId = characterId,
-            Name = "Active",
-            IsActive = true,
-            Slots = [new EssenceLoadoutSlot { Id = Guid.NewGuid(), SlotIndex = 0, PlayerEssenceId = essenceId }]
-        });
-        await db.SaveChangesAsync();
-        var service = CreateService(db, definitions: new SingleDefinitionRepository(UtilityDefinition()));
-
-        var active = (await service.GetAttunedCombatAbilitiesAsync(characterId, CancellationToken.None))
-            .Single(x => x.Definition.Type == CombatAbilityType.Active)
-            .Definition;
-
-        var operations = active.Triggers.Single().Actions
-            .Select(x => Assert.IsType<CombatEffectAction>(x.Action).Operation)
-            .ToList();
-        Assert.Contains(CombatEffectOperation.RemoveStatus, operations);
-        Assert.Contains(CombatEffectOperation.Cleanse, operations);
-        Assert.Contains(CombatEffectOperation.Summon, operations);
-        Assert.Contains(CombatEffectOperation.TriggerSecondaryEffect, operations);
-        Assert.Equal(2, operations.Count(x => x == CombatEffectOperation.RestoreResource));
-        Assert.Equal(1, operations.Count(x => x == CombatEffectOperation.ModifyAttribute));
-        Assert.Equal(4, operations.Count(x => x == CombatEffectOperation.Damage));
-        Assert.Contains(active.Triggers.Single().Actions, x => x.Condition is CombatantStatusCondition);
-        Assert.Contains(active.Triggers.Single().Actions, x => x.Condition is CombatantTagCondition);
-    }
-
-    [Fact]
-    public async Task Attuned_combat_abilities_map_extended_target_selectors_and_conditions()
-    {
-        await using var db = CreateDb();
-        var characterId = await SeedCharacterAndInventoryAsync(db, level: 20);
-        var essenceId = await AddPlayerEssenceAsync(db, characterId, "essence.extended", level: 1);
-        db.EssenceLoadouts.Add(new EssenceLoadout
-        {
-            Id = Guid.NewGuid(),
-            CharacterId = characterId,
-            Name = "Active",
-            IsActive = true,
-            Slots = [new EssenceLoadoutSlot { Id = Guid.NewGuid(), SlotIndex = 0, PlayerEssenceId = essenceId }]
-        });
-        await db.SaveChangesAsync();
-        var definition = FakeDefinitionRepository.CreateDefinition("essence.extended", "monster.extended");
-        definition.ActiveAbility.Targeting = AbilityTargetSelector.TwoEnemies;
-        definition.ActiveAbility.Effects[0].Target = AbilityTargetSelector.TwoEnemies;
-        definition.ActiveAbility.Effects[0].Conditions =
-        [
-            new() { Type = AbilityConditionType.SourceHealthAbovePercent, Value = 20 },
-            new() { Type = AbilityConditionType.ChanceRoll, Value = 25 }
-        ];
-        var service = CreateService(db, definitions: new SingleDefinitionRepository(definition));
-
-        var active = (await service.GetAttunedCombatAbilitiesAsync(characterId, CancellationToken.None))
-            .Single(x => x.Definition.Type == CombatAbilityType.Active)
-            .Definition;
-
-        var action = active.Triggers.Single().Actions.Single();
-        Assert.Equal(CombatTargeting.TwoEnemies, action.Targeting);
-        Assert.Equal(25, action.Chance);
-        Assert.IsType<CombatantHealthCondition>(action.Condition);
-    }
-
-    [Fact]
-    public void Combat_event_bus_rejects_recursive_dispatch_loops()
-    {
-        var bus = new CombatEventBus();
-        var combatEvent = new CombatEvent { Type = TriggerEvent.OnAbilityUsed };
-        bus.Subscribe(_ => bus.Publish(combatEvent));
-
-        var exception = Assert.Throws<InvalidOperationException>(() => bus.Publish(combatEvent));
-
-        Assert.Contains("maximum depth", exception.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -377,15 +267,15 @@ public sealed class EssenceSystemServiceTests
 
         await service.PrepareEntitiesForCombat([combatEntity]);
 
-        Assert.Contains(combatEntity.Abilities, x => x.Definition.Id == "essence.utility.active" && x.Definition.Type == CombatAbilityType.Active);
-        Assert.Contains(combatEntity.Abilities, x => x.Definition.Id == "essence.utility.passive" && x.Definition.Type == CombatAbilityType.Passive);
+        Assert.Contains(combatEntity.EquippedEssences, x => x.EssenceDefinitionId == "essence.utility");
+        Assert.True(combatEntity.HasEquippedEssenceSnapshot);
         Assert.Contains("Species.Beast", combatEntity.Tags);
         var modifier = Assert.Single(combatEntity.TemporaryModifiers, x => x.AttributeType == AttributeType.Power);
-        Assert.Equal(5, modifier.Amount);
+        Assert.Equal(2.24f, modifier.Amount, 2);
     }
 
     [Fact]
-    public void Combat_stats_ignores_ability_use_events_without_stat_contribution()
+    public void Combat_stats_counts_ability_use_events()
     {
         var aggregator = new CombatStatsAggregator();
 
@@ -410,9 +300,104 @@ public sealed class EssenceSystemServiceTests
         ]);
 
         var enemy = stats.Single(x => x.EntityId == "enemy");
-        var ability = Assert.Single(enemy.Abilities);
-        Assert.Equal("Screech", ability.Name);
-        Assert.DoesNotContain(enemy.Abilities, x => x.Name == "ability.essence.cave_bat.screech");
+        Assert.Contains(enemy.Abilities, x =>
+            x.Name == "ability.essence.cave_bat.screech"
+            && x.Uses == 1
+            && x.TotalDamage == 0);
+        Assert.Contains(enemy.Abilities, x =>
+            x.Name == "Screech"
+            && x.Uses == 0
+            && x.TotalDamage == 54);
+    }
+
+    [Fact]
+    public void Combat_stats_groups_effect_output_by_stats_source()
+    {
+        var aggregator = new CombatStatsAggregator();
+
+        var stats = aggregator.Aggregate(
+        [
+            new CombatLogItem
+            {
+                ActorId = "player",
+                Source = "Sneak Attack",
+                EventType = EventType.AbilityUse,
+                Details = "Player used Sneak Attack"
+            },
+            new CombatLogItem
+            {
+                ActorId = "player",
+                TargetId = "enemy",
+                Source = "effect.initial.damage",
+                StatsSource = "Sneak Attack",
+                EventType = EventType.Damage,
+                Magnitude = 33
+            },
+            new CombatLogItem
+            {
+                ActorId = "player",
+                TargetId = "enemy",
+                Source = "effect.poison.dot",
+                StatsSource = "Sneak Attack",
+                EventType = EventType.Damage,
+                Magnitude = 14
+            }
+        ]);
+
+        var player = stats.Single(x => x.EntityId == "player");
+        var ability = Assert.Single(player.Abilities);
+        Assert.Equal("Sneak Attack", ability.Name);
+        Assert.Equal(1, ability.Uses);
+        Assert.Equal(47, ability.TotalDamage);
+    }
+
+    [Fact]
+    public void Combat_stats_counts_marked_passive_outcomes_as_procs()
+    {
+        var aggregator = new CombatStatsAggregator();
+
+        var stats = aggregator.Aggregate(
+        [
+            new CombatLogItem
+            {
+                ActorId = "imp",
+                TargetId = "player",
+                Source = "effect.hot_aura.damage",
+                StatsSource = "Hot Aura",
+                CountsAsActivation = true,
+                EventType = EventType.Damage,
+                Magnitude = 4
+            },
+            new CombatLogItem
+            {
+                ActorId = "archer",
+                TargetId = "enemy",
+                Source = "status.v2.poisoned_arrow",
+                StatsSource = "Poisoned Arrows",
+                CountsAsActivation = true,
+                EventType = EventType.StatusEffect,
+                Magnitude = 1
+            },
+            new CombatLogItem
+            {
+                ActorId = "archer",
+                TargetId = "enemy",
+                Source = "effect.poison.dot",
+                StatsSource = "Poisoned Arrows",
+                EventType = EventType.Damage,
+                Magnitude = 6
+            }
+        ]);
+
+        var hotAura = stats.Single(x => x.EntityId == "imp").Abilities.Single();
+        Assert.Equal("Hot Aura", hotAura.Name);
+        Assert.Equal(1, hotAura.Uses);
+        Assert.Equal(4, hotAura.TotalDamage);
+
+        var poisonedArrows = stats.Single(x => x.EntityId == "archer").Abilities.Single();
+        Assert.Equal("Poisoned Arrows", poisonedArrows.Name);
+        Assert.Equal(1, poisonedArrows.Uses);
+        Assert.Equal(6, poisonedArrows.TotalDamage);
     }
 
     [Fact]
@@ -447,10 +432,10 @@ public sealed class EssenceSystemServiceTests
 
         await setup.PrepareEntitiesForCombat([combatEntity]);
 
-        Assert.Contains(combatEntity.Abilities, x => x.Definition.Id == "essence.test.active" && x.Definition.Type == CombatAbilityType.Active);
-        Assert.Contains(combatEntity.Abilities, x => x.Definition.Id == "essence.test.passive" && x.Definition.Type == CombatAbilityType.Passive);
+        Assert.Contains(combatEntity.EquippedEssences, x => x.Id == essenceId && x.EssenceDefinitionId == "essence.test");
+        Assert.True(combatEntity.HasEquippedEssenceSnapshot);
         Assert.Contains("Species.Beast", combatEntity.Tags);
-        Assert.Equal(13, combatEntity.CombatAttributes[AttributeType.Power]);
+        Assert.Equal(12, combatEntity.CombatAttributes[AttributeType.Power]);
     }
 
     [Fact]
@@ -469,7 +454,7 @@ public sealed class EssenceSystemServiceTests
         Assert.True(result.ReachedTierCap);
         Assert.Equal(10, db.PlayerEssences.Single(x => x.Id == essenceId).Level);
         Assert.Equal(0, db.PlayerEssences.Single(x => x.Id == essenceId).CurrentXp);
-        Assert.Equal(96, await InventoryQuantityAsync(db, characterId, "soul_dust"));
+        Assert.Equal(84, await InventoryQuantityAsync(db, characterId, "soul_dust"));
     }
 
     [Fact]
@@ -478,7 +463,7 @@ public sealed class EssenceSystemServiceTests
         await using var db = CreateDb();
         var characterId = await SeedCharacterAndInventoryAsync(db);
         var essenceId = await AddPlayerEssenceAsync(db, characterId, level: 10);
-        await AddInventoryQuantityAsync(db, characterId, "item.monster_core.tier_1", 1);
+        await AddInventoryQuantityAsync(db, characterId, "item.monster_core.lesser", 6);
         await AddInventoryQuantityAsync(db, characterId, "item.evolution_catalyst.test", 1);
         var service = CreateService(db);
 
@@ -492,7 +477,7 @@ public sealed class EssenceSystemServiceTests
         Assert.True(evolve.Succeeded);
         Assert.Equal(1, essence.AscensionTier);
         Assert.True(essence.IsEvolved);
-        Assert.Equal(0, await InventoryQuantityAsync(db, characterId, "item.monster_core.tier_1"));
+        Assert.Equal(0, await InventoryQuantityAsync(db, characterId, "item.monster_core.lesser"));
         Assert.Equal(0, await InventoryQuantityAsync(db, characterId, "item.evolution_catalyst.test"));
     }
 
@@ -557,6 +542,7 @@ public sealed class EssenceSystemServiceTests
             new EssenceProgressionService(),
             new EssenceSlotUnlockService(),
             new EssenceLoadoutLimitService(),
+            new InventoryItemFactory(),
             random ?? new QueueRandomProvider(0.99));
     }
 
@@ -566,33 +552,31 @@ public sealed class EssenceSystemServiceTests
         SourceMonsterId = "monster.utility",
         Name = "Utility",
         Tags = ["Species.Beast", "Role.Support"],
-        ActiveAbility = new AbilityDefinition
+        ActiveAbilityId = "essence.utility.active",
+        PassiveAbilityId = "essence.utility.passive",
+        ActiveAbility = new AbilitySpec
         {
             Id = "essence.utility.active",
-            Kind = AbilityDefinitionKind.Active,
+            Kind = AbilitySpecKind.Active,
             Name = "Utility Active",
+            CooldownTicks = 100,
             Effects =
             [
-                new() { Id = "remove", Type = AbilityEffectType.RemoveStatus, Status = "Burn" },
-                new() { Id = "cleanse", Type = AbilityEffectType.Cleanse, Target = AbilityTargetSelector.Self },
-                new() { Id = "summon", Type = AbilityEffectType.Summon, Status = "wolf" },
-                new() { Id = "taunt", Type = AbilityEffectType.Taunt, Target = AbilityTargetSelector.Self, Scaling = new AbilityScalingFormula { BaseValue = 1 } },
-                new() { Id = "reflect", Type = AbilityEffectType.ReflectDamage, Scaling = new AbilityScalingFormula { BaseValue = 1 } },
-                new() { Id = "absorb", Type = AbilityEffectType.AbsorbDamage, Target = AbilityTargetSelector.Self, Scaling = new AbilityScalingFormula { BaseValue = 1 } },
-                new() { Id = "secondary", Type = AbilityEffectType.TriggerSecondaryEffect, Status = "secondary.effect" },
-                new() { Id = "heal", Type = AbilityEffectType.Heal, Target = AbilityTargetSelector.Self, Scaling = new AbilityScalingFormula { BaseValue = 1 } },
-                new() { Id = "damage", Type = AbilityEffectType.Damage, Scaling = new AbilityScalingFormula { BaseValue = 1 }, Conditions = [new() { Type = AbilityConditionType.TargetHasStatus, Status = "Burn" }] },
-                new() { Id = "tagged", Type = AbilityEffectType.Damage, Scaling = new AbilityScalingFormula { BaseValue = 1 }, Conditions = [new() { Type = AbilityConditionType.TargetHasTag, Tag = "Role.Tank" }] },
-                new() { Id = "species", Type = AbilityEffectType.Damage, Scaling = new AbilityScalingFormula { BaseValue = 1 }, Conditions = [new() { Type = AbilityConditionType.IsSpecies, Tag = "Beast" }] }
+                new() { Id = "remove", Operation = AbilityEffectOperation.RemoveStatus, StatusId = "Burn" },
+                new() { Id = "cleanse", Operation = AbilityEffectOperation.Cleanse, Target = AbilityTargetSelectorV2.Self },
+                new() { Id = "summon", Operation = AbilityEffectOperation.Summon, SummonId = "wolf" },
+                new() { Id = "heal", Operation = AbilityEffectOperation.Heal, Target = AbilityTargetSelectorV2.Self, BaseValue = 1 },
+                new() { Id = "damage", Operation = AbilityEffectOperation.Damage, BaseValue = 1, Conditions = [new() { Type = AbilityConditionTypeV2.HasStatus, StatusId = "Burn" }] },
+                new() { Id = "tagged", Operation = AbilityEffectOperation.Damage, BaseValue = 1, Conditions = [new() { Type = AbilityConditionTypeV2.HasTag, Tag = "Role.Tank" }] }
             ]
         },
-        PassiveAbility = new AbilityDefinition
+        PassiveAbility = new AbilitySpec
         {
             Id = "essence.utility.passive",
-            Kind = AbilityDefinitionKind.Passive,
+            Kind = AbilitySpecKind.Passive,
             Name = "Utility Passive",
-            Triggers = [new() { Type = "Trigger.OnHit" }],
-            Effects = [new() { Id = "passive.damage", Type = AbilityEffectType.Damage, Scaling = new AbilityScalingFormula { BaseValue = 1 } }]
+            Triggers = [new() { Event = AbilityTriggerEvent.OnHit }],
+            Effects = [new() { Id = "passive.damage", Operation = AbilityEffectOperation.Damage, BaseValue = 1 }]
         },
         Evolution = new EssenceEvolutionDefinition
         {
@@ -607,7 +591,7 @@ public sealed class EssenceSystemServiceTests
         db.Characters.Add(new Character { Id = characterId, UserId = Guid.NewGuid(), Name = "Test", Level = level });
         db.Inventories.Add(new Inventory { CharacterId = characterId });
         await SeedStackableItemBaseAsync(db, "soul_dust");
-        await SeedStackableItemBaseAsync(db, "item.monster_core.tier_1");
+        await SeedStackableItemBaseAsync(db, "item.monster_core.lesser");
         await SeedStackableItemBaseAsync(db, "item.evolution_catalyst.test");
         await db.SaveChangesAsync();
         return characterId;
@@ -684,9 +668,12 @@ public sealed class EssenceSystemServiceTests
         public EssenceDefinition? GetByMonsterId(string monsterId) =>
             _definitions.FirstOrDefault(x => x.SourceMonsterId.Equals(monsterId, StringComparison.OrdinalIgnoreCase));
 
-        public AbilityDefinition? GetAbilityById(string abilityId) =>
+        public AbilitySpec? GetAbilityById(string abilityId) =>
             _definitions.SelectMany(x => new[] { x.ActiveAbility, x.PassiveAbility })
                 .FirstOrDefault(x => x.Id.Equals(abilityId, StringComparison.OrdinalIgnoreCase));
+
+        public IReadOnlyList<AbilitySpec> GetAllAbilities() =>
+            _definitions.SelectMany(x => new[] { x.ActiveAbility, x.PassiveAbility }).ToList();
 
         public static EssenceDefinition CreateDefinition(string id, string monsterId) => new()
         {
@@ -704,23 +691,23 @@ public sealed class EssenceSystemServiceTests
                     BaseValue = 2
                 }
             ],
-            ActiveAbility = new AbilityDefinition
+            ActiveAbility = new AbilitySpec
             {
                 Id = $"{id}.active",
-                Kind = AbilityDefinitionKind.Active,
+                Kind = AbilitySpecKind.Active,
                 Name = "Active",
-                CooldownSeconds = 18,
+                CooldownTicks = 180,
                 Tags = ["Effect.Ability"],
-                Effects = [new() { Id = "effect.damage.main", Type = "Damage", Scaling = new AbilityScalingFormula { BaseValue = 10 } }]
+                Effects = [new() { Id = "effect.damage.main", Operation = AbilityEffectOperation.Damage, BaseValue = 10 }]
             },
-            PassiveAbility = new AbilityDefinition
+            PassiveAbility = new AbilitySpec
             {
                 Id = $"{id}.passive",
-                Kind = AbilityDefinitionKind.Passive,
+                Kind = AbilitySpecKind.Passive,
                 Name = "Passive",
                 Tags = ["Trigger.OnHit"],
-                Triggers = [new() { Type = "Trigger.OnHit" }],
-                Effects = [new() { Id = "effect.attribute.main", Type = "ModifyAttribute", Target = "Self", Attribute = "Power", Scaling = new AbilityScalingFormula { BaseValue = 1 } }]
+                Triggers = [new() { Event = AbilityTriggerEvent.OnHit }],
+                Effects = [new() { Id = "effect.attribute.main", Operation = AbilityEffectOperation.ModifyAttribute, Target = AbilityTargetSelectorV2.Self, Attribute = AttributeType.Power, BaseValue = 1 }]
             },
             Evolution = new EssenceEvolutionDefinition
             {
@@ -748,9 +735,12 @@ public sealed class EssenceSystemServiceTests
             definition.Id.Equals(essenceDefinitionId, StringComparison.OrdinalIgnoreCase) ? definition : null;
         public EssenceDefinition? GetByMonsterId(string monsterId) =>
             definition.SourceMonsterId.Equals(monsterId, StringComparison.OrdinalIgnoreCase) ? definition : null;
-        public AbilityDefinition? GetAbilityById(string abilityId) =>
+        public AbilitySpec? GetAbilityById(string abilityId) =>
             new[] { definition.ActiveAbility, definition.PassiveAbility }
                 .FirstOrDefault(x => x.Id.Equals(abilityId, StringComparison.OrdinalIgnoreCase));
+
+        public IReadOnlyList<AbilitySpec> GetAllAbilities() =>
+            [definition.ActiveAbility, definition.PassiveAbility];
     }
 
     private sealed class NoopCreatureScaler : ICreatureScaler
@@ -766,7 +756,7 @@ public sealed class EssenceSystemServiceTests
             Task.FromResult(Resolve(characterId, []));
 
         public EssenceCombatLoadout Resolve(Guid characterId, IEnumerable<PlayerEssence> equippedEssences) =>
-            new(characterId, equippedEssences.ToList(), [], [], [], new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+            new(characterId, equippedEssences.ToList(), [], new HashSet<string>(StringComparer.OrdinalIgnoreCase));
     }
 
     private sealed class QueueRandomProvider(params double[] values) : IRandomProvider

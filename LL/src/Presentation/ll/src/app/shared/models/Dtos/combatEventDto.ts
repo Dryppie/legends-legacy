@@ -34,5 +34,5 @@ export interface CombatEvent {
   targetId: string;
   timestamp: number;
   details: string;
-  combatEntity: SimpleCombatEntityDto;
+  combatEntity: SimpleCombatEntityDto | null;
 }

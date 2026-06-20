@@ -47,12 +47,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
     {
       link: '/game/city/tavern',
       label: 'Leaderboard',
-      icon: 'icons/ui/Leaderboard.svg',
+      icon: 'icons/podium/Wreath.svg',
     },
     {
       link: '/game/settings',
       label: 'Settings',
-      icon: 'icons/ui/Settings.svg',
+      icon: 'icons/settings/settings.svg',
     },
   ];
 

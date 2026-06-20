@@ -1,5 +1,5 @@
-using Domain.Models.AbilityDefinitions;
 using Domain.Models.Attributes;
+using Domain.Models.Combat.Abilities.V2;
 using Domain.Models.Items;
 using System.Text.Json.Serialization;
 
@@ -17,9 +17,9 @@ public sealed class EssenceDefinition
     public string ActiveAbilityId { get; set; } = string.Empty;
     public string PassiveAbilityId { get; set; } = string.Empty;
     [JsonIgnore]
-    public AbilityDefinition ActiveAbility { get; set; } = new();
+    public AbilitySpec ActiveAbility { get; set; } = new();
     [JsonIgnore]
-    public AbilityDefinition PassiveAbility { get; set; } = new();
+    public AbilitySpec PassiveAbility { get; set; } = new();
     public EssenceDropDefinition Drop { get; set; } = new();
     public EssenceAscensionDefinition Ascension { get; set; } = new();
     public EssenceEvolutionDefinition Evolution { get; set; } = new();

@@ -43,6 +43,13 @@ export class SidebarService {
             icon: 'character/essences',
             title: 'Recipes',
           },
+          {
+            id: 'diagnostics',
+            route: 'diagnostics',
+            icon: 'settings/settings',
+            title: 'Diagnostics',
+            description: 'Combat v2',
+          },
         ],
       },
     ];

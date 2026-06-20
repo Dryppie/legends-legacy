@@ -3,6 +3,7 @@ import { DashboardComponent } from './dashboard.component';
 import { CreaturesComponent } from '../../features/creatures/creatures.component';
 import { ItemsComponent } from '../../features/items/items.component';
 import { RecipesComponent } from '../../features/recipes/recipes.component';
+import { CombatDiagnosticsComponent } from '../../features/diagnostics/combat-diagnostics.component';
 
 export const DASHBOARD_ROUTES: Routes = [
   {
@@ -25,6 +26,10 @@ export const DASHBOARD_ROUTES: Routes = [
       {
         path: 'recipes',
         component: RecipesComponent,
+      },
+      {
+        path: 'diagnostics',
+        component: CombatDiagnosticsComponent,
       },
     ],
   },

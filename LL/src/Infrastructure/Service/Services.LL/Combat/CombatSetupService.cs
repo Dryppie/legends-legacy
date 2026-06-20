@@ -86,6 +86,8 @@ public class CombatSetupService : ICombatSetupService
         foreach (var entity in entities)
         {
             var essenceLoadout = await ResolveEssenceLoadoutForCombatEntityAsync(entity);
+            entity.EquippedEssences = [.. essenceLoadout.EquippedEssences];
+            entity.HasEquippedEssenceSnapshot = entity.EquippedEssences.Count > 0;
 
             foreach (var modifier in essenceLoadout.AttributeModifiers)
             {
@@ -98,8 +100,6 @@ public class CombatSetupService : ICombatSetupService
             foreach (var tag in essenceLoadout.Tags)
                 entity.Tags.Add(tag);
 
-            entity.Abilities.AddRange(essenceLoadout.Abilities.Select(x => x.Ability));
-
             AttributeCalculator.CalculateBaseCombatAttributes(entity);
         }
     }
@@ -109,13 +109,17 @@ public class CombatSetupService : ICombatSetupService
         var simpleCombatEntities = new List<SimpleCombatEntity>();
         foreach (var entity in combatEntities)
         {
-            simpleCombatEntities.Add(new SimpleCombatEntity(
+            var simpleCombatEntity = new SimpleCombatEntity(
                 entity.Id,
                 entity.Name,
                 entity.ImagePath,
-                (int)entity.BaseCombatAttributes[AttributeType.MaxHealth],
+                entity.GetAttributeValue(AttributeType.MaxHealth),
                 entity.GetCurrentBarrierValue())
-            );
+            {
+                Health = entity.GetCurrentHealthValue()
+            };
+
+            simpleCombatEntities.Add(simpleCombatEntity);
         }
 
         return simpleCombatEntities;

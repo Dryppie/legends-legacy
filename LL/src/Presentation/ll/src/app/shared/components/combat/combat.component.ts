@@ -331,6 +331,8 @@ export class CombatComponent implements OnInit {
 
   private handleSummonEvent(event: CombatEvent): void {
     const summonedCharacter = event.combatEntity;
+    if (!summonedCharacter) return;
+
     if (this.isEntityInPlayerTeam(event.actorId)) {
       this.playerCharacters.push(summonedCharacter);
     } else {
@@ -369,7 +371,11 @@ export class CombatComponent implements OnInit {
     this.updateCharacter(event.combatEntity);
   }
 
-  private updateCharacter(combatEntity: SimpleCombatEntityDto) {
+  private updateCharacter(
+    combatEntity: SimpleCombatEntityDto | null | undefined,
+  ) {
+    if (!combatEntity?.id) return;
+
     const character = this.findCharacterById(combatEntity.id);
     if (!character) return;
     character.health = combatEntity.health;
