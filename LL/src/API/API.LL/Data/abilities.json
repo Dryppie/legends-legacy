@@ -1,10 +1,10 @@
 [
   {
-    "id": "ability.v2.training.strike",
+    "id": "ability.training.strike",
     "kind": "Active",
     "name": "Training Strike",
-    "description": "A simple physical strike used to verify the v2 combat pipeline.",
-    "owningEssenceId": "essence.v2.training",
+    "description": "A simple physical strike used to verify the combat pipeline.",
+    "owningEssenceId": "essence.training",
     "cooldownTicks": 20,
     "tags": [ "Family.Training", "Effect.Damage" ],
     "triggers": [
@@ -27,11 +27,11 @@
     ]
   },
   {
-    "id": "ability.v2.training.guard",
+    "id": "ability.training.guard",
     "kind": "Active",
     "name": "Training Guard",
-    "description": "Grants a small barrier and applies a reflect status for v2 integration tests.",
-    "owningEssenceId": "essence.v2.training",
+    "description": "Grants a small barrier and applies a reflect status for integration tests.",
+    "owningEssenceId": "essence.training",
     "cooldownTicks": 45,
     "tags": [ "Family.Training", "Effect.Barrier", "Status.Reflect" ],
     "triggers": [
@@ -51,17 +51,17 @@
         "id": "effect.status.reflect",
         "operation": "ApplyStatus",
         "target": "Self",
-        "statusId": "status.v2.training.reflect",
+        "statusId": "status.training.reflect",
         "baseValue": 1
       }
     ]
   },
   {
-    "id": "ability.v2.training.burn",
+    "id": "ability.training.burn",
     "kind": "Active",
     "name": "Training Burn",
     "description": "Applies a small burn damage over time status.",
-    "owningEssenceId": "essence.v2.training",
+    "owningEssenceId": "essence.training",
     "cooldownTicks": 30,
     "tags": [ "Family.Training", "Status.Burn", "Pattern.Periodic" ],
     "triggers": [
@@ -75,13 +75,13 @@
         "id": "effect.status.burn",
         "operation": "ApplyStatus",
         "target": "CurrentTarget",
-        "statusId": "status.v2.training.burn",
+        "statusId": "status.training.burn",
         "baseValue": 1
       }
     ]
   },
   {
-    "id": "ability.v2.essence.goblin_ambusher.cheap_shot",
+    "id": "ability.essence.goblin_ambusher.cheap_shot",
     "kind": "Active",
     "name": "Cheap Shot",
     "description": "Deals physical damage to one enemy and applies Bleed.",
@@ -107,13 +107,13 @@
         "id": "effect.status.bleed",
         "operation": "ApplyStatus",
         "target": "CurrentTarget",
-        "statusId": "status.v2.bleed",
+        "statusId": "status.bleed",
         "baseValue": 1
       }
     ]
   },
   {
-    "id": "ability.v2.essence.goblin_ambusher.cowards_opening",
+    "id": "ability.essence.goblin_ambusher.cowards_opening",
     "kind": "Passive",
     "name": "Coward's Opening",
     "description": "On hit against a wounded enemy, gain temporary Critical Chance.",
@@ -146,7 +146,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.skeleton_guardian.bone_bulwark",
+    "id": "ability.essence.skeleton_guardian.bone_bulwark",
     "kind": "Active",
     "name": "Bone Bulwark",
     "description": "Grants a Barrier and temporary Block chance to the lowest-health ally.",
@@ -177,7 +177,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.skeleton_guardian.rattle_guard",
+    "id": "ability.essence.skeleton_guardian.rattle_guard",
     "kind": "Passive",
     "name": "Rattle Guard",
     "description": "On taking damage, has a chance to gain a defensive guard.",
@@ -209,7 +209,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.fire_ant.burning_mandibles",
+    "id": "ability.essence.fire_ant.burning_mandibles",
     "kind": "Active",
     "name": "Burning Mandibles",
     "description": "Deals fire damage and applies Burn.",
@@ -235,13 +235,13 @@
         "id": "effect.status.burn",
         "operation": "ApplyStatus",
         "target": "CurrentTarget",
-        "statusId": "status.v2.burn",
+        "statusId": "status.burn",
         "baseValue": 1
       }
     ]
   },
   {
-    "id": "ability.v2.essence.fire_ant.colony_heat",
+    "id": "ability.essence.fire_ant.colony_heat",
     "kind": "Passive",
     "name": "Colony Heat",
     "description": "On hit, has a small chance to gain damage.",
@@ -273,7 +273,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.cave_bat.screech",
+    "id": "ability.essence.cave_bat.screech",
     "kind": "Active",
     "name": "Screech",
     "description": "Deals low damage and disrupts the target's precision.",
@@ -306,7 +306,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.cave_bat.skittering_wings",
+    "id": "ability.essence.cave_bat.skittering_wings",
     "kind": "Passive",
     "name": "Skittering Wings",
     "description": "On dodge, gain temporary precision.",
@@ -332,7 +332,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.necroshade_wraith.wraith_hex",
+    "id": "ability.essence.necroshade_wraith.wraith_hex",
     "kind": "Active",
     "name": "Wraith Hex",
     "description": "Applies Curse and deals shadow damage over time.",
@@ -358,13 +358,13 @@
         "id": "effect.status.curse",
         "operation": "ApplyStatus",
         "target": "CurrentTarget",
-        "statusId": "status.v2.curse",
+        "statusId": "status.curse",
         "baseValue": 1
       }
     ]
   },
   {
-    "id": "ability.v2.essence.necroshade_wraith.grave_whisper",
+    "id": "ability.essence.necroshade_wraith.grave_whisper",
     "kind": "Passive",
     "name": "Grave Whisper",
     "description": "On enemy death, reduce cooldowns slightly.",
@@ -389,7 +389,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.goblin.sneak_attack",
+    "id": "ability.essence.legacy.goblin.sneak_attack",
     "kind": "Active",
     "name": "Sneak Attack",
     "description": "Stab the target and apply a bleeding wound.",
@@ -407,13 +407,13 @@
         "id": "effect.status.sneak_attack_bleed",
         "operation": "ApplyStatus",
         "target": "CurrentTarget",
-        "statusId": "status.v2.sneak_attack_bleed",
+        "statusId": "status.sneak_attack_bleed",
         "baseValue": 1
       }
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.goblin.pocket_dirt",
+    "id": "ability.essence.legacy.goblin.pocket_dirt",
     "kind": "Passive",
     "name": "Pocket Dirt",
     "description": "Whenever you dodge, throw dirt at the attacker to reduce precision.",
@@ -440,7 +440,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.goblin_warrior.raging_cleave",
+    "id": "ability.essence.legacy.goblin_warrior.raging_cleave",
     "kind": "Active",
     "name": "Raging Cleave",
     "description": "Swing your weapon in a wide arc, damaging two enemies.",
@@ -468,7 +468,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.goblin_warrior.reckless_assault",
+    "id": "ability.essence.legacy.goblin_warrior.reckless_assault",
     "kind": "Passive",
     "name": "Reckless Assault",
     "description": "Increase power, but decrease armor.",
@@ -499,7 +499,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.goblin_archer.snipers_strike",
+    "id": "ability.essence.legacy.goblin_archer.snipers_strike",
     "kind": "Active",
     "name": "Sniper's Strike",
     "description": "Unleash a powerful ranged shot.",
@@ -527,7 +527,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.goblin_archer.poisoned_arrows",
+    "id": "ability.essence.legacy.goblin_archer.poisoned_arrows",
     "kind": "Passive",
     "name": "Poisoned Arrows",
     "description": "Ranged attacks have a chance to apply poison.",
@@ -545,7 +545,7 @@
         "id": "effect.status.poison",
         "operation": "ApplyStatus",
         "target": "EventTarget",
-        "statusId": "status.v2.poisoned_arrow",
+        "statusId": "status.poisoned_arrow",
         "baseValue": 1,
         "conditions": [
           {
@@ -557,7 +557,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.large_rat.tail_wrap",
+    "id": "ability.essence.legacy.large_rat.tail_wrap",
     "kind": "Active",
     "name": "Tail Wrap",
     "description": "Apply a crushing force to the target.",
@@ -584,7 +584,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.large_rat.big",
+    "id": "ability.essence.legacy.large_rat.big",
     "kind": "Passive",
     "name": "Big",
     "description": "Health is increased.",
@@ -608,7 +608,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.flame_imp.firebomb_toss",
+    "id": "ability.essence.legacy.flame_imp.firebomb_toss",
     "kind": "Active",
     "name": "Firebomb Toss",
     "description": "Throw a flaming sphere.",
@@ -635,7 +635,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.flame_imp.hot_aura",
+    "id": "ability.essence.legacy.flame_imp.hot_aura",
     "kind": "Passive",
     "name": "Hot Aura",
     "description": "Melee attackers have a chance to receive burn damage.",
@@ -666,7 +666,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.frost_imp.ice_touch",
+    "id": "ability.essence.legacy.frost_imp.ice_touch",
     "kind": "Active",
     "name": "Ice Touch",
     "description": "Freeze targets that have enough cold stacks.",
@@ -684,13 +684,13 @@
         "id": "effect.freeze",
         "operation": "ApplyStatus",
         "target": "CurrentTarget",
-        "statusId": "status.v2.frost_imp.freeze",
+        "statusId": "status.frost_imp.freeze",
         "baseValue": 1,
         "conditions": [
           {
             "type": "StatusStacksAtLeast",
             "subject": "Target",
-            "statusId": "status.v2.cold",
+            "statusId": "status.cold",
             "value": 2
           }
         ]
@@ -698,7 +698,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.frost_imp.cold_aura",
+    "id": "ability.essence.legacy.frost_imp.cold_aura",
     "kind": "Passive",
     "name": "Cold Aura",
     "description": "Melee attackers receive persistent cold stacks.",
@@ -716,13 +716,13 @@
         "id": "effect.cold_stack",
         "operation": "ApplyStatus",
         "target": "EventTarget",
-        "statusId": "status.v2.cold",
+        "statusId": "status.cold",
         "baseValue": 1
       }
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.shadow_imp.shadow_image",
+    "id": "ability.essence.legacy.shadow_imp.shadow_image",
     "kind": "Active",
     "name": "Shadow Image",
     "description": "Summon a short-lived shadow image.",
@@ -748,13 +748,13 @@
         "id": "effect.shadow_image.status",
         "operation": "ApplyStatus",
         "target": "Self",
-        "statusId": "status.v2.shadow_image",
+        "statusId": "status.shadow_image",
         "baseValue": 1
       }
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.shadow_imp.shadowy_presence",
+    "id": "ability.essence.legacy.shadow_imp.shadowy_presence",
     "kind": "Passive",
     "name": "Shadowy Presence",
     "description": "Gain dodge chance at combat start.",
@@ -778,7 +778,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.vampire_bat.bloodthirsty_fangs",
+    "id": "ability.essence.legacy.vampire_bat.bloodthirsty_fangs",
     "kind": "Active",
     "name": "Bloodthirsty Fangs",
     "description": "Bite the target and heal from part of the damage dealt.",
@@ -806,7 +806,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.vampire_bat.dark_vitality",
+    "id": "ability.essence.legacy.vampire_bat.dark_vitality",
     "kind": "Passive",
     "name": "Dark Vitality",
     "description": "Lifesteal healing restores additional health.",
@@ -829,7 +829,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.blue_slime.sweet_water",
+    "id": "ability.essence.legacy.blue_slime.sweet_water",
     "kind": "Active",
     "name": "Sweet Water",
     "description": "Restore health to all allies over time.",
@@ -856,7 +856,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.blue_slime.absorptive_shell",
+    "id": "ability.essence.legacy.blue_slime.absorptive_shell",
     "kind": "Passive",
     "name": "Absorptive Shell",
     "description": "Being attacked improves cooldown pressure.",
@@ -880,7 +880,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.brown_slime.mud_armor",
+    "id": "ability.essence.legacy.brown_slime.mud_armor",
     "kind": "Active",
     "name": "Mud Armor",
     "description": "Reduce incoming damage for a short duration.",
@@ -905,7 +905,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.brown_slime.earthly_fortitude",
+    "id": "ability.essence.legacy.brown_slime.earthly_fortitude",
     "kind": "Passive",
     "name": "Earthly Fortitude",
     "description": "Gain physical defense at combat start.",
@@ -929,7 +929,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.green_slime.acid_splash",
+    "id": "ability.essence.legacy.green_slime.acid_splash",
     "kind": "Active",
     "name": "Acid Splash",
     "description": "Apply poison to all enemies.",
@@ -947,13 +947,13 @@
         "id": "effect.acid_splash.poison",
         "operation": "ApplyStatus",
         "target": "AllEnemies",
-        "statusId": "status.v2.green_slime.poison",
+        "statusId": "status.green_slime.poison",
         "baseValue": 1
       }
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.green_slime.corrosive_ooze",
+    "id": "ability.essence.legacy.green_slime.corrosive_ooze",
     "kind": "Passive",
     "name": "Corrosive Ooze",
     "description": "Melee attackers are coated with poison.",
@@ -971,13 +971,13 @@
         "id": "effect.corrosive_ooze.poison",
         "operation": "ApplyStatus",
         "target": "EventTarget",
-        "statusId": "status.v2.corrosive_ooze.poison",
+        "statusId": "status.corrosive_ooze.poison",
         "baseValue": 1
       }
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.rainbow_slime.unstable_colors",
+    "id": "ability.essence.legacy.rainbow_slime.unstable_colors",
     "kind": "Active",
     "name": "Unstable Colors",
     "description": "Chance to empower all allies for a short duration.",
@@ -995,7 +995,7 @@
         "id": "effect.unstable_colors.buff",
         "operation": "ApplyStatus",
         "target": "AllAllies",
-        "statusId": "status.v2.unstable_colors.buff",
+        "statusId": "status.unstable_colors.buff",
         "baseValue": 1,
         "conditions": [
           {
@@ -1007,7 +1007,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.rainbow_slime.colorful_shield",
+    "id": "ability.essence.legacy.rainbow_slime.colorful_shield",
     "kind": "Passive",
     "name": "Colorful Shield",
     "description": "Using abilities grants barrier to the ally with the highest max health.",
@@ -1030,7 +1030,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.red_slime.ignite_core",
+    "id": "ability.essence.legacy.red_slime.ignite_core",
     "kind": "Active",
     "name": "Ignite Core",
     "description": "Apply a burning aura to everyone but self.",
@@ -1048,13 +1048,13 @@
         "id": "effect.ignite_core.aura",
         "operation": "ApplyStatus",
         "target": "EveryoneButSelf",
-        "statusId": "status.v2.red_slime.fire_aura",
+        "statusId": "status.red_slime.fire_aura",
         "baseValue": 1
       }
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.red_slime.fire_body",
+    "id": "ability.essence.legacy.red_slime.fire_body",
     "kind": "Passive",
     "name": "Fire Body",
     "description": "Gain resistance at combat start.",
@@ -1078,7 +1078,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.transparent_slime.transparent_engulf",
+    "id": "ability.essence.legacy.transparent_slime.transparent_engulf",
     "kind": "Active",
     "name": "Transparent Engulf",
     "description": "Engulf a target, stunning and damaging them over time.",
@@ -1096,13 +1096,13 @@
         "id": "effect.transparent_engulf.status",
         "operation": "ApplyStatus",
         "target": "CurrentTarget",
-        "statusId": "status.v2.transparent_engulfed",
+        "statusId": "status.transparent_engulfed",
         "baseValue": 1
       }
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.transparent_slime.transparent_shift",
+    "id": "ability.essence.legacy.transparent_slime.transparent_shift",
     "kind": "Passive",
     "name": "Transparent Shift",
     "description": "Once when low on health, gain a short dodge boost.",
@@ -1120,7 +1120,7 @@
         "id": "effect.transparent_shift.dodge",
         "operation": "ApplyStatus",
         "target": "Self",
-        "statusId": "status.v2.transparent_dodge_boost",
+        "statusId": "status.transparent_dodge_boost",
         "baseValue": 1,
         "uses": 1,
         "conditions": [
@@ -1134,7 +1134,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.enchanted_fairy.faes_embrace",
+    "id": "ability.essence.legacy.enchanted_fairy.faes_embrace",
     "kind": "Active",
     "name": "Fae's Embrace",
     "description": "Grant barrier to two allies.",
@@ -1157,7 +1157,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.enchanted_fairy.enchanted_charm",
+    "id": "ability.essence.legacy.enchanted_fairy.enchanted_charm",
     "kind": "Passive",
     "name": "Enchanted Charm",
     "description": "Periodically charm enemies with a chance to stun.",
@@ -1175,7 +1175,7 @@
         "id": "effect.enchanted_charm.stun",
         "operation": "ApplyStatus",
         "target": "AllEnemies",
-        "statusId": "status.v2.charmed_stun",
+        "statusId": "status.charmed_stun",
         "baseValue": 1,
         "durationTicks": 6000,
         "intervalTicks": 180,
@@ -1184,7 +1184,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.glade_panther.ambush_strike",
+    "id": "ability.essence.legacy.glade_panther.ambush_strike",
     "kind": "Active",
     "name": "Ambush Strike",
     "description": "Strike the target with a melee attack.",
@@ -1211,7 +1211,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.glade_panther.razor_claws",
+    "id": "ability.essence.legacy.glade_panther.razor_claws",
     "kind": "Passive",
     "name": "Razor Claws",
     "description": "Gain critical damage at combat start.",
@@ -1235,7 +1235,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.illusion_fox.distracting_illusion",
+    "id": "ability.essence.legacy.illusion_fox.distracting_illusion",
     "kind": "Active",
     "name": "Distracting Illusion",
     "description": "Chance to reduce all enemies' precision for a short duration.",
@@ -1253,7 +1253,7 @@
         "id": "effect.distracting_illusion.debuff",
         "operation": "ApplyStatus",
         "target": "AllEnemies",
-        "statusId": "status.v2.illusion_fox.accuracy_debuff",
+        "statusId": "status.illusion_fox.accuracy_debuff",
         "baseValue": 1,
         "conditions": [
           {
@@ -1265,7 +1265,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.illusion_fox.foxfire_wisp",
+    "id": "ability.essence.legacy.illusion_fox.foxfire_wisp",
     "kind": "Passive",
     "name": "Foxfire Wisp",
     "description": "Periodically grants allies a retaliatory foxfire stack.",
@@ -1283,7 +1283,7 @@
         "id": "effect.foxfire.stack",
         "operation": "ApplyStatus",
         "target": "AllAllies",
-        "statusId": "status.v2.foxfire_stack",
+        "statusId": "status.foxfire_stack",
         "baseValue": 1,
         "durationTicks": 6000,
         "intervalTicks": 50
@@ -1291,7 +1291,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.nightshade_blossom.necrotic_spores",
+    "id": "ability.essence.legacy.nightshade_blossom.necrotic_spores",
     "kind": "Active",
     "name": "Necrotic Spores",
     "description": "Afflict all enemies with a regeneration and spirit debuff.",
@@ -1309,13 +1309,13 @@
         "id": "effect.necrotic_spores.debuff",
         "operation": "ApplyStatus",
         "target": "AllEnemies",
-        "statusId": "status.v2.necrotic_spore_debuff",
+        "statusId": "status.necrotic_spore_debuff",
         "baseValue": 1
       }
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.nightshade_blossom.twilight_bloom",
+    "id": "ability.essence.legacy.nightshade_blossom.twilight_bloom",
     "kind": "Passive",
     "name": "Twilight Bloom",
     "description": "Periodically heal all allies.",
@@ -1340,7 +1340,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.pixie.pixie_burst",
+    "id": "ability.essence.legacy.pixie.pixie_burst",
     "kind": "Active",
     "name": "Pixie Burst",
     "description": "Deal magical ranged damage to all enemies.",
@@ -1367,7 +1367,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.pixie.resonant_chime",
+    "id": "ability.essence.legacy.pixie.resonant_chime",
     "kind": "Passive",
     "name": "Resonant Chime",
     "description": "Whenever an ability is used, all allies gain crit chance.",
@@ -1391,7 +1391,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.hobgoblin.frenzy",
+    "id": "ability.essence.legacy.hobgoblin.frenzy",
     "kind": "Active",
     "name": "Frenzy",
     "description": "Gain cooldown and crit chance improvements for a short duration.",
@@ -1424,7 +1424,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.hobgoblin.savage_onslaught",
+    "id": "ability.essence.legacy.hobgoblin.savage_onslaught",
     "kind": "Passive",
     "name": "Savage Onslaught",
     "description": "Once when dropping below 80% health, gain power.",
@@ -1456,7 +1456,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.feral_ghoul.feral_pounce",
+    "id": "ability.essence.legacy.feral_ghoul.feral_pounce",
     "kind": "Active",
     "name": "Feral Pounce",
     "description": "Leap to a target, dealing damage with a chance to stun.",
@@ -1474,21 +1474,21 @@
         "id": "effect.feral_pounce.impact",
         "operation": "ApplyStatus",
         "target": "CurrentTarget",
-        "statusId": "status.v2.feral_pounce_impact",
+        "statusId": "status.feral_pounce_impact",
         "baseValue": 1
       },
       {
         "id": "effect.feral_pounce.stun",
         "operation": "ApplyStatus",
         "target": "CurrentTarget",
-        "statusId": "status.v2.feral_pounce_stunned",
+        "statusId": "status.feral_pounce_stunned",
         "chancePercent": 30,
         "baseValue": 1
       }
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.feral_ghoul.shredding_claws",
+    "id": "ability.essence.legacy.feral_ghoul.shredding_claws",
     "kind": "Passive",
     "name": "Shredding Claws",
     "description": "Melee attacks have a chance to apply bleed.",
@@ -1506,7 +1506,7 @@
         "id": "effect.shredding_claws.bleed",
         "operation": "ApplyStatus",
         "target": "EventTarget",
-        "statusId": "status.v2.shredding_claws_bleed",
+        "statusId": "status.shredding_claws_bleed",
         "baseValue": 1,
         "conditions": [
           {
@@ -1518,7 +1518,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.plague_ghoul.plague_swipe",
+    "id": "ability.essence.legacy.plague_ghoul.plague_swipe",
     "kind": "Active",
     "name": "Plague Swipe",
     "description": "Swipe two nearby enemies, dealing physical damage and applying a short damage over time effect.",
@@ -1536,13 +1536,13 @@
         "id": "effect.plague_swipe.poison",
         "operation": "ApplyStatus",
         "target": "TwoEnemies",
-        "statusId": "status.v2.plague_swipe_poison",
+        "statusId": "status.plague_swipe_poison",
         "baseValue": 1
       }
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.plague_ghoul.pestilent_touch",
+    "id": "ability.essence.legacy.plague_ghoul.pestilent_touch",
     "kind": "Passive",
     "name": "Pestilent Touch",
     "description": "Melee attacks can apply poison damage over time.",
@@ -1560,7 +1560,7 @@
         "id": "effect.pestilent_touch.poison",
         "operation": "ApplyStatus",
         "target": "EventTarget",
-        "statusId": "status.v2.pestilent_touch_poison",
+        "statusId": "status.pestilent_touch_poison",
         "baseValue": 1,
         "conditions": [
           {
@@ -1572,7 +1572,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.ravenous_ghoul.draining_claws",
+    "id": "ability.essence.legacy.ravenous_ghoul.draining_claws",
     "kind": "Active",
     "name": "Draining Claws",
     "description": "Slash a target and sap their power.",
@@ -1590,13 +1590,13 @@
         "id": "effect.draining_claws.debuff",
         "operation": "ApplyStatus",
         "target": "CurrentTarget",
-        "statusId": "status.v2.draining_claws_debuff",
+        "statusId": "status.draining_claws_debuff",
         "baseValue": 1
       }
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.ravenous_ghoul.vile_feast",
+    "id": "ability.essence.legacy.ravenous_ghoul.vile_feast",
     "kind": "Passive",
     "name": "Vile Feast",
     "description": "The first time anyone dies, heal to full.",
@@ -1620,7 +1620,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.skeleton_archer.bone_arrow",
+    "id": "ability.essence.legacy.skeleton_archer.bone_arrow",
     "kind": "Active",
     "name": "Bone Arrow",
     "description": "Fire a bone arrow at a target.",
@@ -1648,7 +1648,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.skeleton_archer.piercing_arrows",
+    "id": "ability.essence.legacy.skeleton_archer.piercing_arrows",
     "kind": "Passive",
     "name": "Piercing Arrows",
     "description": "Ranged attacks can apply bleed.",
@@ -1666,7 +1666,7 @@
         "id": "effect.piercing_arrows.bleed",
         "operation": "ApplyStatus",
         "target": "EventTarget",
-        "statusId": "status.v2.piercing_arrow_bleed",
+        "statusId": "status.piercing_arrow_bleed",
         "baseValue": 1,
         "conditions": [
           {
@@ -1678,7 +1678,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.skeleton_mage.siphon",
+    "id": "ability.essence.legacy.skeleton_mage.siphon",
     "kind": "Active",
     "name": "Siphon",
     "description": "Siphon magic from a target.",
@@ -1705,7 +1705,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.skeleton_mage.protective_bone_barrier",
+    "id": "ability.essence.legacy.skeleton_mage.protective_bone_barrier",
     "kind": "Passive",
     "name": "Protective Bone Barrier",
     "description": "Periodically gain barrier during combat.",
@@ -1730,7 +1730,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.skeleton_warrior.bone_shield",
+    "id": "ability.essence.legacy.skeleton_warrior.bone_shield",
     "kind": "Active",
     "name": "Bone Shield",
     "description": "Form a bone shield that reduces incoming damage.",
@@ -1755,7 +1755,7 @@
     ]
   },
   {
-    "id": "ability.v2.essence.legacy.skeleton_warrior.spiked_defense",
+    "id": "ability.essence.legacy.skeleton_warrior.spiked_defense",
     "kind": "Passive",
     "name": "Spiked Defense",
     "description": "Reflect damage to melee attackers.",
@@ -1780,7 +1780,7 @@
     ]
   },
   {
-    "id": "ability.v2.summon.shadow_image.shadow_strike",
+    "id": "ability.summon.shadow_image.shadow_strike",
     "kind": "Active",
     "name": "Shadow Strike",
     "description": "The shadow image lashes out with a quick shadow attack.",

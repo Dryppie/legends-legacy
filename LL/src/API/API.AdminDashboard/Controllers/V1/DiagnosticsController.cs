@@ -1,8 +1,8 @@
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
-using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalogV2BehaviorDiagnostics;
-using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalogV2Coverage;
-using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalogV2Diagnostics;
+using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalogBehaviorDiagnostics;
+using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalogCoverage;
+using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalogDiagnostics;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetCreatureBuildProfileDiagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,22 +10,22 @@ namespace API.AdminDashboard.Controllers.V1;
 
 public class DiagnosticsController : BaseController
 {
-    [HttpGet("ability-catalog-v2")]
-    public async Task<ActionResult<AbilityCatalogV2DiagnosticReport>> GetAbilityCatalogV2Diagnostics()
+    [HttpGet("ability-catalog")]
+    public async Task<ActionResult<AbilityCatalogDiagnosticReport>> GetAbilityCatalogDiagnostics()
     {
-        return await Mediator.Send(new GetAbilityCatalogV2DiagnosticsQuery());
+        return await Mediator.Send(new GetAbilityCatalogDiagnosticsQuery());
     }
 
-    [HttpGet("ability-catalog-v2-coverage")]
-    public async Task<ActionResult<AbilityCatalogV2CoverageReport>> GetAbilityCatalogV2Coverage()
+    [HttpGet("ability-catalog-coverage")]
+    public async Task<ActionResult<AbilityCatalogCoverageReport>> GetAbilityCatalogCoverage()
     {
-        return await Mediator.Send(new GetAbilityCatalogV2CoverageQuery());
+        return await Mediator.Send(new GetAbilityCatalogCoverageQuery());
     }
 
-    [HttpGet("ability-catalog-v2-behaviors")]
-    public async Task<ActionResult<AbilityCatalogV2BehaviorDiagnosticReport>> GetAbilityCatalogV2BehaviorDiagnostics()
+    [HttpGet("ability-catalog-behaviors")]
+    public async Task<ActionResult<AbilityCatalogBehaviorDiagnosticReport>> GetAbilityCatalogBehaviorDiagnostics()
     {
-        return await Mediator.Send(new GetAbilityCatalogV2BehaviorDiagnosticsQuery());
+        return await Mediator.Send(new GetAbilityCatalogBehaviorDiagnosticsQuery());
     }
 
     [HttpGet("creature-build-profiles")]

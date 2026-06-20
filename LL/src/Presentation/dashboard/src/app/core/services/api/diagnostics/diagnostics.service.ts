@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../api.service';
 import {
-  AbilityCatalogV2BehaviorDiagnosticReport,
-  AbilityCatalogV2CoverageReport,
-  AbilityCatalogV2DiagnosticReport,
-} from '../../../../shared/models/diagnostics/ability-catalog-v2-behavior-diagnostics';
+  AbilityCatalogBehaviorDiagnosticReport,
+  AbilityCatalogCoverageReport,
+  AbilityCatalogDiagnosticReport,
+} from '../../../../shared/models/diagnostics/ability-catalog-diagnostics';
 
 @Injectable({
   providedIn: 'root',
@@ -13,15 +13,15 @@ import {
 export class DiagnosticsService {
   constructor(private apiService: ApiService) {}
 
-  public getAbilityCatalogV2(): Observable<AbilityCatalogV2DiagnosticReport> {
-    return this.apiService.get('diagnostics/ability-catalog-v2');
+  public getAbilityCatalog(): Observable<AbilityCatalogDiagnosticReport> {
+    return this.apiService.get('diagnostics/ability-catalog');
   }
 
-  public getAbilityCatalogV2Coverage(): Observable<AbilityCatalogV2CoverageReport> {
-    return this.apiService.get('diagnostics/ability-catalog-v2-coverage');
+  public getAbilityCatalogCoverage(): Observable<AbilityCatalogCoverageReport> {
+    return this.apiService.get('diagnostics/ability-catalog-coverage');
   }
 
-  public getAbilityCatalogV2Behaviors(): Observable<AbilityCatalogV2BehaviorDiagnosticReport> {
-    return this.apiService.get('diagnostics/ability-catalog-v2-behaviors');
+  public getAbilityCatalogBehaviors(): Observable<AbilityCatalogBehaviorDiagnosticReport> {
+    return this.apiService.get('diagnostics/ability-catalog-behaviors');
   }
 }

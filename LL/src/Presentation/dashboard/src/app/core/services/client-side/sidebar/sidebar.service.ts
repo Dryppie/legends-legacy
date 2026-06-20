@@ -48,7 +48,7 @@ export class SidebarService {
             route: 'diagnostics',
             icon: 'settings/settings',
             title: 'Diagnostics',
-            description: 'Combat v2',
+            description: 'Combat',
           },
         ],
       },

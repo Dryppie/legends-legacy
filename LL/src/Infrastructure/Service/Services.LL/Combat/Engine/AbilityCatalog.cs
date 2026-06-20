@@ -1,11 +1,11 @@
 using Domain.Models.Attributes;
-using Domain.Models.Combat.Abilities.V2;
+using Domain.Models.Combat.Abilities;
 
-namespace Services.LL.Combat.V2;
+namespace Services.LL.Combat.Engine;
 
-public sealed class AbilityCatalogV2
+public sealed class AbilityCatalog
 {
-    public AbilityCatalogV2(
+    public AbilityCatalog(
         IReadOnlyList<AbilitySpec> abilities,
         IReadOnlyList<StatusSpec> statuses,
         IReadOnlyList<SummonSpec> summons,
@@ -92,14 +92,14 @@ public sealed class AbilityCatalogV2
     }
 }
 
-public sealed record AbilityCatalogV2ValidationResult(IReadOnlyList<string> Errors)
+public sealed record AbilityCatalogValidationResult(IReadOnlyList<string> Errors)
 {
     public bool IsValid => Errors.Count == 0;
 }
 
-public static class AbilityCatalogV2Validator
+public static class AbilityCatalogValidator
 {
-    public static AbilityCatalogV2ValidationResult Validate(
+    public static AbilityCatalogValidationResult Validate(
         IReadOnlyList<AbilitySpec> abilities,
         IReadOnlyList<StatusSpec> statuses,
         IReadOnlyDictionary<string, string>? owningEssenceByAbilityId = null,
@@ -190,10 +190,10 @@ public static class AbilityCatalogV2Validator
             }
         }
 
-        return new AbilityCatalogV2ValidationResult(errors);
+        return new AbilityCatalogValidationResult(errors);
     }
 
-    public static AbilityCatalogV2 CreateCatalog(
+    public static AbilityCatalog CreateCatalog(
         IReadOnlyList<AbilitySpec> abilities,
         IReadOnlyList<StatusSpec> statuses,
         IReadOnlyDictionary<string, string>? owningEssenceByAbilityId = null,
@@ -203,9 +203,9 @@ public static class AbilityCatalogV2Validator
         var summonSpecs = summons ?? [];
         var validation = Validate(abilities, statuses, owners, summonSpecs);
         if (!validation.IsValid)
-            throw new InvalidOperationException("Ability catalog v2 validation failed: " + string.Join(" | ", validation.Errors));
+            throw new InvalidOperationException("Ability catalog validation failed: " + string.Join(" | ", validation.Errors));
 
-        return new AbilityCatalogV2(abilities, statuses, summonSpecs, owners);
+        return new AbilityCatalog(abilities, statuses, summonSpecs, owners);
     }
 
     private static void ValidateEffects(
@@ -285,17 +285,17 @@ public static class AbilityCatalogV2Validator
     {
         foreach (var condition in conditions)
         {
-            if ((condition.Type == AbilityConditionTypeV2.HasStatus
-                 || condition.Type == AbilityConditionTypeV2.StatusStacksAtLeast)
+            if ((condition.Type == AbilityConditionType.HasStatus
+                 || condition.Type == AbilityConditionType.StatusStacksAtLeast)
                 && string.IsNullOrWhiteSpace(condition.StatusId))
             {
                 errors.Add($"{ownerId}: condition {condition.Type} requires statusId.");
             }
 
-            if (condition.Type == AbilityConditionTypeV2.HasTag && string.IsNullOrWhiteSpace(condition.Tag))
+            if (condition.Type == AbilityConditionType.HasTag && string.IsNullOrWhiteSpace(condition.Tag))
                 errors.Add($"{ownerId}: condition HasTag requires tag.");
 
-            if (condition.Type == AbilityConditionTypeV2.ChancePercent && condition.Value is < 0 or > 100)
+            if (condition.Type == AbilityConditionType.ChancePercent && condition.Value is < 0 or > 100)
                 errors.Add($"{ownerId}: condition ChancePercent requires value between 0 and 100.");
         }
     }
@@ -326,8 +326,8 @@ public static class AbilityCatalogV2Validator
         ISet<string> knownStatusIds,
         ICollection<string> errors)
     {
-        if ((condition.Type == AbilityConditionTypeV2.HasStatus
-             || condition.Type == AbilityConditionTypeV2.StatusStacksAtLeast)
+        if ((condition.Type == AbilityConditionType.HasStatus
+             || condition.Type == AbilityConditionType.StatusStacksAtLeast)
             && !string.IsNullOrWhiteSpace(condition.StatusId)
             && !knownStatusIds.Contains(condition.StatusId))
         {

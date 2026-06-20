@@ -1,4 +1,4 @@
-﻿using Application.Authorization.Interfaces;
+using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.CharacterActions;
 using Application.Interfaces.Services.LL.Colosseum;
@@ -31,7 +31,7 @@ using Services.LL.Combat.Layers.Rewards.Dungeon;
 using Services.LL.Combat.Layers.Rewards.Idle;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Combat.Stats;
-using Services.LL.Combat.V2;
+using Services.LL.Combat.Engine;
 using Services.LL.Dungeons;
 using Services.LL.Entities;
 using Services.LL.Entities.Characters;
@@ -118,20 +118,20 @@ public static class DependencyInjection
         services.AddScoped<IEssenceProgressionService, EssenceProgressionService>();
         services.AddScoped<IEssenceSlotUnlockService, EssenceSlotUnlockService>();
         services.AddScoped<IEssenceLoadoutLimitService, EssenceLoadoutLimitService>();
-        services.AddSingleton<IAbilityCatalogV2Provider>(sp =>
-            new JsonAbilityCatalogV2Provider(
+        services.AddSingleton<IAbilityCatalogProvider>(sp =>
+            new JsonAbilityCatalogProvider(
                 config,
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>()));
-        services.AddScoped<IAbilityCatalogV2Diagnostics, AbilityCatalogV2Diagnostics>();
-        services.AddScoped<IAbilityCatalogV2BehaviorDiagnostics>(sp =>
-            new AbilityCatalogV2BehaviorDiagnostics(
-                sp.GetRequiredService<IAbilityCatalogV2Provider>(),
+        services.AddScoped<IAbilityCatalogDiagnostics, AbilityCatalogDiagnostics>();
+        services.AddScoped<IAbilityCatalogBehaviorDiagnostics>(sp =>
+            new AbilityCatalogBehaviorDiagnostics(
+                sp.GetRequiredService<IAbilityCatalogProvider>(),
                 config,
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>(),
                 sp.GetRequiredService<IEssenceDefinitionRepository>()));
-        services.AddScoped<IAbilityCatalogV2CoverageAnalyzer, AbilityCatalogV2CoverageAnalyzer>();
+        services.AddScoped<IAbilityCatalogCoverageAnalyzer, AbilityCatalogCoverageAnalyzer>();
         services.AddScoped<IRandomProvider, SystemRandomProvider>();
         services.AddScoped<IEssenceService, EssenceSystemService>();
         services.AddScoped<IEssenceBonusProvider, EssenceSystemService>();
@@ -198,8 +198,8 @@ public static class DependencyInjection
         services.AddScoped<ICombatEncounterResolver, DefaultCombatEncounterResolver>();
         services.AddScoped<IEncounterEntityLoader, EncounterEntityLoader>();
         services.AddScoped<ICombatEncounterRuntimeFactory, CombatEncounterRuntimeFactory>();
-        services.AddScoped<CombatEngineExecutorV2>();
-        services.AddScoped<ICombatEngineExecutor, CombatEngineExecutorV2>();
+        services.AddScoped<CombatEngineExecutor>();
+        services.AddScoped<ICombatEngineExecutor, CombatEngineExecutor>();
         services.AddScoped<ICombatEncounterResultFactory, CombatEncounterResultFactory>();
         services.AddScoped<ICombatantFactory, CombatantFactory>();
 

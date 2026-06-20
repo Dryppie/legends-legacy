@@ -1,5 +1,5 @@
 using Domain.Models.Attributes;
-using Domain.Models.Combat.Abilities.V2;
+using Domain.Models.Combat.Abilities;
 using Domain.Models.Items;
 using System.Text.Json.Serialization;
 

@@ -1,7 +1,7 @@
 using Domain.Models.Attributes;
 using Domain.Models.Damages;
 
-namespace Domain.Models.Combat.Abilities.V2;
+namespace Domain.Models.Combat.Abilities;
 
 public enum AbilitySpecKind
 {
@@ -48,7 +48,7 @@ public enum AbilityEffectOperation
     RestoreResource = 10
 }
 
-public enum AbilityTargetSelectorV2
+public enum AbilityTargetSelector
 {
     Self = 0,
     CurrentTarget = 1,
@@ -67,7 +67,7 @@ public enum AbilityTargetSelectorV2
     NonSummonedAllies = 14
 }
 
-public enum AbilityConditionTypeV2
+public enum AbilityConditionType
 {
     Always = 0,
     HealthBelowPercent = 1,
@@ -93,7 +93,7 @@ public enum AbilityStatusStackingPolicy
     Replace = 2
 }
 
-public enum AbilityResourceTypeV2
+public enum AbilityResourceType
 {
     Health = 0,
     Barrier = 1,
@@ -125,14 +125,14 @@ public sealed class AbilityEffectSpec
 {
     public string Id { get; set; } = string.Empty;
     public AbilityEffectOperation Operation { get; set; }
-    public AbilityTargetSelectorV2 Target { get; set; } = AbilityTargetSelectorV2.CurrentTarget;
+    public AbilityTargetSelector Target { get; set; } = AbilityTargetSelector.CurrentTarget;
     public int BaseValue { get; set; }
     public AttributeType? ScalingAttribute { get; set; }
     public float ScalingCoefficient { get; set; }
     public AttributeType? Attribute { get; set; }
     public string? StatusId { get; set; }
     public string? SummonId { get; set; }
-    public AbilityResourceTypeV2 Resource { get; set; } = AbilityResourceTypeV2.Health;
+    public AbilityResourceType Resource { get; set; } = AbilityResourceType.Health;
     public int DurationTicks { get; set; }
     public int IntervalTicks { get; set; }
     public int Uses { get; set; }
@@ -146,7 +146,7 @@ public sealed class AbilityEffectSpec
 
 public sealed class AbilityConditionSpec
 {
-    public AbilityConditionTypeV2 Type { get; set; }
+    public AbilityConditionType Type { get; set; }
     public AbilityConditionSubject Subject { get; set; } = AbilityConditionSubject.Target;
     public string? StatusId { get; set; }
     public string? Tag { get; set; }

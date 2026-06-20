@@ -1,34 +1,34 @@
 using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
-using Domain.Models.Combat.Abilities.V2;
+using Domain.Models.Combat.Abilities;
 using Domain.Models.Essences.Definitions;
 
-namespace Services.LL.Combat.V2;
+namespace Services.LL.Combat.Engine;
 
-public sealed class AbilityCatalogV2CoverageAnalyzer : IAbilityCatalogV2CoverageAnalyzer
+public sealed class AbilityCatalogCoverageAnalyzer : IAbilityCatalogCoverageAnalyzer
 {
     private readonly IEssenceDefinitionRepository _essenceDefinitions;
-    private readonly IAbilityCatalogV2Provider _v2CatalogProvider;
+    private readonly IAbilityCatalogProvider _catalogProvider;
 
-    public AbilityCatalogV2CoverageAnalyzer(
+    public AbilityCatalogCoverageAnalyzer(
         IEssenceDefinitionRepository essenceDefinitions,
-        IAbilityCatalogV2Provider v2CatalogProvider)
+        IAbilityCatalogProvider catalogProvider)
     {
         _essenceDefinitions = essenceDefinitions;
-        _v2CatalogProvider = v2CatalogProvider;
+        _catalogProvider = catalogProvider;
     }
 
-    public AbilityCatalogV2CoverageReport Analyze()
+    public AbilityCatalogCoverageReport Analyze()
     {
         var essences = _essenceDefinitions.GetAll();
-        var catalog = _v2CatalogProvider.GetCatalog();
+        var catalog = _catalogProvider.GetCatalog();
         var abilitiesByOwnerAndKind = catalog.Abilities
             .Where(x => !string.IsNullOrWhiteSpace(x.OwningEssenceId))
             .GroupBy(x => (Owner: x.OwningEssenceId!, x.Kind))
             .ToDictionary(x => x.Key, x => x.ToList());
-        var slots = new List<AbilityCatalogV2SlotCoverage>();
-        var gaps = new List<AbilityCatalogV2CoverageGap>();
+        var slots = new List<AbilityCatalogSlotCoverage>();
+        var gaps = new List<AbilityCatalogCoverageGap>();
 
         foreach (var essence in essences.OrderBy(x => x.Id, StringComparer.OrdinalIgnoreCase))
         {
@@ -51,50 +51,50 @@ public sealed class AbilityCatalogV2CoverageAnalyzer : IAbilityCatalogV2Coverage
             .Select(essence => CheckRuntimeLoadout(essence, catalog))
             .ToList();
 
-        return new AbilityCatalogV2CoverageReport(
+        return new AbilityCatalogCoverageReport(
             essences.Count,
             slots.Count,
-            slots.Count(x => x.HasOwnedV2Ability && x.KindMatches),
-            slots.Count(x => x.CurrentReferenceExistsInV2),
+            slots.Count(x => x.HasOwnedAbility && x.KindMatches),
+            slots.Count(x => x.CurrentReferenceExists),
             slots,
             gaps,
             unownedAbilityIds,
             runtimeLoadoutChecks);
     }
 
-    private static AbilityCatalogV2RuntimeLoadoutCheck CheckRuntimeLoadout(
+    private static AbilityCatalogRuntimeLoadoutCheck CheckRuntimeLoadout(
         EssenceDefinition essence,
-        AbilityCatalogV2 catalog)
+        AbilityCatalog catalog)
     {
         var abilityIds = catalog.AbilityIdsByOwningEssence.GetValueOrDefault(essence.Id) ?? [];
         if (abilityIds.Count == 0)
         {
-            return new AbilityCatalogV2RuntimeLoadoutCheck(
+            return new AbilityCatalogRuntimeLoadoutCheck(
                 essence.Id,
                 abilityIds,
                 IsReady: false,
                 Outcome: null,
                 Duration: 0,
                 EventCount: 0,
-                Failure: $"No v2 abilities are owned by essence '{essence.Id}'.");
+                Failure: $"No abilities are owned by essence '{essence.Id}'.");
         }
 
         try
         {
-            var compiledAbilities = AbilityCompilerV2.CompileAbilities(abilityIds.Select(id => catalog.AbilitiesById[id]));
-            var compiledCatalogAbilities = AbilityCompilerV2.CompileAbilities(catalog.Abilities);
-            var compiledStatuses = AbilityCompilerV2.CompileStatuses(catalog.Statuses);
-            var compiledSummons = AbilityCompilerV2.CompileSummons(catalog.Summons);
-            var friendly = CreateRuntimeCombatant($"readiness-{essence.Id}", CombatTeamV2.Friendly, compiledAbilities.Values);
-            var hostile = CreateRuntimeCombatant($"readiness-target-{essence.Id}", CombatTeamV2.Hostile, []);
-            var engine = new FastCombatEngineV2(
+            var compiledAbilities = AbilityCompiler.CompileAbilities(abilityIds.Select(id => catalog.AbilitiesById[id]));
+            var compiledCatalogAbilities = AbilityCompiler.CompileAbilities(catalog.Abilities);
+            var compiledStatuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+            var compiledSummons = AbilityCompiler.CompileSummons(catalog.Summons);
+            var friendly = CreateRuntimeCombatant($"readiness-{essence.Id}", CombatTeam.Friendly, compiledAbilities.Values);
+            var hostile = CreateRuntimeCombatant($"readiness-target-{essence.Id}", CombatTeam.Hostile, []);
+            var engine = new FastCombatEngine(
                 compiledStatuses,
                 compiledSummons,
                 compiledCatalogAbilities,
-                new FastCombatEngineV2Options(MaxTicks: 5, BasicAttackIntervalTicks: 1000, RandomSeed: 17));
+                new FastCombatEngineOptions(MaxTicks: 5, BasicAttackIntervalTicks: 1000, RandomSeed: 17));
             var result = engine.Run([friendly], [hostile]);
 
-            return new AbilityCatalogV2RuntimeLoadoutCheck(
+            return new AbilityCatalogRuntimeLoadoutCheck(
                 essence.Id,
                 abilityIds,
                 IsReady: true,
@@ -105,7 +105,7 @@ public sealed class AbilityCatalogV2CoverageAnalyzer : IAbilityCatalogV2Coverage
         }
         catch (Exception ex)
         {
-            return new AbilityCatalogV2RuntimeLoadoutCheck(
+            return new AbilityCatalogRuntimeLoadoutCheck(
                 essence.Id,
                 abilityIds,
                 IsReady: false,
@@ -116,10 +116,10 @@ public sealed class AbilityCatalogV2CoverageAnalyzer : IAbilityCatalogV2Coverage
         }
     }
 
-    private static RuntimeCombatantV2 CreateRuntimeCombatant(
+    private static RuntimeCombatant CreateRuntimeCombatant(
         string id,
-        CombatTeamV2 team,
-        IEnumerable<CompiledAbilityV2> abilities) =>
+        CombatTeam team,
+        IEnumerable<CompiledAbility> abilities) =>
         new(
             id,
             id,
@@ -138,25 +138,25 @@ public sealed class AbilityCatalogV2CoverageAnalyzer : IAbilityCatalogV2Coverage
     private static void AddSlot(
         EssenceDefinition essence,
         string slot,
-        string legacyAbilityId,
+        string referencedAbilityId,
         AbilitySpecKind expectedKind,
-        AbilityCatalogV2 catalog,
+        AbilityCatalog catalog,
         IReadOnlyDictionary<(string Owner, AbilitySpecKind Kind), List<AbilitySpec>> abilitiesByOwnerAndKind,
-        ICollection<AbilityCatalogV2SlotCoverage> slots,
-        ICollection<AbilityCatalogV2CoverageGap> gaps)
+        ICollection<AbilityCatalogSlotCoverage> slots,
+        ICollection<AbilityCatalogCoverageGap> gaps)
     {
         var owned = abilitiesByOwnerAndKind.GetValueOrDefault((essence.Id, expectedKind)) ?? [];
-        var currentReference = !string.IsNullOrWhiteSpace(legacyAbilityId)
-            && catalog.AbilitiesById.TryGetValue(legacyAbilityId, out var current)
+        var currentReference = !string.IsNullOrWhiteSpace(referencedAbilityId)
+            && catalog.AbilitiesById.TryGetValue(referencedAbilityId, out var current)
                 ? current
                 : null;
         var selected = owned.Count == 1 ? owned[0] : currentReference;
         var kindMatches = selected?.Kind == expectedKind;
 
-        slots.Add(new AbilityCatalogV2SlotCoverage(
+        slots.Add(new AbilityCatalogSlotCoverage(
             essence.Id,
             slot,
-            legacyAbilityId,
+            referencedAbilityId,
             selected?.Id,
             owned.Count > 0,
             currentReference is not null,
@@ -164,30 +164,30 @@ public sealed class AbilityCatalogV2CoverageAnalyzer : IAbilityCatalogV2Coverage
 
         if (owned.Count == 0)
         {
-            gaps.Add(new AbilityCatalogV2CoverageGap(
+            gaps.Add(new AbilityCatalogCoverageGap(
                 essence.Id,
                 slot,
-                legacyAbilityId,
-                $"No v2 {expectedKind} ability is owned by essence '{essence.Id}'."));
+                referencedAbilityId,
+                $"No {expectedKind} ability is owned by essence '{essence.Id}'."));
             return;
         }
 
         if (owned.Count > 1)
         {
-            gaps.Add(new AbilityCatalogV2CoverageGap(
+            gaps.Add(new AbilityCatalogCoverageGap(
                 essence.Id,
                 slot,
-                legacyAbilityId,
-                $"Multiple v2 {expectedKind} abilities are owned by essence '{essence.Id}': {string.Join(", ", owned.Select(x => x.Id))}."));
+                referencedAbilityId,
+                $"Multiple {expectedKind} abilities are owned by essence '{essence.Id}': {string.Join(", ", owned.Select(x => x.Id))}."));
         }
 
         foreach (var ability in owned.Where(x => x.Kind != expectedKind))
         {
-            gaps.Add(new AbilityCatalogV2CoverageGap(
+            gaps.Add(new AbilityCatalogCoverageGap(
                 essence.Id,
                 slot,
-                legacyAbilityId,
-                $"V2 ability '{ability.Id}' has kind '{ability.Kind}' but slot expects '{expectedKind}'."));
+                referencedAbilityId,
+                $"Ability '{ability.Id}' has kind '{ability.Kind}' but slot expects '{expectedKind}'."));
         }
     }
 }

@@ -4,7 +4,7 @@ using Domain.Components.Attributes;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Combat;
-using Domain.Models.Combat.Abilities.V2;
+using Domain.Models.Combat.Abilities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
@@ -179,7 +179,7 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
-    public async Task Attuned_essences_return_v2_ability_specs_for_active_loadout_only()
+    public async Task Attuned_essences_return_ability_specs_for_active_loadout_only()
     {
         await using var db = CreateDb();
         var characterId = await SeedCharacterAndInventoryAsync(db, level: 20);
@@ -372,7 +372,7 @@ public sealed class EssenceSystemServiceTests
             {
                 ActorId = "archer",
                 TargetId = "enemy",
-                Source = "status.v2.poisoned_arrow",
+                Source = "status.poisoned_arrow",
                 StatsSource = "Poisoned Arrows",
                 CountsAsActivation = true,
                 EventType = EventType.StatusEffect,
@@ -563,11 +563,11 @@ public sealed class EssenceSystemServiceTests
             Effects =
             [
                 new() { Id = "remove", Operation = AbilityEffectOperation.RemoveStatus, StatusId = "Burn" },
-                new() { Id = "cleanse", Operation = AbilityEffectOperation.Cleanse, Target = AbilityTargetSelectorV2.Self },
+                new() { Id = "cleanse", Operation = AbilityEffectOperation.Cleanse, Target = AbilityTargetSelector.Self },
                 new() { Id = "summon", Operation = AbilityEffectOperation.Summon, SummonId = "wolf" },
-                new() { Id = "heal", Operation = AbilityEffectOperation.Heal, Target = AbilityTargetSelectorV2.Self, BaseValue = 1 },
-                new() { Id = "damage", Operation = AbilityEffectOperation.Damage, BaseValue = 1, Conditions = [new() { Type = AbilityConditionTypeV2.HasStatus, StatusId = "Burn" }] },
-                new() { Id = "tagged", Operation = AbilityEffectOperation.Damage, BaseValue = 1, Conditions = [new() { Type = AbilityConditionTypeV2.HasTag, Tag = "Role.Tank" }] }
+                new() { Id = "heal", Operation = AbilityEffectOperation.Heal, Target = AbilityTargetSelector.Self, BaseValue = 1 },
+                new() { Id = "damage", Operation = AbilityEffectOperation.Damage, BaseValue = 1, Conditions = [new() { Type = AbilityConditionType.HasStatus, StatusId = "Burn" }] },
+                new() { Id = "tagged", Operation = AbilityEffectOperation.Damage, BaseValue = 1, Conditions = [new() { Type = AbilityConditionType.HasTag, Tag = "Role.Tank" }] }
             ]
         },
         PassiveAbility = new AbilitySpec
@@ -707,7 +707,7 @@ public sealed class EssenceSystemServiceTests
                 Name = "Passive",
                 Tags = ["Trigger.OnHit"],
                 Triggers = [new() { Event = AbilityTriggerEvent.OnHit }],
-                Effects = [new() { Id = "effect.attribute.main", Operation = AbilityEffectOperation.ModifyAttribute, Target = AbilityTargetSelectorV2.Self, Attribute = AttributeType.Power, BaseValue = 1 }]
+                Effects = [new() { Id = "effect.attribute.main", Operation = AbilityEffectOperation.ModifyAttribute, Target = AbilityTargetSelector.Self, Attribute = AttributeType.Power, BaseValue = 1 }]
             },
             Evolution = new EssenceEvolutionDefinition
             {

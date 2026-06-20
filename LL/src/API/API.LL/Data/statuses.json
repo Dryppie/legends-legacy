@@ -1,6 +1,6 @@
 [
   {
-    "id": "status.v2.training.burn",
+    "id": "status.training.burn",
     "name": "Training Burn",
     "description": "Deals repeated burn damage for a short duration.",
     "stackingPolicy": "Stack",
@@ -27,7 +27,7 @@
     ]
   },
   {
-    "id": "status.v2.training.reflect",
+    "id": "status.training.reflect",
     "name": "Training Reflect",
     "description": "Reflects a small amount of damage to attackers.",
     "stackingPolicy": "Refresh",
@@ -52,7 +52,7 @@
     ]
   },
   {
-    "id": "status.v2.bleed",
+    "id": "status.bleed",
     "name": "Bleed",
     "description": "Deals bleed damage over time.",
     "stackingPolicy": "Stack",
@@ -79,7 +79,7 @@
     ]
   },
   {
-    "id": "status.v2.burn",
+    "id": "status.burn",
     "name": "Burn",
     "description": "Deals burn damage over time.",
     "stackingPolicy": "Stack",
@@ -106,7 +106,7 @@
     ]
   },
   {
-    "id": "status.v2.curse",
+    "id": "status.curse",
     "name": "Curse",
     "description": "Deals magical curse damage over time.",
     "stackingPolicy": "Stack",
@@ -133,7 +133,7 @@
     ]
   },
   {
-    "id": "status.v2.taunt",
+    "id": "status.taunt",
     "name": "Taunt",
     "description": "Marks the combatant as taunting.",
     "stackingPolicy": "Refresh",
@@ -142,7 +142,7 @@
     "tags": [ "Control.Taunt" ]
   },
   {
-    "id": "status.v2.lesser_burn",
+    "id": "status.lesser_burn",
     "name": "Lesser Burn",
     "description": "Deals light burn damage over time.",
     "stackingPolicy": "Stack",
@@ -169,7 +169,7 @@
     ]
   },
   {
-    "id": "status.v2.vulnerable_mark",
+    "id": "status.vulnerable_mark",
     "name": "Vulnerable Mark",
     "description": "The next hit against this target deals bonus physical damage.",
     "stackingPolicy": "Refresh",
@@ -194,7 +194,7 @@
     ]
   },
   {
-    "id": "status.v2.sneak_attack_bleed",
+    "id": "status.sneak_attack_bleed",
     "name": "Sneak Attack Bleed",
     "description": "Takes initial physical damage and bleeds over time.",
     "stackingPolicy": "Stack",
@@ -231,7 +231,7 @@
     ]
   },
   {
-    "id": "status.v2.poisoned_arrow",
+    "id": "status.poisoned_arrow",
     "name": "Poisoned Arrow",
     "description": "Takes poison damage over time.",
     "stackingPolicy": "Stack",
@@ -258,7 +258,7 @@
     ]
   },
   {
-    "id": "status.v2.cold",
+    "id": "status.cold",
     "name": "Cold",
     "description": "Persistent cold stacks used by frost abilities.",
     "stackingPolicy": "Stack",
@@ -269,7 +269,7 @@
     "effects": []
   },
   {
-    "id": "status.v2.frost_imp.freeze",
+    "id": "status.frost_imp.freeze",
     "name": "Freeze",
     "description": "Short frost control marker.",
     "stackingPolicy": "Refresh",
@@ -280,7 +280,7 @@
     "effects": []
   },
   {
-    "id": "status.v2.shadow_image",
+    "id": "status.shadow_image",
     "name": "Shadow Image",
     "description": "Short-lived shadow image marker.",
     "stackingPolicy": "Refresh",
@@ -291,7 +291,7 @@
     "effects": []
   },
   {
-    "id": "status.v2.green_slime.poison",
+    "id": "status.green_slime.poison",
     "name": "Green Slime Poison",
     "description": "Deals poison damage over 9 seconds.",
     "stackingPolicy": "Stack",
@@ -318,7 +318,7 @@
     ]
   },
   {
-    "id": "status.v2.corrosive_ooze.poison",
+    "id": "status.corrosive_ooze.poison",
     "name": "Corrosive Ooze Poison",
     "description": "Deals poison damage over 12 seconds.",
     "stackingPolicy": "Stack",
@@ -345,7 +345,7 @@
     ]
   },
   {
-    "id": "status.v2.unstable_colors.buff",
+    "id": "status.unstable_colors.buff",
     "name": "Unstable Colors",
     "description": "Increases power twice for a short duration.",
     "stackingPolicy": "Refresh",
@@ -378,7 +378,7 @@
     ]
   },
   {
-    "id": "status.v2.red_slime.fire_aura",
+    "id": "status.red_slime.fire_aura",
     "name": "Fire Aura",
     "description": "Deals burn damage every second for 10 seconds.",
     "stackingPolicy": "Refresh",
@@ -405,7 +405,7 @@
     ]
   },
   {
-    "id": "status.v2.transparent_engulfed",
+    "id": "status.transparent_engulfed",
     "name": "Engulfed",
     "description": "Stunned and taking physical damage over time.",
     "stackingPolicy": "Refresh",
@@ -432,7 +432,7 @@
     ]
   },
   {
-    "id": "status.v2.transparent_dodge_boost",
+    "id": "status.transparent_dodge_boost",
     "name": "Evasive Shift",
     "description": "Dodge chance increased for a short duration.",
     "stackingPolicy": "Refresh",
@@ -457,7 +457,7 @@
     ]
   },
   {
-    "id": "status.v2.charmed_stun",
+    "id": "status.charmed_stun",
     "name": "Charmed",
     "description": "Stunned by charm.",
     "stackingPolicy": "Refresh",
@@ -468,7 +468,7 @@
     "effects": []
   },
   {
-    "id": "status.v2.illusion_fox.accuracy_debuff",
+    "id": "status.illusion_fox.accuracy_debuff",
     "name": "Distracted",
     "description": "Precision reduced by illusion.",
     "stackingPolicy": "Stack",
@@ -493,7 +493,7 @@
     ]
   },
   {
-    "id": "status.v2.foxfire_stack",
+    "id": "status.foxfire_stack",
     "name": "Foxfire Stack",
     "description": "Retaliates when attacked and consumes a stack.",
     "stackingPolicy": "Stack",
@@ -518,7 +518,7 @@
           {
             "type": "StatusStacksAtLeast",
             "subject": "EventSource",
-            "statusId": "status.v2.foxfire_stack",
+            "statusId": "status.foxfire_stack",
             "value": 1
           }
         ]
@@ -527,13 +527,13 @@
         "id": "effect.foxfire.consume",
         "operation": "ModifyStatusStacks",
         "target": "EventSource",
-        "statusId": "status.v2.foxfire_stack",
+        "statusId": "status.foxfire_stack",
         "baseValue": -1,
         "conditions": [
           {
             "type": "StatusStacksAtLeast",
             "subject": "EventSource",
-            "statusId": "status.v2.foxfire_stack",
+            "statusId": "status.foxfire_stack",
             "value": 1
           }
         ]
@@ -541,7 +541,7 @@
     ]
   },
   {
-    "id": "status.v2.necrotic_spore_debuff",
+    "id": "status.necrotic_spore_debuff",
     "name": "Necrotic Spores",
     "description": "Suppresses health regeneration and spirit for a short duration.",
     "stackingPolicy": "Refresh",
@@ -574,7 +574,7 @@
     ]
   },
   {
-    "id": "status.v2.feral_pounce_impact",
+    "id": "status.feral_pounce_impact",
     "name": "Feral Pounce Impact",
     "description": "Takes pounce damage.",
     "stackingPolicy": "Refresh",
@@ -601,7 +601,7 @@
     ]
   },
   {
-    "id": "status.v2.feral_pounce_stunned",
+    "id": "status.feral_pounce_stunned",
     "name": "Stunned",
     "description": "Stunned by impact.",
     "stackingPolicy": "Refresh",
@@ -612,7 +612,7 @@
     "effects": []
   },
   {
-    "id": "status.v2.shredding_claws_bleed",
+    "id": "status.shredding_claws_bleed",
     "name": "Shredding Claws Bleed",
     "description": "Takes bleed damage over 4 seconds.",
     "stackingPolicy": "Stack",
@@ -639,7 +639,7 @@
     ]
   },
   {
-    "id": "status.v2.plague_swipe_poison",
+    "id": "status.plague_swipe_poison",
     "name": "Plague Swipe Poison",
     "description": "Takes plague swipe impact damage and a short damage over time effect.",
     "stackingPolicy": "Refresh",
@@ -676,7 +676,7 @@
     ]
   },
   {
-    "id": "status.v2.pestilent_touch_poison",
+    "id": "status.pestilent_touch_poison",
     "name": "Pestilent Touch Poison",
     "description": "Takes poison damage over time.",
     "stackingPolicy": "Refresh",
@@ -703,7 +703,7 @@
     ]
   },
   {
-    "id": "status.v2.draining_claws_debuff",
+    "id": "status.draining_claws_debuff",
     "name": "Sapped Attack Power",
     "description": "Takes draining claw damage and loses power.",
     "stackingPolicy": "Refresh",
@@ -738,7 +738,7 @@
     ]
   },
   {
-    "id": "status.v2.piercing_arrow_bleed",
+    "id": "status.piercing_arrow_bleed",
     "name": "Pierced Bleed",
     "description": "Takes bleed damage from a pierced wound.",
     "stackingPolicy": "Refresh",

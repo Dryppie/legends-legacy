@@ -2,35 +2,35 @@ using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
 
-namespace Services.LL.Combat.V2;
+namespace Services.LL.Combat.Engine;
 
-public sealed class AbilityCatalogV2Diagnostics : IAbilityCatalogV2Diagnostics
+public sealed class AbilityCatalogDiagnostics : IAbilityCatalogDiagnostics
 {
-    private const string TrainingEssenceId = "essence.v2.training";
-    private readonly IAbilityCatalogV2Provider _catalogProvider;
+    private const string TrainingEssenceId = "essence.training";
+    private readonly IAbilityCatalogProvider _catalogProvider;
 
-    public AbilityCatalogV2Diagnostics(IAbilityCatalogV2Provider catalogProvider)
+    public AbilityCatalogDiagnostics(IAbilityCatalogProvider catalogProvider)
     {
         _catalogProvider = catalogProvider;
     }
 
-    public AbilityCatalogV2DiagnosticReport RunTrainingEncounter()
+    public AbilityCatalogDiagnosticReport RunTrainingEncounter()
     {
         var catalog = _catalogProvider.GetCatalog();
-        var compiledAbilities = AbilityCompilerV2.CompileAbilities(
+        var compiledAbilities = AbilityCompiler.CompileAbilities(
             catalog.OwningEssenceByAbilityId
                 .Where(x => x.Value.Equals(TrainingEssenceId, StringComparison.OrdinalIgnoreCase))
                 .Select(x => catalog.AbilitiesById[x.Key]));
-        var compiledCatalogAbilities = AbilityCompilerV2.CompileAbilities(catalog.Abilities);
-        var compiledStatuses = AbilityCompilerV2.CompileStatuses(catalog.Statuses);
-        var compiledSummons = AbilityCompilerV2.CompileSummons(catalog.Summons);
-        var friendly = CreateCombatant("diagnostic-friendly", CombatTeamV2.Friendly, compiledAbilities.Values);
-        var hostile = CreateCombatant("diagnostic-hostile", CombatTeamV2.Hostile, []);
-        var engine = new FastCombatEngineV2(
+        var compiledCatalogAbilities = AbilityCompiler.CompileAbilities(catalog.Abilities);
+        var compiledStatuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var compiledSummons = AbilityCompiler.CompileSummons(catalog.Summons);
+        var friendly = CreateCombatant("diagnostic-friendly", CombatTeam.Friendly, compiledAbilities.Values);
+        var hostile = CreateCombatant("diagnostic-hostile", CombatTeam.Hostile, []);
+        var engine = new FastCombatEngine(
             compiledStatuses,
             compiledSummons,
             compiledCatalogAbilities,
-            new FastCombatEngineV2Options(MaxTicks: 40, RandomSeed: 7));
+            new FastCombatEngineOptions(MaxTicks: 40, RandomSeed: 7));
         var result = engine.Run([friendly], [hostile]);
         var failures = new List<string>();
 
@@ -40,7 +40,7 @@ public sealed class AbilityCatalogV2Diagnostics : IAbilityCatalogV2Diagnostics
         var reflectObserved = result.EventLog.Any(x => x.Source == "effect.reflect.damage" && x.EventType == EventType.Damage);
         var summonDiagnostics = catalog.Summons
             .OrderBy(x => x.Id, StringComparer.OrdinalIgnoreCase)
-            .Select(x => new AbilityCatalogV2SummonDiagnostic(
+            .Select(x => new AbilityCatalogSummonDiagnostic(
                 x.Id,
                 x.Name,
                 x.ImagePath,
@@ -54,7 +54,7 @@ public sealed class AbilityCatalogV2Diagnostics : IAbilityCatalogV2Diagnostics
         var summonAbilityReferenceCount = catalog.Summons.Sum(x => x.AbilityIds.Count);
 
         if (compiledAbilities.Count == 0)
-            failures.Add($"No v2 abilities found for '{TrainingEssenceId}'.");
+            failures.Add($"No abilities found for '{TrainingEssenceId}'.");
         if (!directDamageObserved)
             failures.Add("Training direct damage was not observed.");
         if (!barrierObserved)
@@ -72,7 +72,7 @@ public sealed class AbilityCatalogV2Diagnostics : IAbilityCatalogV2Diagnostics
             }
         }
 
-        return new AbilityCatalogV2DiagnosticReport(
+        return new AbilityCatalogDiagnosticReport(
             catalog.Abilities.Count,
             catalog.Statuses.Count,
             catalog.Summons.Count,
@@ -94,10 +94,10 @@ public sealed class AbilityCatalogV2Diagnostics : IAbilityCatalogV2Diagnostics
             failures);
     }
 
-    private static RuntimeCombatantV2 CreateCombatant(
+    private static RuntimeCombatant CreateCombatant(
         string id,
-        CombatTeamV2 team,
-        IEnumerable<CompiledAbilityV2> abilities) =>
+        CombatTeam team,
+        IEnumerable<CompiledAbility> abilities) =>
         new(
             id,
             id,

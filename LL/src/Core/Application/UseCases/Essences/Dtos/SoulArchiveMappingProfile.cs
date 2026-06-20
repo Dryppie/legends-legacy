@@ -1,6 +1,6 @@
 using Application.Interfaces.Services.LL.Essences;
 using AutoMapper;
-using Domain.Models.Combat.Abilities.V2;
+using Domain.Models.Combat.Abilities;
 using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;
 
@@ -189,7 +189,7 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
             ability.Name,
             ability.Description,
             ability.CooldownTicks / 10d,
-            ability.Effects.FirstOrDefault()?.Target.ToString() ?? AbilityTargetSelectorV2.CurrentTarget.ToString(),
+            ability.Effects.FirstOrDefault()?.Target.ToString() ?? AbilityTargetSelector.CurrentTarget.ToString(),
             ability.Tags,
             ability.Effects.Select(x => new EssenceEffectDto(
                 x.Id,

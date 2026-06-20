@@ -9,18 +9,18 @@ using Services.LL.Combat.Layers.Resolution.Models;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json;
 
-namespace Services.LL.Combat.V2;
+namespace Services.LL.Combat.Engine;
 
-public sealed class AbilityCatalogV2BehaviorDiagnostics : IAbilityCatalogV2BehaviorDiagnostics
+public sealed class AbilityCatalogBehaviorDiagnostics : IAbilityCatalogBehaviorDiagnostics
 {
-    private readonly IAbilityCatalogV2Provider _catalogProvider;
+    private readonly IAbilityCatalogProvider _catalogProvider;
     private readonly IEssenceDefinitionRepository? _essenceDefinitions;
     private readonly IConfiguration _config;
     private readonly string _contentRootPath;
     private readonly JsonSerializerOptions _jsonOptions;
 
-    public AbilityCatalogV2BehaviorDiagnostics(
-        IAbilityCatalogV2Provider catalogProvider,
+    public AbilityCatalogBehaviorDiagnostics(
+        IAbilityCatalogProvider catalogProvider,
         IConfiguration config,
         string contentRootPath,
         JsonSerializerOptions jsonOptions,
@@ -33,7 +33,7 @@ public sealed class AbilityCatalogV2BehaviorDiagnostics : IAbilityCatalogV2Behav
         _jsonOptions = jsonOptions;
     }
 
-    public AbilityCatalogV2BehaviorDiagnosticReport Analyze()
+    public AbilityCatalogBehaviorDiagnosticReport Analyze()
     {
         var catalog = _catalogProvider.GetCatalog();
         var scenarios = ReadManifest();
@@ -41,7 +41,7 @@ public sealed class AbilityCatalogV2BehaviorDiagnostics : IAbilityCatalogV2Behav
             .Select(scenario => RunScenario(scenario, catalog))
             .ToList();
 
-        return new AbilityCatalogV2BehaviorDiagnosticReport(
+        return new AbilityCatalogBehaviorDiagnosticReport(
             results.Count,
             results.Count(x => x.Passed),
             results.Count(x => !x.Passed),
@@ -58,21 +58,21 @@ public sealed class AbilityCatalogV2BehaviorDiagnostics : IAbilityCatalogV2Behav
     private IReadOnlyList<AbilityBehaviorScenario> ReadManifest()
     {
         var contentRoot = _config["Content:Root"] ?? "Data";
-        var path = Path.Combine(_contentRootPath, contentRoot, "ability-behaviors.v2.json");
+        var path = Path.Combine(_contentRootPath, contentRoot, "ability-behaviors.json");
         if (!File.Exists(path))
             throw new FileNotFoundException($"Could not find ability behavior manifest '{path}'.", path);
 
         return JsonSerializer.Deserialize<List<AbilityBehaviorScenario>>(File.ReadAllText(path), _jsonOptions) ?? [];
     }
 
-    private AbilityCatalogV2BehaviorScenarioResult RunScenario(
+    private AbilityCatalogBehaviorScenarioResult RunScenario(
         AbilityBehaviorScenario scenario,
-        AbilityCatalogV2 catalog)
+        AbilityCatalog catalog)
     {
         var failures = new List<string>();
         if (!catalog.AbilitiesById.ContainsKey(scenario.AbilityId))
         {
-            failures.Add($"Ability '{scenario.AbilityId}' does not exist in v2 catalog.");
+            failures.Add($"Ability '{scenario.AbilityId}' does not exist in catalog.");
             return BuildResult(scenario, failures);
         }
 
@@ -84,7 +84,7 @@ public sealed class AbilityCatalogV2BehaviorDiagnostics : IAbilityCatalogV2Behav
             .FirstOrDefault(id => !catalog.AbilitiesById.ContainsKey(id));
         if (missingAbilityId is not null)
         {
-            failures.Add($"Referenced ability '{missingAbilityId}' does not exist in v2 catalog.");
+            failures.Add($"Referenced ability '{missingAbilityId}' does not exist in catalog.");
             return BuildResult(scenario, failures);
         }
 
@@ -93,32 +93,32 @@ public sealed class AbilityCatalogV2BehaviorDiagnostics : IAbilityCatalogV2Behav
             if (scenario.UsesEssenceLoadout)
                 return RunEssenceScenario(scenario, catalog, failures);
 
-            var allAbilities = AbilityCompilerV2.CompileAbilities(catalog.Abilities);
+            var allAbilities = AbilityCompiler.CompileAbilities(catalog.Abilities);
             var friendlyAbilities = friendlyAbilityIds.Select(id => allAbilities[id]).ToList();
             var hostileAbilities = scenario.HostileAbilityIds.Select(id => allAbilities[id]).ToList();
-            var statuses = AbilityCompilerV2.CompileStatuses(catalog.Statuses);
-            var summons = AbilityCompilerV2.CompileSummons(catalog.Summons);
+            var statuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+            var summons = AbilityCompiler.CompileSummons(catalog.Summons);
             var friendly = CreateCombatant(
                 "friendly",
-                CombatTeamV2.Friendly,
+                CombatTeam.Friendly,
                 friendlyAbilities,
                 scenario.FriendlyStats,
                 scenario.FriendlyHealth);
             var hostiles = Enumerable.Range(1, Math.Max(1, scenario.HostileCount))
                 .Select(index => CreateCombatant(
                     $"hostile-{index}",
-                    CombatTeamV2.Hostile,
+                    CombatTeam.Hostile,
                     hostileAbilities,
                     scenario.HostileStats,
                     scenario.HostileHealth))
                 .ToList();
             var combatants = hostiles.Concat([friendly]).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
             ApplyInitialStatuses(scenario.InitialStatuses, statuses, combatants);
-            var engine = new FastCombatEngineV2(
+            var engine = new FastCombatEngine(
                 statuses,
                 summons,
                 allAbilities,
-                new FastCombatEngineV2Options(
+                new FastCombatEngineOptions(
                     MaxTicks: Math.Max(1, scenario.MaxTicks),
                     BasicAttackIntervalTicks: scenario.BasicAttackIntervalTicks,
                     RandomSeed: scenario.RandomSeed));
@@ -130,7 +130,7 @@ public sealed class AbilityCatalogV2BehaviorDiagnostics : IAbilityCatalogV2Behav
             foreach (var expected in scenario.ExpectedStatuses)
                 CheckExpectedStatus(scenario, expected, combatants, failures);
 
-            return new AbilityCatalogV2BehaviorScenarioResult(
+            return new AbilityCatalogBehaviorScenarioResult(
                 scenario.Id,
                 scenario.AbilityId,
                 failures.Count == 0,
@@ -146,9 +146,9 @@ public sealed class AbilityCatalogV2BehaviorDiagnostics : IAbilityCatalogV2Behav
         }
     }
 
-    private AbilityCatalogV2BehaviorScenarioResult RunEssenceScenario(
+    private AbilityCatalogBehaviorScenarioResult RunEssenceScenario(
         AbilityBehaviorScenario scenario,
-        AbilityCatalogV2 catalog,
+        AbilityCatalog catalog,
         List<string> failures)
     {
         if (_essenceDefinitions is null)
@@ -193,7 +193,7 @@ public sealed class AbilityCatalogV2BehaviorDiagnostics : IAbilityCatalogV2Behav
             plan,
             [new CombatRuntimeParticipant(plan.FriendlyParticipants.Single(), friendlyCharacter, friendlyCombatant)],
             [.. hostileParticipants.Select((item, index) => new CombatRuntimeParticipant(plan.HostileParticipants[index], item.Character, item.Combatant))]);
-        var executor = new CombatEngineExecutorV2(_catalogProvider, _essenceDefinitions);
+        var executor = new CombatEngineExecutor(_catalogProvider, _essenceDefinitions);
         var result = executor.ExecuteAsync(runtime, CancellationToken.None).GetAwaiter().GetResult();
 
         foreach (var expected in scenario.ExpectedLogs)
@@ -202,7 +202,7 @@ public sealed class AbilityCatalogV2BehaviorDiagnostics : IAbilityCatalogV2Behav
         if (scenario.ExpectedStatuses.Count > 0)
             failures.Add("Essence-loadout scenarios currently support expectedLogs only.");
 
-        return new AbilityCatalogV2BehaviorScenarioResult(
+        return new AbilityCatalogBehaviorScenarioResult(
             scenario.Id,
             scenario.AbilityId,
             failures.Count == 0,
@@ -212,7 +212,7 @@ public sealed class AbilityCatalogV2BehaviorDiagnostics : IAbilityCatalogV2Behav
             failures);
     }
 
-    private static AbilityCatalogV2BehaviorScenarioResult BuildResult(
+    private static AbilityCatalogBehaviorScenarioResult BuildResult(
         AbilityBehaviorScenario scenario,
         IReadOnlyList<string> failures) =>
         new(
@@ -247,7 +247,7 @@ public sealed class AbilityCatalogV2BehaviorDiagnostics : IAbilityCatalogV2Behav
     private static void CheckExpectedStatus(
         AbilityBehaviorScenario scenario,
         ExpectedStatusObservation expected,
-        IReadOnlyDictionary<string, RuntimeCombatantV2> combatants,
+        IReadOnlyDictionary<string, RuntimeCombatant> combatants,
         ICollection<string> failures)
     {
         if (!combatants.TryGetValue(expected.CombatantId, out var combatant))
@@ -264,10 +264,10 @@ public sealed class AbilityCatalogV2BehaviorDiagnostics : IAbilityCatalogV2Behav
         }
     }
 
-    private static RuntimeCombatantV2 CreateCombatant(
+    private static RuntimeCombatant CreateCombatant(
         string id,
-        CombatTeamV2 team,
-        IEnumerable<CompiledAbilityV2> abilities,
+        CombatTeam team,
+        IEnumerable<CompiledAbility> abilities,
         IReadOnlyDictionary<AttributeType, float> statOverrides,
         float? health)
     {
@@ -283,7 +283,7 @@ public sealed class AbilityCatalogV2BehaviorDiagnostics : IAbilityCatalogV2Behav
         foreach (var stat in statOverrides)
             stats[stat.Key] = stat.Value;
 
-        var combatant = new RuntimeCombatantV2(
+        var combatant = new RuntimeCombatant(
             id,
             id,
             team,
@@ -367,8 +367,8 @@ public sealed class AbilityCatalogV2BehaviorDiagnostics : IAbilityCatalogV2Behav
 
     private static void ApplyInitialStatuses(
         IReadOnlyList<InitialStatusSpec> initialStatuses,
-        IReadOnlyDictionary<string, CompiledStatusV2> statuses,
-        IReadOnlyDictionary<string, RuntimeCombatantV2> combatants)
+        IReadOnlyDictionary<string, CompiledStatus> statuses,
+        IReadOnlyDictionary<string, RuntimeCombatant> combatants)
     {
         foreach (var initialStatus in initialStatuses)
         {
@@ -383,7 +383,7 @@ public sealed class AbilityCatalogV2BehaviorDiagnostics : IAbilityCatalogV2Behav
                     ? requestedSource
                     : owner;
 
-            owner.Statuses.Add(new RuntimeStatusV2(status, source, owner, Math.Max(1, initialStatus.Stacks)));
+            owner.Statuses.Add(new RuntimeStatus(status, source, owner, Math.Max(1, initialStatus.Stacks)));
         }
     }
 

@@ -1,22 +1,22 @@
-using Domain.Models.Combat.Abilities.V2;
+using Domain.Models.Combat.Abilities;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json;
 
-namespace Services.LL.Combat.V2;
+namespace Services.LL.Combat.Engine;
 
-public sealed class JsonAbilityCatalogV2Provider : IAbilityCatalogV2Provider
+public sealed class JsonAbilityCatalogProvider : IAbilityCatalogProvider
 {
-    private readonly AbilityCatalogV2 _catalog;
+    private readonly AbilityCatalog _catalog;
 
-    public JsonAbilityCatalogV2Provider(
+    public JsonAbilityCatalogProvider(
         IConfiguration config,
         string contentRootPath,
         JsonSerializerOptions options)
     {
         var contentRoot = config["Content:Root"] ?? "Data";
-        var abilityPath = Path.Combine(contentRootPath, contentRoot, "abilities.v2.json");
-        var statusPath = Path.Combine(contentRootPath, contentRoot, "statuses.v2.json");
-        var summonPath = Path.Combine(contentRootPath, contentRoot, "summons.v2.json");
+        var abilityPath = Path.Combine(contentRootPath, contentRoot, "abilities.json");
+        var statusPath = Path.Combine(contentRootPath, contentRoot, "statuses.json");
+        var summonPath = Path.Combine(contentRootPath, contentRoot, "summons.json");
 
         var abilities = ReadList<AbilitySpec>(abilityPath, options);
         var statuses = ReadList<StatusSpec>(statusPath, options);
@@ -25,15 +25,15 @@ public sealed class JsonAbilityCatalogV2Provider : IAbilityCatalogV2Provider
             .Where(x => !string.IsNullOrWhiteSpace(x.OwningEssenceId))
             .ToDictionary(x => x.Id, x => x.OwningEssenceId!, StringComparer.OrdinalIgnoreCase);
 
-        _catalog = AbilityCatalogV2Validator.CreateCatalog(abilities, statuses, owningEssences, summons);
+        _catalog = AbilityCatalogValidator.CreateCatalog(abilities, statuses, owningEssences, summons);
     }
 
-    public AbilityCatalogV2 GetCatalog() => _catalog;
+    public AbilityCatalog GetCatalog() => _catalog;
 
     private static IReadOnlyList<T> ReadList<T>(string path, JsonSerializerOptions options)
     {
         if (!File.Exists(path))
-            throw new FileNotFoundException($"Could not find ability catalog v2 file '{path}'.", path);
+            throw new FileNotFoundException($"Could not find ability catalog file '{path}'.", path);
 
         return JsonSerializer.Deserialize<List<T>>(File.ReadAllText(path), options) ?? [];
     }

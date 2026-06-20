@@ -1,8 +1,8 @@
-export interface AbilityCatalogV2BehaviorDiagnosticReport {
+export interface AbilityCatalogBehaviorDiagnosticReport {
   scenarioCount: number;
   passedCount: number;
   failedCount: number;
-  scenarios: AbilityCatalogV2BehaviorScenarioResult[];
+  scenarios: AbilityCatalogBehaviorScenarioResult[];
   abilityCount: number;
   coveredAbilityCount: number;
   missingAbilityIds: string[];
@@ -10,7 +10,7 @@ export interface AbilityCatalogV2BehaviorDiagnosticReport {
   hasFullAbilityCoverage: boolean;
 }
 
-export interface AbilityCatalogV2BehaviorScenarioResult {
+export interface AbilityCatalogBehaviorScenarioResult {
   behaviorId: string;
   abilityId: string;
   passed: boolean;
@@ -20,7 +20,7 @@ export interface AbilityCatalogV2BehaviorScenarioResult {
   failures: string[];
 }
 
-export interface AbilityCatalogV2DiagnosticReport {
+export interface AbilityCatalogDiagnosticReport {
   abilityCount: number;
   statusCount: number;
   summonCount: number;
@@ -31,7 +31,7 @@ export interface AbilityCatalogV2DiagnosticReport {
   timedSummonCount: number;
   persistentSummonCount: number;
   summonAbilityReferenceCount: number;
-  summons: AbilityCatalogV2SummonDiagnostic[];
+  summons: AbilityCatalogSummonDiagnostic[];
   outcome: string;
   duration: number;
   eventLogCount: number;
@@ -42,7 +42,7 @@ export interface AbilityCatalogV2DiagnosticReport {
   failures: string[];
 }
 
-export interface AbilityCatalogV2SummonDiagnostic {
+export interface AbilityCatalogSummonDiagnostic {
   id: string;
   name: string;
   imagePath: string;
@@ -54,36 +54,36 @@ export interface AbilityCatalogV2SummonDiagnostic {
   tags: string[];
 }
 
-export interface AbilityCatalogV2CoverageReport {
+export interface AbilityCatalogCoverageReport {
   essenceCount: number;
   requiredSlotCount: number;
   coveredSlotCount: number;
   currentReferenceCoveredSlotCount: number;
-  slots: AbilityCatalogV2SlotCoverage[];
-  gaps: AbilityCatalogV2CoverageGap[];
+  slots: AbilityCatalogSlotCoverage[];
+  gaps: AbilityCatalogCoverageGap[];
   unownedAbilityIds: string[];
-  runtimeLoadoutChecks: AbilityCatalogV2RuntimeLoadoutCheck[];
+  runtimeLoadoutChecks: AbilityCatalogRuntimeLoadoutCheck[];
   isComplete: boolean;
 }
 
-export interface AbilityCatalogV2SlotCoverage {
+export interface AbilityCatalogSlotCoverage {
   essenceId: string;
   slot: string;
   legacyAbilityId: string;
-  v2AbilityId: string | null;
-  hasOwnedV2Ability: boolean;
-  currentReferenceExistsInV2: boolean;
+  abilityId: string | null;
+  hasOwnedAbility: boolean;
+  currentReferenceExists: boolean;
   kindMatches: boolean;
 }
 
-export interface AbilityCatalogV2CoverageGap {
+export interface AbilityCatalogCoverageGap {
   essenceId: string;
   slot: string;
   legacyAbilityId: string;
   reason: string;
 }
 
-export interface AbilityCatalogV2RuntimeLoadoutCheck {
+export interface AbilityCatalogRuntimeLoadoutCheck {
   essenceId: string;
   abilityIds: string[];
   isReady: boolean;

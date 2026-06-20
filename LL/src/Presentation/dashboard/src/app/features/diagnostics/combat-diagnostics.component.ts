@@ -2,14 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { finalize, forkJoin } from 'rxjs';
 import {
-  AbilityCatalogV2BehaviorDiagnosticReport,
-  AbilityCatalogV2BehaviorScenarioResult,
-  AbilityCatalogV2CoverageGap,
-  AbilityCatalogV2CoverageReport,
-  AbilityCatalogV2DiagnosticReport,
-  AbilityCatalogV2RuntimeLoadoutCheck,
-  AbilityCatalogV2SummonDiagnostic,
-} from '../../shared/models/diagnostics/ability-catalog-v2-behavior-diagnostics';
+  AbilityCatalogBehaviorDiagnosticReport,
+  AbilityCatalogBehaviorScenarioResult,
+  AbilityCatalogCoverageGap,
+  AbilityCatalogCoverageReport,
+  AbilityCatalogDiagnosticReport,
+  AbilityCatalogRuntimeLoadoutCheck,
+  AbilityCatalogSummonDiagnostic,
+} from '../../shared/models/diagnostics/ability-catalog-diagnostics';
 import { DiagnosticsService } from '../../core/services/api/diagnostics/diagnostics.service';
 
 type DiagnosticsTab = 'catalog' | 'coverage' | 'behaviors';
@@ -28,9 +28,9 @@ export class CombatDiagnosticsComponent implements OnInit {
   ];
 
   activeTab: DiagnosticsTab = 'catalog';
-  catalogReport: AbilityCatalogV2DiagnosticReport | null = null;
-  coverageReport: AbilityCatalogV2CoverageReport | null = null;
-  behaviorReport: AbilityCatalogV2BehaviorDiagnosticReport | null = null;
+  catalogReport: AbilityCatalogDiagnosticReport | null = null;
+  coverageReport: AbilityCatalogCoverageReport | null = null;
+  behaviorReport: AbilityCatalogBehaviorDiagnosticReport | null = null;
   isLoading = false;
   error: string | null = null;
 
@@ -45,9 +45,9 @@ export class CombatDiagnosticsComponent implements OnInit {
     this.error = null;
 
     forkJoin({
-      catalog: this.diagnosticsService.getAbilityCatalogV2(),
-      coverage: this.diagnosticsService.getAbilityCatalogV2Coverage(),
-      behavior: this.diagnosticsService.getAbilityCatalogV2Behaviors(),
+      catalog: this.diagnosticsService.getAbilityCatalog(),
+      coverage: this.diagnosticsService.getAbilityCatalogCoverage(),
+      behavior: this.diagnosticsService.getAbilityCatalogBehaviors(),
     })
       .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
@@ -76,11 +76,11 @@ export class CombatDiagnosticsComponent implements OnInit {
     );
   }
 
-  get failedScenarios(): AbilityCatalogV2BehaviorScenarioResult[] {
+  get failedScenarios(): AbilityCatalogBehaviorScenarioResult[] {
     return this.behaviorReport?.scenarios.filter((scenario) => !scenario.passed) ?? [];
   }
 
-  get sortedScenarios(): AbilityCatalogV2BehaviorScenarioResult[] {
+  get sortedScenarios(): AbilityCatalogBehaviorScenarioResult[] {
     return [...(this.behaviorReport?.scenarios ?? [])].sort((left, right) => {
       if (left.passed !== right.passed) {
         return left.passed ? 1 : -1;
@@ -90,23 +90,23 @@ export class CombatDiagnosticsComponent implements OnInit {
     });
   }
 
-  get failedLoadouts(): AbilityCatalogV2RuntimeLoadoutCheck[] {
+  get failedLoadouts(): AbilityCatalogRuntimeLoadoutCheck[] {
     return this.coverageReport?.runtimeLoadoutChecks.filter((check) => !check.isReady) ?? [];
   }
 
-  trackScenario(_: number, scenario: AbilityCatalogV2BehaviorScenarioResult): string {
+  trackScenario(_: number, scenario: AbilityCatalogBehaviorScenarioResult): string {
     return scenario.behaviorId;
   }
 
-  trackCoverageGap(_: number, gap: AbilityCatalogV2CoverageGap): string {
+  trackCoverageGap(_: number, gap: AbilityCatalogCoverageGap): string {
     return `${gap.essenceId}:${gap.slot}:${gap.legacyAbilityId}`;
   }
 
-  trackLoadout(_: number, check: AbilityCatalogV2RuntimeLoadoutCheck): string {
+  trackLoadout(_: number, check: AbilityCatalogRuntimeLoadoutCheck): string {
     return check.essenceId;
   }
 
-  trackSummon(_: number, summon: AbilityCatalogV2SummonDiagnostic): string {
+  trackSummon(_: number, summon: AbilityCatalogSummonDiagnostic): string {
     return summon.id;
   }
 

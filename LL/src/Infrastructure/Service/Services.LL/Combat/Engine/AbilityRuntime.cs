@@ -1,46 +1,46 @@
 using Domain.Models.Attributes;
-using Domain.Models.Combat.Abilities.V2;
+using Domain.Models.Combat.Abilities;
 using Domain.Models.Damages;
 
-namespace Services.LL.Combat.V2;
+namespace Services.LL.Combat.Engine;
 
-public enum CombatTeamV2
+public enum CombatTeam
 {
     Friendly = 0,
     Hostile = 1
 }
 
-public sealed class CompiledAbilityV2
+public sealed class CompiledAbility
 {
     public required string Id { get; init; }
     public required string Name { get; init; }
     public AbilitySpecKind Kind { get; init; }
     public int CooldownTicks { get; init; }
-    public required IReadOnlyDictionary<AbilityTriggerEvent, IReadOnlyList<CompiledTriggerV2>> TriggersByEvent { get; init; }
+    public required IReadOnlyDictionary<AbilityTriggerEvent, IReadOnlyList<CompiledTrigger>> TriggersByEvent { get; init; }
     public required IReadOnlySet<string> Tags { get; init; }
 }
 
-public sealed class CompiledTriggerV2
+public sealed class CompiledTrigger
 {
     public AbilityTriggerEvent Event { get; init; }
     public int InternalCooldownTicks { get; init; }
-    public required IReadOnlyList<CompiledConditionV2> Conditions { get; init; }
-    public required IReadOnlyList<CompiledEffectV2> Effects { get; init; }
+    public required IReadOnlyList<CompiledCondition> Conditions { get; init; }
+    public required IReadOnlyList<CompiledEffect> Effects { get; init; }
 }
 
-public sealed class CompiledEffectV2
+public sealed class CompiledEffect
 {
     public required string Id { get; init; }
     public required string StatsSource { get; init; }
     public AbilityEffectOperation Operation { get; init; }
-    public AbilityTargetSelectorV2 Target { get; init; }
+    public AbilityTargetSelector Target { get; init; }
     public int BaseValue { get; init; }
     public AttributeType? ScalingAttribute { get; init; }
     public float ScalingCoefficient { get; init; }
     public AttributeType? Attribute { get; init; }
     public string? StatusId { get; init; }
     public string? SummonId { get; init; }
-    public AbilityResourceTypeV2 Resource { get; init; }
+    public AbilityResourceType Resource { get; init; }
     public int DurationTicks { get; init; }
     public int IntervalTicks { get; init; }
     public int Uses { get; init; }
@@ -48,19 +48,19 @@ public sealed class CompiledEffectV2
     public AttackType AttackType { get; init; }
     public DamageType DamageType { get; init; }
     public float LifeStealPercentage { get; init; }
-    public required IReadOnlyList<CompiledConditionV2> Conditions { get; init; }
+    public required IReadOnlyList<CompiledCondition> Conditions { get; init; }
 }
 
-public sealed class CompiledConditionV2
+public sealed class CompiledCondition
 {
-    public AbilityConditionTypeV2 Type { get; init; }
+    public AbilityConditionType Type { get; init; }
     public AbilityConditionSubject Subject { get; init; }
     public string? StatusId { get; init; }
     public string? Tag { get; init; }
     public int Value { get; init; }
 }
 
-public sealed class CompiledStatusV2
+public sealed class CompiledStatus
 {
     public required string Id { get; init; }
     public required string Name { get; init; }
@@ -68,10 +68,10 @@ public sealed class CompiledStatusV2
     public AbilityStatusStackingPolicy StackingPolicy { get; init; }
     public int MaxStacks { get; init; }
     public int DurationTicks { get; init; }
-    public required IReadOnlyDictionary<AbilityTriggerEvent, IReadOnlyList<CompiledTriggerV2>> TriggersByEvent { get; init; }
+    public required IReadOnlyDictionary<AbilityTriggerEvent, IReadOnlyList<CompiledTrigger>> TriggersByEvent { get; init; }
 }
 
-public sealed class CompiledSummonV2
+public sealed class CompiledSummon
 {
     public required string Id { get; init; }
     public required string Name { get; init; }
@@ -80,10 +80,10 @@ public sealed class CompiledSummonV2
     public int MaxActive { get; init; }
     public required IReadOnlySet<string> Tags { get; init; }
     public required IReadOnlyList<string> AbilityIds { get; init; }
-    public required IReadOnlyList<CompiledSummonAttributeV2> Attributes { get; init; }
+    public required IReadOnlyList<CompiledSummonAttribute> Attributes { get; init; }
 }
 
-public sealed class CompiledSummonAttributeV2
+public sealed class CompiledSummonAttribute
 {
     public AttributeType Attribute { get; init; }
     public int BaseValue { get; init; }
@@ -92,18 +92,18 @@ public sealed class CompiledSummonAttributeV2
     public int MinimumValue { get; init; }
 }
 
-public sealed class RuntimeAbilityV2
+public sealed class RuntimeAbility
 {
-    private readonly Dictionary<CompiledTriggerV2, int> _triggerCooldowns = [];
+    private readonly Dictionary<CompiledTrigger, int> _triggerCooldowns = [];
     private readonly Dictionary<string, int> _effectUses = new(StringComparer.OrdinalIgnoreCase);
 
-    public RuntimeAbilityV2(CompiledAbilityV2 definition)
+    public RuntimeAbility(CompiledAbility definition)
     {
         Definition = definition;
         RemainingCooldownTicks = 0;
     }
 
-    public CompiledAbilityV2 Definition { get; }
+    public CompiledAbility Definition { get; }
     public int RemainingCooldownTicks { get; private set; }
     public bool IsReady => RemainingCooldownTicks <= 0;
 
@@ -131,19 +131,19 @@ public sealed class RuntimeAbilityV2
         }
     }
 
-    public bool CanUseTrigger(CompiledTriggerV2 trigger) =>
+    public bool CanUseTrigger(CompiledTrigger trigger) =>
         trigger.InternalCooldownTicks <= 0 || !_triggerCooldowns.ContainsKey(trigger);
 
-    public void StartTriggerCooldown(CompiledTriggerV2 trigger)
+    public void StartTriggerCooldown(CompiledTrigger trigger)
     {
         if (trigger.InternalCooldownTicks > 0)
             _triggerCooldowns[trigger] = trigger.InternalCooldownTicks;
     }
 
-    public bool CanUseEffect(CompiledEffectV2 effect) =>
+    public bool CanUseEffect(CompiledEffect effect) =>
         effect.Uses <= 0 || _effectUses.GetValueOrDefault(effect.Id) < effect.Uses;
 
-    public void MarkEffectUsed(CompiledEffectV2 effect)
+    public void MarkEffectUsed(CompiledEffect effect)
     {
         if (effect.Uses <= 0)
             return;
@@ -152,15 +152,15 @@ public sealed class RuntimeAbilityV2
     }
 }
 
-public sealed class RuntimeStatusV2
+public sealed class RuntimeStatus
 {
-    private readonly Dictionary<CompiledTriggerV2, int> _triggerCooldowns = [];
+    private readonly Dictionary<CompiledTrigger, int> _triggerCooldowns = [];
     private readonly Dictionary<string, int> _effectUses = new(StringComparer.OrdinalIgnoreCase);
 
-    public RuntimeStatusV2(
-        CompiledStatusV2 definition,
-        RuntimeCombatantV2 source,
-        RuntimeCombatantV2 owner,
+    public RuntimeStatus(
+        CompiledStatus definition,
+        RuntimeCombatant source,
+        RuntimeCombatant owner,
         int stacks,
         string? statsSource = null)
     {
@@ -172,9 +172,9 @@ public sealed class RuntimeStatusV2
         RemainingDurationTicks = definition.DurationTicks;
     }
 
-    public CompiledStatusV2 Definition { get; }
-    public RuntimeCombatantV2 Source { get; }
-    public RuntimeCombatantV2 Owner { get; }
+    public CompiledStatus Definition { get; }
+    public RuntimeCombatant Source { get; }
+    public RuntimeCombatant Owner { get; }
     public string StatsSource { get; }
     public int Stacks { get; private set; }
     public int RemainingDurationTicks { get; private set; }
@@ -208,19 +208,19 @@ public sealed class RuntimeStatusV2
         }
     }
 
-    public bool CanUseTrigger(CompiledTriggerV2 trigger) =>
+    public bool CanUseTrigger(CompiledTrigger trigger) =>
         trigger.InternalCooldownTicks <= 0 || !_triggerCooldowns.ContainsKey(trigger);
 
-    public void StartTriggerCooldown(CompiledTriggerV2 trigger)
+    public void StartTriggerCooldown(CompiledTrigger trigger)
     {
         if (trigger.InternalCooldownTicks > 0)
             _triggerCooldowns[trigger] = trigger.InternalCooldownTicks;
     }
 
-    public bool CanUseEffect(CompiledEffectV2 effect) =>
+    public bool CanUseEffect(CompiledEffect effect) =>
         effect.Uses <= 0 || _effectUses.GetValueOrDefault(effect.Id) < effect.Uses;
 
-    public void MarkEffectUsed(CompiledEffectV2 effect)
+    public void MarkEffectUsed(CompiledEffect effect)
     {
         if (effect.Uses <= 0)
             return;
@@ -229,9 +229,9 @@ public sealed class RuntimeStatusV2
     }
 }
 
-public sealed class RuntimeEffectV2
+public sealed class RuntimeEffect
 {
-    public RuntimeEffectV2(CompiledEffectV2 definition, RuntimeCombatantV2 source, RuntimeCombatantV2 target, string? statsSource = null)
+    public RuntimeEffect(CompiledEffect definition, RuntimeCombatant source, RuntimeCombatant target, string? statsSource = null)
     {
         Definition = definition;
         Source = source;
@@ -242,9 +242,9 @@ public sealed class RuntimeEffectV2
         RemainingUses = definition.Uses <= 0 ? int.MaxValue : definition.Uses;
     }
 
-    public CompiledEffectV2 Definition { get; }
-    public RuntimeCombatantV2 Source { get; }
-    public RuntimeCombatantV2 Target { get; }
+    public CompiledEffect Definition { get; }
+    public RuntimeCombatant Source { get; }
+    public RuntimeCombatant Target { get; }
     public string StatsSource { get; }
     public int RemainingDurationTicks { get; private set; }
     public int TicksUntilInterval { get; private set; }
@@ -274,19 +274,19 @@ public sealed class RuntimeEffectV2
     }
 }
 
-public sealed class RuntimeCombatantV2
+public sealed class RuntimeCombatant
 {
-    public RuntimeCombatantV2(
+    public RuntimeCombatant(
         string id,
         string name,
-        CombatTeamV2 team,
+        CombatTeam team,
         IDictionary<AttributeType, float> attributes,
-        IEnumerable<CompiledAbilityV2> abilities,
+        IEnumerable<CompiledAbility> abilities,
         IEnumerable<string>? tags = null,
         string imagePath = "",
         bool isSummoned = false,
         int summonDurationTicks = 0,
-        RuntimeCombatantV2? summonOwner = null)
+        RuntimeCombatant? summonOwner = null)
     {
         Id = id;
         Name = name;
@@ -294,7 +294,7 @@ public sealed class RuntimeCombatantV2
         Attributes = new Dictionary<AttributeType, float>(attributes);
         Health = GetAttribute(AttributeType.MaxHealth);
         Tags = new HashSet<string>(tags ?? [], StringComparer.OrdinalIgnoreCase);
-        Abilities = abilities.Select(x => new RuntimeAbilityV2(x)).ToList();
+        Abilities = abilities.Select(x => new RuntimeAbility(x)).ToList();
         ImagePath = imagePath;
         IsSummoned = isSummoned;
         RemainingSummonDurationTicks = summonDurationTicks;
@@ -305,18 +305,18 @@ public sealed class RuntimeCombatantV2
     public string Id { get; }
     public string Name { get; }
     public string ImagePath { get; }
-    public CombatTeamV2 Team { get; }
+    public CombatTeam Team { get; }
     public Dictionary<AttributeType, float> Attributes { get; }
     public HashSet<string> Tags { get; }
-    public List<RuntimeAbilityV2> Abilities { get; }
-    public List<RuntimeStatusV2> Statuses { get; } = [];
-    public List<RuntimeEffectV2> ActiveEffects { get; } = [];
-    public Dictionary<AbilityTriggerEvent, List<RuntimeAbilityV2>> AbilityTriggersByEvent { get; private set; } = [];
+    public List<RuntimeAbility> Abilities { get; }
+    public List<RuntimeStatus> Statuses { get; } = [];
+    public List<RuntimeEffect> ActiveEffects { get; } = [];
+    public Dictionary<AbilityTriggerEvent, List<RuntimeAbility>> AbilityTriggersByEvent { get; private set; } = [];
     public float Health { get; private set; }
     public float Barrier { get; private set; }
     public bool IsSummoned { get; }
     public int RemainingSummonDurationTicks { get; private set; }
-    public RuntimeCombatantV2? SummonOwner { get; }
+    public RuntimeCombatant? SummonOwner { get; }
     public bool IsAlive => Health > 0;
 
     public float GetAttribute(AttributeType attributeType) =>

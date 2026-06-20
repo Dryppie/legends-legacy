@@ -1,21 +1,21 @@
 using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
-using Domain.Models.Combat.Abilities.V2;
+using Domain.Models.Combat.Abilities;
 using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;
 using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces.Combat.Resolution;
 
-namespace Services.LL.Combat.V2;
+namespace Services.LL.Combat.Engine;
 
-public sealed class CombatEngineExecutorV2 : ICombatEngineExecutor
+public sealed class CombatEngineExecutor : ICombatEngineExecutor
 {
-    private readonly IAbilityCatalogV2Provider _catalogProvider;
+    private readonly IAbilityCatalogProvider _catalogProvider;
     private readonly IEssenceDefinitionRepository? _essenceDefinitions;
 
-    public CombatEngineExecutorV2(
-        IAbilityCatalogV2Provider catalogProvider,
+    public CombatEngineExecutor(
+        IAbilityCatalogProvider catalogProvider,
         IEssenceDefinitionRepository? essenceDefinitions = null)
     {
         _catalogProvider = catalogProvider;
@@ -35,17 +35,17 @@ public sealed class CombatEngineExecutorV2 : ICombatEngineExecutor
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
         var abilitySpecs = SelectAbilitySpecsForEssencesAndSummons(catalog, equippedEssenceIds).ToList();
         var summonIds = SelectSummonIds(abilitySpecs).ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var compiledAbilities = AbilityCompilerV2.CompileAbilities(abilitySpecs);
-        var compiledStatuses = AbilityCompilerV2.CompileStatuses(catalog.Statuses);
-        var compiledSummons = AbilityCompilerV2.CompileSummons(
+        var compiledAbilities = AbilityCompiler.CompileAbilities(abilitySpecs);
+        var compiledStatuses = AbilityCompiler.CompileStatuses(catalog.Statuses);
+        var compiledSummons = AbilityCompiler.CompileSummons(
             summonIds.Select(summonId => catalog.SummonsById[summonId]));
         var friendly = runtime.FriendlyParticipants
-            .Select(participant => CreateRuntimeCombatant(participant.Combatant, CombatTeamV2.Friendly, catalog, compiledAbilities))
+            .Select(participant => CreateRuntimeCombatant(participant.Combatant, CombatTeam.Friendly, catalog, compiledAbilities))
             .ToList();
         var hostile = runtime.HostileParticipants
-            .Select(participant => CreateRuntimeCombatant(participant.Combatant, CombatTeamV2.Hostile, catalog, compiledAbilities))
+            .Select(participant => CreateRuntimeCombatant(participant.Combatant, CombatTeam.Hostile, catalog, compiledAbilities))
             .ToList();
-        var engine = new FastCombatEngineV2(compiledStatuses, compiledSummons, compiledAbilities);
+        var engine = new FastCombatEngine(compiledStatuses, compiledSummons, compiledAbilities);
         var result = engine.Run(friendly, hostile);
         SyncCombatEntityState(runtime.FriendlyParticipants, friendly);
         SyncCombatEntityState(runtime.HostileParticipants, hostile);
@@ -56,7 +56,7 @@ public sealed class CombatEngineExecutorV2 : ICombatEngineExecutor
 
     private static void SyncCombatEntityState(
         IReadOnlyList<CombatRuntimeParticipant> participants,
-        IReadOnlyList<RuntimeCombatantV2> runtimeCombatants)
+        IReadOnlyList<RuntimeCombatant> runtimeCombatants)
     {
         var combatantsById = runtimeCombatants.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
         foreach (var participant in participants)
@@ -69,15 +69,15 @@ public sealed class CombatEngineExecutorV2 : ICombatEngineExecutor
         }
     }
 
-    private RuntimeCombatantV2 CreateRuntimeCombatant(
+    private RuntimeCombatant CreateRuntimeCombatant(
         CombatEntity combatant,
-        CombatTeamV2 team,
-        AbilityCatalogV2 catalog,
-        IReadOnlyDictionary<string, CompiledAbilityV2> compiledAbilities)
+        CombatTeam team,
+        AbilityCatalog catalog,
+        IReadOnlyDictionary<string, CompiledAbility> compiledAbilities)
     {
         var abilities = CreateCombatantAbilities(combatant, catalog, compiledAbilities).ToList();
 
-        return new RuntimeCombatantV2(
+        return new RuntimeCombatant(
             combatant.Id,
             combatant.Name,
             team,
@@ -88,10 +88,10 @@ public sealed class CombatEngineExecutorV2 : ICombatEngineExecutor
             combatant.IsSummoned);
     }
 
-    private IEnumerable<CompiledAbilityV2> CreateCombatantAbilities(
+    private IEnumerable<CompiledAbility> CreateCombatantAbilities(
         CombatEntity combatant,
-        AbilityCatalogV2 catalog,
-        IReadOnlyDictionary<string, CompiledAbilityV2> compiledAbilities)
+        AbilityCatalog catalog,
+        IReadOnlyDictionary<string, CompiledAbility> compiledAbilities)
     {
         var selected = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -110,7 +110,7 @@ public sealed class CombatEngineExecutorV2 : ICombatEngineExecutor
                 var modifiedSpec = ApplyEvolutionModifiers(baseSpec, essence, catalog);
                 yield return ReferenceEquals(baseSpec, modifiedSpec)
                     ? compiledAbilities[abilityId]
-                    : AbilityCompilerV2.CompileAbility(modifiedSpec);
+                    : AbilityCompiler.CompileAbility(modifiedSpec);
             }
         }
 
@@ -128,7 +128,7 @@ public sealed class CombatEngineExecutorV2 : ICombatEngineExecutor
     }
 
     private static IEnumerable<AbilitySpec> SelectAbilitySpecsForEssencesAndSummons(
-        AbilityCatalogV2 catalog,
+        AbilityCatalog catalog,
         IEnumerable<string> essenceIds)
     {
         var selected = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -156,7 +156,7 @@ public sealed class CombatEngineExecutorV2 : ICombatEngineExecutor
     private AbilitySpec ApplyEvolutionModifiers(
         AbilitySpec spec,
         PlayerEssence essence,
-        AbilityCatalogV2 catalog)
+        AbilityCatalog catalog)
     {
         if (!essence.IsEvolved || _essenceDefinitions is null)
             return spec;
@@ -198,7 +198,7 @@ public sealed class CombatEngineExecutorV2 : ICombatEngineExecutor
     private static void ApplyMultiplierModifier(
         AbilitySpec spec,
         EssenceAbilityModifierDefinition modifier,
-        AbilityCatalogV2 catalog)
+        AbilityCatalog catalog)
     {
         var effect = spec.Effects.FirstOrDefault(x => x.Id.Equals(modifier.Target, StringComparison.OrdinalIgnoreCase));
         if (effect is null)
@@ -226,7 +226,7 @@ public sealed class CombatEngineExecutorV2 : ICombatEngineExecutor
     private static void ApplyAddEffectModifier(
         AbilitySpec spec,
         EssenceAbilityModifierDefinition modifier,
-        AbilityCatalogV2 catalog)
+        AbilityCatalog catalog)
     {
         if (modifier.Effect is null
             || spec.Effects.Any(x => x.Id.Equals(modifier.Effect.Id, StringComparison.OrdinalIgnoreCase)))
@@ -257,7 +257,7 @@ public sealed class CombatEngineExecutorV2 : ICombatEngineExecutor
 
     private static bool TryCreateCondition(
         string? condition,
-        AbilityCatalogV2 catalog,
+        AbilityCatalog catalog,
         out AbilityConditionSpec conditionSpec)
     {
         conditionSpec = new AbilityConditionSpec();
@@ -274,7 +274,7 @@ public sealed class CombatEngineExecutorV2 : ICombatEngineExecutor
 
         conditionSpec = new AbilityConditionSpec
         {
-            Type = AbilityConditionTypeV2.HasStatus,
+            Type = AbilityConditionType.HasStatus,
             Subject = AbilityConditionSubject.Target,
             StatusId = statusId
         };
@@ -286,7 +286,7 @@ public sealed class CombatEngineExecutorV2 : ICombatEngineExecutor
         var trimmed = value.Trim();
         return trimmed.StartsWith("status.", StringComparison.OrdinalIgnoreCase)
             ? trimmed
-            : $"status.v2.{ToSnakeCase(trimmed)}";
+            : $"status.{ToSnakeCase(trimmed)}";
     }
 
     private static string ToSnakeCase(string value)
@@ -395,7 +395,7 @@ public sealed class CombatEngineExecutorV2 : ICombatEngineExecutor
             .Select(effect => effect.SummonId!);
 
     private static IEnumerable<string> SelectAbilityIdsForEssences(
-        AbilityCatalogV2 catalog,
+        AbilityCatalog catalog,
         IEnumerable<string> essenceIds)
     {
         var selected = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

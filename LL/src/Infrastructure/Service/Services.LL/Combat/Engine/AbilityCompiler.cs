@@ -1,10 +1,10 @@
-using Domain.Models.Combat.Abilities.V2;
+using Domain.Models.Combat.Abilities;
 
-namespace Services.LL.Combat.V2;
+namespace Services.LL.Combat.Engine;
 
-public static class AbilityCompilerV2
+public static class AbilityCompiler
 {
-    public static CompiledAbilityV2 CompileAbility(AbilitySpec spec)
+    public static CompiledAbility CompileAbility(AbilitySpec spec)
     {
         var effectsById = spec.Effects.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
         var triggers = spec.Triggers.Count == 0
@@ -14,9 +14,9 @@ public static class AbilityCompilerV2
         var compiledTriggers = triggers
             .Select(trigger => CompileTrigger(trigger, effectsById.Values, effectsById, spec.Name))
             .GroupBy(x => x.Event)
-            .ToDictionary(x => x.Key, x => (IReadOnlyList<CompiledTriggerV2>)x.ToList());
+            .ToDictionary(x => x.Key, x => (IReadOnlyList<CompiledTrigger>)x.ToList());
 
-        return new CompiledAbilityV2
+        return new CompiledAbility
         {
             Id = spec.Id,
             Name = spec.Name,
@@ -27,15 +27,15 @@ public static class AbilityCompilerV2
         };
     }
 
-    public static CompiledStatusV2 CompileStatus(StatusSpec spec)
+    public static CompiledStatus CompileStatus(StatusSpec spec)
     {
         var effectsById = spec.Effects.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
         var compiledTriggers = spec.Triggers
             .Select(trigger => CompileTrigger(trigger, spec.Effects, effectsById, spec.Name))
             .GroupBy(x => x.Event)
-            .ToDictionary(x => x.Key, x => (IReadOnlyList<CompiledTriggerV2>)x.ToList());
+            .ToDictionary(x => x.Key, x => (IReadOnlyList<CompiledTrigger>)x.ToList());
 
-        return new CompiledStatusV2
+        return new CompiledStatus
         {
             Id = spec.Id,
             Name = spec.Name,
@@ -47,16 +47,16 @@ public static class AbilityCompilerV2
         };
     }
 
-    public static IReadOnlyDictionary<string, CompiledAbilityV2> CompileAbilities(IEnumerable<AbilitySpec> specs) =>
+    public static IReadOnlyDictionary<string, CompiledAbility> CompileAbilities(IEnumerable<AbilitySpec> specs) =>
         specs.Select(CompileAbility).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
 
-    public static IReadOnlyDictionary<string, CompiledStatusV2> CompileStatuses(IEnumerable<StatusSpec> specs) =>
+    public static IReadOnlyDictionary<string, CompiledStatus> CompileStatuses(IEnumerable<StatusSpec> specs) =>
         specs.Select(CompileStatus).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
 
-    public static IReadOnlyDictionary<string, CompiledSummonV2> CompileSummons(IEnumerable<SummonSpec> specs) =>
+    public static IReadOnlyDictionary<string, CompiledSummon> CompileSummons(IEnumerable<SummonSpec> specs) =>
         specs.Select(CompileSummon).ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
 
-    public static CompiledSummonV2 CompileSummon(SummonSpec spec) =>
+    public static CompiledSummon CompileSummon(SummonSpec spec) =>
         new()
         {
             Id = spec.Id,
@@ -69,7 +69,7 @@ public static class AbilityCompilerV2
             Attributes = [.. spec.Attributes.Select(CompileSummonAttribute)]
         };
 
-    private static CompiledTriggerV2 CompileTrigger(
+    private static CompiledTrigger CompileTrigger(
         AbilityTriggerSpec trigger,
         IEnumerable<AbilityEffectSpec> defaultEffects,
         IReadOnlyDictionary<string, AbilityEffectSpec> effectsById,
@@ -79,7 +79,7 @@ public static class AbilityCompilerV2
             ? defaultEffects
             : trigger.EffectIds.Select(effectId => effectsById[effectId]);
 
-        return new CompiledTriggerV2
+        return new CompiledTrigger
         {
             Event = trigger.Event,
             InternalCooldownTicks = trigger.InternalCooldownTicks,
@@ -88,7 +88,7 @@ public static class AbilityCompilerV2
         };
     }
 
-    private static CompiledEffectV2 CompileEffect(AbilityEffectSpec effect, string statsSource) =>
+    private static CompiledEffect CompileEffect(AbilityEffectSpec effect, string statsSource) =>
         new()
         {
             Id = effect.Id,
@@ -112,7 +112,7 @@ public static class AbilityCompilerV2
             Conditions = [.. effect.Conditions.Select(CompileCondition)]
         };
 
-    private static CompiledConditionV2 CompileCondition(AbilityConditionSpec condition) =>
+    private static CompiledCondition CompileCondition(AbilityConditionSpec condition) =>
         new()
         {
             Type = condition.Type,
@@ -122,7 +122,7 @@ public static class AbilityCompilerV2
             Value = condition.Value
         };
 
-    private static CompiledSummonAttributeV2 CompileSummonAttribute(SummonAttributeSpec attribute) =>
+    private static CompiledSummonAttribute CompileSummonAttribute(SummonAttributeSpec attribute) =>
         new()
         {
             Attribute = attribute.Attribute,

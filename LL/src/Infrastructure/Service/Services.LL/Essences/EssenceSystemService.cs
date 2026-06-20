@@ -1,6 +1,6 @@
 using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Attributes.Modifiers;
-using Domain.Models.Combat.Abilities.V2;
+using Domain.Models.Combat.Abilities;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;

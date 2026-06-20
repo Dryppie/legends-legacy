@@ -1,5 +1,5 @@
 using Domain.Models.Attributes;
-using Domain.Models.Combat.Abilities.V2;
+using Domain.Models.Combat.Abilities;
 using Domain.Models.Essences.Definitions;
 using Microsoft.Extensions.Configuration;
 using Services.LL.Essences;
@@ -62,7 +62,7 @@ public sealed class EssenceDefinitionValidatorTests
     public void Validate_rejects_unknown_condition_tags()
     {
         var definition = ValidDefinition();
-        definition.ActiveAbility.Effects[0].Conditions.Add(new AbilityConditionSpec { Type = AbilityConditionTypeV2.HasTag, Tag = "Role.Unknown" });
+        definition.ActiveAbility.Effects[0].Conditions.Add(new AbilityConditionSpec { Type = AbilityConditionType.HasTag, Tag = "Role.Unknown" });
 
         var errors = _validator.Validate([definition]);
 
@@ -97,7 +97,7 @@ public sealed class EssenceDefinitionValidatorTests
     public void Validate_rejects_invalid_chance_condition_values()
     {
         var definition = ValidDefinition();
-        definition.PassiveAbility.Triggers[0].Conditions.Add(new AbilityConditionSpec { Type = AbilityConditionTypeV2.ChancePercent, Value = 150 });
+        definition.PassiveAbility.Triggers[0].Conditions.Add(new AbilityConditionSpec { Type = AbilityConditionType.ChancePercent, Value = 150 });
 
         var errors = _validator.Validate([definition]);
 
@@ -108,7 +108,7 @@ public sealed class EssenceDefinitionValidatorTests
     public void Validate_rejects_status_stack_conditions_without_status_or_stack_value()
     {
         var definition = ValidDefinition();
-        definition.ActiveAbility.Effects[0].Conditions.Add(new AbilityConditionSpec { Type = AbilityConditionTypeV2.StatusStacksAtLeast, StatusId = "Cold" });
+        definition.ActiveAbility.Effects[0].Conditions.Add(new AbilityConditionSpec { Type = AbilityConditionType.StatusStacksAtLeast, StatusId = "Cold" });
 
         var errors = _validator.Validate([definition]);
 
@@ -196,13 +196,13 @@ public sealed class EssenceDefinitionValidatorTests
         {
             var dataPath = Path.Combine(directory.FullName, "src", "API", "API.LL", "Data");
             var essenceCandidate = Path.Combine(dataPath, "essences.json");
-            var abilityCandidate = Path.Combine(dataPath, "abilities.v2.json");
+            var abilityCandidate = Path.Combine(dataPath, "abilities.json");
             if (File.Exists(essenceCandidate) && File.Exists(abilityCandidate))
                 return Path.Combine(directory.FullName, "src", "API", "API.LL");
 
             directory = directory.Parent;
         }
 
-        throw new DirectoryNotFoundException("Could not locate LL/src/API/API.LL/Data/essences.json and abilities.v2.json from test output directory.");
+        throw new DirectoryNotFoundException("Could not locate LL/src/API/API.LL/Data/essences.json and abilities.json from test output directory.");
     }
 }

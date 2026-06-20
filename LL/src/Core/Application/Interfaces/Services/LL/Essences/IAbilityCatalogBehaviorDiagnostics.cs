@@ -1,15 +1,15 @@
 namespace Application.Interfaces.Services.LL.Essences;
 
-public interface IAbilityCatalogV2BehaviorDiagnostics
+public interface IAbilityCatalogBehaviorDiagnostics
 {
-    AbilityCatalogV2BehaviorDiagnosticReport Analyze();
+    AbilityCatalogBehaviorDiagnosticReport Analyze();
 }
 
-public sealed record AbilityCatalogV2BehaviorDiagnosticReport(
+public sealed record AbilityCatalogBehaviorDiagnosticReport(
     int ScenarioCount,
     int PassedCount,
     int FailedCount,
-    IReadOnlyList<AbilityCatalogV2BehaviorScenarioResult> Scenarios,
+    IReadOnlyList<AbilityCatalogBehaviorScenarioResult> Scenarios,
     int AbilityCount,
     int CoveredAbilityCount,
     IReadOnlyList<string> MissingAbilityIds)
@@ -18,7 +18,7 @@ public sealed record AbilityCatalogV2BehaviorDiagnosticReport(
     public bool HasFullAbilityCoverage => MissingAbilityIds.Count == 0;
 }
 
-public sealed record AbilityCatalogV2BehaviorScenarioResult(
+public sealed record AbilityCatalogBehaviorScenarioResult(
     string BehaviorId,
     string AbilityId,
     bool Passed,

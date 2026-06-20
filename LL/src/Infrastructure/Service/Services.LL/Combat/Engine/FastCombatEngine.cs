@@ -1,39 +1,39 @@
 using Domain.Models.Attributes;
 using Domain.Models.Combat;
-using Domain.Models.Combat.Abilities.V2;
+using Domain.Models.Combat.Abilities;
 using Domain.Models.Damages;
 using Services.LL.Combat.Stats;
 
-namespace Services.LL.Combat.V2;
+namespace Services.LL.Combat.Engine;
 
-public sealed record FastCombatEngineV2Options(int MaxTicks = 6000, int BasicAttackIntervalTicks = 30, int RandomSeed = 1337);
+public sealed record FastCombatEngineOptions(int MaxTicks = 6000, int BasicAttackIntervalTicks = 30, int RandomSeed = 1337);
 
-public sealed class FastCombatEngineV2
+public sealed class FastCombatEngine
 {
-    private readonly IReadOnlyDictionary<string, CompiledStatusV2> _statusesById;
-    private readonly IReadOnlyDictionary<string, CompiledSummonV2> _summonsById;
-    private readonly IReadOnlyDictionary<string, CompiledAbilityV2> _abilitiesById;
+    private readonly IReadOnlyDictionary<string, CompiledStatus> _statusesById;
+    private readonly IReadOnlyDictionary<string, CompiledSummon> _summonsById;
+    private readonly IReadOnlyDictionary<string, CompiledAbility> _abilitiesById;
     private readonly Random _random;
     private readonly int _maxTicks;
     private readonly int _basicAttackIntervalTicks;
-    private readonly Dictionary<RuntimeCombatantV2, int> _basicAttackTimers = [];
+    private readonly Dictionary<RuntimeCombatant, int> _basicAttackTimers = [];
     private readonly List<CombatLogItem> _log = [];
     private int _currentTick;
 
-    public FastCombatEngineV2(
-        IReadOnlyDictionary<string, CompiledStatusV2> statusesById,
-        FastCombatEngineV2Options? options = null)
-        : this(statusesById, new Dictionary<string, CompiledSummonV2>(), new Dictionary<string, CompiledAbilityV2>(), options)
+    public FastCombatEngine(
+        IReadOnlyDictionary<string, CompiledStatus> statusesById,
+        FastCombatEngineOptions? options = null)
+        : this(statusesById, new Dictionary<string, CompiledSummon>(), new Dictionary<string, CompiledAbility>(), options)
     {
     }
 
-    public FastCombatEngineV2(
-        IReadOnlyDictionary<string, CompiledStatusV2> statusesById,
-        IReadOnlyDictionary<string, CompiledSummonV2> summonsById,
-        IReadOnlyDictionary<string, CompiledAbilityV2> abilitiesById,
-        FastCombatEngineV2Options? options = null)
+    public FastCombatEngine(
+        IReadOnlyDictionary<string, CompiledStatus> statusesById,
+        IReadOnlyDictionary<string, CompiledSummon> summonsById,
+        IReadOnlyDictionary<string, CompiledAbility> abilitiesById,
+        FastCombatEngineOptions? options = null)
     {
-        var resolved = options ?? new FastCombatEngineV2Options();
+        var resolved = options ?? new FastCombatEngineOptions();
         _statusesById = statusesById;
         _summonsById = summonsById;
         _abilitiesById = abilitiesById;
@@ -42,17 +42,17 @@ public sealed class FastCombatEngineV2
         _basicAttackIntervalTicks = resolved.BasicAttackIntervalTicks;
     }
 
-    public CombatResult Run(IReadOnlyList<RuntimeCombatantV2> friendly, IReadOnlyList<RuntimeCombatantV2> hostile)
+    public CombatResult Run(IReadOnlyList<RuntimeCombatant> friendly, IReadOnlyList<RuntimeCombatant> hostile)
     {
         var combatants = friendly.Concat(hostile).ToList();
         foreach (var combatant in combatants)
             _basicAttackTimers[combatant] = _basicAttackIntervalTicks;
 
-        Publish(new CombatEventV2(AbilityTriggerEvent.OnCombatStart, null, null, null), combatants);
+        Publish(new CombatEvent(AbilityTriggerEvent.OnCombatStart, null, null, null), combatants);
 
         while (_currentTick < _maxTicks
-               && HasLivingTeam(combatants, CombatTeamV2.Friendly)
-               && HasLivingTeam(combatants, CombatTeamV2.Hostile))
+               && HasLivingTeam(combatants, CombatTeam.Friendly)
+               && HasLivingTeam(combatants, CombatTeam.Hostile))
         {
             foreach (var combatant in combatants.Where(x => x.IsAlive).ToList())
             {
@@ -84,7 +84,7 @@ public sealed class FastCombatEngineV2
         };
     }
 
-    private void UseReadyActiveAbilities(RuntimeCombatantV2 actor, IReadOnlyList<RuntimeCombatantV2> combatants)
+    private void UseReadyActiveAbilities(RuntimeCombatant actor, IReadOnlyList<RuntimeCombatant> combatants)
     {
         foreach (var ability in actor.Abilities.Where(x => x.Definition.Kind == AbilitySpecKind.Active && x.IsReady))
         {
@@ -93,11 +93,11 @@ public sealed class FastCombatEngineV2
 
             ability.StartCooldown();
             Log(actor, null, ability.Definition.Name, EventType.AbilityUse, 0, $"{actor.Name} used {ability.Definition.Name}");
-            Publish(new CombatEventV2(AbilityTriggerEvent.OnAbilityUsed, actor, null, ability.Definition.Id), combatants);
+            Publish(new CombatEvent(AbilityTriggerEvent.OnAbilityUsed, actor, null, ability.Definition.Id), combatants);
         }
     }
 
-    private void TickBasicAttack(RuntimeCombatantV2 actor, IReadOnlyList<RuntimeCombatantV2> combatants)
+    private void TickBasicAttack(RuntimeCombatant actor, IReadOnlyList<RuntimeCombatant> combatants)
     {
         _basicAttackTimers[actor]--;
         if (_basicAttackTimers[actor] > 0)
@@ -112,24 +112,24 @@ public sealed class FastCombatEngineV2
         ApplyDamage(actor, target, damage, AttackType.Melee, DamageType.Physical, combatants, "Basic Attack");
     }
 
-    private static bool IsActionBlocked(RuntimeCombatantV2 combatant) =>
+    private static bool IsActionBlocked(RuntimeCombatant combatant) =>
         combatant.Statuses.Any(status => status.Stacks > 0 && status.Definition.Tags.Contains("Control.Stun"));
 
-    private static bool HasLivingOpponent(RuntimeCombatantV2 actor, IReadOnlyList<RuntimeCombatantV2> combatants) =>
+    private static bool HasLivingOpponent(RuntimeCombatant actor, IReadOnlyList<RuntimeCombatant> combatants) =>
         combatants.Any(x => x.Team != actor.Team && x.IsAlive);
 
-    private static bool HasLivingTeam(IReadOnlyList<RuntimeCombatantV2> combatants, CombatTeamV2 team) =>
+    private static bool HasLivingTeam(IReadOnlyList<RuntimeCombatant> combatants, CombatTeam team) =>
         combatants.Any(x => x.Team == team && x.IsAlive);
 
     private bool CanResolveActiveAbility(
-        RuntimeAbilityV2 ability,
-        RuntimeCombatantV2 actor,
-        IReadOnlyList<RuntimeCombatantV2> combatants)
+        RuntimeAbility ability,
+        RuntimeCombatant actor,
+        IReadOnlyList<RuntimeCombatant> combatants)
     {
         if (!ability.Definition.TriggersByEvent.TryGetValue(AbilityTriggerEvent.OnAbilityUsed, out var triggers))
             return false;
 
-        var combatEvent = new CombatEventV2(AbilityTriggerEvent.OnAbilityUsed, actor, null, ability.Definition.Id);
+        var combatEvent = new CombatEvent(AbilityTriggerEvent.OnAbilityUsed, actor, null, ability.Definition.Id);
         return triggers
             .Where(trigger => ConditionsPass(trigger.Conditions, actor, combatEvent))
             .SelectMany(trigger => trigger.Effects)
@@ -139,7 +139,7 @@ public sealed class FastCombatEngineV2
                     && ConditionsPass(effect.Conditions, actor, combatEvent with { Target = target })));
     }
 
-    private void Publish(CombatEventV2 combatEvent, IReadOnlyList<RuntimeCombatantV2> combatants)
+    private void Publish(CombatEvent combatEvent, IReadOnlyList<RuntimeCombatant> combatants)
     {
         foreach (var combatant in combatants.Where(x => x.IsAlive).ToList())
         {
@@ -204,12 +204,12 @@ public sealed class FastCombatEngineV2
     }
 
     private void ExecuteTrigger(
-        CompiledTriggerV2 trigger,
-        RuntimeCombatantV2 source,
-        CombatEventV2 combatEvent,
-        IReadOnlyList<RuntimeCombatantV2> combatants,
-        Func<CompiledEffectV2, bool> canUseEffect,
-        Action<CompiledEffectV2> markEffectUsed,
+        CompiledTrigger trigger,
+        RuntimeCombatant source,
+        CombatEvent combatEvent,
+        IReadOnlyList<RuntimeCombatant> combatants,
+        Func<CompiledEffect, bool> canUseEffect,
+        Action<CompiledEffect> markEffectUsed,
         string? statsSourceOverride = null,
         bool countStatsActivation = false)
     {
@@ -241,31 +241,31 @@ public sealed class FastCombatEngineV2
     }
 
     private void ExecuteEffect(
-        CompiledEffectV2 effect,
-        RuntimeCombatantV2 source,
-        RuntimeCombatantV2 target,
-        IReadOnlyList<RuntimeCombatantV2> combatants,
+        CompiledEffect effect,
+        RuntimeCombatant source,
+        RuntimeCombatant target,
+        IReadOnlyList<RuntimeCombatant> combatants,
         string? statsSourceOverride = null,
         bool countStatsActivation = false)
     {
         var statsSource = statsSourceOverride ?? effect.StatsSource;
         if (effect.IntervalTicks > 0 && effect.DurationTicks > 0)
         {
-            target.ActiveEffects.Add(new RuntimeEffectV2(effect, source, target, statsSource));
+            target.ActiveEffects.Add(new RuntimeEffect(effect, source, target, statsSource));
             return;
         }
 
         ApplyEffectOnce(effect, source, target, combatants, statsSource, countStatsActivation);
 
         if (effect.DurationTicks > 0 && effect.Operation == AbilityEffectOperation.ModifyAttribute)
-            target.ActiveEffects.Add(new RuntimeEffectV2(effect, source, target, statsSource));
+            target.ActiveEffects.Add(new RuntimeEffect(effect, source, target, statsSource));
     }
 
     private void ApplyEffectOnce(
-        CompiledEffectV2 effect,
-        RuntimeCombatantV2 source,
-        RuntimeCombatantV2 target,
-        IReadOnlyList<RuntimeCombatantV2> combatants,
+        CompiledEffect effect,
+        RuntimeCombatant source,
+        RuntimeCombatant target,
+        IReadOnlyList<RuntimeCombatant> combatants,
         string? statsSourceOverride = null,
         bool countStatsActivation = false)
     {
@@ -286,12 +286,12 @@ public sealed class FastCombatEngineV2
                 Log(source, target, effect.Id, EventType.RestoreBarrier, value, $"{source.Name} granted {value} barrier to {target.Name}.", statsSource, countStatsActivation);
                 break;
             case AbilityEffectOperation.RestoreResource:
-                if (effect.Resource == AbilityResourceTypeV2.Cooldown)
+                if (effect.Resource == AbilityResourceType.Cooldown)
                 {
                     target.ReduceAbilityCooldowns(value);
                     Log(source, target, effect.Id, EventType.Buff, value, $"{source.Name} restored {value} cooldown ticks to {target.Name}.", statsSource, countStatsActivation);
                 }
-                else if (effect.Resource == AbilityResourceTypeV2.Barrier)
+                else if (effect.Resource == AbilityResourceType.Barrier)
                 {
                     target.AdjustBarrier(value);
                     Log(source, target, effect.Id, EventType.RestoreBarrier, value, $"{source.Name} restored {value} barrier to {target.Name}.", statsSource, countStatsActivation);
@@ -329,17 +329,17 @@ public sealed class FastCombatEngineV2
                 ExpireOwnedSummons(target, combatants, "owner death");
                 break;
             default:
-                throw new NotSupportedException($"Unsupported ability v2 operation '{effect.Operation}'.");
+                throw new NotSupportedException($"Unsupported ability operation '{effect.Operation}'.");
         }
     }
 
     private int ApplyDamage(
-        RuntimeCombatantV2 source,
-        RuntimeCombatantV2 target,
+        RuntimeCombatant source,
+        RuntimeCombatant target,
         int damage,
         AttackType attackType,
         DamageType damageType,
-        IReadOnlyList<RuntimeCombatantV2> combatants,
+        IReadOnlyList<RuntimeCombatant> combatants,
         string sourceName,
         string? statsSource = null,
         bool countStatsActivation = false)
@@ -350,7 +350,7 @@ public sealed class FastCombatEngineV2
             if (_random.NextDouble() * 100 < dodgeChance)
             {
                 Log(source, target, sourceName, EventType.Miss, 0, $"{source.Name} missed {target.Name}.", statsSource, countStatsActivation);
-                Publish(new CombatEventV2(AbilityTriggerEvent.OnDodge, target, source, null), combatants);
+                Publish(new CombatEvent(AbilityTriggerEvent.OnDodge, target, source, null), combatants);
                 return 0;
             }
         }
@@ -363,18 +363,18 @@ public sealed class FastCombatEngineV2
         target.AdjustHealth(-healthDamage);
 
         Log(source, target, sourceName, EventType.Damage, healthDamage, $"{source.Name} dealt {healthDamage} {damageType} damage to {target.Name}.", statsSource, countStatsActivation);
-        Publish(new CombatEventV2(AbilityTriggerEvent.OnHit, source, target, null), combatants);
+        Publish(new CombatEvent(AbilityTriggerEvent.OnHit, source, target, null), combatants);
         PublishAttackTypeEvents(source, target, attackType, combatants);
-        Publish(new CombatEventV2(AbilityTriggerEvent.OnDamaged, target, source, null), combatants);
-        Publish(new CombatEventV2(AbilityTriggerEvent.OnAttacked, target, source, null), combatants);
+        Publish(new CombatEvent(AbilityTriggerEvent.OnDamaged, target, source, null), combatants);
+        Publish(new CombatEvent(AbilityTriggerEvent.OnAttacked, target, source, null), combatants);
         if (healthDamage > 0)
-            Publish(new CombatEventV2(AbilityTriggerEvent.OnHealthChanged, target, source, null), combatants);
+            Publish(new CombatEvent(AbilityTriggerEvent.OnHealthChanged, target, source, null), combatants);
 
         if (!target.IsAlive)
         {
             Log(source, target, sourceName, EventType.Death, 0, $"{target.Name} was killed by {source.Name}.", statsSource);
-            Publish(new CombatEventV2(AbilityTriggerEvent.OnKill, source, target, null), combatants);
-            Publish(new CombatEventV2(AbilityTriggerEvent.OnDeath, target, source, null), combatants);
+            Publish(new CombatEvent(AbilityTriggerEvent.OnKill, source, target, null), combatants);
+            Publish(new CombatEvent(AbilityTriggerEvent.OnDeath, target, source, null), combatants);
             ExpireOwnedSummons(target, combatants, "owner death");
         }
 
@@ -384,36 +384,36 @@ public sealed class FastCombatEngineV2
     private static bool CanDodge(AttackType attackType) =>
         attackType is AttackType.Melee or AttackType.Ranged;
 
-    private static int ApplyDamageReduction(RuntimeCombatantV2 target, int damage)
+    private static int ApplyDamageReduction(RuntimeCombatant target, int damage)
     {
         var reduction = Math.Clamp(target.GetAttribute(AttributeType.DamageReduction), -100, 100);
         return Math.Max(0, (int)Math.Round(damage * (1 - reduction / 100f)));
     }
 
     private void PublishAttackTypeEvents(
-        RuntimeCombatantV2 source,
-        RuntimeCombatantV2 target,
+        RuntimeCombatant source,
+        RuntimeCombatant target,
         AttackType attackType,
-        IReadOnlyList<RuntimeCombatantV2> combatants)
+        IReadOnlyList<RuntimeCombatant> combatants)
     {
         switch (attackType)
         {
             case AttackType.Melee:
-                Publish(new CombatEventV2(AbilityTriggerEvent.OnMeleeAttack, source, target, null), combatants);
-                Publish(new CombatEventV2(AbilityTriggerEvent.OnMeleeAttacked, target, source, null), combatants);
+                Publish(new CombatEvent(AbilityTriggerEvent.OnMeleeAttack, source, target, null), combatants);
+                Publish(new CombatEvent(AbilityTriggerEvent.OnMeleeAttacked, target, source, null), combatants);
                 break;
             case AttackType.Ranged:
-                Publish(new CombatEventV2(AbilityTriggerEvent.OnRangedAttack, source, target, null), combatants);
-                Publish(new CombatEventV2(AbilityTriggerEvent.OnRangedAttacked, target, source, null), combatants);
+                Publish(new CombatEvent(AbilityTriggerEvent.OnRangedAttack, source, target, null), combatants);
+                Publish(new CombatEvent(AbilityTriggerEvent.OnRangedAttacked, target, source, null), combatants);
                 break;
         }
     }
 
     private void RestoreHealth(
-        RuntimeCombatantV2 source,
-        RuntimeCombatantV2 target,
+        RuntimeCombatant source,
+        RuntimeCombatant target,
         int value,
-        IReadOnlyList<RuntimeCombatantV2> combatants,
+        IReadOnlyList<RuntimeCombatant> combatants,
         string sourceName,
         string? statsSource,
         bool isLifeSteal,
@@ -427,19 +427,19 @@ public sealed class FastCombatEngineV2
         if (restored <= 0)
             return;
 
-        Publish(new CombatEventV2(AbilityTriggerEvent.OnHeal, source, target, null), combatants);
-        Publish(new CombatEventV2(AbilityTriggerEvent.OnHealed, target, source, null), combatants);
-        Publish(new CombatEventV2(AbilityTriggerEvent.OnHealthChanged, target, source, null), combatants);
+        Publish(new CombatEvent(AbilityTriggerEvent.OnHeal, source, target, null), combatants);
+        Publish(new CombatEvent(AbilityTriggerEvent.OnHealed, target, source, null), combatants);
+        Publish(new CombatEvent(AbilityTriggerEvent.OnHealthChanged, target, source, null), combatants);
 
         if (isLifeSteal)
-            Publish(new CombatEventV2(AbilityTriggerEvent.OnLifestealHeal, source, target, null), combatants);
+            Publish(new CombatEvent(AbilityTriggerEvent.OnLifestealHeal, source, target, null), combatants);
     }
 
     private void ApplyLifeSteal(
-        CompiledEffectV2 effect,
-        RuntimeCombatantV2 source,
+        CompiledEffect effect,
+        RuntimeCombatant source,
         int healthDamage,
-        IReadOnlyList<RuntimeCombatantV2> combatants,
+        IReadOnlyList<RuntimeCombatant> combatants,
         string? statsSource)
     {
         if (effect.LifeStealPercentage <= 0 || healthDamage <= 0)
@@ -453,11 +453,11 @@ public sealed class FastCombatEngineV2
     }
 
     private void ApplyStatus(
-        RuntimeCombatantV2 source,
-        RuntimeCombatantV2 target,
+        RuntimeCombatant source,
+        RuntimeCombatant target,
         string statusId,
         int stacks,
-        IReadOnlyList<RuntimeCombatantV2> combatants,
+        IReadOnlyList<RuntimeCombatant> combatants,
         string? statsSource = null,
         bool countStatsActivation = false)
     {
@@ -476,23 +476,23 @@ public sealed class FastCombatEngineV2
         }
 
         if (existing is null || statusDefinition.StackingPolicy == AbilityStatusStackingPolicy.Replace)
-            target.Statuses.Add(new RuntimeStatusV2(statusDefinition, source, target, stacks, statsSource));
+            target.Statuses.Add(new RuntimeStatus(statusDefinition, source, target, stacks, statsSource));
 
         Log(source, target, statusId, EventType.StatusEffect, stacks, $"{source.Name} applied {statusId} to {target.Name}.", statsSource, countStatsActivation);
-        Publish(new CombatEventV2(AbilityTriggerEvent.OnStatusApplied, source, target, statusId), combatants);
+        Publish(new CombatEvent(AbilityTriggerEvent.OnStatusApplied, source, target, statusId), combatants);
     }
 
     private void SummonCombatant(
-        RuntimeCombatantV2 source,
-        CompiledEffectV2 effect,
-        IReadOnlyList<RuntimeCombatantV2> combatants,
+        RuntimeCombatant source,
+        CompiledEffect effect,
+        IReadOnlyList<RuntimeCombatant> combatants,
         string? statsSource,
         bool countStatsActivation)
     {
         if (string.IsNullOrWhiteSpace(effect.SummonId))
             throw new InvalidOperationException($"Summon effect '{effect.Id}' requires summonId.");
 
-        if (combatants is not List<RuntimeCombatantV2> mutableCombatants)
+        if (combatants is not List<RuntimeCombatant> mutableCombatants)
             throw new InvalidOperationException("Summon effects require a mutable combatant list.");
 
         if (!_summonsById.TryGetValue(effect.SummonId, out var summonDefinition))
@@ -508,11 +508,11 @@ public sealed class FastCombatEngineV2
         Log(source, summon, effect.Id, EventType.Summon, 1, $"{source.Name} summoned {summon.Name}.", statsSource, countStatsActivation);
     }
 
-    private static RuntimeCombatantV2 CreateSummonedCombatant(
-        RuntimeCombatantV2 source,
-        CompiledEffectV2 effect,
-        CompiledSummonV2 summonDefinition,
-        IReadOnlyDictionary<string, CompiledAbilityV2> abilitiesById)
+    private static RuntimeCombatant CreateSummonedCombatant(
+        RuntimeCombatant source,
+        CompiledEffect effect,
+        CompiledSummon summonDefinition,
+        IReadOnlyDictionary<string, CompiledAbility> abilitiesById)
     {
         var summonId = effect.SummonId!;
         var attributes = CreateSummonAttributes(source, summonDefinition);
@@ -527,7 +527,7 @@ public sealed class FastCombatEngineV2
             $"Summon.{summonId}"
         };
 
-        return new RuntimeCombatantV2(
+        return new RuntimeCombatant(
             id: $"{source.Id}:summon:{summonId}:{Guid.NewGuid():N}",
             name: summonDefinition.Name,
             team: source.Team,
@@ -541,8 +541,8 @@ public sealed class FastCombatEngineV2
     }
 
     private static Dictionary<AttributeType, float> CreateSummonAttributes(
-        RuntimeCombatantV2 source,
-        CompiledSummonV2 summonDefinition)
+        RuntimeCombatant source,
+        CompiledSummon summonDefinition)
     {
         var attributes = summonDefinition.Attributes.ToDictionary(
             attribute => attribute.Attribute,
@@ -558,11 +558,11 @@ public sealed class FastCombatEngineV2
     }
 
     private void ModifyStatusStacks(
-        RuntimeCombatantV2 source,
-        RuntimeCombatantV2 target,
+        RuntimeCombatant source,
+        RuntimeCombatant target,
         string statusId,
         int amount,
-        IReadOnlyList<RuntimeCombatantV2> combatants)
+        IReadOnlyList<RuntimeCombatant> combatants)
     {
         var existing = target.Statuses.FirstOrDefault(x => x.Definition.Id.Equals(statusId, StringComparison.OrdinalIgnoreCase));
         if (existing is null)
@@ -574,10 +574,10 @@ public sealed class FastCombatEngineV2
     }
 
     private void RemoveStatus(
-        RuntimeCombatantV2 source,
-        RuntimeCombatantV2 target,
+        RuntimeCombatant source,
+        RuntimeCombatant target,
         string statusId,
-        IReadOnlyList<RuntimeCombatantV2> combatants)
+        IReadOnlyList<RuntimeCombatant> combatants)
     {
         foreach (var status in target.Statuses
                      .Where(x => x.Definition.Id.Equals(statusId, StringComparison.OrdinalIgnoreCase))
@@ -588,28 +588,28 @@ public sealed class FastCombatEngineV2
     }
 
     private void CleanseStatuses(
-        RuntimeCombatantV2 source,
-        RuntimeCombatantV2 target,
-        IReadOnlyList<RuntimeCombatantV2> combatants)
+        RuntimeCombatant source,
+        RuntimeCombatant target,
+        IReadOnlyList<RuntimeCombatant> combatants)
     {
         foreach (var status in target.Statuses.ToList())
             ExpireStatus(source, target, status, combatants);
     }
 
     private void ExpireStatus(
-        RuntimeCombatantV2 source,
-        RuntimeCombatantV2 target,
-        RuntimeStatusV2 status,
-        IReadOnlyList<RuntimeCombatantV2> combatants)
+        RuntimeCombatant source,
+        RuntimeCombatant target,
+        RuntimeStatus status,
+        IReadOnlyList<RuntimeCombatant> combatants)
     {
         if (!target.Statuses.Remove(status))
             return;
 
         Log(source, target, status.Definition.Id, EventType.StatusEffectExpired, 0, $"{status.Definition.Id} expired on {target.Name}.");
-        Publish(new CombatEventV2(AbilityTriggerEvent.OnStatusExpired, status.Source, target, status.Definition.Id), combatants);
+        Publish(new CombatEvent(AbilityTriggerEvent.OnStatusExpired, status.Source, target, status.Definition.Id), combatants);
     }
 
-    private void TickEffects(IReadOnlyList<RuntimeCombatantV2> combatants)
+    private void TickEffects(IReadOnlyList<RuntimeCombatant> combatants)
     {
         foreach (var combatant in combatants)
         {
@@ -633,7 +633,7 @@ public sealed class FastCombatEngineV2
         }
     }
 
-    private void TickStatuses(IReadOnlyList<RuntimeCombatantV2> combatants)
+    private void TickStatuses(IReadOnlyList<RuntimeCombatant> combatants)
     {
         foreach (var combatant in combatants)
         {
@@ -647,7 +647,7 @@ public sealed class FastCombatEngineV2
         }
     }
 
-    private void TickSummons(IReadOnlyList<RuntimeCombatantV2> combatants)
+    private void TickSummons(IReadOnlyList<RuntimeCombatant> combatants)
     {
         foreach (var summon in combatants.Where(x => x.IsSummoned && x.IsAlive).ToList())
         {
@@ -662,40 +662,40 @@ public sealed class FastCombatEngineV2
     private static bool IsStatusLifecycleEvent(AbilityTriggerEvent triggerEvent) =>
         triggerEvent is AbilityTriggerEvent.OnStatusApplied or AbilityTriggerEvent.OnStatusExpired;
 
-    private IEnumerable<RuntimeCombatantV2> SelectTargets(
-        RuntimeCombatantV2 source,
-        AbilityTargetSelectorV2 targetSelector,
-        CombatEventV2 combatEvent,
-        IReadOnlyList<RuntimeCombatantV2> combatants)
+    private IEnumerable<RuntimeCombatant> SelectTargets(
+        RuntimeCombatant source,
+        AbilityTargetSelector targetSelector,
+        CombatEvent combatEvent,
+        IReadOnlyList<RuntimeCombatant> combatants)
     {
         return targetSelector switch
         {
-            AbilityTargetSelectorV2.Self => [source],
-            AbilityTargetSelectorV2.Source => [source],
-            AbilityTargetSelectorV2.EventSource => combatEvent.Source is null ? [] : [combatEvent.Source],
-            AbilityTargetSelectorV2.EventTarget => combatEvent.Target is null ? [] : [combatEvent.Target],
-            AbilityTargetSelectorV2.CurrentTarget => SelectFirstEnemy(source, combatants) is { } target ? [target] : [],
-            AbilityTargetSelectorV2.RandomEnemy => SelectRandomEnemy(source, combatants) is { } target ? [target] : [],
-            AbilityTargetSelectorV2.LowestHealthAlly => combatants.Where(x => x.Team == source.Team && x.IsAlive).OrderBy(x => x.Health).Take(1),
-            AbilityTargetSelectorV2.AllEnemies => combatants.Where(x => x.Team != source.Team && x.IsAlive),
-            AbilityTargetSelectorV2.AllAllies => combatants.Where(x => x.Team == source.Team && x.IsAlive),
-            AbilityTargetSelectorV2.EveryoneButSelf => combatants.Where(x => x.Id != source.Id && x.IsAlive),
-            AbilityTargetSelectorV2.TwoEnemies => combatants.Where(x => x.Team != source.Team && x.IsAlive).Take(2),
-            AbilityTargetSelectorV2.TwoAllies => combatants.Where(x => x.Team == source.Team && x.IsAlive).Take(2),
-            AbilityTargetSelectorV2.HighestMaxHealthAlly => combatants
+            AbilityTargetSelector.Self => [source],
+            AbilityTargetSelector.Source => [source],
+            AbilityTargetSelector.EventSource => combatEvent.Source is null ? [] : [combatEvent.Source],
+            AbilityTargetSelector.EventTarget => combatEvent.Target is null ? [] : [combatEvent.Target],
+            AbilityTargetSelector.CurrentTarget => SelectFirstEnemy(source, combatants) is { } target ? [target] : [],
+            AbilityTargetSelector.RandomEnemy => SelectRandomEnemy(source, combatants) is { } target ? [target] : [],
+            AbilityTargetSelector.LowestHealthAlly => combatants.Where(x => x.Team == source.Team && x.IsAlive).OrderBy(x => x.Health).Take(1),
+            AbilityTargetSelector.AllEnemies => combatants.Where(x => x.Team != source.Team && x.IsAlive),
+            AbilityTargetSelector.AllAllies => combatants.Where(x => x.Team == source.Team && x.IsAlive),
+            AbilityTargetSelector.EveryoneButSelf => combatants.Where(x => x.Id != source.Id && x.IsAlive),
+            AbilityTargetSelector.TwoEnemies => combatants.Where(x => x.Team != source.Team && x.IsAlive).Take(2),
+            AbilityTargetSelector.TwoAllies => combatants.Where(x => x.Team == source.Team && x.IsAlive).Take(2),
+            AbilityTargetSelector.HighestMaxHealthAlly => combatants
                 .Where(x => x.Team == source.Team && x.IsAlive)
                 .OrderByDescending(x => x.GetAttribute(AttributeType.MaxHealth))
                 .Take(1),
-            AbilityTargetSelectorV2.SummonedAllies => combatants.Where(x => x.Team == source.Team && x.IsAlive && x.IsSummoned),
-            AbilityTargetSelectorV2.NonSummonedAllies => combatants.Where(x => x.Team == source.Team && x.IsAlive && !x.IsSummoned),
+            AbilityTargetSelector.SummonedAllies => combatants.Where(x => x.Team == source.Team && x.IsAlive && x.IsSummoned),
+            AbilityTargetSelector.NonSummonedAllies => combatants.Where(x => x.Team == source.Team && x.IsAlive && !x.IsSummoned),
             _ => []
         };
     }
 
     private bool EffectCanResolve(
-        CompiledEffectV2 effect,
-        RuntimeCombatantV2 source,
-        IReadOnlyList<RuntimeCombatantV2> combatants)
+        CompiledEffect effect,
+        RuntimeCombatant source,
+        IReadOnlyList<RuntimeCombatant> combatants)
     {
         if (effect.Operation != AbilityEffectOperation.Summon || string.IsNullOrWhiteSpace(effect.SummonId))
             return true;
@@ -705,9 +705,9 @@ public sealed class FastCombatEngineV2
     }
 
     private static bool HasReachedSummonCap(
-        RuntimeCombatantV2 source,
-        CompiledSummonV2 summonDefinition,
-        IReadOnlyList<RuntimeCombatantV2> combatants) =>
+        RuntimeCombatant source,
+        CompiledSummon summonDefinition,
+        IReadOnlyList<RuntimeCombatant> combatants) =>
         summonDefinition.MaxActive > 0
         && combatants.Count(x => x.IsAlive
             && x.IsSummoned
@@ -715,8 +715,8 @@ public sealed class FastCombatEngineV2
             && x.Tags.Contains($"Summon.{summonDefinition.Id}")) >= summonDefinition.MaxActive;
 
     private void ExpireOwnedSummons(
-        RuntimeCombatantV2 owner,
-        IReadOnlyList<RuntimeCombatantV2> combatants,
+        RuntimeCombatant owner,
+        IReadOnlyList<RuntimeCombatant> combatants,
         string reason)
     {
         foreach (var summon in combatants
@@ -728,19 +728,19 @@ public sealed class FastCombatEngineV2
         }
     }
 
-    private void LogSummonExpired(RuntimeCombatantV2 summon, string reason)
+    private void LogSummonExpired(RuntimeCombatant summon, string reason)
     {
         var source = summon.SummonOwner ?? summon;
         Log(source, summon, summon.Name, EventType.SummonExpired, 0, $"{summon.Name} {reason}.");
     }
 
-    private RuntimeCombatantV2? SelectFirstEnemy(RuntimeCombatantV2 source, IReadOnlyList<RuntimeCombatantV2> combatants)
+    private RuntimeCombatant? SelectFirstEnemy(RuntimeCombatant source, IReadOnlyList<RuntimeCombatant> combatants)
     {
         var enemies = combatants.Where(x => x.Team != source.Team && x.IsAlive).ToList();
         return enemies.FirstOrDefault(IsTaunting) ?? enemies.FirstOrDefault();
     }
 
-    private RuntimeCombatantV2? SelectRandomEnemy(RuntimeCombatantV2 source, IReadOnlyList<RuntimeCombatantV2> combatants)
+    private RuntimeCombatant? SelectRandomEnemy(RuntimeCombatant source, IReadOnlyList<RuntimeCombatant> combatants)
     {
         var enemies = combatants.Where(x => x.Team != source.Team && x.IsAlive).ToList();
         var tauntingEnemies = enemies.Where(IsTaunting).ToList();
@@ -750,18 +750,18 @@ public sealed class FastCombatEngineV2
         return enemies.Count == 0 ? null : enemies[_random.Next(enemies.Count)];
     }
 
-    private static bool IsTaunting(RuntimeCombatantV2 combatant) =>
+    private static bool IsTaunting(RuntimeCombatant combatant) =>
         combatant.Statuses.Any(status =>
-            status.Definition.Id.Equals("status.v2.taunt", StringComparison.OrdinalIgnoreCase)
+            status.Definition.Id.Equals("status.taunt", StringComparison.OrdinalIgnoreCase)
             || status.Definition.Tags.Contains("Control.Taunt"));
 
     private bool ConditionsPass(
-        IEnumerable<CompiledConditionV2> conditions,
-        RuntimeCombatantV2 source,
-        CombatEventV2 combatEvent) =>
+        IEnumerable<CompiledCondition> conditions,
+        RuntimeCombatant source,
+        CombatEvent combatEvent) =>
         conditions.All(condition => ConditionPass(condition, source, combatEvent));
 
-    private bool ConditionPass(CompiledConditionV2 condition, RuntimeCombatantV2 source, CombatEventV2 combatEvent)
+    private bool ConditionPass(CompiledCondition condition, RuntimeCombatant source, CombatEvent combatEvent)
     {
         var subject = ResolveSubject(condition.Subject, source, combatEvent);
         if (subject is null)
@@ -769,23 +769,23 @@ public sealed class FastCombatEngineV2
 
         return condition.Type switch
         {
-            AbilityConditionTypeV2.Always => true,
-            AbilityConditionTypeV2.HealthBelowPercent => subject.GetAttribute(AttributeType.MaxHealth) > 0
+            AbilityConditionType.Always => true,
+            AbilityConditionType.HealthBelowPercent => subject.GetAttribute(AttributeType.MaxHealth) > 0
                 && subject.Health / subject.GetAttribute(AttributeType.MaxHealth) * 100 < condition.Value,
-            AbilityConditionTypeV2.HealthAbovePercent => subject.GetAttribute(AttributeType.MaxHealth) > 0
+            AbilityConditionType.HealthAbovePercent => subject.GetAttribute(AttributeType.MaxHealth) > 0
                 && subject.Health / subject.GetAttribute(AttributeType.MaxHealth) * 100 > condition.Value,
-            AbilityConditionTypeV2.HasStatus => subject.GetStatusStacks(condition.StatusId!) > 0,
-            AbilityConditionTypeV2.StatusStacksAtLeast => subject.GetStatusStacks(condition.StatusId!) >= condition.Value,
-            AbilityConditionTypeV2.HasTag => subject.Tags.Contains(condition.Tag!),
-            AbilityConditionTypeV2.ChancePercent => _random.Next(1, 101) <= condition.Value,
+            AbilityConditionType.HasStatus => subject.GetStatusStacks(condition.StatusId!) > 0,
+            AbilityConditionType.StatusStacksAtLeast => subject.GetStatusStacks(condition.StatusId!) >= condition.Value,
+            AbilityConditionType.HasTag => subject.Tags.Contains(condition.Tag!),
+            AbilityConditionType.ChancePercent => _random.Next(1, 101) <= condition.Value,
             _ => false
         };
     }
 
-    private static RuntimeCombatantV2? ResolveSubject(
+    private static RuntimeCombatant? ResolveSubject(
         AbilityConditionSubject subject,
-        RuntimeCombatantV2 source,
-        CombatEventV2 combatEvent) =>
+        RuntimeCombatant source,
+        CombatEvent combatEvent) =>
         subject switch
         {
             AbilityConditionSubject.Source => source,
@@ -795,7 +795,7 @@ public sealed class FastCombatEngineV2
             _ => null
         };
 
-    private static int CalculateValue(CompiledEffectV2 effect, RuntimeCombatantV2 source) =>
+    private static int CalculateValue(CompiledEffect effect, RuntimeCombatant source) =>
         Math.Max(AllowsNegativeValue(effect.Operation) ? int.MinValue : 0,
             (int)Math.Round(effect.BaseValue + (effect.ScalingAttribute is { } attribute
                 ? source.GetAttribute(attribute) * effect.ScalingCoefficient
@@ -804,12 +804,12 @@ public sealed class FastCombatEngineV2
     private static bool AllowsNegativeValue(AbilityEffectOperation operation) =>
         operation is AbilityEffectOperation.ModifyAttribute or AbilityEffectOperation.ModifyStatusStacks;
 
-    private static bool IsPeriodicEffect(CompiledEffectV2 effect) =>
+    private static bool IsPeriodicEffect(CompiledEffect effect) =>
         effect.IntervalTicks > 0 && effect.DurationTicks > 0;
 
     private void Log(
-        RuntimeCombatantV2 source,
-        RuntimeCombatantV2? target,
+        RuntimeCombatant source,
+        RuntimeCombatant? target,
         string sourceName,
         EventType eventType,
         int magnitude,
@@ -842,20 +842,20 @@ public sealed class FastCombatEngineV2
         });
     }
 
-    private static BattleOutcome DetermineOutcome(IReadOnlyList<RuntimeCombatantV2> combatants)
+    private static BattleOutcome DetermineOutcome(IReadOnlyList<RuntimeCombatant> combatants)
     {
-        if (!HasLivingTeam(combatants, CombatTeamV2.Friendly))
+        if (!HasLivingTeam(combatants, CombatTeam.Friendly))
             return BattleOutcome.Defeat;
 
-        if (!HasLivingTeam(combatants, CombatTeamV2.Hostile))
+        if (!HasLivingTeam(combatants, CombatTeam.Hostile))
             return BattleOutcome.Victory;
 
         return BattleOutcome.Draw;
     }
 
-    private sealed record CombatEventV2(
+    private sealed record CombatEvent(
         AbilityTriggerEvent Event,
-        RuntimeCombatantV2? Source,
-        RuntimeCombatantV2? Target,
+        RuntimeCombatant? Source,
+        RuntimeCombatant? Target,
         string? AbilityId);
 }

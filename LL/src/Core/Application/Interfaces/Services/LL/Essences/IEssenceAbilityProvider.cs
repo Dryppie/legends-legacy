@@ -1,4 +1,4 @@
-using Domain.Models.Combat.Abilities.V2;
+using Domain.Models.Combat.Abilities;
 using Domain.Models.Essences;
 
 namespace Application.Interfaces.Services.LL.Essences;

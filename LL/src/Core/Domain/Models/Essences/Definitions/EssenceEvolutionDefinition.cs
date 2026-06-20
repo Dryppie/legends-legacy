@@ -1,4 +1,4 @@
-using Domain.Models.Combat.Abilities.V2;
+using Domain.Models.Combat.Abilities;
 
 namespace Domain.Models.Essences.Definitions;
 

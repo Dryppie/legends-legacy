@@ -7,7 +7,7 @@
     "durationTicks": 100,
     "maxActive": 1,
     "tags": [ "Summon.ShadowImage", "Element.Shadow" ],
-    "abilityIds": [ "ability.v2.summon.shadow_image.shadow_strike" ],
+    "abilityIds": [ "ability.summon.shadow_image.shadow_strike" ],
     "attributes": [
       {
         "attribute": "MaxHealth",

@@ -1,5 +1,5 @@
 using Application.Interfaces.Services.LL.Essences;
-using Domain.Models.Combat.Abilities.V2;
+using Domain.Models.Combat.Abilities;
 using Domain.Models.Essences.Definitions;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json;
@@ -20,7 +20,7 @@ public sealed class JsonEssenceDefinitionRepository : IEssenceDefinitionReposito
     {
         var contentRoot = config["Content:Root"] ?? "Data";
         var essencePath = Path.Combine(contentRootPath, contentRoot, "essences.json");
-        var abilityPath = Path.Combine(contentRootPath, contentRoot, "abilities.v2.json");
+        var abilityPath = Path.Combine(contentRootPath, contentRoot, "abilities.json");
         var essenceJson = File.ReadAllText(essencePath);
         var abilityJson = File.ReadAllText(abilityPath);
         var document = JsonSerializer.Deserialize<EssenceDefinitionDocument>(essenceJson, options) ?? new();

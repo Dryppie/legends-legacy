@@ -1,11 +1,11 @@
 namespace Application.Interfaces.Services.LL.Essences;
 
-public interface IAbilityCatalogV2Diagnostics
+public interface IAbilityCatalogDiagnostics
 {
-    AbilityCatalogV2DiagnosticReport RunTrainingEncounter();
+    AbilityCatalogDiagnosticReport RunTrainingEncounter();
 }
 
-public sealed record AbilityCatalogV2DiagnosticReport(
+public sealed record AbilityCatalogDiagnosticReport(
     int AbilityCount,
     int StatusCount,
     int SummonCount,
@@ -16,7 +16,7 @@ public sealed record AbilityCatalogV2DiagnosticReport(
     int TimedSummonCount,
     int PersistentSummonCount,
     int SummonAbilityReferenceCount,
-    IReadOnlyList<AbilityCatalogV2SummonDiagnostic> Summons,
+    IReadOnlyList<AbilityCatalogSummonDiagnostic> Summons,
     string Outcome,
     int Duration,
     int EventLogCount,
@@ -26,7 +26,7 @@ public sealed record AbilityCatalogV2DiagnosticReport(
     bool ReflectObserved,
     IReadOnlyList<string> Failures);
 
-public sealed record AbilityCatalogV2SummonDiagnostic(
+public sealed record AbilityCatalogSummonDiagnostic(
     string Id,
     string Name,
     string ImagePath,

@@ -1,5 +1,5 @@
 using AutoMapper;
-using Domain.Models.Combat.Abilities.V2;
+using Domain.Models.Combat.Abilities;
 
 namespace Application.UseCases.Essences.Dtos;
 

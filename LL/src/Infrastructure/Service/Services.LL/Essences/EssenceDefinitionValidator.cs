@@ -1,6 +1,6 @@
 using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Attributes;
-using Domain.Models.Combat.Abilities.V2;
+using Domain.Models.Combat.Abilities;
 using Domain.Models.Essences.Definitions;
 
 namespace Services.LL.Essences;
@@ -182,19 +182,19 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
     {
         foreach (var condition in conditions)
         {
-            if (condition.Type == AbilityConditionTypeV2.HasTag &&
+            if (condition.Type == AbilityConditionType.HasTag &&
                 (string.IsNullOrWhiteSpace(condition.Tag) || !EssenceTagCatalog.AllTags.Contains(condition.Tag)))
             {
                 errors.Add($"{essenceId}/{ownerId}: condition '{condition.Type}' requires a known tag.");
             }
 
-            if (condition.Type == AbilityConditionTypeV2.ChancePercent)
+            if (condition.Type == AbilityConditionType.ChancePercent)
             {
                 if (condition.Value is < 0 or > 100)
                     errors.Add($"{essenceId}/{ownerId}: condition '{condition.Type}' requires a value from 0 to 100.");
             }
 
-            if (condition.Type == AbilityConditionTypeV2.StatusStacksAtLeast
+            if (condition.Type == AbilityConditionType.StatusStacksAtLeast
                 && (string.IsNullOrWhiteSpace(condition.StatusId) || condition.Value <= 0))
             {
                 errors.Add($"{essenceId}/{ownerId}: condition '{condition.Type}' requires status and a positive stack value.");
