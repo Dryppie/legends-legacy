@@ -6,11 +6,16 @@
     "description": "A simple physical strike used to verify the combat pipeline.",
     "owningEssenceId": "essence.training",
     "cooldownTicks": 20,
-    "tags": [ "Family.Training", "Effect.Damage" ],
+    "tags": [
+      "Family.Training",
+      "Effect.Damage"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.damage.main" ]
+        "effectIds": [
+          "effect.damage.main"
+        ]
       }
     ],
     "effects": [
@@ -33,11 +38,18 @@
     "description": "Grants a small barrier and applies a reflect status for integration tests.",
     "owningEssenceId": "essence.training",
     "cooldownTicks": 45,
-    "tags": [ "Family.Training", "Effect.Barrier", "Status.Reflect" ],
+    "tags": [
+      "Family.Training",
+      "Effect.Barrier",
+      "Status.Reflect"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.barrier.main", "effect.status.reflect" ]
+        "effectIds": [
+          "effect.barrier.main",
+          "effect.status.reflect"
+        ]
       }
     ],
     "effects": [
@@ -63,11 +75,17 @@
     "description": "Applies a small burn damage over time status.",
     "owningEssenceId": "essence.training",
     "cooldownTicks": 30,
-    "tags": [ "Family.Training", "Status.Burn", "Pattern.Periodic" ],
+    "tags": [
+      "Family.Training",
+      "Status.Burn",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.status.burn" ]
+        "effectIds": [
+          "effect.status.burn"
+        ]
       }
     ],
     "effects": [
@@ -87,11 +105,19 @@
     "description": "Deals physical damage to one enemy and applies Bleed.",
     "owningEssenceId": "essence.goblin_ambusher",
     "cooldownTicks": 180,
-    "tags": [ "Effect.Ability", "Effect.Physical", "Status.Bleed", "Target.Enemy" ],
+    "tags": [
+      "Effect.Ability",
+      "Effect.Physical",
+      "Status.Bleed",
+      "Target.Enemy"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.damage.main", "effect.status.bleed" ]
+        "effectIds": [
+          "effect.damage.main",
+          "effect.status.bleed"
+        ]
       }
     ],
     "effects": [
@@ -119,7 +145,10 @@
     "description": "On hit against a wounded enemy, gain temporary Critical Chance.",
     "owningEssenceId": "essence.goblin_ambusher",
     "cooldownTicks": 200,
-    "tags": [ "Trigger.OnHit", "Resource.Cooldown" ],
+    "tags": [
+      "Trigger.OnHit",
+      "Resource.Cooldown"
+    ],
     "triggers": [
       {
         "event": "OnHit",
@@ -131,7 +160,9 @@
             "value": 80
           }
         ],
-        "effectIds": [ "effect.buff.crit_chance" ]
+        "effectIds": [
+          "effect.buff.crit_chance"
+        ]
       }
     ],
     "effects": [
@@ -152,11 +183,17 @@
     "description": "Grants a Barrier and temporary Block chance to the lowest-health ally.",
     "owningEssenceId": "essence.skeleton_guardian",
     "cooldownTicks": 240,
-    "tags": [ "Effect.Barrier", "Target.LowestHealthAlly" ],
+    "tags": [
+      "Effect.Barrier",
+      "Target.LowestHealthAlly"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.barrier.main", "effect.buff.block" ]
+        "effectIds": [
+          "effect.barrier.main",
+          "effect.buff.block"
+        ]
       }
     ],
     "effects": [
@@ -183,7 +220,10 @@
     "description": "On taking damage, has a chance to gain a defensive guard.",
     "owningEssenceId": "essence.skeleton_guardian",
     "cooldownTicks": 120,
-    "tags": [ "Trigger.OnTakeDamage", "Defense.Guard" ],
+    "tags": [
+      "Trigger.OnTakeDamage",
+      "Defense.Guard"
+    ],
     "triggers": [
       {
         "event": "OnDamaged",
@@ -194,7 +234,9 @@
             "value": 25
           }
         ],
-        "effectIds": [ "effect.guard.defense" ]
+        "effectIds": [
+          "effect.guard.defense"
+        ]
       }
     ],
     "effects": [
@@ -215,11 +257,17 @@
     "description": "Sting the target with burning venom, dealing Burn damage.",
     "owningEssenceId": "essence.fire_ant",
     "cooldownTicks": 50,
-    "tags": [ "Effect.Ability", "Effect.Burn", "Status.Burn" ],
+    "tags": [
+      "Effect.Ability",
+      "Effect.Burn",
+      "Status.Burn"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.damage.fire" ]
+        "effectIds": [
+          "effect.damage.fire"
+        ]
       }
     ],
     "effects": [
@@ -240,11 +288,17 @@
     "description": "Increase Critical Damage Resistance by 3%.",
     "owningEssenceId": "essence.fire_ant",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnCombatStart", "Defense.DamageReduction" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart",
+      "Defense.DamageReduction"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.exoskeleton.damage_reduction" ]
+        "effectIds": [
+          "effect.exoskeleton.damage_reduction"
+        ]
       }
     ],
     "effects": [
@@ -264,11 +318,18 @@
     "description": "Deals low damage and disrupts the target's precision.",
     "owningEssenceId": "essence.cave_bat",
     "cooldownTicks": 200,
-    "tags": [ "Control.Blind", "Control.Interrupt", "Target.Enemy" ],
+    "tags": [
+      "Control.Blind",
+      "Control.Interrupt",
+      "Target.Enemy"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.damage.sonic", "effect.debuff.accuracy" ]
+        "effectIds": [
+          "effect.damage.sonic",
+          "effect.debuff.accuracy"
+        ]
       }
     ],
     "effects": [
@@ -297,12 +358,17 @@
     "description": "On dodge, gain temporary precision.",
     "owningEssenceId": "essence.cave_bat",
     "cooldownTicks": 100,
-    "tags": [ "Trigger.OnDodge", "Defense.Dodge" ],
+    "tags": [
+      "Trigger.OnDodge",
+      "Defense.Dodge"
+    ],
     "triggers": [
       {
         "event": "OnDodge",
         "internalCooldownTicks": 100,
-        "effectIds": [ "effect.buff.attack_speed" ]
+        "effectIds": [
+          "effect.buff.attack_speed"
+        ]
       }
     ],
     "effects": [
@@ -323,11 +389,18 @@
     "description": "Applies Curse and deals shadow damage over time.",
     "owningEssenceId": "essence.necroshade_wraith",
     "cooldownTicks": 260,
-    "tags": [ "Status.Curse", "Pattern.Periodic", "Effect.Magical" ],
+    "tags": [
+      "Status.Curse",
+      "Pattern.Periodic",
+      "Effect.Magical"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.damage.hex", "effect.status.curse" ]
+        "effectIds": [
+          "effect.damage.hex",
+          "effect.status.curse"
+        ]
       }
     ],
     "effects": [
@@ -355,12 +428,17 @@
     "description": "On enemy death, reduce cooldowns slightly.",
     "owningEssenceId": "essence.necroshade_wraith",
     "cooldownTicks": 180,
-    "tags": [ "Trigger.OnKill", "Resource.Cooldown" ],
+    "tags": [
+      "Trigger.OnKill",
+      "Resource.Cooldown"
+    ],
     "triggers": [
       {
         "event": "OnKill",
         "internalCooldownTicks": 180,
-        "effectIds": [ "effect.restore.cooldown" ]
+        "effectIds": [
+          "effect.restore.cooldown"
+        ]
       }
     ],
     "effects": [
@@ -380,11 +458,16 @@
     "description": "Stab the target and apply a bleeding wound.",
     "owningEssenceId": "essence.legacy.goblin",
     "cooldownTicks": 90,
-    "tags": [ "Effect.Ability", "Status.Bleed" ],
+    "tags": [
+      "Effect.Ability",
+      "Status.Bleed"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.status.sneak_attack_bleed" ]
+        "effectIds": [
+          "effect.status.sneak_attack_bleed"
+        ]
       }
     ],
     "effects": [
@@ -404,11 +487,16 @@
     "description": "Whenever you dodge, throw dirt at the attacker to reduce precision.",
     "owningEssenceId": "essence.legacy.goblin",
     "cooldownTicks": 0,
-    "tags": [ "Trigger.OnDodge", "Effect.Ability" ],
+    "tags": [
+      "Trigger.OnDodge",
+      "Effect.Ability"
+    ],
     "triggers": [
       {
         "event": "OnDodge",
-        "effectIds": [ "effect.debuff.precision" ]
+        "effectIds": [
+          "effect.debuff.precision"
+        ]
       }
     ],
     "effects": [
@@ -431,11 +519,17 @@
     "description": "Swing your weapon in a wide arc, damaging two enemies.",
     "owningEssenceId": "essence.legacy.goblin_warrior",
     "cooldownTicks": 120,
-    "tags": [ "Effect.Ability", "Pattern.MultiTarget", "Range.Melee" ],
+    "tags": [
+      "Effect.Ability",
+      "Pattern.MultiTarget",
+      "Range.Melee"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.cleave.damage" ]
+        "effectIds": [
+          "effect.cleave.damage"
+        ]
       }
     ],
     "effects": [
@@ -448,7 +542,9 @@
         "scalingCoefficient": 0.2,
         "attackType": "Melee",
         "damageType": "Physical",
-        "tags": [ "Slashing" ]
+        "tags": [
+          "Slashing"
+        ]
       }
     ]
   },
@@ -459,11 +555,17 @@
     "description": "Increase power, but decrease armor.",
     "owningEssenceId": "essence.legacy.goblin_warrior",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnCombatStart" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.buff.power", "effect.debuff.armor" ]
+        "effectIds": [
+          "effect.buff.power",
+          "effect.debuff.armor"
+        ]
       }
     ],
     "effects": [
@@ -490,11 +592,16 @@
     "description": "Unleash a powerful ranged shot.",
     "owningEssenceId": "essence.legacy.goblin_archer",
     "cooldownTicks": 150,
-    "tags": [ "Effect.Ability", "Range.Ranged" ],
+    "tags": [
+      "Effect.Ability",
+      "Range.Ranged"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.shot.damage" ]
+        "effectIds": [
+          "effect.shot.damage"
+        ]
       }
     ],
     "effects": [
@@ -507,7 +614,9 @@
         "scalingCoefficient": 0.1,
         "attackType": "Ranged",
         "damageType": "Physical",
-        "tags": [ "Arrows" ]
+        "tags": [
+          "Arrows"
+        ]
       }
     ]
   },
@@ -518,11 +627,17 @@
     "description": "Ranged attacks have a chance to apply poison.",
     "owningEssenceId": "essence.legacy.goblin_archer",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnRangedAttack", "Status.Poison" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnRangedAttack",
+      "Status.Poison"
+    ],
     "triggers": [
       {
         "event": "OnRangedAttack",
-        "effectIds": [ "effect.status.poison" ]
+        "effectIds": [
+          "effect.status.poison"
+        ]
       }
     ],
     "effects": [
@@ -548,11 +663,16 @@
     "description": "Apply a crushing force to the target.",
     "owningEssenceId": "essence.legacy.large_rat",
     "cooldownTicks": 150,
-    "tags": [ "Effect.Ability", "Range.Melee" ],
+    "tags": [
+      "Effect.Ability",
+      "Range.Melee"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.tail.damage" ]
+        "effectIds": [
+          "effect.tail.damage"
+        ]
       }
     ],
     "effects": [
@@ -575,11 +695,16 @@
     "description": "Health is increased.",
     "owningEssenceId": "essence.legacy.large_rat",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnCombatStart" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.buff.max_health" ]
+        "effectIds": [
+          "effect.buff.max_health"
+        ]
       }
     ],
     "effects": [
@@ -599,11 +724,17 @@
     "description": "Throw a flaming sphere.",
     "owningEssenceId": "essence.legacy.flame_imp",
     "cooldownTicks": 110,
-    "tags": [ "Effect.Ability", "Range.Ranged", "Element.Fire" ],
+    "tags": [
+      "Effect.Ability",
+      "Range.Ranged",
+      "Element.Fire"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.firebomb.damage" ]
+        "effectIds": [
+          "effect.firebomb.damage"
+        ]
       }
     ],
     "effects": [
@@ -626,11 +757,17 @@
     "description": "Melee attackers have a chance to receive burn damage.",
     "owningEssenceId": "essence.legacy.flame_imp",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnMeleeAttacked", "Element.Fire" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnMeleeAttacked",
+      "Element.Fire"
+    ],
     "triggers": [
       {
         "event": "OnMeleeAttacked",
-        "effectIds": [ "effect.hot_aura.damage" ]
+        "effectIds": [
+          "effect.hot_aura.damage"
+        ]
       }
     ],
     "effects": [
@@ -657,11 +794,17 @@
     "description": "Freeze targets that have enough cold stacks.",
     "owningEssenceId": "essence.legacy.frost_imp",
     "cooldownTicks": 150,
-    "tags": [ "Effect.Ability", "Element.Frost", "Status.Freeze" ],
+    "tags": [
+      "Effect.Ability",
+      "Element.Frost",
+      "Status.Freeze"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.freeze" ]
+        "effectIds": [
+          "effect.freeze"
+        ]
       }
     ],
     "effects": [
@@ -689,11 +832,18 @@
     "description": "Melee attackers receive persistent cold stacks.",
     "owningEssenceId": "essence.legacy.frost_imp",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnMeleeAttacked", "Element.Frost", "Status.Cold" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnMeleeAttacked",
+      "Element.Frost",
+      "Status.Cold"
+    ],
     "triggers": [
       {
         "event": "OnMeleeAttacked",
-        "effectIds": [ "effect.cold_stack" ]
+        "effectIds": [
+          "effect.cold_stack"
+        ]
       }
     ],
     "effects": [
@@ -713,11 +863,18 @@
     "description": "Summon a short-lived shadow image.",
     "owningEssenceId": "essence.legacy.shadow_imp",
     "cooldownTicks": 150,
-    "tags": [ "Effect.Ability", "Summon", "Element.Shadow" ],
+    "tags": [
+      "Effect.Ability",
+      "Summon",
+      "Element.Shadow"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.shadow_image.summon", "effect.shadow_image.status" ]
+        "effectIds": [
+          "effect.shadow_image.summon",
+          "effect.shadow_image.status"
+        ]
       }
     ],
     "effects": [
@@ -745,11 +902,17 @@
     "description": "Gain dodge chance at combat start.",
     "owningEssenceId": "essence.legacy.shadow_imp",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnCombatStart", "Defense.Dodge" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart",
+      "Defense.Dodge"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.buff.dodge" ]
+        "effectIds": [
+          "effect.buff.dodge"
+        ]
       }
     ],
     "effects": [
@@ -769,11 +932,17 @@
     "description": "Bite the target and heal from part of the damage dealt.",
     "owningEssenceId": "essence.legacy.vampire_bat",
     "cooldownTicks": 200,
-    "tags": [ "Effect.Ability", "Range.Melee", "Mechanic.Lifesteal" ],
+    "tags": [
+      "Effect.Ability",
+      "Range.Melee",
+      "Mechanic.Lifesteal"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.fangs.damage" ]
+        "effectIds": [
+          "effect.fangs.damage"
+        ]
       }
     ],
     "effects": [
@@ -797,11 +966,17 @@
     "description": "Lifesteal healing restores additional health.",
     "owningEssenceId": "essence.legacy.vampire_bat",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnLifestealHeal", "Mechanic.Lifesteal" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnLifestealHeal",
+      "Mechanic.Lifesteal"
+    ],
     "triggers": [
       {
         "event": "OnLifestealHeal",
-        "effectIds": [ "effect.dark_vitality.heal" ]
+        "effectIds": [
+          "effect.dark_vitality.heal"
+        ]
       }
     ],
     "effects": [
@@ -820,11 +995,17 @@
     "description": "Restore health to all allies over time.",
     "owningEssenceId": "essence.legacy.blue_slime",
     "cooldownTicks": 240,
-    "tags": [ "Effect.Ability", "Healing", "Pattern.Periodic" ],
+    "tags": [
+      "Effect.Ability",
+      "Healing",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.sweet_water.heal" ]
+        "effectIds": [
+          "effect.sweet_water.heal"
+        ]
       }
     ],
     "effects": [
@@ -847,11 +1028,17 @@
     "description": "Being attacked improves cooldown pressure.",
     "owningEssenceId": "essence.legacy.blue_slime",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnAttacked", "Defense.Recovery" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnAttacked",
+      "Defense.Recovery"
+    ],
     "triggers": [
       {
         "event": "OnAttacked",
-        "effectIds": [ "effect.shell.cooldown" ]
+        "effectIds": [
+          "effect.shell.cooldown"
+        ]
       }
     ],
     "effects": [
@@ -871,11 +1058,17 @@
     "description": "Reduce incoming damage for a short duration.",
     "owningEssenceId": "essence.legacy.brown_slime",
     "cooldownTicks": 140,
-    "tags": [ "Effect.Ability", "Defense.DamageReduction", "Pattern.TimedBuff" ],
+    "tags": [
+      "Effect.Ability",
+      "Defense.DamageReduction",
+      "Pattern.TimedBuff"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.mud_armor.damage_reduction" ]
+        "effectIds": [
+          "effect.mud_armor.damage_reduction"
+        ]
       }
     ],
     "effects": [
@@ -896,11 +1089,17 @@
     "description": "Gain physical defense at combat start.",
     "owningEssenceId": "essence.legacy.brown_slime",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnCombatStart", "Defense.Armor" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart",
+      "Defense.Armor"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.earthly_fortitude.armor" ]
+        "effectIds": [
+          "effect.earthly_fortitude.armor"
+        ]
       }
     ],
     "effects": [
@@ -920,11 +1119,17 @@
     "description": "Apply poison to all enemies.",
     "owningEssenceId": "essence.legacy.green_slime",
     "cooldownTicks": 170,
-    "tags": [ "Effect.Ability", "Status.Poison", "Target.AllEnemies" ],
+    "tags": [
+      "Effect.Ability",
+      "Status.Poison",
+      "Target.AllEnemies"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.acid_splash.poison" ]
+        "effectIds": [
+          "effect.acid_splash.poison"
+        ]
       }
     ],
     "effects": [
@@ -944,11 +1149,17 @@
     "description": "Melee attackers are coated with poison.",
     "owningEssenceId": "essence.legacy.green_slime",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnMeleeAttacked", "Status.Poison" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnMeleeAttacked",
+      "Status.Poison"
+    ],
     "triggers": [
       {
         "event": "OnMeleeAttacked",
-        "effectIds": [ "effect.corrosive_ooze.poison" ]
+        "effectIds": [
+          "effect.corrosive_ooze.poison"
+        ]
       }
     ],
     "effects": [
@@ -968,11 +1179,17 @@
     "description": "Chance to empower all allies for a short duration.",
     "owningEssenceId": "essence.legacy.rainbow_slime",
     "cooldownTicks": 150,
-    "tags": [ "Effect.Ability", "Target.AllAllies", "Pattern.TimedBuff" ],
+    "tags": [
+      "Effect.Ability",
+      "Target.AllAllies",
+      "Pattern.TimedBuff"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.unstable_colors.buff" ]
+        "effectIds": [
+          "effect.unstable_colors.buff"
+        ]
       }
     ],
     "effects": [
@@ -998,11 +1215,17 @@
     "description": "Using abilities grants barrier to the ally with the highest max health.",
     "owningEssenceId": "essence.legacy.rainbow_slime",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnAbilityUsed", "Defense.Barrier" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnAbilityUsed",
+      "Defense.Barrier"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.colorful_shield.barrier" ]
+        "effectIds": [
+          "effect.colorful_shield.barrier"
+        ]
       }
     ],
     "effects": [
@@ -1021,11 +1244,17 @@
     "description": "Apply a burning aura to everyone but self.",
     "owningEssenceId": "essence.legacy.red_slime",
     "cooldownTicks": 180,
-    "tags": [ "Effect.Ability", "Element.Fire", "Pattern.Periodic" ],
+    "tags": [
+      "Effect.Ability",
+      "Element.Fire",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.ignite_core.aura" ]
+        "effectIds": [
+          "effect.ignite_core.aura"
+        ]
       }
     ],
     "effects": [
@@ -1045,11 +1274,18 @@
     "description": "Gain resistance at combat start.",
     "owningEssenceId": "essence.legacy.red_slime",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnCombatStart", "Element.Fire", "Defense.Resistance" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart",
+      "Element.Fire",
+      "Defense.Resistance"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.fire_body.resistance" ]
+        "effectIds": [
+          "effect.fire_body.resistance"
+        ]
       }
     ],
     "effects": [
@@ -1069,11 +1305,17 @@
     "description": "Engulf a target, stunning and damaging them over time.",
     "owningEssenceId": "essence.legacy.transparent_slime",
     "cooldownTicks": 250,
-    "tags": [ "Effect.Ability", "Control.Stun", "Pattern.Periodic" ],
+    "tags": [
+      "Effect.Ability",
+      "Control.Stun",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.transparent_engulf.status" ]
+        "effectIds": [
+          "effect.transparent_engulf.status"
+        ]
       }
     ],
     "effects": [
@@ -1093,11 +1335,17 @@
     "description": "Once when low on health, gain a short dodge boost.",
     "owningEssenceId": "essence.legacy.transparent_slime",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnHealthChanged", "Defense.Dodge" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnHealthChanged",
+      "Defense.Dodge"
+    ],
     "triggers": [
       {
         "event": "OnHealthChanged",
-        "effectIds": [ "effect.transparent_shift.dodge" ]
+        "effectIds": [
+          "effect.transparent_shift.dodge"
+        ]
       }
     ],
     "effects": [
@@ -1125,11 +1373,17 @@
     "description": "Grant barrier to two allies.",
     "owningEssenceId": "essence.legacy.enchanted_fairy",
     "cooldownTicks": 220,
-    "tags": [ "Effect.Ability", "Defense.Barrier", "Target.TwoAllies" ],
+    "tags": [
+      "Effect.Ability",
+      "Defense.Barrier",
+      "Target.TwoAllies"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.faes_embrace.barrier" ]
+        "effectIds": [
+          "effect.faes_embrace.barrier"
+        ]
       }
     ],
     "effects": [
@@ -1148,11 +1402,17 @@
     "description": "Periodically charm enemies with a chance to stun.",
     "owningEssenceId": "essence.legacy.enchanted_fairy",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnCombatStart", "Control.Stun" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart",
+      "Control.Stun"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.enchanted_charm.stun" ]
+        "effectIds": [
+          "effect.enchanted_charm.stun"
+        ]
       }
     ],
     "effects": [
@@ -1175,11 +1435,16 @@
     "description": "Strike the target with a melee attack.",
     "owningEssenceId": "essence.legacy.glade_panther",
     "cooldownTicks": 200,
-    "tags": [ "Effect.Ability", "Range.Melee" ],
+    "tags": [
+      "Effect.Ability",
+      "Range.Melee"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.ambush.damage" ]
+        "effectIds": [
+          "effect.ambush.damage"
+        ]
       }
     ],
     "effects": [
@@ -1202,11 +1467,17 @@
     "description": "Gain critical damage at combat start.",
     "owningEssenceId": "essence.legacy.glade_panther",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnCombatStart", "Offense.Critical" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart",
+      "Offense.Critical"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.razor_claws.crit_damage" ]
+        "effectIds": [
+          "effect.razor_claws.crit_damage"
+        ]
       }
     ],
     "effects": [
@@ -1226,11 +1497,17 @@
     "description": "Chance to reduce all enemies' precision for a short duration.",
     "owningEssenceId": "essence.legacy.illusion_fox",
     "cooldownTicks": 160,
-    "tags": [ "Effect.Ability", "Target.AllEnemies", "Debuff.Precision" ],
+    "tags": [
+      "Effect.Ability",
+      "Target.AllEnemies",
+      "Debuff.Precision"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.distracting_illusion.debuff" ]
+        "effectIds": [
+          "effect.distracting_illusion.debuff"
+        ]
       }
     ],
     "effects": [
@@ -1256,11 +1533,17 @@
     "description": "Periodically gains a retaliatory foxfire stack.",
     "owningEssenceId": "essence.legacy.illusion_fox",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnCombatStart", "Retaliation" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart",
+      "Retaliation"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.foxfire.stack" ]
+        "effectIds": [
+          "effect.foxfire.stack"
+        ]
       }
     ],
     "effects": [
@@ -1282,11 +1565,17 @@
     "description": "Afflict all enemies with a regeneration and spirit debuff.",
     "owningEssenceId": "essence.legacy.nightshade_blossom",
     "cooldownTicks": 140,
-    "tags": [ "Effect.Ability", "Target.AllEnemies", "Debuff.Regeneration" ],
+    "tags": [
+      "Effect.Ability",
+      "Target.AllEnemies",
+      "Debuff.Regeneration"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.necrotic_spores.debuff" ]
+        "effectIds": [
+          "effect.necrotic_spores.debuff"
+        ]
       }
     ],
     "effects": [
@@ -1306,11 +1595,18 @@
     "description": "Periodically heal all allies.",
     "owningEssenceId": "essence.legacy.nightshade_blossom",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnCombatStart", "Healing", "Pattern.Periodic" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart",
+      "Healing",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.twilight_bloom.heal" ]
+        "effectIds": [
+          "effect.twilight_bloom.heal"
+        ]
       }
     ],
     "effects": [
@@ -1331,11 +1627,17 @@
     "description": "Deal magical ranged damage to all enemies.",
     "owningEssenceId": "essence.legacy.pixie",
     "cooldownTicks": 80,
-    "tags": [ "Effect.Ability", "Target.AllEnemies", "Element.Magical" ],
+    "tags": [
+      "Effect.Ability",
+      "Target.AllEnemies",
+      "Element.Magical"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.pixie_burst.damage" ]
+        "effectIds": [
+          "effect.pixie_burst.damage"
+        ]
       }
     ],
     "effects": [
@@ -1358,11 +1660,17 @@
     "description": "Whenever an ability is used, all allies gain crit chance.",
     "owningEssenceId": "essence.legacy.pixie",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnAbilityUsed", "Offense.Critical" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnAbilityUsed",
+      "Offense.Critical"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.resonant_chime.crit_chance" ]
+        "effectIds": [
+          "effect.resonant_chime.crit_chance"
+        ]
       }
     ],
     "effects": [
@@ -1382,11 +1690,18 @@
     "description": "Gain cooldown and crit chance improvements for a short duration.",
     "owningEssenceId": "essence.legacy.hobgoblin",
     "cooldownTicks": 140,
-    "tags": [ "Effect.Ability", "Pattern.TimedBuff", "Offense.Critical" ],
+    "tags": [
+      "Effect.Ability",
+      "Pattern.TimedBuff",
+      "Offense.Critical"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.frenzy.cooldown", "effect.frenzy.crit_chance" ]
+        "effectIds": [
+          "effect.frenzy.cooldown",
+          "effect.frenzy.crit_chance"
+        ]
       }
     ],
     "effects": [
@@ -1415,11 +1730,17 @@
     "description": "Once when dropping below 80% health, gain power.",
     "owningEssenceId": "essence.legacy.hobgoblin",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnHealthChanged", "Offense.Power" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnHealthChanged",
+      "Offense.Power"
+    ],
     "triggers": [
       {
         "event": "OnHealthChanged",
-        "effectIds": [ "effect.savage_onslaught.power" ]
+        "effectIds": [
+          "effect.savage_onslaught.power"
+        ]
       }
     ],
     "effects": [
@@ -1447,11 +1768,18 @@
     "description": "Leap to a target, dealing damage with a chance to stun.",
     "owningEssenceId": "essence.legacy.feral_ghoul",
     "cooldownTicks": 160,
-    "tags": [ "Effect.Ability", "Range.Melee", "Control.Stun" ],
+    "tags": [
+      "Effect.Ability",
+      "Range.Melee",
+      "Control.Stun"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.feral_pounce.impact", "effect.feral_pounce.stun" ]
+        "effectIds": [
+          "effect.feral_pounce.impact",
+          "effect.feral_pounce.stun"
+        ]
       }
     ],
     "effects": [
@@ -1479,11 +1807,17 @@
     "description": "Melee attacks have a chance to apply bleed.",
     "owningEssenceId": "essence.legacy.feral_ghoul",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnMeleeAttack", "Status.Bleed" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnMeleeAttack",
+      "Status.Bleed"
+    ],
     "triggers": [
       {
         "event": "OnMeleeAttack",
-        "effectIds": [ "effect.shredding_claws.bleed" ]
+        "effectIds": [
+          "effect.shredding_claws.bleed"
+        ]
       }
     ],
     "effects": [
@@ -1509,11 +1843,18 @@
     "description": "Swipe two nearby enemies, dealing physical damage and applying a short damage over time effect.",
     "owningEssenceId": "essence.legacy.plague_ghoul",
     "cooldownTicks": 170,
-    "tags": [ "Effect.Ability", "Range.Melee", "Target.Multi", "Status.Bleed" ],
+    "tags": [
+      "Effect.Ability",
+      "Range.Melee",
+      "Target.Multi",
+      "Status.Bleed"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.plague_swipe.poison" ]
+        "effectIds": [
+          "effect.plague_swipe.poison"
+        ]
       }
     ],
     "effects": [
@@ -1533,11 +1874,17 @@
     "description": "Melee attacks can apply poison damage over time.",
     "owningEssenceId": "essence.legacy.plague_ghoul",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnMeleeAttack", "Status.Poison" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnMeleeAttack",
+      "Status.Poison"
+    ],
     "triggers": [
       {
         "event": "OnMeleeAttack",
-        "effectIds": [ "effect.pestilent_touch.poison" ]
+        "effectIds": [
+          "effect.pestilent_touch.poison"
+        ]
       }
     ],
     "effects": [
@@ -1563,11 +1910,17 @@
     "description": "Slash a target and sap their power.",
     "owningEssenceId": "essence.legacy.ravenous_ghoul",
     "cooldownTicks": 130,
-    "tags": [ "Effect.Ability", "Range.Melee", "Status.Weakened" ],
+    "tags": [
+      "Effect.Ability",
+      "Range.Melee",
+      "Status.Weakened"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.draining_claws.debuff" ]
+        "effectIds": [
+          "effect.draining_claws.debuff"
+        ]
       }
     ],
     "effects": [
@@ -1587,11 +1940,17 @@
     "description": "The first time anyone dies, heal to full.",
     "owningEssenceId": "essence.legacy.ravenous_ghoul",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnDeath", "Healing" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnDeath",
+      "Healing"
+    ],
     "triggers": [
       {
         "event": "OnDeath",
-        "effectIds": [ "effect.vile_feast.heal" ]
+        "effectIds": [
+          "effect.vile_feast.heal"
+        ]
       }
     ],
     "effects": [
@@ -1611,11 +1970,17 @@
     "description": "Fire a bone arrow at a target.",
     "owningEssenceId": "essence.legacy.skeleton_archer",
     "cooldownTicks": 180,
-    "tags": [ "Effect.Ability", "Range.Ranged", "Effect.Physical" ],
+    "tags": [
+      "Effect.Ability",
+      "Range.Ranged",
+      "Effect.Physical"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.bone_arrow.damage" ]
+        "effectIds": [
+          "effect.bone_arrow.damage"
+        ]
       }
     ],
     "effects": [
@@ -1628,7 +1993,9 @@
         "scalingCoefficient": 0.2,
         "attackType": "Ranged",
         "damageType": "Physical",
-        "tags": [ "Piercing" ]
+        "tags": [
+          "Piercing"
+        ]
       }
     ]
   },
@@ -1639,11 +2006,17 @@
     "description": "Ranged attacks can apply bleed.",
     "owningEssenceId": "essence.legacy.skeleton_archer",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnRangedAttack", "Status.Bleed" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnRangedAttack",
+      "Status.Bleed"
+    ],
     "triggers": [
       {
         "event": "OnRangedAttack",
-        "effectIds": [ "effect.piercing_arrows.bleed" ]
+        "effectIds": [
+          "effect.piercing_arrows.bleed"
+        ]
       }
     ],
     "effects": [
@@ -1669,11 +2042,17 @@
     "description": "Siphon magic from a target.",
     "owningEssenceId": "essence.legacy.skeleton_mage",
     "cooldownTicks": 190,
-    "tags": [ "Effect.Ability", "Range.Ranged", "Effect.Magical" ],
+    "tags": [
+      "Effect.Ability",
+      "Range.Ranged",
+      "Effect.Magical"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.siphon.damage" ]
+        "effectIds": [
+          "effect.siphon.damage"
+        ]
       }
     ],
     "effects": [
@@ -1696,11 +2075,17 @@
     "description": "Periodically gain barrier during combat.",
     "owningEssenceId": "essence.legacy.skeleton_mage",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnCombatStart", "Defense.Barrier" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart",
+      "Defense.Barrier"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.protective_bone_barrier.periodic" ]
+        "effectIds": [
+          "effect.protective_bone_barrier.periodic"
+        ]
       }
     ],
     "effects": [
@@ -1721,11 +2106,17 @@
     "description": "Form a bone shield that reduces incoming damage.",
     "owningEssenceId": "essence.legacy.skeleton_warrior",
     "cooldownTicks": 140,
-    "tags": [ "Effect.Ability", "Defense.DamageReduction", "Pattern.TimedBuff" ],
+    "tags": [
+      "Effect.Ability",
+      "Defense.DamageReduction",
+      "Pattern.TimedBuff"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.bone_shield.damage_reduction" ]
+        "effectIds": [
+          "effect.bone_shield.damage_reduction"
+        ]
       }
     ],
     "effects": [
@@ -1746,11 +2137,17 @@
     "description": "Reflect damage to melee attackers.",
     "owningEssenceId": "essence.legacy.skeleton_warrior",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnMeleeAttacked", "Status.Reflect" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnMeleeAttacked",
+      "Status.Reflect"
+    ],
     "triggers": [
       {
         "event": "OnMeleeAttacked",
-        "effectIds": [ "effect.spiked_defense.reflect" ]
+        "effectIds": [
+          "effect.spiked_defense.reflect"
+        ]
       }
     ],
     "effects": [
@@ -1771,11 +2168,18 @@
     "description": "Briefly vanish, then strike from stealth.",
     "owningEssenceId": "essence.legacy.moss_lizard",
     "cooldownTicks": 120,
-    "tags": [ "Effect.Ability", "Range.Melee", "Defense.Dodge" ],
+    "tags": [
+      "Effect.Ability",
+      "Range.Melee",
+      "Defense.Dodge"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.moss_camouflage.dodge", "effect.moss_camouflage.damage" ]
+        "effectIds": [
+          "effect.moss_camouflage.dodge",
+          "effect.moss_camouflage.damage"
+        ]
       }
     ],
     "effects": [
@@ -1806,11 +2210,17 @@
     "description": "When dropping below 40% health for the first time, gain regeneration.",
     "owningEssenceId": "essence.legacy.moss_lizard",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnHealthChanged", "Defense.Recovery" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnHealthChanged",
+      "Defense.Recovery"
+    ],
     "triggers": [
       {
         "event": "OnHealthChanged",
-        "effectIds": [ "effect.lost_tail.regeneration" ]
+        "effectIds": [
+          "effect.lost_tail.regeneration"
+        ]
       }
     ],
     "effects": [
@@ -1839,11 +2249,16 @@
     "description": "Quickly scurry toward the target and strike.",
     "owningEssenceId": "essence.legacy.spider",
     "cooldownTicks": 50,
-    "tags": [ "Effect.Ability", "Range.Melee" ],
+    "tags": [
+      "Effect.Ability",
+      "Range.Melee"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.skittering_strike.damage" ]
+        "effectIds": [
+          "effect.skittering_strike.damage"
+        ]
       }
     ],
     "effects": [
@@ -1866,11 +2281,17 @@
     "description": "Increase critical chance.",
     "owningEssenceId": "essence.legacy.spider",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnCombatStart", "Offense.Critical" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart",
+      "Offense.Critical"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.spider_eyes.crit_chance" ]
+        "effectIds": [
+          "effect.spider_eyes.crit_chance"
+        ]
       }
     ],
     "effects": [
@@ -1890,11 +2311,16 @@
     "description": "Heal yourself.",
     "owningEssenceId": "essence.legacy.treant_sapling",
     "cooldownTicks": 230,
-    "tags": [ "Effect.Ability", "Healing" ],
+    "tags": [
+      "Effect.Ability",
+      "Healing"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.sprouting_surge.heal" ]
+        "effectIds": [
+          "effect.sprouting_surge.heal"
+        ]
       }
     ],
     "effects": [
@@ -1915,11 +2341,17 @@
     "description": "Increase healing affinity at combat start.",
     "owningEssenceId": "essence.legacy.treant_sapling",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnCombatStart", "Healing" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart",
+      "Healing"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.nurturing_roots.healing_power" ]
+        "effectIds": [
+          "effect.nurturing_roots.healing_power"
+        ]
       }
     ],
     "effects": [
@@ -1939,11 +2371,17 @@
     "description": "Poison the target over time.",
     "owningEssenceId": "essence.legacy.venomous_snake",
     "cooldownTicks": 150,
-    "tags": [ "Effect.Ability", "Range.Ranged", "Status.Poison" ],
+    "tags": [
+      "Effect.Ability",
+      "Range.Ranged",
+      "Status.Poison"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.venomous_spit.poison" ]
+        "effectIds": [
+          "effect.venomous_spit.poison"
+        ]
       }
     ],
     "effects": [
@@ -1963,11 +2401,17 @@
     "description": "Increase resistance to hostile statuses.",
     "owningEssenceId": "essence.legacy.venomous_snake",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnCombatStart", "Defense.Resistance" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart",
+      "Defense.Resistance"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.toxic_hide.status_resistance" ]
+        "effectIds": [
+          "effect.toxic_hide.status_resistance"
+        ]
       }
     ],
     "effects": [
@@ -1987,11 +2431,18 @@
     "description": "Bite the target, dealing extra damage if poisoned.",
     "owningEssenceId": "essence.legacy.viper",
     "cooldownTicks": 120,
-    "tags": [ "Effect.Ability", "Range.Melee", "Status.Poison" ],
+    "tags": [
+      "Effect.Ability",
+      "Range.Melee",
+      "Status.Poison"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.piercing_fangs.damage", "effect.piercing_fangs.poison_bonus" ]
+        "effectIds": [
+          "effect.piercing_fangs.damage",
+          "effect.piercing_fangs.poison_bonus"
+        ]
       }
     ],
     "effects": [
@@ -2029,11 +2480,17 @@
     "description": "Increase poison-focused offense.",
     "owningEssenceId": "essence.legacy.viper",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnCombatStart", "Status.Poison" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart",
+      "Status.Poison"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.potent_toxins.magic_penetration" ]
+        "effectIds": [
+          "effect.potent_toxins.magic_penetration"
+        ]
       }
     ],
     "effects": [
@@ -2053,11 +2510,17 @@
     "description": "Restore health to the lowest-health ally over time.",
     "owningEssenceId": "essence.legacy.goblin_shaman",
     "cooldownTicks": 200,
-    "tags": [ "Effect.Ability", "Healing", "Pattern.Periodic" ],
+    "tags": [
+      "Effect.Ability",
+      "Healing",
+      "Pattern.Periodic"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.weak_rejuvenation.heal" ]
+        "effectIds": [
+          "effect.weak_rejuvenation.heal"
+        ]
       }
     ],
     "effects": [
@@ -2080,12 +2543,18 @@
     "description": "Whenever you heal, all allies receive a small heal.",
     "owningEssenceId": "essence.legacy.goblin_shaman",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnHeal", "Healing" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnHeal",
+      "Healing"
+    ],
     "triggers": [
       {
         "event": "OnHeal",
         "internalCooldownTicks": 1,
-        "effectIds": [ "effect.spirit_link.heal" ]
+        "effectIds": [
+          "effect.spirit_link.heal"
+        ]
       }
     ],
     "effects": [
@@ -2104,11 +2573,18 @@
     "description": "Poison the target, with a small chance to add toxic blood.",
     "owningEssenceId": "essence.legacy.poisonous_rat",
     "cooldownTicks": 140,
-    "tags": [ "Effect.Ability", "Range.Melee", "Status.Poison" ],
+    "tags": [
+      "Effect.Ability",
+      "Range.Melee",
+      "Status.Poison"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.toxic_bite.poison", "effect.toxic_bite.toxic_blood" ]
+        "effectIds": [
+          "effect.toxic_bite.poison",
+          "effect.toxic_bite.toxic_blood"
+        ]
       }
     ],
     "effects": [
@@ -2141,11 +2617,17 @@
     "description": "Increase resistance to hostile statuses.",
     "owningEssenceId": "essence.legacy.poisonous_rat",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnCombatStart", "Defense.Resistance" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart",
+      "Defense.Resistance"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.resistant_hide.status_resistance" ]
+        "effectIds": [
+          "effect.resistant_hide.status_resistance"
+        ]
       }
     ],
     "effects": [
@@ -2165,11 +2647,16 @@
     "description": "Deal sonic damage to all enemies.",
     "owningEssenceId": "essence.legacy.giant_bat",
     "cooldownTicks": 100,
-    "tags": [ "Effect.Ability", "Target.AllEnemies" ],
+    "tags": [
+      "Effect.Ability",
+      "Target.AllEnemies"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.echoing_screech.damage" ]
+        "effectIds": [
+          "effect.echoing_screech.damage"
+        ]
       }
     ],
     "effects": [
@@ -2192,11 +2679,17 @@
     "description": "Basic attacks can echo into all enemies.",
     "owningEssenceId": "essence.legacy.giant_bat",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnBasicAttack", "Target.AllEnemies" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnBasicAttack",
+      "Target.AllEnemies"
+    ],
     "triggers": [
       {
         "event": "OnBasicAttack",
-        "effectIds": [ "effect.resonant_cry.damage" ]
+        "effectIds": [
+          "effect.resonant_cry.damage"
+        ]
       }
     ],
     "effects": [
@@ -2223,11 +2716,17 @@
     "description": "Heal the lowest-health ally for 17 Health.",
     "owningEssenceId": "essence.ant_worker",
     "cooldownTicks": 120,
-    "tags": [ "Effect.Ability", "Healing", "Target.LowestHealthAlly" ],
+    "tags": [
+      "Effect.Ability",
+      "Healing",
+      "Target.LowestHealthAlly"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.workers_aid.heal" ]
+        "effectIds": [
+          "effect.workers_aid.heal"
+        ]
       }
     ],
     "effects": [
@@ -2246,11 +2745,17 @@
     "description": "Increase Critical Damage Resistance by 5%.",
     "owningEssenceId": "essence.ant_worker",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnCombatStart", "Defense.DamageReduction" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart",
+      "Defense.DamageReduction"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.reinforced_exoskeleton.damage_reduction" ]
+        "effectIds": [
+          "effect.reinforced_exoskeleton.damage_reduction"
+        ]
       }
     ],
     "effects": [
@@ -2270,11 +2775,17 @@
     "description": "Heal the lowest-health ally for 15 Health.",
     "owningEssenceId": "essence.forest_spirit",
     "cooldownTicks": 110,
-    "tags": [ "Effect.Ability", "Healing", "Target.LowestHealthAlly" ],
+    "tags": [
+      "Effect.Ability",
+      "Healing",
+      "Target.LowestHealthAlly"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.rejuvenation.heal" ]
+        "effectIds": [
+          "effect.rejuvenation.heal"
+        ]
       }
     ],
     "effects": [
@@ -2293,11 +2804,17 @@
     "description": "Increase all Resistances by 4%.",
     "owningEssenceId": "essence.forest_spirit",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnCombatStart", "Defense.Resistance" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart",
+      "Defense.Resistance"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.balance_of_elements.resistance" ]
+        "effectIds": [
+          "effect.balance_of_elements.resistance"
+        ]
       }
     ],
     "effects": [
@@ -2317,11 +2834,17 @@
     "description": "Apply a shield of thorns to the ally with the highest Max Health.",
     "owningEssenceId": "essence.wood_nymph",
     "cooldownTicks": 160,
-    "tags": [ "Effect.Ability", "Status.Reflect", "Target.HighestMaxHealthAlly" ],
+    "tags": [
+      "Effect.Ability",
+      "Status.Reflect",
+      "Target.HighestMaxHealthAlly"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.bramble_shield.status" ]
+        "effectIds": [
+          "effect.bramble_shield.status"
+        ]
       }
     ],
     "effects": [
@@ -2341,11 +2864,17 @@
     "description": "Increase Health Regeneration by 2.",
     "owningEssenceId": "essence.wood_nymph",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnCombatStart", "Defense.Recovery" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart",
+      "Defense.Recovery"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.natures_regeneration.health_regeneration" ]
+        "effectIds": [
+          "effect.natures_regeneration.health_regeneration"
+        ]
       }
     ],
     "effects": [
@@ -2365,11 +2894,17 @@
     "description": "Crash into the target, dealing 40 damage to them and 20 damage to yourself.",
     "owningEssenceId": "essence.giant_spider",
     "cooldownTicks": 240,
-    "tags": [ "Effect.Ability", "Range.Melee" ],
+    "tags": [
+      "Effect.Ability",
+      "Range.Melee"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.spider_crash.damage", "effect.spider_crash.self_damage" ]
+        "effectIds": [
+          "effect.spider_crash.damage",
+          "effect.spider_crash.self_damage"
+        ]
       }
     ],
     "effects": [
@@ -2398,11 +2933,17 @@
     "description": "Increase Physical Armor by 20.",
     "owningEssenceId": "essence.giant_spider",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnCombatStart", "Defense.Armor" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart",
+      "Defense.Armor"
+    ],
     "triggers": [
       {
         "event": "OnCombatStart",
-        "effectIds": [ "effect.thickened_carapace.armor" ]
+        "effectIds": [
+          "effect.thickened_carapace.armor"
+        ]
       }
     ],
     "effects": [
@@ -2422,11 +2963,17 @@
     "description": "Shoot a web at the target and poison them for 20 seconds.",
     "owningEssenceId": "essence.venomous_spiderling",
     "cooldownTicks": 100,
-    "tags": [ "Effect.Ability", "Range.Ranged", "Status.Poison" ],
+    "tags": [
+      "Effect.Ability",
+      "Range.Ranged",
+      "Status.Poison"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.venom_web.poison" ]
+        "effectIds": [
+          "effect.venom_web.poison"
+        ]
       }
     ],
     "effects": [
@@ -2446,11 +2993,17 @@
     "description": "Basic attacks have a chance to apply poison.",
     "owningEssenceId": "essence.venomous_spiderling",
     "cooldownTicks": 0,
-    "tags": [ "Effect.Ability", "Trigger.OnBasicAttack", "Status.Poison" ],
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnBasicAttack",
+      "Status.Poison"
+    ],
     "triggers": [
       {
         "event": "OnBasicAttack",
-        "effectIds": [ "effect.tainted_fangs.poison" ]
+        "effectIds": [
+          "effect.tainted_fangs.poison"
+        ]
       }
     ],
     "effects": [
@@ -2475,11 +3028,17 @@
     "name": "Shadow Strike",
     "description": "The shadow image lashes out with a quick shadow attack.",
     "cooldownTicks": 25,
-    "tags": [ "Effect.SummonAbility", "Element.Shadow", "Damage.Direct" ],
+    "tags": [
+      "Effect.SummonAbility",
+      "Element.Shadow",
+      "Damage.Direct"
+    ],
     "triggers": [
       {
         "event": "OnAbilityUsed",
-        "effectIds": [ "effect.shadow_image.shadow_strike.damage" ]
+        "effectIds": [
+          "effect.shadow_image.shadow_strike.damage"
+        ]
       }
     ],
     "effects": [
@@ -2492,6 +3051,1020 @@
         "scalingCoefficient": 0.2,
         "attackType": "None",
         "damageType": "Magical"
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.blackjaw_spider.crushing_bite",
+    "kind": "Active",
+    "name": "Crushing Bite",
+    "description": "Bite through the target, dealing physical melee damage.",
+    "owningEssenceId": "essence.blackjaw_spider",
+    "cooldownTicks": 130,
+    "tags": [
+      "Effect.Ability",
+      "Target.Enemy",
+      "Pattern.SingleTarget"
+    ],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "effectIds": [
+          "effect.crushing_bite.damage"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.crushing_bite.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "baseValue": 24,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.2,
+        "attackType": "Melee",
+        "damageType": "Physical"
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.blackjaw_spider.chitinous_jaws",
+    "kind": "Passive",
+    "name": "Chitinous Jaws",
+    "description": "Increase armor penetration at the start of combat.",
+    "owningEssenceId": "essence.blackjaw_spider",
+    "cooldownTicks": 0,
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart"
+    ],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.chitinous_jaws.armor_penetration"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.chitinous_jaws.armor_penetration",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "ArmorPenetration",
+        "baseValue": 4
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.raven.ravens_mark",
+    "kind": "Active",
+    "name": "Raven's Mark",
+    "description": "Mark the target with a sharp magical strike.",
+    "owningEssenceId": "essence.raven",
+    "cooldownTicks": 120,
+    "tags": [
+      "Effect.Ability",
+      "Target.Enemy",
+      "Pattern.SingleTarget"
+    ],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "effectIds": [
+          "effect.ravens_mark.damage"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.ravens_mark.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "baseValue": 14,
+        "scalingAttribute": "Precision",
+        "scalingCoefficient": 0.15,
+        "attackType": "Ranged",
+        "damageType": "Magical"
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.raven.watchful_messenger",
+    "kind": "Passive",
+    "name": "Watchful Messenger",
+    "description": "Increase precision at the start of combat.",
+    "owningEssenceId": "essence.raven",
+    "cooldownTicks": 0,
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart"
+    ],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.watchful_messenger.precision"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.watchful_messenger.precision",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "Precision",
+        "baseValue": 3
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.widow_stalker.widows_ambush",
+    "kind": "Active",
+    "name": "Widow's Ambush",
+    "description": "Strike from the underbrush with poison-laced force.",
+    "owningEssenceId": "essence.widow_stalker",
+    "cooldownTicks": 150,
+    "tags": [
+      "Effect.Ability",
+      "Target.Enemy",
+      "Pattern.SingleTarget"
+    ],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "effectIds": [
+          "effect.widows_ambush.damage"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.widows_ambush.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "baseValue": 21,
+        "scalingAttribute": "Precision",
+        "scalingCoefficient": 0.25,
+        "attackType": "Melee",
+        "damageType": "Poison"
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.widow_stalker.silkstep",
+    "kind": "Passive",
+    "name": "Silkstep",
+    "description": "Increase dodge chance at the start of combat.",
+    "owningEssenceId": "essence.widow_stalker",
+    "cooldownTicks": 0,
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart"
+    ],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.silkstep.dodge"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.silkstep.dodge",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "DodgeChance",
+        "baseValue": 3
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.scarecrow.straw_terror",
+    "kind": "Active",
+    "name": "Straw Terror",
+    "description": "Release a ragged burst of fear into all enemies.",
+    "owningEssenceId": "essence.scarecrow",
+    "cooldownTicks": 180,
+    "tags": [
+      "Effect.Ability",
+      "Target.AllEnemies",
+      "Pattern.MultiTarget"
+    ],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "effectIds": [
+          "effect.straw_terror.damage"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.straw_terror.damage",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "baseValue": 9,
+        "scalingAttribute": "Spirit",
+        "scalingCoefficient": 0.15,
+        "attackType": "None",
+        "damageType": "Magical"
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.scarecrow.hollow_gaze",
+    "kind": "Passive",
+    "name": "Hollow Gaze",
+    "description": "Increase crowd control resistance at the start of combat.",
+    "owningEssenceId": "essence.scarecrow",
+    "cooldownTicks": 0,
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart"
+    ],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.hollow_gaze.cc_resistance"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.hollow_gaze.cc_resistance",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "CrowdControlResistance",
+        "baseValue": 5
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.lost_soul.soul_mend",
+    "kind": "Active",
+    "name": "Soul Mend",
+    "description": "Heal the ally with the lowest health.",
+    "owningEssenceId": "essence.lost_soul",
+    "cooldownTicks": 130,
+    "tags": [
+      "Effect.Ability",
+      "Target.LowestHealthAlly",
+      "Effect.Healing"
+    ],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "effectIds": [
+          "effect.soul_mend.heal"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.soul_mend.heal",
+        "operation": "Heal",
+        "target": "LowestHealthAlly",
+        "baseValue": 18,
+        "scalingAttribute": "Spirit",
+        "scalingCoefficient": 0.2
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.lost_soul.lingering_will",
+    "kind": "Passive",
+    "name": "Lingering Will",
+    "description": "Increase spirit at the start of combat.",
+    "owningEssenceId": "essence.lost_soul",
+    "cooldownTicks": 0,
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart"
+    ],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.lingering_will.spirit"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.lingering_will.spirit",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "Spirit",
+        "baseValue": 3
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.apparition.ethereal_touch",
+    "kind": "Active",
+    "name": "Ethereal Touch",
+    "description": "Damage the target and wrap yourself in a small barrier.",
+    "owningEssenceId": "essence.apparition",
+    "cooldownTicks": 150,
+    "tags": [
+      "Effect.Ability",
+      "Target.Enemy",
+      "Pattern.SingleTarget",
+      "Effect.Barrier",
+      "Defense.Barrier"
+    ],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "effectIds": [
+          "effect.ethereal_touch.damage",
+          "effect.ethereal_touch.barrier"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.ethereal_touch.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "baseValue": 20,
+        "scalingAttribute": "Spirit",
+        "scalingCoefficient": 0.15,
+        "attackType": "Melee",
+        "damageType": "Magical"
+      },
+      {
+        "id": "effect.ethereal_touch.barrier",
+        "operation": "GrantBarrier",
+        "target": "Self",
+        "baseValue": 10
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.apparition.phase_body",
+    "kind": "Passive",
+    "name": "Phase Body",
+    "description": "Increase dodge chance at the start of combat.",
+    "owningEssenceId": "essence.apparition",
+    "cooldownTicks": 0,
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart"
+    ],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.phase_body.dodge"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.phase_body.dodge",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "DodgeChance",
+        "baseValue": 4
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.specter.haunting_wail",
+    "kind": "Active",
+    "name": "Haunting Wail",
+    "description": "Wail through all enemies with spectral force.",
+    "owningEssenceId": "essence.specter",
+    "cooldownTicks": 170,
+    "tags": [
+      "Effect.Ability",
+      "Target.AllEnemies",
+      "Pattern.MultiTarget"
+    ],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "effectIds": [
+          "effect.haunting_wail.damage"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.haunting_wail.damage",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "baseValue": 11,
+        "scalingAttribute": "Spirit",
+        "scalingCoefficient": 0.2,
+        "attackType": "None",
+        "damageType": "Magical"
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.specter.spectral_focus",
+    "kind": "Passive",
+    "name": "Spectral Focus",
+    "description": "Increase magic penetration at the start of combat.",
+    "owningEssenceId": "essence.specter",
+    "cooldownTicks": 0,
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart"
+    ],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.spectral_focus.magic_penetration"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.spectral_focus.magic_penetration",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "MagicPenetration",
+        "baseValue": 4
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.zombie.rot_slam",
+    "kind": "Active",
+    "name": "Rot Slam",
+    "description": "Slam the target with decaying force.",
+    "owningEssenceId": "essence.zombie",
+    "cooldownTicks": 140,
+    "tags": [
+      "Effect.Ability",
+      "Target.Enemy",
+      "Pattern.SingleTarget"
+    ],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "effectIds": [
+          "effect.rot_slam.damage"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.rot_slam.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "baseValue": 22,
+        "scalingAttribute": "Fortitude",
+        "scalingCoefficient": 0.15,
+        "attackType": "Melee",
+        "damageType": "Physical"
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.zombie.dead_flesh",
+    "kind": "Passive",
+    "name": "Dead Flesh",
+    "description": "Increase maximum health at the start of combat.",
+    "owningEssenceId": "essence.zombie",
+    "cooldownTicks": 0,
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart"
+    ],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.dead_flesh.max_health"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.dead_flesh.max_health",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "MaxHealth",
+        "baseValue": 35
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.half_zombie.clinging_bite",
+    "kind": "Active",
+    "name": "Clinging Bite",
+    "description": "Bite the target and heal for part of the damage dealt.",
+    "owningEssenceId": "essence.half_zombie",
+    "cooldownTicks": 130,
+    "tags": [
+      "Effect.Ability",
+      "Target.Enemy",
+      "Pattern.SingleTarget",
+      "Mechanic.Lifesteal"
+    ],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "effectIds": [
+          "effect.clinging_bite.damage"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.clinging_bite.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "baseValue": 16,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.15,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "lifeStealPercentage": 25
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.half_zombie.twitching_recovery",
+    "kind": "Passive",
+    "name": "Twitching Recovery",
+    "description": "Increase health regeneration at the start of combat.",
+    "owningEssenceId": "essence.half_zombie",
+    "cooldownTicks": 0,
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart"
+    ],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.twitching_recovery.regeneration"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.twitching_recovery.regeneration",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "HealthRegeneration",
+        "baseValue": 2
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.undead.grave_swing",
+    "kind": "Active",
+    "name": "Grave Swing",
+    "description": "Sweep through two enemies with a heavy melee swing.",
+    "owningEssenceId": "essence.undead",
+    "cooldownTicks": 150,
+    "tags": [
+      "Effect.Ability",
+      "Target.Multi",
+      "Pattern.MultiTarget"
+    ],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "effectIds": [
+          "effect.grave_swing.damage"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.grave_swing.damage",
+        "operation": "Damage",
+        "target": "TwoEnemies",
+        "baseValue": 14,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.15,
+        "attackType": "Melee",
+        "damageType": "Physical"
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.undead.deathless_nerves",
+    "kind": "Passive",
+    "name": "Deathless Nerves",
+    "description": "Increase status resistance at the start of combat.",
+    "owningEssenceId": "essence.undead",
+    "cooldownTicks": 0,
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart"
+    ],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.deathless_nerves.status_resistance"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.deathless_nerves.status_resistance",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "StatusResistance",
+        "baseValue": 5
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.blood_zombie.bloodletting_grasp",
+    "kind": "Active",
+    "name": "Bloodletting Grasp",
+    "description": "Tear at the target and heal for part of the damage dealt.",
+    "owningEssenceId": "essence.blood_zombie",
+    "cooldownTicks": 160,
+    "tags": [
+      "Effect.Ability",
+      "Target.Enemy",
+      "Pattern.SingleTarget",
+      "Mechanic.Lifesteal"
+    ],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "effectIds": [
+          "effect.bloodletting_grasp.damage"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.bloodletting_grasp.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "baseValue": 18,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.2,
+        "attackType": "Melee",
+        "damageType": "Bleed",
+        "lifeStealPercentage": 40
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.blood_zombie.red_hunger",
+    "kind": "Passive",
+    "name": "Red Hunger",
+    "description": "Increase lifesteal at the start of combat.",
+    "owningEssenceId": "essence.blood_zombie",
+    "cooldownTicks": 0,
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart"
+    ],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.red_hunger.lifesteal"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.red_hunger.lifesteal",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "LifeSteal",
+        "baseValue": 4
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.giant_worm.burrow_crush",
+    "kind": "Active",
+    "name": "Burrow Crush",
+    "description": "Burst from below and crush the target.",
+    "owningEssenceId": "essence.giant_worm",
+    "cooldownTicks": 180,
+    "tags": [
+      "Effect.Ability",
+      "Target.Enemy",
+      "Pattern.SingleTarget"
+    ],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "effectIds": [
+          "effect.burrow_crush.damage"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.burrow_crush.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "baseValue": 36,
+        "scalingAttribute": "Fortitude",
+        "scalingCoefficient": 0.2,
+        "attackType": "Melee",
+        "damageType": "Physical"
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.giant_worm.earth_plated_hide",
+    "kind": "Passive",
+    "name": "Earth-Plated Hide",
+    "description": "Increase armor at the start of combat.",
+    "owningEssenceId": "essence.giant_worm",
+    "cooldownTicks": 0,
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart"
+    ],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.earth_plated_hide.armor"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.earth_plated_hide.armor",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "Armor",
+        "baseValue": 15
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.burrowed_horror.rupture",
+    "kind": "Active",
+    "name": "Rupture",
+    "description": "Shake the ground beneath all enemies.",
+    "owningEssenceId": "essence.burrowed_horror",
+    "cooldownTicks": 170,
+    "tags": [
+      "Effect.Ability",
+      "Target.AllEnemies",
+      "Pattern.MultiTarget"
+    ],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "effectIds": [
+          "effect.rupture.damage"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.rupture.damage",
+        "operation": "Damage",
+        "target": "AllEnemies",
+        "baseValue": 12,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.2,
+        "attackType": "None",
+        "damageType": "Physical"
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.burrowed_horror.subterranean_force",
+    "kind": "Passive",
+    "name": "Subterranean Force",
+    "description": "Increase power at the start of combat.",
+    "owningEssenceId": "essence.burrowed_horror",
+    "cooldownTicks": 0,
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart"
+    ],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.subterranean_force.power"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.subterranean_force.power",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "Power",
+        "baseValue": 4
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.cave_leech.leeching_latch",
+    "kind": "Active",
+    "name": "Leeching Latch",
+    "description": "Latch onto the target and heal heavily from the damage dealt.",
+    "owningEssenceId": "essence.cave_leech",
+    "cooldownTicks": 130,
+    "tags": [
+      "Effect.Ability",
+      "Target.Enemy",
+      "Pattern.SingleTarget",
+      "Mechanic.Lifesteal"
+    ],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "effectIds": [
+          "effect.leeching_latch.damage"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.leeching_latch.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "baseValue": 14,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.15,
+        "attackType": "Melee",
+        "damageType": "Physical",
+        "lifeStealPercentage": 75
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.cave_leech.blood_sense",
+    "kind": "Passive",
+    "name": "Blood Sense",
+    "description": "Increase lifesteal at the start of combat.",
+    "owningEssenceId": "essence.cave_leech",
+    "cooldownTicks": 0,
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart"
+    ],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.blood_sense.lifesteal"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.blood_sense.lifesteal",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "LifeSteal",
+        "baseValue": 3
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.stonejaw_grub.stone_gnaw",
+    "kind": "Active",
+    "name": "Stone Gnaw",
+    "description": "Gnaw the target and gain a small barrier.",
+    "owningEssenceId": "essence.stonejaw_grub",
+    "cooldownTicks": 140,
+    "tags": [
+      "Effect.Ability",
+      "Target.Enemy",
+      "Pattern.SingleTarget",
+      "Effect.Barrier",
+      "Defense.Barrier"
+    ],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "effectIds": [
+          "effect.stone_gnaw.damage",
+          "effect.stone_gnaw.barrier"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.stone_gnaw.damage",
+        "operation": "Damage",
+        "target": "CurrentTarget",
+        "baseValue": 18,
+        "scalingAttribute": "Fortitude",
+        "scalingCoefficient": 0.15,
+        "attackType": "Melee",
+        "damageType": "Physical"
+      },
+      {
+        "id": "effect.stone_gnaw.barrier",
+        "operation": "GrantBarrier",
+        "target": "Self",
+        "baseValue": 8
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.stonejaw_grub.mineral_shell",
+    "kind": "Passive",
+    "name": "Mineral Shell",
+    "description": "Increase damage reduction at the start of combat.",
+    "owningEssenceId": "essence.stonejaw_grub",
+    "cooldownTicks": 0,
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart"
+    ],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.mineral_shell.damage_reduction"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.mineral_shell.damage_reduction",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "DamageReduction",
+        "baseValue": 3
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.deep_burrower.tunnel_collapse",
+    "kind": "Active",
+    "name": "Tunnel Collapse",
+    "description": "Collapse loose earth beneath two enemies.",
+    "owningEssenceId": "essence.deep_burrower",
+    "cooldownTicks": 160,
+    "tags": [
+      "Effect.Ability",
+      "Target.Multi",
+      "Pattern.MultiTarget"
+    ],
+    "triggers": [
+      {
+        "event": "OnAbilityUsed",
+        "effectIds": [
+          "effect.tunnel_collapse.damage"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.tunnel_collapse.damage",
+        "operation": "Damage",
+        "target": "TwoEnemies",
+        "baseValue": 15,
+        "scalingAttribute": "Power",
+        "scalingCoefficient": 0.2,
+        "attackType": "None",
+        "damageType": "Physical"
+      }
+    ]
+  },
+  {
+    "id": "ability.essence.deep_burrower.tremor_sense",
+    "kind": "Passive",
+    "name": "Tremor Sense",
+    "description": "Increase armor penetration at the start of combat.",
+    "owningEssenceId": "essence.deep_burrower",
+    "cooldownTicks": 0,
+    "tags": [
+      "Effect.Ability",
+      "Trigger.OnCombatStart"
+    ],
+    "triggers": [
+      {
+        "event": "OnCombatStart",
+        "effectIds": [
+          "effect.tremor_sense.armor_penetration"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.tremor_sense.armor_penetration",
+        "operation": "ModifyAttribute",
+        "target": "Self",
+        "attribute": "ArmorPenetration",
+        "baseValue": 3
       }
     ]
   }

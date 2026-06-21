@@ -45,7 +45,7 @@ export interface Equipment extends ItemBase {
   attackSpeed: number;
   magnitude: number;
   magnitudeRange: number;
-  gatheringType?: GatheringType;
+  gatheringType?: GatheringType | null;
   scalingAttribute: AttributeType;
   scalingAmount: number;
 }

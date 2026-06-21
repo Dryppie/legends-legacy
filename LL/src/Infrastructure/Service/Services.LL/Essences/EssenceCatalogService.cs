@@ -29,12 +29,20 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
         var essenceItems = await _db.EssenceItems
             .Select(item => new { item.Id, item.EssenceDefinitionId })
             .ToListAsync(cancellationToken);
-        var itemIdByEssenceId = essenceItems.ToDictionary(
-            x => x.EssenceDefinitionId,
-            x => x.Id,
-            StringComparer.OrdinalIgnoreCase);
+        var itemIdByEssenceId = essenceItems
+            .Where(x => !string.IsNullOrWhiteSpace(x.EssenceDefinitionId))
+            .GroupBy(x => x.EssenceDefinitionId, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                x => x.Key,
+                x => x.OrderBy(item => item.Id, StringComparer.OrdinalIgnoreCase).First().Id,
+                StringComparer.OrdinalIgnoreCase);
         var essenceByMonsterId = _essenceDefinitions.GetAll()
-            .ToDictionary(x => x.SourceMonsterId, StringComparer.OrdinalIgnoreCase);
+            .Where(x => !string.IsNullOrWhiteSpace(x.SourceMonsterId))
+            .GroupBy(x => x.SourceMonsterId, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                x => x.Key,
+                x => x.First(),
+                StringComparer.OrdinalIgnoreCase);
 
         var areas = BuildRegionOneSources()
             .GroupBy(x => new { x.AreaId, x.AreaName, x.SourceType, x.Tier })
@@ -48,6 +56,7 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
                     .OrderBy(x => x.Name)
                     .ToList()))
             .OrderBy(x => GetSourceSortOrder(x.SourceType))
+            .ThenBy(x => GetAreaSortOrder(x.Id))
             .ThenBy(x => x.Name)
             .ToList();
 
@@ -163,6 +172,22 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
             _ => 4
         };
 
+    private static int GetAreaSortOrder(string areaId) =>
+        areaId switch
+        {
+            "region_01_area_01" => 1,
+            "region_01_area_02" => 2,
+            "region_01_area_03" => 3,
+            "region_01_area_04" => 4,
+            "region_01_area_06" => 5,
+            "region_01_area_08" => 6,
+            "region_01_area_09" => 7,
+            "region_01_area_10" => 8,
+            "region_01_area_11" => 9,
+            "region_01_area_07" => 10,
+            _ => int.MaxValue
+        };
+
     private static IReadOnlyList<EssenceCatalogSourceEntry> BuildRegionOneSources() =>
     [
         new("region_01_area_01", "Lumo Ruins", "Idle Area", "T1", "Large Rat", "large_rat"),
@@ -189,6 +214,24 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
         new("region_01_area_06", "Oak Thicket", "Idle Area", "T1", "Treant Sapling", "treant_sapling"),
         new("region_01_area_06", "Oak Thicket", "Idle Area", "T1", "Venomous Snake", "venomous_snake"),
         new("region_01_area_06", "Oak Thicket", "Idle Area", "T1", "Viper", "viper"),
+        new("region_01_area_08", "Old Forest", "Idle Area", "T1", "Giant Spider", "giant_spider"),
+        new("region_01_area_08", "Old Forest", "Idle Area", "T1", "Venomous Spiderling", "venomous_spiderling"),
+        new("region_01_area_08", "Old Forest", "Idle Area", "T1", "Blackjaw Spider", "blackjaw_spider"),
+        new("region_01_area_08", "Old Forest", "Idle Area", "T1", "Raven", "raven"),
+        new("region_01_area_08", "Old Forest", "Idle Area", "T1", "Widow Stalker", "widow_stalker"),
+        new("region_01_area_09", "Bleak Orchard", "Idle Area", "T1", "Scarecrow", "scarecrow"),
+        new("region_01_area_09", "Bleak Orchard", "Idle Area", "T1", "Lost Soul", "lost_soul"),
+        new("region_01_area_09", "Bleak Orchard", "Idle Area", "T1", "Apparition", "apparition"),
+        new("region_01_area_09", "Bleak Orchard", "Idle Area", "T1", "Specter", "specter"),
+        new("region_01_area_10", "Rotting Hamlet", "Idle Area", "T1", "Zombie", "zombie"),
+        new("region_01_area_10", "Rotting Hamlet", "Idle Area", "T1", "Half Zombie", "half_zombie"),
+        new("region_01_area_10", "Rotting Hamlet", "Idle Area", "T1", "Undead", "undead"),
+        new("region_01_area_10", "Rotting Hamlet", "Idle Area", "T1", "Blood Zombie", "blood_zombie"),
+        new("region_01_area_11", "Wormburrow Depths", "Idle Area", "T1", "Giant Worm", "giant_worm"),
+        new("region_01_area_11", "Wormburrow Depths", "Idle Area", "T1", "Burrowed Horror", "burrowed_horror"),
+        new("region_01_area_11", "Wormburrow Depths", "Idle Area", "T1", "Cave Leech", "cave_leech"),
+        new("region_01_area_11", "Wormburrow Depths", "Idle Area", "T1", "Stonejaw Grub", "stonejaw_grub"),
+        new("region_01_area_11", "Wormburrow Depths", "Idle Area", "T1", "Deep Burrower", "deep_burrower"),
         new("region_01_area_07", "Forgotten Ruins", "Idle Area", "T1", "Feral Ghoul", "feral_ghoul"),
         new("region_01_area_07", "Forgotten Ruins", "Idle Area", "T1", "Plague Ghoul", "plague_ghoul"),
         new("region_01_area_07", "Forgotten Ruins", "Idle Area", "T1", "Ravenous Ghoul", "ravenous_ghoul"),

@@ -50,6 +50,11 @@ public static class LLDbContextExtensions
             await context.SaveChangesAsync();
         }
 
+        if (await SeedCreatures.EnsureRemainingRegionOneIdleAreas(context))
+        {
+            await context.SaveChangesAsync();
+        }
+
 #if DEBUG
         if (await SeedAdminStarterTools(context))
         {

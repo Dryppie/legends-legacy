@@ -41,7 +41,9 @@ public sealed class RegionOneContentDiagnostics : IRegionOneContentDiagnostics
         var essenceItemIds = await _db.EssenceItems
             .Select(item => item.EssenceDefinitionId)
             .ToListAsync(cancellationToken);
-        var essenceItemIdSet = essenceItemIds.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var essenceItemIdSet = essenceItemIds
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
         var creatures = await _db.Creatures
             .Select(creature => new CreatureDiagnosticData(creature.Id, creature.Name, creature.ImagePath))
             .ToListAsync(cancellationToken);
@@ -206,6 +208,30 @@ public sealed class RegionOneContentDiagnostics : IRegionOneContentDiagnostics
         new("Illusion Fox", "illusion_fox", "Idle Area", "Twilight Clearing", "T1", false),
         new("Nightshade Blossom", "nightshade_blossom", "Idle Area", "Twilight Clearing", "T1", false),
         new("Pixie", "pixie", "Idle Area", "Twilight Clearing", "T1", false),
+        new("Giant Spider", "giant_spider", "Idle Area", "Old Forest", "T1", false),
+        new("Venomous Spiderling", "venomous_spiderling", "Idle Area", "Old Forest", "T1", false),
+        new("Blackjaw Spider", "blackjaw_spider", "Idle Area", "Old Forest", "T1", false),
+        new("Raven", "raven", "Idle Area", "Old Forest", "T1", false),
+        new("Widow Stalker", "widow_stalker", "Idle Area", "Old Forest", "T1", false),
+        new("Scarecrow", "scarecrow", "Idle Area", "Bleak Orchard", "T1", false),
+        new("Lost Soul", "lost_soul", "Idle Area", "Bleak Orchard", "T1", false),
+        new("Apparition", "apparition", "Idle Area", "Bleak Orchard", "T1", false),
+        new("Specter", "specter", "Idle Area", "Bleak Orchard", "T1", false),
+        new("Zombie", "zombie", "Idle Area", "Rotting Hamlet", "T1", false),
+        new("Half Zombie", "half_zombie", "Idle Area", "Rotting Hamlet", "T1", false),
+        new("Undead", "undead", "Idle Area", "Rotting Hamlet", "T1", false),
+        new("Blood Zombie", "blood_zombie", "Idle Area", "Rotting Hamlet", "T1", false),
+        new("Giant Worm", "giant_worm", "Idle Area", "Wormburrow Depths", "T1", false),
+        new("Burrowed Horror", "burrowed_horror", "Idle Area", "Wormburrow Depths", "T1", false),
+        new("Cave Leech", "cave_leech", "Idle Area", "Wormburrow Depths", "T1", false),
+        new("Stonejaw Grub", "stonejaw_grub", "Idle Area", "Wormburrow Depths", "T1", false),
+        new("Deep Burrower", "deep_burrower", "Idle Area", "Wormburrow Depths", "T1", false),
+        new("Feral Ghoul", "feral_ghoul", "Idle Area", "Forgotten Ruins", "T1", false),
+        new("Plague Ghoul", "plague_ghoul", "Idle Area", "Forgotten Ruins", "T1", false),
+        new("Ravenous Ghoul", "ravenous_ghoul", "Idle Area", "Forgotten Ruins", "T1", false),
+        new("Skeleton Archer", "skeleton_archer", "Idle Area", "Forgotten Ruins", "T1", false),
+        new("Skeleton Mage", "skeleton_mage", "Idle Area", "Forgotten Ruins", "T1", false),
+        new("Skeleton Warrior", "skeleton_warrior", "Idle Area", "Forgotten Ruins", "T1", false),
         new("Goblin", "goblin", "Dungeon", "Goblin Mines", "T1", false),
         new("Goblin Archer", "goblin_archer", "Dungeon", "Goblin Mines", "T1", false),
         new("Goblin Warrior", "goblin_warrior", "Dungeon", "Goblin Mines", "T1", false),
@@ -224,18 +250,7 @@ public sealed class RegionOneContentDiagnostics : IRegionOneContentDiagnostics
         new("Forest Spirit", "forest_spirit", "Future Dungeon", "The Great Tree", "T2", false),
         new("Wood Nymph", "wood_nymph", "Future Dungeon", "The Great Tree", "T2", false),
         new("Giant Spider", "giant_spider", "Future Dungeon", "Tangled Cave", "T2", false),
-        new("Venomous Spiderling", "venomous_spiderling", "Future Dungeon", "Tangled Cave", "T2", false),
-        new("Raven", "raven", "Future", "Unassigned", "T1", false),
-        new("Apparition", "apparition", "Future", "Unassigned", "T1", false),
-        new("Blackjaw Spider", "blackjaw_spider", "Future", "Unassigned", "T1", false),
-        new("Blood Zombie", "blood_zombie", "Future", "Unassigned", "T1", false),
-        new("Giant Worm", "giant_worm", "Future", "Unassigned", "T1", false),
-        new("Half Zombie", "half_zombie", "Future", "Unassigned", "T1", false),
-        new("Lost Soul", "lost_soul", "Future", "Unassigned", "T1", false),
-        new("Scarecrow", "scarecrow", "Future", "Unassigned", "T1", false),
-        new("Specter", "specter", "Future", "Unassigned", "T1", false),
-        new("Undead", "undead", "Future", "Unassigned", "T1", false),
-        new("Zombie", "zombie", "Future", "Unassigned", "T1", false)
+        new("Venomous Spiderling", "venomous_spiderling", "Future Dungeon", "Tangled Cave", "T2", false)
     ];
 
     private sealed record RegionOneManifestEntry(

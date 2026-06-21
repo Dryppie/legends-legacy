@@ -73,21 +73,71 @@ export class RegionService {
             'Bathed in eternal dusk, the Twilight Clearing is a mystical glade where reality bends. It’s a favorite haunt of mischievous fae and creatures born from illusion and light.',
         },
         {
-          id: 'region_01_area_05',
-          name: 'Goblin Mines',
+          id: 'region_01_area_06',
+          name: 'Oak Thicket',
           levelRequirement: 20,
-          creatures: ['Hobgoblin'],
-          gatheringTypes: [GatheringType.Mining, GatheringType.Fishing],
+          creatures: [
+            'Moss Lizard',
+            'Spider',
+            'Treant Sapling',
+            'Venomous Snake',
+            'Viper',
+          ],
           description:
-            'Deep beneath the hills, the Goblin Mines echo with the clang of stolen tools. Hobgoblins rule here, digging for ancient relics they barely understand.',
+            'Oak Thicket is an old growth woodland where moss-covered predators and venomous creatures hunt beneath roots as thick as fortress walls.',
+        },
+        {
+          id: 'region_01_area_08',
+          name: 'Old Forest',
+          levelRequirement: 25,
+          creatures: [
+            'Giant Spider',
+            'Venomous Spiderling',
+            'Blackjaw Spider',
+            'Raven',
+            'Widow Stalker',
+          ],
+          description:
+            'The Old Forest is a webbed canopy of ancient trunks, ambush nests, and watchful wings where poison and patience rule the underbrush.',
+        },
+        {
+          id: 'region_01_area_09',
+          name: 'Bleak Orchard',
+          levelRequirement: 30,
+          creatures: ['Scarecrow', 'Lost Soul', 'Apparition', 'Specter'],
+          description:
+            'Bleak Orchard is a dead stretch of farmland where hollow figures sway in the mist and restless spirits drift between withered trees.',
+        },
+        {
+          id: 'region_01_area_10',
+          name: 'Rotting Hamlet',
+          levelRequirement: 35,
+          creatures: ['Zombie', 'Half Zombie', 'Undead', 'Blood Zombie'],
+          description:
+            'Rotting Hamlet is a ruined settlement claimed by decay, where the dead linger in broken homes and blood-stained streets.',
+        },
+        {
+          id: 'region_01_area_11',
+          name: 'Wormburrow Depths',
+          levelRequirement: 40,
+          creatures: ['Giant Worm', 'Burrowed Horror', 'Cave Leech', 'Stonejaw Grub', 'Deep Burrower'],
+          description:
+            'Wormburrow Depths is a collapsed maze of earth and stone where burrowing horrors grind through armor and drain anything that survives the first strike.',
         },
         {
           id: 'region_01_area_07',
           name: 'Forgotten Ruins',
-          levelRequirement: 30,
-          creatures: ['Hobgoblin'],
+          levelRequirement: 45,
+          creatures: [
+            'Feral Ghoul',
+            'Plague Ghoul',
+            'Ravenous Ghoul',
+            'Skeleton Archer',
+            'Skeleton Mage',
+            'Skeleton Warrior',
+          ],
           description:
-            'Deep beneath the hills, the Goblin Mines echo with the clang of stolen tools. Hobgoblins rule here, digging for ancient relics they barely understand.',
+            'Forgotten Ruins are the final broken bones of old Shenic, haunted by ravenous ghouls and skeletal remnants that refuse to rest.',
         },
       ],
       dungeons: [],

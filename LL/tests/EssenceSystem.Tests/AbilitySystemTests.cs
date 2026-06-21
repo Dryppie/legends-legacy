@@ -1453,7 +1453,7 @@ public sealed class AbilitySystemTests
 
         Assert.True(report.IsComplete, string.Join(Environment.NewLine, report.Gaps.Select(x => $"{x.EssenceId} {x.Slot}: {x.Reason}")));
         Assert.Equal(report.RequiredSlotCount, report.CoveredSlotCount);
-        Assert.Equal(88, report.RequiredSlotCount);
+        Assert.Equal(120, report.RequiredSlotCount);
         Assert.Equal(report.EssenceCount, report.RuntimeLoadoutChecks.Count);
         Assert.All(report.RuntimeLoadoutChecks, check =>
         {
@@ -1469,6 +1469,28 @@ public sealed class AbilitySystemTests
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.wood_nymph");
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.giant_spider");
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.venomous_spiderling");
+        foreach (var essenceId in new[]
+        {
+            "essence.blackjaw_spider",
+            "essence.raven",
+            "essence.widow_stalker",
+            "essence.scarecrow",
+            "essence.lost_soul",
+            "essence.apparition",
+            "essence.specter",
+            "essence.zombie",
+            "essence.half_zombie",
+            "essence.undead",
+            "essence.blood_zombie",
+            "essence.giant_worm",
+            "essence.burrowed_horror",
+            "essence.cave_leech",
+            "essence.stonejaw_grub",
+            "essence.deep_burrower"
+        })
+        {
+            Assert.DoesNotContain(report.Gaps, x => x.EssenceId == essenceId);
+        }
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.cave_bat");
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.necroshade_wraith");
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.goblin");

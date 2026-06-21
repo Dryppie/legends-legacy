@@ -30,7 +30,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -87,7 +87,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -145,7 +145,7 @@
       "drop": {
         "baseDropChance": 0.0012,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 4E-05,
+        "dropChanceBonusPerResonance": 0.00004,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -205,7 +205,7 @@
       "drop": {
         "baseDropChance": 0.0015,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 4E-05,
+        "dropChanceBonusPerResonance": 0.00004,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -265,7 +265,7 @@
       "drop": {
         "baseDropChance": 0.0008,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.012
       },
       "evolution": {
@@ -320,7 +320,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -358,7 +358,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -396,7 +396,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -433,7 +433,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -470,7 +470,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -507,7 +507,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -544,7 +544,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -581,7 +581,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -618,7 +618,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -655,7 +655,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -692,7 +692,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -729,7 +729,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -766,7 +766,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -803,7 +803,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -840,7 +840,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -877,7 +877,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -914,7 +914,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -951,7 +951,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -988,7 +988,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1026,7 +1026,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1063,7 +1063,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1100,7 +1100,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1138,7 +1138,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1176,7 +1176,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1214,7 +1214,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1252,7 +1252,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1290,7 +1290,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1327,7 +1327,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1364,7 +1364,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1401,7 +1401,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1438,7 +1438,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1475,7 +1475,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1512,7 +1512,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1549,7 +1549,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1588,7 +1588,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1627,7 +1627,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1667,7 +1667,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1706,7 +1706,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1745,7 +1745,7 @@
       "drop": {
         "baseDropChance": 0.001,
         "resonanceGainPerFailedEligibleKill": 1,
-        "dropChanceBonusPerResonance": 5E-05,
+        "dropChanceBonusPerResonance": 0.00005,
         "maxResonanceBonus": 0.01
       },
       "evolution": {
@@ -1757,6 +1757,598 @@
       },
       "activeAbilityId": "ability.essence.venomous_spiderling.venom_web",
       "passiveAbilityId": "ability.essence.venomous_spiderling.tainted_fangs"
+    },
+    {
+      "id": "essence.blackjaw_spider",
+      "sourceMonsterId": "monster.blackjaw_spider",
+      "name": "Blackjaw Spider's Essence",
+      "description": "A hardened forest spider essence built around crushing bites and armor penetration.",
+      "rarity": "Uncommon",
+      "tags": [
+        "Species.Beast",
+        "Role.Offensive",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 3
+        },
+        {
+          "attribute": "ArmorPenetration",
+          "baseValue": 2
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00005,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.blackjaw_spider",
+        "name": "Legacy Awakening",
+        "description": "This essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.blackjaw_spider.crushing_bite",
+      "passiveAbilityId": "ability.essence.blackjaw_spider.chitinous_jaws"
+    },
+    {
+      "id": "essence.raven",
+      "sourceMonsterId": "monster.raven",
+      "name": "Raven's Essence",
+      "description": "A watchful messenger essence that marks targets from afar.",
+      "rarity": "Common",
+      "tags": [
+        "Species.Avian",
+        "Role.Support",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Precision",
+          "baseValue": 2
+        },
+        {
+          "attribute": "DodgeChance",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00005,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.raven",
+        "name": "Legacy Awakening",
+        "description": "This essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.raven.ravens_mark",
+      "passiveAbilityId": "ability.essence.raven.watchful_messenger"
+    },
+    {
+      "id": "essence.widow_stalker",
+      "sourceMonsterId": "monster.widow_stalker",
+      "name": "Widow Stalker's Essence",
+      "description": "A patient ambusher essence that favors venomous openings and evasive footwork.",
+      "rarity": "Uncommon",
+      "tags": [
+        "Species.Beast",
+        "Role.Assassin",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Precision",
+          "baseValue": 3
+        },
+        {
+          "attribute": "DodgeChance",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00005,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.widow_stalker",
+        "name": "Legacy Awakening",
+        "description": "This essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.widow_stalker.widows_ambush",
+      "passiveAbilityId": "ability.essence.widow_stalker.silkstep"
+    },
+    {
+      "id": "essence.scarecrow",
+      "sourceMonsterId": "monster.scarecrow",
+      "name": "Scarecrow's Essence",
+      "description": "A hollow field-ward essence that frightens groups and resists control.",
+      "rarity": "Uncommon",
+      "tags": [
+        "Species.Construct",
+        "Role.Controller",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 2
+        },
+        {
+          "attribute": "CrowdControlResistance",
+          "baseValue": 2
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00005,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.scarecrow",
+        "name": "Legacy Awakening",
+        "description": "This essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.scarecrow.straw_terror",
+      "passiveAbilityId": "ability.essence.scarecrow.hollow_gaze"
+    },
+    {
+      "id": "essence.lost_soul",
+      "sourceMonsterId": "monster.lost_soul",
+      "name": "Lost Soul's Essence",
+      "description": "A sorrowful support essence that restores wounded allies and strengthens spirit.",
+      "rarity": "Uncommon",
+      "tags": [
+        "Species.Spirit",
+        "Role.Support",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 3
+        },
+        {
+          "attribute": "HealingPowerPercent",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00005,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.lost_soul",
+        "name": "Legacy Awakening",
+        "description": "This essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.lost_soul.soul_mend",
+      "passiveAbilityId": "ability.essence.lost_soul.lingering_will"
+    },
+    {
+      "id": "essence.apparition",
+      "sourceMonsterId": "monster.apparition",
+      "name": "Apparition's Essence",
+      "description": "A flickering defensive essence that strikes and phases behind a barrier.",
+      "rarity": "Uncommon",
+      "tags": [
+        "Species.Spirit",
+        "Role.Defensive",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "DodgeChance",
+          "baseValue": 2
+        },
+        {
+          "attribute": "Spirit",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00005,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.apparition",
+        "name": "Legacy Awakening",
+        "description": "This essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.apparition.ethereal_touch",
+      "passiveAbilityId": "ability.essence.apparition.phase_body"
+    },
+    {
+      "id": "essence.specter",
+      "sourceMonsterId": "monster.specter",
+      "name": "Specter's Essence",
+      "description": "A focused haunting essence that tears through magical defenses.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Undead",
+        "Role.Caster",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 3
+        },
+        {
+          "attribute": "MagicPenetration",
+          "baseValue": 2
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00005,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.specter",
+        "name": "Legacy Awakening",
+        "description": "This essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.specter.haunting_wail",
+      "passiveAbilityId": "ability.essence.specter.spectral_focus"
+    },
+    {
+      "id": "essence.zombie",
+      "sourceMonsterId": "monster.zombie",
+      "name": "Zombie's Essence",
+      "description": "A stubborn undead essence built around raw health and heavy blows.",
+      "rarity": "Common",
+      "tags": [
+        "Species.Undead",
+        "Role.Tank",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "MaxHealth",
+          "baseValue": 10
+        },
+        {
+          "attribute": "Fortitude",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00005,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.zombie",
+        "name": "Legacy Awakening",
+        "description": "This essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.zombie.rot_slam",
+      "passiveAbilityId": "ability.essence.zombie.dead_flesh"
+    },
+    {
+      "id": "essence.half_zombie",
+      "sourceMonsterId": "monster.half_zombie",
+      "name": "Half Zombie's Essence",
+      "description": "A twitching undead essence that clings to life through bites and recovery.",
+      "rarity": "Common",
+      "tags": [
+        "Species.Undead",
+        "Role.Defensive",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 2
+        },
+        {
+          "attribute": "HealthRegeneration",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00005,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.half_zombie",
+        "name": "Legacy Awakening",
+        "description": "This essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.half_zombie.clinging_bite",
+      "passiveAbilityId": "ability.essence.half_zombie.twitching_recovery"
+    },
+    {
+      "id": "essence.undead",
+      "sourceMonsterId": "monster.undead",
+      "name": "Undead's Essence",
+      "description": "A tireless undead essence that swings through multiple foes and shrugs off statuses.",
+      "rarity": "Uncommon",
+      "tags": [
+        "Species.Undead",
+        "Role.Offensive",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 2
+        },
+        {
+          "attribute": "StatusResistance",
+          "baseValue": 2
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00005,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.undead",
+        "name": "Legacy Awakening",
+        "description": "This essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.undead.grave_swing",
+      "passiveAbilityId": "ability.essence.undead.deathless_nerves"
+    },
+    {
+      "id": "essence.blood_zombie",
+      "sourceMonsterId": "monster.blood_zombie",
+      "name": "Blood Zombie's Essence",
+      "description": "A hungry undead essence that drains life through bleeding strikes.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Undead",
+        "Role.Offensive",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 3
+        },
+        {
+          "attribute": "LifeSteal",
+          "baseValue": 2
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00005,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.blood_zombie",
+        "name": "Legacy Awakening",
+        "description": "This essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.blood_zombie.bloodletting_grasp",
+      "passiveAbilityId": "ability.essence.blood_zombie.red_hunger"
+    },
+    {
+      "id": "essence.giant_worm",
+      "sourceMonsterId": "monster.giant_worm",
+      "name": "Giant Worm's Essence",
+      "description": "A massive burrowing essence that crushes enemies and hardens armor.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Vermin",
+        "Role.Offensive",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Fortitude",
+          "baseValue": 3
+        },
+        {
+          "attribute": "Armor",
+          "baseValue": 3
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00005,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.giant_worm",
+        "name": "Legacy Awakening",
+        "description": "This essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.giant_worm.burrow_crush",
+      "passiveAbilityId": "ability.essence.giant_worm.earth_plated_hide"
+    },
+    {
+      "id": "essence.burrowed_horror",
+      "sourceMonsterId": "monster.burrowed_horror",
+      "name": "Burrowed Horror's Essence",
+      "description": "A subterranean terror essence that ruptures groups and increases raw power.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Aberration",
+        "Role.Offensive",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 4
+        },
+        {
+          "attribute": "ArmorPenetration",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00005,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.burrowed_horror",
+        "name": "Legacy Awakening",
+        "description": "This essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.burrowed_horror.rupture",
+      "passiveAbilityId": "ability.essence.burrowed_horror.subterranean_force"
+    },
+    {
+      "id": "essence.cave_leech",
+      "sourceMonsterId": "monster.cave_leech",
+      "name": "Cave Leech's Essence",
+      "description": "A draining cave essence that latches on and feeds through lifesteal.",
+      "rarity": "Uncommon",
+      "tags": [
+        "Species.Vermin",
+        "Role.Support",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "LifeSteal",
+          "baseValue": 2
+        },
+        {
+          "attribute": "HealthRegeneration",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00005,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.cave_leech",
+        "name": "Legacy Awakening",
+        "description": "This essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.cave_leech.leeching_latch",
+      "passiveAbilityId": "ability.essence.cave_leech.blood_sense"
+    },
+    {
+      "id": "essence.stonejaw_grub",
+      "sourceMonsterId": "monster.stonejaw_grub",
+      "name": "Stonejaw Grub's Essence",
+      "description": "A mineral-fed grub essence that gnaws enemies while shielding itself.",
+      "rarity": "Uncommon",
+      "tags": [
+        "Species.Vermin",
+        "Role.Tank",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Fortitude",
+          "baseValue": 2
+        },
+        {
+          "attribute": "DamageReduction",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00005,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.stonejaw_grub",
+        "name": "Legacy Awakening",
+        "description": "This essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.stonejaw_grub.stone_gnaw",
+      "passiveAbilityId": "ability.essence.stonejaw_grub.mineral_shell"
+    },
+    {
+      "id": "essence.deep_burrower",
+      "sourceMonsterId": "monster.deep_burrower",
+      "name": "Deep Burrower's Essence",
+      "description": "A deep-tunneling bruiser essence that collapses earth beneath multiple foes.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Vermin",
+        "Role.Offensive",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 3
+        },
+        {
+          "attribute": "ArmorPenetration",
+          "baseValue": 2
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 0.00005,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.deep_burrower",
+        "name": "Legacy Awakening",
+        "description": "This essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.deep_burrower.tunnel_collapse",
+      "passiveAbilityId": "ability.essence.deep_burrower.tremor_sense"
     }
   ]
 }

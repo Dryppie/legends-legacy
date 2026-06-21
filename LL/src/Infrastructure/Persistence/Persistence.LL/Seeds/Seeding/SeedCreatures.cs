@@ -5,6 +5,7 @@ using Domain.Models.LootTables;
 using Domain.Models.Professions.Gathering.GatheringNodes;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
+using Microsoft.EntityFrameworkCore;
 
 namespace Persistence.LL.Seeds.Seeding;
 public static class SeedCreatures
@@ -61,6 +62,22 @@ public static class SeedCreatures
         var woodNymphId = Guid.Parse("00000000-0000-0000-0000-000000000035");
         var giantSpiderId = Guid.Parse("00000000-0000-0000-0000-000000000036");
         var venomousSpiderlingId = Guid.Parse("00000000-0000-0000-0000-000000000037");
+        var blackjawSpiderId = Guid.Parse("00000000-0000-0000-0000-000000000038");
+        var ravenId = Guid.Parse("00000000-0000-0000-0000-000000000039");
+        var scarecrowId = Guid.Parse("00000000-0000-0000-0000-000000000040");
+        var lostSoulId = Guid.Parse("00000000-0000-0000-0000-000000000041");
+        var apparitionId = Guid.Parse("00000000-0000-0000-0000-000000000042");
+        var specterId = Guid.Parse("00000000-0000-0000-0000-000000000043");
+        var zombieId = Guid.Parse("00000000-0000-0000-0000-000000000044");
+        var halfZombieId = Guid.Parse("00000000-0000-0000-0000-000000000045");
+        var undeadId = Guid.Parse("00000000-0000-0000-0000-000000000046");
+        var bloodZombieId = Guid.Parse("00000000-0000-0000-0000-000000000047");
+        var giantWormId = Guid.Parse("00000000-0000-0000-0000-000000000048");
+        var burrowedHorrorId = Guid.Parse("00000000-0000-0000-0000-000000000049");
+        var caveLeechId = Guid.Parse("00000000-0000-0000-0000-000000000050");
+        var widowStalkerId = Guid.Parse("00000000-0000-0000-0000-000000000051");
+        var stonejawGrubId = Guid.Parse("00000000-0000-0000-0000-000000000052");
+        var deepBurrowerId = Guid.Parse("00000000-0000-0000-0000-000000000053");
         // Step 2 - Loot Tables
 
 
@@ -508,6 +525,22 @@ public static class SeedCreatures
             Id = Guid.NewGuid(),
             Entries = [venomousSpiderlingLootTableLegendary]
         };
+        var blackjawSpiderLootTable = BuildEmptyCreatureLootTable();
+        var ravenLootTable = BuildEmptyCreatureLootTable();
+        var scarecrowLootTable = BuildEmptyCreatureLootTable();
+        var lostSoulLootTable = BuildEmptyCreatureLootTable();
+        var apparitionLootTable = BuildEmptyCreatureLootTable();
+        var specterLootTable = BuildEmptyCreatureLootTable();
+        var zombieLootTable = BuildEmptyCreatureLootTable();
+        var halfZombieLootTable = BuildEmptyCreatureLootTable();
+        var undeadLootTable = BuildEmptyCreatureLootTable();
+        var bloodZombieLootTable = BuildEmptyCreatureLootTable();
+        var giantWormLootTable = BuildEmptyCreatureLootTable();
+        var burrowedHorrorLootTable = BuildEmptyCreatureLootTable();
+        var caveLeechLootTable = BuildEmptyCreatureLootTable();
+        var widowStalkerLootTable = BuildEmptyCreatureLootTable();
+        var stonejawGrubLootTable = BuildEmptyCreatureLootTable();
+        var deepBurrowerLootTable = BuildEmptyCreatureLootTable();
         // Loot tables
         await context.LootTables.AddRangeAsync(goblinLootTable, goblinWarriorLootTable, goblinArcherLootTable, largeRatLootTable);
         await context.LootTables.AddRangeAsync(flameImpLootTable, frostImpLootTable, shadowImpLootTable, vampireBatLootTable);
@@ -517,6 +550,23 @@ public static class SeedCreatures
         await context.LootTables.AddRangeAsync(mossLizardLootTable, spiderLootTable, treantSaplingLootTable, venomousSnakeLootTable, viperLootTable);
         await context.LootTables.AddRangeAsync(feralGhoulLootTable, plagueGhoulLootTable, ravenousGhoulLootTable, skeletonArcherLootTable, skeletonMageLootTable, skeletonWarriorLootTable);
         await context.LootTables.AddRangeAsync(antWorkerLootTable, fireAntLootTable, forestSpiritLootTable, woodNymphLootTable, giantSpiderLootTable, venomousSpiderlingLootTable);
+        await context.LootTables.AddRangeAsync(
+            blackjawSpiderLootTable,
+            ravenLootTable,
+            scarecrowLootTable,
+            lostSoulLootTable,
+            apparitionLootTable,
+            specterLootTable,
+            zombieLootTable,
+            halfZombieLootTable,
+            undeadLootTable,
+            bloodZombieLootTable,
+            giantWormLootTable,
+            burrowedHorrorLootTable,
+            caveLeechLootTable,
+            widowStalkerLootTable,
+            stonejawGrubLootTable,
+            deepBurrowerLootTable);
 
         // Step 5 - Create creatures
         var lumoRuinsCreatures = new List<Creature>
@@ -588,6 +638,26 @@ public static class SeedCreatures
             new() { Id = venomousSpiderlingId, Name = "Venomous Spiderling", ImagePath = "venomous_spiderling", LootTableId = venomousSpiderlingLootTable.Id, ExperienceReward = 16, Archetype = CreatureArchetype.Balanced },
         };
 
+        var remainingRegionOneIdleCreatures = new List<Creature>
+        {
+            new() { Id = blackjawSpiderId, Name = "Blackjaw Spider", ImagePath = "blackjaw_spider", LootTableId = blackjawSpiderLootTable.Id, ExperienceReward = 19, Archetype = CreatureArchetype.Bruiser },
+            new() { Id = ravenId, Name = "Raven", ImagePath = "raven", LootTableId = ravenLootTable.Id, ExperienceReward = 16, Archetype = CreatureArchetype.Balanced },
+            new() { Id = widowStalkerId, Name = "Widow Stalker", ImagePath = "widow_stalker", LootTableId = widowStalkerLootTable.Id, ExperienceReward = 20, Archetype = CreatureArchetype.DPS },
+            new() { Id = scarecrowId, Name = "Scarecrow", ImagePath = "scarecrow", LootTableId = scarecrowLootTable.Id, ExperienceReward = 19, Archetype = CreatureArchetype.Hazard },
+            new() { Id = lostSoulId, Name = "Lost Soul", ImagePath = "lost_soul", LootTableId = lostSoulLootTable.Id, ExperienceReward = 18, Archetype = CreatureArchetype.Support },
+            new() { Id = apparitionId, Name = "Apparition", ImagePath = "apparition", LootTableId = apparitionLootTable.Id, ExperienceReward = 20, Archetype = CreatureArchetype.Hazard },
+            new() { Id = specterId, Name = "Specter", ImagePath = "specter", LootTableId = specterLootTable.Id, ExperienceReward = 21, Archetype = CreatureArchetype.DPS },
+            new() { Id = zombieId, Name = "Zombie", ImagePath = "zombie", LootTableId = zombieLootTable.Id, ExperienceReward = 20, Archetype = CreatureArchetype.Tank },
+            new() { Id = halfZombieId, Name = "Half Zombie", ImagePath = "half_zombie", LootTableId = halfZombieLootTable.Id, ExperienceReward = 19, Archetype = CreatureArchetype.Balanced },
+            new() { Id = undeadId, Name = "Undead", ImagePath = "undead", LootTableId = undeadLootTable.Id, ExperienceReward = 21, Archetype = CreatureArchetype.Bruiser },
+            new() { Id = bloodZombieId, Name = "Blood Zombie", ImagePath = "blood_zombie", LootTableId = bloodZombieLootTable.Id, ExperienceReward = 22, Archetype = CreatureArchetype.Tank },
+            new() { Id = giantWormId, Name = "Giant Worm", ImagePath = "giant_worm", LootTableId = giantWormLootTable.Id, ExperienceReward = 23, Archetype = CreatureArchetype.Bruiser },
+            new() { Id = burrowedHorrorId, Name = "Burrowed Horror", ImagePath = "burrowed_horror", LootTableId = burrowedHorrorLootTable.Id, ExperienceReward = 24, Archetype = CreatureArchetype.DPS },
+            new() { Id = caveLeechId, Name = "Cave Leech", ImagePath = "cave_leech", LootTableId = caveLeechLootTable.Id, ExperienceReward = 22, Archetype = CreatureArchetype.Support },
+            new() { Id = stonejawGrubId, Name = "Stonejaw Grub", ImagePath = "stonejaw_grub", LootTableId = stonejawGrubLootTable.Id, ExperienceReward = 21, Archetype = CreatureArchetype.Tank },
+            new() { Id = deepBurrowerId, Name = "Deep Burrower", ImagePath = "deep_burrower", LootTableId = deepBurrowerLootTable.Id, ExperienceReward = 25, Archetype = CreatureArchetype.Bruiser },
+        };
+
         await context.Creatures.AddRangeAsync(lumoRuinsCreatures);
         await context.Creatures.AddRangeAsync(bloodGroveCreatures);
         await context.Creatures.AddRangeAsync(crystalCreekCreatures);
@@ -596,6 +666,7 @@ public static class SeedCreatures
         await context.Creatures.AddRangeAsync(oakThicketCreatures);
         await context.Creatures.AddRangeAsync(forgottenRuinsCreatures);
         await context.Creatures.AddRangeAsync(futureRegionOneCreatures);
+        await context.Creatures.AddRangeAsync(remainingRegionOneIdleCreatures);
 
 
         // Step 6 - Create area
@@ -649,6 +720,45 @@ public static class SeedCreatures
         };
 
         var forgottenRuinsAreaId = "region_01_area_07";
+        var oldForestAreaId = "region_01_area_08";
+        var bleakOrchardAreaId = "region_01_area_09";
+        var rottingHamletAreaId = "region_01_area_10";
+        var wormburrowDepthsAreaId = "region_01_area_11";
+
+        var oldForestAreaCreatures = new List<AreaCreature>
+        {
+            new AreaCreature() { AreaId = oldForestAreaId, CreatureId = giantSpiderId, WeightedSpawnRate = 0.22f },
+            new AreaCreature() { AreaId = oldForestAreaId, CreatureId = venomousSpiderlingId, WeightedSpawnRate = 0.28f },
+            new AreaCreature() { AreaId = oldForestAreaId, CreatureId = blackjawSpiderId, WeightedSpawnRate = 0.22f },
+            new AreaCreature() { AreaId = oldForestAreaId, CreatureId = ravenId, WeightedSpawnRate = 0.13f },
+            new AreaCreature() { AreaId = oldForestAreaId, CreatureId = widowStalkerId, WeightedSpawnRate = 0.15f },
+        };
+
+        var bleakOrchardAreaCreatures = new List<AreaCreature>
+        {
+            new AreaCreature() { AreaId = bleakOrchardAreaId, CreatureId = scarecrowId, WeightedSpawnRate = 0.30f },
+            new AreaCreature() { AreaId = bleakOrchardAreaId, CreatureId = lostSoulId, WeightedSpawnRate = 0.30f },
+            new AreaCreature() { AreaId = bleakOrchardAreaId, CreatureId = apparitionId, WeightedSpawnRate = 0.20f },
+            new AreaCreature() { AreaId = bleakOrchardAreaId, CreatureId = specterId, WeightedSpawnRate = 0.20f },
+        };
+
+        var rottingHamletAreaCreatures = new List<AreaCreature>
+        {
+            new AreaCreature() { AreaId = rottingHamletAreaId, CreatureId = zombieId, WeightedSpawnRate = 0.35f },
+            new AreaCreature() { AreaId = rottingHamletAreaId, CreatureId = halfZombieId, WeightedSpawnRate = 0.25f },
+            new AreaCreature() { AreaId = rottingHamletAreaId, CreatureId = undeadId, WeightedSpawnRate = 0.25f },
+            new AreaCreature() { AreaId = rottingHamletAreaId, CreatureId = bloodZombieId, WeightedSpawnRate = 0.15f },
+        };
+
+        var wormburrowDepthsAreaCreatures = new List<AreaCreature>
+        {
+            new AreaCreature() { AreaId = wormburrowDepthsAreaId, CreatureId = giantWormId, WeightedSpawnRate = 0.30f },
+            new AreaCreature() { AreaId = wormburrowDepthsAreaId, CreatureId = burrowedHorrorId, WeightedSpawnRate = 0.22f },
+            new AreaCreature() { AreaId = wormburrowDepthsAreaId, CreatureId = caveLeechId, WeightedSpawnRate = 0.18f },
+            new AreaCreature() { AreaId = wormburrowDepthsAreaId, CreatureId = stonejawGrubId, WeightedSpawnRate = 0.16f },
+            new AreaCreature() { AreaId = wormburrowDepthsAreaId, CreatureId = deepBurrowerId, WeightedSpawnRate = 0.14f },
+        };
+
         var forgottenRuinsAreaCreatures = new List<AreaCreature>
         {
             new AreaCreature() { AreaId = forgottenRuinsAreaId, CreatureId = feralGhoulId, WeightedSpawnRate = 0.20f },
@@ -789,10 +899,10 @@ public static class SeedCreatures
                 },
                 new Area
                 {
-                    Id = forgottenRuinsAreaId, // region, [area, dungeon, raid, or rift], area
-                    Name = "Forgotten Ruins",
+                    Id = oldForestAreaId,
+                    Name = "Old Forest",
                     LevelRequirement = 25,
-                    Creatures = forgottenRuinsAreaCreatures,
+                    Creatures = oldForestAreaCreatures,
                     SpawnProbabilities =
                     [
                         0.03f,
@@ -800,6 +910,62 @@ public static class SeedCreatures
                         0.001f,
                     ],
                     DifficultyTier = 6,
+                },
+                new Area
+                {
+                    Id = bleakOrchardAreaId,
+                    Name = "Bleak Orchard",
+                    LevelRequirement = 30,
+                    Creatures = bleakOrchardAreaCreatures,
+                    SpawnProbabilities =
+                    [
+                        0.03f,
+                        0.969f,
+                        0.001f,
+                    ],
+                    DifficultyTier = 7,
+                },
+                new Area
+                {
+                    Id = rottingHamletAreaId,
+                    Name = "Rotting Hamlet",
+                    LevelRequirement = 35,
+                    Creatures = rottingHamletAreaCreatures,
+                    SpawnProbabilities =
+                    [
+                        0.03f,
+                        0.969f,
+                        0.001f,
+                    ],
+                    DifficultyTier = 8,
+                },
+                new Area
+                {
+                    Id = wormburrowDepthsAreaId,
+                    Name = "Wormburrow Depths",
+                    LevelRequirement = 40,
+                    Creatures = wormburrowDepthsAreaCreatures,
+                    SpawnProbabilities =
+                    [
+                        0.03f,
+                        0.969f,
+                        0.001f,
+                    ],
+                    DifficultyTier = 9,
+                },
+                new Area
+                {
+                    Id = forgottenRuinsAreaId, // region, [area, dungeon, raid, or rift], area
+                    Name = "Forgotten Ruins",
+                    LevelRequirement = 45,
+                    Creatures = forgottenRuinsAreaCreatures,
+                    SpawnProbabilities =
+                    [
+                        0.03f,
+                        0.969f,
+                        0.001f,
+                    ],
+                    DifficultyTier = 10,
                 }
             };
 
@@ -815,6 +981,211 @@ public static class SeedCreatures
             };
             await context.Regions.AddRangeAsync(regions);
         }
+    }
+
+    public static async Task<bool> EnsureRemainingRegionOneIdleAreas(LLDbContext context)
+    {
+        var shenic = await context.Regions
+            .Include(region => region.Areas)
+            .FirstOrDefaultAsync(region => region.Name == "Shenic");
+
+        if (shenic is null)
+        {
+            return false;
+        }
+
+        var changed = false;
+        var creatureSeeds = BuildRemainingRegionOneIdleCreatureSeeds();
+        var creatureIds = creatureSeeds.Select(creature => creature.Id).ToArray();
+        var existingCreatureIds = await context.Creatures
+            .Where(creature => creatureIds.Contains(creature.Id))
+            .Select(creature => creature.Id)
+            .ToListAsync();
+        var existingCreatureIdSet = existingCreatureIds.ToHashSet();
+
+        foreach (var seed in creatureSeeds.Where(seed => !existingCreatureIdSet.Contains(seed.Id)))
+        {
+            var lootTable = BuildEmptyCreatureLootTable();
+            context.LootTables.Add(lootTable);
+            context.Creatures.Add(new Creature
+            {
+                Id = seed.Id,
+                Name = seed.Name,
+                ImagePath = seed.ImagePath,
+                LootTableId = lootTable.Id,
+                ExperienceReward = seed.ExperienceReward,
+                Archetype = seed.Archetype
+            });
+            changed = true;
+        }
+
+        foreach (var areaSeed in BuildRemainingRegionOneIdleAreaSeeds())
+        {
+            var area = await context.Areas
+                .Include(existingArea => existingArea.Creatures)
+                .FirstOrDefaultAsync(existingArea => existingArea.Id == areaSeed.Id);
+
+            if (area is null)
+            {
+                area = new Area
+                {
+                    Id = areaSeed.Id,
+                    Name = areaSeed.Name,
+                    LevelRequirement = areaSeed.LevelRequirement,
+                    DifficultyTier = areaSeed.DifficultyTier,
+                    SpawnProbabilities = [0.03f, 0.969f, 0.001f],
+                    Creatures = areaSeed.Creatures
+                        .Select(creature => new AreaCreature
+                        {
+                            AreaId = areaSeed.Id,
+                            CreatureId = creature.CreatureId,
+                            WeightedSpawnRate = creature.WeightedSpawnRate
+                        })
+                        .ToList()
+                };
+
+                shenic.Areas.Add(area);
+                changed = true;
+                continue;
+            }
+
+            var expectedSpawnProbabilities = new List<float> { 0.03f, 0.969f, 0.001f };
+            if (area.Name != areaSeed.Name
+                || area.LevelRequirement != areaSeed.LevelRequirement
+                || area.DifficultyTier != areaSeed.DifficultyTier
+                || !area.SpawnProbabilities.SequenceEqual(expectedSpawnProbabilities))
+            {
+                changed = true;
+            }
+
+            area.Name = areaSeed.Name;
+            area.LevelRequirement = areaSeed.LevelRequirement;
+            area.DifficultyTier = areaSeed.DifficultyTier;
+            area.SpawnProbabilities = expectedSpawnProbabilities;
+
+            foreach (var creatureSeed in areaSeed.Creatures)
+            {
+                var existingAreaCreature = area.Creatures.FirstOrDefault(creature => creature.CreatureId == creatureSeed.CreatureId);
+                if (existingAreaCreature is not null)
+                {
+                    if (Math.Abs(existingAreaCreature.WeightedSpawnRate - creatureSeed.WeightedSpawnRate) > 0.0001f)
+                    {
+                        existingAreaCreature.WeightedSpawnRate = creatureSeed.WeightedSpawnRate;
+                        changed = true;
+                    }
+
+                    continue;
+                }
+
+                area.Creatures.Add(new AreaCreature
+                {
+                    AreaId = areaSeed.Id,
+                    CreatureId = creatureSeed.CreatureId,
+                    WeightedSpawnRate = creatureSeed.WeightedSpawnRate
+                });
+                changed = true;
+            }
+        }
+
+        var forgottenRuins = await context.Areas
+            .FirstOrDefaultAsync(area => area.Id == "region_01_area_07");
+        if (forgottenRuins is not null
+            && (forgottenRuins.LevelRequirement != 45 || forgottenRuins.DifficultyTier != 10))
+        {
+            forgottenRuins.LevelRequirement = 45;
+            forgottenRuins.DifficultyTier = 10;
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    private static IReadOnlyList<RegionOneCreatureSeed> BuildRemainingRegionOneIdleCreatureSeeds() =>
+    [
+        new(Guid.Parse("00000000-0000-0000-0000-000000000036"), "Giant Spider", "giant_spider", 18, CreatureArchetype.Bruiser),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000037"), "Venomous Spiderling", "venomous_spiderling", 16, CreatureArchetype.Balanced),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000038"), "Blackjaw Spider", "blackjaw_spider", 19, CreatureArchetype.Bruiser),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000039"), "Raven", "raven", 16, CreatureArchetype.Balanced),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000051"), "Widow Stalker", "widow_stalker", 20, CreatureArchetype.DPS),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000040"), "Scarecrow", "scarecrow", 19, CreatureArchetype.Hazard),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000041"), "Lost Soul", "lost_soul", 18, CreatureArchetype.Support),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000042"), "Apparition", "apparition", 20, CreatureArchetype.Hazard),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000043"), "Specter", "specter", 21, CreatureArchetype.DPS),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000044"), "Zombie", "zombie", 20, CreatureArchetype.Tank),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000045"), "Half Zombie", "half_zombie", 19, CreatureArchetype.Balanced),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000046"), "Undead", "undead", 21, CreatureArchetype.Bruiser),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000047"), "Blood Zombie", "blood_zombie", 22, CreatureArchetype.Tank),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000048"), "Giant Worm", "giant_worm", 23, CreatureArchetype.Bruiser),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000049"), "Burrowed Horror", "burrowed_horror", 24, CreatureArchetype.DPS),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000050"), "Cave Leech", "cave_leech", 22, CreatureArchetype.Support),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000052"), "Stonejaw Grub", "stonejaw_grub", 21, CreatureArchetype.Tank),
+        new(Guid.Parse("00000000-0000-0000-0000-000000000053"), "Deep Burrower", "deep_burrower", 25, CreatureArchetype.Bruiser),
+    ];
+
+    private static IReadOnlyList<RegionOneAreaSeed> BuildRemainingRegionOneIdleAreaSeeds() =>
+    [
+        new(
+            "region_01_area_08",
+            "Old Forest",
+            25,
+            6,
+            [
+                new(Guid.Parse("00000000-0000-0000-0000-000000000036"), 0.22f),
+                new(Guid.Parse("00000000-0000-0000-0000-000000000037"), 0.28f),
+                new(Guid.Parse("00000000-0000-0000-0000-000000000038"), 0.22f),
+                new(Guid.Parse("00000000-0000-0000-0000-000000000039"), 0.13f),
+                new(Guid.Parse("00000000-0000-0000-0000-000000000051"), 0.15f),
+            ]),
+        new(
+            "region_01_area_09",
+            "Bleak Orchard",
+            30,
+            7,
+            [
+                new(Guid.Parse("00000000-0000-0000-0000-000000000040"), 0.30f),
+                new(Guid.Parse("00000000-0000-0000-0000-000000000041"), 0.30f),
+                new(Guid.Parse("00000000-0000-0000-0000-000000000042"), 0.20f),
+                new(Guid.Parse("00000000-0000-0000-0000-000000000043"), 0.20f),
+            ]),
+        new(
+            "region_01_area_10",
+            "Rotting Hamlet",
+            35,
+            8,
+            [
+                new(Guid.Parse("00000000-0000-0000-0000-000000000044"), 0.35f),
+                new(Guid.Parse("00000000-0000-0000-0000-000000000045"), 0.25f),
+                new(Guid.Parse("00000000-0000-0000-0000-000000000046"), 0.25f),
+                new(Guid.Parse("00000000-0000-0000-0000-000000000047"), 0.15f),
+            ]),
+        new(
+            "region_01_area_11",
+            "Wormburrow Depths",
+            40,
+            9,
+            [
+                new(Guid.Parse("00000000-0000-0000-0000-000000000048"), 0.30f),
+                new(Guid.Parse("00000000-0000-0000-0000-000000000049"), 0.22f),
+                new(Guid.Parse("00000000-0000-0000-0000-000000000050"), 0.18f),
+                new(Guid.Parse("00000000-0000-0000-0000-000000000052"), 0.16f),
+                new(Guid.Parse("00000000-0000-0000-0000-000000000053"), 0.14f),
+            ]),
+    ];
+
+    private static LootTable BuildEmptyCreatureLootTable()
+    {
+        var legendaryTable = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [],
+            Weight = 5
+        };
+
+        return new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [legendaryTable]
+        };
     }
 
     private static LootTable BuildGatheringLootTable(
@@ -856,4 +1227,20 @@ public static class SeedCreatures
             }
         }
     }
+
+    private sealed record RegionOneCreatureSeed(
+        Guid Id,
+        string Name,
+        string ImagePath,
+        int ExperienceReward,
+        CreatureArchetype Archetype);
+
+    private sealed record RegionOneAreaSeed(
+        string Id,
+        string Name,
+        int LevelRequirement,
+        int DifficultyTier,
+        IReadOnlyList<RegionOneAreaCreatureSeed> Creatures);
+
+    private sealed record RegionOneAreaCreatureSeed(Guid CreatureId, float WeightedSpawnRate);
 }
