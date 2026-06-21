@@ -4,6 +4,7 @@ using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalog
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalogCoverage;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalogDiagnostics;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetCreatureBuildProfileDiagnostics;
+using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunAbilityBalanceSimulation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.AdminDashboard.Controllers.V1;
@@ -32,5 +33,12 @@ public class DiagnosticsController : BaseController
     public async Task<ActionResult<CreatureBuildProfileDiagnosticReport>> GetCreatureBuildProfileDiagnostics()
     {
         return await Mediator.Send(new GetCreatureBuildProfileDiagnosticsQuery());
+    }
+
+    [HttpPost("ability-balance-simulation")]
+    public async Task<ActionResult<AbilityBalanceSimulationReport>> RunAbilityBalanceSimulation(
+        [FromBody] AbilityBalanceSimulationRequest request)
+    {
+        return await Mediator.Send(new RunAbilityBalanceSimulationQuery(request));
     }
 }

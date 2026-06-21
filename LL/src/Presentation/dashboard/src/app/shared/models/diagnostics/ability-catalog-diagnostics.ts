@@ -92,3 +92,65 @@ export interface AbilityCatalogRuntimeLoadoutCheck {
   eventCount: number;
   failure: string | null;
 }
+
+export interface AbilityBalanceSimulationRequest {
+  battleCount: number;
+  teamSize: number;
+  essencesPerParticipant: number;
+  randomSeed: number;
+  topResults: number;
+  candidatePoolSize: number;
+  candidateTeams: AbilityBalanceTeamLoadout[] | null;
+}
+
+export interface AbilityBalanceTeamLoadout {
+  participants: AbilityBalanceParticipantLoadout[];
+}
+
+export interface AbilityBalanceParticipantLoadout {
+  essenceIds: string[];
+}
+
+export interface AbilityBalanceSimulationReport {
+  mode: string;
+  requestedBattleCount: number;
+  battlesRun: number;
+  teamSize: number;
+  essencesPerParticipant: number;
+  randomSeed: number;
+  candidateTeamCount: number;
+  candidatePoolSize: number;
+  availableEssenceCount: number;
+  rankedCombinations: AbilityBalanceCombinationResult[];
+  battleSummaries: AbilityBalanceBattleSummary[];
+}
+
+export interface AbilityBalanceCombinationResult {
+  signature: string;
+  displayName: string;
+  participants: AbilityBalanceParticipantLoadout[];
+  battles: number;
+  wins: number;
+  losses: number;
+  draws: number;
+  winRate: number;
+  lossRate: number;
+  drawRate: number;
+  averageDuration: number;
+  averageDamageDone: number;
+  averageDamageTaken: number;
+}
+
+export interface AbilityBalanceBattleSummary {
+  index: number;
+  friendlySignature: string;
+  friendlyDisplayName: string;
+  hostileSignature: string;
+  hostileDisplayName: string;
+  outcome: string;
+  duration: number;
+  friendlyDamageDone: number;
+  friendlyDamageTaken: number;
+  hostileDamageDone: number;
+  hostileDamageTaken: number;
+}

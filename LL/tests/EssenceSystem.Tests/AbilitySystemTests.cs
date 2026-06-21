@@ -748,6 +748,89 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Balance_simulator_ranks_random_essence_combinations()
+    {
+        var provider = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions());
+        var essenceRepository = new JsonEssenceDefinitionRepository(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions(),
+            new EssenceDefinitionValidator());
+        var simulator = new AbilityBalanceSimulator(provider, essenceRepository);
+
+        var report = simulator.Run(new AbilityBalanceSimulationRequest(
+            BattleCount: 20,
+            TeamSize: 2,
+            EssencesPerParticipant: 2,
+            RandomSeed: 123,
+            TopResults: 10,
+            CandidatePoolSize: 5,
+            CandidateTeams: null));
+
+        Assert.Equal("RandomPool", report.Mode);
+        Assert.Equal(20, report.BattlesRun);
+        Assert.Equal(2, report.TeamSize);
+        Assert.Equal(2, report.EssencesPerParticipant);
+        Assert.Equal(5, report.CandidatePoolSize);
+        Assert.Equal(5, report.CandidateTeamCount);
+        Assert.NotEmpty(report.RankedCombinations);
+        Assert.True(report.RankedCombinations.Count <= 5);
+        Assert.Equal(40, report.RankedCombinations.Sum(x => x.Battles));
+        Assert.All(report.RankedCombinations, combination =>
+        {
+            Assert.DoesNotContain("essence.", combination.DisplayName, StringComparison.OrdinalIgnoreCase);
+            Assert.NotEqual(combination.Signature, combination.DisplayName);
+        });
+        Assert.All(report.RankedCombinations, combination =>
+        {
+            Assert.True(combination.Battles > 0);
+            Assert.InRange(combination.WinRate, 0, 1);
+            Assert.Equal(2, combination.Participants.Count);
+            Assert.All(combination.Participants, participant => Assert.Equal(2, participant.EssenceIds.Count));
+        });
+    }
+
+    [Fact]
+    public void Balance_simulator_runs_saved_combinations_as_round_robin()
+    {
+        var provider = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions());
+        var essenceRepository = new JsonEssenceDefinitionRepository(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions(),
+            new EssenceDefinitionValidator());
+        var simulator = new AbilityBalanceSimulator(provider, essenceRepository);
+        var first = new AbilityBalanceTeamLoadout(
+            [new AbilityBalanceParticipantLoadout(["essence.legacy.large_rat"])]);
+        var second = new AbilityBalanceTeamLoadout(
+            [new AbilityBalanceParticipantLoadout(["essence.legacy.flame_imp"])]);
+
+        var report = simulator.Run(new AbilityBalanceSimulationRequest(
+            BattleCount: 6,
+            TeamSize: 1,
+            EssencesPerParticipant: 1,
+            RandomSeed: 456,
+            TopResults: 10,
+            CandidatePoolSize: 10,
+            CandidateTeams: [first, second]));
+
+        Assert.Equal("SavedRoundRobin", report.Mode);
+        Assert.Equal(6, report.BattlesRun);
+        Assert.Equal(2, report.CandidateTeamCount);
+        Assert.Equal(10, report.CandidatePoolSize);
+        Assert.Equal(2, report.RankedCombinations.Count);
+        Assert.Contains(report.RankedCombinations, combination => combination.DisplayName == "Large Rat's Essence");
+        Assert.Contains(report.RankedCombinations, combination => combination.DisplayName == "Flame Imp's Essence");
+        Assert.All(report.RankedCombinations, combination => Assert.Equal(6, combination.Battles));
+    }
+
+    [Fact]
     public void Engine_supports_status_stacks_and_reflect_triggers()
     {
         var thorns = new AbilitySpec

@@ -251,6 +251,213 @@
         </div>
       </div>
     </section>
+
+    <section *ngIf="activeTab === 'balance'" class="min-h-0 flex-auto overflow-auto rounded border border-light_gray/40 bg-black/20 p-4">
+      <div class="grid gap-3 md:grid-cols-6">
+        <label class="grid gap-1 text-sm">
+          <span class="text-light_gray">Battles</span>
+          <input
+            type="number"
+            min="1"
+            class="rounded border border-light_gray/40 bg-black/40 px-3 py-2 text-white"
+            [(ngModel)]="balanceSettings.battleCount"
+          />
+        </label>
+        <label class="grid gap-1 text-sm">
+          <span class="text-light_gray">Participants / Team</span>
+          <input
+            type="number"
+            min="1"
+            max="10"
+            class="rounded border border-light_gray/40 bg-black/40 px-3 py-2 text-white"
+            [(ngModel)]="balanceSettings.teamSize"
+          />
+        </label>
+        <label class="grid gap-1 text-sm">
+          <span class="text-light_gray">Essences / Participant</span>
+          <input
+            type="number"
+            min="1"
+            max="10"
+            class="rounded border border-light_gray/40 bg-black/40 px-3 py-2 text-white"
+            [(ngModel)]="balanceSettings.essencesPerParticipant"
+          />
+        </label>
+        <label class="grid gap-1 text-sm">
+          <span class="text-light_gray">Seed</span>
+          <input
+            type="number"
+            class="rounded border border-light_gray/40 bg-black/40 px-3 py-2 text-white"
+            [(ngModel)]="balanceSettings.randomSeed"
+          />
+        </label>
+        <label class="grid gap-1 text-sm">
+          <span class="text-light_gray">Top Rows</span>
+          <input
+            type="number"
+            min="1"
+            max="500"
+            class="rounded border border-light_gray/40 bg-black/40 px-3 py-2 text-white"
+            [(ngModel)]="balanceSettings.topResults"
+          />
+        </label>
+        <label class="grid gap-1 text-sm">
+          <span class="text-light_gray">Random Pool</span>
+          <input
+            type="number"
+            min="2"
+            max="1000"
+            class="rounded border border-light_gray/40 bg-black/40 px-3 py-2 text-white"
+            [(ngModel)]="balanceSettings.candidatePoolSize"
+          />
+        </label>
+      </div>
+
+      <div class="mt-4 grid gap-3 text-sm text-light_gray lg:grid-cols-3">
+        <div class="rounded border border-light_gray/30 bg-black/20 p-4">
+          <div class="font-semibold text-primary">Random Pool</div>
+          <p class="mt-2">
+            Builds a fixed pool of random teams using the selected participants per team and essences per participant.
+            The battle count is then spent matching teams from that pool, so each ranked combination can collect repeat fights.
+          </p>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-4">
+          <div class="font-semibold text-primary">Saved vs Saved</div>
+          <p class="mt-2">
+            Uses saved combinations as the candidate list and runs every saved team against every other saved team.
+            The battle count is applied per pairing, with sides alternated to reduce side bias.
+          </p>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-4">
+          <div class="font-semibold text-primary">Reading Results</div>
+          <p class="mt-2">
+            Win rate is calculated from that combination's fights only. Higher fight counts are more trustworthy.
+            Damage and ticks are averages across all fights for the listed combination.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-4 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          class="rounded border border-primary px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/10 disabled:cursor-wait disabled:opacity-60"
+          [disabled]="isSimulating"
+          (click)="runRandomSimulation()"
+        >
+          {{ isSimulating ? 'Running' : 'Run Random Pool' }}
+        </button>
+        <button
+          type="button"
+          class="rounded border border-emerald-300/70 px-4 py-2 text-sm font-semibold text-emerald-200 hover:bg-emerald-400/10 disabled:opacity-50"
+          [disabled]="isSimulating || savedCombinations.length < 2"
+          (click)="runSavedSimulation()"
+        >
+          Run Saved vs Saved
+        </button>
+        <button
+          type="button"
+          class="rounded border border-light_gray/40 px-4 py-2 text-sm font-semibold text-light_gray hover:bg-white/5 disabled:opacity-50"
+          [disabled]="!balanceReport?.rankedCombinations?.length"
+          (click)="saveTop(10)"
+        >
+          Save Top 10
+        </button>
+        <button
+          type="button"
+          class="rounded border border-light_gray/40 px-4 py-2 text-sm font-semibold text-light_gray hover:bg-white/5 disabled:opacity-50"
+          [disabled]="!balanceReport?.rankedCombinations?.length"
+          (click)="saveTop(100)"
+        >
+          Save Top 100
+        </button>
+        <button
+          type="button"
+          class="rounded border border-red-300/60 px-4 py-2 text-sm font-semibold text-red-200 hover:bg-red-400/10 disabled:opacity-50"
+          [disabled]="savedCombinations.length === 0"
+          (click)="clearSavedCombinations()"
+        >
+          Clear Saved
+        </button>
+        <span class="text-sm text-light_gray">
+          {{ savedCombinations.length }} saved combination{{ savedCombinations.length === 1 ? '' : 's' }}
+        </span>
+      </div>
+
+      <div *ngIf="simulationError" class="mt-4 rounded border border-red-400/60 bg-red-950/40 p-4 text-red-100">
+        {{ simulationError }}
+      </div>
+
+      <div *ngIf="balanceReport" class="mt-4 grid gap-3 md:grid-cols-6">
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Mode</div>
+          <div class="mt-1 text-xl text-primary">{{ balanceReport.mode }}</div>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Battles Run</div>
+          <div class="mt-1 text-xl text-primary">{{ balanceReport.battlesRun }}</div>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Candidates</div>
+          <div class="mt-1 text-xl text-primary">{{ balanceReport.candidateTeamCount }}</div>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Pool Target</div>
+          <div class="mt-1 text-xl text-primary">{{ balanceReport.candidatePoolSize }}</div>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Available Essences</div>
+          <div class="mt-1 text-xl text-primary">{{ balanceReport.availableEssenceCount }}</div>
+        </div>
+        <div class="rounded border border-light_gray/30 bg-black/20 p-3">
+          <div class="text-xs uppercase text-light_gray">Seed</div>
+          <div class="mt-1 text-xl text-primary">{{ balanceReport.randomSeed }}</div>
+        </div>
+      </div>
+
+      <div *ngIf="rankedCombinations.length" class="mt-4 overflow-auto rounded border border-light_gray/30">
+        <div class="grid min-w-[76rem] grid-cols-[4rem_7rem_7rem_7rem_7rem_8rem_8rem_1fr] border-b border-light_gray/40 bg-black/30 px-4 py-3 text-xs font-semibold uppercase text-light_gray">
+          <div>Rank</div>
+          <div>Win</div>
+          <div>W / L / D</div>
+          <div>Fights</div>
+          <div>Ticks</div>
+          <div>Dmg Done</div>
+          <div>Dmg Taken</div>
+          <div>Combination</div>
+        </div>
+        <div
+          *ngFor="let combination of rankedCombinations; let i = index; trackBy: trackCombination"
+          class="grid min-w-[76rem] grid-cols-[4rem_7rem_7rem_7rem_7rem_8rem_8rem_1fr] border-b border-light_gray/20 px-4 py-3 text-sm"
+        >
+          <div class="text-light_gray">{{ i + 1 }}</div>
+          <div class="font-semibold text-emerald-300">{{ formatPercent(combination.winRate) }}</div>
+          <div class="text-white">{{ combination.wins }} / {{ combination.losses }} / {{ combination.draws }}</div>
+          <div class="text-light_gray">{{ combination.battles }}</div>
+          <div class="text-light_gray">{{ formatNumber(combination.averageDuration) }}</div>
+          <div class="text-primary">{{ formatNumber(combination.averageDamageDone) }}</div>
+          <div class="text-amber-200">{{ formatNumber(combination.averageDamageTaken) }}</div>
+          <div class="min-w-0 text-light_gray" [title]="combination.signature">{{ combination.displayName }}</div>
+        </div>
+      </div>
+
+      <div *ngIf="battleSummaries.length" class="mt-4 overflow-auto rounded border border-light_gray/30">
+        <div class="border-b border-light_gray/40 bg-black/30 px-4 py-3 text-sm font-semibold text-light_gray">
+          Battle Samples
+        </div>
+        <div
+          *ngFor="let battle of battleSummaries"
+          class="grid min-w-[70rem] grid-cols-[4rem_8rem_6rem_8rem_8rem_1fr_1fr] border-b border-light_gray/20 px-4 py-3 text-xs"
+        >
+          <div class="text-light_gray">#{{ battle.index }}</div>
+          <div class="text-primary">{{ battle.outcome }}</div>
+          <div class="text-light_gray">{{ battle.duration }}</div>
+          <div class="text-emerald-200">{{ battle.friendlyDamageDone }} / {{ battle.friendlyDamageTaken }}</div>
+          <div class="text-red-200">{{ battle.hostileDamageDone }} / {{ battle.hostileDamageTaken }}</div>
+          <div class="text-light_gray" [title]="battle.friendlySignature">{{ battle.friendlyDisplayName }}</div>
+          <div class="text-light_gray" [title]="battle.hostileSignature">{{ battle.hostileDisplayName }}</div>
+        </div>
+      </div>
+    </section>
   </div>
 
   <div *ngIf="isLoading && !catalogReport" class="flex flex-auto items-center justify-center text-light_gray">

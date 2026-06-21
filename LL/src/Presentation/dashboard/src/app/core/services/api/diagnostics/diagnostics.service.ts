@@ -5,6 +5,8 @@ import {
   AbilityCatalogBehaviorDiagnosticReport,
   AbilityCatalogCoverageReport,
   AbilityCatalogDiagnosticReport,
+  AbilityBalanceSimulationReport,
+  AbilityBalanceSimulationRequest,
 } from '../../../../shared/models/diagnostics/ability-catalog-diagnostics';
 
 @Injectable({
@@ -23,5 +25,11 @@ export class DiagnosticsService {
 
   public getAbilityCatalogBehaviors(): Observable<AbilityCatalogBehaviorDiagnosticReport> {
     return this.apiService.get('diagnostics/ability-catalog-behaviors');
+  }
+
+  public runAbilityBalanceSimulation(
+    request: AbilityBalanceSimulationRequest,
+  ): Observable<AbilityBalanceSimulationReport> {
+    return this.apiService.post('diagnostics/ability-balance-simulation', request);
   }
 }

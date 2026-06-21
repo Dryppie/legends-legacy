@@ -124,6 +124,7 @@ public static class DependencyInjection
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<IAbilityCatalogDiagnostics, AbilityCatalogDiagnostics>();
+        services.AddScoped<IAbilityBalanceSimulator, AbilityBalanceSimulator>();
         services.AddScoped<IAbilityCatalogBehaviorDiagnostics>(sp =>
             new AbilityCatalogBehaviorDiagnostics(
                 sp.GetRequiredService<IAbilityCatalogProvider>(),
