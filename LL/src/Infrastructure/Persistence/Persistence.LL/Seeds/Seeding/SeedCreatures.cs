@@ -55,6 +55,12 @@ public static class SeedCreatures
         var skeletonArcherId = Guid.Parse("00000000-0000-0000-0000-000000000029");
         var skeletonMageId = Guid.Parse("00000000-0000-0000-0000-000000000030");
         var skeletonWarriorId = Guid.Parse("00000000-0000-0000-0000-000000000031");
+        var antWorkerId = Guid.Parse("00000000-0000-0000-0000-000000000032");
+        var fireAntId = Guid.Parse("00000000-0000-0000-0000-000000000033");
+        var forestSpiritId = Guid.Parse("00000000-0000-0000-0000-000000000034");
+        var woodNymphId = Guid.Parse("00000000-0000-0000-0000-000000000035");
+        var giantSpiderId = Guid.Parse("00000000-0000-0000-0000-000000000036");
+        var venomousSpiderlingId = Guid.Parse("00000000-0000-0000-0000-000000000037");
         // Step 2 - Loot Tables
 
 
@@ -430,6 +436,78 @@ public static class SeedCreatures
             Id = Guid.NewGuid(),
             Entries = [skeletonWarriorLootTableLegendary]
         };
+        // Create LootTableRarities for Ant Worker
+        var antWorkerLootTableLegendary = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [],
+            Weight = 5 // 0.02%
+        };
+        var antWorkerLootTable = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [antWorkerLootTableLegendary]
+        };
+        // Create LootTableRarities for Fire Ant
+        var fireAntLootTableLegendary = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [],
+            Weight = 5 // 0.02%
+        };
+        var fireAntLootTable = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [fireAntLootTableLegendary]
+        };
+        // Create LootTableRarities for Forest Spirit
+        var forestSpiritLootTableLegendary = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [],
+            Weight = 5 // 0.02%
+        };
+        var forestSpiritLootTable = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [forestSpiritLootTableLegendary]
+        };
+        // Create LootTableRarities for Wood Nymph
+        var woodNymphLootTableLegendary = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [],
+            Weight = 5 // 0.02%
+        };
+        var woodNymphLootTable = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [woodNymphLootTableLegendary]
+        };
+        // Create LootTableRarities for Giant Spider
+        var giantSpiderLootTableLegendary = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [],
+            Weight = 5 // 0.02%
+        };
+        var giantSpiderLootTable = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [giantSpiderLootTableLegendary]
+        };
+        // Create LootTableRarities for Venomous Spiderling
+        var venomousSpiderlingLootTableLegendary = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [],
+            Weight = 5 // 0.02%
+        };
+        var venomousSpiderlingLootTable = new LootTable
+        {
+            Id = Guid.NewGuid(),
+            Entries = [venomousSpiderlingLootTableLegendary]
+        };
         // Loot tables
         await context.LootTables.AddRangeAsync(goblinLootTable, goblinWarriorLootTable, goblinArcherLootTable, largeRatLootTable);
         await context.LootTables.AddRangeAsync(flameImpLootTable, frostImpLootTable, shadowImpLootTable, vampireBatLootTable);
@@ -438,6 +516,7 @@ public static class SeedCreatures
         await context.LootTables.AddRangeAsync(hobgoblinLootTable);
         await context.LootTables.AddRangeAsync(mossLizardLootTable, spiderLootTable, treantSaplingLootTable, venomousSnakeLootTable, viperLootTable);
         await context.LootTables.AddRangeAsync(feralGhoulLootTable, plagueGhoulLootTable, ravenousGhoulLootTable, skeletonArcherLootTable, skeletonMageLootTable, skeletonWarriorLootTable);
+        await context.LootTables.AddRangeAsync(antWorkerLootTable, fireAntLootTable, forestSpiritLootTable, woodNymphLootTable, giantSpiderLootTable, venomousSpiderlingLootTable);
 
         // Step 5 - Create creatures
         var lumoRuinsCreatures = new List<Creature>
@@ -475,7 +554,7 @@ public static class SeedCreatures
             new() { Id = pixieId, Name = "Pixie", ImagePath = "pixie", LootTableId = pixieLootTable.Id, ExperienceReward = 12 },
         };
 
-        var goblinMinesCreatures = new List<Creature>
+        var goblinMinesDungeonCreatures = new List<Creature>
         {
             new() { Id = hobgoblinId, Name = "Hobgoblin", ImagePath = "hobgoblin", LootTableId = hobgoblinLootTable.Id, ExperienceReward = 20 },
         };
@@ -499,13 +578,24 @@ public static class SeedCreatures
             new() { Id = skeletonWarriorId, Name = "Skeleton Warrior", ImagePath = "skeleton_warrior", LootTableId = skeletonWarriorLootTable.Id, ExperienceReward = 20 },
         };
 
+        var futureRegionOneCreatures = new List<Creature>
+        {
+            new() { Id = antWorkerId, Name = "Ant Worker", ImagePath = "ant_worker", LootTableId = antWorkerLootTable.Id, ExperienceReward = 8, Archetype = CreatureArchetype.Support },
+            new() { Id = fireAntId, Name = "Fire Ant", ImagePath = "fire_ant", LootTableId = fireAntLootTable.Id, ExperienceReward = 9, Archetype = CreatureArchetype.DPS },
+            new() { Id = forestSpiritId, Name = "Forest Spirit", ImagePath = "forest_spirit", LootTableId = forestSpiritLootTable.Id, ExperienceReward = 18, Archetype = CreatureArchetype.Support },
+            new() { Id = woodNymphId, Name = "Wood Nymph", ImagePath = "wood_nymph", LootTableId = woodNymphLootTable.Id, ExperienceReward = 18, Archetype = CreatureArchetype.Support },
+            new() { Id = giantSpiderId, Name = "Giant Spider", ImagePath = "giant_spider", LootTableId = giantSpiderLootTable.Id, ExperienceReward = 18, Archetype = CreatureArchetype.Bruiser },
+            new() { Id = venomousSpiderlingId, Name = "Venomous Spiderling", ImagePath = "venomous_spiderling", LootTableId = venomousSpiderlingLootTable.Id, ExperienceReward = 16, Archetype = CreatureArchetype.Balanced },
+        };
+
         await context.Creatures.AddRangeAsync(lumoRuinsCreatures);
         await context.Creatures.AddRangeAsync(bloodGroveCreatures);
         await context.Creatures.AddRangeAsync(crystalCreekCreatures);
         await context.Creatures.AddRangeAsync(twilightClearingCreatures);
-        await context.Creatures.AddRangeAsync(goblinMinesCreatures);
+        await context.Creatures.AddRangeAsync(goblinMinesDungeonCreatures);
         await context.Creatures.AddRangeAsync(oakThicketCreatures);
         await context.Creatures.AddRangeAsync(forgottenRuinsCreatures);
+        await context.Creatures.AddRangeAsync(futureRegionOneCreatures);
 
 
         // Step 6 - Create area
@@ -546,12 +636,6 @@ public static class SeedCreatures
             new AreaCreature() { AreaId = twilightClearingAreaId, CreatureId = illusionFoxId, WeightedSpawnRate = 0.20f },
             new AreaCreature() { AreaId = twilightClearingAreaId, CreatureId = nightshadeBlossomId, WeightedSpawnRate = 0.10f },
             new AreaCreature() { AreaId = twilightClearingAreaId, CreatureId = pixieId, WeightedSpawnRate = 0.20f },
-        };
-
-        var goblinMinesAreaId = "region_01_area_05";
-        var goblinMinesAreaCreatures = new List<AreaCreature>
-        {
-            new AreaCreature() { AreaId = goblinMinesAreaId, CreatureId = hobgoblinId, WeightedSpawnRate = 1f },
         };
 
         var oakThicketAreaId = "region_01_area_06";
@@ -613,23 +697,11 @@ public static class SeedCreatures
 
         if (!context.Regions.Any())
         {
-            var goblinMiningTable = BuildGatheringLootTable(
-                ("iron_ore", 45, 1, 4, false),
-                ("rough_stone", 35, 1, 3, false),
-                ("cracked_garnet", 5, 1, 1, true));
-
-            var goblinFishingTable = BuildGatheringLootTable(
-                ("cave_fish", 40, 1, 2, false),
-                ("murky_fish_oil", 15, 1, 1, false));
-
             var bloodwoodTable = BuildGatheringLootTable(
                 ("bloodwood", 45, 1, 3, false),
                 ("living_bark", 15, 1, 1, false));
 
-            await context.LootTables.AddRangeAsync(
-                FlattenLootTables(goblinMiningTable)
-                    .Concat(FlattenLootTables(goblinFishingTable))
-                    .Concat(FlattenLootTables(bloodwoodTable)));
+            await context.LootTables.AddRangeAsync(FlattenLootTables(bloodwoodTable));
 
             var areas = new List<Area>()
             {
@@ -703,42 +775,9 @@ public static class SeedCreatures
                 },
                 new Area
                 {
-                    Id = goblinMinesAreaId, // region, [area, dungeon, raid, or rift], area
-                    Name = "Goblin Mines",
-                    LevelRequirement = 20,
-                    Creatures = goblinMinesAreaCreatures,
-                    SpawnProbabilities =
-                    [
-                        1f,
-                    ],
-                    DifficultyTier = 5,
-                    GatheringNodes =
-                    [
-                        new AreaGatheringNode
-                        {
-                            Id = "goblin_mines_cracked_iron_vein",
-                            Name = "Cracked Iron Vein",
-                            AreaId = goblinMinesAreaId,
-                            Type = GatheringType.Mining,
-                            ProcChance = 0.45f,
-                            LootTable = goblinMiningTable
-                        },
-                        new AreaGatheringNode
-                        {
-                            Id = "goblin_mines_underground_stream",
-                            Name = "Underground Stream",
-                            AreaId = goblinMinesAreaId,
-                            Type = GatheringType.Fishing,
-                            ProcChance = 0.20f,
-                            LootTable = goblinFishingTable
-                        }
-                    ]
-                },
-                new Area
-                {
                     Id = oakThicketAreaId, // region, [area, dungeon, raid, or rift], area
                     Name = "Oak Thicket",
-                    LevelRequirement = 25,
+                    LevelRequirement = 20,
                     Creatures = oakThicketAreaCreatures,
                     SpawnProbabilities =
                     [
@@ -746,13 +785,13 @@ public static class SeedCreatures
                         0.969f,
                         0.001f,
                     ],
-                    DifficultyTier = 6,
+                    DifficultyTier = 5,
                 },
                 new Area
                 {
                     Id = forgottenRuinsAreaId, // region, [area, dungeon, raid, or rift], area
                     Name = "Forgotten Ruins",
-                    LevelRequirement = 30,
+                    LevelRequirement = 25,
                     Creatures = forgottenRuinsAreaCreatures,
                     SpawnProbabilities =
                     [
@@ -760,7 +799,7 @@ public static class SeedCreatures
                         0.969f,
                         0.001f,
                     ],
-                    DifficultyTier = 7,
+                    DifficultyTier = 6,
                 }
             };
 

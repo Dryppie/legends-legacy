@@ -15,10 +15,12 @@ import {
   AbilityCatalogDiagnosticReport,
   AbilityCatalogRuntimeLoadoutCheck,
   AbilityCatalogSummonDiagnostic,
+  RegionOneContentDiagnosticReport,
+  RegionOneContentEntryDiagnostic,
 } from '../../shared/models/diagnostics/ability-catalog-diagnostics';
 import { DiagnosticsService } from '../../core/services/api/diagnostics/diagnostics.service';
 
-type DiagnosticsTab = 'catalog' | 'coverage' | 'behaviors' | 'balance';
+type DiagnosticsTab = 'catalog' | 'coverage' | 'behaviors' | 'region-one' | 'balance';
 
 @Component({
   selector: 'app-combat-diagnostics',
@@ -32,6 +34,7 @@ export class CombatDiagnosticsComponent implements OnInit {
     { id: 'catalog', label: 'Catalog' },
     { id: 'coverage', label: 'Coverage' },
     { id: 'behaviors', label: 'Behaviors' },
+    { id: 'region-one', label: 'Region 1' },
     { id: 'balance', label: 'Balance' },
   ];
 
@@ -39,6 +42,7 @@ export class CombatDiagnosticsComponent implements OnInit {
   catalogReport: AbilityCatalogDiagnosticReport | null = null;
   coverageReport: AbilityCatalogCoverageReport | null = null;
   behaviorReport: AbilityCatalogBehaviorDiagnosticReport | null = null;
+  regionOneReport: RegionOneContentDiagnosticReport | null = null;
   balanceReport: AbilityBalanceSimulationReport | null = null;
   savedCombinations: AbilityBalanceTeamLoadout[] = [];
   balanceSettings = {
@@ -69,6 +73,7 @@ export class CombatDiagnosticsComponent implements OnInit {
       catalog: this.diagnosticsService.getAbilityCatalog(),
       coverage: this.diagnosticsService.getAbilityCatalogCoverage(),
       behavior: this.diagnosticsService.getAbilityCatalogBehaviors(),
+      regionOne: this.diagnosticsService.getRegionOneContent(),
     })
       .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
@@ -76,6 +81,7 @@ export class CombatDiagnosticsComponent implements OnInit {
           this.catalogReport = reports.catalog;
           this.coverageReport = reports.coverage;
           this.behaviorReport = reports.behavior;
+          this.regionOneReport = reports.regionOne;
         },
         error: (error: Error) => {
           this.error = error.message || 'Unable to load diagnostics.';
@@ -161,7 +167,8 @@ export class CombatDiagnosticsComponent implements OnInit {
         this.catalogReport.failures.length === 0 &&
         this.coverageReport?.isComplete &&
         this.behaviorReport?.isComplete &&
-        this.behaviorReport.hasFullAbilityCoverage,
+        this.behaviorReport.hasFullAbilityCoverage &&
+        this.regionOneReport?.staleAreaCount === 0,
     );
   }
 
@@ -187,6 +194,10 @@ export class CombatDiagnosticsComponent implements OnInit {
     return this.balanceReport?.rankedCombinations ?? [];
   }
 
+  get incompleteRegionOneEntries(): RegionOneContentEntryDiagnostic[] {
+    return this.regionOneReport?.entries.filter((entry) => !entry.isComplete) ?? [];
+  }
+
   get battleSummaries(): AbilityBalanceBattleSummary[] {
     return this.balanceReport?.battleSummaries ?? [];
   }
@@ -205,6 +216,10 @@ export class CombatDiagnosticsComponent implements OnInit {
 
   trackSummon(_: number, summon: AbilityCatalogSummonDiagnostic): string {
     return summon.id;
+  }
+
+  trackRegionOneEntry(_: number, entry: RegionOneContentEntryDiagnostic): string {
+    return `${entry.sourceType}:${entry.sourceName}:${entry.creatureKey}`;
   }
 
   trackText(_: number, value: string): string {

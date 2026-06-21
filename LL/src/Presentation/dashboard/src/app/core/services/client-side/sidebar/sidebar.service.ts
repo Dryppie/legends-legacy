@@ -50,6 +50,12 @@ export class SidebarService {
             title: 'Diagnostics',
             description: 'Combat',
           },
+          {
+            id: 'essence-catalog',
+            route: 'essence-catalog',
+            icon: 'character/essences',
+            title: 'Essence Catalog',
+          },
         ],
       },
     ];

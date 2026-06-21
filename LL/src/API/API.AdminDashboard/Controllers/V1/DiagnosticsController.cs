@@ -1,9 +1,11 @@
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
+using Application.Interfaces.Services.LL.Regions;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalogBehaviorDiagnostics;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalogCoverage;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalogDiagnostics;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetCreatureBuildProfileDiagnostics;
+using Application.UseCases._AdminDashboard.Diagnostics.Queries.GetRegionOneContentDiagnostics;
 using Application.UseCases._AdminDashboard.Diagnostics.Queries.RunAbilityBalanceSimulation;
 using Microsoft.AspNetCore.Mvc;
 
@@ -33,6 +35,12 @@ public class DiagnosticsController : BaseController
     public async Task<ActionResult<CreatureBuildProfileDiagnosticReport>> GetCreatureBuildProfileDiagnostics()
     {
         return await Mediator.Send(new GetCreatureBuildProfileDiagnosticsQuery());
+    }
+
+    [HttpGet("region-one-content")]
+    public async Task<ActionResult<RegionOneContentDiagnosticReport>> GetRegionOneContentDiagnostics()
+    {
+        return await Mediator.Send(new GetRegionOneContentDiagnosticsQuery());
     }
 
     [HttpPost("ability-balance-simulation")]

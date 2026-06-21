@@ -7,9 +7,11 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -21,9 +23,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -33,12 +37,13 @@
     "description": "A sigil used to open a run into the Goblin Mines.",
     "itemType": "Resource",
     "rarity": "Common",
-    "stackable": true,
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -48,27 +53,29 @@
     "description": "A sigil used to open a run into the Forgotten Catacombs.",
     "itemType": "Resource",
     "rarity": "Common",
-    "stackable": true,
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
   {
     "id": "sigil_hives_abyss",
     "name": "Hive Sigil",
-    "description": "A sigil used to open a run into The Hive's Abyss.",
+    "description": "A sigil used to open a run into The Hive\u0027s Abyss.",
     "itemType": "Resource",
     "rarity": "Common",
-    "stackable": true,
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -78,13 +85,13 @@
     "description": "A lesser core taken from monsters and used to ascend Essences into Ascension Tier 1.",
     "itemType": "Resource",
     "rarity": "Uncommon",
-    "stackable": true,
-    "isBound": true,
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -94,13 +101,13 @@
     "description": "A greater core taken from monsters and used to ascend Essences into Ascension Tier 2.",
     "itemType": "Resource",
     "rarity": "Rare",
-    "stackable": true,
-    "isBound": true,
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -110,13 +117,13 @@
     "description": "A primal core taken from monsters and used to ascend Essences into Ascension Tier 3.",
     "itemType": "Resource",
     "rarity": "Epic",
-    "stackable": true,
-    "isBound": true,
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -126,12 +133,13 @@
     "description": "A catalyst used to evolve opportunistic Essences.",
     "itemType": "Resource",
     "rarity": "Rare",
-    "stackable": true,
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -141,12 +149,13 @@
     "description": "A catalyst used to evolve defensive Essences.",
     "itemType": "Resource",
     "rarity": "Rare",
-    "stackable": true,
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -156,12 +165,13 @@
     "description": "A catalyst used to evolve fire Essences.",
     "itemType": "Resource",
     "rarity": "Rare",
-    "stackable": true,
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -171,12 +181,13 @@
     "description": "A catalyst used to evolve evasive Essences.",
     "itemType": "Resource",
     "rarity": "Uncommon",
-    "stackable": true,
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -186,12 +197,13 @@
     "description": "A catalyst used to evolve spectral Essences.",
     "itemType": "Resource",
     "rarity": "Epic",
-    "stackable": true,
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -201,12 +213,13 @@
     "description": "A catalyst used to evolve holy or radiant Essences.",
     "itemType": "Resource",
     "rarity": "Rare",
-    "stackable": true,
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -216,12 +229,13 @@
     "description": "A catalyst used to evolve beastly or primal Essences.",
     "itemType": "Resource",
     "rarity": "Rare",
-    "stackable": true,
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -231,12 +245,13 @@
     "description": "A catalyst used to evolve undead or spectral Essences.",
     "itemType": "Resource",
     "rarity": "Rare",
-    "stackable": true,
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -246,12 +261,13 @@
     "description": "A rare catalyst reserved for especially powerful boss Essences.",
     "itemType": "Resource",
     "rarity": "Epic",
-    "stackable": true,
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -263,9 +279,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -275,10 +293,15 @@
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
-    "stackable": true,
-    "essenceDefinitionId": "essence.goblin_ambusher",
-    "isBound": false,
-    "dismantleDustAmount": 1
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
   },
   {
     "id": "item.essence.skeleton_guardian",
@@ -286,10 +309,15 @@
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
-    "stackable": true,
-    "essenceDefinitionId": "essence.skeleton_guardian",
-    "isBound": false,
-    "dismantleDustAmount": 1
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
   },
   {
     "id": "item.essence.fire_ant",
@@ -297,10 +325,15 @@
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Rare",
-    "stackable": true,
-    "essenceDefinitionId": "essence.fire_ant",
-    "isBound": false,
-    "dismantleDustAmount": 1
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
   },
   {
     "id": "item.essence.cave_bat",
@@ -308,10 +341,15 @@
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
-    "stackable": true,
-    "essenceDefinitionId": "essence.cave_bat",
-    "isBound": false,
-    "dismantleDustAmount": 1
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
   },
   {
     "id": "item.essence.necroshade_wraith",
@@ -319,65 +357,463 @@
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Epic",
-    "stackable": true,
-    "essenceDefinitionId": "essence.necroshade_wraith",
-    "isBound": false,
-    "dismantleDustAmount": 2
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
   },
   {
     "id": "item.essence.legacy.goblin",
-    "name": "Unbound Goblin's Essence",
+    "name": "Unbound Goblin\u0027s Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Common",
-    "stackable": true,
-    "essenceDefinitionId": "essence.legacy.goblin",
-    "isBound": false,
-    "dismantleDustAmount": 1
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
   },
   {
     "id": "item.essence.legacy.goblin_warrior",
-    "name": "Unbound Goblin Warrior's Essence",
+    "name": "Unbound Goblin Warrior\u0027s Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Common",
-    "stackable": true,
-    "essenceDefinitionId": "essence.legacy.goblin_warrior",
-    "isBound": false,
-    "dismantleDustAmount": 1
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
   },
   {
     "id": "item.essence.legacy.goblin_archer",
-    "name": "Unbound Goblin Archer's Essence",
+    "name": "Unbound Goblin Archer\u0027s Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Common",
-    "stackable": true,
-    "essenceDefinitionId": "essence.legacy.goblin_archer",
-    "isBound": false,
-    "dismantleDustAmount": 1
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
   },
   {
     "id": "item.essence.legacy.large_rat",
-    "name": "Unbound Large Rat's Essence",
+    "name": "Unbound Large Rat\u0027s Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Common",
-    "stackable": true,
-    "essenceDefinitionId": "essence.legacy.large_rat",
-    "isBound": false,
-    "dismantleDustAmount": 1
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
   },
   {
     "id": "item.essence.legacy.flame_imp",
-    "name": "Unbound Flame Imp's Essence",
+    "name": "Unbound Flame Imp\u0027s Essence",
     "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
     "itemType": "Essence",
     "rarity": "Uncommon",
-    "stackable": true,
-    "essenceDefinitionId": "essence.legacy.flame_imp",
-    "isBound": false,
-    "dismantleDustAmount": 1
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.moss_lizard",
+    "name": "Unbound Moss Lizard\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.spider",
+    "name": "Unbound Spider\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.treant_sapling",
+    "name": "Unbound Treant Sapling\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.venomous_snake",
+    "name": "Unbound Venomous Snake\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Uncommon",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.viper",
+    "name": "Unbound Viper\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Uncommon",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.goblin_shaman",
+    "name": "Unbound Goblin Shaman\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Uncommon",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.poisonous_rat",
+    "name": "Unbound Poisonous Rat\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Uncommon",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.giant_bat",
+    "name": "Unbound Giant Bat\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Uncommon",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.frost_imp",
+    "name": "Unbound Frost Imp\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Uncommon",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.shadow_imp",
+    "name": "Unbound Shadow Imp\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Uncommon",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.vampire_bat",
+    "name": "Unbound Vampire Bat\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Uncommon",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.blue_slime",
+    "name": "Unbound Blue Slime\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.brown_slime",
+    "name": "Unbound Brown Slime\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.green_slime",
+    "name": "Unbound Green Slime\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.rainbow_slime",
+    "name": "Unbound Rainbow Slime\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.red_slime",
+    "name": "Unbound Red Slime\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.transparent_slime",
+    "name": "Unbound Transparent Slime\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Uncommon",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.enchanted_fairy",
+    "name": "Unbound Enchanted Fairy\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.glade_panther",
+    "name": "Unbound Glade Panther\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.illusion_fox",
+    "name": "Unbound Illusion Fox\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.nightshade_blossom",
+    "name": "Unbound Nightshade Blossom\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.pixie",
+    "name": "Unbound Pixie\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.legacy.hobgoblin",
+    "name": "Unbound Hobgoblin\u0027s Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
   },
   {
     "id": "ore",
@@ -387,9 +823,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -401,9 +839,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -415,9 +855,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -429,9 +871,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -443,9 +887,11 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -457,9 +903,11 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -471,9 +919,11 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -485,9 +935,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -499,9 +951,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -513,9 +967,11 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -527,9 +983,11 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -541,9 +999,11 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -555,9 +1015,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -569,9 +1031,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -583,9 +1047,11 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -597,9 +1063,11 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -611,9 +1079,11 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -625,9 +1095,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -639,9 +1111,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -653,9 +1127,11 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -667,9 +1143,11 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -681,9 +1159,11 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -695,9 +1175,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -709,9 +1191,11 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -723,9 +1207,11 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -737,9 +1223,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -751,9 +1239,11 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -765,9 +1255,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -779,9 +1271,11 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -793,9 +1287,11 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -807,9 +1303,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -821,9 +1319,11 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -835,9 +1335,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -849,9 +1351,11 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -863,9 +1367,11 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -877,9 +1383,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -891,9 +1399,11 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -905,9 +1415,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -919,9 +1431,11 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -933,9 +1447,11 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -947,9 +1463,11 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -961,9 +1479,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -975,9 +1495,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -989,9 +1511,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1003,9 +1527,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1017,9 +1543,11 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1031,9 +1559,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1045,9 +1575,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1059,9 +1591,11 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1073,9 +1607,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1087,9 +1623,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1101,9 +1639,11 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1115,9 +1655,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1129,9 +1671,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1143,9 +1687,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1157,9 +1703,11 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1171,9 +1719,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1185,9 +1735,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1199,9 +1751,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1213,9 +1767,11 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1227,9 +1783,11 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1241,9 +1799,11 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1255,9 +1815,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1269,9 +1831,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1283,9 +1847,11 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1297,9 +1863,11 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1311,9 +1879,11 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1325,9 +1895,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1339,9 +1911,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1353,9 +1927,11 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1367,9 +1943,11 @@
     "rarity": "Uncommon",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1381,9 +1959,11 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1395,9 +1975,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1409,9 +1991,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1423,9 +2007,11 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1437,9 +2023,11 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1451,9 +2039,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1465,9 +2055,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1479,9 +2071,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1493,9 +2087,11 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1507,9 +2103,11 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1521,9 +2119,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1535,9 +2135,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1549,9 +2151,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1563,9 +2167,11 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1577,9 +2183,11 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1591,9 +2199,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1605,9 +2215,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1619,9 +2231,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1633,9 +2247,11 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1647,9 +2263,11 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1661,9 +2279,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1675,9 +2295,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1689,9 +2311,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1703,9 +2327,11 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1717,9 +2343,11 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1731,9 +2359,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1745,9 +2375,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1759,9 +2391,11 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1773,9 +2407,11 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1787,9 +2423,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1801,9 +2439,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1815,9 +2455,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1829,9 +2471,11 @@
     "rarity": "Rare",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1843,9 +2487,11 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1857,9 +2503,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1871,9 +2519,11 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1885,9 +2535,11 @@
     "rarity": "Common",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1899,9 +2551,11 @@
     "rarity": "Unique",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1913,9 +2567,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1927,9 +2583,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1941,9 +2599,11 @@
     "rarity": "Legendary",
     "equipmentType": "Head",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1968,9 +2628,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -1989,9 +2651,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2010,9 +2674,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2037,9 +2703,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2058,9 +2726,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2079,9 +2749,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2106,9 +2778,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2127,9 +2801,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2148,9 +2824,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2175,9 +2853,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2196,9 +2876,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2217,9 +2899,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2238,9 +2922,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2259,9 +2945,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2280,9 +2968,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2301,9 +2991,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2322,9 +3014,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2343,9 +3037,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2364,9 +3060,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2385,9 +3083,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2406,9 +3106,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2433,9 +3135,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2454,9 +3158,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2475,9 +3181,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2496,9 +3204,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2523,9 +3233,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2544,9 +3256,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2571,9 +3285,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2598,9 +3314,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2625,9 +3343,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2652,9 +3372,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2673,9 +3395,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 5,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -2694,9 +3418,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2715,9 +3441,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2736,9 +3464,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2757,9 +3487,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2784,9 +3516,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2811,9 +3545,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -2838,9 +3574,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2859,9 +3597,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2880,9 +3620,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2907,9 +3649,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2934,9 +3678,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2955,9 +3701,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -2982,9 +3730,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -3003,9 +3753,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -3024,9 +3776,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -3051,9 +3805,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -3072,9 +3828,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -3099,9 +3857,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -3120,9 +3880,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -3147,9 +3909,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -3174,9 +3938,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -3195,9 +3961,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -3216,9 +3984,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -3243,9 +4013,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -3270,9 +4042,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -3291,9 +4065,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -3312,9 +4088,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 1
   },
@@ -3339,9 +4117,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 10,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -3360,9 +4140,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 10,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -3381,9 +4163,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 10,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -3402,9 +4186,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 10,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -3429,9 +4215,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 10,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -3450,9 +4238,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 10,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -3471,9 +4261,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 10,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -3498,9 +4290,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 10,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -3525,9 +4319,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 10,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -3552,9 +4348,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 10,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -3573,9 +4371,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 10,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -3600,9 +4400,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 10,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -3621,9 +4423,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 10,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -3648,9 +4452,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 10,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -3669,9 +4475,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 10,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -3696,9 +4504,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 10,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -3723,9 +4533,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 10,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0.1
   },
@@ -3756,9 +4568,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3789,9 +4603,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3822,9 +4638,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3855,9 +4673,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3888,9 +4708,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3921,9 +4743,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3954,9 +4778,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -3987,9 +4813,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -4020,9 +4848,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -4053,9 +4883,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -4086,9 +4918,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -4119,9 +4953,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -4140,9 +4976,11 @@
         "modifierType": "Additive"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -4161,9 +4999,11 @@
         "modifierType": "Additive"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -4182,9 +5022,11 @@
         "modifierType": "Additive"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -4203,9 +5045,11 @@
         "modifierType": "Additive"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -4224,9 +5068,11 @@
         "modifierType": "Additive"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -4245,9 +5091,11 @@
         "modifierType": "Additive"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -4266,9 +5114,11 @@
         "modifierType": "Additive"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -4287,9 +5137,11 @@
         "modifierType": "Additive"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -4308,9 +5160,11 @@
         "modifierType": "Additive"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -4322,9 +5176,11 @@
     "rarity": "Common",
     "equipmentType": "OneHanded",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 20,
     "magnitude": 10,
     "magnitudeRange": 20,
+    "gatheringType": null,
     "scalingAttribute": "Power",
     "scalingAmount": 1
   },
@@ -4336,9 +5192,11 @@
     "rarity": "Common",
     "equipmentType": "OneHanded",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 20,
     "magnitude": 10,
     "magnitudeRange": 30,
+    "gatheringType": null,
     "scalingAttribute": "Power",
     "scalingAmount": 1
   },
@@ -4350,9 +5208,11 @@
     "rarity": "Common",
     "equipmentType": "OneHanded",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 20,
     "magnitude": 10,
     "magnitudeRange": 25,
+    "gatheringType": null,
     "scalingAttribute": "Power",
     "scalingAmount": 1
   },
@@ -4364,9 +5224,11 @@
     "rarity": "Common",
     "equipmentType": "OneHanded",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 24,
     "magnitude": 8,
     "magnitudeRange": 15,
+    "gatheringType": null,
     "scalingAttribute": "Power",
     "scalingAmount": 0.8
   },
@@ -4378,9 +5240,11 @@
     "rarity": "Common",
     "equipmentType": "TwoHanded",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 10,
     "magnitude": 15,
     "magnitudeRange": 30,
+    "gatheringType": null,
     "scalingAttribute": "Power",
     "scalingAmount": 2
   },
@@ -4392,9 +5256,11 @@
     "rarity": "Common",
     "equipmentType": "TwoHanded",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 10,
     "magnitude": 15,
     "magnitudeRange": 50,
+    "gatheringType": null,
     "scalingAttribute": "Power",
     "scalingAmount": 2
   },
@@ -4406,9 +5272,11 @@
     "rarity": "Common",
     "equipmentType": "TwoHanded",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 10,
     "magnitude": 15,
     "magnitudeRange": 40,
+    "gatheringType": null,
     "scalingAttribute": "Power",
     "scalingAmount": 2
   },
@@ -4420,9 +5288,11 @@
     "rarity": "Common",
     "equipmentType": "TwoHanded",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 12,
     "magnitude": 14,
     "magnitudeRange": 25,
+    "gatheringType": null,
     "scalingAttribute": "Power",
     "scalingAmount": 1.8
   },
@@ -4447,9 +5317,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -4474,9 +5346,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -4488,9 +5362,11 @@
     "rarity": "Common",
     "equipmentType": "TwoHanded",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 10,
     "magnitude": 15,
     "magnitudeRange": 35,
+    "gatheringType": null,
     "scalingAttribute": "Power",
     "scalingAmount": 2
   },
@@ -4509,9 +5385,11 @@
         "modifierType": "Flat"
       }
     ],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
+    "gatheringType": null,
     "scalingAttribute": "MaxHealth",
     "scalingAmount": 0
   },
@@ -4523,9 +5401,11 @@
     "rarity": "Common",
     "equipmentType": "OneHanded",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 20,
     "magnitude": 10,
     "magnitudeRange": 20,
+    "gatheringType": null,
     "scalingAttribute": "Power",
     "scalingAmount": 1
   },
@@ -4537,9 +5417,11 @@
     "rarity": "Common",
     "equipmentType": "TwoHanded",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 15,
     "magnitude": 13,
     "magnitudeRange": 25,
+    "gatheringType": null,
     "scalingAttribute": "Power",
     "scalingAmount": 1.7
   },
@@ -4551,9 +5433,11 @@
     "rarity": "Common",
     "equipmentType": "TwoHanded",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 20,
     "magnitude": 10,
     "magnitudeRange": 40,
+    "gatheringType": null,
     "scalingAttribute": "Power",
     "scalingAmount": 1.5
   },
@@ -4565,9 +5449,11 @@
     "rarity": "Common",
     "equipmentType": "TwoHanded",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 25,
     "magnitude": 12,
     "magnitudeRange": 20,
+    "gatheringType": null,
     "scalingAttribute": "Power",
     "scalingAmount": 1.3
   },
@@ -4579,11 +5465,11 @@
     "rarity": "Common",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Mining",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4595,11 +5481,11 @@
     "rarity": "Common",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Woodcutting",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4611,11 +5497,11 @@
     "rarity": "Common",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Fishing",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4627,11 +5513,11 @@
     "rarity": "Common",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Skinning",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4643,11 +5529,11 @@
     "rarity": "Uncommon",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Mining",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4659,11 +5545,11 @@
     "rarity": "Uncommon",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Woodcutting",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4675,11 +5561,11 @@
     "rarity": "Uncommon",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Fishing",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4691,11 +5577,11 @@
     "rarity": "Uncommon",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Skinning",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4707,11 +5593,11 @@
     "rarity": "Rare",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Mining",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4723,11 +5609,11 @@
     "rarity": "Rare",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Woodcutting",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4739,11 +5625,11 @@
     "rarity": "Rare",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Fishing",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4755,11 +5641,11 @@
     "rarity": "Rare",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Skinning",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4771,11 +5657,11 @@
     "rarity": "Epic",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Mining",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4787,11 +5673,11 @@
     "rarity": "Epic",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Woodcutting",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4803,11 +5689,11 @@
     "rarity": "Epic",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Fishing",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4819,11 +5705,11 @@
     "rarity": "Epic",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Skinning",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4835,11 +5721,11 @@
     "rarity": "Unique",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Mining",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4851,11 +5737,11 @@
     "rarity": "Unique",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Woodcutting",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4867,11 +5753,11 @@
     "rarity": "Unique",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Fishing",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4883,11 +5769,11 @@
     "rarity": "Unique",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Skinning",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4899,11 +5785,11 @@
     "rarity": "Legendary",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Mining",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4915,11 +5801,11 @@
     "rarity": "Legendary",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Woodcutting",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4931,11 +5817,11 @@
     "rarity": "Legendary",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Fishing",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4947,11 +5833,11 @@
     "rarity": "Legendary",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Skinning",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4963,11 +5849,11 @@
     "rarity": "Legacy",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Mining",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4979,11 +5865,11 @@
     "rarity": "Legacy",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Woodcutting",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -4995,11 +5881,11 @@
     "rarity": "Legacy",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Fishing",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -5011,11 +5897,11 @@
     "rarity": "Legacy",
     "equipmentType": "Tool",
     "attributeModifiers": [],
+    "toolBonuses": [],
     "attackSpeed": 0,
     "magnitude": 0,
     "magnitudeRange": 0,
     "gatheringType": "Skinning",
-    "toolBonuses": [],
     "scalingAttribute": "Power",
     "scalingAmount": 0
   },
@@ -5024,62 +5910,233 @@
     "name": "Rough Stone",
     "description": "A rough stone chipped from combat-area gathering nodes.",
     "itemType": "Resource",
-    "rarity": "Common"
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
   },
   {
     "id": "cracked_garnet",
     "name": "Cracked Garnet",
     "description": "A flawed garnet from an unstable ore vein.",
     "itemType": "Resource",
-    "rarity": "Rare"
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
   },
   {
     "id": "cave_fish",
     "name": "Cave Fish",
     "description": "A pale fish from underground streams.",
     "itemType": "Resource",
-    "rarity": "Common"
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
   },
   {
     "id": "murky_fish_oil",
     "name": "Murky Fish Oil",
     "description": "A pungent oil rendered from cave fish.",
     "itemType": "Resource",
-    "rarity": "Uncommon"
+    "rarity": "Uncommon",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
   },
   {
     "id": "bloodwood",
     "name": "Bloodwood",
     "description": "Dark red timber from the Blood Grove.",
     "itemType": "Resource",
-    "rarity": "Common"
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
   },
   {
     "id": "living_bark",
     "name": "Living Bark",
     "description": "Bark that still pulses faintly with life.",
     "itemType": "Resource",
-    "rarity": "Uncommon"
+    "rarity": "Uncommon",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.ant_worker",
+    "essenceDefinitionId": "essence.ant_worker",
+    "dismantleDustAmount": 1,
+    "name": "Unbound Ant Worker's Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.forest_spirit",
+    "essenceDefinitionId": "essence.forest_spirit",
+    "dismantleDustAmount": 1,
+    "name": "Unbound Forest Spirit's Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.wood_nymph",
+    "essenceDefinitionId": "essence.wood_nymph",
+    "dismantleDustAmount": 1,
+    "name": "Unbound Wood Nymph's Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.giant_spider",
+    "essenceDefinitionId": "essence.giant_spider",
+    "dismantleDustAmount": 1,
+    "name": "Unbound Giant Spider's Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
+  },
+  {
+    "id": "item.essence.venomous_spiderling",
+    "essenceDefinitionId": "essence.venomous_spiderling",
+    "dismantleDustAmount": 1,
+    "name": "Unbound Venomous Spiderling's Essence",
+    "description": "A tradable Essence that can be absorbed into the Soul Archive or dismantled into Soul Dust.",
+    "itemType": "Essence",
+    "rarity": "Uncommon",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
   },
   {
     "id": "ant_chitin",
     "name": "Ant Chitin",
     "description": "Hardened chitin from hive creatures.",
     "itemType": "Resource",
-    "rarity": "Common"
+    "rarity": "Common",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
   },
   {
     "id": "hive_resin",
     "name": "Hive Resin",
     "description": "Sticky resin harvested from hive remains.",
     "itemType": "Resource",
-    "rarity": "Uncommon"
+    "rarity": "Uncommon",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
   },
   {
     "id": "royal_chitin_fragment",
     "name": "Royal Chitin Fragment",
     "description": "A rare fragment of unusually dense chitin.",
     "itemType": "Resource",
-    "rarity": "Rare"
+    "rarity": "Rare",
+    "equipmentType": "Head",
+    "attributeModifiers": [],
+    "toolBonuses": [],
+    "attackSpeed": 0,
+    "magnitude": 0,
+    "magnitudeRange": 0,
+    "gatheringType": null,
+    "scalingAttribute": "Power",
+    "scalingAmount": 0
   }
 ]

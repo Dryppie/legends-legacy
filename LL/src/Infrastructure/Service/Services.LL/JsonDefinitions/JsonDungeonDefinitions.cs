@@ -6,6 +6,13 @@ namespace Services.LL.JsonDefinitions;
 
 public sealed class JsonDungeonDefinitions : IDungeonDefinitions
 {
+    private static readonly HashSet<string> RetiredDungeonIds = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "hives_abyss",
+        "hives_abyss_ii",
+        "hives_abyss_iii"
+    };
+
     private readonly Dictionary<string, DungeonDefinition> _byId;
 
     public JsonDungeonDefinitions(
@@ -13,7 +20,9 @@ public sealed class JsonDungeonDefinitions : IDungeonDefinitions
         IDungeonDefinitionValidator validator)
     {
         validator.ThrowIfInvalid(reader.All);
-        _byId = reader.All.ToDictionary(d => d.Id, d => d, StringComparer.OrdinalIgnoreCase);
+        _byId = reader.All
+            .Where(d => !RetiredDungeonIds.Contains(d.Id))
+            .ToDictionary(d => d.Id, d => d, StringComparer.OrdinalIgnoreCase);
     }
 
     public DungeonDefinition GetByKey(string id)

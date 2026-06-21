@@ -23,9 +23,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -42,6 +44,7 @@
           "name": "Stone",
           "description": "Mining material - Stone can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -55,6 +58,7 @@
           "name": "Flint",
           "description": "Mining material - Flint can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -68,6 +72,7 @@
           "name": "Jagged Obsidian",
           "description": "Mining material - Jagged Obsidian can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -81,6 +86,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -107,9 +113,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -126,6 +134,7 @@
           "name": "Stone",
           "description": "Mining material - Stone can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -139,6 +148,7 @@
           "name": "Flint",
           "description": "Mining material - Flint can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -152,6 +162,7 @@
           "name": "Jagged Obsidian",
           "description": "Mining material - Jagged Obsidian can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -165,6 +176,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -191,9 +203,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -210,6 +224,7 @@
           "name": "Stone",
           "description": "Mining material - Stone can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -223,6 +238,7 @@
           "name": "Flint",
           "description": "Mining material - Flint can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -236,6 +252,7 @@
           "name": "Jagged Obsidian",
           "description": "Mining material - Jagged Obsidian can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -249,6 +266,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -280,9 +298,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -299,6 +319,7 @@
           "name": "Stone",
           "description": "Mining material - Stone can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -312,6 +333,7 @@
           "name": "Willow Log",
           "description": "Woodcutting material - Willow Log can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -325,6 +347,7 @@
           "name": "Tiny Geode",
           "description": "Mining material - Tiny Geode can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -338,6 +361,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -364,9 +388,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -383,6 +409,7 @@
           "name": "Stone",
           "description": "Mining material - Stone can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -396,6 +423,7 @@
           "name": "Willow Log",
           "description": "Woodcutting material - Willow Log can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -409,6 +437,7 @@
           "name": "Tiny Geode",
           "description": "Mining material - Tiny Geode can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -422,6 +451,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -448,9 +478,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -467,6 +499,7 @@
           "name": "Stone",
           "description": "Mining material - Stone can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -480,6 +513,7 @@
           "name": "Willow Log",
           "description": "Woodcutting material - Willow Log can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -493,6 +527,7 @@
           "name": "Tiny Geode",
           "description": "Mining material - Tiny Geode can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -506,6 +541,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -537,9 +573,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -556,6 +594,7 @@
           "name": "Flint",
           "description": "Mining material - Flint can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -569,6 +608,7 @@
           "name": "Sticky Sap",
           "description": "Woodcutting material - Sticky Sap can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -582,6 +622,7 @@
           "name": "Silk Vine",
           "description": "Woodcutting material - Silk Vine can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -595,6 +636,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -621,9 +663,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -640,6 +684,7 @@
           "name": "Flint",
           "description": "Mining material - Flint can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -653,6 +698,7 @@
           "name": "Sticky Sap",
           "description": "Woodcutting material - Sticky Sap can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -666,6 +712,7 @@
           "name": "Silk Vine",
           "description": "Woodcutting material - Silk Vine can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -679,6 +726,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -705,9 +753,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -724,6 +774,7 @@
           "name": "Flint",
           "description": "Mining material - Flint can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -737,6 +788,7 @@
           "name": "Sticky Sap",
           "description": "Woodcutting material - Sticky Sap can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -750,6 +802,7 @@
           "name": "Silk Vine",
           "description": "Woodcutting material - Silk Vine can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -763,6 +816,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -794,9 +848,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -813,6 +869,7 @@
           "name": "Willow Log",
           "description": "Woodcutting material - Willow Log can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -826,6 +883,7 @@
           "name": "Sticky Sap",
           "description": "Woodcutting material - Sticky Sap can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -839,6 +897,7 @@
           "name": "Feather-lined Nest",
           "description": "Woodcutting material - Feather-lined Nest can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -852,6 +911,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -878,9 +938,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -897,6 +959,7 @@
           "name": "Willow Log",
           "description": "Woodcutting material - Willow Log can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -910,6 +973,7 @@
           "name": "Sticky Sap",
           "description": "Woodcutting material - Sticky Sap can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -923,6 +987,7 @@
           "name": "Feather-lined Nest",
           "description": "Woodcutting material - Feather-lined Nest can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -936,6 +1001,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -962,9 +1028,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -981,6 +1049,7 @@
           "name": "Willow Log",
           "description": "Woodcutting material - Willow Log can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -994,6 +1063,7 @@
           "name": "Sticky Sap",
           "description": "Woodcutting material - Sticky Sap can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -1007,6 +1077,7 @@
           "name": "Feather-lined Nest",
           "description": "Woodcutting material - Feather-lined Nest can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -1020,6 +1091,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -1046,9 +1118,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1065,6 +1139,7 @@
           "name": "Willow Log",
           "description": "Woodcutting material - Willow Log can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -1078,6 +1153,7 @@
           "name": "Silk Vine",
           "description": "Woodcutting material - Silk Vine can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -1091,6 +1167,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -1117,9 +1194,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1136,6 +1215,7 @@
           "name": "Willow Log",
           "description": "Woodcutting material - Willow Log can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -1149,6 +1229,7 @@
           "name": "Silk Vine",
           "description": "Woodcutting material - Silk Vine can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -1162,6 +1243,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -1188,9 +1270,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1207,6 +1291,7 @@
           "name": "Willow Log",
           "description": "Woodcutting material - Willow Log can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -1220,6 +1305,7 @@
           "name": "Silk Vine",
           "description": "Woodcutting material - Silk Vine can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -1233,6 +1319,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -1259,9 +1346,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1278,6 +1367,7 @@
           "name": "Stone",
           "description": "Mining material - Stone can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -1291,6 +1381,7 @@
           "name": "Jagged Obsidian",
           "description": "Mining material - Jagged Obsidian can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -1304,6 +1395,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -1330,9 +1422,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1349,6 +1443,7 @@
           "name": "Stone",
           "description": "Mining material - Stone can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -1362,6 +1457,7 @@
           "name": "Jagged Obsidian",
           "description": "Mining material - Jagged Obsidian can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -1375,6 +1471,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -1401,9 +1498,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1420,6 +1519,7 @@
           "name": "Stone",
           "description": "Mining material - Stone can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -1433,6 +1533,7 @@
           "name": "Jagged Obsidian",
           "description": "Mining material - Jagged Obsidian can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -1446,6 +1547,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -1472,9 +1574,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1491,6 +1595,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -1504,6 +1609,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -1530,9 +1636,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1549,6 +1657,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -1562,6 +1671,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -1588,9 +1698,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1607,6 +1719,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -1620,6 +1733,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -1651,9 +1765,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1670,6 +1786,7 @@
           "name": "Stone",
           "description": "Mining material - Stone can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -1683,6 +1800,7 @@
           "name": "Silk Vine",
           "description": "Woodcutting material - Silk Vine can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -1696,6 +1814,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -1709,6 +1828,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -1735,9 +1855,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1754,6 +1876,7 @@
           "name": "Willow Log",
           "description": "Woodcutting material - Willow Log can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -1767,6 +1890,7 @@
           "name": "Jagged Obsidian",
           "description": "Mining material - Jagged Obsidian can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -1780,6 +1904,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -1793,6 +1918,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -1819,9 +1945,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1838,6 +1966,7 @@
           "name": "Flint",
           "description": "Mining material - Flint can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -1851,6 +1980,7 @@
           "name": "Sticky Sap",
           "description": "Woodcutting material - Sticky Sap can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -1864,6 +1994,7 @@
           "name": "Tiny Geode",
           "description": "Mining material - Tiny Geode can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -1877,6 +2008,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -1903,9 +2035,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -1922,6 +2056,7 @@
           "name": "Flint",
           "description": "Mining material - Flint can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -1935,6 +2070,7 @@
           "name": "Silk Vine",
           "description": "Woodcutting material - Silk Vine can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -1948,6 +2084,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -1961,6 +2098,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -1992,9 +2130,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2011,6 +2151,7 @@
           "name": "Willow Log",
           "description": "Woodcutting material - Willow Log can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -2024,6 +2165,7 @@
           "name": "Feather-lined Nest",
           "description": "Woodcutting material - Feather-lined Nest can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -2037,6 +2179,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -2050,6 +2193,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -2076,9 +2220,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2095,6 +2241,7 @@
           "name": "Stone",
           "description": "Mining material - Stone can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -2108,6 +2255,7 @@
           "name": "Jagged Obsidian",
           "description": "Mining material - Jagged Obsidian can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -2121,6 +2269,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -2134,6 +2283,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -2165,9 +2315,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2184,6 +2336,7 @@
           "name": "Stone",
           "description": "Mining material - Stone can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -2197,6 +2350,7 @@
           "name": "Tiny Geode",
           "description": "Mining material - Tiny Geode can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -2210,6 +2364,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -2223,6 +2378,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -2254,9 +2410,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2273,6 +2431,7 @@
           "name": "Willow Log",
           "description": "Woodcutting material - Willow Log can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -2286,6 +2445,7 @@
           "name": "Feather-lined Nest",
           "description": "Woodcutting material - Feather-lined Nest can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -2299,6 +2459,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -2312,6 +2473,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -2343,9 +2505,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2362,6 +2526,7 @@
           "name": "Stone",
           "description": "Mining material - Stone can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -2375,6 +2540,7 @@
           "name": "Willow Log",
           "description": "Woodcutting material - Willow Log can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -2388,6 +2554,7 @@
           "name": "Feather-lined Nest",
           "description": "Woodcutting material - Feather-lined Nest can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -2401,6 +2568,7 @@
           "name": "Jagged Obsidian",
           "description": "Mining material - Jagged Obsidian can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -2432,9 +2600,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2451,6 +2621,7 @@
           "name": "Flint",
           "description": "Mining material - Flint can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -2464,6 +2635,7 @@
           "name": "Sticky Sap",
           "description": "Woodcutting material - Sticky Sap can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -2477,6 +2649,7 @@
           "name": "Silk Vine",
           "description": "Woodcutting material - Silk Vine can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -2490,6 +2663,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -2516,9 +2690,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 5,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -2535,6 +2711,7 @@
           "name": "Willow Log",
           "description": "Woodcutting material - Willow Log can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -2548,6 +2725,7 @@
           "name": "Tiny Geode",
           "description": "Mining material - Tiny Geode can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -2561,6 +2739,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -2574,6 +2753,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -2600,9 +2780,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2619,6 +2801,7 @@
           "name": "Sticky Sap",
           "description": "Woodcutting material - Sticky Sap can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -2632,6 +2815,7 @@
           "name": "Feather-lined Nest",
           "description": "Woodcutting material - Feather-lined Nest can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -2645,6 +2829,7 @@
           "name": "Silk Vine",
           "description": "Woodcutting material - Silk Vine can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -2658,6 +2843,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -2684,9 +2870,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2703,6 +2891,7 @@
           "name": "Stone",
           "description": "Mining material - Stone can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -2716,6 +2905,7 @@
           "name": "Willow Log",
           "description": "Woodcutting material - Willow Log can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -2729,6 +2919,7 @@
           "name": "Jagged Obsidian",
           "description": "Mining material - Jagged Obsidian can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -2742,6 +2933,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -2768,9 +2960,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2787,6 +2981,7 @@
           "name": "Stone",
           "description": "Mining material - Stone can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -2800,6 +2995,7 @@
           "name": "Tiny Geode",
           "description": "Mining material - Tiny Geode can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -2813,6 +3009,7 @@
           "name": "Feather-lined Nest",
           "description": "Woodcutting material - Feather-lined Nest can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -2826,6 +3023,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -2852,9 +3050,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2871,6 +3071,7 @@
           "name": "Willow Log",
           "description": "Woodcutting material - Willow Log can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -2884,6 +3085,7 @@
           "name": "Feather-lined Nest",
           "description": "Woodcutting material - Feather-lined Nest can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -2897,6 +3099,7 @@
           "name": "Silk Vine",
           "description": "Woodcutting material - Silk Vine can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -2910,6 +3113,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -2941,9 +3145,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -2960,6 +3166,7 @@
           "name": "Flint",
           "description": "Mining material - Flint can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -2973,6 +3180,7 @@
           "name": "Jagged Obsidian",
           "description": "Mining material - Jagged Obsidian can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -2986,6 +3194,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -2999,6 +3208,7 @@
           "name": "Shimmering Leaf",
           "description": "Woodcutting material - Shimmering Leaf can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -3030,9 +3240,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -3049,6 +3261,7 @@
           "name": "Flint",
           "description": "Mining material - Flint can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -3062,6 +3275,7 @@
           "name": "Jagged Obsidian",
           "description": "Mining material - Jagged Obsidian can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -3075,6 +3289,7 @@
           "name": "Silk Vine",
           "description": "Woodcutting material - Silk Vine can be found when chopping \u0027Young Willow\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -3088,6 +3303,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -3119,9 +3335,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3138,6 +3356,7 @@
           "name": "Copper Ore",
           "description": "Mining material - Copper Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -3151,6 +3370,7 @@
           "name": "Veinstone Chip",
           "description": "Mining material - Veinstone Chip can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -3164,6 +3384,7 @@
           "name": "Verdant Ore",
           "description": "Mining material - Verdant Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -3177,6 +3398,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -3203,9 +3425,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3222,6 +3446,7 @@
           "name": "Copper Ore",
           "description": "Mining material - Copper Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -3235,6 +3460,7 @@
           "name": "Veinstone Chip",
           "description": "Mining material - Veinstone Chip can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -3248,6 +3474,7 @@
           "name": "Verdant Ore",
           "description": "Mining material - Verdant Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -3261,6 +3488,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -3287,9 +3515,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3306,6 +3536,7 @@
           "name": "Copper Ore",
           "description": "Mining material - Copper Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -3319,6 +3550,7 @@
           "name": "Veinstone Chip",
           "description": "Mining material - Veinstone Chip can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -3332,6 +3564,7 @@
           "name": "Verdant Ore",
           "description": "Mining material - Verdant Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -3345,6 +3578,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -3376,9 +3610,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3395,6 +3631,7 @@
           "name": "Copper Ore",
           "description": "Mining material - Copper Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -3408,6 +3645,7 @@
           "name": "Maple Log",
           "description": "Woodcutting material - Maple Log can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -3421,6 +3659,7 @@
           "name": "Malachite Shard",
           "description": "Mining material - Malachite Shard can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -3434,6 +3673,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -3465,9 +3705,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3484,6 +3726,7 @@
           "name": "Copper Ore",
           "description": "Mining material - Copper Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -3497,6 +3740,7 @@
           "name": "Maple Log",
           "description": "Woodcutting material - Maple Log can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -3510,6 +3754,7 @@
           "name": "Malachite Shard",
           "description": "Mining material - Malachite Shard can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -3523,6 +3768,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -3549,9 +3795,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3568,6 +3816,7 @@
           "name": "Copper Ore",
           "description": "Mining material - Copper Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -3581,6 +3830,7 @@
           "name": "Maple Log",
           "description": "Woodcutting material - Maple Log can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -3594,6 +3844,7 @@
           "name": "Malachite Shard",
           "description": "Mining material - Malachite Shard can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -3607,6 +3858,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -3638,9 +3890,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3657,6 +3911,7 @@
           "name": "Veinstone Chip",
           "description": "Mining material - Veinstone Chip can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -3670,6 +3925,7 @@
           "name": "Amber Syrup",
           "description": "Woodcutting material - Amber Syrup can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -3683,6 +3939,7 @@
           "name": "Honeycomb",
           "description": "Woodcutting material - Honeycomb can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -3696,6 +3953,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -3722,9 +3980,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3741,6 +4001,7 @@
           "name": "Veinstone Chip",
           "description": "Mining material - Veinstone Chip can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -3754,6 +4015,7 @@
           "name": "Amber Syrup",
           "description": "Woodcutting material - Amber Syrup can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -3767,6 +4029,7 @@
           "name": "Honeycomb",
           "description": "Woodcutting material - Honeycomb can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -3780,6 +4043,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -3806,9 +4070,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3825,6 +4091,7 @@
           "name": "Veinstone Chip",
           "description": "Mining material - Veinstone Chip can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -3838,6 +4105,7 @@
           "name": "Amber Syrup",
           "description": "Woodcutting material - Amber Syrup can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -3851,6 +4119,7 @@
           "name": "Honeycomb",
           "description": "Woodcutting material - Honeycomb can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -3864,6 +4133,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -3895,9 +4165,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3914,6 +4186,7 @@
           "name": "Maple Log",
           "description": "Woodcutting material - Maple Log can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -3927,6 +4200,7 @@
           "name": "Amber Syrup",
           "description": "Woodcutting material - Amber Syrup can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -3940,6 +4214,7 @@
           "name": "Sweet Bark Chips",
           "description": "Woodcutting material - Sweet Bark Chips can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -3953,6 +4228,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -3979,9 +4255,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -3998,6 +4276,7 @@
           "name": "Maple Log",
           "description": "Woodcutting material - Maple Log can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -4011,6 +4290,7 @@
           "name": "Amber Syrup",
           "description": "Woodcutting material - Amber Syrup can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -4024,6 +4304,7 @@
           "name": "Sweet Bark Chips",
           "description": "Woodcutting material - Sweet Bark Chips can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -4037,6 +4318,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -4068,9 +4350,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -4087,6 +4371,7 @@
           "name": "Maple Log",
           "description": "Woodcutting material - Maple Log can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -4100,6 +4385,7 @@
           "name": "Amber Syrup",
           "description": "Woodcutting material - Amber Syrup can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -4113,6 +4399,7 @@
           "name": "Sweet Bark Chips",
           "description": "Woodcutting material - Sweet Bark Chips can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -4126,6 +4413,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -4152,9 +4440,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -4171,6 +4461,7 @@
           "name": "Maple Log",
           "description": "Woodcutting material - Maple Log can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -4184,6 +4475,7 @@
           "name": "Honeycomb",
           "description": "Woodcutting material - Honeycomb can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -4197,6 +4489,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -4228,9 +4521,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -4247,6 +4542,7 @@
           "name": "Maple Log",
           "description": "Woodcutting material - Maple Log can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -4260,6 +4556,7 @@
           "name": "Honeycomb",
           "description": "Woodcutting material - Honeycomb can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -4273,6 +4570,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -4304,9 +4602,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -4323,6 +4623,7 @@
           "name": "Maple Log",
           "description": "Woodcutting material - Maple Log can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -4336,6 +4637,7 @@
           "name": "Honeycomb",
           "description": "Woodcutting material - Honeycomb can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -4349,6 +4651,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -4375,9 +4678,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -4394,6 +4699,7 @@
           "name": "Copper Ore",
           "description": "Mining material - Copper Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -4407,6 +4713,7 @@
           "name": "Verdant Ore",
           "description": "Mining material - Verdant Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -4420,6 +4727,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -4446,9 +4754,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -4465,6 +4775,7 @@
           "name": "Copper Ore",
           "description": "Mining material - Copper Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -4478,6 +4789,7 @@
           "name": "Verdant Ore",
           "description": "Mining material - Verdant Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -4491,6 +4803,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -4522,9 +4835,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -4541,6 +4856,7 @@
           "name": "Copper Ore",
           "description": "Mining material - Copper Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -4554,6 +4870,7 @@
           "name": "Verdant Ore",
           "description": "Mining material - Verdant Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -4567,6 +4884,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -4598,9 +4916,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -4617,6 +4937,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -4630,6 +4951,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -4656,9 +4978,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -4675,6 +4999,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -4688,6 +5013,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -4714,9 +5040,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 1
     },
@@ -4733,6 +5061,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -4746,6 +5075,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -4777,9 +5107,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 10,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -4796,6 +5128,7 @@
           "name": "Copper Ore",
           "description": "Mining material - Copper Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -4809,6 +5142,7 @@
           "name": "Honeycomb",
           "description": "Woodcutting material - Honeycomb can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -4822,6 +5156,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -4835,6 +5170,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -4861,9 +5197,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 10,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -4880,6 +5218,7 @@
           "name": "Maple Log",
           "description": "Woodcutting material - Maple Log can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -4893,6 +5232,7 @@
           "name": "Verdant Ore",
           "description": "Mining material - Verdant Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -4906,6 +5246,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -4919,6 +5260,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -4945,9 +5287,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 10,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -4964,6 +5308,7 @@
           "name": "Veinstone Chip",
           "description": "Mining material - Veinstone Chip can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -4977,6 +5322,7 @@
           "name": "Amber Syrup",
           "description": "Woodcutting material - Amber Syrup can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -4990,6 +5336,7 @@
           "name": "Malachite Shard",
           "description": "Mining material - Malachite Shard can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -5003,6 +5350,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -5029,9 +5377,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 10,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5048,6 +5398,7 @@
           "name": "Veinstone Chip",
           "description": "Mining material - Veinstone Chip can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -5061,6 +5412,7 @@
           "name": "Honeycomb",
           "description": "Woodcutting material - Honeycomb can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -5074,6 +5426,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -5087,6 +5440,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -5118,9 +5472,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 10,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5137,6 +5493,7 @@
           "name": "Maple Log",
           "description": "Woodcutting material - Maple Log can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -5150,6 +5507,7 @@
           "name": "Sweet Bark Chips",
           "description": "Woodcutting material - Sweet Bark Chips can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -5163,6 +5521,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -5176,6 +5535,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -5202,9 +5562,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 10,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5221,6 +5583,7 @@
           "name": "Veinstone Chip",
           "description": "Mining material - Veinstone Chip can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -5234,6 +5597,7 @@
           "name": "Malachite Shard",
           "description": "Mining material - Malachite Shard can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -5247,6 +5611,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -5260,6 +5625,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -5286,9 +5652,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 10,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5305,6 +5673,7 @@
           "name": "Copper Ore",
           "description": "Mining material - Copper Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -5318,6 +5687,7 @@
           "name": "Verdant Ore",
           "description": "Mining material - Verdant Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -5331,6 +5701,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -5344,6 +5715,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -5375,9 +5747,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 10,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5394,6 +5768,7 @@
           "name": "Maple Log",
           "description": "Woodcutting material - Maple Log can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -5407,6 +5782,7 @@
           "name": "Sweet Bark Chips",
           "description": "Woodcutting material - Sweet Bark Chips can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -5420,6 +5796,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -5433,6 +5810,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -5464,9 +5842,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 10,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5483,6 +5863,7 @@
           "name": "Copper Ore",
           "description": "Mining material - Copper Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -5496,6 +5877,7 @@
           "name": "Maple Log",
           "description": "Woodcutting material - Maple Log can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -5509,6 +5891,7 @@
           "name": "Sweet Bark Chips",
           "description": "Woodcutting material - Sweet Bark Chips can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -5522,6 +5905,7 @@
           "name": "Crystalline Powder",
           "description": "Mining material - Crystalline Powder can be found in \u0027Slate Shard\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -5553,9 +5937,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 10,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5572,6 +5958,7 @@
           "name": "Veinstone Chip",
           "description": "Mining material - Veinstone Chip can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -5585,6 +5972,7 @@
           "name": "Amber Syrup",
           "description": "Woodcutting material - Amber Syrup can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -5598,6 +5986,7 @@
           "name": "Honeycomb",
           "description": "Woodcutting material - Honeycomb can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -5611,6 +6000,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -5637,9 +6027,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 10,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5656,6 +6048,7 @@
           "name": "Maple Log",
           "description": "Woodcutting material - Maple Log can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -5669,6 +6062,7 @@
           "name": "Verdant Ore",
           "description": "Mining material - Verdant Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -5682,6 +6076,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -5695,6 +6090,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -5726,9 +6122,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 10,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5745,6 +6143,7 @@
           "name": "Amber Syrup",
           "description": "Woodcutting material - Amber Syrup can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -5758,6 +6157,7 @@
           "name": "Sweet Bark Chips",
           "description": "Woodcutting material - Sweet Bark Chips can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -5771,6 +6171,7 @@
           "name": "Honeycomb",
           "description": "Woodcutting material - Honeycomb can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -5784,6 +6185,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -5810,9 +6212,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 10,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5829,6 +6233,7 @@
           "name": "Copper Ore",
           "description": "Mining material - Copper Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -5842,6 +6247,7 @@
           "name": "Maple Log",
           "description": "Woodcutting material - Maple Log can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -5855,6 +6261,7 @@
           "name": "Verdant Ore",
           "description": "Mining material - Verdant Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -5868,6 +6275,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -5899,9 +6307,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 10,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -5918,6 +6328,7 @@
           "name": "Copper Ore",
           "description": "Mining material - Copper Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -5931,6 +6342,7 @@
           "name": "Malachite Shard",
           "description": "Mining material - Malachite Shard can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -5944,6 +6356,7 @@
           "name": "Sweet Bark Chips",
           "description": "Woodcutting material - Sweet Bark Chips can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -5957,6 +6370,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -5983,9 +6397,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 10,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -6002,6 +6418,7 @@
           "name": "Maple Log",
           "description": "Woodcutting material - Maple Log can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6015,6 +6432,7 @@
           "name": "Sweet Bark Chips",
           "description": "Woodcutting material - Sweet Bark Chips can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -6028,6 +6446,7 @@
           "name": "Honeycomb",
           "description": "Woodcutting material - Honeycomb can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -6041,6 +6460,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -6072,9 +6492,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 10,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -6091,6 +6513,7 @@
           "name": "Veinstone Chip",
           "description": "Mining material - Veinstone Chip can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6104,6 +6527,7 @@
           "name": "Verdant Ore",
           "description": "Mining material - Verdant Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -6117,6 +6541,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -6130,6 +6555,7 @@
           "name": "Glowing Amber",
           "description": "Woodcutting material - Glowing Amber can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -6161,9 +6587,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 10,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0.1
     },
@@ -6180,6 +6608,7 @@
           "name": "Veinstone Chip",
           "description": "Mining material - Veinstone Chip can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6193,6 +6622,7 @@
           "name": "Verdant Ore",
           "description": "Mining material - Verdant Ore can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -6206,6 +6636,7 @@
           "name": "Honeycomb",
           "description": "Woodcutting material - Honeycomb can be found when chopping \u0027Amberleaf Maple\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Uncommon"
         }
@@ -6219,6 +6650,7 @@
           "name": "Living Amber",
           "description": "Mining material - Living Amber can be found in \u0027Copperbloom Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Rare"
         }
@@ -6255,9 +6687,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6274,6 +6708,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6287,6 +6722,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6323,9 +6759,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6342,6 +6780,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6355,6 +6794,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6391,9 +6831,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6410,6 +6852,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6423,6 +6866,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6459,9 +6903,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6478,6 +6924,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6491,6 +6938,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6527,9 +6975,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6546,6 +6996,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6559,6 +7010,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6595,9 +7047,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6614,6 +7068,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6627,6 +7082,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6663,9 +7119,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6682,6 +7140,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6695,6 +7154,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6731,9 +7191,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6750,6 +7212,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6763,6 +7226,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6799,9 +7263,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6818,6 +7284,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6831,6 +7298,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6867,9 +7335,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6886,6 +7356,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6899,6 +7370,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6935,9 +7407,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -6954,6 +7428,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -6967,6 +7442,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7003,9 +7479,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -7022,6 +7500,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7035,6 +7514,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7061,9 +7541,11 @@
           "modifierType": "Additive"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -7080,6 +7562,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7093,6 +7576,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7119,9 +7603,11 @@
           "modifierType": "Additive"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -7138,6 +7624,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7151,6 +7638,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7177,9 +7665,11 @@
           "modifierType": "Additive"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -7196,6 +7686,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7209,6 +7700,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7235,9 +7727,11 @@
           "modifierType": "Additive"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -7254,6 +7748,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7267,6 +7762,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7293,9 +7789,11 @@
           "modifierType": "Additive"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -7312,6 +7810,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7325,6 +7824,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7351,9 +7851,11 @@
           "modifierType": "Additive"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -7370,6 +7872,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7383,6 +7886,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7409,9 +7913,11 @@
           "modifierType": "Additive"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -7428,6 +7934,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7441,6 +7948,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7467,9 +7975,11 @@
           "modifierType": "Additive"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -7486,6 +7996,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7499,6 +8010,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7525,9 +8037,11 @@
           "modifierType": "Additive"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -7544,6 +8058,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7557,6 +8072,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7577,9 +8093,11 @@
       "rarity": "Common",
       "equipmentType": "OneHanded",
       "attributeModifiers": [],
+      "toolBonuses": [],
       "attackSpeed": 20,
       "magnitude": 10,
       "magnitudeRange": 20,
+      "gatheringType": null,
       "scalingAttribute": "Power",
       "scalingAmount": 1
     },
@@ -7596,6 +8114,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7609,6 +8128,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7629,9 +8149,11 @@
       "rarity": "Common",
       "equipmentType": "OneHanded",
       "attributeModifiers": [],
+      "toolBonuses": [],
       "attackSpeed": 20,
       "magnitude": 10,
       "magnitudeRange": 30,
+      "gatheringType": null,
       "scalingAttribute": "Power",
       "scalingAmount": 1
     },
@@ -7648,6 +8170,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7661,6 +8184,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7681,9 +8205,11 @@
       "rarity": "Common",
       "equipmentType": "OneHanded",
       "attributeModifiers": [],
+      "toolBonuses": [],
       "attackSpeed": 20,
       "magnitude": 10,
       "magnitudeRange": 25,
+      "gatheringType": null,
       "scalingAttribute": "Power",
       "scalingAmount": 1
     },
@@ -7700,6 +8226,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7713,6 +8240,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7733,9 +8261,11 @@
       "rarity": "Common",
       "equipmentType": "OneHanded",
       "attributeModifiers": [],
+      "toolBonuses": [],
       "attackSpeed": 24,
       "magnitude": 8,
       "magnitudeRange": 15,
+      "gatheringType": null,
       "scalingAttribute": "Power",
       "scalingAmount": 0.8
     },
@@ -7752,6 +8282,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7765,6 +8296,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7785,9 +8317,11 @@
       "rarity": "Common",
       "equipmentType": "TwoHanded",
       "attributeModifiers": [],
+      "toolBonuses": [],
       "attackSpeed": 10,
       "magnitude": 15,
       "magnitudeRange": 30,
+      "gatheringType": null,
       "scalingAttribute": "Power",
       "scalingAmount": 2
     },
@@ -7804,6 +8338,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7817,6 +8352,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7837,9 +8373,11 @@
       "rarity": "Common",
       "equipmentType": "TwoHanded",
       "attributeModifiers": [],
+      "toolBonuses": [],
       "attackSpeed": 10,
       "magnitude": 15,
       "magnitudeRange": 50,
+      "gatheringType": null,
       "scalingAttribute": "Power",
       "scalingAmount": 2
     },
@@ -7856,6 +8394,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7869,6 +8408,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7889,9 +8429,11 @@
       "rarity": "Common",
       "equipmentType": "TwoHanded",
       "attributeModifiers": [],
+      "toolBonuses": [],
       "attackSpeed": 10,
       "magnitude": 15,
       "magnitudeRange": 40,
+      "gatheringType": null,
       "scalingAttribute": "Power",
       "scalingAmount": 2
     },
@@ -7908,6 +8450,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7921,6 +8464,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7941,9 +8485,11 @@
       "rarity": "Common",
       "equipmentType": "TwoHanded",
       "attributeModifiers": [],
+      "toolBonuses": [],
       "attackSpeed": 12,
       "magnitude": 14,
       "magnitudeRange": 25,
+      "gatheringType": null,
       "scalingAttribute": "Power",
       "scalingAmount": 1.8
     },
@@ -7960,6 +8506,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -7973,6 +8520,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -8004,9 +8552,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -8023,6 +8573,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -8036,6 +8587,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -8067,9 +8619,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -8086,6 +8640,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -8099,6 +8654,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -8119,9 +8675,11 @@
       "rarity": "Common",
       "equipmentType": "TwoHanded",
       "attributeModifiers": [],
+      "toolBonuses": [],
       "attackSpeed": 10,
       "magnitude": 15,
       "magnitudeRange": 35,
+      "gatheringType": null,
       "scalingAttribute": "Power",
       "scalingAmount": 2
     },
@@ -8138,6 +8696,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -8151,6 +8710,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -8177,9 +8737,11 @@
           "modifierType": "Flat"
         }
       ],
+      "toolBonuses": [],
       "attackSpeed": 0,
       "magnitude": 0,
       "magnitudeRange": 0,
+      "gatheringType": null,
       "scalingAttribute": "MaxHealth",
       "scalingAmount": 0
     },
@@ -8196,6 +8758,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -8209,6 +8772,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -8229,9 +8793,11 @@
       "rarity": "Common",
       "equipmentType": "OneHanded",
       "attributeModifiers": [],
+      "toolBonuses": [],
       "attackSpeed": 20,
       "magnitude": 10,
       "magnitudeRange": 20,
+      "gatheringType": null,
       "scalingAttribute": "Power",
       "scalingAmount": 1
     },
@@ -8248,6 +8814,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -8261,6 +8828,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -8281,9 +8849,11 @@
       "rarity": "Common",
       "equipmentType": "TwoHanded",
       "attributeModifiers": [],
+      "toolBonuses": [],
       "attackSpeed": 15,
       "magnitude": 13,
       "magnitudeRange": 25,
+      "gatheringType": null,
       "scalingAttribute": "Power",
       "scalingAmount": 1.7
     },
@@ -8300,6 +8870,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -8313,6 +8884,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -8333,9 +8905,11 @@
       "rarity": "Common",
       "equipmentType": "TwoHanded",
       "attributeModifiers": [],
+      "toolBonuses": [],
       "attackSpeed": 20,
       "magnitude": 10,
       "magnitudeRange": 40,
+      "gatheringType": null,
       "scalingAttribute": "Power",
       "scalingAmount": 1.5
     },
@@ -8352,6 +8926,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -8365,6 +8940,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -8385,9 +8961,11 @@
       "rarity": "Common",
       "equipmentType": "TwoHanded",
       "attributeModifiers": [],
+      "toolBonuses": [],
       "attackSpeed": 25,
       "magnitude": 12,
       "magnitudeRange": 20,
+      "gatheringType": null,
       "scalingAttribute": "Power",
       "scalingAmount": 1.3
     },
@@ -8404,6 +8982,7 @@
           "name": "Ore",
           "description": "Mining material - Ore can be found in \u0027Vein\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }
@@ -8417,6 +8996,7 @@
           "name": "Wood",
           "description": "Woodcutting material - Wood can be found when chopping \u0027Tree\u0027",
           "stackable": true,
+          "isBound": false,
           "itemType": "Resource",
           "rarity": "Common"
         }

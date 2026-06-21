@@ -151,7 +151,7 @@
       "evolution": {
         "id": "evolution.fire_ant.hiveflame_instinct",
         "name": "Hiveflame Instinct",
-        "description": "Burning Mandibles spreads a weaker Burn to another random enemy.",
+        "description": "Yellow Sting spreads a weaker Burn to another random enemy.",
         "requiredAscensionTier": 2,
         "requiredCatalystItemId": "item.evolution_catalyst.flame",
         "addsTags": [
@@ -159,7 +159,7 @@
         ],
         "activeAbilityModifiers": [
           {
-            "target": "effect.status.burn",
+            "target": "effect.damage.fire",
             "operation": "AddEffect",
             "value": 1,
             "effect": {
@@ -1040,6 +1040,307 @@
       "passiveAbilityId": "ability.essence.legacy.hobgoblin.savage_onslaught"
     },
     {
+      "id": "essence.legacy.moss_lizard",
+      "sourceMonsterId": "monster.moss_lizard",
+      "name": "Moss Lizard's Essence",
+      "description": "A recovered legacy essence containing Moss Camouflage and Lost Tail.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Beast",
+        "Role.Assassin",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Precision",
+          "baseValue": 3
+        },
+        {
+          "attribute": "DodgeChance",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.moss_lizard",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.legacy.moss_lizard.moss_camouflage",
+      "passiveAbilityId": "ability.essence.legacy.moss_lizard.lost_tail"
+    },
+    {
+      "id": "essence.legacy.spider",
+      "sourceMonsterId": "monster.spider",
+      "name": "Spider's Essence",
+      "description": "A recovered legacy essence containing Skittering Strike and Spider Eyes.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Beast",
+        "Role.Assassin",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Precision",
+          "baseValue": 4
+        },
+        {
+          "attribute": "CritChance",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.spider",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.legacy.spider.skittering_strike",
+      "passiveAbilityId": "ability.essence.legacy.spider.spider_eyes"
+    },
+    {
+      "id": "essence.legacy.treant_sapling",
+      "sourceMonsterId": "monster.treant_sapling",
+      "name": "Treant Sapling's Essence",
+      "description": "A recovered legacy essence containing Sprouting Surge and Nurturing Roots.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Plant",
+        "Role.Support",
+        "Effect.Ability",
+        "Healing"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Fortitude",
+          "baseValue": 3
+        },
+        {
+          "attribute": "HealingPowerPercent",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.treant_sapling",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.legacy.treant_sapling.sprouting_surge",
+      "passiveAbilityId": "ability.essence.legacy.treant_sapling.nurturing_roots"
+    },
+    {
+      "id": "essence.legacy.venomous_snake",
+      "sourceMonsterId": "monster.venomous_snake",
+      "name": "Venomous Snake's Essence",
+      "description": "A recovered legacy essence containing Venomous Spit and Toxic Hide.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Beast",
+        "Role.Controller",
+        "Status.Poison",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Precision",
+          "baseValue": 3
+        },
+        {
+          "attribute": "StatusResistance",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.venomous_snake",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.legacy.venomous_snake.venomous_spit",
+      "passiveAbilityId": "ability.essence.legacy.venomous_snake.toxic_hide"
+    },
+    {
+      "id": "essence.legacy.viper",
+      "sourceMonsterId": "monster.viper",
+      "name": "Viper's Essence",
+      "description": "A recovered legacy essence containing Piercing Fangs and Potent Toxins.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Beast",
+        "Role.Assassin",
+        "Status.Poison",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 3
+        },
+        {
+          "attribute": "MagicPenetration",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.viper",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.legacy.viper.piercing_fangs",
+      "passiveAbilityId": "ability.essence.legacy.viper.potent_toxins"
+    },
+    {
+      "id": "essence.legacy.goblin_shaman",
+      "sourceMonsterId": "monster.goblin_shaman",
+      "name": "Goblin Shaman's Essence",
+      "description": "A recovered legacy essence containing Weak Rejuvenation and Spirit Link.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Goblinoid",
+        "Species.Humanoid",
+        "Role.Support",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 4
+        },
+        {
+          "attribute": "HealingPowerPercent",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.goblin_shaman",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.legacy.goblin_shaman.weak_rejuvenation",
+      "passiveAbilityId": "ability.essence.legacy.goblin_shaman.spirit_link"
+    },
+    {
+      "id": "essence.legacy.poisonous_rat",
+      "sourceMonsterId": "monster.poisonous_rat",
+      "name": "Poisonous Rat's Essence",
+      "description": "A recovered legacy essence containing Toxic Bite and Resistant Hide.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Beast",
+        "Role.Controller",
+        "Status.Poison",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Precision",
+          "baseValue": 3
+        },
+        {
+          "attribute": "StatusResistance",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.poisonous_rat",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.legacy.poisonous_rat.toxic_bite",
+      "passiveAbilityId": "ability.essence.legacy.poisonous_rat.resistant_hide"
+    },
+    {
+      "id": "essence.legacy.giant_bat",
+      "sourceMonsterId": "monster.giant_bat",
+      "name": "Giant Bat's Essence",
+      "description": "A recovered legacy essence containing Echoing Screech and Resonant Cry.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Beast",
+        "Role.Controller",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Precision",
+          "baseValue": 3
+        },
+        {
+          "attribute": "Spirit",
+          "baseValue": 2
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.legacy.giant_bat",
+        "name": "Legacy Awakening",
+        "description": "This legacy essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.legacy.giant_bat.echoing_screech",
+      "passiveAbilityId": "ability.essence.legacy.giant_bat.resonant_cry"
+    },
+    {
       "id": "essence.legacy.feral_ghoul",
       "sourceMonsterId": "monster.feral_ghoul",
       "name": "Feral Ghoul's Essence",
@@ -1260,6 +1561,202 @@
       },
       "activeAbilityId": "ability.essence.legacy.skeleton_warrior.bone_shield",
       "passiveAbilityId": "ability.essence.legacy.skeleton_warrior.spiked_defense"
+    },
+    {
+      "id": "essence.ant_worker",
+      "sourceMonsterId": "monster.ant_worker",
+      "name": "Ant Worker's Essence",
+      "description": "A diligent hive essence that protects allies and hardens itself through steady labor.",
+      "rarity": "Common",
+      "tags": [
+        "Species.Insectoid",
+        "Role.Support",
+        "Healing",
+        "Defense.DamageReduction",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Fortitude",
+          "baseValue": 3
+        },
+        {
+          "attribute": "DamageReduction",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.ant_worker",
+        "name": "Legacy Awakening",
+        "description": "This essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.ant_worker.workers_aid",
+      "passiveAbilityId": "ability.essence.ant_worker.reinforced_exoskeleton"
+    },
+    {
+      "id": "essence.forest_spirit",
+      "sourceMonsterId": "monster.forest_spirit",
+      "name": "Forest Spirit's Essence",
+      "description": "A calm woodland essence that restores wounded allies and steadies elemental defenses.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Spirit",
+        "Role.Support",
+        "Healing",
+        "Defense.Resistance",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 4
+        },
+        {
+          "attribute": "Resistance",
+          "baseValue": 2
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.forest_spirit",
+        "name": "Legacy Awakening",
+        "description": "This essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.forest_spirit.rejuvenation",
+      "passiveAbilityId": "ability.essence.forest_spirit.balance_of_elements"
+    },
+    {
+      "id": "essence.wood_nymph",
+      "sourceMonsterId": "monster.wood_nymph",
+      "name": "Wood Nymph's Essence",
+      "description": "A defensive forest essence that wraps allies in thorns and encourages natural recovery.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Plant",
+        "Species.Spirit",
+        "Role.Support",
+        "Status.Reflect",
+        "Defense.Recovery",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Spirit",
+          "baseValue": 3
+        },
+        {
+          "attribute": "HealthRegeneration",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.wood_nymph",
+        "name": "Legacy Awakening",
+        "description": "This essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.wood_nymph.bramble_shield",
+      "passiveAbilityId": "ability.essence.wood_nymph.natures_regeneration"
+    },
+    {
+      "id": "essence.giant_spider",
+      "sourceMonsterId": "monster.giant_spider",
+      "name": "Giant Spider's Essence",
+      "description": "A heavy arachnid essence built around brutal impact and hardened carapace.",
+      "rarity": "Rare",
+      "tags": [
+        "Species.Beast",
+        "Role.Offensive",
+        "Range.Melee",
+        "Defense.Armor",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Power",
+          "baseValue": 4
+        },
+        {
+          "attribute": "Armor",
+          "baseValue": 3
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.giant_spider",
+        "name": "Legacy Awakening",
+        "description": "This essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.giant_spider.spider_crash",
+      "passiveAbilityId": "ability.essence.giant_spider.thickened_carapace"
+    },
+    {
+      "id": "essence.venomous_spiderling",
+      "sourceMonsterId": "monster.venomous_spiderling",
+      "name": "Venomous Spiderling's Essence",
+      "description": "A quick venomous essence that binds targets in poison and turns basic attacks toxic.",
+      "rarity": "Uncommon",
+      "tags": [
+        "Species.Beast",
+        "Role.Controller",
+        "Status.Poison",
+        "Range.Ranged",
+        "Effect.Ability"
+      ],
+      "attributeBonuses": [
+        {
+          "attribute": "Precision",
+          "baseValue": 3
+        },
+        {
+          "attribute": "MagicPenetration",
+          "baseValue": 1
+        }
+      ],
+      "drop": {
+        "baseDropChance": 0.001,
+        "resonanceGainPerFailedEligibleKill": 1,
+        "dropChanceBonusPerResonance": 5E-05,
+        "maxResonanceBonus": 0.01
+      },
+      "evolution": {
+        "id": "evolution.venomous_spiderling",
+        "name": "Legacy Awakening",
+        "description": "This essence has no special evolution yet.",
+        "requiredAscensionTier": 1,
+        "requiredCatalystItemId": "item.evolution_catalyst.legacy"
+      },
+      "activeAbilityId": "ability.essence.venomous_spiderling.venom_web",
+      "passiveAbilityId": "ability.essence.venomous_spiderling.tainted_fangs"
     }
   ]
 }

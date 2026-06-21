@@ -93,6 +93,38 @@ export interface AbilityCatalogRuntimeLoadoutCheck {
   failure: string | null;
 }
 
+export interface RegionOneContentDiagnosticReport {
+  manifestEntryCount: number;
+  completeEntryCount: number;
+  missingEntryCount: number;
+  awaitingManaCount: number;
+  staleAreaCount: number;
+  isComplete: boolean;
+  entries: RegionOneContentEntryDiagnostic[];
+  warnings: string[];
+}
+
+export interface RegionOneContentEntryDiagnostic {
+  name: string;
+  creatureKey: string;
+  sourceType: string;
+  sourceName: string;
+  expectedTier: string;
+  essenceId: string | null;
+  activeAbilityId: string | null;
+  passiveAbilityId: string | null;
+  requiresMana: boolean;
+  creatureResolved: boolean;
+  essenceResolved: boolean;
+  activeAbilityResolved: boolean;
+  passiveAbilityResolved: boolean;
+  essenceItemResolved: boolean;
+  sourcePlacementResolved: boolean;
+  behaviorCovered: boolean;
+  isComplete: boolean;
+  missing: string[];
+}
+
 export interface AbilityBalanceSimulationRequest {
   battleCount: number;
   teamSize: number;

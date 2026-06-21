@@ -7,6 +7,7 @@ using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL.Professions;
+using Application.Interfaces.Services.LL.Regions;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Users;
@@ -76,6 +77,7 @@ public static class DependencyInjection
         // Related to regions
         services.AddScoped<IRegionService, RegionService>();
         services.AddScoped<IAreaService, AreaService>();
+        services.AddScoped<IRegionOneContentDiagnostics, RegionOneContentDiagnostics>();
 
         services.AddScoped<IAttributeService, AttributeService>();
         services.AddScoped<ICharacterService, CharacterService>();
@@ -139,6 +141,7 @@ public static class DependencyInjection
         services.AddScoped<IEssenceAbilityProvider, EssenceSystemService>();
         services.AddScoped<IEssenceCombatLoadoutResolver, EssenceSystemService>();
         services.AddScoped<IEssenceResonanceService, EssenceSystemService>();
+        services.AddScoped<IEssenceCatalogService, EssenceCatalogService>();
 
         services.AddScoped<IGuildService, GuildService>();
         services.AddScoped<IGuildBuildingUpgradeService, GuildBuildingUpgradeService>();

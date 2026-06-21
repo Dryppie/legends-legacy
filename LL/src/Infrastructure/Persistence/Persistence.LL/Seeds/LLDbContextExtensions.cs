@@ -1,4 +1,5 @@
 ﻿using Domain.Helpers;
+using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Colosseum;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
@@ -19,6 +20,8 @@ public static class LLDbContextExtensions
     public const string CHARACTER_GUID = "11111111-1111-1111-1111-111111111111";
     private const int LOCAL_GUEST_ACCOUNT_COUNT = 10;
     private const string LOCAL_GUEST_USERNAME_PREFIX = "SeedGuest";
+    private const string RETIRED_GOBLIN_MINES_IDLE_AREA_ID = "region_01_area_05";
+    private const string RETIRED_GOBLIN_MINES_REPLACEMENT_AREA_ID = "region_01_area_06";
     private static readonly (Guid InstanceId, string ItemBaseId)[] AdminStarterTools =
     [
         (Guid.Parse("00000000-0000-0000-1000-000000000001"), "basic_pickaxe"),
@@ -31,6 +34,10 @@ public static class LLDbContextExtensions
     {
         // Always seed from the json files. Might update old data
         await DbJsonSeeder.RunAsync(context);
+        if (await RemoveRetiredGoblinMinesIdleArea(context))
+        {
+            await context.SaveChangesAsync();
+        }
 
         if (!context.Entities.Any())
         {
@@ -55,6 +62,39 @@ public static class LLDbContextExtensions
             await SeedLocalGuestAccounts(context);
             await context.SaveChangesAsync();
         }
+    }
+
+    private static async Task<bool> RemoveRetiredGoblinMinesIdleArea(LLDbContext context)
+    {
+        var retiredArea = await context.Areas
+            .Include(area => area.Creatures)
+            .Include(area => area.GatheringNodes)
+            .FirstOrDefaultAsync(area => area.Id == RETIRED_GOBLIN_MINES_IDLE_AREA_ID);
+
+        if (retiredArea is null)
+        {
+            return false;
+        }
+
+        var replacementArea = await context.Areas
+            .FirstOrDefaultAsync(area => area.Id == RETIRED_GOBLIN_MINES_REPLACEMENT_AREA_ID);
+
+        if (replacementArea is not null)
+        {
+            var activeActions = await context.ActionDetails
+                .OfType<CombatActionDetails>()
+                .Include(details => details.Area)
+                .Where(details => details.Area.Id == RETIRED_GOBLIN_MINES_IDLE_AREA_ID)
+                .ToListAsync();
+
+            foreach (var action in activeActions)
+            {
+                action.Area = replacementArea;
+            }
+        }
+
+        context.Areas.Remove(retiredArea);
+        return true;
     }
 
     private static async Task SeedAdminData(LLDbContext context, IPasswordHasher<AppUser> hasher)

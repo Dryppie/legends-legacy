@@ -763,5 +763,164 @@
         "damageType": "Bleed"
       }
     ]
+  },
+  {
+    "id": "status.venomous_spit_poison",
+    "name": "Venomous Spit Poison",
+    "description": "Takes poison damage every 2 seconds.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 140,
+    "tags": [ "Status.Poison", "Pattern.Periodic" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.venomous_spit_poison.dot" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.venomous_spit_poison.dot",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 3,
+        "durationTicks": 140,
+        "intervalTicks": 20,
+        "attackType": "DamageOverTime",
+        "damageType": "Poison"
+      }
+    ]
+  },
+  {
+    "id": "status.toxic_bite_poison",
+    "name": "Toxic Bite Poison",
+    "description": "Takes poison damage over 10 seconds.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 100,
+    "tags": [ "Status.Poison", "Pattern.Periodic" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.toxic_bite_poison.dot" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.toxic_bite_poison.dot",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 4,
+        "durationTicks": 100,
+        "intervalTicks": 20,
+        "attackType": "DamageOverTime",
+        "damageType": "Poison"
+      }
+    ]
+  },
+  {
+    "id": "status.toxic_blood",
+    "name": "Toxic Blood",
+    "description": "Periodically refreshes Toxic Bite poison.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 100,
+    "tags": [ "Status.Poison", "Pattern.Periodic" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.toxic_blood.poison" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.toxic_blood.poison",
+        "operation": "ApplyStatus",
+        "target": "EventTarget",
+        "statusId": "status.toxic_bite_poison",
+        "baseValue": 1,
+        "durationTicks": 100,
+        "intervalTicks": 10
+      }
+    ]
+  },
+  {
+    "id": "status.bramble_shield",
+    "name": "Bramble Shield",
+    "description": "Retaliates against melee attackers with thorn damage.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 100,
+    "tags": [ "Status.Reflect", "Pattern.TimedBuff" ],
+    "triggers": [
+      {
+        "event": "OnMeleeAttacked",
+        "effectIds": [ "effect.bramble_shield.thorns" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.bramble_shield.thorns",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 8,
+        "attackType": "None",
+        "damageType": "Physical"
+      }
+    ]
+  },
+  {
+    "id": "status.venom_web_poison",
+    "name": "Venom Web Poison",
+    "description": "Takes poison damage every 5 seconds for 20 seconds.",
+    "stackingPolicy": "Refresh",
+    "maxStacks": 1,
+    "durationTicks": 200,
+    "tags": [ "Status.Poison", "Pattern.Periodic" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.venom_web_poison.dot" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.venom_web_poison.dot",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 5,
+        "durationTicks": 200,
+        "intervalTicks": 50,
+        "attackType": "DamageOverTime",
+        "damageType": "Poison"
+      }
+    ]
+  },
+  {
+    "id": "status.tainted_fangs_poison",
+    "name": "Tainted Fangs Poison",
+    "description": "Takes poison damage over 12 seconds.",
+    "stackingPolicy": "Stack",
+    "maxStacks": 5,
+    "durationTicks": 120,
+    "tags": [ "Status.Poison", "Pattern.Periodic" ],
+    "triggers": [
+      {
+        "event": "OnStatusApplied",
+        "effectIds": [ "effect.tainted_fangs_poison.dot" ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "effect.tainted_fangs_poison.dot",
+        "operation": "Damage",
+        "target": "EventTarget",
+        "baseValue": 4,
+        "durationTicks": 120,
+        "intervalTicks": 60,
+        "attackType": "DamageOverTime",
+        "damageType": "Poison"
+      }
+    ]
   }
 ]
