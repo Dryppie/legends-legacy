@@ -1,5 +1,5 @@
 using AutoMapper;
-using Domain.Models.AbilityDefinitions;
+using Domain.Models.Combat.Abilities;
 
 namespace Application.UseCases.Essences.Dtos;
 
@@ -7,20 +7,20 @@ public sealed class EssenceAbilityMappingProfile : Profile
 {
     public EssenceAbilityMappingProfile()
     {
-        CreateMap<AbilityDefinition, EssenceAbilityDto>().ConvertUsing<AbilityDefinitionConverter>();
+        CreateMap<AbilitySpec, EssenceAbilityDto>().ConvertUsing<AbilitySpecConverter>();
     }
 }
 
-public sealed class AbilityDefinitionConverter : ITypeConverter<AbilityDefinition, EssenceAbilityDto>
+public sealed class AbilitySpecConverter : ITypeConverter<AbilitySpec, EssenceAbilityDto>
 {
-    public EssenceAbilityDto Convert(AbilityDefinition source, EssenceAbilityDto destination, ResolutionContext context) =>
+    public EssenceAbilityDto Convert(AbilitySpec source, EssenceAbilityDto destination, ResolutionContext context) =>
         new(
             source.Id,
-            source.Kind,
+            source.Kind.ToString(),
             source.Name,
             source.Description,
-            source.CooldownSeconds,
-            source.Targeting,
+            source.CooldownTicks / 10d,
+            source.Effects.FirstOrDefault()?.Target.ToString() ?? AbilityTargetSelector.CurrentTarget.ToString(),
             source.Tags,
             source.Effects.Select(x => context.Mapper.Map<EssenceEffectDto>(x)).ToList());
 }

@@ -1,10 +1,6 @@
 using Application.Interfaces.Services.LL.Essences;
 using AutoMapper;
-using Domain.Interfaces.Combat;
-using Domain.Models.AbilityDefinitions;
-using Domain.Models.Combat.Abilities.Effects;
-using Domain.Models.Combat.Abilities.Effects.Actions;
-using Domain.Models.Combat.Abilities.ResourceCosts;
+using Domain.Models.Combat.Abilities;
 using Domain.Models.Essences;
 using Domain.Models.Essences.Definitions;
 
@@ -29,16 +25,13 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
 {
     private readonly IEssenceDefinitionRepository _definitions;
     private readonly IEssenceProgressionService _progression;
-    private readonly IStatusDefinitionService _statuses;
 
     public PlayerEssenceArchiveEntryConverter(
         IEssenceDefinitionRepository definitions,
-        IEssenceProgressionService progression,
-        IStatusDefinitionService statuses)
+        IEssenceProgressionService progression)
     {
         _definitions = definitions;
         _progression = progression;
-        _statuses = statuses;
     }
 
     public PlayerEssenceDto Convert(PlayerEssenceArchiveEntry source, PlayerEssenceDto destination, ResolutionContext context)
@@ -189,87 +182,28 @@ public sealed class PlayerEssenceArchiveEntryConverter : ITypeConverter<PlayerEs
         }
     }
 
-    private EssenceAbilityDto MapAbility(AbilityDefinition ability, PlayerEssence essence) =>
+    private EssenceAbilityDto MapAbility(AbilitySpec ability, PlayerEssence essence) =>
         new(
             ability.Id,
-            ability.Kind,
+            ability.Kind.ToString(),
             ability.Name,
             ability.Description,
-            ability.CooldownSeconds,
-            ability.Targeting,
+            ability.CooldownTicks / 10d,
+            ability.Effects.FirstOrDefault()?.Target.ToString() ?? AbilityTargetSelector.CurrentTarget.ToString(),
             ability.Tags,
             ability.Effects.Select(x => new EssenceEffectDto(
                 x.Id,
-                x.Type,
-                x.Target,
-                x.Scaling.BaseValue,
-                EssenceProgressionConstants.ScaleAbilityValue(x.Scaling.BaseValue, essence.Level, essence.AscensionTier, x.Type),
-                x.Attribute,
-                x.Status,
-                x.DurationSeconds is > 0
-                    ? EssenceProgressionConstants.ScaleEffectDurationSeconds(x.DurationSeconds.Value, essence.AscensionTier, x.Type, x.Status)
-                    : x.DurationSeconds,
-                x.Scaling.AttributeScaling
-                    .Select(scaling => new EssenceEffectScalingDto(scaling.Attribute.ToString(), scaling.Coefficient))
-                    .ToList(),
-                GetNestedEffects(x, essence).ToList())).ToList());
-
-    private IEnumerable<EssenceEffectDto> GetNestedEffects(AbilityEffectDefinition source, PlayerEssence essence)
-    {
-        if (!source.Type.Equals(AbilityEffectType.ApplyStatus, StringComparison.OrdinalIgnoreCase)
-            || string.IsNullOrWhiteSpace(source.Status)
-            || !_statuses.TryGetById(source.Status, out var status))
-        {
-            yield break;
-        }
-
-        foreach (var effect in status.Triggers.SelectMany(x => x.Actions))
-        {
-            if (MapNestedEffect(effect, essence) is { } mapped)
-            {
-                yield return mapped;
-            }
-        }
-    }
-
-    private static EssenceEffectDto? MapNestedEffect(EffectDefinition effect, PlayerEssence essence)
-    {
-        if (effect.Action is not CombatEffectAction action)
-        {
-            return null;
-        }
-
-        var type = action.Operation switch
-        {
-            CombatEffectOperation.Damage => AbilityEffectType.Damage,
-            CombatEffectOperation.RestoreResource when action.Resource == ResourceType.Health => AbilityEffectType.Heal,
-            CombatEffectOperation.RestoreResource when action.Resource == ResourceType.Barrier => AbilityEffectType.GrantBarrier,
-            CombatEffectOperation.ModifyAttribute => AbilityEffectType.ModifyAttribute,
-            CombatEffectOperation.ApplyStatus => AbilityEffectType.ApplyStatus,
-            CombatEffectOperation.ModifyStatusEffect => AbilityEffectType.ModifyStatusEffect,
-            _ => null
-        };
-
-        if (type is null)
-        {
-            return null;
-        }
-
-        var scaling = action.ScalingAttribute is { } attribute
-            ? new[] { new EssenceEffectScalingDto(attribute.ToString(), action.ScalingMultiplier) }
-            : Array.Empty<EssenceEffectScalingDto>();
-        var currentValue = EssenceProgressionConstants.ScaleAbilityValue(action.Magnitude, essence.Level, essence.AscensionTier, type);
-
-        return new EssenceEffectDto(
-            effect.Log,
-            type,
-            effect.Targeting.ToString(),
-            action.Magnitude,
-            currentValue,
-            action.Attribute?.ToString(),
-            action.StatusId,
-            null,
-            scaling,
-            []);
-    }
+                x.Operation.ToString(),
+                x.Target.ToString(),
+                x.BaseValue,
+                EssenceProgressionConstants.ScaleAbilityValue(x.BaseValue, essence.Level, essence.AscensionTier, x.Operation.ToString()),
+                x.Attribute?.ToString(),
+                x.StatusId,
+                x.DurationTicks > 0
+                    ? EssenceProgressionConstants.ScaleEffectDurationSeconds(x.DurationTicks / 10d, essence.AscensionTier, x.Operation.ToString(), x.StatusId)
+                    : null,
+                x.ScalingAttribute is { } attribute
+                    ? [new EssenceEffectScalingDto(attribute.ToString(), x.ScalingCoefficient)]
+                    : [],
+                [])).ToList());
 }

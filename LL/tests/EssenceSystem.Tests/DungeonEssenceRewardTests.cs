@@ -1,6 +1,7 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Dungeons;
 using Domain.Models.Dungeons;
+using Domain.Models.Dungeons.Runs;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
 using Domain.Models.LootTables;
@@ -9,6 +10,7 @@ using Persistence.LL;
 using Persistence.LL.Repositories.Items;
 using Services.LL.Combat.Layers.Rewards.Dungeon;
 using Services.LL.Combat.Layers.Rewards.Models;
+using Services.LL.Inventories;
 using Services.LL.Interfaces.Combat.Reward.Dungeon;
 
 namespace EssenceSystem.Tests;
@@ -21,8 +23,8 @@ public sealed class DungeonEssenceRewardTests
         await using var db = CreateDb();
         db.ItemBases.Add(new ItemBase
         {
-            Id = "item.monster_core.tier_1",
-            Name = "Tier 1 Monster Core",
+            Id = "item.monster_core.lesser",
+            Name = "Lesser Monster Core",
             ItemType = ItemType.Resource,
             Stackable = true
         });
@@ -31,17 +33,19 @@ public sealed class DungeonEssenceRewardTests
         var pendingRewards = new CapturingDungeonPendingRewardWriter();
         var applier = new DungeonCompletionRewardApplier(
             new SingleDungeonDefinitions(new DungeonDefinition { Id = "dungeon.tier_1", Tier = 1 }),
+            new EmptyDungeonRunRepository(),
             new EmptyLootTableRepository(),
             new ItemBaseRepository(db),
             new EmptyLootService(),
-            pendingRewards);
+            pendingRewards,
+            new InventoryItemFactory());
 
         await applier.ApplyAsync(new() { Id = Guid.NewGuid(), DungeonDefinitionId = "dungeon.tier_1" }, CancellationToken.None);
 
-        var reward = Assert.Single(pendingRewards.Loot);
-        Assert.Equal("item.monster_core.tier_1", reward.ItemInstance.ItemBaseId);
-        Assert.Equal(1, reward.Quantity);
-        Assert.Equal("Tier 1 Monster Core", pendingRewards.Source);
+        var batch = Assert.Single(pendingRewards.Batches, x => x.Source == "Grade I Monster Cores");
+        var reward = Assert.Single(batch.Loot);
+        Assert.Equal("item.monster_core.lesser", reward.ItemInstance.ItemBaseId);
+        Assert.InRange(reward.Quantity, 3, 6);
     }
 
     private static LLDbContext CreateDb()
@@ -63,6 +67,7 @@ public sealed class DungeonEssenceRewardTests
     {
         public IReadOnlyList<InventoryItem> Loot { get; private set; } = [];
         public string Source { get; private set; } = string.Empty;
+        public List<CapturedLootBatch> Batches { get; } = [];
 
         public Task AddAsync(
             DungeonCombatRewardFacts facts,
@@ -77,8 +82,25 @@ public sealed class DungeonEssenceRewardTests
         {
             Loot = loot;
             Source = source;
+            Batches.Add(new(source, loot));
             return Task.CompletedTask;
         }
+    }
+
+    private sealed record CapturedLootBatch(string Source, IReadOnlyList<InventoryItem> Loot);
+
+    private sealed class EmptyDungeonRunRepository : IDungeonRunRepository
+    {
+        public Task<bool> CreateDungeonRunAsync(DungeonRun dungeonRun, CancellationToken cancellationToken) => Task.FromResult(true);
+        public Task<bool> DeleteDungeonRunAsync(DungeonRun dungeonRun, CancellationToken cancellationToken) => Task.FromResult(true);
+        public Task<bool> AddPendingRewardAsync(DungeonRun dungeonRun, RunReward reward, CancellationToken cancellationToken) => Task.FromResult(true);
+        public Task<DungeonRun?> GetDungeonRunByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken) => Task.FromResult<DungeonRun?>(null);
+        public Task<DungeonRun?> GetDungeonRunByDungeonIdAsync(Guid dungeonId, CancellationToken cancellationToken) => Task.FromResult<DungeonRun?>(null);
+        public Task<IReadOnlyList<DungeonCompletionRecord>> GetCompletionRecordsAsync(Guid characterId, IReadOnlyCollection<string> dungeonDefinitionIds, CancellationToken cancellationToken) => Task.FromResult<IReadOnlyList<DungeonCompletionRecord>>([]);
+        public Task<IReadOnlyList<DungeonCompletionLeaderboardEntry>> GetCompletionLeaderboardAsync(IReadOnlyCollection<string> dungeonDefinitionIds, CancellationToken cancellationToken) => Task.FromResult<IReadOnlyList<DungeonCompletionLeaderboardEntry>>([]);
+        public Task<bool> HasCompletedDungeonAsync(Guid characterId, string dungeonDefinitionId, CancellationToken cancellationToken) => Task.FromResult(false);
+        public Task MarkDungeonCompletedAsync(Guid characterId, string dungeonDefinitionId, DateTimeOffset completedAt, CancellationToken cancellationToken) => Task.CompletedTask;
+        public Task<bool> UpdateDungeonRunAsync(DungeonRun dungeonRun, CancellationToken cancellationToken) => Task.FromResult(true);
     }
 
     private sealed class EmptyLootTableRepository : ILootTableRepository

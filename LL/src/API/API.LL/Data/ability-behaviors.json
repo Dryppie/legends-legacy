@@ -1,0 +1,1419 @@
+[
+  {
+    "id": "behavior.training.strike.damage",
+    "abilityId": "ability.training.strike",
+    "friendlyAbilityIds": [ "ability.training.strike" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.damage.main",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 20
+      }
+    ]
+  },
+  {
+    "id": "behavior.training.guard.barrier_reflect_status",
+    "abilityId": "ability.training.guard",
+    "friendlyAbilityIds": [ "ability.training.guard" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.barrier.main",
+        "eventType": "RestoreBarrier",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 18
+      },
+      {
+        "source": "status.training.reflect",
+        "eventType": "StatusEffect",
+        "targetId": "friendly",
+        "minCount": 1
+      }
+    ],
+    "expectedStatuses": [
+      {
+        "combatantId": "friendly",
+        "statusId": "status.training.reflect",
+        "minStacks": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.training.burn.applies_dot",
+    "abilityId": "ability.training.burn",
+    "friendlyAbilityIds": [ "ability.training.burn" ],
+    "maxTicks": 8,
+    "expectedLogs": [
+      {
+        "source": "status.training.burn",
+        "eventType": "StatusEffect",
+        "targetId": "hostile-1",
+        "minCount": 1
+      },
+      {
+        "source": "effect.burn.dot",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 2,
+        "minMagnitude": 3
+      }
+    ],
+    "expectedStatuses": [
+      {
+        "combatantId": "hostile-1",
+        "statusId": "status.training.burn",
+        "minStacks": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.spiked_defense.reflects_melee",
+    "abilityId": "ability.essence.legacy.skeleton_warrior.spiked_defense",
+    "friendlyAbilityIds": [ "ability.essence.legacy.skeleton_warrior.spiked_defense" ],
+    "hostileAbilityIds": [ "ability.essence.legacy.glade_panther.ambush_strike" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.spiked_defense.reflect",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 6
+      }
+    ]
+  },
+  {
+    "id": "behavior.plague_swipe.two_target_dot",
+    "abilityId": "ability.essence.legacy.plague_ghoul.plague_swipe",
+    "friendlyAbilityIds": [ "ability.essence.legacy.plague_ghoul.plague_swipe" ],
+    "hostileCount": 2,
+    "maxTicks": 35,
+    "expectedLogs": [
+      {
+        "source": "effect.plague_swipe.damage",
+        "eventType": "Damage",
+        "minCount": 2
+      },
+      {
+        "source": "effect.plague_swipe.dot",
+        "eventType": "Damage",
+        "minCount": 2
+      }
+    ]
+  },
+  {
+    "id": "behavior.feral_pounce.applies_impact_damage",
+    "abilityId": "ability.essence.legacy.feral_ghoul.feral_pounce",
+    "friendlyAbilityIds": [ "ability.essence.legacy.feral_ghoul.feral_pounce" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "status.feral_pounce_impact",
+        "eventType": "StatusEffect",
+        "targetId": "hostile-1",
+        "minCount": 1
+      },
+      {
+        "source": "effect.feral_pounce.damage",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 41
+      }
+    ]
+  },
+  {
+    "id": "behavior.goblin_ambusher.cheap_shot.damage_and_bleed",
+    "abilityId": "ability.essence.goblin_ambusher.cheap_shot",
+    "friendlyAbilityIds": [ "ability.essence.goblin_ambusher.cheap_shot" ],
+    "maxTicks": 25,
+    "expectedLogs": [
+      {
+        "source": "effect.damage.main",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 18
+      },
+      {
+        "source": "status.bleed",
+        "eventType": "StatusEffect",
+        "targetId": "hostile-1",
+        "minCount": 1
+      },
+      {
+        "source": "effect.bleed.dot",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 2
+      }
+    ],
+    "expectedStatuses": [
+      {
+        "combatantId": "hostile-1",
+        "statusId": "status.bleed",
+        "minStacks": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.skeleton_guardian.bone_bulwark.barrier_and_block",
+    "abilityId": "ability.essence.skeleton_guardian.bone_bulwark",
+    "friendlyAbilityIds": [ "ability.essence.skeleton_guardian.bone_bulwark" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.barrier.main",
+        "eventType": "RestoreBarrier",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 24
+      },
+      {
+        "source": "effect.buff.block",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 4
+      }
+    ]
+  },
+  {
+    "id": "behavior.fire_ant.burning_mandibles.damage_and_burn",
+    "abilityId": "ability.essence.fire_ant.burning_mandibles",
+    "friendlyAbilityIds": [ "ability.essence.fire_ant.burning_mandibles" ],
+    "maxTicks": 25,
+    "expectedLogs": [
+      {
+        "source": "effect.damage.fire",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 16
+      },
+      {
+        "source": "status.burn",
+        "eventType": "StatusEffect",
+        "targetId": "hostile-1",
+        "minCount": 1
+      },
+      {
+        "source": "effect.burn.dot",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 2
+      }
+    ]
+  },
+  {
+    "id": "behavior.cave_bat.screech.damage_and_precision_debuff",
+    "abilityId": "ability.essence.cave_bat.screech",
+    "friendlyAbilityIds": [ "ability.essence.cave_bat.screech" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.damage.sonic",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 10
+      },
+      {
+        "source": "effect.debuff.accuracy",
+        "eventType": "Debuff",
+        "targetId": "hostile-1",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.necroshade_wraith.wraith_hex.damage_and_curse",
+    "abilityId": "ability.essence.necroshade_wraith.wraith_hex",
+    "friendlyAbilityIds": [ "ability.essence.necroshade_wraith.wraith_hex" ],
+    "maxTicks": 25,
+    "expectedLogs": [
+      {
+        "source": "effect.damage.hex",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 14
+      },
+      {
+        "source": "status.curse",
+        "eventType": "StatusEffect",
+        "targetId": "hostile-1",
+        "minCount": 1
+      },
+      {
+        "source": "effect.curse.dot",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 2
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.goblin.sneak_attack.bleed_damage",
+    "abilityId": "ability.essence.legacy.goblin.sneak_attack",
+    "friendlyAbilityIds": [ "ability.essence.legacy.goblin.sneak_attack" ],
+    "maxTicks": 45,
+    "expectedLogs": [
+      {
+        "source": "status.sneak_attack_bleed",
+        "eventType": "StatusEffect",
+        "targetId": "hostile-1",
+        "minCount": 1
+      },
+      {
+        "source": "effect.initial.damage",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 12
+      },
+      {
+        "source": "effect.bleed.dot",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 4
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.goblin_warrior.raging_cleave.two_enemy_damage",
+    "abilityId": "ability.essence.legacy.goblin_warrior.raging_cleave",
+    "friendlyAbilityIds": [ "ability.essence.legacy.goblin_warrior.raging_cleave" ],
+    "hostileCount": 2,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.cleave.damage",
+        "eventType": "Damage",
+        "minCount": 2,
+        "minMagnitude": 18
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.goblin_warrior.reckless_assault.start_buff_debuff",
+    "abilityId": "ability.essence.legacy.goblin_warrior.reckless_assault",
+    "friendlyAbilityIds": [ "ability.essence.legacy.goblin_warrior.reckless_assault" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.buff.power",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 20
+      },
+      {
+        "source": "effect.debuff.armor",
+        "eventType": "Debuff",
+        "targetId": "friendly",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.goblin_archer.snipers_strike.ranged_damage",
+    "abilityId": "ability.essence.legacy.goblin_archer.snipers_strike",
+    "friendlyAbilityIds": [ "ability.essence.legacy.goblin_archer.snipers_strike" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.shot.damage",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 20
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.large_rat.big.max_health_buff",
+    "abilityId": "ability.essence.legacy.large_rat.big",
+    "friendlyAbilityIds": [ "ability.essence.legacy.large_rat.big" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.buff.max_health",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 50
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.frost_imp.ice_touch.requires_cold_stacks",
+    "abilityId": "ability.essence.legacy.frost_imp.ice_touch",
+    "friendlyAbilityIds": [ "ability.essence.legacy.frost_imp.ice_touch" ],
+    "initialStatuses": [
+      {
+        "combatantId": "hostile-1",
+        "statusId": "status.cold",
+        "stacks": 2
+      }
+    ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "status.frost_imp.freeze",
+        "eventType": "StatusEffect",
+        "targetId": "hostile-1",
+        "minCount": 1
+      }
+    ],
+    "expectedStatuses": [
+      {
+        "combatantId": "hostile-1",
+        "statusId": "status.frost_imp.freeze",
+        "minStacks": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.frost_imp.cold_aura.melee_attacker_gets_cold",
+    "abilityId": "ability.essence.legacy.frost_imp.cold_aura",
+    "friendlyAbilityIds": [ "ability.essence.legacy.frost_imp.cold_aura" ],
+    "hostileAbilityIds": [ "ability.essence.legacy.glade_panther.ambush_strike" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "status.cold",
+        "eventType": "StatusEffect",
+        "targetId": "hostile-1",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.shadow_imp.shadow_image.summon_and_status",
+    "abilityId": "ability.essence.legacy.shadow_imp.shadow_image",
+    "friendlyAbilityIds": [ "ability.essence.legacy.shadow_imp.shadow_image" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.shadow_image.summon",
+        "eventType": "Summon",
+        "minCount": 1
+      },
+      {
+        "source": "status.shadow_image",
+        "eventType": "StatusEffect",
+        "targetId": "friendly",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.vampire_bat.bloodthirsty_fangs.lifesteal",
+    "abilityId": "ability.essence.legacy.vampire_bat.bloodthirsty_fangs",
+    "friendlyAbilityIds": [ "ability.essence.legacy.vampire_bat.bloodthirsty_fangs" ],
+    "friendlyHealth": 150,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.fangs.damage",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 21
+      },
+      {
+        "source": "effect.fangs.damage",
+        "eventType": "Heal",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 6
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.green_slime.acid_splash.all_enemies_poison",
+    "abilityId": "ability.essence.legacy.green_slime.acid_splash",
+    "friendlyAbilityIds": [ "ability.essence.legacy.green_slime.acid_splash" ],
+    "hostileCount": 2,
+    "maxTicks": 35,
+    "expectedLogs": [
+      {
+        "source": "status.green_slime.poison",
+        "eventType": "StatusEffect",
+        "minCount": 2
+      },
+      {
+        "source": "effect.green_slime_poison.dot",
+        "eventType": "Damage",
+        "minCount": 2,
+        "minMagnitude": 4
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.green_slime.corrosive_ooze.melee_attacker_gets_poison",
+    "abilityId": "ability.essence.legacy.green_slime.corrosive_ooze",
+    "friendlyAbilityIds": [ "ability.essence.legacy.green_slime.corrosive_ooze" ],
+    "hostileAbilityIds": [ "ability.essence.legacy.glade_panther.ambush_strike" ],
+    "maxTicks": 45,
+    "expectedLogs": [
+      {
+        "source": "status.corrosive_ooze.poison",
+        "eventType": "StatusEffect",
+        "targetId": "hostile-1",
+        "minCount": 1
+      },
+      {
+        "source": "effect.corrosive_ooze_poison.dot",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 2
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.red_slime.ignite_core.everyone_but_self_burns",
+    "abilityId": "ability.essence.legacy.red_slime.ignite_core",
+    "friendlyAbilityIds": [ "ability.essence.legacy.red_slime.ignite_core" ],
+    "hostileCount": 2,
+    "maxTicks": 15,
+    "expectedLogs": [
+      {
+        "source": "status.red_slime.fire_aura",
+        "eventType": "StatusEffect",
+        "minCount": 2
+      },
+      {
+        "source": "effect.fire_aura.dot",
+        "eventType": "Damage",
+        "minCount": 2,
+        "minMagnitude": 3
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.transparent_slime.transparent_engulf.stun_and_dot",
+    "abilityId": "ability.essence.legacy.transparent_slime.transparent_engulf",
+    "friendlyAbilityIds": [ "ability.essence.legacy.transparent_slime.transparent_engulf" ],
+    "maxTicks": 15,
+    "expectedLogs": [
+      {
+        "source": "status.transparent_engulfed",
+        "eventType": "StatusEffect",
+        "targetId": "hostile-1",
+        "minCount": 1
+      },
+      {
+        "source": "effect.engulf.damage",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 3
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.pixie.pixie_burst.all_enemy_damage",
+    "abilityId": "ability.essence.legacy.pixie.pixie_burst",
+    "friendlyAbilityIds": [ "ability.essence.legacy.pixie.pixie_burst" ],
+    "hostileCount": 2,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.pixie_burst.damage",
+        "eventType": "Damage",
+        "minCount": 2,
+        "minMagnitude": 30
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.pixie.resonant_chime.ability_use_buffs_allies",
+    "abilityId": "ability.essence.legacy.pixie.resonant_chime",
+    "friendlyAbilityIds": [
+      "ability.training.strike",
+      "ability.essence.legacy.pixie.resonant_chime"
+    ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.resonant_chime.crit_chance",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.hobgoblin.frenzy.self_buffs",
+    "abilityId": "ability.essence.legacy.hobgoblin.frenzy",
+    "friendlyAbilityIds": [ "ability.essence.legacy.hobgoblin.frenzy" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.frenzy.cooldown",
+        "eventType": "Debuff",
+        "targetId": "friendly",
+        "minCount": 1
+      },
+      {
+        "source": "effect.frenzy.crit_chance",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 25
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.hobgoblin.savage_onslaught.low_health_power",
+    "abilityId": "ability.essence.legacy.hobgoblin.savage_onslaught",
+    "friendlyAbilityIds": [ "ability.essence.legacy.hobgoblin.savage_onslaught" ],
+    "hostileAbilityIds": [ "ability.essence.legacy.feral_ghoul.feral_pounce" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.savage_onslaught.power",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 95
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.ravenous_ghoul.draining_claws.damage_and_power_debuff",
+    "abilityId": "ability.essence.legacy.ravenous_ghoul.draining_claws",
+    "friendlyAbilityIds": [ "ability.essence.legacy.ravenous_ghoul.draining_claws" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "status.draining_claws_debuff",
+        "eventType": "StatusEffect",
+        "targetId": "hostile-1",
+        "minCount": 1
+      },
+      {
+        "source": "effect.draining_claws.damage",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 43
+      },
+      {
+        "source": "effect.draining_claws.power",
+        "eventType": "Debuff",
+        "targetId": "hostile-1",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.ravenous_ghoul.vile_feast.heals_on_death",
+    "abilityId": "ability.essence.legacy.ravenous_ghoul.vile_feast",
+    "friendlyAbilityIds": [
+      "ability.essence.legacy.ravenous_ghoul.vile_feast",
+      "ability.essence.legacy.skeleton_mage.siphon"
+    ],
+    "friendlyHealth": 150,
+    "hostileHealth": 16,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.siphon.damage",
+        "eventType": "Death",
+        "targetId": "hostile-1",
+        "minCount": 1
+      },
+      {
+        "source": "effect.vile_feast.heal",
+        "eventType": "Heal",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 50
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.skeleton_mage.protective_bone_barrier.periodic_barrier",
+    "abilityId": "ability.essence.legacy.skeleton_mage.protective_bone_barrier",
+    "friendlyAbilityIds": [ "ability.essence.legacy.skeleton_mage.protective_bone_barrier" ],
+    "maxTicks": 105,
+    "expectedLogs": [
+      {
+        "source": "effect.protective_bone_barrier.periodic",
+        "eventType": "RestoreBarrier",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 25
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.skeleton_warrior.bone_shield.damage_reduction_buff",
+    "abilityId": "ability.essence.legacy.skeleton_warrior.bone_shield",
+    "friendlyAbilityIds": [ "ability.essence.legacy.skeleton_warrior.bone_shield" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.bone_shield.damage_reduction",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 10
+      }
+    ]
+  },
+  {
+    "id": "behavior.goblin_ambusher.cowards_opening.wounded_hit_crit_buff",
+    "abilityId": "ability.essence.goblin_ambusher.cowards_opening",
+    "friendlyAbilityIds": [
+      "ability.essence.legacy.feral_ghoul.feral_pounce",
+      "ability.essence.goblin_ambusher.cowards_opening"
+    ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.buff.crit_chance",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 3
+      }
+    ]
+  },
+  {
+    "id": "behavior.cave_bat.skittering_wings.dodge_precision_buff",
+    "abilityId": "ability.essence.cave_bat.skittering_wings",
+    "friendlyAbilityIds": [ "ability.essence.cave_bat.skittering_wings" ],
+    "hostileAbilityIds": [ "ability.essence.legacy.glade_panther.ambush_strike" ],
+    "friendlyStats": {
+      "DodgeChance": 100
+    },
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.buff.attack_speed",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 4
+      }
+    ]
+  },
+  {
+    "id": "behavior.necroshade_wraith.grave_whisper.kill_restores_cooldown",
+    "abilityId": "ability.essence.necroshade_wraith.grave_whisper",
+    "friendlyAbilityIds": [
+      "ability.essence.necroshade_wraith.grave_whisper",
+      "ability.essence.legacy.skeleton_mage.siphon"
+    ],
+    "hostileHealth": 16,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.restore.cooldown",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 3
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.goblin.pocket_dirt.dodge_precision_debuff",
+    "abilityId": "ability.essence.legacy.goblin.pocket_dirt",
+    "friendlyAbilityIds": [ "ability.essence.legacy.goblin.pocket_dirt" ],
+    "hostileAbilityIds": [ "ability.essence.legacy.glade_panther.ambush_strike" ],
+    "friendlyStats": {
+      "DodgeChance": 100
+    },
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.debuff.precision",
+        "eventType": "Debuff",
+        "targetId": "hostile-1",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.large_rat.tail_wrap.damage",
+    "abilityId": "ability.essence.legacy.large_rat.tail_wrap",
+    "friendlyAbilityIds": [ "ability.essence.legacy.large_rat.tail_wrap" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.tail.damage",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 22
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.flame_imp.firebomb_toss.magical_damage",
+    "abilityId": "ability.essence.legacy.flame_imp.firebomb_toss",
+    "friendlyAbilityIds": [ "ability.essence.legacy.flame_imp.firebomb_toss" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.firebomb.damage",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 21
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.shadow_imp.shadowy_presence.start_dodge_buff",
+    "abilityId": "ability.essence.legacy.shadow_imp.shadowy_presence",
+    "friendlyAbilityIds": [ "ability.essence.legacy.shadow_imp.shadowy_presence" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.buff.dodge",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 2
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.vampire_bat.dark_vitality.extra_lifesteal_heal",
+    "abilityId": "ability.essence.legacy.vampire_bat.dark_vitality",
+    "friendlyAbilityIds": [
+      "ability.essence.legacy.vampire_bat.bloodthirsty_fangs",
+      "ability.essence.legacy.vampire_bat.dark_vitality"
+    ],
+    "friendlyHealth": 150,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.dark_vitality.heal",
+        "eventType": "Heal",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 4
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.blue_slime.sweet_water.heal_over_time",
+    "abilityId": "ability.essence.legacy.blue_slime.sweet_water",
+    "friendlyAbilityIds": [ "ability.essence.legacy.blue_slime.sweet_water" ],
+    "friendlyHealth": 150,
+    "maxTicks": 25,
+    "expectedLogs": [
+      {
+        "source": "effect.sweet_water.heal",
+        "eventType": "Heal",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 12
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.blue_slime.absorptive_shell.attacked_cooldown_buff",
+    "abilityId": "ability.essence.legacy.blue_slime.absorptive_shell",
+    "friendlyAbilityIds": [ "ability.essence.legacy.blue_slime.absorptive_shell" ],
+    "hostileAbilityIds": [ "ability.essence.legacy.glade_panther.ambush_strike" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.shell.cooldown",
+        "eventType": "Debuff",
+        "targetId": "friendly",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.brown_slime.mud_armor.damage_reduction_buff",
+    "abilityId": "ability.essence.legacy.brown_slime.mud_armor",
+    "friendlyAbilityIds": [ "ability.essence.legacy.brown_slime.mud_armor" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.mud_armor.damage_reduction",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 2
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.brown_slime.earthly_fortitude.start_armor_buff",
+    "abilityId": "ability.essence.legacy.brown_slime.earthly_fortitude",
+    "friendlyAbilityIds": [ "ability.essence.legacy.brown_slime.earthly_fortitude" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.earthly_fortitude.armor",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 15
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.rainbow_slime.colorful_shield.ability_use_barrier",
+    "abilityId": "ability.essence.legacy.rainbow_slime.colorful_shield",
+    "friendlyAbilityIds": [
+      "ability.training.strike",
+      "ability.essence.legacy.rainbow_slime.colorful_shield"
+    ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.colorful_shield.barrier",
+        "eventType": "RestoreBarrier",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 20
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.red_slime.fire_body.start_resistance_buff",
+    "abilityId": "ability.essence.legacy.red_slime.fire_body",
+    "friendlyAbilityIds": [ "ability.essence.legacy.red_slime.fire_body" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.fire_body.resistance",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 5
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.transparent_slime.transparent_shift.low_health_dodge_status",
+    "abilityId": "ability.essence.legacy.transparent_slime.transparent_shift",
+    "friendlyAbilityIds": [ "ability.essence.legacy.transparent_slime.transparent_shift" ],
+    "hostileAbilityIds": [ "ability.essence.legacy.feral_ghoul.feral_pounce" ],
+    "hostileStats": {
+      "Power": 400
+    },
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "status.transparent_dodge_boost",
+        "eventType": "StatusEffect",
+        "targetId": "friendly",
+        "minCount": 1
+      },
+      {
+        "source": "effect.transparent_dodge_boost.dodge",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 40
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.enchanted_fairy.faes_embrace.barrier",
+    "abilityId": "ability.essence.legacy.enchanted_fairy.faes_embrace",
+    "friendlyAbilityIds": [ "ability.essence.legacy.enchanted_fairy.faes_embrace" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.faes_embrace.barrier",
+        "eventType": "RestoreBarrier",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 20
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.glade_panther.ambush_strike.damage",
+    "abilityId": "ability.essence.legacy.glade_panther.ambush_strike",
+    "friendlyAbilityIds": [ "ability.essence.legacy.glade_panther.ambush_strike" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.ambush.damage",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 25
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.glade_panther.razor_claws.start_crit_damage_buff",
+    "abilityId": "ability.essence.legacy.glade_panther.razor_claws",
+    "friendlyAbilityIds": [ "ability.essence.legacy.glade_panther.razor_claws" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.razor_claws.crit_damage",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 15
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.illusion_fox.foxfire_wisp.gains_foxfire_stack",
+    "abilityId": "ability.essence.legacy.illusion_fox.foxfire_wisp",
+    "friendlyAbilityIds": [ "ability.essence.legacy.illusion_fox.foxfire_wisp" ],
+    "maxTicks": 55,
+    "expectedLogs": [
+      {
+        "source": "status.foxfire_stack",
+        "eventType": "StatusEffect",
+        "targetId": "friendly",
+        "minCount": 1
+      }
+    ],
+    "expectedStatuses": [
+      {
+        "combatantId": "friendly",
+        "statusId": "status.foxfire_stack",
+        "minStacks": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.nightshade_blossom.necrotic_spores.all_enemy_debuff",
+    "abilityId": "ability.essence.legacy.nightshade_blossom.necrotic_spores",
+    "friendlyAbilityIds": [ "ability.essence.legacy.nightshade_blossom.necrotic_spores" ],
+    "hostileCount": 2,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "status.necrotic_spore_debuff",
+        "eventType": "StatusEffect",
+        "minCount": 2
+      },
+      {
+        "source": "effect.necrotic_spores.health_regen",
+        "eventType": "Debuff",
+        "minCount": 2
+      },
+      {
+        "source": "effect.necrotic_spores.spirit",
+        "eventType": "Debuff",
+        "minCount": 2
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.nightshade_blossom.twilight_bloom.periodic_heal",
+    "abilityId": "ability.essence.legacy.nightshade_blossom.twilight_bloom",
+    "friendlyAbilityIds": [ "ability.essence.legacy.nightshade_blossom.twilight_bloom" ],
+    "friendlyHealth": 100,
+    "maxTicks": 115,
+    "expectedLogs": [
+      {
+        "source": "effect.twilight_bloom.heal",
+        "eventType": "Heal",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 29
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.skeleton_archer.bone_arrow.ranged_damage",
+    "abilityId": "ability.essence.legacy.skeleton_archer.bone_arrow",
+    "friendlyAbilityIds": [ "ability.essence.legacy.skeleton_archer.bone_arrow" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.bone_arrow.damage",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 30
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.skeleton_mage.siphon.magical_damage",
+    "abilityId": "ability.essence.legacy.skeleton_mage.siphon",
+    "friendlyAbilityIds": [ "ability.essence.legacy.skeleton_mage.siphon" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.siphon.damage",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 31
+      }
+    ]
+  },
+  {
+    "id": "behavior.skeleton_guardian.rattle_guard.proc_defense_buff",
+    "abilityId": "ability.essence.skeleton_guardian.rattle_guard",
+    "friendlyAbilityIds": [ "ability.essence.skeleton_guardian.rattle_guard" ],
+    "hostileAbilityIds": [ "ability.essence.legacy.glade_panther.ambush_strike" ],
+    "randomSeed": 14,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.guard.defense",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 2
+      }
+    ]
+  },
+  {
+    "id": "behavior.fire_ant.colony_heat.proc_power_buff",
+    "abilityId": "ability.essence.fire_ant.colony_heat",
+    "friendlyAbilityIds": [
+      "ability.training.strike",
+      "ability.essence.fire_ant.colony_heat"
+    ],
+    "randomSeed": 14,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.buff.attack_power",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 3
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.goblin_archer.poisoned_arrows.proc_poison",
+    "abilityId": "ability.essence.legacy.goblin_archer.poisoned_arrows",
+    "friendlyAbilityIds": [
+      "ability.essence.legacy.skeleton_archer.bone_arrow",
+      "ability.essence.legacy.goblin_archer.poisoned_arrows"
+    ],
+    "randomSeed": 14,
+    "maxTicks": 15,
+    "expectedLogs": [
+      {
+        "source": "status.poisoned_arrow",
+        "eventType": "StatusEffect",
+        "targetId": "hostile-1",
+        "minCount": 1
+      },
+      {
+        "source": "effect.poison.dot",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 2
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.flame_imp.hot_aura.proc_burn_damage",
+    "abilityId": "ability.essence.legacy.flame_imp.hot_aura",
+    "friendlyAbilityIds": [ "ability.essence.legacy.flame_imp.hot_aura" ],
+    "hostileAbilityIds": [ "ability.essence.legacy.glade_panther.ambush_strike" ],
+    "randomSeed": 14,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.hot_aura.damage",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 4
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.rainbow_slime.unstable_colors.proc_ally_power_buff",
+    "abilityId": "ability.essence.legacy.rainbow_slime.unstable_colors",
+    "friendlyAbilityIds": [ "ability.essence.legacy.rainbow_slime.unstable_colors" ],
+    "randomSeed": 1,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "status.unstable_colors.buff",
+        "eventType": "StatusEffect",
+        "targetId": "friendly",
+        "minCount": 1
+      },
+      {
+        "source": "effect.unstable_colors.power_one",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 20
+      },
+      {
+        "source": "effect.unstable_colors.power_two",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 20
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.enchanted_fairy.enchanted_charm.proc_stun",
+    "abilityId": "ability.essence.legacy.enchanted_fairy.enchanted_charm",
+    "friendlyAbilityIds": [ "ability.essence.legacy.enchanted_fairy.enchanted_charm" ],
+    "randomSeed": 14,
+    "maxTicks": 185,
+    "expectedLogs": [
+      {
+        "source": "status.charmed_stun",
+        "eventType": "StatusEffect",
+        "targetId": "hostile-1",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.illusion_fox.distracting_illusion.proc_precision_debuff",
+    "abilityId": "ability.essence.legacy.illusion_fox.distracting_illusion",
+    "friendlyAbilityIds": [ "ability.essence.legacy.illusion_fox.distracting_illusion" ],
+    "randomSeed": 1,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "status.illusion_fox.accuracy_debuff",
+        "eventType": "StatusEffect",
+        "targetId": "hostile-1",
+        "minCount": 1
+      },
+      {
+        "source": "effect.accuracy_debuff.precision",
+        "eventType": "Debuff",
+        "targetId": "hostile-1",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.feral_ghoul.shredding_claws.proc_bleed",
+    "abilityId": "ability.essence.legacy.feral_ghoul.shredding_claws",
+    "friendlyAbilityIds": [
+      "ability.essence.legacy.glade_panther.ambush_strike",
+      "ability.essence.legacy.feral_ghoul.shredding_claws"
+    ],
+    "randomSeed": 14,
+    "maxTicks": 15,
+    "expectedLogs": [
+      {
+        "source": "status.shredding_claws_bleed",
+        "eventType": "StatusEffect",
+        "targetId": "hostile-1",
+        "minCount": 1
+      },
+      {
+        "source": "effect.shredding_claws_bleed.dot",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 4
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.plague_ghoul.pestilent_touch.proc_poison",
+    "abilityId": "ability.essence.legacy.plague_ghoul.pestilent_touch",
+    "friendlyAbilityIds": [
+      "ability.essence.legacy.glade_panther.ambush_strike",
+      "ability.essence.legacy.plague_ghoul.pestilent_touch"
+    ],
+    "randomSeed": 14,
+    "maxTicks": 25,
+    "expectedLogs": [
+      {
+        "source": "status.pestilent_touch_poison",
+        "eventType": "StatusEffect",
+        "targetId": "hostile-1",
+        "minCount": 1
+      },
+      {
+        "source": "effect.pestilent_touch_poison.dot",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 5
+      }
+    ]
+  },
+  {
+    "id": "behavior.legacy.skeleton_archer.piercing_arrows.proc_bleed",
+    "abilityId": "ability.essence.legacy.skeleton_archer.piercing_arrows",
+    "friendlyAbilityIds": [
+      "ability.essence.legacy.skeleton_archer.bone_arrow",
+      "ability.essence.legacy.skeleton_archer.piercing_arrows"
+    ],
+    "randomSeed": 14,
+    "maxTicks": 35,
+    "expectedLogs": [
+      {
+        "source": "status.piercing_arrow_bleed",
+        "eventType": "StatusEffect",
+        "targetId": "hostile-1",
+        "minCount": 1
+      },
+      {
+        "source": "effect.piercing_arrow_bleed.dot",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 5
+      }
+    ]
+  },
+  {
+    "id": "behavior.summon.shadow_image.shadow_strike.direct_damage",
+    "abilityId": "ability.summon.shadow_image.shadow_strike",
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "Shadow Strike",
+        "eventType": "AbilityUse",
+        "minCount": 1
+      },
+      {
+        "source": "effect.shadow_image.shadow_strike.damage",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 18
+      }
+    ]
+  },
+  {
+    "id": "behavior.evolved.goblin_ambusher.cheap_shot_runs",
+    "abilityId": "ability.essence.goblin_ambusher.cheap_shot",
+    "evolvedFriendlyEssenceIds": [ "essence.goblin_ambusher" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.damage.main",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 18
+      },
+      {
+        "source": "status.bleed",
+        "eventType": "StatusEffect",
+        "targetId": "hostile-1",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.evolved.skeleton_guardian.taunt",
+    "abilityId": "ability.essence.skeleton_guardian.bone_bulwark",
+    "evolvedFriendlyEssenceIds": [ "essence.skeleton_guardian" ],
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.barrier.main",
+        "eventType": "RestoreBarrier",
+        "targetId": "friendly",
+        "minCount": 1
+      },
+      {
+        "source": "status.taunt",
+        "eventType": "StatusEffect",
+        "targetId": "friendly",
+        "minCount": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.evolved.fire_ant.lesser_burn_spread",
+    "abilityId": "ability.essence.fire_ant.burning_mandibles",
+    "evolvedFriendlyEssenceIds": [ "essence.fire_ant" ],
+    "hostileCount": 2,
+    "maxTicks": 25,
+    "expectedLogs": [
+      {
+        "source": "status.burn",
+        "eventType": "StatusEffect",
+        "minCount": 1
+      },
+      {
+        "source": "status.lesser_burn",
+        "eventType": "StatusEffect",
+        "minCount": 1
+      },
+      {
+        "source": "effect.lesser_burn.dot",
+        "eventType": "Damage",
+        "minCount": 1,
+        "minMagnitude": 1
+      }
+    ]
+  },
+  {
+    "id": "behavior.evolved.cave_bat.vulnerable_mark",
+    "abilityId": "ability.essence.cave_bat.screech",
+    "evolvedFriendlyEssenceIds": [ "essence.cave_bat" ],
+    "basicAttackIntervalTicks": 1,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "status.vulnerable_mark",
+        "eventType": "StatusEffect",
+        "targetId": "hostile-1",
+        "minCount": 1
+      },
+      {
+        "source": "effect.vulnerable_mark.damage",
+        "eventType": "Damage",
+        "targetId": "hostile-1",
+        "minCount": 1,
+        "minMagnitude": 5
+      }
+    ]
+  },
+  {
+    "id": "behavior.evolved.necroshade_wraith.cooldown_bonus",
+    "abilityId": "ability.essence.necroshade_wraith.grave_whisper",
+    "evolvedFriendlyEssenceIds": [ "essence.necroshade_wraith" ],
+    "hostileHealth": 10,
+    "maxTicks": 1,
+    "expectedLogs": [
+      {
+        "source": "effect.restore.cooldown",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 3
+      },
+      {
+        "source": "effect.restore.cooldown.evolved",
+        "eventType": "Buff",
+        "targetId": "friendly",
+        "minCount": 1,
+        "minMagnitude": 1
+      }
+    ]
+  }
+]

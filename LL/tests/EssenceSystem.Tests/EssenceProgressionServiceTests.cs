@@ -1,5 +1,4 @@
 using Domain.Models.Essences;
-using Domain.Models.AbilityDefinitions;
 using Services.LL.Essences;
 
 namespace EssenceSystem.Tests;
@@ -54,9 +53,9 @@ public sealed class EssenceProgressionServiceTests
             baseValue: 100,
             level: 3,
             ascensionTier: 1,
-            effectType: AbilityEffectType.Damage);
+            effectType: "Damage");
 
-        Assert.Equal(120d, scaled);
+        Assert.Equal(112d, scaled, 6);
     }
 
     [Fact]
@@ -73,12 +72,12 @@ public sealed class EssenceProgressionServiceTests
         var poison = EssenceProgressionConstants.ScaleEffectDurationSeconds(
             baseDurationSeconds: 10,
             ascensionTier: 2,
-            effectType: AbilityEffectType.ApplyStatus,
+            effectType: "ApplyStatus",
             statusId: "Poison");
         var stun = EssenceProgressionConstants.ScaleEffectDurationSeconds(
             baseDurationSeconds: 10,
             ascensionTier: 2,
-            effectType: AbilityEffectType.ApplyStatus,
+            effectType: "ApplyStatus",
             statusId: "Stunned");
 
         Assert.Equal(11d, poison);

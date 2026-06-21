@@ -39,6 +39,11 @@ export interface EntityStats {
   healingDone: number;
   healingReceived: number;
   healthRegenerated: number;
+  selfDamageDone: number;
+  selfDamageTaken: number;
+  alliedDamageDone: number;
+  alliedDamageTaken: number;
+  team: string;
 }
 
 export interface AbilityStats {
@@ -50,6 +55,8 @@ export interface AbilityStats {
   crits: number;
   summons: number;
   stuns: number;
+  selfDamage: number;
+  alliedDamage: number;
 }
 
 export interface SimpleCombatEntityDto {

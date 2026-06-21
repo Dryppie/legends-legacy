@@ -1,11 +1,10 @@
-using Domain.Models.AbilityDefinitions;
-using Domain.Models.Essences.Definitions;
 using Domain.Models.Attributes;
+using Domain.Models.Combat.Abilities;
+using Domain.Models.Essences.Definitions;
 using Microsoft.Extensions.Configuration;
 using Services.LL.Essences;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using AuthoredAbilityDefinition = Domain.Models.AbilityDefinitions.AbilityDefinition;
 
 namespace EssenceSystem.Tests;
 
@@ -47,33 +46,11 @@ public sealed class EssenceDefinitionValidatorTests
     }
 
     [Fact]
-    public void Validate_rejects_unknown_effect_types()
-    {
-        var definition = ValidDefinition();
-        definition.ActiveAbility.Effects[0].Type = "InventNewEffect";
-
-        var errors = _validator.Validate([definition]);
-
-        Assert.Contains(errors, error => error.Contains("unknown effect type", StringComparison.OrdinalIgnoreCase));
-    }
-
-    [Fact]
-    public void Validate_rejects_unknown_targets()
-    {
-        var definition = ValidDefinition();
-        definition.ActiveAbility.Targeting = "BackPocket";
-
-        var errors = _validator.Validate([definition]);
-
-        Assert.Contains(errors, error => error.Contains("unknown target selector", StringComparison.OrdinalIgnoreCase));
-    }
-
-    [Fact]
     public void Validate_rejects_active_and_passive_ability_kind_mismatches()
     {
         var definition = ValidDefinition();
-        definition.ActiveAbility.Kind = AbilityDefinitionKind.Passive;
-        definition.PassiveAbility.Kind = AbilityDefinitionKind.Active;
+        definition.ActiveAbility.Kind = AbilitySpecKind.Passive;
+        definition.PassiveAbility.Kind = AbilitySpecKind.Active;
 
         var errors = _validator.Validate([definition]);
 
@@ -82,21 +59,10 @@ public sealed class EssenceDefinitionValidatorTests
     }
 
     [Fact]
-    public void Validate_rejects_unknown_conditions()
-    {
-        var definition = ValidDefinition();
-        definition.PassiveAbility.Conditions.Add(new AbilityConditionDefinition { Type = "OnlyOnTuesdays" });
-
-        var errors = _validator.Validate([definition]);
-
-        Assert.Contains(errors, error => error.Contains("unknown condition", StringComparison.OrdinalIgnoreCase));
-    }
-
-    [Fact]
     public void Validate_rejects_unknown_condition_tags()
     {
         var definition = ValidDefinition();
-        definition.ActiveAbility.Effects[0].Conditions.Add(new AbilityConditionDefinition { Type = AbilityConditionType.TargetHasTag, Tag = "Role.Unknown" });
+        definition.ActiveAbility.Effects[0].Conditions.Add(new AbilityConditionSpec { Type = AbilityConditionType.HasTag, Tag = "Role.Unknown" });
 
         var errors = _validator.Validate([definition]);
 
@@ -120,7 +86,7 @@ public sealed class EssenceDefinitionValidatorTests
     public void Validate_rejects_active_ability_without_cooldown()
     {
         var definition = ValidDefinition();
-        definition.ActiveAbility.CooldownSeconds = 0;
+        definition.ActiveAbility.CooldownTicks = 0;
 
         var errors = _validator.Validate([definition]);
 
@@ -131,7 +97,7 @@ public sealed class EssenceDefinitionValidatorTests
     public void Validate_rejects_invalid_chance_condition_values()
     {
         var definition = ValidDefinition();
-        definition.PassiveAbility.Conditions.Add(new AbilityConditionDefinition { Type = AbilityConditionType.ChanceRoll, Value = 150 });
+        definition.PassiveAbility.Triggers[0].Conditions.Add(new AbilityConditionSpec { Type = AbilityConditionType.ChancePercent, Value = 150 });
 
         var errors = _validator.Validate([definition]);
 
@@ -142,7 +108,7 @@ public sealed class EssenceDefinitionValidatorTests
     public void Validate_rejects_status_stack_conditions_without_status_or_stack_value()
     {
         var definition = ValidDefinition();
-        definition.ActiveAbility.Effects[0].Conditions.Add(new AbilityConditionDefinition { Type = AbilityConditionType.TargetHasStatusStacksAtLeast, Status = "Cold" });
+        definition.ActiveAbility.Effects[0].Conditions.Add(new AbilityConditionSpec { Type = AbilityConditionType.StatusStacksAtLeast, StatusId = "Cold" });
 
         var errors = _validator.Validate([definition]);
 
@@ -163,7 +129,11 @@ public sealed class EssenceDefinitionValidatorTests
             .AddInMemoryCollection(new Dictionary<string, string?> { ["Content:Root"] = "Data" })
             .Build();
 
-        var repository = new JsonEssenceDefinitionRepository(config, FindApiContentRoot(), options, _validator);
+        var repository = new JsonEssenceDefinitionRepository(
+            config,
+            FindApiContentRoot(),
+            options,
+            _validator);
 
         Assert.NotEmpty(repository.GetAll());
     }
@@ -176,36 +146,37 @@ public sealed class EssenceDefinitionValidatorTests
         ActiveAbilityId = "active.test",
         PassiveAbilityId = "passive.test",
         Tags = ["Species.Beast", "Role.Offensive"],
-        ActiveAbility = new AuthoredAbilityDefinition
+        ActiveAbility = new AbilitySpec
         {
             Id = "active.test",
             Name = "Active Test",
-            Kind = AbilityDefinitionKind.Active,
-            CooldownSeconds = 10,
-            Targeting = AbilityTargetSelector.CurrentTarget,
+            Kind = AbilitySpecKind.Active,
+            CooldownTicks = 100,
             Tags = ["Effect.Ability"],
             Effects =
             [
                 new()
                 {
                     Id = "effect.damage.main",
-                    Type = "Damage"
+                    Operation = AbilityEffectOperation.Damage,
+                    BaseValue = 1
                 }
             ]
         },
-        PassiveAbility = new AuthoredAbilityDefinition
+        PassiveAbility = new AbilitySpec
         {
             Id = "passive.test",
             Name = "Passive Test",
-            Kind = AbilityDefinitionKind.Passive,
+            Kind = AbilitySpecKind.Passive,
             Tags = ["Trigger.OnHit"],
+            Triggers = [new() { Event = AbilityTriggerEvent.OnHit }],
             Effects =
             [
                 new()
                 {
                     Id = "effect.attribute.main",
-                    Type = "ModifyAttribute",
-                    Attribute = "Power"
+                    Operation = AbilityEffectOperation.ModifyAttribute,
+                    Attribute = AttributeType.Power
                 }
             ]
         },

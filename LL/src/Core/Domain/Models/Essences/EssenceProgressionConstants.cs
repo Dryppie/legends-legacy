@@ -1,5 +1,3 @@
-using Domain.Models.AbilityDefinitions;
-
 namespace Domain.Models.Essences;
 
 public static class EssenceProgressionConstants
@@ -104,20 +102,21 @@ public static class EssenceProgressionConstants
     private static double GetTierValueGrowth(string? effectType) =>
         effectType switch
         {
-            AbilityEffectType.Damage => DamageValueGrowthPerAscensionTier,
-            AbilityEffectType.ReflectDamage => DamageValueGrowthPerAscensionTier,
-            AbilityEffectType.Heal => HealingValueGrowthPerAscensionTier,
-            AbilityEffectType.RestoreResource => HealingValueGrowthPerAscensionTier,
-            AbilityEffectType.GrantBarrier => BarrierValueGrowthPerAscensionTier,
-            AbilityEffectType.AbsorbDamage => BarrierValueGrowthPerAscensionTier,
-            AbilityEffectType.ModifyAttribute => AttributeValueGrowthPerAscensionTier,
-            AbilityEffectType.Taunt => AttributeValueGrowthPerAscensionTier,
-            AbilityEffectType.ModifyStatusEffect => StatusStackValueGrowthPerAscensionTier,
+            "Damage" => DamageValueGrowthPerAscensionTier,
+            "ReflectDamage" => DamageValueGrowthPerAscensionTier,
+            "Heal" => HealingValueGrowthPerAscensionTier,
+            "RestoreResource" => HealingValueGrowthPerAscensionTier,
+            "GrantBarrier" => BarrierValueGrowthPerAscensionTier,
+            "AbsorbDamage" => BarrierValueGrowthPerAscensionTier,
+            "ModifyAttribute" => AttributeValueGrowthPerAscensionTier,
+            "Taunt" => AttributeValueGrowthPerAscensionTier,
+            "ModifyStatusStacks" => StatusStackValueGrowthPerAscensionTier,
+            "ModifyStatusEffect" => StatusStackValueGrowthPerAscensionTier,
             _ => 0
         };
 
     private static bool ShouldScaleDuration(string? effectType) =>
-        effectType is AbilityEffectType.ApplyStatus or AbilityEffectType.ModifyAttribute or AbilityEffectType.ModifyStatusEffect;
+        effectType is "ApplyStatus" or "ModifyAttribute" or "ModifyStatusStacks" or "ModifyStatusEffect";
 
     private static bool IsHardCrowdControlStatus(string? statusId) =>
         statusId is not null

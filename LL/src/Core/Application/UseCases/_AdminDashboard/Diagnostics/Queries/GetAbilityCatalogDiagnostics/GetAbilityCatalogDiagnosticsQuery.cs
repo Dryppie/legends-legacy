@@ -3,20 +3,20 @@ using MediatR;
 
 namespace Application.UseCases._AdminDashboard.Diagnostics.Queries.GetAbilityCatalogDiagnostics;
 
-public record GetAbilityCatalogDiagnosticsQuery() : IRequest<AbilityCatalogSmokeTestReport>;
+public record GetAbilityCatalogDiagnosticsQuery() : IRequest<AbilityCatalogDiagnosticReport>;
 
 public sealed class GetAbilityCatalogDiagnosticsQueryHandler
-    : IRequestHandler<GetAbilityCatalogDiagnosticsQuery, AbilityCatalogSmokeTestReport>
+    : IRequestHandler<GetAbilityCatalogDiagnosticsQuery, AbilityCatalogDiagnosticReport>
 {
-    private readonly IAbilityCatalogSmokeTester _smokeTester;
+    private readonly IAbilityCatalogDiagnostics _diagnostics;
 
-    public GetAbilityCatalogDiagnosticsQueryHandler(IAbilityCatalogSmokeTester smokeTester)
+    public GetAbilityCatalogDiagnosticsQueryHandler(IAbilityCatalogDiagnostics diagnostics)
     {
-        _smokeTester = smokeTester;
+        _diagnostics = diagnostics;
     }
 
-    public Task<AbilityCatalogSmokeTestReport> Handle(
+    public Task<AbilityCatalogDiagnosticReport> Handle(
         GetAbilityCatalogDiagnosticsQuery request,
         CancellationToken cancellationToken) =>
-        Task.FromResult(_smokeTester.Run());
+        Task.FromResult(_diagnostics.RunTrainingEncounter());
 }

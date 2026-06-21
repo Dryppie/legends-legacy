@@ -1,4 +1,3 @@
-using Domain.Models.Combat.Abilities;
 using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Items.Equipments.Slots;
@@ -14,14 +13,6 @@ public abstract class Entity
     public string Name { get; set; } = string.Empty;
     public ICollection<EntityAttribute> BaseAttributes { get; set; } = [];
     public ICollection<EquipmentSlot> EquipmentSlots { get; set; } = [];
-    [NotMapped]
-    public List<CombatAbilityInstance> Abilities { get; set; } = [];
-    [NotMapped]
-    public int NextBasicAttackIn = 300; // TODO: Turn 300 into a Constant somewhere, as it is also stored in the CombatSimulator class
-                                        // Every tick, this decrements by BaseAttackSpeed.
-                                        // Start at 300. Whenever it is equal to or lower than 0, perform the attack.
-                                        // If you increase attack speed by 100%, BasicAttackSpeed goes from 10 to 20,
-                                        // and thust counting down faster to the next attack each tick
     public bool IsAlive => CombatAttributes.FirstOrDefault(cm => cm.Key.Equals(AttributeType.MaxHealth)).Value > 0;
     [NotMapped]
     public Dictionary<AttributeType, float> BaseCombatAttributes { get; } = [];

@@ -5,7 +5,12 @@ using System.Collections.Concurrent;
 namespace Services.LL.Combat.Stats;
 public sealed class CombatStatsAggregator : ICombatStatsAggregator
 {
-    public IReadOnlyList<EntityStats> Aggregate(IEnumerable<CombatLogItem> log)
+    public IReadOnlyList<EntityStats> Aggregate(IEnumerable<CombatLogItem> log) =>
+        Aggregate(log, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
+
+    public IReadOnlyList<EntityStats> Aggregate(
+        IEnumerable<CombatLogItem> log,
+        IReadOnlyDictionary<string, string> teamsByEntityId)
     {
         // 1) allocate work dictionaries
         var entityMap = new ConcurrentDictionary<string, WorkEntity>();
@@ -14,14 +19,33 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
         {
             // ----- entity context ------------------------------------------------
             var entity = entityMap.GetOrAdd(item.ActorId, static id => new WorkEntity(id));
+            var actorTeam = ResolveTeam(item.ActorId, teamsByEntityId);
+            var targetTeam = ResolveTeam(item.TargetId, teamsByEntityId);
+            var relationship = ResolveTargetRelationship(item.ActorId, actorTeam, item.TargetId, targetTeam);
+            entity.SetTeam(actorTeam);
+            var statsSource = string.IsNullOrWhiteSpace(item.StatsSource) ? item.Source : item.StatsSource;
+            if (!string.IsNullOrWhiteSpace(statsSource)
+                && (item.EventType == EventType.AbilityUse || item.CountsAsActivation))
+            {
+                entity.GetOrAddAbility(statsSource).Uses++;
+            }
 
             // ----- high-level stats ----------------------------------------------
             switch (item.EventType)
             {
                 case EventType.Damage:
-                    entity.DamageDone += item.Magnitude;
+                case EventType.DamageOverTime:
+                case EventType.DamageCrit:
+                    if (relationship == DamageTargetRelationship.Opponent)
+                        entity.DamageDone += item.Magnitude;
+                    else if (relationship == DamageTargetRelationship.Self)
+                        entity.SelfDamageDone += item.Magnitude;
+                    else if (relationship == DamageTargetRelationship.Ally)
+                        entity.AlliedDamageDone += item.Magnitude;
                     break;
                 case EventType.Heal:
+                case EventType.HealOverTime:
+                case EventType.HealCrit:
                     entity.HealingDone += item.Magnitude;
                     break;
                 // add more global categories here
@@ -34,21 +58,21 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
             switch (item.EventType)
             {
                 case EventType.AbilityUse:
-                    if (string.IsNullOrWhiteSpace(item.Source))
-                        break;
-
-                    var usedAbility = entity.GetOrAddAbility(item.Source);
-                    usedAbility.Uses++;
                     break;
 
                 case EventType.Damage:
                 case EventType.DamageOverTime:
                 case EventType.DamageCrit:
-                    if (string.IsNullOrWhiteSpace(item.Source))
+                    if (string.IsNullOrWhiteSpace(statsSource))
                         break;
 
-                    var damageAbility = entity.GetOrAddAbility(item.Source);
-                    damageAbility.TotalDamage += item.Magnitude;
+                    var damageAbility = entity.GetOrAddAbility(statsSource);
+                    if (relationship == DamageTargetRelationship.Opponent)
+                        damageAbility.TotalDamage += item.Magnitude;
+                    else if (relationship == DamageTargetRelationship.Self)
+                        damageAbility.SelfDamage += item.Magnitude;
+                    else if (relationship == DamageTargetRelationship.Ally)
+                        damageAbility.AlliedDamage += item.Magnitude;
                     damageAbility.Hits++;
                     if (item.EventType == EventType.DamageCrit)
                         damageAbility.Crits++;
@@ -57,10 +81,10 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
                 case EventType.Heal:
                 case EventType.HealOverTime:
                 case EventType.HealCrit:
-                    if (string.IsNullOrWhiteSpace(item.Source))
+                    if (string.IsNullOrWhiteSpace(statsSource))
                         break;
 
-                    var healAbility = entity.GetOrAddAbility(item.Source);
+                    var healAbility = entity.GetOrAddAbility(statsSource);
                     healAbility.TotalHealing += item.Magnitude;
                     healAbility.Hits++;
                     if (item.EventType == EventType.HealCrit)
@@ -68,10 +92,10 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
                     break;
 
                 case EventType.Summon:
-                    if (string.IsNullOrWhiteSpace(item.Source))
+                    if (string.IsNullOrWhiteSpace(statsSource))
                         break;
 
-                    var summonAbility = entity.GetOrAddAbility(item.Source);
+                    var summonAbility = entity.GetOrAddAbility(statsSource);
                     summonAbility.Summons++;
                     break;
 
@@ -84,8 +108,17 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
             if (item.TargetId is { Length: > 0 })
             {
                 var target = entityMap.GetOrAdd(item.TargetId, static id => new WorkEntity(id));
+                target.SetTeam(targetTeam);
+                target.SetName(item.CombatEntity?.Name);
                 if (item.EventType == EventType.Damage || item.EventType == EventType.DamageOverTime || item.EventType == EventType.DamageCrit)
-                    target.DamageTaken += item.Magnitude;
+                {
+                    if (relationship == DamageTargetRelationship.Opponent)
+                        target.DamageTaken += item.Magnitude;
+                    else if (relationship == DamageTargetRelationship.Self)
+                        target.SelfDamageTaken += item.Magnitude;
+                    else if (relationship == DamageTargetRelationship.Ally)
+                        target.AlliedDamageTaken += item.Magnitude;
+                }
                 else if (item.EventType == EventType.Heal || item.EventType == EventType.HealOverTime || item.EventType == EventType.HealCrit)
                     target.HealingReceived += item.Magnitude;
             }
@@ -97,13 +130,43 @@ public sealed class CombatStatsAggregator : ICombatStatsAggregator
                         .ToList()
                         .AsReadOnly();
     }
+
+    private static string ResolveTeam(string entityId, IReadOnlyDictionary<string, string> teamsByEntityId) =>
+        !string.IsNullOrWhiteSpace(entityId) && teamsByEntityId.TryGetValue(entityId, out var team) ? team : string.Empty;
+
+    private static DamageTargetRelationship ResolveTargetRelationship(
+        string actorId,
+        string actorTeam,
+        string targetId,
+        string targetTeam)
+    {
+        if (string.IsNullOrWhiteSpace(targetId))
+            return DamageTargetRelationship.Opponent;
+
+        if (actorId.Equals(targetId, StringComparison.OrdinalIgnoreCase))
+            return DamageTargetRelationship.Self;
+
+        return !string.IsNullOrWhiteSpace(actorTeam)
+               && actorTeam.Equals(targetTeam, StringComparison.OrdinalIgnoreCase)
+            ? DamageTargetRelationship.Ally
+            : DamageTargetRelationship.Opponent;
+    }
+
+    private enum DamageTargetRelationship
+    {
+        Opponent,
+        Self,
+        Ally
+    }
 }
 
 public sealed class WorkEntity
 {
     public string Id { get; }
     public string Name => _firstEntityName ?? Id;
+    public string Team { get; private set; } = string.Empty;
     public int DamageDone, DamageTaken, HealingDone, HealingReceived, HealthRegenerated;
+    public int SelfDamageDone, SelfDamageTaken, AlliedDamageDone, AlliedDamageTaken;
 
     private readonly Dictionary<string, WorkAbility> _abilities = new(StringComparer.Ordinal);
     private string? _firstEntityName;
@@ -117,20 +180,41 @@ public sealed class WorkEntity
         return ability;
     }
 
+    public void SetTeam(string team)
+    {
+        if (!string.IsNullOrWhiteSpace(team) && string.IsNullOrWhiteSpace(Team))
+            Team = team;
+    }
+
+    public void SetName(string? name)
+    {
+        if (!string.IsNullOrWhiteSpace(name) && string.IsNullOrWhiteSpace(_firstEntityName))
+            _firstEntityName = name;
+    }
+
     public EntityStats ToImmutable() =>
         new(Id, Name, _abilities.Values
             .Select(a => a.ToImmutable())
-            .OrderByDescending(a => Math.Max(a.TotalDamage, a.TotalHealing))
+            .OrderByDescending(a => Math.Max(Math.Max(a.TotalDamage, a.TotalHealing), Math.Max(a.SelfDamage, a.AlliedDamage)))
             .ToList(),
-        DamageDone, DamageTaken, HealingDone, HealingReceived, HealthRegenerated);
+        DamageDone,
+        DamageTaken,
+        HealingDone,
+        HealingReceived,
+        HealthRegenerated,
+        SelfDamageDone,
+        SelfDamageTaken,
+        AlliedDamageDone,
+        AlliedDamageTaken,
+        Team);
 }
 
 public sealed class WorkAbility
 {
     public string Name { get; }
-    public int TotalDamage, TotalHealing, Uses, Hits, Crits, Summons, Stuns;
+    public int TotalDamage, TotalHealing, Uses, Hits, Crits, Summons, Stuns, SelfDamage, AlliedDamage;
 
     public WorkAbility(string name) => Name = name;
 
-    public AbilityStats ToImmutable() => new(Name, TotalDamage, TotalHealing, Uses, Hits, Crits, Summons, Stuns);
+    public AbilityStats ToImmutable() => new(Name, TotalDamage, TotalHealing, Uses, Hits, Crits, Summons, Stuns, SelfDamage, AlliedDamage);
 }

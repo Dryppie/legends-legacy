@@ -1,10 +1,12 @@
 ﻿using Application.Interfaces.Services.LL.Colosseum;
 using Application.Interfaces.Services.LL.Entities;
-using Domain.Interfaces.Combat;
 using Domain.Models.Colosseum;
 using Domain.Models.Combat;
 using Domain.Models.Leaderboards;
+using Services.LL.Combat.Layers.Orchestration.Models;
+using Services.LL.Combat.Layers.Resolution.Models;
 using Services.LL.Interfaces;
+using Services.LL.Interfaces.Combat.Resolution;
 
 namespace Services.LL.Colosseum;
 public class ColosseumService : IColosseumService
@@ -13,16 +15,25 @@ public class ColosseumService : IColosseumService
     private readonly ICharacterService _characterService;
     private readonly ICombatSetupService _combatSetupService;
     private readonly IColosseumRepository _colosseumRepository;
-    private readonly ICombatContext _combatContext;
+    private readonly ICombatEngineExecutor _combatEngineExecutor;
+    private readonly ICombatEncounterResultFactory _combatEncounterResultFactory;
     private readonly IRatingService _ratingService;
 
-    public ColosseumService(IEntityService es, ICharacterService cs, ICombatSetupService css, IColosseumRepository cr, ICombatContext cc, IRatingService rs)
+    public ColosseumService(
+        IEntityService es,
+        ICharacterService cs,
+        ICombatSetupService css,
+        IColosseumRepository cr,
+        ICombatEngineExecutor combatEngineExecutor,
+        ICombatEncounterResultFactory combatEncounterResultFactory,
+        IRatingService rs)
     {
         _entityService = es;
         _characterService = cs;
         _combatSetupService = css;
         _colosseumRepository = cr;
-        _combatContext = cc;
+        _combatEngineExecutor = combatEngineExecutor;
+        _combatEncounterResultFactory = combatEncounterResultFactory;
         _ratingService = rs;
     }
 
@@ -45,16 +56,45 @@ public class ColosseumService : IColosseumService
         var combatEnemyEntities = _combatSetupService.CreatePlayerCombatEntities(enemyTeam);
         await _combatSetupService.PrepareEntitiesForCombat([.. combatPlayerEntities, .. combatEnemyEntities]);
 
-        var combatResult = _combatContext.InstantiateAndRunCombat(combatPlayerEntities, combatEnemyEntities);
+        var encounterPlan = CreateArenaEncounterPlan(characterId, enemyId, now);
+        var runtime = new CombatEncounterRuntime(
+            encounterPlan,
+            [
+                new CombatRuntimeParticipant(
+                    encounterPlan.FriendlyParticipants.Single(),
+                    playerTeam.Single(),
+                    combatPlayerEntities.Single())
+            ],
+            [
+                new CombatRuntimeParticipant(
+                    encounterPlan.HostileParticipants.Single(),
+                    enemyTeam.Single(),
+                    combatEnemyEntities.Single())
+            ]);
 
-        if (combatResult == null) return null;
-
-        combatResult.StartedAt = now;
-
-        combatResult.PlayerTeam = _combatSetupService.CreateSimpleCombatEntities(combatPlayerEntities);
-        combatResult.EnemyTeam = _combatSetupService.CreateSimpleCombatEntities(combatEnemyEntities);
+        var combatResult = await _combatEngineExecutor.ExecuteAsync(runtime, cancellationToken);
+        combatResult = _combatEncounterResultFactory.Create(runtime, combatResult).CombatResult;
 
         return new StartArenaBattleResult(combatResult, arenaTicketStatus);
+    }
+
+    private static CombatEncounterPlan CreateArenaEncounterPlan(
+        Guid characterId,
+        Guid enemyId,
+        DateTimeOffset startsAt)
+    {
+        var matchId = Guid.NewGuid();
+        return new CombatEncounterPlan(
+            EncounterId: matchId,
+            Mode: CombatMode.Pvp,
+            Sequence: 1,
+            StartsAt: startsAt,
+            Participants:
+            [
+                new CombatParticipantSlot(characterId.ToString(), characterId, CombatSide.Friendly),
+                new CombatParticipantSlot(enemyId.ToString(), enemyId, CombatSide.Hostile)
+            ],
+            SourceContext: new PvpEncounterSourceContext(matchId, characterId, enemyId));
     }
 
     /// <summary>

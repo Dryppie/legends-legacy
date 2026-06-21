@@ -1,0 +1,391 @@
+using Domain.Models.Attributes;
+using Domain.Models.Combat.Abilities;
+
+namespace Services.LL.Combat.Engine;
+
+public sealed class AbilityCatalog
+{
+    public AbilityCatalog(
+        IReadOnlyList<AbilitySpec> abilities,
+        IReadOnlyList<StatusSpec> statuses,
+        IReadOnlyList<SummonSpec> summons,
+        IReadOnlyDictionary<string, string> owningEssenceByAbilityId)
+    {
+        Abilities = abilities;
+        Statuses = statuses;
+        Summons = summons;
+        OwningEssenceByAbilityId = owningEssenceByAbilityId;
+        AbilitiesById = abilities.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+        StatusesById = statuses.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+        SummonsById = summons.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+        AbilityIdsByKind = abilities
+            .GroupBy(x => x.Kind)
+            .ToDictionary(x => x.Key, x => (IReadOnlyList<string>)x.Select(a => a.Id).ToList());
+        AbilityIdsByTag = BuildTagIndex(abilities.Select(x => (x.Id, Tags: (IEnumerable<string>)x.Tags)));
+        StatusIdsByTag = BuildTagIndex(statuses.Select(x => (x.Id, Tags: (IEnumerable<string>)x.Tags)));
+        SummonIdsByTag = BuildTagIndex(summons.Select(x => (x.Id, Tags: (IEnumerable<string>)x.Tags)));
+        AbilityIdsByTrigger = BuildTriggerIndex(abilities);
+        AbilityIdsByOwningEssence = owningEssenceByAbilityId
+            .GroupBy(x => x.Value, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                x => x.Key,
+                x => (IReadOnlyList<string>)x.Select(item => item.Key).ToList(),
+                StringComparer.OrdinalIgnoreCase);
+    }
+
+    public IReadOnlyList<AbilitySpec> Abilities { get; }
+    public IReadOnlyList<StatusSpec> Statuses { get; }
+    public IReadOnlyList<SummonSpec> Summons { get; }
+    public IReadOnlyDictionary<string, AbilitySpec> AbilitiesById { get; }
+    public IReadOnlyDictionary<string, StatusSpec> StatusesById { get; }
+    public IReadOnlyDictionary<string, SummonSpec> SummonsById { get; }
+    public IReadOnlyDictionary<AbilitySpecKind, IReadOnlyList<string>> AbilityIdsByKind { get; }
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> AbilityIdsByTag { get; }
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> StatusIdsByTag { get; }
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> SummonIdsByTag { get; }
+    public IReadOnlyDictionary<AbilityTriggerEvent, IReadOnlyList<string>> AbilityIdsByTrigger { get; }
+    public IReadOnlyDictionary<string, string> OwningEssenceByAbilityId { get; }
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> AbilityIdsByOwningEssence { get; }
+
+    private static IReadOnlyDictionary<string, IReadOnlyList<string>> BuildTagIndex(
+        IEnumerable<(string Id, IEnumerable<string> Tags)> taggedItems)
+    {
+        var index = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var item in taggedItems)
+        {
+            foreach (var tag in item.Tags.Where(x => !string.IsNullOrWhiteSpace(x)).Distinct(StringComparer.OrdinalIgnoreCase))
+            {
+                if (!index.TryGetValue(tag, out var ids))
+                {
+                    ids = [];
+                    index.Add(tag, ids);
+                }
+
+                ids.Add(item.Id);
+            }
+        }
+
+        return index.ToDictionary(x => x.Key, x => (IReadOnlyList<string>)x.Value, StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static IReadOnlyDictionary<AbilityTriggerEvent, IReadOnlyList<string>> BuildTriggerIndex(
+        IEnumerable<AbilitySpec> abilities)
+    {
+        var index = new Dictionary<AbilityTriggerEvent, List<string>>();
+
+        foreach (var ability in abilities)
+        {
+            foreach (var triggerEvent in ability.Triggers.Select(x => x.Event).Distinct())
+            {
+                if (!index.TryGetValue(triggerEvent, out var ids))
+                {
+                    ids = [];
+                    index.Add(triggerEvent, ids);
+                }
+
+                ids.Add(ability.Id);
+            }
+        }
+
+        return index.ToDictionary(x => x.Key, x => (IReadOnlyList<string>)x.Value);
+    }
+}
+
+public sealed record AbilityCatalogValidationResult(IReadOnlyList<string> Errors)
+{
+    public bool IsValid => Errors.Count == 0;
+}
+
+public static class AbilityCatalogValidator
+{
+    public static AbilityCatalogValidationResult Validate(
+        IReadOnlyList<AbilitySpec> abilities,
+        IReadOnlyList<StatusSpec> statuses,
+        IReadOnlyDictionary<string, string>? owningEssenceByAbilityId = null,
+        IReadOnlyList<SummonSpec>? summons = null)
+    {
+        var errors = new List<string>();
+        var abilityIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var statusIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var summonIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var summonSpecs = summons ?? [];
+
+        foreach (var ability in abilities)
+        {
+            var label = string.IsNullOrWhiteSpace(ability.Id) ? "<missing ability id>" : ability.Id;
+            if (string.IsNullOrWhiteSpace(ability.Id))
+                errors.Add("Ability id is required.");
+            else if (!abilityIds.Add(ability.Id))
+                errors.Add($"Duplicate ability id '{ability.Id}'.");
+
+            if (string.IsNullOrWhiteSpace(ability.Name))
+                errors.Add($"{label}: name is required.");
+
+            if (ability.CooldownTicks < 0)
+                errors.Add($"{label}: cooldown cannot be negative.");
+
+            ValidateEffects(label, ability.Effects, statusIds: null, errors);
+            ValidateTriggers(label, ability.Triggers, ability.Effects, errors);
+        }
+
+        foreach (var status in statuses)
+        {
+            var label = string.IsNullOrWhiteSpace(status.Id) ? "<missing status id>" : status.Id;
+            if (string.IsNullOrWhiteSpace(status.Id))
+                errors.Add("Status id is required.");
+            else if (!statusIds.Add(status.Id))
+                errors.Add($"Duplicate status id '{status.Id}'.");
+
+            if (status.MaxStacks <= 0)
+                errors.Add($"{label}: max stacks must be greater than 0.");
+
+            if (status.DurationTicks < 0)
+                errors.Add($"{label}: duration cannot be negative.");
+
+            ValidateEffects(label, status.Effects, statusIds: null, errors);
+            ValidateTriggers(label, status.Triggers, status.Effects, errors);
+        }
+
+        foreach (var summon in summonSpecs)
+        {
+            var label = string.IsNullOrWhiteSpace(summon.Id) ? "<missing summon id>" : summon.Id;
+            if (string.IsNullOrWhiteSpace(summon.Id))
+                errors.Add("Summon id is required.");
+            else if (!summonIds.Add(summon.Id))
+                errors.Add($"Duplicate summon id '{summon.Id}'.");
+
+            if (string.IsNullOrWhiteSpace(summon.Name))
+                errors.Add($"{label}: name is required.");
+
+            if (summon.DurationTicks < 0)
+                errors.Add($"{label}: duration cannot be negative.");
+
+            if (summon.MaxActive < 0)
+                errors.Add($"{label}: maxActive cannot be negative.");
+
+            ValidateSummonAttributes(label, summon.Attributes, errors);
+        }
+
+        var knownStatusIds = new HashSet<string>(statuses.Select(x => x.Id), StringComparer.OrdinalIgnoreCase);
+        foreach (var ability in abilities)
+            ValidateStatusReferences(ability.Id, ability.Effects, ability.Triggers.SelectMany(x => x.Conditions), knownStatusIds, errors);
+        foreach (var status in statuses)
+            ValidateStatusReferences(status.Id, status.Effects, status.Triggers.SelectMany(x => x.Conditions), knownStatusIds, errors);
+
+        var knownSummonIds = new HashSet<string>(summonSpecs.Select(x => x.Id), StringComparer.OrdinalIgnoreCase);
+        foreach (var ability in abilities)
+            ValidateSummonReferences(ability.Id, ability.Effects, knownSummonIds, errors);
+        foreach (var status in statuses)
+            ValidateSummonReferences(status.Id, status.Effects, knownSummonIds, errors);
+        foreach (var summon in summonSpecs)
+            ValidateSummonAbilityReferences(summon, abilityIds, errors);
+
+        if (owningEssenceByAbilityId is not null)
+        {
+            foreach (var abilityId in owningEssenceByAbilityId.Keys)
+            {
+                if (!abilityIds.Contains(abilityId))
+                    errors.Add($"Owning essence index references unknown ability '{abilityId}'.");
+            }
+        }
+
+        return new AbilityCatalogValidationResult(errors);
+    }
+
+    public static AbilityCatalog CreateCatalog(
+        IReadOnlyList<AbilitySpec> abilities,
+        IReadOnlyList<StatusSpec> statuses,
+        IReadOnlyDictionary<string, string>? owningEssenceByAbilityId = null,
+        IReadOnlyList<SummonSpec>? summons = null)
+    {
+        var owners = owningEssenceByAbilityId ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var summonSpecs = summons ?? [];
+        var validation = Validate(abilities, statuses, owners, summonSpecs);
+        if (!validation.IsValid)
+            throw new InvalidOperationException("Ability catalog validation failed: " + string.Join(" | ", validation.Errors));
+
+        return new AbilityCatalog(abilities, statuses, summonSpecs, owners);
+    }
+
+    private static void ValidateEffects(
+        string ownerId,
+        IReadOnlyList<AbilityEffectSpec> effects,
+        ISet<string>? statusIds,
+        ICollection<string> errors)
+    {
+        var effectIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var effect in effects)
+        {
+            var label = string.IsNullOrWhiteSpace(effect.Id) ? $"{ownerId}/<missing effect id>" : $"{ownerId}/{effect.Id}";
+            if (string.IsNullOrWhiteSpace(effect.Id))
+                errors.Add($"{ownerId}: effect id is required.");
+            else if (!effectIds.Add(effect.Id))
+                errors.Add($"{ownerId}: duplicate effect id '{effect.Id}'.");
+
+            if (effect.ChancePercent is < 0 or > 100)
+                errors.Add($"{label}: chance must be between 0 and 100.");
+
+            if (effect.DurationTicks < 0 || effect.IntervalTicks < 0 || effect.Uses < 0)
+                errors.Add($"{label}: duration, interval, and uses cannot be negative.");
+
+            if (effect.Operation == AbilityEffectOperation.ModifyAttribute && effect.Attribute is null)
+                errors.Add($"{label}: ModifyAttribute requires attribute.");
+
+            if ((effect.Operation == AbilityEffectOperation.ApplyStatus
+                 || effect.Operation == AbilityEffectOperation.ModifyStatusStacks
+                 || effect.Operation == AbilityEffectOperation.RemoveStatus)
+                && string.IsNullOrWhiteSpace(effect.StatusId))
+            {
+                errors.Add($"{label}: {effect.Operation} requires statusId.");
+            }
+
+            if (effect.Operation == AbilityEffectOperation.Summon && string.IsNullOrWhiteSpace(effect.SummonId))
+                errors.Add($"{label}: Summon requires summonId.");
+
+            if (statusIds is not null
+                && !string.IsNullOrWhiteSpace(effect.StatusId)
+                && !statusIds.Contains(effect.StatusId))
+            {
+                errors.Add($"{label}: references unknown status '{effect.StatusId}'.");
+            }
+
+            ValidateConditions(label, effect.Conditions, errors);
+        }
+    }
+
+    private static void ValidateTriggers(
+        string ownerId,
+        IReadOnlyList<AbilityTriggerSpec> triggers,
+        IReadOnlyList<AbilityEffectSpec> effects,
+        ICollection<string> errors)
+    {
+        var effectIds = effects.Select(x => x.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var trigger in triggers)
+        {
+            if (trigger.InternalCooldownTicks < 0)
+                errors.Add($"{ownerId}: trigger {trigger.Event} internal cooldown cannot be negative.");
+
+            foreach (var effectId in trigger.EffectIds)
+            {
+                if (!effectIds.Contains(effectId))
+                    errors.Add($"{ownerId}: trigger {trigger.Event} references unknown effect '{effectId}'.");
+            }
+
+            ValidateConditions($"{ownerId}/{trigger.Event}", trigger.Conditions, errors);
+        }
+    }
+
+    private static void ValidateConditions(
+        string ownerId,
+        IEnumerable<AbilityConditionSpec> conditions,
+        ICollection<string> errors)
+    {
+        foreach (var condition in conditions)
+        {
+            if ((condition.Type == AbilityConditionType.HasStatus
+                 || condition.Type == AbilityConditionType.StatusStacksAtLeast)
+                && string.IsNullOrWhiteSpace(condition.StatusId))
+            {
+                errors.Add($"{ownerId}: condition {condition.Type} requires statusId.");
+            }
+
+            if (condition.Type == AbilityConditionType.HasTag && string.IsNullOrWhiteSpace(condition.Tag))
+                errors.Add($"{ownerId}: condition HasTag requires tag.");
+
+            if (condition.Type == AbilityConditionType.ChancePercent && condition.Value is < 0 or > 100)
+                errors.Add($"{ownerId}: condition ChancePercent requires value between 0 and 100.");
+        }
+    }
+
+    private static void ValidateStatusReferences(
+        string ownerId,
+        IEnumerable<AbilityEffectSpec> effects,
+        IEnumerable<AbilityConditionSpec> triggerConditions,
+        ISet<string> knownStatusIds,
+        ICollection<string> errors)
+    {
+        foreach (var effect in effects)
+        {
+            if (!string.IsNullOrWhiteSpace(effect.StatusId) && !knownStatusIds.Contains(effect.StatusId))
+                errors.Add($"{ownerId}/{effect.Id}: references unknown status '{effect.StatusId}'.");
+
+            foreach (var condition in effect.Conditions)
+                ValidateStatusConditionReference($"{ownerId}/{effect.Id}", condition, knownStatusIds, errors);
+        }
+
+        foreach (var condition in triggerConditions)
+            ValidateStatusConditionReference(ownerId, condition, knownStatusIds, errors);
+    }
+
+    private static void ValidateStatusConditionReference(
+        string ownerId,
+        AbilityConditionSpec condition,
+        ISet<string> knownStatusIds,
+        ICollection<string> errors)
+    {
+        if ((condition.Type == AbilityConditionType.HasStatus
+             || condition.Type == AbilityConditionType.StatusStacksAtLeast)
+            && !string.IsNullOrWhiteSpace(condition.StatusId)
+            && !knownStatusIds.Contains(condition.StatusId))
+        {
+            errors.Add($"{ownerId}: condition references unknown status '{condition.StatusId}'.");
+        }
+    }
+
+    private static void ValidateSummonReferences(
+        string ownerId,
+        IEnumerable<AbilityEffectSpec> effects,
+        ISet<string> knownSummonIds,
+        ICollection<string> errors)
+    {
+        foreach (var effect in effects)
+        {
+            if (effect.Operation != AbilityEffectOperation.Summon || string.IsNullOrWhiteSpace(effect.SummonId))
+                continue;
+
+            if (!knownSummonIds.Contains(effect.SummonId))
+                errors.Add($"{ownerId}/{effect.Id}: references unknown summon '{effect.SummonId}'.");
+        }
+    }
+
+    private static void ValidateSummonAbilityReferences(
+        SummonSpec summon,
+        ISet<string> knownAbilityIds,
+        ICollection<string> errors)
+    {
+        foreach (var abilityId in summon.AbilityIds)
+        {
+            if (string.IsNullOrWhiteSpace(abilityId))
+            {
+                errors.Add($"{summon.Id}: summon ability id is required.");
+                continue;
+            }
+
+            if (!knownAbilityIds.Contains(abilityId))
+                errors.Add($"{summon.Id}: references unknown ability '{abilityId}'.");
+        }
+    }
+
+    private static void ValidateSummonAttributes(
+        string summonId,
+        IEnumerable<SummonAttributeSpec> attributes,
+        ICollection<string> errors)
+    {
+        var attributeTypes = new HashSet<AttributeType>();
+
+        foreach (var attribute in attributes)
+        {
+            if (!attributeTypes.Add(attribute.Attribute))
+                errors.Add($"{summonId}: duplicate summon attribute '{attribute.Attribute}'.");
+
+            if (attribute.ScalingCoefficient < 0)
+                errors.Add($"{summonId}/{attribute.Attribute}: scaling coefficient cannot be negative.");
+        }
+
+        if (!attributeTypes.Contains(AttributeType.MaxHealth))
+            errors.Add($"{summonId}: summon attributes must include MaxHealth.");
+    }
+}

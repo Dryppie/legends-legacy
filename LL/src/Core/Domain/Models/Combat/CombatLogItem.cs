@@ -2,6 +2,8 @@
 public class CombatLogItem
 {
     public string Source { get; set; } = string.Empty;
+    public string StatsSource { get; set; } = string.Empty;
+    public bool CountsAsActivation { get; set; }
     public int Timestamp { get; set; }
     public string ActorId { get; set; } = string.Empty;
     public string TargetId { get; set; } = string.Empty;

@@ -7,4 +7,6 @@ public sealed record AbilityStats(
     int Hits = 0,
     int Crits = 0,
     int Summons = 0,
-    int Stuns = 0);
+    int Stuns = 0,
+    int SelfDamage = 0,
+    int AlliedDamage = 0);

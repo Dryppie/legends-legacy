@@ -1,6 +1,6 @@
 using Application.Interfaces.Services.LL.Essences;
-using Domain.Models.AbilityDefinitions;
 using Domain.Models.Attributes;
+using Domain.Models.Combat.Abilities;
 using Domain.Models.Essences.Definitions;
 
 namespace Services.LL.Essences;
@@ -21,9 +21,9 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
             if (string.IsNullOrWhiteSpace(definition.PassiveAbilityId)) errors.Add($"{definition.Id}: passiveAbilityId is required.");
             if (definition.ActiveAbility is null || string.IsNullOrWhiteSpace(definition.ActiveAbility.Id)) errors.Add($"{definition.Id}: activeAbilityId '{definition.ActiveAbilityId}' could not be resolved.");
             if (definition.PassiveAbility is null || string.IsNullOrWhiteSpace(definition.PassiveAbility.Id)) errors.Add($"{definition.Id}: passiveAbilityId '{definition.PassiveAbilityId}' could not be resolved.");
-            if (definition.ActiveAbility is not null && !definition.ActiveAbility.Kind.Equals(AbilityDefinitionKind.Active, StringComparison.OrdinalIgnoreCase))
+            if (definition.ActiveAbility is not null && definition.ActiveAbility.Kind != AbilitySpecKind.Active)
                 errors.Add($"{definition.Id}: activeAbilityId '{definition.ActiveAbilityId}' must reference an Active ability definition.");
-            if (definition.PassiveAbility is not null && !definition.PassiveAbility.Kind.Equals(AbilityDefinitionKind.Passive, StringComparison.OrdinalIgnoreCase))
+            if (definition.PassiveAbility is not null && definition.PassiveAbility.Kind != AbilitySpecKind.Passive)
                 errors.Add($"{definition.Id}: passiveAbilityId '{definition.PassiveAbilityId}' must reference a Passive ability definition.");
             if (definition.Evolution is null || string.IsNullOrWhiteSpace(definition.Evolution.Id)) errors.Add($"{definition.Id}: exactly one evolution is required.");
             if (definition.AttributeBonuses.Count == 0) errors.Add($"{definition.Id}: at least one attribute bonus is required.");
@@ -43,6 +43,8 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
 
             ValidateAbility(definition.Id, definition.ActiveAbility, errors);
             ValidateAbility(definition.Id, definition.PassiveAbility, errors);
+            ValidateAbilityModifiers(definition.Id, definition.ActiveAbility, definition.Evolution?.ActiveAbilityModifiers ?? [], errors);
+            ValidateAbilityModifiers(definition.Id, definition.PassiveAbility, definition.Evolution?.PassiveAbilityModifiers ?? [], errors);
 
             var tiers = definition.Ascension?.Tiers ?? [];
             if (tiers.Count != 4 || tiers.Select(x => x.Tier).Order().SequenceEqual([0, 1, 2, 3]) == false)
@@ -55,26 +57,20 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
         return errors;
     }
 
-    private static void ValidateAbility(string essenceId, AbilityDefinition? ability, List<string> errors)
+    private static void ValidateAbility(string essenceId, AbilitySpec? ability, List<string> errors)
     {
         if (ability is null) return;
 
-        if (string.IsNullOrWhiteSpace(ability.Kind)) errors.Add($"{essenceId}/{ability.Id}: ability kind is required.");
-        else if (!AbilityDefinitionKind.All.Contains(ability.Kind)) errors.Add($"{essenceId}/{ability.Id}: unknown ability kind '{ability.Kind}'.");
         if (string.IsNullOrWhiteSpace(ability.Id)) errors.Add($"{essenceId}: ability id is required.");
         if (string.IsNullOrWhiteSpace(ability.Name)) errors.Add($"{essenceId}/{ability.Id}: ability name is required.");
 
-        if (!string.IsNullOrWhiteSpace(ability.Targeting) && !AbilityTargetSelector.All.Contains(ability.Targeting))
-            errors.Add($"{essenceId}/{ability.Id}: unknown target selector '{ability.Targeting}'.");
-
-        if (ability.Kind.Equals(AbilityDefinitionKind.Active, StringComparison.OrdinalIgnoreCase))
+        if (ability.Kind == AbilitySpecKind.Active)
         {
-            if (ability.CooldownSeconds <= 0) errors.Add($"{essenceId}/{ability.Id}: active ability cooldown must be greater than zero.");
-            if (string.IsNullOrWhiteSpace(ability.Targeting)) errors.Add($"{essenceId}/{ability.Id}: active ability target selector is required.");
+            if (ability.CooldownTicks <= 0) errors.Add($"{essenceId}/{ability.Id}: active ability cooldown must be greater than zero.");
             if (ability.Effects.Count == 0) errors.Add($"{essenceId}/{ability.Id}: active ability requires at least one effect.");
         }
 
-        if (ability.Kind.Equals(AbilityDefinitionKind.Passive, StringComparison.OrdinalIgnoreCase)
+        if (ability.Kind == AbilitySpecKind.Passive
             && ability.Triggers.Count == 0
             && ability.Effects.Count == 0)
         {
@@ -82,13 +78,7 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
         }
 
         foreach (var trigger in ability.Triggers)
-        {
-            var normalized = AbilityTriggerType.Normalize(trigger.Type);
-            if (!AbilityTriggerType.All.Contains(normalized))
-                errors.Add($"{essenceId}/{ability.Id}: unknown trigger '{trigger.Type}'.");
-        }
-
-        ValidateConditions(essenceId, ability.Id, ability.Conditions, errors);
+            ValidateConditions(essenceId, ability.Id, trigger.Conditions, errors);
 
         var duplicateEffectIds = ability.Effects
             .Where(x => !string.IsNullOrWhiteSpace(x.Id))
@@ -100,61 +90,112 @@ public sealed class EssenceDefinitionValidator : IEssenceDefinitionValidator
         foreach (var effect in ability.Effects)
         {
             if (string.IsNullOrWhiteSpace(effect.Id)) errors.Add($"{essenceId}/{ability.Id}: effect id is required.");
-            if (!AbilityEffectType.All.Contains(effect.Type)) errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: unknown effect type '{effect.Type}'.");
-            if (!AbilityTargetSelector.All.Contains(effect.Target)) errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: unknown target selector '{effect.Target}'.");
-            if (!effect.Type.Equals(AbilityEffectType.ModifyAttribute, StringComparison.OrdinalIgnoreCase)
-                && effect.Scaling.BaseValue < 0)
+            if (effect.Operation != AbilityEffectOperation.ModifyAttribute
+                && effect.BaseValue < 0)
             {
                 errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: scaling values cannot be negative.");
             }
-            if (effect.Type.Equals(AbilityEffectType.ModifyAttribute, StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(effect.Attribute))
+            if (effect.Operation == AbilityEffectOperation.ModifyAttribute && effect.Attribute is null)
                 errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: ModifyAttribute requires attribute.");
-            if (!string.IsNullOrWhiteSpace(effect.Attribute))
-            {
-                if (!Enum.TryParse<AttributeType>(effect.Attribute, ignoreCase: true, out var attributeType))
-                    errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: unknown attribute '{effect.Attribute}'.");
-                else if (!AttributeCatalog.IsContentFacing(attributeType))
-                    errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: attribute '{effect.Attribute}' is runtime-only and cannot be authored.");
-            }
-            if (effect.Type.Equals(AbilityEffectType.ApplyStatus, StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(effect.Status))
+            if (effect.Attribute is { } attribute && !AttributeCatalog.IsContentFacing(attribute))
+                errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: attribute '{effect.Attribute}' is runtime-only and cannot be authored.");
+            if (effect.Operation == AbilityEffectOperation.ApplyStatus && string.IsNullOrWhiteSpace(effect.StatusId))
                 errors.Add($"{essenceId}/{ability.Id}/{effect.Id}: ApplyStatus requires status.");
 
             ValidateConditions(essenceId, $"{ability.Id}/{effect.Id}", effect.Conditions, errors);
         }
     }
 
-    private static void ValidateConditions(string essenceId, string ownerId, IEnumerable<AbilityConditionDefinition> conditions, List<string> errors)
+    private static void ValidateAbilityModifiers(
+        string essenceId,
+        AbilitySpec? ability,
+        IReadOnlyList<EssenceAbilityModifierDefinition> modifiers,
+        List<string> errors)
+    {
+        if (ability is null)
+            return;
+
+        var abilityEffectIds = ability.Effects.Select(x => x.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (var modifier in modifiers)
+        {
+            var label = $"{essenceId}/{ability.Id}/modifier.{modifier.Operation}";
+            if (string.IsNullOrWhiteSpace(modifier.Operation))
+            {
+                errors.Add($"{label}: operation is required.");
+                continue;
+            }
+
+            if (string.IsNullOrWhiteSpace(modifier.Target))
+                errors.Add($"{label}: target effect id is required.");
+            else if (!abilityEffectIds.Contains(modifier.Target))
+                errors.Add($"{label}: target effect '{modifier.Target}' could not be resolved.");
+
+            if (modifier.Operation.Equals("AddMultiplier", StringComparison.OrdinalIgnoreCase))
+            {
+                if (modifier.Value <= -1)
+                    errors.Add($"{label}: AddMultiplier value must be greater than -1.");
+                continue;
+            }
+
+            if (modifier.Operation.Equals("AddEffect", StringComparison.OrdinalIgnoreCase))
+            {
+                if (modifier.Effect is null)
+                {
+                    errors.Add($"{label}: AddEffect requires an effect payload.");
+                    continue;
+                }
+
+                if (abilityEffectIds.Contains(modifier.Effect.Id))
+                    errors.Add($"{label}: AddEffect payload effect id '{modifier.Effect.Id}' must be unique within the ability.");
+
+                ValidateEffect(essenceId, $"{ability.Id}/{modifier.Effect.Id}", modifier.Effect, errors);
+                continue;
+            }
+
+            errors.Add($"{label}: unsupported modifier operation '{modifier.Operation}'.");
+        }
+    }
+
+    private static void ValidateEffect(
+        string essenceId,
+        string ownerId,
+        AbilityEffectSpec effect,
+        List<string> errors)
+    {
+        if (string.IsNullOrWhiteSpace(effect.Id)) errors.Add($"{essenceId}/{ownerId}: effect id is required.");
+        if (effect.Operation != AbilityEffectOperation.ModifyAttribute
+            && effect.BaseValue < 0)
+        {
+            errors.Add($"{essenceId}/{ownerId}: scaling values cannot be negative.");
+        }
+        if (effect.Operation == AbilityEffectOperation.ModifyAttribute && effect.Attribute is null)
+            errors.Add($"{essenceId}/{ownerId}: ModifyAttribute requires attribute.");
+        if (effect.Attribute is { } attribute && !AttributeCatalog.IsContentFacing(attribute))
+            errors.Add($"{essenceId}/{ownerId}: attribute '{effect.Attribute}' is runtime-only and cannot be authored.");
+        if (effect.Operation == AbilityEffectOperation.ApplyStatus && string.IsNullOrWhiteSpace(effect.StatusId))
+            errors.Add($"{essenceId}/{ownerId}: ApplyStatus requires status.");
+
+        ValidateConditions(essenceId, ownerId, effect.Conditions, errors);
+    }
+
+    private static void ValidateConditions(string essenceId, string ownerId, IEnumerable<AbilityConditionSpec> conditions, List<string> errors)
     {
         foreach (var condition in conditions)
         {
-            if (!AbilityConditionType.All.Contains(condition.Type))
-                errors.Add($"{essenceId}/{ownerId}: unknown condition '{condition.Type}'.");
-
-            if ((condition.Type.Equals(AbilityConditionType.SourceHasTag, StringComparison.OrdinalIgnoreCase) ||
-                 condition.Type.Equals(AbilityConditionType.TargetHasTag, StringComparison.OrdinalIgnoreCase)) &&
+            if (condition.Type == AbilityConditionType.HasTag &&
                 (string.IsNullOrWhiteSpace(condition.Tag) || !EssenceTagCatalog.AllTags.Contains(condition.Tag)))
             {
                 errors.Add($"{essenceId}/{ownerId}: condition '{condition.Type}' requires a known tag.");
             }
 
-            if (condition.Type.Equals(AbilityConditionType.IsSpecies, StringComparison.OrdinalIgnoreCase))
+            if (condition.Type == AbilityConditionType.ChancePercent)
             {
-                var speciesTag = string.IsNullOrWhiteSpace(condition.Tag)
-                    ? string.Empty
-                    : condition.Tag.StartsWith("Species.", StringComparison.OrdinalIgnoreCase) ? condition.Tag : $"Species.{condition.Tag}";
-                if (!EssenceTagCatalog.AllTags.Contains(speciesTag))
-                    errors.Add($"{essenceId}/{ownerId}: condition '{condition.Type}' requires a known species tag.");
-            }
-
-            if (condition.Type.Equals(AbilityConditionType.RandomChance, StringComparison.OrdinalIgnoreCase)
-                || condition.Type.Equals(AbilityConditionType.ChanceRoll, StringComparison.OrdinalIgnoreCase))
-            {
-                if (condition.Value is null or < 0 or > 100)
+                if (condition.Value is < 0 or > 100)
                     errors.Add($"{essenceId}/{ownerId}: condition '{condition.Type}' requires a value from 0 to 100.");
             }
 
-            if (condition.Type.Equals(AbilityConditionType.TargetHasStatusStacksAtLeast, StringComparison.OrdinalIgnoreCase)
-                && (string.IsNullOrWhiteSpace(condition.Status) || condition.Value is null or <= 0))
+            if (condition.Type == AbilityConditionType.StatusStacksAtLeast
+                && (string.IsNullOrWhiteSpace(condition.StatusId) || condition.Value <= 0))
             {
                 errors.Add($"{essenceId}/{ownerId}: condition '{condition.Type}' requires status and a positive stack value.");
             }

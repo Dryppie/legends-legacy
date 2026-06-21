@@ -1,4 +1,4 @@
-using Domain.Models.AbilityDefinitions;
+using Domain.Models.Combat.Abilities;
 
 namespace Domain.Models.Essences.Definitions;
 
@@ -11,6 +11,15 @@ public sealed class EssenceEvolutionDefinition
     public string RequiredCatalystItemId { get; set; } = string.Empty;
     public List<string> AddsTags { get; set; } = [];
     public List<EssenceAttributeBonusDefinition> AttributeModifierChanges { get; set; } = [];
-    public List<AbilityModifierDefinition> ActiveAbilityModifiers { get; set; } = [];
-    public List<AbilityModifierDefinition> PassiveAbilityModifiers { get; set; } = [];
+    public List<EssenceAbilityModifierDefinition> ActiveAbilityModifiers { get; set; } = [];
+    public List<EssenceAbilityModifierDefinition> PassiveAbilityModifiers { get; set; } = [];
+}
+
+public sealed class EssenceAbilityModifierDefinition
+{
+    public string Target { get; set; } = string.Empty;
+    public string Operation { get; set; } = string.Empty;
+    public double Value { get; set; }
+    public string? Condition { get; set; }
+    public AbilityEffectSpec? Effect { get; set; }
 }

@@ -1,4 +1,4 @@
-﻿using Application.Authorization.Interfaces;
+using Application.Authorization.Interfaces;
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.CharacterActions;
 using Application.Interfaces.Services.LL.Colosseum;
@@ -7,7 +7,6 @@ using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Items;
 using Application.Interfaces.Services.LL.Professions;
-using Domain.Interfaces.Combat;
 using Domain.Models.Dungeons;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Users;
@@ -21,7 +20,6 @@ using Services.LL.Bonuses;
 using Services.LL.CharacterActions;
 using Services.LL.Colosseum;
 using Services.LL.Combat;
-using Services.LL.Combat.CombatEngine;
 using Services.LL.Combat.Layers.Orchestration;
 using Services.LL.Combat.Layers.Orchestration.Dungeon;
 using Services.LL.Combat.Layers.Orchestration.Idle;
@@ -33,7 +31,7 @@ using Services.LL.Combat.Layers.Rewards.Dungeon;
 using Services.LL.Combat.Layers.Rewards.Idle;
 using Services.LL.Combat.Layers.Rewards.Models;
 using Services.LL.Combat.Stats;
-using Services.LL.Combat.Statuses;
+using Services.LL.Combat.Engine;
 using Services.LL.Dungeons;
 using Services.LL.Entities;
 using Services.LL.Entities.Characters;
@@ -97,8 +95,6 @@ public static class DependencyInjection
         services.AddCombatDependencyInjection();
         services.AddScoped<ICombatService, CombatService>();
         services.AddScoped<ICombatSetupService, CombatSetupService>();
-        services.AddScoped<ICombatContext, CombatContext>();
-        services.AddScoped<ICombatEventBus, CombatEventBus>();
         services.AddScoped<ICombatStatsAggregator, CombatStatsAggregator>();
 
         services.AddScoped<ICraftingService, CraftingService>();
@@ -113,19 +109,30 @@ public static class DependencyInjection
         services.AddScoped<IEquipmentSlotService, EquipmentSlotService>();
 
         services.AddSingleton<IEssenceDefinitionValidator, EssenceDefinitionValidator>();
-        services.AddSingleton<IAbilityCatalogValidator, AbilityCatalogValidator>();
         services.AddSingleton<IEssenceDefinitionRepository>(sp =>
             new JsonEssenceDefinitionRepository(
                 config,
                 contentRootPath,
                 sp.GetRequiredService<JsonSerializerOptions>(),
-                sp.GetRequiredService<IAbilityCatalogValidator>(),
                 sp.GetRequiredService<IEssenceDefinitionValidator>()));
         services.AddScoped<IEssenceProgressionService, EssenceProgressionService>();
         services.AddScoped<IEssenceSlotUnlockService, EssenceSlotUnlockService>();
         services.AddScoped<IEssenceLoadoutLimitService, EssenceLoadoutLimitService>();
-        services.AddScoped<IEssenceCombatAbilityFactory, EssenceCombatAbilityFactory>();
-        services.AddScoped<IAbilityCatalogSmokeTester, AbilityCatalogSmokeTester>();
+        services.AddSingleton<IAbilityCatalogProvider>(sp =>
+            new JsonAbilityCatalogProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddScoped<IAbilityCatalogDiagnostics, AbilityCatalogDiagnostics>();
+        services.AddScoped<IAbilityBalanceSimulator, AbilityBalanceSimulator>();
+        services.AddScoped<IAbilityCatalogBehaviorDiagnostics>(sp =>
+            new AbilityCatalogBehaviorDiagnostics(
+                sp.GetRequiredService<IAbilityCatalogProvider>(),
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>(),
+                sp.GetRequiredService<IEssenceDefinitionRepository>()));
+        services.AddScoped<IAbilityCatalogCoverageAnalyzer, AbilityCatalogCoverageAnalyzer>();
         services.AddScoped<IRandomProvider, SystemRandomProvider>();
         services.AddScoped<IEssenceService, EssenceSystemService>();
         services.AddScoped<IEssenceBonusProvider, EssenceSystemService>();
@@ -168,7 +175,6 @@ public static class DependencyInjection
 
         services.AddSingleton<GuildBuildingUpgradeDefinitionProvider>();
         services.AddSingleton<SoulstoneUpgradeDefinitionProvider>();
-        services.AddSingleton<IStatusDefinitionService, JsonStatusService>();
 
         services.AddJsonDefinitionReader(config, contentRootPath);
 
@@ -193,6 +199,7 @@ public static class DependencyInjection
         services.AddScoped<ICombatEncounterResolver, DefaultCombatEncounterResolver>();
         services.AddScoped<IEncounterEntityLoader, EncounterEntityLoader>();
         services.AddScoped<ICombatEncounterRuntimeFactory, CombatEncounterRuntimeFactory>();
+        services.AddScoped<CombatEngineExecutor>();
         services.AddScoped<ICombatEngineExecutor, CombatEngineExecutor>();
         services.AddScoped<ICombatEncounterResultFactory, CombatEncounterResultFactory>();
         services.AddScoped<ICombatantFactory, CombatantFactory>();

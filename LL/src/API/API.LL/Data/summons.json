@@ -1,0 +1,40 @@
+[
+  {
+    "id": "shadowImage",
+    "name": "Shadow Image",
+    "description": "A short-lived shadow image that fights for its summoner.",
+    "imagePath": "shadow_image",
+    "durationTicks": 100,
+    "maxActive": 1,
+    "tags": [ "Summon.ShadowImage", "Element.Shadow" ],
+    "abilityIds": [ "ability.summon.shadow_image.shadow_strike" ],
+    "attributes": [
+      {
+        "attribute": "MaxHealth",
+        "baseValue": 1,
+        "scalingAttribute": "SummonHealth",
+        "scalingCoefficient": 1,
+        "minimumValue": 1
+      },
+      {
+        "attribute": "Power",
+        "baseValue": 0,
+        "scalingAttribute": "SummonPower",
+        "scalingCoefficient": 1,
+        "minimumValue": 0
+      },
+      {
+        "attribute": "CritDamage",
+        "baseValue": 0,
+        "scalingAttribute": "CritDamage",
+        "scalingCoefficient": 1,
+        "minimumValue": 0
+      },
+      {
+        "attribute": "DodgeChance",
+        "baseValue": 0,
+        "minimumValue": 0
+      }
+    ]
+  }
+]

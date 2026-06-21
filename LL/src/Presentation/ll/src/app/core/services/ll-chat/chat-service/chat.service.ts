@@ -267,7 +267,7 @@ export class ChatService {
     }
 
     this.lastConnectionWarningAt = now;
-    console.warn('Chat service unavailable; continuing without chat.', error);
+    console.warn('Chat service unavailable; continuing without chat.');
   }
 
   private isTemporarilyUnavailable(): boolean {
