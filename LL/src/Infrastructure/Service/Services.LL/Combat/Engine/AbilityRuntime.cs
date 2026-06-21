@@ -322,14 +322,43 @@ public sealed class RuntimeCombatant
     public float GetAttribute(AttributeType attributeType) =>
         Attributes.GetValueOrDefault(attributeType);
 
-    public void AdjustAttribute(AttributeType attributeType, float amount) =>
+    public void AdjustAttribute(AttributeType attributeType, float amount)
+    {
+        var oldMaxHealth = GetAttribute(AttributeType.MaxHealth);
         Attributes[attributeType] = Attributes.GetValueOrDefault(attributeType) + amount;
+
+        if (attributeType == AttributeType.MaxHealth)
+            SyncHealthAfterMaxHealthChange(oldMaxHealth, GetAttribute(AttributeType.MaxHealth));
+    }
 
     public void AdjustHealth(float amount) =>
         Health = Math.Clamp(Health + amount, 0, GetAttribute(AttributeType.MaxHealth));
 
     public void SetHealth(float value) =>
         Health = Math.Clamp(value, 0, GetAttribute(AttributeType.MaxHealth));
+
+    private void SyncHealthAfterMaxHealthChange(float oldMaxHealth, float newMaxHealth)
+    {
+        if (oldMaxHealth <= 0)
+        {
+            SetHealth(newMaxHealth);
+            return;
+        }
+
+        if (Health <= 0)
+        {
+            SetHealth(0);
+            return;
+        }
+
+        if (newMaxHealth > oldMaxHealth)
+        {
+            AdjustHealth(newMaxHealth - oldMaxHealth);
+            return;
+        }
+
+        SetHealth(Health);
+    }
 
     public bool TickSummonDuration()
     {

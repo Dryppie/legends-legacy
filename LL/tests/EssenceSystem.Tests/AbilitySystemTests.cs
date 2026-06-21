@@ -726,6 +726,28 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Json_catalog_large_rat_big_increases_current_health_with_max_health()
+    {
+        var provider = new JsonAbilityCatalogProvider(
+            CreateConfig(),
+            FindApiContentRoot(),
+            CreateJsonOptions());
+        var catalog = provider.GetCatalog();
+        var compiledAbilities = AbilityCompiler.CompileAbilities(
+            [catalog.AbilitiesById["ability.essence.legacy.large_rat.big"]]);
+        var friendly = CreateCombatant("friendly", CombatTeam.Friendly, compiledAbilities.Values);
+        var hostile = CreateCombatant("hostile", CombatTeam.Hostile, []);
+        var engine = new FastCombatEngine(
+            AbilityCompiler.CompileStatuses(catalog.Statuses),
+            new FastCombatEngineOptions(MaxTicks: 1, BasicAttackIntervalTicks: 1000));
+
+        engine.Run([friendly], [hostile]);
+
+        Assert.Equal(250, friendly.GetAttribute(AttributeType.MaxHealth));
+        Assert.Equal(250, friendly.Health);
+    }
+
+    [Fact]
     public void Engine_supports_status_stacks_and_reflect_triggers()
     {
         var thorns = new AbilitySpec
