@@ -93,10 +93,15 @@ public sealed class FastCombatEngine
     {
         foreach (var ability in actor.Abilities.Where(x => x.Definition.Kind == AbilitySpecKind.Active && x.IsReady))
         {
-            if (!HasLivingOpponent(actor, combatants) || !CanResolveActiveAbility(ability, actor, combatants))
+            if (!HasLivingOpponent(actor, combatants)
+                || !CanResolveActiveAbility(ability, actor, combatants)
+                || !CanPayAbilityCosts(actor, ability.Definition))
+            {
                 continue;
+            }
 
-            ability.StartCooldown();
+            var additionalCooldownTicks = PayAbilityCosts(actor, ability.Definition, combatants);
+            ability.StartCooldown(additionalCooldownTicks);
             Log(actor, null, ability.Definition.Name, EventType.AbilityUse, 0, $"{actor.Name} used {ability.Definition.Name}");
             Publish(new CombatEvent(AbilityTriggerEvent.OnAbilityUsed, actor, null, ability.Definition.Id), combatants);
         }
@@ -114,6 +119,7 @@ public sealed class FastCombatEngine
 
         var damage = Math.Max(1, (int)Math.Round(1 + actor.GetAttribute(AttributeType.Power) / 10f));
         Log(actor, null, "Basic Attack", EventType.AbilityUse, 0, $"{actor.Name} used Basic Attack");
+        Publish(new CombatEvent(AbilityTriggerEvent.OnBasicAttack, actor, target, null), combatants);
         ApplyDamage(actor, target, damage, AttackType.Melee, DamageType.Physical, combatants, "Basic Attack");
     }
 
@@ -142,6 +148,67 @@ public sealed class FastCombatEngine
                 .Any(target => target.IsAlive
                     && EffectCanResolve(effect, actor, combatants)
                     && ConditionsPass(effect.Conditions, actor, combatEvent with { Target = target })));
+    }
+
+    private static bool CanPayAbilityCosts(RuntimeCombatant actor, CompiledAbility ability)
+    {
+        foreach (var cost in ability.Costs)
+        {
+            var value = CalculateCostValue(cost, actor);
+            if (value <= 0)
+                continue;
+
+            if (cost.Resource == AbilityResourceType.Health && actor.Health <= value)
+                return false;
+
+            if (cost.Resource == AbilityResourceType.Barrier && actor.Barrier < value)
+                return false;
+
+            if (cost.Resource == AbilityResourceType.Mana)
+                return false;
+        }
+
+        return true;
+    }
+
+    private int PayAbilityCosts(
+        RuntimeCombatant actor,
+        CompiledAbility ability,
+        IReadOnlyList<RuntimeCombatant> combatants)
+    {
+        var additionalCooldownTicks = 0;
+        var healthChanged = false;
+
+        foreach (var cost in ability.Costs)
+        {
+            var value = CalculateCostValue(cost, actor);
+            if (value <= 0)
+                continue;
+
+            switch (cost.Resource)
+            {
+                case AbilityResourceType.Health:
+                    actor.AdjustHealth(-value);
+                    healthChanged = true;
+                    break;
+                case AbilityResourceType.Barrier:
+                    actor.AdjustBarrier(-value);
+                    break;
+                case AbilityResourceType.Cooldown:
+                    additionalCooldownTicks += value;
+                    break;
+                case AbilityResourceType.Mana:
+                    throw new InvalidOperationException(
+                        $"Ability '{ability.Id}' requires Mana, but combat mana is not implemented.");
+                default:
+                    throw new NotSupportedException($"Unsupported ability cost resource '{cost.Resource}'.");
+            }
+        }
+
+        if (healthChanged)
+            Publish(new CombatEvent(AbilityTriggerEvent.OnHealthChanged, actor, actor, null), combatants);
+
+        return additionalCooldownTicks;
     }
 
     private void Publish(CombatEvent combatEvent, IReadOnlyList<RuntimeCombatant> combatants)
@@ -679,11 +746,15 @@ public sealed class FastCombatEngine
         combatEvent.Event switch
         {
             AbilityTriggerEvent.OnMeleeAttack
+                or AbilityTriggerEvent.OnBasicAttack
                 or AbilityTriggerEvent.OnRangedAttack
                 or AbilityTriggerEvent.OnMeleeAttacked
                 or AbilityTriggerEvent.OnRangedAttacked
                 or AbilityTriggerEvent.OnDamaged
-                or AbilityTriggerEvent.OnAttacked => ReferenceEquals(combatEvent.Source, listener),
+                or AbilityTriggerEvent.OnAttacked
+                or AbilityTriggerEvent.OnHeal
+                or AbilityTriggerEvent.OnHealed
+                or AbilityTriggerEvent.OnLifestealHeal => ReferenceEquals(combatEvent.Source, listener),
             _ => true
         };
 
@@ -825,6 +896,11 @@ public sealed class FastCombatEngine
             (int)Math.Round(effect.BaseValue + (effect.ScalingAttribute is { } attribute
                 ? source.GetAttribute(attribute) * effect.ScalingCoefficient
                 : 0)));
+
+    private static int CalculateCostValue(CompiledCost cost, RuntimeCombatant source) =>
+        Math.Max(0, (int)Math.Round(cost.BaseValue + (cost.ScalingAttribute is { } attribute
+            ? source.GetAttribute(attribute) * cost.ScalingCoefficient
+            : 0)));
 
     private static bool AllowsNegativeValue(AbilityEffectOperation operation) =>
         operation is AbilityEffectOperation.ModifyAttribute or AbilityEffectOperation.ModifyStatusStacks;

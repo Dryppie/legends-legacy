@@ -7,6 +7,7 @@ import {
   AbilityCatalogDiagnosticReport,
   AbilityBalanceSimulationReport,
   AbilityBalanceSimulationRequest,
+  RegionOneContentDiagnosticReport,
 } from '../../../../shared/models/diagnostics/ability-catalog-diagnostics';
 
 @Injectable({
@@ -25,6 +26,10 @@ export class DiagnosticsService {
 
   public getAbilityCatalogBehaviors(): Observable<AbilityCatalogBehaviorDiagnosticReport> {
     return this.apiService.get('diagnostics/ability-catalog-behaviors');
+  }
+
+  public getRegionOneContent(): Observable<RegionOneContentDiagnosticReport> {
+    return this.apiService.get('diagnostics/region-one-content');
   }
 
   public runAbilityBalanceSimulation(

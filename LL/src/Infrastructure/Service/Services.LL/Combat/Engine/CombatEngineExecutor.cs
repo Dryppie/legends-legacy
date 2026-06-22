@@ -341,8 +341,18 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
             OwningEssenceId = spec.OwningEssenceId,
             CooldownTicks = spec.CooldownTicks,
             Tags = [.. spec.Tags],
+            Costs = [.. spec.Costs.Select(CloneCost)],
             Triggers = [.. spec.Triggers.Select(CloneTrigger)],
             Effects = [.. spec.Effects.Select(CloneEffect)]
+        };
+
+    private static AbilityCostSpec CloneCost(AbilityCostSpec cost) =>
+        new()
+        {
+            Resource = cost.Resource,
+            BaseValue = cost.BaseValue,
+            ScalingAttribute = cost.ScalingAttribute,
+            ScalingCoefficient = cost.ScalingCoefficient
         };
 
     private static AbilityTriggerSpec CloneTrigger(AbilityTriggerSpec trigger) =>

@@ -16,8 +16,17 @@ public sealed class CompiledAbility
     public required string Name { get; init; }
     public AbilitySpecKind Kind { get; init; }
     public int CooldownTicks { get; init; }
+    public required IReadOnlyList<CompiledCost> Costs { get; init; }
     public required IReadOnlyDictionary<AbilityTriggerEvent, IReadOnlyList<CompiledTrigger>> TriggersByEvent { get; init; }
     public required IReadOnlySet<string> Tags { get; init; }
+}
+
+public sealed class CompiledCost
+{
+    public AbilityResourceType Resource { get; init; }
+    public int BaseValue { get; init; }
+    public AttributeType? ScalingAttribute { get; init; }
+    public float ScalingCoefficient { get; init; }
 }
 
 public sealed class CompiledTrigger
@@ -107,7 +116,8 @@ public sealed class RuntimeAbility
     public int RemainingCooldownTicks { get; private set; }
     public bool IsReady => RemainingCooldownTicks <= 0;
 
-    public void StartCooldown() => RemainingCooldownTicks = Definition.CooldownTicks;
+    public void StartCooldown(int additionalTicks = 0) =>
+        RemainingCooldownTicks = Math.Max(0, Definition.CooldownTicks + additionalTicks);
 
     public void ReduceCooldown(int ticks)
     {

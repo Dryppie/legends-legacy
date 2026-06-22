@@ -97,7 +97,8 @@ public enum AbilityResourceType
 {
     Health = 0,
     Barrier = 1,
-    Cooldown = 2
+    Cooldown = 2,
+    Mana = 3
 }
 
 public sealed class AbilitySpec
@@ -109,8 +110,17 @@ public sealed class AbilitySpec
     public string? OwningEssenceId { get; set; }
     public int CooldownTicks { get; set; }
     public List<string> Tags { get; set; } = [];
+    public List<AbilityCostSpec> Costs { get; set; } = [];
     public List<AbilityTriggerSpec> Triggers { get; set; } = [];
     public List<AbilityEffectSpec> Effects { get; set; } = [];
+}
+
+public sealed class AbilityCostSpec
+{
+    public AbilityResourceType Resource { get; set; } = AbilityResourceType.Health;
+    public int BaseValue { get; set; }
+    public AttributeType? ScalingAttribute { get; set; }
+    public float ScalingCoefficient { get; set; }
 }
 
 public sealed class AbilityTriggerSpec

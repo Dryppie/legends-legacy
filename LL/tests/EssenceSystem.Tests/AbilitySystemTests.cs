@@ -109,6 +109,57 @@ public sealed class AbilitySystemTests
     }
 
     [Fact]
+    public void Engine_pays_health_cost_before_using_active_ability()
+    {
+        var ability = CreateDamageAbility("ability.health.cost", "Family.Test");
+        ability.Costs.Add(new AbilityCostSpec
+        {
+            Resource = AbilityResourceType.Health,
+            BaseValue = 25
+        });
+
+        var result = RunBattle([ability], [], maxTicks: 1, out var friendly, out var hostile);
+
+        Assert.Equal(175, friendly.Health);
+        Assert.Equal(180, hostile.Health);
+        Assert.Contains(result.EventLog, x => x.EventType == EventType.AbilityUse && x.Source == ability.Name);
+    }
+
+    [Fact]
+    public void Engine_does_not_use_active_ability_when_health_cost_cannot_be_paid()
+    {
+        var ability = CreateDamageAbility("ability.health.cost.unpaid", "Family.Test");
+        ability.Costs.Add(new AbilityCostSpec
+        {
+            Resource = AbilityResourceType.Health,
+            BaseValue = 200
+        });
+
+        var result = RunBattle([ability], [], maxTicks: 1, out var friendly, out var hostile);
+
+        Assert.Equal(200, friendly.Health);
+        Assert.Equal(200, hostile.Health);
+        Assert.DoesNotContain(result.EventLog, x => x.EventType == EventType.AbilityUse && x.Source == ability.Name);
+    }
+
+    [Fact]
+    public void Engine_recognizes_mana_costs_as_unpayable_until_mana_runtime_exists()
+    {
+        var ability = CreateDamageAbility("ability.mana.cost", "Family.Test");
+        ability.Costs.Add(new AbilityCostSpec
+        {
+            Resource = AbilityResourceType.Mana,
+            BaseValue = 5
+        });
+
+        var result = RunBattle([ability], [], maxTicks: 1, out var friendly, out var hostile);
+
+        Assert.Equal(200, friendly.Health);
+        Assert.Equal(200, hostile.Health);
+        Assert.DoesNotContain(result.EventLog, x => x.EventType == EventType.AbilityUse && x.Source == ability.Name);
+    }
+
+    [Fact]
     public void Engine_stats_record_actual_health_damage_not_overkill()
     {
         var ability = new AbilitySpec
@@ -1402,7 +1453,7 @@ public sealed class AbilitySystemTests
 
         Assert.True(report.IsComplete, string.Join(Environment.NewLine, report.Gaps.Select(x => $"{x.EssenceId} {x.Slot}: {x.Reason}")));
         Assert.Equal(report.RequiredSlotCount, report.CoveredSlotCount);
-        Assert.Equal(62, report.RequiredSlotCount);
+        Assert.Equal(120, report.RequiredSlotCount);
         Assert.Equal(report.EssenceCount, report.RuntimeLoadoutChecks.Count);
         Assert.All(report.RuntimeLoadoutChecks, check =>
         {
@@ -1413,6 +1464,33 @@ public sealed class AbilitySystemTests
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.goblin_ambusher");
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.skeleton_guardian");
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.fire_ant");
+        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.ant_worker");
+        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.forest_spirit");
+        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.wood_nymph");
+        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.giant_spider");
+        Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.venomous_spiderling");
+        foreach (var essenceId in new[]
+        {
+            "essence.blackjaw_spider",
+            "essence.raven",
+            "essence.widow_stalker",
+            "essence.scarecrow",
+            "essence.lost_soul",
+            "essence.apparition",
+            "essence.specter",
+            "essence.zombie",
+            "essence.half_zombie",
+            "essence.undead",
+            "essence.blood_zombie",
+            "essence.giant_worm",
+            "essence.burrowed_horror",
+            "essence.cave_leech",
+            "essence.stonejaw_grub",
+            "essence.deep_burrower"
+        })
+        {
+            Assert.DoesNotContain(report.Gaps, x => x.EssenceId == essenceId);
+        }
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.cave_bat");
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.necroshade_wraith");
         Assert.DoesNotContain(report.Gaps, x => x.EssenceId == "essence.legacy.goblin");

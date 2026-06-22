@@ -125,6 +125,7 @@ public static class AbilityCatalogValidator
             if (ability.CooldownTicks < 0)
                 errors.Add($"{label}: cooldown cannot be negative.");
 
+            ValidateCosts(label, ability.Costs, errors);
             ValidateEffects(label, ability.Effects, statusIds: null, errors);
             ValidateTriggers(label, ability.Triggers, ability.Effects, errors);
         }
@@ -252,6 +253,21 @@ public static class AbilityCatalogValidator
             }
 
             ValidateConditions(label, effect.Conditions, errors);
+        }
+    }
+
+    private static void ValidateCosts(
+        string ownerId,
+        IEnumerable<AbilityCostSpec> costs,
+        ICollection<string> errors)
+    {
+        foreach (var cost in costs)
+        {
+            if (cost.BaseValue < 0)
+                errors.Add($"{ownerId}: cost {cost.Resource} base value cannot be negative.");
+
+            if (cost.ScalingCoefficient < 0)
+                errors.Add($"{ownerId}: cost {cost.Resource} scaling coefficient cannot be negative.");
         }
     }
 

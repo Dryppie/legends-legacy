@@ -40,14 +40,14 @@ public static class EssenceTagCatalog
                 "Trigger.OnStatusExpired", "Trigger.OnSummonDeath", "Trigger.OnAbilityUse", "Trigger.OnAbilityUsed",
                 "Trigger.OnBasicAttack", "Trigger.OnAttacked", "Trigger.OnMeleeAttack", "Trigger.OnRangedAttack",
                 "Trigger.OnMeleeAttacked", "Trigger.OnRangedAttacked", "Trigger.OnHealthChanged", "Trigger.OnDeath",
-                "Trigger.OnLifestealHeal"
+                "Trigger.OnHeal", "Trigger.OnHealed", "Trigger.OnLifestealHeal"
             ],
             ["Target"] =
             [
                 "Target.Self", "Target.Ally", "Target.LowestHealthAlly", "Target.Enemy", "Target.RandomEnemy",
                 "Target.LowestHealthEnemy", "Target.HighestThreatEnemy", "Target.Frontline", "Target.Backline",
                 "Target.Area", "Target.Adjacent", "Target.SummonOwner", "Target.Summon", "Target.Multi",
-                "Target.AllEnemies", "Target.AllAllies", "Target.TwoAllies"
+                "Target.AllEnemies", "Target.AllAllies", "Target.TwoAllies", "Target.HighestMaxHealthAlly"
             ],
             ["Mechanic"] = ["Mechanic.Execute", "Mechanic.Lifesteal"],
             ["General"] = ["Summon", "Healing", "Retaliation"]

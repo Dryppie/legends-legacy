@@ -22,6 +22,7 @@ public static class AbilityCompiler
             Name = spec.Name,
             Kind = spec.Kind,
             CooldownTicks = spec.CooldownTicks,
+            Costs = [.. spec.Costs.Select(CompileCost)],
             Tags = new HashSet<string>(spec.Tags, StringComparer.OrdinalIgnoreCase),
             TriggersByEvent = compiledTriggers
         };
@@ -110,6 +111,15 @@ public static class AbilityCompiler
             DamageType = effect.DamageType,
             LifeStealPercentage = effect.LifeStealPercentage,
             Conditions = [.. effect.Conditions.Select(CompileCondition)]
+        };
+
+    private static CompiledCost CompileCost(AbilityCostSpec cost) =>
+        new()
+        {
+            Resource = cost.Resource,
+            BaseValue = cost.BaseValue,
+            ScalingAttribute = cost.ScalingAttribute,
+            ScalingCoefficient = cost.ScalingCoefficient
         };
 
     private static CompiledCondition CompileCondition(AbilityConditionSpec condition) =>

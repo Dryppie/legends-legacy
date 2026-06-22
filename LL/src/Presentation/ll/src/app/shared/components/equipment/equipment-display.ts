@@ -17,7 +17,7 @@ export interface EquipmentDisplay {
   description?: string;
   baseModifiers?: AttributeModifier[];
   instanceModifiers: AttributeModifier[];
-  gatheringType?: GatheringType;
+  gatheringType?: GatheringType | null;
   toolBonuses: ToolBonusModifier[];
   toolAffixes: ToolBonusModifier[];
   baseToolBonuses: ToolBonusModifier[];
