@@ -35,8 +35,21 @@ public sealed class DungeonRunFactory
             Seed = seed,
             Status = DungeonRunStatus.Active,
             CurrentRoomIndex = 0,
+            State = new DungeonRunState
+            {
+                MechanicId = string.IsNullOrWhiteSpace(dungeon.Mechanic?.Id)
+                    ? "pressure"
+                    : dungeon.Mechanic.Id,
+                MechanicDisplayName = string.IsNullOrWhiteSpace(dungeon.Mechanic?.DisplayName)
+                    ? "Pressure"
+                    : dungeon.Mechanic.DisplayName,
+                MechanicMaxValue = Math.Max(1, dungeon.Mechanic?.MaxValue ?? 100),
+                Pressure = Math.Clamp(dungeon.Mechanic?.InitialValue ?? 0, 0, Math.Max(1, dungeon.Mechanic?.MaxValue ?? 100)),
+                RewardMultiplierPercent = 100
+            },
             CreatedAt = DateTimeOffset.UtcNow
         };
+        run.State.RunId = run.Id;
 
         // Initialize floor states (no event outcome yet)
         run.Rooms = CreateDungeonRooms(dungeon, rand);

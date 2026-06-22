@@ -108,6 +108,7 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
 
                 var baseSpec = catalog.AbilitiesById[abilityId];
                 var modifiedSpec = ApplyEvolutionModifiers(baseSpec, essence, catalog);
+                modifiedSpec = ApplyTemporaryAbilityModifiers(modifiedSpec, combatant, catalog);
                 yield return ReferenceEquals(baseSpec, modifiedSpec)
                     ? compiledAbilities[abilityId]
                     : AbilityCompiler.CompileAbility(modifiedSpec);
@@ -180,6 +181,42 @@ public sealed class CombatEngineExecutor : ICombatEngineExecutor
         }
 
         return clone ?? spec;
+    }
+
+    private AbilitySpec ApplyTemporaryAbilityModifiers(
+        AbilitySpec spec,
+        CombatEntity combatant,
+        AbilityCatalog catalog)
+    {
+        if (combatant.TemporaryAbilityModifiers.Count == 0)
+            return spec;
+
+        AbilitySpec? clone = null;
+        foreach (var modifier in combatant.TemporaryAbilityModifiers)
+        {
+            if (!CanApplyModifier(spec, modifier))
+                continue;
+
+            clone ??= CloneAbilitySpec(spec);
+            if (modifier.Operation.Equals("AddMultiplier", StringComparison.OrdinalIgnoreCase))
+                ApplyMultiplierModifier(clone, modifier, catalog);
+            else if (modifier.Operation.Equals("AddEffect", StringComparison.OrdinalIgnoreCase))
+                ApplyAddEffectModifier(clone, modifier, catalog);
+        }
+
+        return clone ?? spec;
+    }
+
+    private static bool CanApplyModifier(AbilitySpec spec, EssenceAbilityModifierDefinition modifier)
+    {
+        if (string.IsNullOrWhiteSpace(modifier.Target))
+            return false;
+
+        if (spec.Effects.Any(x => x.Id.Equals(modifier.Target, StringComparison.OrdinalIgnoreCase)))
+            return true;
+
+        return modifier.Effect is not null
+            && spec.Triggers.Any(x => x.EffectIds.Contains(modifier.Target, StringComparer.OrdinalIgnoreCase));
     }
 
     private static IReadOnlyList<EssenceAbilityModifierDefinition> SelectEvolutionModifiers(

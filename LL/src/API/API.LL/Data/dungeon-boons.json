@@ -1,0 +1,102 @@
+{
+  "boons": [
+    {
+      "id": "bulwark_echo",
+      "name": "Bulwark Echo",
+      "description": "Defensive effects are stronger for this dungeon.",
+      "rarity": "Common",
+      "combatStyleTags": [ "Defense" ],
+      "attributeModifiers": [
+        { "attributeType": "Armor", "amount": 15, "modifierType": "Additive" },
+        { "attributeType": "Resistance", "amount": 15, "modifierType": "Additive" }
+      ]
+    },
+    {
+      "id": "hunter_focus",
+      "name": "Hunter's Focus",
+      "description": "Gain an edge against elites and bosses.",
+      "rarity": "Common",
+      "combatStyleTags": [ "Critical", "Elite" ],
+      "attributeModifiers": [
+        { "attributeType": "CritChance", "amount": 5, "modifierType": "Flat" },
+        { "attributeType": "Precision", "amount": 8, "modifierType": "Additive" }
+      ]
+    },
+    {
+      "id": "venom_bloom",
+      "name": "Venom Bloom",
+      "description": "Poison and curse effects linger longer.",
+      "rarity": "Common",
+      "essenceTags": [ "Status.Poison", "Status.Curse" ],
+      "attributeModifiers": [
+        { "attributeType": "Power", "amount": 6, "modifierType": "Additive" },
+        { "attributeType": "StatusResistance", "amount": 5, "modifierType": "Flat" }
+      ]
+    },
+    {
+      "id": "mana_spiral",
+      "name": "Mana Spiral",
+      "description": "Damage abilities gain momentum during rooms.",
+      "rarity": "Uncommon",
+      "combatStyleTags": [ "Spell", "Damage" ],
+      "attributeModifiers": [
+        { "attributeType": "Spirit", "amount": 12, "modifierType": "Additive" },
+        { "attributeType": "MagicPenetration", "amount": 5, "modifierType": "Flat" }
+      ],
+      "abilityModifiers": [
+        {
+          "target": "effect.damage.main",
+          "operation": "AddMultiplier",
+          "value": 0.08
+        }
+      ]
+    },
+    {
+      "id": "guardian_root",
+      "name": "Guardian Root",
+      "description": "Protective reactions become more reliable.",
+      "rarity": "Uncommon",
+      "combatStyleTags": [ "Defense", "Barrier" ],
+      "attributeModifiers": [
+        { "attributeType": "Fortitude", "amount": 10, "modifierType": "Additive" },
+        { "attributeType": "BlockChance", "amount": 5, "modifierType": "Flat" }
+      ]
+    },
+    {
+      "id": "warlord_rhythm",
+      "name": "Warlord's Rhythm",
+      "description": "Melee active abilities hit harder during this run.",
+      "rarity": "Rare",
+      "combatStyleTags": [ "Melee", "Weapon" ],
+      "attributeModifiers": [
+        { "attributeType": "Cooldown", "amount": 5, "modifierType": "Flat" },
+        { "attributeType": "WeaponDamage", "amount": 10, "modifierType": "Additive" }
+      ],
+      "abilityModifiers": [
+        {
+          "target": "effect.damage.main",
+          "operation": "AddMultiplier",
+          "value": 0.12
+        }
+      ]
+    },
+    {
+      "id": "gravefire_brand",
+      "name": "Gravefire Brand",
+      "description": "Your main damage effects burn hotter for this dungeon.",
+      "rarity": "Rare",
+      "essenceTags": [ "Status.Burn", "Status.Curse" ],
+      "combatStyleTags": [ "Damage" ],
+      "attributeModifiers": [
+        { "attributeType": "Power", "amount": 10, "modifierType": "Additive" }
+      ],
+      "abilityModifiers": [
+        {
+          "target": "effect.damage.main",
+          "operation": "AddMultiplier",
+          "value": 0.15
+        }
+      ]
+    }
+  ]
+}

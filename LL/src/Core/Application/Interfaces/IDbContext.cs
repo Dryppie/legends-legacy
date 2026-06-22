@@ -2,6 +2,7 @@ using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Colosseum;
+using Domain.Models.Dungeons.Mastery;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
@@ -49,6 +50,7 @@ public interface IDbContext
     DbSet<DungeonRun> DungeonRuns { get; }
     DbSet<RunReward> RunRewards { get; }
     DbSet<DungeonCompletionRecord> DungeonCompletionRecords { get; }
+    DbSet<CharacterDungeonMastery> CharacterDungeonMasteries { get; }
 
     // Effects
     //DbSet<Modifier> Modifiers { get; }

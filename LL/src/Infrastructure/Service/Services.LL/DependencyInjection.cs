@@ -106,6 +106,34 @@ public static class DependencyInjection
         services.AddScoped<IDungeonRunService, DungeonRunService>();
         services.AddScoped<IDungeonAccessPolicy, DungeonAccessPolicy>();
         services.AddScoped<IDungeonPreviewRewardService, DungeonPreviewRewardService>();
+        services.AddSingleton<IDungeonMasteryBonusDefinitionProvider>(sp =>
+            new JsonDungeonMasteryBonusDefinitionProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddScoped<IDungeonMasteryService, DungeonMasteryService>();
+        services.AddScoped<IDungeonPressureService, DungeonPressureService>();
+        services.AddSingleton<IDungeonRouteDefinitionProvider>(sp =>
+            new JsonDungeonRouteDefinitionProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddScoped<IDungeonRouteService, DungeonRouteService>();
+        services.AddSingleton<IDungeonBoonDefinitionProvider>(sp =>
+            new JsonDungeonBoonDefinitionProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddScoped<IDungeonBoonService, DungeonBoonService>();
+        services.AddScoped<IDungeonCheckpointService, DungeonCheckpointService>();
+        services.AddSingleton<IDungeonEventDefinitionProvider>(sp =>
+            new JsonDungeonEventDefinitionProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddScoped<IDungeonEventChoiceService, DungeonEventChoiceService>();
+        services.AddScoped<IDungeonBossModifierService, DungeonBossModifierService>();
+        services.AddScoped<IDungeonEncounterModifierService, DungeonEncounterModifierService>();
 
         services.AddScoped<IEntityService, EntityService>();
         services.AddScoped<IEquipmentSlotService, EquipmentSlotService>();

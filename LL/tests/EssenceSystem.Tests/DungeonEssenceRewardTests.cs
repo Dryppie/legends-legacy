@@ -38,7 +38,8 @@ public sealed class DungeonEssenceRewardTests
             new ItemBaseRepository(db),
             new EmptyLootService(),
             pendingRewards,
-            new InventoryItemFactory());
+            new InventoryItemFactory(),
+            new NoOpDungeonMasteryService());
 
         await applier.ApplyAsync(new() { Id = Guid.NewGuid(), DungeonDefinitionId = "dungeon.tier_1" }, CancellationToken.None);
 
@@ -101,6 +102,35 @@ public sealed class DungeonEssenceRewardTests
         public Task<bool> HasCompletedDungeonAsync(Guid characterId, string dungeonDefinitionId, CancellationToken cancellationToken) => Task.FromResult(false);
         public Task MarkDungeonCompletedAsync(Guid characterId, string dungeonDefinitionId, DateTimeOffset completedAt, CancellationToken cancellationToken) => Task.CompletedTask;
         public Task<bool> UpdateDungeonRunAsync(DungeonRun dungeonRun, CancellationToken cancellationToken) => Task.FromResult(true);
+    }
+
+    private sealed class NoOpDungeonMasteryService : IDungeonMasteryService
+    {
+        public int CalculateLevel(long experience) => 0;
+        public int? GetExperienceRequiredForNextLevel(int level) => null;
+
+        public Task<DungeonMasteryAwardResult> AwardCompletionAsync(
+            DungeonRun run,
+            CancellationToken cancellationToken) =>
+            Task.FromResult(new DungeonMasteryAwardResult(
+                run.DungeonDefinitionId,
+                0,
+                0,
+                0,
+                0,
+                0,
+                [],
+                AlreadyAwarded: false));
+
+        public Task ApplyStartBonusesAsync(DungeonRun run, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+
+        public Task<IReadOnlyDictionary<string, DungeonMasterySnapshot>> GetMasteryByDungeonAsync(
+            Guid characterId,
+            IReadOnlyCollection<string> dungeonDefinitionIds,
+            CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyDictionary<string, DungeonMasterySnapshot>>(
+                new Dictionary<string, DungeonMasterySnapshot>(StringComparer.OrdinalIgnoreCase));
     }
 
     private sealed class EmptyLootTableRepository : ILootTableRepository

@@ -20,6 +20,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
     private readonly ILootService _lootService;
     private readonly IDungeonPendingRewardWriter _pendingRewardWriter;
     private readonly IInventoryItemFactory _inventoryItemFactory;
+    private readonly IDungeonMasteryService _mastery;
 
     public DungeonCompletionRewardApplier(
         IDungeonDefinitions dungeonDefinitions,
@@ -28,7 +29,8 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
         IItemBaseRepository itemBases,
         ILootService lootService,
         IDungeonPendingRewardWriter pendingRewardWriter,
-        IInventoryItemFactory inventoryItemFactory)
+        IInventoryItemFactory inventoryItemFactory,
+        IDungeonMasteryService mastery)
     {
         _dungeonDefinitions = dungeonDefinitions;
         _dungeonRuns = dungeonRuns;
@@ -37,6 +39,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
         _lootService = lootService;
         _pendingRewardWriter = pendingRewardWriter;
         _inventoryItemFactory = inventoryItemFactory;
+        _mastery = mastery;
     }
 
     public async Task ApplyAsync(DungeonRun run, CancellationToken cancellationToken)
@@ -63,6 +66,7 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
 
         await AddMonsterCoreRewardsAsync(run.Id, dungeon.Grade, cancellationToken);
         await AddFirstCompletionRewardsIfNeededAsync(run, dungeon, cancellationToken);
+        await _mastery.AwardCompletionAsync(run, cancellationToken);
         await _dungeonRuns.MarkDungeonCompletedAsync(
             run.CharacterId,
             run.DungeonDefinitionId,

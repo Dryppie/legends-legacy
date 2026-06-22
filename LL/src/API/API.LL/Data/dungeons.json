@@ -26,6 +26,30 @@
     "monsterLootModifiers": {
       "Essence": 25
     },
+    "mechanic": {
+      "id": "alarm",
+      "displayName": "Alarm Level",
+      "initialValue": 0,
+      "maxValue": 100,
+      "thresholds": [
+        {
+          "id": "alarm_watchful",
+          "value": 50,
+          "description": "The alarm has enemies watching every tunnel.",
+          "enemyModifierIds": [ "alarm_enemy_ready" ],
+          "bossModifierIds": [ "alarm_boss_ready" ],
+          "rewardMultiplierBonusPercent": 25
+        },
+        {
+          "id": "alarm_full",
+          "value": 75,
+          "description": "The boss is fully alerted and enraged.",
+          "enemyModifierIds": [ "alarm_enemy_reinforced" ],
+          "bossModifierIds": [ "alarm_boss_enraged" ],
+          "rewardMultiplierBonusPercent": 45
+        }
+      ]
+    },
     "gatheringNodes": [
       {
         "id": "goblin_mines_dungeon_iron_vein",
@@ -88,7 +112,7 @@
           "goblin",
           "goblin_archer",
           "goblin_warrior",
-          "goblin_shaman"
+          "hobgoblin"
         ]
       },
       {
@@ -128,6 +152,30 @@
     "tierLootTableId": "10000000-0000-0000-0000-000000000002",
     "monsterLootModifiers": {
       "Essence": 25
+    },
+    "mechanic": {
+      "id": "alarm",
+      "displayName": "Alarm Level",
+      "initialValue": 0,
+      "maxValue": 100,
+      "thresholds": [
+        {
+          "id": "alarm_watchful",
+          "value": 50,
+          "description": "The alarm has enemies watching every tunnel.",
+          "enemyModifierIds": [ "alarm_enemy_ready" ],
+          "bossModifierIds": [ "alarm_boss_ready" ],
+          "rewardMultiplierBonusPercent": 25
+        },
+        {
+          "id": "alarm_full",
+          "value": 75,
+          "description": "The boss is fully alerted and enraged.",
+          "enemyModifierIds": [ "alarm_enemy_reinforced" ],
+          "bossModifierIds": [ "alarm_boss_enraged" ],
+          "rewardMultiplierBonusPercent": 45
+        }
+      ]
     },
     "gatheringNodes": [
       {
@@ -170,7 +218,7 @@
           "goblin",
           "goblin_archer",
           "goblin_warrior",
-          "goblin_shaman"
+          "hobgoblin"
         ]
       },
       {
@@ -210,6 +258,30 @@
     "tierLootTableId": "10000000-0000-0000-0000-000000000003",
     "monsterLootModifiers": {
       "Essence": 25
+    },
+    "mechanic": {
+      "id": "alarm",
+      "displayName": "Alarm Level",
+      "initialValue": 0,
+      "maxValue": 100,
+      "thresholds": [
+        {
+          "id": "alarm_watchful",
+          "value": 50,
+          "description": "The alarm has enemies watching every tunnel.",
+          "enemyModifierIds": [ "alarm_enemy_ready" ],
+          "bossModifierIds": [ "alarm_boss_ready" ],
+          "rewardMultiplierBonusPercent": 25
+        },
+        {
+          "id": "alarm_full",
+          "value": 75,
+          "description": "The boss is fully alerted and enraged.",
+          "enemyModifierIds": [ "alarm_enemy_reinforced" ],
+          "bossModifierIds": [ "alarm_boss_enraged" ],
+          "rewardMultiplierBonusPercent": 45
+        }
+      ]
     },
     "gatheringNodes": [
       {
@@ -252,7 +324,7 @@
           "goblin",
           "goblin_archer",
           "goblin_warrior",
-          "goblin_shaman"
+          "hobgoblin"
         ]
       },
       {
@@ -291,6 +363,30 @@
     "monsterLootModifiers": {
       "Essence": 15
     },
+    "mechanic": {
+      "id": "curse",
+      "displayName": "Curse",
+      "initialValue": 0,
+      "maxValue": 100,
+      "thresholds": [
+        {
+          "id": "curse_shroud",
+          "value": 50,
+          "description": "The curse settles into a defensive shroud.",
+          "enemyModifierIds": [ "curse_enemy_shrouded" ],
+          "bossModifierIds": [ "curse_boss_shrouded" ],
+          "rewardMultiplierBonusPercent": 25
+        },
+        {
+          "id": "curse_empowered",
+          "value": 75,
+          "description": "The curse feeds the dead with violent force.",
+          "enemyModifierIds": [ "curse_enemy_empowered" ],
+          "bossModifierIds": [ "curse_boss_empowered" ],
+          "rewardMultiplierBonusPercent": 45
+        }
+      ]
+    },
     "hasCheckpoint": true,
     "minRooms": 6,
     "maxRooms": 8,
@@ -299,35 +395,37 @@
         "type": "Combat",
         "weight": 1.0,
         "encounterIds": [
-          "skeleton"
+          "skeleton_archer",
+          "skeleton_mage",
+          "skeleton_warrior"
         ]
       },
       {
         "type": "Combat",
         "weight": 0.8,
         "encounterIds": [
-          "poisonous_rat"
+          "large_rat"
         ]
       },
       {
         "type": "Combat",
         "weight": 0.8,
         "encounterIds": [
-          "cave_bat"
+          "vampire_bat"
         ]
       },
       {
         "type": "Combat",
         "weight": 0.6,
         "encounterIds": [
-          "giant_bat"
+          "vampire_bat"
         ]
       },
       {
         "type": "Boss",
         "weight": 1.0,
         "encounterIds": [
-          "necroshade_wraith"
+          "specter"
         ]
       }
     ]
@@ -361,6 +459,30 @@
     "monsterLootModifiers": {
       "Essence": 15
     },
+    "mechanic": {
+      "id": "curse",
+      "displayName": "Curse",
+      "initialValue": 0,
+      "maxValue": 100,
+      "thresholds": [
+        {
+          "id": "curse_shroud",
+          "value": 50,
+          "description": "The curse settles into a defensive shroud.",
+          "enemyModifierIds": [ "curse_enemy_shrouded" ],
+          "bossModifierIds": [ "curse_boss_shrouded" ],
+          "rewardMultiplierBonusPercent": 25
+        },
+        {
+          "id": "curse_empowered",
+          "value": 75,
+          "description": "The curse feeds the dead with violent force.",
+          "enemyModifierIds": [ "curse_enemy_empowered" ],
+          "bossModifierIds": [ "curse_boss_empowered" ],
+          "rewardMultiplierBonusPercent": 45
+        }
+      ]
+    },
     "hasCheckpoint": true,
     "minRooms": 7,
     "maxRooms": 9,
@@ -369,35 +491,37 @@
         "type": "Combat",
         "weight": 1.0,
         "encounterIds": [
-          "skeleton"
+          "skeleton_archer",
+          "skeleton_mage",
+          "skeleton_warrior"
         ]
       },
       {
         "type": "Combat",
         "weight": 0.8,
         "encounterIds": [
-          "poisonous_rat"
+          "large_rat"
         ]
       },
       {
         "type": "Combat",
         "weight": 0.8,
         "encounterIds": [
-          "cave_bat"
+          "vampire_bat"
         ]
       },
       {
         "type": "Combat",
         "weight": 0.6,
         "encounterIds": [
-          "giant_bat"
+          "vampire_bat"
         ]
       },
       {
         "type": "Boss",
         "weight": 1.0,
         "encounterIds": [
-          "necroshade_wraith"
+          "specter"
         ]
       }
     ]
@@ -431,6 +555,30 @@
     "monsterLootModifiers": {
       "Essence": 15
     },
+    "mechanic": {
+      "id": "curse",
+      "displayName": "Curse",
+      "initialValue": 0,
+      "maxValue": 100,
+      "thresholds": [
+        {
+          "id": "curse_shroud",
+          "value": 50,
+          "description": "The curse settles into a defensive shroud.",
+          "enemyModifierIds": [ "curse_enemy_shrouded" ],
+          "bossModifierIds": [ "curse_boss_shrouded" ],
+          "rewardMultiplierBonusPercent": 25
+        },
+        {
+          "id": "curse_empowered",
+          "value": 75,
+          "description": "The curse feeds the dead with violent force.",
+          "enemyModifierIds": [ "curse_enemy_empowered" ],
+          "bossModifierIds": [ "curse_boss_empowered" ],
+          "rewardMultiplierBonusPercent": 45
+        }
+      ]
+    },
     "hasCheckpoint": true,
     "minRooms": 8,
     "maxRooms": 10,
@@ -439,35 +587,37 @@
         "type": "Combat",
         "weight": 1.0,
         "encounterIds": [
-          "skeleton"
+          "skeleton_archer",
+          "skeleton_mage",
+          "skeleton_warrior"
         ]
       },
       {
         "type": "Combat",
         "weight": 0.8,
         "encounterIds": [
-          "poisonous_rat"
+          "large_rat"
         ]
       },
       {
         "type": "Combat",
         "weight": 0.8,
         "encounterIds": [
-          "cave_bat"
+          "vampire_bat"
         ]
       },
       {
         "type": "Combat",
         "weight": 0.6,
         "encounterIds": [
-          "giant_bat"
+          "vampire_bat"
         ]
       },
       {
         "type": "Boss",
         "weight": 1.0,
         "encounterIds": [
-          "necroshade_wraith"
+          "specter"
         ]
       }
     ]
@@ -521,21 +671,21 @@
         "type": "MiniBoss",
         "weight": 1.0,
         "encounterIds": [
-          "queens_guard_ant"
+          "ant_worker"
         ]
       },
       {
         "type": "Boss",
         "weight": 0.92,
         "encounterIds": [
-          "ant_queen"
+          "fire_ant"
         ]
       },
       {
         "type": "Boss",
         "weight": 0.08,
         "encounterIds": [
-          "ant_king"
+          "fire_ant"
         ]
       }
     ]
@@ -591,21 +741,21 @@
         "type": "MiniBoss",
         "weight": 1.0,
         "encounterIds": [
-          "queens_guard_ant"
+          "ant_worker"
         ]
       },
       {
         "type": "Boss",
         "weight": 0.92,
         "encounterIds": [
-          "ant_queen"
+          "fire_ant"
         ]
       },
       {
         "type": "Boss",
         "weight": 0.08,
         "encounterIds": [
-          "ant_king"
+          "fire_ant"
         ]
       }
     ]
@@ -661,21 +811,21 @@
         "type": "MiniBoss",
         "weight": 1.0,
         "encounterIds": [
-          "queens_guard_ant"
+          "ant_worker"
         ]
       },
       {
         "type": "Boss",
         "weight": 0.92,
         "encounterIds": [
-          "ant_queen"
+          "fire_ant"
         ]
       },
       {
         "type": "Boss",
         "weight": 0.08,
         "encounterIds": [
-          "ant_king"
+          "fire_ant"
         ]
       }
     ]

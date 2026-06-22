@@ -151,6 +151,22 @@ export class DungeonStateService {
     this.executeAction('continue');
   }
 
+  chooseRoute(routeOptionId: string): void {
+    this.executeAction('choose_route', { routeOptionId });
+  }
+
+  chooseBoon(boonId: string): void {
+    this.executeAction('choose_boon', { boonId });
+  }
+
+  chooseCheckpoint(choice: string): void {
+    this.executeAction('checkpoint_choice', { choice });
+  }
+
+  chooseEventChoice(choiceId: string): void {
+    this.executeAction('event_choice', { choiceId });
+  }
+
   withdraw(): void {
     this.executeAction('withdraw');
   }

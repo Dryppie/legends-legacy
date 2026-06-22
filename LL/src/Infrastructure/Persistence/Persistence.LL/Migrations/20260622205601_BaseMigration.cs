@@ -14,6 +14,24 @@ namespace Persistence.LL.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "CharacterDungeonMasteries",
+                columns: table => new
+                {
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    DungeonDefinitionId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    Experience = table.Column<long>(type: "bigint", nullable: false),
+                    Level = table.Column<int>(type: "integer", nullable: false),
+                    CompletionCount = table.Column<int>(type: "integer", nullable: false),
+                    LastAwardedRunId = table.Column<Guid>(type: "uuid", nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CharacterDungeonMasteries", x => new { x.CharacterId, x.DungeonDefinitionId });
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CharacterSnapshots",
                 columns: table => new
                 {
@@ -54,6 +72,7 @@ namespace Persistence.LL.Migrations
                     Seed = table.Column<int>(type: "integer", nullable: false),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     CurrentRoomIndex = table.Column<int>(type: "integer", nullable: false),
+                    State = table.Column<string>(type: "jsonb", nullable: false),
                     PendingExperience = table.Column<int>(type: "integer", nullable: false),
                     PendingCinders = table.Column<int>(type: "integer", nullable: false),
                     PendingSoulstones = table.Column<int>(type: "integer", nullable: false),
@@ -1109,6 +1128,11 @@ namespace Persistence.LL.Migrations
                 column: "RegionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CharacterDungeonMasteries_DungeonDefinitionId",
+                table: "CharacterDungeonMasteries",
+                column: "DungeonDefinitionId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ColosseumMatches_CharacterBId",
                 table: "ColosseumMatches",
                 column: "CharacterBId");
@@ -1344,6 +1368,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "ArenaTicketStatus");
+
+            migrationBuilder.DropTable(
+                name: "CharacterDungeonMasteries");
 
             migrationBuilder.DropTable(
                 name: "CharacterSoulstoneUpgrades");

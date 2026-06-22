@@ -3,6 +3,7 @@ using Domain.Models.Attributes;
 using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.Colosseum;
+using Domain.Models.Dungeons.Mastery;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
@@ -145,6 +146,7 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
     public DbSet<DungeonRun> DungeonRuns => Set<DungeonRun>();
     public DbSet<RunReward> RunRewards => Set<RunReward>();
     public DbSet<DungeonCompletionRecord> DungeonCompletionRecords => Set<DungeonCompletionRecord>();
+    public DbSet<CharacterDungeonMastery> CharacterDungeonMasteries => Set<CharacterDungeonMastery>();
 
     // Effects
 

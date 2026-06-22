@@ -31,30 +31,33 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
 
     public async Task<IReadOnlyList<InventoryItem>> ClaimAsync(DungeonRun run, CancellationToken cancellationToken)
     {
-        if (run.PendingExperience > 0)
+        var rewardState = GetClaimableRewards(run);
+
+        if (rewardState.Experience > 0)
         {
             await _experienceWriter.AddSplitExperienceAsync(
                 [run.CharacterId],
-                run.PendingExperience,
+                rewardState.Experience,
                 cancellationToken);
         }
 
-        if (run.PendingCinders > 0 || run.PendingSoulstones > 0)
+        if (rewardState.Cinders > 0 || rewardState.Soulstones > 0)
         {
             await _currencyWriter.AddAsync(
                 run.CharacterId,
-                run.PendingCinders,
-                run.PendingSoulstones,
+                rewardState.Cinders,
+                rewardState.Soulstones,
                 cancellationToken);
         }
 
-        if (run.PendingRewards.Count <= 0)
+        if (rewardState.Items.Count <= 0)
         {
             return [];
         }
 
-        var itemIds = run.PendingRewards
-            .Select(x => x.ItemId)
+        var itemIds = rewardState.Items
+            .Where(x => x.Value > 0)
+            .Select(x => x.Key)
             .Distinct()
             .ToArray();
 
@@ -63,14 +66,14 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
             cancellationToken);
 
         var inventoryItems = new List<InventoryItem>();
-        foreach (var reward in run.PendingRewards)
+        foreach (var reward in rewardState.Items)
         {
-            if (!itemBases.TryGetValue(reward.ItemId, out var itemBase))
+            if (reward.Value <= 0 || !itemBases.TryGetValue(reward.Key, out var itemBase))
             {
                 continue;
             }
 
-            inventoryItems.AddRange(_inventoryItemFactory.CreateForQuantity(itemBase, reward.Quantity, run.CharacterId));
+            inventoryItems.AddRange(_inventoryItemFactory.CreateForQuantity(itemBase, reward.Value, run.CharacterId));
         }
 
         if (inventoryItems.Count > 0)
@@ -84,4 +87,29 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
         return inventoryItems;
     }
 
+    private static DungeonLootBag GetClaimableRewards(DungeonRun run)
+    {
+        if (run.Status == DungeonRunStatus.Withdrawn && HasLoot(run.State?.SecuredLoot))
+        {
+            return run.State!.SecuredLoot;
+        }
+
+        return new DungeonLootBag
+        {
+            Experience = run.PendingExperience,
+            Cinders = run.PendingCinders,
+            Soulstones = run.PendingSoulstones,
+            Items = run.PendingRewards
+                .Where(x => !string.IsNullOrWhiteSpace(x.ItemId) && x.Quantity > 0)
+                .GroupBy(x => x.ItemId, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(x => x.Key, x => x.Sum(reward => reward.Quantity), StringComparer.OrdinalIgnoreCase)
+        };
+    }
+
+    private static bool HasLoot(DungeonLootBag? bag) =>
+        bag is not null &&
+        (bag.Experience > 0 ||
+            bag.Cinders > 0 ||
+            bag.Soulstones > 0 ||
+            bag.Items.Any(x => x.Value > 0));
 }

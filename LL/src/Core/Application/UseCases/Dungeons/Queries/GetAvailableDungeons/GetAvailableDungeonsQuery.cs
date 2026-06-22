@@ -21,6 +21,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
     private readonly IDungeonPreviewRewardService _previewRewards;
     private readonly ICharacterService _characters;
     private readonly IDungeonRunService _dungeonRuns;
+    private readonly IDungeonMasteryService _mastery;
     private readonly IItemBaseRepository _itemBases;
     private readonly IMapper _mapper;
 
@@ -30,6 +31,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         IDungeonPreviewRewardService previewRewards,
         ICharacterService characters,
         IDungeonRunService dungeonRuns,
+        IDungeonMasteryService mastery,
         IItemBaseRepository itemBases,
         IMapper mapper)
     {
@@ -38,6 +40,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         _previewRewards = previewRewards;
         _characters = characters;
         _dungeonRuns = dungeonRuns;
+        _mastery = mastery;
         _itemBases = itemBases;
         _mapper = mapper;
     }
@@ -63,10 +66,15 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
         var records = completionRecords.ToDictionary(
             x => x.DungeonDefinitionId,
             StringComparer.OrdinalIgnoreCase);
+        var masteryByDungeon = await _mastery.GetMasteryByDungeonAsync(
+            request.CharacterId,
+            dungeons.Select(x => x.Id).ToArray(),
+            cancellationToken);
 
         foreach (var dungeon in dungeons)
         {
             records.TryGetValue(dungeon.Id, out var record);
+            masteryByDungeon.TryGetValue(dungeon.Id, out var mastery);
             var access = await _dungeonAccess.EvaluateAsync(
                 request.CharacterId,
                 dungeon,
@@ -99,6 +107,7 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
                 MinRooms = dungeon.MinRooms,
                 MaxRooms = dungeon.MaxRooms,
                 Record = MapRecord(record),
+                Mastery = MapMastery(mastery),
                 Rewards = await MapRewardsAsync(dungeon, cancellationToken),
                 GatheringNodes = await MapGatheringNodesAsync(dungeon, cancellationToken)
             });
@@ -189,6 +198,31 @@ public sealed class GetAvailableDungeonsQueryHandler : IRequestHandler<GetAvaila
             FirstClearedAt = record.FirstCompletedAt,
             LastClearedAt = record.LastCompletedAt,
             TotalClears = record.CompletionCount
+        };
+    }
+
+    private static DungeonMasteryDto MapMastery(DungeonMasterySnapshot? mastery)
+    {
+        if (mastery is null)
+        {
+            return new DungeonMasteryDto();
+        }
+
+        return new DungeonMasteryDto
+        {
+            Experience = mastery.Experience,
+            Level = mastery.Level,
+            ExperienceRequiredForNextLevel = mastery.ExperienceRequiredForNextLevel,
+            CompletionCount = mastery.CompletionCount,
+            Bonuses = mastery.Bonuses
+                .Select(x => new DungeonMasteryBonusPreviewDto
+                {
+                    Id = x.Id,
+                    RequiredLevel = x.RequiredLevel,
+                    Description = x.Description,
+                    IsActive = x.IsActive
+                })
+                .ToList()
         };
     }
 

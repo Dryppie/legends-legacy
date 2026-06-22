@@ -1,3 +1,5 @@
+using Domain.Models.Attributes.Modifiers;
+using Domain.Models.Essences.Definitions;
 using Domain.Models.Snapshots;
 
 namespace Services.LL.Combat.Layers.Orchestration.Models;
@@ -7,4 +9,7 @@ public sealed record DungeonCombatPlan(
     Guid CharacterId,
     CharacterSnapshot CharacterSnapshot,
     IReadOnlyList<Guid> PlayerEntityIds,
-    IReadOnlyList<Guid> EnemySourceEntityIds);
+    IReadOnlyList<Guid> EnemySourceEntityIds,
+    IReadOnlyList<AttributeModifierBase> RunAttributeModifiers,
+    IReadOnlyList<EssenceAbilityModifierDefinition> RunAbilityModifiers,
+    IReadOnlyList<AttributeModifierBase> EnemyAttributeModifiers);

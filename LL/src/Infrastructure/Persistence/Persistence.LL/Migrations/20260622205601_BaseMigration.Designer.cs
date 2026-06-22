@@ -13,7 +13,7 @@ using Persistence.LL;
 namespace Persistence.LL.Migrations
 {
     [DbContext(typeof(LLDbContext))]
-    [Migration("20260618035934_BaseMigration")]
+    [Migration("20260622205601_BaseMigration")]
     partial class BaseMigration
     {
         /// <inheritdoc />
@@ -208,6 +208,40 @@ namespace Persistence.LL.Migrations
                     b.ToTable("ColosseumMatches");
                 });
 
+            modelBuilder.Entity("Domain.Models.Dungeons.Mastery.CharacterDungeonMastery", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DungeonDefinitionId")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<int>("CompletionCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("Experience")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid?>("LastAwardedRunId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("CharacterId", "DungeonDefinitionId");
+
+                    b.HasIndex("DungeonDefinitionId");
+
+                    b.ToTable("CharacterDungeonMasteries");
+                });
+
             modelBuilder.Entity("Domain.Models.Dungeons.Runs.DungeonCompletionRecord", b =>
                 {
                     b.Property<Guid>("Id")
@@ -279,6 +313,10 @@ namespace Persistence.LL.Migrations
 
                     b.Property<int>("Seed")
                         .HasColumnType("integer");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");

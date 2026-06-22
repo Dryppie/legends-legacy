@@ -23,6 +23,7 @@ public sealed class DungeonDefinition
     public Guid? CompletionLootTableId { get; set; }
     public Guid? TierLootTableId { get; set; }
     public Dictionary<ItemType, double> MonsterLootModifiers { get; set; } = [];
+    public DungeonMechanicDefinition Mechanic { get; set; } = new();
     public List<DungeonGatheringNodeDefinition> GatheringNodes { get; set; } = [];
     public bool HasCheckpoint { get; set; } = true;
     public int MinRooms { get; set; }

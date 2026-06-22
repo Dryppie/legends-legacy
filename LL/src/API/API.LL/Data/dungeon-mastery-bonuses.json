@@ -1,0 +1,94 @@
+{
+  "bonuses": [
+    {
+      "id": "mastery_reward_multiplier_level_1",
+      "description": "+5% dungeon reward multiplier",
+      "requiredLevel": 1,
+      "rewardMultiplierBonusPercent": 5,
+      "addFlags": [
+        "mastery_level_1_reward_bonus_unlocked"
+      ]
+    },
+    {
+      "id": "mastery_reward_multiplier_level_2",
+      "description": "+5% dungeon reward multiplier",
+      "requiredLevel": 2,
+      "rewardMultiplierBonusPercent": 5,
+      "addFlags": [
+        "mastery_level_2_reward_bonus_unlocked"
+      ]
+    },
+    {
+      "id": "mastery_reward_multiplier_level_3",
+      "description": "+5% dungeon reward multiplier",
+      "requiredLevel": 3,
+      "rewardMultiplierBonusPercent": 5,
+      "addFlags": [
+        "mastery_level_3_reward_bonus_unlocked"
+      ]
+    },
+    {
+      "id": "mastery_reward_multiplier_level_4",
+      "description": "+5% dungeon reward multiplier",
+      "requiredLevel": 4,
+      "rewardMultiplierBonusPercent": 5,
+      "addFlags": [
+        "mastery_level_4_reward_bonus_unlocked"
+      ]
+    },
+    {
+      "id": "mastery_reward_multiplier_level_5",
+      "description": "+5% dungeon reward multiplier",
+      "requiredLevel": 5,
+      "rewardMultiplierBonusPercent": 5,
+      "addFlags": [
+        "mastery_level_5_reward_bonus_unlocked"
+      ]
+    },
+    {
+      "id": "mastery_reward_multiplier_level_6",
+      "description": "+5% dungeon reward multiplier",
+      "requiredLevel": 6,
+      "rewardMultiplierBonusPercent": 5,
+      "addFlags": [
+        "mastery_level_6_reward_bonus_unlocked"
+      ]
+    },
+    {
+      "id": "mastery_reward_multiplier_level_7",
+      "description": "+5% dungeon reward multiplier",
+      "requiredLevel": 7,
+      "rewardMultiplierBonusPercent": 5,
+      "addFlags": [
+        "mastery_level_7_reward_bonus_unlocked"
+      ]
+    },
+    {
+      "id": "mastery_reward_multiplier_level_8",
+      "description": "+5% dungeon reward multiplier",
+      "requiredLevel": 8,
+      "rewardMultiplierBonusPercent": 5,
+      "addFlags": [
+        "mastery_level_8_reward_bonus_unlocked"
+      ]
+    },
+    {
+      "id": "mastery_reward_multiplier_level_9",
+      "description": "+5% dungeon reward multiplier",
+      "requiredLevel": 9,
+      "rewardMultiplierBonusPercent": 5,
+      "addFlags": [
+        "mastery_level_9_reward_bonus_unlocked"
+      ]
+    },
+    {
+      "id": "mastery_reward_multiplier_level_10",
+      "description": "+5% dungeon reward multiplier",
+      "requiredLevel": 10,
+      "rewardMultiplierBonusPercent": 5,
+      "addFlags": [
+        "mastery_level_10_reward_bonus_unlocked"
+      ]
+    }
+  ]
+}

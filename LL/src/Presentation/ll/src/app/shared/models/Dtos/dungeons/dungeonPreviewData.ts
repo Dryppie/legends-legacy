@@ -30,6 +30,21 @@ export interface DungeonRecord {
   totalClears: number;
 }
 
+export interface DungeonMasteryBonusPreview {
+  id: string;
+  requiredLevel: number;
+  description: string;
+  isActive: boolean;
+}
+
+export interface DungeonMastery {
+  experience: number;
+  level: number;
+  experienceRequiredForNextLevel?: number | null;
+  completionCount: number;
+  bonuses: DungeonMasteryBonusPreview[];
+}
+
 export interface DungeonEntryRequirement {
   itemId: string;
   name: string;
@@ -60,6 +75,7 @@ export interface DungeonPreviewData {
   keyItem?: DungeonKeyItem;
   roomsRange?: [number, number];
   record?: DungeonRecord;
+  mastery?: DungeonMastery;
   rewards: DungeonPreviewReward[];
   gatheringNodes?: DungeonGatheringNodePreview[];
   unlockedDifficulties: DungeonDifficulty[];
