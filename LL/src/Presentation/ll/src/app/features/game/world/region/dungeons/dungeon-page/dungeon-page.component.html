@@ -445,7 +445,7 @@
                 <div class="mt-2 text-xs text-secondary">
                   {{ getRoomTypeLabel(route.roomType) }} · Risk
                   {{ route.riskLevel }} ·
-                  {{ runState()?.mechanicDisplayName || 'Pressure' }}
+                  {{ runState()?.mechanicDisplayName || "Pressure" }}
                   {{ formatPressureDelta(route.pressureDelta) }}
                 </div>
                 <div
@@ -477,7 +477,9 @@
                 *ngFor="let choice of eventChoices(); trackBy: trackByIndex"
                 type="button"
                 class="ll-card px-3 py-3 text-left transition hover:border-primary/50 disabled:opacity-60"
-                [disabled]="loading() || (choice.missingRequirements?.length ?? 0)"
+                [disabled]="
+                  loading() || (choice.missingRequirements?.length ?? 0)
+                "
                 (click)="chooseEventChoice(choice.id)"
               >
                 <div class="font-semibold text-primary">
@@ -487,17 +489,13 @@
                   {{ choice.description }}
                 </p>
                 <div class="mt-2 text-xs text-primary">
-                  {{ runState()?.mechanicDisplayName || 'Pressure' }}
+                  {{ runState()?.mechanicDisplayName || "Pressure" }}
                   {{ formatPressureDelta(choice.pressureDelta) }}
                   <span *ngIf="choice.ambushChancePercent">
                     · Ambush {{ choice.ambushChancePercent }}%
                   </span>
-                  <span *ngIf="choice.grantsBoonChoice">
-                    · Boon choice
-                  </span>
-                  <span *ngIf="choice.grantsLoot">
-                    · Loot
-                  </span>
+                  <span *ngIf="choice.grantsBoonChoice"> · Boon choice </span>
+                  <span *ngIf="choice.grantsLoot"> · Loot </span>
                   <span *ngIf="choice.revealsHiddenRoute">
                     · Reveals route
                   </span>
@@ -506,7 +504,7 @@
                   *ngIf="choice.missingRequirements?.length"
                   class="mt-2 text-[0.7rem] text-danger"
                 >
-                  {{ (choice.missingRequirements ?? []).join(' · ') }}
+                  {{ (choice.missingRequirements ?? []).join(" · ") }}
                 </div>
               </button>
             </div>
@@ -539,7 +537,7 @@
                   {{ choice.description }}
                 </p>
                 <div class="mt-2 text-xs text-primary">
-                  {{ runState()?.mechanicDisplayName || 'Pressure' }}
+                  {{ runState()?.mechanicDisplayName || "Pressure" }}
                   {{ formatPressureDelta(choice.pressureDelta) }}
                   <span *ngIf="choice.rewardMultiplierDeltaPercent">
                     · Rewards
@@ -604,8 +602,10 @@
 
             <app-regular-button
               *ngIf="
-                isCheckpointRoom() && canLeave() && !checkpointChoices().length
-                && !boonChoices().length
+                isCheckpointRoom() &&
+                canLeave() &&
+                !checkpointChoices().length &&
+                !boonChoices().length
               "
               variant="secondary"
               text="Withdraw"
@@ -636,15 +636,100 @@
             <h2 class="ll-heading mt-1">Pending Rewards</h2>
           </div>
           <div *ngIf="!isFailedRun() && !isRewardClaimRun()" class="space-y-3">
-            <div *ngIf="activeBoonIds().length">
+            <div *ngIf="activeBoonSummaries().length">
               <div class="ll-eyebrow mb-2">Temporary Boons</div>
               <div class="flex flex-wrap gap-2">
-                <span
-                  *ngFor="let boonId of activeBoonIds()"
-                  class="ll-badge ll-badge-accent rounded"
+                <div
+                  *ngFor="
+                    let boon of activeBoonSummaries();
+                    trackBy: trackByIndex
+                  "
+                  #boonOrigin="cdkOverlayOrigin"
+                  cdkOverlayOrigin
+                  class="inline-flex"
+                  (mouseenter)="showBoonTooltip(boon.id)"
+                  (mouseleave)="hideBoonTooltip(boon.id)"
                 >
-                  {{ formatBoonName(boonId) }}
-                </span>
+                  <span class="ll-badge ll-badge-accent rounded">
+                    {{ boon.name }}
+                    <span *ngIf="boon.count > 1">x{{ boon.count }}</span>
+                  </span>
+
+                  <ng-template
+                    cdkConnectedOverlay
+                    [cdkConnectedOverlayOrigin]="boonOrigin"
+                    [cdkConnectedOverlayOpen]="isBoonTooltipOpen(boon.id)"
+                    [cdkConnectedOverlayPositions]="boonTooltipPositions"
+                    [cdkConnectedOverlayPush]="true"
+                    [cdkConnectedOverlayViewportMargin]="12"
+                  >
+                    <div
+                      class="w-72 max-w-[calc(100vw-2rem)] rounded border border-primary/50 bg-black/95 px-3 py-2 text-left text-[11px] text-zinc-200 shadow-lg"
+                    >
+                      <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0">
+                          <div
+                            class="truncate text-sm font-semibold text-primary"
+                          >
+                            {{ boon.name }}
+                            <span *ngIf="boon.count > 1"
+                              >x{{ boon.count }}</span
+                            >
+                          </div>
+                          <div class="text-[0.65rem] uppercase text-secondary">
+                            {{ boon.rarity }}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div
+                        *ngIf="boon.effectSummaries?.length"
+                        class="mt-2 flex flex-wrap gap-1"
+                      >
+                        <span
+                          *ngFor="
+                            let effect of boon.effectSummaries;
+                            trackBy: trackByIndex
+                          "
+                          class="ll-badge rounded text-[0.65rem]"
+                        >
+                          {{ effect }}
+                        </span>
+                      </div>
+
+                      <p class="mt-2 text-xs text-secondary">
+                        {{ boon.description }}
+                      </p>
+                    </div>
+                  </ng-template>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="activeBoonEffectSummaries().length">
+              <div class="ll-eyebrow mb-2">Current Buffs</div>
+              <div class="grid gap-2 text-left">
+                <div
+                  *ngFor="
+                    let effect of activeBoonEffectSummaries();
+                    trackBy: trackByIndex
+                  "
+                  class="ll-card px-3 py-2"
+                >
+                  <div class="flex items-center justify-between gap-2">
+                    <div class="min-w-0">
+                      <div class="truncate text-sm text-primary">
+                        {{ effect.label }}
+                      </div>
+                      <div class="text-[0.65rem] uppercase text-secondary">
+                        {{ effect.category }}
+                      </div>
+                    </div>
+                    <div class="shrink-0 font-serif text-lg text-primary">
+                      {{ effect.value }}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 

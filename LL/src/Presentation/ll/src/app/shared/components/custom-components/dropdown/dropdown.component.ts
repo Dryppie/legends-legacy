@@ -1,3 +1,4 @@
+import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import {
   Component,
@@ -25,7 +26,7 @@ export interface DropdownOption<T = unknown> {
 @Component({
   selector: 'app-dropdown',
   standalone: true,
-  imports: [NgClass, NgFor, NgIf],
+  imports: [NgClass, NgFor, NgIf, OverlayModule],
   templateUrl: './dropdown.component.html',
   host: {
     class: 'relative inline-block',
@@ -56,6 +57,36 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
 
   readonly open = signal(false);
   readonly menuId = `ll-dropdown-menu-${DropdownComponent.nextId++}`;
+  readonly dropdownPositions: ConnectedPosition[] = [
+    {
+      originX: 'start',
+      originY: 'bottom',
+      overlayX: 'start',
+      overlayY: 'top',
+      offsetY: 4,
+    },
+    {
+      originX: 'end',
+      originY: 'bottom',
+      overlayX: 'end',
+      overlayY: 'top',
+      offsetY: 4,
+    },
+    {
+      originX: 'start',
+      originY: 'top',
+      overlayX: 'start',
+      overlayY: 'bottom',
+      offsetY: -4,
+    },
+    {
+      originX: 'end',
+      originY: 'top',
+      overlayX: 'end',
+      overlayY: 'bottom',
+      offsetY: -4,
+    },
+  ];
 
   constructor(private readonly registry: DropdownRegistryService) {}
 

@@ -11,6 +11,8 @@ public sealed class DungeonRunStateDto
     public int MechanicMaxValue { get; set; } = 100;
     public int RewardMultiplierPercent { get; set; } = 100;
     public List<string> ActiveBoonIds { get; set; } = [];
+    public List<DungeonActiveBoonSummaryDto> ActiveBoonSummaries { get; set; } = [];
+    public List<DungeonBoonEffectSummaryDto> ActiveBoonEffectSummaries { get; set; } = [];
     public Dictionary<string, int> Flags { get; set; } = [];
     public DungeonLootBagDto SecuredLoot { get; set; } = new();
     public DungeonLootBagDto UnsecuredLoot { get; set; } = new();
@@ -84,6 +86,24 @@ public sealed class DungeonBoonChoiceOptionDto
     public string Description { get; set; } = string.Empty;
     public string Rarity { get; set; } = string.Empty;
     public List<string> EffectSummaries { get; set; } = [];
+}
+
+public sealed class DungeonActiveBoonSummaryDto
+{
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string Rarity { get; set; } = string.Empty;
+    public int Count { get; set; }
+    public List<string> EffectSummaries { get; set; } = [];
+}
+
+public sealed class DungeonBoonEffectSummaryDto
+{
+    public string Id { get; set; } = string.Empty;
+    public string Label { get; set; } = string.Empty;
+    public string Value { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
 }
 
 public sealed class DungeonBossModifierDto

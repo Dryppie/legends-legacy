@@ -1,3 +1,4 @@
+import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { Component, computed, inject } from '@angular/core';
 import { DungeonStateService } from '../../../../../../core/services/api/dungeon/dungeon-state.service';
 import { NgClass, NgFor, NgIf } from '@angular/common';
@@ -18,6 +19,7 @@ import { DungeonRoomIconComponent } from '../../../../../../shared/components/du
     RegularButtonComponent,
     CombatComponent,
     DungeonRoomIconComponent,
+    OverlayModule,
   ],
   templateUrl: './dungeon-page.component.html',
 })
@@ -104,7 +106,9 @@ export class DungeonPageComponent {
 
   readonly pressureValue = computed(() => this.runState()?.pressure ?? 0);
 
-  readonly pressureMax = computed(() => this.runState()?.mechanicMaxValue ?? 100);
+  readonly pressureMax = computed(
+    () => this.runState()?.mechanicMaxValue ?? 100,
+  );
 
   readonly pressurePercent = computed(() => {
     const max = Math.max(1, this.pressureMax());
@@ -133,6 +137,45 @@ export class DungeonPageComponent {
   );
 
   readonly activeBoonIds = computed(() => this.runState()?.activeBoonIds ?? []);
+
+  readonly activeBoonSummaries = computed(
+    () => this.runState()?.activeBoonSummaries ?? [],
+  );
+
+  readonly activeBoonEffectSummaries = computed(
+    () => this.runState()?.activeBoonEffectSummaries ?? [],
+  );
+  readonly boonTooltipPositions: ConnectedPosition[] = [
+    {
+      originX: 'start',
+      originY: 'bottom',
+      overlayX: 'start',
+      overlayY: 'top',
+      offsetY: 8,
+    },
+    {
+      originX: 'end',
+      originY: 'bottom',
+      overlayX: 'end',
+      overlayY: 'top',
+      offsetY: 8,
+    },
+    {
+      originX: 'start',
+      originY: 'top',
+      overlayX: 'start',
+      overlayY: 'bottom',
+      offsetY: -8,
+    },
+    {
+      originX: 'end',
+      originY: 'top',
+      overlayX: 'end',
+      overlayY: 'bottom',
+      offsetY: -8,
+    },
+  ];
+  hoveredBoonId: string | null = null;
 
   readonly bossModifiers = computed(
     () => this.runState()?.currentBossModifiers ?? [],
@@ -483,6 +526,20 @@ export class DungeonPageComponent {
     this.dungeonState.chooseBoon(boonId);
   }
 
+  showBoonTooltip(boonId: string): void {
+    this.hoveredBoonId = boonId;
+  }
+
+  hideBoonTooltip(boonId: string): void {
+    if (this.hoveredBoonId === boonId) {
+      this.hoveredBoonId = null;
+    }
+  }
+
+  isBoonTooltipOpen(boonId: string): boolean {
+    return this.hoveredBoonId === boonId;
+  }
+
   chooseEventChoice(choiceId: string): void {
     const room = this.currentRoom();
     if (
@@ -573,9 +630,7 @@ export class DungeonPageComponent {
   ): string {
     const value = amount ?? 0;
     const prefix = value > 0 ? '+' : '';
-    return modifierType === 'Flat'
-      ? `${prefix}${value}`
-      : `${prefix}${value}%`;
+    return modifierType === 'Flat' ? `${prefix}${value}` : `${prefix}${value}%`;
   }
 
   refresh(): void {

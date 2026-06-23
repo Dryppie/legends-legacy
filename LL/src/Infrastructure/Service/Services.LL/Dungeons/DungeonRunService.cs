@@ -1307,6 +1307,7 @@ public sealed class DungeonRunService : IDungeonRunService
         run.State ??= new DungeonRunState();
         run.State.RunId = run.Id;
         _pressure.ApplyPressureDelta(run, 0);
+        _boons.SyncActiveBoonState(run);
     }
 
     private DungeonRouteOption ChooseRoute(DungeonRun run, string routeOptionId)

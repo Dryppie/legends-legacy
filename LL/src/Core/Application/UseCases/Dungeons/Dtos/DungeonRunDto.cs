@@ -97,6 +97,22 @@ public class DungeonRunDto : IMapFrom<DungeonRun>
             MechanicMaxValue = state.MechanicMaxValue <= 0 ? 100 : state.MechanicMaxValue,
             RewardMultiplierPercent = state.RewardMultiplierPercent <= 0 ? 100 : state.RewardMultiplierPercent,
             ActiveBoonIds = state.ActiveBoonIds.ToList(),
+            ActiveBoonSummaries = state.ActiveBoonSummaries.Select(boon => new DungeonActiveBoonSummaryDto
+            {
+                Id = boon.Id,
+                Name = boon.Name,
+                Description = boon.Description,
+                Rarity = boon.Rarity,
+                Count = boon.Count,
+                EffectSummaries = boon.EffectSummaries.ToList()
+            }).ToList(),
+            ActiveBoonEffectSummaries = state.ActiveBoonEffectSummaries.Select(effect => new DungeonBoonEffectSummaryDto
+            {
+                Id = effect.Id,
+                Label = effect.Label,
+                Value = effect.Value,
+                Category = effect.Category
+            }).ToList(),
             Flags = new Dictionary<string, int>(state.Flags),
             SecuredLoot = new DungeonLootBagDto
             {

@@ -1,4 +1,7 @@
 <button
+  #dropdownButton
+  #dropdownOrigin="cdkOverlayOrigin"
+  cdkOverlayOrigin
   type="button"
   class="flex h-8 w-full items-center justify-between gap-2 whitespace-nowrap rounded px-3 text-left text-sm text-neutral-300 transition-colors hover:bg-zinc-600/30"
   [ngClass]="
@@ -25,49 +28,68 @@
 </button>
 
 <!-- Dropdown ------------------------------------------------------------->
-<ul
-  *ngIf="open() && hasSubOptions"
-  [id]="menuId"
-  class="absolute z-20 mt-1 min-w-40 rounded border border-light_gray bg-texture py-1 shadow-xl shadow-black/60"
-  role="menu"
-  (keydown)="onDropdownKeydown($event)"
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="dropdownOrigin"
+  [cdkConnectedOverlayOpen]="open() && hasSubOptions"
+  [cdkConnectedOverlayPositions]="dropdownPositions"
+  [cdkConnectedOverlayPush]="true"
+  [cdkConnectedOverlayViewportMargin]="8"
 >
-  <li
-    *ngFor="let sub of subOptions"
-    class="grid cursor-pointer grid-cols-[1fr_auto] gap-6 whitespace-nowrap px-3 py-2 text-sm text-zinc-300 hover:bg-primary/20 hover:text-white"
-    role="menuitem"
-    tabindex="0"
-    (click)="onSubOptionClick(sub)"
-    (keydown)="onSubOptionKeydown($event, sub)"
+  <ul
+    [id]="menuId"
+    class="min-w-40 rounded border border-light_gray bg-texture py-1 shadow-xl shadow-black/60"
+    role="menu"
+    (keydown)="onDropdownKeydown($event)"
   >
-    <span>{{ sub }}</span>
-    <span class="text-primary">0</span>
-  </li>
-</ul>
+    <li
+      *ngFor="let sub of subOptions"
+      class="grid cursor-pointer grid-cols-[1fr_auto] gap-6 whitespace-nowrap px-3 py-2 text-sm text-zinc-300 hover:bg-primary/20 hover:text-white"
+      role="menuitem"
+      tabindex="0"
+      (click)="onSubOptionClick(sub)"
+      (keydown)="onSubOptionKeydown($event, sub)"
+    >
+      <span>{{ sub }}</span>
+      <span class="text-primary">0</span>
+    </li>
+  </ul>
+</ng-template>
 
-<ul
-  *ngIf="open() && hasOptions"
-  [id]="menuId"
-  class="absolute z-20 mt-1 max-h-72 min-w-full overflow-y-auto rounded border border-light_gray bg-texture py-1 shadow-xl shadow-black/60"
-  role="listbox"
-  (keydown)="onDropdownKeydown($event)"
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="dropdownOrigin"
+  [cdkConnectedOverlayOpen]="open() && hasOptions"
+  [cdkConnectedOverlayPositions]="dropdownPositions"
+  [cdkConnectedOverlayPush]="true"
+  [cdkConnectedOverlayViewportMargin]="8"
 >
-  <li
-    *ngFor="let option of options"
-    class="grid cursor-pointer grid-cols-[1fr_auto] gap-6 whitespace-nowrap px-3 py-2 text-sm text-zinc-300 transition-colors hover:bg-primary/20 hover:text-white"
-    [ngClass]="{
-      'bg-primary/20 text-primary': isOptionSelected(option),
-      'cursor-not-allowed opacity-45 hover:bg-transparent hover:text-zinc-300':
-        option.disabled,
-    }"
-    role="option"
-    [attr.aria-selected]="isOptionSelected(option)"
-    [attr.aria-disabled]="option.disabled || null"
-    [attr.tabindex]="option.disabled ? -1 : 0"
-    (click)="onOptionClick(option)"
-    (keydown)="onOptionKeydown($event, option)"
+  <ul
+    [id]="menuId"
+    class="max-h-72 overflow-y-auto rounded border border-light_gray bg-texture py-1 shadow-xl shadow-black/60"
+    [style.width.px]="dropdownButton.offsetWidth"
+    role="listbox"
+    (keydown)="onDropdownKeydown($event)"
   >
-    <span>{{ option.label }}</span>
-    <span *ngIf="option.detail" class="text-primary">{{ option.detail }}</span>
-  </li>
-</ul>
+    <li
+      *ngFor="let option of options"
+      class="grid cursor-pointer grid-cols-[1fr_auto] gap-6 whitespace-nowrap px-3 py-2 text-sm text-zinc-300 transition-colors hover:bg-primary/20 hover:text-white"
+      [ngClass]="{
+        'bg-primary/20 text-primary': isOptionSelected(option),
+        'cursor-not-allowed opacity-45 hover:bg-transparent hover:text-zinc-300':
+          option.disabled,
+      }"
+      role="option"
+      [attr.aria-selected]="isOptionSelected(option)"
+      [attr.aria-disabled]="option.disabled || null"
+      [attr.tabindex]="option.disabled ? -1 : 0"
+      (click)="onOptionClick(option)"
+      (keydown)="onOptionKeydown($event, option)"
+    >
+      <span>{{ option.label }}</span>
+      <span *ngIf="option.detail" class="text-primary">{{
+        option.detail
+      }}</span>
+    </li>
+  </ul>
+</ng-template>

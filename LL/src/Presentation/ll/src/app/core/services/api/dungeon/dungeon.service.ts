@@ -75,6 +75,8 @@ export interface DungeonRunState {
   mechanicMaxValue: number;
   rewardMultiplierPercent: number;
   activeBoonIds: string[];
+  activeBoonSummaries: DungeonActiveBoonSummary[];
+  activeBoonEffectSummaries: DungeonBoonEffectSummary[];
   flags: Record<string, number>;
   securedLoot: DungeonLootBag;
   unsecuredLoot: DungeonLootBag;
@@ -142,6 +144,22 @@ export interface DungeonBoonChoiceOption {
   description: string;
   rarity: string;
   effectSummaries: string[];
+}
+
+export interface DungeonActiveBoonSummary {
+  id: string;
+  name: string;
+  description: string;
+  rarity: string;
+  count: number;
+  effectSummaries: string[];
+}
+
+export interface DungeonBoonEffectSummary {
+  id: string;
+  label: string;
+  value: string;
+  category: string;
 }
 
 export interface DungeonBossModifier {

@@ -250,6 +250,29 @@ public sealed class DungeonRogueliteStateTests
         Assert.Contains("+8% main damage effects", choice.EffectSummaries);
     }
 
+    [Fact]
+    public void Active_boon_state_summarizes_active_boons_and_combines_matching_effects()
+    {
+        var run = CreateRun();
+        run.State.ActiveBoonIds.Add("bulwark_echo");
+        run.State.ActiveBoonIds.Add("bulwark_echo");
+        run.State.ActiveBoonIds.Add("hunter_focus");
+        var service = CreateBoonService();
+
+        service.SyncActiveBoonState(run);
+
+        var bulwark = Assert.Single(run.State.ActiveBoonSummaries, x => x.Id == "bulwark_echo");
+        Assert.Equal(2, bulwark.Count);
+        Assert.Contains(bulwark.EffectSummaries, x => x == "+15% Armor");
+
+        Assert.Contains(run.State.ActiveBoonEffectSummaries, x =>
+            x.Label == "Armor" && x.Value == "+30%" && x.Category == "Stats");
+        Assert.Contains(run.State.ActiveBoonEffectSummaries, x =>
+            x.Label == "Resistance" && x.Value == "+30%" && x.Category == "Stats");
+        Assert.Contains(run.State.ActiveBoonEffectSummaries, x =>
+            x.Label == "Crit Chance" && x.Value == "+5" && x.Category == "Stats");
+    }
+
     [Theory]
     [InlineData(RoomType.Combat, 4)]
     [InlineData(RoomType.MiniBoss, 8)]

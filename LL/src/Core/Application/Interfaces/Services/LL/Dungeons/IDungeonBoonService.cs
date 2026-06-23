@@ -11,6 +11,7 @@ public interface IDungeonBoonService
     DungeonBoonDefinition? GetDefinition(string boonId);
     IReadOnlyList<DungeonBoonChoiceOption> GenerateBoonChoices(DungeonRun run, int count = 3);
     void ChooseBoon(DungeonRun run, string boonId);
+    void SyncActiveBoonState(DungeonRun run);
     IReadOnlyList<AttributeModifierBase> GetActiveAttributeModifiers(DungeonRun run);
     IReadOnlyList<EssenceAbilityModifierDefinition> GetActiveAbilityModifiers(DungeonRun run);
 }

@@ -14,6 +14,8 @@ public sealed class DungeonRunState
     public int Pressure { get; set; }
     public int RewardMultiplierPercent { get; set; } = 100;
     public List<string> ActiveBoonIds { get; set; } = [];
+    public List<DungeonActiveBoonSummary> ActiveBoonSummaries { get; set; } = [];
+    public List<DungeonBoonEffectSummary> ActiveBoonEffectSummaries { get; set; } = [];
     public Dictionary<string, int> Flags { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public DungeonLootBag SecuredLoot { get; set; } = new();
     public DungeonLootBag UnsecuredLoot { get; set; } = new();
@@ -80,6 +82,24 @@ public sealed class DungeonBoonChoiceOption
     public string Description { get; set; } = string.Empty;
     public string Rarity { get; set; } = "Common";
     public List<string> EffectSummaries { get; set; } = [];
+}
+
+public sealed class DungeonActiveBoonSummary
+{
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string Rarity { get; set; } = "Common";
+    public int Count { get; set; } = 1;
+    public List<string> EffectSummaries { get; set; } = [];
+}
+
+public sealed class DungeonBoonEffectSummary
+{
+    public string Id { get; set; } = string.Empty;
+    public string Label { get; set; } = string.Empty;
+    public string Value { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
 }
 
 public sealed class DungeonBossModifier

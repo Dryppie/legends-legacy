@@ -58,6 +58,28 @@ public sealed class DungeonBoonService : IDungeonBoonService
         }
 
         run.State.CurrentBoonChoices.Clear();
+        SyncActiveBoonState(run);
+    }
+
+    public void SyncActiveBoonState(DungeonRun run)
+    {
+        ArgumentNullException.ThrowIfNull(run);
+        run.State ??= new DungeonRunState { RunId = run.Id };
+
+        var activeStacks = GetActiveBoonStacks(run).ToList();
+        run.State.ActiveBoonSummaries = activeStacks
+            .Select(stack => new DungeonActiveBoonSummary
+            {
+                Id = stack.Definition.Id,
+                Name = stack.Definition.Name,
+                Description = stack.Definition.Description,
+                Rarity = stack.Definition.Rarity.ToString(),
+                Count = stack.Count,
+                EffectSummaries = CreateEffectSummaries(stack.Definition)
+            })
+            .ToList();
+
+        run.State.ActiveBoonEffectSummaries = CreateAggregateEffectSummaries(activeStacks);
     }
 
     public IReadOnlyList<AttributeModifierBase> GetActiveAttributeModifiers(DungeonRun run)
@@ -126,6 +148,72 @@ public sealed class DungeonBoonService : IDungeonBoonService
             _ => 1
         };
 
+    private IEnumerable<ActiveBoonStack> GetActiveBoonStacks(DungeonRun run)
+    {
+        foreach (var group in run.State.ActiveBoonIds
+                     .Where(id => !string.IsNullOrWhiteSpace(id))
+                     .GroupBy(id => id, StringComparer.OrdinalIgnoreCase))
+        {
+            var definition = _definitions.GetById(group.Key);
+            if (definition is null)
+            {
+                continue;
+            }
+
+            yield return new ActiveBoonStack(definition, group.Count());
+        }
+    }
+
+    private static List<DungeonBoonEffectSummary> CreateAggregateEffectSummaries(
+        IReadOnlyList<ActiveBoonStack> activeStacks)
+    {
+        var attributeEffects = activeStacks
+            .SelectMany(stack => stack.Definition.AttributeModifiers.Select(modifier => new
+            {
+                modifier.AttributeType,
+                modifier.ModifierType,
+                Amount = modifier.Amount * stack.Count
+            }))
+            .GroupBy(
+                modifier => new { modifier.AttributeType, modifier.ModifierType },
+                modifier => modifier.Amount)
+            .Select(group => new DungeonBoonEffectSummary
+            {
+                Id = $"attribute:{group.Key.AttributeType}:{group.Key.ModifierType}",
+                Label = FormatIdentifier(group.Key.AttributeType.ToString()),
+                Value = FormatSignedAmount(group.Sum(), group.Key.ModifierType != ModifierType.Flat),
+                Category = "Stats"
+            });
+
+        var abilityEffects = activeStacks
+            .SelectMany(stack => stack.Definition.AbilityModifiers.Select(modifier => new
+            {
+                modifier.Target,
+                modifier.Operation,
+                Value = modifier.Value * stack.Count
+            }))
+            .GroupBy(
+                modifier => new
+                {
+                    Target = modifier.Target ?? string.Empty,
+                    Operation = modifier.Operation ?? string.Empty
+                },
+                modifier => modifier.Value)
+            .Select(group => new DungeonBoonEffectSummary
+            {
+                Id = $"ability:{group.Key.Target}:{group.Key.Operation}",
+                Label = FormatAbilityTarget(group.Key.Target),
+                Value = FormatAggregateAbilityValue(group.Key.Operation, group.Sum()),
+                Category = "Ability Effects"
+            });
+
+        return attributeEffects
+            .Concat(abilityEffects)
+            .OrderBy(effect => effect.Category)
+            .ThenBy(effect => effect.Label)
+            .ToList();
+    }
+
     private static DungeonBoonChoiceOption ToChoiceOption(DungeonBoonDefinition definition) => new()
     {
         Id = definition.Id,
@@ -178,6 +266,21 @@ public sealed class DungeonBoonService : IDungeonBoonService
 
         var value = FormatSignedDouble(modifier.Value);
         return $"{FormatIdentifier(modifier.Operation)} {value} to {target}";
+    }
+
+    private static string FormatAggregateAbilityValue(string operation, double value)
+    {
+        if (operation.Equals("AddMultiplier", StringComparison.OrdinalIgnoreCase))
+        {
+            return $"{FormatSignedDouble(value * 100)}%";
+        }
+
+        if (operation.Equals("AddEffect", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Added";
+        }
+
+        return $"{FormatIdentifier(operation)} {FormatSignedDouble(value)}";
     }
 
     private static string FormatSignedAmount(float value, bool asPercent)
@@ -255,4 +358,6 @@ public sealed class DungeonBoonService : IDungeonBoonService
             return seed;
         }
     }
+
+    private sealed record ActiveBoonStack(DungeonBoonDefinition Definition, int Count);
 }
