@@ -88,7 +88,8 @@ export class CombatComponent implements OnInit, OnDestroy {
     this.currentAction = this.characterActionService.currentAction;
 
     const isStartingCombatSig = this.characterActionService.loadingCombat;
-    const isRefreshingActionSig = this.characterActionService.loadingActionRefresh;
+    const isRefreshingActionSig =
+      this.characterActionService.loadingActionRefresh;
 
     effect(() => {
       this.isLoading = isStartingCombatSig() || isRefreshingActionSig();
@@ -108,17 +109,13 @@ export class CombatComponent implements OnInit, OnDestroy {
 
     effect(() => {
       const type = this.battleTypeSignal();
-      const players = this.combatStateService.getPlayerCharacters(
-        type,
-      )();
+      const players = this.combatStateService.getPlayerCharacters(type)();
       if (players) this.playerCharacters = players;
     });
 
     effect(() => {
       const type = this.battleTypeSignal();
-      const enemies = this.combatStateService.getEnemyCharacters(
-        type,
-      )();
+      const enemies = this.combatStateService.getEnemyCharacters(type)();
       if (enemies) this.enemyCharacters = enemies;
     });
 
@@ -131,9 +128,7 @@ export class CombatComponent implements OnInit, OnDestroy {
     /** Handle combat event stream */
     effect(() => {
       const type = this.battleTypeSignal();
-      const allEvents = this.combatStateService.getCombatEvents(
-        type,
-      )();
+      const allEvents = this.combatStateService.getCombatEvents(type)();
       const lastHandledEvent = this.lastHandledCombatEvent.get(type);
       const lastHandledIndex = lastHandledEvent
         ? allEvents.indexOf(lastHandledEvent)
@@ -173,9 +168,7 @@ export class CombatComponent implements OnInit, OnDestroy {
     /** Handle outcome to optionally trigger auto-exit */
     effect(() => {
       const type = this.battleTypeSignal();
-      const outcome = this.combatStateService.getCombatOutcome(
-        type,
-      )();
+      const outcome = this.combatStateService.getCombatOutcome(type)();
 
       this.outcome = outcome;
 
@@ -479,23 +472,6 @@ export class CombatComponent implements OnInit, OnDestroy {
     if (this.battleType === BattleType.Colosseum) return 'Arena Battle';
 
     return 'Battle';
-  }
-
-  battleStatusLabel(): string {
-    if (this.outcome) return this.outcome;
-    if (this.isLoading) return 'Catching Up';
-    return 'In Progress';
-  }
-
-  battleStatusClass(): Record<string, boolean> {
-    return {
-      'll-badge-success': this.outcome === BattleOutcome.Victory,
-      'll-badge-danger': this.outcome === BattleOutcome.Defeat,
-      'll-badge-accent':
-        this.outcome === BattleOutcome.Draw ||
-        (!this.outcome && !this.isLoading),
-      'll-badge-muted': this.isLoading,
-    };
   }
 
   teamSelectorClass(
