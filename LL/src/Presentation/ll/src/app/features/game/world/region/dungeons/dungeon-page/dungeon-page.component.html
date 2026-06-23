@@ -366,16 +366,7 @@
           </h2>
 
           <div
-            class="ll-card ll-card-accent mx-auto w-full max-w-xl px-4 py-3 text-left"
-          >
-            <div class="ll-eyebrow text-primary">Next Decision</div>
-            <p class="ll-copy mt-1 text-zinc-300">
-              {{ currentDecisionText() }}
-            </p>
-          </div>
-
-          <div
-            *ngIf="currentRoom()?.encounterIds?.length"
+            *ngIf="showCurrentRoomEncounters()"
             class="ll-card mx-auto max-w-xl p-4 text-left"
           >
             <div class="ll-eyebrow mb-2">Encounters</div>

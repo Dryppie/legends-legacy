@@ -128,7 +128,7 @@ public sealed class DungeonEventChoiceService : IDungeonEventChoiceService
         {
             if (run.State.Flags.GetValueOrDefault(flag) <= 0)
             {
-                missing.Add($"Requires: {flag}");
+                missing.Add($"Requires: {FormatFlagRequirement(flag)}");
             }
         }
 
@@ -136,11 +136,41 @@ public sealed class DungeonEventChoiceService : IDungeonEventChoiceService
         {
             if (run.State.Flags.GetValueOrDefault(flag) > 0)
             {
-                missing.Add($"Blocked by: {flag}");
+                missing.Add($"Blocked by: {FormatFlagRequirement(flag)}");
             }
         }
 
         return missing;
+    }
+
+    private static string FormatFlagRequirement(string flag)
+    {
+        if (string.IsNullOrWhiteSpace(flag))
+        {
+            return "Unknown requirement";
+        }
+
+        return flag switch
+        {
+            "saved_miner" => "Save Miner",
+            "cleansed_shrine" => "Cleanse Shrine",
+            "cleansed_tomb" => "Cleanse Tomb",
+            "searched_deep_treasure" => "Search Deeper",
+            "revealed_hidden_route" => "Reveal Hidden Route",
+            "hidden_route_revealed" => "Reveal Hidden Route",
+            "collapsed_tunnel" => "Collapse Tunnel",
+            "goblin_powder_looted" => "Loot Powder Cache",
+            "saved_explosives" => "Save Explosives",
+            "opened_reliquary" => "Open Reliquary",
+            "sealed_reliquary" => "Seal Reliquary",
+            "bound_spirit_power" => "Bind Spirit Power",
+            "sacrificed_loot_for_boon" => "Sacrifice Loot",
+            "boss_reinforcements_reduced" => "Reduce Boss Reinforcements",
+            _ => string.Join(
+                ' ',
+                flag.Split(['_', '-'], StringSplitOptions.RemoveEmptyEntries)
+                    .Select(part => char.ToUpperInvariant(part[0]) + part[1..]))
+        };
     }
 
     private static bool RollsAmbush(DungeonRun run, DungeonEventChoiceOption choice)

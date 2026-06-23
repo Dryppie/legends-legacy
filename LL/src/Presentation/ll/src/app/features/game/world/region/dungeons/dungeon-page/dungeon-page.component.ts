@@ -272,6 +272,16 @@ export class DungeonPageComponent {
     }
   });
 
+  readonly showCurrentRoomEncounters = computed(() => {
+    const room = this.currentRoom();
+
+    return (
+      this.isCombatRoom() &&
+      room?.status === 'Active' &&
+      (room.encounterIds?.length ?? 0) > 0
+    );
+  });
+
   readonly pendingCurrencyRewards = computed(() => {
     const run = this.activeDungeon();
 

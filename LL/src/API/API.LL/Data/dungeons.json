@@ -102,8 +102,8 @@
       }
     ],
     "hasCheckpoint": true,
-    "minRooms": 5,
-    "maxRooms": 7,
+    "minRooms": 10,
+    "maxRooms": 12,
     "rooms": [
       {
         "type": "Combat",
@@ -208,8 +208,8 @@
       }
     ],
     "hasCheckpoint": true,
-    "minRooms": 6,
-    "maxRooms": 8,
+    "minRooms": 11,
+    "maxRooms": 13,
     "rooms": [
       {
         "type": "Combat",
@@ -314,8 +314,8 @@
       }
     ],
     "hasCheckpoint": true,
-    "minRooms": 7,
-    "maxRooms": 9,
+    "minRooms": 12,
+    "maxRooms": 14,
     "rooms": [
       {
         "type": "Combat",
@@ -388,8 +388,8 @@
       ]
     },
     "hasCheckpoint": true,
-    "minRooms": 6,
-    "maxRooms": 8,
+    "minRooms": 11,
+    "maxRooms": 13,
     "rooms": [
       {
         "type": "Combat",
@@ -484,8 +484,8 @@
       ]
     },
     "hasCheckpoint": true,
-    "minRooms": 7,
-    "maxRooms": 9,
+    "minRooms": 12,
+    "maxRooms": 14,
     "rooms": [
       {
         "type": "Combat",
@@ -580,8 +580,8 @@
       ]
     },
     "hasCheckpoint": true,
-    "minRooms": 8,
-    "maxRooms": 10,
+    "minRooms": 13,
+    "maxRooms": 15,
     "rooms": [
       {
         "type": "Combat",
@@ -650,8 +650,8 @@
       "Essence": 15
     },
     "hasCheckpoint": true,
-    "minRooms": 7,
-    "maxRooms": 9,
+    "minRooms": 12,
+    "maxRooms": 14,
     "rooms": [
       {
         "type": "Combat",
@@ -720,8 +720,8 @@
       "Essence": 15
     },
     "hasCheckpoint": true,
-    "minRooms": 8,
-    "maxRooms": 10,
+    "minRooms": 13,
+    "maxRooms": 15,
     "rooms": [
       {
         "type": "Combat",
@@ -790,8 +790,8 @@
       "Essence": 15
     },
     "hasCheckpoint": true,
-    "minRooms": 9,
-    "maxRooms": 11,
+    "minRooms": 14,
+    "maxRooms": 16,
     "rooms": [
       {
         "type": "Combat",

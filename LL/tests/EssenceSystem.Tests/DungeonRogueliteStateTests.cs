@@ -719,7 +719,8 @@ public sealed class DungeonRogueliteStateTests
         var choices = service.EnsureChoices(run, EventOutcomeType.Shrine);
 
         var hiddenRoute = Assert.Single(choices, x => x.Id == "use_miner_route");
-        Assert.Contains(hiddenRoute.MissingRequirements, x => x.Contains("saved_miner", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains("Requires: Save Miner", hiddenRoute.MissingRequirements);
+        Assert.DoesNotContain(hiddenRoute.MissingRequirements, x => x.Contains("saved_miner", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
