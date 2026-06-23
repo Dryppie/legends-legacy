@@ -8,6 +8,7 @@ public static class DependencyInjection
     {
         // Related to regions
         services.AddScoped<IGameEventPublisher, GameEventPublisher>();
+        services.AddScoped<IGameRealtimeBroadcasterV2, GameRealtimeBroadcasterV2>();
 
         return services;
     }

@@ -4,6 +4,7 @@ import { CombatRecord } from '../../../../../shared/components/combat/combat-log
 
 @Injectable({ providedIn: 'root' })
 export class CombatLogService {
+  private readonly maxLogs = 100;
   private readonly _logs = new BehaviorSubject<CombatRecord[]>([]);
   readonly logs$ = this._logs.asObservable();
 
@@ -14,7 +15,7 @@ export class CombatLogService {
       {
         ...record,
       },
-    ]);
+    ].slice(-this.maxLogs));
   }
 
   clear() {

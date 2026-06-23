@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CombatResultDto } from '../../../../../shared/models/Dtos/combatResultDto';
 import { CombatPlaybackStrategy } from './combat-playback-strategy';
-import { finalize, from, map, mergeMap, Observable, timer } from 'rxjs';
+import { from, map, mergeMap, Observable, tap, timer } from 'rxjs';
 import { CombatEvent } from '../../../../../shared/models/Dtos/combatEventDto';
 import { CombatLogService } from '../combat-log/combat-log.service';
 import { LevelingService } from '../../leveling/leveling.service';
@@ -23,7 +23,7 @@ export class IdlePlaybackStrategy implements CombatPlaybackStrategy {
         const delayMs = Math.max(0, (evTime - elapsed) * 1000);
         return timer(delayMs).pipe(map(() => ev));
       }),
-      finalize(() => this.onFinished(result)),
+      tap({ complete: () => this.onFinished(result) }),
     );
   }
 

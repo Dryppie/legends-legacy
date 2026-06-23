@@ -77,6 +77,11 @@ export class AuthService {
   }
 
   updateCharacter(updatedCharacter: CharacterDto): void {
+    const current = this._currentCharacter();
+    if (current && this.isSameCharacter(current, updatedCharacter)) {
+      return;
+    }
+
     this._currentCharacter.set(updatedCharacter);
   }
 
@@ -227,7 +232,14 @@ export class AuthService {
   private fetchCharacter(): Observable<CharacterDto> {
     return this.api
       .get('character')
-      .pipe(tap((character) => this._currentCharacter.set(character)));
+      .pipe(
+        tap((character) => {
+          const current = this._currentCharacter();
+          if (!current || !this.isSameCharacter(current, character)) {
+            this._currentCharacter.set(character);
+          }
+        }),
+      );
   }
 
   /** Returns `true` when refresh succeeded. */
@@ -306,5 +318,18 @@ export class AuthService {
 
   private setAccessExpiry(exp: number) {
     this._accessExpiresAt = exp;
+  }
+
+  private isSameCharacter(a: CharacterDto, b: CharacterDto): boolean {
+    return (
+      a.id === b.id &&
+      a.name === b.name &&
+      a.level === b.level &&
+      a.experience === b.experience &&
+      a.experienceUntilNextLevel === b.experienceUntilNextLevel &&
+      a.cinders === b.cinders &&
+      a.soulstones === b.soulstones &&
+      a.arenaRating === b.arenaRating
+    );
   }
 }

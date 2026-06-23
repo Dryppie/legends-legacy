@@ -1,6 +1,8 @@
 import { NgFor, NgIf } from '@angular/common';
 import { Component, effect, signal } from '@angular/core';
 import { GameEventService } from '../../../core/services/real-time/game-event.service';
+import { GameRealtimeStoreV2 } from '../../../core/services/real-time-v2/game-realtime-store-v2.service';
+import { isGameRealtimeV2Enabled } from '../../../core/services/real-time-v2/game-realtime-feature-v2';
 import { InventoryItem } from '../../../shared/models/inventoryItem';
 import { ItemComponent } from '../../../shared/components/item/item.component';
 import { LocalStorageService } from '../../../core/services/client-side/local-storage/local-storage.service';
@@ -24,12 +26,15 @@ export class LootTrackerComponent {
 
   constructor(
     private readonly eventService: GameEventService,
+    private readonly realtimeStoreV2: GameRealtimeStoreV2,
     private readonly storage: LocalStorageService,
   ) {
     this.expanded.set(this.storage.get<boolean>('lootTrackerExpanded') ?? true);
 
     effect(
       () => {
+        if (isGameRealtimeV2Enabled()) return;
+
         const envelope = this.eventService.eventEnvelope.LootReceivedMsg();
         const loot = envelope?.payload;
         if (loot) {
@@ -50,6 +55,11 @@ export class LootTrackerComponent {
       },
       { allowSignalWrites: true },
     );
+
+    effect(() => {
+      if (!isGameRealtimeV2Enabled()) return;
+      this.entries = this.realtimeStoreV2.recentLoot();
+    });
   }
 
   toggle() {

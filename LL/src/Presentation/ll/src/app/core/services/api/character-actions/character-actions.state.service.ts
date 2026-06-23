@@ -117,10 +117,7 @@ export class CharacterActionsStateService {
           }),
         ),
       (action) => {
-        this._currentAction.set(action);
-        if (action) {
-          this.persistence.set(action.characterActionType);
-        }
+        this.applyActionUpdate(action);
       },
     );
   }
@@ -253,5 +250,43 @@ export class CharacterActionsStateService {
 
   hide(): void {
     this._showAction.set(false);
+  }
+
+  applyRealtimeIdleCombat(action: CharacterActionDto): void {
+    this.applyActionUpdate(action);
+  }
+
+  private applyActionUpdate(action: CharacterActionDto | null): void {
+    const currentKey = this.getActionUpdateKey(this._currentAction());
+    const nextKey = this.getActionUpdateKey(action);
+
+    if (currentKey && nextKey && currentKey === nextKey) {
+      return;
+    }
+
+    this._currentAction.set(action);
+    if (action) {
+      this.persistence.set(action.characterActionType);
+    }
+  }
+
+  private getActionUpdateKey(action: CharacterActionDto | null): string | null {
+    if (!action) return null;
+
+    const combat = action.combatSession?.combatResult;
+    if (combat) {
+      return [
+        action.characterActionType,
+        action.updatedAt,
+        action.isDeleted,
+        combat.startedAt,
+        combat.outcome,
+        combat.duration,
+      ].join('|');
+    }
+
+    return [action.characterActionType, action.updatedAt, action.isDeleted].join(
+      '|',
+    );
   }
 }

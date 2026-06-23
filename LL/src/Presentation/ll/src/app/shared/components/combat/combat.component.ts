@@ -3,6 +3,7 @@ import {
   effect,
   EventEmitter,
   Input,
+  OnDestroy,
   OnInit,
   Output,
   signal,
@@ -45,10 +46,13 @@ import { TourService } from '../../../core/services/client-side/tutorial-tour/to
   ],
   templateUrl: './combat.component.html',
 })
-export class CombatComponent implements OnInit {
+export class CombatComponent implements OnInit, OnDestroy {
   combatEvents: CombatEvent[] = [];
   entityStats: EntityStats[] = [];
-  private lastEventsLength = 0;
+  private readonly lastHandledCombatEvent = new Map<BattleType, CombatEvent>();
+  private flavorIntervalId: ReturnType<typeof setInterval> | null = null;
+  private flavorVisibilityTimeoutId: ReturnType<typeof setTimeout> | null =
+    null;
   private readonly battleTypeSignal = signal<BattleType>(BattleType.IdleCombat);
 
   @Input()
@@ -129,9 +133,18 @@ export class CombatComponent implements OnInit {
       const allEvents = this.combatStateService.getCombatEvents(
         type,
       )();
-      const previousLength = this.lastEventsLength;
-      const newEvents = allEvents.slice(previousLength);
-      this.lastEventsLength = allEvents.length;
+      const lastHandledEvent = this.lastHandledCombatEvent.get(type);
+      const lastHandledIndex = lastHandledEvent
+        ? allEvents.indexOf(lastHandledEvent)
+        : -1;
+      const newEvents =
+        lastHandledEvent && lastHandledIndex >= 0
+          ? allEvents.slice(lastHandledIndex + 1)
+          : allEvents;
+      const newestEvent = allEvents[allEvents.length - 1];
+
+      if (newestEvent) this.lastHandledCombatEvent.set(type, newestEvent);
+      else this.lastHandledCombatEvent.delete(type);
 
       newEvents.forEach((event) => this.handleCombatEvent(event));
     });
@@ -214,7 +227,18 @@ export class CombatComponent implements OnInit {
     ];
 
     this.pickRandomFlavorText();
-    setInterval(() => this.pickRandomFlavorText(), 5000);
+    this.flavorIntervalId = setInterval(
+      () => this.pickRandomFlavorText(),
+      5000,
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+    if (this.flavorIntervalId) clearInterval(this.flavorIntervalId);
+    if (this.flavorVisibilityTimeoutId) {
+      clearTimeout(this.flavorVisibilityTimeoutId);
+    }
   }
 
   onStopOrSkip(): void {
@@ -532,7 +556,11 @@ export class CombatComponent implements OnInit {
     } else {
       this.flavorText = newText;
     }
-    setTimeout(() => {
+    if (this.flavorVisibilityTimeoutId) {
+      clearTimeout(this.flavorVisibilityTimeoutId);
+    }
+
+    this.flavorVisibilityTimeoutId = setTimeout(() => {
       this.flavorTextVisible = true;
     });
   }

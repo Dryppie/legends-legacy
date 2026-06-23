@@ -1,18 +1,4 @@
-import {
-  inject,
-  Injectable,
-  NgZone,
-  Signal,
-  signal,
-  WritableSignal,
-} from '@angular/core';
-import { environment } from '../../../../environments/environment';
-import {
-  HubConnection,
-  HubConnectionBuilder,
-  HubConnectionState,
-  LogLevel,
-} from '@microsoft/signalr';
+import { Injectable, Signal, signal, WritableSignal } from '@angular/core';
 import {
   GameEventMap,
   GameEventName,
@@ -22,25 +8,18 @@ import {
 } from './game-event/game-event.map';
 import { AudienceDto } from './audience/aducienceDto';
 import { GameEventEnvelope } from './game-event/game-event-envelope';
-import { GameConnectionStatus } from './connection-status.model';
+import { GameRealtimeDiagnosticsV2 } from '../real-time-v2/game-realtime-diagnostics-v2.service';
+import { GameRealtimeConnectionV2 } from '../real-time-v2/game-realtime-connection-v2.service';
+import { GameRealtimeEnvelopeV2 } from '../real-time-v2/game-realtime-contracts-v2';
+import { isGameRealtimeV2Enabled } from '../real-time-v2/game-realtime-feature-v2';
 
 @Injectable({ providedIn: 'root' })
 export class GameEventService {
-  private readonly hubUrl = `${environment.apiBaseUrl}/hub`;
-  private hub?: HubConnection;
-  private connectPromise?: Promise<void>;
-  private readonly guildSubscriptions = new Set<string>();
-  private readonly activeGuildSubscriptions = new Set<string>();
   private readonly handledUpdateIds = new Set<string>();
   private readonly handledUpdateIdQueue: string[] = [];
-  private worldSubscriptionRequested = false;
-  private worldSubscriptionActive = false;
-  private readonly zone = inject(NgZone);
-  private readonly _connectionStatus =
-    signal<GameConnectionStatus>('disconnected');
-  private readonly _reconnectCount = signal(0);
+  private initialized = false;
 
-  /** One *signal* per event – this is what the new code will use. */
+  /** One *signal* per event - this is what consumers use. */
   private readonly channelsSig = new Map<
     GameEventName,
     WritableSignal<unknown | null>
@@ -50,90 +29,31 @@ export class GameEventService {
     WritableSignal<GameEventEnvelope<GameEventName> | null>
   >();
 
-  /* ------------  strongly-typed public signals  ------------ */
   event = new Proxy({} as GameEventSignalMap, {
-    get: (_t, key: string) => this.onSig(key as GameEventName),
+    get: (_target, key: string) => this.onSig(key as GameEventName),
   }) as GameEventSignalMap;
-  eventEnvelope = new Proxy({} as GameEventEnvelopeSignalMap, {
-    get: (_t, key: string) => this.onEnvelopeSig(key as GameEventName),
-  }) as GameEventEnvelopeSignalMap;
-  // add one line per new event, or code-gen them
-  readonly connectionStatus = this._connectionStatus.asReadonly();
-  readonly reconnectCount = this._reconnectCount.asReadonly();
 
-  /* -------------  connection boilerplate (unchanged)  ------------- */
+  eventEnvelope = new Proxy({} as GameEventEnvelopeSignalMap, {
+    get: (_target, key: string) => this.onEnvelopeSig(key as GameEventName),
+  }) as GameEventEnvelopeSignalMap;
+
+  readonly connectionStatus;
+  readonly reconnectCount;
+
+  constructor(
+    private readonly connection: GameRealtimeConnectionV2,
+    private readonly diagnostics: GameRealtimeDiagnosticsV2,
+  ) {
+    this.connectionStatus = this.connection.connectionStatus;
+    this.reconnectCount = this.connection.reconnectCount;
+  }
 
   async connect(audience?: AudienceDto): Promise<void> {
-    if (this.hub?.state === HubConnectionState.Connected) {
-      if (audience) {
-        await this.subscribeToAudience(audience);
-      }
-      return;
-    }
+    if (!isGameRealtimeV2Enabled()) return;
 
-    if (this.connectPromise) {
-      await this.connectPromise;
-      if (audience) {
-        await this.subscribeToAudience(audience);
-      }
-      return;
-    }
+    this.initialize();
+    await this.connection.connect();
 
-    this.hub = new HubConnectionBuilder()
-      .withUrl(this.hubUrl, { withCredentials: true })
-      // .withHubProtocol(new MessagePackHubProtocol())
-      .withAutomaticReconnect({
-        nextRetryDelayInMilliseconds: (r) =>
-          Math.min(10_000, r.previousRetryCount * 2_000),
-      })
-      .configureLogging(LogLevel.Warning)
-      .build();
-
-    this.hub.on('Publish', (env: GameEventEnvelope<string>) =>
-      this.dispatch(env),
-    );
-
-    this.hub.onreconnecting((error) => {
-      this.activeGuildSubscriptions.clear();
-      this.worldSubscriptionActive = false;
-      this.zone.run(() => this._connectionStatus.set('reconnecting'));
-      if (error) console.warn('Game realtime reconnecting', error);
-    });
-
-    this.hub.onreconnected(() => {
-      this.activeGuildSubscriptions.clear();
-      this.worldSubscriptionActive = false;
-      this.zone.run(() => {
-        this._connectionStatus.set('connected');
-        this._reconnectCount.update((count) => count + 1);
-      });
-      void this.resubscribeAudiences();
-    });
-
-    this.hub.onclose((error) => {
-      this.activeGuildSubscriptions.clear();
-      this.worldSubscriptionActive = false;
-      this.zone.run(() => this._connectionStatus.set('disconnected'));
-      if (error) console.warn('Game realtime disconnected', error);
-    });
-
-    this._connectionStatus.set('connecting');
-    this.connectPromise = this.hub
-      .start()
-      .then(() => {
-        this.zone.run(() => this._connectionStatus.set('connected'));
-      })
-      .catch((error) => {
-        this.zone.run(() => this._connectionStatus.set('disconnected'));
-        throw error;
-      })
-      .finally(() => {
-        this.connectPromise = undefined;
-      });
-
-    await this.connectPromise;
-
-    // Character stream is automatic; subscribe to extra audiences if requested.
     if (audience) {
       await this.subscribeToAudience(audience);
     }
@@ -151,33 +71,17 @@ export class GameEventService {
   }
 
   async subscribeToGuild(guildId: string): Promise<void> {
-    this.guildSubscriptions.add(guildId);
-    await this.ensureConnected();
-    if (this.activeGuildSubscriptions.has(guildId)) return;
+    await this.connection.subscribeToGuild(guildId);
+  }
 
-    await this.hub?.invoke('SubscribeToGuild', guildId);
-    this.activeGuildSubscriptions.add(guildId);
+  async subscribeToWorld(): Promise<void> {
+    await this.connection.subscribeToWorld();
   }
 
   async disconnect(): Promise<void> {
-    await this.hub?.stop();
-    this.hub = undefined;
-    this.guildSubscriptions.clear();
-    this.activeGuildSubscriptions.clear();
-    this.worldSubscriptionRequested = false;
-    this.worldSubscriptionActive = false;
-    this._connectionStatus.set('disconnected');
-
-    /* reset signals to null so new components can distinguish old vs. new data */
-    this.channelsSig.forEach((sig) => sig.set(null));
-    this.envelopeSig.forEach((sig) => sig.set(null));
-    this.handledUpdateIds.clear();
-    this.handledUpdateIdQueue.length = 0;
+    this.resetSignals();
   }
 
-  /* --------------------  PUBLIC API  -------------------- */
-
-  /** Generic accessor for any event as a signal (typed). */
   onSig<K extends GameEventName>(name: K): Signal<GameEventMap[K] | null> {
     let sig = this.channelsSig.get(name) as
       | WritableSignal<GameEventMap[K] | null>
@@ -205,69 +109,58 @@ export class GameEventService {
     return sig.asReadonly();
   }
 
-  /* -----------------  internal fan-out  ----------------- */
+  private initialize(): void {
+    if (this.initialized) return;
+    this.initialized = true;
+    this.diagnostics.start();
+    this.connection.events$.subscribe((envelope) => this.dispatch(envelope));
+  }
 
-  private dispatch(env: GameEventEnvelope<string>): void {
-    if (env.updateId && this.hasHandledUpdate(env.updateId)) {
+  private dispatch(envelope: GameRealtimeEnvelopeV2): void {
+    if (envelope.updateId && this.hasHandledUpdate(envelope.updateId)) {
       return;
     }
 
-    if (!isGameEventName(env.event)) {
-      console.warn(`Unknown game event ignored: ${env.event}`);
+    if (!isGameEventName(envelope.event)) {
       return;
     }
 
-    /* Update the signal (in the Angular zone so change detection runs). */
-    let sig = this.channelsSig.get(env.event);
+    const legacyEnvelope = envelope as GameEventEnvelope<GameEventName>;
+
+    let sig = this.channelsSig.get(legacyEnvelope.event);
     if (!sig) {
       sig = signal<unknown | null>(null);
-      this.channelsSig.set(env.event, sig);
+      this.channelsSig.set(legacyEnvelope.event, sig);
     }
 
-    let envelopeSignal = this.envelopeSig.get(env.event);
+    let envelopeSignal = this.envelopeSig.get(legacyEnvelope.event);
     if (!envelopeSignal) {
       envelopeSignal = signal<GameEventEnvelope<GameEventName> | null>(null);
-      this.envelopeSig.set(env.event, envelopeSignal);
+      this.envelopeSig.set(legacyEnvelope.event, envelopeSignal);
     }
 
-    this.zone.run(() => {
-      (sig as WritableSignal<unknown>).set(env.payload);
-      (
-        envelopeSignal as WritableSignal<GameEventEnvelope<GameEventName>>
-      ).set(env as GameEventEnvelope<GameEventName>);
-    });
+    this.diagnostics.runHandler(
+      {
+        updateId: envelope.updateId,
+        occurredAt: envelope.occurredAt,
+        event: `compat:${legacyEnvelope.event}`,
+        payload: envelope.payload,
+      },
+      () => {
+        (sig as WritableSignal<unknown>).set(legacyEnvelope.payload);
+        (
+          envelopeSignal as WritableSignal<GameEventEnvelope<GameEventName>>
+        ).set(legacyEnvelope);
+      },
+      true,
+    );
   }
 
-  private async ensureConnected(): Promise<void> {
-    if (this.hub?.state === HubConnectionState.Connected) return;
-    await this.connect();
-  }
-
-  private async subscribeToWorld(): Promise<void> {
-    this.worldSubscriptionRequested = true;
-    await this.ensureConnected();
-    if (this.worldSubscriptionActive) return;
-
-    await this.hub?.invoke('SubscribeToWorld');
-    this.worldSubscriptionActive = true;
-  }
-
-  private async resubscribeAudiences(): Promise<void> {
-    if (this.worldSubscriptionRequested) {
-      try {
-        await this.subscribeToWorld();
-      } catch (error) {
-        console.warn('Failed to resubscribe to world realtime', error);
-      }
-    }
-
-    for (const guildId of this.guildSubscriptions) {
-      try {
-        await this.subscribeToGuild(guildId);
-      } catch (error) {
-        console.warn('Failed to resubscribe to guild realtime', error);
-      }
-    }
+  private resetSignals(): void {
+    this.channelsSig.forEach((sig) => sig.set(null));
+    this.envelopeSig.forEach((sig) => sig.set(null));
+    this.handledUpdateIds.clear();
+    this.handledUpdateIdQueue.length = 0;
   }
 
   private hasHandledUpdate(updateId: string): boolean {

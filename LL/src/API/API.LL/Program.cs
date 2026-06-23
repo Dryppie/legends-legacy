@@ -199,7 +199,7 @@ if (!app.Environment.IsDevelopment())       // prod only
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapHub<GameHub>("/hub").RequireAuthorization();
+app.MapHub<GameHubV2>("/hub/game/v2").RequireAuthorization();
 
 if (config.GetValue("FeatureManagement:AllowAnonymous", "false") == "true")
 {
