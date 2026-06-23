@@ -425,7 +425,15 @@ public sealed class EssenceSystemService : IEssenceService, IEssenceBonusProvide
     private string ResolveDefinitionId(EssenceItemBase essenceItem)
     {
         if (!string.IsNullOrWhiteSpace(essenceItem.EssenceDefinitionId)) return essenceItem.EssenceDefinitionId;
-        return string.Empty;
+        return InferDefinitionIdFromItemBaseId(essenceItem.Id);
+    }
+
+    private static string InferDefinitionIdFromItemBaseId(string itemBaseId)
+    {
+        const string itemPrefix = "item.";
+        return itemBaseId.StartsWith(itemPrefix, StringComparison.OrdinalIgnoreCase)
+            ? itemBaseId[itemPrefix.Length..]
+            : string.Empty;
     }
 
     private static IEnumerable<EssenceAttributeBonusDefinition> GetAttributeBonusDefinitions(EssenceDefinition definition, PlayerEssence essence) =>

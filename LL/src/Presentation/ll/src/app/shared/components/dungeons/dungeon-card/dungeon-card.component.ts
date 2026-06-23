@@ -12,6 +12,8 @@ import { ItemComponent } from '../../item/item.component';
 import { DungeonStateService } from '../../../../core/services/api/dungeon/dungeon-state.service';
 import {
   DungeonGatheringNodePreview,
+  DungeonMastery,
+  DungeonMasteryBonusPreview,
   DungeonPreviewData,
   DungeonPreviewReward,
 } from '../../../models/Dtos/dungeons/dungeonPreviewData';
@@ -32,7 +34,7 @@ interface EntryRequirementPreview {
   requiredAmount: number;
 }
 
-type DungeonDetailTab = 'rewards' | 'gathering';
+type DungeonDetailTab = 'rewards' | 'gathering' | 'mastery';
 
 @Component({
   selector: 'app-dungeon-card',
@@ -66,6 +68,7 @@ export class DungeonCardComponent implements OnChanges {
   readonly detailTabs: { id: DungeonDetailTab; label: string }[] = [
     { id: 'rewards', label: 'Rewards' },
     { id: 'gathering', label: 'Gathering' },
+    { id: 'mastery', label: 'Mastery' },
   ];
 
   showPreview = signal(false);
@@ -372,6 +375,98 @@ export class DungeonCardComponent implements OnChanges {
   selectedGatheringSummary(): string {
     const types = this.selectedGatheringTypes();
     return types.length ? types.join(' · ') : 'None';
+  }
+
+  previewMasteryLevel(): number {
+    return this.previewData.mastery?.level ?? 0;
+  }
+
+  previewMasteryExperienceLabel(): string {
+    return this.formatMasteryExperienceLabel(this.previewData.mastery);
+  }
+
+  previewActiveMasteryBonuses(): DungeonMasteryBonusPreview[] {
+    return this.activeMasteryBonuses(this.previewData.mastery);
+  }
+
+  previewNextMasteryBonus(): DungeonMasteryBonusPreview | null {
+    return this.nextMasteryBonus(this.previewData.mastery);
+  }
+
+  selectedMasteryLevel(): number {
+    return this.selectedPreviewData().mastery?.level ?? 0;
+  }
+
+  selectedMasteryExperience(): number {
+    return this.selectedPreviewData().mastery?.experience ?? 0;
+  }
+
+  selectedMasteryNextExperience(): number | null {
+    return this.selectedPreviewData().mastery?.experienceRequiredForNextLevel ?? null;
+  }
+
+  selectedMasteryCompletionCount(): number {
+    return this.selectedPreviewData().mastery?.completionCount ?? 0;
+  }
+
+  selectedMasteryProgressPercent(): number {
+    const next = this.selectedMasteryNextExperience();
+    if (!next || next <= 0) {
+      return 100;
+    }
+
+    return Math.max(
+      0,
+      Math.min(100, Math.round((this.selectedMasteryExperience() / next) * 100)),
+    );
+  }
+
+  selectedMasteryBonuses(): DungeonMasteryBonusPreview[] {
+    return this.selectedPreviewData().mastery?.bonuses ?? [];
+  }
+
+  selectedActiveMasteryBonuses(): DungeonMasteryBonusPreview[] {
+    return this.activeMasteryBonuses(this.selectedPreviewData().mastery);
+  }
+
+  selectedNextMasteryBonus(): DungeonMasteryBonusPreview | null {
+    return this.nextMasteryBonus(this.selectedPreviewData().mastery);
+  }
+
+  masteryExperienceLabel(): string {
+    return this.formatMasteryExperienceLabel(this.selectedPreviewData().mastery);
+  }
+
+  private formatMasteryExperienceLabel(
+    mastery: DungeonMastery | null | undefined,
+  ): string {
+    const experience = mastery?.experience ?? 0;
+    const next = mastery?.experienceRequiredForNextLevel ?? null;
+
+    return next
+      ? `${experience} / ${next} XP`
+      : `${experience} XP`;
+  }
+
+  private activeMasteryBonuses(
+    mastery: DungeonMastery | null | undefined,
+  ): DungeonMasteryBonusPreview[] {
+    return (mastery?.bonuses ?? []).filter((bonus) => bonus.isActive);
+  }
+
+  private nextMasteryBonus(
+    mastery: DungeonMastery | null | undefined,
+  ): DungeonMasteryBonusPreview | null {
+    return (
+      (mastery?.bonuses ?? [])
+        .filter((bonus) => !bonus.isActive)
+        .sort((first, second) => first.requiredLevel - second.requiredLevel)[0] ??
+      null
+    );
+  }
+
+  trackMasteryBonus(_: number, bonus: DungeonMasteryBonusPreview): string {
+    return bonus.id;
   }
 
   previewGatheringTypes(): string[] {

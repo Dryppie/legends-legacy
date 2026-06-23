@@ -37,10 +37,57 @@
           </span>
         </div>
 
-        <div
-          *ngIf="previewGatheringTypes().length"
-          class="mt-3 flex flex-wrap items-center justify-end gap-1.5"
-        >
+        <div class="mt-3 flex flex-wrap items-center justify-end gap-1.5">
+          <span
+            class="group/mastery relative inline-flex"
+          >
+            <span class="ll-item-chip ll-item-chip-accent">
+              Mastery Lv. {{ previewMasteryLevel() }}
+            </span>
+            <span
+              class="pointer-events-none absolute bottom-full right-0 z-20 mb-2 w-72 max-w-[calc(100vw-2rem)] rounded border border-primary/50 bg-black/95 px-3 py-2 text-left text-[11px] text-zinc-200 opacity-0 shadow-lg transition group-hover/mastery:opacity-100"
+            >
+              <span class="ll-eyebrow block text-[9px]">Mastery XP</span>
+              <span class="mt-1 block font-serif text-sm text-primary">
+                {{ previewMasteryExperienceLabel() }}
+              </span>
+              <span class="mt-2 block border-t border-light_gray/40 pt-2">
+                <span class="ll-eyebrow block text-[9px]">
+                  Active Bonuses
+                </span>
+                <ng-container
+                  *ngIf="
+                    previewActiveMasteryBonuses().length;
+                    else noPreviewActiveMasteryBonuses
+                  "
+                >
+                  <span
+                    *ngFor="
+                      let bonus of previewActiveMasteryBonuses();
+                      trackBy: trackMasteryBonus
+                    "
+                    class="mt-1 block leading-4 text-zinc-200"
+                  >
+                    {{ bonus.description }}
+                  </span>
+                </ng-container>
+                <ng-template #noPreviewActiveMasteryBonuses>
+                  <span class="mt-1 block leading-4 text-secondary">
+                    None unlocked yet.
+                  </span>
+                </ng-template>
+              </span>
+              <span
+                *ngIf="previewNextMasteryBonus() as bonus"
+                class="mt-2 block border-t border-light_gray/40 pt-2"
+              >
+                <span class="ll-eyebrow block text-[9px]">Next Unlock</span>
+                <span class="mt-1 block leading-4 text-zinc-200">
+                  Lv. {{ bonus.requiredLevel }} · {{ bonus.description }}
+                </span>
+              </span>
+            </span>
+          </span>
           <span
             *ngFor="let type of previewGatheringTypes()"
             class="ll-item-chip"
@@ -144,6 +191,58 @@
             <span class="ll-stat-label"> Clears </span>
             <span class="ml-2 font-serif text-lg text-white">
               {{ selectedPreviewData().record?.totalClears ?? 0 }}
+            </span>
+          </div>
+
+          <div
+            class="ll-stat-card group/mastery relative px-3 py-2"
+          >
+            <span class="ll-stat-label"> Mastery </span>
+            <span class="ml-2 font-serif text-lg text-white">
+              Lv. {{ selectedMasteryLevel() }}
+            </span>
+            <span
+              class="pointer-events-none absolute bottom-full left-0 z-20 mb-2 w-72 max-w-[calc(100vw-2rem)] rounded border border-primary/50 bg-black/95 px-3 py-2 text-left text-[11px] text-zinc-200 opacity-0 shadow-lg transition group-hover/mastery:opacity-100"
+            >
+              <span class="ll-eyebrow block text-[9px]">Mastery XP</span>
+              <span class="mt-1 block font-serif text-sm text-primary">
+                {{ masteryExperienceLabel() }}
+              </span>
+              <span class="mt-2 block border-t border-light_gray/40 pt-2">
+                <span class="ll-eyebrow block text-[9px]">
+                  Active Bonuses
+                </span>
+                <ng-container
+                  *ngIf="
+                    selectedActiveMasteryBonuses().length;
+                    else noSelectedActiveMasteryBonuses
+                  "
+                >
+                  <span
+                    *ngFor="
+                      let bonus of selectedActiveMasteryBonuses();
+                      trackBy: trackMasteryBonus
+                    "
+                    class="mt-1 block leading-4 text-zinc-200"
+                  >
+                    {{ bonus.description }}
+                  </span>
+                </ng-container>
+                <ng-template #noSelectedActiveMasteryBonuses>
+                  <span class="mt-1 block leading-4 text-secondary">
+                    None unlocked yet.
+                  </span>
+                </ng-template>
+              </span>
+              <span
+                *ngIf="selectedNextMasteryBonus() as bonus"
+                class="mt-2 block border-t border-light_gray/40 pt-2"
+              >
+                <span class="ll-eyebrow block text-[9px]">Next Unlock</span>
+                <span class="mt-1 block leading-4 text-zinc-200">
+                  Lv. {{ bonus.requiredLevel }} · {{ bonus.description }}
+                </span>
+              </span>
             </span>
           </div>
         </div>
@@ -286,6 +385,77 @@
                   This dungeon has no gathering nodes.
                 </div>
               </ng-template>
+            </div>
+
+            <!-- MASTERY TAB -->
+            <div *ngIf="selectedTab() === 'mastery'" class="h-full">
+              <div class="grid gap-3 lg:grid-cols-[0.85fr_1.15fr]">
+                <article class="ll-card min-w-0 px-3 py-3">
+                  <div class="ll-eyebrow">Dungeon Mastery</div>
+                  <div class="mt-2 flex items-end justify-between gap-3">
+                    <div>
+                      <div class="font-serif text-3xl text-white">
+                        Lv. {{ selectedMasteryLevel() }}
+                      </div>
+                      <div class="mt-1 text-xs text-secondary">
+                        {{ selectedMasteryCompletionCount() }}
+                        {{
+                          selectedMasteryCompletionCount() === 1
+                            ? "clear"
+                            : "clears"
+                        }}
+                      </div>
+                    </div>
+                    <span class="ll-item-chip ll-item-chip-accent">
+                      {{ masteryExperienceLabel() }}
+                    </span>
+                  </div>
+
+                  <div class="mt-4 h-2 overflow-hidden rounded bg-black/30">
+                    <div
+                      class="h-full bg-primary"
+                      [style.width.%]="selectedMasteryProgressPercent()"
+                    ></div>
+                  </div>
+                </article>
+
+                <article class="ll-card min-w-0 px-3 py-3">
+                  <div class="ll-eyebrow">Bonuses</div>
+                  <div
+                    *ngIf="
+                      selectedMasteryBonuses().length;
+                      else noMasteryBonuses
+                    "
+                    class="mt-3 space-y-2"
+                  >
+                    <div
+                      *ngFor="
+                        let bonus of selectedMasteryBonuses();
+                        trackBy: trackMasteryBonus
+                      "
+                      class="ll-list-row px-2 py-2 text-xs"
+                      [ngClass]="
+                        bonus.isActive
+                          ? 'll-card-accent text-primary'
+                          : 'text-secondary'
+                      "
+                    >
+                      <span class="min-w-0 truncate">
+                        {{ bonus.description }}
+                      </span>
+                      <span class="ll-item-chip shrink-0">
+                        Lv. {{ bonus.requiredLevel }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <ng-template #noMasteryBonuses>
+                    <div class="ll-empty-state mt-3 p-3 text-sm">
+                      No mastery bonuses listed.
+                    </div>
+                  </ng-template>
+                </article>
+              </div>
             </div>
           </div>
         </div>

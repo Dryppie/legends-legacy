@@ -1,0 +1,219 @@
+{
+  "events": [
+    {
+      "id": "generic_patrol",
+      "name": "Enemy Patrol",
+      "description": "Enemies are moving through the dungeon.",
+      "outcomeType": "ExtraCombat",
+      "choices": [
+        {
+          "id": "engage_patrol",
+          "label": "Engage Patrol",
+          "description": "Draw the enemies into a fight.",
+          "pressureDelta": 4,
+          "ambushChancePercent": 10
+        },
+        {
+          "id": "avoid_patrol",
+          "label": "Avoid Patrol",
+          "description": "Slip around the patrol and lower pressure slightly.",
+          "pressureDelta": -4
+        }
+      ]
+    },
+    {
+      "id": "generic_treasure_cart",
+      "name": "Abandoned Treasure Cart",
+      "description": "A half-hidden cache waits in the dark.",
+      "outcomeType": "TreasureRoom",
+      "choices": [
+        {
+          "id": "take_supplies",
+          "label": "Take Supplies",
+          "description": "Gain moderate unsecured loot.",
+          "pressureDelta": 4,
+          "grantsLoot": true
+        },
+        {
+          "id": "search_deeper",
+          "label": "Search Deeper",
+          "description": "Gain better unsecured loot at higher risk.",
+          "pressureDelta": 12,
+          "grantsLoot": true,
+          "addFlags": [ "searched_deep_treasure" ]
+        },
+        {
+          "id": "collapse_tunnel",
+          "label": "Collapse Tunnel",
+          "description": "Gain no loot, but reduce future reinforcements.",
+          "pressureDelta": -10,
+          "addFlags": [ "boss_reinforcements_reduced" ]
+        }
+      ]
+    },
+    {
+      "id": "generic_cracked_shrine",
+      "name": "Cracked Shrine",
+      "description": "Old power gathers around a damaged shrine.",
+      "outcomeType": "Shrine",
+      "choices": [
+        {
+          "id": "receive_blessing",
+          "label": "Receive Blessing",
+          "description": "Choose one temporary boon.",
+          "grantsBoonChoice": true
+        },
+        {
+          "id": "cleanse_corruption",
+          "label": "Cleanse Corruption",
+          "description": "Reduce pressure.",
+          "pressureDelta": -15,
+          "addFlags": [ "cleansed_shrine" ]
+        },
+        {
+          "id": "sacrifice_loot",
+          "label": "Sacrifice Loot",
+          "description": "Lose unsecured loot to choose a stronger boon.",
+          "grantsBoonChoice": true,
+          "addFlags": [ "sacrificed_loot_for_boon" ]
+        }
+      ]
+    },
+    {
+      "id": "generic_pressure_plate",
+      "name": "Pressure Plate",
+      "description": "The room is wired with old mechanisms.",
+      "outcomeType": "Trap",
+      "choices": [
+        {
+          "id": "force_through",
+          "label": "Force Through",
+          "description": "Accept the danger and move quickly.",
+          "pressureDelta": 5
+        },
+        {
+          "id": "disarm_carefully",
+          "label": "Disarm Carefully",
+          "description": "Take your time and avoid the penalty."
+        },
+        {
+          "id": "trigger_intentionally",
+          "label": "Trigger Intentionally",
+          "description": "Raise pressure to reveal a hidden opportunity.",
+          "pressureDelta": 10,
+          "addFlags": [ "revealed_hidden_route" ],
+          "revealsHiddenRoute": true
+        }
+      ]
+    },
+    {
+      "id": "goblin_explosive_storage",
+      "name": "Explosive Storage",
+      "description": "Unstable goblin blasting powder is stacked against a support beam.",
+      "outcomeType": "TreasureRoom",
+      "dungeonDefinitionIds": [ "goblin_mines" ],
+      "choices": [
+        {
+          "id": "loot_powder_cache",
+          "label": "Loot Powder Cache",
+          "description": "Secure extra loot, but the noise raises the alarm.",
+          "pressureDelta": 12,
+          "grantsLoot": true,
+          "addFlags": [ "goblin_powder_looted" ]
+        },
+        {
+          "id": "save_explosives",
+          "label": "Save Explosives",
+          "description": "Save explosives for the boss fight.",
+          "pressureDelta": 4,
+          "addFlags": [ "saved_explosives" ],
+          "revealsHiddenRoute": true
+        },
+        {
+          "id": "collapse_goblin_tunnel",
+          "label": "Collapse Tunnel",
+          "description": "Reduce reinforcements and reveal a safer passage.",
+          "pressureDelta": -8,
+          "addFlags": [ "collapsed_tunnel", "revealed_hidden_route" ],
+          "revealsHiddenRoute": true
+        }
+      ]
+    },
+    {
+      "id": "goblin_captured_miner",
+      "name": "Captured Miner",
+      "description": "A miner is trapped behind a crude goblin barricade.",
+      "outcomeType": "Shrine",
+      "dungeonDefinitionIds": [ "goblin_mines" ],
+      "choices": [
+        {
+          "id": "save_miner",
+          "label": "Save Miner",
+          "description": "Free the miner and earn an optional mastery objective.",
+          "pressureDelta": 6,
+          "addFlags": [ "saved_miner" ],
+          "grantsBoonChoice": true
+        },
+        {
+          "id": "use_miner_route",
+          "label": "Use Miner Route",
+          "description": "Take the miner's hidden route.",
+          "requiredFlags": [ "saved_miner" ],
+          "pressureDelta": -10,
+          "addFlags": [ "revealed_hidden_route" ],
+          "revealsHiddenRoute": true
+        }
+      ]
+    },
+    {
+      "id": "catacombs_bound_spirit",
+      "name": "Bound Spirit",
+      "description": "A restless spirit clings to the old burial stones.",
+      "outcomeType": "Shrine",
+      "dungeonDefinitionIds": [ "forgotten_catacombs" ],
+      "choices": [
+        {
+          "id": "cleanse_bound_spirit",
+          "label": "Cleanse Spirit",
+          "description": "Lower the curse and mark the tomb as cleansed.",
+          "pressureDelta": -15,
+          "addFlags": [ "cleansed_shrine", "cleansed_tomb" ]
+        },
+        {
+          "id": "bind_spirit_power",
+          "label": "Bind Power",
+          "description": "Gain a boon, but risk an ambush.",
+          "pressureDelta": 8,
+          "ambushChancePercent": 25,
+          "grantsBoonChoice": true,
+          "addFlags": [ "bound_spirit_power" ]
+        }
+      ]
+    },
+    {
+      "id": "catacombs_cursed_reliquary",
+      "name": "Cursed Reliquary",
+      "description": "A sealed reliquary hums with a cold promise.",
+      "outcomeType": "TreasureRoom",
+      "dungeonDefinitionIds": [ "forgotten_catacombs" ],
+      "choices": [
+        {
+          "id": "open_reliquary",
+          "label": "Open Reliquary",
+          "description": "Claim stronger loot and accept the curse.",
+          "pressureDelta": 14,
+          "grantsLoot": true,
+          "addFlags": [ "opened_reliquary" ],
+          "ambushChancePercent": 20
+        },
+        {
+          "id": "seal_reliquary",
+          "label": "Seal Reliquary",
+          "description": "Deny the relic and weaken the final shade.",
+          "pressureDelta": -8,
+          "addFlags": [ "sealed_reliquary" ]
+        }
+      ]
+    }
+  ]
+}

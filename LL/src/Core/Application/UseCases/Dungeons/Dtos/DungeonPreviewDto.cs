@@ -22,8 +22,26 @@ public sealed class DungeonPreviewDto
     public int MaxRooms { get; set; }
     public DungeonTier DungeonTier { get; set; }
     public DungeonRecordDto Record { get; set; } = new();
+    public DungeonMasteryDto Mastery { get; set; } = new();
     public List<DungeonPreviewRewardDto> Rewards { get; set; } = [];
     public List<DungeonGatheringNodePreviewDto> GatheringNodes { get; set; } = [];
+}
+
+public sealed class DungeonMasteryDto
+{
+    public long Experience { get; set; }
+    public int Level { get; set; }
+    public int? ExperienceRequiredForNextLevel { get; set; }
+    public int CompletionCount { get; set; }
+    public List<DungeonMasteryBonusPreviewDto> Bonuses { get; set; } = [];
+}
+
+public sealed class DungeonMasteryBonusPreviewDto
+{
+    public string Id { get; set; } = string.Empty;
+    public int RequiredLevel { get; set; }
+    public string Description { get; set; } = string.Empty;
+    public bool IsActive { get; set; }
 }
 
 public sealed class DungeonPreviewRewardDto

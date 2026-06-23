@@ -1,13 +1,31 @@
 using Domain.Models.Dungeons.Runs;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Text.Json;
 
 namespace Persistence.LL.Configurations.Dungeons;
 
 public class DungeonRunConfiguration : IEntityTypeConfiguration<DungeonRun>
 {
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
+
     public void Configure(EntityTypeBuilder<DungeonRun> builder)
     {
+        builder.Property(x => x.State)
+            .HasColumnType("jsonb")
+            .HasConversion(
+                state => JsonSerializer.Serialize(state ?? new DungeonRunState(), JsonOptions),
+                json => string.IsNullOrWhiteSpace(json)
+                    ? new DungeonRunState()
+                    : JsonSerializer.Deserialize<DungeonRunState>(json, JsonOptions) ?? new DungeonRunState())
+            .Metadata.SetValueComparer(new ValueComparer<DungeonRunState>(
+                (left, right) => JsonSerializer.Serialize(left, JsonOptions) == JsonSerializer.Serialize(right, JsonOptions),
+                state => JsonSerializer.Serialize(state, JsonOptions).GetHashCode(),
+                state => JsonSerializer.Deserialize<DungeonRunState>(
+                    JsonSerializer.Serialize(state, JsonOptions),
+                    JsonOptions) ?? new DungeonRunState()));
+
         builder
             .HasMany(x => x.PendingRewards)
             .WithOne()

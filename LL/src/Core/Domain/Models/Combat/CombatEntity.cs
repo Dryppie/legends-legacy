@@ -3,6 +3,7 @@ using Domain.Models.Attributes;
 using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Entities;
 using Domain.Models.Essences;
+using Domain.Models.Essences.Definitions;
 using Domain.Models.Items.Equipments;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -34,6 +35,7 @@ public class CombatEntity
     public Dictionary<AttributeType, float> BaseCombatAttributes { get; } = [];
     public Dictionary<AttributeType, float> CombatAttributes { get; } = [];
     public List<AttributeModifierBase> TemporaryModifiers { get; set; } = [];
+    public List<EssenceAbilityModifierDefinition> TemporaryAbilityModifiers { get; set; } = [];
     public int Level { get; set; }
     public bool IsSummoned = false;
 
@@ -162,6 +164,7 @@ public class CombatEntity
         NextRecoveryIn = entity.NextRecoveryIn;
         Equipment = entity.Equipment.Select(e => e).ToList();
         TemporaryModifiers = entity.TemporaryModifiers.Select(tm => tm).ToList();
+        TemporaryAbilityModifiers = entity.TemporaryAbilityModifiers.Select(tm => tm).ToList();
         BaseAttributes = [.. entity.BaseAttributes];
         BaseCombatAttributes = new Dictionary<AttributeType, float>(entity.BaseCombatAttributes);
         CombatAttributes = new Dictionary<AttributeType, float>(entity.CombatAttributes);

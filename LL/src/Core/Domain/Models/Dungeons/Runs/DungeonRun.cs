@@ -17,6 +17,7 @@ public sealed class DungeonRun
 
     // Track what was rolled / selected.
     public List<RoomInstance> Rooms { get; set; } = [];
+    public DungeonRunState State { get; set; } = new();
 
     //public List<RunModifier> ActiveModifiers { get; set; } = []; // run-wide active
     //public List<RunBlessing> AppliedBlessings { get; set; } = [];

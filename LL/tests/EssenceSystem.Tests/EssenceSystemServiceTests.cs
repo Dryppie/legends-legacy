@@ -48,6 +48,33 @@ public sealed class EssenceSystemServiceTests
     }
 
     [Fact]
+    public async Task AbsorbUnboundEssence_infers_definition_from_item_base_id_when_missing()
+    {
+        await using var db = CreateDb();
+        var characterId = await SeedCharacterAndInventoryAsync(db);
+        var itemInstanceId = Guid.NewGuid();
+        db.ItemBases.Add(new EssenceItemBase
+        {
+            Id = "item.essence.test",
+            Name = "Test Essence",
+            ItemType = ItemType.Essence,
+            Stackable = true
+        });
+        db.ItemInstances.Add(new EssenceItemInstance { Id = itemInstanceId, ItemBaseId = "item.essence.test" });
+        db.InventoryItems.Add(new InventoryItem { InventoryId = characterId, ItemInstanceId = itemInstanceId, Quantity = 1 });
+        await db.SaveChangesAsync();
+        var service = CreateService(db);
+
+        var result = await service.AbsorbUnboundEssenceAsync(characterId, itemInstanceId, CancellationToken.None);
+        await db.SaveChangesAsync();
+
+        Assert.True(result.Succeeded);
+        var essence = Assert.Single(db.PlayerEssences.Where(x => x.CharacterId == characterId));
+        Assert.Equal("essence.test", essence.EssenceDefinitionId);
+        Assert.DoesNotContain(db.InventoryItems, x => x.ItemInstanceId == itemInstanceId);
+    }
+
+    [Fact]
     public async Task DismantleUnboundEssence_consumes_item_and_grants_essence_dust()
     {
         await using var db = CreateDb();

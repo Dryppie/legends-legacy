@@ -1,3 +1,4 @@
+import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { Component, computed, inject } from '@angular/core';
 import { DungeonStateService } from '../../../../../../core/services/api/dungeon/dungeon-state.service';
 import { NgClass, NgFor, NgIf } from '@angular/common';
@@ -18,6 +19,7 @@ import { DungeonRoomIconComponent } from '../../../../../../shared/components/du
     RegularButtonComponent,
     CombatComponent,
     DungeonRoomIconComponent,
+    OverlayModule,
   ],
   templateUrl: './dungeon-page.component.html',
 })
@@ -100,6 +102,85 @@ export class DungeonPageComponent {
     return this.currentRoom()?.type === 'Checkpoint';
   });
 
+  readonly runState = computed(() => this.activeDungeon()?.state ?? null);
+
+  readonly pressureValue = computed(() => this.runState()?.pressure ?? 0);
+
+  readonly pressureMax = computed(
+    () => this.runState()?.mechanicMaxValue ?? 100,
+  );
+
+  readonly pressurePercent = computed(() => {
+    const max = Math.max(1, this.pressureMax());
+    return Math.min(100, Math.round((this.pressureValue() / max) * 100));
+  });
+
+  readonly rewardMultiplierLabel = computed(() => {
+    const multiplier = this.runState()?.rewardMultiplierPercent ?? 100;
+    return `x${(multiplier / 100).toFixed(2)}`;
+  });
+
+  readonly routeOptions = computed(
+    () => this.runState()?.currentRouteOptions ?? [],
+  );
+
+  readonly eventChoices = computed(
+    () => this.runState()?.currentEventChoices ?? [],
+  );
+
+  readonly checkpointChoices = computed(
+    () => this.runState()?.currentCheckpointChoices ?? [],
+  );
+
+  readonly boonChoices = computed(
+    () => this.runState()?.currentBoonChoices ?? [],
+  );
+
+  readonly activeBoonIds = computed(() => this.runState()?.activeBoonIds ?? []);
+
+  readonly activeBoonSummaries = computed(
+    () => this.runState()?.activeBoonSummaries ?? [],
+  );
+
+  readonly activeBoonEffectSummaries = computed(
+    () => this.runState()?.activeBoonEffectSummaries ?? [],
+  );
+  readonly boonTooltipPositions: ConnectedPosition[] = [
+    {
+      originX: 'start',
+      originY: 'bottom',
+      overlayX: 'start',
+      overlayY: 'top',
+      offsetY: 8,
+    },
+    {
+      originX: 'end',
+      originY: 'bottom',
+      overlayX: 'end',
+      overlayY: 'top',
+      offsetY: 8,
+    },
+    {
+      originX: 'start',
+      originY: 'top',
+      overlayX: 'start',
+      overlayY: 'bottom',
+      offsetY: -8,
+    },
+    {
+      originX: 'end',
+      originY: 'top',
+      overlayX: 'end',
+      overlayY: 'bottom',
+      offsetY: -8,
+    },
+  ];
+  hoveredBoonId: string | null = null;
+
+  readonly bossModifiers = computed(
+    () => this.runState()?.currentBossModifiers ?? [],
+  );
+
   readonly primaryActionLabel = computed(() => {
     const run = this.activeDungeon();
     const room = this.currentRoom();
@@ -109,6 +190,10 @@ export class DungeonPageComponent {
     if (run.status === 'Completed' || run.status === 'Withdrawn')
       return 'Claim Rewards';
     if (run.status === 'Failed') return null;
+
+    if (this.boonChoices().length) return null;
+    if (this.routeOptions().length) return null;
+    if (room.type === 'Event' && this.eventChoices().length) return null;
 
     switch (room.type) {
       case 'Combat':
@@ -185,6 +270,28 @@ export class DungeonPageComponent {
     return this.getRoomTypeLabel(room.type);
   });
 
+  readonly isChoosingBoon = computed(() => this.boonChoices().length > 0);
+
+  readonly isChoosingRoute = computed(
+    () => !this.isChoosingBoon() && this.routeOptions().length > 0,
+  );
+
+  readonly activeRunPhaseLabel = computed(() => {
+    if (this.isChoosingBoon()) return 'Run Choice';
+    if (this.isChoosingRoute()) return 'Room Cleared';
+
+    return 'Current Room';
+  });
+
+  readonly activeRunTitle = computed(() => {
+    if (this.isChoosingBoon()) return 'Choose a Boon';
+    if (this.isChoosingRoute()) return 'Choose a Route';
+
+    return this.currentRoomTitle();
+  });
+
+  readonly showCurrentRoomIcon = computed(() => !this.isChoosingRoute());
+
   readonly currentDecisionText = computed(() => {
     const run = this.activeDungeon();
     const room = this.currentRoom();
@@ -201,6 +308,14 @@ export class DungeonPageComponent {
     }
 
     if (!room) return 'Preparing the next room.';
+
+    if (this.boonChoices().length) {
+      return 'Choose one temporary boon to shape the rest of this expedition.';
+    }
+
+    if (this.routeOptions().length) {
+      return 'Choose a route into the next room.';
+    }
 
     switch (room.type) {
       case 'Combat':
@@ -220,6 +335,16 @@ export class DungeonPageComponent {
       default:
         return 'Resolve this room to continue the run.';
     }
+  });
+
+  readonly showCurrentRoomEncounters = computed(() => {
+    const room = this.currentRoom();
+
+    return (
+      this.isCombatRoom() &&
+      room?.status === 'Active' &&
+      (room.encounterIds?.length ?? 0) > 0
+    );
   });
 
   readonly pendingCurrencyRewards = computed(() => {
@@ -302,6 +427,9 @@ export class DungeonPageComponent {
     }
 
     if (!room) return false;
+    if (this.boonChoices().length) return false;
+    if (this.routeOptions().length) return false;
+    if (room.type === 'Event' && this.eventChoices().length) return false;
 
     return true;
   });
@@ -318,6 +446,9 @@ export class DungeonPageComponent {
     }
 
     if (!room) return;
+    if (this.boonChoices().length) return;
+    if (this.routeOptions().length) return;
+    if (room.type === 'Event' && this.eventChoices().length) return;
 
     switch (room.type) {
       case 'Combat':
@@ -349,6 +480,7 @@ export class DungeonPageComponent {
   continueAtCheckpoint(): void {
     const room = this.currentRoom();
     if (!room || room.type !== 'Checkpoint') return;
+    if (this.boonChoices().length) return;
 
     this.dungeonState.continueAtCheckpoint();
   }
@@ -356,6 +488,7 @@ export class DungeonPageComponent {
   withdrawAtCheckpoint(): void {
     const room = this.currentRoom();
     if (!room || room.type !== 'Checkpoint') return;
+    if (this.boonChoices().length) return;
 
     this.dungeonState.withdraw();
   }
@@ -363,6 +496,8 @@ export class DungeonPageComponent {
   handleEventRoom(): void {
     const room = this.currentRoom();
     if (!room || room.type !== 'Event') return;
+    if (this.boonChoices().length) return;
+    if (this.eventChoices().length) return;
 
     this.dungeonState.chooseEventAction(
       room.status === 'Active' ? 'event.accept' : 'event.inspect',
@@ -372,8 +507,67 @@ export class DungeonPageComponent {
   chooseEventAction(actionId: string, payload?: unknown): void {
     const room = this.currentRoom();
     if (!room || room.type !== 'Event') return;
+    if (this.boonChoices().length) return;
+    if (this.eventChoices().length) return;
 
     this.dungeonState.chooseEventAction(actionId, payload);
+  }
+
+  chooseRoute(routeOptionId: string): void {
+    if (!routeOptionId || this.loading()) return;
+    if (this.boonChoices().length) return;
+
+    this.dungeonState.chooseRoute(routeOptionId);
+  }
+
+  chooseBoon(boonId: string): void {
+    if (!boonId || this.loading()) return;
+
+    this.dungeonState.chooseBoon(boonId);
+  }
+
+  showBoonTooltip(boonId: string): void {
+    this.hoveredBoonId = boonId;
+  }
+
+  hideBoonTooltip(boonId: string): void {
+    if (this.hoveredBoonId === boonId) {
+      this.hoveredBoonId = null;
+    }
+  }
+
+  isBoonTooltipOpen(boonId: string): boolean {
+    return this.hoveredBoonId === boonId;
+  }
+
+  chooseEventChoice(choiceId: string): void {
+    const room = this.currentRoom();
+    if (
+      !choiceId ||
+      !room ||
+      room.type !== 'Event' ||
+      this.loading() ||
+      this.boonChoices().length ||
+      this.routeOptions().length
+    )
+      return;
+
+    this.dungeonState.chooseEventChoice(choiceId);
+  }
+
+  chooseCheckpointChoice(choiceId: string): void {
+    const room = this.currentRoom();
+    if (
+      !choiceId ||
+      !room ||
+      room.type !== 'Checkpoint' ||
+      this.loading() ||
+      this.boonChoices().length ||
+      this.routeOptions().length
+    )
+      return;
+
+    this.dungeonState.chooseCheckpoint(choiceId);
   }
 
   leaveDungeon(): void {
@@ -411,6 +605,32 @@ export class DungeonPageComponent {
       .replace(/:/g, ' ')
       .replace(/-/g, ' ')
       .replace(/\b\w/g, (char) => char.toUpperCase());
+  }
+
+  formatBoonName(value: string | null | undefined): string {
+    return this.formatEncounterName(value);
+  }
+
+  formatPressureDelta(value: number | null | undefined): string {
+    const delta = value ?? 0;
+    if (delta > 0) return `+${delta}`;
+    return `${delta}`;
+  }
+
+  formatRewardMultiplierDelta(value: number | null | undefined): string {
+    const delta = value ?? 0;
+    if (delta > 0) return `+${delta}%`;
+    if (delta < 0) return `${delta}%`;
+    return '0%';
+  }
+
+  formatBossModifierAmount(
+    amount: number | null | undefined,
+    modifierType: string | null | undefined,
+  ): string {
+    const value = amount ?? 0;
+    const prefix = value > 0 ? '+' : '';
+    return modifierType === 'Flat' ? `${prefix}${value}` : `${prefix}${value}%`;
   }
 
   refresh(): void {

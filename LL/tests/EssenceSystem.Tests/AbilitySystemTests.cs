@@ -1808,6 +1808,75 @@ public sealed class AbilitySystemTests
         Assert.Single(result.EventLog, x => x.Source == "Add Effect Strike" && x.EventType == EventType.AbilityUse);
     }
 
+    [Fact]
+    public async Task Combat_engine_executor_applies_temporary_ability_modifiers()
+    {
+        var ability = new AbilitySpec
+        {
+            Id = "ability.test.temporary_modifier_strike",
+            Kind = AbilitySpecKind.Active,
+            Name = "Temporary Modifier Strike",
+            OwningEssenceId = "essence.test.temporary_modifier",
+            CooldownTicks = 999,
+            Triggers =
+            [
+                new()
+                {
+                    Event = AbilityTriggerEvent.OnAbilityUsed,
+                    EffectIds = ["effect.damage.main"]
+                }
+            ],
+            Effects =
+            [
+                new()
+                {
+                    Id = "effect.damage.main",
+                    Operation = AbilityEffectOperation.Damage,
+                    Target = AbilityTargetSelector.CurrentTarget,
+                    BaseValue = 10
+                }
+            ]
+        };
+        var catalog = AbilityCatalogValidator.CreateCatalog(
+            [ability],
+            [],
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                [ability.Id] = "essence.test.temporary_modifier"
+            });
+        var provider = new FakeAbilityCatalogProvider(catalog);
+        var friendlyCharacter = CreateSourceCharacter("Temporary Modifier Friendly");
+        var hostileCharacter = CreateSourceCharacter("Temporary Modifier Hostile");
+        var friendlyCombatant = CreateCombatEntity("friendly-slot", friendlyCharacter, "essence.test.temporary_modifier");
+        friendlyCombatant.TemporaryAbilityModifiers.Add(new EssenceAbilityModifierDefinition
+        {
+            Target = "effect.damage.main",
+            Operation = "AddMultiplier",
+            Value = 0.5
+        });
+        var hostileCombatant = CreateCombatEntity("hostile-slot", hostileCharacter);
+        var plan = new CombatEncounterPlan(
+            Guid.NewGuid(),
+            CombatMode.Idle,
+            1,
+            DateTimeOffset.UtcNow,
+            [
+                new CombatParticipantSlot("friendly-slot", friendlyCharacter.Id, CombatSide.Friendly),
+                new CombatParticipantSlot("hostile-slot", hostileCharacter.Id, CombatSide.Hostile)
+            ],
+            new IdleEncounterSourceContext(friendlyCharacter.Id, new Area(), TimeSpan.FromSeconds(1)));
+        var runtime = new CombatEncounterRuntime(
+            plan,
+            [new CombatRuntimeParticipant(plan.FriendlyParticipants.Single(), friendlyCharacter, friendlyCombatant)],
+            [new CombatRuntimeParticipant(plan.HostileParticipants.Single(), hostileCharacter, hostileCombatant)]);
+        var executor = new CombatEngineExecutor(provider);
+
+        var result = await executor.ExecuteAsync(runtime, CancellationToken.None);
+
+        Assert.Contains(result.EventLog, x => x.Source == "effect.damage.main" && x.EventType == EventType.Damage && x.Magnitude == 15);
+        Assert.Single(result.EventLog, x => x.Source == "Temporary Modifier Strike" && x.EventType == EventType.AbilityUse);
+    }
+
     [Theory]
     [InlineData(CombatMode.Idle)]
     [InlineData(CombatMode.Dungeon)]

@@ -5,6 +5,7 @@ import {
   Input,
   OnInit,
   Output,
+  signal,
 } from '@angular/core';
 import { CombatAvatarComponent } from './combat-avatar/combat-avatar.component';
 import { CombatOverviewComponent } from './combat-overview/combat-overview.component';
@@ -48,7 +49,17 @@ export class CombatComponent implements OnInit {
   combatEvents: CombatEvent[] = [];
   entityStats: EntityStats[] = [];
   private lastEventsLength = 0;
-  @Input() battleType: BattleType = BattleType.IdleCombat;
+  private readonly battleTypeSignal = signal<BattleType>(BattleType.IdleCombat);
+
+  @Input()
+  set battleType(value: BattleType) {
+    this.battleTypeSignal.set(value ?? BattleType.IdleCombat);
+  }
+
+  get battleType(): BattleType {
+    return this.battleTypeSignal();
+  }
+
   @Output() skipBattle = new EventEmitter<void>();
 
   isStoppingCombat = false;
@@ -83,32 +94,40 @@ export class CombatComponent implements OnInit {
     });
 
     effect(() => {
-      this.displayCombat = isCombatActiveSig();
+      const type = this.battleTypeSignal();
+      this.displayCombat =
+        type === BattleType.IdleCombat
+          ? isCombatActiveSig()
+          : this.combatStateService.getIsCombatActive(type)();
     });
 
     effect(() => {
+      const type = this.battleTypeSignal();
       const players = this.combatStateService.getPlayerCharacters(
-        this.battleType,
+        type,
       )();
       if (players) this.playerCharacters = players;
     });
 
     effect(() => {
+      const type = this.battleTypeSignal();
       const enemies = this.combatStateService.getEnemyCharacters(
-        this.battleType,
+        type,
       )();
       if (enemies) this.enemyCharacters = enemies;
     });
 
     effect(() => {
-      const stats = this.combatStateService.getEntityStats(this.battleType)();
+      const type = this.battleTypeSignal();
+      const stats = this.combatStateService.getEntityStats(type)();
       if (stats) this.entityStats = stats;
     });
 
     /** Handle combat event stream */
     effect(() => {
+      const type = this.battleTypeSignal();
       const allEvents = this.combatStateService.getCombatEvents(
-        this.battleType,
+        type,
       )();
       const previousLength = this.lastEventsLength;
       const newEvents = allEvents.slice(previousLength);
@@ -119,14 +138,16 @@ export class CombatComponent implements OnInit {
 
     /** Handle next combat tick */
     effect(() => {
-      const time = this.combatStateService.getNextCombat(this.battleType)();
+      const type = this.battleTypeSignal();
+      const time = this.combatStateService.getNextCombat(type)();
       if (time) this.nextCombatIn = time;
       else this.nextCombatIn = this.currentAction()?.updatedAt ?? new Date();
     });
 
     /** Handle combat result */
     effect(() => {
-      const result = this.combatStateService.getCombatResult(this.battleType)();
+      const type = this.battleTypeSignal();
+      const result = this.combatStateService.getCombatResult(type)();
       if (result) {
         this.displayCombat = true;
         this.setupCombat();
@@ -137,8 +158,9 @@ export class CombatComponent implements OnInit {
 
     /** Handle outcome to optionally trigger auto-exit */
     effect(() => {
+      const type = this.battleTypeSignal();
       const outcome = this.combatStateService.getCombatOutcome(
-        this.battleType,
+        type,
       )();
 
       this.outcome = outcome;

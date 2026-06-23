@@ -1,0 +1,226 @@
+{
+  "routes": [
+    {
+      "id": "goblin_mines_combat_ventilation_shaft",
+      "dungeonDefinitionIds": [ "goblin_mines" ],
+      "roomType": "Combat",
+      "displayName": "Ventilation Shaft",
+      "riskLevel": 1,
+      "pressureDelta": 3,
+      "tags": [ "combat", "mine", "safe" ],
+      "possibleRewards": [ "Lower alarm" ]
+    },
+    {
+      "id": "goblin_mines_combat_minecart_track",
+      "dungeonDefinitionIds": [ "goblin_mines" ],
+      "roomType": "Combat",
+      "displayName": "Minecart Track",
+      "riskLevel": 2,
+      "pressureDelta": 7,
+      "tags": [ "combat", "goblin", "loot" ],
+      "possibleRewards": [ "Ore cache", "Cinders" ]
+    },
+    {
+      "id": "goblin_mines_combat_guarded_powder_tunnel",
+      "dungeonDefinitionIds": [ "goblin_mines" ],
+      "roomType": "Combat",
+      "displayName": "Guarded Powder Tunnel",
+      "riskLevel": 3,
+      "pressureDelta": 12,
+      "tags": [ "combat", "danger", "explosives" ],
+      "possibleRewards": [ "Better rewards", "Explosive cache" ]
+    },
+    {
+      "id": "goblin_mines_event_blasted_store_room",
+      "dungeonDefinitionIds": [ "goblin_mines" ],
+      "roomType": "Event",
+      "displayName": "Blasted Store Room",
+      "riskLevel": 2,
+      "pressureDelta": 6,
+      "tags": [ "event", "explosives", "loot" ],
+      "possibleRewards": [ "Explosives", "Hidden route" ]
+    },
+    {
+      "id": "goblin_mines_event_miner_barricade",
+      "dungeonDefinitionIds": [ "goblin_mines" ],
+      "roomType": "Event",
+      "displayName": "Miner Barricade",
+      "riskLevel": 2,
+      "pressureDelta": 4,
+      "tags": [ "event", "miner", "boon" ],
+      "possibleRewards": [ "Miner aid", "Boon chance" ]
+    },
+    {
+      "id": "goblin_mines_event_unstable_supports",
+      "dungeonDefinitionIds": [ "goblin_mines" ],
+      "roomType": "Event",
+      "displayName": "Unstable Supports",
+      "riskLevel": 3,
+      "pressureDelta": 10,
+      "tags": [ "event", "mystery", "shortcut" ],
+      "possibleRewards": [ "Collapsed tunnel", "Safer boss" ],
+      "isUnknown": true
+    },
+    {
+      "id": "goblin_mines_miniboss_sapper_post",
+      "dungeonDefinitionIds": [ "goblin_mines" ],
+      "roomType": "MiniBoss",
+      "displayName": "Sapper Post",
+      "riskLevel": 3,
+      "pressureDelta": 10,
+      "tags": [ "elite", "explosives" ],
+      "possibleRewards": [ "Boon chance", "Explosive cache" ]
+    },
+    {
+      "id": "goblin_mines_miniboss_overseer_bridge",
+      "dungeonDefinitionIds": [ "goblin_mines" ],
+      "roomType": "MiniBoss",
+      "displayName": "Overseer Bridge",
+      "riskLevel": 3,
+      "pressureDelta": 12,
+      "tags": [ "elite", "goblin", "loot" ],
+      "possibleRewards": [ "Unsecured loot" ]
+    },
+    {
+      "id": "goblin_mines_miniboss_reckless_charge",
+      "dungeonDefinitionIds": [ "goblin_mines" ],
+      "roomType": "MiniBoss",
+      "displayName": "Reckless Charge",
+      "riskLevel": 4,
+      "pressureDelta": 16,
+      "tags": [ "elite", "greedy", "danger" ],
+      "possibleRewards": [ "Improved rewards" ]
+    },
+    {
+      "id": "goblin_mines_checkpoint_lantern_niche",
+      "dungeonDefinitionIds": [ "goblin_mines" ],
+      "roomType": "Checkpoint",
+      "displayName": "Lantern Niche",
+      "riskLevel": 1,
+      "pressureDelta": 0,
+      "tags": [ "checkpoint", "safe", "mine" ],
+      "possibleRewards": []
+    },
+    {
+      "id": "goblin_mines_checkpoint_noisy_lift",
+      "dungeonDefinitionIds": [ "goblin_mines" ],
+      "roomType": "Checkpoint",
+      "displayName": "Noisy Lift",
+      "riskLevel": 2,
+      "pressureDelta": 5,
+      "tags": [ "checkpoint", "alarm" ],
+      "possibleRewards": [ "Focus opportunity" ]
+    },
+    {
+      "id": "catacombs_combat_ossuary_passage",
+      "dungeonDefinitionIds": [ "forgotten_catacombs" ],
+      "roomType": "Combat",
+      "displayName": "Ossuary Passage",
+      "riskLevel": 1,
+      "pressureDelta": 4,
+      "tags": [ "combat", "undead", "safe" ],
+      "possibleRewards": [ "Lower curse" ]
+    },
+    {
+      "id": "catacombs_combat_candlelit_aisle",
+      "dungeonDefinitionIds": [ "forgotten_catacombs" ],
+      "roomType": "Combat",
+      "displayName": "Candlelit Aisle",
+      "riskLevel": 2,
+      "pressureDelta": 8,
+      "tags": [ "combat", "reliquary", "loot" ],
+      "possibleRewards": [ "Reliquary fragments", "Cinders" ]
+    },
+    {
+      "id": "catacombs_combat_grave_sluice",
+      "dungeonDefinitionIds": [ "forgotten_catacombs" ],
+      "roomType": "Combat",
+      "displayName": "Grave Sluice",
+      "riskLevel": 3,
+      "pressureDelta": 12,
+      "tags": [ "combat", "curse", "danger" ],
+      "possibleRewards": [ "Better rewards" ]
+    },
+    {
+      "id": "catacombs_event_bound_spirit_nave",
+      "dungeonDefinitionIds": [ "forgotten_catacombs" ],
+      "roomType": "Event",
+      "displayName": "Bound Spirit Nave",
+      "riskLevel": 2,
+      "pressureDelta": 6,
+      "tags": [ "event", "spirit", "boon" ],
+      "possibleRewards": [ "Cleanse tomb", "Boon chance" ]
+    },
+    {
+      "id": "catacombs_event_sealed_reliquary_path",
+      "dungeonDefinitionIds": [ "forgotten_catacombs" ],
+      "roomType": "Event",
+      "displayName": "Sealed Reliquary Path",
+      "riskLevel": 2,
+      "pressureDelta": 7,
+      "tags": [ "event", "reliquary", "loot" ],
+      "possibleRewards": [ "Relic loot", "Boss weakness" ]
+    },
+    {
+      "id": "catacombs_event_whispering_crypt",
+      "dungeonDefinitionIds": [ "forgotten_catacombs" ],
+      "roomType": "Event",
+      "displayName": "Whispering Crypt",
+      "riskLevel": 3,
+      "pressureDelta": 11,
+      "tags": [ "event", "mystery", "curse" ],
+      "possibleRewards": [ "Hidden choice", "Stronger loot" ],
+      "isUnknown": true
+    },
+    {
+      "id": "catacombs_miniboss_bone_watcher",
+      "dungeonDefinitionIds": [ "forgotten_catacombs" ],
+      "roomType": "MiniBoss",
+      "displayName": "Bone Watcher",
+      "riskLevel": 3,
+      "pressureDelta": 10,
+      "tags": [ "elite", "undead" ],
+      "possibleRewards": [ "Boon chance" ]
+    },
+    {
+      "id": "catacombs_miniboss_reliquary_guard",
+      "dungeonDefinitionIds": [ "forgotten_catacombs" ],
+      "roomType": "MiniBoss",
+      "displayName": "Reliquary Guard",
+      "riskLevel": 3,
+      "pressureDelta": 12,
+      "tags": [ "elite", "reliquary", "loot" ],
+      "possibleRewards": [ "Unsecured loot" ]
+    },
+    {
+      "id": "catacombs_miniboss_cursed_procession",
+      "dungeonDefinitionIds": [ "forgotten_catacombs" ],
+      "roomType": "MiniBoss",
+      "displayName": "Cursed Procession",
+      "riskLevel": 4,
+      "pressureDelta": 16,
+      "tags": [ "elite", "curse", "greedy" ],
+      "possibleRewards": [ "Improved rewards" ]
+    },
+    {
+      "id": "catacombs_checkpoint_silent_altar",
+      "dungeonDefinitionIds": [ "forgotten_catacombs" ],
+      "roomType": "Checkpoint",
+      "displayName": "Silent Altar",
+      "riskLevel": 1,
+      "pressureDelta": 0,
+      "tags": [ "checkpoint", "safe", "altar" ],
+      "possibleRewards": []
+    },
+    {
+      "id": "catacombs_checkpoint_cracked_sarcophagus",
+      "dungeonDefinitionIds": [ "forgotten_catacombs" ],
+      "roomType": "Checkpoint",
+      "displayName": "Cracked Sarcophagus",
+      "riskLevel": 2,
+      "pressureDelta": 5,
+      "tags": [ "checkpoint", "curse" ],
+      "possibleRewards": [ "Focus opportunity" ]
+    }
+  ]
+}

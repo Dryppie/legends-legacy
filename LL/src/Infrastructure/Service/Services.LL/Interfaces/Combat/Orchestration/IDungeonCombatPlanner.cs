@@ -1,3 +1,5 @@
+using Domain.Models.Attributes.Modifiers;
+using Domain.Models.Essences.Definitions;
 using Domain.Models.Snapshots;
 using Services.LL.Combat.Layers.Orchestration.Models;
 
@@ -10,7 +12,10 @@ public interface IDungeonCombatPlanner
         Guid characterId,
         CharacterSnapshot characterSnapshot,
         IReadOnlyList<Guid> playerEntityIds,
-        IReadOnlyList<Guid> enemySourceEntityIds);
+        IReadOnlyList<Guid> enemySourceEntityIds,
+        IReadOnlyList<AttributeModifierBase>? runAttributeModifiers = null,
+        IReadOnlyList<EssenceAbilityModifierDefinition>? runAbilityModifiers = null,
+        IReadOnlyList<AttributeModifierBase>? enemyAttributeModifiers = null);
 
     CombatEncounterPlan CreateEncounterPlan(
         DungeonCombatPlan plan,

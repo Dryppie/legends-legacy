@@ -79,24 +79,22 @@ export class CombatService {
     const combatAction = combatResult;
     this.combatStateService.setPlayerCharacters(type, combatResult.playerTeam);
     this.combatStateService.setEnemyCharacters(type, combatResult.enemyTeam);
-
-    if (combatAction.eventLog.length < 1) {
-      return;
-    }
+    this.combatStateService.setCombatResult(type, combatAction);
+    this.combatStateService.setEntityStats(type, combatAction.entityStats);
 
     const combatStartTime = new Date(combatAction.startedAt).getTime();
     const now = Date.now();
 
-    this.playback.play(combatResult).subscribe({
-      next: (ev) => this.combatStateService.addCombatEvent(type, ev),
-    });
-
-    this.combatStateService.setCombatResult(type, combatAction);
-    this.combatStateService.setEntityStats(type, combatAction.entityStats);
+    if (combatAction.eventLog.length > 0) {
+      this.playback.play(combatResult).subscribe({
+        next: (ev) => this.combatStateService.addCombatEvent(type, ev),
+      });
+    }
 
     const combatDurationMs = combatAction.duration * 100;
     const remainingDuration =
       combatStartTime + 10000 /* combatDurationMs + 3000 */ - now;
+    const minimumDisplayMs = type === BattleType.IdleCombat ? 0 : 3000;
 
     const onComplete = (finalResult: CombatResultDto) => {
       // Defensive: skip execution if combat was deactivated
@@ -107,12 +105,12 @@ export class CombatService {
     };
 
     const complete$ = of(combatAction).pipe(
-      delay(Math.max(0, remainingDuration)), // ensure no negative delay
+      delay(Math.max(minimumDisplayMs, remainingDuration)),
     );
 
     const sub = complete$.subscribe(onComplete);
 
-    if (type === BattleType.Colosseum) {
+    if (type === BattleType.Colosseum || type === BattleType.Dungeon) {
       this.combatEndSubscriptions.get(type)?.unsubscribe();
       this.combatEndSubscriptions.set(type, sub);
     }

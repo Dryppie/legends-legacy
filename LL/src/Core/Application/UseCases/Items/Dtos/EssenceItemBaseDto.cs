@@ -30,9 +30,12 @@ public sealed class EssenceItemBaseConverter : ITypeConverter<EssenceItemBase, E
 
     public EssenceItemBaseDto Convert(EssenceItemBase source, EssenceItemBaseDto destination, ResolutionContext context)
     {
-        var essence = string.IsNullOrWhiteSpace(source.EssenceDefinitionId)
+        var essenceDefinitionId = string.IsNullOrWhiteSpace(source.EssenceDefinitionId)
+            ? InferDefinitionIdFromItemBaseId(source.Id)
+            : source.EssenceDefinitionId;
+        var essence = string.IsNullOrWhiteSpace(essenceDefinitionId)
             ? null
-            : _definitions.GetById(source.EssenceDefinitionId);
+            : _definitions.GetById(essenceDefinitionId);
 
         return new EssenceItemBaseDto
         {
@@ -43,9 +46,17 @@ public sealed class EssenceItemBaseConverter : ITypeConverter<EssenceItemBase, E
             IsBound = source.IsBound,
             ItemType = source.ItemType,
             Rarity = source.Rarity,
-            EssenceDefinitionId = source.EssenceDefinitionId,
+            EssenceDefinitionId = essenceDefinitionId,
             DismantleDustAmount = source.DismantleDustAmount,
             Essence = essence is null ? null : context.Mapper.Map<EssenceDefinitionDto>(essence)
         };
+    }
+
+    private static string InferDefinitionIdFromItemBaseId(string itemBaseId)
+    {
+        const string itemPrefix = "item.";
+        return itemBaseId.StartsWith(itemPrefix, StringComparison.OrdinalIgnoreCase)
+            ? itemBaseId[itemPrefix.Length..]
+            : string.Empty;
     }
 }

@@ -81,8 +81,9 @@ export interface EssenceItem extends ItemBase {
 }
 
 export function essenceItemToEssence(item: EssenceItem): Essence {
+  const essenceDefinitionId = inferEssenceDefinitionId(item);
   return {
-    id: item.essenceDefinitionId || item.id,
+    id: essenceDefinitionId,
     name: item.name,
     active: {
       name: 'Unbound Essence',
@@ -106,4 +107,8 @@ export function essenceItemToEssence(item: EssenceItem): Essence {
     },
     attributeModifiers: [],
   };
+}
+
+export function inferEssenceDefinitionId(item: EssenceItem): string {
+  return item.essenceDefinitionId || item.id.replace(/^item\./i, '');
 }

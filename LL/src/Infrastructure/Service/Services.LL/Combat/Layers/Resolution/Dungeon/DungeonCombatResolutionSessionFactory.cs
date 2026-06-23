@@ -64,8 +64,17 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
                 $"Failed to preload idle combat source entities. Missing: {string.Join(", ", missingIds)}");
         }
 
-        var friendlyTemplates = BuildFriendlyTemplates(playerIds, sourceEntitiesById, plan.CharacterSnapshot);
-        var hostileTemplates = BuildHostileTemplates(hostileIds, sourceEntitiesById, new Area() { DifficultyTier = 1 });
+        var friendlyTemplates = BuildFriendlyTemplates(
+            playerIds,
+            sourceEntitiesById,
+            plan.CharacterSnapshot,
+            plan.RunAttributeModifiers,
+            plan.RunAbilityModifiers);
+        var hostileTemplates = BuildHostileTemplates(
+            hostileIds,
+            sourceEntitiesById,
+            new Area() { DifficultyTier = 1 },
+            plan.EnemyAttributeModifiers);
 
         await _combatSetupService.PrepareEntitiesForCombat(
             [.. friendlyTemplates.Values, .. hostileTemplates.Values]);
@@ -84,7 +93,9 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
     private Dictionary<Guid, CombatEntity> BuildFriendlyTemplates(
         IReadOnlyCollection<Guid> playerIds,
         Dictionary<Guid, Entity> sourceEntitiesById,
-        CharacterSnapshot snapshot)
+        CharacterSnapshot snapshot,
+        IReadOnlyList<Domain.Models.Attributes.Modifiers.AttributeModifierBase> runAttributeModifiers,
+        IReadOnlyList<Domain.Models.Essences.Definitions.EssenceAbilityModifierDefinition> runAbilityModifiers)
     {
         var templates = new Dictionary<Guid, CombatEntity>();
 
@@ -106,6 +117,22 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
                 .ToList();
             template.HasEquippedEssenceSnapshot = true;
 
+            foreach (var modifier in runAttributeModifiers)
+            {
+                if (template.BaseAttributes.All(x => x.AttributeType != modifier.AttributeType))
+                {
+                    template.BaseAttributes.Add(new Domain.Models.Attributes.EntityAttribute
+                    {
+                        AttributeType = modifier.AttributeType,
+                        Value = 0
+                    });
+                }
+
+                template.TemporaryModifiers.Add(modifier);
+            }
+
+            template.TemporaryAbilityModifiers.AddRange(runAbilityModifiers);
+
             templates.Add(playerId, template);
         }
 
@@ -115,7 +142,8 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
     private Dictionary<Guid, CombatEntity> BuildHostileTemplates(
         IReadOnlyCollection<Guid> hostileIds,
         Dictionary<Guid, Entity> sourceEntitiesById,
-        Area area)
+        Area area,
+        IReadOnlyList<Domain.Models.Attributes.Modifiers.AttributeModifierBase> enemyAttributeModifiers)
     {
         var templates = new Dictionary<Guid, CombatEntity>();
 
@@ -130,6 +158,20 @@ public sealed class DungeonCombatResolutionSessionFactory : IDungeonCombatResolu
             var template = _combatSetupService
                 .CreateCreatureCombatEntities([creature], area)
                 .Single();
+
+            foreach (var modifier in enemyAttributeModifiers)
+            {
+                if (template.BaseAttributes.All(x => x.AttributeType != modifier.AttributeType))
+                {
+                    template.BaseAttributes.Add(new Domain.Models.Attributes.EntityAttribute
+                    {
+                        AttributeType = modifier.AttributeType,
+                        Value = 0
+                    });
+                }
+
+                template.TemporaryModifiers.Add(modifier);
+            }
 
             templates.Add(hostileId, template);
         }
