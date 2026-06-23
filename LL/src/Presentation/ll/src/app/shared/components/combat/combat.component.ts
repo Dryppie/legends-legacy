@@ -87,10 +87,11 @@ export class CombatComponent implements OnInit, OnDestroy {
   ) {
     this.currentAction = this.characterActionService.currentAction;
 
-    const isLoadingSig = this.characterActionService.loadingCombat;
+    const isStartingCombatSig = this.characterActionService.loadingCombat;
+    const isRefreshingActionSig = this.characterActionService.loadingActionRefresh;
 
     effect(() => {
-      this.isLoading = isLoadingSig();
+      this.isLoading = isStartingCombatSig() || isRefreshingActionSig();
     });
 
     const isCombatActiveSig = toSignal(this.gameService.combatActive$, {
@@ -467,7 +468,7 @@ export class CombatComponent implements OnInit, OnDestroy {
   }
 
   battleTitle(): string {
-    if (this.isLoading) return 'Loading Battle';
+    if (this.isLoading) return 'Resolving Combat';
 
     if (this.battleType === BattleType.IdleCombat) {
       const areaName = this.currentAction()?.combatActionDetails?.area?.name;
@@ -482,7 +483,7 @@ export class CombatComponent implements OnInit, OnDestroy {
 
   battleStatusLabel(): string {
     if (this.outcome) return this.outcome;
-    if (this.isLoading) return 'Loading';
+    if (this.isLoading) return 'Catching Up';
     return 'In Progress';
   }
 

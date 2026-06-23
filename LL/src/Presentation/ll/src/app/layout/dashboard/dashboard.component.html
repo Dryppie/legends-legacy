@@ -36,6 +36,21 @@
                 class="mb-2 block shrink-0 pr-4 sm:hidden"
                 (click)="navigateToAction()"
               ></app-current-action>
+              <div
+                *ngIf="isResolvingAction"
+                class="ll-panel mb-2 flex shrink-0 items-center gap-3 px-4 py-3 pr-4 text-sm text-white sm:mr-4"
+              >
+                <span
+                  class="h-3 w-3 shrink-0 animate-pulse rounded-full bg-primary"
+                  aria-hidden="true"
+                ></span>
+                <div class="min-w-0">
+                  <p class="font-bold">Catching up offline progress</p>
+                  <p class="ll-copy text-xs">
+                    Resolving stored actions and rewards.
+                  </p>
+                </div>
+              </div>
               <div class="min-h-0 flex-1 overflow-hidden">
                 <ng-container *ngIf="combatVisible$ | async; else mainView">
                   <app-combat></app-combat>

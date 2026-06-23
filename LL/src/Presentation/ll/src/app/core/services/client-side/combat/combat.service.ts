@@ -61,13 +61,14 @@ export class CombatService {
     const combatResult = characterAction.combatSession?.combatResult;
     if (!combatResult) return;
     combatResult.battleType = BattleType.IdleCombat;
-    this.combatStateService.resetCombatStateForNextBattle(
-      combatResult.battleType,
-    );
 
     this.combatStateService.setNextCombatIn(
       combatResult.battleType,
       characterAction.updatedAt,
+    );
+
+    this.combatStateService.resetCombatStateForNextBattle(
+      combatResult.battleType,
     );
 
     this.combatStateService.setCombatActive(combatResult.battleType, true);
@@ -187,6 +188,11 @@ export class CombatService {
     }
 
     this.combatStateService.setCombatActive(type, false);
+
+    if (type === BattleType.IdleCombat) {
+      return;
+    }
+
     this.stop(type);
   }
 

@@ -161,12 +161,8 @@ export class CombatStateService {
   resetCombatStateForNextBattle(type: BattleType) {
     this.lastEventsLength[type] = 0;
     this.patchState(type, {
-      playerCharacters: [],
-      enemyCharacters: [],
       combatEvents: [],
-      combatResult: null,
       combatOutcome: null,
-      entityStats: [],
     });
   }
 

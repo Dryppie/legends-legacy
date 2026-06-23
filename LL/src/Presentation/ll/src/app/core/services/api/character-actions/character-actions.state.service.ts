@@ -10,12 +10,10 @@ import { CraftingActionHandler } from './handlers/crafting-action-handler';
 import { CharacterActionsPollingService } from './helpers/characterActionsPollingService';
 import {
   catchError,
-  of,
+  finalize,
   Observable,
+  of,
   tap,
-  interval,
-  map,
-  startWith,
 } from 'rxjs';
 import { CharacterActionsService } from './character-actions.service';
 import { CharacterActionTypePersistenceService } from './helpers/character-action-type-persistence.service';
@@ -32,6 +30,12 @@ export class CharacterActionsStateService {
 
   private readonly _loadingCombat = signal(false);
   readonly loadingCombat = computed(() => this._loadingCombat());
+
+  private readonly _loadingActionRefresh = signal(false);
+  readonly loadingActionRefresh = computed(() => this._loadingActionRefresh());
+  private activeActionRefreshes = 0;
+  private actionRefreshLoadingTimeout: ReturnType<typeof setTimeout> | null =
+    null;
 
   private readonly _startTime = signal<number | null>(null);
   private readonly _tickingDuration = signal<number>(0);
@@ -110,11 +114,13 @@ export class CharacterActionsStateService {
     this._startTime.set(Date.now());
     this.polling.start(
       () =>
-        this.actionsService.getCurrentAction().pipe(
-          catchError((err) => {
-            console.error('[Polling] Failed to fetch current action', err);
-            return of(null);
-          }),
+        this.trackActionRefresh(
+          this.actionsService.getCurrentAction().pipe(
+            catchError((err) => {
+              console.error('[Polling] Failed to fetch current action', err);
+              return of(null);
+            }),
+          ),
         ),
       (action) => {
         this.applyActionUpdate(action);
@@ -288,5 +294,50 @@ export class CharacterActionsStateService {
     return [action.characterActionType, action.updatedAt, action.isDeleted].join(
       '|',
     );
+  }
+
+  private trackActionRefresh(
+    request$: Observable<CharacterActionDto | null>,
+  ): Observable<CharacterActionDto | null> {
+    this.activeActionRefreshes += 1;
+
+    if (!this.actionRefreshLoadingTimeout) {
+      this.actionRefreshLoadingTimeout = setTimeout(() => {
+        if (this.activeActionRefreshes > 0 && this.shouldShowActionRefreshLoading()) {
+          this._loadingActionRefresh.set(true);
+        }
+      }, 250);
+    }
+
+    return request$.pipe(
+      finalize(() => {
+        this.activeActionRefreshes = Math.max(0, this.activeActionRefreshes - 1);
+
+        if (this.activeActionRefreshes > 0) {
+          return;
+        }
+
+        if (this.actionRefreshLoadingTimeout) {
+          clearTimeout(this.actionRefreshLoadingTimeout);
+          this.actionRefreshLoadingTimeout = null;
+        }
+
+        this._loadingActionRefresh.set(false);
+      }),
+    );
+  }
+
+  private shouldShowActionRefreshLoading(): boolean {
+    const action = this._currentAction();
+
+    if (!action) {
+      return true;
+    }
+
+    if (action.characterActionType !== CharacterActionType.Combat) {
+      return true;
+    }
+
+    return !action.combatSession?.combatResult;
   }
 }

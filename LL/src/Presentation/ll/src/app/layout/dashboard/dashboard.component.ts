@@ -37,6 +37,7 @@ export class DashboardComponent implements OnInit {
   isChatOpenDesktop = true; // open by default on ≥ lg
   isFloatingChatOpen = false;
   displayCurrentAction = false;
+  isResolvingAction = false;
   combatVisible$!: Observable<boolean>;
 
   constructor(
@@ -46,6 +47,10 @@ export class DashboardComponent implements OnInit {
   ) {
     effect(() => {
       this.displayCurrentAction = this.state.displayCurrentAction();
+    });
+
+    effect(() => {
+      this.isResolvingAction = this.state.loadingActionRefresh();
     });
   }
 
