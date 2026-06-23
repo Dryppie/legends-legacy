@@ -181,6 +181,8 @@ export class DungeonStateService {
   }
 
   claimDungeonRewards(onSuccess?: () => void): void {
+    if (this._loading()) return;
+
     this._loading.set(true);
     this._error.set(null);
 
