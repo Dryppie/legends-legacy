@@ -1,12 +1,15 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { forkJoin, Observable, tap } from 'rxjs';
+import { EMPTY, forkJoin, Observable, catchError, tap } from 'rxjs';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { EssencesService } from './essences.service';
 import { EssenceItemViewService } from './essence-item-view.service';
 import { Essence } from '../../../../shared/models/essence';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { InventoryItem } from '../../../../shared/models/inventoryItem';
-import { EssenceItem } from '../../../../shared/models/item';
+import {
+  EssenceItem,
+  inferEssenceDefinitionId,
+} from '../../../../shared/models/item';
 import {
   EssenceLoadoutDto,
   EssenceLoadoutsDto,
@@ -203,14 +206,22 @@ export class EssenceStateService {
       return null;
     }
 
+    this._error.set(null);
     return this.essencesService.absorb(inventoryItemId).pipe(
       tap((response) => {
-        if (!response.succeeded) return;
+        if (!response.succeeded) {
+          this._error.set(response.message || 'Failed to absorb essence');
+          return;
+        }
 
         this.applyEssenceMutation(response);
         this._selectedInventoryItemId.set(
           this.getFirstAbsorbableInventoryEssenceId(),
         );
+      }),
+      catchError((error) => {
+        this._error.set(error?.message ?? 'Failed to absorb essence');
+        return EMPTY;
       }),
     );
   }
@@ -219,12 +230,20 @@ export class EssenceStateService {
     const item = this.selectedInventoryItem();
     if (!item) return null;
 
+    this._error.set(null);
     return this.essencesService.dismantle(item.itemInstance.id).pipe(
       tap((response) => {
-        if (!response.succeeded) return;
+        if (!response.succeeded) {
+          this._error.set(response.message || 'Failed to shatter essence');
+          return;
+        }
 
         this.applyEssenceMutation(response);
         this._selectedInventoryItemId.set(null);
+      }),
+      catchError((error) => {
+        this._error.set(error?.message ?? 'Failed to shatter essence');
+        return EMPTY;
       }),
     );
   }
@@ -348,8 +367,9 @@ export class EssenceStateService {
   }
 
   private getEssenceDefinitionId(inventoryItem: InventoryItem): string {
-    return (inventoryItem.itemInstance.itemBase as EssenceItem)
-      .essenceDefinitionId;
+    return inferEssenceDefinitionId(
+      inventoryItem.itemInstance.itemBase as EssenceItem,
+    );
   }
 
   private getFirstAbsorbableInventoryEssenceId(): string | null {
