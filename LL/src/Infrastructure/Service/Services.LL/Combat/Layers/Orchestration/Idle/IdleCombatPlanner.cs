@@ -17,11 +17,11 @@ public sealed class IdleCombatPlanner : IIdleCombatPlanner
 
     public IdleCombatPlan CreatePlan(IdleCombatOrchestrationRequest request)
     {
-        var from = request.LastProcessedAt;
+        var from = request.NextEncounterAt;
         var to = request.Now;
         var action = request.ActionDetails;
 
-        if (from >= to)
+        if (from > to)
         {
             return new IdleCombatPlan(
                 CharacterId: request.CharacterId,
@@ -35,7 +35,7 @@ public sealed class IdleCombatPlanner : IIdleCombatPlanner
         }
 
         var elapsed = to - from;
-        var plannedEncounterCount = Math.Max(1, (int)(elapsed.Ticks / EncounterCadence.Ticks));
+        var plannedEncounterCount = 1 + (int)(elapsed.Ticks / EncounterCadence.Ticks);
         var executableUntil = from.AddTicks(plannedEncounterCount * EncounterCadence.Ticks);
 
         return new IdleCombatPlan(

@@ -9,7 +9,7 @@ public sealed record IdleCombatOrchestrationRequest(
     : CombatOrchestrationRequest(CombatMode.Idle)
 {
     public Guid CharacterId => CharacterAction.CharacterId;
-    public DateTimeOffset LastProcessedAt => CharacterAction.UpdatedAt;
+    public DateTimeOffset NextEncounterAt => CharacterAction.UpdatedAt;
 
     public CombatActionDetails ActionDetails =>
         CharacterAction.ActionDetails as CombatActionDetails
