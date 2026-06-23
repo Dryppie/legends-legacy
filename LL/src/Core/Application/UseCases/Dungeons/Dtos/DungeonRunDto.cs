@@ -100,10 +100,14 @@ public class DungeonRunDto : IMapFrom<DungeonRun>
             ActiveBoonSummaries = state.ActiveBoonSummaries.Select(boon => new DungeonActiveBoonSummaryDto
             {
                 Id = boon.Id,
+                FamilyId = boon.FamilyId,
+                FamilyName = boon.FamilyName,
                 Name = boon.Name,
                 Description = boon.Description,
                 Rarity = boon.Rarity,
+                Tier = boon.Tier,
                 Count = boon.Count,
+                MaxFamilyStacks = boon.MaxFamilyStacks,
                 EffectSummaries = boon.EffectSummaries.ToList()
             }).ToList(),
             ActiveBoonEffectSummaries = state.ActiveBoonEffectSummaries.Select(effect => new DungeonBoonEffectSummaryDto
@@ -167,9 +171,16 @@ public class DungeonRunDto : IMapFrom<DungeonRun>
             CurrentBoonChoices = state.CurrentBoonChoices.Select(choice => new DungeonBoonChoiceOptionDto
             {
                 Id = choice.Id,
+                FamilyId = choice.FamilyId,
+                FamilyName = choice.FamilyName,
                 Name = choice.Name,
                 Description = choice.Description,
                 Rarity = choice.Rarity,
+                Tier = choice.Tier,
+                CurrentStacks = choice.CurrentStacks,
+                MaxStacks = choice.MaxStacks,
+                CurrentFamilyStacks = choice.CurrentFamilyStacks,
+                MaxFamilyStacks = choice.MaxFamilyStacks,
                 EffectSummaries = choice.EffectSummaries.ToList()
             }).ToList(),
             CurrentBossModifiers = state.CurrentBossModifiers.Select(modifier => new DungeonBossModifierDto

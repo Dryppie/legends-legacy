@@ -173,21 +173,63 @@ public sealed class DungeonRogueliteStateTests
     }
 
     [Fact]
-    public void Boon_selection_adds_active_boon_once_and_clears_choices()
+    public void Unique_boon_selection_cannot_exceed_stack_limit()
     {
         var run = CreateRun();
         var service = CreateBoonService();
-        var choices = service.GenerateBoonChoices(run);
+        var choice = new DungeonBoonChoiceOption
+        {
+            Id = "hunter_focus",
+            Name = "Hunter's Focus",
+            Description = "Gain an edge against elites and bosses.",
+            Rarity = DungeonBoonRarity.Common.ToString()
+        };
 
-        Assert.NotEmpty(choices);
-        var choice = choices[0];
+        run.State.CurrentBoonChoices.Add(choice);
+        service.ChooseBoon(run, choice.Id);
+        run.State.CurrentBoonChoices.Add(choice);
+        var exception = Assert.Throws<InvalidOperationException>(() => service.ChooseBoon(run, choice.Id));
 
+        Assert.Single(run.State.ActiveBoonIds);
+        Assert.Equal("The selected boon has already reached its stack limit.", exception.Message);
+    }
+
+    [Fact]
+    public void Stackable_boon_selection_adds_multiple_stacks_until_limit()
+    {
+        var run = CreateRun();
+        var choice = new DungeonBoonChoiceOption
+        {
+            Id = "stacking_edge",
+            Name = "Stacking Edge",
+            Description = "A test boon that can stack.",
+            Rarity = DungeonBoonRarity.Common.ToString()
+        };
+        var service = new DungeonBoonService(new StaticBoonDefinitions(
+        [
+            new()
+            {
+                Id = "stacking_edge",
+                Name = "Stacking Edge",
+                Description = "A test boon that can stack.",
+                Rarity = DungeonBoonRarity.Common,
+                MaxStacks = 2,
+                AttributeModifiers =
+                [
+                    new EssenceAttributeModifier(AttributeType.Power, 5, ModifierType.Additive)
+                ]
+            }
+        ]));
+
+        run.State.CurrentBoonChoices.Add(choice);
         service.ChooseBoon(run, choice.Id);
         run.State.CurrentBoonChoices.Add(choice);
         service.ChooseBoon(run, choice.Id);
+        run.State.CurrentBoonChoices.Add(choice);
+        var exception = Assert.Throws<InvalidOperationException>(() => service.ChooseBoon(run, choice.Id));
 
-        Assert.Single(run.State.ActiveBoonIds);
-        Assert.Empty(run.State.CurrentBoonChoices);
+        Assert.Equal(2, run.State.ActiveBoonIds.Count);
+        Assert.Equal("The selected boon has already reached its stack limit.", exception.Message);
     }
 
     [Fact]
@@ -234,6 +276,94 @@ public sealed class DungeonRogueliteStateTests
     }
 
     [Fact]
+    public void Boon_generation_includes_stackable_active_boons_below_stack_limit()
+    {
+        var run = CreateRun();
+        run.State.ActiveBoonIds.Add("stacking_edge");
+        run.State.ActiveBoonIds.Add("one_time_guard");
+        var service = new DungeonBoonService(new StaticBoonDefinitions(
+        [
+            new()
+            {
+                Id = "stacking_edge",
+                Name = "Stacking Edge",
+                Description = "A test boon that can stack.",
+                Rarity = DungeonBoonRarity.Common,
+                MaxStacks = 2
+            },
+            new()
+            {
+                Id = "one_time_guard",
+                Name = "One Time Guard",
+                Description = "A test boon that cannot stack.",
+                Rarity = DungeonBoonRarity.Common
+            }
+        ]));
+
+        var choice = Assert.Single(service.GenerateBoonChoices(run, 2));
+
+        Assert.Equal("stacking_edge", choice.Id);
+    }
+
+    [Fact]
+    public void Boon_generation_respects_family_stack_limits_and_deduplicates_choice_families()
+    {
+        var run = CreateRun();
+        run.State.ActiveBoonIds.Add("focus_common");
+        var service = new DungeonBoonService(new StaticBoonDefinitions(
+        [
+            new()
+            {
+                Id = "focus_common",
+                FamilyId = "focus",
+                FamilyName = "Focus",
+                Name = "Focus",
+                Description = "Common focus.",
+                Rarity = DungeonBoonRarity.Common,
+                Tier = 1,
+                MaxStacks = 2,
+                MaxFamilyStacks = 2
+            },
+            new()
+            {
+                Id = "focus_rare",
+                FamilyId = "focus",
+                FamilyName = "Focus",
+                Name = "Focus",
+                Description = "Rare focus.",
+                Rarity = DungeonBoonRarity.Rare,
+                Tier = 3,
+                MaxStacks = 2,
+                MaxFamilyStacks = 2
+            },
+            new()
+            {
+                Id = "guard_common",
+                FamilyId = "guard",
+                FamilyName = "Guard",
+                Name = "Guard",
+                Description = "Common guard.",
+                Rarity = DungeonBoonRarity.Common,
+                Tier = 1,
+                MaxStacks = 2,
+                MaxFamilyStacks = 2
+            }
+        ]));
+
+        var choices = service.GenerateBoonChoices(run, 3);
+
+        Assert.Equal(2, choices.Count);
+        var focusChoice = Assert.Single(choices, x => x.FamilyId == "focus");
+        Assert.Single(choices, x => x.FamilyId == "guard");
+
+        run.State.CurrentBoonChoices.Clear();
+        run.State.CurrentBoonChoices.Add(focusChoice);
+        service.ChooseBoon(run, run.State.CurrentBoonChoices[0].Id);
+
+        Assert.DoesNotContain(service.GenerateBoonChoices(run, 3), x => x.FamilyId == "focus");
+    }
+
+    [Fact]
     public void Boon_generation_includes_readable_effect_summaries()
     {
         var run = CreateRun();
@@ -263,7 +393,9 @@ public sealed class DungeonRogueliteStateTests
 
         var bulwark = Assert.Single(run.State.ActiveBoonSummaries, x => x.Id == "bulwark_echo");
         Assert.Equal(2, bulwark.Count);
-        Assert.Contains(bulwark.EffectSummaries, x => x == "+15% Armor");
+        Assert.Equal("bulwark_echo", bulwark.FamilyId);
+        Assert.Equal("Bulwark Echo", bulwark.FamilyName);
+        Assert.Contains(bulwark.EffectSummaries, x => x == "+30% Armor");
 
         Assert.Contains(run.State.ActiveBoonEffectSummaries, x =>
             x.Label == "Armor" && x.Value == "+30%" && x.Category == "Stats");
@@ -315,12 +447,28 @@ public sealed class DungeonRogueliteStateTests
 
         var manaSpiral = provider.GetById("mana_spiral");
         var hunterFocus = provider.GetById("hunter_focus");
+        var fatebreakerSeal = provider.GetById("fatebreaker_seal");
 
         Assert.NotNull(manaSpiral);
         Assert.NotNull(hunterFocus);
+        Assert.NotNull(fatebreakerSeal);
+        Assert.True(provider.GetAll().Count >= 43);
         Assert.Contains(provider.GetAll(), x => x.Rarity == DungeonBoonRarity.Rare);
+        Assert.Contains(provider.GetAll(), x => x.Rarity == DungeonBoonRarity.Legacy);
+        Assert.Contains(provider.GetAll(), x => x.MaxStacks > 1);
+        Assert.Equal(
+            Enum.GetValues<DungeonBoonRarity>(),
+            provider.GetAll()
+                .Where(x => x.FamilyId == "hunter_focus")
+                .Select(x => x.Rarity)
+                .OrderBy(x => x)
+                .ToArray());
         Assert.Contains(hunterFocus!.AttributeModifiers, x => x.AttributeType == AttributeType.CritChance && x.Amount == 5);
         Assert.Contains(manaSpiral!.AbilityModifiers, x => x.Target == "effect.damage.main" && x.Operation == "AddMultiplier");
+        Assert.Equal(5, hunterFocus.MaxStacks);
+        Assert.Equal(5, hunterFocus.MaxFamilyStacks);
+        Assert.Equal(2, manaSpiral.Tier);
+        Assert.Equal(1, fatebreakerSeal!.MaxStacks);
     }
 
     [Fact]

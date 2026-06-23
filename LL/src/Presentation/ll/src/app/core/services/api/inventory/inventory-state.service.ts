@@ -140,7 +140,10 @@ export class InventoryStateService {
       });
   }
 
-  setInventory(items: InventoryItem[], suppressNextLoot?: InventoryItem[]): void {
+  setInventory(
+    items: InventoryItem[],
+    suppressNextLoot?: InventoryItem[],
+  ): void {
     this._items.set(this.sortItems(items));
 
     if (suppressNextLoot?.length) {
@@ -172,9 +175,31 @@ export class InventoryStateService {
   }
 
   addOrIncrementMany(itemsToAdd: InventoryItem[]): void {
-    for (const newItem of itemsToAdd) {
-      this.addOrIncrement(newItem);
+    if (!itemsToAdd.length) {
+      return;
     }
+
+    const updated = [...this._items()];
+
+    for (const newItem of itemsToAdd) {
+      const index = updated.findIndex(
+        (i) =>
+          i.itemInstance.itemBase.stackable &&
+          i.itemInstance.itemBase.id === newItem.itemInstance.itemBase.id,
+      );
+
+      if (index !== -1) {
+        updated[index] = {
+          ...updated[index],
+          quantity: updated[index].quantity + newItem.quantity,
+        };
+        continue;
+      }
+
+      updated.push(newItem);
+    }
+
+    this._items.set(this.sortItems(updated));
   }
 
   addOrIncrement(item: InventoryItem): void {
@@ -250,4 +275,3 @@ export class InventoryStateService {
       );
   }
 }
-

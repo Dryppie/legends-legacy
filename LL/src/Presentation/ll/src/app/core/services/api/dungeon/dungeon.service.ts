@@ -140,18 +140,29 @@ export interface DungeonCheckpointChoiceOption {
 
 export interface DungeonBoonChoiceOption {
   id: string;
+  familyId: string;
+  familyName: string;
   name: string;
   description: string;
   rarity: string;
+  tier: number;
+  currentStacks: number;
+  maxStacks: number;
+  currentFamilyStacks: number;
+  maxFamilyStacks: number;
   effectSummaries: string[];
 }
 
 export interface DungeonActiveBoonSummary {
   id: string;
+  familyId: string;
+  familyName: string;
   name: string;
   description: string;
   rarity: string;
+  tier: number;
   count: number;
+  maxFamilyStacks: number;
   effectSummaries: string[];
 }
 

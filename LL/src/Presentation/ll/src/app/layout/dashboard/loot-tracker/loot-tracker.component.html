@@ -10,10 +10,10 @@
     class="overflow-y-auto border-t border-primary px-2 pt-2"
   >
     <ng-container *ngIf="entries.length > 0; else emptyState">
-      <div *ngFor="let entry of entries">
+      <div *ngFor="let entry of entries; trackBy: trackEntry">
         <div class="flex gap-1">
-          <div>{{ entry.quantity }}</div>
-          <app-item [item]="entry.itemInstance"></app-item>
+          <div>{{ entry.item.quantity }}</div>
+          <app-item [item]="entry.item.itemInstance"></app-item>
         </div>
       </div>
     </ng-container>

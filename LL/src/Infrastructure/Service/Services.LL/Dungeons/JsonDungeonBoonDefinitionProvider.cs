@@ -51,7 +51,58 @@ public sealed class JsonDungeonBoonDefinitionProvider : IDungeonBoonDefinitionPr
         {
             throw new InvalidOperationException("Dungeon boon definitions require non-empty ids and names.");
         }
+
+        var invalidStacks = definitions
+            .Where(x => x.MaxStacks <= 0)
+            .Select(x => x.Id)
+            .ToList();
+
+        if (invalidStacks.Count > 0)
+        {
+            throw new InvalidOperationException("Dungeon boon definitions require MaxStacks greater than zero: " + string.Join(", ", invalidStacks));
+        }
+
+        var invalidTiers = definitions
+            .Where(x => x.Tier <= 0)
+            .Select(x => x.Id)
+            .ToList();
+
+        if (invalidTiers.Count > 0)
+        {
+            throw new InvalidOperationException("Dungeon boon definitions require Tier greater than zero: " + string.Join(", ", invalidTiers));
+        }
+
+        var invalidFamilyStacks = definitions
+            .Where(x => x.MaxFamilyStacks < 0)
+            .Select(x => x.Id)
+            .ToList();
+
+        if (invalidFamilyStacks.Count > 0)
+        {
+            throw new InvalidOperationException("Dungeon boon definitions require MaxFamilyStacks to be zero or greater: " + string.Join(", ", invalidFamilyStacks));
+        }
+
+        var inconsistentFamilyStackCaps = definitions
+            .GroupBy(GetFamilyId, StringComparer.OrdinalIgnoreCase)
+            .Select(group => new
+            {
+                FamilyId = group.Key,
+                Caps = group.Select(x => x.MaxFamilyStacks).Where(x => x > 0).Distinct().ToList()
+            })
+            .Where(x => x.Caps.Count > 1)
+            .Select(x => x.FamilyId)
+            .ToList();
+
+        if (inconsistentFamilyStackCaps.Count > 0)
+        {
+            throw new InvalidOperationException("Dungeon boon family variants must use the same MaxFamilyStacks value: " + string.Join(", ", inconsistentFamilyStackCaps));
+        }
     }
+
+    private static string GetFamilyId(DungeonBoonDefinition definition) =>
+        string.IsNullOrWhiteSpace(definition.FamilyId)
+            ? definition.Id
+            : definition.FamilyId;
 
     private sealed class DungeonBoonDefinitionDocument
     {

@@ -2,9 +2,14 @@
   "boons": [
     {
       "id": "bulwark_echo",
+      "familyId": "bulwark_echo",
+      "familyName": "Bulwark Echo",
       "name": "Bulwark Echo",
-      "description": "Defensive effects are stronger for this dungeon.",
+      "description": "Layer another echo of armor and resistance around your expedition.",
       "rarity": "Common",
+      "tier": 1,
+      "maxStacks": 5,
+      "maxFamilyStacks": 5,
       "combatStyleTags": [ "Defense" ],
       "attributeModifiers": [
         { "attributeType": "Armor", "amount": 15, "modifierType": "Additive" },
@@ -12,10 +17,99 @@
       ]
     },
     {
+      "id": "bulwark_echo_uncommon",
+      "familyId": "bulwark_echo",
+      "familyName": "Bulwark Echo",
+      "name": "Bulwark Echo",
+      "description": "A sturdier echo reinforces armor and resistance.",
+      "rarity": "Uncommon",
+      "tier": 2,
+      "maxStacks": 5,
+      "maxFamilyStacks": 5,
+      "combatStyleTags": [ "Defense" ],
+      "attributeModifiers": [
+        { "attributeType": "Armor", "amount": 22, "modifierType": "Additive" },
+        { "attributeType": "Resistance", "amount": 22, "modifierType": "Additive" }
+      ]
+    },
+    {
+      "id": "bulwark_echo_rare",
+      "familyId": "bulwark_echo",
+      "familyName": "Bulwark Echo",
+      "name": "Bulwark Echo",
+      "description": "A rare defensive echo adds mitigation on top of armor and resistance.",
+      "rarity": "Rare",
+      "tier": 3,
+      "maxStacks": 5,
+      "maxFamilyStacks": 5,
+      "combatStyleTags": [ "Defense" ],
+      "attributeModifiers": [
+        { "attributeType": "Armor", "amount": 32, "modifierType": "Additive" },
+        { "attributeType": "Resistance", "amount": 32, "modifierType": "Additive" },
+        { "attributeType": "DamageReduction", "amount": 2, "modifierType": "Flat" }
+      ]
+    },
+    {
+      "id": "bulwark_echo_epic",
+      "familyId": "bulwark_echo",
+      "familyName": "Bulwark Echo",
+      "name": "Bulwark Echo",
+      "description": "An epic echo turns the dungeon's pressure into broad protection.",
+      "rarity": "Epic",
+      "tier": 4,
+      "maxStacks": 5,
+      "maxFamilyStacks": 5,
+      "combatStyleTags": [ "Defense" ],
+      "attributeModifiers": [
+        { "attributeType": "Armor", "amount": 45, "modifierType": "Additive" },
+        { "attributeType": "Resistance", "amount": 45, "modifierType": "Additive" },
+        { "attributeType": "DamageReduction", "amount": 4, "modifierType": "Flat" }
+      ]
+    },
+    {
+      "id": "bulwark_echo_legendary",
+      "familyId": "bulwark_echo",
+      "familyName": "Bulwark Echo",
+      "name": "Bulwark Echo",
+      "description": "A legendary ward hardens the whole expedition against punishment.",
+      "rarity": "Legendary",
+      "tier": 5,
+      "maxStacks": 5,
+      "maxFamilyStacks": 5,
+      "combatStyleTags": [ "Defense" ],
+      "attributeModifiers": [
+        { "attributeType": "Armor", "amount": 60, "modifierType": "Additive" },
+        { "attributeType": "Resistance", "amount": 60, "modifierType": "Additive" },
+        { "attributeType": "DamageReduction", "amount": 6, "modifierType": "Flat" }
+      ]
+    },
+    {
+      "id": "bulwark_echo_legacy",
+      "familyId": "bulwark_echo",
+      "familyName": "Bulwark Echo",
+      "name": "Bulwark Echo",
+      "description": "A legacy echo wraps the run in exceptional armor, resistance, and mitigation.",
+      "rarity": "Legacy",
+      "tier": 6,
+      "maxStacks": 5,
+      "maxFamilyStacks": 5,
+      "combatStyleTags": [ "Defense" ],
+      "attributeModifiers": [
+        { "attributeType": "Armor", "amount": 80, "modifierType": "Additive" },
+        { "attributeType": "Resistance", "amount": 80, "modifierType": "Additive" },
+        { "attributeType": "DamageReduction", "amount": 8, "modifierType": "Flat" }
+      ]
+    },
+    {
       "id": "hunter_focus",
+      "familyId": "hunter_focus",
+      "familyName": "Hunter's Focus",
       "name": "Hunter's Focus",
-      "description": "Gain an edge against elites and bosses.",
+      "description": "Sharpen your aim and critical reliability against tougher prey.",
       "rarity": "Common",
+      "tier": 1,
+      "maxStacks": 5,
+      "maxFamilyStacks": 5,
       "combatStyleTags": [ "Critical", "Elite" ],
       "attributeModifiers": [
         { "attributeType": "CritChance", "amount": 5, "modifierType": "Flat" },
@@ -23,10 +117,109 @@
       ]
     },
     {
+      "id": "hunter_focus_uncommon",
+      "familyId": "hunter_focus",
+      "familyName": "Hunter's Focus",
+      "name": "Hunter's Focus",
+      "description": "A cleaner focus improves crit reliability and precision.",
+      "rarity": "Uncommon",
+      "tier": 2,
+      "maxStacks": 5,
+      "maxFamilyStacks": 5,
+      "combatStyleTags": [ "Critical", "Elite" ],
+      "attributeModifiers": [
+        { "attributeType": "CritChance", "amount": 6, "modifierType": "Flat" },
+        { "attributeType": "Precision", "amount": 12, "modifierType": "Additive" }
+      ]
+    },
+    {
+      "id": "hunter_focus_rare",
+      "familyId": "hunter_focus",
+      "familyName": "Hunter's Focus",
+      "name": "Hunter's Focus",
+      "description": "A rare focus makes critical openings sharper and more punishing.",
+      "rarity": "Rare",
+      "tier": 3,
+      "maxStacks": 5,
+      "maxFamilyStacks": 5,
+      "combatStyleTags": [ "Critical", "Elite" ],
+      "attributeModifiers": [
+        { "attributeType": "CritChance", "amount": 8, "modifierType": "Flat" },
+        { "attributeType": "Precision", "amount": 16, "modifierType": "Additive" },
+        { "attributeType": "CritDamage", "amount": 10, "modifierType": "Additive" }
+      ]
+    },
+    {
+      "id": "hunter_focus_epic",
+      "familyId": "hunter_focus",
+      "familyName": "Hunter's Focus",
+      "name": "Hunter's Focus",
+      "description": "An epic focus turns elite fights into critical openings.",
+      "rarity": "Epic",
+      "tier": 4,
+      "maxStacks": 5,
+      "maxFamilyStacks": 5,
+      "combatStyleTags": [ "Critical", "Elite" ],
+      "attributeModifiers": [
+        { "attributeType": "CritChance", "amount": 10, "modifierType": "Flat" },
+        { "attributeType": "Precision", "amount": 22, "modifierType": "Additive" },
+        { "attributeType": "CritDamage", "amount": 16, "modifierType": "Additive" }
+      ]
+    },
+    {
+      "id": "hunter_focus_legendary",
+      "familyId": "hunter_focus",
+      "familyName": "Hunter's Focus",
+      "name": "Hunter's Focus",
+      "description": "A legendary focus magnifies your cleanest hits.",
+      "rarity": "Legendary",
+      "tier": 5,
+      "maxStacks": 5,
+      "maxFamilyStacks": 5,
+      "combatStyleTags": [ "Critical", "Elite" ],
+      "attributeModifiers": [
+        { "attributeType": "CritChance", "amount": 12, "modifierType": "Flat" },
+        { "attributeType": "Precision", "amount": 30, "modifierType": "Additive" },
+        { "attributeType": "CritDamage", "amount": 24, "modifierType": "Additive" }
+      ],
+      "abilityModifiers": [
+        {
+          "target": "effect.damage.main",
+          "operation": "AddMultiplier",
+          "value": 0.1
+        }
+      ]
+    },
+    {
+      "id": "hunter_focus_legacy",
+      "familyId": "hunter_focus",
+      "familyName": "Hunter's Focus",
+      "name": "Hunter's Focus",
+      "description": "A legacy focus makes every decisive opening count.",
+      "rarity": "Legacy",
+      "tier": 6,
+      "maxStacks": 5,
+      "maxFamilyStacks": 5,
+      "combatStyleTags": [ "Critical", "Elite" ],
+      "attributeModifiers": [
+        { "attributeType": "CritChance", "amount": 15, "modifierType": "Flat" },
+        { "attributeType": "Precision", "amount": 40, "modifierType": "Additive" },
+        { "attributeType": "CritDamage", "amount": 35, "modifierType": "Additive" }
+      ],
+      "abilityModifiers": [
+        {
+          "target": "effect.damage.main",
+          "operation": "AddMultiplier",
+          "value": 0.18
+        }
+      ]
+    },
+    {
       "id": "venom_bloom",
       "name": "Venom Bloom",
-      "description": "Poison and curse effects linger longer.",
+      "description": "Poison and curse pressure grows stronger with each bloom.",
       "rarity": "Common",
+      "maxStacks": 5,
       "essenceTags": [ "Status.Poison", "Status.Curse" ],
       "attributeModifiers": [
         { "attributeType": "Power", "amount": 6, "modifierType": "Additive" },
@@ -34,10 +227,141 @@
       ]
     },
     {
+      "id": "iron_lungs",
+      "name": "Iron Lungs",
+      "description": "Push deeper with a larger health pool and steadier nerves.",
+      "rarity": "Common",
+      "maxStacks": 5,
+      "combatStyleTags": [ "Defense", "Endurance" ],
+      "attributeModifiers": [
+        { "attributeType": "MaxHealth", "amount": 8, "modifierType": "Additive" },
+        { "attributeType": "CrowdControlResistance", "amount": 4, "modifierType": "Flat" }
+      ]
+    },
+    {
+      "id": "quickened_feet",
+      "name": "Quickened Feet",
+      "description": "Move faster between openings and slip more incoming blows.",
+      "rarity": "Common",
+      "maxStacks": 5,
+      "combatStyleTags": [ "Speed", "Evasion" ],
+      "attributeModifiers": [
+        { "attributeType": "DodgeChance", "amount": 3, "modifierType": "Flat" },
+        { "attributeType": "Cooldown", "amount": 2, "modifierType": "Flat" }
+      ]
+    },
+    {
+      "id": "stone_knuckles",
+      "name": "Stone Knuckles",
+      "description": "Weapon strikes land heavier and punch through armor.",
+      "rarity": "Common",
+      "maxStacks": 5,
+      "combatStyleTags": [ "Weapon", "Melee" ],
+      "attributeModifiers": [
+        { "attributeType": "WeaponDamage", "amount": 6, "modifierType": "Additive" },
+        { "attributeType": "ArmorPenetration", "amount": 4, "modifierType": "Flat" }
+      ]
+    },
+    {
+      "id": "ember_spark",
+      "name": "Ember Spark",
+      "description": "A small offensive spark that makes main damage effects hit harder.",
+      "rarity": "Common",
+      "maxStacks": 5,
+      "essenceTags": [ "Status.Burn" ],
+      "combatStyleTags": [ "Damage" ],
+      "attributeModifiers": [
+        { "attributeType": "Power", "amount": 6, "modifierType": "Additive" }
+      ],
+      "abilityModifiers": [
+        {
+          "target": "effect.damage.main",
+          "operation": "AddMultiplier",
+          "value": 0.04
+        }
+      ]
+    },
+    {
+      "id": "warding_chant",
+      "name": "Warding Chant",
+      "description": "Repeat the chant to steadily improve magical defense and control resistance.",
+      "rarity": "Common",
+      "maxStacks": 5,
+      "combatStyleTags": [ "Defense", "Spell" ],
+      "attributeModifiers": [
+        { "attributeType": "Resistance", "amount": 10, "modifierType": "Additive" },
+        { "attributeType": "CrowdControlResistance", "amount": 4, "modifierType": "Flat" }
+      ]
+    },
+    {
+      "id": "sustaining_draught",
+      "name": "Sustaining Draught",
+      "description": "Improve healing output and passive recovery for the rest of the run.",
+      "rarity": "Common",
+      "maxStacks": 5,
+      "combatStyleTags": [ "Healing", "Endurance" ],
+      "attributeModifiers": [
+        { "attributeType": "HealingPowerPercent", "amount": 6, "modifierType": "Additive" },
+        { "attributeType": "HealthRegeneration", "amount": 6, "modifierType": "Flat" }
+      ]
+    },
+    {
+      "id": "skirmisher_step",
+      "name": "Skirmisher Step",
+      "description": "Keep positioning clean with precision and a little extra dodge.",
+      "rarity": "Common",
+      "maxStacks": 5,
+      "combatStyleTags": [ "Ranged", "Evasion" ],
+      "attributeModifiers": [
+        { "attributeType": "Precision", "amount": 6, "modifierType": "Additive" },
+        { "attributeType": "DodgeChance", "amount": 2, "modifierType": "Flat" }
+      ]
+    },
+    {
+      "id": "grave_sense",
+      "name": "Grave Sense",
+      "description": "Read the dead air of the dungeon and strike more decisive openings.",
+      "rarity": "Common",
+      "maxStacks": 5,
+      "combatStyleTags": [ "Critical", "Status" ],
+      "attributeModifiers": [
+        { "attributeType": "CritChance", "amount": 3, "modifierType": "Flat" },
+        { "attributeType": "StatusResistance", "amount": 4, "modifierType": "Flat" }
+      ]
+    },
+    {
+      "id": "mana_spiral_common",
+      "familyId": "mana_spiral",
+      "familyName": "Mana Spiral",
+      "name": "Mana Spiral",
+      "description": "A modest spell spiral improves spirit and main damage effects.",
+      "rarity": "Common",
+      "tier": 1,
+      "maxStacks": 5,
+      "maxFamilyStacks": 5,
+      "combatStyleTags": [ "Spell", "Damage" ],
+      "attributeModifiers": [
+        { "attributeType": "Spirit", "amount": 8, "modifierType": "Additive" },
+        { "attributeType": "MagicPenetration", "amount": 3, "modifierType": "Flat" }
+      ],
+      "abilityModifiers": [
+        {
+          "target": "effect.damage.main",
+          "operation": "AddMultiplier",
+          "value": 0.04
+        }
+      ]
+    },
+    {
       "id": "mana_spiral",
+      "familyId": "mana_spiral",
+      "familyName": "Mana Spiral",
       "name": "Mana Spiral",
       "description": "Damage abilities gain momentum during rooms.",
       "rarity": "Uncommon",
+      "tier": 2,
+      "maxStacks": 5,
+      "maxFamilyStacks": 5,
       "combatStyleTags": [ "Spell", "Damage" ],
       "attributeModifiers": [
         { "attributeType": "Spirit", "amount": 12, "modifierType": "Additive" },
@@ -52,14 +376,174 @@
       ]
     },
     {
+      "id": "mana_spiral_rare",
+      "familyId": "mana_spiral",
+      "familyName": "Mana Spiral",
+      "name": "Mana Spiral",
+      "description": "A rare spiral punches spell damage through enemy defenses.",
+      "rarity": "Rare",
+      "tier": 3,
+      "maxStacks": 5,
+      "maxFamilyStacks": 5,
+      "combatStyleTags": [ "Spell", "Damage" ],
+      "attributeModifiers": [
+        { "attributeType": "Spirit", "amount": 16, "modifierType": "Additive" },
+        { "attributeType": "MagicPenetration", "amount": 8, "modifierType": "Flat" }
+      ],
+      "abilityModifiers": [
+        {
+          "target": "effect.damage.main",
+          "operation": "AddMultiplier",
+          "value": 0.12
+        }
+      ]
+    },
+    {
+      "id": "mana_spiral_epic",
+      "familyId": "mana_spiral",
+      "familyName": "Mana Spiral",
+      "name": "Mana Spiral",
+      "description": "An epic spiral builds stronger spell momentum through each room.",
+      "rarity": "Epic",
+      "tier": 4,
+      "maxStacks": 5,
+      "maxFamilyStacks": 5,
+      "combatStyleTags": [ "Spell", "Damage" ],
+      "attributeModifiers": [
+        { "attributeType": "Spirit", "amount": 22, "modifierType": "Additive" },
+        { "attributeType": "MagicPenetration", "amount": 12, "modifierType": "Flat" }
+      ],
+      "abilityModifiers": [
+        {
+          "target": "effect.damage.main",
+          "operation": "AddMultiplier",
+          "value": 0.16
+        }
+      ]
+    },
+    {
+      "id": "mana_spiral_legendary",
+      "familyId": "mana_spiral",
+      "familyName": "Mana Spiral",
+      "name": "Mana Spiral",
+      "description": "A legendary spiral heavily amplifies spell offense.",
+      "rarity": "Legendary",
+      "tier": 5,
+      "maxStacks": 5,
+      "maxFamilyStacks": 5,
+      "combatStyleTags": [ "Spell", "Damage" ],
+      "attributeModifiers": [
+        { "attributeType": "Spirit", "amount": 30, "modifierType": "Additive" },
+        { "attributeType": "MagicPenetration", "amount": 16, "modifierType": "Flat" }
+      ],
+      "abilityModifiers": [
+        {
+          "target": "effect.damage.main",
+          "operation": "AddMultiplier",
+          "value": 0.22
+        }
+      ]
+    },
+    {
+      "id": "mana_spiral_legacy",
+      "familyId": "mana_spiral",
+      "familyName": "Mana Spiral",
+      "name": "Mana Spiral",
+      "description": "A legacy spiral floods the run with overwhelming spell momentum.",
+      "rarity": "Legacy",
+      "tier": 6,
+      "maxStacks": 5,
+      "maxFamilyStacks": 5,
+      "combatStyleTags": [ "Spell", "Damage" ],
+      "attributeModifiers": [
+        { "attributeType": "Spirit", "amount": 40, "modifierType": "Additive" },
+        { "attributeType": "MagicPenetration", "amount": 24, "modifierType": "Flat" }
+      ],
+      "abilityModifiers": [
+        {
+          "target": "effect.damage.main",
+          "operation": "AddMultiplier",
+          "value": 0.3
+        }
+      ]
+    },
+    {
       "id": "guardian_root",
       "name": "Guardian Root",
       "description": "Protective reactions become more reliable.",
       "rarity": "Uncommon",
+      "maxStacks": 3,
       "combatStyleTags": [ "Defense", "Barrier" ],
       "attributeModifiers": [
         { "attributeType": "Fortitude", "amount": 10, "modifierType": "Additive" },
         { "attributeType": "BlockChance", "amount": 5, "modifierType": "Flat" }
+      ]
+    },
+    {
+      "id": "blood_oath",
+      "name": "Blood Oath",
+      "description": "Trade caution for sustaining offense through lifesteal and power.",
+      "rarity": "Uncommon",
+      "maxStacks": 3,
+      "combatStyleTags": [ "Damage", "Sustain" ],
+      "attributeModifiers": [
+        { "attributeType": "LifeSteal", "amount": 3, "modifierType": "Flat" },
+        { "attributeType": "Power", "amount": 8, "modifierType": "Additive" }
+      ]
+    },
+    {
+      "id": "sharpened_instinct",
+      "name": "Sharpened Instinct",
+      "description": "Critical hits become more punishing as your instincts settle in.",
+      "rarity": "Uncommon",
+      "maxStacks": 3,
+      "combatStyleTags": [ "Critical" ],
+      "attributeModifiers": [
+        { "attributeType": "CritDamage", "amount": 8, "modifierType": "Additive" },
+        { "attributeType": "Precision", "amount": 8, "modifierType": "Additive" }
+      ]
+    },
+    {
+      "id": "arcane_channel",
+      "name": "Arcane Channel",
+      "description": "Channel magic through enemy defenses and strengthen main damage effects.",
+      "rarity": "Uncommon",
+      "maxStacks": 3,
+      "combatStyleTags": [ "Spell", "Damage" ],
+      "attributeModifiers": [
+        { "attributeType": "Spirit", "amount": 10, "modifierType": "Additive" },
+        { "attributeType": "MagicPenetration", "amount": 4, "modifierType": "Flat" }
+      ],
+      "abilityModifiers": [
+        {
+          "target": "effect.damage.main",
+          "operation": "AddMultiplier",
+          "value": 0.06
+        }
+      ]
+    },
+    {
+      "id": "shield_tempo",
+      "name": "Shield Tempo",
+      "description": "Find a defensive rhythm with better blocks and general mitigation.",
+      "rarity": "Uncommon",
+      "maxStacks": 3,
+      "combatStyleTags": [ "Defense", "Shield" ],
+      "attributeModifiers": [
+        { "attributeType": "BlockChance", "amount": 4, "modifierType": "Flat" },
+        { "attributeType": "DamageReduction", "amount": 3, "modifierType": "Flat" }
+      ]
+    },
+    {
+      "id": "summoner_pact",
+      "name": "Summoner's Pact",
+      "description": "Strengthen summoned allies for the remainder of the dungeon.",
+      "rarity": "Uncommon",
+      "maxStacks": 3,
+      "combatStyleTags": [ "Summon" ],
+      "attributeModifiers": [
+        { "attributeType": "SummonPower", "amount": 10, "modifierType": "Additive" },
+        { "attributeType": "SummonHealth", "amount": 10, "modifierType": "Additive" }
       ]
     },
     {
@@ -95,6 +579,156 @@
           "target": "effect.damage.main",
           "operation": "AddMultiplier",
           "value": 0.15
+        }
+      ]
+    },
+    {
+      "id": "executioner_mark",
+      "name": "Executioner's Mark",
+      "description": "One marked rhythm makes critical openings far more lethal.",
+      "rarity": "Rare",
+      "combatStyleTags": [ "Critical", "Elite" ],
+      "attributeModifiers": [
+        { "attributeType": "CritChance", "amount": 8, "modifierType": "Flat" },
+        { "attributeType": "CritDamage", "amount": 20, "modifierType": "Additive" }
+      ],
+      "abilityModifiers": [
+        {
+          "target": "effect.damage.main",
+          "operation": "AddMultiplier",
+          "value": 0.12
+        }
+      ]
+    },
+    {
+      "id": "aegis_overflow",
+      "name": "Aegis Overflow",
+      "description": "A rare defensive surge expands health and reduces incoming damage.",
+      "rarity": "Rare",
+      "combatStyleTags": [ "Defense", "Endurance" ],
+      "attributeModifiers": [
+        { "attributeType": "MaxHealth", "amount": 18, "modifierType": "Additive" },
+        { "attributeType": "DamageReduction", "amount": 5, "modifierType": "Flat" }
+      ]
+    },
+    {
+      "id": "void_thread",
+      "name": "Void Thread",
+      "description": "Thread spell power through weak points and recover ability tempo.",
+      "rarity": "Rare",
+      "combatStyleTags": [ "Spell", "Cooldown" ],
+      "attributeModifiers": [
+        { "attributeType": "Spirit", "amount": 12, "modifierType": "Additive" },
+        { "attributeType": "MagicPenetration", "amount": 12, "modifierType": "Flat" },
+        { "attributeType": "Cooldown", "amount": 8, "modifierType": "Flat" }
+      ]
+    },
+    {
+      "id": "thorn_crown",
+      "name": "Thorn Crown",
+      "description": "A crown of pressure makes you harder to break in dangerous rooms.",
+      "rarity": "Rare",
+      "combatStyleTags": [ "Defense", "Status" ],
+      "attributeModifiers": [
+        { "attributeType": "Armor", "amount": 20, "modifierType": "Additive" },
+        { "attributeType": "Resistance", "amount": 20, "modifierType": "Additive" },
+        { "attributeType": "DamageReduction", "amount": 4, "modifierType": "Flat" }
+      ]
+    },
+    {
+      "id": "phoenix_contract",
+      "name": "Phoenix Contract",
+      "description": "A single contract that sharply improves recovery and comeback power.",
+      "rarity": "Epic",
+      "combatStyleTags": [ "Healing", "Sustain" ],
+      "attributeModifiers": [
+        { "attributeType": "LifeSteal", "amount": 8, "modifierType": "Flat" },
+        { "attributeType": "HealthRegeneration", "amount": 20, "modifierType": "Flat" },
+        { "attributeType": "MaxHealth", "amount": 12, "modifierType": "Additive" }
+      ]
+    },
+    {
+      "id": "storm_choir",
+      "name": "Storm Choir",
+      "description": "A rare cadence of power accelerates abilities and amplifies main damage.",
+      "rarity": "Epic",
+      "combatStyleTags": [ "Damage", "Cooldown" ],
+      "attributeModifiers": [
+        { "attributeType": "Power", "amount": 18, "modifierType": "Additive" },
+        { "attributeType": "Cooldown", "amount": 10, "modifierType": "Flat" }
+      ],
+      "abilityModifiers": [
+        {
+          "target": "effect.damage.main",
+          "operation": "AddMultiplier",
+          "value": 0.18
+        }
+      ]
+    },
+    {
+      "id": "titan_lease",
+      "name": "Titan Lease",
+      "description": "Borrow giant strength for one run, gaining heavy toughness.",
+      "rarity": "Epic",
+      "combatStyleTags": [ "Defense", "Endurance" ],
+      "attributeModifiers": [
+        { "attributeType": "Fortitude", "amount": 20, "modifierType": "Additive" },
+        { "attributeType": "Armor", "amount": 30, "modifierType": "Additive" },
+        { "attributeType": "Resistance", "amount": 30, "modifierType": "Additive" }
+      ]
+    },
+    {
+      "id": "kingmaker_edict",
+      "name": "Kingmaker Edict",
+      "description": "A legendary command turns weapon pressure into decisive finishing power.",
+      "rarity": "Legendary",
+      "combatStyleTags": [ "Weapon", "Critical" ],
+      "attributeModifiers": [
+        { "attributeType": "WeaponDamage", "amount": 20, "modifierType": "Additive" },
+        { "attributeType": "CritChance", "amount": 10, "modifierType": "Flat" }
+      ],
+      "abilityModifiers": [
+        {
+          "target": "effect.damage.main",
+          "operation": "AddMultiplier",
+          "value": 0.25
+        }
+      ]
+    },
+    {
+      "id": "astral_surge",
+      "name": "Astral Surge",
+      "description": "A legendary surge floods spell damage through enemy defenses.",
+      "rarity": "Legendary",
+      "combatStyleTags": [ "Spell", "Damage" ],
+      "attributeModifiers": [
+        { "attributeType": "Spirit", "amount": 25, "modifierType": "Additive" },
+        { "attributeType": "MagicPenetration", "amount": 18, "modifierType": "Flat" }
+      ],
+      "abilityModifiers": [
+        {
+          "target": "effect.damage.main",
+          "operation": "AddMultiplier",
+          "value": 0.22
+        }
+      ]
+    },
+    {
+      "id": "fatebreaker_seal",
+      "name": "Fatebreaker Seal",
+      "description": "A legacy seal bends the run toward overwhelming offense and survival.",
+      "rarity": "Legacy",
+      "combatStyleTags": [ "Damage", "Defense", "Critical" ],
+      "attributeModifiers": [
+        { "attributeType": "Power", "amount": 20, "modifierType": "Additive" },
+        { "attributeType": "CritDamage", "amount": 30, "modifierType": "Additive" },
+        { "attributeType": "DamageReduction", "amount": 10, "modifierType": "Flat" }
+      ],
+      "abilityModifiers": [
+        {
+          "target": "effect.damage.main",
+          "operation": "AddMultiplier",
+          "value": 0.25
         }
       ]
     }

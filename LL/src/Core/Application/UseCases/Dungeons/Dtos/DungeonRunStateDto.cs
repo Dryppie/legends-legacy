@@ -82,19 +82,30 @@ public sealed class DungeonCheckpointChoiceOptionDto
 public sealed class DungeonBoonChoiceOptionDto
 {
     public string Id { get; set; } = string.Empty;
+    public string FamilyId { get; set; } = string.Empty;
+    public string FamilyName { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Rarity { get; set; } = string.Empty;
+    public int Tier { get; set; }
+    public int CurrentStacks { get; set; }
+    public int MaxStacks { get; set; }
+    public int CurrentFamilyStacks { get; set; }
+    public int MaxFamilyStacks { get; set; }
     public List<string> EffectSummaries { get; set; } = [];
 }
 
 public sealed class DungeonActiveBoonSummaryDto
 {
     public string Id { get; set; } = string.Empty;
+    public string FamilyId { get; set; } = string.Empty;
+    public string FamilyName { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Rarity { get; set; } = string.Empty;
+    public int Tier { get; set; }
     public int Count { get; set; }
+    public int MaxFamilyStacks { get; set; }
     public List<string> EffectSummaries { get; set; } = [];
 }
 

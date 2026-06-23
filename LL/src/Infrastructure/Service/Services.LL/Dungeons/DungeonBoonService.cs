@@ -25,15 +25,21 @@ public sealed class DungeonBoonService : IDungeonBoonService
         ArgumentNullException.ThrowIfNull(run);
         run.State ??= new DungeonRunState { RunId = run.Id };
 
-        var active = run.State.ActiveBoonIds.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var activeStacks = run.State.ActiveBoonIds
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .GroupBy(id => id, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(x => x.Key, x => x.Count(), StringComparer.OrdinalIgnoreCase);
+        var activeFamilyStacks = GetActiveFamilyStackCounts(run);
         var available = _definitions.GetAll()
-            .Where(x => !active.Contains(x.Id))
+            .Where(x => activeStacks.GetValueOrDefault(x.Id) < x.MaxStacks)
+            .Where(x => GetMaxFamilyStacks(x) <= 0 ||
+                activeFamilyStacks.GetValueOrDefault(GetFamilyId(x)) < GetMaxFamilyStacks(x))
             .Where(x => !string.IsNullOrWhiteSpace(x.Id))
             .ToList();
 
-        var random = new Random(CreateRunSeed(run.Seed, run.CurrentRoomIndex, active.Count));
+        var random = new Random(CreateRunSeed(run.Seed, run.CurrentRoomIndex, run.State.ActiveBoonIds.Count));
         var choices = PickWeighted(available, Math.Max(1, count), random)
-            .Select(ToChoiceOption)
+            .Select(definition => ToChoiceOption(definition, activeStacks, activeFamilyStacks))
             .ToList();
 
         run.State.CurrentBoonChoices = choices;
@@ -47,16 +53,27 @@ public sealed class DungeonBoonService : IDungeonBoonService
         var choice = run.State.CurrentBoonChoices
             .FirstOrDefault(x => string.Equals(x.Id, boonId, StringComparison.OrdinalIgnoreCase));
 
-        if (choice is null || _definitions.GetById(choice.Id) is null)
+        var definition = choice is null ? null : _definitions.GetById(choice.Id);
+        if (choice is null || definition is null)
         {
             throw new InvalidOperationException("The selected boon is no longer available.");
         }
 
-        if (!run.State.ActiveBoonIds.Contains(choice.Id, StringComparer.OrdinalIgnoreCase))
+        var activeStacks = run.State.ActiveBoonIds
+            .Count(id => id.Equals(choice.Id, StringComparison.OrdinalIgnoreCase));
+        if (activeStacks >= definition.MaxStacks)
         {
-            run.State.ActiveBoonIds.Add(choice.Id);
+            throw new InvalidOperationException("The selected boon has already reached its stack limit.");
         }
 
+        var maxFamilyStacks = GetMaxFamilyStacks(definition);
+        if (maxFamilyStacks > 0 &&
+            GetActiveFamilyStackCounts(run).GetValueOrDefault(GetFamilyId(definition)) >= maxFamilyStacks)
+        {
+            throw new InvalidOperationException("The selected boon has already reached its stack limit.");
+        }
+
+        run.State.ActiveBoonIds.Add(choice.Id);
         run.State.CurrentBoonChoices.Clear();
         SyncActiveBoonState(run);
     }
@@ -68,15 +85,32 @@ public sealed class DungeonBoonService : IDungeonBoonService
 
         var activeStacks = GetActiveBoonStacks(run).ToList();
         run.State.ActiveBoonSummaries = activeStacks
-            .Select(stack => new DungeonActiveBoonSummary
+            .GroupBy(stack => GetFamilyId(stack.Definition), StringComparer.OrdinalIgnoreCase)
+            .Select(group =>
             {
-                Id = stack.Definition.Id,
-                Name = stack.Definition.Name,
-                Description = stack.Definition.Description,
-                Rarity = stack.Definition.Rarity.ToString(),
-                Count = stack.Count,
-                EffectSummaries = CreateEffectSummaries(stack.Definition)
+                var familyStacks = group.ToList();
+                var strongest = familyStacks
+                    .OrderByDescending(stack => stack.Definition.Rarity)
+                    .ThenByDescending(stack => GetTier(stack.Definition))
+                    .First();
+                var familyId = GetFamilyId(strongest.Definition);
+                var familyName = GetFamilyName(strongest.Definition);
+
+                return new DungeonActiveBoonSummary
+                {
+                    Id = familyId,
+                    FamilyId = familyId,
+                    FamilyName = familyName,
+                    Name = familyName,
+                    Description = strongest.Definition.Description,
+                    Rarity = strongest.Definition.Rarity.ToString(),
+                    Tier = GetTier(strongest.Definition),
+                    Count = familyStacks.Sum(stack => stack.Count),
+                    MaxFamilyStacks = familyStacks.Max(stack => GetMaxFamilyStacks(stack.Definition)),
+                    EffectSummaries = CreateAggregateEffectTextSummaries(familyStacks)
+                };
             })
+            .OrderBy(summary => summary.Name)
             .ToList();
 
         run.State.ActiveBoonEffectSummaries = CreateAggregateEffectSummaries(activeStacks);
@@ -128,7 +162,8 @@ public sealed class DungeonBoonService : IDungeonBoonService
                 }
 
                 var selected = pool[i];
-                pool.RemoveAt(i);
+                var selectedFamilyId = GetFamilyId(selected);
+                pool.RemoveAll(x => GetFamilyId(x).Equals(selectedFamilyId, StringComparison.OrdinalIgnoreCase));
                 count--;
                 yield return selected;
                 break;
@@ -162,6 +197,15 @@ public sealed class DungeonBoonService : IDungeonBoonService
 
             yield return new ActiveBoonStack(definition, group.Count());
         }
+    }
+
+    private Dictionary<string, int> GetActiveFamilyStackCounts(DungeonRun run)
+    {
+        return run.State.ActiveBoonIds
+            .Select(_definitions.GetById)
+            .Where(x => x is not null)
+            .GroupBy(x => GetFamilyId(x!), StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(x => x.Key, x => x.Count(), StringComparer.OrdinalIgnoreCase);
     }
 
     private static List<DungeonBoonEffectSummary> CreateAggregateEffectSummaries(
@@ -214,14 +258,63 @@ public sealed class DungeonBoonService : IDungeonBoonService
             .ToList();
     }
 
-    private static DungeonBoonChoiceOption ToChoiceOption(DungeonBoonDefinition definition) => new()
+    private static List<string> CreateAggregateEffectTextSummaries(IReadOnlyList<ActiveBoonStack> activeStacks)
     {
-        Id = definition.Id,
-        Name = definition.Name,
-        Description = definition.Description,
-        Rarity = definition.Rarity.ToString(),
-        EffectSummaries = CreateEffectSummaries(definition)
-    };
+        var summaries = CreateAggregateEffectSummaries(activeStacks)
+            .Select(effect => effect.Value.Equals("Added", StringComparison.OrdinalIgnoreCase)
+                ? $"Adds {effect.Label}"
+                : $"{effect.Value} {effect.Label}")
+            .ToList();
+
+        return summaries.Count > 0
+            ? summaries
+            : ["No direct combat effect."];
+    }
+
+    private static DungeonBoonChoiceOption ToChoiceOption(
+        DungeonBoonDefinition definition,
+        IReadOnlyDictionary<string, int> activeStacks,
+        IReadOnlyDictionary<string, int> activeFamilyStacks)
+    {
+        var familyId = GetFamilyId(definition);
+        var familyName = GetFamilyName(definition);
+
+        return new DungeonBoonChoiceOption
+        {
+            Id = definition.Id,
+            FamilyId = familyId,
+            FamilyName = familyName,
+            Name = definition.Name,
+            Description = definition.Description,
+            Rarity = definition.Rarity.ToString(),
+            Tier = GetTier(definition),
+            CurrentStacks = activeStacks.GetValueOrDefault(definition.Id),
+            MaxStacks = definition.MaxStacks,
+            CurrentFamilyStacks = activeFamilyStacks.GetValueOrDefault(familyId),
+            MaxFamilyStacks = GetMaxFamilyStacks(definition),
+            EffectSummaries = CreateEffectSummaries(definition)
+        };
+    }
+
+    private static string GetFamilyId(DungeonBoonDefinition definition) =>
+        string.IsNullOrWhiteSpace(definition.FamilyId)
+            ? definition.Id
+            : definition.FamilyId;
+
+    private static string GetFamilyName(DungeonBoonDefinition definition) =>
+        string.IsNullOrWhiteSpace(definition.FamilyName)
+            ? definition.Name
+            : definition.FamilyName;
+
+    private static int GetTier(DungeonBoonDefinition definition) =>
+        definition.Tier > 0
+            ? definition.Tier
+            : (int)definition.Rarity + 1;
+
+    private static int GetMaxFamilyStacks(DungeonBoonDefinition definition) =>
+        definition.MaxFamilyStacks > 0
+            ? definition.MaxFamilyStacks
+            : definition.MaxStacks;
 
     private static List<string> CreateEffectSummaries(DungeonBoonDefinition definition)
     {
