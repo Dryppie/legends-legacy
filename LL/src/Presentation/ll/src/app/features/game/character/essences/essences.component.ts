@@ -174,6 +174,13 @@ export class EssencesComponent implements OnInit {
     this.essenceState.setDraftSlot(slotIndex, selection.main as string | null);
   }
 
+  public setDraftSlotFromNativeDropdown(
+    slotIndex: number,
+    playerEssenceId: string | null,
+  ): void {
+    this.essenceState.setDraftSlot(slotIndex, playerEssenceId);
+  }
+
   public toggleUpgradeDetails(): void {
     this.upgradeDetailsOpen.update((open) => !open);
   }
