@@ -445,7 +445,7 @@
         </div>
 
         <div class="grid gap-2">
-          <label
+          <div
             class="ll-field"
             *ngFor="let slotIndex of essenceState.slotIndexes()"
           >
@@ -458,23 +458,7 @@
               [selectedValue]="essenceState.draftSlots()[slotIndex]"
               (selection)="setDraftSlotFromDropdown(slotIndex, $event)"
             ></app-dropdown>
-            <select
-              class="ll-select ll-input-compact mt-1 w-full cursor-pointer border-light_gray bg-black/40 text-sm text-neutral-300 focus:border-primary"
-              [ngModel]="essenceState.draftSlots()[slotIndex]"
-              (ngModelChange)="
-                setDraftSlotFromNativeDropdown(slotIndex, $event)
-              "
-            >
-              <option
-                *ngFor="let option of draftSlotDropdownOptions(slotIndex)"
-                class="bg-zinc-950 text-zinc-200 disabled:text-zinc-500"
-                [ngValue]="option.value"
-                [disabled]="option.disabled"
-              >
-                {{ option.label }}
-              </option>
-            </select>
-          </label>
+          </div>
         </div>
 
         <p class="ll-copy mt-2 text-xs" *ngIf="loadoutSaveHint() as saveHint">

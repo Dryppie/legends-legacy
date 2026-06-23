@@ -266,7 +266,20 @@ export class EssenceStateService {
 
   setDraftSlot(slotIndex: number, playerEssenceId: string | null): void {
     const slots = [...this._draftSlots()];
-    slots[slotIndex] = playerEssenceId || null;
+    const nextPlayerEssenceId = playerEssenceId || null;
+
+    if (nextPlayerEssenceId) {
+      const previousSlotIndex = slots.findIndex(
+        (slotPlayerEssenceId, index) =>
+          index !== slotIndex && slotPlayerEssenceId === nextPlayerEssenceId,
+      );
+
+      if (previousSlotIndex >= 0) {
+        slots[previousSlotIndex] = null;
+      }
+    }
+
+    slots[slotIndex] = nextPlayerEssenceId;
     this._draftSlots.set(slots);
   }
 

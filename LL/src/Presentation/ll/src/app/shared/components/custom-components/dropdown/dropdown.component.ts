@@ -56,6 +56,7 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
   @Output() readonly selection = new EventEmitter<DropdownSelection<T>>();
 
   readonly open = signal(false);
+  readonly hoveredOptionIndex = signal<number | null>(null);
   readonly menuId = `ll-dropdown-menu-${DropdownComponent.nextId++}`;
   readonly dropdownPositions: ConnectedPosition[] = [
     {
@@ -134,6 +135,31 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
   }
 
   onOptionClick(option: DropdownOption<T>): void {
+    this.selectOption(option);
+  }
+
+  onOptionPointerDown(event: PointerEvent, option: DropdownOption<T>): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.selectOption(option);
+  }
+
+  onOptionPointerEnter(optionIndex: number): void {
+    this.hoveredOptionIndex.set(optionIndex);
+  }
+
+  onOptionPointerLeave(optionIndex: number): void {
+    if (this.hoveredOptionIndex() === optionIndex) {
+      this.hoveredOptionIndex.set(null);
+    }
+  }
+
+  isOptionHovered(optionIndex: number): boolean {
+    return this.hoveredOptionIndex() === optionIndex;
+  }
+
+  private selectOption(option: DropdownOption<T>): void {
     if (option.disabled) return;
 
     this.close();
@@ -176,6 +202,7 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
   /** Public API required by the registry. */
   close(): void {
     this.open.set(false);
+    this.hoveredOptionIndex.set(null);
   }
 
   /* --------------------------------------------------------------------
@@ -186,7 +213,11 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
     if (!this.open()) return;
 
     const target = event.target as HTMLElement | null;
-    if (target && target.closest('app-dropdown') === null) {
+    if (
+      target &&
+      target.closest('app-dropdown') === null &&
+      target.closest(`#${this.menuId}`) === null
+    ) {
       this.close();
       this.registry.clear(this);
     }
