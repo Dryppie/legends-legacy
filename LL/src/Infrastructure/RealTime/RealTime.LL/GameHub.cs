@@ -6,11 +6,11 @@ using System.Security.Claims;
 namespace RealTime.LL;
 
 [Authorize]
-public sealed class GameHubV2 : Hub<IGameClientV2>
+public sealed class GameHub : Hub<IGameClient>
 {
     private readonly IGuildService _guildService;
 
-    public GameHubV2(IGuildService guildService)
+    public GameHub(IGuildService guildService)
     {
         _guildService = guildService;
     }
@@ -24,7 +24,7 @@ public sealed class GameHubV2 : Hub<IGameClientV2>
     public Task SubscribeToWorld()
     {
         _ = Context.RequireCharacterId();
-        return Groups.AddToGroupAsync(Context.ConnectionId, "world:v2");
+        return Groups.AddToGroupAsync(Context.ConnectionId, "world");
     }
 
     public async Task SubscribeToGuild(Guid guildId)
@@ -48,8 +48,8 @@ public sealed class GameHubV2 : Hub<IGameClientV2>
             : Groups.RemoveFromGroupAsync(Context.ConnectionId, CharacterGroup(characterId.Value));
     }
 
-    public static string CharacterGroup(Guid id) => $"char:v2:{id}";
-    public static string GuildGroup(Guid id) => $"guild:v2:{id}";
+    public static string CharacterGroup(Guid id) => $"char:{id}";
+    public static string GuildGroup(Guid id) => $"guild:{id}";
 }
 
 public static class HubCallerContextExtensions

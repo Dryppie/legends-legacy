@@ -6,18 +6,18 @@ import {
   LogLevel,
 } from '@microsoft/signalr';
 import { Subject } from 'rxjs';
-import { environment } from '../../../../environments/environment';
-import { GameConnectionStatus } from '../real-time/connection-status.model';
-import { GameRealtimeDiagnosticsV2 } from './game-realtime-diagnostics-v2.service';
-import { GameRealtimeEnvelopeV2 } from './game-realtime-contracts-v2';
-import { isGameRealtimeV2Enabled } from './game-realtime-feature-v2';
+import { environment } from '../../../../../environments/environment';
+import { GameConnectionStatus } from '../connection-status.model';
+import { GameRealtimeDiagnostics } from './game-realtime-diagnostics.service';
+import { GameRealtimeEnvelope } from './game-realtime-contracts';
+import { isGameRealtimeEnabled } from './game-realtime-feature';
 
 @Injectable({ providedIn: 'root' })
-export class GameRealtimeConnectionV2 {
-  private readonly hubUrl = `${environment.apiBaseUrl}/hub/game/v2`;
+export class GameRealtimeConnection {
+  private readonly hubUrl = `${environment.apiBaseUrl}/hub/game`;
   private readonly zone = inject(NgZone);
-  private readonly diagnostics = inject(GameRealtimeDiagnosticsV2);
-  private readonly eventsSubject = new Subject<GameRealtimeEnvelopeV2>();
+  private readonly diagnostics = inject(GameRealtimeDiagnostics);
+  private readonly eventsSubject = new Subject<GameRealtimeEnvelope>();
   private readonly _connectionStatus =
     signal<GameConnectionStatus>('disconnected');
   private readonly _reconnectCount = signal(0);
@@ -34,7 +34,7 @@ export class GameRealtimeConnectionV2 {
   readonly reconnectCount = computed(() => this._reconnectCount());
 
   async connect(): Promise<void> {
-    if (!isGameRealtimeV2Enabled()) return;
+    if (!isGameRealtimeEnabled()) return;
     this.diagnostics.start();
 
     if (this.hub?.state === HubConnectionState.Connected) return;
@@ -120,7 +120,7 @@ export class GameRealtimeConnectionV2 {
     if (!this.hub || this.handlersRegistered) return;
     this.handlersRegistered = true;
 
-    this.hub.on('ReceiveEvent', (envelope: GameRealtimeEnvelopeV2) => {
+    this.hub.on('ReceiveEvent', (envelope: GameRealtimeEnvelope) => {
       this.diagnostics.recordReceive(envelope);
       this.zone.run(() => this.eventsSubject.next(envelope));
     });
@@ -129,7 +129,7 @@ export class GameRealtimeConnectionV2 {
       this.activeGuildSubscriptions.clear();
       this.worldSubscriptionActive = false;
       this.zone.run(() => this._connectionStatus.set('reconnecting'));
-      if (error) console.warn('Game realtime v2 reconnecting', error);
+      if (error) console.warn('Game realtime reconnecting', error);
     });
 
     this.hub.onreconnected(() => {
@@ -144,7 +144,7 @@ export class GameRealtimeConnectionV2 {
       this.activeGuildSubscriptions.clear();
       this.worldSubscriptionActive = false;
       this.zone.run(() => this._connectionStatus.set('disconnected'));
-      if (error) console.warn('Game realtime v2 disconnected', error);
+      if (error) console.warn('Game realtime disconnected', error);
     });
   }
 
@@ -158,7 +158,7 @@ export class GameRealtimeConnectionV2 {
       try {
         await this.subscribeToWorld();
       } catch (error) {
-        console.warn('Failed to resubscribe to world realtime v2', error);
+        console.warn('Failed to resubscribe to world realtime', error);
       }
     }
 
@@ -166,7 +166,7 @@ export class GameRealtimeConnectionV2 {
       try {
         await this.subscribeToGuild(guildId);
       } catch (error) {
-        console.warn('Failed to resubscribe to guild realtime v2', error);
+        console.warn('Failed to resubscribe to guild realtime', error);
       }
     }
   }

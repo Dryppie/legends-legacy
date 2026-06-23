@@ -1,9 +1,9 @@
 import { Injectable, NgZone, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { environment } from '../../../../environments/environment';
-import { GameRealtimeEnvelopeV2 } from './game-realtime-contracts-v2';
+import { environment } from '../../../../../environments/environment';
+import { GameRealtimeEnvelope } from './game-realtime-contracts';
 
-export interface GameRealtimeDiagnosticEventV2 {
+export interface GameRealtimeDiagnosticEvent {
   event: string;
   updateId?: string;
   timestamp: number;
@@ -16,11 +16,11 @@ export interface GameRealtimeDiagnosticEventV2 {
 }
 
 @Injectable({ providedIn: 'root' })
-export class GameRealtimeDiagnosticsV2 {
+export class GameRealtimeDiagnostics {
   private readonly maxEvents = 100;
   private readonly slowHandlerMs = 50;
   private readonly freezeThresholdMs = 250;
-  private readonly events: GameRealtimeDiagnosticEventV2[] = [];
+  private readonly events: GameRealtimeDiagnosticEvent[] = [];
   private readonly router = inject(Router);
   private readonly zone = inject(NgZone);
   private heartbeatStarted = false;
@@ -32,7 +32,7 @@ export class GameRealtimeDiagnosticsV2 {
     this.startFreezeHeartbeat();
   }
 
-  recordReceive(envelope: GameRealtimeEnvelopeV2): void {
+  recordReceive(envelope: GameRealtimeEnvelope): void {
     this.push({
       event: envelope.event,
       updateId: envelope.updateId,
@@ -43,7 +43,7 @@ export class GameRealtimeDiagnosticsV2 {
   }
 
   runHandler(
-    envelope: GameRealtimeEnvelopeV2,
+    envelope: GameRealtimeEnvelope,
     handler: () => void,
     updatedState: boolean,
     causedHttpRequest = false,
@@ -67,14 +67,14 @@ export class GameRealtimeDiagnosticsV2 {
 
       if (duration > this.slowHandlerMs) {
         console.warn(
-          `[GameRealtimeV2] Slow handler: ${envelope.event} ${duration.toFixed(1)}ms`,
+          `[GameRealtime] Slow handler: ${envelope.event} ${duration.toFixed(1)}ms`,
           envelope.payload,
         );
       }
     }
   }
 
-  recentEvents(): GameRealtimeDiagnosticEventV2[] {
+  recentEvents(): GameRealtimeDiagnosticEvent[] {
     return [...this.events];
   }
 
@@ -86,14 +86,14 @@ export class GameRealtimeDiagnosticsV2 {
     this.events.length = 0;
   }
 
-  private push(entry: GameRealtimeDiagnosticEventV2): void {
+  private push(entry: GameRealtimeDiagnosticEvent): void {
     this.events.push(entry);
     while (this.events.length > this.maxEvents) {
       this.events.shift();
     }
   }
 
-  private findEntry(updateId?: string): GameRealtimeDiagnosticEventV2 | undefined {
+  private findEntry(updateId?: string): GameRealtimeDiagnosticEvent | undefined {
     if (!updateId) return this.events[this.events.length - 1];
     for (let i = this.events.length - 1; i >= 0; i -= 1) {
       if (this.events[i].updateId === updateId) return this.events[i];
@@ -119,7 +119,7 @@ export class GameRealtimeDiagnosticsV2 {
 
         if (blockedFor > this.freezeThresholdMs) {
           console.warn(
-            `[GameRealtimeV2] Main thread blocked for ${blockedFor.toFixed(0)}ms. Recent game realtime events:`,
+            `[GameRealtime] Main thread blocked for ${blockedFor.toFixed(0)}ms. Recent game realtime events:`,
           );
           this.printRecentEvents();
         }

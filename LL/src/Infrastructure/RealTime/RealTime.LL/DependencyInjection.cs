@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.WebSockets;
+using Application.Interfaces.WebSockets;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace RealTime.LL;
@@ -8,7 +8,7 @@ public static class DependencyInjection
     {
         // Related to regions
         services.AddScoped<IGameEventPublisher, GameEventPublisher>();
-        services.AddScoped<IGameRealtimeBroadcasterV2, GameRealtimeBroadcasterV2>();
+        services.AddScoped<IGameRealtimeBroadcaster, GameRealtimeBroadcaster>();
 
         return services;
     }

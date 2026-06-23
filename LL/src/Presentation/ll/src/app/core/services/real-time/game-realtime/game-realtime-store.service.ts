@@ -1,6 +1,6 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { CharacterActionDto } from '../../../shared/models/Dtos/characterActionDto';
-import { InventoryItem } from '../../../shared/models/inventoryItem';
+import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
+import { InventoryItem } from '../../../../shared/models/inventoryItem';
 
 interface RecentLootEntry {
   item: InventoryItem;
@@ -8,7 +8,7 @@ interface RecentLootEntry {
 }
 
 @Injectable({ providedIn: 'root' })
-export class GameRealtimeStoreV2 {
+export class GameRealtimeStore {
   private readonly maxLootEntries = 60;
   private readonly _recentLoot = signal<RecentLootEntry[]>([]);
   private readonly _lastIdleAction = signal<CharacterActionDto | null>(null);

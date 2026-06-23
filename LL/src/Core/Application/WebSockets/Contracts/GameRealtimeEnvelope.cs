@@ -1,6 +1,6 @@
-namespace Application.WebSockets.Contracts.V2;
+namespace Application.WebSockets.Contracts;
 
-public sealed class GameRealtimeEnvelopeV2
+public sealed class GameRealtimeEnvelope
 {
     public required Guid UpdateId { get; init; }
     public required DateTimeOffset OccurredAt { get; init; }

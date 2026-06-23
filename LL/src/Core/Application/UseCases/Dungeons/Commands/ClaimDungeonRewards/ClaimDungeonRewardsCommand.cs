@@ -7,7 +7,6 @@ using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Inventories.Dtos;
 using Application.WebSockets.Contracts;
-using Application.WebSockets.Contracts.V2;
 using AutoMapper;
 using Common.Primitives;
 using MediatR;
@@ -21,20 +20,20 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
     private readonly IDungeonRunService _dungeonRunService;
     private readonly IInventoryService _inventoryService;
     private readonly ICharacterService _characterService;
-    private readonly IGameRealtimeBroadcasterV2 _gameRealtimeV2;
+    private readonly IGameRealtimeBroadcaster _gameRealtime;
     private readonly IMapper _mapper;
 
     public ClaimDungeonRewardsCommandHandler(
         IDungeonRunService dungeonRunService,
         IInventoryService inventoryService,
         ICharacterService characterService,
-        IGameRealtimeBroadcasterV2 gameRealtimeV2,
+        IGameRealtimeBroadcaster gameRealtime,
         IMapper mapper)
     {
         _dungeonRunService = dungeonRunService;
         _inventoryService = inventoryService;
         _characterService = characterService;
-        _gameRealtimeV2 = gameRealtimeV2;
+        _gameRealtime = gameRealtime;
         _mapper = mapper;
     }
 
@@ -53,21 +52,21 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
         var claimedLoot = _mapper.Map<List<InventoryItemDto>>(result.ClaimedLoot);
         var characterDto = _mapper.Map<CharacterDto>(character);
 
-        await _gameRealtimeV2.PublishAsync(
+        await _gameRealtime.PublishAsync(
             new Audience.Character(request.CharacterId),
-            new DungeonRewardsClaimedV2(request.CharacterId, claimedLoot),
+            new DungeonRewardsClaimed(request.CharacterId, claimedLoot),
             nameof(ClaimDungeonRewardsCommandHandler),
             cancellationToken);
 
-        await _gameRealtimeV2.PublishAsync(
+        await _gameRealtime.PublishAsync(
             new Audience.Character(request.CharacterId),
-            new InventorySnapshotV2(request.CharacterId, inventoryItems, "dungeon-reward-claim"),
+            new InventorySnapshot(request.CharacterId, inventoryItems, "dungeon-reward-claim"),
             nameof(ClaimDungeonRewardsCommandHandler),
             cancellationToken);
 
-        await _gameRealtimeV2.PublishAsync(
+        await _gameRealtime.PublishAsync(
             new Audience.Character(request.CharacterId),
-            new CharacterSnapshotV2(request.CharacterId, characterDto, "dungeon-reward-claim"),
+            new CharacterSnapshot(request.CharacterId, characterDto, "dungeon-reward-claim"),
             nameof(ClaimDungeonRewardsCommandHandler),
             cancellationToken);
 

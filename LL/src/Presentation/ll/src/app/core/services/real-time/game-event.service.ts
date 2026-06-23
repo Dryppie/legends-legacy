@@ -8,10 +8,10 @@ import {
 } from './game-event/game-event.map';
 import { AudienceDto } from './audience/aducienceDto';
 import { GameEventEnvelope } from './game-event/game-event-envelope';
-import { GameRealtimeDiagnosticsV2 } from '../real-time-v2/game-realtime-diagnostics-v2.service';
-import { GameRealtimeConnectionV2 } from '../real-time-v2/game-realtime-connection-v2.service';
-import { GameRealtimeEnvelopeV2 } from '../real-time-v2/game-realtime-contracts-v2';
-import { isGameRealtimeV2Enabled } from '../real-time-v2/game-realtime-feature-v2';
+import { GameRealtimeDiagnostics } from './game-realtime/game-realtime-diagnostics.service';
+import { GameRealtimeConnection } from './game-realtime/game-realtime-connection.service';
+import { GameRealtimeEnvelope } from './game-realtime/game-realtime-contracts';
+import { isGameRealtimeEnabled } from './game-realtime/game-realtime-feature';
 
 @Injectable({ providedIn: 'root' })
 export class GameEventService {
@@ -41,15 +41,15 @@ export class GameEventService {
   readonly reconnectCount;
 
   constructor(
-    private readonly connection: GameRealtimeConnectionV2,
-    private readonly diagnostics: GameRealtimeDiagnosticsV2,
+    private readonly connection: GameRealtimeConnection,
+    private readonly diagnostics: GameRealtimeDiagnostics,
   ) {
     this.connectionStatus = this.connection.connectionStatus;
     this.reconnectCount = this.connection.reconnectCount;
   }
 
   async connect(audience?: AudienceDto): Promise<void> {
-    if (!isGameRealtimeV2Enabled()) return;
+    if (!isGameRealtimeEnabled()) return;
 
     this.initialize();
     await this.connection.connect();
@@ -116,7 +116,7 @@ export class GameEventService {
     this.connection.events$.subscribe((envelope) => this.dispatch(envelope));
   }
 
-  private dispatch(envelope: GameRealtimeEnvelopeV2): void {
+  private dispatch(envelope: GameRealtimeEnvelope): void {
     if (envelope.updateId && this.hasHandledUpdate(envelope.updateId)) {
       return;
     }

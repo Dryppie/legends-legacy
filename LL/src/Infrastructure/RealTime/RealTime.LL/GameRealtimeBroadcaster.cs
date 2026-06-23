@@ -1,20 +1,19 @@
 using Application.Interfaces.WebSockets;
 using Application.WebSockets.Contracts;
-using Application.WebSockets.Contracts.V2;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace RealTime.LL;
 
-internal sealed class GameRealtimeBroadcasterV2 : IGameRealtimeBroadcasterV2
+internal sealed class GameRealtimeBroadcaster : IGameRealtimeBroadcaster
 {
-    private readonly IHubContext<GameHubV2, IGameClientV2> _hub;
-    private readonly ILogger<GameRealtimeBroadcasterV2> _logger;
+    private readonly IHubContext<GameHub, IGameClient> _hub;
+    private readonly ILogger<GameRealtimeBroadcaster> _logger;
 
-    public GameRealtimeBroadcasterV2(
-        IHubContext<GameHubV2, IGameClientV2> hub,
-        ILogger<GameRealtimeBroadcasterV2> logger)
+    public GameRealtimeBroadcaster(
+        IHubContext<GameHub, IGameClient> hub,
+        ILogger<GameRealtimeBroadcaster> logger)
     {
         _hub = hub;
         _logger = logger;
@@ -22,11 +21,11 @@ internal sealed class GameRealtimeBroadcasterV2 : IGameRealtimeBroadcasterV2
 
     public Task PublishAsync(
         Audience audience,
-        GameRealtimeEventV2 message,
+        GameRealtimeEvent message,
         string sender,
         CancellationToken cancellationToken = default)
     {
-        var envelope = new GameRealtimeEnvelopeV2
+        var envelope = new GameRealtimeEnvelope
         {
             UpdateId = Guid.NewGuid(),
             OccurredAt = DateTimeOffset.UtcNow,
@@ -35,7 +34,7 @@ internal sealed class GameRealtimeBroadcasterV2 : IGameRealtimeBroadcasterV2
         };
 
         _logger.LogInformation(
-            "Game realtime v2 send {Event} target={Target} sender={Sender} payloadBytes={PayloadBytes} sentAt={SentAt:o}",
+            "Game realtime send {Event} target={Target} sender={Sender} payloadBytes={PayloadBytes} sentAt={SentAt:o}",
             envelope.Event,
             DescribeAudience(audience),
             sender,
@@ -45,10 +44,10 @@ internal sealed class GameRealtimeBroadcasterV2 : IGameRealtimeBroadcasterV2
         return Send(audience, envelope);
     }
 
-    private Task Send(Audience audience, GameRealtimeEnvelopeV2 envelope) => audience switch
+    private Task Send(Audience audience, GameRealtimeEnvelope envelope) => audience switch
     {
-        Audience.Character character => _hub.Clients.Group(GameHubV2.CharacterGroup(character.CharacterId)).ReceiveEvent(envelope),
-        Audience.Guild guild => _hub.Clients.Group(GameHubV2.GuildGroup(guild.GuildId)).ReceiveEvent(envelope),
+        Audience.Character character => _hub.Clients.Group(GameHub.CharacterGroup(character.CharacterId)).ReceiveEvent(envelope),
+        Audience.Guild guild => _hub.Clients.Group(GameHub.GuildGroup(guild.GuildId)).ReceiveEvent(envelope),
         Audience.World => _hub.Clients.All.ReceiveEvent(envelope),
         _ => throw new ArgumentException($"Unsupported audience type: {audience.GetType().Name}", nameof(audience)),
     };
@@ -61,7 +60,7 @@ internal sealed class GameRealtimeBroadcasterV2 : IGameRealtimeBroadcasterV2
         _ => audience.GetType().Name
     };
 
-    private static int EstimatePayloadBytes(GameRealtimeEnvelopeV2 envelope)
+    private static int EstimatePayloadBytes(GameRealtimeEnvelope envelope)
     {
         try
         {
