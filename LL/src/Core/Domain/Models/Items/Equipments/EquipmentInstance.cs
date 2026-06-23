@@ -18,6 +18,7 @@ public class EquipmentInstance : ItemInstance
         ? ToolInstanceNaming.GetDisplayName(EquipmentBase.Name, Rarity)
         : EquipmentBase.Name;
 
+    [NotMapped]
     public IReadOnlyCollection<ItemAttributeModifier> BaseModifiers =>
         EquipmentBase?.AttributeModifiers
             .Select(attr => new ItemAttributeModifier(attr.AttributeType, (int)Math.Ceiling(attr.Amount * Boost), attr.ModifierType))
