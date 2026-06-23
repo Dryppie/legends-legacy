@@ -153,7 +153,8 @@ public class DungeonRunDto : IMapFrom<DungeonRun>
                 Id = choice.Id,
                 Name = choice.Name,
                 Description = choice.Description,
-                Rarity = choice.Rarity
+                Rarity = choice.Rarity,
+                EffectSummaries = choice.EffectSummaries.ToList()
             }).ToList(),
             CurrentBossModifiers = state.CurrentBossModifiers.Select(modifier => new DungeonBossModifierDto
             {

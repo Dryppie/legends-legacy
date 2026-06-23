@@ -227,6 +227,28 @@ export class DungeonPageComponent {
     return this.getRoomTypeLabel(room.type);
   });
 
+  readonly isChoosingBoon = computed(() => this.boonChoices().length > 0);
+
+  readonly isChoosingRoute = computed(
+    () => !this.isChoosingBoon() && this.routeOptions().length > 0,
+  );
+
+  readonly activeRunPhaseLabel = computed(() => {
+    if (this.isChoosingBoon()) return 'Run Choice';
+    if (this.isChoosingRoute()) return 'Room Cleared';
+
+    return 'Current Room';
+  });
+
+  readonly activeRunTitle = computed(() => {
+    if (this.isChoosingBoon()) return 'Choose a Boon';
+    if (this.isChoosingRoute()) return 'Choose a Route';
+
+    return this.currentRoomTitle();
+  });
+
+  readonly showCurrentRoomIcon = computed(() => !this.isChoosingRoute());
+
   readonly currentDecisionText = computed(() => {
     const run = this.activeDungeon();
     const room = this.currentRoom();

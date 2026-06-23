@@ -141,6 +141,7 @@ export interface DungeonBoonChoiceOption {
   name: string;
   description: string;
   rarity: string;
+  effectSummaries: string[];
 }
 
 export interface DungeonBossModifier {

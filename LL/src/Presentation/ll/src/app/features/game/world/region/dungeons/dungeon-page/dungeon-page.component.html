@@ -353,16 +353,16 @@
             </div>
           </div>
 
-          <div class="ll-icon-orb mx-auto">
+          <div *ngIf="showCurrentRoomIcon()" class="ll-icon-orb mx-auto">
             <app-dungeon-room-icon
               [type]="currentRoom()?.type"
             ></app-dungeon-room-icon>
           </div>
 
-          <div class="ll-eyebrow">Current Room</div>
+          <div class="ll-eyebrow">{{ activeRunPhaseLabel() }}</div>
 
           <h2 class="ll-heading text-3xl">
-            {{ currentRoomTitle() }}
+            {{ activeRunTitle() }}
           </h2>
 
           <div
@@ -492,6 +492,12 @@
                   <span *ngIf="choice.ambushChancePercent">
                     · Ambush {{ choice.ambushChancePercent }}%
                   </span>
+                  <span *ngIf="choice.grantsBoonChoice">
+                    · Boon choice
+                  </span>
+                  <span *ngIf="choice.grantsLoot">
+                    · Loot
+                  </span>
                   <span *ngIf="choice.revealsHiddenRoute">
                     · Reveals route
                   </span>
@@ -566,6 +572,20 @@
                 </div>
                 <div class="mt-1 text-xs text-secondary">
                   {{ boon.rarity }}
+                </div>
+                <div
+                  *ngIf="boon.effectSummaries?.length"
+                  class="mt-3 flex flex-wrap gap-1"
+                >
+                  <span
+                    *ngFor="
+                      let effect of boon.effectSummaries;
+                      trackBy: trackByIndex
+                    "
+                    class="ll-badge ll-badge-accent rounded text-[0.65rem]"
+                  >
+                    {{ effect }}
+                  </span>
                 </div>
                 <p class="mt-2 text-xs text-secondary">
                   {{ boon.description }}

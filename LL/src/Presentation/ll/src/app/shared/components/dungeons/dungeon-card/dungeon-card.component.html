@@ -424,7 +424,10 @@
                 <article class="ll-card min-w-0 px-3 py-3">
                   <div class="ll-eyebrow">Bonuses</div>
                   <div
-                    *ngIf="selectedMasteryBonuses().length; else noMasteryBonuses"
+                    *ngIf="
+                      selectedMasteryBonuses().length;
+                      else noMasteryBonuses
+                    "
                     class="mt-3 space-y-2"
                   >
                     <div

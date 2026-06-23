@@ -230,6 +230,56 @@ public sealed class DungeonRogueliteStateTests
         Assert.Equal(3, choices.Count);
         Assert.DoesNotContain(choices, x => x.Id == "hunter_focus");
         Assert.All(choices, x => Assert.False(string.IsNullOrWhiteSpace(x.Rarity)));
+        Assert.All(choices, x => Assert.NotEmpty(x.EffectSummaries));
+    }
+
+    [Fact]
+    public void Boon_generation_includes_readable_effect_summaries()
+    {
+        var run = CreateRun();
+        run.State.ActiveBoonIds.Add("bulwark_echo");
+        run.State.ActiveBoonIds.Add("hunter_focus");
+        run.State.ActiveBoonIds.Add("guardian_root");
+        var service = CreateBoonService();
+
+        var choice = Assert.Single(service.GenerateBoonChoices(run));
+
+        Assert.Equal("mana_spiral", choice.Id);
+        Assert.Contains("+12% Spirit", choice.EffectSummaries);
+        Assert.Contains("+5 Magic Penetration", choice.EffectSummaries);
+        Assert.Contains("+8% main damage effects", choice.EffectSummaries);
+    }
+
+    [Theory]
+    [InlineData(RoomType.Combat, 4)]
+    [InlineData(RoomType.MiniBoss, 8)]
+    public void Combat_victory_completion_generates_boon_choices_for_non_boss_battles(
+        RoomType roomType,
+        int expectedPressure)
+    {
+        var run = CreateRun();
+        var room = run.Rooms[0];
+        room.Type = roomType;
+
+        InvokeApplyRoomCompletionPressure(run, room);
+
+        Assert.Equal(expectedPressure, run.State.Pressure);
+        Assert.Equal(1, run.State.Flags.GetValueOrDefault("pending_boon_advances_room"));
+        Assert.NotEmpty(run.State.CurrentBoonChoices);
+    }
+
+    [Fact]
+    public void Boss_victory_completion_does_not_generate_boon_choices()
+    {
+        var run = CreateRun();
+        var room = run.Rooms[0];
+        room.Type = RoomType.Boss;
+
+        InvokeApplyRoomCompletionPressure(run, room);
+
+        Assert.Equal(0, run.State.Pressure);
+        Assert.False(run.State.Flags.ContainsKey("pending_boon_advances_room"));
+        Assert.Empty(run.State.CurrentBoonChoices);
     }
 
     [Fact]
@@ -986,6 +1036,42 @@ public sealed class DungeonRogueliteStateTests
         throw new DirectoryNotFoundException("Could not locate LL/src/API/API.LL/Data/dungeon-boons.json from test output directory.");
     }
 
+    private static void InvokeApplyRoomCompletionPressure(DungeonRun run, RoomInstance room)
+    {
+        var definitions = new SingleDungeonDefinitions(new DungeonDefinition
+        {
+            Id = run.DungeonDefinitionId,
+            Name = "Test Dungeon"
+        });
+
+        var service = new DungeonRunService(
+            null!,
+            null!,
+            null!,
+            null!,
+            null!,
+            null!,
+            null!,
+            definitions,
+            null!,
+            null!,
+            new DungeonPressureService(definitions),
+            null!,
+            CreateBoonService(),
+            null!,
+            null!,
+            null!,
+            null!,
+            null!);
+
+        var method = typeof(DungeonRunService).GetMethod(
+            "ApplyRoomCompletionPressure",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+
+        Assert.NotNull(method);
+        method.Invoke(service, [run, room]);
+    }
+
     private static DungeonBoonService CreateBoonService() => new(new StaticBoonDefinitions(
     [
         new()
@@ -1018,6 +1104,11 @@ public sealed class DungeonRogueliteStateTests
             Name = "Mana Spiral",
             Description = "Damage abilities gain momentum during rooms.",
             Rarity = DungeonBoonRarity.Uncommon,
+            AttributeModifiers =
+            [
+                new EssenceAttributeModifier(AttributeType.Spirit, 12, ModifierType.Additive),
+                new EssenceAttributeModifier(AttributeType.MagicPenetration, 5, ModifierType.Flat)
+            ],
             AbilityModifiers =
             [
                 new()

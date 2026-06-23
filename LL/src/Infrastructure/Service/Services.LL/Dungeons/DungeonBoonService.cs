@@ -3,6 +3,7 @@ using Domain.Models.Attributes.Modifiers;
 using Domain.Models.Dungeons.Definitions.Boons;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Essences.Definitions;
+using System.Globalization;
 
 namespace Services.LL.Dungeons;
 
@@ -130,8 +131,118 @@ public sealed class DungeonBoonService : IDungeonBoonService
         Id = definition.Id,
         Name = definition.Name,
         Description = definition.Description,
-        Rarity = definition.Rarity.ToString()
+        Rarity = definition.Rarity.ToString(),
+        EffectSummaries = CreateEffectSummaries(definition)
     };
+
+    private static List<string> CreateEffectSummaries(DungeonBoonDefinition definition)
+    {
+        var summaries = definition.AttributeModifiers
+            .Select(FormatAttributeModifier)
+            .Concat(definition.AbilityModifiers.Select(FormatAbilityModifier))
+            .Where(summary => !string.IsNullOrWhiteSpace(summary))
+            .ToList();
+
+        return summaries.Count > 0
+            ? summaries
+            : ["No direct combat effect."];
+    }
+
+    private static string FormatAttributeModifier(EssenceAttributeModifier modifier)
+    {
+        var amount = FormatSignedAmount(modifier.Amount, modifier.ModifierType != ModifierType.Flat);
+        var attribute = FormatIdentifier(modifier.AttributeType.ToString());
+        var suffix = modifier.ModifierType switch
+        {
+            ModifierType.Multiplicative => " multiplier",
+            _ => string.Empty
+        };
+
+        return $"{amount} {attribute}{suffix}";
+    }
+
+    private static string FormatAbilityModifier(EssenceAbilityModifierDefinition modifier)
+    {
+        var target = FormatAbilityTarget(modifier.Target);
+
+        if (modifier.Operation.Equals("AddMultiplier", StringComparison.OrdinalIgnoreCase))
+        {
+            var percent = FormatSignedDouble(modifier.Value * 100);
+            return $"{percent}% {target}";
+        }
+
+        if (modifier.Operation.Equals("AddEffect", StringComparison.OrdinalIgnoreCase))
+        {
+            return $"Adds {target}";
+        }
+
+        var value = FormatSignedDouble(modifier.Value);
+        return $"{FormatIdentifier(modifier.Operation)} {value} to {target}";
+    }
+
+    private static string FormatSignedAmount(float value, bool asPercent)
+    {
+        var formatted = value.ToString("0.##", CultureInfo.InvariantCulture);
+        var prefix = value > 0 ? "+" : string.Empty;
+        return asPercent ? $"{prefix}{formatted}%" : $"{prefix}{formatted}";
+    }
+
+    private static string FormatSignedDouble(double value)
+    {
+        var formatted = value.ToString("0.##", CultureInfo.InvariantCulture);
+        var prefix = value > 0 ? "+" : string.Empty;
+        return $"{prefix}{formatted}";
+    }
+
+    private static string FormatAbilityTarget(string target)
+    {
+        if (target.Equals("effect.damage.main", StringComparison.OrdinalIgnoreCase))
+        {
+            return "main damage effects";
+        }
+
+        return FormatIdentifier(target);
+    }
+
+    private static string FormatIdentifier(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "effect";
+        }
+
+        return string.Join(
+            ' ',
+            value
+                .Replace('.', ' ')
+                .Replace('_', ' ')
+                .Replace('-', ' ')
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Select(SplitIdentifierPart))
+            .Trim();
+    }
+
+    private static string SplitIdentifierPart(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        var chars = new List<char>(value.Length + 4);
+        for (var i = 0; i < value.Length; i++)
+        {
+            var current = value[i];
+            if (i > 0 && char.IsUpper(current) && !char.IsUpper(value[i - 1]))
+            {
+                chars.Add(' ');
+            }
+
+            chars.Add(i == 0 ? char.ToUpperInvariant(current) : current);
+        }
+
+        return new string(chars.ToArray());
+    }
 
     private static int CreateRunSeed(int runSeed, int roomIndex, int activeBoonCount)
     {

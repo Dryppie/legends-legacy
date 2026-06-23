@@ -1423,7 +1423,7 @@ public sealed class DungeonRunService : IDungeonRunService
             _pressure.ApplyPressureDelta(run, delta);
         }
 
-        if (room.Type == RoomType.MiniBoss)
+        if (room.Type is RoomType.Combat or RoomType.MiniBoss)
         {
             if (_boons.GenerateBoonChoices(run).Count > 0)
             {

@@ -83,6 +83,7 @@ public sealed class DungeonBoonChoiceOptionDto
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Rarity { get; set; } = string.Empty;
+    public List<string> EffectSummaries { get; set; } = [];
 }
 
 public sealed class DungeonBossModifierDto
