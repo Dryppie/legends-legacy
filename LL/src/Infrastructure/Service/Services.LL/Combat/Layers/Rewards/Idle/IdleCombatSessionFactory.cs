@@ -25,13 +25,14 @@ public sealed class IdleCombatSessionFactory : IIdleCombatSessionFactory
 
         var summary = new CombatSummary
         {
+            TotalBattles = facts.Encounters.Count,
+            Wins = facts.Encounters.Count(x => x.Outcome == BattleOutcome.Victory),
+            Losses = facts.Encounters.Count(x => x.Outcome == BattleOutcome.Defeat),
+            Draws = facts.Encounters.Count(x => x.Outcome == BattleOutcome.Draw),
             TotalExperience = outcome.TotalExperience,
             TotalCinders = outcome.TotalCinders,
             TotalSoulstones = outcome.TotalSoulstones
         };
-
-        // If your existing CombatSummary has more counters,
-        // populate them here from facts.Encounters instead of inside the reward calculator.
 
         return new CombatSession
         {

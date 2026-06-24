@@ -18,6 +18,7 @@ import { Observable } from 'rxjs';
 import { GameEventService } from '../../real-time/game-event.service';
 import { InventoryStateService } from '../inventory/inventory-state.service';
 import { CharacterStateService } from '../character/character-state.service';
+import { isGameRealtimeEnabled } from '../../real-time/game-realtime/game-realtime-feature';
 
 @Injectable({
   providedIn: 'root',
@@ -180,6 +181,8 @@ export class DungeonStateService {
   }
 
   claimDungeonRewards(onSuccess?: () => void): void {
+    if (this._loading()) return;
+
     this._loading.set(true);
     this._error.set(null);
 
@@ -226,6 +229,8 @@ export class DungeonStateService {
 
   private applyClaimDungeonRewards(response: ClaimDungeonRewardsResponse): void {
     this._activeDungeon.set(response.activeRun);
+    if (isGameRealtimeEnabled()) return;
+
     this.inventoryState.setInventory(response.inventoryItems, response.claimedLoot);
     this.characterState.updateCharacter(response.character);
   }

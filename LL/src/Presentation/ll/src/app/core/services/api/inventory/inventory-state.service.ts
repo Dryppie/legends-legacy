@@ -5,6 +5,7 @@ import { InventoryService } from './inventory.service';
 import { ItemType } from '../../../../shared/models/enums/itemType';
 import { GameEventService } from '../../real-time/game-event.service';
 import { GameEventDeduper } from '../../real-time/game-event/game-event-consumer';
+import { isGameRealtimeEnabled } from '../../real-time/game-realtime/game-realtime-feature';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryStateService {
@@ -30,6 +31,8 @@ export class InventoryStateService {
 
     effect(
       () => {
+        if (isGameRealtimeEnabled()) return;
+
         const envelope = this.eventService.eventEnvelope.LootReceivedMsg();
         const loot = envelope?.payload;
         if (loot) {

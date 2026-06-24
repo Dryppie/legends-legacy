@@ -1,5 +1,5 @@
 import { effect, Injectable } from '@angular/core';
-import { delay, of, Subscription } from 'rxjs';
+import { bufferTime, delay, filter, of, Subscription } from 'rxjs';
 import { CharacterActionDto } from '../../../../shared/models/Dtos/characterActionDto';
 import { CombatStateService } from '../../../state/combat-state/combat-state.service';
 import { EventBusService } from '../event-bus/event-bus.service';
@@ -12,6 +12,7 @@ import { CombatResultDto } from '../../../../shared/models/Dtos/combatResultDto'
 })
 export class CombatService {
   private combatEndSubscriptions = new Map<BattleType, Subscription>();
+  private combatEventSubscriptions = new Map<BattleType, Subscription>();
 
   constructor(
     private playback: CombatPlaybackService,
@@ -60,13 +61,14 @@ export class CombatService {
     const combatResult = characterAction.combatSession?.combatResult;
     if (!combatResult) return;
     combatResult.battleType = BattleType.IdleCombat;
-    this.combatStateService.resetCombatStateForNextBattle(
-      combatResult.battleType,
-    );
 
     this.combatStateService.setNextCombatIn(
       combatResult.battleType,
       characterAction.updatedAt,
+    );
+
+    this.combatStateService.resetCombatStateForNextBattle(
+      combatResult.battleType,
     );
 
     this.combatStateService.setCombatActive(combatResult.battleType, true);
@@ -86,9 +88,19 @@ export class CombatService {
     const now = Date.now();
 
     if (combatAction.eventLog.length > 0) {
-      this.playback.play(combatResult).subscribe({
-        next: (ev) => this.combatStateService.addCombatEvent(type, ev),
-      });
+      this.combatEventSubscriptions.get(type)?.unsubscribe();
+      const eventSub = this.playback
+        .play(combatResult)
+        .pipe(
+          bufferTime(16),
+          filter((events) => events.length > 0),
+        )
+        .subscribe({
+          next: (events) =>
+            this.combatStateService.addCombatEvents(type, events),
+          complete: () => this.combatEventSubscriptions.delete(type),
+        });
+      this.combatEventSubscriptions.set(type, eventSub);
     }
 
     const combatDurationMs = combatAction.duration * 100;
@@ -128,11 +140,11 @@ export class CombatService {
     this.combatEndSubscriptions.get(type)?.unsubscribe();
     this.combatEndSubscriptions.delete(type);
 
-    const alreadyPlayed =
-      this.combatStateService.getCombatEvents(type)().length;
-    combatResult.eventLog
-      .slice(alreadyPlayed)
-      .forEach((ev) => this.combatStateService.addCombatEvent(type, ev));
+    const alreadyPlayed = this.combatStateService.getLastEventsLength(type);
+    this.combatStateService.addCombatEvents(
+      type,
+      combatResult.eventLog.slice(alreadyPlayed),
+    );
 
     this.combatStateService.setCombatOutcome(type, combatResult.outcome);
     this.combatStateService.setCombatActive(type, false);
@@ -152,11 +164,11 @@ export class CombatService {
     this.combatEndSubscriptions.get(type)?.unsubscribe();
     this.combatEndSubscriptions.delete(type);
 
-    const alreadyPlayed =
-      this.combatStateService.getCombatEvents(type)().length;
-    combatResult.eventLog
-      .slice(alreadyPlayed)
-      .forEach((ev) => this.combatStateService.addCombatEvent(type, ev));
+    const alreadyPlayed = this.combatStateService.getLastEventsLength(type);
+    this.combatStateService.addCombatEvents(
+      type,
+      combatResult.eventLog.slice(alreadyPlayed),
+    );
 
     this.combatStateService.setCombatOutcome(type, combatResult.outcome);
     this.combatStateService.setCombatActive(type, false);
@@ -176,16 +188,28 @@ export class CombatService {
     }
 
     this.combatStateService.setCombatActive(type, false);
+
+    if (type === BattleType.IdleCombat) {
+      return;
+    }
+
     this.stop(type);
   }
 
   /** stop & forget a particular fight (e.g. UI tab closed) */
   stop(battleType: BattleType) {
-    this.playback.stop(); // cancels *all* streams; adapt if you need per‑session cancel
+    this.combatEventSubscriptions.get(battleType)?.unsubscribe();
+    this.combatEventSubscriptions.delete(battleType);
+    this.combatEndSubscriptions.get(battleType)?.unsubscribe();
+    this.combatEndSubscriptions.delete(battleType);
     this.combatStateService.resetCombatState(battleType);
   }
 
   handleLogout() {
+    this.combatEventSubscriptions.forEach((sub) => sub.unsubscribe());
+    this.combatEventSubscriptions.clear();
+    this.combatEndSubscriptions.forEach((sub) => sub.unsubscribe());
+    this.combatEndSubscriptions.clear();
     this.clearCurrentCombat(BattleType.IdleCombat);
   }
 }

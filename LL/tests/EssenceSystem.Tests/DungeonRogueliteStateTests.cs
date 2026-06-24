@@ -1,4 +1,5 @@
 using Application.Interfaces.Services.AdminDashboard;
+using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.UseCases._AdminDashboard.Creatures.Dtos;
 using Domain.Models.Attributes;
@@ -15,6 +16,8 @@ using Domain.Models.Essences.Definitions;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
+using Domain.Models.MarketPlaces;
+using Domain.Models.Professions.Crafting;
 using Microsoft.Extensions.Configuration;
 using Services.LL.Combat.Layers.Orchestration.Dungeon;
 using Services.LL.Combat.Layers.Orchestration.Models;
@@ -852,17 +855,17 @@ public sealed class DungeonRogueliteStateTests
         };
         var experience = new CapturingExperienceRewardWriter();
         var currency = new CapturingCurrencyRewardWriter();
-        var loot = new CapturingLootRewardWriter();
+        var inventory = new CapturingInventoryService();
         var claimer = new DungeonRunRewardClaimer(
             experience,
-            loot,
             currency,
             new StaticItemBaseRepository(
             [
                 new() { Id = "item.secured", Name = "Secured", ItemType = ItemType.Resource, Stackable = true },
                 new() { Id = "item.unsecured", Name = "Unsecured", ItemType = ItemType.Resource, Stackable = true }
             ]),
-            new InventoryItemFactory());
+            new InventoryItemFactory(),
+            inventory);
 
         var claimed = await claimer.ClaimAsync(run, CancellationToken.None);
 
@@ -872,7 +875,7 @@ public sealed class DungeonRogueliteStateTests
         var claimedItem = Assert.Single(claimed);
         Assert.Equal("item.secured", claimedItem.ItemInstance.ItemBaseId);
         Assert.Equal(4, claimedItem.Quantity);
-        Assert.DoesNotContain(loot.Items, item => item.ItemInstance.ItemBaseId == "item.unsecured");
+        Assert.DoesNotContain(inventory.Items, item => item.ItemInstance.ItemBaseId == "item.unsecured");
     }
 
     [Fact]
@@ -1404,18 +1407,51 @@ public sealed class DungeonRogueliteStateTests
         }
     }
 
-    private sealed class CapturingLootRewardWriter : ILootRewardWriter
+    private sealed class CapturingInventoryService : IInventoryService
     {
         public List<InventoryItem> Items { get; } = [];
 
-        public Task AddLootAsync(
+        public Task<Inventory?> GetInventoryByIdAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.FromResult<Inventory?>(null);
+
+        public Task AddItemsToInventory(
             Guid characterId,
-            IReadOnlyCollection<InventoryItem> items,
+            List<InventoryItem> loot,
             CancellationToken cancellationToken)
         {
-            Items.AddRange(items);
+            Items.AddRange(loot);
             return Task.CompletedTask;
         }
+
+        public Task CreateInventoryAsync(Guid characterId, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+
+        public Task<bool> TryRemoveCraftingMaterialsAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken) =>
+            Task.FromResult(false);
+
+        public Task<bool> TryRemoveItemsForMarketPlaceListingAsync(
+            Guid characterId,
+            MarketPlaceListing marketplaceListing,
+            CancellationToken cancellationToken) =>
+            Task.FromResult(false);
+
+        public Task<bool> AddItemInstanceBackToInventory(
+            Guid characterId,
+            ItemInstance itemInstance,
+            CancellationToken cancellationToken) =>
+            Task.FromResult(false);
+
+        public Task AddItemToInventoryFromMarketPlace(
+            Guid characterId,
+            InventoryItem inventoryItem,
+            CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+
+        public Task<InventoryItem?> ScrapEquipments(
+            Guid characterId,
+            List<Guid> parsedGuids,
+            CancellationToken cancellationToken) =>
+            Task.FromResult<InventoryItem?>(null);
     }
 
     private sealed class StaticItemBaseRepository(IReadOnlyList<ItemBase> itemBases) : IItemBaseRepository

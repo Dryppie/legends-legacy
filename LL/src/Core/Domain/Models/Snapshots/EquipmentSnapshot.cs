@@ -37,7 +37,17 @@ public sealed class EquipmentSnapshot
             ItemXp = inst.ItemXp,
             IsMasterpiece = inst.IsMasterpiece,
             IsLevelingItem = inst.IsLevelingItem,
-            InstanceModifiers = inst.InstanceModifiers?.ToList() ?? []
+            InstanceModifiers = inst.InstanceModifiers?
+                .Select(CloneInstanceModifier)
+                .ToList() ?? []
         };
     }
+
+    private static InstanceAttributeModifier CloneInstanceModifier(
+        InstanceAttributeModifier modifier) =>
+        new(modifier.AttributeType, modifier.Amount, modifier.ModifierType)
+        {
+            Id = Guid.NewGuid(),
+            ItemInstanceId = modifier.ItemInstanceId
+        };
 }

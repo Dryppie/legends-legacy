@@ -330,6 +330,25 @@
     background: rgba(0, 0, 0, 0.32);
   }
 
+  .ll-dropdown-option {
+    color: rgb(212 212 216);
+  }
+
+  .ll-dropdown-option-hovered {
+    background: rgba(249, 220, 160, 0.18);
+    color: var(--ll-color-text);
+  }
+
+  .ll-dropdown-option-selected {
+    background: rgba(249, 220, 160, 0.18);
+    color: var(--ll-color-primary);
+  }
+
+  .ll-dropdown-option-disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
   .ll-page-header {
     border: 1px solid var(--ll-color-border);
     border-radius: var(--ll-radius-md);

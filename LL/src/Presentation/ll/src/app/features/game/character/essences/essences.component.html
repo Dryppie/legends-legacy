@@ -445,7 +445,7 @@
         </div>
 
         <div class="grid gap-2">
-          <label
+          <div
             class="ll-field"
             *ngFor="let slotIndex of essenceState.slotIndexes()"
           >
@@ -458,7 +458,7 @@
               [selectedValue]="essenceState.draftSlots()[slotIndex]"
               (selection)="setDraftSlotFromDropdown(slotIndex, $event)"
             ></app-dropdown>
-          </label>
+          </div>
         </div>
 
         <p class="ll-copy mt-2 text-xs" *ngIf="loadoutSaveHint() as saveHint">

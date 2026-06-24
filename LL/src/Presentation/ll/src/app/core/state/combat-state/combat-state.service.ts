@@ -20,6 +20,7 @@ import { BattleType, CombatState } from './combatState';
 })
 @Injectable({ providedIn: 'root' })
 export class CombatStateService {
+  private readonly maxCombatEvents = 500;
   private readonly defaultState: CombatState = {
     playerCharacters: [],
     enemyCharacters: [],
@@ -67,8 +68,21 @@ export class CombatStateService {
   }
 
   addCombatEvent(type: BattleType, event: CombatEvent) {
+    this.addCombatEvents(type, [event]);
+  }
+
+  addCombatEvents(type: BattleType, events: CombatEvent[]) {
+    if (!events.length) return;
+
     const state = this.ensureState(type)();
-    this.patchState(type, { combatEvents: [...state.combatEvents, event] });
+    this.lastEventsLength[type] =
+      (this.lastEventsLength[type] ?? state.combatEvents.length) +
+      events.length;
+    this.patchState(type, {
+      combatEvents: [...state.combatEvents, ...events].slice(
+        -this.maxCombatEvents,
+      ),
+    });
   }
 
   setCombatActive(type: BattleType, isActive: boolean) {
@@ -146,8 +160,10 @@ export class CombatStateService {
 
   resetCombatStateForNextBattle(type: BattleType) {
     this.lastEventsLength[type] = 0;
-    this.setCombatOutcome(type, null);
-    this.setCombatResult(type, null);
+    this.patchState(type, {
+      combatEvents: [],
+      combatOutcome: null,
+    });
   }
 
   resetCombatState(type: BattleType) {

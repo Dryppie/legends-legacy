@@ -1,5 +1,8 @@
-﻿namespace RealTime.LL;
+using Application.WebSockets.Contracts;
+
+namespace RealTime.LL;
+
 public interface IGameClient
 {
-    Task Publish(GameEventEnvelope e);
+    Task ReceiveEvent(GameRealtimeEnvelope e);
 }

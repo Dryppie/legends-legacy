@@ -30,8 +30,9 @@ public class CombatService : ICombatService
             orchestrationRequest,
             cancellationToken);
 
-        // Keep mutation/persistence outside the orchestrator.
-        // In the next step this should be saved through your repository/unit of work.
+        // For combat actions, UpdatedAt is the next encounter due time. A new
+        // action starts due immediately, then each processed encounter advances
+        // the scheduler by the idle cadence.
         characterAction.UpdatedAt = (orchestrationResult.Details as IdleCombatOrchestrationDetails)!.ProcessedUntil;
 
         var outcomeRequest = new CombatOutcomeRequest(

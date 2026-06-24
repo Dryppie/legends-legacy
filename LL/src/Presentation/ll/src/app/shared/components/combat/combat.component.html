@@ -4,9 +4,16 @@
     class="flex h-full w-full items-center justify-center px-4 text-center"
   >
     <div class="ll-panel w-full max-w-xl p-6">
-      <p class="ll-eyebrow">Combat Queued</p>
-      <h2 class="ll-heading mt-2 text-2xl">Next Fight Begins Soon</h2>
-      <div class="mt-4 text-lg font-bold text-white">
+      <p class="ll-eyebrow">
+        {{ isLoading ? "Offline Progress" : "Combat Queued" }}
+      </p>
+      <h2 class="ll-heading mt-2 text-2xl">
+        {{ isLoading ? "Resolving Combat" : "Next Fight Begins Soon" }}
+      </h2>
+      <p *ngIf="isLoading" class="ll-copy mt-3">
+        Resolving stored combat and rewards.
+      </p>
+      <div *ngIf="!isLoading" class="mt-4 text-lg font-bold text-white">
         <app-countdown [targetDate]="nextCombatIn!"></app-countdown>
       </div>
 
@@ -48,9 +55,6 @@
           *ngIf="battleType === 'IdleCombat'"
           class="max-w-full"
         ></app-combat-log>
-        <span class="ll-badge" [ngClass]="battleStatusClass()">
-          {{ battleStatusLabel() }}
-        </span>
       </div>
     </div>
 
@@ -134,7 +138,7 @@
       </div>
 
       <div
-        *ngIf="outcome"
+        *ngIf="outcome && battleType !== 'IdleCombat'"
         class="ll-card flex flex-col items-center justify-center p-3 lg:col-span-2"
       >
         <img

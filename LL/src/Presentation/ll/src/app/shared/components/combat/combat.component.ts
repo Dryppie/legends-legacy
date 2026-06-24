@@ -3,6 +3,7 @@ import {
   effect,
   EventEmitter,
   Input,
+  OnDestroy,
   OnInit,
   Output,
   signal,
@@ -45,10 +46,13 @@ import { TourService } from '../../../core/services/client-side/tutorial-tour/to
   ],
   templateUrl: './combat.component.html',
 })
-export class CombatComponent implements OnInit {
+export class CombatComponent implements OnInit, OnDestroy {
   combatEvents: CombatEvent[] = [];
   entityStats: EntityStats[] = [];
-  private lastEventsLength = 0;
+  private readonly lastHandledCombatEvent = new Map<BattleType, CombatEvent>();
+  private flavorIntervalId: ReturnType<typeof setInterval> | null = null;
+  private flavorVisibilityTimeoutId: ReturnType<typeof setTimeout> | null =
+    null;
   private readonly battleTypeSignal = signal<BattleType>(BattleType.IdleCombat);
 
   @Input()
@@ -83,10 +87,12 @@ export class CombatComponent implements OnInit {
   ) {
     this.currentAction = this.characterActionService.currentAction;
 
-    const isLoadingSig = this.characterActionService.loadingCombat;
+    const isStartingCombatSig = this.characterActionService.loadingCombat;
+    const isRefreshingActionSig =
+      this.characterActionService.loadingActionRefresh;
 
     effect(() => {
-      this.isLoading = isLoadingSig();
+      this.isLoading = isStartingCombatSig() || isRefreshingActionSig();
     });
 
     const isCombatActiveSig = toSignal(this.gameService.combatActive$, {
@@ -103,17 +109,13 @@ export class CombatComponent implements OnInit {
 
     effect(() => {
       const type = this.battleTypeSignal();
-      const players = this.combatStateService.getPlayerCharacters(
-        type,
-      )();
+      const players = this.combatStateService.getPlayerCharacters(type)();
       if (players) this.playerCharacters = players;
     });
 
     effect(() => {
       const type = this.battleTypeSignal();
-      const enemies = this.combatStateService.getEnemyCharacters(
-        type,
-      )();
+      const enemies = this.combatStateService.getEnemyCharacters(type)();
       if (enemies) this.enemyCharacters = enemies;
     });
 
@@ -126,12 +128,19 @@ export class CombatComponent implements OnInit {
     /** Handle combat event stream */
     effect(() => {
       const type = this.battleTypeSignal();
-      const allEvents = this.combatStateService.getCombatEvents(
-        type,
-      )();
-      const previousLength = this.lastEventsLength;
-      const newEvents = allEvents.slice(previousLength);
-      this.lastEventsLength = allEvents.length;
+      const allEvents = this.combatStateService.getCombatEvents(type)();
+      const lastHandledEvent = this.lastHandledCombatEvent.get(type);
+      const lastHandledIndex = lastHandledEvent
+        ? allEvents.indexOf(lastHandledEvent)
+        : -1;
+      const newEvents =
+        lastHandledEvent && lastHandledIndex >= 0
+          ? allEvents.slice(lastHandledIndex + 1)
+          : allEvents;
+      const newestEvent = allEvents[allEvents.length - 1];
+
+      if (newestEvent) this.lastHandledCombatEvent.set(type, newestEvent);
+      else this.lastHandledCombatEvent.delete(type);
 
       newEvents.forEach((event) => this.handleCombatEvent(event));
     });
@@ -159,9 +168,7 @@ export class CombatComponent implements OnInit {
     /** Handle outcome to optionally trigger auto-exit */
     effect(() => {
       const type = this.battleTypeSignal();
-      const outcome = this.combatStateService.getCombatOutcome(
-        type,
-      )();
+      const outcome = this.combatStateService.getCombatOutcome(type)();
 
       this.outcome = outcome;
 
@@ -214,7 +221,18 @@ export class CombatComponent implements OnInit {
     ];
 
     this.pickRandomFlavorText();
-    setInterval(() => this.pickRandomFlavorText(), 5000);
+    this.flavorIntervalId = setInterval(
+      () => this.pickRandomFlavorText(),
+      5000,
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+    if (this.flavorIntervalId) clearInterval(this.flavorIntervalId);
+    if (this.flavorVisibilityTimeoutId) {
+      clearTimeout(this.flavorVisibilityTimeoutId);
+    }
   }
 
   onStopOrSkip(): void {
@@ -443,7 +461,7 @@ export class CombatComponent implements OnInit {
   }
 
   battleTitle(): string {
-    if (this.isLoading) return 'Loading Battle';
+    if (this.isLoading) return 'Resolving Combat';
 
     if (this.battleType === BattleType.IdleCombat) {
       const areaName = this.currentAction()?.combatActionDetails?.area?.name;
@@ -454,23 +472,6 @@ export class CombatComponent implements OnInit {
     if (this.battleType === BattleType.Colosseum) return 'Arena Battle';
 
     return 'Battle';
-  }
-
-  battleStatusLabel(): string {
-    if (this.outcome) return this.outcome;
-    if (this.isLoading) return 'Loading';
-    return 'In Progress';
-  }
-
-  battleStatusClass(): Record<string, boolean> {
-    return {
-      'll-badge-success': this.outcome === BattleOutcome.Victory,
-      'll-badge-danger': this.outcome === BattleOutcome.Defeat,
-      'll-badge-accent':
-        this.outcome === BattleOutcome.Draw ||
-        (!this.outcome && !this.isLoading),
-      'll-badge-muted': this.isLoading,
-    };
   }
 
   teamSelectorClass(
@@ -532,7 +533,11 @@ export class CombatComponent implements OnInit {
     } else {
       this.flavorText = newText;
     }
-    setTimeout(() => {
+    if (this.flavorVisibilityTimeoutId) {
+      clearTimeout(this.flavorVisibilityTimeoutId);
+    }
+
+    this.flavorVisibilityTimeoutId = setTimeout(() => {
       this.flavorTextVisible = true;
     });
   }

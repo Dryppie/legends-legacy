@@ -1,10 +1,12 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Entities;
+using Application.Interfaces.WebSockets;
 using Application.MediatR.Markers;
 using Application.UseCases.Characters.Dtos;
 using Application.UseCases.Dungeons.Dtos;
 using Application.UseCases.Inventories.Dtos;
+using Application.WebSockets.Contracts;
 using AutoMapper;
 using Common.Primitives;
 using MediatR;
@@ -18,17 +20,20 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
     private readonly IDungeonRunService _dungeonRunService;
     private readonly IInventoryService _inventoryService;
     private readonly ICharacterService _characterService;
+    private readonly IGameRealtimeBroadcaster _gameRealtime;
     private readonly IMapper _mapper;
 
     public ClaimDungeonRewardsCommandHandler(
         IDungeonRunService dungeonRunService,
         IInventoryService inventoryService,
         ICharacterService characterService,
+        IGameRealtimeBroadcaster gameRealtime,
         IMapper mapper)
     {
         _dungeonRunService = dungeonRunService;
         _inventoryService = inventoryService;
         _characterService = characterService;
+        _gameRealtime = gameRealtime;
         _mapper = mapper;
     }
 
@@ -43,12 +48,34 @@ public class ClaimDungeonRewardsCommandHandler : IRequestHandler<ClaimDungeonRew
         if (inventory == null || character == null)
             return Response<ClaimDungeonRewardsResponseDto>.Fail("Failed to load claimed dungeon rewards.");
 
+        var inventoryItems = _mapper.Map<List<InventoryItemDto>>(inventory.InventoryItems);
+        var claimedLoot = _mapper.Map<List<InventoryItemDto>>(result.ClaimedLoot);
+        var characterDto = _mapper.Map<CharacterDto>(character);
+
+        await _gameRealtime.PublishAsync(
+            new Audience.Character(request.CharacterId),
+            new DungeonRewardsClaimed(request.CharacterId, claimedLoot),
+            nameof(ClaimDungeonRewardsCommandHandler),
+            cancellationToken);
+
+        await _gameRealtime.PublishAsync(
+            new Audience.Character(request.CharacterId),
+            new InventorySnapshot(request.CharacterId, inventoryItems, "dungeon-reward-claim"),
+            nameof(ClaimDungeonRewardsCommandHandler),
+            cancellationToken);
+
+        await _gameRealtime.PublishAsync(
+            new Audience.Character(request.CharacterId),
+            new CharacterSnapshot(request.CharacterId, characterDto, "dungeon-reward-claim"),
+            nameof(ClaimDungeonRewardsCommandHandler),
+            cancellationToken);
+
         return Response<ClaimDungeonRewardsResponseDto>.Success(new ClaimDungeonRewardsResponseDto
         {
             ActiveRun = null,
-            InventoryItems = _mapper.Map<List<InventoryItemDto>>(inventory.InventoryItems),
-            ClaimedLoot = _mapper.Map<List<InventoryItemDto>>(result.ClaimedLoot),
-            Character = _mapper.Map<CharacterDto>(character)
+            InventoryItems = inventoryItems,
+            ClaimedLoot = claimedLoot,
+            Character = characterDto
         });
     }
 }

@@ -1,3 +1,4 @@
+using Application.Interfaces.Services.LL;
 using Domain.Models.Dungeons.Runs;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
@@ -10,23 +11,23 @@ namespace Services.LL.Combat.Layers.Rewards.Dungeon;
 public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
 {
     private readonly IExperienceRewardWriter _experienceWriter;
-    private readonly ILootRewardWriter _lootWriter;
     private readonly ICurrencyRewardWriter _currencyWriter;
     private readonly IItemBaseRepository _itemBases;
     private readonly IInventoryItemFactory _inventoryItemFactory;
+    private readonly IInventoryService _inventoryService;
 
     public DungeonRunRewardClaimer(
         IExperienceRewardWriter experienceWriter,
-        ILootRewardWriter lootWriter,
         ICurrencyRewardWriter currencyWriter,
         IItemBaseRepository itemBases,
-        IInventoryItemFactory inventoryItemFactory)
+        IInventoryItemFactory inventoryItemFactory,
+        IInventoryService inventoryService)
     {
         _experienceWriter = experienceWriter;
-        _lootWriter = lootWriter;
         _currencyWriter = currencyWriter;
         _itemBases = itemBases;
         _inventoryItemFactory = inventoryItemFactory;
+        _inventoryService = inventoryService;
     }
 
     public async Task<IReadOnlyList<InventoryItem>> ClaimAsync(DungeonRun run, CancellationToken cancellationToken)
@@ -78,9 +79,9 @@ public sealed class DungeonRunRewardClaimer : IDungeonRunRewardClaimer
 
         if (inventoryItems.Count > 0)
         {
-            await _lootWriter.AddLootAsync(
+            await _inventoryService.AddItemsToInventory(
                 run.CharacterId,
-                inventoryItems,
+                inventoryItems.ToList(),
                 cancellationToken);
         }
 

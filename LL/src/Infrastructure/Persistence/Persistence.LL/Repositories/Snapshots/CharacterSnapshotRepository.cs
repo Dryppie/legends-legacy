@@ -1,7 +1,6 @@
 using Application.Common.Interfaces;
 using Domain.Models.Snapshots;
 using Microsoft.EntityFrameworkCore;
-using Persistence.LL.QueryProfiles;
 
 namespace Persistence.LL.Repositories.Snapshots;
 
@@ -19,7 +18,13 @@ public class CharacterSnapshotRepository : ICharacterSnapshotRepository
         var snapshotId = Guid.NewGuid();
         var character = await _dbContext.Characters
             .AsNoTracking()
-            .EntireCharacter()
+            .Include(c => c.BaseAttributes)
+            .Include(c => c.EquipmentSlots)
+                .ThenInclude(es => es.EquipmentInstance)
+                    .ThenInclude(ei => ei.InstanceModifiers)
+            .Include(c => c.EssenceLoadouts.Where(x => x.IsActive))
+                .ThenInclude(x => x.Slots)
+                    .ThenInclude(x => x.PlayerEssence)
             .SingleAsync(c => c.Id == characterId, ct);
 
         var baseAttrs = character.BaseAttributes
