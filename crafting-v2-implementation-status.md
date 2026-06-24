@@ -20,7 +20,7 @@ Updated against the current repository state on 2026-06-24.
 Crafting V2 now has two layers implemented:
 
 1. The original vertical slice: quality, potential, recipe mastery, recipe unlocks, JSON-backed definitions, crafting endpoints, tempering endpoints, migrations, and Angular UI.
-2. The newer recipe-data refactor: recipes are broad archetypes with forms, while blueprints carry variant/theme identity and legacy-name compatibility.
+2. The newer recipe-data refactor: recipes are broad archetypes with forms, while blueprints carry variant/theme identity.
 
 The latest JSON refactor changes Crafting V2 from exact item recipes into:
 
@@ -44,12 +44,12 @@ The JSON schema can now represent this, but `CraftItemsCommand` currently accept
 | --- | --- | --- |
 | `Data/crafting/base-recipes.json` | Broad craftable archetypes plus forms | Implemented for requested 9 base recipes and 35 forms |
 | `Data/crafting/recipe-variants.json` | Legacy exact-variant recipe file | Intentionally empty |
-| `Data/crafting/blueprints.json` | Blueprint families, compatibility tags, output naming, legacy aliases | Implemented as data; craft-time use is partial |
+| `Data/crafting/blueprints.json` | Blueprint families, compatibility tags, and output naming | Implemented as data; craft-time use is partial |
 | `Data/crafting/materials.json` | Standard material families/tier lookup plus special resources | Implemented through Region One tier 1-3 standard families |
 | `Data/crafting/tempering-recipes.json` | Tempering directions | Starter set still |
 | `Data/items.json` | Equipment, resources, blueprint items, neutral form outputs | Updated with neutral form outputs, material bases, and blueprint items; obsolete named accessory/relic output items removed |
 | `Data/dungeons.json` | Dungeon acquisition and gathering | Partially updated; `iron_ore` mismatch fixed, blueprint/special-resource rewards not wired |
-| `Data/recipes.json` | Legacy recipe content | Still legacy; not loaded by Crafting V2 |
+| `Data/recipes.json` | Legacy recipe content | Still legacy; obsolete accessory/relic recipes removed; not loaded by Crafting V2 |
 
 ## Counts
 
@@ -84,7 +84,7 @@ Important implementation details:
 
 - Exact item names such as `Band of Fury`, `Phoenix Vial`, and `Charm of the Warden` are no longer base recipes.
 - Accessory/relic base forms now use neutral outputs: `band`, `amulet`, `charm`, `talisman`, `vial`, `heart`, and `totem`.
-- Old exact names are preserved as `legacyNames` and special blueprint output names. Obsolete named accessory/relic IDs were removed from active V2 alias fields after deleting their item records.
+- Blueprint-specific names are represented through `specialOutputNames`, not legacy alias fields.
 - Armor forms include armor-weight tags for Heavy, Medium, Light, and Cloth identities.
 - Weapon/offhand forms include tags for blade, dagger, axe, mace, wand, great weapon, ranged, ward, grimoire, shield, and related identity concepts.
 
@@ -97,8 +97,6 @@ Added minimal schema support while preserving existing fields:
 - `CraftingRecipeDefinition.Slot`
 - `CraftingRecipeDefinition.Tags`
 - `CraftingRecipeDefinition.OutputNameTemplate`
-- `CraftingRecipeDefinition.LegacyNames`
-- `CraftingRecipeDefinition.LegacyItemIds`
 - `CraftingRecipeFormDefinition`
 - `BlueprintDefinition.BlueprintFamily`
 - `BlueprintDefinition.AllowedBaseRecipeIds`
@@ -106,8 +104,6 @@ Added minimal schema support while preserving existing fields:
 - `BlueprintDefinition.OutputNameTemplate`
 - `BlueprintDefinition.SpecialOutputNames`
 - `BlueprintDefinition.Tags`
-- `BlueprintDefinition.LegacyNames`
-- `BlueprintDefinition.LegacyItemIds`
 
 The provider validates:
 
@@ -197,7 +193,7 @@ Removed obsolete named accessory/relic item records that are now represented by 
 - `mana_heart`
 - `primal_totem`
 
-Those names still exist as `legacyNames` and/or blueprint `specialOutputNames`, but not as active `items.json` records.
+Those names still exist only as blueprint `specialOutputNames`, not as active `items.json` records or legacy alias fields.
 
 ### Dungeon Data
 
@@ -315,7 +311,7 @@ Existing tests still pass, but no dedicated tests were added for:
 - blueprint compatibility unlocks
 - blueprint-derived craft options
 - material family+tier validation
-- legacy alias preservation
+- absence of legacy recipe alias fields
 - neutral accessory/relic base outputs
 - `iron_ore` reference regression
 
@@ -347,7 +343,7 @@ Affix and special modifier IDs remain embedded in tempering recipe data. Tier/st
 
 Not implemented.
 
-`Data/recipes.json` still contains 113 legacy recipes. Crafting V2 does not load that file. A future pass should either:
+`Data/recipes.json` still contains 104 legacy recipes after removing the obsolete named accessory/relic recipes. Crafting V2 does not load that file. A future pass should either:
 
 - migrate useful themes into V2 blueprint/form data, or
 - clearly retire the legacy equipment recipe system.
@@ -406,6 +402,7 @@ Not implemented.
 | Special resources are separate non-tiered items | Implemented |
 | Obsolete named accessory/relic item IDs are removed from `items.json` | Implemented |
 | Old exact item names are no longer base recipes | Implemented |
+| Legacy recipe alias fields are removed from active V2 recipe/blueprint JSON | Implemented |
 | Broad base recipe count is 9 | Implemented |
 | Forms determine physical output within base recipes | Implemented |
 | Blueprints define theme/variant identity | Implemented as data |
@@ -443,16 +440,9 @@ Not implemented.
 - `LL/src/Presentation/ll/src/app/features/game/professions/crafting/regular-crafting/regular-crafting.component.ts`
 - `LL/src/Presentation/ll/src/app/features/game/professions/crafting/regular-crafting/regular-crafting.component.html`
 
-## Compatibility Aliases
+## Legacy Recipe Cleanup
 
-Preserved as form `legacyItemIds` and/or blueprint `legacyItemIds` where the corresponding item records still exist:
-
-- armor forms such as `heavy_helm`, `medium_mail`, `cloth_robe`
-- weapon forms such as `shortsword`, `dagger`, `hatchet`, `staff`
-- offhand forms such as `towershield`, `Spiritward`, `grimoire`
-- old blueprint items `blueprint_venom_touched_sword` and `blueprint_hivefang_dagger`
-
-Removed from `items.json` and from active V2 `legacyItemIds`:
+Removed from `items.json`, active Crafting V2 recipes, active Crafting V2 blueprints, `Data/recipes.json`, and generated `recipes-content.ts`:
 
 - `band_of_fury`
 - `band_of_arcane`
@@ -464,7 +454,11 @@ Removed from `items.json` and from active V2 `legacyItemIds`:
 - `mana_heart`
 - `primal_totem`
 
-Remaining legacy caveat: `LL/src/API/API.LL/Data/recipes.json` and `LL/src/Presentation/ll/src/app/data/recipes-content.ts` still mention these removed IDs. Those files are legacy/static content and were not cleaned up in this `items.json` removal pass.
+Also removed the legacy alias fields from Crafting V2 recipe schema/data:
+
+- `legacyNames`
+- `legacyItemIds`
+- `legacyItemId`
 
 ## Assumptions
 
@@ -481,10 +475,9 @@ Changed JSON validation:
 - all changed JSON files parse successfully
 - material `itemId` references resolve to `items.json`
 - recipe form `outputItemId` references resolve to `items.json`
-- non-empty form `legacyItemIds` resolve to `items.json`
 - blueprint `itemId` references resolve to `items.json`
-- non-empty blueprint `legacyItemIds` resolve to `items.json`
-- removed accessory/relic IDs no longer appear in active V2 `legacyItemIds` or `specialOutputNames[].legacyItemId`
+- no `legacyNames`, `legacyItemIds`, or `legacyItemId` fields remain in recipe/blueprint data or V2 recipe schema models
+- removed accessory/relic IDs no longer appear in `items.json`, active V2 recipe data, `Data/recipes.json`, or generated `recipes-content.ts`
 - blueprint `allowedBaseRecipeIds` resolve to V2 recipes
 - no remaining `iron_ore` references were found
 
