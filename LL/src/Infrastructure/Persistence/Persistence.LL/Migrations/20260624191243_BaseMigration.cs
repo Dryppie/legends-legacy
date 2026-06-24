@@ -32,6 +32,36 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CharacterRecipeMasteries",
+                columns: table => new
+                {
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RecipeId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    Level = table.Column<int>(type: "integer", nullable: false),
+                    Experience = table.Column<int>(type: "integer", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CharacterRecipeMasteries", x => new { x.CharacterId, x.RecipeId });
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CharacterRecipeUnlocks",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    RecipeId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    BlueprintId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    UnlockedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CharacterRecipeUnlocks", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CharacterSnapshots",
                 columns: table => new
                 {
@@ -294,6 +324,27 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ItemAttributeModifier",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ItemBaseId = table.Column<string>(type: "text", nullable: false),
+                    AttributeType = table.Column<int>(type: "integer", nullable: false),
+                    Amount = table.Column<float>(type: "real", nullable: false),
+                    ModifierType = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ItemAttributeModifier", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ItemAttributeModifier_ItemBases_ItemBaseId",
+                        column: x => x.ItemBaseId,
+                        principalTable: "ItemBases",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ItemInstances",
                 columns: table => new
                 {
@@ -301,10 +352,20 @@ namespace Persistence.LL.Migrations
                     ItemBaseId = table.Column<string>(type: "text", nullable: false),
                     ItemType = table.Column<int>(type: "integer", nullable: false),
                     Rarity = table.Column<int>(type: "integer", nullable: true),
+                    Quality = table.Column<int>(type: "integer", nullable: true),
+                    RecipeId = table.Column<string>(type: "text", nullable: true),
+                    BaseRecipeId = table.Column<string>(type: "text", nullable: true),
+                    BlueprintId = table.Column<string>(type: "text", nullable: true),
+                    CraftedName = table.Column<string>(type: "text", nullable: true),
+                    Tier = table.Column<int>(type: "integer", nullable: true),
                     Potential = table.Column<int>(type: "integer", nullable: true),
+                    MaxPotential = table.Column<int>(type: "integer", nullable: true),
+                    TemperingProgress = table.Column<int>(type: "integer", nullable: true),
                     ItemXp = table.Column<int>(type: "integer", nullable: true),
                     IsMasterpiece = table.Column<bool>(type: "boolean", nullable: true),
-                    IsLevelingItem = table.Column<bool>(type: "boolean", nullable: true)
+                    IsLevelingItem = table.Column<bool>(type: "boolean", nullable: true),
+                    AffinityTags = table.Column<List<string>>(type: "text[]", nullable: true),
+                    SpecialModifiers = table.Column<List<string>>(type: "text[]", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -345,29 +406,6 @@ namespace Persistence.LL.Migrations
                         principalTable: "LootTableEntry",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Recipes",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    ItemId = table.Column<string>(type: "text", nullable: false),
-                    Quantity = table.Column<int>(type: "integer", nullable: false),
-                    CraftType = table.Column<int>(type: "integer", nullable: false),
-                    LevelRequirement = table.Column<int>(type: "integer", nullable: false),
-                    ItemType = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Recipes", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Recipes_ItemBases_ItemId",
-                        column: x => x.ItemId,
-                        principalTable: "ItemBases",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -468,33 +506,6 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ItemAttributeModifier",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ItemBaseId = table.Column<string>(type: "text", nullable: false),
-                    EquipmentInstanceId = table.Column<Guid>(type: "uuid", nullable: true),
-                    AttributeType = table.Column<int>(type: "integer", nullable: false),
-                    Amount = table.Column<float>(type: "real", nullable: false),
-                    ModifierType = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ItemAttributeModifier", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ItemAttributeModifier_ItemBases_ItemBaseId",
-                        column: x => x.ItemBaseId,
-                        principalTable: "ItemBases",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ItemAttributeModifier_ItemInstances_EquipmentInstanceId",
-                        column: x => x.EquipmentInstanceId,
-                        principalTable: "ItemInstances",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "MarketPlaceListings",
                 columns: table => new
                 {
@@ -581,37 +592,6 @@ namespace Persistence.LL.Migrations
                         name: "FK_Entities_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Material",
-                columns: table => new
-                {
-                    RecipeId = table.Column<Guid>(type: "uuid", nullable: false),
-                    ItemId = table.Column<string>(type: "text", nullable: false),
-                    Quantity = table.Column<int>(type: "integer", nullable: false),
-                    ItemBaseId = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Material", x => new { x.RecipeId, x.ItemId });
-                    table.ForeignKey(
-                        name: "FK_Material_ItemBases_ItemBaseId",
-                        column: x => x.ItemBaseId,
-                        principalTable: "ItemBases",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Material_ItemBases_ItemId",
-                        column: x => x.ItemId,
-                        principalTable: "ItemBases",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Material_Recipes_RecipeId",
-                        column: x => x.RecipeId,
-                        principalTable: "Recipes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -1133,6 +1113,12 @@ namespace Persistence.LL.Migrations
                 column: "DungeonDefinitionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CharacterRecipeUnlocks_CharacterId_RecipeId",
+                table: "CharacterRecipeUnlocks",
+                columns: new[] { "CharacterId", "RecipeId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ColosseumMatches_CharacterBId",
                 table: "ColosseumMatches",
                 column: "CharacterBId");
@@ -1250,11 +1236,6 @@ namespace Persistence.LL.Migrations
                 column: "ItemInstanceId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ItemAttributeModifier_EquipmentInstanceId",
-                table: "ItemAttributeModifier",
-                column: "EquipmentInstanceId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ItemAttributeModifier_ItemBaseId",
                 table: "ItemAttributeModifier",
                 column: "ItemBaseId");
@@ -1285,16 +1266,6 @@ namespace Persistence.LL.Migrations
                 column: "ItemInstanceId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Material_ItemBaseId",
-                table: "Material",
-                column: "ItemBaseId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Material_ItemId",
-                table: "Material",
-                column: "ItemId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_MonsterResonances_CharacterId",
                 table: "MonsterResonances",
                 column: "CharacterId");
@@ -1315,11 +1286,6 @@ namespace Persistence.LL.Migrations
                 table: "PlayerEssences",
                 columns: new[] { "CharacterId", "EssenceDefinitionId" },
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Recipes_ItemId",
-                table: "Recipes",
-                column: "ItemId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RefreshTokens_AppUserId",
@@ -1371,6 +1337,12 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "CharacterDungeonMasteries");
+
+            migrationBuilder.DropTable(
+                name: "CharacterRecipeMasteries");
+
+            migrationBuilder.DropTable(
+                name: "CharacterRecipeUnlocks");
 
             migrationBuilder.DropTable(
                 name: "CharacterSoulstoneUpgrades");
@@ -1427,9 +1399,6 @@ namespace Persistence.LL.Migrations
                 name: "MarketPlaceListings");
 
             migrationBuilder.DropTable(
-                name: "Material");
-
-            migrationBuilder.DropTable(
                 name: "MonsterResonances");
 
             migrationBuilder.DropTable(
@@ -1467,9 +1436,6 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "Inventories");
-
-            migrationBuilder.DropTable(
-                name: "Recipes");
 
             migrationBuilder.DropTable(
                 name: "DungeonRuns");

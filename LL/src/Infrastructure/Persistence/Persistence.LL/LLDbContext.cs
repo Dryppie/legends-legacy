@@ -194,7 +194,8 @@ public class LLDbContext(DbContextOptions<LLDbContext> options) : DbContext(opti
 
     //public DbSet<TownBuilding> TownBuildings => Set<TownBuilding>();
 
-    public DbSet<Recipe> Recipes => Set<Recipe>();
+    public DbSet<CharacterRecipeUnlock> CharacterRecipeUnlocks => Set<CharacterRecipeUnlock>();
+    public DbSet<CharacterRecipeMastery> CharacterRecipeMasteries => Set<CharacterRecipeMastery>();
 
     public DbSet<Region> Regions => Set<Region>();
 
