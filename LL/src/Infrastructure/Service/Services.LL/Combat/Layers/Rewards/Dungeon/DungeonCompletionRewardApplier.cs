@@ -64,6 +64,12 @@ public sealed class DungeonCompletionRewardApplier : IDungeonCompletionRewardApp
                 cancellationToken);
         }
 
+        await AddItemGrantsAsync(
+            run.Id,
+            dungeon.RewardTable.CompletionRewards,
+            "Dungeon Completion Rewards",
+            cancellationToken);
+
         await AddMonsterCoreRewardsAsync(run.Id, dungeon.Grade, cancellationToken);
         await AddFirstCompletionRewardsIfNeededAsync(run, dungeon, cancellationToken);
         await _mastery.AwardCompletionAsync(run, cancellationToken);

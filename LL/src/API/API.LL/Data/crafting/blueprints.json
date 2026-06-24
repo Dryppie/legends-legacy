@@ -1,0 +1,439 @@
+[
+  {
+    "id": "blueprint_fury",
+    "name": "Blueprint: Fury",
+    "blueprintFamily": "Fury",
+    "unlocksRecipeId": "recipe_ring",
+    "itemId": "blueprint_fury",
+    "sourceType": "Dungeon",
+    "sourceId": "goblin_mines",
+    "allowedBaseRecipeIds": [
+      "recipe_ring",
+      "recipe_one_handed_weapon",
+      "recipe_two_handed_weapon",
+      "recipe_chest_armor"
+    ],
+    "allowedRecipeTags": [
+      "OneHanded",
+      "Axe",
+      "Gauntlets",
+      "MediumArmor",
+      "Ring"
+    ],
+    "outputNameTemplate": "{BlueprintName} {FormName}",
+    "specialOutputNames": [
+      {
+        "baseRecipeId": "recipe_ring",
+        "formId": "band",
+        "outputName": "Band of Fury"
+      }
+    ],
+    "tags": [
+      "Fury",
+      "Physical",
+      "Crit",
+      "Aggression"
+    ],
+    "specialResourceRequirements": []
+  },
+  {
+    "id": "blueprint_arcane",
+    "name": "Blueprint: Arcane",
+    "blueprintFamily": "Arcane",
+    "unlocksRecipeId": "recipe_ring",
+    "itemId": "blueprint_arcane",
+    "sourceType": "Dungeon",
+    "sourceId": "goblin_mines",
+    "allowedBaseRecipeIds": [
+      "recipe_ring",
+      "recipe_one_handed_weapon",
+      "recipe_two_handed_weapon",
+      "recipe_offhand",
+      "recipe_head_armor",
+      "recipe_chest_armor",
+      "recipe_leg_armor"
+    ],
+    "allowedRecipeTags": [
+      "Wand",
+      "Staff",
+      "Grimoire",
+      "ClothArmor",
+      "Ring",
+      "Magic"
+    ],
+    "outputNameTemplate": "{BlueprintName} {FormName}",
+    "specialOutputNames": [
+      {
+        "baseRecipeId": "recipe_ring",
+        "formId": "band",
+        "outputName": "Band of Arcane"
+      }
+    ],
+    "tags": [
+      "Arcane",
+      "Magic",
+      "SpellPower",
+      "Cooldown"
+    ],
+    "specialResourceRequirements": []
+  },
+  {
+    "id": "blueprint_execution",
+    "name": "Blueprint: Execution",
+    "blueprintFamily": "Execution",
+    "unlocksRecipeId": "recipe_ring",
+    "itemId": "blueprint_execution",
+    "sourceType": "Dungeon",
+    "sourceId": "goblin_mines",
+    "allowedBaseRecipeIds": [
+      "recipe_ring",
+      "recipe_one_handed_weapon",
+      "recipe_two_handed_weapon"
+    ],
+    "allowedRecipeTags": [
+      "Blade",
+      "Crit",
+      "Precision",
+      "Ring",
+      "Ranged"
+    ],
+    "outputNameTemplate": "{BlueprintName} {FormName}",
+    "specialOutputNames": [
+      {
+        "baseRecipeId": "recipe_ring",
+        "formId": "band",
+        "outputName": "Band of Execution"
+      }
+    ],
+    "tags": [
+      "Execution",
+      "Crit",
+      "Precision",
+      "Damage"
+    ],
+    "specialResourceRequirements": []
+  },
+  {
+    "id": "blueprint_aegis",
+    "name": "Blueprint: Aegis",
+    "blueprintFamily": "Aegis",
+    "unlocksRecipeId": "recipe_necklace",
+    "itemId": "blueprint_aegis",
+    "sourceType": "Dungeon",
+    "sourceId": "forgotten_catacombs",
+    "allowedBaseRecipeIds": [
+      "recipe_necklace",
+      "recipe_offhand",
+      "recipe_head_armor",
+      "recipe_chest_armor",
+      "recipe_leg_armor"
+    ],
+    "allowedRecipeTags": [
+      "HeavyArmor",
+      "Shield",
+      "Necklace",
+      "Defensive",
+      "Barrier"
+    ],
+    "outputNameTemplate": "{BlueprintName} {FormName}",
+    "specialOutputNames": [
+      {
+        "baseRecipeId": "recipe_necklace",
+        "formId": "amulet",
+        "outputName": "Amulet of Aegis"
+      }
+    ],
+    "tags": [
+      "Aegis",
+      "Defensive",
+      "Barrier",
+      "PhysicalDefense"
+    ],
+    "specialResourceRequirements": []
+  },
+  {
+    "id": "blueprint_warden",
+    "name": "Blueprint: Warden",
+    "blueprintFamily": "Warden",
+    "unlocksRecipeId": "recipe_necklace",
+    "itemId": "blueprint_warden",
+    "sourceType": "Dungeon",
+    "sourceId": "hives_abyss",
+    "allowedBaseRecipeIds": [
+      "recipe_necklace",
+      "recipe_offhand",
+      "recipe_chest_armor"
+    ],
+    "allowedRecipeTags": [
+      "Necklace",
+      "Ward",
+      "MediumArmor",
+      "Support",
+      "Nature"
+    ],
+    "outputNameTemplate": "{BlueprintName} {FormName}",
+    "specialOutputNames": [
+      {
+        "baseRecipeId": "recipe_necklace",
+        "formId": "charm",
+        "outputName": "Charm of the Warden"
+      }
+    ],
+    "tags": [
+      "Warden",
+      "Support",
+      "Sustain",
+      "Nature"
+    ],
+    "specialResourceRequirements": []
+  },
+  {
+    "id": "blueprint_endurance",
+    "name": "Blueprint: Endurance",
+    "blueprintFamily": "Endurance",
+    "unlocksRecipeId": "recipe_necklace",
+    "itemId": "blueprint_endurance",
+    "sourceType": "Dungeon",
+    "sourceId": "forgotten_catacombs",
+    "allowedBaseRecipeIds": [
+      "recipe_necklace",
+      "recipe_head_armor",
+      "recipe_chest_armor",
+      "recipe_leg_armor"
+    ],
+    "allowedRecipeTags": [
+      "Necklace",
+      "HeavyArmor",
+      "MediumArmor",
+      "Endurance",
+      "Sustain"
+    ],
+    "outputNameTemplate": "{BlueprintName} {FormName}",
+    "specialOutputNames": [
+      {
+        "baseRecipeId": "recipe_necklace",
+        "formId": "talisman",
+        "outputName": "Talisman of Endurance"
+      }
+    ],
+    "tags": [
+      "Endurance",
+      "Sustain",
+      "MaxHealth"
+    ],
+    "specialResourceRequirements": []
+  },
+  {
+    "id": "blueprint_phoenix",
+    "name": "Blueprint: Phoenix",
+    "blueprintFamily": "Phoenix",
+    "unlocksRecipeId": "recipe_relic",
+    "itemId": "blueprint_phoenix",
+    "sourceType": "Dungeon",
+    "sourceId": "forgotten_catacombs",
+    "allowedBaseRecipeIds": [
+      "recipe_relic",
+      "recipe_chest_armor",
+      "recipe_two_handed_weapon"
+    ],
+    "allowedRecipeTags": [
+      "Relic",
+      "Vial",
+      "Recovery",
+      "Fire",
+      "Support"
+    ],
+    "outputNameTemplate": "{BlueprintName} {FormName}",
+    "specialOutputNames": [
+      {
+        "baseRecipeId": "recipe_relic",
+        "formId": "vial",
+        "outputName": "Phoenix Vial"
+      }
+    ],
+    "tags": [
+      "Phoenix",
+      "Fire",
+      "Recovery",
+      "Support"
+    ],
+    "specialResourceRequirements": []
+  },
+  {
+    "id": "blueprint_spirit",
+    "name": "Blueprint: Spirit",
+    "blueprintFamily": "Spirit",
+    "unlocksRecipeId": "recipe_relic",
+    "itemId": "blueprint_spirit",
+    "sourceType": "Dungeon",
+    "sourceId": "forgotten_catacombs",
+    "allowedBaseRecipeIds": [
+      "recipe_relic",
+      "recipe_offhand",
+      "recipe_head_armor",
+      "recipe_chest_armor",
+      "recipe_leg_armor"
+    ],
+    "allowedRecipeTags": [
+      "Relic",
+      "Heart",
+      "Ward",
+      "ClothArmor",
+      "Spirit",
+      "Support"
+    ],
+    "outputNameTemplate": "{BlueprintName} {FormName}",
+    "specialOutputNames": [
+      {
+        "baseRecipeId": "recipe_relic",
+        "formId": "heart",
+        "outputName": "Spirit Heart"
+      }
+    ],
+    "tags": [
+      "Spirit",
+      "Support",
+      "Mana",
+      "MagicDefense"
+    ],
+    "specialResourceRequirements": []
+  },
+  {
+    "id": "blueprint_primal",
+    "name": "Blueprint: Primal",
+    "blueprintFamily": "Primal",
+    "unlocksRecipeId": "recipe_relic",
+    "itemId": "blueprint_primal",
+    "sourceType": "Dungeon",
+    "sourceId": "hives_abyss",
+    "allowedBaseRecipeIds": [
+      "recipe_relic",
+      "recipe_two_handed_weapon",
+      "recipe_chest_armor"
+    ],
+    "allowedRecipeTags": [
+      "Relic",
+      "Totem",
+      "Summon",
+      "Nature",
+      "GreatWeapon"
+    ],
+    "outputNameTemplate": "{BlueprintName} {FormName}",
+    "specialOutputNames": [
+      {
+        "baseRecipeId": "recipe_relic",
+        "formId": "totem",
+        "outputName": "Primal Totem"
+      }
+    ],
+    "tags": [
+      "Primal",
+      "Nature",
+      "Summon",
+      "BuildDefining"
+    ],
+    "specialResourceRequirements": [
+      {
+        "type": "SpecialResource",
+        "itemId": "hive_ichor",
+        "baseAmount": 1,
+        "amountPerTier": 0
+      }
+    ]
+  },
+  {
+    "id": "blueprint_venom",
+    "name": "Blueprint: Venom",
+    "blueprintFamily": "Venom",
+    "unlocksRecipeId": "recipe_one_handed_weapon",
+    "itemId": "blueprint_venom_touched_sword",
+    "sourceType": "Dungeon",
+    "sourceId": "hives_abyss",
+    "allowedBaseRecipeIds": [
+      "recipe_one_handed_weapon",
+      "recipe_two_handed_weapon",
+      "recipe_head_armor",
+      "recipe_chest_armor",
+      "recipe_leg_armor",
+      "recipe_ring",
+      "recipe_relic"
+    ],
+    "allowedRecipeTags": [
+      "Blade",
+      "Ranged",
+      "LightArmor",
+      "Ring",
+      "Relic",
+      "Poison"
+    ],
+    "outputNameTemplate": "{BlueprintName} {FormName}",
+    "specialOutputNames": [
+      {
+        "baseRecipeId": "recipe_one_handed_weapon",
+        "formId": "shortsword",
+        "outputName": "Venom-Touched Sword"
+      }
+    ],
+    "tags": [
+      "Venom",
+      "Poison",
+      "Status",
+      "DamageOverTime"
+    ],
+    "specialResourceRequirements": [
+      {
+        "type": "SpecialResource",
+        "itemId": "venom_gland",
+        "baseAmount": 1,
+        "amountPerTier": 0
+      }
+    ]
+  },
+  {
+    "id": "blueprint_hive",
+    "name": "Blueprint: Hive",
+    "blueprintFamily": "Hive",
+    "unlocksRecipeId": "recipe_one_handed_weapon",
+    "itemId": "blueprint_hivefang_dagger",
+    "sourceType": "Dungeon",
+    "sourceId": "hives_abyss",
+    "allowedBaseRecipeIds": [
+      "recipe_one_handed_weapon",
+      "recipe_two_handed_weapon",
+      "recipe_head_armor",
+      "recipe_chest_armor",
+      "recipe_leg_armor",
+      "recipe_offhand"
+    ],
+    "allowedRecipeTags": [
+      "Chitin",
+      "Resin",
+      "Dagger",
+      "LightArmor",
+      "Shield",
+      "Poison"
+    ],
+    "outputNameTemplate": "Hive{FormName}",
+    "specialOutputNames": [
+      {
+        "baseRecipeId": "recipe_one_handed_weapon",
+        "formId": "dagger",
+        "outputName": "Hivefang Dagger"
+      }
+    ],
+    "tags": [
+      "Hive",
+      "Chitin",
+      "Resin",
+      "Poison"
+    ],
+    "specialResourceRequirements": [
+      {
+        "type": "SpecialResource",
+        "itemId": "royal_chitin_plate",
+        "baseAmount": 1,
+        "amountPerTier": 0
+      }
+    ]
+  }
+]
