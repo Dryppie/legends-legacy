@@ -11,7 +11,15 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
 {
     public string DisplayName { get; set; } = string.Empty;
     public Rarity Rarity { get; set; } = Rarity.Common;
+    public ItemQuality Quality { get; set; } = ItemQuality.Standard;
+    public string? RecipeId { get; set; }
+    public string? BaseRecipeId { get; set; }
+    public string? BlueprintId { get; set; }
+    public string? CraftedName { get; set; }
+    public int Tier { get; set; } = 1;
     public int? Potential { get; set; } = null;
+    public int? MaxPotential { get; set; } = null;
+    public int TemperingProgress { get; set; } = 0;
     public EquipmentBase EquipmentBase { get; set; } = null!;
     public int ItemXp { get; set; } = 0;
     public IReadOnlyCollection<ItemAttributeModifier> BaseModifiers { get; set; } = [];
@@ -19,6 +27,8 @@ public class EquipmentInstanceDto : ItemInstanceDto, IMapFrom<EquipmentInstance>
     public List<AttributeModifierBase> AttributeModifiers { get; set; } = [];
     public List<ToolBonusModifier> ToolAffixes { get; set; } = [];
     public IReadOnlyList<ToolBonusModifier> EffectiveToolBonuses { get; set; } = [];
+    public List<string> AffinityTags { get; set; } = [];
+    public List<string> SpecialModifiers { get; set; } = [];
     public void Mapping(Profile profile)
     {
         profile.CreateMap<EquipmentInstance, EquipmentInstanceDto>();
