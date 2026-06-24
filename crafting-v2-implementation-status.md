@@ -1,369 +1,494 @@
 # Crafting V2 Implementation Status
 
-Source design document: `C:/Users/HrHoe/Downloads/crafting-v2-design-for-codex.md`
+Source design documents:
 
-Generated against the current repository state on 2026-06-24.
+- `C:/Users/HrHoe/Downloads/crafting-v2-design-for-codex.md`
+- `C:/Users/HrHoe/.codex/attachments/e0b1d947-283b-491b-9904-78225956f1e5/pasted-text.txt`
+
+Updated against the current repository state on 2026-06-24.
 
 ## Status Key
 
-| Status      | Meaning                                                                                                            |
-| ----------- | ------------------------------------------------------------------------------------------------------------------ |
-| Implemented | The feature exists in code/content and is wired into the current flow.                                             |
-| Partial     | The main path exists, but some design detail, content breadth, validation, UI detail, or test coverage is missing. |
-| Not done    | The feature or design requirement has not been implemented.                                                        |
+| Status | Meaning |
+| --- | --- |
+| Implemented | The feature exists in code/content and is wired into the current flow. |
+| Partial | The data/schema exists, but runtime behavior, content breadth, tests, or acquisition wiring is incomplete. |
+| Not done | The requested feature or design requirement has not been implemented. |
 
 ## Executive Summary
 
-Crafting V2 is implemented as a working vertical slice across backend, persistence, static JSON definitions, API endpoints, and Angular UI.
+Crafting V2 now has two layers implemented:
 
-The implemented flow supports:
+1. The original vertical slice: quality, potential, recipe mastery, recipe unlocks, JSON-backed definitions, crafting endpoints, tempering endpoints, migrations, and Angular UI.
+2. The newer recipe-data refactor: recipes are broad archetypes with forms, while blueprints carry variant/theme identity and legacy-name compatibility.
 
-- Base recipes available without unlock rows.
-- Blueprint-unlocked variant recipes.
-- Batch crafting with `recipeId`, `targetTier`, and `quantity`.
-- Automatic material resolution with no manual material selection.
-- Crafted equipment always starting at `Common`.
-- Per-item quality rolls.
-- Per-item potential calculation.
-- Recipe mastery persistence and XP gain.
-- Tempering directions selected by the player.
-- Tempering consuming only item Potential.
-- Tempering progress, rarity upgrades, stat improvements, affix IDs, and special modifier IDs.
-- Tool crafting and tool tempering rejection in the new V2 paths.
+The latest JSON refactor changes Crafting V2 from exact item recipes into:
 
-The largest remaining gaps are:
+- 9 broad base recipes.
+- 35 forms under those recipes.
+- 11 blueprint families.
+- 33 material definitions.
+- `recipe-variants.json` intentionally empty, because exact variants moved to blueprint data.
 
-- No dedicated automated tests were added for Crafting V2.
-- Static content is a starter set, not a full conversion of every equipment item in `items.json`.
-- Dungeon rewards were not updated to award blueprints/special resources or globally prevent equipment drops.
-- Some recommended configurability is still hardcoded in services rather than separate JSON files.
-- Some suggested API endpoints and UI details are not present.
+The largest remaining runtime gap is blueprint materialization:
+
+```text
+recipe_ring + band form + blueprint_fury = Band of Fury
+```
+
+The JSON schema can now represent this, but `CraftItemsCommand` currently accepts only `recipeId`, `formId`, `targetTier`, and `quantity`. It does not yet accept `blueprintId`, enforce blueprint compatibility at craft time, apply blueprint special resource costs, or create blueprint-named generated outputs. Broad recipe + form crafting works; broad recipe + form + blueprint crafting is still partial.
+
+## Current JSON Shape
+
+| JSON file | Current role | Status |
+| --- | --- | --- |
+| `Data/crafting/base-recipes.json` | Broad craftable archetypes plus forms | Implemented for requested 9 base recipes and 35 forms |
+| `Data/crafting/recipe-variants.json` | Legacy exact-variant recipe file | Intentionally empty |
+| `Data/crafting/blueprints.json` | Blueprint families, compatibility tags, output naming, legacy aliases | Implemented as data; craft-time use is partial |
+| `Data/crafting/materials.json` | Standard material families/tier lookup plus special resources | Implemented through Region One tier 1-3 standard families |
+| `Data/crafting/tempering-recipes.json` | Tempering directions | Starter set still |
+| `Data/items.json` | Equipment, resources, blueprint items, neutral form outputs | Updated with neutral form outputs, material bases, and blueprint items; obsolete named accessory/relic output items removed |
+| `Data/dungeons.json` | Dungeon acquisition and gathering | Partially updated; `iron_ore` mismatch fixed, blueprint/special-resource rewards not wired |
+| `Data/recipes.json` | Legacy recipe content | Still legacy; not loaded by Crafting V2 |
+
+## Counts
+
+| Area | Count |
+| --- | ---: |
+| Broad base recipes | 9 |
+| Forms | 35 |
+| Blueprint families | 11 |
+| Material definitions | 33 |
+| Standard material definitions | 30 |
+| Special resource definitions | 3 |
 
 ## Implemented
 
-### Core Crafting Rules
+### Broad Recipe Refactor
 
-| Requirement                                                  | Status      | Notes                                                                                                     |
-| ------------------------------------------------------------ | ----------- | --------------------------------------------------------------------------------------------------------- |
-| Crafting request does not include manual material selections | Implemented | `CraftItemsCommand` accepts recipe, tier, and quantity. The frontend sends those fields only.             |
-| Crafting is batch-friendly                                   | Implemented | `CraftItemsCommand` supports quantity, clamped to 1-100.                                                  |
-| Base recipes are available to all players                    | Implemented | Base recipes do not require unlock rows.                                                                  |
-| Blueprint variants require unlocks                           | Implemented | Variant recipes check `CharacterRecipeUnlocks`.                                                           |
-| Crafted equipment always starts as Common                    | Implemented | New V2 craft command sets `Rarity.Common`. Legacy crafting path was also adjusted to stop rolling rarity. |
-| Quality is rolled during crafting                            | Implemented | `IItemQualityRollService` / `ItemQualityRollService` rolls quality per created item.                      |
-| Potential is generated when crafting                         | Implemented | `IItemPotentialService` calculates starting and max potential.                                            |
-| Tools cannot be crafted                                      | Implemented | V2 craft command rejects outputs where `EquipmentType == Tool`.                                           |
-| Tools cannot be tempered                                     | Implemented | V2 temper command rejects tools.                                                                          |
-| Tempering consumes Potential only                            | Implemented | V2 temper command spends item Potential and does not query or consume material inventory.                 |
-| Rarity changes through tempering                             | Implemented | V2 temper command advances progress and upgrades rarity when thresholds are reached.                      |
+The requested 9 base recipe IDs now exist:
 
-### Static Definition System
+| Base recipe | Forms |
+| --- | --- |
+| `recipe_head_armor` | `heavy_helm`, `medium_helm`, `light_hood`, `cloth_cowl` |
+| `recipe_chest_armor` | `heavy_breastplate`, `medium_mail`, `light_vest`, `cloth_robe` |
+| `recipe_leg_armor` | `heavy_legplates`, `medium_greaves`, `light_legwraps`, `cloth_pants` |
+| `recipe_ring` | `band` |
+| `recipe_necklace` | `amulet`, `charm`, `talisman` |
+| `recipe_relic` | `vial`, `heart`, `totem` |
+| `recipe_one_handed_weapon` | `shortsword`, `dagger`, `hand_axe`, `mace`, `wand` |
+| `recipe_two_handed_weapon` | `greatsword`, `battle_axe`, `maul`, `spear`, `staff`, `longbow`, `crossbow`, `gauntlets` |
+| `recipe_offhand` | `towershield`, `spiritward`, `grimoire` |
 
-| Requirement                                      | Status      | Notes                                                                          |
-| ------------------------------------------------ | ----------- | ------------------------------------------------------------------------------ |
-| JSON-backed definitions                          | Implemented | Added `Data/crafting/*.json`.                                                  |
-| Material definitions                             | Implemented | Added `materials.json`.                                                        |
-| Base recipe definitions                          | Implemented | Added `base-recipes.json`.                                                     |
-| Recipe variant definitions                       | Implemented | Added `recipe-variants.json`.                                                  |
-| Blueprint definitions                            | Implemented | Added `blueprints.json`.                                                       |
-| Tempering recipe definitions                     | Implemented | Added `tempering-recipes.json`.                                                |
-| Definition provider service                      | Implemented | Added `ICraftingDefinitionProvider` and `JsonCraftingDefinitionProvider`.      |
-| One standard material per family+tier validation | Implemented | Provider validates duplicate standard tiered materials.                        |
-| Variant base recipe validation                   | Implemented | Provider validates variant `BaseRecipeId`.                                     |
-| Blueprint unlock target validation               | Implemented | Provider validates blueprint `UnlocksRecipeId`.                                |
-| Special resource validation                      | Implemented | Provider validates special resource requirements against material definitions. |
+Important implementation details:
 
-### Persistence
+- Exact item names such as `Band of Fury`, `Phoenix Vial`, and `Charm of the Warden` are no longer base recipes.
+- Accessory/relic base forms now use neutral outputs: `band`, `amulet`, `charm`, `talisman`, `vial`, `heart`, and `totem`.
+- Old exact names are preserved as `legacyNames` and special blueprint output names. Obsolete named accessory/relic IDs were removed from active V2 alias fields after deleting their item records.
+- Armor forms include armor-weight tags for Heavy, Medium, Light, and Cloth identities.
+- Weapon/offhand forms include tags for blade, dagger, axe, mace, wand, great weapon, ranged, ward, grimoire, shield, and related identity concepts.
 
-| Requirement                                       | Status      | Notes                                                           |
-| ------------------------------------------------- | ----------- | --------------------------------------------------------------- |
-| Add item quality to equipment instances           | Implemented | Added `ItemQuality` and `EquipmentInstance.Quality`.            |
-| Add recipe identity fields to equipment instances | Implemented | Added `RecipeId` and `BaseRecipeId`.                            |
-| Add tier to equipment instances                   | Implemented | Added `Tier`.                                                   |
-| Add max potential to equipment instances          | Implemented | Added `MaxPotential`.                                           |
-| Add tempering progress to equipment instances     | Implemented | Added `TemperingProgress`.                                      |
-| Add affinity tags to equipment instances          | Implemented | Added `AffinityTags`.                                           |
-| Add special modifiers to equipment instances      | Implemented | Added `SpecialModifiers`.                                       |
-| Character recipe unlock persistence               | Implemented | Added `CharacterRecipeUnlock` and EF configuration.             |
-| Character recipe mastery persistence              | Implemented | Added `CharacterRecipeMastery` and EF configuration.            |
-| EF migrations                                     | Implemented | Added `AddEquipmentItemQuality` and `AddCraftingV2Progression`. |
+### Definition Schema Support
 
-### Commands and Queries
+Added minimal schema support while preserving existing fields:
 
-| Design item                         | Status      | Notes                                                                                                                               |
-| ----------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `CraftItemsCommand`                 | Implemented | Resolves costs, consumes materials, rolls quality, creates Common equipment, assigns potential, updates mastery.                    |
-| `LearnBlueprintCommand`             | Implemented | Consumes blueprint item and creates persistent unlock. Duplicate unlocks are rejected.                                              |
-| `TemperItemCommand`                 | Implemented | Applies selected tempering recipe, spends Potential, rolls outcome, progresses rarity, applies stat/affix/special modifier effects. |
-| `GetCraftingRecipesQuery`           | Implemented | Returns base recipes plus unlocked variants, with resolved costs and owned material counts.                                         |
-| `GetRecipeMasteriesQuery`           | Implemented | Returns persisted recipe mastery rows.                                                                                              |
-| `GetAvailableTemperingRecipesQuery` | Implemented | Returns tempering directions applicable to the selected item.                                                                       |
+- `CraftingRecipeDefinition.Forms`
+- `CraftingRecipeDefinition.RecipeFamily`
+- `CraftingRecipeDefinition.Slot`
+- `CraftingRecipeDefinition.Tags`
+- `CraftingRecipeDefinition.OutputNameTemplate`
+- `CraftingRecipeDefinition.LegacyNames`
+- `CraftingRecipeDefinition.LegacyItemIds`
+- `CraftingRecipeFormDefinition`
+- `BlueprintDefinition.BlueprintFamily`
+- `BlueprintDefinition.AllowedBaseRecipeIds`
+- `BlueprintDefinition.AllowedRecipeTags`
+- `BlueprintDefinition.OutputNameTemplate`
+- `BlueprintDefinition.SpecialOutputNames`
+- `BlueprintDefinition.Tags`
+- `BlueprintDefinition.LegacyNames`
+- `BlueprintDefinition.LegacyItemIds`
 
-### API Endpoints
+The provider validates:
 
-| Endpoint from design                                 | Status      | Implemented route                                    |
-| ---------------------------------------------------- | ----------- | ---------------------------------------------------- |
-| `GET /api/crafting/recipes`                          | Implemented | `GET Crafting/recipes?targetTier=...`                |
-| `POST /api/crafting/craft`                           | Implemented | `POST Crafting/craft`                                |
-| `GET /api/crafting/mastery`                          | Implemented | `GET Crafting/mastery`                               |
-| `POST /api/crafting/blueprints/learn`                | Implemented | `POST Crafting/blueprints/learn`                     |
-| `GET /api/crafting/items/{itemId}/tempering-options` | Implemented | `GET Crafting/items/{itemId:guid}/tempering-options` |
-| `POST /api/crafting/temper`                          | Implemented | `POST Crafting/temper`                               |
+- duplicate standard material family+tier definitions
+- duplicate form IDs inside a recipe
+- recipes with neither output item nor forms
+- variant base recipe references when variants exist
+- blueprint unlock recipe references when supplied
+- blueprint compatible base recipe references
+- special resource references
+- duplicate tempering recipe IDs
 
-### Frontend
+### Crafting Runtime
 
-| Requirement                                 | Status      | Notes                                                                    |
-| ------------------------------------------- | ----------- | ------------------------------------------------------------------------ |
-| Crafting UI uses recipe/tier/quantity       | Implemented | Regular crafting UI now uses V2 recipes and batch quantity.              |
-| No manual material selection in crafting UI | Implemented | Material slots/manual picks were removed from the V2 craft path.         |
-| Required and owned materials shown          | Implemented | UI displays material costs and owned counts for the selected batch.      |
-| Current recipe mastery shown                | Implemented | Craft panel displays mastery level.                                      |
-| Locked variants hidden from craftable list  | Implemented | Backend only returns base recipes and unlocked variants.                 |
-| Tempering UI selects item and direction     | Implemented | Tempering screen loads available directions for selected equipment.      |
-| Tempering UI has no material slots          | Implemented | Tempering UI spends Potential only.                                      |
-| Item models updated for V2 fields           | Implemented | Player and dashboard item contracts include quality/V2 equipment fields. |
+Implemented:
 
-### Content Added
+- `CraftItemsRequestDto.FormId`
+- `CraftItemsCommand` now resolves `recipeId + formId` into a concrete existing `EquipmentBase`.
+- If no `formId` is supplied for a recipe with forms, the first form is used.
+- Created equipment keeps `RecipeId` as the broad recipe ID.
+- Created equipment keeps `BaseRecipeId` as the broad recipe ID.
+- Form tags are added to crafted equipment affinity tags.
+- The Angular crafting UI exposes a Form selector.
 
-| Content area                 | Status      | Notes                                                                                                       |
-| ---------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------- |
-| Standard material item bases | Implemented | Added missing resource item bases such as `ore`, `wood`, `copper_ore`, `verdant_ore`, `crystalline_powder`. |
-| Special resource item bases  | Implemented | Added `venom_gland`, `royal_chitin_plate`, and `hive_ichor`.                                                |
-| Blueprint item bases         | Implemented | Added `blueprint_venom_touched_sword` and `blueprint_hivefang_dagger`.                                      |
-| Starter base recipes         | Implemented | Added recipes including shortsword, dagger, towershield, staff, heavy breastplate, and band of fury.        |
-| Starter variant recipes      | Implemented | Added venom/hive-themed variants.                                                                           |
-| Starter tempering directions | Implemented | Added generic and poison-oriented tempering recipes.                                                        |
+Still not implemented:
+
+- `CraftItemsRequestDto.BlueprintId`
+- craft-time blueprint compatibility checks
+- blueprint special resource consumption
+- generated blueprint output naming
+- generated item definitions for blueprint outcomes
+
+### Blueprint Learning
+
+Implemented:
+
+- Blueprint definitions can now use compatibility fields instead of only exact variant recipe IDs.
+- `LearnBlueprintCommand` supports compatibility-style blueprint unlocks by storing the blueprint ID as the unlock key.
+- Exact recipe blueprint behavior remains supported for backward compatibility.
+- Duplicate blueprint learning still rejects duplicate unlock rows.
+
+Partial:
+
+- Learned compatibility blueprints are persisted, but the recipe list and craft command do not yet generate selectable blueprint outcomes from those unlocks.
+
+### Materials
+
+`materials.json` now covers all recommended material families for Region One tiers 1-3:
+
+| Family | Tiers |
+| --- | --- |
+| Metal | 1, 2, 3 |
+| Wood | 1, 2, 3 |
+| Hide | 1, 2, 3 |
+| Crystal | 1, 2, 3 |
+| Stone | 1, 2, 3 |
+| Fiber | 1, 2, 3 |
+| Bone | 1, 2, 3 |
+| Chitin | 1, 2, 3 |
+| Resin | 1, 2, 3 |
+| Oil | 1, 2, 3 |
+
+Special resources currently defined:
+
+- `venom_gland`
+- `royal_chitin_plate`
+- `hive_ichor`
+
+### Item Catalog
+
+Added item bases for:
+
+- neutral form outputs: `band`, `amulet`, `charm`, `talisman`, `vial`, `heart`, `totem`
+- missing standard materials: examples include `rawhide`, `thick_hide`, `scaled_hide`, `soulglass_shard`, `woven_fiber`, `silk_thread`, `bone_fragments`, `grave_bone`, `amber_resin`, `living_resin`, and more
+- blueprint family items: `blueprint_fury`, `blueprint_arcane`, `blueprint_execution`, `blueprint_aegis`, `blueprint_warden`, `blueprint_endurance`, `blueprint_phoenix`, `blueprint_spirit`, `blueprint_primal`
+- previously added blueprint compatibility items: `blueprint_venom_touched_sword`, `blueprint_hivefang_dagger`
+
+Removed obsolete named accessory/relic item records that are now represented by neutral form outputs plus blueprint names:
+
+- `band_of_fury`
+- `band_of_arcane`
+- `band_of_execution`
+- `amulet_of_aegis`
+- `charm_of_the_warden`
+- `talisman_of_endurance`
+- `phoenix_vial`
+- `mana_heart`
+- `primal_totem`
+
+Those names still exist as `legacyNames` and/or blueprint `specialOutputNames`, but not as active `items.json` records.
+
+### Dungeon Data
+
+Implemented:
+
+- Fixed the `iron_ore` mismatch in `dungeons.json`.
+- Goblin Mines now references V2 material IDs:
+  - Grade I: `ore`
+  - Grade II: `copper_ore`
+  - Grade III: `verdant_ore`
+
+Not implemented:
+
+- blueprint drops
+- special resource drops
+- full Region One gathering/resource acquisition alignment
+- global prevention of equipment rewards from all combat/loot paths
 
 ## Partially Implemented
 
-### Design Rule Enforcement Outside Crafting V2
+### Blueprint Outcome Crafting
 
-| Requirement                                                  | Status  | Gap                                                                                                                                                           |
-| ------------------------------------------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Equipment is never dropped from combat                       | Partial | Crafting V2 creates equipment correctly, but the global combat/loot system was not fully audited or changed to enforce "no equipment from combat" everywhere. |
-| Equipment can only be received through crafting              | Partial | V2 crafting follows this rule. Existing reward/loot systems may still need review.                                                                            |
-| Tools can only be received from dungeons                     | Partial | Tools are blocked from V2 crafting and tempering, but dungeon reward tables were not updated as part of this pass.                                            |
-| Dungeons can reward tools, blueprints, and special resources | Partial | Blueprint/special resource item bases and definitions exist, but dungeon reward integration was not wired.                                                    |
+Status: Partial.
 
-### Recipe and Material Content Breadth
+The data can represent:
 
-| Requirement                                                               | Status  | Gap                                                                                                                                                                   |
-| ------------------------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Base recipes should match currently implemented equipment in `items.json` | Partial | A starter set was added, not a complete recipe for every valid equipment base in the catalog.                                                                         |
-| Recommended material families                                             | Partial | Implemented families include Metal, Wood, Hide, Crystal, Stone, Chitin, Resin, and Oil. Fiber and Bone are not currently used.                                        |
-| Multi-tier material coverage                                              | Partial | Starter materials cover only the tiers needed by the starter recipe set. This is not a complete tier 1-10 economy.                                                    |
-| Variant library                                                           | Partial | Two variants were added. The broader examples from the design, such as Flame-Scarred, Wraithbound, Mineforged, Royal Carapace, Gravebound, etc., are not implemented. |
+```text
+recipe_ring + band + blueprint_fury = Band of Fury
+recipe_relic + vial + blueprint_phoenix = Phoenix Vial
+recipe_one_handed_weapon + dagger + blueprint_venom = Venom Dagger
+recipe_head_armor + heavy_helm + blueprint_aegis = Aegis Heavy Helm
+```
 
-### Configurability
+But the runtime cannot yet craft those blueprint-selected outcomes.
 
-| Requirement                                                   | Status  | Gap                                                                                                                                           |
-| ------------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Quality odds should be configurable                           | Partial | Quality odds are in `ItemQualityRollService`, not external JSON/config.                                                                       |
-| Potential formula should be configurable                      | Partial | Potential multipliers and weights are in `ItemPotentialService`, not external JSON/config.                                                    |
-| Tier budgets should be configurable                           | Partial | Tier/stat budget logic is service code, not `crafting/tier-budgets.json`.                                                                     |
-| Affix and special modifier pools should be separately defined | Partial | Affix/special modifier IDs are embedded in tempering recipe definitions. Separate `affixes.json` and `special-modifiers.json` were not added. |
+Required next work:
 
-### Crafting Operation Details
+- Add `blueprintId` to `CraftItemsRequestDto`.
+- Add blueprint selection to Angular.
+- Validate learned blueprint unlocks at craft time.
+- Validate blueprint compatibility against base recipe, form, and tags.
+- Add blueprint special resource requirements.
+- Decide whether blueprint outcomes reuse legacy item IDs or create generated item definitions.
+- Apply `specialOutputNames` and `outputNameTemplate` to the crafted item display/output model.
 
-| Requirement                                  | Status  | Gap                                                                                                                                                                |
-| -------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Character existence validation               | Partial | V2 commands validate inventory/ownership/output conditions, but there is no explicit character existence check in `CraftItemsCommand`.                             |
-| Explicit transaction boundary                | Partial | The command uses existing services and DbContext flow, but no explicit transaction wrapper was added around material removal, item creation, mastery XP, and save. |
-| Crafting level affects Potential             | Partial | Potential considers target tier, item type, quality, and recipe mastery. A separate global crafting level is not currently used.                                   |
-| Recipe definition affects Potential directly | Partial | Potential uses the item/equipment type and tier. It does not currently read recipe-specific potential modifiers.                                                   |
+### Recipe Unlock Semantics
 
-### Tempering Architecture
+Status: Partial.
 
-| Requirement                              | Status  | Gap                                                                                                      |
-| ---------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------- |
-| `ITemperingOutcomeRollService`           | Partial | Outcome rolling exists inside `TemperItemCommand`, not in a separate service.                            |
-| `ITemperingProgressService`              | Partial | Progress logic exists inside `TemperItemCommand`, not in a separate service.                             |
-| `IAffixRollService`                      | Partial | Affix selection exists inside `TemperItemCommand`, not in a separate service.                            |
-| `ISpecialModifierRollService`            | Partial | Special modifier selection exists inside `TemperItemCommand`, not in a separate service.                 |
-| Existing `ITemperingService` integration | Partial | The new V2 tempering path is command-driven and does not deeply refactor the existing tempering service. |
+Base recipes are available. Blueprint unlock rows can be created. However, unlocked blueprint families do not yet appear as craftable derived outcomes in `GetCraftingRecipesQuery`.
 
-### API Coverage
+The old model was:
 
-| Endpoint from design                   | Status   | Gap                                                                                      |
-| -------------------------------------- | -------- | ---------------------------------------------------------------------------------------- |
-| `GET /api/crafting/recipes/{recipeId}` | Not done | No dedicated recipe details endpoint was added.                                          |
-| `GET /api/crafting/tempering-recipes`  | Not done | Tempering recipes are exposed as item-specific options, not as a standalone list.        |
-| `GetCraftingRecipeDetailsQuery`        | Not done | Not added.                                                                               |
-| `GetItemTemperingOptionsQuery`         | Partial  | Functionally covered by `GetAvailableTemperingRecipesQuery`, but not named as suggested. |
+```text
+unlock recipe variant -> variant appears in recipe list
+```
 
-### Frontend UX
+The new model should become:
 
-| Requirement                      | Status   | Gap                                                                                                                                                 |
-| -------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Recipe list grouped by base item | Partial  | Recipes are listed and filterable, but not shown as nested groups under each base recipe.                                                           |
-| Expected quality odds displayed  | Not done | UI shows mastery level but not quality probability distribution.                                                                                    |
-| Possible outcomes displayed      | Partial  | Tempering recipe data is available, but the UI mainly shows direction and potential cost. It does not fully present outcome probabilities/progress. |
-| Possible affixes displayed       | Partial  | Tempering option data exists, but the UI does not fully display affix and special modifier pools.                                                   |
-| Craft result sentence            | Partial  | The UI updates inventory/results, but the exact design sentence format is not fully implemented.                                                    |
+```text
+unlock blueprint family -> compatible forms expose blueprint-derived craft options
+```
+
+That query/runtime projection is not implemented yet.
+
+### Tempering Content
+
+Status: Partial.
+
+`tempering-recipes.json` still contains a starter set:
+
+- weapon sharpening
+- armor fortification
+- jewelry polishing
+- venom tempering
+
+Needed for richer Region One identity:
+
+- shield/offhand reinforcement
+- caster focusing
+- precision/ranged tuning
+- heavy/medium/light/cloth armor directions
+- Goblin/Mine/Powder directions
+- Wraith/Grave/Catacomb directions
+- Hive/Chitin/Resin directions
+- Blood/Fire/Frost/Shadow directions
+- Crystal/Slime/Geode directions
+- Nature/Moss/Treant directions
+- Undead/Bone/Ghoul directions
+- Worm/Leech/Burrow directions
+
+### Dungeon and Region One Acquisition
+
+Status: Partial.
+
+The material catalog now has enough standard families for Region One tier 1-3 crafting, but acquisition is not fully wired.
+
+Still needed:
+
+- blueprint drops or rewards
+- special resource drops
+- gathering nodes for every material family
+- Region One source mapping for each blueprint family
+- first-clear or completion reward decisions
+- validation that equipment is not dropped from combat or dungeon rewards
+
+### Automated Tests
+
+Status: Not done for Crafting V2-specific behavior.
+
+Existing tests still pass, but no dedicated tests were added for:
+
+- broad recipe + form crafting
+- missing/invalid form ID behavior
+- blueprint compatibility unlocks
+- blueprint-derived craft options
+- material family+tier validation
+- legacy alias preservation
+- neutral accessory/relic base outputs
+- `iron_ore` reference regression
 
 ## Not Done
 
-### Dedicated Test Coverage
+### Blueprint Runtime Materialization
 
-No Crafting V2-specific automated tests were added.
+Not implemented:
 
-The design requested tests for:
+- crafting with `blueprintId`
+- generated blueprint item names
+- generated blueprint output IDs
+- applying blueprint tags to crafted equipment
+- consuming blueprint-specific special resources
+- showing blueprint choices in UI
+- grouping available blueprint outcomes under base recipe + form
 
-- Base recipe crafting creates Common item.
-- Variant crafting creates Common item.
-- Crafting never creates Rare/Epic/Legendary item.
-- Quality roll behavior.
-- Potential assignment.
-- Correct tiered material consumption.
-- Variant special resource consumption.
-- Locked variant failure.
-- Invalid tier failure.
-- Tool craft failure.
-- Recipe mastery increase.
-- Higher mastery quality odds.
-- Blueprint unlock behavior.
-- Duplicate blueprint behavior.
-- Tempering Potential consumption.
-- Tempering material non-consumption.
-- Affinity-gated tempering.
-- Rarity progress and affix gain.
-- Tool tempering failure.
-- Zero-Potential tempering failure.
-- Material definition validation.
+### Separate Affix/Special Modifier Definitions
 
-Current verification only confirms that existing tests still pass.
-
-### Separate Static Files
-
-The following recommended definition files were not added:
+Not implemented:
 
 - `crafting/affixes.json`
 - `crafting/special-modifiers.json`
 - `crafting/tier-budgets.json`
 
-The current implementation embeds those concerns in `tempering-recipes.json` and service code.
+Affix and special modifier IDs remain embedded in tempering recipe data. Tier/stat budget behavior remains service code.
 
-### Dungeon Integration
+### Legacy Recipe Retirement or Migration
 
-Not implemented:
+Not implemented.
 
-- Add blueprint drops to dungeon rewards.
-- Add special resource/catalyst drops to dungeon rewards.
-- Verify tools are only dungeon rewards.
-- Globally prevent equipment from combat/dungeon rewards.
-- Add the design's dungeon-specific reward examples.
+`Data/recipes.json` still contains 113 legacy recipes. Crafting V2 does not load that file. A future pass should either:
 
-### Optional Later Features
-
-Not implemented, and listed as later/optional in the design:
-
-- Research Notes from duplicate blueprints.
-- `SalvageItemsCommand`.
-- `BatchTemperItemCommand`.
+- migrate useful themes into V2 blueprint/form data, or
+- clearly retire the legacy equipment recipe system.
 
 ## Acceptance Criteria Status
 
-### Crafting
+### Original Crafting V2 Criteria
 
-| Acceptance criterion                                                       | Status      |
-| -------------------------------------------------------------------------- | ----------- |
-| Base recipes are available without blueprint unlocks                       | Implemented |
-| Variant recipes are unavailable until blueprint unlock                     | Implemented |
-| Player can craft base recipe at valid tiers                                | Implemented |
-| Player can craft unlocked variant at valid tiers                           | Implemented |
-| Crafting request does not include material selections                      | Implemented |
-| Crafting consumes resolved tiered materials automatically                  | Implemented |
-| Crafting consumes special resources only if selected variant requires them | Implemented |
-| Crafting always creates Common equipment                                   | Implemented |
-| Crafting rolls Quality                                                     | Implemented |
-| Crafting creates Potential based on Quality and Recipe Mastery             | Implemented |
-| Crafting increases Recipe Mastery                                          | Implemented |
-| Tools cannot be crafted                                                    | Implemented |
+| Acceptance criterion | Status |
+| --- | --- |
+| Base recipes are available without blueprint unlocks | Implemented |
+| Player can craft base recipe at valid tiers | Implemented |
+| Crafting request does not include manual material selections | Implemented |
+| Crafting consumes resolved tiered materials automatically | Implemented |
+| Crafting always creates Common equipment | Implemented |
+| Crafting rolls Quality | Implemented |
+| Crafting creates Potential based on Quality and Recipe Mastery | Implemented |
+| Crafting increases Recipe Mastery | Implemented |
+| Tools cannot be crafted | Implemented |
+| Variant recipes are unavailable until blueprint unlock | Replaced by new blueprint-family model; runtime projection is partial |
+| Player can craft unlocked variant at valid tiers | Partial |
+| Crafting consumes special resources only if selected variant requires them | Partial |
 
-### Blueprints
+### Blueprint Criteria
 
-| Acceptance criterion                                             | Status      |
-| ---------------------------------------------------------------- | ----------- |
-| Blueprint item can unlock a variant recipe                       | Implemented |
-| Learning a blueprint creates persistent recipe unlock            | Implemented |
-| Learning a duplicate blueprint does not create duplicate unlocks | Implemented |
-| Unlocked variants appear in available recipe list                | Implemented |
-| Base recipes are available without unlock records                | Implemented |
+| Acceptance criterion | Status |
+| --- | --- |
+| Blueprint item can be learned | Implemented |
+| Learning a blueprint creates a persistent unlock | Implemented |
+| Learning duplicate blueprint does not create duplicate unlocks | Implemented |
+| Blueprint has compatibility data for recipes/forms | Implemented in JSON |
+| Unlocked blueprint-derived outcomes appear in recipe list | Not done |
+| Blueprint-derived outcome can be crafted | Not done |
 
-### Tempering
+### Tempering Criteria
 
-| Acceptance criterion                                            | Status      |
-| --------------------------------------------------------------- | ----------- |
-| Tempering consumes Potential only                               | Implemented |
-| Tempering does not consume any materials                        | Implemented |
-| Tempering cannot be performed on tools                          | Implemented |
+| Acceptance criterion | Status |
+| --- | --- |
+| Tempering consumes Potential only | Implemented |
+| Tempering does not consume any materials | Implemented |
+| Tempering cannot be performed on tools | Implemented |
 | Tempering uses selected Tempering Recipe to determine direction | Implemented |
-| Tempering can improve item stats                                | Implemented |
-| Tempering can increase rarity progress                          | Implemented |
-| Rarity can only increase through tempering                      | Partial     |
-| Rarity upgrade adds affix from selected Tempering Recipe pool   | Implemented |
-| Special modifiers only appear at configured rarities            | Implemented |
-| Item cannot be tempered when Potential is insufficient          | Implemented |
+| Tempering can improve item stats | Implemented |
+| Tempering can increase rarity progress | Implemented |
+| Rarity upgrade adds affix from selected Tempering Recipe pool | Implemented |
+| Special modifiers only appear at configured rarities | Implemented |
+| Item cannot be tempered when Potential is insufficient | Implemented |
 
-Note on "Rarity can only increase through tempering": the V2 craft path and adjusted legacy craft path follow this, but the whole codebase was not exhaustively audited for every possible rarity mutation.
+### Material and Data Cleanliness Criteria
 
-### Materials and Market Cleanliness
+| Acceptance criterion | Status |
+| --- | --- |
+| One standard material per family per tier | Implemented |
+| No multiple equivalent Tier 2 metals | Implemented in V2 materials |
+| No multiple equivalent Tier 3 woods | Implemented in V2 materials |
+| Special resources are separate non-tiered items | Implemented |
+| Obsolete named accessory/relic item IDs are removed from `items.json` | Implemented |
+| Old exact item names are no longer base recipes | Implemented |
+| Broad base recipe count is 9 | Implemented |
+| Forms determine physical output within base recipes | Implemented |
+| Blueprints define theme/variant identity | Implemented as data |
 
-| Acceptance criterion                                                        | Status                             |
-| --------------------------------------------------------------------------- | ---------------------------------- |
-| There is only one standard material per family per tier                     | Implemented                        |
-| No multiple equivalent Tier 2 metals                                        | Implemented in current definitions |
-| No multiple equivalent Tier 3 woods                                         | Implemented in current definitions |
-| Special resources are separate non-tiered items                             | Implemented                        |
-| Special resources are only consumed by recipes that explicitly require them | Implemented                        |
+## Files Changed By This Work
 
-## Files Added or Changed
+### JSON Content
 
-### Backend
-
-- `LL/src/API/API.LL/Controllers/V1/CraftingController.cs`
-- `LL/src/API/API.LL/Data/crafting/materials.json`
 - `LL/src/API/API.LL/Data/crafting/base-recipes.json`
-- `LL/src/API/API.LL/Data/crafting/recipe-variants.json`
 - `LL/src/API/API.LL/Data/crafting/blueprints.json`
+- `LL/src/API/API.LL/Data/crafting/materials.json`
+- `LL/src/API/API.LL/Data/crafting/recipe-variants.json`
 - `LL/src/API/API.LL/Data/crafting/tempering-recipes.json`
 - `LL/src/API/API.LL/Data/items.json`
-- `LL/src/Core/Application/UseCases/Crafting/**`
-- `LL/src/Core/Domain/Models/Professions/Crafting/V2/**`
-- `LL/src/Core/Domain/Models/Professions/Crafting/CharacterRecipeUnlock.cs`
-- `LL/src/Core/Domain/Models/Professions/Crafting/CharacterRecipeMastery.cs`
-- `LL/src/Core/Domain/Models/Items/ItemQuality.cs`
-- `LL/src/Core/Domain/Models/Items/Equipments/EquipmentInstance.cs`
-- `LL/src/Core/Application/UseCases/Equipments/Dtos/EquipmentInstanceDto.cs`
-- `LL/src/Infrastructure/Service/Services.LL/Professions/Craftings/**`
-- `LL/src/Infrastructure/Service/Services.LL/DependencyInjection.cs`
+- `LL/src/API/API.LL/Data/dungeons.json`
 
-### Persistence
+### Backend Schema and Runtime
 
-- `LL/src/Infrastructure/Persistence/Persistence.LL/Configurations/Professions/Crafting/CharacterRecipeUnlockConfiguration.cs`
-- `LL/src/Infrastructure/Persistence/Persistence.LL/Configurations/Professions/Crafting/CharacterRecipeMasteryConfiguration.cs`
-- `LL/src/Infrastructure/Persistence/Persistence.LL/Migrations/20260624143520_AddEquipmentItemQuality.cs`
-- `LL/src/Infrastructure/Persistence/Persistence.LL/Migrations/20260624143520_AddEquipmentItemQuality.Designer.cs`
-- `LL/src/Infrastructure/Persistence/Persistence.LL/Migrations/20260624145236_AddCraftingV2Progression.cs`
-- `LL/src/Infrastructure/Persistence/Persistence.LL/Migrations/20260624145236_AddCraftingV2Progression.Designer.cs`
-- `LL/src/Infrastructure/Persistence/Persistence.LL/Migrations/LLDbContextModelSnapshot.cs`
+- `LL/src/Core/Domain/Models/Professions/Crafting/V2/CraftingRecipeDefinition.cs`
+- `LL/src/Core/Domain/Models/Professions/Crafting/V2/CraftingRecipeFormDefinition.cs`
+- `LL/src/Core/Domain/Models/Professions/Crafting/V2/BlueprintDefinition.cs`
+- `LL/src/Core/Domain/Models/Professions/Crafting/V2/BlueprintOutputNameDefinition.cs`
+- `LL/src/Core/Application/UseCases/Crafting/Dtos/CraftingRecipeDto.cs`
+- `LL/src/Core/Application/UseCases/Crafting/Dtos/CraftingRecipeFormDto.cs`
+- `LL/src/Core/Application/UseCases/Crafting/Dtos/CraftItemsRequestDto.cs`
+- `LL/src/Core/Application/UseCases/Crafting/Commands/CraftItems/CraftItemsCommand.cs`
+- `LL/src/Core/Application/UseCases/Crafting/Commands/LearnBlueprint/LearnBlueprintCommand.cs`
+- `LL/src/Core/Application/UseCases/Crafting/Queries/GetCraftingRecipes/GetCraftingRecipesQuery.cs`
+- `LL/src/Infrastructure/Service/Services.LL/Professions/Craftings/JsonCraftingDefinitionProvider.cs`
+- `LL/src/API/API.LL/Controllers/V1/CraftingController.cs`
 
 ### Frontend
 
 - `LL/src/Presentation/ll/src/app/shared/models/crafting-v2.ts`
-- `LL/src/Presentation/ll/src/app/shared/models/item.ts`
-- `LL/src/Presentation/ll/src/app/shared/models/enums/itemQuality.ts`
-- `LL/src/Presentation/ll/src/app/core/services/api/crafting/crafting.service.ts`
 - `LL/src/Presentation/ll/src/app/features/game/professions/crafting/regular-crafting/regular-crafting.component.ts`
 - `LL/src/Presentation/ll/src/app/features/game/professions/crafting/regular-crafting/regular-crafting.component.html`
-- `LL/src/Presentation/ll/src/app/features/game/professions/crafting/tempering/tempering.component.ts`
-- `LL/src/Presentation/ll/src/app/features/game/professions/crafting/tempering/tempering.component.html`
-- `LL/src/Presentation/dashboard/src/app/shared/models/item.ts`
-- `LL/src/Presentation/dashboard/src/app/shared/models/enums/itemQuality.ts`
+
+## Compatibility Aliases
+
+Preserved as form `legacyItemIds` and/or blueprint `legacyItemIds` where the corresponding item records still exist:
+
+- armor forms such as `heavy_helm`, `medium_mail`, `cloth_robe`
+- weapon forms such as `shortsword`, `dagger`, `hatchet`, `staff`
+- offhand forms such as `towershield`, `Spiritward`, `grimoire`
+- old blueprint items `blueprint_venom_touched_sword` and `blueprint_hivefang_dagger`
+
+Removed from `items.json` and from active V2 `legacyItemIds`:
+
+- `band_of_fury`
+- `band_of_arcane`
+- `band_of_execution`
+- `amulet_of_aegis`
+- `charm_of_the_warden`
+- `talisman_of_endurance`
+- `phoenix_vial`
+- `mana_heart`
+- `primal_totem`
+
+Remaining legacy caveat: `LL/src/API/API.LL/Data/recipes.json` and `LL/src/Presentation/ll/src/app/data/recipes-content.ts` still mention these removed IDs. Those files are legacy/static content and were not cleaned up in this `items.json` removal pass.
+
+## Assumptions
+
+- Neutral accessory/relic base items use empty modifiers for now, because the request said not to invent detailed balance values.
+- Form identity is represented through tags and `statProfileId` references instead of full balance tables.
+- Blueprint-derived names are represented in JSON but not yet applied to actual crafted instances.
+- Compatibility blueprint unlocks currently persist by blueprint ID, while exact recipe unlocks can still persist by recipe ID.
+- `recipe-variants.json` is empty by design after this refactor; exact variants should come from blueprint data.
 
 ## Verification Performed
 
-These commands passed:
+Changed JSON validation:
+
+- all changed JSON files parse successfully
+- material `itemId` references resolve to `items.json`
+- recipe form `outputItemId` references resolve to `items.json`
+- non-empty form `legacyItemIds` resolve to `items.json`
+- blueprint `itemId` references resolve to `items.json`
+- non-empty blueprint `legacyItemIds` resolve to `items.json`
+- removed accessory/relic IDs no longer appear in active V2 `legacyItemIds` or `specialOutputNames[].legacyItemId`
+- blueprint `allowedBaseRecipeIds` resolve to V2 recipes
+- no remaining `iron_ore` references were found
+
+Commands passed:
 
 ```powershell
 dotnet build LL/LegendsLegacy.sln --nologo -v:q
@@ -378,7 +503,7 @@ Failed: 0
 Skipped: 0
 ```
 
-Both Angular builds passed:
+Angular builds passed:
 
 ```powershell
 cd LL/src/Presentation/ll
@@ -388,21 +513,28 @@ cd LL/src/Presentation/dashboard
 .\node_modules\.bin\ng.cmd build --configuration development
 ```
 
-A targeted crafting JSON reference check was also run and passed. It verified:
-
-- No duplicate item IDs in `items.json`.
-- Every crafting material `itemId` exists in `items.json`.
-- Every recipe `outputItemId` exists in `items.json`.
-- Every blueprint `itemId` exists in `items.json`.
+No verification commands were skipped.
 
 ## Migration and Deployment Notes
 
-The migrations were generated but not applied.
+No new EF migration was generated for the recipe/form/blueprint JSON refactor.
 
-Before using Crafting V2 in a deployed environment:
+Existing Crafting V2 migrations from the earlier implementation still need to be applied before using Crafting V2 in an environment:
 
-1. Apply the new EF migrations.
-2. Deploy the new `Data/crafting` JSON files with the API content files.
-3. Deploy the updated `items.json`.
-4. Add dungeon reward integration for blueprint and special-resource drops if players need to acquire the new variant unlocks naturally.
-5. Add dedicated tests before expanding the recipe/material economy further.
+- `20260624143520_AddEquipmentItemQuality`
+- `20260624145236_AddCraftingV2Progression`
+
+Deployment needs the updated content files:
+
+- `Data/crafting/*.json`
+- `Data/items.json`
+- `Data/dungeons.json`
+
+The next implementation pass should prioritize blueprint runtime materialization, because the data model now expects the player-facing flow to be:
+
+```text
+Choose broad recipe.
+Choose form.
+Optionally choose learned compatible blueprint.
+Craft the resulting named output.
+```
