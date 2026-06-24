@@ -6,15 +6,41 @@
     "recipeFamily": "Armor",
     "slot": "Head",
     "outputItemType": "Head",
-    "tierRange": { "min": 1, "max": 3 },
+    "tierRange": {
+      "min": 1,
+      "max": 3
+    },
     "materialRequirements": [
-      { "type": "TieredMaterial", "family": "Metal", "baseAmount": 8, "amountPerTier": 3 },
-      { "type": "TieredMaterial", "family": "Hide", "baseAmount": 4, "amountPerTier": 1 }
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 8,
+        "amountPerTier": 3
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Hide",
+        "baseAmount": 4,
+        "amountPerTier": 1
+      }
     ],
-    "baseStatProfile": { "Armor": 0.45, "Fortitude": 0.3, "MaxHealth": 0.25 },
-    "affinityTags": [ "Armor", "Head" ],
-    "defaultTemperingTags": [ "Armor", "Head" ],
-    "tags": [ "Armor", "Head" ],
+    "baseStatProfile": {
+      "Armor": 0.45,
+      "Fortitude": 0.3,
+      "MaxHealth": 0.25
+    },
+    "affinityTags": [
+      "Armor",
+      "Head"
+    ],
+    "defaultTemperingTags": [
+      "Armor",
+      "Head"
+    ],
+    "tags": [
+      "Armor",
+      "Head"
+    ],
     "forms": [
       {
         "formId": "heavy_helm",
@@ -23,9 +49,16 @@
         "outputItemType": "Head",
         "armorWeight": "Heavy",
         "statProfileId": "armor_heavy",
-        "tags": [ "Armor", "HeavyArmor", "Defensive", "PhysicalDefense", "Block", "Guard", "Barrier", "Threat" ],
-        "legacyNames": [ "Heavy Helm" ],
-        "legacyItemIds": [ "heavy_helm" ]
+        "tags": [
+          "Armor",
+          "HeavyArmor",
+          "Defensive",
+          "PhysicalDefense",
+          "Block",
+          "Guard",
+          "Barrier",
+          "Threat"
+        ]
       },
       {
         "formId": "medium_helm",
@@ -34,9 +67,14 @@
         "outputItemType": "Head",
         "armorWeight": "Medium",
         "statProfileId": "armor_medium",
-        "tags": [ "Armor", "MediumArmor", "Bruiser", "BalancedDefense", "Endurance", "Physical" ],
-        "legacyNames": [ "Medium Helm" ],
-        "legacyItemIds": [ "medium_helm" ]
+        "tags": [
+          "Armor",
+          "MediumArmor",
+          "Bruiser",
+          "BalancedDefense",
+          "Endurance",
+          "Physical"
+        ]
       },
       {
         "formId": "light_hood",
@@ -45,9 +83,15 @@
         "outputItemType": "Head",
         "armorWeight": "Light",
         "statProfileId": "armor_light",
-        "tags": [ "Armor", "LightArmor", "Dodge", "Crit", "Speed", "Precision", "Poison" ],
-        "legacyNames": [ "Light Hood" ],
-        "legacyItemIds": [ "light_hood" ]
+        "tags": [
+          "Armor",
+          "LightArmor",
+          "Dodge",
+          "Crit",
+          "Speed",
+          "Precision",
+          "Poison"
+        ]
       },
       {
         "formId": "cloth_cowl",
@@ -56,9 +100,15 @@
         "outputItemType": "Head",
         "armorWeight": "Cloth",
         "statProfileId": "armor_cloth",
-        "tags": [ "Armor", "ClothArmor", "Magic", "Mana", "Cooldown", "Support", "MagicDefense" ],
-        "legacyNames": [ "Cloth Cowl" ],
-        "legacyItemIds": [ "cloth_cowl" ]
+        "tags": [
+          "Armor",
+          "ClothArmor",
+          "Magic",
+          "Mana",
+          "Cooldown",
+          "Support",
+          "MagicDefense"
+        ]
       }
     ]
   },
@@ -69,15 +119,41 @@
     "recipeFamily": "Armor",
     "slot": "Chest",
     "outputItemType": "Chest",
-    "tierRange": { "min": 1, "max": 3 },
+    "tierRange": {
+      "min": 1,
+      "max": 3
+    },
     "materialRequirements": [
-      { "type": "TieredMaterial", "family": "Metal", "baseAmount": 14, "amountPerTier": 5 },
-      { "type": "TieredMaterial", "family": "Hide", "baseAmount": 6, "amountPerTier": 2 }
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 14,
+        "amountPerTier": 5
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Hide",
+        "baseAmount": 6,
+        "amountPerTier": 2
+      }
     ],
-    "baseStatProfile": { "Armor": 0.5, "Fortitude": 0.25, "MaxHealth": 0.25 },
-    "affinityTags": [ "Armor", "Chest" ],
-    "defaultTemperingTags": [ "Armor", "Chest" ],
-    "tags": [ "Armor", "Chest" ],
+    "baseStatProfile": {
+      "Armor": 0.5,
+      "Fortitude": 0.25,
+      "MaxHealth": 0.25
+    },
+    "affinityTags": [
+      "Armor",
+      "Chest"
+    ],
+    "defaultTemperingTags": [
+      "Armor",
+      "Chest"
+    ],
+    "tags": [
+      "Armor",
+      "Chest"
+    ],
     "forms": [
       {
         "formId": "heavy_breastplate",
@@ -86,9 +162,16 @@
         "outputItemType": "Chest",
         "armorWeight": "Heavy",
         "statProfileId": "armor_heavy",
-        "tags": [ "Armor", "HeavyArmor", "Defensive", "PhysicalDefense", "Block", "Guard", "Barrier", "Threat" ],
-        "legacyNames": [ "Heavy Breastplate" ],
-        "legacyItemIds": [ "heavy_breastplate" ]
+        "tags": [
+          "Armor",
+          "HeavyArmor",
+          "Defensive",
+          "PhysicalDefense",
+          "Block",
+          "Guard",
+          "Barrier",
+          "Threat"
+        ]
       },
       {
         "formId": "medium_mail",
@@ -97,9 +180,14 @@
         "outputItemType": "Chest",
         "armorWeight": "Medium",
         "statProfileId": "armor_medium",
-        "tags": [ "Armor", "MediumArmor", "Bruiser", "BalancedDefense", "Endurance", "Physical" ],
-        "legacyNames": [ "Medium Mail" ],
-        "legacyItemIds": [ "medium_mail" ]
+        "tags": [
+          "Armor",
+          "MediumArmor",
+          "Bruiser",
+          "BalancedDefense",
+          "Endurance",
+          "Physical"
+        ]
       },
       {
         "formId": "light_vest",
@@ -108,9 +196,15 @@
         "outputItemType": "Chest",
         "armorWeight": "Light",
         "statProfileId": "armor_light",
-        "tags": [ "Armor", "LightArmor", "Dodge", "Crit", "Speed", "Precision", "Poison" ],
-        "legacyNames": [ "Light Vest" ],
-        "legacyItemIds": [ "light_vest" ]
+        "tags": [
+          "Armor",
+          "LightArmor",
+          "Dodge",
+          "Crit",
+          "Speed",
+          "Precision",
+          "Poison"
+        ]
       },
       {
         "formId": "cloth_robe",
@@ -119,9 +213,15 @@
         "outputItemType": "Chest",
         "armorWeight": "Cloth",
         "statProfileId": "armor_cloth",
-        "tags": [ "Armor", "ClothArmor", "Magic", "Mana", "Cooldown", "Support", "MagicDefense" ],
-        "legacyNames": [ "Cloth Robe" ],
-        "legacyItemIds": [ "cloth_robe" ]
+        "tags": [
+          "Armor",
+          "ClothArmor",
+          "Magic",
+          "Mana",
+          "Cooldown",
+          "Support",
+          "MagicDefense"
+        ]
       }
     ]
   },
@@ -132,15 +232,41 @@
     "recipeFamily": "Armor",
     "slot": "Legs",
     "outputItemType": "Legs",
-    "tierRange": { "min": 1, "max": 3 },
+    "tierRange": {
+      "min": 1,
+      "max": 3
+    },
     "materialRequirements": [
-      { "type": "TieredMaterial", "family": "Metal", "baseAmount": 10, "amountPerTier": 4 },
-      { "type": "TieredMaterial", "family": "Hide", "baseAmount": 5, "amountPerTier": 2 }
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 10,
+        "amountPerTier": 4
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Hide",
+        "baseAmount": 5,
+        "amountPerTier": 2
+      }
     ],
-    "baseStatProfile": { "Armor": 0.45, "DodgeChance": 0.25, "Fortitude": 0.3 },
-    "affinityTags": [ "Armor", "Legs" ],
-    "defaultTemperingTags": [ "Armor", "Legs" ],
-    "tags": [ "Armor", "Legs" ],
+    "baseStatProfile": {
+      "Armor": 0.45,
+      "DodgeChance": 0.25,
+      "Fortitude": 0.3
+    },
+    "affinityTags": [
+      "Armor",
+      "Legs"
+    ],
+    "defaultTemperingTags": [
+      "Armor",
+      "Legs"
+    ],
+    "tags": [
+      "Armor",
+      "Legs"
+    ],
     "forms": [
       {
         "formId": "heavy_legplates",
@@ -149,9 +275,16 @@
         "outputItemType": "Legs",
         "armorWeight": "Heavy",
         "statProfileId": "armor_heavy",
-        "tags": [ "Armor", "HeavyArmor", "Defensive", "PhysicalDefense", "Block", "Guard", "Barrier", "Threat" ],
-        "legacyNames": [ "Heavy Legplates" ],
-        "legacyItemIds": [ "heavy_legplates" ]
+        "tags": [
+          "Armor",
+          "HeavyArmor",
+          "Defensive",
+          "PhysicalDefense",
+          "Block",
+          "Guard",
+          "Barrier",
+          "Threat"
+        ]
       },
       {
         "formId": "medium_greaves",
@@ -160,9 +293,14 @@
         "outputItemType": "Legs",
         "armorWeight": "Medium",
         "statProfileId": "armor_medium",
-        "tags": [ "Armor", "MediumArmor", "Bruiser", "BalancedDefense", "Endurance", "Physical" ],
-        "legacyNames": [ "Medium Greaves" ],
-        "legacyItemIds": [ "medium_greaves" ]
+        "tags": [
+          "Armor",
+          "MediumArmor",
+          "Bruiser",
+          "BalancedDefense",
+          "Endurance",
+          "Physical"
+        ]
       },
       {
         "formId": "light_legwraps",
@@ -171,9 +309,15 @@
         "outputItemType": "Legs",
         "armorWeight": "Light",
         "statProfileId": "armor_light",
-        "tags": [ "Armor", "LightArmor", "Dodge", "Crit", "Speed", "Precision", "Poison" ],
-        "legacyNames": [ "Light Legwraps", "Light Leggings" ],
-        "legacyItemIds": [ "light_leggings" ]
+        "tags": [
+          "Armor",
+          "LightArmor",
+          "Dodge",
+          "Crit",
+          "Speed",
+          "Precision",
+          "Poison"
+        ]
       },
       {
         "formId": "cloth_pants",
@@ -182,9 +326,15 @@
         "outputItemType": "Legs",
         "armorWeight": "Cloth",
         "statProfileId": "armor_cloth",
-        "tags": [ "Armor", "ClothArmor", "Magic", "Mana", "Cooldown", "Support", "MagicDefense" ],
-        "legacyNames": [ "Cloth Pants" ],
-        "legacyItemIds": [ "cloth_pants" ]
+        "tags": [
+          "Armor",
+          "ClothArmor",
+          "Magic",
+          "Mana",
+          "Cooldown",
+          "Support",
+          "MagicDefense"
+        ]
       }
     ]
   },
@@ -195,15 +345,46 @@
     "recipeFamily": "Accessory",
     "slot": "Ring",
     "outputItemType": "Ring",
-    "tierRange": { "min": 1, "max": 3 },
+    "tierRange": {
+      "min": 1,
+      "max": 3
+    },
     "materialRequirements": [
-      { "type": "TieredMaterial", "family": "Metal", "baseAmount": 5, "amountPerTier": 2 },
-      { "type": "TieredMaterial", "family": "Crystal", "baseAmount": 3, "amountPerTier": 1 }
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 5,
+        "amountPerTier": 2
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Crystal",
+        "baseAmount": 3,
+        "amountPerTier": 1
+      }
     ],
-    "baseStatProfile": { "Power": 0.35, "Precision": 0.25, "CritChance": 0.2, "CritDamage": 0.2 },
-    "affinityTags": [ "Accessory", "Ring", "OffensiveScaling", "StatusScaling" ],
-    "defaultTemperingTags": [ "Accessory", "Ring" ],
-    "tags": [ "Accessory", "Ring", "OffensiveScaling", "StatusScaling" ],
+    "baseStatProfile": {
+      "Power": 0.35,
+      "Precision": 0.25,
+      "CritChance": 0.2,
+      "CritDamage": 0.2
+    },
+    "affinityTags": [
+      "Accessory",
+      "Ring",
+      "OffensiveScaling",
+      "StatusScaling"
+    ],
+    "defaultTemperingTags": [
+      "Accessory",
+      "Ring"
+    ],
+    "tags": [
+      "Accessory",
+      "Ring",
+      "OffensiveScaling",
+      "StatusScaling"
+    ],
     "forms": [
       {
         "formId": "band",
@@ -211,9 +392,11 @@
         "outputItemId": "band",
         "outputItemType": "Ring",
         "statProfileId": "ring_band",
-        "tags": [ "Accessory", "Ring", "Band" ],
-        "legacyNames": [ "Band of Fury", "Band of Arcane", "Band of Execution" ],
-        "legacyItemIds": []
+        "tags": [
+          "Accessory",
+          "Ring",
+          "Band"
+        ]
       }
     ]
   },
@@ -224,15 +407,46 @@
     "recipeFamily": "Accessory",
     "slot": "Necklace",
     "outputItemType": "Necklace",
-    "tierRange": { "min": 1, "max": 3 },
+    "tierRange": {
+      "min": 1,
+      "max": 3
+    },
     "materialRequirements": [
-      { "type": "TieredMaterial", "family": "Metal", "baseAmount": 6, "amountPerTier": 2 },
-      { "type": "TieredMaterial", "family": "Crystal", "baseAmount": 4, "amountPerTier": 1 }
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 6,
+        "amountPerTier": 2
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Crystal",
+        "baseAmount": 4,
+        "amountPerTier": 1
+      }
     ],
-    "baseStatProfile": { "MaxHealth": 0.35, "Fortitude": 0.25, "Spirit": 0.2, "Resistance": 0.2 },
-    "affinityTags": [ "Accessory", "Necklace", "Survival", "Sustain" ],
-    "defaultTemperingTags": [ "Accessory", "Necklace" ],
-    "tags": [ "Accessory", "Necklace", "Survival", "Sustain" ],
+    "baseStatProfile": {
+      "MaxHealth": 0.35,
+      "Fortitude": 0.25,
+      "Spirit": 0.2,
+      "Resistance": 0.2
+    },
+    "affinityTags": [
+      "Accessory",
+      "Necklace",
+      "Survival",
+      "Sustain"
+    ],
+    "defaultTemperingTags": [
+      "Accessory",
+      "Necklace"
+    ],
+    "tags": [
+      "Accessory",
+      "Necklace",
+      "Survival",
+      "Sustain"
+    ],
     "forms": [
       {
         "formId": "amulet",
@@ -240,9 +454,12 @@
         "outputItemId": "amulet",
         "outputItemType": "Necklace",
         "statProfileId": "necklace_amulet",
-        "tags": [ "Accessory", "Necklace", "Amulet", "Defensive" ],
-        "legacyNames": [ "Amulet of Aegis" ],
-        "legacyItemIds": []
+        "tags": [
+          "Accessory",
+          "Necklace",
+          "Amulet",
+          "Defensive"
+        ]
       },
       {
         "formId": "charm",
@@ -250,9 +467,12 @@
         "outputItemId": "charm",
         "outputItemType": "Necklace",
         "statProfileId": "necklace_charm",
-        "tags": [ "Accessory", "Necklace", "Charm", "Warden" ],
-        "legacyNames": [ "Charm of the Warden" ],
-        "legacyItemIds": []
+        "tags": [
+          "Accessory",
+          "Necklace",
+          "Charm",
+          "Warden"
+        ]
       },
       {
         "formId": "talisman",
@@ -260,9 +480,12 @@
         "outputItemId": "talisman",
         "outputItemType": "Necklace",
         "statProfileId": "necklace_talisman",
-        "tags": [ "Accessory", "Necklace", "Talisman", "Endurance" ],
-        "legacyNames": [ "Talisman of Endurance" ],
-        "legacyItemIds": []
+        "tags": [
+          "Accessory",
+          "Necklace",
+          "Talisman",
+          "Endurance"
+        ]
       }
     ]
   },
@@ -273,15 +496,41 @@
     "recipeFamily": "Relic",
     "slot": "Relic",
     "outputItemType": "Relic",
-    "tierRange": { "min": 1, "max": 3 },
+    "tierRange": {
+      "min": 1,
+      "max": 3
+    },
     "materialRequirements": [
-      { "type": "TieredMaterial", "family": "Crystal", "baseAmount": 6, "amountPerTier": 2 },
-      { "type": "TieredMaterial", "family": "Bone", "baseAmount": 3, "amountPerTier": 1 }
+      {
+        "type": "TieredMaterial",
+        "family": "Crystal",
+        "baseAmount": 6,
+        "amountPerTier": 2
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Bone",
+        "baseAmount": 3,
+        "amountPerTier": 1
+      }
     ],
-    "baseStatProfile": { "Spirit": 0.35, "Power": 0.25, "SummonPower": 0.2, "Cooldown": 0.2 },
-    "affinityTags": [ "Relic", "BuildDefining" ],
-    "defaultTemperingTags": [ "Relic" ],
-    "tags": [ "Relic", "BuildDefining" ],
+    "baseStatProfile": {
+      "Spirit": 0.35,
+      "Power": 0.25,
+      "SummonPower": 0.2,
+      "Cooldown": 0.2
+    },
+    "affinityTags": [
+      "Relic",
+      "BuildDefining"
+    ],
+    "defaultTemperingTags": [
+      "Relic"
+    ],
+    "tags": [
+      "Relic",
+      "BuildDefining"
+    ],
     "forms": [
       {
         "formId": "vial",
@@ -289,9 +538,11 @@
         "outputItemId": "vial",
         "outputItemType": "Relic",
         "statProfileId": "relic_vial",
-        "tags": [ "Relic", "Vial", "Recovery" ],
-        "legacyNames": [ "Phoenix Vial" ],
-        "legacyItemIds": []
+        "tags": [
+          "Relic",
+          "Vial",
+          "Recovery"
+        ]
       },
       {
         "formId": "heart",
@@ -299,9 +550,12 @@
         "outputItemId": "heart",
         "outputItemType": "Relic",
         "statProfileId": "relic_heart",
-        "tags": [ "Relic", "Heart", "Spirit", "Mana" ],
-        "legacyNames": [ "Spirit Heart" ],
-        "legacyItemIds": []
+        "tags": [
+          "Relic",
+          "Heart",
+          "Spirit",
+          "Mana"
+        ]
       },
       {
         "formId": "totem",
@@ -309,9 +563,12 @@
         "outputItemId": "totem",
         "outputItemType": "Relic",
         "statProfileId": "relic_totem",
-        "tags": [ "Relic", "Totem", "Primal", "Summon" ],
-        "legacyNames": [ "Primal Totem" ],
-        "legacyItemIds": []
+        "tags": [
+          "Relic",
+          "Totem",
+          "Primal",
+          "Summon"
+        ]
       }
     ]
   },
@@ -322,15 +579,45 @@
     "recipeFamily": "Weapon",
     "slot": "OneHanded",
     "outputItemType": "OneHanded",
-    "tierRange": { "min": 1, "max": 3 },
+    "tierRange": {
+      "min": 1,
+      "max": 3
+    },
     "materialRequirements": [
-      { "type": "TieredMaterial", "family": "Metal", "baseAmount": 10, "amountPerTier": 4 },
-      { "type": "TieredMaterial", "family": "Wood", "baseAmount": 3, "amountPerTier": 1 }
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 10,
+        "amountPerTier": 4
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Wood",
+        "baseAmount": 3,
+        "amountPerTier": 1
+      }
     ],
-    "baseStatProfile": { "WeaponDamage": 0.5, "Precision": 0.25, "CritChance": 0.15, "ArmorPenetration": 0.1 },
-    "affinityTags": [ "Weapon", "MainHand", "OneHanded" ],
-    "defaultTemperingTags": [ "Weapon", "OneHanded" ],
-    "tags": [ "Weapon", "MainHand", "OneHanded", "Melee" ],
+    "baseStatProfile": {
+      "WeaponDamage": 0.5,
+      "Precision": 0.25,
+      "CritChance": 0.15,
+      "ArmorPenetration": 0.1
+    },
+    "affinityTags": [
+      "Weapon",
+      "MainHand",
+      "OneHanded"
+    ],
+    "defaultTemperingTags": [
+      "Weapon",
+      "OneHanded"
+    ],
+    "tags": [
+      "Weapon",
+      "MainHand",
+      "OneHanded",
+      "Melee"
+    ],
     "forms": [
       {
         "formId": "shortsword",
@@ -338,9 +625,14 @@
         "outputItemId": "shortsword",
         "outputItemType": "OneHanded",
         "statProfileId": "one_handed_blade_balanced",
-        "tags": [ "Weapon", "MainHand", "OneHanded", "Melee", "Blade", "Balanced" ],
-        "legacyNames": [ "Shortsword" ],
-        "legacyItemIds": [ "shortsword" ]
+        "tags": [
+          "Weapon",
+          "MainHand",
+          "OneHanded",
+          "Melee",
+          "Blade",
+          "Balanced"
+        ]
       },
       {
         "formId": "dagger",
@@ -348,9 +640,17 @@
         "outputItemId": "dagger",
         "outputItemType": "OneHanded",
         "statProfileId": "one_handed_dagger",
-        "tags": [ "Weapon", "MainHand", "OneHanded", "Melee", "Blade", "Dagger", "Finesse", "Crit", "Poison" ],
-        "legacyNames": [ "Dagger" ],
-        "legacyItemIds": [ "dagger" ]
+        "tags": [
+          "Weapon",
+          "MainHand",
+          "OneHanded",
+          "Melee",
+          "Blade",
+          "Dagger",
+          "Finesse",
+          "Crit",
+          "Poison"
+        ]
       },
       {
         "formId": "hand_axe",
@@ -358,9 +658,15 @@
         "outputItemId": "hatchet",
         "outputItemType": "OneHanded",
         "statProfileId": "one_handed_axe",
-        "tags": [ "Weapon", "MainHand", "OneHanded", "Melee", "Axe", "Bleed", "Aggression" ],
-        "legacyNames": [ "Hatchet", "Hand Axe" ],
-        "legacyItemIds": [ "hatchet" ]
+        "tags": [
+          "Weapon",
+          "MainHand",
+          "OneHanded",
+          "Melee",
+          "Axe",
+          "Bleed",
+          "Aggression"
+        ]
       },
       {
         "formId": "mace",
@@ -368,9 +674,15 @@
         "outputItemId": "mace",
         "outputItemType": "OneHanded",
         "statProfileId": "one_handed_mace",
-        "tags": [ "Weapon", "MainHand", "OneHanded", "Melee", "Mace", "ArmorBreak", "Stun" ],
-        "legacyNames": [ "Mace" ],
-        "legacyItemIds": [ "mace" ]
+        "tags": [
+          "Weapon",
+          "MainHand",
+          "OneHanded",
+          "Melee",
+          "Mace",
+          "ArmorBreak",
+          "Stun"
+        ]
       },
       {
         "formId": "wand",
@@ -378,9 +690,14 @@
         "outputItemId": "wand",
         "outputItemType": "OneHanded",
         "statProfileId": "one_handed_wand",
-        "tags": [ "Weapon", "MainHand", "OneHanded", "Wand", "Magic", "SpellPower" ],
-        "legacyNames": [ "Wand" ],
-        "legacyItemIds": [ "wand" ]
+        "tags": [
+          "Weapon",
+          "MainHand",
+          "OneHanded",
+          "Wand",
+          "Magic",
+          "SpellPower"
+        ]
       }
     ]
   },
@@ -391,15 +708,42 @@
     "recipeFamily": "Weapon",
     "slot": "TwoHanded",
     "outputItemType": "TwoHanded",
-    "tierRange": { "min": 1, "max": 3 },
+    "tierRange": {
+      "min": 1,
+      "max": 3
+    },
     "materialRequirements": [
-      { "type": "TieredMaterial", "family": "Metal", "baseAmount": 16, "amountPerTier": 6 },
-      { "type": "TieredMaterial", "family": "Wood", "baseAmount": 6, "amountPerTier": 2 }
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 16,
+        "amountPerTier": 6
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Wood",
+        "baseAmount": 6,
+        "amountPerTier": 2
+      }
     ],
-    "baseStatProfile": { "WeaponDamage": 0.55, "Power": 0.2, "Precision": 0.15, "ArmorPenetration": 0.1 },
-    "affinityTags": [ "Weapon", "TwoHanded" ],
-    "defaultTemperingTags": [ "Weapon", "TwoHanded" ],
-    "tags": [ "Weapon", "TwoHanded" ],
+    "baseStatProfile": {
+      "WeaponDamage": 0.55,
+      "Power": 0.2,
+      "Precision": 0.15,
+      "ArmorPenetration": 0.1
+    },
+    "affinityTags": [
+      "Weapon",
+      "TwoHanded"
+    ],
+    "defaultTemperingTags": [
+      "Weapon",
+      "TwoHanded"
+    ],
+    "tags": [
+      "Weapon",
+      "TwoHanded"
+    ],
     "forms": [
       {
         "formId": "greatsword",
@@ -407,9 +751,14 @@
         "outputItemId": "greatsword",
         "outputItemType": "TwoHanded",
         "statProfileId": "two_handed_greatsword",
-        "tags": [ "Weapon", "TwoHanded", "GreatWeapon", "Blade", "Cleave", "Balanced" ],
-        "legacyNames": [ "Greatsword" ],
-        "legacyItemIds": [ "greatsword" ]
+        "tags": [
+          "Weapon",
+          "TwoHanded",
+          "GreatWeapon",
+          "Blade",
+          "Cleave",
+          "Balanced"
+        ]
       },
       {
         "formId": "battle_axe",
@@ -417,9 +766,14 @@
         "outputItemId": "battle_axe",
         "outputItemType": "TwoHanded",
         "statProfileId": "two_handed_battle_axe",
-        "tags": [ "Weapon", "TwoHanded", "GreatWeapon", "Axe", "Crit", "Bleed" ],
-        "legacyNames": [ "Battle Axe" ],
-        "legacyItemIds": [ "battle_axe" ]
+        "tags": [
+          "Weapon",
+          "TwoHanded",
+          "GreatWeapon",
+          "Axe",
+          "Crit",
+          "Bleed"
+        ]
       },
       {
         "formId": "maul",
@@ -427,9 +781,14 @@
         "outputItemId": "maul",
         "outputItemType": "TwoHanded",
         "statProfileId": "two_handed_maul",
-        "tags": [ "Weapon", "TwoHanded", "GreatWeapon", "Mace", "Stagger", "BlockBreak" ],
-        "legacyNames": [ "Maul" ],
-        "legacyItemIds": [ "maul" ]
+        "tags": [
+          "Weapon",
+          "TwoHanded",
+          "GreatWeapon",
+          "Mace",
+          "Stagger",
+          "BlockBreak"
+        ]
       },
       {
         "formId": "spear",
@@ -437,9 +796,14 @@
         "outputItemId": "spear",
         "outputItemType": "TwoHanded",
         "statProfileId": "two_handed_spear",
-        "tags": [ "Weapon", "TwoHanded", "Polearm", "Reach", "Precision", "AntiBoss" ],
-        "legacyNames": [ "Spear" ],
-        "legacyItemIds": [ "spear" ]
+        "tags": [
+          "Weapon",
+          "TwoHanded",
+          "Polearm",
+          "Reach",
+          "Precision",
+          "AntiBoss"
+        ]
       },
       {
         "formId": "staff",
@@ -447,9 +811,14 @@
         "outputItemId": "staff",
         "outputItemType": "TwoHanded",
         "statProfileId": "two_handed_staff",
-        "tags": [ "Weapon", "TwoHanded", "Staff", "Caster", "Support", "Magic" ],
-        "legacyNames": [ "Staff" ],
-        "legacyItemIds": [ "staff" ]
+        "tags": [
+          "Weapon",
+          "TwoHanded",
+          "Staff",
+          "Caster",
+          "Support",
+          "Magic"
+        ]
       },
       {
         "formId": "longbow",
@@ -457,9 +826,14 @@
         "outputItemId": "longbow",
         "outputItemType": "TwoHanded",
         "statProfileId": "two_handed_longbow",
-        "tags": [ "Weapon", "TwoHanded", "Ranged", "Bow", "SustainedDamage", "Precision" ],
-        "legacyNames": [ "Longbow" ],
-        "legacyItemIds": [ "longbow" ]
+        "tags": [
+          "Weapon",
+          "TwoHanded",
+          "Ranged",
+          "Bow",
+          "SustainedDamage",
+          "Precision"
+        ]
       },
       {
         "formId": "crossbow",
@@ -467,9 +841,14 @@
         "outputItemId": "crossbow",
         "outputItemType": "TwoHanded",
         "statProfileId": "two_handed_crossbow",
-        "tags": [ "Weapon", "TwoHanded", "Ranged", "Crossbow", "Burst", "ArmorPenetration" ],
-        "legacyNames": [ "Crossbow" ],
-        "legacyItemIds": [ "crossbow" ]
+        "tags": [
+          "Weapon",
+          "TwoHanded",
+          "Ranged",
+          "Crossbow",
+          "Burst",
+          "ArmorPenetration"
+        ]
       },
       {
         "formId": "gauntlets",
@@ -477,9 +856,14 @@
         "outputItemId": "gauntlets",
         "outputItemType": "TwoHanded",
         "statProfileId": "two_handed_gauntlets",
-        "tags": [ "Weapon", "TwoHanded", "Gauntlets", "Brawler", "Combo", "Multihit" ],
-        "legacyNames": [ "Gauntlets" ],
-        "legacyItemIds": [ "gauntlets" ]
+        "tags": [
+          "Weapon",
+          "TwoHanded",
+          "Gauntlets",
+          "Brawler",
+          "Combo",
+          "Multihit"
+        ]
       }
     ]
   },
@@ -490,15 +874,39 @@
     "recipeFamily": "Offhand",
     "slot": "OffHand",
     "outputItemType": "OffHand",
-    "tierRange": { "min": 1, "max": 3 },
+    "tierRange": {
+      "min": 1,
+      "max": 3
+    },
     "materialRequirements": [
-      { "type": "TieredMaterial", "family": "Metal", "baseAmount": 8, "amountPerTier": 3 },
-      { "type": "TieredMaterial", "family": "Crystal", "baseAmount": 4, "amountPerTier": 1 }
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 8,
+        "amountPerTier": 3
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Crystal",
+        "baseAmount": 4,
+        "amountPerTier": 1
+      }
     ],
-    "baseStatProfile": { "BlockChance": 0.35, "Resistance": 0.25, "Spirit": 0.2, "Armor": 0.2 },
-    "affinityTags": [ "OffHand" ],
-    "defaultTemperingTags": [ "OffHand" ],
-    "tags": [ "OffHand" ],
+    "baseStatProfile": {
+      "BlockChance": 0.35,
+      "Resistance": 0.25,
+      "Spirit": 0.2,
+      "Armor": 0.2
+    },
+    "affinityTags": [
+      "OffHand"
+    ],
+    "defaultTemperingTags": [
+      "OffHand"
+    ],
+    "tags": [
+      "OffHand"
+    ],
     "forms": [
       {
         "formId": "towershield",
@@ -506,9 +914,14 @@
         "outputItemId": "towershield",
         "outputItemType": "OffHand",
         "statProfileId": "offhand_towershield",
-        "tags": [ "OffHand", "Shield", "Block", "Guard", "Defensive", "PhysicalDefense" ],
-        "legacyNames": [ "Towershield" ],
-        "legacyItemIds": [ "towershield" ]
+        "tags": [
+          "OffHand",
+          "Shield",
+          "Block",
+          "Guard",
+          "Defensive",
+          "PhysicalDefense"
+        ]
       },
       {
         "formId": "spiritward",
@@ -516,9 +929,15 @@
         "outputItemId": "Spiritward",
         "outputItemType": "OffHand",
         "statProfileId": "offhand_spiritward",
-        "tags": [ "OffHand", "Ward", "MagicDefense", "Barrier", "Spirit", "Support", "Summon" ],
-        "legacyNames": [ "Spiritward" ],
-        "legacyItemIds": [ "Spiritward" ]
+        "tags": [
+          "OffHand",
+          "Ward",
+          "MagicDefense",
+          "Barrier",
+          "Spirit",
+          "Support",
+          "Summon"
+        ]
       },
       {
         "formId": "grimoire",
@@ -526,9 +945,14 @@
         "outputItemId": "grimoire",
         "outputItemType": "OffHand",
         "statProfileId": "offhand_grimoire",
-        "tags": [ "OffHand", "Grimoire", "SpellPower", "Cooldown", "Control", "Magic" ],
-        "legacyNames": [ "Grimoire" ],
-        "legacyItemIds": [ "grimoire" ]
+        "tags": [
+          "OffHand",
+          "Grimoire",
+          "SpellPower",
+          "Cooldown",
+          "Control",
+          "Magic"
+        ]
       }
     ]
   }
