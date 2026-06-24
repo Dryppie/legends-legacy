@@ -59,7 +59,7 @@
         "procChance": 0.35,
         "loot": [
           {
-            "itemId": "iron_ore",
+            "itemId": "ore",
             "weight": 45,
             "minQuantity": 1,
             "maxQuantity": 3
@@ -186,7 +186,7 @@
         "procChance": 0.40,
         "loot": [
           {
-            "itemId": "iron_ore",
+            "itemId": "copper_ore",
             "weight": 45,
             "minQuantity": 1,
             "maxQuantity": 4
@@ -292,7 +292,7 @@
         "procChance": 0.45,
         "loot": [
           {
-            "itemId": "iron_ore",
+            "itemId": "verdant_ore",
             "weight": 45,
             "minQuantity": 2,
             "maxQuantity": 4
