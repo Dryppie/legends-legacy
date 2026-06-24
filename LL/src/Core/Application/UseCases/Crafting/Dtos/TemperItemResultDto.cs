@@ -1,22 +1,13 @@
+using Application.Interfaces.Services.LL.Professions;
 using Application.Common.Mappings;
 using Application.UseCases.Equipments.Dtos;
 using AutoMapper;
 using Domain.Models.Items;
-using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting.V2;
 
 namespace Application.UseCases.Crafting.Dtos;
 
-public sealed record TemperItemResult(
-    EquipmentInstance Equipment,
-    TemperingOutcomeType Outcome,
-    int PotentialSpent,
-    int ProgressGained,
-    Rarity PreviousRarity,
-    Rarity NewRarity,
-    bool RarityUpgraded);
-
-public sealed class TemperItemResultDto : IMapFrom<TemperItemResult>
+public sealed class TemperItemResultDto : IMapFrom<TemperingAttemptResult>
 {
     public EquipmentInstanceDto Equipment { get; init; } = null!;
     public TemperingOutcomeType Outcome { get; init; }
@@ -28,6 +19,6 @@ public sealed class TemperItemResultDto : IMapFrom<TemperItemResult>
 
     public void Mapping(Profile profile)
     {
-        profile.CreateMap<TemperItemResult, TemperItemResultDto>();
+        profile.CreateMap<TemperingAttemptResult, TemperItemResultDto>();
     }
 }

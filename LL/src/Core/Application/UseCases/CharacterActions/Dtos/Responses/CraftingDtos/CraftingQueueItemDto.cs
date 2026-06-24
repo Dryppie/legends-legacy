@@ -8,7 +8,9 @@ public class CraftingQueueItemDto : IMapFrom<CraftingQueueItem>
 {
     public Guid Id { get; set; }
     public Guid EquipmentInstanceId { get; set; }
+    public string TemperingRecipeId { get; set; } = string.Empty;
     public EquipmentInstanceDto EquipmentInstance { get; set; } = null!;
+    
     public void Mapping(Profile profile)
     {
         profile.CreateMap<CraftingQueueItem, CraftingQueueItemDto>();

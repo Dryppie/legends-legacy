@@ -12,7 +12,6 @@ public sealed class TemperingRecipeDto : IMapFrom<TemperingRecipeDefinition>
     public IReadOnlyList<EquipmentType> ApplicableItemTypes { get; init; } = [];
     public IReadOnlyList<string> RequiredItemAffinityTags { get; init; } = [];
     public IReadOnlyList<string> DirectionTags { get; init; } = [];
-    public int PotentialCost { get; init; }
 
     public void Mapping(Profile profile)
     {
