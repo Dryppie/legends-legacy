@@ -29,8 +29,12 @@ public class CharacterService : ICharacterService
         return character;
     }
 
-    public async Task<Character?> GetCharacterByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken) =>
-        await _characterRepository.GetCharacterByCharacterIdAsync(characterId, cancellationToken);
+    public async Task<Character?> GetCharacterByCharacterIdAsync(Guid characterId, CancellationToken cancellationToken)
+    {
+        var character = await _characterRepository.GetCharacterByCharacterIdAsync(characterId, cancellationToken);
+        if (character != null) character.ExperienceUntilNextLevel = EntityLevelConstants.XP_REQUIRED(character.Level);
+        return character;
+    }
 
     public async Task<Character?> GetMyCharacterOverviewAsync(Guid currentUserId, CancellationToken cancellationToken)
     {

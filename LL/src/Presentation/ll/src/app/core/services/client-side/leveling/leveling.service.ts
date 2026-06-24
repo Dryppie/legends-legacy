@@ -18,35 +18,27 @@ export class LevelingService {
    * ────────────────────────────────────────────────────────*/
   gainExperience(xp: number): void {
     const char = this.state.currentCharacter();
-    if (!char) return;
+    if (!char || xp <= 0) return;
 
-    let experience = char.experience + xp;
-    let level = char.level;
-    let experienceUntilNextLevel = char.experienceUntilNextLevel;
+    const experience = char.experience + xp;
+    const experienceUntilNextLevel = char.experienceUntilNextLevel;
 
-    let leveledUp = false;
-    while (experience >= experienceUntilNextLevel) {
-      experience -= experienceUntilNextLevel;
-      level += 1;
-      leveledUp = true;
+    if (experienceUntilNextLevel <= 0) {
+      this.state.refresh();
+      return;
+    }
 
-      // TODO: Update this to a real formula or lookup
-      experienceUntilNextLevel = char.experienceUntilNextLevel;
+    if (experience >= experienceUntilNextLevel) {
+      this.state.refresh();
+      return;
     }
 
     const updated: CharacterDto = {
       ...char,
       experience,
-      level,
-      experienceUntilNextLevel,
     };
 
     this.state.updateCharacter(updated);
-
-    if (leveledUp) {
-      // Optional: Sync with backend to avoid discrepancies
-      this.state.refresh();
-    }
   }
 
   /* ────────────────────────────────────────────────────────
