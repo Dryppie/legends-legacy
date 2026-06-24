@@ -1,5 +1,10 @@
-using Application.UseCases.Inventories.Dtos;
-using Application.UseCases.Professions.Commands.CraftItem;
+using Application.UseCases.Crafting.Commands.CraftItems;
+using Application.UseCases.Crafting.Commands.LearnBlueprint;
+using Application.UseCases.Crafting.Commands.TemperItem;
+using Application.UseCases.Crafting.Dtos;
+using Application.UseCases.Crafting.Queries.GetAvailableTemperingRecipes;
+using Application.UseCases.Crafting.Queries.GetCraftingRecipes;
+using Application.UseCases.Crafting.Queries.GetRecipeMasteries;
 using Application.UseCases.Professions.Commands.RemoveCraftingQueueItem;
 using Application.UseCases.Professions.Dtos;
 using Common.Primitives;
@@ -9,9 +14,29 @@ namespace API.LL.Controllers.V1;
 
 public class CraftingController : BaseController
 {
-    [HttpPost("CraftItem")]
-    public async Task<ActionResult<Response<InventoryItemDto>>> CraftItem([FromBody] string recipeId) =>
-        await Mediator.Send(new CraftItemCommand(CurrentCharacterGuid, recipeId));
+    [HttpGet("recipes")]
+    public async Task<ActionResult<Response<IReadOnlyList<CraftingRecipeDto>>>> GetRecipes([FromQuery] int targetTier = 1) =>
+        await Mediator.Send(new GetCraftingRecipesQuery(CurrentCharacterGuid, targetTier));
+
+    [HttpPost("craft")]
+    public async Task<ActionResult<Response<CraftItemsResultDto>>> CraftItems([FromBody] CraftItemsRequestDto request) =>
+        await Mediator.Send(new CraftItemsCommand(CurrentCharacterGuid, request.RecipeId, request.FormId, request.BlueprintId, request.TargetTier, request.Quantity));
+
+    [HttpGet("mastery")]
+    public async Task<ActionResult<Response<IReadOnlyList<RecipeMasteryDto>>>> GetMastery() =>
+        await Mediator.Send(new GetRecipeMasteriesQuery(CurrentCharacterGuid));
+
+    [HttpPost("blueprints/learn")]
+    public async Task<ActionResult<Response<LearnBlueprintResultDto>>> LearnBlueprint([FromBody] LearnBlueprintRequestDto request) =>
+        await Mediator.Send(new LearnBlueprintCommand(CurrentCharacterGuid, request.BlueprintItemInstanceId));
+
+    [HttpGet("items/{itemId:guid}/tempering-options")]
+    public async Task<ActionResult<Response<IReadOnlyList<TemperingRecipeDto>>>> GetTemperingOptions([FromRoute] Guid itemId) =>
+        await Mediator.Send(new GetAvailableTemperingRecipesQuery(CurrentCharacterGuid, itemId));
+
+    [HttpPost("temper")]
+    public async Task<ActionResult<Response<TemperItemResultDto>>> Temper([FromBody] TemperItemRequestDto request) =>
+        await Mediator.Send(new TemperItemCommand(CurrentCharacterGuid, request.ItemInstanceId, request.TemperingRecipeId));
 
     [HttpPost("RemoveCraftingQueueItem")]
     public async Task<ActionResult<Response<RemoveCraftingQueueItemResponseDto>>> RemoveCraftingQueueItem([FromBody] string queueItemId) =>
