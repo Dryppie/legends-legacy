@@ -213,7 +213,7 @@
         "statProfileId": "ring_band",
         "tags": [ "Accessory", "Ring", "Band" ],
         "legacyNames": [ "Band of Fury", "Band of Arcane", "Band of Execution" ],
-        "legacyItemIds": [ "band_of_fury", "band_of_arcane", "band_of_execution" ]
+        "legacyItemIds": []
       }
     ]
   },
@@ -242,7 +242,7 @@
         "statProfileId": "necklace_amulet",
         "tags": [ "Accessory", "Necklace", "Amulet", "Defensive" ],
         "legacyNames": [ "Amulet of Aegis" ],
-        "legacyItemIds": [ "amulet_of_aegis" ]
+        "legacyItemIds": []
       },
       {
         "formId": "charm",
@@ -252,7 +252,7 @@
         "statProfileId": "necklace_charm",
         "tags": [ "Accessory", "Necklace", "Charm", "Warden" ],
         "legacyNames": [ "Charm of the Warden" ],
-        "legacyItemIds": [ "charm_of_the_warden" ]
+        "legacyItemIds": []
       },
       {
         "formId": "talisman",
@@ -262,7 +262,7 @@
         "statProfileId": "necklace_talisman",
         "tags": [ "Accessory", "Necklace", "Talisman", "Endurance" ],
         "legacyNames": [ "Talisman of Endurance" ],
-        "legacyItemIds": [ "talisman_of_endurance" ]
+        "legacyItemIds": []
       }
     ]
   },
@@ -291,7 +291,7 @@
         "statProfileId": "relic_vial",
         "tags": [ "Relic", "Vial", "Recovery" ],
         "legacyNames": [ "Phoenix Vial" ],
-        "legacyItemIds": [ "phoenix_vial" ]
+        "legacyItemIds": []
       },
       {
         "formId": "heart",
@@ -301,7 +301,7 @@
         "statProfileId": "relic_heart",
         "tags": [ "Relic", "Heart", "Spirit", "Mana" ],
         "legacyNames": [ "Spirit Heart" ],
-        "legacyItemIds": [ "mana_heart" ]
+        "legacyItemIds": []
       },
       {
         "formId": "totem",
@@ -311,7 +311,7 @@
         "statProfileId": "relic_totem",
         "tags": [ "Relic", "Totem", "Primal", "Summon" ],
         "legacyNames": [ "Primal Totem" ],
-        "legacyItemIds": [ "primal_totem" ]
+        "legacyItemIds": []
       }
     ]
   },
