@@ -9,6 +9,9 @@ export interface CharacterDto {
   experienceUntilNextLevel: number;
   cinders: number;
   soulstones: number;
+  fateEcho: number;
+  sigilFragments: number;
+  ascensionStoneFragments: number;
   arenaRating: number;
 }
 

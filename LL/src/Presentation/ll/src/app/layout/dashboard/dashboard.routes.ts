@@ -40,6 +40,13 @@ export const DASHBOARD_ROUTES: Routes = [
           ),
       },
       {
+        path: 'prophecies',
+        loadChildren: () =>
+          import('./../../features/game/prophecies/prophecies.routes').then(
+            (m) => m.PROPHECIES_ROUTES,
+          ),
+      },
+      {
         path: 'settings',
         loadChildren: () =>
           import('./../../features/game/settings/settings.routes').then(

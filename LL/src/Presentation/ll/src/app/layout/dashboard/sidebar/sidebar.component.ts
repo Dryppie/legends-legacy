@@ -26,6 +26,7 @@ import {
   NOTIFICATION_SURFACE,
   NotificationService,
 } from '../../../core/services/client-side/notifications/notification.service';
+import { ProphecyNotificationService } from '../../../core/services/api/prophecies/prophecy-notification.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -46,6 +47,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   @Output() itemTapped = new EventEmitter<void>();
 
   private readonly destroy$ = new Subject<void>();
+  private prophecyNotificationCharacterId: string | null = null;
 
   sections: SidebarSection[] = [];
   activeUrl = '';
@@ -60,10 +62,21 @@ export class SidebarComponent implements OnInit, OnDestroy {
     private readonly state: CharacterActionsStateService,
     private readonly characterState: CharacterStateService,
     private readonly notificationService: NotificationService,
+    private readonly prophecyNotificationService: ProphecyNotificationService,
     private readonly router: Router,
   ) {
     effect(() => {
       this.displayCurrentAction = this.state.displayCurrentAction();
+    });
+
+    effect(() => {
+      const characterId = this.characterState.currentCharacter()?.id;
+      if (!characterId || characterId === this.prophecyNotificationCharacterId) {
+        return;
+      }
+
+      this.prophecyNotificationCharacterId = characterId;
+      this.prophecyNotificationService.refreshCount();
     });
 
     this.currentCharacter = this.characterState.currentCharacter;

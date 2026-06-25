@@ -1,19 +1,19 @@
 <div
-  class="ll-sidebar-nav-item group relative"
+  class="ll-sidebar-nav-item group relative overflow-hidden"
   [class.ll-sidebar-nav-item-active]="isActive"
 >
   <app-notification-indicator
-    class="absolute right-3 top-2"
+    class="absolute right-3 top-2 z-20"
     [count]="notificationCount"
   ></app-notification-indicator>
 
-  <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
+  <div class="relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
     <app-profession-icon
       class="scale-[0.68]"
       [image]="item.icon"
     ></app-profession-icon>
   </div>
-  <div class="ml-3 flex min-w-0 flex-col">
+  <div class="relative z-10 ml-3 flex min-w-0 flex-col">
     <h3
       class="truncate text-start text-[15px] leading-5 text-primary sm:text-base"
     >
