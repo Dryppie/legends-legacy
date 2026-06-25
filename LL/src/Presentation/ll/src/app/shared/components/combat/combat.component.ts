@@ -35,7 +35,6 @@ import { TourService } from '../../../core/services/client-side/tutorial-tour/to
   standalone: true,
   imports: [
     CombatAvatarComponent,
-    CombatOverviewComponent,
     NgClass,
     NgFor,
     NgIf,
@@ -157,7 +156,8 @@ export class CombatComponent implements OnInit, OnDestroy {
     effect(() => {
       const type = this.battleTypeSignal();
       const result = this.combatStateService.getCombatResult(type)();
-      if (result) {
+      console.log(result);
+      if (result?.playerTeam.length) {
         this.displayCombat = true;
         this.setupCombat();
 
@@ -237,12 +237,21 @@ export class CombatComponent implements OnInit, OnDestroy {
 
   onStopOrSkip(): void {
     if (this.battleType === BattleType.IdleCombat) {
-      // Original behaviour
       this.initiateStoppingCombat();
-    } else if (this.battleType === BattleType.Colosseum) {
-      // New behaviour
+    } else if (
+      this.battleType === BattleType.Colosseum ||
+      this.battleType === BattleType.Dungeon
+    ) {
       this.skipCombat();
     }
+  }
+
+  combatActionButtonText(): string {
+    if (this.battleType === BattleType.IdleCombat) {
+      return this.isStoppingCombat ? 'Quitting...' : 'Quit';
+    }
+
+    return 'Skip Battle';
   }
 
   skipCombat() {
