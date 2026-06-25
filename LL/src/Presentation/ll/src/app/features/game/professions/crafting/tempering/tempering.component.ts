@@ -1,263 +1,261 @@
-import { NgClass, NgFor, NgIf, SlicePipe } from '@angular/common';
-import {
-  Component,
-  computed,
-  effect,
-  Input,
-  OnInit,
-  signal,
-  Signal,
-} from '@angular/core';
-import {
-  CraftingQueueItem,
-  CraftType,
-} from '../../../../../shared/models/profession';
-import {
-  EquipmentInstance,
-  ItemInstance,
-} from '../../../../../shared/models/item';
-import { InventoryDto } from '../../../../../shared/models/Dtos/inventoryDto';
-import {
-  CharacterActionDto,
-  StartCraftingActionRequest,
-} from '../../../../../shared/models/Dtos/characterActionDto';
-import { CraftingService } from '../../../../../core/services/api/crafting/crafting.service';
+import { NgClass, NgFor, NgIf } from '@angular/common';
+import { Component, computed, effect, Input, signal, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { CraftingQueueItem, CraftType } from '../../../../../shared/models/profession';
+import { EquipmentInstance, ItemInstance } from '../../../../../shared/models/item';
+import { CraftingService } from '../../../../../core/services/api/crafting/crafting.service';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
-import { CharacterActionType } from '../../../../../shared/models/enums/characterActionType';
-import { CharacterActionsStateService } from '../../../../../core/services/api/character-actions/character-actions.state.service';
 import { ItemComponent } from '../../../../../shared/components/item/item.component';
 import { EquipmentDisplayComponent } from '../../../../../shared/components/equipment/equipment-display/equipment-display.component';
 import { TourService } from '../../../../../core/services/client-side/tutorial-tour/tour.service';
+import { TemperingRecipe } from '../../../../../shared/models/crafting-v2';
+import { EquipmentType } from '../../../../../shared/models/enums/equipmentType';
+import { CharacterActionsStateService } from '../../../../../core/services/api/character-actions/character-actions.state.service';
+import { CharacterActionType } from '../../../../../shared/models/enums/characterActionType';
 
 @Component({
   selector: 'app-tempering',
   standalone: true,
-  imports: [
-    NgFor,
-    NgIf,
-    NgClass,
-    SlicePipe,
-    ItemComponent,
-    EquipmentDisplayComponent,
-  ],
+  imports: [NgFor, NgIf, NgClass, ItemComponent, EquipmentDisplayComponent],
   templateUrl: './tempering.component.html',
 })
-export class TemperingComponent implements OnInit {
+export class TemperingComponent {
   @Input({ required: true }) inventory!: Signal<InventoryItem[]>;
   @Input({ required: true }) craftType!: CraftType;
+
+  readonly craftingQueue: Signal<CraftingQueueItem[]>;
+  readonly temperingOptions = signal<TemperingRecipe[]>([]);
+  readonly selectedTemperingRecipeId = signal<string | null>(null);
+  readonly error = signal<string | null>(null);
+  readonly isLoadingOptions = signal(false);
+  readonly lastOutcome = signal<string | null>(null);
+  readonly removingQueueItemId = signal<string | null>(null);
+  readonly activeQueueItem = computed<CraftingQueueItem | null>(
+    () => this.craftingQueue()[0] ?? null,
+  );
+  readonly waitingQueue = computed<CraftingQueueItem[]>(() =>
+    this.craftingQueue().slice(1),
+  );
+
   filteredInventory = computed(() => {
-    return this.inventory().filter(
-      (ii) => (ii.itemInstance as EquipmentInstance).potential,
-    );
+    return this.inventory().filter((ii) => {
+      const equipment = ii.itemInstance as EquipmentInstance;
+      return (
+        equipment.equipmentBase?.equipmentType !== EquipmentType.Tool &&
+        (equipment.potential ?? 0) > 0
+      );
+    });
   });
-  readonly craftingQueue;
-  readonly isPerformingOtherAction = signal(false);
 
   private readonly selectedItemId = signal<string | null>(null);
 
-  readonly selectedEquipmentInstance = computed<EquipmentInstance | null>(
-    () => {
-      const id = this.selectedItemId();
-      const queue = this.craftingQueue();
+  readonly selectedQueueItem = computed<CraftingQueueItem | null>(() => {
+    const id = this.selectedItemId();
+    return id
+      ? (this.craftingQueue().find((item) => item.equipmentInstance.id === id) ??
+          null)
+      : null;
+  });
 
-      const invItem = this.inventoryState
+  readonly selectedEquipmentInstance = computed<EquipmentInstance | null>(() => {
+    const id = this.selectedItemId();
+    return (
+      (this.inventoryState
         .items()
         .find((i) => i.itemInstance.id === id)?.itemInstance as
         | EquipmentInstance
-        | undefined;
+        | undefined) ??
+      this.selectedQueueItem()?.equipmentInstance ??
+      null
+    );
+  });
 
-      return (
-        invItem ??
-        queue.find((q) => q.equipmentInstance.id === id)?.equipmentInstance ??
-        null
-      );
-    },
-  );
-  readonly currentAction = signal<CharacterActionDto | null>(null); // declared safely first
+  readonly selectedTemperingRecipe = computed<TemperingRecipe | null>(() => {
+    const id = this.selectedTemperingRecipeId();
+    return id
+      ? (this.temperingOptions().find((recipe) => recipe.id === id) ?? null)
+      : (this.temperingOptions()[0] ?? null);
+  });
 
   readonly canTemper = computed<boolean>(() => {
     const eq = this.selectedEquipmentInstance();
-    return !!eq && (eq.potential ?? 0) > 0;
+    const recipe = this.selectedTemperingRecipe();
+    return !!eq && !!recipe && (eq.potential ?? 0) >= 1;
   });
-
-  readonly isQueueSelected = computed<boolean>(() => {
-    const id = this.selectedItemId();
-    return (
-      !!id && !this.inventoryState.items().some((i) => i.itemInstance.id === id)
-    );
-  });
-  private checkTimeout: any = null;
 
   constructor(
     private readonly inventoryState: InventoryStateService,
-    private readonly characterActionService: CharacterActionsStateService,
     private readonly craftingService: CraftingService,
+    private readonly characterActionsState: CharacterActionsStateService,
     private readonly tour: TourService,
   ) {
     this.craftingQueue = toSignal(this.craftingService.craftingQueue$, {
       initialValue: [] as CraftingQueueItem[],
     });
 
-    effect(() => {
-      const action = this.characterActionService.currentAction();
+    effect(
+      () => {
+        const equipment = this.selectedEquipmentInstance();
+        if (!equipment) {
+          this.temperingOptions.set([]);
+          this.selectedTemperingRecipeId.set(null);
+          return;
+        }
 
-      if (!action) {
-        this.clearCheckTimeout();
-        queueMicrotask(() => this.isPerformingOtherAction.set(false));
-        return;
-      }
+        if (this.selectedQueueItem()) {
+          this.temperingOptions.set([]);
+          this.selectedTemperingRecipeId.set(null);
+          return;
+        }
 
-      const isCrafting =
-        action.characterActionType === CharacterActionType.Crafting;
+        this.loadTemperingOptions(equipment.id);
+      },
+      { allowSignalWrites: true },
+    );
 
-      if (
-        isCrafting &&
-        action.isDeleted &&
-        action.craftingActionDetails?.craftingQueueItems.length
-      ) {
-        const queueCopy = [
-          ...(action.craftingActionDetails?.craftingQueueItems ?? []),
-        ];
-        queueMicrotask(() => this.cancelEntireQueue(queueCopy));
-      }
+    effect(
+      () => {
+        const selectedId = this.selectedItemId();
+        if (selectedId) return;
 
-      if (isCrafting) {
-        this.clearCheckTimeout();
-        queueMicrotask(() => this.isPerformingOtherAction.set(false));
-        return;
-      }
-
-      if (
-        new Date(action.updatedAt).getTime() > new Date(Date.now()).getTime() ||
-        !action.isDeleted
-      ) {
-        queueMicrotask(() => this.isPerformingOtherAction.set(true));
-      }
-
-      const updatedAt = new Date(action.updatedAt ?? 0).getTime();
-      const now = Date.now();
-
-      if (action.isDeleted && updatedAt > now) {
-        this.clearCheckTimeout();
-        this.checkTimeout = setTimeout(() => {
-          queueMicrotask(() => this.isPerformingOtherAction.set(false));
-        }, updatedAt - now);
-      } else {
-        this.clearCheckTimeout();
-      }
-
-      queueMicrotask(() => this.isPerformingOtherAction.set(false));
-    });
+        const active = this.activeQueueItem();
+        if (active) {
+          this.selectedItemId.set(active.equipmentInstance.id);
+        }
+      },
+      { allowSignalWrites: true },
+    );
 
     this.tour.start('tempering');
   }
 
-  ngOnInit(): void {}
-
-  ngOnDestroy(): void {
-    this.clearCheckTimeout();
-  }
-
-  private clearCheckTimeout(): void {
-    if (this.checkTimeout) {
-      clearTimeout(this.checkTimeout);
-      this.checkTimeout = null;
-    }
-  }
-
-  handleEquipmentInstanceAndTempering(
-    inventory: InventoryDto,
-    id: string | null,
-    queue: CraftingQueueItem[],
-  ): EquipmentInstance {
-    const inventoryItem =
-      (inventory.inventoryItems.find((i) => i.itemInstance.id === id)
-        ?.itemInstance as EquipmentInstance) ?? null;
-    let equipment =
-      inventoryItem ??
-      queue.find((q) => q.equipmentInstance.id === id)?.equipmentInstance ??
-      null;
-
-    return equipment;
-  }
-
   selectItem(e: ItemInstance): void {
     this.selectedItemId.set(e.id);
+    this.lastOutcome.set(null);
+  }
+
+  selectTemperingRecipe(recipe: TemperingRecipe): void {
+    this.selectedTemperingRecipeId.set(recipe.id);
   }
 
   temper(equipment: EquipmentInstance): void {
-    if (!equipment) return;
-    // take the latest inventory once, synchronously
-    const items = this.inventoryState.items();
-    if (!items) return;
+    const recipe = this.selectedTemperingRecipe();
+    if (!equipment || !recipe || !this.canTemper()) return;
 
-    if (!equipment.potential || equipment.potential <= 0) {
-      return;
-    }
-
+    const queueId = crypto.randomUUID();
     const queueItem: CraftingQueueItem = {
-      id: crypto.randomUUID(),
+      id: queueId,
       equipmentInstance: equipment,
+      temperingRecipeId: recipe.id,
     };
 
-    const startCraftingActionRequest: StartCraftingActionRequest = {
-      queueId: queueItem.id,
+    this.characterActionsState.startAction(CharacterActionType.Crafting, {
+      queueId,
       itemInstanceId: equipment.id,
-    };
-    this.characterActionService.startAction(
-      CharacterActionType.Crafting,
-      startCraftingActionRequest,
+      temperingRecipeId: recipe.id,
+    });
+    this.craftingService.setQueue([
+      ...this.craftingService.currentQueue,
+      queueItem,
+    ]);
+
+    this.inventoryState.setInventory(
+      this.inventoryState.items().filter((item) => item.itemInstance.id !== equipment.id),
     );
-
     this.selectedItemId.set(null);
+    this.lastOutcome.set(`Queued ${equipment.displayName ?? equipment.itemBase.name} for ${recipe.name}`);
   }
 
-  cancelCraft(queueItem: CraftingQueueItem): void {
-    if (!queueItem) return;
-
-    this.craftingService
-      .removeItemFromQueue(queueItem)
-      .subscribe((response) => {
-        this.inventoryState.setInventory(response.inventoryItems);
-        if (this.craftingService.currentQueue.length === 0) {
-          this.clearCurrentAction();
-        }
-        this.selectedItemId.set(null);
-      });
+  selectQueuedItem(queueItem: CraftingQueueItem): void {
+    this.selectedItemId.set(queueItem.equipmentInstance.id);
+    this.lastOutcome.set(null);
   }
 
-  cancelEntireQueue(queue: CraftingQueueItem[]) {
-    if (!queue.length) return;
-
-    this.craftingService.setQueue([]);
-    this.clearCurrentAction();
-    this.selectedItemId.set(null);
-  }
-
-  clearCurrentAction() {
-    let action = this.characterActionService.currentAction();
-    action!.craftingActionDetails!.craftingQueueItems = [];
-    this.characterActionService.currentAction.set(action);
-    this.characterActionService.clear();
+  queuedRecipeName(queueItem: CraftingQueueItem): string {
+    return (
+      this.temperingOptions().find(
+        (recipe) => recipe.id === queueItem.temperingRecipeId,
+      )?.name ?? this.formatTemperingRecipeName(queueItem.temperingRecipeId)
+    );
   }
 
   getEstimatedTime(queue: CraftingQueueItem[]): string {
-    const totalSeconds = queue.reduce((sum, q) => {
-      const potential = q.equipmentInstance?.potential ?? 0;
-      return sum + potential * 6;
+    const totalSeconds = queue.reduce((sum, item) => {
+      return sum + Math.max(0, item.equipmentInstance.potential ?? 0) * 6;
     }, 0);
 
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
 
-    const parts = [];
+    const parts: string[] = [];
     if (hours > 0) parts.push(`${hours}h`);
     if (minutes > 0) parts.push(`${minutes}m`);
     if (seconds > 0 || parts.length === 0) parts.push(`${seconds}s`);
 
     return parts.join(' ');
   }
+
+  removeQueuedItem(queueItem: CraftingQueueItem, event: MouseEvent): void {
+    event.stopPropagation();
+    if (this.removingQueueItemId()) return;
+
+    this.removingQueueItemId.set(queueItem.id);
+    this.error.set(null);
+    const wasSelected = this.selectedQueueItem()?.id === queueItem.id;
+
+    this.craftingService.removeItemFromQueue(queueItem).subscribe({
+      next: (response) => {
+        const nextQueue =
+          response.currentAction?.craftingActionDetails?.craftingQueueItems ?? [];
+        this.inventoryState.setInventory(response.inventoryItems);
+        this.craftingService.setQueue(nextQueue);
+        this.characterActionsState.refreshCurrentAction();
+
+        if (wasSelected) {
+          this.selectedItemId.set(queueItem.equipmentInstance.id);
+        }
+
+        this.lastOutcome.set(
+          `Removed ${queueItem.equipmentInstance.displayName ?? queueItem.equipmentInstance.itemBase.name} from the tempering queue`,
+        );
+        this.removingQueueItemId.set(null);
+      },
+      error: (err) => {
+        this.error.set(err.message ?? 'Failed to remove item from queue.');
+        this.removingQueueItemId.set(null);
+      },
+    });
+  }
+
+  private formatTemperingRecipeName(recipeId: string | null | undefined): string {
+    if (!recipeId) return 'Tempering';
+
+    return recipeId
+      .replace(/^temper_/i, '')
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (match) => match.toUpperCase());
+  }
+
+  private loadTemperingOptions(itemId: string): void {
+    this.isLoadingOptions.set(true);
+    this.error.set(null);
+    this.craftingService.getTemperingOptions(itemId).subscribe({
+      next: (options) => {
+        this.temperingOptions.set(options);
+        if (!options.some((option) => option.id === this.selectedTemperingRecipeId())) {
+          this.selectedTemperingRecipeId.set(options[0]?.id ?? null);
+        }
+        this.isLoadingOptions.set(false);
+      },
+      error: (err) => {
+        this.error.set(err.message ?? 'Failed to load tempering options.');
+        this.temperingOptions.set([]);
+        this.selectedTemperingRecipeId.set(null);
+        this.isLoadingOptions.set(false);
+      },
+    });
+  }
+
 }

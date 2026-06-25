@@ -3,79 +3,152 @@
 >
   <div class="flex w-full flex-col space-y-2 md:order-2">
     <section class="ll-panel p-4" data-tour="selected-recipe">
-      <h2 class="ll-heading text-xl">Item Description</h2>
+      <h2 class="ll-heading text-xl">Craft</h2>
       <ng-container *ngIf="selectedRecipe() as selectedRecipe; else noRecipe">
-        <app-equipment-display [item]="selectedRecipe.item">
-        </app-equipment-display>
-        <div class="ll-item-detail-section ll-copy mt-3">
+        <div class="ll-copy mt-2 flex flex-wrap items-center gap-2">
+          <span class="ll-state">{{ selectedRecipe.outputItemType }}</span>
+          <span class="ll-state">{{ selectedRecipe.recipeType }}</span>
+          <span class="ll-state">Mastery {{ selectedRecipe.currentMasteryLevel }}</span>
+        </div>
+
+        <div class="ll-copy mt-3">
+          <span class="ll-eyebrow text-primary">Output</span>
+          <div class="font-semibold text-white">{{ outputPreviewName() }}</div>
+        </div>
+
+        <label *ngIf="selectedRecipe.forms.length" class="ll-copy mt-4 block">
+          Form
+          <select
+            class="ll-input mt-1 w-full px-2 py-1"
+            [value]="selectedFormId() ?? ''"
+            (change)="setForm($any($event.target).value)"
+          >
+            <option
+              *ngFor="let form of selectedRecipe.forms"
+              [value]="form.formId"
+            >
+              {{ form.displayName }}
+            </option>
+          </select>
+        </label>
+
+        <label *ngIf="availableBlueprints().length" class="ll-copy mt-4 block">
+          Blueprint
+          <select
+            class="ll-input mt-1 w-full px-2 py-1"
+            [value]="selectedBlueprintId() ?? ''"
+            (change)="setBlueprint($any($event.target).value)"
+          >
+            <option value="">None</option>
+            <option
+              *ngFor="let blueprint of availableBlueprints()"
+              [value]="blueprint.id"
+            >
+              {{ blueprint.blueprintFamily || blueprint.name }}
+            </option>
+          </select>
+        </label>
+
+        <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_8rem]">
+          <div class="ll-copy min-w-0">
+            <div>Tier</div>
+            <div *ngIf="tierOptions().length <= 1" class="ll-state mt-1 inline-flex">
+              T{{ targetTier() }}
+            </div>
+            <div *ngIf="tierOptions().length > 1" class="mt-1 flex flex-wrap gap-2">
+              <button
+                *ngFor="let tier of tierOptions(); trackBy: trackByTier"
+                type="button"
+                class="ll-button min-h-9 px-3 py-1 text-sm"
+                [ngClass]="{
+                  'll-card-accent text-primary': targetTier() === tier,
+                }"
+                (click)="setTargetTier(tier)"
+              >
+                T{{ tier }}
+              </button>
+            </div>
+          </div>
+
+          <label class="ll-copy">
+            Quantity
+            <input
+              type="number"
+              class="ll-input no-spinner mt-1 w-full px-2 py-1 text-right"
+              min="1"
+              max="100"
+              [value]="quantity()"
+              (input)="setQuantity($any($event.target).valueAsNumber)"
+            />
+          </label>
+        </div>
+
+        <div class="ll-item-detail-section ll-copy mt-4">
           <div class="ll-eyebrow text-primary">Requires</div>
           <ul class="ml-5 list-disc">
-            <li
-              *ngFor="let mat of selectedRecipe.materials"
-              class="group relative"
-            >
-              {{ mat.item.name }}:
+            <li *ngFor="let mat of selectedMaterialCosts()">
+              {{ mat.name }}<span *ngIf="mat.tier"> T{{ mat.tier }}</span>:
               <span
                 [ngClass]="{
-                  'text-rose-500': getOwnedQuantity(mat.item.id) < mat.quantity,
+                  'text-rose-500':
+                    getOwnedQuantity(mat.itemId) < requiredForBatch(mat.required),
                 }"
               >
-                x{{ getOwnedQuantity(mat.item.id) | numberFormat }} / x{{
-                  mat.quantity
+                x{{ getOwnedQuantity(mat.itemId) | numberFormat }} / x{{
+                  requiredForBatch(mat.required) | numberFormat
                 }}
               </span>
-
-              <div
-                class="ll-card absolute right-0 top-1/2 z-20 hidden w-64 -translate-y-1/2 p-2 text-sm text-white group-hover:block"
-              >
-                {{ mat.item.description }}
-              </div>
             </li>
           </ul>
         </div>
 
-        <div class="mt-4 flex items-center gap-2">
-          <ng-container
-            *ngIf="meetsLevelRequirement(selectedRecipe); else levelTooLow"
-          >
-            <ng-container *ngIf="canCraftSelected() as canCraft; else nothing">
-              <app-regular-button
-                (pressed)="craft(selectedRecipe)"
-                [disabled]="!meetsLevelRequirement(selectedRecipe)"
-              >
-                Craft
-              </app-regular-button>
-            </ng-container>
-            <ng-template #nothing>
-              <span *ngIf="!canCraftSelected()" class="text-rose-500">
-                Not enough materials
-              </span>
-            </ng-template>
-          </ng-container>
-          <ng-template #levelTooLow>
+        <div class="ll-item-detail-section ll-copy mt-4">
+          <div class="ll-eyebrow text-primary">Affinity</div>
+          <div class="mt-2 flex flex-wrap gap-2">
             <span
-              *ngIf="!meetsLevelRequirement(selectedRecipe)"
-              class="ll-state ll-state-danger"
+              *ngFor="let tag of selectedRecipe.affinityTags"
+              class="ll-state"
             >
-              Crafting level is too low.
+              {{ tag }}
             </span>
-          </ng-template>
+            <span
+              *ngFor="let tag of selectedBlueprint()?.tags ?? []"
+              class="ll-state"
+            >
+              {{ tag }}
+            </span>
+          </div>
+        </div>
+
+        <div *ngIf="error() as errorMessage" class="ll-state ll-state-danger mt-4">
+          {{ errorMessage }}
+        </div>
+
+        <div class="mt-4 flex items-center gap-2">
+          <app-regular-button
+            (pressed)="craft(selectedRecipe)"
+            [disabled]="!canCraftSelected() || isLoading()"
+          >
+            Craft
+          </app-regular-button>
+          <span *ngIf="!canCraftSelected()" class="text-rose-500">
+            Not enough materials
+          </span>
         </div>
       </ng-container>
       <ng-template #noRecipe>
-        <div class="ll-empty-state mt-3">Select a recipe to view details.</div>
+        <div class="ll-empty-state mt-3">No craftable recipes available.</div>
       </ng-template>
     </section>
   </div>
+
   <section class="flex h-full w-full flex-col overflow-hidden">
     <h2 class="ll-heading flex text-xl">Recipes</h2>
     <div class="ll-toolbar mb-4">
       <button
         type="button"
         class="ll-button flex items-center justify-between gap-1 whitespace-nowrap px-2 py-1"
-        [ngClass]="{
-          'll-card-accent text-primary': filterMode() === 'all',
-        }"
+        [ngClass]="{ 'll-card-accent text-primary': filterMode() === 'all' }"
         (click)="filterMode.set('all')"
       >
         All
@@ -102,52 +175,24 @@
       >
         Un-craftable
       </button>
-
-      <div class="flex gap-2">
-        <label class="ll-copy whitespace-nowrap">
-          Min&nbsp;Lv
-          <input
-            type="number"
-            min="1"
-            class="ll-input no-spinner w-16 px-2 py-1 text-right"
-            [value]="minLevel()"
-            (input)="minLevel.set($any($event.target).valueAsNumber || 1)"
-          />
-        </label>
-
-        <label class="ll-copy whitespace-nowrap">
-          Max&nbsp;Lv
-          <input
-            type="number"
-            min="1"
-            class="ll-input no-spinner w-16 px-2 py-1 text-right"
-            [value]="maxLevel() ?? ''"
-            (input)="
-              maxLevel.set(
-                $any($event.target).value === ''
-                  ? null
-                  : $any($event.target).valueAsNumber
-              )
-            "
-          />
-        </label>
-      </div>
     </div>
+
     <div
       class="flex h-full w-full flex-col space-y-2 overflow-y-auto md:order-1"
       data-tour="crafting-introduction"
     >
       <ng-container *ngIf="filteredRecipes().length; else noRecipes">
         <div
-          *ngFor="let recipe of filteredRecipes()"
+          *ngFor="let recipe of filteredRecipes(); trackBy: trackByRecipe"
           class="ll-card cursor-pointer p-3 transition-colors hover:border-primary"
           (click)="selectRecipe(recipe)"
-          [ngClass]="{
-            'll-card-accent': selectedRecipe()?.id === recipe.id,
-          }"
+          [ngClass]="{ 'll-card-accent': selectedRecipe()?.id === recipe.id }"
         >
           <div class="font-semibold text-white">{{ recipe.name }}</div>
-          <div class="ll-copy">Lv {{ recipe.levelRequirement }}</div>
+          <div class="ll-copy">
+            {{ recipeTierLabel(recipe) }} ·
+            {{ recipe.outputItemType }}
+          </div>
         </div>
       </ng-container>
       <ng-template #noRecipes>

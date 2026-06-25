@@ -1,94 +1,151 @@
 import { NgClass, NgFor, NgIf } from '@angular/common';
-import { Component, computed, Input, signal, Signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  Input,
+  input,
+  signal,
+  Signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { InventoryItem } from '../../../../../shared/models/inventoryItem';
-import { Recipe } from '../../../../../shared/models/profession';
+import { CraftType, Recipe } from '../../../../../shared/models/profession';
 import { CraftingService } from '../../../../../core/services/api/crafting/crafting.service';
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import { CharacterProfession } from '../../../../../shared/models/Dtos/characterProfession';
 import { RegularButtonComponent } from '../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
-import { EquipmentDisplayComponent } from '../../../../../shared/components/equipment/equipment-display/equipment-display.component';
 import { TourService } from '../../../../../core/services/client-side/tutorial-tour/tour.service';
-
-function hasQuantity(
-  inv: InventoryItem[],
-  itemBaseId: string,
-  required: number,
-): boolean {
-  const found = inv.find((ii) => ii.itemInstance.itemBase.id === itemBaseId);
-  return found ? found.quantity >= required : false;
-}
-
-function consumeMaterials(
-  items: InventoryItem[],
-  recipe: Recipe,
-): InventoryItem[] {
-  return items.map((ii) => {
-    const mat = recipe.materials.find(
-      (m) => m.item.id === ii.itemInstance.itemBase.id,
-    );
-    return mat ? { ...ii, quantity: ii.quantity - mat.quantity } : ii;
-  });
-}
+import { CraftingRecipe } from '../../../../../shared/models/crafting-v2';
+import { EquipmentType } from '../../../../../shared/models/enums/equipmentType';
 
 @Component({
   selector: 'app-regular-crafting',
   standalone: true,
-  imports: [
-    NgIf,
-    NgFor,
-    NgClass,
-    RegularButtonComponent,
-    NumberFormatPipe,
-    EquipmentDisplayComponent,
-  ],
+  imports: [NgIf, NgFor, NgClass, RegularButtonComponent, NumberFormatPipe],
   templateUrl: './regular-crafting.component.html',
 })
 export class RegularCraftingComponent {
   @Input({ required: true }) recipes!: Signal<Recipe[]>;
   @Input({ required: true }) inventory!: Signal<InventoryItem[]>;
   @Input({ required: true }) characterProfession!: CharacterProfession;
+  readonly craftType = input.required<CraftType>();
 
-  /** all | craftable | uncraftable */
+  readonly recipesV2 = signal<CraftingRecipe[]>([]);
+  readonly isLoading = signal(false);
+  readonly error = signal<string | null>(null);
+  readonly targetTier = signal(1);
+  readonly quantity = signal(1);
   readonly filterMode = signal<'all' | 'craftable' | 'uncraftable'>('all');
-  /** minimum level (inclusive) */
-  readonly minLevel = signal<number>(1);
-  /** maximum level (inclusive, null ⇒ no upper limit) */
-  readonly maxLevel = signal<number | null>(null);
 
+  private readonly destroyRef = inject(DestroyRef);
   private readonly selectedRecipeId = signal<string | null>(null);
-  readonly selectedRecipe = computed<Recipe | null>(() => {
-    const id = this.selectedRecipeId();
-    return id
-      ? (this.recipes().find((r) => r.id === id) ?? null)
-      : this.recipes()[0];
-  });
-  readonly canCraftSelected = computed<boolean>(() => {
-    const recipe = this.selectedRecipe();
-    const inv = this.inventory();
-    if (!recipe || !inv) return false;
-    return recipe.materials.every((mat) =>
-      hasQuantity(inv, mat.item.id, mat.quantity),
+  readonly selectedFormId = signal<string | null>(null);
+  readonly selectedBlueprintId = signal<string | null>(null);
+  private readonly outputTypesByCraft: Record<CraftType, EquipmentType[]> = {
+    [CraftType.ArmorForging]: [
+      EquipmentType.Head,
+      EquipmentType.Chest,
+      EquipmentType.Legs,
+    ],
+    [CraftType.JewelryCrafting]: [
+      EquipmentType.Ring,
+      EquipmentType.Necklace,
+      EquipmentType.Relic,
+    ],
+    [CraftType.WeaponSmithing]: [
+      EquipmentType.TwoHanded,
+      EquipmentType.OneHanded,
+      EquipmentType.OffHand,
+    ],
+  };
+
+  readonly familyRecipes = computed<CraftingRecipe[]>(() => {
+    const allowedTypes = this.outputTypesByCraft[this.craftType()] ?? [];
+    return this.recipesV2().filter((recipe) =>
+      allowedTypes.includes(recipe.outputItemType),
     );
   });
 
-  readonly filteredRecipes = computed<Recipe[]>(() => {
+  readonly selectedRecipe = computed<CraftingRecipe | null>(() => {
+    const id = this.selectedRecipeId();
+    const recipes = this.familyRecipes();
+    return id
+      ? (recipes.find((r) => r.id === id) ?? recipes[0] ?? null)
+      : (recipes[0] ?? null);
+  });
+
+  readonly filteredRecipes = computed<CraftingRecipe[]>(() => {
     const mode = this.filterMode();
-    const min = this.minLevel();
-    const max = this.maxLevel();
-    const inv = this.inventory();
-
-    return this.recipes().filter((r) => {
-      /* level gate */
-      if (r.levelRequirement < min) return false;
-      if (max !== null && r.levelRequirement > max) return false;
-
-      /* craftability gate (if requested) */
-      const craftable = this.canCraft(r, inv);
-      if (mode === 'craftable') return craftable;
-      if (mode === 'uncraftable') return !craftable;
-      return true; // mode === 'all'
+    return this.familyRecipes().filter((recipe) => {
+      const canCraft = this.canCraft(recipe);
+      if (mode === 'craftable') return canCraft;
+      if (mode === 'uncraftable') return !canCraft;
+      return true;
     });
+  });
+
+  readonly canCraftSelected = computed<boolean>(() => {
+    const recipe = this.selectedRecipe();
+    return recipe ? this.canCraft(recipe) && this.hasSelectedForm(recipe) : false;
+  });
+
+  readonly tierOptions = computed<number[]>(() => {
+    const recipe = this.selectedRecipe();
+    if (!recipe) return [];
+
+    const min = Math.max(1, recipe.minTier);
+    const max = Math.max(min, recipe.maxTier);
+    return Array.from({ length: max - min + 1 }, (_, index) => min + index);
+  });
+
+  readonly availableBlueprints = computed(() => {
+    const recipe = this.selectedRecipe();
+    if (!recipe) return [];
+    const formId = this.selectedFormId();
+    return recipe.blueprints.filter(
+      (blueprint) =>
+        blueprint.compatibleFormIds.length === 0 ||
+        (formId != null && blueprint.compatibleFormIds.includes(formId)),
+    );
+  });
+
+  readonly selectedBlueprint = computed(() => {
+    const id = this.selectedBlueprintId();
+    return id
+      ? (this.availableBlueprints().find((blueprint) => blueprint.id === id) ??
+          null)
+      : null;
+  });
+
+  readonly selectedMaterialCosts = computed(() => {
+    const recipe = this.selectedRecipe();
+    const blueprint = this.selectedBlueprint();
+    return blueprint?.materialCosts ?? recipe?.materialCosts ?? [];
+  });
+
+  readonly outputPreviewName = computed(() => {
+    const recipe = this.selectedRecipe();
+    if (!recipe) return '';
+    const blueprint = this.selectedBlueprint();
+    const form = recipe.forms.find((candidate) => candidate.formId === this.selectedFormId());
+    if (!blueprint) return form?.displayName ?? recipe.name;
+
+    const specialName = blueprint.specialOutputNames.find(
+      (candidate) =>
+        candidate.baseRecipeId.toLowerCase() === recipe.id.toLowerCase() &&
+        (!form || candidate.formId.toLowerCase() === form.formId.toLowerCase()),
+    );
+    if (specialName) return specialName.outputName;
+
+    const family = blueprint.blueprintFamily ?? blueprint.name.replace(/^Blueprint:\s*/i, '');
+    return blueprint.outputNameTemplate
+      .replace(/\{BlueprintName\}/gi, family)
+      .replace(/\{FormName\}/gi, form?.displayName ?? recipe.name)
+      .trim();
   });
 
   constructor(
@@ -97,43 +154,92 @@ export class RegularCraftingComponent {
     private readonly tour: TourService,
   ) {
     this.tour.start('crafting');
-  }
 
-  meetsLevelRequirement(recipe: Recipe): boolean {
-    return this.characterProfession.level >= recipe.levelRequirement;
-  }
-
-  selectRecipe(recipe: Recipe): void {
-    this.selectedRecipeId.set(recipe.id);
-  }
-
-  craft(recipe: Recipe): void {
-    const items = this.inventoryState.items();
-    if (!items) return;
-
-    if (
-      !recipe.materials.every((m) => hasQuantity(items, m.item.id, m.quantity))
-    ) {
-      return;
-    }
-
-    const updatedItems = consumeMaterials(items, recipe);
-    const backup = [...this.inventoryState.items()];
-
-    this.craftingService.craftItem(recipe.id).subscribe({
-      next: (item) => {
-        this.inventoryState.setInventory([...updatedItems, item]);
+    effect(
+      () => {
+        this.loadRecipes(this.targetTier());
       },
-      error: () => {
-        this.inventoryState.setInventory(backup);
-      },
-    });
-  }
-
-  private canCraft(recipe: Recipe, inv: InventoryItem[]): boolean {
-    return recipe.materials.every((m) =>
-      hasQuantity(inv, m.item.id, m.quantity),
+      { allowSignalWrites: true },
     );
+
+    effect(
+      () => {
+        const recipes = this.familyRecipes();
+        const selected = this.selectedRecipe();
+        if (!recipes.length) {
+          this.selectedRecipeId.set(null);
+          this.selectedFormId.set(null);
+          this.selectedBlueprintId.set(null);
+          return;
+        }
+
+        if (!selected || !recipes.some((recipe) => recipe.id === this.selectedRecipeId())) {
+          const first = recipes[0];
+          this.selectedRecipeId.set(first.id);
+          this.selectedFormId.set(first.forms[0]?.formId ?? null);
+          this.selectedBlueprintId.set(null);
+        }
+      },
+      { allowSignalWrites: true },
+    );
+
+    this.craftingService.blueprintLearned$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.loadRecipes(this.targetTier()));
+  }
+
+  selectRecipe(recipe: CraftingRecipe): void {
+    this.selectedRecipeId.set(recipe.id);
+    this.selectedFormId.set(recipe.forms[0]?.formId ?? null);
+    this.selectedBlueprintId.set(null);
+    this.targetTier.set(Math.min(Math.max(this.targetTier(), recipe.minTier), recipe.maxTier));
+  }
+
+  setForm(formId: string): void {
+    this.selectedFormId.set(formId);
+    if (!this.availableBlueprints().some((blueprint) => blueprint.id === this.selectedBlueprintId())) {
+      this.selectedBlueprintId.set(null);
+    }
+  }
+
+  setBlueprint(blueprintId: string): void {
+    this.selectedBlueprintId.set(blueprintId || null);
+  }
+
+  setTargetTier(value: number): void {
+    const selected = this.selectedRecipe();
+    const min = selected?.minTier ?? 1;
+    const max = selected?.maxTier ?? 10;
+    this.targetTier.set(Math.min(Math.max(value || min, min), max));
+  }
+
+  setQuantity(value: number): void {
+    this.quantity.set(Math.min(Math.max(value || 1, 1), 100));
+  }
+
+  craft(recipe: CraftingRecipe): void {
+    if (!this.canCraft(recipe)) return;
+
+    this.craftingService
+      .craftItems({
+        recipeId: recipe.id,
+        formId: this.selectedFormId(),
+        blueprintId: this.selectedBlueprintId(),
+        targetTier: this.targetTier(),
+        quantity: this.quantity(),
+      })
+      .subscribe({
+        next: (result) => {
+          const updatedInventory = this.consumeMaterials(
+            this.inventoryState.items(),
+            this.selectedMaterialCosts(),
+            this.quantity(),
+          );
+          this.inventoryState.setInventory([...updatedInventory, ...result.createdItems]);
+          this.loadRecipes(this.targetTier());
+        },
+        error: (err) => this.error.set(err.message ?? 'Failed to craft items.'),
+      });
   }
 
   getOwnedQuantity(itemId: string): number {
@@ -143,7 +249,87 @@ export class RegularCraftingComponent {
     return inventoryItem?.quantity ?? 0;
   }
 
-  trackByRecipe(_: number, recipe: Recipe): string {
+  requiredForBatch(required: number): number {
+    return required * this.quantity();
+  }
+
+  canCraft(recipe: CraftingRecipe): boolean {
+    const costs = recipe.id === this.selectedRecipe()?.id ? this.selectedMaterialCosts() : recipe.materialCosts;
+    return costs.every(
+      (cost) => this.getOwnedQuantity(cost.itemId) >= this.requiredForBatch(cost.required),
+    );
+  }
+
+  hasSelectedForm(recipe: CraftingRecipe): boolean {
+    return recipe.forms.length === 0 || recipe.forms.some((form) => form.formId === this.selectedFormId());
+  }
+
+  trackByRecipe(_: number, recipe: CraftingRecipe): string {
     return recipe.id;
+  }
+
+  trackByTier(_: number, tier: number): number {
+    return tier;
+  }
+
+  recipeTierLabel(recipe: CraftingRecipe): string {
+    return recipe.minTier === recipe.maxTier
+      ? `T${recipe.minTier}`
+      : `T${recipe.minTier}-${recipe.maxTier}`;
+  }
+
+  private loadRecipes(targetTier: number): void {
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    this.craftingService.getRecipes(targetTier).subscribe({
+      next: (recipes) => {
+        this.recipesV2.set(recipes);
+        const familyRecipes = this.familyRecipes();
+        if (!familyRecipes.some((recipe) => recipe.id === this.selectedRecipeId())) {
+          this.selectedRecipeId.set(familyRecipes[0]?.id ?? null);
+        }
+        const selected =
+          familyRecipes.find((recipe) => recipe.id === this.selectedRecipeId()) ??
+          familyRecipes[0];
+        if (selected && !this.hasSelectedForm(selected)) {
+          this.selectedFormId.set(selected.forms[0]?.formId ?? null);
+        }
+        if (!this.availableBlueprints().some((blueprint) => blueprint.id === this.selectedBlueprintId())) {
+          this.selectedBlueprintId.set(null);
+        }
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        this.error.set(err.message ?? 'Failed to load crafting recipes.');
+        this.isLoading.set(false);
+      },
+    });
+  }
+
+  private consumeMaterials(
+    inventory: InventoryItem[],
+    costs: { itemId: string; required: number }[],
+    quantity: number,
+  ): InventoryItem[] {
+    const remainingByItemId = new Map(
+      costs.map((cost) => [cost.itemId, cost.required * quantity]),
+    );
+
+    return inventory
+      .map((item) => {
+        const itemId = item.itemInstance.itemBase.id;
+        const remaining = remainingByItemId.get(itemId) ?? 0;
+        if (remaining <= 0) return item;
+
+        const consumed = Math.min(item.quantity, remaining);
+        remainingByItemId.set(itemId, remaining - consumed);
+
+        return {
+          ...item,
+          quantity: item.quantity - consumed,
+        };
+      })
+      .filter((item) => item.quantity > 0);
   }
 }
