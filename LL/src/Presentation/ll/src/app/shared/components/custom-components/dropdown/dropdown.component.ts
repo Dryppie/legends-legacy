@@ -50,6 +50,9 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
   /** Currently selected option value for option-mode dropdowns. */
   @Input() selectedValue: T | null = null;
 
+  /** Visual treatment: toolbar button by default, form field when used in panels/forms. */
+  @Input() appearance: 'button' | 'field' = 'button';
+
   /** Whether the parent considers this the active/main selection. */
   @Input() selected = false;
 
@@ -108,6 +111,26 @@ export class DropdownComponent<T = unknown> implements OnDestroy {
       this.options.find((option) => option.value === this.selectedValue)
         ?.label ?? this.label
     );
+  }
+
+  get buttonClasses(): string {
+    const classes = [
+      this.appearance === 'field'
+        ? 'h-9 rounded border border-light_gray bg-black/20 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04)] hover:border-primary/70 hover:bg-primary/10 focus-visible:outline focus-visible:outline-1 focus-visible:outline-primary/80'
+        : 'h-8 rounded text-neutral-300 hover:bg-zinc-600/30',
+    ];
+
+    if (this.selected) {
+      classes.push(
+        'bg-primary/30 text-primary shadow-[inset_0_0_0_1px_rgba(249,220,160,0.35)] hover:bg-primary/40',
+      );
+    }
+
+    if (this.open() && this.appearance === 'field') {
+      classes.push('border-primary bg-primary/10 text-primary');
+    }
+
+    return classes.join(' ');
   }
 
   onButtonClick(event: MouseEvent): void {

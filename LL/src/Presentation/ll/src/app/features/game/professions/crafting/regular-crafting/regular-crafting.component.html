@@ -18,35 +18,28 @@
 
         <label *ngIf="selectedRecipe.forms.length" class="ll-copy mt-4 block">
           Form
-          <select
-            class="ll-input mt-1 w-full px-2 py-1"
-            [value]="selectedFormId() ?? ''"
-            (change)="setForm($any($event.target).value)"
-          >
-            <option
-              *ngFor="let form of selectedRecipe.forms"
-              [value]="form.formId"
-            >
-              {{ form.displayName }}
-            </option>
-          </select>
+          <app-dropdown
+            class="mt-1 block w-full"
+            appearance="field"
+            label="Select form"
+            [value]="selectedFormId()"
+            [options]="formDropdownOptions()"
+            [selectedValue]="selectedFormId()"
+            (selection)="setFormFromDropdown($event)"
+          ></app-dropdown>
         </label>
 
         <label *ngIf="availableBlueprints().length" class="ll-copy mt-4 block">
           Blueprint
-          <select
-            class="ll-input mt-1 w-full px-2 py-1"
-            [value]="selectedBlueprintId() ?? ''"
-            (change)="setBlueprint($any($event.target).value)"
-          >
-            <option value="">None</option>
-            <option
-              *ngFor="let blueprint of availableBlueprints()"
-              [value]="blueprint.id"
-            >
-              {{ blueprint.blueprintFamily || blueprint.name }}
-            </option>
-          </select>
+          <app-dropdown
+            class="mt-1 block w-full"
+            appearance="field"
+            label="None"
+            [value]="selectedBlueprintId()"
+            [options]="blueprintDropdownOptions()"
+            [selectedValue]="selectedBlueprintId()"
+            (selection)="setBlueprintFromDropdown($event)"
+          ></app-dropdown>
         </label>
 
         <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_8rem]">

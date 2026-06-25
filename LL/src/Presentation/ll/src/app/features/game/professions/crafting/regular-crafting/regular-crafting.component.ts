@@ -17,6 +17,11 @@ import { CraftingService } from '../../../../../core/services/api/crafting/craft
 import { InventoryStateService } from '../../../../../core/services/api/inventory/inventory-state.service';
 import { CharacterProfession } from '../../../../../shared/models/Dtos/characterProfession';
 import { RegularButtonComponent } from '../../../../../shared/components/custom-components/buttons/regular-button/regular-button.component';
+import {
+  DropdownComponent,
+  DropdownOption,
+  DropdownSelection,
+} from '../../../../../shared/components/custom-components/dropdown/dropdown.component';
 import { NumberFormatPipe } from '../../../../../shared/pipes/number-format/number-format.pipe';
 import { TourService } from '../../../../../core/services/client-side/tutorial-tour/tour.service';
 import { CraftingRecipe } from '../../../../../shared/models/crafting-v2';
@@ -25,7 +30,7 @@ import { EquipmentType } from '../../../../../shared/models/enums/equipmentType'
 @Component({
   selector: 'app-regular-crafting',
   standalone: true,
-  imports: [NgIf, NgFor, NgClass, RegularButtonComponent, NumberFormatPipe],
+  imports: [NgIf, NgFor, NgClass, RegularButtonComponent, NumberFormatPipe, DropdownComponent],
   templateUrl: './regular-crafting.component.html',
 })
 export class RegularCraftingComponent {
@@ -120,6 +125,23 @@ export class RegularCraftingComponent {
           null)
       : null;
   });
+
+  readonly formDropdownOptions = computed<DropdownOption<string>[]>(() => {
+    return (
+      this.selectedRecipe()?.forms.map((form) => ({
+        label: form.displayName,
+        value: form.formId,
+      })) ?? []
+    );
+  });
+
+  readonly blueprintDropdownOptions = computed<DropdownOption<string | null>[]>(() => [
+    { label: 'None', value: null },
+    ...this.availableBlueprints().map((blueprint) => ({
+      label: blueprint.blueprintFamily || blueprint.name,
+      value: blueprint.id,
+    })),
+  ]);
 
   readonly selectedForm = computed(() => {
     const recipe = this.selectedRecipe();
@@ -243,6 +265,15 @@ export class RegularCraftingComponent {
 
   setBlueprint(blueprintId: string): void {
     this.selectedBlueprintId.set(blueprintId || null);
+  }
+
+  setFormFromDropdown(selection: DropdownSelection<string | null>): void {
+    if (!selection.main) return;
+    this.setForm(selection.main);
+  }
+
+  setBlueprintFromDropdown(selection: DropdownSelection<string | null>): void {
+    this.selectedBlueprintId.set(selection.main);
   }
 
   setTargetTier(value: number): void {

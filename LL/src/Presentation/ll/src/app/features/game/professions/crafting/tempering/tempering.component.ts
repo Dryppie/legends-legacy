@@ -54,6 +54,25 @@ export class TemperingComponent {
       : null;
   });
 
+  readonly selectedQueueStatus = computed<string | null>(() => {
+    const queueItem = this.selectedQueueItem();
+    if (!queueItem) return null;
+
+    const queueIndex = this.craftingQueue().findIndex(
+      (item) => item.id === queueItem.id,
+    );
+
+    if (queueIndex === 0) {
+      return 'Working on this item now.';
+    }
+
+    if (queueIndex === 1) {
+      return 'Queued next. The current working item will finish first.';
+    }
+
+    return `Queued position ${queueIndex + 1}. Current and earlier queued items will finish first.`;
+  });
+
   readonly selectedEquipmentInstance = computed<EquipmentInstance | null>(() => {
     const id = this.selectedItemId();
     return (
@@ -124,7 +143,7 @@ export class TemperingComponent {
     this.inventoryState.setInventory(
       this.inventoryState.items().filter((item) => item.itemInstance.id !== equipment.id),
     );
-    this.selectedItemId.set(null);
+    this.selectedItemId.set(equipment.id);
     this.lastOutcome.set(`Queued ${equipment.displayName ?? equipment.itemBase.name} for tempering`);
   }
 
