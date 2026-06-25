@@ -1,16 +1,18 @@
-<div class="ll-modal-panel max-w-full">
+<div class="ll-modal-panel max-h-[90vh] max-w-full overflow-y-auto">
   <div class="flex w-full items-center justify-center pb-2">
     <h2 class="ll-heading text-xl">
       {{ equipmentInstance.displayName || equipmentInstance.itemBase.name }}
     </h2>
   </div>
+
   <div class="border-t border-primary/20 pb-3"></div>
 
   <div class="flex flex-col justify-between gap-4 sm:flex-row">
-    <app-equipment-display [item]="equipmentInstance"></app-equipment-display>
+    <app-equipment-display [item]="equipmentInstance"> </app-equipment-display>
 
     <div class="mt-6 flex place-items-end justify-end gap-2">
       <button type="button" (click)="onClose()" class="ll-button">Close</button>
+
       <button type="button" class="ll-button" (click)="onEquip()">Equip</button>
     </div>
   </div>
