@@ -34,7 +34,51 @@
       "Crit",
       "Aggression"
     ],
-    "specialResourceRequirements": []
+    "specialResourceRequirements": [],
+    "temperingProfile": {
+      "id": "blueprint_fury_tempering_profile",
+      "name": "Fury Tempering",
+      "progressOnOutcome": {
+        "CriticalFail": 0,
+        "Fail": 1,
+        "Success": 3,
+        "GreatSuccess": 6
+      },
+      "statImprovementPool": [
+        {
+          "stat": "WeaponDamage",
+          "weight": 35
+        },
+        {
+          "stat": "CritChance",
+          "weight": 25
+        },
+        {
+          "stat": "CritDamage",
+          "weight": 25
+        },
+        {
+          "stat": "Fortitude",
+          "weight": 15
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_fury_damage",
+          "weight": 35
+        },
+        {
+          "id": "affix_fury_crit",
+          "weight": 20
+        }
+      ],
+      "specialModifierPool": [
+        {
+          "id": "special_battle_trance",
+          "weight": 10
+        }
+      ]
+    }
   },
   {
     "id": "blueprint_arcane",
@@ -75,7 +119,51 @@
       "SpellPower",
       "Cooldown"
     ],
-    "specialResourceRequirements": []
+    "specialResourceRequirements": [],
+    "temperingProfile": {
+      "id": "blueprint_arcane_tempering_profile",
+      "name": "Arcane Tempering",
+      "progressOnOutcome": {
+        "CriticalFail": 0,
+        "Fail": 1,
+        "Success": 3,
+        "GreatSuccess": 6
+      },
+      "statImprovementPool": [
+        {
+          "stat": "Spirit",
+          "weight": 35
+        },
+        {
+          "stat": "Cooldown",
+          "weight": 25
+        },
+        {
+          "stat": "MagicPenetration",
+          "weight": 20
+        },
+        {
+          "stat": "Resistance",
+          "weight": 20
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_spirit_focus",
+          "weight": 35
+        },
+        {
+          "id": "affix_cooldown",
+          "weight": 25
+        }
+      ],
+      "specialModifierPool": [
+        {
+          "id": "special_arcane_cycle",
+          "weight": 10
+        }
+      ]
+    }
   },
   {
     "id": "blueprint_execution",
@@ -111,7 +199,55 @@
       "Precision",
       "Damage"
     ],
-    "specialResourceRequirements": []
+    "specialResourceRequirements": [],
+    "temperingProfile": {
+      "id": "blueprint_execution_tempering_profile",
+      "name": "Execution Tempering",
+      "progressOnOutcome": {
+        "CriticalFail": 0,
+        "Fail": 1,
+        "Success": 3,
+        "GreatSuccess": 6
+      },
+      "statImprovementPool": [
+        {
+          "stat": "Precision",
+          "weight": 35
+        },
+        {
+          "stat": "CritChance",
+          "weight": 25
+        },
+        {
+          "stat": "ArmorPenetration",
+          "weight": 25
+        },
+        {
+          "stat": "CritDamage",
+          "weight": 15
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_ranged_precision",
+          "weight": 35
+        },
+        {
+          "id": "affix_armor_penetration",
+          "weight": 25
+        },
+        {
+          "id": "affix_crit_chance",
+          "weight": 20
+        }
+      ],
+      "specialModifierPool": [
+        {
+          "id": "special_deadeye",
+          "weight": 10
+        }
+      ]
+    }
   },
   {
     "id": "blueprint_aegis",
@@ -149,7 +285,55 @@
       "Barrier",
       "PhysicalDefense"
     ],
-    "specialResourceRequirements": []
+    "specialResourceRequirements": [],
+    "temperingProfile": {
+      "id": "blueprint_aegis_tempering_profile",
+      "name": "Aegis Tempering",
+      "progressOnOutcome": {
+        "CriticalFail": 0,
+        "Fail": 1,
+        "Success": 3,
+        "GreatSuccess": 6
+      },
+      "statImprovementPool": [
+        {
+          "stat": "BlockChance",
+          "weight": 35
+        },
+        {
+          "stat": "Armor",
+          "weight": 30
+        },
+        {
+          "stat": "DamageReduction",
+          "weight": 25
+        },
+        {
+          "stat": "Resistance",
+          "weight": 10
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_block_chance",
+          "weight": 35
+        },
+        {
+          "id": "affix_damage_reduction",
+          "weight": 25
+        },
+        {
+          "id": "affix_armor",
+          "weight": 20
+        }
+      ],
+      "specialModifierPool": [
+        {
+          "id": "special_unbroken_guard",
+          "weight": 10
+        }
+      ]
+    }
   },
   {
     "id": "blueprint_warden",
@@ -185,7 +369,55 @@
       "Sustain",
       "Nature"
     ],
-    "specialResourceRequirements": []
+    "specialResourceRequirements": [],
+    "temperingProfile": {
+      "id": "blueprint_warden_tempering_profile",
+      "name": "Warden Tempering",
+      "progressOnOutcome": {
+        "CriticalFail": 0,
+        "Fail": 1,
+        "Success": 3,
+        "GreatSuccess": 6
+      },
+      "statImprovementPool": [
+        {
+          "stat": "Resistance",
+          "weight": 30
+        },
+        {
+          "stat": "Spirit",
+          "weight": 25
+        },
+        {
+          "stat": "HealthRegeneration",
+          "weight": 25
+        },
+        {
+          "stat": "Fortitude",
+          "weight": 20
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_grave_resistance",
+          "weight": 30
+        },
+        {
+          "id": "affix_spirit",
+          "weight": 25
+        },
+        {
+          "id": "affix_fortitude",
+          "weight": 20
+        }
+      ],
+      "specialModifierPool": [
+        {
+          "id": "special_restless_ward",
+          "weight": 10
+        }
+      ]
+    }
   },
   {
     "id": "blueprint_endurance",
@@ -221,7 +453,55 @@
       "Sustain",
       "MaxHealth"
     ],
-    "specialResourceRequirements": []
+    "specialResourceRequirements": [],
+    "temperingProfile": {
+      "id": "blueprint_endurance_tempering_profile",
+      "name": "Endurance Tempering",
+      "progressOnOutcome": {
+        "CriticalFail": 0,
+        "Fail": 1,
+        "Success": 3,
+        "GreatSuccess": 6
+      },
+      "statImprovementPool": [
+        {
+          "stat": "MaxHealth",
+          "weight": 35
+        },
+        {
+          "stat": "Fortitude",
+          "weight": 30
+        },
+        {
+          "stat": "Armor",
+          "weight": 20
+        },
+        {
+          "stat": "DamageReduction",
+          "weight": 15
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_fortitude",
+          "weight": 30
+        },
+        {
+          "id": "affix_armor",
+          "weight": 25
+        },
+        {
+          "id": "affix_damage_reduction_heavy",
+          "weight": 20
+        }
+      ],
+      "specialModifierPool": [
+        {
+          "id": "special_unbroken_guard",
+          "weight": 10
+        }
+      ]
+    }
   },
   {
     "id": "blueprint_phoenix",
@@ -257,7 +537,55 @@
       "Recovery",
       "Support"
     ],
-    "specialResourceRequirements": []
+    "specialResourceRequirements": [],
+    "temperingProfile": {
+      "id": "blueprint_phoenix_tempering_profile",
+      "name": "Phoenix Tempering",
+      "progressOnOutcome": {
+        "CriticalFail": 0,
+        "Fail": 1,
+        "Success": 3,
+        "GreatSuccess": 6
+      },
+      "statImprovementPool": [
+        {
+          "stat": "HealthRegeneration",
+          "weight": 35
+        },
+        {
+          "stat": "Spirit",
+          "weight": 25
+        },
+        {
+          "stat": "Power",
+          "weight": 20
+        },
+        {
+          "stat": "StatusResistance",
+          "weight": 20
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_spirit",
+          "weight": 30
+        },
+        {
+          "id": "affix_power",
+          "weight": 25
+        },
+        {
+          "id": "affix_status_resistance",
+          "weight": 20
+        }
+      ],
+      "specialModifierPool": [
+        {
+          "id": "special_arcane_cycle",
+          "weight": 10
+        }
+      ]
+    }
   },
   {
     "id": "blueprint_spirit",
@@ -296,7 +624,55 @@
       "Mana",
       "MagicDefense"
     ],
-    "specialResourceRequirements": []
+    "specialResourceRequirements": [],
+    "temperingProfile": {
+      "id": "blueprint_spirit_tempering_profile",
+      "name": "Spirit Tempering",
+      "progressOnOutcome": {
+        "CriticalFail": 0,
+        "Fail": 1,
+        "Success": 3,
+        "GreatSuccess": 6
+      },
+      "statImprovementPool": [
+        {
+          "stat": "Spirit",
+          "weight": 35
+        },
+        {
+          "stat": "Resistance",
+          "weight": 25
+        },
+        {
+          "stat": "StatusResistance",
+          "weight": 25
+        },
+        {
+          "stat": "HealthRegeneration",
+          "weight": 15
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_spirit_focus",
+          "weight": 35
+        },
+        {
+          "id": "affix_grave_resistance",
+          "weight": 25
+        },
+        {
+          "id": "affix_status_grave",
+          "weight": 20
+        }
+      ],
+      "specialModifierPool": [
+        {
+          "id": "special_restless_ward",
+          "weight": 10
+        }
+      ]
+    }
   },
   {
     "id": "blueprint_primal",
@@ -339,7 +715,51 @@
         "baseAmount": 1,
         "amountPerTier": 0
       }
-    ]
+    ],
+    "temperingProfile": {
+      "id": "blueprint_primal_tempering_profile",
+      "name": "Primal Tempering",
+      "progressOnOutcome": {
+        "CriticalFail": 0,
+        "Fail": 1,
+        "Success": 3,
+        "GreatSuccess": 6
+      },
+      "statImprovementPool": [
+        {
+          "stat": "SummonPower",
+          "weight": 35
+        },
+        {
+          "stat": "SummonHealth",
+          "weight": 35
+        },
+        {
+          "stat": "Fortitude",
+          "weight": 15
+        },
+        {
+          "stat": "Power",
+          "weight": 15
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_summon_power",
+          "weight": 35
+        },
+        {
+          "id": "affix_summon_health",
+          "weight": 20
+        }
+      ],
+      "specialModifierPool": [
+        {
+          "id": "special_wild_bond",
+          "weight": 10
+        }
+      ]
+    }
   },
   {
     "id": "blueprint_venom",
@@ -387,7 +807,51 @@
         "baseAmount": 1,
         "amountPerTier": 0
       }
-    ]
+    ],
+    "temperingProfile": {
+      "id": "blueprint_venom_tempering_profile",
+      "name": "Venom Tempering",
+      "progressOnOutcome": {
+        "CriticalFail": 0,
+        "Fail": 1,
+        "Success": 3,
+        "GreatSuccess": 6
+      },
+      "statImprovementPool": [
+        {
+          "stat": "Precision",
+          "weight": 30
+        },
+        {
+          "stat": "CritChance",
+          "weight": 20
+        },
+        {
+          "stat": "LifeSteal",
+          "weight": 30
+        },
+        {
+          "stat": "StatusResistance",
+          "weight": 20
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_venom_edge",
+          "weight": 45
+        },
+        {
+          "id": "affix_status_chance",
+          "weight": 25
+        }
+      ],
+      "specialModifierPool": [
+        {
+          "id": "special_poison_critical",
+          "weight": 10
+        }
+      ]
+    }
   },
   {
     "id": "blueprint_hive",
@@ -434,6 +898,50 @@
         "baseAmount": 1,
         "amountPerTier": 0
       }
-    ]
+    ],
+    "temperingProfile": {
+      "id": "blueprint_hive_tempering_profile",
+      "name": "Hive Tempering",
+      "progressOnOutcome": {
+        "CriticalFail": 0,
+        "Fail": 1,
+        "Success": 3,
+        "GreatSuccess": 6
+      },
+      "statImprovementPool": [
+        {
+          "stat": "Armor",
+          "weight": 30
+        },
+        {
+          "stat": "Precision",
+          "weight": 25
+        },
+        {
+          "stat": "StatusResistance",
+          "weight": 25
+        },
+        {
+          "stat": "LifeSteal",
+          "weight": 20
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_hive_lacquer",
+          "weight": 35
+        },
+        {
+          "id": "affix_hive_instinct",
+          "weight": 20
+        }
+      ],
+      "specialModifierPool": [
+        {
+          "id": "special_swarm_shell",
+          "weight": 10
+        }
+      ]
+    }
   }
 ]

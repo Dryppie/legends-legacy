@@ -46,12 +46,13 @@ public class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
 
         var materials = Read<IReadOnlyList<MaterialDefinition>>(craftingRoot, "materials.json", options);
         var baseRecipes = Read<IReadOnlyList<CraftingRecipeDefinition>>(craftingRoot, "base-recipes.json", options);
-        var blueprints = Read<IReadOnlyList<BlueprintDefinition>>(craftingRoot, "blueprints.json", options);
+        var rawBlueprints = Read<IReadOnlyList<BlueprintDefinition>>(craftingRoot, "blueprints.json", options);
         var affixes = Read<IReadOnlyList<WeightedAffixDefinition>>(craftingRoot, "affixes.json", options);
         var specialModifiers = Read<IReadOnlyList<WeightedAffixDefinition>>(craftingRoot, "special-modifiers.json", options);
         var tierBudgets = Read<IReadOnlyList<TemperingTierBudgetDefinition>>(craftingRoot, "tier-budgets.json", options);
         var rawTemperingRecipes = Read<IReadOnlyList<TemperingRecipeDefinition>>(craftingRoot, "tempering-recipes.json", options);
         var temperingRecipes = ResolveTemperingRecipes(rawTemperingRecipes, affixes, specialModifiers);
+        var blueprints = ResolveBlueprintTemperingProfiles(rawBlueprints, affixes, specialModifiers);
 
         var recipes = baseRecipes.ToList();
         Validate(materials, recipes, blueprints, temperingRecipes, affixes, specialModifiers, tierBudgets);
@@ -172,21 +173,63 @@ public class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
         var specialModifiersById = specialModifiers.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
 
         return recipes
-            .Select(recipe => new TemperingRecipeDefinition
-            {
-                Id = recipe.Id,
-                Name = recipe.Name,
-                ApplicableItemTypes = recipe.ApplicableItemTypes,
-                RequiredItemAffinityTags = recipe.RequiredItemAffinityTags,
-                DirectionTags = recipe.DirectionTags,
-                ProgressOnOutcome = recipe.ProgressOnOutcome,
-                StatImprovementPool = recipe.StatImprovementPool,
-                AffixPool = recipe.AffixPool,
-                SpecialModifierPool = recipe.SpecialModifierPool,
-                ResolvedAffixPool = ResolveModifierPool(recipe.Id, "affix", recipe.AffixPool, affixesById),
-                ResolvedSpecialModifierPool = ResolveModifierPool(recipe.Id, "special modifier", recipe.SpecialModifierPool, specialModifiersById)
-            })
+            .Select(recipe => ResolveTemperingProfile(recipe, affixesById, specialModifiersById))
             .ToList();
+    }
+
+    private static IReadOnlyList<BlueprintDefinition> ResolveBlueprintTemperingProfiles(
+        IReadOnlyList<BlueprintDefinition> blueprints,
+        IReadOnlyList<WeightedAffixDefinition> affixes,
+        IReadOnlyList<WeightedAffixDefinition> specialModifiers)
+    {
+        var affixesById = affixes.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+        var specialModifiersById = specialModifiers.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+
+        return blueprints
+            .Select(blueprint => blueprint.TemperingProfile == null
+                ? blueprint
+                : new BlueprintDefinition
+                {
+                    Id = blueprint.Id,
+                    Name = blueprint.Name,
+                    BlueprintFamily = blueprint.BlueprintFamily,
+                    UnlocksRecipeId = blueprint.UnlocksRecipeId,
+                    ItemId = blueprint.ItemId,
+                    SourceType = blueprint.SourceType,
+                    SourceId = blueprint.SourceId,
+                    AllowedBaseRecipeIds = blueprint.AllowedBaseRecipeIds,
+                    AllowedRecipeTags = blueprint.AllowedRecipeTags,
+                    OutputNameTemplate = blueprint.OutputNameTemplate,
+                    SpecialOutputNames = blueprint.SpecialOutputNames,
+                    SpecialResourceRequirements = blueprint.SpecialResourceRequirements,
+                    Tags = blueprint.Tags,
+                    TemperingProfile = ResolveTemperingProfile(
+                        blueprint.TemperingProfile,
+                        affixesById,
+                        specialModifiersById)
+                })
+            .ToList();
+    }
+
+    private static TemperingRecipeDefinition ResolveTemperingProfile(
+        TemperingRecipeDefinition profile,
+        IReadOnlyDictionary<string, WeightedAffixDefinition> affixesById,
+        IReadOnlyDictionary<string, WeightedAffixDefinition> specialModifiersById)
+    {
+        return new TemperingRecipeDefinition
+        {
+            Id = profile.Id,
+            Name = profile.Name,
+            ApplicableItemTypes = profile.ApplicableItemTypes,
+            RequiredItemAffinityTags = profile.RequiredItemAffinityTags,
+            DirectionTags = profile.DirectionTags,
+            ProgressOnOutcome = profile.ProgressOnOutcome,
+            StatImprovementPool = profile.StatImprovementPool,
+            AffixPool = profile.AffixPool,
+            SpecialModifierPool = profile.SpecialModifierPool,
+            ResolvedAffixPool = ResolveModifierPool(profile.Id, "affix", profile.AffixPool, affixesById),
+            ResolvedSpecialModifierPool = ResolveModifierPool(profile.Id, "special modifier", profile.SpecialModifierPool, specialModifiersById)
+        };
     }
 
     private static IReadOnlyList<WeightedAffixDefinition> ResolveModifierPool(
