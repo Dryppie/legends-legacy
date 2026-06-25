@@ -1,8 +1,9 @@
-using Application.Common.Interfaces;
 using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Regions;
-using Microsoft.EntityFrameworkCore;
+using Domain.Models.Entities.Creatures;
+using Domain.Models.Items;
+using Domain.Models.Regions.Areas;
 using Services.LL.Combat.Engine;
 
 namespace Services.LL.Regions;
@@ -10,20 +11,26 @@ namespace Services.LL.Regions;
 public sealed class RegionOneContentDiagnostics : IRegionOneContentDiagnostics
 {
     private const string RetiredGoblinMinesIdleAreaId = "region_01_area_05";
-    private readonly IDbContext _db;
+    private readonly ICreatureRepository _creatures;
+    private readonly IAreaRepository _areas;
+    private readonly IItemBaseRepository _itemBases;
     private readonly IEssenceDefinitionRepository _essenceDefinitions;
     private readonly IAbilityCatalogProvider _catalogProvider;
     private readonly IAbilityCatalogBehaviorDiagnostics _behaviorDiagnostics;
     private readonly IDungeonDefinitions _dungeonDefinitions;
 
     public RegionOneContentDiagnostics(
-        IDbContext db,
+        ICreatureRepository creatures,
+        IAreaRepository areas,
+        IItemBaseRepository itemBases,
         IEssenceDefinitionRepository essenceDefinitions,
         IAbilityCatalogProvider catalogProvider,
         IAbilityCatalogBehaviorDiagnostics behaviorDiagnostics,
         IDungeonDefinitions dungeonDefinitions)
     {
-        _db = db;
+        _creatures = creatures;
+        _areas = areas;
+        _itemBases = itemBases;
         _essenceDefinitions = essenceDefinitions;
         _catalogProvider = catalogProvider;
         _behaviorDiagnostics = behaviorDiagnostics;
@@ -38,21 +45,15 @@ public sealed class RegionOneContentDiagnostics : IRegionOneContentDiagnostics
         var coveredAbilityIds = behaviorReport.Scenarios
             .Select(x => x.AbilityId)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var essenceItemIds = await _db.EssenceItems
-            .Select(item => item.EssenceDefinitionId)
-            .ToListAsync(cancellationToken);
-        var essenceItemIdSet = essenceItemIds
-            .Where(x => !string.IsNullOrWhiteSpace(x))
+        var essenceItemIdSet = (await _itemBases.GetEssenceItemBaseIdsByDefinitionIdAsync(cancellationToken))
+            .Keys
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var creatures = await _db.Creatures
+        var creatures = (await _creatures.GetCreaturesAsync(cancellationToken))
             .Select(creature => new CreatureDiagnosticData(creature.Id, creature.Name, creature.ImagePath))
-            .ToListAsync(cancellationToken);
+            .ToList();
         var creaturesByKey = creatures.ToDictionary(x => x.Key, StringComparer.OrdinalIgnoreCase);
-        var areas = await _db.Areas
-            .Include(area => area.Creatures)
-            .ToListAsync(cancellationToken);
-        var staleAreaCount = await _db.Areas
-            .CountAsync(area => area.Id == RetiredGoblinMinesIdleAreaId, cancellationToken);
+        var areas = await _areas.GetAreasWithCreaturesAsync(cancellationToken);
+        var staleAreaCount = await _areas.CountByIdAsync(RetiredGoblinMinesIdleAreaId, cancellationToken);
         var dungeons = _dungeonDefinitions.GetAll();
         var entries = new List<RegionOneContentEntryDiagnostic>(manifest.Count);
 

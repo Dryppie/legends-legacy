@@ -36,6 +36,18 @@ public class InventoryService : IInventoryService
         return await _inventoryRepository.TryRemoveCraftingMaterialsAsync(characterId, requiredByItemId, cancellationToken);
     }
 
+    public async Task<bool> TryConsumeInventoryItemAsync(Guid characterId, Guid itemInstanceId, CancellationToken cancellationToken)
+    {
+        var inventoryItem = await _inventoryRepository.GetInventoryItemAsync(characterId, itemInstanceId, cancellationToken);
+        if (inventoryItem == null) return false;
+
+        inventoryItem.Quantity--;
+        if (inventoryItem.Quantity <= 0)
+            _inventoryRepository.RemoveInventoryItem(inventoryItem);
+
+        return true;
+    }
+
     public async Task<bool> TryRemoveItemsForMarketPlaceListingAsync(Guid characterId, MarketPlaceListing marketplaceListing, CancellationToken cancellationToken)
     {
         return await _inventoryRepository.TryRemoveItemsForMarketPlaceListingAsync(characterId, marketplaceListing, cancellationToken);
