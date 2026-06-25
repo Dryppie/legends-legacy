@@ -1,10 +1,10 @@
 <div class="ll-toolbar overflow-visible p-1">
   <app-dropdown
-    *ngFor="let type of itemTypes"
-    [value]="type"
-    [label]="type"
-    [subOptions]="itemTypeSubcategories[type]"
-    [selected]="selectedItemType() === type"
-    (selection)="onSelection($event)"
+    *ngFor="let tab of tabs"
+    [value]="tab.itemType"
+    [label]="tab.label"
+    [subOptions]="tab.subOptions"
+    [selected]="selectedTabId() === tab.id"
+    (selection)="onSelection(tab, $event)"
   />
 </div>

@@ -11,6 +11,13 @@ export interface ItemTypeSelection {
   subcategory: string | null;
 }
 
+interface MarketPlaceFilterTab {
+  id: string;
+  label: string;
+  itemType: ItemType;
+  subOptions: readonly string[];
+}
+
 @Component({
   selector: 'app-market-place-filter',
   standalone: true,
@@ -18,30 +25,85 @@ export interface ItemTypeSelection {
   templateUrl: './market-place-filter.component.html',
 })
 export class MarketPlaceFilterComponent {
-  readonly itemTypes = [
-    ItemType.Resource,
-    ItemType.Consumable,
-    ItemType.Equipment,
-    ItemType.Essence,
+  readonly tabs: readonly MarketPlaceFilterTab[] = [
+    {
+      id: 'resources',
+      label: 'Resources',
+      itemType: ItemType.Resource,
+      subOptions: [
+        'Metal',
+        'Wood',
+        'Hide',
+        'Crystal',
+        'Stone',
+        'Fiber',
+        'Bone',
+        'Chitin',
+        'Resin',
+        'Oil',
+      ],
+    },
+    {
+      id: 'consumables',
+      label: 'Consumables',
+      itemType: ItemType.Consumable,
+      subOptions: ['Potion', 'Food', 'Scroll'],
+    },
+    {
+      id: 'blueprints',
+      label: 'Blueprints',
+      itemType: ItemType.Resource,
+      subOptions: [
+        'Blueprint: Fury',
+        'Blueprint: Arcane',
+        'Blueprint: Execution',
+        'Blueprint: Aegis',
+        'Blueprint: Warden',
+        'Blueprint: Endurance',
+        'Blueprint: Phoenix',
+        'Blueprint: Spirit',
+        'Blueprint: Primal',
+        'Blueprint: Venom-Touched Sword',
+        'Blueprint: Hivefang Dagger',
+      ],
+    },
+    {
+      id: 'catalysts',
+      label: 'Catalysts',
+      itemType: ItemType.Resource,
+      subOptions: [
+        'Venom Gland',
+        'Royal Chitin Plate',
+        'Hive Ichor',
+      ],
+    },
+    {
+      id: 'equipment',
+      label: 'Equipment',
+      itemType: ItemType.Equipment,
+      subOptions: [],
+    },
+    {
+      id: 'essences',
+      label: 'Essences',
+      itemType: ItemType.Essence,
+      subOptions: [],
+    },
   ];
 
-  readonly selectedItemType = signal<ItemType>(ItemType.Resource);
+  readonly selectedTabId = signal<string>('resources');
   readonly selectedSubCategory = signal<string | null>(null);
 
   @Output() readonly itemTypeChanged = new EventEmitter<
     DropdownSelection<ItemType>
   >();
 
-  readonly itemTypeSubcategories: Record<ItemType, string[]> = {
-    [ItemType.Resource]: ['Wood', 'Ore'],
-    [ItemType.Consumable]: ['Potion', 'Food', 'Scroll'],
-    [ItemType.Equipment]: [],
-    [ItemType.Essence]: [],
-  };
-
-  onSelection(sel: DropdownSelection<ItemType>): void {
-    this.selectedItemType.set(sel.main);
+  onSelection(
+    tab: MarketPlaceFilterTab,
+    sel: DropdownSelection<ItemType>,
+  ): void {
+    this.selectedTabId.set(tab.id);
     this.selectedSubCategory.set(sel.sub);
-    this.itemTypeChanged.emit(sel);
+    this.itemTypeChanged.emit({ main: tab.itemType, sub: sel.sub });
   }
 }

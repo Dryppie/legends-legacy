@@ -57,6 +57,29 @@
           </span>
           Cinders
         </div>
+
+        <div *ngIf="commodities().length > 1" class="mt-4">
+          <h3 class="ll-label mb-2">Commodities</h3>
+          <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+            <button
+              type="button"
+              *ngFor="let commodity of commodities(); trackBy: trackCommodity"
+              (click)="selectCommodity(commodity)"
+              class="ll-card flex items-center justify-between gap-3 px-3 py-2 text-left transition-colors hover:border-primary/70 hover:bg-primary/10"
+              [ngClass]="{
+                'border-primary bg-primary/15 text-primary':
+                  commodity.base.id === selectedCommodity()?.base?.id,
+              }"
+            >
+              <span class="min-w-0 truncate text-sm">{{
+                commodity.base.name
+              }}</span>
+              <span class="shrink-0 text-xs text-zinc-300">
+                {{ commodity.listedQuantity | numberFormat }} listed
+              </span>
+            </button>
+          </div>
+        </div>
       </ng-container>
 
       <ng-template #noCommodity>

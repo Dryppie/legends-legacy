@@ -44,6 +44,23 @@ interface CommodityOrderRow {
   templateUrl: './market-place-commodity.component.html',
 })
 export class MarketPlaceCommodityComponent implements OnInit {
+  private readonly resourceFamilyItemIds = new Map<string, string[]>([
+    ['metal', ['ore']],
+    ['wood', ['wood']],
+    ['hide', ['rawhide']],
+    ['crystal', ['crystalline_powder']],
+    ['stone', ['rough_stone']],
+    ['fiber', ['woven_fiber']],
+    ['bone', ['bone_fragments']],
+    ['chitin', ['ant_chitin']],
+    ['resin', ['hive_resin']],
+    ['oil', ['murky_fish_oil']],
+  ]);
+  private readonly specialMaterialItemIds = new Set([
+    'venom_gland',
+    'royal_chitin_plate',
+    'hive_ichor',
+  ]);
   private readonly _itemType = signal<ItemType>(ItemType.Resource);
   private readonly _subcategory = signal<string | null>(null);
 
@@ -58,6 +75,7 @@ export class MarketPlaceCommodityComponent implements OnInit {
   }
 
   readonly selectedSellPrice = signal<number | null>(null);
+  readonly selectedCommodityId = signal<string | null>(null);
   readonly placingOrder = signal(false);
 
   readonly quantityCtrl = new FormControl<number>(1, {
@@ -106,27 +124,63 @@ export class MarketPlaceCommodityComponent implements OnInit {
       });
     }
 
-    return [...byBase.values()].sort((a, b) =>
-      a.base.name.localeCompare(b.base.name),
+    return [...byBase.values()].sort((a, b) => {
+      const blueprintRank =
+        Number(this.isBlueprintResource(b.base)) -
+        Number(this.isBlueprintResource(a.base));
+      if (blueprintRank !== 0) return blueprintRank;
+
+      const tierRank =
+        this.getResourceFamilySortRank(a.base) -
+        this.getResourceFamilySortRank(b.base);
+      if (tierRank !== 0) return tierRank;
+
+      return a.base.name.localeCompare(b.base.name);
+    });
+  });
+
+  readonly selectedCommodity = computed(() => {
+    const commodities = this.commodities();
+    if (!commodities.length) return null;
+
+    return (
+      commodities.find(
+        (commodity) => commodity.base.id === this.selectedCommodityId(),
+      ) ?? commodities[0]
+    );
+  });
+
+  readonly selectedListings = computed(() => {
+    const selected = this.selectedCommodity();
+    if (!selected) return [];
+
+    return this.listings().filter(
+      (listing) => listing.itemInstance.itemBase.id === selected.base.id,
     );
   });
 
   readonly marketName = computed(() => {
-    const commodities = this.commodities();
-    if (commodities.length === 1) return commodities[0].base.name;
-    return this._subcategory() || this._itemType();
+    return (
+      this.selectedCommodity()?.base.name ||
+      this._subcategory() ||
+      this._itemType()
+    );
   });
 
-  readonly hasSingleCommodity = computed(() => this.commodities().length === 1);
-
   readonly selectedInventoryItem = computed(() => {
-    if (!this.hasSingleCommodity()) return null;
-    return this.inventory()[0] ?? null;
+    const selected = this.selectedCommodity();
+    if (!selected) return null;
+
+    return (
+      this.inventory().find(
+        (item) => item.itemInstance.itemBase.id === selected.base.id,
+      ) ?? null
+    );
   });
 
   readonly sellOrderRows = computed(() => {
     const grouped = new Map<number, CommodityOrderRow>();
-    for (const listing of this.listings()) {
+    for (const listing of this.selectedListings()) {
       const existing = grouped.get(listing.unitPrice);
       if (existing) {
         existing.quantity += listing.quantity;
@@ -144,17 +198,11 @@ export class MarketPlaceCommodityComponent implements OnInit {
   });
 
   readonly ownedQuantity = computed(() =>
-    this.commodities().reduce(
-      (total, commodity) => total + commodity.ownedQuantity,
-      0,
-    ),
+    this.selectedCommodity()?.ownedQuantity ?? 0,
   );
 
   readonly bestSellPrice = computed(() => {
-    const prices = this.commodities()
-      .map((commodity) => commodity.bestSellPrice)
-      .filter((price): price is number => price !== null);
-    return prices.length ? Math.min(...prices) : null;
+    return this.selectedCommodity()?.bestSellPrice ?? null;
   });
 
   constructor(
@@ -165,6 +213,7 @@ export class MarketPlaceCommodityComponent implements OnInit {
       () => {
         this._itemType();
         this._subcategory();
+        this.selectedCommodityId();
         this.quantityCtrl.setValue(1, { emitEvent: false });
         this.unitPriceCtrl.setValue(this.bestSellPrice(), {
           emitEvent: false,
@@ -175,6 +224,28 @@ export class MarketPlaceCommodityComponent implements OnInit {
 
     effect(
       () => {
+        const commodities = this.commodities();
+        const selectedCommodityId = this.selectedCommodityId();
+        if (!commodities.length) {
+          this.selectedCommodityId.set(null);
+          return;
+        }
+
+        if (
+          !selectedCommodityId ||
+          !commodities.some(
+            (commodity) => commodity.base.id === selectedCommodityId,
+          )
+        ) {
+          this.selectedCommodityId.set(commodities[0].base.id);
+        }
+      },
+      { allowSignalWrites: true },
+    );
+
+    effect(
+      () => {
+        this.selectedCommodityId();
         const firstSellOrder = this.sellOrderRows()[0];
         const current = this.selectedSellPrice();
         if (!firstSellOrder) {
@@ -201,6 +272,10 @@ export class MarketPlaceCommodityComponent implements OnInit {
   selectSellOrder(row: CommodityOrderRow): void {
     this.selectedSellPrice.set(row.unitPrice);
     this.unitPriceCtrl.setValue(row.unitPrice, { emitEvent: false });
+  }
+
+  selectCommodity(commodity: Commodity): void {
+    this.selectedCommodityId.set(commodity.base.id);
   }
 
   sellSelectedCommodity(): void {
@@ -267,7 +342,7 @@ export class MarketPlaceCommodityComponent implements OnInit {
   canSell(): boolean {
     return (
       !this.placingOrder() &&
-      this.hasSingleCommodity() &&
+      !!this.selectedCommodity() &&
       !!this.selectedInventoryItem() &&
       !this.quantityCtrl.invalid &&
       !this.unitPriceCtrl.invalid &&
@@ -278,7 +353,7 @@ export class MarketPlaceCommodityComponent implements OnInit {
   canBuy(): boolean {
     return (
       !this.placingOrder() &&
-      this.hasSingleCommodity() &&
+      !!this.selectedCommodity() &&
       !this.quantityCtrl.invalid &&
       !this.unitPriceCtrl.invalid &&
       (this.quantityCtrl.value ?? 0) > 0 &&
@@ -296,13 +371,53 @@ export class MarketPlaceCommodityComponent implements OnInit {
     const subcategory = this._subcategory();
     const category = item.itemInstance.category?.toLowerCase();
     const name = base.name.toLowerCase();
+    const normalizedSubcategory = subcategory?.toLowerCase();
 
     return (
       base.itemType === this._itemType() &&
       base.stackable &&
       (!subcategory ||
-        category === subcategory.toLowerCase() ||
-        name === subcategory.toLowerCase())
+        this.matchesResourceGroup(base, normalizedSubcategory) ||
+        category === normalizedSubcategory ||
+        name === normalizedSubcategory)
+    );
+  }
+
+  private matchesResourceGroup(
+    base: ItemBase,
+    subcategory: string | undefined,
+  ): boolean {
+    if (base.itemType !== ItemType.Resource || !subcategory) return false;
+
+    switch (subcategory) {
+      case 'blueprints':
+        return this.isBlueprintResource(base);
+      case 'catalysts':
+        return this.specialMaterialItemIds.has(base.id);
+      default:
+        return this.resourceFamilyItemIds.get(subcategory)?.includes(base.id) ??
+          false;
+    }
+  }
+
+  private getResourceFamilySortRank(base: ItemBase): number {
+    const subcategory = this._subcategory()?.toLowerCase();
+    if (!subcategory) return Number.MAX_SAFE_INTEGER;
+
+    const familyIds =
+      subcategory === 'catalysts'
+        ? [...this.specialMaterialItemIds]
+        : this.resourceFamilyItemIds.get(subcategory);
+    const index = familyIds?.indexOf(base.id) ?? -1;
+
+    return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+  }
+
+  private isBlueprintResource(base: ItemBase): boolean {
+    return (
+      base.itemType === ItemType.Resource &&
+      (base.id.toLowerCase().startsWith('blueprint_') ||
+        base.name.toLowerCase().startsWith('blueprint:'))
     );
   }
 
