@@ -6,6 +6,7 @@ using Application.Interfaces.Services.LL.Dungeons;
 using Application.Interfaces.Services.LL.Entities;
 using Application.Interfaces.Services.LL.Essences;
 using Application.Interfaces.Services.LL.Items;
+using Application.Interfaces.Services.LL.Prophecies;
 using Application.Interfaces.Services.LL.Professions;
 using Application.Interfaces.Services.LL.Regions;
 using Domain.Models.Dungeons;
@@ -57,6 +58,7 @@ using Services.LL.Loots;
 using Services.LL.LootTables;
 using Services.LL.MarketPlaces;
 using Services.LL.Players;
+using Services.LL.Prophecies;
 using Services.LL.Professions;
 using Services.LL.Professions.Craftings;
 using Services.LL.Providers;
@@ -200,6 +202,12 @@ public static class DependencyInjection
         services.AddScoped<IProfessionService, ProfessionService>();
 
         services.AddScoped<IPlayerService, PlayerService>();
+        services.AddSingleton<IProphecyDefinitionProvider>(sp =>
+            new JsonProphecyDefinitionProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
+        services.AddScoped<IProphecyService, ProphecyService>();
 
         services.AddScoped<ISoulstoneUpgradeService, SoulstoneUpgradeService>();
 

@@ -1,0 +1,108 @@
+{
+  "definitions": [
+    {
+      "id": "weekly.combat.kills",
+      "title": "The World Will Know Your Violence",
+      "flavorText": "A week is enough time to become a warning.",
+      "objectiveText": "Defeat {target} qualifying creatures this week.",
+      "scope": "Weekly",
+      "category": "Combat",
+      "difficulty": "Uncommon",
+      "objectiveType": "KillCreatures",
+      "rewardProfileId": "Weekly.Combat.Uncommon",
+      "weight": 100,
+      "allowedSlots": [ "Greater" ]
+    },
+    {
+      "id": "weekly.combat.unique",
+      "title": "Many Names Will Be Written in Ash",
+      "flavorText": "The Oracle keeps lists. Give her names to cross out.",
+      "objectiveText": "Defeat {target} different creature types this week.",
+      "scope": "Weekly",
+      "category": "Combat",
+      "difficulty": "Rare",
+      "objectiveType": "KillDifferentCreatureTypes",
+      "rewardProfileId": "Weekly.Combat.Rare",
+      "weight": 80,
+      "allowedSlots": [ "Greater" ]
+    },
+    {
+      "id": "weekly.dungeon.complete",
+      "title": "The Dungeon Gates Will Remember Your Name",
+      "flavorText": "Enter the dark often enough, and even stone learns fear.",
+      "objectiveText": "Complete {target} dungeons this week.",
+      "scope": "Weekly",
+      "category": "Dungeon",
+      "difficulty": "Rare",
+      "objectiveType": "CompleteDungeons",
+      "rewardProfileId": "Weekly.Dungeon.Rare",
+      "weight": 75,
+      "allowedSlots": [ "Greater" ]
+    },
+    {
+      "id": "weekly.dungeon.rooms",
+      "title": "The Deep Places Will Surrender Their Secrets",
+      "flavorText": "No door is patient forever.",
+      "objectiveText": "Clear {target} dungeon rooms this week.",
+      "scope": "Weekly",
+      "category": "Dungeon",
+      "difficulty": "Uncommon",
+      "objectiveType": "ClearDungeonRooms",
+      "rewardProfileId": "Weekly.Dungeon.Uncommon",
+      "weight": 90,
+      "allowedSlots": [ "Greater" ]
+    },
+    {
+      "id": "weekly.essence.xp",
+      "title": "Ten Souls Will Echo in the Archive",
+      "flavorText": "Power does not vanish when stored. It waits.",
+      "objectiveText": "Gain {target} Essence XP this week.",
+      "scope": "Weekly",
+      "category": "Essence",
+      "difficulty": "Uncommon",
+      "objectiveType": "GainEssenceXp",
+      "rewardProfileId": "Weekly.Essence.Uncommon",
+      "weight": 85,
+      "allowedSlots": [ "Greater" ]
+    },
+    {
+      "id": "weekly.gathering",
+      "title": "The World Itself Will Be Harvested",
+      "flavorText": "Stone, wood, and river will all give testimony.",
+      "objectiveText": "Gather {target} resources this week.",
+      "scope": "Weekly",
+      "category": "Gathering",
+      "difficulty": "Uncommon",
+      "objectiveType": "GatherResources",
+      "rewardProfileId": "Weekly.Gathering.Uncommon",
+      "weight": 80,
+      "allowedSlots": [ "Greater" ]
+    },
+    {
+      "id": "weekly.crafting",
+      "title": "Steel Will Remember Your Hands",
+      "flavorText": "Enough work becomes a signature.",
+      "objectiveText": "Temper items {target} times this week.",
+      "scope": "Weekly",
+      "category": "Crafting",
+      "difficulty": "Uncommon",
+      "objectiveType": "TemperItems",
+      "rewardProfileId": "Weekly.Crafting.Uncommon",
+      "weight": 80,
+      "allowedSlots": [ "Greater" ]
+    },
+    {
+      "id": "weekly.survival",
+      "title": "The Oracle Saw You Fall. She Also Saw You Rise.",
+      "flavorText": "The omen is not the fall. It is what follows.",
+      "objectiveText": "Register a meaningful defeat, then win {target} qualifying encounters this week.",
+      "scope": "Weekly",
+      "category": "Survival",
+      "difficulty": "Epic",
+      "objectiveType": "MeaningfulDefeatThenWins",
+      "rewardProfileId": "Weekly.Survival.Epic",
+      "weight": 45,
+      "allowedSlots": [ "Greater" ]
+    }
+  ]
+}

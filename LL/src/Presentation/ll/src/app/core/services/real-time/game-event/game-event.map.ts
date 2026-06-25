@@ -24,6 +24,7 @@ import { GuildStateChangedMsg } from '../guild/guild-state-changed';
 import { GuildMembershipChangedMsg } from '../guild/guild-membership-changed';
 import { GuildDisbandedMsg } from '../guild/guild-disbanded';
 import { GuildDirectoryChangedMsg } from '../guild/guild-directory-changed';
+import { ProphecyProgressedMsg } from '../prophecies/prophecy-progressed';
 
 export const gameEventNames = [
   'LootReceivedMsg',
@@ -42,6 +43,7 @@ export const gameEventNames = [
   'GuildMembershipChangedMsg',
   'GuildDisbandedMsg',
   'GuildDirectoryChangedMsg',
+  'ProphecyProgressedMsg',
 ] as const;
 
 export type GameEventSignalMap = {
@@ -70,6 +72,7 @@ export interface GameEventMap {
   GuildMembershipChangedMsg: GuildMembershipChangedMsg;
   GuildDisbandedMsg: GuildDisbandedMsg;
   GuildDirectoryChangedMsg: GuildDirectoryChangedMsg;
+  ProphecyProgressedMsg: ProphecyProgressedMsg;
   //   SaleCompleted: SaleCompletedMsg;
   //   RiftOpened:    RiftOpenedMsg;
   // 💡 when you add a new C# record and regenerate the client

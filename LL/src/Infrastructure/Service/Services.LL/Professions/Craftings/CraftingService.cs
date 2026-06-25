@@ -1,7 +1,9 @@
 using Application.Interfaces.Services.LL;
+using Application.Interfaces.Services.LL.Prophecies;
 using Application.Interfaces.Services.LL.Professions;
 using Application.UseCases.Crafting;
 using Application.UseCases.Crafting.Dtos;
+using Application.UseCases.Prophecies.Events;
 using Application.UseCases.Soulstones.Events;
 using AutoMapper;
 using Common.Primitives;
@@ -131,6 +133,7 @@ public class CraftingService : ICraftingService
             soulstoneDoubleDropChance,
             cancellationToken);
         await UpdateCharacterProfessionsAsync(characterAction.CharacterId, temperingSummary, cancellationToken);
+        await PublishProphecyProgressAsync(characterAction.CharacterId, now, temperingSummary, cancellationToken);
 
         return new TemperingSession
         {
@@ -368,6 +371,31 @@ public class CraftingService : ICraftingService
 
         await _publisher.Publish(new SoulstoneDropEvent(characterId, soulstonesEarned), cancellationToken);
         return soulstonesEarned;
+    }
+
+    private async Task PublishProphecyProgressAsync(
+        Guid characterId,
+        DateTimeOffset occurredAt,
+        TemperingSummary temperingSummary,
+        CancellationToken cancellationToken)
+    {
+        if (temperingSummary.TotalActions <= 0)
+        {
+            return;
+        }
+
+        await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
+            characterId,
+            occurredAt,
+            ProphecyProgressKind.ItemTempered,
+            temperingSummary.TotalActions)), cancellationToken);
+
+        await _publisher.Publish(new ProphecyProgressNotification(new ProphecyProgressEvent(
+            characterId,
+            occurredAt,
+            ProphecyProgressKind.PotentialSpent,
+            temperingSummary.TotalActions,
+            PotentialSpent: temperingSummary.TotalActions)), cancellationToken);
     }
 
     private async Task UpdateCharacterProfessionsAsync(Guid characterId, TemperingSummary temperingSummary, CancellationToken cancellationToken)
