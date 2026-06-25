@@ -81,7 +81,8 @@ public interface IDbContext
     //DbSet<Title> Titles { get; }
     //DbSet<Town> Towns { get; }
     //DbSet<TownBuilding> TownBuildings { get; }
-    DbSet<Recipe> Recipes { get; }
+    DbSet<CharacterRecipeUnlock> CharacterRecipeUnlocks { get; }
+    DbSet<CharacterRecipeMastery> CharacterRecipeMasteries { get; }
     DbSet<Region> Regions { get; }
 
     // Snapshots
