@@ -82,7 +82,8 @@ public interface IDbContext
     //DbSet<Title> Titles { get; }
     //DbSet<Town> Towns { get; }
     //DbSet<TownBuilding> TownBuildings { get; }
-    DbSet<Recipe> Recipes { get; }
+    DbSet<CharacterRecipeUnlock> CharacterRecipeUnlocks { get; }
+    DbSet<CharacterRecipeMastery> CharacterRecipeMasteries { get; }
     DbSet<ProphecyDefinition> ProphecyDefinitions { get; }
     DbSet<PlayerProphecyInstance> PlayerProphecyInstances { get; }
     DbSet<WeeklyRevelationProgress> WeeklyRevelationProgress { get; }

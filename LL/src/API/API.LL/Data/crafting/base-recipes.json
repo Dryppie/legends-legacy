@@ -1,0 +1,1296 @@
+[
+  {
+    "id": "recipe_head_armor",
+    "name": "Head Armor",
+    "recipeType": "Base",
+    "recipeFamily": "Armor",
+    "slot": "Head",
+    "outputItemType": "Head",
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 8,
+        "amountPerTier": 3
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Hide",
+        "baseAmount": 4,
+        "amountPerTier": 1
+      }
+    ],
+    "baseStatProfile": {
+      "Armor": 0.45,
+      "Fortitude": 0.3,
+      "MaxHealth": 0.25
+    },
+    "affinityTags": [
+      "Armor",
+      "Head"
+    ],
+    "defaultTemperingTags": [
+      "Armor",
+      "Head"
+    ],
+    "tags": [
+      "Armor",
+      "Head"
+    ],
+    "forms": [
+      {
+        "formId": "heavy_helm",
+        "displayName": "Heavy Helm",
+        "outputItemId": "heavy_helm",
+        "outputItemType": "Head",
+        "armorWeight": "Heavy",
+        "statProfileId": "armor_heavy",
+        "tags": [
+          "Armor",
+          "HeavyArmor",
+          "Defensive",
+          "PhysicalDefense",
+          "Block",
+          "Guard",
+          "Barrier",
+          "Threat"
+        ]
+      },
+      {
+        "formId": "medium_helm",
+        "displayName": "Medium Helm",
+        "outputItemId": "medium_helm",
+        "outputItemType": "Head",
+        "armorWeight": "Medium",
+        "statProfileId": "armor_medium",
+        "tags": [
+          "Armor",
+          "MediumArmor",
+          "Bruiser",
+          "BalancedDefense",
+          "Endurance",
+          "Physical"
+        ]
+      },
+      {
+        "formId": "light_hood",
+        "displayName": "Light Hood",
+        "outputItemId": "light_hood",
+        "outputItemType": "Head",
+        "armorWeight": "Light",
+        "statProfileId": "armor_light",
+        "tags": [
+          "Armor",
+          "LightArmor",
+          "Dodge",
+          "Crit",
+          "Speed",
+          "Precision",
+          "Poison"
+        ]
+      },
+      {
+        "formId": "cloth_cowl",
+        "displayName": "Cloth Cowl",
+        "outputItemId": "cloth_cowl",
+        "outputItemType": "Head",
+        "armorWeight": "Cloth",
+        "statProfileId": "armor_cloth",
+        "tags": [
+          "Armor",
+          "ClothArmor",
+          "Magic",
+          "Mana",
+          "Cooldown",
+          "Support",
+          "MagicDefense"
+        ]
+      }
+    ],
+    "temperingProfile": {
+      "id": "recipe_head_armor_tempering_profile",
+      "name": "Armor Tempering",
+      "statImprovementPool": [
+        {
+          "stat": "Armor",
+          "weight": 45
+        },
+        {
+          "stat": "Fortitude",
+          "weight": 35
+        },
+        {
+          "stat": "MaxHealth",
+          "weight": 20
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_armor",
+          "weight": 45
+        },
+        {
+          "id": "affix_fortitude",
+          "weight": 35
+        }
+      ],
+      "specialModifierPool": []
+    }
+  },
+  {
+    "id": "recipe_chest_armor",
+    "name": "Chest Armor",
+    "recipeType": "Base",
+    "recipeFamily": "Armor",
+    "slot": "Chest",
+    "outputItemType": "Chest",
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 14,
+        "amountPerTier": 5
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Hide",
+        "baseAmount": 6,
+        "amountPerTier": 2
+      }
+    ],
+    "baseStatProfile": {
+      "Armor": 0.5,
+      "Fortitude": 0.25,
+      "MaxHealth": 0.25
+    },
+    "affinityTags": [
+      "Armor",
+      "Chest"
+    ],
+    "defaultTemperingTags": [
+      "Armor",
+      "Chest"
+    ],
+    "tags": [
+      "Armor",
+      "Chest"
+    ],
+    "forms": [
+      {
+        "formId": "heavy_breastplate",
+        "displayName": "Heavy Breastplate",
+        "outputItemId": "heavy_breastplate",
+        "outputItemType": "Chest",
+        "armorWeight": "Heavy",
+        "statProfileId": "armor_heavy",
+        "tags": [
+          "Armor",
+          "HeavyArmor",
+          "Defensive",
+          "PhysicalDefense",
+          "Block",
+          "Guard",
+          "Barrier",
+          "Threat"
+        ]
+      },
+      {
+        "formId": "medium_mail",
+        "displayName": "Medium Mail",
+        "outputItemId": "medium_mail",
+        "outputItemType": "Chest",
+        "armorWeight": "Medium",
+        "statProfileId": "armor_medium",
+        "tags": [
+          "Armor",
+          "MediumArmor",
+          "Bruiser",
+          "BalancedDefense",
+          "Endurance",
+          "Physical"
+        ]
+      },
+      {
+        "formId": "light_vest",
+        "displayName": "Light Vest",
+        "outputItemId": "light_vest",
+        "outputItemType": "Chest",
+        "armorWeight": "Light",
+        "statProfileId": "armor_light",
+        "tags": [
+          "Armor",
+          "LightArmor",
+          "Dodge",
+          "Crit",
+          "Speed",
+          "Precision",
+          "Poison"
+        ]
+      },
+      {
+        "formId": "cloth_robe",
+        "displayName": "Cloth Robe",
+        "outputItemId": "cloth_robe",
+        "outputItemType": "Chest",
+        "armorWeight": "Cloth",
+        "statProfileId": "armor_cloth",
+        "tags": [
+          "Armor",
+          "ClothArmor",
+          "Magic",
+          "Mana",
+          "Cooldown",
+          "Support",
+          "MagicDefense"
+        ]
+      }
+    ],
+    "temperingProfile": {
+      "id": "recipe_chest_armor_tempering_profile",
+      "name": "Armor Tempering",
+      "statImprovementPool": [
+        {
+          "stat": "Armor",
+          "weight": 45
+        },
+        {
+          "stat": "Fortitude",
+          "weight": 35
+        },
+        {
+          "stat": "MaxHealth",
+          "weight": 20
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_armor",
+          "weight": 45
+        },
+        {
+          "id": "affix_fortitude",
+          "weight": 35
+        }
+      ],
+      "specialModifierPool": []
+    }
+  },
+  {
+    "id": "recipe_leg_armor",
+    "name": "Leg Armor",
+    "recipeType": "Base",
+    "recipeFamily": "Armor",
+    "slot": "Legs",
+    "outputItemType": "Legs",
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 10,
+        "amountPerTier": 4
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Hide",
+        "baseAmount": 5,
+        "amountPerTier": 2
+      }
+    ],
+    "baseStatProfile": {
+      "Armor": 0.45,
+      "DodgeChance": 0.25,
+      "Fortitude": 0.3
+    },
+    "affinityTags": [
+      "Armor",
+      "Legs"
+    ],
+    "defaultTemperingTags": [
+      "Armor",
+      "Legs"
+    ],
+    "tags": [
+      "Armor",
+      "Legs"
+    ],
+    "forms": [
+      {
+        "formId": "heavy_legplates",
+        "displayName": "Heavy Legplates",
+        "outputItemId": "heavy_legplates",
+        "outputItemType": "Legs",
+        "armorWeight": "Heavy",
+        "statProfileId": "armor_heavy",
+        "tags": [
+          "Armor",
+          "HeavyArmor",
+          "Defensive",
+          "PhysicalDefense",
+          "Block",
+          "Guard",
+          "Barrier",
+          "Threat"
+        ]
+      },
+      {
+        "formId": "medium_greaves",
+        "displayName": "Medium Greaves",
+        "outputItemId": "medium_greaves",
+        "outputItemType": "Legs",
+        "armorWeight": "Medium",
+        "statProfileId": "armor_medium",
+        "tags": [
+          "Armor",
+          "MediumArmor",
+          "Bruiser",
+          "BalancedDefense",
+          "Endurance",
+          "Physical"
+        ]
+      },
+      {
+        "formId": "light_legwraps",
+        "displayName": "Light Legwraps",
+        "outputItemId": "light_leggings",
+        "outputItemType": "Legs",
+        "armorWeight": "Light",
+        "statProfileId": "armor_light",
+        "tags": [
+          "Armor",
+          "LightArmor",
+          "Dodge",
+          "Crit",
+          "Speed",
+          "Precision",
+          "Poison"
+        ]
+      },
+      {
+        "formId": "cloth_pants",
+        "displayName": "Cloth Pants",
+        "outputItemId": "cloth_pants",
+        "outputItemType": "Legs",
+        "armorWeight": "Cloth",
+        "statProfileId": "armor_cloth",
+        "tags": [
+          "Armor",
+          "ClothArmor",
+          "Magic",
+          "Mana",
+          "Cooldown",
+          "Support",
+          "MagicDefense"
+        ]
+      }
+    ],
+    "temperingProfile": {
+      "id": "recipe_leg_armor_tempering_profile",
+      "name": "Armor Tempering",
+      "statImprovementPool": [
+        {
+          "stat": "Armor",
+          "weight": 35
+        },
+        {
+          "stat": "DodgeChance",
+          "weight": 25
+        },
+        {
+          "stat": "Fortitude",
+          "weight": 25
+        },
+        {
+          "stat": "MaxHealth",
+          "weight": 15
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_armor",
+          "weight": 35
+        },
+        {
+          "id": "affix_fortitude",
+          "weight": 25
+        },
+        {
+          "id": "affix_dodge_chance",
+          "weight": 15
+        }
+      ],
+      "specialModifierPool": []
+    }
+  },
+  {
+    "id": "recipe_ring",
+    "name": "Ring",
+    "recipeType": "Base",
+    "recipeFamily": "Accessory",
+    "slot": "Ring",
+    "outputItemType": "Ring",
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 5,
+        "amountPerTier": 2
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Crystal",
+        "baseAmount": 3,
+        "amountPerTier": 1
+      }
+    ],
+    "baseStatProfile": {
+      "Power": 0.35,
+      "Precision": 0.25,
+      "CritChance": 0.2,
+      "CritDamage": 0.2
+    },
+    "affinityTags": [
+      "Accessory",
+      "Ring",
+      "OffensiveScaling",
+      "StatusScaling"
+    ],
+    "defaultTemperingTags": [
+      "Accessory",
+      "Ring"
+    ],
+    "tags": [
+      "Accessory",
+      "Ring",
+      "OffensiveScaling",
+      "StatusScaling"
+    ],
+    "forms": [
+      {
+        "formId": "band",
+        "displayName": "Band",
+        "outputItemId": "band",
+        "outputItemType": "Ring",
+        "statProfileId": "ring_band",
+        "tags": [
+          "Accessory",
+          "Ring",
+          "Band"
+        ]
+      }
+    ],
+    "temperingProfile": {
+      "id": "recipe_ring_tempering_profile",
+      "name": "Ring Tempering",
+      "statImprovementPool": [
+        {
+          "stat": "Power",
+          "weight": 30
+        },
+        {
+          "stat": "Precision",
+          "weight": 25
+        },
+        {
+          "stat": "CritChance",
+          "weight": 25
+        },
+        {
+          "stat": "CritDamage",
+          "weight": 20
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_power",
+          "weight": 35
+        },
+        {
+          "id": "affix_precision",
+          "weight": 30
+        },
+        {
+          "id": "affix_crit_chance",
+          "weight": 20
+        }
+      ],
+      "specialModifierPool": []
+    }
+  },
+  {
+    "id": "recipe_necklace",
+    "name": "Necklace",
+    "recipeType": "Base",
+    "recipeFamily": "Accessory",
+    "slot": "Necklace",
+    "outputItemType": "Necklace",
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 6,
+        "amountPerTier": 2
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Crystal",
+        "baseAmount": 4,
+        "amountPerTier": 1
+      }
+    ],
+    "baseStatProfile": {
+      "MaxHealth": 0.35,
+      "Fortitude": 0.25,
+      "Spirit": 0.2,
+      "Resistance": 0.2
+    },
+    "affinityTags": [
+      "Accessory",
+      "Necklace",
+      "Survival",
+      "Sustain"
+    ],
+    "defaultTemperingTags": [
+      "Accessory",
+      "Necklace"
+    ],
+    "tags": [
+      "Accessory",
+      "Necklace",
+      "Survival",
+      "Sustain"
+    ],
+    "forms": [
+      {
+        "formId": "amulet",
+        "displayName": "Amulet",
+        "outputItemId": "amulet",
+        "outputItemType": "Necklace",
+        "statProfileId": "necklace_amulet",
+        "tags": [
+          "Accessory",
+          "Necklace",
+          "Amulet",
+          "Defensive"
+        ]
+      },
+      {
+        "formId": "charm",
+        "displayName": "Charm",
+        "outputItemId": "charm",
+        "outputItemType": "Necklace",
+        "statProfileId": "necklace_charm",
+        "tags": [
+          "Accessory",
+          "Necklace",
+          "Charm",
+          "Warden"
+        ]
+      },
+      {
+        "formId": "talisman",
+        "displayName": "Talisman",
+        "outputItemId": "talisman",
+        "outputItemType": "Necklace",
+        "statProfileId": "necklace_talisman",
+        "tags": [
+          "Accessory",
+          "Necklace",
+          "Talisman",
+          "Endurance"
+        ]
+      }
+    ],
+    "temperingProfile": {
+      "id": "recipe_necklace_tempering_profile",
+      "name": "Necklace Tempering",
+      "statImprovementPool": [
+        {
+          "stat": "MaxHealth",
+          "weight": 30
+        },
+        {
+          "stat": "Fortitude",
+          "weight": 25
+        },
+        {
+          "stat": "Spirit",
+          "weight": 25
+        },
+        {
+          "stat": "Resistance",
+          "weight": 20
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_fortitude",
+          "weight": 30
+        },
+        {
+          "id": "affix_spirit",
+          "weight": 25
+        },
+        {
+          "id": "affix_grave_resistance",
+          "weight": 20
+        }
+      ],
+      "specialModifierPool": []
+    }
+  },
+  {
+    "id": "recipe_relic",
+    "name": "Relic",
+    "recipeType": "Base",
+    "recipeFamily": "Relic",
+    "slot": "Relic",
+    "outputItemType": "Relic",
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Crystal",
+        "baseAmount": 6,
+        "amountPerTier": 2
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Bone",
+        "baseAmount": 3,
+        "amountPerTier": 1
+      }
+    ],
+    "baseStatProfile": {
+      "Spirit": 0.35,
+      "Power": 0.25,
+      "SummonPower": 0.2,
+      "Cooldown": 0.2
+    },
+    "affinityTags": [
+      "Relic",
+      "BuildDefining"
+    ],
+    "defaultTemperingTags": [
+      "Relic"
+    ],
+    "tags": [
+      "Relic",
+      "BuildDefining"
+    ],
+    "forms": [
+      {
+        "formId": "vial",
+        "displayName": "Vial",
+        "outputItemId": "vial",
+        "outputItemType": "Relic",
+        "statProfileId": "relic_vial",
+        "tags": [
+          "Relic",
+          "Vial",
+          "Recovery"
+        ]
+      },
+      {
+        "formId": "heart",
+        "displayName": "Heart",
+        "outputItemId": "heart",
+        "outputItemType": "Relic",
+        "statProfileId": "relic_heart",
+        "tags": [
+          "Relic",
+          "Heart",
+          "Spirit",
+          "Mana"
+        ]
+      },
+      {
+        "formId": "totem",
+        "displayName": "Totem",
+        "outputItemId": "totem",
+        "outputItemType": "Relic",
+        "statProfileId": "relic_totem",
+        "tags": [
+          "Relic",
+          "Totem",
+          "Primal",
+          "Summon"
+        ]
+      }
+    ],
+    "temperingProfile": {
+      "id": "recipe_relic_tempering_profile",
+      "name": "Relic Tempering",
+      "statImprovementPool": [
+        {
+          "stat": "Spirit",
+          "weight": 35
+        },
+        {
+          "stat": "Power",
+          "weight": 25
+        },
+        {
+          "stat": "SummonPower",
+          "weight": 20
+        },
+        {
+          "stat": "Cooldown",
+          "weight": 20
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_spirit_focus",
+          "weight": 35
+        },
+        {
+          "id": "affix_power",
+          "weight": 25
+        },
+        {
+          "id": "affix_cooldown",
+          "weight": 20
+        }
+      ],
+      "specialModifierPool": [
+        {
+          "id": "special_arcane_cycle",
+          "weight": 10
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe_one_handed_weapon",
+    "name": "One-Handed Weapon",
+    "recipeType": "Base",
+    "recipeFamily": "Weapon",
+    "slot": "OneHanded",
+    "outputItemType": "OneHanded",
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 10,
+        "amountPerTier": 4
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Wood",
+        "baseAmount": 3,
+        "amountPerTier": 1
+      }
+    ],
+    "baseStatProfile": {
+      "WeaponDamage": 0.5,
+      "Precision": 0.25,
+      "CritChance": 0.15,
+      "ArmorPenetration": 0.1
+    },
+    "affinityTags": [
+      "Weapon",
+      "MainHand",
+      "OneHanded"
+    ],
+    "defaultTemperingTags": [
+      "Weapon",
+      "OneHanded"
+    ],
+    "tags": [
+      "Weapon",
+      "MainHand",
+      "OneHanded",
+      "Melee"
+    ],
+    "forms": [
+      {
+        "formId": "shortsword",
+        "displayName": "Shortsword",
+        "outputItemId": "shortsword",
+        "outputItemType": "OneHanded",
+        "statProfileId": "one_handed_blade_balanced",
+        "tags": [
+          "Weapon",
+          "MainHand",
+          "OneHanded",
+          "Melee",
+          "Blade",
+          "Balanced"
+        ]
+      },
+      {
+        "formId": "dagger",
+        "displayName": "Dagger",
+        "outputItemId": "dagger",
+        "outputItemType": "OneHanded",
+        "statProfileId": "one_handed_dagger",
+        "tags": [
+          "Weapon",
+          "MainHand",
+          "OneHanded",
+          "Melee",
+          "Blade",
+          "Dagger",
+          "Finesse",
+          "Crit",
+          "Poison"
+        ]
+      },
+      {
+        "formId": "hand_axe",
+        "displayName": "Hand Axe",
+        "outputItemId": "hatchet",
+        "outputItemType": "OneHanded",
+        "statProfileId": "one_handed_axe",
+        "tags": [
+          "Weapon",
+          "MainHand",
+          "OneHanded",
+          "Melee",
+          "Axe",
+          "Bleed",
+          "Aggression"
+        ]
+      },
+      {
+        "formId": "mace",
+        "displayName": "Mace",
+        "outputItemId": "mace",
+        "outputItemType": "OneHanded",
+        "statProfileId": "one_handed_mace",
+        "tags": [
+          "Weapon",
+          "MainHand",
+          "OneHanded",
+          "Melee",
+          "Mace",
+          "ArmorBreak",
+          "Stun"
+        ]
+      },
+      {
+        "formId": "wand",
+        "displayName": "Wand",
+        "outputItemId": "wand",
+        "outputItemType": "OneHanded",
+        "statProfileId": "one_handed_wand",
+        "tags": [
+          "Weapon",
+          "MainHand",
+          "OneHanded",
+          "Wand",
+          "Magic",
+          "SpellPower"
+        ]
+      }
+    ],
+    "temperingProfile": {
+      "id": "recipe_one_handed_weapon_tempering_profile",
+      "name": "Weapon Tempering",
+      "statImprovementPool": [
+        {
+          "stat": "WeaponDamage",
+          "weight": 50
+        },
+        {
+          "stat": "Precision",
+          "weight": 25
+        },
+        {
+          "stat": "CritChance",
+          "weight": 25
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_weapon_damage",
+          "weight": 50
+        },
+        {
+          "id": "affix_precision",
+          "weight": 30
+        },
+        {
+          "id": "affix_crit_chance",
+          "weight": 20
+        }
+      ],
+      "specialModifierPool": [
+        {
+          "id": "special_decisive_edge",
+          "weight": 10
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe_two_handed_weapon",
+    "name": "Two-Handed Weapon",
+    "recipeType": "Base",
+    "recipeFamily": "Weapon",
+    "slot": "TwoHanded",
+    "outputItemType": "TwoHanded",
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 16,
+        "amountPerTier": 6
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Wood",
+        "baseAmount": 6,
+        "amountPerTier": 2
+      }
+    ],
+    "baseStatProfile": {
+      "WeaponDamage": 0.55,
+      "Power": 0.2,
+      "Precision": 0.15,
+      "ArmorPenetration": 0.1
+    },
+    "affinityTags": [
+      "Weapon",
+      "TwoHanded"
+    ],
+    "defaultTemperingTags": [
+      "Weapon",
+      "TwoHanded"
+    ],
+    "tags": [
+      "Weapon",
+      "TwoHanded"
+    ],
+    "forms": [
+      {
+        "formId": "greatsword",
+        "displayName": "Greatsword",
+        "outputItemId": "greatsword",
+        "outputItemType": "TwoHanded",
+        "statProfileId": "two_handed_greatsword",
+        "tags": [
+          "Weapon",
+          "TwoHanded",
+          "GreatWeapon",
+          "Blade",
+          "Cleave",
+          "Balanced"
+        ]
+      },
+      {
+        "formId": "battle_axe",
+        "displayName": "Battle Axe",
+        "outputItemId": "battle_axe",
+        "outputItemType": "TwoHanded",
+        "statProfileId": "two_handed_battle_axe",
+        "tags": [
+          "Weapon",
+          "TwoHanded",
+          "GreatWeapon",
+          "Axe",
+          "Crit",
+          "Bleed"
+        ]
+      },
+      {
+        "formId": "maul",
+        "displayName": "Maul",
+        "outputItemId": "maul",
+        "outputItemType": "TwoHanded",
+        "statProfileId": "two_handed_maul",
+        "tags": [
+          "Weapon",
+          "TwoHanded",
+          "GreatWeapon",
+          "Mace",
+          "Stagger",
+          "BlockBreak"
+        ]
+      },
+      {
+        "formId": "spear",
+        "displayName": "Spear",
+        "outputItemId": "spear",
+        "outputItemType": "TwoHanded",
+        "statProfileId": "two_handed_spear",
+        "tags": [
+          "Weapon",
+          "TwoHanded",
+          "Polearm",
+          "Reach",
+          "Precision",
+          "AntiBoss"
+        ]
+      },
+      {
+        "formId": "staff",
+        "displayName": "Staff",
+        "outputItemId": "staff",
+        "outputItemType": "TwoHanded",
+        "statProfileId": "two_handed_staff",
+        "tags": [
+          "Weapon",
+          "TwoHanded",
+          "Staff",
+          "Caster",
+          "Support",
+          "Magic"
+        ]
+      },
+      {
+        "formId": "longbow",
+        "displayName": "Longbow",
+        "outputItemId": "longbow",
+        "outputItemType": "TwoHanded",
+        "statProfileId": "two_handed_longbow",
+        "tags": [
+          "Weapon",
+          "TwoHanded",
+          "Ranged",
+          "Bow",
+          "SustainedDamage",
+          "Precision"
+        ]
+      },
+      {
+        "formId": "crossbow",
+        "displayName": "Crossbow",
+        "outputItemId": "crossbow",
+        "outputItemType": "TwoHanded",
+        "statProfileId": "two_handed_crossbow",
+        "tags": [
+          "Weapon",
+          "TwoHanded",
+          "Ranged",
+          "Crossbow",
+          "Burst",
+          "ArmorPenetration"
+        ]
+      },
+      {
+        "formId": "gauntlets",
+        "displayName": "Gauntlets",
+        "outputItemId": "gauntlets",
+        "outputItemType": "TwoHanded",
+        "statProfileId": "two_handed_gauntlets",
+        "tags": [
+          "Weapon",
+          "TwoHanded",
+          "Gauntlets",
+          "Brawler",
+          "Combo",
+          "Multihit"
+        ]
+      }
+    ],
+    "temperingProfile": {
+      "id": "recipe_two_handed_weapon_tempering_profile",
+      "name": "Weapon Tempering",
+      "statImprovementPool": [
+        {
+          "stat": "WeaponDamage",
+          "weight": 45
+        },
+        {
+          "stat": "Power",
+          "weight": 25
+        },
+        {
+          "stat": "Precision",
+          "weight": 20
+        },
+        {
+          "stat": "ArmorPenetration",
+          "weight": 10
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_weapon_damage",
+          "weight": 45
+        },
+        {
+          "id": "affix_precision",
+          "weight": 25
+        },
+        {
+          "id": "affix_armor_penetration",
+          "weight": 15
+        }
+      ],
+      "specialModifierPool": [
+        {
+          "id": "special_decisive_edge",
+          "weight": 10
+        }
+      ]
+    }
+  },
+  {
+    "id": "recipe_offhand",
+    "name": "Offhand",
+    "recipeType": "Base",
+    "recipeFamily": "Offhand",
+    "slot": "OffHand",
+    "outputItemType": "OffHand",
+    "tierRange": {
+      "min": 1,
+      "max": 1
+    },
+    "materialRequirements": [
+      {
+        "type": "TieredMaterial",
+        "family": "Metal",
+        "baseAmount": 8,
+        "amountPerTier": 3
+      },
+      {
+        "type": "TieredMaterial",
+        "family": "Crystal",
+        "baseAmount": 4,
+        "amountPerTier": 1
+      }
+    ],
+    "baseStatProfile": {
+      "BlockChance": 0.35,
+      "Resistance": 0.25,
+      "Spirit": 0.2,
+      "Armor": 0.2
+    },
+    "affinityTags": [
+      "OffHand"
+    ],
+    "defaultTemperingTags": [
+      "OffHand"
+    ],
+    "tags": [
+      "OffHand"
+    ],
+    "forms": [
+      {
+        "formId": "towershield",
+        "displayName": "Towershield",
+        "outputItemId": "towershield",
+        "outputItemType": "OffHand",
+        "statProfileId": "offhand_towershield",
+        "tags": [
+          "OffHand",
+          "Shield",
+          "Block",
+          "Guard",
+          "Defensive",
+          "PhysicalDefense"
+        ]
+      },
+      {
+        "formId": "spiritward",
+        "displayName": "Spiritward",
+        "outputItemId": "Spiritward",
+        "outputItemType": "OffHand",
+        "statProfileId": "offhand_spiritward",
+        "tags": [
+          "OffHand",
+          "Ward",
+          "MagicDefense",
+          "Barrier",
+          "Spirit",
+          "Support",
+          "Summon"
+        ]
+      },
+      {
+        "formId": "grimoire",
+        "displayName": "Grimoire",
+        "outputItemId": "grimoire",
+        "outputItemType": "OffHand",
+        "statProfileId": "offhand_grimoire",
+        "tags": [
+          "OffHand",
+          "Grimoire",
+          "SpellPower",
+          "Cooldown",
+          "Control",
+          "Magic"
+        ]
+      }
+    ],
+    "temperingProfile": {
+      "id": "recipe_offhand_tempering_profile",
+      "name": "Offhand Tempering",
+      "statImprovementPool": [
+        {
+          "stat": "BlockChance",
+          "weight": 30
+        },
+        {
+          "stat": "Resistance",
+          "weight": 25
+        },
+        {
+          "stat": "Spirit",
+          "weight": 25
+        },
+        {
+          "stat": "Armor",
+          "weight": 20
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_block_chance",
+          "weight": 30
+        },
+        {
+          "id": "affix_grave_resistance",
+          "weight": 25
+        },
+        {
+          "id": "affix_spirit",
+          "weight": 25
+        },
+        {
+          "id": "affix_armor",
+          "weight": 20
+        }
+      ],
+      "specialModifierPool": [
+        {
+          "id": "special_unbroken_guard",
+          "weight": 10
+        }
+      ]
+    }
+  }
+]

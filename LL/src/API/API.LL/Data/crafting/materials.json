@@ -1,0 +1,15 @@
+[
+  { "id": "metal_t1", "itemId": "ore", "name": "Ore", "family": "Metal", "tier": 1, "isStandardTieredMaterial": true, "isSpecialResource": false },
+  { "id": "wood_t1", "itemId": "wood", "name": "Wood", "family": "Wood", "tier": 1, "isStandardTieredMaterial": true, "isSpecialResource": false },
+  { "id": "hide_t1", "itemId": "rawhide", "name": "Rawhide", "family": "Hide", "tier": 1, "isStandardTieredMaterial": true, "isSpecialResource": false },
+  { "id": "crystal_t1", "itemId": "crystalline_powder", "name": "Crystalline Powder", "family": "Crystal", "tier": 1, "isStandardTieredMaterial": true, "isSpecialResource": false },
+  { "id": "stone_t1", "itemId": "rough_stone", "name": "Rough Stone", "family": "Stone", "tier": 1, "isStandardTieredMaterial": true, "isSpecialResource": false },
+  { "id": "fiber_t1", "itemId": "woven_fiber", "name": "Woven Fiber", "family": "Fiber", "tier": 1, "isStandardTieredMaterial": true, "isSpecialResource": false },
+  { "id": "bone_t1", "itemId": "bone_fragments", "name": "Bone Fragments", "family": "Bone", "tier": 1, "isStandardTieredMaterial": true, "isSpecialResource": false },
+  { "id": "chitin_t1", "itemId": "ant_chitin", "name": "Ant Chitin", "family": "Chitin", "tier": 1, "isStandardTieredMaterial": true, "isSpecialResource": false },
+  { "id": "resin_t1", "itemId": "hive_resin", "name": "Hive Resin", "family": "Resin", "tier": 1, "isStandardTieredMaterial": true, "isSpecialResource": false },
+  { "id": "oil_t1", "itemId": "murky_fish_oil", "name": "Murky Fish Oil", "family": "Oil", "tier": 1, "isStandardTieredMaterial": true, "isSpecialResource": false },
+  { "id": "venom_gland", "itemId": "venom_gland", "name": "Venom Gland", "family": "Special", "tier": null, "isStandardTieredMaterial": false, "isSpecialResource": true },
+  { "id": "royal_chitin_plate", "itemId": "royal_chitin_plate", "name": "Royal Chitin Plate", "family": "Special", "tier": null, "isStandardTieredMaterial": false, "isSpecialResource": true },
+  { "id": "hive_ichor", "itemId": "hive_ichor", "name": "Hive Ichor", "family": "Special", "tier": null, "isStandardTieredMaterial": false, "isSpecialResource": true }
+]

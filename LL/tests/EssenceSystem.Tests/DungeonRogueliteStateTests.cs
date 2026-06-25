@@ -16,6 +16,7 @@ using Domain.Models.Essences.Definitions;
 using Domain.Models.Entities.Creatures;
 using Domain.Models.Inventories;
 using Domain.Models.Items;
+using Domain.Models.Items.Equipments;
 using Domain.Models.MarketPlaces;
 using Domain.Models.Professions.Crafting;
 using Microsoft.Extensions.Configuration;
@@ -1429,6 +1430,9 @@ public sealed class DungeonRogueliteStateTests
         public Task<bool> TryRemoveCraftingMaterialsAsync(Guid characterId, List<Material> materials, CancellationToken cancellationToken) =>
             Task.FromResult(false);
 
+        public Task<bool> TryConsumeInventoryItemAsync(Guid characterId, Guid itemInstanceId, CancellationToken cancellationToken) =>
+            Task.FromResult(false);
+
         public Task<bool> TryRemoveItemsForMarketPlaceListingAsync(
             Guid characterId,
             MarketPlaceListing marketplaceListing,
@@ -1469,6 +1473,12 @@ public sealed class DungeonRogueliteStateTests
 
             return Task.FromResult<IReadOnlyDictionary<string, ItemBase>>(result);
         }
+
+        public Task<IReadOnlyDictionary<string, string>> GetEssenceItemBaseIdsByDefinitionIdAsync(CancellationToken cancellationToken) =>
+            Task.FromResult<IReadOnlyDictionary<string, string>>(new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
+
+        public Task<EquipmentBase?> GetCraftableEquipmentBaseAsync(string itemBaseId, CancellationToken cancellationToken) =>
+            Task.FromResult(itemBases.OfType<EquipmentBase>().FirstOrDefault(x => x.Id == itemBaseId));
 
         public Task AddMissingItemBasesAsync(IReadOnlyCollection<ItemBase> itemBases, CancellationToken cancellationToken)
         {

@@ -3,6 +3,7 @@ import { AttributeType } from './enums/attributeType';
 import { EquipmentType } from './enums/equipmentType';
 import { GatheringType } from './enums/gatheringType';
 import { ItemType } from './enums/itemType';
+import { ItemQuality } from './enums/itemQuality';
 import { Rarity } from './enums/rarity';
 import { Essence } from './essence';
 import { EssenceDefinitionDto } from './essence-system';
@@ -18,14 +19,22 @@ export interface ItemInstance {
 export interface EquipmentInstance extends ItemInstance {
   displayName: string;
   rarity: Rarity;
+  quality: ItemQuality;
+  recipeId?: string | null;
+  baseRecipeId?: string | null;
+  tier: number;
   equipmentBase: Equipment;
   potential?: number;
+  maxPotential?: number | null;
+  temperingProgress: number;
   itemXp: number;
   baseModifiers: AttributeModifier[];
   instanceModifiers: AttributeModifier[];
   attributeModifiers: AttributeModifier[];
   toolAffixes: ToolBonusModifier[];
   effectiveToolBonuses: ToolBonusModifier[];
+  affinityTags: string[];
+  specialModifiers: string[];
 }
 
 export interface ItemBase {

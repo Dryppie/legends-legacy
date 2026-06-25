@@ -103,6 +103,19 @@ public static class DependencyInjection
 
         services.AddScoped<ICraftingService, CraftingService>();
         services.AddScoped<ITemperingService, TemperingService>();
+        services.AddScoped<ITemperingProfileResolver, TemperingProfileResolver>();
+        services.AddScoped<ITemperingMechanicsService, TemperingMechanicsService>();
+        services.AddScoped<ICraftingProgressionService, CraftingProgressionService>();
+        services.AddScoped<ICraftingItemCatalogService, CraftingItemCatalogService>();
+        services.AddScoped<IItemQualityRollService, ItemQualityRollService>();
+        services.AddScoped<IItemPotentialService, ItemPotentialService>();
+        services.AddScoped<ICraftingRequirementResolver, CraftingRequirementResolver>();
+        services.AddScoped<IItemStatRollService, ItemStatRollService>();
+        services.AddSingleton<ICraftingDefinitionProvider>(sp =>
+            new JsonCraftingDefinitionProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
 
         services.AddScoped<DungeonRunFactory>();
         services.AddScoped<IDungeonRunService, DungeonRunService>();
@@ -187,7 +200,6 @@ public static class DependencyInjection
         services.AddScoped<IMarketPlaceService, MarketPlaceService>();
 
         services.AddScoped<IProfessionService, ProfessionService>();
-        services.AddScoped<IRecipeService, RecipeService>();
 
         services.AddScoped<IPlayerService, PlayerService>();
         services.AddSingleton<IProphecyDefinitionProvider>(sp =>
