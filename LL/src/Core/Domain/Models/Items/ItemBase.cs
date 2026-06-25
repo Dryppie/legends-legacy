@@ -1,6 +1,5 @@
 ﻿using System.Text.Json.Serialization;
 using Domain.Models.LootTables;
-using Domain.Models.Professions.Crafting;
 
 namespace Domain.Models.Items;
 public class ItemBase
@@ -16,6 +15,4 @@ public class ItemBase
     public ICollection<ItemInstance> ItemInstances { get; set; } = [];
     [JsonIgnore]
     public ICollection<LootTableItem> LootTablesItems { get; set; } = [];
-    [JsonIgnore]
-    public ICollection<Material> Materials { get; set; } = [];
 }
