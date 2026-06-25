@@ -15,9 +15,9 @@ public sealed class TemperingMechanicsServiceTests
         var service = new TemperingMechanicsService(new TestCraftingDefinitionProvider(
             new Dictionary<Rarity, int> { [Rarity.Uncommon] = 100 }));
         var equipment = CreateEquipment();
-        var recipe = CreateRecipe();
+        var profile = CreateProfile();
 
-        var result = service.ApplyTemperingAttempt(equipment, recipe, new FixedRandom(0.50d));
+        var result = service.ApplyTemperingAttempt(equipment, profile, new FixedRandom(0.50d));
 
         Assert.False(result.RarityUpgraded);
         Assert.Equal(Rarity.Common, equipment.Rarity);
@@ -32,9 +32,9 @@ public sealed class TemperingMechanicsServiceTests
         var service = new TemperingMechanicsService(new TestCraftingDefinitionProvider(
             new Dictionary<Rarity, int> { [Rarity.Uncommon] = 10 }));
         var equipment = CreateEquipment();
-        var recipe = CreateRecipe();
+        var profile = CreateProfile();
 
-        var result = service.ApplyTemperingAttempt(equipment, recipe, new FixedRandom(0.50d));
+        var result = service.ApplyTemperingAttempt(equipment, profile, new FixedRandom(0.50d));
 
         Assert.True(result.RarityUpgraded);
         Assert.Equal(Rarity.Uncommon, equipment.Rarity);
@@ -57,7 +57,7 @@ public sealed class TemperingMechanicsServiceTests
         Potential = 10
     };
 
-    private static TemperingRecipeDefinition CreateRecipe() => new()
+    private static TemperingProfileDefinition CreateProfile() => new()
     {
         Id = "armor_fortification",
         Name = "Armor Fortification",
@@ -111,8 +111,6 @@ public sealed class TemperingMechanicsServiceTests
 
         public IReadOnlyList<BlueprintDefinition> GetBlueprints() => [];
 
-        public IReadOnlyList<TemperingRecipeDefinition> GetTemperingRecipes() => [];
-
         public IReadOnlyDictionary<Rarity, int> GetTemperingProgressThresholds() => temperingProgressThresholds;
 
         public MaterialDefinition? GetStandardMaterial(MaterialFamily family, int tier) => null;
@@ -125,6 +123,5 @@ public sealed class TemperingMechanicsServiceTests
 
         public BlueprintDefinition? GetBlueprintByItemId(string itemId) => null;
 
-        public TemperingRecipeDefinition? GetTemperingRecipe(string recipeId) => null;
     }
 }

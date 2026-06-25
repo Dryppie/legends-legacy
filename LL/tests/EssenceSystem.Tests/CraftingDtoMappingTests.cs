@@ -55,19 +55,6 @@ public sealed class CraftingDtoMappingTests
         Assert.Single(craftDto.CreatedItems);
         Assert.Equal(1, craftDto.QualityCounts[ItemQuality.Fine]);
 
-        var temperDto = mapper.Map<TemperItemResultDto>(new TemperingAttemptResult(
-            equipment,
-            TemperingOutcomeType.Success,
-            2,
-            10,
-            Rarity.Common,
-            Rarity.Uncommon,
-            true));
-
-        Assert.Equal(TemperingOutcomeType.Success, temperDto.Outcome);
-        Assert.Equal(Rarity.Uncommon, temperDto.NewRarity);
-        Assert.Equal(itemInstanceId, temperDto.Equipment.Id);
-
         var recipeDto = mapper.Map<CraftingRecipeDto>(
             new CraftingRecipeDefinition
             {

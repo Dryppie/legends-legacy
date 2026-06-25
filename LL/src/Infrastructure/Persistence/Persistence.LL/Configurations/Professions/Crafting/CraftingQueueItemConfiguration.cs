@@ -7,9 +7,6 @@ public class CraftingQueueItemConfiguration : IEntityTypeConfiguration<CraftingQ
 {
     public void Configure(EntityTypeBuilder<CraftingQueueItem> builder)
     {
-        builder.Property(x => x.TemperingRecipeId)
-            .HasMaxLength(128);
-
         builder
             .HasOne(x => x.EquipmentInstance)
             .WithMany()

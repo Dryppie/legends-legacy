@@ -14,16 +14,16 @@ public class StartCraftingActionCommandHandler : IRequestHandler<StartCraftingAc
 {
     private readonly ICharacterActionService _characterActionService;
     private readonly IInventoryService _inventoryService;
-    private readonly ITemperingRecipeResolver _temperingRecipeResolver;
+    private readonly ITemperingProfileResolver _temperingProfileResolver;
 
     public StartCraftingActionCommandHandler(
         ICharacterActionService characterActionService,
         IInventoryService inventoryService,
-        ITemperingRecipeResolver temperingRecipeResolver)
+        ITemperingProfileResolver temperingProfileResolver)
     {
         _characterActionService = characterActionService;
         _inventoryService = inventoryService;
-        _temperingRecipeResolver = temperingRecipeResolver;
+        _temperingProfileResolver = temperingProfileResolver;
     }
 
     public async Task<Response<bool>> Handle(StartCraftingActionCommand request, CancellationToken cancellationToken)
@@ -40,9 +40,9 @@ public class StartCraftingActionCommandHandler : IRequestHandler<StartCraftingAc
         if (equipmentInstance.EquipmentBase.EquipmentType == EquipmentType.Tool)
             return Response<bool>.Fail("Tools cannot be modified through Crafting.");
 
-        var temperingRecipe = _temperingRecipeResolver.ResolveFor(equipmentInstance);
-        if (temperingRecipe == null)
-            return Response<bool>.Fail("No tempering recipe applies to this item.");
+        var temperingProfile = _temperingProfileResolver.ResolveFor(equipmentInstance);
+        if (temperingProfile == null)
+            return Response<bool>.Fail("No tempering profile applies to this item.");
 
         if ((equipmentInstance.Potential ?? 0) < TemperingConstants.PotentialCost)
             return Response<bool>.Fail("Item does not have enough Potential.");
@@ -50,8 +50,7 @@ public class StartCraftingActionCommandHandler : IRequestHandler<StartCraftingAc
         var queueItem = new CraftingQueueItem
         {
             Id = queueId,
-            EquipmentInstanceId = itemInstanceId,
-            TemperingRecipeId = temperingRecipe.Id
+            EquipmentInstanceId = itemInstanceId
         };
 
         var success = await _characterActionService.UpdateCraftingCharacterActionAsync(request.CharacterId, queueItem, cancellationToken);

@@ -66,20 +66,20 @@ public sealed class CraftingRegionOneContentTests
     }
 
     [Fact]
-    public void CraftingV2_HasExpandedTemperingPlate()
+    public void CraftingV2_HasTemperingProfilesOnBlueprintsAndBaseRecipes()
     {
-        var temperingRecipes = ReadArray("crafting/tempering-recipes.json");
+        var baseRecipes = ReadArray("crafting/base-recipes.json");
+        var blueprints = ReadArray("crafting/blueprints.json");
 
-        Assert.True(temperingRecipes.Count >= 15);
-        Assert.Contains(temperingRecipes, recipe => recipe?["id"]?.GetValue<string>() == "shield_reinforcement");
-        Assert.Contains(temperingRecipes, recipe => recipe?["id"]?.GetValue<string>() == "caster_focusing");
-        Assert.Contains(temperingRecipes, recipe => recipe?["id"]?.GetValue<string>() == "hive_chitin_lacquering");
+        Assert.All(baseRecipes, recipe => Assert.NotNull(recipe?["temperingProfile"]));
+        Assert.All(blueprints, blueprint => Assert.NotNull(blueprint?["temperingProfile"]));
     }
 
     [Fact]
-    public void CraftingV2_TemperingRecipes_UseExternalModifierCatalogs()
+    public void CraftingV2_TemperingProfiles_UseExternalModifierCatalogs()
     {
-        var temperingRecipes = ReadArray("crafting/tempering-recipes.json");
+        var baseRecipes = ReadArray("crafting/base-recipes.json");
+        var blueprints = ReadArray("crafting/blueprints.json");
         var affixes = ReadArray("crafting/affixes.json");
         var specialModifiers = ReadArray("crafting/special-modifiers.json");
         var tierBudgets = ReadArray("crafting/tier-budgets.json");
@@ -94,16 +94,18 @@ public sealed class CraftingRegionOneContentTests
             .Select(modifier => modifier?["id"]?.GetValue<string>() ?? string.Empty)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var recipe in temperingRecipes)
+        foreach (var profile in baseRecipes.Select(x => x?["temperingProfile"]).Concat(blueprints.Select(x => x?["temperingProfile"])))
         {
-            foreach (var affixRef in ChildArray(recipe, "affixPool"))
+            Assert.NotNull(profile);
+
+            foreach (var affixRef in ChildArray(profile, "affixPool"))
             {
                 Assert.Contains(affixRef?["id"]?.GetValue<string>() ?? string.Empty, affixIds);
                 Assert.False(affixRef?.AsObject().ContainsKey("name") == true);
                 Assert.False(affixRef?.AsObject().ContainsKey("statModifier") == true);
             }
 
-            foreach (var specialModifierRef in ChildArray(recipe, "specialModifierPool"))
+            foreach (var specialModifierRef in ChildArray(profile, "specialModifierPool"))
             {
                 Assert.Contains(specialModifierRef?["id"]?.GetValue<string>() ?? string.Empty, specialModifierIds);
                 Assert.False(specialModifierRef?.AsObject().ContainsKey("name") == true);

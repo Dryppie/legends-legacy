@@ -101,7 +101,7 @@ public static class DependencyInjection
 
         services.AddScoped<ICraftingService, CraftingService>();
         services.AddScoped<ITemperingService, TemperingService>();
-        services.AddScoped<ITemperingRecipeResolver, TemperingRecipeResolver>();
+        services.AddScoped<ITemperingProfileResolver, TemperingProfileResolver>();
         services.AddScoped<ITemperingMechanicsService, TemperingMechanicsService>();
         services.AddScoped<ICraftingProgressionService, CraftingProgressionService>();
         services.AddScoped<ICraftingItemCatalogService, CraftingItemCatalogService>();

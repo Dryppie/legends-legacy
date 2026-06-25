@@ -26,4 +26,5 @@ public sealed class CraftingRecipeDefinition
     public IReadOnlyList<string> Tags { get; init; } = [];
     public string? OutputNameTemplate { get; init; }
     public string? BlueprintId { get; init; }
+    public TemperingProfileDefinition? TemperingProfile { get; init; }
 }

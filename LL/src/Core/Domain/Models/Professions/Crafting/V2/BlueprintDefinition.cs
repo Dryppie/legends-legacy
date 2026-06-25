@@ -15,5 +15,5 @@ public sealed class BlueprintDefinition
     public IReadOnlyList<BlueprintOutputNameDefinition> SpecialOutputNames { get; init; } = [];
     public IReadOnlyList<MaterialRequirementDefinition> SpecialResourceRequirements { get; init; } = [];
     public IReadOnlyList<string> Tags { get; init; } = [];
-    public TemperingRecipeDefinition? TemperingProfile { get; init; }
+    public TemperingProfileDefinition? TemperingProfile { get; init; }
 }

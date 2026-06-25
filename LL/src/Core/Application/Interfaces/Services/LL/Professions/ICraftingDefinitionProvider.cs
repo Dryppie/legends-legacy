@@ -8,12 +8,10 @@ public interface ICraftingDefinitionProvider
     IReadOnlyList<MaterialDefinition> GetMaterials();
     IReadOnlyList<CraftingRecipeDefinition> GetRecipes();
     IReadOnlyList<BlueprintDefinition> GetBlueprints();
-    IReadOnlyList<TemperingRecipeDefinition> GetTemperingRecipes();
     IReadOnlyDictionary<Rarity, int> GetTemperingProgressThresholds();
     MaterialDefinition? GetStandardMaterial(MaterialFamily family, int tier);
     MaterialDefinition? GetMaterialByItemId(string itemId);
     CraftingRecipeDefinition? GetRecipe(string recipeId);
     BlueprintDefinition? GetBlueprint(string blueprintId);
     BlueprintDefinition? GetBlueprintByItemId(string itemId);
-    TemperingRecipeDefinition? GetTemperingRecipe(string recipeId);
 }

@@ -960,11 +960,6 @@ namespace Persistence.LL.Migrations
                     b.Property<Guid>("EquipmentInstanceId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("TemperingRecipeId")
-                        .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CraftingActionDetailsId");

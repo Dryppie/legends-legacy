@@ -18,7 +18,6 @@ public class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
     public IReadOnlyList<MaterialDefinition> GetMaterials() => _definitions.Value.Materials;
     public IReadOnlyList<CraftingRecipeDefinition> GetRecipes() => _definitions.Value.Recipes;
     public IReadOnlyList<BlueprintDefinition> GetBlueprints() => _definitions.Value.Blueprints;
-    public IReadOnlyList<TemperingRecipeDefinition> GetTemperingRecipes() => _definitions.Value.TemperingRecipes;
     public IReadOnlyDictionary<Rarity, int> GetTemperingProgressThresholds() => _definitions.Value.TemperingProgressThresholds;
 
     public MaterialDefinition? GetStandardMaterial(MaterialFamily family, int tier) =>
@@ -36,29 +35,24 @@ public class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
     public BlueprintDefinition? GetBlueprintByItemId(string itemId) =>
         _definitions.Value.Blueprints.FirstOrDefault(x => x.ItemId != null && x.ItemId.Equals(itemId, StringComparison.OrdinalIgnoreCase));
 
-    public TemperingRecipeDefinition? GetTemperingRecipe(string recipeId) =>
-        _definitions.Value.TemperingRecipes.FirstOrDefault(x => x.Id.Equals(recipeId, StringComparison.OrdinalIgnoreCase));
-
     private static DefinitionSet Load(IConfiguration config, string contentRootPath, JsonSerializerOptions options)
     {
         var contentRoot = config["Content:Root"] ?? "Data";
         var craftingRoot = Path.Combine(contentRootPath, contentRoot, "crafting");
 
         var materials = Read<IReadOnlyList<MaterialDefinition>>(craftingRoot, "materials.json", options);
-        var baseRecipes = Read<IReadOnlyList<CraftingRecipeDefinition>>(craftingRoot, "base-recipes.json", options);
+        var rawBaseRecipes = Read<IReadOnlyList<CraftingRecipeDefinition>>(craftingRoot, "base-recipes.json", options);
         var rawBlueprints = Read<IReadOnlyList<BlueprintDefinition>>(craftingRoot, "blueprints.json", options);
         var affixes = Read<IReadOnlyList<WeightedAffixDefinition>>(craftingRoot, "affixes.json", options);
         var specialModifiers = Read<IReadOnlyList<WeightedAffixDefinition>>(craftingRoot, "special-modifiers.json", options);
         var tierBudgets = Read<IReadOnlyList<TemperingTierBudgetDefinition>>(craftingRoot, "tier-budgets.json", options);
-        var rawTemperingRecipes = Read<IReadOnlyList<TemperingRecipeDefinition>>(craftingRoot, "tempering-recipes.json", options);
-        var temperingRecipes = ResolveTemperingRecipes(rawTemperingRecipes, affixes, specialModifiers);
+        var recipes = ResolveRecipeTemperingProfiles(rawBaseRecipes, affixes, specialModifiers);
         var blueprints = ResolveBlueprintTemperingProfiles(rawBlueprints, affixes, specialModifiers);
 
-        var recipes = baseRecipes.ToList();
-        Validate(materials, recipes, blueprints, temperingRecipes, affixes, specialModifiers, tierBudgets);
+        Validate(materials, recipes, blueprints, affixes, specialModifiers, tierBudgets);
         var temperingProgressThresholds = tierBudgets.ToDictionary(x => x.Rarity, x => x.ProgressRequired);
 
-        return new DefinitionSet(materials, recipes, blueprints, temperingRecipes, temperingProgressThresholds);
+        return new DefinitionSet(materials, recipes, blueprints, temperingProgressThresholds);
     }
 
     private static T Read<T>(string root, string fileName, JsonSerializerOptions options)
@@ -75,7 +69,6 @@ public class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
         IReadOnlyList<MaterialDefinition> materials,
         IReadOnlyList<CraftingRecipeDefinition> recipes,
         IReadOnlyList<BlueprintDefinition> blueprints,
-        IReadOnlyList<TemperingRecipeDefinition> temperingRecipes,
         IReadOnlyList<WeightedAffixDefinition> affixes,
         IReadOnlyList<WeightedAffixDefinition> specialModifiers,
         IReadOnlyList<TemperingTierBudgetDefinition> tierBudgets)
@@ -133,12 +126,6 @@ public class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
             }
         }
 
-        var duplicateTempering = temperingRecipes
-            .GroupBy(x => x.Id, StringComparer.OrdinalIgnoreCase)
-            .FirstOrDefault(g => g.Count() > 1);
-        if (duplicateTempering != null)
-            throw new InvalidOperationException($"Duplicate tempering recipe '{duplicateTempering.Key}'.");
-
         ValidateModifierDefinitions("affix", affixes);
         ValidateModifierDefinitions("special modifier", specialModifiers);
 
@@ -164,8 +151,8 @@ public class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
             throw new InvalidOperationException($"Duplicate {label} definition '{duplicate.Key}'.");
     }
 
-    private static IReadOnlyList<TemperingRecipeDefinition> ResolveTemperingRecipes(
-        IReadOnlyList<TemperingRecipeDefinition> recipes,
+    private static IReadOnlyList<CraftingRecipeDefinition> ResolveRecipeTemperingProfiles(
+        IReadOnlyList<CraftingRecipeDefinition> recipes,
         IReadOnlyList<WeightedAffixDefinition> affixes,
         IReadOnlyList<WeightedAffixDefinition> specialModifiers)
     {
@@ -173,7 +160,36 @@ public class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
         var specialModifiersById = specialModifiers.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
 
         return recipes
-            .Select(recipe => ResolveTemperingProfile(recipe, affixesById, specialModifiersById))
+            .Select(recipe => recipe.TemperingProfile == null
+                ? recipe
+                : new CraftingRecipeDefinition
+                {
+                    Id = recipe.Id,
+                    Name = recipe.Name,
+                    RecipeType = recipe.RecipeType,
+                    BaseRecipeId = recipe.BaseRecipeId,
+                    RecipeFamily = recipe.RecipeFamily,
+                    Slot = recipe.Slot,
+                    OutputItemId = recipe.OutputItemId,
+                    OutputItemType = recipe.OutputItemType,
+                    TierRange = recipe.TierRange,
+                    Forms = recipe.Forms,
+                    InheritBaseMaterialRequirements = recipe.InheritBaseMaterialRequirements,
+                    MaterialRequirements = recipe.MaterialRequirements,
+                    AdditionalMaterialRequirements = recipe.AdditionalMaterialRequirements,
+                    SpecialResourceRequirements = recipe.SpecialResourceRequirements,
+                    BaseStatProfile = recipe.BaseStatProfile,
+                    BaseStatProfileOverride = recipe.BaseStatProfileOverride,
+                    AffinityTags = recipe.AffinityTags,
+                    DefaultTemperingTags = recipe.DefaultTemperingTags,
+                    Tags = recipe.Tags,
+                    OutputNameTemplate = recipe.OutputNameTemplate,
+                    BlueprintId = recipe.BlueprintId,
+                    TemperingProfile = ResolveTemperingProfile(
+                        recipe.TemperingProfile,
+                        affixesById,
+                        specialModifiersById)
+                })
             .ToList();
     }
 
@@ -211,18 +227,15 @@ public class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
             .ToList();
     }
 
-    private static TemperingRecipeDefinition ResolveTemperingProfile(
-        TemperingRecipeDefinition profile,
+    private static TemperingProfileDefinition ResolveTemperingProfile(
+        TemperingProfileDefinition profile,
         IReadOnlyDictionary<string, WeightedAffixDefinition> affixesById,
         IReadOnlyDictionary<string, WeightedAffixDefinition> specialModifiersById)
     {
-        return new TemperingRecipeDefinition
+        return new TemperingProfileDefinition
         {
             Id = profile.Id,
             Name = profile.Name,
-            ApplicableItemTypes = profile.ApplicableItemTypes,
-            RequiredItemAffinityTags = profile.RequiredItemAffinityTags,
-            DirectionTags = profile.DirectionTags,
             ProgressOnOutcome = profile.ProgressOnOutcome,
             StatImprovementPool = profile.StatImprovementPool,
             AffixPool = profile.AffixPool,
@@ -241,7 +254,7 @@ public class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
         return references.Select(reference =>
         {
             if (!definitionsById.TryGetValue(reference.Id, out var definition))
-                throw new InvalidOperationException($"Tempering recipe '{recipeId}' references missing {label} '{reference.Id}'.");
+                throw new InvalidOperationException($"Tempering profile '{recipeId}' references missing {label} '{reference.Id}'.");
 
             return new WeightedAffixDefinition
             {
@@ -258,6 +271,5 @@ public class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
         IReadOnlyList<MaterialDefinition> Materials,
         IReadOnlyList<CraftingRecipeDefinition> Recipes,
         IReadOnlyList<BlueprintDefinition> Blueprints,
-        IReadOnlyList<TemperingRecipeDefinition> TemperingRecipes,
         IReadOnlyDictionary<Rarity, int> TemperingProgressThresholds);
 }
