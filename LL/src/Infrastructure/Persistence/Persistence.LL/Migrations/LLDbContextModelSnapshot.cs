@@ -936,7 +936,7 @@ namespace Persistence.LL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CharacterId", "RecipeId")
+                    b.HasIndex("CharacterId", "RecipeId", "BlueprintId")
                         .IsUnique();
 
                     b.ToTable("CharacterRecipeUnlocks");
@@ -959,6 +959,11 @@ namespace Persistence.LL.Migrations
 
                     b.Property<Guid>("EquipmentInstanceId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("TemperingRecipeId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
 
                     b.HasKey("Id");
 

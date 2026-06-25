@@ -1,7 +1,8 @@
+using Application.UseCases.CharacterActions.Commands.StartCraftingAction;
 using Application.UseCases.Crafting.Commands.CraftItems;
 using Application.UseCases.Crafting.Commands.LearnBlueprint;
-using Application.UseCases.Crafting.Commands.TemperItem;
 using Application.UseCases.Crafting.Dtos;
+using Application.UseCases.Crafting.Queries.GetBlueprintLearningOptions;
 using Application.UseCases.Crafting.Queries.GetAvailableTemperingRecipes;
 using Application.UseCases.Crafting.Queries.GetCraftingRecipes;
 using Application.UseCases.Crafting.Queries.GetRecipeMasteries;
@@ -28,15 +29,23 @@ public class CraftingController : BaseController
 
     [HttpPost("blueprints/learn")]
     public async Task<ActionResult<Response<LearnBlueprintResultDto>>> LearnBlueprint([FromBody] LearnBlueprintRequestDto request) =>
-        await Mediator.Send(new LearnBlueprintCommand(CurrentCharacterGuid, request.BlueprintItemInstanceId));
+        await Mediator.Send(new LearnBlueprintCommand(CurrentCharacterGuid, request.BlueprintItemInstanceId, request.RecipeId));
+
+    [HttpGet("blueprints/{blueprintItemInstanceId:guid}/learning-options")]
+    public async Task<ActionResult<Response<IReadOnlyList<BlueprintLearningOptionDto>>>> GetBlueprintLearningOptions([FromRoute] Guid blueprintItemInstanceId) =>
+        await Mediator.Send(new GetBlueprintLearningOptionsQuery(CurrentCharacterGuid, blueprintItemInstanceId));
 
     [HttpGet("items/{itemId:guid}/tempering-options")]
     public async Task<ActionResult<Response<IReadOnlyList<TemperingRecipeDto>>>> GetTemperingOptions([FromRoute] Guid itemId) =>
         await Mediator.Send(new GetAvailableTemperingRecipesQuery(CurrentCharacterGuid, itemId));
 
     [HttpPost("temper")]
-    public async Task<ActionResult<Response<TemperItemResultDto>>> Temper([FromBody] TemperItemRequestDto request) =>
-        await Mediator.Send(new TemperItemCommand(CurrentCharacterGuid, request.ItemInstanceId, request.TemperingRecipeId));
+    public async Task<ActionResult<Response<bool>>> Temper([FromBody] TemperItemRequestDto request) =>
+        await Mediator.Send(new StartCraftingActionCommand(
+            CurrentCharacterGuid,
+            Guid.NewGuid().ToString(),
+            request.ItemInstanceId.ToString(),
+            request.TemperingRecipeId));
 
     [HttpPost("RemoveCraftingQueueItem")]
     public async Task<ActionResult<Response<RemoveCraftingQueueItemResponseDto>>> RemoveCraftingQueueItem([FromBody] string queueItemId) =>

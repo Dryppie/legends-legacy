@@ -1,24 +1,29 @@
 using Application.Interfaces.Services.LL;
 using Application.Interfaces.Services.LL.CharacterActions;
+using Application.Interfaces.Services.LL.Professions;
 using Application.MediatR.Markers;
 using Common.Primitives;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Professions.Crafting;
+using Domain.Models.Professions.Crafting.V2;
 using MediatR;
 
 namespace Application.UseCases.CharacterActions.Commands.StartCraftingAction;
-public record StartCraftingActionCommand(Guid CharacterId, string QueueId, string ItemInstanceId) : ICommand<Response<bool>>;
+public record StartCraftingActionCommand(Guid CharacterId, string QueueId, string ItemInstanceId, string TemperingRecipeId) : ICommand<Response<bool>>;
 public class StartCraftingActionCommandHandler : IRequestHandler<StartCraftingActionCommand, Response<bool>>
 {
     private readonly ICharacterActionService _characterActionService;
     private readonly IInventoryService _inventoryService;
+    private readonly ICraftingDefinitionProvider _definitions;
 
     public StartCraftingActionCommandHandler(
         ICharacterActionService characterActionService,
-        IInventoryService inventoryService)
+        IInventoryService inventoryService,
+        ICraftingDefinitionProvider definitions)
     {
         _characterActionService = characterActionService;
         _inventoryService = inventoryService;
+        _definitions = definitions;
     }
 
     public async Task<Response<bool>> Handle(StartCraftingActionCommand request, CancellationToken cancellationToken)
@@ -35,10 +40,24 @@ public class StartCraftingActionCommandHandler : IRequestHandler<StartCraftingAc
         if (equipmentInstance.EquipmentBase.EquipmentType == EquipmentType.Tool)
             return Response<bool>.Fail("Tools cannot be modified through Crafting.");
 
+        var temperingRecipe = _definitions.GetTemperingRecipe(request.TemperingRecipeId);
+        if (temperingRecipe == null)
+            return Response<bool>.Fail("Tempering recipe does not exist.");
+
+        if (temperingRecipe.ApplicableItemTypes.Count > 0 && !temperingRecipe.ApplicableItemTypes.Contains(equipmentInstance.EquipmentBase.EquipmentType))
+            return Response<bool>.Fail("Tempering recipe does not apply to this item.");
+
+        if (!temperingRecipe.RequiredItemAffinityTags.All(tag => equipmentInstance.AffinityTags.Contains(tag, StringComparer.OrdinalIgnoreCase)))
+            return Response<bool>.Fail("Item does not have the required affinity.");
+
+        if ((equipmentInstance.Potential ?? 0) < TemperingConstants.PotentialCost)
+            return Response<bool>.Fail("Item does not have enough Potential.");
+
         var queueItem = new CraftingQueueItem
         {
             Id = queueId,
-            EquipmentInstanceId = itemInstanceId
+            EquipmentInstanceId = itemInstanceId,
+            TemperingRecipeId = temperingRecipe.Id
         };
 
         var success = await _characterActionService.UpdateCraftingCharacterActionAsync(request.CharacterId, queueItem, cancellationToken);

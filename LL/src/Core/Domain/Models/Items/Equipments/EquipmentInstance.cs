@@ -6,7 +6,15 @@ namespace Domain.Models.Items.Equipments;
 public class EquipmentInstance : ItemInstance
 {
     public Rarity Rarity { get; set; } = Rarity.Common;
+    public ItemQuality Quality { get; set; } = ItemQuality.Standard;
+    public string? RecipeId { get; set; }
+    public string? BaseRecipeId { get; set; }
+    public string? BlueprintId { get; set; }
+    public string? CraftedName { get; set; }
+    public int Tier { get; set; } = 1;
     public int? Potential { get; set; } = null;
+    public int? MaxPotential { get; set; } = null;
+    public int TemperingProgress { get; set; } = 0;
     public int ItemXp { get; set; } = 0;
     public bool IsMasterpiece { get; set; } = false;
     public bool IsLevelingItem { get; set; } = false;
@@ -16,7 +24,7 @@ public class EquipmentInstance : ItemInstance
     [NotMapped]
     public string DisplayName => EquipmentBase.EquipmentType == EquipmentType.Tool
         ? ToolInstanceNaming.GetDisplayName(EquipmentBase.Name, Rarity)
-        : EquipmentBase.Name;
+        : CraftedName ?? EquipmentBase.Name;
 
     [NotMapped]
     public IReadOnlyCollection<ItemAttributeModifier> BaseModifiers =>
@@ -29,6 +37,8 @@ public class EquipmentInstance : ItemInstance
     /// <summary>Modifiers that were added to *this* item as it levelled up.</summary>
     public List<InstanceAttributeModifier> InstanceModifiers { get; set; } = [];
     public List<ToolBonusModifier> ToolAffixes { get; set; } = [];
+    public List<string> AffinityTags { get; set; } = [];
+    public List<string> SpecialModifiers { get; set; } = [];
 
     [NotMapped]
     public List<AttributeModifierBase> AttributeModifiers =>
