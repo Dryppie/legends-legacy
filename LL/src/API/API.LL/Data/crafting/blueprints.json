@@ -38,12 +38,6 @@
     "temperingProfile": {
       "id": "blueprint_fury_tempering_profile",
       "name": "Fury Tempering",
-      "progressOnOutcome": {
-        "CriticalFail": 0,
-        "Fail": 1,
-        "Success": 3,
-        "GreatSuccess": 6
-      },
       "statImprovementPool": [
         {
           "stat": "WeaponDamage",
@@ -123,12 +117,6 @@
     "temperingProfile": {
       "id": "blueprint_arcane_tempering_profile",
       "name": "Arcane Tempering",
-      "progressOnOutcome": {
-        "CriticalFail": 0,
-        "Fail": 1,
-        "Success": 3,
-        "GreatSuccess": 6
-      },
       "statImprovementPool": [
         {
           "stat": "Spirit",
@@ -203,12 +191,6 @@
     "temperingProfile": {
       "id": "blueprint_execution_tempering_profile",
       "name": "Execution Tempering",
-      "progressOnOutcome": {
-        "CriticalFail": 0,
-        "Fail": 1,
-        "Success": 3,
-        "GreatSuccess": 6
-      },
       "statImprovementPool": [
         {
           "stat": "Precision",
@@ -289,12 +271,6 @@
     "temperingProfile": {
       "id": "blueprint_aegis_tempering_profile",
       "name": "Aegis Tempering",
-      "progressOnOutcome": {
-        "CriticalFail": 0,
-        "Fail": 1,
-        "Success": 3,
-        "GreatSuccess": 6
-      },
       "statImprovementPool": [
         {
           "stat": "BlockChance",
@@ -373,12 +349,6 @@
     "temperingProfile": {
       "id": "blueprint_warden_tempering_profile",
       "name": "Warden Tempering",
-      "progressOnOutcome": {
-        "CriticalFail": 0,
-        "Fail": 1,
-        "Success": 3,
-        "GreatSuccess": 6
-      },
       "statImprovementPool": [
         {
           "stat": "Resistance",
@@ -457,12 +427,6 @@
     "temperingProfile": {
       "id": "blueprint_endurance_tempering_profile",
       "name": "Endurance Tempering",
-      "progressOnOutcome": {
-        "CriticalFail": 0,
-        "Fail": 1,
-        "Success": 3,
-        "GreatSuccess": 6
-      },
       "statImprovementPool": [
         {
           "stat": "MaxHealth",
@@ -541,12 +505,6 @@
     "temperingProfile": {
       "id": "blueprint_phoenix_tempering_profile",
       "name": "Phoenix Tempering",
-      "progressOnOutcome": {
-        "CriticalFail": 0,
-        "Fail": 1,
-        "Success": 3,
-        "GreatSuccess": 6
-      },
       "statImprovementPool": [
         {
           "stat": "HealthRegeneration",
@@ -628,12 +586,6 @@
     "temperingProfile": {
       "id": "blueprint_spirit_tempering_profile",
       "name": "Spirit Tempering",
-      "progressOnOutcome": {
-        "CriticalFail": 0,
-        "Fail": 1,
-        "Success": 3,
-        "GreatSuccess": 6
-      },
       "statImprovementPool": [
         {
           "stat": "Spirit",
@@ -719,12 +671,6 @@
     "temperingProfile": {
       "id": "blueprint_primal_tempering_profile",
       "name": "Primal Tempering",
-      "progressOnOutcome": {
-        "CriticalFail": 0,
-        "Fail": 1,
-        "Success": 3,
-        "GreatSuccess": 6
-      },
       "statImprovementPool": [
         {
           "stat": "SummonPower",
@@ -811,12 +757,6 @@
     "temperingProfile": {
       "id": "blueprint_venom_tempering_profile",
       "name": "Venom Tempering",
-      "progressOnOutcome": {
-        "CriticalFail": 0,
-        "Fail": 1,
-        "Success": 3,
-        "GreatSuccess": 6
-      },
       "statImprovementPool": [
         {
           "stat": "Precision",
@@ -902,12 +842,6 @@
     "temperingProfile": {
       "id": "blueprint_hive_tempering_profile",
       "name": "Hive Tempering",
-      "progressOnOutcome": {
-        "CriticalFail": 0,
-        "Fail": 1,
-        "Success": 3,
-        "GreatSuccess": 6
-      },
       "statImprovementPool": [
         {
           "stat": "Armor",

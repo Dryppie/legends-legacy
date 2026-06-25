@@ -4,7 +4,6 @@ public sealed class TemperingProfileDefinition
 {
     public string Id { get; init; } = string.Empty;
     public string Name { get; init; } = string.Empty;
-    public IReadOnlyDictionary<TemperingOutcomeType, int> ProgressOnOutcome { get; init; } = new Dictionary<TemperingOutcomeType, int>();
     public IReadOnlyList<WeightedStatDefinition> StatImprovementPool { get; init; } = [];
     public IReadOnlyList<WeightedModifierReferenceDefinition> AffixPool { get; init; } = [];
     public IReadOnlyList<WeightedModifierReferenceDefinition> SpecialModifierPool { get; init; } = [];

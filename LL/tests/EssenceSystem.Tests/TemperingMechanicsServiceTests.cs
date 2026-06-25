@@ -13,7 +13,7 @@ public sealed class TemperingMechanicsServiceTests
     public void ApplyTemperingAttempt_WhenRarityDoesNotIncrease_DoesNotAddInstanceModifier()
     {
         var service = new TemperingMechanicsService(new TestCraftingDefinitionProvider(
-            new Dictionary<Rarity, int> { [Rarity.Uncommon] = 100 }));
+            new Dictionary<Rarity, int> { [Rarity.Uncommon] = 10 }));
         var equipment = CreateEquipment();
         var profile = CreateProfile();
 
@@ -21,7 +21,7 @@ public sealed class TemperingMechanicsServiceTests
 
         Assert.False(result.RarityUpgraded);
         Assert.Equal(Rarity.Common, equipment.Rarity);
-        Assert.Equal(10, equipment.TemperingProgress);
+        Assert.Equal(3, equipment.TemperingProgress);
         Assert.Equal(9, equipment.Potential);
         Assert.Empty(equipment.InstanceModifiers);
     }
@@ -30,7 +30,7 @@ public sealed class TemperingMechanicsServiceTests
     public void ApplyTemperingAttempt_WhenRarityIncreases_AddsRarityUpgradeReward()
     {
         var service = new TemperingMechanicsService(new TestCraftingDefinitionProvider(
-            new Dictionary<Rarity, int> { [Rarity.Uncommon] = 10 }));
+            new Dictionary<Rarity, int> { [Rarity.Uncommon] = 3 }));
         var equipment = CreateEquipment();
         var profile = CreateProfile();
 
@@ -61,13 +61,6 @@ public sealed class TemperingMechanicsServiceTests
     {
         Id = "armor_fortification",
         Name = "Armor Fortification",
-        ProgressOnOutcome = new Dictionary<TemperingOutcomeType, int>
-        {
-            [TemperingOutcomeType.CriticalFail] = 0,
-            [TemperingOutcomeType.Fail] = 0,
-            [TemperingOutcomeType.Success] = 10,
-            [TemperingOutcomeType.GreatSuccess] = 20
-        },
         StatImprovementPool =
         [
             new WeightedStatDefinition

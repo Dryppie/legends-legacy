@@ -236,7 +236,6 @@ public class JsonCraftingDefinitionProvider : ICraftingDefinitionProvider
         {
             Id = profile.Id,
             Name = profile.Name,
-            ProgressOnOutcome = profile.ProgressOnOutcome,
             StatImprovementPool = profile.StatImprovementPool,
             AffixPool = profile.AffixPool,
             SpecialModifierPool = profile.SpecialModifierPool,
