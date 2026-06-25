@@ -19,6 +19,7 @@ using Domain.Models.LootTables;
 using Domain.Models.MarketPlaces;
 using Domain.Models.Professions;
 using Domain.Models.Professions.Crafting;
+using Domain.Models.Prophecies;
 using Domain.Models.Regions;
 using Domain.Models.Regions.Areas;
 using Domain.Models.Snapshots;
@@ -44,6 +45,7 @@ using Persistence.LL.Repositories.LootTables;
 using Persistence.LL.Repositories.MarketPlaces;
 using Persistence.LL.Repositories.Professions;
 using Persistence.LL.Repositories.Professions.Craftings;
+using Persistence.LL.Repositories.Prophecies;
 using Persistence.LL.Repositories.Regions;
 using Persistence.LL.Repositories.Regions.Areas;
 using Persistence.LL.Repositories.Snapshots;
@@ -101,6 +103,7 @@ public static class DependencyInjection
         services.AddScoped<IProfessionRepository, ProfessionRepository>();
         services.AddScoped<ICraftingRepository, CraftingRepository>();
         services.AddScoped<IRecipeRepository, RecipeRepository>();
+        services.AddScoped<IProphecyRepository, ProphecyRepository>();
 
         services.AddScoped<IPlayerRepository, PlayerRepository>();
 

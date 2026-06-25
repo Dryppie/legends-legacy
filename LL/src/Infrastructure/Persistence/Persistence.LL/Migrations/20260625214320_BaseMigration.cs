@@ -148,6 +148,34 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ProphecyDefinitions",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    Title = table.Column<string>(type: "character varying(160)", maxLength: 160, nullable: false),
+                    FlavorText = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    ObjectiveText = table.Column<string>(type: "character varying(240)", maxLength: 240, nullable: false),
+                    Scope = table.Column<int>(type: "integer", nullable: false),
+                    Category = table.Column<int>(type: "integer", nullable: false),
+                    Difficulty = table.Column<int>(type: "integer", nullable: false),
+                    ObjectiveType = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: false),
+                    ObjectiveParameterJson = table.Column<string>(type: "jsonb", nullable: false, defaultValue: "{}"),
+                    RewardProfileId = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: false),
+                    Weight = table.Column<int>(type: "integer", nullable: false),
+                    IsEnabled = table.Column<bool>(type: "boolean", nullable: false),
+                    AllowedSlots = table.Column<string>(type: "jsonb", nullable: false),
+                    RequiredFeatures = table.Column<string>(type: "jsonb", nullable: false),
+                    RequiredTags = table.Column<string>(type: "jsonb", nullable: false),
+                    ExcludedTags = table.Column<string>(type: "jsonb", nullable: false),
+                    MinPlayerLevel = table.Column<int>(type: "integer", nullable: false),
+                    MaxPlayerLevel = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProphecyDefinitions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Regions",
                 columns: table => new
                 {
@@ -177,6 +205,27 @@ namespace Persistence.LL.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "WeeklyRevelationProgress",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PlayerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PeriodStart = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    PeriodEnd = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    PropheticFavor = table.Column<int>(type: "integer", nullable: false),
+                    Milestone3Claimed = table.Column<bool>(type: "boolean", nullable: false),
+                    Milestone5Claimed = table.Column<bool>(type: "boolean", nullable: false),
+                    Milestone7Claimed = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WeeklyRevelationProgress", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -294,6 +343,27 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ItemAttributeModifier",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ItemBaseId = table.Column<string>(type: "text", nullable: false),
+                    AttributeType = table.Column<int>(type: "integer", nullable: false),
+                    Amount = table.Column<float>(type: "real", nullable: false),
+                    ModifierType = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ItemAttributeModifier", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ItemAttributeModifier_ItemBases_ItemBaseId",
+                        column: x => x.ItemBaseId,
+                        principalTable: "ItemBases",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ItemInstances",
                 columns: table => new
                 {
@@ -368,6 +438,41 @@ namespace Persistence.LL.Migrations
                         principalTable: "ItemBases",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PlayerProphecyInstances",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PlayerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ProphecyDefinitionId = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    Scope = table.Column<int>(type: "integer", nullable: false),
+                    SlotType = table.Column<int>(type: "integer", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    PeriodStart = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    PeriodEnd = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    GeneratedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    AcceptedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    CompletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    ClaimedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    TargetValue = table.Column<int>(type: "integer", nullable: false),
+                    CurrentValue = table.Column<int>(type: "integer", nullable: false),
+                    ObjectiveParameterSnapshotJson = table.Column<string>(type: "jsonb", nullable: false, defaultValue: "{}"),
+                    ProgressJson = table.Column<string>(type: "jsonb", nullable: false, defaultValue: "{}"),
+                    RewardSnapshotJson = table.Column<string>(type: "jsonb", nullable: false, defaultValue: "{}"),
+                    RowVersion = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlayerProphecyInstances", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PlayerProphecyInstances_ProphecyDefinitions_ProphecyDefinit~",
+                        column: x => x.ProphecyDefinitionId,
+                        principalTable: "ProphecyDefinitions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -468,33 +573,6 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ItemAttributeModifier",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ItemBaseId = table.Column<string>(type: "text", nullable: false),
-                    EquipmentInstanceId = table.Column<Guid>(type: "uuid", nullable: true),
-                    AttributeType = table.Column<int>(type: "integer", nullable: false),
-                    Amount = table.Column<float>(type: "real", nullable: false),
-                    ModifierType = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ItemAttributeModifier", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ItemAttributeModifier_ItemBases_ItemBaseId",
-                        column: x => x.ItemBaseId,
-                        principalTable: "ItemBases",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ItemAttributeModifier_ItemInstances_EquipmentInstanceId",
-                        column: x => x.EquipmentInstanceId,
-                        principalTable: "ItemInstances",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "MarketPlaceListings",
                 columns: table => new
                 {
@@ -559,6 +637,9 @@ namespace Persistence.LL.Migrations
                     Experience = table.Column<float>(type: "real", nullable: true),
                     Cinders = table.Column<long>(type: "bigint", nullable: true),
                     Soulstones = table.Column<long>(type: "bigint", nullable: true),
+                    FateEcho = table.Column<long>(type: "bigint", nullable: true),
+                    SigilFragments = table.Column<long>(type: "bigint", nullable: true),
+                    AscensionStoneFragments = table.Column<long>(type: "bigint", nullable: true),
                     ArenaRating = table.Column<int>(type: "integer", nullable: true),
                     Archetype = table.Column<int>(type: "integer", nullable: true),
                     DamageProfile = table.Column<int>(type: "integer", nullable: true),
@@ -1250,11 +1331,6 @@ namespace Persistence.LL.Migrations
                 column: "ItemInstanceId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ItemAttributeModifier_EquipmentInstanceId",
-                table: "ItemAttributeModifier",
-                column: "EquipmentInstanceId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ItemAttributeModifier_ItemBaseId",
                 table: "ItemAttributeModifier",
                 column: "ItemBaseId");
@@ -1317,6 +1393,32 @@ namespace Persistence.LL.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_PlayerProphecyInstances_PlayerId_CharacterId_Scope_PeriodS~1",
+                table: "PlayerProphecyInstances",
+                columns: new[] { "PlayerId", "CharacterId", "Scope", "PeriodStart", "SlotType" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayerProphecyInstances_PlayerId_CharacterId_Scope_PeriodSt~",
+                table: "PlayerProphecyInstances",
+                columns: new[] { "PlayerId", "CharacterId", "Scope", "PeriodStart", "PeriodEnd" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayerProphecyInstances_PlayerId_CharacterId_Status",
+                table: "PlayerProphecyInstances",
+                columns: new[] { "PlayerId", "CharacterId", "Status" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayerProphecyInstances_ProphecyDefinitionId",
+                table: "PlayerProphecyInstances",
+                column: "ProphecyDefinitionId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProphecyDefinitions_Scope_Category_Difficulty_IsEnabled",
+                table: "ProphecyDefinitions",
+                columns: new[] { "Scope", "Category", "Difficulty", "IsEnabled" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Recipes_ItemId",
                 table: "Recipes",
                 column: "ItemId");
@@ -1355,6 +1457,12 @@ namespace Persistence.LL.Migrations
                 name: "IX_ToolBonusModifier_EquipmentInstanceId",
                 table: "ToolBonusModifier",
                 column: "EquipmentInstanceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_WeeklyRevelationProgress_PlayerId_CharacterId_PeriodStart",
+                table: "WeeklyRevelationProgress",
+                columns: new[] { "PlayerId", "CharacterId", "PeriodStart" },
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -1433,6 +1541,9 @@ namespace Persistence.LL.Migrations
                 name: "MonsterResonances");
 
             migrationBuilder.DropTable(
+                name: "PlayerProphecyInstances");
+
+            migrationBuilder.DropTable(
                 name: "Professions");
 
             migrationBuilder.DropTable(
@@ -1449,6 +1560,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "ToolBonusModifier");
+
+            migrationBuilder.DropTable(
+                name: "WeeklyRevelationProgress");
 
             migrationBuilder.DropTable(
                 name: "ActionDetails");
@@ -1470,6 +1584,9 @@ namespace Persistence.LL.Migrations
 
             migrationBuilder.DropTable(
                 name: "Recipes");
+
+            migrationBuilder.DropTable(
+                name: "ProphecyDefinitions");
 
             migrationBuilder.DropTable(
                 name: "DungeonRuns");
