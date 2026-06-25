@@ -12,6 +12,9 @@ public class CharacterDto : IMapFrom<Character>
     public float ExperienceUntilNextLevel { get; set; }
     public long Cinders { get; set; } = 0;
     public long Soulstones { get; set; } = 0;
+    public long FateEcho { get; set; } = 0;
+    public long SigilFragments { get; set; } = 0;
+    public long AscensionStoneFragments { get; set; } = 0;
     public int ArenaRating { get; set; }
 
     public void Mapping(Profile profile)

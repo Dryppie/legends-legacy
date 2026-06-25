@@ -4,15 +4,15 @@ using AutoMapper;
 
 namespace Application.UseCases.Prophecies.Dtos;
 
-public sealed class ClaimWeeklyRevelationMilestoneResponseDto : IMapFrom<WeeklyRevelationClaimResult>
+public sealed class ProphecyClaimResponseDto : IMapFrom<ProphecyClaimResult>
 {
-    public int FavorRequired { get; set; }
+    public ProphecyInstanceDto Prophecy { get; set; } = new();
     public ProphecyRewardSnapshotDto Reward { get; set; } = new();
     public WeeklyRevelationProgressDto WeeklyRevelation { get; set; } = new();
 
     public void Mapping(Profile profile)
     {
-        profile.CreateMap<WeeklyRevelationClaimResult, ClaimWeeklyRevelationMilestoneResponseDto>()
+        profile.CreateMap<ProphecyClaimResult, ProphecyClaimResponseDto>()
             .ForMember(
                 dest => dest.WeeklyRevelation,
                 opt => opt.MapFrom((src, _, _, context) =>

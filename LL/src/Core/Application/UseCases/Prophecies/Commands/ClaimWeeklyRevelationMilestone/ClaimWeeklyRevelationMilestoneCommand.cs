@@ -1,6 +1,7 @@
 using Application.Interfaces.Services.LL.Prophecies;
 using Application.MediatR.Markers;
 using Application.UseCases.Prophecies.Dtos;
+using AutoMapper;
 using Common.Primitives;
 using MediatR;
 
@@ -11,10 +12,12 @@ public sealed record ClaimWeeklyRevelationMilestoneCommand(Guid PlayerId, Guid C
 public sealed class ClaimWeeklyRevelationMilestoneCommandHandler : IRequestHandler<ClaimWeeklyRevelationMilestoneCommand, Response<ClaimWeeklyRevelationMilestoneResponseDto>>
 {
     private readonly IProphecyService _prophecyService;
+    private readonly IMapper _mapper;
 
-    public ClaimWeeklyRevelationMilestoneCommandHandler(IProphecyService prophecyService)
+    public ClaimWeeklyRevelationMilestoneCommandHandler(IProphecyService prophecyService, IMapper mapper)
     {
         _prophecyService = prophecyService;
+        _mapper = mapper;
     }
 
     public async Task<Response<ClaimWeeklyRevelationMilestoneResponseDto>> Handle(ClaimWeeklyRevelationMilestoneCommand request, CancellationToken cancellationToken)
@@ -31,9 +34,6 @@ public sealed class ClaimWeeklyRevelationMilestoneCommandHandler : IRequestHandl
             return Response<ClaimWeeklyRevelationMilestoneResponseDto>.Fail(result.Error ?? "Could not claim weekly milestone.");
         }
 
-        return Response<ClaimWeeklyRevelationMilestoneResponseDto>.Success(new ClaimWeeklyRevelationMilestoneResponseDto(
-            result.Value.FavorRequired,
-            ProphecyDtoMapper.ToDto(result.Value.Reward),
-            ProphecyDtoMapper.ToDto(result.Value.WeeklyRevelation, result.Value.WeeklyMilestones)));
+        return Response<ClaimWeeklyRevelationMilestoneResponseDto>.Success(_mapper.Map<ClaimWeeklyRevelationMilestoneResponseDto>(result.Value));
     }
 }

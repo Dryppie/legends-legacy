@@ -1,6 +1,7 @@
 using Application.Interfaces.Services.LL.Prophecies;
 using Application.MediatR.Markers;
 using Application.UseCases.Prophecies.Dtos;
+using AutoMapper;
 using Common.Primitives;
 using MediatR;
 
@@ -11,10 +12,12 @@ public sealed record ClaimProphecyCommand(Guid PlayerId, Guid CharacterId, Guid 
 public sealed class ClaimProphecyCommandHandler : IRequestHandler<ClaimProphecyCommand, Response<ProphecyClaimResponseDto>>
 {
     private readonly IProphecyService _prophecyService;
+    private readonly IMapper _mapper;
 
-    public ClaimProphecyCommandHandler(IProphecyService prophecyService)
+    public ClaimProphecyCommandHandler(IProphecyService prophecyService, IMapper mapper)
     {
         _prophecyService = prophecyService;
+        _mapper = mapper;
     }
 
     public async Task<Response<ProphecyClaimResponseDto>> Handle(ClaimProphecyCommand request, CancellationToken cancellationToken)
@@ -31,9 +34,6 @@ public sealed class ClaimProphecyCommandHandler : IRequestHandler<ClaimProphecyC
             return Response<ProphecyClaimResponseDto>.Fail(result.Error ?? "Could not claim prophecy.");
         }
 
-        return Response<ProphecyClaimResponseDto>.Success(new ProphecyClaimResponseDto(
-            ProphecyDtoMapper.ToDto(result.Value.Prophecy),
-            ProphecyDtoMapper.ToDto(result.Value.Reward),
-            ProphecyDtoMapper.ToDto(result.Value.WeeklyRevelation, result.Value.WeeklyMilestones)));
+        return Response<ProphecyClaimResponseDto>.Success(_mapper.Map<ProphecyClaimResponseDto>(result.Value));
     }
 }

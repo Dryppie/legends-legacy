@@ -1,6 +1,7 @@
 using Application.Interfaces.Services.LL.Prophecies;
 using Application.MediatR.Markers;
 using Application.UseCases.Prophecies.Dtos;
+using AutoMapper;
 using Common.Primitives;
 using MediatR;
 
@@ -11,10 +12,12 @@ public sealed record GetPropheciesOverviewCommand(Guid PlayerId, Guid CharacterI
 public sealed class GetPropheciesOverviewCommandHandler : IRequestHandler<GetPropheciesOverviewCommand, Response<PropheciesOverviewDto>>
 {
     private readonly IProphecyService _prophecyService;
+    private readonly IMapper _mapper;
 
-    public GetPropheciesOverviewCommandHandler(IProphecyService prophecyService)
+    public GetPropheciesOverviewCommandHandler(IProphecyService prophecyService, IMapper mapper)
     {
         _prophecyService = prophecyService;
+        _mapper = mapper;
     }
 
     public async Task<Response<PropheciesOverviewDto>> Handle(GetPropheciesOverviewCommand request, CancellationToken cancellationToken)
@@ -25,6 +28,6 @@ public sealed class GetPropheciesOverviewCommandHandler : IRequestHandler<GetPro
             DateTimeOffset.UtcNow,
             cancellationToken);
 
-        return Response<PropheciesOverviewDto>.Success(ProphecyDtoMapper.ToDto(overview));
+        return Response<PropheciesOverviewDto>.Success(_mapper.Map<PropheciesOverviewDto>(overview));
     }
 }
