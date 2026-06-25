@@ -9,21 +9,21 @@ using Domain.Models.Professions.Crafting.V2;
 using MediatR;
 
 namespace Application.UseCases.CharacterActions.Commands.StartCraftingAction;
-public record StartCraftingActionCommand(Guid CharacterId, string QueueId, string ItemInstanceId, string TemperingRecipeId) : ICommand<Response<bool>>;
+public record StartCraftingActionCommand(Guid CharacterId, string QueueId, string ItemInstanceId, string? TemperingRecipeId) : ICommand<Response<bool>>;
 public class StartCraftingActionCommandHandler : IRequestHandler<StartCraftingActionCommand, Response<bool>>
 {
     private readonly ICharacterActionService _characterActionService;
     private readonly IInventoryService _inventoryService;
-    private readonly ICraftingDefinitionProvider _definitions;
+    private readonly ITemperingRecipeResolver _temperingRecipeResolver;
 
     public StartCraftingActionCommandHandler(
         ICharacterActionService characterActionService,
         IInventoryService inventoryService,
-        ICraftingDefinitionProvider definitions)
+        ITemperingRecipeResolver temperingRecipeResolver)
     {
         _characterActionService = characterActionService;
         _inventoryService = inventoryService;
-        _definitions = definitions;
+        _temperingRecipeResolver = temperingRecipeResolver;
     }
 
     public async Task<Response<bool>> Handle(StartCraftingActionCommand request, CancellationToken cancellationToken)
@@ -40,15 +40,9 @@ public class StartCraftingActionCommandHandler : IRequestHandler<StartCraftingAc
         if (equipmentInstance.EquipmentBase.EquipmentType == EquipmentType.Tool)
             return Response<bool>.Fail("Tools cannot be modified through Crafting.");
 
-        var temperingRecipe = _definitions.GetTemperingRecipe(request.TemperingRecipeId);
+        var temperingRecipe = _temperingRecipeResolver.ResolveFor(equipmentInstance, request.TemperingRecipeId);
         if (temperingRecipe == null)
-            return Response<bool>.Fail("Tempering recipe does not exist.");
-
-        if (temperingRecipe.ApplicableItemTypes.Count > 0 && !temperingRecipe.ApplicableItemTypes.Contains(equipmentInstance.EquipmentBase.EquipmentType))
-            return Response<bool>.Fail("Tempering recipe does not apply to this item.");
-
-        if (!temperingRecipe.RequiredItemAffinityTags.All(tag => equipmentInstance.AffinityTags.Contains(tag, StringComparer.OrdinalIgnoreCase)))
-            return Response<bool>.Fail("Item does not have the required affinity.");
+            return Response<bool>.Fail("No tempering recipe applies to this item.");
 
         if ((equipmentInstance.Potential ?? 0) < TemperingConstants.PotentialCost)
             return Response<bool>.Fail("Item does not have enough Potential.");
