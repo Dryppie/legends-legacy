@@ -275,6 +275,9 @@ public class CraftingService : ICraftingService
         var itemBase = await _itemCatalogService.GetCraftableEquipmentBaseAsync(outputItemId, cancellationToken);
         if (itemBase == null) return Response<CraftItemsResult>.Fail("Recipe output item does not exist.");
         if (itemBase.EquipmentType == EquipmentType.Tool) return Response<CraftItemsResult>.Fail("Tools cannot be crafted.");
+        var professionType = ResolveCraftingProfession(itemBase.EquipmentType);
+        if (professionType == ProfessionType.None)
+            return Response<CraftItemsResult>.Fail("Recipe output does not map to a crafting profession.");
 
         var costs = _requirementResolver.ResolveCosts(recipe, targetTier, blueprint.Value?.SpecialResourceRequirements)
             .Select(cost => new Material
@@ -287,6 +290,7 @@ public class CraftingService : ICraftingService
         if (!removedMaterials) return Response<CraftItemsResult>.Fail("Not enough materials.");
 
         var mastery = await _progressionService.GetOrCreateRecipeMasteryAsync(characterId, recipe.Id, cancellationToken);
+        var craftingLevel = await _professionService.GetProfessionLevelAsync(characterId, professionType, cancellationToken);
         var rng = Random.Shared;
         var created = new List<InventoryItem>();
         var qualityCounts = new Dictionary<ItemQuality, int>();
@@ -294,7 +298,7 @@ public class CraftingService : ICraftingService
         for (var i = 0; i < craftQuantity; i++)
         {
             var quality = _qualityRollService.RollQuality(recipe.Id, mastery.Level, rng);
-            var potential = _potentialService.CalculateStartingPotential(itemBase, targetTier, quality, mastery.Level);
+            var potential = _potentialService.CalculateStartingPotential(itemBase, targetTier, quality, mastery.Level, craftingLevel);
             qualityCounts[quality] = qualityCounts.GetValueOrDefault(quality) + 1;
 
             var equipmentInstance = new EquipmentInstance
@@ -530,6 +534,17 @@ public class CraftingService : ICraftingService
         if (string.IsNullOrWhiteSpace(formId)) return recipe.Forms[0];
 
         return recipe.Forms.FirstOrDefault(x => x.FormId.Equals(formId, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static ProfessionType ResolveCraftingProfession(EquipmentType equipmentType)
+    {
+        return equipmentType switch
+        {
+            EquipmentType.Head or EquipmentType.Chest or EquipmentType.Legs => ProfessionType.ArmorForging,
+            EquipmentType.Ring or EquipmentType.Necklace or EquipmentType.Relic => ProfessionType.JewelryCrafting,
+            EquipmentType.OneHanded or EquipmentType.TwoHanded or EquipmentType.OffHand => ProfessionType.WeaponSmithing,
+            _ => ProfessionType.None
+        };
     }
 
     private async Task<(BlueprintDefinition? Value, string? Error)> ResolveCraftingBlueprintAsync(
