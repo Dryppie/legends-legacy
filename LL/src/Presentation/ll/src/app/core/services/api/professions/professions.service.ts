@@ -1,7 +1,6 @@
 import { Injectable, Signal, signal } from '@angular/core';
 import { ApiService } from '../../api/api.service';
 import { CraftingProfession, Profession, Recipe } from '../../../../shared/models/profession';
-import { RECIPES_CONTENT } from '../../../../data/recipes-content';
 import {
   CharacterProfession,
   ProfessionType,
@@ -97,6 +96,6 @@ export class ProfessionsService {
   }
 
   getWeaponsmithingRecipes(): Recipe[] {
-    return RECIPES_CONTENT;
+    return [];
   }
 }

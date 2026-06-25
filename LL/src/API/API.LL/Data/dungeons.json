@@ -18,6 +18,19 @@
           "itemId": "item.monster_core.lesser",
           "minAmount": 6,
           "maxAmount": 6
+        },
+        {
+          "itemId": "blueprint_fury",
+          "minAmount": 1,
+          "maxAmount": 1
+        }
+      ],
+      "completionRewards": [
+        {
+          "itemId": "blueprint_fury",
+          "minAmount": 1,
+          "maxAmount": 1,
+          "chance": 0.05
         }
       ]
     },
@@ -36,42 +49,90 @@
           "id": "alarm_watchful",
           "value": 50,
           "description": "The alarm has enemies watching every tunnel.",
-          "enemyModifierIds": [ "alarm_enemy_ready" ],
-          "bossModifierIds": [ "alarm_boss_ready" ],
+          "enemyModifierIds": [
+            "alarm_enemy_ready"
+          ],
+          "bossModifierIds": [
+            "alarm_boss_ready"
+          ],
           "rewardMultiplierBonusPercent": 25
         },
         {
           "id": "alarm_full",
           "value": 75,
           "description": "The boss is fully alerted and enraged.",
-          "enemyModifierIds": [ "alarm_enemy_reinforced" ],
-          "bossModifierIds": [ "alarm_boss_enraged" ],
+          "enemyModifierIds": [
+            "alarm_enemy_reinforced"
+          ],
+          "bossModifierIds": [
+            "alarm_boss_enraged"
+          ],
           "rewardMultiplierBonusPercent": 45
         }
       ]
     },
     "gatheringNodes": [
       {
-        "id": "goblin_mines_dungeon_iron_vein",
-        "name": "Dungeon Iron Vein",
+        "id": "goblin_mines_dungeon_ore_vein",
+        "name": "Dungeon Ore Vein",
         "type": "Mining",
         "levelRequirement": 1,
         "procChance": 0.35,
         "loot": [
           {
-            "itemId": "iron_ore",
+            "itemId": "ore",
             "weight": 45,
             "minQuantity": 1,
             "maxQuantity": 3
           },
           {
             "itemId": "rough_stone",
-            "weight": 35,
+            "weight": 30,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "crystalline_powder",
+            "weight": 20,
             "minQuantity": 1,
             "maxQuantity": 2
           },
           {
             "itemId": "cracked_garnet",
+            "weight": 5,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          }
+        ]
+      },
+      {
+        "id": "goblin_mines_dungeon_timber_cache",
+        "name": "Reclaimed Timber Cache",
+        "type": "Woodcutting",
+        "levelRequirement": 1,
+        "procChance": 0.22,
+        "loot": [
+          {
+            "itemId": "wood",
+            "weight": 45,
+            "minQuantity": 1,
+            "maxQuantity": 3
+          },
+          {
+            "itemId": "woven_fiber",
+            "weight": 25,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "rawhide",
+            "weight": 20,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "bloodwood",
             "weight": 5,
             "minQuantity": 1,
             "maxQuantity": 1,
@@ -94,9 +155,16 @@
           },
           {
             "itemId": "murky_fish_oil",
-            "weight": 15,
+            "weight": 30,
             "minQuantity": 1,
             "maxQuantity": 1
+          },
+          {
+            "itemId": "refined_fish_oil",
+            "weight": 5,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
           }
         ]
       }
@@ -107,7 +175,7 @@
     "rooms": [
       {
         "type": "Combat",
-        "weight": 1.0,
+        "weight": 1,
         "encounterIds": [
           "goblin",
           "goblin_archer",
@@ -117,7 +185,7 @@
       },
       {
         "type": "Boss",
-        "weight": 1.0,
+        "weight": 1,
         "encounterIds": [
           "hobgoblin"
         ]
@@ -145,6 +213,19 @@
           "itemId": "item.monster_core.greater",
           "minAmount": 12,
           "maxAmount": 12
+        },
+        {
+          "itemId": "blueprint_execution",
+          "minAmount": 1,
+          "maxAmount": 1
+        }
+      ],
+      "completionRewards": [
+        {
+          "itemId": "blueprint_execution",
+          "minAmount": 1,
+          "maxAmount": 1,
+          "chance": 0.045
         }
       ]
     },
@@ -163,42 +244,118 @@
           "id": "alarm_watchful",
           "value": 50,
           "description": "The alarm has enemies watching every tunnel.",
-          "enemyModifierIds": [ "alarm_enemy_ready" ],
-          "bossModifierIds": [ "alarm_boss_ready" ],
+          "enemyModifierIds": [
+            "alarm_enemy_ready"
+          ],
+          "bossModifierIds": [
+            "alarm_boss_ready"
+          ],
           "rewardMultiplierBonusPercent": 25
         },
         {
           "id": "alarm_full",
           "value": 75,
           "description": "The boss is fully alerted and enraged.",
-          "enemyModifierIds": [ "alarm_enemy_reinforced" ],
-          "bossModifierIds": [ "alarm_boss_enraged" ],
+          "enemyModifierIds": [
+            "alarm_enemy_reinforced"
+          ],
+          "bossModifierIds": [
+            "alarm_boss_enraged"
+          ],
           "rewardMultiplierBonusPercent": 45
         }
       ]
     },
     "gatheringNodes": [
       {
-        "id": "goblin_mines_ii_dungeon_iron_vein",
-        "name": "Rich Dungeon Iron Vein",
+        "id": "goblin_mines_ii_rich_ore_vein",
+        "name": "Rich Ore Vein",
         "type": "Mining",
         "levelRequirement": 1,
-        "procChance": 0.40,
+        "procChance": 0.4,
         "loot": [
           {
-            "itemId": "iron_ore",
+            "itemId": "copper_ore",
             "weight": 45,
             "minQuantity": 1,
             "maxQuantity": 4
           },
           {
-            "itemId": "rough_stone",
-            "weight": 35,
+            "itemId": "mossy_stone",
+            "weight": 30,
             "minQuantity": 1,
             "maxQuantity": 3
           },
           {
             "itemId": "cracked_garnet",
+            "weight": 20,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "soulglass_shard",
+            "weight": 5,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          }
+        ]
+      },
+      {
+        "id": "goblin_mines_ii_support_timber",
+        "name": "Support Timber Cache",
+        "type": "Woodcutting",
+        "levelRequirement": 1,
+        "procChance": 0.24,
+        "loot": [
+          {
+            "itemId": "bloodwood",
+            "weight": 40,
+            "minQuantity": 1,
+            "maxQuantity": 3
+          },
+          {
+            "itemId": "thick_hide",
+            "weight": 25,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "silk_thread",
+            "weight": 20,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "living_bark",
+            "weight": 5,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          }
+        ]
+      },
+      {
+        "id": "goblin_mines_ii_deep_stream",
+        "name": "Deep Mine Stream",
+        "type": "Fishing",
+        "levelRequirement": 1,
+        "procChance": 0.2,
+        "loot": [
+          {
+            "itemId": "cave_fish",
+            "weight": 35,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "refined_fish_oil",
+            "weight": 30,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "shadow_oil",
             "weight": 5,
             "minQuantity": 1,
             "maxQuantity": 1,
@@ -213,7 +370,7 @@
     "rooms": [
       {
         "type": "Combat",
-        "weight": 1.0,
+        "weight": 1,
         "encounterIds": [
           "goblin",
           "goblin_archer",
@@ -223,7 +380,7 @@
       },
       {
         "type": "Boss",
-        "weight": 1.0,
+        "weight": 1,
         "encounterIds": [
           "hobgoblin"
         ]
@@ -251,6 +408,19 @@
           "itemId": "item.monster_core.primal",
           "minAmount": 24,
           "maxAmount": 24
+        },
+        {
+          "itemId": "blueprint_arcane",
+          "minAmount": 1,
+          "maxAmount": 1
+        }
+      ],
+      "completionRewards": [
+        {
+          "itemId": "blueprint_arcane",
+          "minAmount": 1,
+          "maxAmount": 1,
+          "chance": 0.04
         }
       ]
     },
@@ -269,42 +439,118 @@
           "id": "alarm_watchful",
           "value": 50,
           "description": "The alarm has enemies watching every tunnel.",
-          "enemyModifierIds": [ "alarm_enemy_ready" ],
-          "bossModifierIds": [ "alarm_boss_ready" ],
+          "enemyModifierIds": [
+            "alarm_enemy_ready"
+          ],
+          "bossModifierIds": [
+            "alarm_boss_ready"
+          ],
           "rewardMultiplierBonusPercent": 25
         },
         {
           "id": "alarm_full",
           "value": 75,
           "description": "The boss is fully alerted and enraged.",
-          "enemyModifierIds": [ "alarm_enemy_reinforced" ],
-          "bossModifierIds": [ "alarm_boss_enraged" ],
+          "enemyModifierIds": [
+            "alarm_enemy_reinforced"
+          ],
+          "bossModifierIds": [
+            "alarm_boss_enraged"
+          ],
           "rewardMultiplierBonusPercent": 45
         }
       ]
     },
     "gatheringNodes": [
       {
-        "id": "goblin_mines_iii_dungeon_iron_vein",
-        "name": "Deep Dungeon Iron Vein",
+        "id": "goblin_mines_iii_verdant_vein",
+        "name": "Verdant Deep Vein",
         "type": "Mining",
         "levelRequirement": 1,
         "procChance": 0.45,
         "loot": [
           {
-            "itemId": "iron_ore",
+            "itemId": "verdant_ore",
             "weight": 45,
             "minQuantity": 2,
             "maxQuantity": 4
           },
           {
-            "itemId": "rough_stone",
-            "weight": 35,
+            "itemId": "deep_stone",
+            "weight": 30,
             "minQuantity": 1,
             "maxQuantity": 3
           },
           {
-            "itemId": "cracked_garnet",
+            "itemId": "soulglass_shard",
+            "weight": 20,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "shadow_oil",
+            "weight": 5,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          }
+        ]
+      },
+      {
+        "id": "goblin_mines_iii_living_timber",
+        "name": "Living Timber Cache",
+        "type": "Woodcutting",
+        "levelRequirement": 1,
+        "procChance": 0.26,
+        "loot": [
+          {
+            "itemId": "living_bark",
+            "weight": 40,
+            "minQuantity": 1,
+            "maxQuantity": 3
+          },
+          {
+            "itemId": "scaled_hide",
+            "weight": 25,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "spectral_thread",
+            "weight": 20,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "soulglass_shard",
+            "weight": 5,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          }
+        ]
+      },
+      {
+        "id": "goblin_mines_iii_black_stream",
+        "name": "Blackwater Stream",
+        "type": "Fishing",
+        "levelRequirement": 1,
+        "procChance": 0.22,
+        "loot": [
+          {
+            "itemId": "cave_fish",
+            "weight": 30,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "shadow_oil",
+            "weight": 30,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "soulglass_shard",
             "weight": 5,
             "minQuantity": 1,
             "maxQuantity": 1,
@@ -319,7 +565,7 @@
     "rooms": [
       {
         "type": "Combat",
-        "weight": 1.0,
+        "weight": 1,
         "encounterIds": [
           "goblin",
           "goblin_archer",
@@ -329,7 +575,7 @@
       },
       {
         "type": "Boss",
-        "weight": 1.0,
+        "weight": 1,
         "encounterIds": [
           "hobgoblin"
         ]
@@ -355,6 +601,19 @@
           "itemId": "item.monster_core.lesser",
           "minAmount": 6,
           "maxAmount": 6
+        },
+        {
+          "itemId": "blueprint_aegis",
+          "minAmount": 1,
+          "maxAmount": 1
+        }
+      ],
+      "completionRewards": [
+        {
+          "itemId": "blueprint_aegis",
+          "minAmount": 1,
+          "maxAmount": 1,
+          "chance": 0.05
         }
       ]
     },
@@ -373,16 +632,24 @@
           "id": "curse_shroud",
           "value": 50,
           "description": "The curse settles into a defensive shroud.",
-          "enemyModifierIds": [ "curse_enemy_shrouded" ],
-          "bossModifierIds": [ "curse_boss_shrouded" ],
+          "enemyModifierIds": [
+            "curse_enemy_shrouded"
+          ],
+          "bossModifierIds": [
+            "curse_boss_shrouded"
+          ],
           "rewardMultiplierBonusPercent": 25
         },
         {
           "id": "curse_empowered",
           "value": 75,
           "description": "The curse feeds the dead with violent force.",
-          "enemyModifierIds": [ "curse_enemy_empowered" ],
-          "bossModifierIds": [ "curse_boss_empowered" ],
+          "enemyModifierIds": [
+            "curse_enemy_empowered"
+          ],
+          "bossModifierIds": [
+            "curse_boss_empowered"
+          ],
           "rewardMultiplierBonusPercent": 45
         }
       ]
@@ -393,7 +660,7 @@
     "rooms": [
       {
         "type": "Combat",
-        "weight": 1.0,
+        "weight": 1,
         "encounterIds": [
           "skeleton_archer",
           "skeleton_mage",
@@ -423,9 +690,79 @@
       },
       {
         "type": "Boss",
-        "weight": 1.0,
+        "weight": 1,
         "encounterIds": [
           "specter"
+        ]
+      }
+    ],
+    "gatheringNodes": [
+      {
+        "id": "forgotten_catacombs_ossuary",
+        "name": "Dusty Ossuary",
+        "type": "Mining",
+        "levelRequirement": 1,
+        "procChance": 0.3,
+        "loot": [
+          {
+            "itemId": "bone_fragments",
+            "weight": 45,
+            "minQuantity": 1,
+            "maxQuantity": 3
+          },
+          {
+            "itemId": "rough_stone",
+            "weight": 25,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "woven_fiber",
+            "weight": 20,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "grave_bone",
+            "weight": 5,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          }
+        ]
+      },
+      {
+        "id": "forgotten_catacombs_funeral_wrappings",
+        "name": "Funeral Wrappings",
+        "type": "Skinning",
+        "levelRequirement": 1,
+        "procChance": 0.24,
+        "loot": [
+          {
+            "itemId": "woven_fiber",
+            "weight": 40,
+            "minQuantity": 1,
+            "maxQuantity": 3
+          },
+          {
+            "itemId": "rawhide",
+            "weight": 25,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "crystalline_powder",
+            "weight": 20,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "spectral_thread",
+            "weight": 5,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          }
         ]
       }
     ]
@@ -451,6 +788,19 @@
           "itemId": "item.monster_core.greater",
           "minAmount": 12,
           "maxAmount": 12
+        },
+        {
+          "itemId": "blueprint_spirit",
+          "minAmount": 1,
+          "maxAmount": 1
+        }
+      ],
+      "completionRewards": [
+        {
+          "itemId": "blueprint_spirit",
+          "minAmount": 1,
+          "maxAmount": 1,
+          "chance": 0.045
         }
       ]
     },
@@ -469,16 +819,24 @@
           "id": "curse_shroud",
           "value": 50,
           "description": "The curse settles into a defensive shroud.",
-          "enemyModifierIds": [ "curse_enemy_shrouded" ],
-          "bossModifierIds": [ "curse_boss_shrouded" ],
+          "enemyModifierIds": [
+            "curse_enemy_shrouded"
+          ],
+          "bossModifierIds": [
+            "curse_boss_shrouded"
+          ],
           "rewardMultiplierBonusPercent": 25
         },
         {
           "id": "curse_empowered",
           "value": 75,
           "description": "The curse feeds the dead with violent force.",
-          "enemyModifierIds": [ "curse_enemy_empowered" ],
-          "bossModifierIds": [ "curse_boss_empowered" ],
+          "enemyModifierIds": [
+            "curse_enemy_empowered"
+          ],
+          "bossModifierIds": [
+            "curse_boss_empowered"
+          ],
           "rewardMultiplierBonusPercent": 45
         }
       ]
@@ -489,7 +847,7 @@
     "rooms": [
       {
         "type": "Combat",
-        "weight": 1.0,
+        "weight": 1,
         "encounterIds": [
           "skeleton_archer",
           "skeleton_mage",
@@ -519,9 +877,79 @@
       },
       {
         "type": "Boss",
-        "weight": 1.0,
+        "weight": 1,
         "encounterIds": [
           "specter"
+        ]
+      }
+    ],
+    "gatheringNodes": [
+      {
+        "id": "forgotten_catacombs_ii_bone_pile",
+        "name": "Grave Bone Pile",
+        "type": "Mining",
+        "levelRequirement": 1,
+        "procChance": 0.34,
+        "loot": [
+          {
+            "itemId": "grave_bone",
+            "weight": 45,
+            "minQuantity": 1,
+            "maxQuantity": 3
+          },
+          {
+            "itemId": "mossy_stone",
+            "weight": 25,
+            "minQuantity": 1,
+            "maxQuantity": 3
+          },
+          {
+            "itemId": "silk_thread",
+            "weight": 20,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "ancient_bone",
+            "weight": 5,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          }
+        ]
+      },
+      {
+        "id": "forgotten_catacombs_ii_spectral_webbing",
+        "name": "Spectral Webbing",
+        "type": "Skinning",
+        "levelRequirement": 1,
+        "procChance": 0.26,
+        "loot": [
+          {
+            "itemId": "silk_thread",
+            "weight": 40,
+            "minQuantity": 1,
+            "maxQuantity": 3
+          },
+          {
+            "itemId": "thick_hide",
+            "weight": 20,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "cracked_garnet",
+            "weight": 20,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "spectral_thread",
+            "weight": 8,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          }
         ]
       }
     ]
@@ -547,6 +975,30 @@
           "itemId": "item.monster_core.primal",
           "minAmount": 24,
           "maxAmount": 24
+        },
+        {
+          "itemId": "blueprint_endurance",
+          "minAmount": 1,
+          "maxAmount": 1
+        },
+        {
+          "itemId": "blueprint_phoenix",
+          "minAmount": 1,
+          "maxAmount": 1
+        }
+      ],
+      "completionRewards": [
+        {
+          "itemId": "blueprint_endurance",
+          "minAmount": 1,
+          "maxAmount": 1,
+          "chance": 0.035
+        },
+        {
+          "itemId": "blueprint_phoenix",
+          "minAmount": 1,
+          "maxAmount": 1,
+          "chance": 0.03
         }
       ]
     },
@@ -565,16 +1017,24 @@
           "id": "curse_shroud",
           "value": 50,
           "description": "The curse settles into a defensive shroud.",
-          "enemyModifierIds": [ "curse_enemy_shrouded" ],
-          "bossModifierIds": [ "curse_boss_shrouded" ],
+          "enemyModifierIds": [
+            "curse_enemy_shrouded"
+          ],
+          "bossModifierIds": [
+            "curse_boss_shrouded"
+          ],
           "rewardMultiplierBonusPercent": 25
         },
         {
           "id": "curse_empowered",
           "value": 75,
           "description": "The curse feeds the dead with violent force.",
-          "enemyModifierIds": [ "curse_enemy_empowered" ],
-          "bossModifierIds": [ "curse_boss_empowered" ],
+          "enemyModifierIds": [
+            "curse_enemy_empowered"
+          ],
+          "bossModifierIds": [
+            "curse_boss_empowered"
+          ],
           "rewardMultiplierBonusPercent": 45
         }
       ]
@@ -585,7 +1045,7 @@
     "rooms": [
       {
         "type": "Combat",
-        "weight": 1.0,
+        "weight": 1,
         "encounterIds": [
           "skeleton_archer",
           "skeleton_mage",
@@ -615,9 +1075,79 @@
       },
       {
         "type": "Boss",
-        "weight": 1.0,
+        "weight": 1,
         "encounterIds": [
           "specter"
+        ]
+      }
+    ],
+    "gatheringNodes": [
+      {
+        "id": "forgotten_catacombs_iii_ancient_ossuary",
+        "name": "Ancient Ossuary",
+        "type": "Mining",
+        "levelRequirement": 1,
+        "procChance": 0.38,
+        "loot": [
+          {
+            "itemId": "ancient_bone",
+            "weight": 45,
+            "minQuantity": 1,
+            "maxQuantity": 3
+          },
+          {
+            "itemId": "deep_stone",
+            "weight": 25,
+            "minQuantity": 1,
+            "maxQuantity": 3
+          },
+          {
+            "itemId": "spectral_thread",
+            "weight": 20,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "soulglass_shard",
+            "weight": 5,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          }
+        ]
+      },
+      {
+        "id": "forgotten_catacombs_iii_soulglass_font",
+        "name": "Soulglass Font",
+        "type": "Skinning",
+        "levelRequirement": 1,
+        "procChance": 0.28,
+        "loot": [
+          {
+            "itemId": "soulglass_shard",
+            "weight": 35,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "spectral_thread",
+            "weight": 30,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "shadow_oil",
+            "weight": 15,
+            "minQuantity": 1,
+            "maxQuantity": 1
+          },
+          {
+            "itemId": "ancient_bone",
+            "weight": 5,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          }
         ]
       }
     ]
@@ -641,6 +1171,25 @@
           "itemId": "item.monster_core.lesser",
           "minAmount": 6,
           "maxAmount": 6
+        },
+        {
+          "itemId": "blueprint_venom_touched_sword",
+          "minAmount": 1,
+          "maxAmount": 1
+        }
+      ],
+      "completionRewards": [
+        {
+          "itemId": "blueprint_venom_touched_sword",
+          "minAmount": 1,
+          "maxAmount": 1,
+          "chance": 0.05
+        },
+        {
+          "itemId": "venom_gland",
+          "minAmount": 1,
+          "maxAmount": 1,
+          "chance": 0.22
         }
       ]
     },
@@ -655,7 +1204,7 @@
     "rooms": [
       {
         "type": "Combat",
-        "weight": 1.0,
+        "weight": 1,
         "encounterIds": [
           "ant_worker"
         ]
@@ -669,7 +1218,7 @@
       },
       {
         "type": "MiniBoss",
-        "weight": 1.0,
+        "weight": 1,
         "encounterIds": [
           "ant_worker"
         ]
@@ -686,6 +1235,70 @@
         "weight": 0.08,
         "encounterIds": [
           "fire_ant"
+        ]
+      }
+    ],
+    "gatheringNodes": [
+      {
+        "id": "hives_abyss_chitin_nest",
+        "name": "Chitin Nest",
+        "type": "Skinning",
+        "levelRequirement": 1,
+        "procChance": 0.36,
+        "loot": [
+          {
+            "itemId": "ant_chitin",
+            "weight": 45,
+            "minQuantity": 1,
+            "maxQuantity": 3
+          },
+          {
+            "itemId": "hive_resin",
+            "weight": 35,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "rawhide",
+            "weight": 15,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "venom_gland",
+            "weight": 5,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          }
+        ]
+      },
+      {
+        "id": "hives_abyss_resin_runoff",
+        "name": "Resin Runoff",
+        "type": "Fishing",
+        "levelRequirement": 1,
+        "procChance": 0.2,
+        "loot": [
+          {
+            "itemId": "hive_resin",
+            "weight": 35,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "murky_fish_oil",
+            "weight": 25,
+            "minQuantity": 1,
+            "maxQuantity": 1
+          },
+          {
+            "itemId": "venom_gland",
+            "weight": 8,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          }
         ]
       }
     ]
@@ -711,6 +1324,36 @@
           "itemId": "item.monster_core.greater",
           "minAmount": 12,
           "maxAmount": 12
+        },
+        {
+          "itemId": "blueprint_hivefang_dagger",
+          "minAmount": 1,
+          "maxAmount": 1
+        },
+        {
+          "itemId": "blueprint_warden",
+          "minAmount": 1,
+          "maxAmount": 1
+        }
+      ],
+      "completionRewards": [
+        {
+          "itemId": "blueprint_hivefang_dagger",
+          "minAmount": 1,
+          "maxAmount": 1,
+          "chance": 0.04
+        },
+        {
+          "itemId": "blueprint_warden",
+          "minAmount": 1,
+          "maxAmount": 1,
+          "chance": 0.035
+        },
+        {
+          "itemId": "royal_chitin_plate",
+          "minAmount": 1,
+          "maxAmount": 1,
+          "chance": 0.16
         }
       ]
     },
@@ -725,7 +1368,7 @@
     "rooms": [
       {
         "type": "Combat",
-        "weight": 1.0,
+        "weight": 1,
         "encounterIds": [
           "ant_worker"
         ]
@@ -739,7 +1382,7 @@
       },
       {
         "type": "MiniBoss",
-        "weight": 1.0,
+        "weight": 1,
         "encounterIds": [
           "ant_worker"
         ]
@@ -756,6 +1399,77 @@
         "weight": 0.08,
         "encounterIds": [
           "fire_ant"
+        ]
+      }
+    ],
+    "gatheringNodes": [
+      {
+        "id": "hives_abyss_ii_royal_nest",
+        "name": "Royal Chitin Nest",
+        "type": "Skinning",
+        "levelRequirement": 1,
+        "procChance": 0.4,
+        "loot": [
+          {
+            "itemId": "royal_chitin_fragment",
+            "weight": 45,
+            "minQuantity": 1,
+            "maxQuantity": 3
+          },
+          {
+            "itemId": "amber_resin",
+            "weight": 35,
+            "minQuantity": 1,
+            "maxQuantity": 3
+          },
+          {
+            "itemId": "thick_hide",
+            "weight": 15,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "royal_chitin_plate",
+            "weight": 5,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          }
+        ]
+      },
+      {
+        "id": "hives_abyss_ii_ichor_pool",
+        "name": "Ichor Pool",
+        "type": "Fishing",
+        "levelRequirement": 1,
+        "procChance": 0.22,
+        "loot": [
+          {
+            "itemId": "amber_resin",
+            "weight": 35,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "refined_fish_oil",
+            "weight": 25,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "venom_gland",
+            "weight": 8,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          },
+          {
+            "itemId": "royal_chitin_plate",
+            "weight": 4,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          }
         ]
       }
     ]
@@ -781,6 +1495,31 @@
           "itemId": "item.monster_core.primal",
           "minAmount": 24,
           "maxAmount": 24
+        },
+        {
+          "itemId": "blueprint_primal",
+          "minAmount": 1,
+          "maxAmount": 1
+        }
+      ],
+      "completionRewards": [
+        {
+          "itemId": "blueprint_primal",
+          "minAmount": 1,
+          "maxAmount": 1,
+          "chance": 0.035
+        },
+        {
+          "itemId": "hive_ichor",
+          "minAmount": 1,
+          "maxAmount": 1,
+          "chance": 0.14
+        },
+        {
+          "itemId": "royal_chitin_plate",
+          "minAmount": 1,
+          "maxAmount": 1,
+          "chance": 0.12
         }
       ]
     },
@@ -795,7 +1534,7 @@
     "rooms": [
       {
         "type": "Combat",
-        "weight": 1.0,
+        "weight": 1,
         "encounterIds": [
           "ant_worker"
         ]
@@ -809,7 +1548,7 @@
       },
       {
         "type": "MiniBoss",
-        "weight": 1.0,
+        "weight": 1,
         "encounterIds": [
           "ant_worker"
         ]
@@ -826,6 +1565,77 @@
         "weight": 0.08,
         "encounterIds": [
           "fire_ant"
+        ]
+      }
+    ],
+    "gatheringNodes": [
+      {
+        "id": "hives_abyss_iii_hardened_nest",
+        "name": "Hardened Chitin Nest",
+        "type": "Skinning",
+        "levelRequirement": 1,
+        "procChance": 0.44,
+        "loot": [
+          {
+            "itemId": "hardened_chitin",
+            "weight": 45,
+            "minQuantity": 1,
+            "maxQuantity": 3
+          },
+          {
+            "itemId": "living_resin",
+            "weight": 35,
+            "minQuantity": 1,
+            "maxQuantity": 3
+          },
+          {
+            "itemId": "scaled_hide",
+            "weight": 15,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "hive_ichor",
+            "weight": 5,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          }
+        ]
+      },
+      {
+        "id": "hives_abyss_iii_living_resin_pool",
+        "name": "Living Resin Pool",
+        "type": "Fishing",
+        "levelRequirement": 1,
+        "procChance": 0.24,
+        "loot": [
+          {
+            "itemId": "living_resin",
+            "weight": 35,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "shadow_oil",
+            "weight": 25,
+            "minQuantity": 1,
+            "maxQuantity": 2
+          },
+          {
+            "itemId": "hive_ichor",
+            "weight": 8,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          },
+          {
+            "itemId": "royal_chitin_plate",
+            "weight": 5,
+            "minQuantity": 1,
+            "maxQuantity": 1,
+            "isRare": true
+          }
         ]
       }
     ]

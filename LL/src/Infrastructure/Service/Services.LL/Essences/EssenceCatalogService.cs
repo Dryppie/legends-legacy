@@ -1,24 +1,23 @@
-using Application.Common.Interfaces;
 using Application.Interfaces.Services.LL.Essences;
 using Domain.Models.Combat.Abilities;
 using Domain.Models.Essences.Definitions;
-using Microsoft.EntityFrameworkCore;
+using Domain.Models.Items;
 using Services.LL.Combat.Engine;
 
 namespace Services.LL.Essences;
 
 public sealed class EssenceCatalogService : IEssenceCatalogService
 {
-    private readonly IDbContext _db;
+    private readonly IItemBaseRepository _itemBases;
     private readonly IEssenceDefinitionRepository _essenceDefinitions;
     private readonly IAbilityCatalogProvider _catalogProvider;
 
     public EssenceCatalogService(
-        IDbContext db,
+        IItemBaseRepository itemBases,
         IEssenceDefinitionRepository essenceDefinitions,
         IAbilityCatalogProvider catalogProvider)
     {
-        _db = db;
+        _itemBases = itemBases;
         _essenceDefinitions = essenceDefinitions;
         _catalogProvider = catalogProvider;
     }
@@ -26,16 +25,7 @@ public sealed class EssenceCatalogService : IEssenceCatalogService
     public async Task<EssenceCatalogReport> GetCatalogAsync(CancellationToken cancellationToken)
     {
         var catalog = _catalogProvider.GetCatalog();
-        var essenceItems = await _db.EssenceItems
-            .Select(item => new { item.Id, item.EssenceDefinitionId })
-            .ToListAsync(cancellationToken);
-        var itemIdByEssenceId = essenceItems
-            .Where(x => !string.IsNullOrWhiteSpace(x.EssenceDefinitionId))
-            .GroupBy(x => x.EssenceDefinitionId, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(
-                x => x.Key,
-                x => x.OrderBy(item => item.Id, StringComparer.OrdinalIgnoreCase).First().Id,
-                StringComparer.OrdinalIgnoreCase);
+        var itemIdByEssenceId = await _itemBases.GetEssenceItemBaseIdsByDefinitionIdAsync(cancellationToken);
         var essenceByMonsterId = _essenceDefinitions.GetAll()
             .Where(x => !string.IsNullOrWhiteSpace(x.SourceMonsterId))
             .GroupBy(x => x.SourceMonsterId, StringComparer.OrdinalIgnoreCase)

@@ -4,6 +4,7 @@ using Domain.Models.Colosseum;
 using Domain.Models.Entities;
 using Domain.Models.Entities.Characters;
 using Domain.Models.Inventories;
+using Domain.Models.Items;
 using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Slots;
 using Domain.Models.Items.EssenceItems;
@@ -28,6 +29,33 @@ public static class LLDbContextExtensions
         (Guid.Parse("00000000-0000-0000-1000-000000000002"), "basic_hatchet"),
         (Guid.Parse("00000000-0000-0000-1000-000000000003"), "basic_fishing_rod"),
         (Guid.Parse("00000000-0000-0000-1000-000000000004"), "basic_skinning_knife"),
+    ];
+    private static readonly (string ItemBaseId, int Quantity)[] AdminCraftingTestKit =
+    [
+        ("ore", 500),
+        ("wood", 500),
+        ("rawhide", 500),
+        ("crystalline_powder", 500),
+        ("rough_stone", 500),
+        ("woven_fiber", 500),
+        ("bone_fragments", 500),
+        ("ant_chitin", 500),
+        ("hive_resin", 500),
+        ("murky_fish_oil", 500),
+        ("venom_gland", 100),
+        ("royal_chitin_plate", 100),
+        ("hive_ichor", 100),
+        ("blueprint_fury", 3),
+        ("blueprint_arcane", 3),
+        ("blueprint_execution", 3),
+        ("blueprint_aegis", 3),
+        ("blueprint_warden", 3),
+        ("blueprint_endurance", 3),
+        ("blueprint_phoenix", 3),
+        ("blueprint_spirit", 3),
+        ("blueprint_primal", 3),
+        ("blueprint_venom_touched_sword", 3),
+        ("blueprint_hivefang_dagger", 3),
     ];
 
     public static async Task SeedData(this LLDbContext context, IPasswordHasher<AppUser> hasher, bool seedLocalGuestAccounts = false)
@@ -57,6 +85,11 @@ public static class LLDbContextExtensions
 
 #if DEBUG
         if (await SeedAdminStarterTools(context))
+        {
+            await context.SaveChangesAsync();
+        }
+
+        if (await SeedAdminCraftingTestKit(context))
         {
             await context.SaveChangesAsync();
         }
@@ -372,6 +405,80 @@ public static class LLDbContextExtensions
         await context.InventoryItems.AddRangeAsync(inventoryItems);
 
         return true;
+    }
+
+    private static async Task<bool> SeedAdminCraftingTestKit(LLDbContext context)
+    {
+        var adminCharacterId = Guid.Parse(CHARACTER_GUID);
+        var hasAdminInventory = await context.Inventories
+            .AnyAsync(inventory => inventory.CharacterId == adminCharacterId);
+
+        if (!hasAdminInventory)
+        {
+            return false;
+        }
+
+        var testKitItemBaseIds = AdminCraftingTestKit
+            .Select(item => item.ItemBaseId)
+            .ToArray();
+
+        var seededItemBaseIds = await context.ItemBases
+            .Where(itemBase => testKitItemBaseIds.Contains(itemBase.Id))
+            .Select(itemBase => itemBase.Id)
+            .ToListAsync();
+
+        var missingItemBaseIds = testKitItemBaseIds
+            .Except(seededItemBaseIds)
+            .ToArray();
+
+        if (missingItemBaseIds.Length > 0)
+        {
+            throw new InvalidOperationException(
+                $"Admin crafting test kit item bases were not seeded: {string.Join(", ", missingItemBaseIds)}");
+        }
+
+        var existingItems = await context.InventoryItems
+            .Include(inventoryItem => inventoryItem.ItemInstance)
+            .Where(inventoryItem => inventoryItem.InventoryId == adminCharacterId)
+            .Where(inventoryItem => testKitItemBaseIds.Contains(inventoryItem.ItemInstance.ItemBaseId))
+            .ToListAsync();
+
+        var existingByItemBaseId = existingItems
+            .GroupBy(item => item.ItemInstance.ItemBaseId)
+            .ToDictionary(group => group.Key, group => group.ToList(), StringComparer.OrdinalIgnoreCase);
+
+        var changed = false;
+        foreach (var (itemBaseId, desiredQuantity) in AdminCraftingTestKit)
+        {
+            if (existingByItemBaseId.TryGetValue(itemBaseId, out var matchingItems))
+            {
+                var currentQuantity = matchingItems.Sum(item => item.Quantity);
+                if (currentQuantity < desiredQuantity)
+                {
+                    matchingItems[0].Quantity += desiredQuantity - currentQuantity;
+                    changed = true;
+                }
+
+                continue;
+            }
+
+            var itemInstance = new ItemInstance
+            {
+                Id = Guid.NewGuid(),
+                ItemBaseId = itemBaseId
+            };
+
+            await context.ItemInstances.AddAsync(itemInstance);
+            await context.InventoryItems.AddAsync(new InventoryItem
+            {
+                InventoryId = adminCharacterId,
+                ItemInstanceId = itemInstance.Id,
+                Quantity = desiredQuantity
+            });
+            changed = true;
+        }
+
+        return changed;
     }
 
 }

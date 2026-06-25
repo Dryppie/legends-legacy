@@ -9,7 +9,7 @@ public class CreatureService : ICreatureService
 {
     private readonly ICreatureRepository _creatureRepository;
     private readonly CreatureJsonReader _creatureReader;
-    public CreatureService(ICreatureRepository creatureRepository, IDbContext context)
+    public CreatureService(ICreatureRepository creatureRepository)
     {
         _creatureRepository = creatureRepository;
         _creatureReader = new();

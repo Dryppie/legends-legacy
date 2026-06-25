@@ -7,7 +7,6 @@ using Domain.Models.Items.Equipments;
 using Domain.Models.Items.Equipments.Tools;
 using Domain.Models.LootTables;
 using Microsoft.EntityFrameworkCore;
-using Persistence.LL.Seeds.JsonSeeding.Dtos.Recipes;
 using Persistence.LL.Seeds.JsonSeeding.JsonConverters;
 
 namespace Persistence.LL.Seeds.JsonSeeding;
@@ -16,11 +15,8 @@ public static class DbJsonSeeder
 
     public static async Task RunAsync(IDbContext ctx)
     {
-        //if (await ctx.Recipes.AnyAsync()) return;
-
         var opt = new JsonSerializerOptions() { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase, Converters = { new JsonStringEnumConverter(), new ItemBaseConverter() } };
         await SeedBaseItems(ctx, opt);
-        await SeedRecipes(ctx, opt);
         await SeedDungeonLootTables(ctx);
         await ctx.SaveChangesAsync(CancellationToken.None);
     }
@@ -291,28 +287,6 @@ public static class DbJsonSeeder
         modifierOwnersById[desired.Id] = equipment;
     }
 
-    private static async Task SeedRecipes(IDbContext ctx, JsonSerializerOptions opt)
-    {
-        var recipePath = Path.Combine(AppContext.BaseDirectory, "Data", "recipes.json");
-        var recipeJson = await File.ReadAllTextAsync(recipePath);
-        var dtos = JsonSerializer.Deserialize<List<RecipeDto>>(recipeJson, opt)!;
-
-        foreach (var dto in dtos)
-        {
-            var recipe = dto.ToEntity();
-            var existing = await ctx.Recipes.FirstOrDefaultAsync(r => r.Id == recipe.Id);
-
-            if (existing == null)
-            {
-                ctx.Recipes.Add(recipe);
-            }
-            else
-            {
-                ctx.GetEntry(existing).CurrentValues.SetValues(recipe); // Update existing, but not materials
-            }
-        }
-    }
-
     private static async Task SeedDungeonLootTables(IDbContext ctx)
     {
         await AddLootTableIfMissing(
@@ -475,7 +449,7 @@ public static class DbJsonSeeder
             [
                 CreateLootTableItem(
                     id: Guid.Parse("10000000-0000-0000-0101-000000000001"),
-                    itemId: "stoneguard_ring",
+                    itemId: "blueprint_fury",
                     weight: 10),
                 CreateLootTableItem(
                     id: Guid.Parse("10000000-0000-0000-0101-000000000011"),

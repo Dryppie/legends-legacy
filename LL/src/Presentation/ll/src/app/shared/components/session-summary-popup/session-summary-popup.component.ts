@@ -1,6 +1,14 @@
 import { NgFor, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
 import { SessionSummaryService } from '../../../core/services/client-side/session-summary/session-summary.service';
+import { CombatSessionDto } from '../../models/Dtos/combatResultDto';
+import { InventoryItem } from '../../models/inventoryItem';
+
+interface LootSummaryItem {
+  key: string;
+  name: string;
+  quantity: number;
+}
 
 @Component({
   selector: 'app-session-summary-popup',
@@ -10,6 +18,7 @@ import { SessionSummaryService } from '../../../core/services/client-side/sessio
 })
 export class SessionSummaryPopupComponent {
   constructor(public svc: SessionSummaryService) {}
+
   getDuration(from: string | Date, to: string | Date): string {
     const fromDate = new Date(from);
     const toDate = new Date();
@@ -28,5 +37,49 @@ export class SessionSummaryPopupComponent {
     let joinedDuration = parts.join(', ');
     if (days || hours >= 16) joinedDuration += ' (Rewards stop after 16 hours)';
     return joinedDuration;
+  }
+
+  gatheredLoot(combatSession: CombatSessionDto): LootSummaryItem[] {
+    return this.compactLoot(
+      combatSession.combatResult.gatheringRewards.flatMap(
+        (gathering) => gathering.itemsGained,
+      ),
+    );
+  }
+
+  hasGatheredLoot(combatSession: CombatSessionDto): boolean {
+    return combatSession.combatResult.gatheringRewards.some(
+      (gathering) => gathering.itemsGained.length > 0,
+    );
+  }
+
+  trackLoot(_index: number, loot: LootSummaryItem): string {
+    return loot.key;
+  }
+
+  private compactLoot(items: InventoryItem[]): LootSummaryItem[] {
+    const compacted = new Map<string, LootSummaryItem>();
+
+    for (const item of items) {
+      const itemBase = item.itemInstance.itemBase;
+      const name = item.itemInstance.displayName || itemBase.name;
+      const key = itemBase.id || name;
+      const existing = compacted.get(key);
+
+      if (existing) {
+        existing.quantity += item.quantity;
+        continue;
+      }
+
+      compacted.set(key, {
+        key,
+        name,
+        quantity: item.quantity,
+      });
+    }
+
+    return Array.from(compacted.values()).sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
   }
 }

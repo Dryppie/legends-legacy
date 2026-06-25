@@ -1,19 +1,4 @@
 <div class="ll-item-row" (click)="openModal()">
-  <div *ngIf="equipmentIconPath || isEssence" class="ll-item-icon">
-    <img
-      *ngIf="equipmentIconPath"
-      [src]="equipmentIconPath"
-      [alt]="equipmentIcon + ' slot'"
-      class="center w-4 object-contain"
-    />
-    <img
-      *ngIf="isEssence"
-      src="icons/items/essence-item.svg"
-      alt="essence item"
-      class="center w-4 object-contain"
-    />
-  </div>
-
   <div class="min-w-0 flex-1">
     <app-item [item]="inventoryItem.itemInstance"></app-item>
   </div>

@@ -100,7 +100,6 @@ public static class DependencyInjection
 
         services.AddScoped<IProfessionRepository, ProfessionRepository>();
         services.AddScoped<ICraftingRepository, CraftingRepository>();
-        services.AddScoped<IRecipeRepository, RecipeRepository>();
 
         services.AddScoped<IPlayerRepository, PlayerRepository>();
 

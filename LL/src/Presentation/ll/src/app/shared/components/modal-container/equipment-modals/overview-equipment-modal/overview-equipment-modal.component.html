@@ -19,13 +19,19 @@
     <div class="ll-card mt-2 p-3">
       <div class="flex justify-between gap-3 font-semibold">
         <div>
-          {{ currentEquippedEquipment.itemBase.name }}
+          {{ currentEquippedEquipment.displayName }}
         </div>
-        <span class="ll-item-chip">
-          {{
-            currentEquippedEquipment.equipmentBase.equipmentType | equipmentType
-          }}
-        </span>
+        <div class="flex shrink-0 flex-wrap justify-end gap-2">
+          <span class="ll-item-chip">
+            {{
+              currentEquippedEquipment.equipmentBase.equipmentType
+                | equipmentType
+            }}
+          </span>
+          <span class="ll-item-chip ll-item-chip-accent">
+            {{ currentEquippedEquipment.quality }}
+          </span>
+        </div>
       </div>
       <div
         *ngFor="let attribute of currentEquippedEquipment.attributeModifiers"
@@ -64,11 +70,16 @@
         >
           <div class="flex justify-between gap-3 font-semibold">
             <div>
-              {{ equipment.itemBase.name }}
+              {{ equipment.displayName }}
             </div>
-            <span class="ll-item-chip">
-              {{ equipment.equipmentBase.equipmentType | equipmentType }}
-            </span>
+            <div class="flex shrink-0 flex-wrap justify-end gap-2">
+              <span class="ll-item-chip">
+                {{ equipment.equipmentBase.equipmentType | equipmentType }}
+              </span>
+              <span class="ll-item-chip ll-item-chip-accent">
+                {{ equipment.quality }}
+              </span>
+            </div>
           </div>
           <div
             *ngFor="let attribute of equipment.attributeModifiers"

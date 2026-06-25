@@ -2,13 +2,11 @@
   "name": "ll",
   "version": "0.0.0",
   "scripts": {
-    "generate:content": "tsx ./scripts/generate-static-content.ts",
     "generate:version": "tsx ./scripts/write-build-version.ts",
-    "prestart": "npm run generate:content",
     "ng": "ng",
     "start": "ng serve --open",
-    "build": "npm run generate:content && npm run generate:version && ng build",
-    "build:development": "npm run generate:content && ng build --configuration development",
+    "build": "npm run generate:version && ng build",
+    "build:development": "ng build --configuration development",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },

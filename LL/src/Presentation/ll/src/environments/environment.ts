@@ -15,5 +15,5 @@ export const environment = {
   },
   errorMessage:
     'ERROR! Something went wrong! Please send a ticket to support and attach a screenshot. Thank you!',
-  baseDuration: 6,
+  baseDuration: 10,
 };

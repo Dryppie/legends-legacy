@@ -2,6 +2,7 @@ import { AttributeModifier } from './Dtos/attributesDto';
 import { EquipmentType } from './Dtos/equipmentSlot';
 import { AttributeType } from './enums/attributeType';
 import { ItemType } from './enums/itemType';
+import { ItemQuality } from './enums/itemQuality';
 import { Rarity } from './enums/rarity';
 import { Essence } from './essence';
 
@@ -10,7 +11,18 @@ export interface ItemInstance {
   itemBase: ItemBase;
 }
 
-export interface EquipmentInstance extends ItemInstance {}
+export interface EquipmentInstance extends ItemInstance {
+  rarity: Rarity;
+  quality: ItemQuality;
+  recipeId?: string | null;
+  baseRecipeId?: string | null;
+  tier: number;
+  potential?: number;
+  maxPotential?: number | null;
+  temperingProgress: number;
+  affinityTags: string[];
+  specialModifiers: string[];
+}
 
 export interface ItemBase {
   id: string;

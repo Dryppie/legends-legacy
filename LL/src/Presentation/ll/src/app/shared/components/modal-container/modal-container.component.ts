@@ -9,6 +9,8 @@ import { EquipmentInstance } from '../../models/item';
 import { InventoryEquipmentModalComponent } from './equipment-modals/equipment-modal/inventory-equipment-modal.component';
 import { OverviewEquipmentModalComponent } from './equipment-modals/overview-equipment-modal/overview-equipment-modal.component';
 import { EquipmentSlotType } from '../../models/Dtos/equipment-slots/equipmentSlot';
+import { InventoryItem } from '../../models/inventoryItem';
+import { InventoryItemModalComponent } from './item-modals/inventory-item-modal/inventory-item-modal.component';
 
 @Component({
   selector: 'app-modal-container',
@@ -17,6 +19,7 @@ import { EquipmentSlotType } from '../../models/Dtos/equipment-slots/equipmentSl
     NgIf,
     EssenceModalComponent,
     CombatFiltersModalComponent,
+    InventoryItemModalComponent,
     InventoryEquipmentModalComponent,
     OverviewEquipmentModalComponent,
   ],
@@ -26,6 +29,7 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
 
   inventoryEquipment: EquipmentInstance | null = null;
+  inventoryItem: InventoryItem | null = null;
   overviewEquipment: EquipmentSlotType | null = null;
   essence: Essence | null = null;
   filterCombat: boolean = false;
@@ -33,6 +37,11 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
   constructor(private modalService: ModalService) {}
 
   ngOnInit() {
+    this.subscriptions.push(
+      this.modalService.inventoryItemModalState$.subscribe(
+        (data: InventoryItem | null) => (this.inventoryItem = data),
+      ),
+    );
     this.subscriptions.push(
       this.modalService.inventoryEquipmentModalState$.subscribe(
         (data: EquipmentInstance | null) => (this.inventoryEquipment = data),
@@ -65,6 +74,7 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
   get isModalOpen(): boolean {
     return (
       !!this.inventoryEquipment ||
+      !!this.inventoryItem ||
       !!this.overviewEquipment ||
       !!this.essence ||
       !!this.filterCombat
@@ -77,6 +87,7 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
       // Closes whichever modal is open. If you have multiple modals open,
       // you'd close them accordingly.
       this.onInventoryEquipmentModalClose();
+      this.onInventoryItemModalClose();
       this.onOverviewEquipmentModalClose();
       this.onEssenceModalClose();
       this.onEditCombatFiltersModalClose();
@@ -85,6 +96,10 @@ export class ModalContainerComponent implements OnInit, OnDestroy {
 
   onInventoryEquipmentModalClose() {
     this.modalService.toggleInventoryEquipItemModal();
+  }
+
+  onInventoryItemModalClose() {
+    this.modalService.toggleInventoryItemModal();
   }
   onOverviewEquipmentModalClose() {
     this.modalService.toggleOverviewEquipItemModal();

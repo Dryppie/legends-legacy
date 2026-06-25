@@ -3,22 +3,18 @@
   #dropdownOrigin="cdkOverlayOrigin"
   cdkOverlayOrigin
   type="button"
-  class="flex h-8 w-full items-center justify-between gap-2 whitespace-nowrap rounded px-3 text-left text-sm text-neutral-300 transition-colors hover:bg-zinc-600/30"
-  [ngClass]="
-    selected
-      ? 'bg-primary/30 text-primary shadow-[inset_0_0_0_1px_rgba(249,220,160,0.35)] hover:bg-primary/40'
-      : ''
-  "
+  class="flex w-full items-center justify-between gap-2 whitespace-nowrap px-3 text-left text-sm transition-colors"
+  [ngClass]="buttonClasses"
   [attr.aria-expanded]="hasSubOptions || hasOptions ? open() : null"
   [attr.aria-haspopup]="hasSubOptions || hasOptions ? 'menu' : null"
   [attr.aria-controls]="open() && (hasSubOptions || hasOptions) ? menuId : null"
   (click)="onButtonClick($event)"
   (keydown)="onDropdownKeydown($event)"
 >
-  {{ displayLabel }}
+  <span class="min-w-0 truncate">{{ displayLabel }}</span>
   <svg
     *ngIf="hasSubOptions || hasOptions"
-    class="h-3 w-3 transition-transform duration-200"
+    class="h-3 w-3 shrink-0 text-primary/80 transition-transform duration-200"
     [ngClass]="{ 'rotate-180': open() }"
     viewBox="0 0 16 16"
     fill="currentColor"

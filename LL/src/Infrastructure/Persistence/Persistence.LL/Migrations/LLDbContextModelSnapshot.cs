@@ -889,6 +889,59 @@ namespace Persistence.LL.Migrations
                     b.ToTable("MarketPlaceListings");
                 });
 
+            modelBuilder.Entity("Domain.Models.Professions.Crafting.CharacterRecipeMastery", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RecipeId")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<int>("Experience")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("CharacterId", "RecipeId");
+
+                    b.ToTable("CharacterRecipeMasteries");
+                });
+
+            modelBuilder.Entity("Domain.Models.Professions.Crafting.CharacterRecipeUnlock", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BlueprintId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("RecipeId")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTimeOffset>("UnlockedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId", "RecipeId", "BlueprintId")
+                        .IsUnique();
+
+                    b.ToTable("CharacterRecipeUnlocks");
+                });
+
             modelBuilder.Entity("Domain.Models.Professions.Crafting.CraftingQueueItem", b =>
                 {
                     b.Property<Guid>("Id")
@@ -914,62 +967,6 @@ namespace Persistence.LL.Migrations
                     b.HasIndex("EquipmentInstanceId");
 
                     b.ToTable("CraftingQueueItems");
-                });
-
-            modelBuilder.Entity("Domain.Models.Professions.Crafting.Material", b =>
-                {
-                    b.Property<Guid>("RecipeId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("ItemId")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ItemBaseId")
-                        .HasColumnType("text");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
-
-                    b.HasKey("RecipeId", "ItemId");
-
-                    b.HasIndex("ItemBaseId");
-
-                    b.HasIndex("ItemId");
-
-                    b.ToTable("Material");
-                });
-
-            modelBuilder.Entity("Domain.Models.Professions.Crafting.Recipe", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<int>("CraftType")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("ItemId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("ItemType")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("LevelRequirement")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ItemId");
-
-                    b.ToTable("Recipes");
                 });
 
             modelBuilder.Entity("Domain.Models.Professions.Profession", b =>
@@ -1474,6 +1471,19 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Items.ItemInstance");
 
+                    b.PrimitiveCollection<List<string>>("AffinityTags")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<string>("BaseRecipeId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("BlueprintId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CraftedName")
+                        .HasColumnType("text");
+
                     b.Property<bool>("IsLevelingItem")
                         .HasColumnType("boolean");
 
@@ -1483,10 +1493,29 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("ItemXp")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("MaxPotential")
+                        .HasColumnType("integer");
+
                     b.Property<int?>("Potential")
                         .HasColumnType("integer");
 
+                    b.Property<int>("Quality")
+                        .HasColumnType("integer");
+
                     b.Property<int>("Rarity")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("RecipeId")
+                        .HasColumnType("text");
+
+                    b.PrimitiveCollection<List<string>>("SpecialModifiers")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<int>("TemperingProgress")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Tier")
                         .HasColumnType("integer");
 
                     b.HasDiscriminator().HasValue(0);
@@ -1842,38 +1871,6 @@ namespace Persistence.LL.Migrations
                     b.Navigation("EquipmentInstance");
                 });
 
-            modelBuilder.Entity("Domain.Models.Professions.Crafting.Material", b =>
-                {
-                    b.HasOne("Domain.Models.Items.ItemBase", null)
-                        .WithMany("Materials")
-                        .HasForeignKey("ItemBaseId");
-
-                    b.HasOne("Domain.Models.Items.ItemBase", "Item")
-                        .WithMany()
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Models.Professions.Crafting.Recipe", null)
-                        .WithMany("Materials")
-                        .HasForeignKey("RecipeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Item");
-                });
-
-            modelBuilder.Entity("Domain.Models.Professions.Crafting.Recipe", b =>
-                {
-                    b.HasOne("Domain.Models.Items.Equipments.EquipmentBase", "Item")
-                        .WithMany()
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Item");
-                });
-
             modelBuilder.Entity("Domain.Models.Professions.Profession", b =>
                 {
                     b.HasOne("Domain.Models.Entities.Characters.Character", null)
@@ -2067,13 +2064,6 @@ namespace Persistence.LL.Migrations
                     b.Navigation("ItemInstances");
 
                     b.Navigation("LootTablesItems");
-
-                    b.Navigation("Materials");
-                });
-
-            modelBuilder.Entity("Domain.Models.Professions.Crafting.Recipe", b =>
-                {
-                    b.Navigation("Materials");
                 });
 
             modelBuilder.Entity("Domain.Models.Regions.Areas.Area", b =>

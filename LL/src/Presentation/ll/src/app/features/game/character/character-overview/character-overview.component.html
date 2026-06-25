@@ -22,6 +22,11 @@
         [disabled]="isLoading()"
         [text]="isLoading() ? 'Loading' : 'Search'"
       ></app-regular-button>
+      <app-regular-button
+        (pressed)="refresh()"
+        [disabled]="isLoading()"
+        [text]="isLoading() ? 'Refreshing' : 'Refresh'"
+      ></app-regular-button>
     </div>
 
     <p *ngIf="errorMessage()" class="ll-state ll-state-danger">

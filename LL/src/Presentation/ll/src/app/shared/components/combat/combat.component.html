@@ -55,6 +55,13 @@
           *ngIf="battleType === 'IdleCombat'"
           class="max-w-full"
         ></app-combat-log>
+        <app-mini-button
+          class="mt-2"
+          [text]="combatActionButtonText()"
+          [disabled]="isStoppingCombat"
+          [width]="battleType === 'IdleCombat' ? '88px' : '112px'"
+          (click)="onStopOrSkip()"
+        ></app-mini-button>
       </div>
     </div>
 
