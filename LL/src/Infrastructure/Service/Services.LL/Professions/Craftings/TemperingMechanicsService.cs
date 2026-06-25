@@ -93,7 +93,7 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
     private static TemperingOutcome RollOutcome(Rarity rarity, Random rng)
     {
         /* ---------------- probability tables ----------------
-        • Critical  : 0.0005 % doubled per rarity step
+        • Critical  : 0.0005 % additive per rarity step
         • Negative  : 5 % base  +5 % per rarity step
         • Positive  : See PositiveChance()
         • Neutral   : remainder
@@ -123,8 +123,8 @@ public sealed class TemperingMechanicsService : ITemperingMechanicsService
             Rarity.Common => 0.06,
             Rarity.Uncommon => 0.03,
             Rarity.Rare => 0.015,
-            Rarity.Epic => 0.05,
-            Rarity.Unique => 0.01,
+            Rarity.Epic => 0.005,
+            Rarity.Unique => 0.001,
             _ => 0
         };
     }
