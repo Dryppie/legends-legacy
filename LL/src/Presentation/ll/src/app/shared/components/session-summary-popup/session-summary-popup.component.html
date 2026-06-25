@@ -36,28 +36,22 @@
 
       <div
         class="mt-3 flex flex-col items-center justify-center gap-2 text-center"
-        *ngIf="combatSession.combatResult.gatheringRewards.length"
+        *ngIf="hasGatheredLoot(combatSession)"
       >
         <div class="ll-eyebrow">Gathering</div>
         <div class="flex flex-wrap justify-center gap-2">
-          <ng-container
+          <div
+            class="ll-card flex min-w-16 items-center gap-2 px-2 py-1"
             *ngFor="
-              let gathering of combatSession.combatResult.gatheringRewards
+              let loot of gatheredLoot(combatSession);
+              trackBy: trackLoot
             "
           >
-            <div
-              class="ll-card flex min-w-16 items-center gap-2 px-2 py-1"
-              *ngFor="let loot of gathering.itemsGained"
-            >
-              <div class="ll-text-success">
-                {{
-                  loot.itemInstance.displayName ||
-                    loot.itemInstance.itemBase.name
-                }}
-              </div>
-              <div class="text-secondary">x{{ loot.quantity }}</div>
+            <div class="ll-text-success">
+              {{ loot.name }}
             </div>
-          </ng-container>
+            <div class="text-secondary">x{{ loot.quantity }}</div>
+          </div>
         </div>
       </div>
 
