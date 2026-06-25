@@ -1,6 +1,6 @@
 # Prophecies Implementation Status
 
-Last updated: 2026-06-25
+Last updated: 2026-06-26
 
 Branch: `prophecy-implementation`
 
@@ -18,6 +18,7 @@ The implementation supports:
 - Prophecy cache rewards as real stackable inventory items.
 - Prophecy cache opening from the Prophecies page.
 - Weighted prophecy cache reward tables with multiple rolls per cache type.
+- JSON-authored prophecy definitions loaded from API content data.
 - Recent prophecy history in the overview and page.
 - Toast feedback for accept and claim actions.
 - Ready-to-claim indicators and sidebar notification counts for actionable prophecy rewards.
@@ -60,6 +61,7 @@ Added prophecy service contract and CQRS-style use cases:
 - `ClaimProphecyCommand`
 - `ClaimWeeklyRevelationMilestoneCommand`
 - `ProphecyProgressNotification`
+- `IProphecyDefinitionProvider`
 - Prophecy service result/read models for overview, claims, weekly milestones, and cache opening.
 - Prophecy DTOs and DTO mapping helpers.
 
@@ -99,6 +101,16 @@ Generated migrations:
 
 The migrations create the prophecy tables and add prophecy reward balance columns to characters.
 
+### Prophecy Content
+
+Added JSON-authored prophecy definitions under `LL/src/API/API.LL/Data/prophecies.json`.
+
+Added prophecy definition loading under `LL/src/Infrastructure/Service/Services.LL/Prophecies/`:
+
+- `JsonProphecyDefinitionProvider`
+
+The provider loads the API content file through the same content root and shared JSON serializer options used by other authored game data. It validates empty files, duplicate ids, missing required fields, missing allowed slots, and invalid weights at startup.
+
 ### Prophecy Service
 
 Added `ProphecyService` under `LL/src/Infrastructure/Service/Services.LL/Prophecies/`.
@@ -107,7 +119,7 @@ Implemented behavior:
 
 - UTC daily periods.
 - UTC weekly periods starting Monday.
-- On-demand prophecy definition seeding.
+- On-demand syncing of JSON-authored prophecy definitions into persistence.
 - Deterministic daily slot generation for `Steady`, `Focused`, and `Ominous`.
 - One auto-accepted weekly Greater Prophecy.
 - Daily accept flow that declines the other daily choices.
@@ -212,18 +224,20 @@ The page shows:
 
 ### Prophecy Content Authoring
 
-The system is data-driven at the `ProphecyDefinition` level, but the initial definition set is seeded inside `ProphecyService` on first overview load.
+The system is data-driven at the `ProphecyDefinition` level. The initial daily and weekly definition set now lives in `LL/src/API/API.LL/Data/prophecies.json` and is loaded through `JsonProphecyDefinitionProvider`.
 
 What exists:
 
 - A reusable prophecy definition table.
+- JSON-authored daily and weekly prophecy definitions.
+- Startup validation for duplicate ids, missing required fields, missing slot assignment, and invalid weights.
 - Weighted/difficulty-aware selection.
-- Initial daily and weekly definitions.
+- On-demand persistence sync from JSON definitions when the overview is loaded.
 
 What is partial:
 
 - No admin UI exists for authoring or tuning prophecy definitions.
-- No external JSON/content pipeline exists for prophecy definitions yet.
+- Prophecy definition edits require an app restart/redeploy; there is no hot reload or database authoring workflow.
 
 ### General Item Rewards
 

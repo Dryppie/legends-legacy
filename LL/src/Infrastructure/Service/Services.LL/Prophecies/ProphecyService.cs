@@ -15,9 +15,9 @@ namespace Services.LL.Prophecies;
 public sealed class ProphecyService : IProphecyService
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
-    private static readonly IReadOnlyList<ProphecyDefinition> SeedDefinitions = CreateSeedDefinitions();
     private static readonly IReadOnlyDictionary<string, IReadOnlyList<WeightedProphecyCacheReward>> CacheRewardTables = CreateCacheRewardTables();
 
+    private readonly IReadOnlyList<ProphecyDefinition> _definitions;
     private readonly IProphecyRepository _repository;
     private readonly ICharacterService _characterService;
     private readonly IEntityService _entityService;
@@ -27,6 +27,7 @@ public sealed class ProphecyService : IProphecyService
     private readonly IItemBaseRepository _itemBases;
 
     public ProphecyService(
+        IProphecyDefinitionProvider definitionProvider,
         IProphecyRepository repository,
         ICharacterService characterService,
         IEntityService entityService,
@@ -35,6 +36,7 @@ public sealed class ProphecyService : IProphecyService
         IInventoryRepository inventoryRepository,
         IItemBaseRepository itemBases)
     {
+        _definitions = definitionProvider.GetAll();
         _repository = repository;
         _characterService = characterService;
         _entityService = entityService;
@@ -50,13 +52,13 @@ public sealed class ProphecyService : IProphecyService
         DateTimeOffset now,
         CancellationToken cancellationToken)
     {
-        await _repository.AddMissingDefinitionsAsync(SeedDefinitions, cancellationToken);
+        var definitions = await _repository.SyncDefinitionsAsync(_definitions, cancellationToken);
 
         var dailyPeriod = GetDailyPeriod(now);
         var weeklyPeriod = GetWeeklyPeriod(now);
 
-        var daily = await EnsureDailyInstancesAsync(playerId, characterId, dailyPeriod.Start, dailyPeriod.End, now, cancellationToken);
-        var greater = await EnsureGreaterProphecyAsync(playerId, characterId, weeklyPeriod.Start, weeklyPeriod.End, now, cancellationToken);
+        var daily = await EnsureDailyInstancesAsync(definitions, playerId, characterId, dailyPeriod.Start, dailyPeriod.End, now, cancellationToken);
+        var greater = await EnsureGreaterProphecyAsync(definitions, playerId, characterId, weeklyPeriod.Start, weeklyPeriod.End, now, cancellationToken);
         var weekly = await EnsureWeeklyProgressAsync(playerId, characterId, weeklyPeriod.Start, weeklyPeriod.End, now, cancellationToken);
         var recent = await _repository.GetRecentInstancesAsync(
             playerId,
@@ -298,6 +300,7 @@ public sealed class ProphecyService : IProphecyService
     }
 
     private async Task<IReadOnlyList<PlayerProphecyInstance>> EnsureDailyInstancesAsync(
+        IReadOnlyList<ProphecyDefinition> definitions,
         Guid playerId,
         Guid characterId,
         DateTimeOffset periodStart,
@@ -331,7 +334,7 @@ public sealed class ProphecyService : IProphecyService
             generated.Add(CreateInstance(
                 playerId,
                 characterId,
-                PickDefinition(ProphecyScope.Daily, slot, characterId, periodStart),
+                PickDefinition(definitions, ProphecyScope.Daily, slot, characterId, periodStart),
                 ProphecyScope.Daily,
                 slot,
                 ProphecyStatus.Offered,
@@ -345,6 +348,7 @@ public sealed class ProphecyService : IProphecyService
     }
 
     private async Task<PlayerProphecyInstance> EnsureGreaterProphecyAsync(
+        IReadOnlyList<ProphecyDefinition> definitions,
         Guid playerId,
         Guid characterId,
         DateTimeOffset periodStart,
@@ -369,7 +373,7 @@ public sealed class ProphecyService : IProphecyService
         greater = CreateInstance(
             playerId,
             characterId,
-            PickDefinition(ProphecyScope.Weekly, ProphecySlotType.Greater, characterId, periodStart),
+            PickDefinition(definitions, ProphecyScope.Weekly, ProphecySlotType.Greater, characterId, periodStart),
             ProphecyScope.Weekly,
             ProphecySlotType.Greater,
             ProphecyStatus.Accepted,
@@ -442,21 +446,22 @@ public sealed class ProphecyService : IProphecyService
         };
     }
 
-    private static ProphecyDefinition PickDefinition(
+    private ProphecyDefinition PickDefinition(
+        IReadOnlyList<ProphecyDefinition> definitions,
         ProphecyScope scope,
         ProphecySlotType slot,
         Guid characterId,
         DateTimeOffset periodStart)
     {
         var slotName = slot.ToString();
-        var candidates = SeedDefinitions
+        var candidates = definitions
             .Where(x => x.IsEnabled && x.Scope == scope && x.AllowedSlots.Contains(slotName))
             .ToList();
 
         if (candidates.Count == 0)
         {
-            candidates = SeedDefinitions
-                .Where(x => x.Scope == scope && x.Category == ProphecyCategory.Combat)
+            candidates = definitions
+                .Where(x => x.IsEnabled && x.Scope == scope && x.Category == ProphecyCategory.Combat)
                 .ToList();
         }
 
@@ -959,7 +964,7 @@ public sealed class ProphecyService : IProphecyService
     private static bool IsAcceptedOrLater(PlayerProphecyInstance instance) =>
         instance.Status is ProphecyStatus.Accepted or ProphecyStatus.Completed or ProphecyStatus.Claimed;
 
-    private static void RebalanceTargetIfHigher(PlayerProphecyInstance instance)
+    private void RebalanceTargetIfHigher(PlayerProphecyInstance instance)
     {
         if (instance.Status is not (ProphecyStatus.Offered or ProphecyStatus.Accepted))
         {
@@ -967,7 +972,7 @@ public sealed class ProphecyService : IProphecyService
         }
 
         var definition = instance.ProphecyDefinition ??
-            SeedDefinitions.FirstOrDefault(x => x.Id.Equals(instance.ProphecyDefinitionId, StringComparison.OrdinalIgnoreCase));
+            _definitions.FirstOrDefault(x => x.Id.Equals(instance.ProphecyDefinitionId, StringComparison.OrdinalIgnoreCase));
 
         if (definition is null)
         {
@@ -1026,99 +1031,6 @@ public sealed class ProphecyService : IProphecyService
         var hash = SHA256.HashData(Encoding.UTF8.GetBytes(value));
         return BitConverter.ToInt32(hash, 0);
     }
-
-    private static IReadOnlyList<ProphecyDefinition> CreateSeedDefinitions() =>
-    [
-        Daily("daily.combat.kills.common", "You Will Conquer a Multitude", "The lesser beasts will gather beneath your shadow, and none will remain standing.", "Defeat {target} qualifying creatures.", ProphecyCategory.Combat, ProphecyDifficulty.Common, ProphecyObjectiveType.KillCreatures, "steady", 120),
-        Daily("daily.combat.kills.uncommon", "The Road Will Empty Before You", "A path cannot stay crowded when you decide to walk it.", "Defeat {target} qualifying creatures.", ProphecyCategory.Combat, ProphecyDifficulty.Uncommon, ProphecyObjectiveType.KillCreatures, "steady,focused", 90),
-        Daily("daily.combat.unique", "Ten Shadows Will Bear Ten Names", "The Oracle has seen many faces fall before you. Seek variety in conquest.", "Defeat {target} different creature types.", ProphecyCategory.Combat, ProphecyDifficulty.Uncommon, ProphecyObjectiveType.KillDifferentCreatureTypes, "focused,ominous", 75),
-        Daily("daily.combat.group", "The Weak Will Gather, and You Will Break Them", "They will come in numbers. That will not save them.", "Win {target} encounters against groups of 2 or more enemies.", ProphecyCategory.Combat, ProphecyDifficulty.Rare, ProphecyObjectiveType.WinEncounters, "ominous", 70, "{\"minimumEnemyCount\":2}"),
-        Daily("daily.combat.wins", "Victory Will Become Habit", "Let the day learn the shape of your triumph.", "Win {target} qualifying encounters.", ProphecyCategory.Combat, ProphecyDifficulty.Common, ProphecyObjectiveType.WinEncounters, "steady", 90),
-        Daily("daily.dungeon.rooms", "The Deep Will Pay Tribute", "A sealed door will open, and something beneath the earth will remember your name.", "Clear {target} dungeon rooms.", ProphecyCategory.Dungeon, ProphecyDifficulty.Uncommon, ProphecyObjectiveType.ClearDungeonRooms, "focused,ominous", 85),
-        Daily("daily.dungeon.complete", "You Will Return from Darkness Carrying Proof", "The underworld does not give gifts freely. Take one anyway.", "Complete {target} dungeon.", ProphecyCategory.Dungeon, ProphecyDifficulty.Rare, ProphecyObjectiveType.CompleteDungeons, "ominous", 55),
-        Daily("daily.dungeon.events", "A Hidden Room Will Answer", "The dungeon keeps secrets only from the impatient.", "Resolve {target} dungeon event rooms.", ProphecyCategory.Dungeon, ProphecyDifficulty.Uncommon, ProphecyObjectiveType.ResolveDungeonEvents, "focused", 60),
-        Daily("daily.essence.xp", "A Sleeping Soul Will Stir", "Power rests inside the silent soul. Wake it.", "Gain {target} Essence XP.", ProphecyCategory.Essence, ProphecyDifficulty.Common, ProphecyObjectiveType.GainEssenceXp, "steady,focused", 80),
-        Daily("daily.essence.archive", "The Archive Hungers", "Not every soul must be worn. Some are meant to echo forever.", "Add or feed {target} Essence into the Soul Archive.", ProphecyCategory.Essence, ProphecyDifficulty.Rare, ProphecyObjectiveType.EssenceArchivedOrFed, "focused,ominous", 35),
-        Daily("daily.treasure.progress", "You Will Find What Others Missed", "Gold sleeps poorly near you.", "Find combat loot, dungeon treasure, or boss caches to fill Treasure Progress.", ProphecyCategory.Treasure, ProphecyDifficulty.Uncommon, ProphecyObjectiveType.TreasureProgress, "steady,focused", 75),
-        Daily("daily.gathering.ore", "The Mountain Will Give Up Its Bones", "Stone remembers every strike. Make it remember yours.", "Gather {target} ore.", ProphecyCategory.Gathering, ProphecyDifficulty.Common, ProphecyObjectiveType.GatherResources, "focused", 70, "{\"requiredProfession\":\"Mining\"}"),
-        Daily("daily.gathering.wood", "The Forest Will Remember Your Axe", "Roots hold secrets. Wood carries them away.", "Gather {target} wood.", ProphecyCategory.Gathering, ProphecyDifficulty.Common, ProphecyObjectiveType.GatherResources, "focused", 70, "{\"requiredProfession\":\"Woodcutting\"}"),
-        Daily("daily.gathering.fish", "The River Hides Silver Beneath Silence", "The water keeps what careless hands lose.", "Gather {target} fish.", ProphecyCategory.Gathering, ProphecyDifficulty.Common, ProphecyObjectiveType.GatherResources, "focused", 70, "{\"requiredProfession\":\"Fishing\"}"),
-        Daily("daily.crafting.temper", "A Flawed Blade Will Seek Perfection", "Greatness is not found. It is forced into shape.", "Temper items {target} times.", ProphecyCategory.Crafting, ProphecyDifficulty.Common, ProphecyObjectiveType.TemperItems, "focused", 75),
-        Daily("daily.crafting.potential", "Potential Must Be Spent Before Greatness Wakes", "Power unused is power wasted.", "Spend {target} item Potential.", ProphecyCategory.Crafting, ProphecyDifficulty.Uncommon, ProphecyObjectiveType.SpendPotential, "focused,ominous", 60),
-        Daily("daily.survival.recover", "Blood Will Teach What Victory Cannot", "The Oracle does not fear your defeat. She fears you learning nothing from it.", "After a meaningful defeat, win {target} qualifying encounters.", ProphecyCategory.Survival, ProphecyDifficulty.Rare, ProphecyObjectiveType.MeaningfulDefeatThenWins, "ominous", 65),
-        Daily("daily.combat.elite", "A Stronger Shadow Will Fall", "Not every enemy deserves prophecy. Find one that does.", "Defeat {target} qualifying creatures.", ProphecyCategory.Combat, ProphecyDifficulty.Rare, ProphecyObjectiveType.KillCreatures, "ominous", 50),
-        Daily("daily.treasure.ominous", "The Caches Will Open Reluctantly", "Treasure resents being found. Let it resent you.", "Fill Treasure Progress.", ProphecyCategory.Treasure, ProphecyDifficulty.Rare, ProphecyObjectiveType.TreasureProgress, "ominous", 45),
-        Daily("daily.essence.ominous", "The Soul Will Burn Brighter", "A quiet essence will refuse to remain quiet.", "Gain {target} Essence XP.", ProphecyCategory.Essence, ProphecyDifficulty.Rare, ProphecyObjectiveType.GainEssenceXp, "ominous", 45),
-
-        Weekly("weekly.combat.kills", "The World Will Know Your Violence", "A week is enough time to become a warning.", "Defeat {target} qualifying creatures this week.", ProphecyCategory.Combat, ProphecyDifficulty.Uncommon, ProphecyObjectiveType.KillCreatures, 100),
-        Weekly("weekly.combat.unique", "Many Names Will Be Written in Ash", "The Oracle keeps lists. Give her names to cross out.", "Defeat {target} different creature types this week.", ProphecyCategory.Combat, ProphecyDifficulty.Rare, ProphecyObjectiveType.KillDifferentCreatureTypes, 80),
-        Weekly("weekly.dungeon.complete", "The Dungeon Gates Will Remember Your Name", "Enter the dark often enough, and even stone learns fear.", "Complete {target} dungeons this week.", ProphecyCategory.Dungeon, ProphecyDifficulty.Rare, ProphecyObjectiveType.CompleteDungeons, 75),
-        Weekly("weekly.dungeon.rooms", "The Deep Places Will Surrender Their Secrets", "No door is patient forever.", "Clear {target} dungeon rooms this week.", ProphecyCategory.Dungeon, ProphecyDifficulty.Uncommon, ProphecyObjectiveType.ClearDungeonRooms, 90),
-        Weekly("weekly.essence.xp", "Ten Souls Will Echo in the Archive", "Power does not vanish when stored. It waits.", "Gain {target} Essence XP this week.", ProphecyCategory.Essence, ProphecyDifficulty.Uncommon, ProphecyObjectiveType.GainEssenceXp, 85),
-        Weekly("weekly.gathering", "The World Itself Will Be Harvested", "Stone, wood, and river will all give testimony.", "Gather {target} resources this week.", ProphecyCategory.Gathering, ProphecyDifficulty.Uncommon, ProphecyObjectiveType.GatherResources, 80),
-        Weekly("weekly.crafting", "Steel Will Remember Your Hands", "Enough work becomes a signature.", "Temper items {target} times this week.", ProphecyCategory.Crafting, ProphecyDifficulty.Uncommon, ProphecyObjectiveType.TemperItems, 80),
-        Weekly("weekly.survival", "The Oracle Saw You Fall. She Also Saw You Rise.", "The omen is not the fall. It is what follows.", "Register a meaningful defeat, then win {target} qualifying encounters this week.", ProphecyCategory.Survival, ProphecyDifficulty.Epic, ProphecyObjectiveType.MeaningfulDefeatThenWins, 45)
-    ];
-
-    private static ProphecyDefinition Daily(
-        string id,
-        string title,
-        string flavor,
-        string objective,
-        ProphecyCategory category,
-        ProphecyDifficulty difficulty,
-        string objectiveType,
-        string slots,
-        int weight,
-        string parameters = "{}") =>
-        Definition(id, title, flavor, objective, ProphecyScope.Daily, category, difficulty, objectiveType, slots, weight, parameters);
-
-    private static ProphecyDefinition Weekly(
-        string id,
-        string title,
-        string flavor,
-        string objective,
-        ProphecyCategory category,
-        ProphecyDifficulty difficulty,
-        string objectiveType,
-        int weight,
-        string parameters = "{}") =>
-        Definition(id, title, flavor, objective, ProphecyScope.Weekly, category, difficulty, objectiveType, ProphecySlotType.Greater.ToString(), weight, parameters);
-
-    private static ProphecyDefinition Definition(
-        string id,
-        string title,
-        string flavor,
-        string objective,
-        ProphecyScope scope,
-        ProphecyCategory category,
-        ProphecyDifficulty difficulty,
-        string objectiveType,
-        string slots,
-        int weight,
-        string parameters) =>
-        new()
-        {
-            Id = id,
-            Title = title,
-            FlavorText = flavor,
-            ObjectiveText = objective,
-            Scope = scope,
-            Category = category,
-            Difficulty = difficulty,
-            ObjectiveType = objectiveType,
-            ObjectiveParameterJson = parameters,
-            RewardProfileId = $"{scope}.{category}.{difficulty}",
-            Weight = weight,
-            AllowedSlots = slots.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-                .Select(NormalizeSlot)
-                .ToList()
-        };
-
-    private static string NormalizeSlot(string value) =>
-        Enum.TryParse<ProphecySlotType>(value, ignoreCase: true, out var slot)
-            ? slot.ToString()
-            : value;
 
     private sealed record WeightedProphecyCacheReward(int Weight, ProphecyRewardSnapshot Reward);
 }

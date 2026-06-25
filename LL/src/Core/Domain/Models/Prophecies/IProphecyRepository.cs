@@ -3,7 +3,7 @@ namespace Domain.Models.Prophecies;
 public interface IProphecyRepository
 {
     Task<IReadOnlyList<ProphecyDefinition>> GetEnabledDefinitionsAsync(CancellationToken cancellationToken);
-    Task AddMissingDefinitionsAsync(IReadOnlyCollection<ProphecyDefinition> definitions, CancellationToken cancellationToken);
+    Task<IReadOnlyList<ProphecyDefinition>> SyncDefinitionsAsync(IReadOnlyCollection<ProphecyDefinition> definitions, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<PlayerProphecyInstance>> GetInstancesForPeriodAsync(
         Guid playerId,

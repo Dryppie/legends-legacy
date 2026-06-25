@@ -190,6 +190,11 @@ public static class DependencyInjection
         services.AddScoped<IRecipeService, RecipeService>();
 
         services.AddScoped<IPlayerService, PlayerService>();
+        services.AddSingleton<IProphecyDefinitionProvider>(sp =>
+            new JsonProphecyDefinitionProvider(
+                config,
+                contentRootPath,
+                sp.GetRequiredService<JsonSerializerOptions>()));
         services.AddScoped<IProphecyService, ProphecyService>();
 
         services.AddScoped<ISoulstoneUpgradeService, SoulstoneUpgradeService>();

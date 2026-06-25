@@ -19,21 +19,33 @@ public sealed class ProphecyRepository : IProphecyRepository
             .Where(x => x.IsEnabled)
             .ToListAsync(cancellationToken);
 
-    public async Task AddMissingDefinitionsAsync(IReadOnlyCollection<ProphecyDefinition> definitions, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<ProphecyDefinition>> SyncDefinitionsAsync(IReadOnlyCollection<ProphecyDefinition> definitions, CancellationToken cancellationToken)
     {
-        var ids = definitions.Select(x => x.Id).ToArray();
         var existing = await _context.ProphecyDefinitions
-            .Where(x => ids.Contains(x.Id))
-            .Select(x => x.Id)
             .ToListAsync(cancellationToken);
 
-        var existingSet = existing.ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var missing = definitions.Where(x => !existingSet.Contains(x.Id)).ToList();
+        var existingById = existing.ToDictionary(x => x.Id, StringComparer.OrdinalIgnoreCase);
+        var authoredIds = definitions.Select(x => x.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        if (missing.Count > 0)
+        foreach (var staleDefinition in existing.Where(x => !authoredIds.Contains(x.Id)))
         {
-            await _context.ProphecyDefinitions.AddRangeAsync(missing, cancellationToken);
+            staleDefinition.IsEnabled = false;
         }
+
+        foreach (var definition in definitions)
+        {
+            if (existingById.TryGetValue(definition.Id, out var existingDefinition))
+            {
+                CopyDefinition(definition, existingDefinition);
+                continue;
+            }
+
+            var newDefinition = CloneDefinition(definition);
+            await _context.ProphecyDefinitions.AddAsync(newDefinition, cancellationToken);
+            existingById.Add(newDefinition.Id, newDefinition);
+        }
+
+        return definitions.Select(x => existingById[x.Id]).ToList();
     }
 
     public async Task<IReadOnlyList<PlayerProphecyInstance>> GetInstancesForPeriodAsync(
@@ -111,4 +123,36 @@ public sealed class ProphecyRepository : IProphecyRepository
 
     public async Task AddWeeklyProgressAsync(WeeklyRevelationProgress progress, CancellationToken cancellationToken) =>
         await _context.WeeklyRevelationProgress.AddAsync(progress, cancellationToken);
+
+    private static ProphecyDefinition CloneDefinition(ProphecyDefinition source)
+    {
+        var target = new ProphecyDefinition
+        {
+            Id = source.Id
+        };
+
+        CopyDefinition(source, target);
+        return target;
+    }
+
+    private static void CopyDefinition(ProphecyDefinition source, ProphecyDefinition target)
+    {
+        target.Title = source.Title;
+        target.FlavorText = source.FlavorText;
+        target.ObjectiveText = source.ObjectiveText;
+        target.Scope = source.Scope;
+        target.Category = source.Category;
+        target.Difficulty = source.Difficulty;
+        target.ObjectiveType = source.ObjectiveType;
+        target.ObjectiveParameterJson = source.ObjectiveParameterJson;
+        target.RewardProfileId = source.RewardProfileId;
+        target.Weight = source.Weight;
+        target.IsEnabled = source.IsEnabled;
+        target.AllowedSlots = source.AllowedSlots.ToList();
+        target.RequiredFeatures = source.RequiredFeatures.ToList();
+        target.RequiredTags = source.RequiredTags.ToList();
+        target.ExcludedTags = source.ExcludedTags.ToList();
+        target.MinPlayerLevel = source.MinPlayerLevel;
+        target.MaxPlayerLevel = source.MaxPlayerLevel;
+    }
 }
