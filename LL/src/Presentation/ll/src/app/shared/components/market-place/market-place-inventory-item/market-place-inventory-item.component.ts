@@ -1,10 +1,8 @@
 import { Component, Input } from '@angular/core';
 import { InventoryItem } from '../../../models/inventoryItem';
 import { NgIf } from '@angular/common';
-import { Equipment } from '../../../models/item';
 import { ItemType } from '../../../models/enums/itemType';
 import { ItemComponent } from '../../item/item.component';
-import { EquipmentType } from '../../../models/enums/equipmentType';
 import { NumberFormatPipe } from '../../../pipes/number-format/number-format.pipe';
 
 @Component({
@@ -22,28 +20,4 @@ export class MarketPlaceInventoryItemComponent {
     );
   }
 
-  get isEssence(): boolean {
-    return (
-      this.inventoryItem.itemInstance.itemBase.itemType === ItemType.Essence
-    );
-  }
-
-  get equipmentIcon(): string | null {
-    if (!this.isEquipment) return null;
-    const equipmentType = (
-      this.inventoryItem.itemInstance.itemBase as Equipment
-    ).equipmentType;
-    if (
-      equipmentType === EquipmentType.TwoHanded ||
-      equipmentType === EquipmentType.OneHanded
-    )
-      return 'mainhand';
-    else return equipmentType.toLowerCase();
-  }
-
-  get equipmentIconPath(): string | null {
-    return this.equipmentIcon
-      ? `icons/equipment-slots/empty_${this.equipmentIcon}.svg`
-      : null;
-  }
 }

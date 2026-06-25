@@ -3,13 +3,18 @@
     <h2 class="ll-item-detail-title" [ngClass]="rarityClasses">
       {{ data.name }}
     </h2>
-    <span
-      *ngIf="!useBaseName"
-      class="ll-item-chip"
-      [ngClass]="rarityBadgeClasses"
-    >
-      {{ data.rarity }}
-    </span>
+    <div class="flex shrink-0 flex-wrap justify-end gap-2">
+      <span
+        *ngIf="!useBaseName"
+        class="ll-item-chip"
+        [ngClass]="rarityBadgeClasses"
+      >
+        {{ data.rarity }}
+      </span>
+      <span *ngIf="data.quality" class="ll-item-chip ll-item-chip-accent">
+        {{ data.quality }}
+      </span>
+    </div>
   </div>
 
   <div class="ll-item-meta flex flex-wrap items-center gap-2">

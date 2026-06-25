@@ -2,6 +2,7 @@ import { AttributeModifier } from '../../models/Dtos/attributesDto';
 import { AttributeType } from '../../models/enums/attributeType';
 import { EquipmentType } from '../../models/enums/equipmentType';
 import { GatheringType } from '../../models/enums/gatheringType';
+import { ItemQuality } from '../../models/enums/itemQuality';
 import { Rarity } from '../../models/enums/rarity';
 import {
   Equipment,
@@ -13,6 +14,7 @@ export interface EquipmentDisplay {
   // Common
   name: string;
   rarity: Rarity;
+  quality?: ItemQuality;
   equipmentType: EquipmentType;
   description?: string;
   baseModifiers?: AttributeModifier[];
@@ -72,6 +74,7 @@ export function mapInstanceToDisplay(
   return {
     name: inst.displayName || base.name,
     rarity: inst.rarity ?? base.rarity,
+    quality: inst.quality,
     equipmentType: base.equipmentType,
     description: base.description,
     baseModifiers: inst.baseModifiers,
