@@ -121,6 +121,12 @@ export class RegularCraftingComponent {
       : null;
   });
 
+  readonly selectedForm = computed(() => {
+    const recipe = this.selectedRecipe();
+    if (!recipe) return null;
+    return recipe.forms.find((form) => form.formId === this.selectedFormId()) ?? null;
+  });
+
   readonly selectedMaterialCosts = computed(() => {
     const recipe = this.selectedRecipe();
     const blueprint = this.selectedBlueprint();
@@ -131,7 +137,7 @@ export class RegularCraftingComponent {
     const recipe = this.selectedRecipe();
     if (!recipe) return '';
     const blueprint = this.selectedBlueprint();
-    const form = recipe.forms.find((candidate) => candidate.formId === this.selectedFormId());
+    const form = this.selectedForm();
     if (!blueprint) return form?.displayName ?? recipe.name;
 
     const specialName = blueprint.specialOutputNames.find(
@@ -146,6 +152,39 @@ export class RegularCraftingComponent {
       .replace(/\{BlueprintName\}/gi, family)
       .replace(/\{FormName\}/gi, form?.displayName ?? recipe.name)
       .trim();
+  });
+
+  readonly affinityGroups = computed(() => {
+    const recipe = this.selectedRecipe();
+    if (!recipe) return [];
+
+    const groups = [
+      {
+        label: 'Base item',
+        tags: recipe.affinityTags,
+      },
+      {
+        label: 'Form',
+        tags: this.selectedForm()?.tags ?? [],
+      },
+      {
+        label: 'Blueprint',
+        tags: this.selectedBlueprint()?.tags ?? [],
+      },
+    ];
+
+    const seen = new Set<string>();
+    return groups
+      .map((group) => ({
+        ...group,
+        tags: group.tags.filter((tag) => {
+          const key = tag.toLowerCase();
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        }),
+      }))
+      .filter((group) => group.tags.length > 0);
   });
 
   constructor(
@@ -276,6 +315,16 @@ export class RegularCraftingComponent {
     return recipe.minTier === recipe.maxTier
       ? `T${recipe.minTier}`
       : `T${recipe.minTier}-${recipe.maxTier}`;
+  }
+
+  formatDisplayLabel(value: string | null | undefined): string {
+    if (!value) return '';
+
+    return value
+      .replace(/[_-]+/g, ' ')
+      .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+      .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
+      .trim();
   }
 
   private loadRecipes(targetTier: number): void {

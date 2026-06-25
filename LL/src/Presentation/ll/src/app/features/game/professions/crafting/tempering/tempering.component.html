@@ -7,36 +7,8 @@
       <ng-container *ngIf="selectedEquipmentInstance() as equipment; else noItem">
         <app-equipment-display [item]="equipment"></app-equipment-display>
 
-        <div class="ll-copy mt-3 flex flex-wrap gap-2">
-          <span class="ll-state">{{ equipment.rarity }}</span>
-          <span class="ll-state">{{ equipment.quality }}</span>
-          <span class="ll-state">{{ equipment.potential ?? 0 }} Potential</span>
-          <span class="ll-state">{{ equipment.temperingProgress }} Progress</span>
-        </div>
-
         <div *ngIf="selectedQueueItem()" class="ll-state mt-4">
           Already in tempering queue.
-        </div>
-
-        <div *ngIf="!selectedQueueItem()" class="ll-item-detail-section ll-copy mt-4">
-          <div class="ll-eyebrow text-primary">Directions</div>
-          <ng-container *ngIf="temperingOptions().length; else noOptions">
-            <button
-              *ngFor="let recipe of temperingOptions()"
-              type="button"
-              class="ll-button mr-2 mt-2 px-2 py-1"
-              [ngClass]="{
-                'll-card-accent text-primary':
-                  selectedTemperingRecipe()?.id === recipe.id,
-              }"
-              (click)="selectTemperingRecipe(recipe)"
-            >
-              {{ recipe.name }}
-            </button>
-          </ng-container>
-          <ng-template #noOptions>
-            <div class="ll-empty-state mt-2">No tempering directions available.</div>
-          </ng-template>
         </div>
 
         <div *ngIf="lastOutcome() as outcome" class="ll-state mt-4">
@@ -50,7 +22,7 @@
           <button
             type="button"
             class="ll-button"
-            [disabled]="!canTemper() || isLoadingOptions()"
+            [disabled]="!canTemper()"
             (click)="temper(equipment)"
           >
             Queue Tempering
@@ -91,11 +63,9 @@
               <app-item [item]="workingItem.equipmentInstance"></app-item>
               <div class="ll-copy mt-2 flex flex-wrap gap-2">
                 <span>{{ workingItem.equipmentInstance.potential ?? 0 }} Potential</span>
-                <span>{{ workingItem.equipmentInstance.temperingProgress }} Progress</span>
               </div>
             </div>
             <div class="flex shrink-0 flex-col items-end gap-2">
-              <span class="ll-state">{{ queuedRecipeName(workingItem) }}</span>
               <button
                 type="button"
                 class="ll-button px-2 py-1 text-xs"
@@ -130,11 +100,9 @@
                 <app-item [item]="queueItem.equipmentInstance"></app-item>
                 <div class="ll-copy mt-2 flex flex-wrap gap-2">
                   <span>{{ queueItem.equipmentInstance.potential ?? 0 }} Potential</span>
-                  <span>{{ queueItem.equipmentInstance.temperingProgress }} Progress</span>
                 </div>
               </div>
               <div class="flex shrink-0 flex-col items-end gap-2">
-                <span class="ll-state">{{ queuedRecipeName(queueItem) }}</span>
                 <button
                   type="button"
                   class="ll-button px-2 py-1 text-xs"

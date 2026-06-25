@@ -9,7 +9,6 @@ import { InventoryItem } from '../../../../../shared/models/inventoryItem';
 import { ItemComponent } from '../../../../../shared/components/item/item.component';
 import { EquipmentDisplayComponent } from '../../../../../shared/components/equipment/equipment-display/equipment-display.component';
 import { TourService } from '../../../../../core/services/client-side/tutorial-tour/tour.service';
-import { TemperingRecipe } from '../../../../../shared/models/crafting-v2';
 import { EquipmentType } from '../../../../../shared/models/enums/equipmentType';
 import { CharacterActionsStateService } from '../../../../../core/services/api/character-actions/character-actions.state.service';
 import { CharacterActionType } from '../../../../../shared/models/enums/characterActionType';
@@ -25,10 +24,7 @@ export class TemperingComponent {
   @Input({ required: true }) craftType!: CraftType;
 
   readonly craftingQueue: Signal<CraftingQueueItem[]>;
-  readonly temperingOptions = signal<TemperingRecipe[]>([]);
-  readonly selectedTemperingRecipeId = signal<string | null>(null);
   readonly error = signal<string | null>(null);
-  readonly isLoadingOptions = signal(false);
   readonly lastOutcome = signal<string | null>(null);
   readonly removingQueueItemId = signal<string | null>(null);
   readonly activeQueueItem = computed<CraftingQueueItem | null>(
@@ -71,17 +67,9 @@ export class TemperingComponent {
     );
   });
 
-  readonly selectedTemperingRecipe = computed<TemperingRecipe | null>(() => {
-    const id = this.selectedTemperingRecipeId();
-    return id
-      ? (this.temperingOptions().find((recipe) => recipe.id === id) ?? null)
-      : (this.temperingOptions()[0] ?? null);
-  });
-
   readonly canTemper = computed<boolean>(() => {
     const eq = this.selectedEquipmentInstance();
-    const recipe = this.selectedTemperingRecipe();
-    return !!eq && !!recipe && (eq.potential ?? 0) >= 1;
+    return !!eq && (eq.potential ?? 0) >= 1;
   });
 
   constructor(
@@ -93,26 +81,6 @@ export class TemperingComponent {
     this.craftingQueue = toSignal(this.craftingService.craftingQueue$, {
       initialValue: [] as CraftingQueueItem[],
     });
-
-    effect(
-      () => {
-        const equipment = this.selectedEquipmentInstance();
-        if (!equipment) {
-          this.temperingOptions.set([]);
-          this.selectedTemperingRecipeId.set(null);
-          return;
-        }
-
-        if (this.selectedQueueItem()) {
-          this.temperingOptions.set([]);
-          this.selectedTemperingRecipeId.set(null);
-          return;
-        }
-
-        this.loadTemperingOptions(equipment.id);
-      },
-      { allowSignalWrites: true },
-    );
 
     effect(
       () => {
@@ -135,25 +103,19 @@ export class TemperingComponent {
     this.lastOutcome.set(null);
   }
 
-  selectTemperingRecipe(recipe: TemperingRecipe): void {
-    this.selectedTemperingRecipeId.set(recipe.id);
-  }
-
   temper(equipment: EquipmentInstance): void {
-    const recipe = this.selectedTemperingRecipe();
-    if (!equipment || !recipe || !this.canTemper()) return;
+    if (!equipment || !this.canTemper()) return;
 
     const queueId = crypto.randomUUID();
     const queueItem: CraftingQueueItem = {
       id: queueId,
       equipmentInstance: equipment,
-      temperingRecipeId: recipe.id,
+      temperingRecipeId: '',
     };
 
     this.characterActionsState.startAction(CharacterActionType.Crafting, {
       queueId,
       itemInstanceId: equipment.id,
-      temperingRecipeId: recipe.id,
     });
     this.craftingService.setQueue([
       ...this.craftingService.currentQueue,
@@ -164,20 +126,12 @@ export class TemperingComponent {
       this.inventoryState.items().filter((item) => item.itemInstance.id !== equipment.id),
     );
     this.selectedItemId.set(null);
-    this.lastOutcome.set(`Queued ${equipment.displayName ?? equipment.itemBase.name} for ${recipe.name}`);
+    this.lastOutcome.set(`Queued ${equipment.displayName ?? equipment.itemBase.name} for tempering`);
   }
 
   selectQueuedItem(queueItem: CraftingQueueItem): void {
     this.selectedItemId.set(queueItem.equipmentInstance.id);
     this.lastOutcome.set(null);
-  }
-
-  queuedRecipeName(queueItem: CraftingQueueItem): string {
-    return (
-      this.temperingOptions().find(
-        (recipe) => recipe.id === queueItem.temperingRecipeId,
-      )?.name ?? this.formatTemperingRecipeName(queueItem.temperingRecipeId)
-    );
   }
 
   getEstimatedTime(queue: CraftingQueueItem[]): string {
@@ -225,35 +179,6 @@ export class TemperingComponent {
       error: (err) => {
         this.error.set(err.message ?? 'Failed to remove item from queue.');
         this.removingQueueItemId.set(null);
-      },
-    });
-  }
-
-  private formatTemperingRecipeName(recipeId: string | null | undefined): string {
-    if (!recipeId) return 'Tempering';
-
-    return recipeId
-      .replace(/^temper_/i, '')
-      .replace(/_/g, ' ')
-      .replace(/\b\w/g, (match) => match.toUpperCase());
-  }
-
-  private loadTemperingOptions(itemId: string): void {
-    this.isLoadingOptions.set(true);
-    this.error.set(null);
-    this.craftingService.getTemperingOptions(itemId).subscribe({
-      next: (options) => {
-        this.temperingOptions.set(options);
-        if (!options.some((option) => option.id === this.selectedTemperingRecipeId())) {
-          this.selectedTemperingRecipeId.set(options[0]?.id ?? null);
-        }
-        this.isLoadingOptions.set(false);
-      },
-      error: (err) => {
-        this.error.set(err.message ?? 'Failed to load tempering options.');
-        this.temperingOptions.set([]);
-        this.selectedTemperingRecipeId.set(null);
-        this.isLoadingOptions.set(false);
       },
     });
   }

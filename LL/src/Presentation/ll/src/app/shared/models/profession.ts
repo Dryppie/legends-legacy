@@ -26,6 +26,7 @@ export interface Recipe {
 
 export interface CraftingQueueItem {
   id: string;
+  temperingRecipeId: string;
   equipmentInstance: EquipmentInstance;
 }
 
