@@ -218,7 +218,7 @@ export class InventoryComponent implements OnInit {
           : this.temperedItems();
 
       case 'Resources':
-        return this.state.materials();
+        return this.sortResourcesForDisplay(this.state.materials());
 
       case 'Essences':
         return this.state.essences();
@@ -263,5 +263,27 @@ export class InventoryComponent implements OnInit {
     return this.isScrapMode
       ? 'No tempered equipment is ready to scrap.'
       : 'No items in this category.';
+  }
+
+  private sortResourcesForDisplay(items: InventoryItem[]): InventoryItem[] {
+    return [...items].sort((a, b) => {
+      const blueprintRank =
+        Number(this.isBlueprintResource(b)) -
+        Number(this.isBlueprintResource(a));
+      if (blueprintRank !== 0) return blueprintRank;
+
+      return a.itemInstance.itemBase.name.localeCompare(
+        b.itemInstance.itemBase.name,
+      );
+    });
+  }
+
+  private isBlueprintResource(item: InventoryItem): boolean {
+    const itemBase = item.itemInstance.itemBase;
+    return (
+      itemBase.itemType === ItemType.Resource &&
+      (itemBase.id.toLowerCase().startsWith('blueprint_') ||
+        itemBase.name.toLowerCase().startsWith('blueprint:'))
+    );
   }
 }
