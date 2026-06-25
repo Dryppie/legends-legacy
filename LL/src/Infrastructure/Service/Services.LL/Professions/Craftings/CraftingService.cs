@@ -109,7 +109,7 @@ public class CraftingService : ICraftingService
                 continue;
             }
 
-            characterAction.UpdatedAt += TimeSpan.FromSeconds(6);
+            characterAction.UpdatedAt += TimeSpan.FromSeconds(TemperingConstants.ActionDurationSeconds);
             actionsToPerform--;
             temperingSummary.TotalActions++;
 
@@ -362,7 +362,7 @@ public class CraftingService : ICraftingService
 
     private async Task<int> ProcessSoulstoneDrops(Guid characterId, int actionsPerformed, double dropRate, double doubleDropChance, CancellationToken cancellationToken)
     {
-        var durationInSeconds = 6 * actionsPerformed;
+        var durationInSeconds = TemperingConstants.ActionDurationSeconds * actionsPerformed;
         var soulstonesEarned = _lootService.GenerateSoulstoneLoot(durationInSeconds, dropRate, doubleDropChance);
         if (soulstonesEarned < 1) return 0;
 

@@ -24,6 +24,7 @@ export class TemperingComponent {
   @Input({ required: true }) craftType!: CraftType;
 
   private readonly itemXpPerRarity = 10;
+  private readonly temperingActionDurationSeconds = 10;
 
   readonly craftingQueue: Signal<CraftingQueueItem[]>;
   readonly error = signal<string | null>(null);
@@ -156,7 +157,7 @@ export class TemperingComponent {
 
   getEstimatedTime(queue: CraftingQueueItem[]): string {
     const totalSeconds = queue.reduce((sum, item) => {
-      return sum + Math.max(0, item.equipmentInstance.potential ?? 0) * 6;
+      return sum + Math.max(0, item.equipmentInstance.potential ?? 0) * this.temperingActionDurationSeconds;
     }, 0);
 
     const hours = Math.floor(totalSeconds / 3600);

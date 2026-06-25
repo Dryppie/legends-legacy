@@ -5,6 +5,7 @@ using Domain.Models.CharacterActions;
 using Domain.Models.CharacterActions.CharacterActionDetails;
 using Domain.Models.CharacterActions.Sessions;
 using Domain.Models.Professions.Crafting;
+using Domain.Models.Professions.Crafting.V2;
 using Services.LL.Interfaces;
 
 namespace Services.LL.CharacterActions;
@@ -98,7 +99,7 @@ public class CharacterActionService : ICharacterActionService
         (characterAction.ActionDetails as CraftingActionDetails)!.CraftingQueueItems = [..
             (characterAction.ActionDetails as CraftingActionDetails)!.CraftingQueueItems.OrderBy(queueItem => queueItem.AddedAt)];
 
-        var actionsToPerform = characterAction.UpdatedAt.NumberOfXSecondsIntervals(now, 6);
+        var actionsToPerform = characterAction.UpdatedAt.NumberOfXSecondsIntervals(now, TemperingConstants.ActionDurationSeconds);
 
         if (actionsToPerform == 0) return null;
 

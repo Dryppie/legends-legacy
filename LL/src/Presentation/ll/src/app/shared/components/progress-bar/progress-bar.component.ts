@@ -27,6 +27,7 @@ export class ProgressBarComponent implements OnDestroy {
 
   private animationFrameId: number = 0;
   private actionSubscription: Subscription | null = null;
+  private readonly craftingActionDurationSeconds = 10;
 
   constructor(private readonly state: CharacterActionsStateService) {
     effect(() => {
@@ -60,11 +61,15 @@ export class ProgressBarComponent implements OnDestroy {
       const timeUntilFinished = (updatedAt - Date.now()) / 1000; // Remaining time
       duration = Math.max(timeUntilFinished, 0); // Ensure non-negative duration
       startTime = Date.now(); // Start now, since the fight is ongoing
-    } else {
-      // Non-combat: updatedAt is in the past, meaning it started before and has 6 seconds duration
+    } else if (action.characterActionType === CharacterActionType.Crafting) {
+      // Crafting: updatedAt is in the past, meaning the current tempering tick started before now.
       const actionUpdatedAt = new Date(action.updatedAt).getTime();
       startTime = actionUpdatedAt; // The action started in the past
-      duration = 6; // Fixed duration of 6 seconds
+      duration = this.craftingActionDurationSeconds;
+    } else {
+      const actionUpdatedAt = new Date(action.updatedAt).getTime();
+      startTime = actionUpdatedAt;
+      duration = environment.baseDuration;
     }
 
     // Calculate initial progress
