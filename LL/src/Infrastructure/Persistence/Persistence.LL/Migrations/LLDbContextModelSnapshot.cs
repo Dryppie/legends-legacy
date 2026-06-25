@@ -135,6 +135,40 @@ namespace Persistence.LL.Migrations
                     b.UseTphMappingStrategy();
                 });
 
+            modelBuilder.Entity("Domain.Models.Colosseum.ArenaDefenseSnapshot", b =>
+                {
+                    b.Property<Guid>("CharacterId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterSnapshotId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsOutdated")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsValid")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LoadoutHash")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("CharacterId");
+
+                    b.HasIndex("CharacterSnapshotId")
+                        .IsUnique();
+
+                    b.ToTable("ArenaDefenseSnapshots");
+                });
+
             modelBuilder.Entity("Domain.Models.Colosseum.ArenaTicketStatus", b =>
                 {
                     b.Property<Guid>("CharacterId")
@@ -151,11 +185,43 @@ namespace Persistence.LL.Migrations
                     b.ToTable("ArenaTicketStatus");
                 });
 
+            modelBuilder.Entity("Domain.Models.Colosseum.ChampionMarketPurchase", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CharacterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("GloryCostPaid")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ItemId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("PurchasedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId", "ItemId", "PurchasedAt");
+
+                    b.ToTable("ChampionMarketPurchases");
+                });
+
             modelBuilder.Entity("Domain.Models.Colosseum.ColosseumMatchResult", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<int>("CharacterAGloryEarned")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("CharacterAId")
                         .HasColumnType("uuid");
@@ -170,6 +236,18 @@ namespace Persistence.LL.Migrations
                     b.Property<int>("CharacterARatingBefore")
                         .HasColumnType("integer");
 
+                    b.Property<int>("CharacterARatingDelta")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CharacterAStreakAfter")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CharacterAStreakBefore")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CharacterBGloryEarned")
+                        .HasColumnType("integer");
+
                     b.Property<Guid>("CharacterBId")
                         .HasColumnType("uuid");
 
@@ -182,6 +260,13 @@ namespace Persistence.LL.Migrations
 
                     b.Property<int>("CharacterBRatingBefore")
                         .HasColumnType("integer");
+
+                    b.Property<int>("CharacterBRatingDelta")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("PlayedAt")
                         .HasColumnType("timestamp with time zone");
@@ -1366,6 +1451,48 @@ namespace Persistence.LL.Migrations
                 {
                     b.HasBaseType("Domain.Models.Entities.Entity");
 
+                    b.Property<int>("ArenaAttackDraws")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ArenaAttackLosses")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ArenaAttackWins")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ArenaBestAttackWinStreak")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ArenaCurrentAttackWinStreak")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("ArenaDailyDefenseCounterDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ArenaDailyDefensiveGloryEarned")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ArenaDailyIncomingRatedDefenseCount")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ArenaDefenseDraws")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ArenaDefenseLosses")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ArenaDefenseWins")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ArenaGlory")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("ArenaLastFirstWinBonusAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ArenaLifetimeHighestRating")
+                        .HasColumnType("integer");
+
                     b.Property<int>("ArenaRating")
                         .HasColumnType("integer");
 
@@ -1593,6 +1720,17 @@ namespace Persistence.LL.Migrations
                         .HasForeignKey("Domain.Models.CharacterActions.CharacterActionDetails.ActionDetails", "CharacterActionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Models.Colosseum.ArenaDefenseSnapshot", b =>
+                {
+                    b.HasOne("Domain.Models.Snapshots.CharacterSnapshot", "CharacterSnapshot")
+                        .WithOne()
+                        .HasForeignKey("Domain.Models.Colosseum.ArenaDefenseSnapshot", "CharacterSnapshotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CharacterSnapshot");
                 });
 
             modelBuilder.Entity("Domain.Models.Colosseum.ArenaTicketStatus", b =>

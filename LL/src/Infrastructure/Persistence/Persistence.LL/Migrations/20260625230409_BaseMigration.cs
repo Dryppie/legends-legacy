@@ -14,6 +14,22 @@ namespace Persistence.LL.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "ChampionMarketPurchases",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ItemId = table.Column<string>(type: "text", nullable: false),
+                    Quantity = table.Column<int>(type: "integer", nullable: false),
+                    GloryCostPaid = table.Column<int>(type: "integer", nullable: false),
+                    PurchasedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChampionMarketPurchases", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CharacterDungeonMasteries",
                 columns: table => new
                 {
@@ -180,6 +196,29 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ArenaDefenseSnapshots",
+                columns: table => new
+                {
+                    CharacterId = table.Column<Guid>(type: "uuid", nullable: false),
+                    CharacterSnapshotId = table.Column<Guid>(type: "uuid", nullable: false),
+                    LoadoutHash = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    IsValid = table.Column<bool>(type: "boolean", nullable: false),
+                    IsOutdated = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    UpdatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ArenaDefenseSnapshots", x => x.CharacterId);
+                    table.ForeignKey(
+                        name: "FK_ArenaDefenseSnapshots_CharacterSnapshots_CharacterSnapshotId",
+                        column: x => x.CharacterSnapshotId,
+                        principalTable: "CharacterSnapshots",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "EntityAttributeSnapshot",
                 columns: table => new
                 {
@@ -289,6 +328,27 @@ namespace Persistence.LL.Migrations
                         name: "FK_RunRewards_DungeonRuns_DungeonRunId",
                         column: x => x.DungeonRunId,
                         principalTable: "DungeonRuns",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ItemAttributeModifier",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ItemBaseId = table.Column<string>(type: "text", nullable: false),
+                    AttributeType = table.Column<int>(type: "integer", nullable: false),
+                    Amount = table.Column<float>(type: "real", nullable: false),
+                    ModifierType = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ItemAttributeModifier", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ItemAttributeModifier_ItemBases_ItemBaseId",
+                        column: x => x.ItemBaseId,
+                        principalTable: "ItemBases",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -468,33 +528,6 @@ namespace Persistence.LL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ItemAttributeModifier",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    ItemBaseId = table.Column<string>(type: "text", nullable: false),
-                    EquipmentInstanceId = table.Column<Guid>(type: "uuid", nullable: true),
-                    AttributeType = table.Column<int>(type: "integer", nullable: false),
-                    Amount = table.Column<float>(type: "real", nullable: false),
-                    ModifierType = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ItemAttributeModifier", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_ItemAttributeModifier_ItemBases_ItemBaseId",
-                        column: x => x.ItemBaseId,
-                        principalTable: "ItemBases",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ItemAttributeModifier_ItemInstances_EquipmentInstanceId",
-                        column: x => x.EquipmentInstanceId,
-                        principalTable: "ItemInstances",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "MarketPlaceListings",
                 columns: table => new
                 {
@@ -560,6 +593,20 @@ namespace Persistence.LL.Migrations
                     Cinders = table.Column<long>(type: "bigint", nullable: true),
                     Soulstones = table.Column<long>(type: "bigint", nullable: true),
                     ArenaRating = table.Column<int>(type: "integer", nullable: true),
+                    ArenaLifetimeHighestRating = table.Column<int>(type: "integer", nullable: true),
+                    ArenaGlory = table.Column<int>(type: "integer", nullable: true),
+                    ArenaCurrentAttackWinStreak = table.Column<int>(type: "integer", nullable: true),
+                    ArenaBestAttackWinStreak = table.Column<int>(type: "integer", nullable: true),
+                    ArenaAttackWins = table.Column<int>(type: "integer", nullable: true),
+                    ArenaAttackDraws = table.Column<int>(type: "integer", nullable: true),
+                    ArenaAttackLosses = table.Column<int>(type: "integer", nullable: true),
+                    ArenaDefenseWins = table.Column<int>(type: "integer", nullable: true),
+                    ArenaDefenseDraws = table.Column<int>(type: "integer", nullable: true),
+                    ArenaDefenseLosses = table.Column<int>(type: "integer", nullable: true),
+                    ArenaDailyDefensiveGloryEarned = table.Column<int>(type: "integer", nullable: true),
+                    ArenaDailyIncomingRatedDefenseCount = table.Column<int>(type: "integer", nullable: true),
+                    ArenaDailyDefenseCounterDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    ArenaLastFirstWinBonusAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     Archetype = table.Column<int>(type: "integer", nullable: true),
                     DamageProfile = table.Column<int>(type: "integer", nullable: true),
                     DefenseProfile = table.Column<int>(type: "integer", nullable: true),
@@ -742,7 +789,14 @@ namespace Persistence.LL.Migrations
                     CharacterBRatingAfter = table.Column<int>(type: "integer", nullable: false),
                     WinnerId = table.Column<Guid>(type: "uuid", nullable: true),
                     WinnerName = table.Column<string>(type: "text", nullable: false),
-                    PlayedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                    PlayedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    Outcome = table.Column<string>(type: "text", nullable: false),
+                    CharacterARatingDelta = table.Column<int>(type: "integer", nullable: false),
+                    CharacterBRatingDelta = table.Column<int>(type: "integer", nullable: false),
+                    CharacterAGloryEarned = table.Column<int>(type: "integer", nullable: false),
+                    CharacterBGloryEarned = table.Column<int>(type: "integer", nullable: false),
+                    CharacterAStreakBefore = table.Column<int>(type: "integer", nullable: false),
+                    CharacterAStreakAfter = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -1128,6 +1182,17 @@ namespace Persistence.LL.Migrations
                 column: "RegionId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ArenaDefenseSnapshots_CharacterSnapshotId",
+                table: "ArenaDefenseSnapshots",
+                column: "CharacterSnapshotId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChampionMarketPurchases_CharacterId_ItemId_PurchasedAt",
+                table: "ChampionMarketPurchases",
+                columns: new[] { "CharacterId", "ItemId", "PurchasedAt" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CharacterDungeonMasteries_DungeonDefinitionId",
                 table: "CharacterDungeonMasteries",
                 column: "DungeonDefinitionId");
@@ -1250,11 +1315,6 @@ namespace Persistence.LL.Migrations
                 column: "ItemInstanceId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ItemAttributeModifier_EquipmentInstanceId",
-                table: "ItemAttributeModifier",
-                column: "EquipmentInstanceId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ItemAttributeModifier_ItemBaseId",
                 table: "ItemAttributeModifier",
                 column: "ItemBaseId");
@@ -1367,7 +1427,13 @@ namespace Persistence.LL.Migrations
                 name: "AreaGatheringNode");
 
             migrationBuilder.DropTable(
+                name: "ArenaDefenseSnapshots");
+
+            migrationBuilder.DropTable(
                 name: "ArenaTicketStatus");
+
+            migrationBuilder.DropTable(
+                name: "ChampionMarketPurchases");
 
             migrationBuilder.DropTable(
                 name: "CharacterDungeonMasteries");
