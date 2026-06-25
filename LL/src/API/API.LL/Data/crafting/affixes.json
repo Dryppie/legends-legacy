@@ -1,0 +1,281 @@
+[
+  {
+    "id": "affix_armor",
+    "name": "Reinforced",
+    "minRarity": "Uncommon",
+    "statModifier": {
+      "stat": "Armor",
+      "weight": 3
+    }
+  },
+  {
+    "id": "affix_armor_penetration",
+    "name": "Piercing",
+    "minRarity": "Rare",
+    "statModifier": {
+      "stat": "ArmorPenetration",
+      "weight": 2
+    }
+  },
+  {
+    "id": "affix_block_chance",
+    "name": "Guarding",
+    "minRarity": "Uncommon",
+    "statModifier": {
+      "stat": "BlockChance",
+      "weight": 2
+    }
+  },
+  {
+    "id": "affix_cloth_resistance",
+    "name": "Warded",
+    "minRarity": "Uncommon",
+    "statModifier": {
+      "stat": "Resistance",
+      "weight": 2
+    }
+  },
+  {
+    "id": "affix_cloth_spirit",
+    "name": "Lucid",
+    "minRarity": "Uncommon",
+    "statModifier": {
+      "stat": "Spirit",
+      "weight": 2
+    }
+  },
+  {
+    "id": "affix_cooldown",
+    "name": "Quickened",
+    "minRarity": "Rare",
+    "statModifier": {
+      "stat": "Cooldown",
+      "weight": 1
+    }
+  },
+  {
+    "id": "affix_crit_chance",
+    "name": "Keen",
+    "minRarity": "Rare",
+    "statModifier": {
+      "stat": "CritChance",
+      "weight": 1
+    }
+  },
+  {
+    "id": "affix_damage_reduction",
+    "name": "Bulwark",
+    "minRarity": "Rare",
+    "statModifier": {
+      "stat": "DamageReduction",
+      "weight": 1
+    }
+  },
+  {
+    "id": "affix_damage_reduction_heavy",
+    "name": "Immovable",
+    "minRarity": "Rare",
+    "statModifier": {
+      "stat": "DamageReduction",
+      "weight": 1
+    }
+  },
+  {
+    "id": "affix_dodge_chance",
+    "name": "Mobile",
+    "minRarity": "Rare",
+    "statModifier": {
+      "stat": "DodgeChance",
+      "weight": 1
+    }
+  },
+  {
+    "id": "affix_fortitude",
+    "name": "Stalwart",
+    "minRarity": "Uncommon",
+    "statModifier": {
+      "stat": "Fortitude",
+      "weight": 2
+    }
+  },
+  {
+    "id": "affix_fury_crit",
+    "name": "Blooded",
+    "minRarity": "Rare",
+    "statModifier": {
+      "stat": "CritDamage",
+      "weight": 3
+    }
+  },
+  {
+    "id": "affix_fury_damage",
+    "name": "Furious",
+    "minRarity": "Uncommon",
+    "statModifier": {
+      "stat": "WeaponDamage",
+      "weight": 3
+    }
+  },
+  {
+    "id": "affix_grave_resistance",
+    "name": "Gravebound",
+    "minRarity": "Uncommon",
+    "statModifier": {
+      "stat": "Resistance",
+      "weight": 2
+    }
+  },
+  {
+    "id": "affix_heavy_plating",
+    "name": "Plated",
+    "minRarity": "Uncommon",
+    "statModifier": {
+      "stat": "Armor",
+      "weight": 3
+    }
+  },
+  {
+    "id": "affix_hive_instinct",
+    "name": "Instinctive",
+    "minRarity": "Rare",
+    "statModifier": {
+      "stat": "Precision",
+      "weight": 2
+    }
+  },
+  {
+    "id": "affix_hive_lacquer",
+    "name": "Lacquered",
+    "minRarity": "Uncommon",
+    "statModifier": {
+      "stat": "Armor",
+      "weight": 2
+    }
+  },
+  {
+    "id": "affix_light_footing",
+    "name": "Fleet",
+    "minRarity": "Uncommon",
+    "statModifier": {
+      "stat": "DodgeChance",
+      "weight": 1
+    }
+  },
+  {
+    "id": "affix_medium_balance",
+    "name": "Balanced",
+    "minRarity": "Uncommon",
+    "statModifier": {
+      "stat": "Precision",
+      "weight": 2
+    }
+  },
+  {
+    "id": "affix_power",
+    "name": "Empowered",
+    "minRarity": "Uncommon",
+    "statModifier": {
+      "stat": "Power",
+      "weight": 2
+    }
+  },
+  {
+    "id": "affix_precision",
+    "name": "Balanced",
+    "minRarity": "Uncommon",
+    "statModifier": {
+      "stat": "Precision",
+      "weight": 2
+    }
+  },
+  {
+    "id": "affix_ranged_precision",
+    "name": "Sighted",
+    "minRarity": "Uncommon",
+    "statModifier": {
+      "stat": "Precision",
+      "weight": 2
+    }
+  },
+  {
+    "id": "affix_spirit",
+    "name": "Lucid",
+    "minRarity": "Uncommon",
+    "statModifier": {
+      "stat": "Spirit",
+      "weight": 2
+    }
+  },
+  {
+    "id": "affix_spirit_focus",
+    "name": "Focused",
+    "minRarity": "Uncommon",
+    "statModifier": {
+      "stat": "Spirit",
+      "weight": 2
+    }
+  },
+  {
+    "id": "affix_status_chance",
+    "name": "Toxic",
+    "minRarity": "Rare",
+    "statModifier": {
+      "stat": "Precision",
+      "weight": 2
+    }
+  },
+  {
+    "id": "affix_status_grave",
+    "name": "Unhaunted",
+    "minRarity": "Rare",
+    "statModifier": {
+      "stat": "StatusResistance",
+      "weight": 2
+    }
+  },
+  {
+    "id": "affix_status_resistance",
+    "name": "Resilient",
+    "minRarity": "Rare",
+    "statModifier": {
+      "stat": "StatusResistance",
+      "weight": 2
+    }
+  },
+  {
+    "id": "affix_summon_health",
+    "name": "Rooted",
+    "minRarity": "Rare",
+    "statModifier": {
+      "stat": "SummonHealth",
+      "weight": 3
+    }
+  },
+  {
+    "id": "affix_summon_power",
+    "name": "Primal",
+    "minRarity": "Uncommon",
+    "statModifier": {
+      "stat": "SummonPower",
+      "weight": 3
+    }
+  },
+  {
+    "id": "affix_venom_edge",
+    "name": "Venomous",
+    "minRarity": "Uncommon",
+    "statModifier": {
+      "stat": "LifeSteal",
+      "weight": 2
+    }
+  },
+  {
+    "id": "affix_weapon_damage",
+    "name": "Honed",
+    "minRarity": "Uncommon",
+    "statModifier": {
+      "stat": "WeaponDamage",
+      "weight": 3
+    }
+  }
+]

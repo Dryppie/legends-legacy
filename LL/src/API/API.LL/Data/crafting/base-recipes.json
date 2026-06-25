@@ -110,7 +110,36 @@
           "MagicDefense"
         ]
       }
-    ]
+    ],
+    "temperingProfile": {
+      "id": "recipe_head_armor_tempering_profile",
+      "name": "Armor Tempering",
+      "statImprovementPool": [
+        {
+          "stat": "Armor",
+          "weight": 45
+        },
+        {
+          "stat": "Fortitude",
+          "weight": 35
+        },
+        {
+          "stat": "MaxHealth",
+          "weight": 20
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_armor",
+          "weight": 45
+        },
+        {
+          "id": "affix_fortitude",
+          "weight": 35
+        }
+      ],
+      "specialModifierPool": []
+    }
   },
   {
     "id": "recipe_chest_armor",
@@ -223,7 +252,36 @@
           "MagicDefense"
         ]
       }
-    ]
+    ],
+    "temperingProfile": {
+      "id": "recipe_chest_armor_tempering_profile",
+      "name": "Armor Tempering",
+      "statImprovementPool": [
+        {
+          "stat": "Armor",
+          "weight": 45
+        },
+        {
+          "stat": "Fortitude",
+          "weight": 35
+        },
+        {
+          "stat": "MaxHealth",
+          "weight": 20
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_armor",
+          "weight": 45
+        },
+        {
+          "id": "affix_fortitude",
+          "weight": 35
+        }
+      ],
+      "specialModifierPool": []
+    }
   },
   {
     "id": "recipe_leg_armor",
@@ -336,7 +394,44 @@
           "MagicDefense"
         ]
       }
-    ]
+    ],
+    "temperingProfile": {
+      "id": "recipe_leg_armor_tempering_profile",
+      "name": "Armor Tempering",
+      "statImprovementPool": [
+        {
+          "stat": "Armor",
+          "weight": 35
+        },
+        {
+          "stat": "DodgeChance",
+          "weight": 25
+        },
+        {
+          "stat": "Fortitude",
+          "weight": 25
+        },
+        {
+          "stat": "MaxHealth",
+          "weight": 15
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_armor",
+          "weight": 35
+        },
+        {
+          "id": "affix_fortitude",
+          "weight": 25
+        },
+        {
+          "id": "affix_dodge_chance",
+          "weight": 15
+        }
+      ],
+      "specialModifierPool": []
+    }
   },
   {
     "id": "recipe_ring",
@@ -398,7 +493,44 @@
           "Band"
         ]
       }
-    ]
+    ],
+    "temperingProfile": {
+      "id": "recipe_ring_tempering_profile",
+      "name": "Ring Tempering",
+      "statImprovementPool": [
+        {
+          "stat": "Power",
+          "weight": 30
+        },
+        {
+          "stat": "Precision",
+          "weight": 25
+        },
+        {
+          "stat": "CritChance",
+          "weight": 25
+        },
+        {
+          "stat": "CritDamage",
+          "weight": 20
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_power",
+          "weight": 35
+        },
+        {
+          "id": "affix_precision",
+          "weight": 30
+        },
+        {
+          "id": "affix_crit_chance",
+          "weight": 20
+        }
+      ],
+      "specialModifierPool": []
+    }
   },
   {
     "id": "recipe_necklace",
@@ -487,7 +619,44 @@
           "Endurance"
         ]
       }
-    ]
+    ],
+    "temperingProfile": {
+      "id": "recipe_necklace_tempering_profile",
+      "name": "Necklace Tempering",
+      "statImprovementPool": [
+        {
+          "stat": "MaxHealth",
+          "weight": 30
+        },
+        {
+          "stat": "Fortitude",
+          "weight": 25
+        },
+        {
+          "stat": "Spirit",
+          "weight": 25
+        },
+        {
+          "stat": "Resistance",
+          "weight": 20
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_fortitude",
+          "weight": 30
+        },
+        {
+          "id": "affix_spirit",
+          "weight": 25
+        },
+        {
+          "id": "affix_grave_resistance",
+          "weight": 20
+        }
+      ],
+      "specialModifierPool": []
+    }
   },
   {
     "id": "recipe_relic",
@@ -570,7 +739,49 @@
           "Summon"
         ]
       }
-    ]
+    ],
+    "temperingProfile": {
+      "id": "recipe_relic_tempering_profile",
+      "name": "Relic Tempering",
+      "statImprovementPool": [
+        {
+          "stat": "Spirit",
+          "weight": 35
+        },
+        {
+          "stat": "Power",
+          "weight": 25
+        },
+        {
+          "stat": "SummonPower",
+          "weight": 20
+        },
+        {
+          "stat": "Cooldown",
+          "weight": 20
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_spirit_focus",
+          "weight": 35
+        },
+        {
+          "id": "affix_power",
+          "weight": 25
+        },
+        {
+          "id": "affix_cooldown",
+          "weight": 20
+        }
+      ],
+      "specialModifierPool": [
+        {
+          "id": "special_arcane_cycle",
+          "weight": 10
+        }
+      ]
+    }
   },
   {
     "id": "recipe_one_handed_weapon",
@@ -699,7 +910,45 @@
           "SpellPower"
         ]
       }
-    ]
+    ],
+    "temperingProfile": {
+      "id": "recipe_one_handed_weapon_tempering_profile",
+      "name": "Weapon Tempering",
+      "statImprovementPool": [
+        {
+          "stat": "WeaponDamage",
+          "weight": 50
+        },
+        {
+          "stat": "Precision",
+          "weight": 25
+        },
+        {
+          "stat": "CritChance",
+          "weight": 25
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_weapon_damage",
+          "weight": 50
+        },
+        {
+          "id": "affix_precision",
+          "weight": 30
+        },
+        {
+          "id": "affix_crit_chance",
+          "weight": 20
+        }
+      ],
+      "specialModifierPool": [
+        {
+          "id": "special_decisive_edge",
+          "weight": 10
+        }
+      ]
+    }
   },
   {
     "id": "recipe_two_handed_weapon",
@@ -865,7 +1114,49 @@
           "Multihit"
         ]
       }
-    ]
+    ],
+    "temperingProfile": {
+      "id": "recipe_two_handed_weapon_tempering_profile",
+      "name": "Weapon Tempering",
+      "statImprovementPool": [
+        {
+          "stat": "WeaponDamage",
+          "weight": 45
+        },
+        {
+          "stat": "Power",
+          "weight": 25
+        },
+        {
+          "stat": "Precision",
+          "weight": 20
+        },
+        {
+          "stat": "ArmorPenetration",
+          "weight": 10
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_weapon_damage",
+          "weight": 45
+        },
+        {
+          "id": "affix_precision",
+          "weight": 25
+        },
+        {
+          "id": "affix_armor_penetration",
+          "weight": 15
+        }
+      ],
+      "specialModifierPool": [
+        {
+          "id": "special_decisive_edge",
+          "weight": 10
+        }
+      ]
+    }
   },
   {
     "id": "recipe_offhand",
@@ -954,6 +1245,52 @@
           "Magic"
         ]
       }
-    ]
+    ],
+    "temperingProfile": {
+      "id": "recipe_offhand_tempering_profile",
+      "name": "Offhand Tempering",
+      "statImprovementPool": [
+        {
+          "stat": "BlockChance",
+          "weight": 30
+        },
+        {
+          "stat": "Resistance",
+          "weight": 25
+        },
+        {
+          "stat": "Spirit",
+          "weight": 25
+        },
+        {
+          "stat": "Armor",
+          "weight": 20
+        }
+      ],
+      "affixPool": [
+        {
+          "id": "affix_block_chance",
+          "weight": 30
+        },
+        {
+          "id": "affix_grave_resistance",
+          "weight": 25
+        },
+        {
+          "id": "affix_spirit",
+          "weight": 25
+        },
+        {
+          "id": "affix_armor",
+          "weight": 20
+        }
+      ],
+      "specialModifierPool": [
+        {
+          "id": "special_unbroken_guard",
+          "weight": 10
+        }
+      ]
+    }
   }
 ]
